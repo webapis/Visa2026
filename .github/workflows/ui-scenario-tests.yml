@@ -12,6 +12,7 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   UI_SCENARIO_CONNECTION: Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True
   UI_SCENARIO_BASE_URL: http://localhost:5000
+  UI_SCENARIO_HOST_DIR: Visa2026.Blazor.Server/bin/Debug/net8.0
 
 jobs:
   ui-scenarios:
@@ -65,9 +66,9 @@ jobs:
       - name: Greenfield scenario database
         shell: pwsh
         run: |
-          # Run XAF updaters before the web host — cold schema + LookupCatalogs sync can exceed LoginPage wait.
           $env:ConnectionStrings__DefaultConnection = $env:UI_SCENARIO_CONNECTION
-          $hostExe = "Visa2026.Blazor.Server/bin/Debug/net8.0/Visa2026.Blazor.Server.exe"
+          $hostDir = (Resolve-Path -LiteralPath $env:UI_SCENARIO_HOST_DIR).Path
+          $hostExe = Join-Path $hostDir "Visa2026.Blazor.Server.exe"
           if (-not (Test-Path -LiteralPath $hostExe)) {
             throw "Host exe not found: $hostExe"
           }
@@ -86,20 +87,28 @@ jobs:
       - name: Start Blazor Server
         shell: pwsh
         run: |
+          # Match scripts/local/Invoke-UiScenarioRun.ps1: dotnet <host.dll>, NOT "dotnet run --project"
+          # (dotnet run parent exits quickly; tracked PID dies and logs stay empty).
+          $hostDir = (Resolve-Path -LiteralPath $env:UI_SCENARIO_HOST_DIR).Path
+          $hostDll = Join-Path $hostDir "Visa2026.Blazor.Server.dll"
+          if (-not (Test-Path -LiteralPath $hostDll)) {
+            throw "Host DLL not found: $hostDll"
+          }
+
           $env:ASPNETCORE_ENVIRONMENT = "Development"
+          $env:DOTNET_ENVIRONMENT = "Development"
           $env:VISA2026_UI_SCENARIOS = "true"
           $env:ASPNETCORE_URLS = $env:UI_SCENARIO_BASE_URL
           $env:ConnectionStrings__DefaultConnection = $env:UI_SCENARIO_CONNECTION
           Remove-Item Env:FORCE_XAF_DB_UPDATE -ErrorAction SilentlyContinue
-          $proc = Start-Process -FilePath "dotnet" -ArgumentList @(
-            "run",
-            "--project", "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj",
-            "--no-build",
-            "-c", "Debug",
-            "--no-launch-profile"
-          ) -PassThru -RedirectStandardOutput "blazor-out.log" -RedirectStandardError "blazor-err.log"
+
+          $proc = Start-Process -FilePath "dotnet" -ArgumentList @($hostDll) `
+            -WorkingDirectory $hostDir -PassThru `
+            -RedirectStandardOutput "blazor-out.log" `
+            -RedirectStandardError "blazor-err.log"
+
           "BLAZOR_PID=$($proc.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
-          Write-Host "Blazor Server PID $($proc.Id)"
+          Write-Host "Blazor host PID $($proc.Id) (dotnet $hostDll)"
 
       - name: Wait for LoginPage
         shell: pwsh
@@ -111,14 +120,6 @@ jobs:
           }
 
           for ($i = 0; $i -lt 120; $i++) {
-            if ($blazorPid -gt 0) {
-              $proc = Get-Process -Id $blazorPid -ErrorAction SilentlyContinue
-              if (-not $proc) {
-                Write-Host "Blazor process (PID $blazorPid) exited before LoginPage was ready."
-                break
-              }
-            }
-
             try {
               $response = Invoke-WebRequest -Uri "$($env:UI_SCENARIO_BASE_URL)/LoginPage" -UseBasicParsing -TimeoutSec 10
               if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
@@ -127,16 +128,24 @@ jobs:
                 break
               }
             } catch {
-              Write-Host "Waiting for app... ($($i * 3)s)"
+              $pidAlive = $false
+              if ($blazorPid -gt 0) {
+                $pidAlive = $null -ne (Get-Process -Id $blazorPid -ErrorAction SilentlyContinue)
+              }
+              Write-Host "Waiting for app... ($($i * 3)s, host PID alive: $pidAlive)"
+              if ($blazorPid -gt 0 -and -not $pidAlive) {
+                Write-Host "Host process exited before LoginPage was ready."
+                break
+              }
             }
             Start-Sleep -Seconds 3
           }
 
           if (-not $ready) {
-            Write-Host "--- blazor-out.log (tail) ---"
-            Get-Content blazor-out.log -Tail 80 -ErrorAction SilentlyContinue
-            Write-Host "--- blazor-err.log (tail) ---"
-            Get-Content blazor-err.log -Tail 80 -ErrorAction SilentlyContinue
+            Write-Host "--- blazor-out.log ---"
+            Get-Content blazor-out.log -ErrorAction SilentlyContinue
+            Write-Host "--- blazor-err.log ---"
+            Get-Content blazor-err.log -ErrorAction SilentlyContinue
             throw "Blazor Server did not become ready on $($env:UI_SCENARIO_BASE_URL)/LoginPage"
           }
 
@@ -155,6 +164,8 @@ jobs:
             Stop-Process -Id $env:BLAZOR_PID -Force -ErrorAction SilentlyContinue
           }
           Get-Process -Name "Visa2026.Blazor.Server" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+          Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue |
+            ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 
       - name: Upload Blazor logs on failure
         if: failure()

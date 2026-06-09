@@ -113,8 +113,8 @@ Append outcomes to [learnings.md](./learnings.md) after a verified run.
 1. Create LocalDB `Visa2026UiScenario`
 2. Build Blazor.Server + UiScenarioRunner
 3. **`--updateDatabase --silent --forceUpdate`** (greenfield seed **before** web host)
-4. Start Blazor on `:5000` with `VISA2026_UI_SCENARIOS=true` (no `FORCE_XAF_DB_UPDATE` on host)
-5. Wait for `/LoginPage` (up to ~6 min; fail if Blazor process exits)
+4. Start Blazor on `:5000` via **`dotnet Visa2026.Blazor.Server.dll`** (not `dotnet run --project`); `VISA2026_UI_SCENARIOS=true`; no `FORCE_XAF_DB_UPDATE` on host
+5. Wait for `/LoginPage` (up to ~6 min; dump full logs on failure)
 6. `UiScenarioRunner --all`
 
 ---

@@ -111,11 +111,12 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 
 ### 2026-06-09 — [-] GitHub Actions ui-scenario-tests — Wait for LoginPage timeout
 
-- **Outcome**: negative → fixed in workflow
-- **Symptom**: `Wait for LoginPage` fails after ~3 min; job ~13 min; Blazor never HTTP-ready
-- **Cause**: empty `Visa2026UiScenario` + `FORCE_XAF_DB_UPDATE` on **web** `dotnet run` — XAF schema + LookupCatalogs sync during host startup exceeds 90×2s wait
-- **Fix**: CI step **Greenfield scenario database** (`Visa2026.Blazor.Server.exe --updateDatabase --silent --forceUpdate`) **before** Start Blazor; drop `FORCE_XAF_DB_UPDATE` on web host; wait 120×3s + fail if Blazor PID exits early
-- **Reuse**: Same pattern as local `Reset-UiScenarioDatabase.ps1` / `Update-LocalDatabase.ps1 -Profile UiScenario`
+- **Outcome**: negative → fixed in workflow (two causes)
+- **Symptom**: `Wait for LoginPage` fails; `blazor-out.log` artifact ~634 bytes; host PID exits immediately
+- **Cause 1**: empty DB + slow XAF startup — fixed by **Greenfield scenario database** (`--updateDatabase --forceUpdate`) before web host
+- **Cause 2**: CI used `dotnet run --project` — parent `dotnet` exits after spawn; tracked PID dead, empty logs, HTTP never ready
+- **Fix**: Start host like `Invoke-UiScenarioRun.ps1` — `dotnet Visa2026.Blazor.Server.dll` with **absolute** `-WorkingDirectory` (`Resolve-Path` on `bin/Debug/net8.0`); relative DLL path alone fails `Start-Process` on Windows with "file not found"
+- **Reuse**: Same pattern as local `Reset-UiScenarioDatabase.ps1` + `Invoke-UiScenarioRun.ps1` (never `dotnet run --project` for background host)
 
 ### 2026-06-09 — [+] P0 pass/fail shield: exit code + login-smoke outcome
 
