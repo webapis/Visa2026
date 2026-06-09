@@ -88,10 +88,9 @@ jobs:
         run: |
           pwsh tools/UiScenarioRunner/bin/Debug/net8.0/playwright.ps1 install chromium
 
-      - name: Start Blazor Server
+      - name: Start Blazor Server and wait for LoginPage
         shell: pwsh
         run: |
-          # Match scripts/local/Invoke-UiScenarioRun.ps1: dotnet <host.dll>, NOT "dotnet run --project"
           $hostDir = $env:UI_SCENARIO_HOST_DIR
           if (-not $hostDir) {
             $hostDir = (Resolve-Path -LiteralPath "Visa2026.Blazor.Server/bin/Debug/net8.0").Path
@@ -101,79 +100,12 @@ jobs:
             throw "Host DLL not found: $hostDll"
           }
 
-          $outLog = Join-Path $hostDir "ui-scenario-out.log"
-          $errLog = Join-Path $hostDir "ui-scenario-err.log"
-          Remove-Item -LiteralPath $outLog, $errLog -ErrorAction SilentlyContinue
-
-          $env:ASPNETCORE_ENVIRONMENT = "Development"
-          $env:DOTNET_ENVIRONMENT = "Development"
-          $env:VISA2026_UI_SCENARIOS = "true"
-          $env:ASPNETCORE_URLS = $env:UI_SCENARIO_BASE_URL
-          $env:ConnectionStrings__DefaultConnection = $env:UI_SCENARIO_CONNECTION
-          Remove-Item Env:FORCE_XAF_DB_UPDATE -ErrorAction SilentlyContinue
-
-          $proc = Start-Process -FilePath "dotnet" -ArgumentList @($hostDll) `
-            -WorkingDirectory $hostDir -PassThru `
-            -RedirectStandardOutput $outLog `
-            -RedirectStandardError $errLog
-
-          "BLAZOR_PID=$($proc.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
-          Write-Host "Blazor host PID $($proc.Id) (dotnet $hostDll)"
-          Write-Host "Host logs: $outLog | $errLog"
-
-      - name: Wait for LoginPage
-        shell: pwsh
-        run: |
-          $ready = $false
-          $blazorPid = 0
-          $diagPath = "wait-diagnostics.log"
-          Remove-Item -LiteralPath $diagPath -ErrorAction SilentlyContinue
-
-          function Write-WaitDiag([string]$Line) {
-            $timestamp = (Get-Date).ToString('o')
-            "[$timestamp] $Line" | Tee-Object -FilePath $diagPath -Append
-          }
-
-          if ($env:BLAZOR_PID -match '^\d+$') {
-            $blazorPid = [int]$env:BLAZOR_PID
-          }
-
-          Write-WaitDiag "wait start baseUrl=$($env:UI_SCENARIO_BASE_URL) pid=$blazorPid"
-
-          for ($i = 0; $i -lt 120; $i++) {
-            try {
-              $response = Invoke-WebRequest -Uri "$($env:UI_SCENARIO_BASE_URL)/LoginPage" -UseBasicParsing -TimeoutSec 10
-              if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
-                $ready = $true
-                Write-WaitDiag "LoginPage ready after $($i * 3)s status=$($response.StatusCode)"
-                break
-              }
-              Write-WaitDiag "unexpected status $($response.StatusCode) at $($i * 3)s"
-            } catch {
-              $pidAlive = $false
-              if ($blazorPid -gt 0) {
-                $pidAlive = $null -ne (Get-Process -Id $blazorPid -ErrorAction SilentlyContinue)
-              }
-              Write-WaitDiag "attempt $($i + 1)/120 elapsed=$($i * 3)s pidAlive=$pidAlive error=$($_.Exception.Message)"
-              if ($blazorPid -gt 0 -and -not $pidAlive) {
-                Write-WaitDiag "host process exited before LoginPage was ready"
-                break
-              }
-            }
-            Start-Sleep -Seconds 3
-          }
-
-          if (-not $ready) {
-            $hostDir = $env:UI_SCENARIO_HOST_DIR
-            foreach ($name in @('ui-scenario-out.log', 'ui-scenario-err.log')) {
-              $path = Join-Path $hostDir $name
-              if (Test-Path -LiteralPath $path) {
-                Write-Host "--- $name ---"
-                Get-Content -LiteralPath $path -ErrorAction SilentlyContinue
-              }
-            }
-            throw "Blazor Server did not become ready on $($env:UI_SCENARIO_BASE_URL)/LoginPage"
-          }
+          & ./scripts/ci/Start-UiScenarioBlazorHost.ps1 `
+            -HostDir $hostDir `
+            -HostDll $hostDll `
+            -BaseUrl $env:UI_SCENARIO_BASE_URL `
+            -ConnectionString $env:UI_SCENARIO_CONNECTION `
+            -WaitForLoginPage
 
       - name: Run UI scenarios
         shell: pwsh
@@ -220,5 +152,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ui-scenario-ci-logs
-          path: ${{ env.UI_SCENARIO_CI_ARTIFACT_DIR }}
-          if-no-files-found: warn
+          path: |
+            ${{ env.UI_SCENARIO_CI_ARTIFACT_DIR }}/
+            wait-diagnostics.log
+          if-no-files-found: error
+          retention-days: 14

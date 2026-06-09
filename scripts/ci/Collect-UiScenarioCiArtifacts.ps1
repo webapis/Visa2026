@@ -73,6 +73,10 @@ foreach ($name in $hostLogNames) {
 
 $repoRoot = Get-Location
 $repoLogNames = @('blazor-out.log', 'blazor-err.log', 'wait-diagnostics.log', 'scenario-runner.log')
+$hostDiag = Join-Path $HostDir 'wait-diagnostics.log'
+if ((Test-Path -LiteralPath $hostDiag) -and -not (Test-Path -LiteralPath (Join-Path $repoRoot 'wait-diagnostics.log'))) {
+    Copy-IfExists -Source $hostDiag -Destination (Join-Path $ArtifactDir 'wait-diagnostics.log') | Out-Null
+}
 foreach ($name in $repoLogNames) {
     $source = Join-Path $repoRoot $name
     if ($copiedLogs -notcontains $name -and (Copy-IfExists -Source $source -Destination (Join-Path $ArtifactDir $name))) {
@@ -158,6 +162,26 @@ try {
 
 Write-DiagnosticLine $manifestPath "copiedLogs=$($copiedLogs -join ', ')"
 
+$sizesPath = Join-Path $ArtifactDir 'file-sizes.txt'
+Write-DiagnosticLine $sizesPath '--- artifact file sizes ---'
+Get-ChildItem -LiteralPath $ArtifactDir -File -ErrorAction SilentlyContinue |
+    Sort-Object Name |
+    ForEach-Object { Write-DiagnosticLine $sizesPath "$($_.Name) $($_.Length) bytes" }
+
+foreach ($name in @('ui-scenario-out.log', 'ui-scenario-err.log', 'wait-diagnostics.log')) {
+    $source = Join-Path $HostDir $name
+    if ($name -eq 'wait-diagnostics.log') { $source = Join-Path $repoRoot $name }
+    if (Test-Path -LiteralPath $source) {
+        $bytes = (Get-Item -LiteralPath $source).Length
+        Write-DiagnosticLine $manifestPath "${name}=${bytes}bytes"
+        if ($bytes -eq 0) {
+            Write-DiagnosticLine $manifestPath "WARNING ${name} is empty"
+        }
+    } else {
+        Write-DiagnosticLine $manifestPath "WARNING ${name} missing"
+    }
+}
+
 $readme = @"
 Visa2026 UI scenario CI diagnostics
 ===================================
@@ -180,3 +204,21 @@ Write-Host "Collected UI scenario CI artifacts in $ArtifactDir"
 Get-ChildItem -LiteralPath $ArtifactDir -File | ForEach-Object {
     Write-Host "  $($_.Name) ($($_.Length) bytes)"
 }
+
+Write-Host '::group::Artifact preview (wait-diagnostics.log)'
+$preview = Join-Path $ArtifactDir 'wait-diagnostics.log'
+if (Test-Path -LiteralPath $preview) {
+    Get-Content -LiteralPath $preview -ErrorAction SilentlyContinue | Select-Object -First 40 | ForEach-Object { Write-Host $_ }
+} else {
+    Write-Host 'wait-diagnostics.log not in artifact dir'
+}
+Write-Host '::endgroup::'
+
+Write-Host '::group::Artifact preview (ui-scenario-err.log)'
+$errPreview = Join-Path $ArtifactDir 'ui-scenario-err.log'
+if (Test-Path -LiteralPath $errPreview) {
+    Get-Content -LiteralPath $errPreview -ErrorAction SilentlyContinue | Select-Object -First 80 | ForEach-Object { Write-Host $_ }
+} else {
+    Write-Host 'ui-scenario-err.log not in artifact dir'
+}
+Write-Host '::endgroup::'
