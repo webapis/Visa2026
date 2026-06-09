@@ -1,4 +1,4 @@
-# One-off staging run (unique personal number). Not for CI.
+# One-off staging run (unique personal number). Not for CI — use -Scenario with -SkipServer.
 id: person-employee-create-staging
 description: person-employee-create against staging with unique personal number
 requiresAuth: true
@@ -42,5 +42,7 @@ steps:
       person-foreign-address-country: ${employeeForeignAddressCountry}
       person-project-contract: ${employeeProjectContract}
       person-subcontractor: ${employeeSubcontractor}
-  - click: person-detail-employee-save-and-close
+  - click: person-detail-employee-save
+  - goto: /Person_ListView_Employees
+  - wait-for: person-list-employees-new
   - assert-visible: person-list-employees-new

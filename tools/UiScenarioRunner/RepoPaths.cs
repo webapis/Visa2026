@@ -32,6 +32,7 @@ internal static class RepoPaths
             ? Directory.GetFiles(DefaultScenariosDir(), "*.yaml")
                 .Select(Path.GetFileNameWithoutExtension)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Where(id => !id!.EndsWith("-staging", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(id => id, StringComparer.OrdinalIgnoreCase)
                 .Select(id => id!)
                 .ToList()
