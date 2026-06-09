@@ -117,6 +117,7 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Cause 2**: CI used `dotnet run --project` — parent `dotnet` exits after spawn; tracked PID dead, empty logs, HTTP never ready
 - **Fix**: Start host like `Invoke-UiScenarioRun.ps1` — `dotnet Visa2026.Blazor.Server.dll` with **absolute** `-WorkingDirectory` (`Resolve-Path` on `bin/Debug/net8.0`); relative DLL path alone fails `Start-Process` on Windows with "file not found"
 - **Reuse**: Same pattern as local `Reset-UiScenarioDatabase.ps1` + `Invoke-UiScenarioRun.ps1` (never `dotnet run --project` for background host)
+- **CI triage**: failed run → Actions artifact **`ui-scenario-ci-logs`** (`wait-diagnostics.log`, `ui-scenario-out.log`, `ui-scenario-err.log`, `system-diagnostics.txt`, `README.txt`)
 
 ### 2026-06-09 — [+] P0 pass/fail shield: exit code + login-smoke outcome
 

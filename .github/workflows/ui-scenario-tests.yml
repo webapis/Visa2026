@@ -1,5 +1,6 @@
 # Playwright UI scenarios from tools/UiScenarioRunner/scenarios/ against a running Blazor host.
 # Requires GitHub secrets: DEVEXPRESS_LICENSE (same as publish-to-docker-hub workflow).
+# On failure: download artifact "ui-scenario-ci-logs" and share with the agent.
 
 name: UI Scenario Tests
 
@@ -13,6 +14,8 @@ env:
   UI_SCENARIO_CONNECTION: Server=(localdb)\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True
   UI_SCENARIO_BASE_URL: http://localhost:5000
   UI_SCENARIO_HOST_DIR: Visa2026.Blazor.Server/bin/Debug/net8.0
+  UI_SCENARIO_CI_ARTIFACT_DIR: artifacts/ui-scenario-ci
+  UI_SCENARIO_CI_PORT: "5000"
 
 jobs:
   ui-scenarios:
@@ -68,6 +71,7 @@ jobs:
         run: |
           $env:ConnectionStrings__DefaultConnection = $env:UI_SCENARIO_CONNECTION
           $hostDir = (Resolve-Path -LiteralPath $env:UI_SCENARIO_HOST_DIR).Path
+          "UI_SCENARIO_HOST_DIR=$hostDir" | Out-File -FilePath $env:GITHUB_ENV -Append
           $hostExe = Join-Path $hostDir "Visa2026.Blazor.Server.exe"
           if (-not (Test-Path -LiteralPath $hostExe)) {
             throw "Host exe not found: $hostExe"
@@ -88,12 +92,18 @@ jobs:
         shell: pwsh
         run: |
           # Match scripts/local/Invoke-UiScenarioRun.ps1: dotnet <host.dll>, NOT "dotnet run --project"
-          # (dotnet run parent exits quickly; tracked PID dies and logs stay empty).
-          $hostDir = (Resolve-Path -LiteralPath $env:UI_SCENARIO_HOST_DIR).Path
+          $hostDir = $env:UI_SCENARIO_HOST_DIR
+          if (-not $hostDir) {
+            $hostDir = (Resolve-Path -LiteralPath "Visa2026.Blazor.Server/bin/Debug/net8.0").Path
+          }
           $hostDll = Join-Path $hostDir "Visa2026.Blazor.Server.dll"
           if (-not (Test-Path -LiteralPath $hostDll)) {
             throw "Host DLL not found: $hostDll"
           }
+
+          $outLog = Join-Path $hostDir "ui-scenario-out.log"
+          $errLog = Join-Path $hostDir "ui-scenario-err.log"
+          Remove-Item -LiteralPath $outLog, $errLog -ErrorAction SilentlyContinue
 
           $env:ASPNETCORE_ENVIRONMENT = "Development"
           $env:DOTNET_ENVIRONMENT = "Development"
@@ -104,37 +114,49 @@ jobs:
 
           $proc = Start-Process -FilePath "dotnet" -ArgumentList @($hostDll) `
             -WorkingDirectory $hostDir -PassThru `
-            -RedirectStandardOutput "blazor-out.log" `
-            -RedirectStandardError "blazor-err.log"
+            -RedirectStandardOutput $outLog `
+            -RedirectStandardError $errLog
 
           "BLAZOR_PID=$($proc.Id)" | Out-File -FilePath $env:GITHUB_ENV -Append
           Write-Host "Blazor host PID $($proc.Id) (dotnet $hostDll)"
+          Write-Host "Host logs: $outLog | $errLog"
 
       - name: Wait for LoginPage
         shell: pwsh
         run: |
           $ready = $false
           $blazorPid = 0
+          $diagPath = "wait-diagnostics.log"
+          Remove-Item -LiteralPath $diagPath -ErrorAction SilentlyContinue
+
+          function Write-WaitDiag([string]$Line) {
+            $timestamp = (Get-Date).ToString('o')
+            "[$timestamp] $Line" | Tee-Object -FilePath $diagPath -Append
+          }
+
           if ($env:BLAZOR_PID -match '^\d+$') {
             $blazorPid = [int]$env:BLAZOR_PID
           }
+
+          Write-WaitDiag "wait start baseUrl=$($env:UI_SCENARIO_BASE_URL) pid=$blazorPid"
 
           for ($i = 0; $i -lt 120; $i++) {
             try {
               $response = Invoke-WebRequest -Uri "$($env:UI_SCENARIO_BASE_URL)/LoginPage" -UseBasicParsing -TimeoutSec 10
               if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
                 $ready = $true
-                Write-Host "LoginPage ready after $($i * 3)s"
+                Write-WaitDiag "LoginPage ready after $($i * 3)s status=$($response.StatusCode)"
                 break
               }
+              Write-WaitDiag "unexpected status $($response.StatusCode) at $($i * 3)s"
             } catch {
               $pidAlive = $false
               if ($blazorPid -gt 0) {
                 $pidAlive = $null -ne (Get-Process -Id $blazorPid -ErrorAction SilentlyContinue)
               }
-              Write-Host "Waiting for app... ($($i * 3)s, host PID alive: $pidAlive)"
+              Write-WaitDiag "attempt $($i + 1)/120 elapsed=$($i * 3)s pidAlive=$pidAlive error=$($_.Exception.Message)"
               if ($blazorPid -gt 0 -and -not $pidAlive) {
-                Write-Host "Host process exited before LoginPage was ready."
+                Write-WaitDiag "host process exited before LoginPage was ready"
                 break
               }
             }
@@ -142,18 +164,24 @@ jobs:
           }
 
           if (-not $ready) {
-            Write-Host "--- blazor-out.log ---"
-            Get-Content blazor-out.log -ErrorAction SilentlyContinue
-            Write-Host "--- blazor-err.log ---"
-            Get-Content blazor-err.log -ErrorAction SilentlyContinue
+            $hostDir = $env:UI_SCENARIO_HOST_DIR
+            foreach ($name in @('ui-scenario-out.log', 'ui-scenario-err.log')) {
+              $path = Join-Path $hostDir $name
+              if (Test-Path -LiteralPath $path) {
+                Write-Host "--- $name ---"
+                Get-Content -LiteralPath $path -ErrorAction SilentlyContinue
+              }
+            }
             throw "Blazor Server did not become ready on $($env:UI_SCENARIO_BASE_URL)/LoginPage"
           }
 
       - name: Run UI scenarios
         shell: pwsh
         run: |
+          $logPath = "scenario-runner.log"
           dotnet run --project tools/UiScenarioRunner/UiScenarioRunner.csproj --no-build -c Debug -- `
-            --all --base-url $env:UI_SCENARIO_BASE_URL --timeout 120000
+            --all --base-url $env:UI_SCENARIO_BASE_URL --timeout 120000 2>&1 |
+            Tee-Object -FilePath $logPath
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Stop Blazor Server
@@ -164,14 +192,33 @@ jobs:
             Stop-Process -Id $env:BLAZOR_PID -Force -ErrorAction SilentlyContinue
           }
           Get-Process -Name "Visa2026.Blazor.Server" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-          Get-NetTCPConnection -LocalPort 5000 -ErrorAction SilentlyContinue |
+          Get-NetTCPConnection -LocalPort $env:UI_SCENARIO_CI_PORT -ErrorAction SilentlyContinue |
             ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+          Start-Sleep -Seconds 2
 
-      - name: Upload Blazor logs on failure
+      - name: Collect UI scenario CI artifacts
+        if: always()
+        shell: pwsh
+        run: |
+          $phase = if ($env:GITHUB_JOB_STATUS) { $env:GITHUB_JOB_STATUS } else { 'always' }
+          $blazorPid = 0
+          if ($env:BLAZOR_PID -match '^\d+$') { $blazorPid = [int]$env:BLAZOR_PID }
+          $hostDir = $env:UI_SCENARIO_HOST_DIR
+          if (-not $hostDir) {
+            $hostDir = (Resolve-Path -LiteralPath "Visa2026.Blazor.Server/bin/Debug/net8.0").Path
+          }
+          & ./scripts/ci/Collect-UiScenarioCiArtifacts.ps1 `
+            -HostDir $hostDir `
+            -ArtifactDir $env:UI_SCENARIO_CI_ARTIFACT_DIR `
+            -BaseUrl $env:UI_SCENARIO_BASE_URL `
+            -BlazorPid $blazorPid `
+            -Phase $phase `
+            -Port ([int]$env:UI_SCENARIO_CI_PORT)
+
+      - name: Upload UI scenario CI logs
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ui-scenario-blazor-logs
-          path: |
-            blazor-out.log
-            blazor-err.log
+          name: ui-scenario-ci-logs
+          path: ${{ env.UI_SCENARIO_CI_ARTIFACT_DIR }}
+          if-no-files-found: warn

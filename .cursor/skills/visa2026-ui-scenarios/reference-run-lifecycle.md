@@ -114,8 +114,9 @@ Append outcomes to [learnings.md](./learnings.md) after a verified run.
 2. Build Blazor.Server + UiScenarioRunner
 3. **`--updateDatabase --silent --forceUpdate`** (greenfield seed **before** web host)
 4. Start Blazor on `:5000` via **`dotnet Visa2026.Blazor.Server.dll`** (not `dotnet run --project`); `VISA2026_UI_SCENARIOS=true`; no `FORCE_XAF_DB_UPDATE` on host
-5. Wait for `/LoginPage` (up to ~6 min; dump full logs on failure)
-6. `UiScenarioRunner --all`
+5. Wait for `/LoginPage` (up to ~6 min; writes `wait-diagnostics.log`)
+6. `UiScenarioRunner --all` (stdout → `scenario-runner.log`)
+7. On failure: download artifact **`ui-scenario-ci-logs`** (`scripts/ci/Collect-UiScenarioCiArtifacts.ps1` bundles host logs + diagnostics)
 
 ---
 
