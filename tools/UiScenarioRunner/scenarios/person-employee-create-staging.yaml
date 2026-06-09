@@ -1,0 +1,46 @@
+# One-off staging run (unique personal number). Not for CI.
+id: person-employee-create-staging
+description: person-employee-create against staging with unique personal number
+requiresAuth: true
+
+env:
+  employeePersonalNumber: E2E-CREATE-STG-011
+  employeeFirstName: Ferdi
+  employeeLastName: Başyılmaz
+  employeeDateOfBirth: "22.05.1980"
+  employeeBirthPlace: Soma
+  employeeCountryOfBirth: Türkiye
+  employeeGender: Male
+  employeeMaritalStatus: Divorced
+  employeeNationality: Türkiye
+  employeeForeignAddress: Kurtuluş mah. DR.Behiç Kaynak sk. N-11 iç kapı N-4 Soma/Manisa
+  employeeForeignAddressCountry: Türkiye
+  employeeProjectContract: GT-15
+  employeeSubcontractor: Çalyk Enerji
+  employeeVisaFamilyMembersText: "Ýok"
+
+steps:
+  - login:
+      user: standarduser
+      password: ""
+  - goto: /Person_ListView_Employees
+  - wait-for: person-list-employees-new
+  - click: person-list-employees-new
+  - wait-for: person-first-name
+  - fill:
+      person-first-name: ${employeeFirstName}
+      person-last-name: ${employeeLastName}
+      person-date-of-birth: ${employeeDateOfBirth}
+      person-birth-place: ${employeeBirthPlace}
+      person-country-of-birth: ${employeeCountryOfBirth}
+      person-gender: ${employeeGender}
+      person-marital-status: ${employeeMaritalStatus}
+      person-visa-application-family-members-text: ${employeeVisaFamilyMembersText}
+      person-nationality: ${employeeNationality}
+      person-personal-number: ${employeePersonalNumber}
+      person-foreign-address: ${employeeForeignAddress}
+      person-foreign-address-country: ${employeeForeignAddressCountry}
+      person-project-contract: ${employeeProjectContract}
+      person-subcontractor: ${employeeSubcontractor}
+  - click: person-detail-employee-save-and-close
+  - assert-visible: person-list-employees-new
