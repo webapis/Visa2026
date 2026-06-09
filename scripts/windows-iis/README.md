@@ -4,73 +4,92 @@
 
 **Agent skill:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [learnings.md](../../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)
 
-Use when the company host is **Windows Server** and **Docker / WSL is not acceptable**. The app runs as **ASP.NET Core** behind **IIS**; SQL Server runs **on Windows** (same machine or separate).
+Use when the company host is **Windows Server** and **Docker / WSL is not acceptable**. The app runs as **ASP.NET Core** behind **IIS**; SQL Server runs **on Windows** (same machine).
 
 **Not this folder:** `scripts/linux/` (Docker on Ubuntu), `scripts/legacy/on-prem-windows/` (WSL + Docker), `droplet-scripts/` (cloud).
+
+## Deployment slots
+
+One server hosts **three independent IIS stacks** (see [Visa2026-IisSlots.ps1](./Visa2026-IisSlots.ps1)):
+
+| Profile | Port | Site | Publish path | Env file | Database |
+|---------|------|------|--------------|----------|----------|
+| **Production** | 80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
+| **Staging** | 8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
+| **Demo** | 8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+
+Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates: [env/](./env/).
+
+**Legacy** single site (`Visa2026` / `C:\inetpub\visa2026` / `C:\visa2026\.env.prod`) — **`-Profile Legacy`** during migration.
 
 ## Scripts
 
 | Script | Where to run | Purpose |
 |--------|----------------|---------|
-| `Publish-Visa2026ForIis.ps1` | Dev PC or build agent | `dotnet publish` → `dist/visa2026-iis-<version>/` |
-| `Deploy-Visa2026IisRemote.ps1` | Dev PC (SSH) | Full deploy to `visa2026-onprem` |
-| `Install-SqlServerExpress.ps1` | Windows Server | SQL Server 2022 Express (`SQLEXPRESS`) + create DB |
-| `Configure-SqlExpressSaLogin.ps1` | Windows Server | After **manual** SQL install: mixed mode, `sa`, create DB |
-| `Restore-Visa2026SqlBackup.ps1` | Windows Server | Restore `.bak` into `Visa2026DbProd` (`WITH REPLACE`) |
+| `Visa2026-IisSlots.ps1` | (dot-sourced) | Slot manifest: ports, paths, DB names |
+| `Publish-Visa2026ForIis.ps1` | Dev PC | `dotnet publish` → `dist/visa2026-iis-<version>/` |
+| `Deploy-Visa2026IisRemote.ps1` | Dev PC (SSH) | Deploy **one slot** (default Production) |
+| `Deploy-Visa2026IisSlotRemote.ps1` | Dev PC (SSH) | Same; explicit slot deploy implementation |
+| `Install-Visa2026IisSlots.ps1` | Windows Server | Create all slot sites, env files, databases |
+| `Ensure-Visa2026SlotDatabases.ps1` | Windows Server | `CREATE DATABASE` for slot DBs if missing |
+| `Set-Visa2026IisSlotsAutoStart.ps1` | Windows Server | Auto-start all slots; Default Web Site → `127.0.0.1:8090` |
+| `Enable-Visa2026IisSlotFirewall.ps1` | Windows Server | Inbound TCP firewall for Staging `:8080` and Demo `:8081` |
+| `Install-SqlServerExpress.ps1` | Windows Server | SQL Server 2022 Express (`SQLEXPRESS`) |
+| `Configure-SqlExpressSaLogin.ps1` | Windows Server | After manual SQL install: mixed mode, `sa` |
+| `Restore-Visa2026SqlBackup.ps1` | Windows Server | Restore `.bak` (`-Profile Production` default) |
 | `Install-Visa2026ServerPrerequisites.ps1` | Windows Server | IIS + .NET 8 Hosting Bundle |
-| `Install-Visa2026IisSite.ps1` | Windows Server | Create app pool, site, WebSockets |
-| `Configure-Visa2026Production.ps1` | Windows Server | `appsettings.Production.json` from `C:\visa2026\.env.prod` |
+| `Install-Visa2026IisSite.ps1` | Windows Server | One site/app pool (`-Profile` or explicit paths) |
+| `Configure-Visa2026Production.ps1` | Windows Server | `appsettings.Production.json` from slot env file |
 | `Set-Visa2026AppPoolEnvironment.ps1` | Windows Server | App pool env via **appcmd** |
 | `Update-Visa2026Database.ps1` | Windows Server | `Visa2026.Blazor.Server.exe --updateDatabase` |
-| `Run-Visa2026DbUpdateOnServer.ps1` | Windows Server | DB update using publish folder + env json |
-| `Diagnose-Port80.ps1` | Windows Server | Port 80 listener + IIS sites + Docker ports |
-| `Set-Visa2026IisAutoStart.ps1` | Windows Server | Auto-start Visa2026 after reboot; SQL before IIS; move Default Web Site off :80 |
-| `Register-Visa2026IisBootTask.ps1` | Windows Server | Scheduled task **Visa2026-IisAfterBoot** (recycle after SQL on boot) |
-| `Get-Visa2026IisStartupError.ps1` | Windows Server | Diagnose 500.30 / startup failures (services, SQL wait, HTTP probe) |
-| `Get-Visa2026RecentIisErrors.ps1` | Windows Server | Last IIS / ASP.NET Core errors from Application event log |
-| `Test-Visa2026Startup.ps1` | Windows Server | Run `Visa2026.Blazor.Server.exe` once with publish env (console errors) |
-| `Enable-Visa2026StdoutLog.ps1` | Windows Server | Enable ASP.NET Core stdout logging in `web.config` |
-| `Set-Visa2026EnvDbName.ps1` | Windows Server | Set `DB_NAME` in `C:\visa2026\.env.prod` (demo vs prod) |
-| `Remove-Visa2026ForceXafDbUpdate.ps1` | Windows Server | Remove `FORCE_XAF_DB_UPDATE` from app pool (one-shot flag) |
+| `Run-Visa2026DbUpdateOnServer.ps1` | Windows Server | DB update for one slot |
+| `Diagnose-Port80.ps1` | Windows Server | Port 80 listener + IIS sites |
+| `Set-Visa2026IisAutoStart.ps1` | Windows Server | Auto-start one site (used by slots script) |
+| `Register-Visa2026IisBootTask.ps1` | Windows Server | Scheduled task after boot |
+| `Get-Visa2026IisStartupError.ps1` | Windows Server | Diagnose 500.30 (`-Profile`) |
+| `Get-Visa2026RecentIisErrors.ps1` | Windows Server | Application event log triage |
+| `Test-Visa2026Startup.ps1` | Windows Server | Console startup probe (`-Profile`) |
+| `Enable-Visa2026StdoutLog.ps1` | Windows Server | Enable stdout logging (`-Profile`) |
+| `Set-Visa2026EnvDbName.ps1` | Windows Server | **Legacy** — change `DB_NAME` in one env file; prefer slot deploy |
+| `Remove-Visa2026ForceXafDbUpdate.ps1` | Windows Server | Remove `FORCE_XAF_DB_UPDATE` from slot app pool |
 
 ## Quick start (workstation)
 
 ```powershell
 cd C:\path\to\Visa2026
-.\scripts\windows-iis\Publish-Visa2026ForIis.ps1 -Zip -OpenOutputFolder
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Production
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Staging
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Demo
 ```
-
-Copy the publish folder (or zip) to the server, e.g. `C:\inetpub\visa2026`.
 
 ## Server layout
 
 ```text
-C:\inetpub\visa2026\          # publish output (site physical path)
-C:\visa2026\.env.prod         # SA_PASSWORD, DEVEXPRESS_LICENSEKEY, DB_NAME
-C:\visa2026-deploy\iis\       # scripts copied from repo
-C:\visa2026\backups\          # SQL .bak files
+C:\inetpub\visa2026-prod\       # Production publish (:80)
+C:\inetpub\visa2026-staging\    # Staging (:8080)
+C:\inetpub\visa2026-demo\       # Demo (:8081)
+C:\visa2026\env\
+  prod.env                      # SA_PASSWORD, DEVEXPRESS_LICENSEKEY, DB_NAME
+  staging.env
+  demo.env
+C:\visa2026-deploy\iis\         # scripts copied from repo
+C:\visa2026\backups\
+  prod\  staging\  demo\       # SQL .bak per slot
 C:\ProgramData\Visa2026\
-  DataProtection-Keys\        # persist across app pool recycle (env var)
+  DataProtection-Keys-Prod\
+  DataProtection-Keys-Staging\
+  DataProtection-Keys-Demo\
 ```
 
-Set **app pool** environment variables (use `Set-Visa2026AppPoolEnvironment.ps1` or IIS Manager):
-
-- `ASPNETCORE_ENVIRONMENT` = `Production`
-- `DEVEXPRESS_LICENSEKEY` = (same value as Docker `.env.prod`)
-- `ASPNETCORE_DATA_PROTECTION_KEYS` = `C:\ProgramData\Visa2026\DataProtection-Keys`
-
-Connection string: **`Server=localhost\SQLEXPRESS`** in `appsettings.Production.json` (from `Configure-Visa2026Production.ps1`).
-
-First deploy: run database update before opening the site to users:
+First deploy per slot:
 
 ```powershell
-C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate
+C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -Profile Production -ForceUpdate
 ```
 
-Restore prod data from backup:
+Restore production data:
 
 ```powershell
-C:\visa2026-deploy\iis\Restore-Visa2026SqlBackup.ps1 -BackupPath C:\visa2026\backups\<file>.bak
-C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1
+C:\visa2026-deploy\iis\Restore-Visa2026SqlBackup.ps1 -Profile Production -BackupPath C:\visa2026\backups\prod\<file>.bak
+C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -Profile Production
 ```
-

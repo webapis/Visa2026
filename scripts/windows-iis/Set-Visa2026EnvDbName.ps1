@@ -1,13 +1,23 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Set DB_NAME in C:\visa2026\.env.prod (on server) without changing other keys.
+  Set DB_NAME in a slot env file (on server). Prefer -Profile; legacy default is C:\visa2026\.env.prod.
+  For prod/staging/demo isolation use separate slots (Install-Visa2026IisSlots.ps1) instead of swapping DB_NAME.
 #>
 param(
     [Parameter(Mandatory = $true)]
     [string]$DatabaseName,
-    [string]$EnvFile = "C:\visa2026\.env.prod"
+
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$EnvFile = ""
 )
+
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+if ([string]::IsNullOrWhiteSpace($EnvFile)) {
+    $EnvFile = (Resolve-Visa2026IisSlotContext -Profile $Profile).EnvFile
+}
 
 $ErrorActionPreference = "Stop"
 if (-not (Test-Path -LiteralPath $EnvFile)) {

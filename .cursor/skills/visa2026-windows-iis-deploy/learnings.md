@@ -61,3 +61,11 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Related:** `-ForceUpdate` failed with **`Invalid column name 'IsDeleted'`** on greenfield — `SoftDeleteColumnsCleanupUpdater` `DELETE` was compile-validated despite `IF COL_LENGTH`; fixed with **`sp_executesql`** for purge. App pool **`FORCE_XAF_DB_UPDATE=true`** (not in `.env.prod`) caused **500.30** on startup — remove with [Remove-Visa2026ForceXafDbUpdate.ps1](../../../scripts/windows-iis/Remove-Visa2026ForceXafDbUpdate.ps1).
 - **Deploy:** Republish → copy `C:\inetpub\visa2026` → `Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate` (exit 0) → `appcmd start apppool Visa2026`. Verify: `sys.views` has `View_VisaExtensionStatus`; `SELECT COUNT(*)` returns 0 on empty demo.
 - **Prevent:** Do not leave `FORCE_XAF_DB_UPDATE` on the app pool after greenfield update; use normal DB update on release unless schema drift.
+
+### 2026-06-01 — Multi-slot IIS (prod :80 / staging :8080 / demo :8081) (10.100.128.25)
+
+- **Problem:** Single site `Visa2026` + `Set-Visa2026EnvDbName.ps1` made it easy to point prod URL at demo DB by mistake.
+- **Fix:** [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots.ps1) + `Install-Visa2026IisSlots.ps1` — three sites/pools/publish folders/env files/DBs on one SQL Express instance.
+- **Ports:** Production **80**, Staging **8080**, Demo **8081**. Default Web Site moved to **`127.0.0.1:8090`** (not 8080) via `Set-Visa2026IisSlotsAutoStart.ps1`.
+- **Deploy:** `Deploy-Visa2026IisRemote.ps1 -Profile Production|Staging|Demo`; DB update `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`.
+- **Migration:** Legacy `C:\inetpub\visa2026` → copy to slot folders; stop old `Visa2026` site; `-Profile Legacy` during transition.

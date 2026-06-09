@@ -189,6 +189,56 @@ dxd-license,
     border-radius: 10px;
     padding: 6px 10px;
     backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.app-version-badge__version,
+.app-version-badge__deployment {
+    display: block;
+    line-height: 1.25;
+}
+
+.deployment-env-badge {
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+}
+
+.deployment-env-badge__slot {
+    font-weight: 600;
+}
+
+.deployment-env-badge__separator {
+    margin: 0 0.25em;
+    opacity: 0.55;
+}
+
+.deployment-env-badge__database {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95em;
+}
+
+.deployment-env-badge--production .deployment-env-badge__slot {
+    color: #2e7d32;
+}
+
+.deployment-env-badge--staging .deployment-env-badge__slot {
+    color: #1565c0;
+}
+
+.deployment-env-badge--demo .deployment-env-badge__slot {
+    color: #e65100;
+}
+
+.deployment-env-badge--development .deployment-env-badge__slot {
+    color: #6a1b9a;
+}
+
+.deployment-env-badge--legacy .deployment-env-badge__slot {
+    color: #5d4037;
 }
 
 /* Lift version pill above the FORCE_XAF_DB_UPDATE strip when both are visible */

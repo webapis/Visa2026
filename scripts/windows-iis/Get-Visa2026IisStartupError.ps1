@@ -1,10 +1,20 @@
 #Requires -Version 5.1
 param(
-    [string]$PublishPath = "C:\inetpub\visa2026",
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$PublishPath = "",
     [int]$StartupWaitSeconds = 90
 )
 
 $ErrorActionPreference = "Continue"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath
+$PublishPath = $ctx.PublishPath
+$appPoolName = $ctx.AppPoolName
+$siteName = $ctx.SiteName
+$loginUrl = $ctx.LoginPageUrl
+
 $appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
 
 Write-Host "=== Services ===" -ForegroundColor Cyan
@@ -13,10 +23,10 @@ Get-Service -Name "MSSQL`$SQLEXPRESS" -ErrorAction SilentlyContinue | Format-Tab
 
 Write-Host "=== IIS ===" -ForegroundColor Cyan
 & $appcmd list site
-& $appcmd list apppool Visa2026
+& $appcmd list apppool $appPoolName
 
 Write-Host "=== App pool env (names only) ===" -ForegroundColor Cyan
-& $appcmd list config "Visa2026" -section:system.applicationHost/applicationPools /text:* 2>$null | Select-String -Pattern "DEVEXPRESS|ASPNETCORE|Connection"
+& $appcmd list apppool $appPoolName /text:* 2>$null | Select-String -Pattern "DEVEXPRESS|ASPNETCORE|FORCE"
 
 Write-Host "=== Config files ===" -ForegroundColor Cyan
 $prod = Join-Path $PublishPath "appsettings.Production.json"
@@ -45,7 +55,7 @@ while ((Get-Date) -lt $deadline) {
 Write-Host "SQL Express running: $sqlUp"
 
 Write-Host "=== Run exe once (capture startup errors) ===" -ForegroundColor Cyan
-$envFile = "C:\inetpub\visa2026\iis-apppool-env.json"
+$envFile = Join-Path $PublishPath "iis-apppool-env.json"
 $appSettings = Join-Path $PublishPath "appsettings.Production.json"
 if ((Test-Path $envFile) -and (Test-Path $appSettings)) {
     $e = Get-Content $envFile | ConvertFrom-Json

@@ -1,7 +1,16 @@
 #Requires -Version 5.1
-param([string]$PublishPath = "C:\inetpub\visa2026")
+param(
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$PublishPath = ""
+)
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath
+$PublishPath = $ctx.PublishPath
+$appPoolName = $ctx.AppPoolName
 $logDir = Join-Path $PublishPath "logs"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $webConfig = Join-Path $PublishPath "web.config"
@@ -10,10 +19,10 @@ $asp = $xml.configuration.location.system.webServer.aspNetCore
 $asp.stdoutLogEnabled = "true"
 $xml.Save($webConfig)
 Write-Host "stdoutLogEnabled=true; logs: $logDir"
-& "$env:windir\System32\inetsrv\appcmd.exe" recycle apppool Visa2026 | Out-Null
+& "$env:windir\System32\inetsrv\appcmd.exe" recycle apppool $appPoolName | Out-Null
 Start-Sleep -Seconds 8
 try {
-    $r = Invoke-WebRequest -Uri "http://127.0.0.1/LoginPage" -UseBasicParsing -TimeoutSec 90
+    $r = Invoke-WebRequest -Uri $ctx.LoginPageUrl -UseBasicParsing -TimeoutSec 90
     Write-Host "HTTP $($r.StatusCode)"
 }
 catch {

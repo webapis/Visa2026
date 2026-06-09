@@ -4,11 +4,17 @@
   Run Visa2026.Blazor.Server.exe once on the server and print startup errors (IIS triage).
 #>
 param(
-    [string]$PublishPath = "C:\inetpub\visa2026",
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$PublishPath = "",
     [int]$TimeoutSeconds = 25
 )
 
 $ErrorActionPreference = "Continue"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath
+$PublishPath = $ctx.PublishPath
 $envJson = Join-Path $PublishPath "iis-apppool-env.json"
 $appSettings = Join-Path $PublishPath "appsettings.Production.json"
 $exe = Join-Path $PublishPath "Visa2026.Blazor.Server.exe"

@@ -27,17 +27,28 @@
   Runbook: docs/ON_PREM_WINDOWS_IIS.md
 #>
 param(
-    [string]$PublishPath = "C:\inetpub\visa2026",
-    [string]$SiteName = "Visa2026",
-    [string]$AppPoolName = "Visa2026",
-    [int]$HttpPort = 80
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$PublishPath = "",
+    [string]$SiteName = "",
+    [string]$AppPoolName = "",
+    [int]$HttpPort = 0,
+    [switch]$SkipAutoStart
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath -SiteName $SiteName -AppPoolName $AppPoolName -HttpPort $HttpPort
+$PublishPath = $ctx.PublishPath
+$SiteName = $ctx.SiteName
+$AppPoolName = $ctx.AppPoolName
+$HttpPort = $ctx.HttpPort
+$dataProtectionPath = $ctx.DataProtectionKeysPath
 
 Import-Module WebAdministration -ErrorAction Stop
 
-$dataProtectionPath = "C:\ProgramData\Visa2026\DataProtection-Keys"
 $publishPathFull = [System.IO.Path]::GetFullPath($PublishPath)
 
 if (-not (Test-Path -LiteralPath $publishPathFull)) {
@@ -65,13 +76,15 @@ Write-Host "==> Enable WebSockets for site" -ForegroundColor Cyan
 Set-WebConfigurationProperty -PSPath "MACHINE/WEBROOT/APPHOST" -Location "$SiteName" `
     -Filter "system.webServer/webSocket" -Name "enabled" -Value "True"
 
-Write-Host "==> Auto-start after reboot" -ForegroundColor Cyan
-$autoStartScript = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "Set-Visa2026IisAutoStart.ps1"
-if (Test-Path -LiteralPath $autoStartScript) {
-    & $autoStartScript -SiteName $SiteName -AppPoolName $AppPoolName
-}
-else {
-    Write-Warning "Set-Visa2026IisAutoStart.ps1 not found beside this script; run it manually after install."
+if (-not $SkipAutoStart) {
+    Write-Host "==> Auto-start after reboot" -ForegroundColor Cyan
+    $autoStartScript = Join-Path $PSScriptRoot "Set-Visa2026IisAutoStart.ps1"
+    if (Test-Path -LiteralPath $autoStartScript) {
+        & $autoStartScript -SiteName $SiteName -AppPoolName $AppPoolName
+    }
+    else {
+        Write-Warning "Set-Visa2026IisAutoStart.ps1 not found beside this script; run Set-Visa2026IisSlotsAutoStart.ps1 after all slots are installed."
+    }
 }
 
 Write-Host ""

@@ -22,13 +22,23 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$BackupPath,
-    [string]$EnvFile = "C:\visa2026\.env.prod",
+
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "Production",
+
+    [string]$EnvFile = "",
     [string]$InstanceName = "SQLEXPRESS",
-    [string]$AppPoolName = "Visa2026",
+    [string]$AppPoolName = "",
     [switch]$StopAppPool = $true
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -AppPoolName $AppPoolName -EnvFile $EnvFile
+$EnvFile = $ctx.EnvFile
+$AppPoolName = $ctx.AppPoolName
+
 Add-Type -AssemblyName System.Data
 
 function Read-DotEnvMap([string]$Path) {

@@ -2,9 +2,9 @@
 name: visa2026-windows-iis-deploy
 description: >-
   Deploy and update Visa2026 on company Windows Server with IIS + native SQL Server Express (no Docker/WSL).
-  Publish, SSH copy, Configure-Visa2026Production, DB update, .bak restore, SQL sa/mixed-mode fixes, port 80
-  portproxy cleanup. Use for on-prem IIS, localhost\SQLEXPRESS, scripts/windows-iis, visa2026-onprem host,
-  C:\inetpub\visa2026, Login failed for user sa, site won't start on port 80.
+  Three slots on one host — Production :80, Staging :8080, Demo :8081 — each with its own DB, publish folder,
+  app pool, and env file. Publish, SSH copy, -Profile deploy, DB update, .bak restore, FORCE_XAF_DB_UPDATE per pool.
+  Use for on-prem IIS, localhost\SQLEXPRESS, scripts/windows-iis, visa2026-onprem, Login failed for user sa.
 disable-model-invocation: false
 ---
 
@@ -13,6 +13,16 @@ disable-model-invocation: false
 ## Goal
 
 Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server Express** on the same host — **no Docker**, **no WSL**.
+
+One server runs **three independent slots** (separate site, app pool, publish folder, database, data-protection keys):
+
+| Slot | Port | Site / pool | Publish path | Env file | Database |
+|------|------|-------------|--------------|----------|----------|
+| **Production** | **80** | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
+| **Staging** | **8080** | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
+| **Demo** | **8081** | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+
+Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots.ps1). Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts.
 
 **Canonical runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md)
 
@@ -26,11 +36,11 @@ Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server E
 
 **Not this skill:** Ubuntu + Docker ([setup-docker-engine](../setup-docker-engine/SKILL.md)), droplet ([visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md)), legacy WSL ([legacy-on-prem-windows-setup](../legacy-on-prem-windows-setup/SKILL.md)), local dev Docker ([visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md)).
 
-**Runtime app errors (LogError, batch failures, planned SQL inbox):** [visa2026-runtime-error-tracking](../visa2026-runtime-error-tracking/SKILL.md) — triage VS Output + IIS stdout; not IIS deploy/502/sa login (stay in §6 below).
+**Runtime app errors:** [visa2026-runtime-error-tracking](../visa2026-runtime-error-tracking/SKILL.md) — not IIS deploy/502/sa login (§6 below).
 
 ### Chat openers
 
-- `@.cursor/skills/visa2026-windows-iis-deploy/` — deploy or update IIS on-prem prod.
+- `@.cursor/skills/visa2026-windows-iis-deploy/` — deploy or update IIS slot (prod / staging / demo).
 - **IIS Login failed for user sa** / **port 80 in use** / **restore .bak to SQLEXPRESS**.
 
 ---
@@ -38,9 +48,12 @@ Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server E
 ## 1. Before you start
 
 1. Read **[learnings.md](./learnings.md)** (append-only fixes from real hosts, e.g. `10.100.128.25`).
-2. Confirm path: **IIS + native SQL**, not Docker. If the user wants Linux on-prem, use **setup-docker-engine**.
-3. Secrets live in **`C:\visa2026\.env.prod`** on the server (`SA_PASSWORD`, `DEVEXPRESS_LICENSEKEY`, `DB_NAME`) — **never commit** or paste into chat.
-4. SSH config example: host **`visa2026-onprem`** → company server; scripts copied to **`C:\visa2026-deploy\iis\`**.
+2. Confirm path: **IIS + native SQL**, not Docker.
+3. **Ask which slot** if the user did not say (default **Production** for production releases; **Demo** for greenfield/playground).
+4. Secrets live in **`C:\visa2026\env\*.env`** (`SA_PASSWORD`, `DEVEXPRESS_LICENSEKEY`, `DB_NAME` per slot). Legacy **`C:\visa2026\.env.prod`** can seed new env files — **never commit** or paste into chat.
+5. SSH host **`visa2026-onprem`**; scripts on server under **`C:\visa2026-deploy\iis\`**.
+
+**Legacy single site** (`Visa2026` on `C:\inetpub\visa2026`) — use **`-Profile Legacy`** or migrate via [reference.md § Migration](./reference.md).
 
 ---
 
@@ -48,58 +61,60 @@ Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server E
 
 | Class | Examples | OK required? |
 |-------|----------|--------------|
-| **Read-only** | `appcmd list site`, `sc query MSSQL$SQLEXPRESS`, `curl` LoginPage, `Diagnose-Port80.ps1` | No |
-| **Deploy / mutate** | Copy publish folder, `Configure-Visa2026Production.ps1`, `Run-Visa2026DbUpdateOnServer.ps1`, `Restore-Visa2026SqlBackup.ps1`, `Configure-SqlExpressSaLogin.ps1`, `iisreset`, stop/start site | **Yes** (unless user said “go ahead”) |
-| **Destructive** | `RESTORE … WITH REPLACE`, removing portproxy, SQL single-user `-m` bootstrap | **Yes** |
+| **Read-only** | `appcmd list site`, `sc query MSSQL$SQLEXPRESS`, curl LoginPage per port, `Diagnose-Port80.ps1` | No |
+| **Deploy / mutate** | Copy publish, `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
+| **Destructive** | `RESTORE … WITH REPLACE` on **prod** DB, removing portproxy, SQL single-user `-m` bootstrap | **Yes** |
 
-Take a **SQL `.bak`** before restore or risky schema update when prod data matters.
+Take a **SQL `.bak`** before restore or risky schema update on **Production**.
 
 ---
 
-## 3. Greenfield deploy (summary)
+## 3. Greenfield (all slots on server)
 
-Full steps: [reference.md § Greenfield](./reference.md). Runbook phases: [ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md).
+Full steps: [reference.md](./reference.md). Phases: [ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md).
 
 | Step | Script / action |
 |------|-----------------|
-| Publish (dev PC) | `Publish-Visa2026ForIis.ps1` → `dist/visa2026-iis-<version>/` |
-| SQL Express | `Install-SqlServerExpress.ps1` **or** manual install + `Configure-SqlExpressSaLogin.ps1` |
+| Publish (dev PC) | `Publish-Visa2026ForIis.ps1` |
+| SQL Express | `Install-SqlServerExpress.ps1` or `Configure-SqlExpressSaLogin.ps1` |
 | IIS + Hosting Bundle | `Install-Visa2026ServerPrerequisites.ps1` |
-| Site | `Install-Visa2026IisSite.ps1` → `C:\inetpub\visa2026` |
-| Config | `Configure-Visa2026Production.ps1 -SqlServer 'localhost\SQLEXPRESS'` |
-| App pool env | `Set-Visa2026AppPoolEnvironment.ps1` |
-| DB | `Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate` (exit **0**) |
-| Port 80 | `Diagnose-Port80.ps1`; remove WSL **portproxy** if present ([learnings](./learnings.md)) |
-| Verify | HTTP **200** on `/LoginPage`; change **Admin** password |
+| **All three slots** | `Install-Visa2026IisSlots.ps1 -SourceEnvFile C:\visa2026\.env.prod` (creates sites, env templates, DBs) |
+| Copy publish | Same build into each `C:\inetpub\visa2026-{prod,staging,demo}\` (or deploy one slot at a time) |
+| Per-slot DB update | `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate` (etc.) |
+| Auto-start | `Set-Visa2026IisSlotsAutoStart.ps1` (prod :80 + staging :8080 + demo :8081) |
+| Port 80 | `Diagnose-Port80.ps1`; remove WSL **portproxy** if present |
 
-**Remote orchestration (dev PC):** `Deploy-Visa2026IisRemote.ps1` (SSH + scp).
+**Remote (dev PC, one slot):**
+
+```powershell
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Production
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Staging -ForceUpdate
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Demo -EnableForceXafDbUpdate -ForceUpdate
+```
 
 ---
 
 ## 4. App update (each release)
 
-1. **Backup** database (`.bak` on server under `C:\visa2026\backups\`).
-2. **Publish** new version on dev PC.
-3. **Stop** app pool `Visa2026` (or site).
-4. Copy publish to **`C:\inetpub\visa2026`** — **keep** `appsettings.Production.json` and **`C:\ProgramData\Visa2026\DataProtection-Keys`**.
-5. **`Run-Visa2026DbUpdateOnServer.ps1`** when release includes schema/module changes (`-ForceUpdate` if drift).
-6. **Start** app pool + site; smoke **`/LoginPage`**.
+1. **Backup** that slot’s database (`C:\visa2026\backups\<prod|staging|demo>\`).
+2. **Publish** on dev PC.
+3. **Stop** that slot’s app pool (`Visa2026-Prod` / `-Staging` / `-Demo`).
+4. Copy publish to that slot’s **`C:\inetpub\visa2026-*`** — keep slot’s `appsettings.Production.json` and **`DataProtection-Keys-*`**.
+5. **`Run-Visa2026DbUpdateOnServer.ps1 -Profile <slot>`** (`-ForceUpdate` if drift).
+6. Start app pool + site; smoke that slot’s LoginPage URL (see table in § Goal).
 
-There is **no** `docker compose pull` — track version via `publish-version.txt` in the publish folder.
+Track version via `publish-version.txt` in the publish folder.
 
 ---
 
 ## 5. Restore prod data from `.bak`
 
-Use when migrating off Docker/WSL SQL or replacing a greenfield DB.
-
 ```powershell
-# On server (after scp .bak to C:\visa2026\backups\)
-C:\visa2026-deploy\iis\Restore-Visa2026SqlBackup.ps1 -BackupPath C:\visa2026\backups\<file>.bak
-C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1
+C:\visa2026-deploy\iis\Restore-Visa2026SqlBackup.ps1 -Profile Production -BackupPath C:\visa2026\backups\prod\<file>.bak
+C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -Profile Production
 ```
 
-Then verify login with **existing** users (not only greenfield Admin).
+Use **`-Profile Staging`** only when intentionally cloning data to staging.
 
 ---
 
@@ -107,23 +122,19 @@ Then verify login with **existing** users (not only greenfield Admin).
 
 | Signal | Likely cause | Action |
 |--------|----------------|--------|
-| **`Login failed for user 'sa'`** | Manual SQL install: Windows-only auth, disabled `sa`, or `SA_PASSWORD` mismatch | [Configure-SqlExpressSaLogin.ps1](../../../scripts/windows-iis/Configure-SqlExpressSaLogin.ps1); see [learnings](./learnings.md) |
-| **Site won't start / port 80 in use** | Leftover **`netsh interface portproxy`** from WSL/Docker | [Diagnose-Port80.ps1](../../../scripts/windows-iis/Diagnose-Port80.ps1); `portproxy delete` — [reference.md](./reference.md) |
-| **`Invalid column name`** | App newer than DB schema | `Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate` |
+| **`Login failed for user 'sa'`** | `sa` / mixed mode / password mismatch | [Configure-SqlExpressSaLogin.ps1](../../../scripts/windows-iis/Configure-SqlExpressSaLogin.ps1) |
+| **Port 80 in use** | portproxy or Default Web Site | [Diagnose-Port80.ps1](../../../scripts/windows-iis/Diagnose-Port80.ps1) |
+| **Staging won’t bind :8080** | Rare conflict with Default Web Site on `127.0.0.1:8080` | `Set-Visa2026IisSlotsAutoStart.ps1` moves Default to **8090** |
+| **`Invalid column name`** | App newer than that slot’s DB | `Run-Visa2026DbUpdateOnServer.ps1 -Profile … -ForceUpdate` |
 | **502.5 / 500.30** | Hosting Bundle / runtime | [ON_PREM_WINDOWS_IIS.md § Troubleshooting](../../../docs/ON_PREM_WINDOWS_IIS.md) |
-| **HTTP 500.30 after reboot** | **SQL Express** not running yet; app pool started first | Wait 2–3 min; `Set-Visa2026IisAutoStart.ps1`; ensure **Visa2026-IisAfterBoot** task exists |
-| **IIS welcome page after reboot** | **Default Web Site** took port **80**; Visa2026 stopped | `Set-Visa2026IisAutoStart.ps1` ([learnings](./learnings.md)) |
-| **Everyone logged out after recycle** | Data Protection keys path | `ASPNETCORE_DATA_PROTECTION_KEYS` → `C:\ProgramData\Visa2026\DataProtection-Keys` |
-| **DevExpress license** | Missing app pool env | `Set-Visa2026AppPoolEnvironment.ps1` |
-| **App LogError / batch failed / officer saw error toast** | Application runtime fault | [visa2026-runtime-error-tracking](../visa2026-runtime-error-tracking/SKILL.md) — stdout tail + SQL batch tables; future `ApplicationRuntimeLog` |
+| **Logged out after recycle** | Wrong data-protection path for slot | Per-slot `ASPNETCORE_DATA_PROTECTION_KEYS` via `Configure-Visa2026Production.ps1 -Profile …` |
+| **`FORCE_XAF_DB_UPDATE` left on** | Slow startup / 500.30 | `Remove-Visa2026ForceXafDbUpdate.ps1 -Profile …` |
+| **Wrong data shown** | Deployed to wrong slot or old single-site swap | Confirm `-Profile` and smoke URL port |
+
+**Avoid** swapping `DB_NAME` on one site (`Set-Visa2026EnvDbName.ps1`) — prefer **slot deploy**.
 
 ---
 
 ## 7. Record experience
 
-After a **verified** fix on a real host:
-
-1. **Append** [learnings.md](./learnings.md) (template in [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md)).
-2. If the pattern repeats, add a row to **§6** above or a short subsection in [DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](../../../docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md) §8.
-
-Do **not** put secrets or full connection strings in learnings or docs.
+After a **verified** fix: **append** [learnings.md](./learnings.md). Do **not** put secrets in learnings or docs.

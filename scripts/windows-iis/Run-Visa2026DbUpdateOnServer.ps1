@@ -1,11 +1,20 @@
 #Requires -Version 5.1
 param(
-    [string]$PublishPath = "C:\inetpub\visa2026",
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$PublishPath = "",
     [switch]$ForceUpdate
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath
+$PublishPath = $ctx.PublishPath
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+Write-Host "DB update slot: $($ctx.Profile) -> $($ctx.DbName) ($PublishPath)" -ForegroundColor Cyan
 
 $envJson = Join-Path $PublishPath "iis-apppool-env.json"
 $appSettings = Join-Path $PublishPath "appsettings.Production.json"

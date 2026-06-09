@@ -19,20 +19,32 @@ Runbook for deploying Visa2026 on **Windows Server** using **IIS**, the **ASP.NE
 ## Architecture
 
 ```text
-LAN clients  -->  http://<server-ip>  (IIS :80 / :443)
-                        |
-              IIS + ASP.NET Core Module (ANCM)
-                        |
-              Kestrel (Visa2026.Blazor.Server.exe)
-                        |
-              SQL Server on Windows (local or remote)
+LAN clients
+  --> :80   Production  (Visa2026-Prod)     --> Visa2026DbProd
+  --> :8080 Staging     (Visa2026-Staging)  --> Visa2026DbStaging
+  --> :8081 Demo        (Visa2026-Demo)     --> Visa2026DbDemo
+              |
+        IIS + ASP.NET Core Module (ANCM) — three sites / app pools
+              |
+        Kestrel (Visa2026.Blazor.Server.exe per slot)
+              |
+        SQL Server Express localhost\SQLEXPRESS (one instance, three databases)
 ```
+
+| Slot | Port | IIS site | Publish path | Database |
+|------|------|----------|--------------|----------|
+| Production | 80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `Visa2026DbProd` |
+| Staging | 8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `Visa2026DbStaging` |
+| Demo | 8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `Visa2026DbDemo` |
+
+Slot manifest and scripts: [scripts/windows-iis/Visa2026-IisSlots.ps1](../scripts/windows-iis/Visa2026-IisSlots.ps1), [scripts/windows-iis/README.md](../scripts/windows-iis/README.md).
 
 | Component | Technology |
 |-----------|------------|
-| Web host | IIS site → `C:\inetpub\visa2026` |
-| App | .NET 8 **Visa2026.Blazor.Server** (published folder) |
-| Database | **SQL Server** 2019+ / Express / Standard (Windows) |
+| Web host | Three IIS sites (one publish folder per slot) |
+| App | .NET 8 **Visa2026.Blazor.Server** (same build copied to each slot) |
+| Database | **SQL Server** Express on Windows — `Visa2026DbProd` / `Staging` / `Demo` |
+| Secrets | Per-slot env: `C:\visa2026\env\prod.env`, `staging.env`, `demo.env` |
 | Reports / PDF | Windows fonts (Times New Roman, etc.) — no Linux font stack |
 
 ---
@@ -69,10 +81,14 @@ Optional: [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md
 
 | Path | Purpose |
 |------|---------|
-| `C:\inetpub\visa2026\` | IIS site physical path (full publish output) |
-| `C:\inetpub\visa2026\appsettings.Production.json` | Production config (create from example; not in git) |
-| `C:\ProgramData\Visa2026\DataProtection-Keys\` | Persist auth cookies across app pool recycle |
-| `C:\inetpub\visa2026\logs\` | Optional stdout logs (if configured) |
+| `C:\inetpub\visa2026-prod\` | Production publish (:80) |
+| `C:\inetpub\visa2026-staging\` | Staging publish (:8080) |
+| `C:\inetpub\visa2026-demo\` | Demo publish (:8081) |
+| `C:\visa2026\env\prod.env` (etc.) | Per-slot secrets + `DB_NAME` (not in git) |
+| `C:\ProgramData\Visa2026\DataProtection-Keys-{Prod,Staging,Demo}\` | Auth cookies per slot |
+| `C:\inetpub\visa2026-*\logs\` | Optional stdout logs per slot |
+
+Legacy single-site path `C:\inetpub\visa2026\` — migrate to slots; see skill [reference.md](../.cursor/skills/visa2026-windows-iis-deploy/reference.md) § Migration.
 
 ---
 

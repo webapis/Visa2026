@@ -16,13 +16,23 @@
   Optional port when not using a named instance (default: omit; use instance name).
 #>
 param(
-    [string]$PublishPath = "C:\inetpub\visa2026",
-    [string]$EnvFile = "C:\visa2026\.env.prod",
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$PublishPath = "",
+    [string]$EnvFile = "",
     [string]$SqlServer = "localhost\SQLEXPRESS",
     [int]$SqlPort = 0
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath -EnvFile $EnvFile
+$PublishPath = $ctx.PublishPath
+$EnvFile = $ctx.EnvFile
+$dataProtectionKeysPath = $ctx.DataProtectionKeysPath
+$defaultDbName = $ctx.DbName
 
 function Read-DotEnvMap([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) {
@@ -47,7 +57,7 @@ function Read-DotEnvMap([string]$Path) {
 $envMap = Read-DotEnvMap $EnvFile
 $saPassword = $envMap["SA_PASSWORD"]
 $devexpressKey = $envMap["DEVEXPRESS_LICENSEKEY"]
-$dbName = if ($envMap.ContainsKey("DB_NAME")) { $envMap["DB_NAME"] } else { "Visa2026DbProd" }
+$dbName = if ($envMap.ContainsKey("DB_NAME")) { $envMap["DB_NAME"] } else { $defaultDbName }
 
 if ([string]::IsNullOrWhiteSpace($saPassword)) { throw "SA_PASSWORD missing in $EnvFile" }
 if ([string]::IsNullOrWhiteSpace($devexpressKey)) { throw "DEVEXPRESS_LICENSEKEY missing in $EnvFile" }
@@ -115,20 +125,26 @@ $config = @{
         TracesSampleRate = 0.0
         SendDefaultPii = $false
     }
+    DeploymentEnvironment = @{
+        Slot = $ctx.Profile
+        ShowOnLoginPage = $true
+    }
 }
 
 $outPath = Join-Path $PublishPath "appsettings.Production.json"
 $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $outPath -Encoding UTF8
 
 # App pool environment (DevExpress + data protection; connection string in json)
+New-Item -ItemType Directory -Force -Path $dataProtectionKeysPath | Out-Null
+
 $poolEnv = @{
     ASPNETCORE_ENVIRONMENT = "Production"
     DEVEXPRESS_LICENSEKEY = $devexpressKey
-    ASPNETCORE_DATA_PROTECTION_KEYS = "C:\ProgramData\Visa2026\DataProtection-Keys"
+    ASPNETCORE_DATA_PROTECTION_KEYS = $dataProtectionKeysPath
 }
 
 Write-Host "Wrote $outPath" -ForegroundColor Green
-Write-Host "Database: $dbName on $serverPart (sa)"
+Write-Host "Slot: $($ctx.Profile)  Database: $dbName on $serverPart (sa)"
 Write-Host "Set app pool environment variables:" -ForegroundColor Yellow
 $poolEnv.GetEnumerator() | ForEach-Object { Write-Host "  $($_.Key)=***" }
 

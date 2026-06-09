@@ -1,11 +1,23 @@
 #Requires -Version 5.1
 #Requires -RunAsAdministrator
 param(
-    [string]$AppPoolName = "Visa2026",
-    [string]$EnvJsonPath = "C:\inetpub\visa2026\iis-apppool-env.json"
+    [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
+    [string]$Profile = "",
+
+    [string]$AppPoolName = "",
+    [string]$EnvJsonPath = "",
+    [string]$PublishPath = ""
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+$ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath -AppPoolName $AppPoolName
+if ([string]::IsNullOrWhiteSpace($EnvJsonPath)) {
+    $EnvJsonPath = Join-Path $ctx.PublishPath "iis-apppool-env.json"
+}
+$AppPoolName = $ctx.AppPoolName
+
 $appcmd = Join-Path $env:Windir "System32\inetsrv\appcmd.exe"
 
 if (-not (Test-Path -LiteralPath $EnvJsonPath)) {

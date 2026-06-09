@@ -9,6 +9,7 @@
 @{
     var forceXafDbUpdate = HostingEnvironmentFlags.IsForceXafDbUpdate(Configuration);
     var usageLicenseBanner = UsageLicensePresenter.TryCreate(Configuration);
+    var deploymentEnvironmentBadge = DeploymentEnvironmentPresenter.TryCreate(Configuration);
     var appTitle = VisaLocalization.GetApplicationTitle();
     var htmlLang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
 }
@@ -159,7 +160,15 @@
     }
 
     <div id="app-version-badge" class="app-version-badge@(forceXafDbUpdate ? " app-version-badge--with-force-banner" : "")" data-version="@Visa2026Module.VersionDisplay" hidden>
-        <small>Version: @Visa2026Module.VersionDisplay</small>
+        <small class="app-version-badge__version">Version: @Visa2026Module.VersionDisplay</small>
+        @if (deploymentEnvironmentBadge != null)
+        {
+            <small class="app-version-badge__deployment deployment-env-badge deployment-env-badge--@deploymentEnvironmentBadge.CssModifier">
+                <span class="deployment-env-badge__slot">@deploymentEnvironmentBadge.SlotLabel</span>
+                <span class="deployment-env-badge__separator" aria-hidden="true">·</span>
+                <span class="deployment-env-badge__database">@deploymentEnvironmentBadge.DatabaseName</span>
+            </small>
+        }
     </div>
 
     <script>
