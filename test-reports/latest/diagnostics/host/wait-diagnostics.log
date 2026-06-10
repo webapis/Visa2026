@@ -1,4 +1,4 @@
-[2026-06-10T05:03:27.8854521+00:00] wait start url=http://localhost:5000/LoginPage pid=4116
-[2026-06-10T05:03:32.3112175+00:00] attempt 1/120 elapsed=0s error=No connection could be made because the target machine actively refused it. (localhost:5000)
-[2026-06-10T05:03:39.3996388+00:00] attempt 2/120 elapsed=3s error=No connection could be made because the target machine actively refused it. (localhost:5000)
-[2026-06-10T05:03:43.2353905+00:00] LoginPage ready after 6s status=200
+[2026-06-10T05:28:08.8856391+00:00] wait start url=http://localhost:5000/LoginPage pid=7472
+[2026-06-10T05:28:13.2703035+00:00] attempt 1/120 elapsed=0s error=No connection could be made because the target machine actively refused it. (localhost:5000)
+[2026-06-10T05:28:20.3615912+00:00] attempt 2/120 elapsed=3s error=No connection could be made because the target machine actively refused it. (localhost:5000)
+[2026-06-10T05:28:25.9742889+00:00] LoginPage ready after 6s status=200
