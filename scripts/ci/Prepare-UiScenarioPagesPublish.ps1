@@ -53,6 +53,24 @@ $indexHtml = @"
 "@
 
 Set-Content -LiteralPath (Join-Path $reportsRoot 'index.html') -Value $indexHtml -Encoding utf8
+
+$siteRootIndex = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=test-reports/latest/index.html" />
+  <title>Visa2026 GitHub Pages</title>
+</head>
+<body>
+  <p><a href="test-reports/latest/index.html">Latest UI scenario report</a></p>
+  <p><a href="test-reports/">All scenario reports</a></p>
+</body>
+</html>
+"@
+
+Set-Content -LiteralPath (Join-Path $PublishRoot 'index.html') -Value $siteRootIndex -Encoding utf8
 Write-Host "Prepared Pages publish root:"
 Write-Host "  $versionDir"
 Write-Host "  $latestDir"
+Write-Host "  $(Join-Path $PublishRoot 'index.html') (site root redirect)"
