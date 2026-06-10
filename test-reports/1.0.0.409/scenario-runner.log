@@ -1,0 +1,72 @@
+Scenario: login-language-switch — Change UI language from login page header switcher (en-US to tk-TM)
+YAML: D:\a\Visa2026\Visa2026\tools\UiScenarioRunner\scenarios\login-language-switch.yaml
+Base URL: http://localhost:5000
+
+[PASS] step 1 goto /LoginPage
+[PASS] step 2 wait-for login-language-switcher
+[PASS] step 3 click login-language-switcher
+[PASS] step 4 select-listbox-item Türkmen Dili (Türkmenistan)
+[PASS] step 5 wait-for login-user-name
+[PASS] step 6 wait-for login-submit
+
+Scenario 'login-language-switch' passed.
+
+Scenario: login-smoke — Log on as Admin and assert app shell (nav) is visible
+YAML: D:\a\Visa2026\Visa2026\tools\UiScenarioRunner\scenarios\login-smoke.yaml
+Base URL: http://localhost:5000
+
+[PASS] step 1 goto /LoginPage
+[PASS] step 2 fill login-user-name, login-password
+[PASS] step 3 click login-submit
+[PASS] step 4 assert-visible nav-people
+
+Scenario 'login-smoke' passed.
+
+Scenario: person-employee-create — Log in, open Employees list, New employee, fill required fields, Save, return to list
+YAML: D:\a\Visa2026\Visa2026\tools\UiScenarioRunner\scenarios\person-employee-create.yaml
+Base URL: http://localhost:5000
+
+Screenshot saved: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\screenshots\person-employee-create-before-save.png
+Screenshot saved: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\screenshots\person-employee-create-after-save.png
+[PASS] step 1 login standarduser
+[PASS] step 2 goto /Person_ListView_Employees
+[PASS] step 3 wait-for person-list-employees-new
+[PASS] step 4 click person-list-employees-new
+[PASS] step 5 wait-for person-first-name
+[PASS] step 6 fill person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor
+[PASS] step 7 click person-detail-employee-save
+[PASS] step 8 goto /Person_ListView_Employees
+[PASS] step 9 wait-for person-list-employees-new
+[PASS] step 10 assert-visible person-list-employees-new
+
+Scenario 'person-employee-create' passed.
+
+Scenario: person-employee-create-tk — Switch UI to tk-TM on logon, log in, New employee, fill required fields, Save and Close
+YAML: D:\a\Visa2026\Visa2026\tools\UiScenarioRunner\scenarios\person-employee-create-tk.yaml
+Base URL: http://localhost:5000
+
+Screenshot saved: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\screenshots\person-employee-create-tk-before-save.png
+Screenshot saved: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\screenshots\person-employee-create-tk-after-save.png
+[PASS] step 1 goto /LoginPage
+[PASS] step 2 wait-for login-language-switcher
+[PASS] step 3 click login-language-switcher
+[PASS] step 4 select-listbox-item Türkmen Dili (Türkmenistan)
+[PASS] step 5 wait-for login-user-name
+[PASS] step 6 fill login-user-name, login-password
+[PASS] step 7 click login-submit
+[PASS] step 8 goto /Person_ListView_Employees
+[PASS] step 9 wait-for person-list-employees-new
+[PASS] step 10 click person-list-employees-new
+[PASS] step 11 wait-for person-first-name
+[PASS] step 12 fill person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor
+[PASS] step 13 click person-detail-employee-save
+[PASS] step 14 goto /Person_ListView_Employees
+[PASS] step 15 wait-for person-list-employees-new
+[PASS] step 16 assert-visible person-list-employees-new
+
+Scenario 'person-employee-create-tk' passed.
+
+JUnit report: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\results.junit.xml
+JSON report: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\results.json
+HTML report: D:\a\Visa2026\Visa2026\artifacts\ui-scenario-report\index.html
+All 4 scenario(s) passed.
