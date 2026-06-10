@@ -1,0 +1,7 @@
+[2026-06-10T04:40:05.7384420+00:00] --- artifact file sizes ---
+[2026-06-10T04:40:05.7417318+00:00] file-sizes.txt 65 bytes
+[2026-06-10T04:40:05.7424323+00:00] manifest.txt 712 bytes
+[2026-06-10T04:40:05.7429708+00:00] system-diagnostics.txt 20676 bytes
+[2026-06-10T04:40:05.7435398+00:00] ui-scenario-err.log 0 bytes
+[2026-06-10T04:40:05.7440339+00:00] ui-scenario-out.log 2966 bytes
+[2026-06-10T04:40:05.7445465+00:00] wait-diagnostics.log 488 bytes

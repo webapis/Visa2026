@@ -1,0 +1,14 @@
+[2026-06-10T04:40:00.7298219+00:00] phase=always
+[2026-06-10T04:40:00.7409756+00:00] hostDir=D:\a\Visa2026\Visa2026\Visa2026.Blazor.Server\bin\Debug\net8.0
+[2026-06-10T04:40:00.7501553+00:00] baseUrl=http://localhost:5000
+[2026-06-10T04:40:00.7522885+00:00] blazorPid=4504
+[2026-06-10T04:40:00.7529977+00:00] runnerOs=Windows
+[2026-06-10T04:40:00.7535532+00:00] githubRunId=27253248784
+[2026-06-10T04:40:00.7540721+00:00] githubRunAttempt=1
+[2026-06-10T04:40:00.7545842+00:00] githubSha=7f474eb7db9ed24034ef87abcb2376bc7d09348c
+[2026-06-10T04:40:00.7550510+00:00] githubRef=refs/heads/master
+[2026-06-10T04:40:05.7376643+00:00] copiedLogs=ui-scenario-out.log, ui-scenario-err.log, wait-diagnostics.log
+[2026-06-10T04:40:05.7479152+00:00] ui-scenario-out.log=2966bytes
+[2026-06-10T04:40:05.7505795+00:00] ui-scenario-err.log=0bytes
+[2026-06-10T04:40:05.7511730+00:00] WARNING ui-scenario-err.log is empty
+[2026-06-10T04:40:05.7521817+00:00] wait-diagnostics.log=488bytes

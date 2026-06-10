@@ -1,0 +1,39 @@
+info: Visa2026.Module.Services.RuntimeLogging.ApplicationRuntimeLogRetentionBackgroundService[0]
+      ApplicationRuntimeLogRetentionBackgroundService is starting.
+info: Visa2026.Blazor.Server.Services.TempFileCleanupService[0]
+      TempFileCleanupService is starting.
+info: Visa2026.Blazor.Server.Services.TempFileCleanupService[0]
+      Deleted old temp file: dd_BackgroundDownload_20260526030810.log
+info: Visa2026.Blazor.Server.Services.TempFileCleanupService[0]
+      Deleted old temp file: dd_BackgroundDownload_20260526030810_result_Success.log
+info: Visa2026.Blazor.Server.Services.TempFileCleanupService[0]
+      Deleted old temp file: TFRE76.tmp
+info: Visa2026.Blazor.Server.Services.TempFileCleanupService[0]
+      Deleted old temp file: UnrealEngineServerModeFallback.txt
+info: Visa2026.Blazor.Server.Services.TempFileCleanupService[0]
+      Temporary file cleanup job finished. Deleted 4 files.
+info: Visa2026.Blazor.Server.Services.PdfGenerationBatchWorkerService[0]
+      PdfGenerationBatchWorkerService is starting.
+info: Visa2026.Blazor.Server.Services.WordReportGenerationBatchWorkerService[0]
+      WordReportGenerationBatchWorkerService is starting.
+info: Visa2026.Blazor.Server.Services.BatchWorkerSchemaGate[0]
+      Batch schema columns verified (PdfGenerationBatches / WordReportGenerationBatches).
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'PdfSupportingZipMergeOption' property 'SupportingZipMergeOption' on entity type 'PdfGenerationBatch' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'IndividualFilesOnly', since this is the CLR default for the 'PdfSupportingZipMergeOption' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+info: Visa2026.Blazor.Server.Services.UserReportTemplateSeedGate[0]
+      User report template seed completed (22 template(s) in database).
+warn: Sentry.AspNetCore.SentryTracingMiddleware[0]
+      Sentry tracing middleware was already registered. This call to UseSentryTracing is unnecessary.
+info: DevExpress.AspNetCore.Reporting.Logger[0]
+      AspNetCoreThreadingTimerStoragesCleaner.StartCore
+      
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\a\Visa2026\Visa2026\Visa2026.Blazor.Server\bin\Debug\net8.0
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.

@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visa2026 UI Scenario Report</title>
+  <style>
+    body { font-family: Segoe UI, system-ui, sans-serif; margin: 24px; color: #1f2328; background: #f6f8fa; }
+    .card { background: #fff; border: 1px solid #d0d7de; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+    h1 { margin: 0 0 8px; font-size: 1.5rem; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-weight: 600; font-size: 0.85rem; }
+    .badge-pass { background: #dafbe1; color: #116329; }
+    .badge-fail { background: #ffebe9; color: #82071e; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { border-bottom: 1px solid #d0d7de; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f6f8fa; }
+    .pass { color: #116329; font-weight: 600; }
+    .fail { color: #82071e; font-weight: 600; }
+    .meta { color: #57606a; font-size: 0.9rem; }
+    img.thumb { max-width: 240px; border: 1px solid #d0d7de; border-radius: 4px; margin-top: 6px; }
+    code { background: #f6f8fa; padding: 1px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Visa2026 UI Scenario Report</h1>
+    <p><span class="badge badge-pass">PASSED</span></p>
+    <p class="meta">
+      Version: <code>1.0.0.408</code><br />
+      Base URL: <code>http://localhost:5000</code><br />
+      Started: 2026-06-10 04:35:19Z<br />
+      Finished: 2026-06-10 04:39:52Z<br />
+      Git: <code>7f474eb</code> refs/heads/master<br />
+      CI run: <a href="https://github.com/webapis/Visa2026/actions/runs/27253248784">https://github.com/webapis/Visa2026/actions/runs/27253248784</a><br />
+      Summary: 4 passed, 0 failed, 4 total
+    </p>
+  </div>
+  <div class="card">
+    <h2>login-language-switch <span class="pass">PASS</span></h2>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>Detail</th><th>Status</th><th>Error</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>goto</code></td>
+          <td>/LoginPage</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><code>wait-for</code></td>
+          <td>login-language-switcher</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><code>click</code></td>
+          <td>login-language-switcher</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><code>select-listbox-item</code></td>
+          <td>T&#252;rkmen Dili (T&#252;rkmenistan)</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><code>wait-for</code></td>
+          <td>login-user-name</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><code>wait-for</code></td>
+          <td>login-submit</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h2>login-smoke <span class="pass">PASS</span></h2>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>Detail</th><th>Status</th><th>Error</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>goto</code></td>
+          <td>/LoginPage</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><code>fill</code></td>
+          <td>login-user-name, login-password</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><code>click</code></td>
+          <td>login-submit</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><code>assert-visible</code></td>
+          <td>nav-people</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h2>person-employee-create <span class="pass">PASS</span></h2>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>Detail</th><th>Status</th><th>Error</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>login</code></td>
+          <td>standarduser</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><code>goto</code></td>
+          <td>/Person_ListView_Employees</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><code>wait-for</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><code>click</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><code>wait-for</code></td>
+          <td>person-first-name</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><code>fill</code></td>
+          <td>person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><code>click</code></td>
+          <td>person-detail-employee-save</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><code>goto</code></td>
+          <td>/Person_ListView_Employees</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td><code>wait-for</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td><code>assert-visible</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>before-save</strong><br /><img class="thumb" src="screenshots/person-employee-create-before-save.png" alt="person-employee-create-before-save.png" /></p>
+    <p><strong>after-save</strong><br /><img class="thumb" src="screenshots/person-employee-create-after-save.png" alt="person-employee-create-after-save.png" /></p>
+  </div>
+  <div class="card">
+    <h2>person-employee-create-tk <span class="pass">PASS</span></h2>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>Detail</th><th>Status</th><th>Error</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><code>goto</code></td>
+          <td>/LoginPage</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><code>wait-for</code></td>
+          <td>login-language-switcher</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><code>click</code></td>
+          <td>login-language-switcher</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><code>select-listbox-item</code></td>
+          <td>T&#252;rkmen Dili (T&#252;rkmenistan)</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><code>wait-for</code></td>
+          <td>login-user-name</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><code>fill</code></td>
+          <td>login-user-name, login-password</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><code>click</code></td>
+          <td>login-submit</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td><code>goto</code></td>
+          <td>/Person_ListView_Employees</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td><code>wait-for</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td><code>click</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td><code>wait-for</code></td>
+          <td>person-first-name</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td><code>fill</code></td>
+          <td>person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td><code>click</code></td>
+          <td>person-detail-employee-save</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td><code>goto</code></td>
+          <td>/Person_ListView_Employees</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td><code>wait-for</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td><code>assert-visible</code></td>
+          <td>person-list-employees-new</td>
+          <td class="pass">PASS</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>before-save</strong><br /><img class="thumb" src="screenshots/person-employee-create-tk-before-save.png" alt="person-employee-create-tk-before-save.png" /></p>
+    <p><strong>after-save</strong><br /><img class="thumb" src="screenshots/person-employee-create-tk-after-save.png" alt="person-employee-create-tk-after-save.png" /></p>
+  </div>
+</body>
+</html>

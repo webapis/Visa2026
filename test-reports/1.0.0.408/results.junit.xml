@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites name="Visa2026 UI Scenarios" tests="36" failures="0" time="272.701">
+  <testsuite name="login-language-switch" tests="6" failures="0" errors="0" skipped="0">
+    <testcase classname="login-language-switch" name="step-1 goto /LoginPage" />
+    <testcase classname="login-language-switch" name="step-2 wait-for login-language-switcher" />
+    <testcase classname="login-language-switch" name="step-3 click login-language-switcher" />
+    <testcase classname="login-language-switch" name="step-4 select-listbox-item Türkmen Dili (Türkmenistan)" />
+    <testcase classname="login-language-switch" name="step-5 wait-for login-user-name" />
+    <testcase classname="login-language-switch" name="step-6 wait-for login-submit" />
+  </testsuite>
+  <testsuite name="login-smoke" tests="4" failures="0" errors="0" skipped="0">
+    <testcase classname="login-smoke" name="step-1 goto /LoginPage" />
+    <testcase classname="login-smoke" name="step-2 fill login-user-name, login-password" />
+    <testcase classname="login-smoke" name="step-3 click login-submit" />
+    <testcase classname="login-smoke" name="step-4 assert-visible nav-people" />
+  </testsuite>
+  <testsuite name="person-employee-create" tests="10" failures="0" errors="0" skipped="0">
+    <testcase classname="person-employee-create" name="step-1 login standarduser" />
+    <testcase classname="person-employee-create" name="step-2 goto /Person_ListView_Employees" />
+    <testcase classname="person-employee-create" name="step-3 wait-for person-list-employees-new" />
+    <testcase classname="person-employee-create" name="step-4 click person-list-employees-new" />
+    <testcase classname="person-employee-create" name="step-5 wait-for person-first-name" />
+    <testcase classname="person-employee-create" name="step-6 fill person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor" />
+    <testcase classname="person-employee-create" name="step-7 click person-detail-employee-save" />
+    <testcase classname="person-employee-create" name="step-8 goto /Person_ListView_Employees" />
+    <testcase classname="person-employee-create" name="step-9 wait-for person-list-employees-new" />
+    <testcase classname="person-employee-create" name="step-10 assert-visible person-list-employees-new" />
+  </testsuite>
+  <testsuite name="person-employee-create-tk" tests="16" failures="0" errors="0" skipped="0">
+    <testcase classname="person-employee-create-tk" name="step-1 goto /LoginPage" />
+    <testcase classname="person-employee-create-tk" name="step-2 wait-for login-language-switcher" />
+    <testcase classname="person-employee-create-tk" name="step-3 click login-language-switcher" />
+    <testcase classname="person-employee-create-tk" name="step-4 select-listbox-item Türkmen Dili (Türkmenistan)" />
+    <testcase classname="person-employee-create-tk" name="step-5 wait-for login-user-name" />
+    <testcase classname="person-employee-create-tk" name="step-6 fill login-user-name, login-password" />
+    <testcase classname="person-employee-create-tk" name="step-7 click login-submit" />
+    <testcase classname="person-employee-create-tk" name="step-8 goto /Person_ListView_Employees" />
+    <testcase classname="person-employee-create-tk" name="step-9 wait-for person-list-employees-new" />
+    <testcase classname="person-employee-create-tk" name="step-10 click person-list-employees-new" />
+    <testcase classname="person-employee-create-tk" name="step-11 wait-for person-first-name" />
+    <testcase classname="person-employee-create-tk" name="step-12 fill person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor" />
+    <testcase classname="person-employee-create-tk" name="step-13 click person-detail-employee-save" />
+    <testcase classname="person-employee-create-tk" name="step-14 goto /Person_ListView_Employees" />
+    <testcase classname="person-employee-create-tk" name="step-15 wait-for person-list-employees-new" />
+    <testcase classname="person-employee-create-tk" name="step-16 assert-visible person-list-employees-new" />
+  </testsuite>
+</testsuites>

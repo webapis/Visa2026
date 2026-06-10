@@ -1,0 +1,255 @@
+{
+  "ApplicationVersion": "1.0.0.408",
+  "GitSha": "7f474eb7db9ed24034ef87abcb2376bc7d09348c",
+  "GitRef": "refs/heads/master",
+  "BaseUrl": "http://localhost:5000",
+  "WorkflowRunId": "27253248784",
+  "workflowRunUrl": "https://github.com/webapis/Visa2026/actions/runs/27253248784",
+  "startedAt": "2026-06-10T04:35:19.5789342+00:00",
+  "finishedAt": "2026-06-10T04:39:52.2798176+00:00",
+  "passed": 4,
+  "failed": 0,
+  "total": 4,
+  "scenarios": [
+    {
+      "id": "login-language-switch",
+      "ok": true,
+      "steps": [
+        {
+          "index": 1,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/LoginPage"
+        },
+        {
+          "index": 2,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "login-language-switcher"
+        },
+        {
+          "index": 3,
+          "kind": "click",
+          "ok": true,
+          "detail": "login-language-switcher"
+        },
+        {
+          "index": 4,
+          "kind": "select-listbox-item",
+          "ok": true,
+          "detail": "T\u00FCrkmen Dili (T\u00FCrkmenistan)"
+        },
+        {
+          "index": 5,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "login-user-name"
+        },
+        {
+          "index": 6,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "login-submit"
+        }
+      ]
+    },
+    {
+      "id": "login-smoke",
+      "ok": true,
+      "steps": [
+        {
+          "index": 1,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/LoginPage"
+        },
+        {
+          "index": 2,
+          "kind": "fill",
+          "ok": true,
+          "detail": "login-user-name, login-password"
+        },
+        {
+          "index": 3,
+          "kind": "click",
+          "ok": true,
+          "detail": "login-submit"
+        },
+        {
+          "index": 4,
+          "kind": "assert-visible",
+          "ok": true,
+          "detail": "nav-people"
+        }
+      ]
+    },
+    {
+      "id": "person-employee-create",
+      "ok": true,
+      "steps": [
+        {
+          "index": 1,
+          "kind": "login",
+          "ok": true,
+          "detail": "standarduser"
+        },
+        {
+          "index": 2,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/Person_ListView_Employees"
+        },
+        {
+          "index": 3,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        },
+        {
+          "index": 4,
+          "kind": "click",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        },
+        {
+          "index": 5,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "person-first-name"
+        },
+        {
+          "index": 6,
+          "kind": "fill",
+          "ok": true,
+          "detail": "person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor"
+        },
+        {
+          "index": 7,
+          "kind": "click",
+          "ok": true,
+          "detail": "person-detail-employee-save"
+        },
+        {
+          "index": 8,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/Person_ListView_Employees"
+        },
+        {
+          "index": 9,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        },
+        {
+          "index": 10,
+          "kind": "assert-visible",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        }
+      ]
+    },
+    {
+      "id": "person-employee-create-tk",
+      "ok": true,
+      "steps": [
+        {
+          "index": 1,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/LoginPage"
+        },
+        {
+          "index": 2,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "login-language-switcher"
+        },
+        {
+          "index": 3,
+          "kind": "click",
+          "ok": true,
+          "detail": "login-language-switcher"
+        },
+        {
+          "index": 4,
+          "kind": "select-listbox-item",
+          "ok": true,
+          "detail": "T\u00FCrkmen Dili (T\u00FCrkmenistan)"
+        },
+        {
+          "index": 5,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "login-user-name"
+        },
+        {
+          "index": 6,
+          "kind": "fill",
+          "ok": true,
+          "detail": "login-user-name, login-password"
+        },
+        {
+          "index": 7,
+          "kind": "click",
+          "ok": true,
+          "detail": "login-submit"
+        },
+        {
+          "index": 8,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/Person_ListView_Employees"
+        },
+        {
+          "index": 9,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        },
+        {
+          "index": 10,
+          "kind": "click",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        },
+        {
+          "index": 11,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "person-first-name"
+        },
+        {
+          "index": 12,
+          "kind": "fill",
+          "ok": true,
+          "detail": "person-first-name, person-last-name, person-date-of-birth, person-birth-place, person-country-of-birth, person-gender, person-marital-status, person-visa-application-family-members-text, person-nationality, person-personal-number, person-foreign-address, person-foreign-address-country, person-project-contract, person-subcontractor"
+        },
+        {
+          "index": 13,
+          "kind": "click",
+          "ok": true,
+          "detail": "person-detail-employee-save"
+        },
+        {
+          "index": 14,
+          "kind": "goto",
+          "ok": true,
+          "detail": "/Person_ListView_Employees"
+        },
+        {
+          "index": 15,
+          "kind": "wait-for",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        },
+        {
+          "index": 16,
+          "kind": "assert-visible",
+          "ok": true,
+          "detail": "person-list-employees-new"
+        }
+      ]
+    }
+  ]
+}
