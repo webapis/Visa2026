@@ -18,5 +18,6 @@ Work-in-progress **maps and YAML** for [visa2026-ui-scenarios](../SKILL.md). **I
 | `person-employee-minimal.yaml` | draft | Do not run until promoted |
 | `person-employee-create_map.md` | Ready for YAML | Login → Employees nav → New → fill → Save |
 | `person-employee-create.yaml` | draft | Set tenant lookup env before run; do not promote until green |
+| `person-employee-create-staging.yaml` | staging-only | **Never promote** — unique personal number for persistent staging host; copy temporarily to `scenarios/` for `-SkipServer` runs |
 
 **Ready example:** [`tools/UiScenarioRunner/scenarios/login-smoke*`](../../../tools/UiScenarioRunner/scenarios/).

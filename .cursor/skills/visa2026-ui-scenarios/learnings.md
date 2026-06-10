@@ -115,6 +115,7 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Symptom**: `hook 'person-detail-employee-save-and-close' not visible` on **New** employee detail (Save / Save and New / Delete only)
 - **Fix**: YAML uses `click: person-detail-employee-save` → `goto: /Person_ListView_Employees` → `assert-visible: person-list-employees-new`; exclude `*-staging.yaml` from `--all`
 - **Reuse**: SaveAndClose hook verified on **existing** detail; new-record flows need Save + navigate until product shows SaveAndClose on create
+- **Location**: keep `person-employee-create-staging.yaml` in **examples/** only (not `scenarios/`); `main` merge had re-introduced a stale copy — removed
 
 ### 2026-06-09 — [-] GitHub Actions ui-scenario-tests — Wait for LoginPage timeout
 

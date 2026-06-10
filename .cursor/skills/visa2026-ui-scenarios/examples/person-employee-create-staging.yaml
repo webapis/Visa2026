@@ -1,4 +1,14 @@
-# One-off staging run (unique personal number). Not for CI — use -Scenario with -SkipServer.
+# Staging-only draft — lives in examples/, NOT tools/UiScenarioRunner/scenarios/.
+# Unique personal number for persistent staging DB (not reset each run).
+#
+# Manual run (copy into scenarios/ for one session, or pass yaml path if runner supports it):
+#   Copy-Item .cursor/skills/visa2026-ui-scenarios/examples/person-employee-create-staging.yaml `
+#     tools/UiScenarioRunner/scenarios/ -Force
+#   .\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-create-staging `
+#     -SkipServer -SkipBuild -BaseUrl "http://10.100.128.25:8080"
+#   Remove-Item tools/UiScenarioRunner/scenarios/person-employee-create-staging.yaml
+#
+# CI: never promote this file — use person-employee-create.yaml on fresh LocalDB instead.
 id: person-employee-create-staging
 description: person-employee-create against staging with unique personal number
 requiresAuth: true
