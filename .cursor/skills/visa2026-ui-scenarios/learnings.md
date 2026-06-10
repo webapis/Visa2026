@@ -109,6 +109,13 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Fix**: `VISA2026_UI_SCENARIOS=true` on `:5052` host → ephemeral user `ModelDifferenceStore` (no SQL layout load) + `RestoreTabbedMdiLayout=false`; runner uses incognito context + `ClearCookiesAsync()`
 - **Reuse**: Always use `Invoke-UiScenarioRun.ps1`; close orphaned Chromium windows after interrupted headed runs
 
+### 2026-06-09 — [-] login-language-switch CI flake after culture reload
+
+- **Outcome**: negative → fixed in runner
+- **Symptom**: CI step 5 `wait-for: login-user-name` fails; same flow in `person-employee-create-tk` often passes (runs later / warm host)
+- **Cause**: `select-listbox-item` returned after click before LoginPage culture reload + hook paint finished
+- **Fix**: `WaitForPostDropdownSelectionAsync` after dropdown click (Load + Blazor + login hooks on `/LoginPage`); `wait-for` / `assert-visible` now call `WaitForBlazorAsync` + `WaitForBusyOverlayAsync` first
+
 ### 2026-06-09 — [+] UI scenario CI reports (JUnit + artifact + GitHub Pages)
 
 - **Outcome**: positive (Phase 1+2)

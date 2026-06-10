@@ -254,15 +254,14 @@ internal sealed class ScenarioRunner
             case "wait-for":
             case "assert-visible":
                 hookId = value.ToString() ?? "";
+                await WaitForBlazorAsync(page);
+                await WaitForBusyOverlayAsync(page);
                 await LocateHookAsync(page, hookId);
                 return new StepResult(index, kind, true, hookId, null);
 
             case "select-listbox-item":
                 string itemText = ResolveEnv(scenario, value.ToString() ?? "");
                 await SelectDevExpressListboxItemAsync(page, itemText);
-                await page.WaitForLoadStateAsync(LoadState.Load);
-                await WaitForBlazorAsync(page);
-                await WaitForBusyOverlayAsync(page);
                 return new StepResult(index, kind, true, itemText, null);
 
             default:
@@ -480,6 +479,7 @@ internal sealed class ScenarioRunner
         {
             if (await TryClickDropdownItemAsync(items, text))
             {
+                await WaitForPostDropdownSelectionAsync(page);
                 return;
             }
         }
@@ -491,12 +491,46 @@ internal sealed class ScenarioRunner
             if (await exactInPopup.CountAsync() > 0)
             {
                 await exactInPopup.First.ClickAsync();
+                await WaitForPostDropdownSelectionAsync(page);
                 return;
             }
         }
 
         throw new InvalidOperationException(
             $"No dropdown item matching '{text}'. Visible labels: [{await CollectVisibleDropdownLabelsAsync(page)}]");
+    }
+
+    /// <summary>
+    /// Culture / combo picks may trigger full reload — wait past first Load before next hook.
+    /// </summary>
+    private static async Task WaitForPostDropdownSelectionAsync(IPage page)
+    {
+        try
+        {
+            await page.WaitForLoadStateAsync(
+                LoadState.Load,
+                new PageWaitForLoadStateOptions { Timeout = 90_000 });
+        }
+        catch (TimeoutException)
+        {
+            // Continue — Blazor may keep the connection open after Load.
+        }
+
+        await WaitForBlazorAsync(page);
+        await WaitForBusyOverlayAsync(page);
+
+        if (!page.Url.Contains("LoginPage", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        ILocator loginSurface = page.Locator(
+            "[data-testid='login-user-name'], [data-testid='login-submit'], [data-testid='login-language-switcher']");
+        await loginSurface.First.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 90_000,
+        });
     }
 
     private static async Task WaitForDevExpressDropdownAsync(IPage page)
