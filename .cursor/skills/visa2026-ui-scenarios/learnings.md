@@ -113,7 +113,7 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 
 - **Outcome**: positive (Phase 1+2)
 - **Phase 1**: `UiScenarioRunner` writes `results.junit.xml`, `results.json`, `index.html`; CI uploads artifact **`ui-scenario-report`** always; GitHub Checks via dorny/test-reporter; `$GITHUB_STEP_SUMMARY`
-- **Phase 2**: on green **`main`** push → `gh-pages` **`test-reports/latest/`** + **`test-reports/{AssemblyVersion}/`** via peaceiris/actions-gh-pages
+- **Phase 2**: on green **`master`** push → `gh-pages` **`test-reports/latest/`** + **`test-reports/{AssemblyVersion}/`** via peaceiris/actions-gh-pages
 - **Enable Pages**: repo Settings → Pages → deploy from branch **`gh-pages`** / root (once)
 - **Trace**: `--trace-dir` saves Playwright `.zip` on scenario failure only
 

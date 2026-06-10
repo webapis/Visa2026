@@ -64,9 +64,9 @@ if ($env:GITHUB_REPOSITORY) {
         $pagesLatest = "$pagesBase/latest/index.html"
         if ($Version) {
             $pagesVersion = "$pagesBase/$Version/index.html"
-            $lines += "| Published (main) | [latest]($pagesLatest) · [$Version]($pagesVersion) |"
+            $lines += "| Published (master) | [latest]($pagesLatest) · [$Version]($pagesVersion) |"
         } else {
-            $lines += "| Published (main) | [latest]($pagesLatest) |"
+            $lines += "| Published (master) | [latest]($pagesLatest) |"
         }
 
         $lines += ''

@@ -1,6 +1,6 @@
 # Playwright UI scenarios from tools/UiScenarioRunner/scenarios/ against a running Blazor host.
 # Requires GitHub secrets: DEVEXPRESS_LICENSE (same as publish-to-docker-hub workflow).
-# Reports: artifact ui-scenario-report (always). GitHub Pages on main: test-reports/latest/
+# Reports: artifact ui-scenario-report (always). GitHub Pages on master: test-reports/latest/
 
 name: UI Scenario Tests
 
@@ -218,7 +218,7 @@ jobs:
 
   publish-ui-scenario-report:
     needs: ui-scenarios
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.ui-scenarios.result == 'success'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.ui-scenarios.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write

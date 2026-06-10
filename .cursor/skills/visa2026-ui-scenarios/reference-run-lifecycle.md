@@ -120,7 +120,7 @@ Append outcomes to [learnings.md](./learnings.md) after a verified run.
    - `results.json`, `index.html`, `screenshots/`, `traces/` (on failure)
    - Artifact **`ui-scenario-report`** (always, 30 days)
    - Step summary on run page
-7. On **`main` push** (green run): publish to **GitHub Pages** `test-reports/latest/` and `test-reports/{AssemblyVersion}/`
+7. On **`master` push** (green run): publish to **GitHub Pages** `test-reports/latest/` and `test-reports/{AssemblyVersion}/`
 8. On failure: artifact **`ui-scenario-ci-logs`** (host diagnostics)
 
 **Pages URL (after repo Settings → Pages → branch `gh-pages`):**  
