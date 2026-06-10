@@ -115,8 +115,27 @@ Append outcomes to [learnings.md](./learnings.md) after a verified run.
 3. **`--updateDatabase --silent --forceUpdate`** (greenfield seed **before** web host)
 4. Start Blazor on `:5000` via **`dotnet Visa2026.Blazor.Server.dll`** (not `dotnet run --project`); `VISA2026_UI_SCENARIOS=true`; no `FORCE_XAF_DB_UPDATE` on host
 5. Wait for `/LoginPage` (up to ~6 min; writes `wait-diagnostics.log`)
-6. `UiScenarioRunner --all` (stdout → `scenario-runner.log`)
-7. On failure: download artifact **`ui-scenario-ci-logs`** (`scripts/ci/Collect-UiScenarioCiArtifacts.ps1` bundles host logs + diagnostics)
+6. `UiScenarioRunner --all` with reports:
+   - `results.junit.xml` → GitHub **Checks** (dorny/test-reporter)
+   - `results.json`, `index.html`, `screenshots/`, `traces/` (on failure)
+   - Artifact **`ui-scenario-report`** (always, 30 days)
+   - Step summary on run page
+7. On **`main` push** (green run): publish to **GitHub Pages** `test-reports/latest/` and `test-reports/{AssemblyVersion}/`
+8. On failure: artifact **`ui-scenario-ci-logs`** (host diagnostics)
+
+**Pages URL (after repo Settings → Pages → branch `gh-pages`):**  
+`https://<owner>.github.io/<repo>/test-reports/latest/index.html`
+
+**Runner flags (local or CI):**
+
+```powershell
+dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost:5052 `
+  --junit-report artifacts/ui-scenario-report/results.junit.xml `
+  --json-report artifacts/ui-scenario-report/results.json `
+  --html-report artifacts/ui-scenario-report/index.html `
+  --screenshot-dir artifacts/ui-scenario-report/screenshots `
+  --trace-dir artifacts/ui-scenario-report/traces
+```
 
 ---
 

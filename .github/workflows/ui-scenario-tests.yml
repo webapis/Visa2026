@@ -1,6 +1,6 @@
 # Playwright UI scenarios from tools/UiScenarioRunner/scenarios/ against a running Blazor host.
 # Requires GitHub secrets: DEVEXPRESS_LICENSE (same as publish-to-docker-hub workflow).
-# On failure: download artifact "ui-scenario-ci-logs" and share with the agent.
+# Reports: artifact ui-scenario-report (always). GitHub Pages on main: test-reports/latest/
 
 name: UI Scenario Tests
 
@@ -15,16 +15,30 @@ env:
   UI_SCENARIO_BASE_URL: http://localhost:5000
   UI_SCENARIO_HOST_DIR: Visa2026.Blazor.Server/bin/Debug/net8.0
   UI_SCENARIO_CI_ARTIFACT_DIR: artifacts/ui-scenario-ci
+  UI_SCENARIO_REPORT_DIR: artifacts/ui-scenario-report
   UI_SCENARIO_CI_PORT: "5000"
 
 jobs:
   ui-scenarios:
     runs-on: windows-latest
     timeout-minutes: 45
+    permissions:
+      contents: read
+      checks: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Read application version
+        shell: pwsh
+        run: |
+          $match = [regex]::Match(
+            (Get-Content -LiteralPath Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj -Raw),
+            '<AssemblyVersion>([^<]+)</AssemblyVersion>')
+          if (-not $match.Success) { throw 'AssemblyVersion not found in Visa2026.Blazor.Server.csproj' }
+          "APP_VERSION=$($match.Groups[1].Value)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          Write-Host "APP_VERSION=$($match.Groups[1].Value)"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -110,10 +124,21 @@ jobs:
       - name: Run UI scenarios
         shell: pwsh
         run: |
-          $logPath = "scenario-runner.log"
+          New-Item -ItemType Directory -Force -Path $env:UI_SCENARIO_REPORT_DIR | Out-Null
+          $reportDir = (Resolve-Path -LiteralPath $env:UI_SCENARIO_REPORT_DIR).Path
+          $logPath = Join-Path $reportDir "scenario-runner.log"
+
           dotnet run --project tools/UiScenarioRunner/UiScenarioRunner.csproj --no-build -c Debug -- `
-            --all --base-url $env:UI_SCENARIO_BASE_URL --timeout 120000 2>&1 |
+            --all `
+            --base-url $env:UI_SCENARIO_BASE_URL `
+            --timeout 120000 `
+            --screenshot-dir "$reportDir/screenshots" `
+            --trace-dir "$reportDir/traces" `
+            --junit-report "$reportDir/results.junit.xml" `
+            --json-report "$reportDir/results.json" `
+            --html-report "$reportDir/index.html" 2>&1 |
             Tee-Object -FilePath $logPath
+
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Stop Blazor Server
@@ -147,6 +172,39 @@ jobs:
             -Phase $phase `
             -Port ([int]$env:UI_SCENARIO_CI_PORT)
 
+      - name: Bundle report diagnostics
+        if: always()
+        shell: pwsh
+        run: |
+          $diagDir = Join-Path $env:UI_SCENARIO_REPORT_DIR "diagnostics"
+          New-Item -ItemType Directory -Force -Path $diagDir | Out-Null
+          Copy-Item -LiteralPath wait-diagnostics.log -Destination $diagDir -ErrorAction SilentlyContinue
+          Copy-Item -LiteralPath $env:UI_SCENARIO_CI_ARTIFACT_DIR -Destination (Join-Path $diagDir "host") -Recurse -Force -ErrorAction SilentlyContinue
+
+      - name: Write GitHub step summary
+        if: always()
+        shell: pwsh
+        run: |
+          & ./scripts/ci/Write-UiScenarioReportSummary.ps1 -ReportDir $env:UI_SCENARIO_REPORT_DIR -Version $env:APP_VERSION
+
+      - name: Publish JUnit test report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: UI Scenarios
+          path: artifacts/ui-scenario-report/results.junit.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Upload UI scenario report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-scenario-report
+          path: artifacts/ui-scenario-report/
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Upload UI scenario CI logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -155,5 +213,44 @@ jobs:
           path: |
             ${{ env.UI_SCENARIO_CI_ARTIFACT_DIR }}/
             wait-diagnostics.log
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
+
+  publish-ui-scenario-report:
+    needs: ui-scenarios
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.ui-scenarios.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download UI scenario report
+        uses: actions/download-artifact@v4
+        with:
+          name: ui-scenario-report
+          path: report
+
+      - name: Prepare GitHub Pages publish tree
+        shell: pwsh
+        run: |
+          $jsonPath = Join-Path report "results.json"
+          $version = "unknown"
+          if (Test-Path -LiteralPath $jsonPath) {
+            $version = [string](Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json).ApplicationVersion
+          }
+          if ([string]::IsNullOrWhiteSpace($version)) { $version = "unknown" }
+          New-Item -ItemType Directory -Force -Path pages-publish | Out-Null
+          & ./scripts/ci/Prepare-UiScenarioPagesPublish.ps1 `
+            -ReportDir (Resolve-Path report).Path `
+            -PublishRoot (Resolve-Path pages-publish).Path `
+            -Version $version
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: pages-publish
+          keep_files: true

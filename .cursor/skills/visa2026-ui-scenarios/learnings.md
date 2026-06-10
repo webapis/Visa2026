@@ -109,6 +109,14 @@ Capture **verified** outcomes from authoring YAML scenarios and running Playwrig
 - **Fix**: `VISA2026_UI_SCENARIOS=true` on `:5052` host → ephemeral user `ModelDifferenceStore` (no SQL layout load) + `RestoreTabbedMdiLayout=false`; runner uses incognito context + `ClearCookiesAsync()`
 - **Reuse**: Always use `Invoke-UiScenarioRun.ps1`; close orphaned Chromium windows after interrupted headed runs
 
+### 2026-06-09 — [+] UI scenario CI reports (JUnit + artifact + GitHub Pages)
+
+- **Outcome**: positive (Phase 1+2)
+- **Phase 1**: `UiScenarioRunner` writes `results.junit.xml`, `results.json`, `index.html`; CI uploads artifact **`ui-scenario-report`** always; GitHub Checks via dorny/test-reporter; `$GITHUB_STEP_SUMMARY`
+- **Phase 2**: on green **`main`** push → `gh-pages` **`test-reports/latest/`** + **`test-reports/{AssemblyVersion}/`** via peaceiris/actions-gh-pages
+- **Enable Pages**: repo Settings → Pages → deploy from branch **`gh-pages`** / root (once)
+- **Trace**: `--trace-dir` saves Playwright `.zip` on scenario failure only
+
 ### 2026-06-09 — [-] person-employee-create — SaveAndClose not on new employee detail
 
 - **Outcome**: negative → YAML workaround (CI green pending)

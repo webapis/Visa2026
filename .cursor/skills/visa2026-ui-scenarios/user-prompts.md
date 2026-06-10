@@ -153,6 +153,7 @@ dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost
 | Goal | User prompt |
 |------|-------------|
 | **Understand CI** | `@visa2026-ui-scenarios Which scenarios run on push? Explain **.github/workflows/ui-scenario-tests.yml**.` |
+| **CI reports / Pages** | `@visa2026-ui-scenarios Where are UI scenario reports published? Explain artifact **ui-scenario-report** and GitHub Pages **test-reports/latest**.` |
 | **Add scenario to CI** | `@visa2026-ui-scenarios I promoted **{id}** to **scenarios/** — confirm **--all** will pick it up on the next push.` |
 | **CI failure triage** | `@visa2026-ui-scenarios UI scenario CI failed on **{scenario-id}** — compare hook manifest vs **UI_TEST_HOOKS.md** and suggest fix.` |
 

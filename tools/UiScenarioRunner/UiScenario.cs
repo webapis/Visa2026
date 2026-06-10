@@ -40,6 +40,7 @@ internal sealed record RunOptions(
     string? ScreenshotDir,
     bool ScreenshotEachStep,
     int PauseAfterSaveMs,
+    string? TraceDir,
     string ManifestPath);
 
 internal sealed record StepResult(int Index, string StepKind, bool Ok, string? Detail, string? Error);

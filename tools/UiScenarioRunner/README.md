@@ -10,7 +10,7 @@ Playwright runner for hook-based UI scenarios (YAML + [`docs/UI_TEST_HOOKS.md`](
 
 Skill: [visa2026-ui-scenarios](../.cursor/skills/visa2026-ui-scenarios/SKILL.md).
 
-**CI:** [`.github/workflows/ui-scenario-tests.yml`](../../.github/workflows/ui-scenario-tests.yml) runs `--all` on every push / pull request (Windows + LocalDB + Playwright).
+**CI:** [`.github/workflows/ui-scenario-tests.yml`](../../.github/workflows/ui-scenario-tests.yml) runs `--all` on every push / pull request. Produces artifact **`ui-scenario-report`** (JUnit, HTML, JSON, screenshots). On green **`main`** push, publishes to GitHub Pages **`test-reports/latest/`** (enable Pages from branch **`gh-pages`** once).
 
 ## Local setup
 

@@ -61,6 +61,21 @@ internal sealed class ScenarioRunner
         await using var context = await browser.NewContextAsync(contextOptions);
         await context.ClearCookiesAsync();
 
+        string? tracePath = null;
+        bool tracingStarted = false;
+        if (!string.IsNullOrWhiteSpace(_options.TraceDir))
+        {
+            Directory.CreateDirectory(_options.TraceDir);
+            tracePath = Path.Combine(_options.TraceDir, $"{scenario.Id}.zip");
+            await context.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true,
+            });
+            tracingStarted = true;
+        }
+
         var page = await context.NewPageAsync();
         page.SetDefaultTimeout(_options.TimeoutMs);
 
@@ -75,6 +90,7 @@ internal sealed class ScenarioRunner
             Dictionary<string, object> step = scenario.Steps[i];
             if (step.Count != 1)
             {
+                await StopTracingAsync(context, tracingStarted, failed: true, tracePath);
                 return Fail(scenario.Id, stepResults, $"Step {i + 1}: expected one key per step, got {step.Count}.");
             }
 
@@ -94,6 +110,7 @@ internal sealed class ScenarioRunner
                     await TryCaptureScreenshotAsync(
                         page,
                         ResolveScreenshotPath(scenario.Id, "failure"));
+                    await StopTracingAsync(context, tracingStarted, failed: true, tracePath);
                     return new ScenarioRunResult(scenario.Id, false, stepResults, result.Error);
                 }
             }
@@ -103,11 +120,34 @@ internal sealed class ScenarioRunner
                 await TryCaptureScreenshotAsync(
                     page,
                     ResolveScreenshotPath(scenario.Id, "failure"));
+                await StopTracingAsync(context, tracingStarted, failed: true, tracePath);
                 return new ScenarioRunResult(scenario.Id, false, stepResults, ex.Message);
             }
         }
 
+        await StopTracingAsync(context, tracingStarted, failed: false, tracePath);
         return new ScenarioRunResult(scenario.Id, true, stepResults, null);
+    }
+
+    private static async Task StopTracingAsync(
+        IBrowserContext context,
+        bool tracingStarted,
+        bool failed,
+        string? tracePath)
+    {
+        if (!tracingStarted)
+        {
+            return;
+        }
+
+        if (failed && !string.IsNullOrWhiteSpace(tracePath))
+        {
+            await context.Tracing.StopAsync(new TracingStopOptions { Path = tracePath });
+            Console.WriteLine($"Trace saved: {tracePath}");
+            return;
+        }
+
+        await context.Tracing.StopAsync();
     }
 
     private async Task<StepResult> ExecuteStepAsync(
