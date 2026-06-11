@@ -47,13 +47,13 @@ public static class E2ETestPersonFieldCaptions
     public const string Subcontractor = "Company (Subcontractor)";
 }
 
-/// <summary>Officer logon for E2E flows that mirror UiScenario (empty password in dev).</summary>
+/// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {
     public const string StandardUserName = "standarduser";
     public const string StandardUserPassword = "";
 
-    /// <summary>Blazor route for <c>Person_ListView_Employees</c> (UiScenarioRunner <c>goto</c> path).</summary>
+    /// <summary>Blazor route for <c>Person_ListView_Employees</c>.</summary>
     public const string EmployeesListViewPath = "Person_ListView_Employees";
 
     /// <summary>Expected detail view id after New on the employees list.</summary>

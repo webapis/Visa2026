@@ -84,17 +84,11 @@ Use **`user` / `password`** top-level or under `login:` — align with `E2ETestL
 
 ---
 
-## UiScenario twin (optional)
-
-Same business journey may exist under `tools/UiScenarioRunner/scenarios/` with **hook ids** on `:5052`. Cross-link in map §0; do not copy hook yaml into EasyTest yaml.
-
----
-
 ## Agent rules
 
 | Situation | Action |
 |-----------|--------|
 | User asks for EasyTest scenario | Write `_map.md` first in `scenarios/examples/` |
-| Caption missing | Fix Blazor/Module accessibility or use URL navigation; not ui-test-hooks unless Playwright twin |
+| Caption missing | Fix Blazor/Module accessibility, `InputId`, or URL navigation |
 | Yaml without C# | Incomplete — add matching `[Fact]` |
 | Promote to ready/ | Only after filtered `dotnet test` passes |

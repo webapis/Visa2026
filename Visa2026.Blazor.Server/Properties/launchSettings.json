@@ -33,25 +33,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Visa2026 - Hook Verify (LocalDB)": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5051",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026HookVerify;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-      }
-    },
-    "Visa2026 - UI Scenarios (LocalDB)": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5052",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "VISA2026_UI_SCENARIOS": "true",
-        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-      }
-    },
     "Visa2026 - EasyTest (LocalDB)": {
       "commandName": "Project",
       "launchBrowser": false,

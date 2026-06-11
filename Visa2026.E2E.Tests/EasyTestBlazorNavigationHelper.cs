@@ -5,7 +5,7 @@ using OpenQA.Selenium;
 namespace Visa2026.E2E.Tests;
 
 /// <summary>
-/// Blazor view navigation via Selenium URL (same approach as UiScenarioRunner <c>goto: /Person_ListView_Employees</c>).
+/// Blazor view navigation via Selenium URL (e.g. <c>/Person_ListView_Employees</c>).
 /// EasyTest <see cref="ApplicationContextExtensions.Navigate"/> does not reliably activate the correct TabbedMDI tab.
 /// </summary>
 internal static class EasyTestBlazorNavigationHelper

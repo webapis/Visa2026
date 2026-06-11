@@ -12,7 +12,7 @@
 | **YAML file** | [person-employee-create.yaml](./person-employee-create.yaml) |
 | **C# test** | `EmployeeTests.Employee_Create_RequiredFields_SavesAndAppearsInList` |
 
-**UiScenario twin:** [`tools/UiScenarioRunner/scenarios/person-employee-create.yaml`](../../../tools/UiScenarioRunner/scenarios/person-employee-create.yaml) (hook ids, `:5052`). Seed display strings differ slightly; EasyTest uses [`E2ETestEmployeeCreateValues`](../../../Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs).
+**Seed constants:** [`E2ETestEmployeeCreateValues`](../../../Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs)
 
 ---
 
@@ -22,7 +22,7 @@ Log on as **`standarduser`**, open **Employees** list via URL, click **New**, fi
 
 **Outcome:** saved employee with `Personal Number` **E2E-EMP-010** and expected First/Last name on detail.
 
-**Note:** `Visa Application Family Members Text` is not filled in EasyTest — `Person.OnSaving` defaults it for employees when empty (UiScenario fills explicitly via hook).
+**Note:** `Visa Application Family Members Text` is not filled — `Person.OnSaving` defaults it for employees when empty.
 
 ---
 
@@ -79,7 +79,7 @@ Authoritative: [person-employee-create.yaml](./person-employee-create.yaml).
 |-------|--------|
 | **TabbedMDI URL** | After **New**, browser URL may stay `http://localhost:5050/` — assert employee detail via **Save** + **Project Contract** form field, not URL alone |
 | **Blazor captions** | Use XAF title case (**Date Of Birth**, **Country Of Birth**); date editor may need hook `InputId` fallback via `FillInputByTestId` |
-| **SaveAndClose** | Not on new employee detail — use **Save** then `goto` list (same as UiScenario promoted yaml) |
+| **SaveAndClose** | Not on new employee detail — use **Save** then navigate to list |
 | **Lookup combos** | Use tenant display strings from `E2ETestEmployeeCreateValues`; `FillFormWithRetry` per field |
 | **Unique PersonalNumber** | Fixed seed `E2E-EMP-010`; DB dropped once per test run |
 

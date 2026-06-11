@@ -81,7 +81,7 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Outcome shield after logon (mirrors UiScenario <c>assert-visible: nav-people</c>).
+        /// Outcome shield after logon — authenticated shell with navigable Application list.
         /// Navigates to Application list and expects toolbar <c>New</c>.
         /// </summary>
         protected void AssertAuthenticatedAppShell()

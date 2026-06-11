@@ -12,15 +12,13 @@
 | **YAML file** | [login-smoke.yaml](./login-smoke.yaml) |
 | **C# test** | `SmokeTests.LoginSmoke_AuthenticatedShellLoads` |
 
-**UiScenario twin:** [`tools/UiScenarioRunner/scenarios/login-smoke.yaml`](../../../tools/UiScenarioRunner/scenarios/login-smoke.yaml) (hook ids, `:5052`, Admin user).
-
 ---
 
 ## 1. Journey
 
 Log on as **`standarduser`** (empty password — officer default on EasyTest DB), then assert the **authenticated app shell** loaded.
 
-**Outcome shield:** filling logon fields alone is not enough — after `Log In`, C# calls `AssertAuthenticatedAppShell()` (navigates to **Application** list and expects **New**). Mirrors UiScenario `assert-visible: nav-people`.
+**Outcome shield:** filling logon fields alone is not enough — after `Log In`, C# calls `AssertAuthenticatedAppShell()` (navigates to **Application** list and expects **New**).
 
 ---
 

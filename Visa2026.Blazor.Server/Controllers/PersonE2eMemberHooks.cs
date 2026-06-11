@@ -4,9 +4,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Required / always-visible scalar <see cref="Person"/> detail members for UI test hooks.
+/// Required / always-visible scalar <see cref="Person"/> detail members for EasyTest E2E selectors.
 /// Excludes collections, computed/hidden members, optional gear-hidden scalars, and gear toggle.
-/// See docs/OPTIONAL_DETAIL_FIELDS.md and visa2026-ui-test-hooks skill.
+/// See docs/OPTIONAL_DETAIL_FIELDS.md.
 /// </summary>
 internal static class PersonE2eMemberHooks
 {

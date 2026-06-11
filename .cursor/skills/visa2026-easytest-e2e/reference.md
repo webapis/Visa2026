@@ -1,18 +1,16 @@
 # visa2026-easytest-e2e — reference
 
-## Three UI test stacks
+## Stack summary
 
-| | **EasyTest E2E** | **UiScenarioRunner** | **UI test hooks** |
-|--|------------------|----------------------|-------------------|
-| Skill | **visa2026-easytest-e2e** | visa2026-ui-scenarios | visa2026-ui-test-hooks |
-| Project | `Visa2026.E2E.Tests` | `tools/UiScenarioRunner` | `Visa2026.Blazor.Server` controllers |
-| Port | **5050** | **5052** | 5051 (verify only) |
-| DB | **Visa2026EasyTest** | Visa2026UiScenario | Visa2026HookVerify |
-| Selectors | **Captions** / actions | **`data-testid`** hook ids | Prepare hooks → `UI_TEST_HOOKS.md` |
-| Config | **EasyTest** | Debug + `VISA2026_UI_SCENARIOS` | Hook Verify profile |
-| CI | `e2e-tests.yml` | `ui-scenario-tests.yml` | optional VerifyUiTestHooks |
-
-Same officer journey may exist in **both** EasyTest and UiScenario — keep seed values and steps aligned (`E2ETestEmployeeCreateValues` ↔ scenario `env:` block).
+| Item | Value |
+|------|--------|
+| Skill | **visa2026-easytest-e2e** |
+| Project | `Visa2026.E2E.Tests` |
+| Port | **5050** |
+| DB | **Visa2026EasyTest** |
+| Selectors | **Captions** / EasyTest actions (`FillFormWithRetry` may fall back to `InputId` / `data-testid`) |
+| Config | **EasyTest** |
+| CI | `e2e-tests.yml` |
 
 ---
 
@@ -126,19 +124,6 @@ Visual Studio: configuration **EasyTest**, Test Explorer, run headed (Edge opens
 ## CI
 
 Workflow: **`Visa2026.E2E.Tests/e2e-tests.yml`** — build `-c EasyTest`, `dotnet test`, Windows + Edge driver steps as configured.
-
----
-
-## When to choose EasyTest vs UiScenario
-
-| Prefer **EasyTest** | Prefer **UiScenarioRunner** |
-|---------------------|----------------------------|
-| CI E2E matrix already wired | Journey needs **hook ids** / shadow DOM toolbar |
-| Caption-based smoke aligned with XAF docs | Nested collection **New** (Passports tab) |
-| DevExpress-native API maintenance | Agent scenario maps + screenshot steps |
-| Windows officer regression | Promoted YAML inventory under `scenarios/` |
-
-Both can coexist; align data constants and business steps, not selector mechanism.
 
 ---
 

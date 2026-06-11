@@ -6,8 +6,7 @@ description: >-
   :5050, Visa2026EasyTest DB, msedgedriver, caption-based FillForm/Navigate,
   URL navigation for typed Person lists, seed constants, and dotnet test -c EasyTest.
   Use when adding EasyTest, E2E test class, EmployeeTests, E2ETestBase helper,
-  headed Edge run, or CI e2e-tests.yml — not Playwright ui-scenarios, ui-test-hooks,
-  or Module unit tests. See user-prompts.md.
+  headed Edge run, or CI e2e-tests.yml. See user-prompts.md.
 disable-model-invocation: false
 ---
 
@@ -17,12 +16,7 @@ disable-model-invocation: false
 
 **Author and run** officer-journey tests in **`Visa2026.E2E.Tests`** using DevExpress **EasyTest Blazor adapter** + **xUnit** + **Microsoft Edge** (Selenium). Tests use the **C# API** (`IApplicationContext`, `EasyTestParameter`) — not `.ets` scripts in this repo.
 
-| Layer | Project / tool | Skill |
-|-------|----------------|-------|
-| **EasyTest E2E** | `Visa2026.E2E.Tests` | **This skill** |
-| **Playwright scenarios** | `tools/UiScenarioRunner` (`:5052`, hook ids) | [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md) |
-| **CSS hook prep** | `data-testid` / `UI_TEST_HOOKS.md` | [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md) |
-| **Unit / integration** | `Visa2026.Module.Tests` | [visa2026-unit-tests](../visa2026-unit-tests/SKILL.md) |
+**Project:** `Visa2026.E2E.Tests` — native XAF EasyTest Blazor adapter + xUnit + Edge (Selenium).
 
 **Strategy context:** [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md). **Experience log:** [learnings.md](./learnings.md) — read before, append after verified runs.
 
@@ -78,7 +72,7 @@ Full host + driver setup: [reference.md § Host and driver](./reference.md#host-
 
 ### Selectors: captions, not hooks
 
-EasyTest fills fields by **English model caption** (`EasyTestParameter("First Name", value)`), not `data-testid`. Keep captions aligned with embedded model / en-US. Custom Blazor editors may need **`InputId`** / aria for EasyTest to find controls (see unit-tests learnings cross-link — fix in Module/Blazor, not in hook skill).
+EasyTest fills fields by **English model caption** (`EasyTestParameter("First Name", value)`). Keep captions aligned with embedded model / en-US. Custom Blazor editors may need **`InputId`** / aria — fix in Module/Blazor; `E2ETestBase.FillFormWithRetry` falls back to `data-testid` via `EasyTestBlazorNavigationHelper` when captions fail.
 
 ### Navigation (critical)
 
@@ -145,7 +139,7 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 3. **Implement** minimal test class; prefer extending base helpers over duplicating steps.
 4. **Build** `-c EasyTest`; **run** filtered `dotnet test`.
 5. **Append** learnings.md after verified fixes (not for trivial typos).
-6. **Do not** implement Playwright YAML, `data-testid` hooks, or Module unit tests in the same task unless explicitly asked.
+6. **Stay in EasyTest** — scenario yaml under `Visa2026.E2E.Tests/scenarios/` is metadata only (Option A).
 
 ---
 
@@ -157,21 +151,16 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 | **`Navigate("Employees")`** → Family Members detail | **`NavigateEmployeesList()`** (URL **`Person_ListView_Employees`**) + **`AssertEmployeeDetailViewActive()`** |
 | **`GetAction("New")` null** | Wait/retry; ensure correct list URL first |
 | **`msedgedriver` not found** | Install to **`.webdrivers/`** or `%USERPROFILE%\.local\bin`; CDN **`msedgedriver.microsoft.com`** |
-| Use **`Visa2026EasyTest`** in Module.Tests | E2E owns EasyTest DB; unit/integration uses **`Visa2026Test`** |
-| Duplicate evaluator matrix in E2E | Unit-test evaluators; E2E = one officer path |
-| Confuse with **UiScenarioRunner** | Playwright + hooks + **`:5052`** — different skill |
-| Add hooks for EasyTest only | EasyTest uses **captions**; hooks are for Playwright unless caption lookup fails |
+| Duplicate evaluator matrix in E2E | E2E = one officer path per journey; not full BR matrix |
+| Caption fill fails on custom editor | Add `InputId` / E2e selector in Blazor; use `FillFormWithRetry` fallback |
 
 ---
 
 ## Additional resources
 
 - [user-prompts.md](./user-prompts.md) — invoke messages
-- [reference.md](./reference.md) — host, driver, API patterns, CI, three-stack table
+- [reference.md](./reference.md) — host, driver, API patterns, CI
 - [reference-map-contract.md](./reference-map-contract.md) — `*_map.md` + yaml + C# (Option A)
 - [learnings.md](./learnings.md) — append-only verified experience
 - [`Visa2026.E2E.Tests/scenarios/`](../../../Visa2026.E2E.Tests/scenarios/README.md) — scenario maps and yaml specs
-- [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — pyramid, backlog E2E-xxx
-- [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md) — hook-based Playwright journeys
-- [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md) — selector prep (not EasyTest)
-- [visa2026-unit-tests](../visa2026-unit-tests/SKILL.md) — Module tests (not E2E)
+- [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — E2E inventory, backlog E2E-xxx

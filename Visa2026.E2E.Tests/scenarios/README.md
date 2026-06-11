@@ -10,8 +10,6 @@ Scenario **metadata** lives here; **execution** is matching C# in `Visa2026.E2E.
 
 **Host:** `http://localhost:5050`, DB `Visa2026EasyTest`, build **EasyTest**.
 
-**Not UiScenarioRunner:** Playwright scenarios under `tools/UiScenarioRunner/scenarios/` use hook ids on `:5052`. Same journey may share scenario id and business steps; EasyTest yaml uses **English captions** and **actions**.
-
 ## Workflow
 
 ```text

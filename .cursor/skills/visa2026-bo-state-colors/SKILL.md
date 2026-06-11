@@ -25,13 +25,13 @@ disable-model-invocation: false
 | **ListView row tint** | `[Appearance]` on BOs, future registrar, optional Blazor controller | Target end state; partial today |
 | **Application workflow states** | `ApplicationProgress`, catalogs `application-state.json`, `application-location.json` | Map `State.Code` / `Location.Code` to registry |
 
-**Not this skill:** state notification inbox UI ([`docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](../../../docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)), E2E list appearance ([`visa2026-unit-tests`](../visa2026-unit-tests/SKILL.md) for evaluator unit tests only).
+**Not this skill:** state notification inbox UI ([`docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](../../../docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)), E2E list appearance ([`visa2026-easytest-e2e`](../visa2026-easytest-e2e/SKILL.md) for officer-journey tests).
 
 **Experience log:** [learnings.md](./learnings.md) — append-only (read before, append after verified ListView / appearance work).
 
 **Implementation detail:** [reference.md](./reference.md) — file map, interfaces, registrar pattern, Blazor fallback.
 
-**Related skills:** [visa2026-unit-tests](../visa2026-unit-tests/SKILL.md) (evaluator tests), [commit-after-verify](../commit-after-verify/SKILL.md).
+**Related skills:** [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md), [commit-after-verify](../commit-after-verify/SKILL.md).
 
 ---
 
@@ -136,7 +136,7 @@ Implement / fix ListView row background?
    | **D.** SQL view entity column | Dashboard/list backed by `VisaExtensionStatus`-style views |
 
 7. **Appearance:** register row rule keyed on `PrimaryStateCode` or flag (see [reference.md](./reference.md)); column rules for secondary concurrent states.
-8. **Tests:** [visa2026-unit-tests](../visa2026-unit-tests/SKILL.md) — golden `StateCode` from STATE_SPECIFICATIONS.
+8. **Tests:** [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) — officer-journey smoke when UI state visibility matters.
 9. **Append** [learnings.md](./learnings.md) if Blazor ListView behaviour differed from model `[Appearance]`.
 
 ---
