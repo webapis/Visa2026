@@ -18,6 +18,13 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-06-11 — Headed local / headless CI via EasyTestBrowserMode
+
+- **Outcome**: positive
+- **Context**: `EasyTestBrowserMode.cs`, `E2ETestBase`, `e2e-tests.yml`
+- **Fix / reuse**: `runHeadless: EasyTestBrowserMode.RunHeadless` — headed when no env; headless when `CI=true` or `VISA2026_E2E_HEADLESS=true`; `VISA2026_E2E_HEADED=true` forces headed.
+- **Reuse**: Do not hardcode `runHeadless` in tests; removed obsolete CI `Config.xml` headless patch.
+
 ### 2026-06-11 — Promote Tier 0 scenarios to ready/
 
 - **Outcome**: positive

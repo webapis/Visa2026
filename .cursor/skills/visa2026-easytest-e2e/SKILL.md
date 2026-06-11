@@ -54,7 +54,7 @@ EasyTest must **not** share the IDE dev host (`:5000` / `:5001`).
 | URL | **`http://localhost:5050`** |
 | DB | **`Visa2026EasyTest`** on `(localdb)\mssqllocaldb` |
 | Build config | **`EasyTest`** |
-| Browser | **Edge** (`runHeadless: false` in `E2ETestBase` — headed by default) |
+| Browser | **Edge** — **headed** locally; **headless** on CI (`EasyTestBrowserMode` / `CI` or `VISA2026_E2E_HEADLESS`) |
 
 **TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when **`Visa2026EasyTest`** is the connection string (see `EasyTestHostMode` in Blazor.Server). Without this, **`standarduser`** can reopen **Family Members** instead of Employees.
 
@@ -92,7 +92,6 @@ Constants: **`E2ETestLoginValues`** in `Visa2026.Module/DatabaseUpdate/E2ETestDa
 | `NavigateEmployeesList` | URL → employees list |
 | `CreateEmployeeWithRequiredFields` | E2E-010 pattern |
 | `OpenEmployeeInListByPersonalNumber` | Grid `ProcessRow` |
-| `CreateApplicationWithTypeCode` / `AddApplicationItemWithPerson` | Application smoke |
 | `FillFormWithRetry` | One field at a time + retry |
 | `ExecuteActionWithRetry` | Toolbar actions after Blazor load |
 
@@ -114,6 +113,17 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 **Prerequisites:** Windows, LocalDB, **`msedgedriver.exe`** matching Edge (see [reference.md](./reference.md)). Optional: `Visa2026.E2E.Tests\.webdrivers\` (copied to output on build).
 
+### Browser mode (headed vs headless)
+
+| Environment | Edge window | How |
+|-------------|-------------|-----|
+| **Local dev** (default) | Visible (headed) | No env vars — `dotnet test -c EasyTest` |
+| **GitHub Actions / CI** | Headless | `CI=true` (automatic) or `VISA2026_E2E_HEADLESS=true` in workflow |
+| **Force headed** (e.g. debug CI-like run) | Visible | `VISA2026_E2E_HEADED=true` |
+| **Force headless locally** | Hidden | `VISA2026_E2E_HEADLESS=true` |
+
+Implemented in **`EasyTestBrowserMode.RunHeadless`** → `BlazorApplicationOptions.runHeadless` in `E2ETestBase`.
+
 ---
 
 ## Current inventory (extend, do not duplicate)
@@ -122,9 +132,6 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 |------------|--------|
 | `SmokeTests` | E2E-001 / E2E-001-nav (`scenarios/ready/`) |
 | `EmployeeTests` | E2E-010 employee create (`scenarios/ready/person-employee-create`) |
-| `ApplicationTests` | Application + application item |
-| `CountryTests` | Lookup CRUD |
-| `OrganizationSettingsTests` | Organization singletons |
 
 Config: **`Config.xml`**, **`e2e-tests.yml`** (CI). Docs: [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md), [`EasyTestFixtureContext.md`](../../../Visa2026.E2E.Tests/EasyTestFixtureContext.md).
 
@@ -153,6 +160,8 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 | **`msedgedriver` not found** | Install to **`.webdrivers/`** or `%USERPROFILE%\.local\bin`; CDN **`msedgedriver.microsoft.com`** |
 | Duplicate evaluator matrix in E2E | E2E = one officer path per journey; not full BR matrix |
 | Caption fill fails on custom editor | Add `InputId` / E2e selector in Blazor; use `FillFormWithRetry` fallback |
+| Headless on local dev | Unset `VISA2026_E2E_HEADLESS`; local default is headed |
+| No visible browser on CI | Expected — `CI` / `VISA2026_E2E_HEADLESS`; use `VISA2026_E2E_HEADED=true` to debug headed |
 
 ---
 

@@ -29,36 +29,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore --configuration EasyTest
 
-    - name: Configure Headless Mode (Update Config.xml)
-      shell: pwsh
-      run: |
-        $configPath = "Visa2026.E2E.Tests\Config.xml"
-        [xml]$xml = Get-Content $configPath
-        
-        # Ensure Options/Aliases structure exists
-        if ($null -eq $xml.EasyTestSettings.Options) {
-            $options = $xml.CreateElement("Options")
-            $xml.EasyTestSettings.PrependChild($options) | Out-Null
-        }
-        if ($null -eq $xml.EasyTestSettings.Options.Aliases) {
-            $aliases = $xml.CreateElement("Aliases")
-            $xml.EasyTestSettings.Options.AppendChild($aliases) | Out-Null
-        }
-
-        # Add or Update Edge Alias to force headless mode
-        $alias = $xml.SelectSingleNode("//Alias[@Name='Edge']")
-        if ($null -eq $alias) {
-            $alias = $xml.CreateElement("Alias")
-            $alias.SetAttribute("Name", "Edge")
-            $alias.SetAttribute("Value", "Edge")
-            $xml.EasyTestSettings.Options.Aliases.AppendChild($alias) | Out-Null
-        }
-        
-        # Set arguments for headless execution and window size
-        $alias.SetAttribute("Arguments", "--headless=new;--window-size=1920,1080")
-        
-        $xml.Save($configPath)
-        Write-Host "Config.xml updated for headless execution."
-
     - name: Run Tests
+      env:
+        VISA2026_E2E_HEADLESS: true
       run: dotnet test Visa2026.E2E.Tests\Visa2026.E2E.Tests.csproj --no-build --configuration EasyTest --logger trx

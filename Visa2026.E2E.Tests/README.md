@@ -66,7 +66,7 @@ The application is configured to find the driver automatically through the syste
 
 ### Application Behavior
 1.  **Initialization**: The test runner initializes the test fixture. The existing test database (`Visa2026EasyTest`) is dropped and recreated to ensure a clean environment.
-2.  **Launch**: A new Microsoft Edge browser window will automatically open.
+2.  **Launch**: On local dev, a visible Microsoft Edge window opens (headed). On CI (`CI=true` / `VISA2026_E2E_HEADLESS`), Edge runs headless — see `EasyTestBrowserMode.cs`.
 3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5050`).
 4.  **Simulation**: You will see the browser automatically interacting with the application based on the `.ets` script.
 5.  **Completion**: Once the script finishes, the browser window will close automatically.

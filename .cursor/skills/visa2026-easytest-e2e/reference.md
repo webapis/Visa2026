@@ -34,9 +34,22 @@ new BlazorApplicationOptions(
     configuration: "EasyTest",
     arguments: "--launch-profile \"Visa2026 - EasyTest (LocalDB)\"",
     browser: "Edge",
-    runHeadless: false,
+    runHeadless: EasyTestBrowserMode.RunHeadless,
     webDriverPath: ResolveWebDriverDirectory())
 ```
+
+### Headed vs headless
+
+`EasyTestBrowserMode.RunHeadless` (see `EasyTestBrowserMode.cs`):
+
+| Variable | Effect |
+|----------|--------|
+| *(none)* on dev PC | Headed |
+| `CI=true` | Headless (GitHub Actions sets this automatically) |
+| `VISA2026_E2E_HEADLESS=true` | Headless |
+| `VISA2026_E2E_HEADED=true` | Headed (overrides CI / headless) |
+
+CI workflow (`e2e-tests.yml`) sets `VISA2026_E2E_HEADLESS: true` on the test step for an explicit contract; `CI=true` alone would also suffice.
 
 ### Edge WebDriver
 
@@ -103,7 +116,7 @@ AssertEmployeeDetailViewActive(); // URL or employee form (TabbedMDI may keep UR
 
 | Type | Purpose |
 |------|---------|
-| `E2ETestDataSeed` | Applicant + passport for ApplicationTests |
+| `E2ETestDataSeed` | Shared login + employee create constants |
 | `E2ETestEmployeeCreateValues` | E2E-010 employee field values |
 | `E2ETestLoginValues` | `standarduser`, list/detail view paths |
 
@@ -153,6 +166,7 @@ Example yaml step → C#:
 
 | Path | Role |
 |------|------|
+| `Visa2026.E2E.Tests/EasyTestBrowserMode.cs` | Headed (local) vs headless (CI) |
 | `Visa2026.E2E.Tests/E2ETestBase.cs` | Fixture, helpers |
 | `Visa2026.E2E.Tests/SmokeTests.cs` | E2E-001 / E2E-001-nav Tier 0 smokes |
 | `Visa2026.E2E.Tests/EasyTestBlazorNavigationHelper.cs` | URL navigation |

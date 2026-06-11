@@ -67,16 +67,13 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 |------------|-------|---------|
 | `SmokeTests` | 2 | E2E-001, E2E-001-nav |
 | `EmployeeTests` | 1 | E2E-010 |
-| `CountryTests` | 3 | E2E-002 |
-| `OrganizationSettingsTests` | 3 | E2E-003 |
-| `ApplicationTests` | 1 | E2E-020 |
 
-**Count:** 10 facts across 5 classes.
+**Count:** 3 facts across 2 classes.
 
-**Tier 0 run:**
+**Full suite:**
 
 ```powershell
-dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --filter "FullyQualifiedName~SmokeTests|FullyQualifiedName~EmployeeTests"
+dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 ```
 
 ---
@@ -91,8 +88,6 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 |----|----------|--------|
 | E2E-001 | Login + app shell | Done |
 | E2E-001-nav | Login + Employees list nav | Done |
-| E2E-002 | Lookup Country CRUD + validation | Done |
-| E2E-003 | Organization singleton save / required field | Done |
 
 ### Tier 1 — Foundation data
 
@@ -106,7 +101,7 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-020 | Create Application (canonical type `App_Inv`) | Done |
+| E2E-020 | Create Application (canonical type `App_Inv`) | Planned |
 | E2E-021 | Add ApplicationItem with person | Planned |
 | E2E-022 | Add ApplicationProgress milestone | Planned |
 | E2E-023 | State Dashboard tile → filtered list | Planned |
@@ -125,6 +120,8 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 ```
 
 **Prerequisites:** Windows, SQL Server LocalDB, `msedgedriver.exe` matching Edge ([E2E README](../Visa2026.E2E.Tests/README.md)).
+
+**Browser:** headed Edge locally (default); headless on CI via `EasyTestBrowserMode` (`CI=true` or `VISA2026_E2E_HEADLESS=true`). Override locally: `$env:VISA2026_E2E_HEADLESS='true'` before `dotnet test`.
 
 **CI policy (recommended):**
 
