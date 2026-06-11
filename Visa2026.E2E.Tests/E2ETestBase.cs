@@ -27,10 +27,42 @@ namespace Visa2026.E2E.Tests
 
         protected void Login(string userName = "Admin", string password = "")
         {
+            if (IsAuthenticatedShellReady())
+                return;
+
             AppContext.GetForm().FillForm(
                 new EasyTestParameter("User Name", userName),
                 new EasyTestParameter("Password", password));
             AppContext.GetAction("Log In").Execute();
+        }
+
+        /// <summary>
+        /// Shared <see cref="EasyTestSessionFixture"/> keeps one browser session for all facts —
+        /// skip logon when a prior test already authenticated.
+        /// </summary>
+        private bool IsAuthenticatedShellReady()
+        {
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, "LoginPage"))
+                        return false;
+
+                    if (AppContext.GetAction("Log In") != null)
+                        return false;
+
+                    AppContext.Navigate("Application");
+                    if (AppContext.GetAction("New") != null)
+                        return true;
+                }
+                catch (Exception) when (attempt < 9)
+                {
+                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -262,22 +294,23 @@ namespace Visa2026.E2E.Tests
             {
                 AppContext.GetGrid().ProcessRow(
                     new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber));
-                AssertEmployeeDetailShowsPersonalNumber(personalNumber);
-                return true;
+                if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                    return true;
             }
             catch (AdapterOperationException)
             {
-                try
-                {
-                    AppContext.GetGrid().ProcessRow(
-                        new EasyTestParameter("Full Name", fullNameFallback));
-                    AssertEmployeeDetailShowsPersonalNumber(personalNumber);
-                    return true;
-                }
-                catch (AdapterOperationException)
-                {
-                    return false;
-                }
+                // Fall through to full-name row match.
+            }
+
+            try
+            {
+                AppContext.GetGrid().ProcessRow(
+                    new EasyTestParameter("Full Name", fullNameFallback));
+                return EmployeeDetailShowsPersonalNumber(personalNumber);
+            }
+            catch (AdapterOperationException)
+            {
+                return false;
             }
         }
 
@@ -440,9 +473,26 @@ namespace Visa2026.E2E.Tests
 
         private void AssertEmployeeDetailShowsPersonalNumber(string personalNumber)
         {
-            Assert.NotNull(AppContext.GetAction("Save"));
-            string actual = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.PersonalNumber);
-            Assert.Equal(personalNumber, actual);
+            Assert.True(
+                EmployeeDetailShowsPersonalNumber(personalNumber),
+                $"Employee detail with Personal Number '{personalNumber}' was not detected " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private bool EmployeeDetailShowsPersonalNumber(string personalNumber)
+        {
+            try
+            {
+                if (AppContext.GetAction("Save") == null)
+                    return false;
+
+                string actual = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.PersonalNumber);
+                return string.Equals(personalNumber, actual, StringComparison.Ordinal);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         protected void FillFormWithRetry(params EasyTestParameter[] fields)
