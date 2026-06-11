@@ -8,7 +8,11 @@ internal static class EasyTestHostMode
 {
     internal static bool IsEnabled =>
         IsEnvFlagSet("VISA2026_EASYTEST")
-        || UsesEasyTestDatabaseConnection();
+        || UsesEasyTestDatabaseConnection()
+        || string.Equals(
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+            "EasyTest",
+            StringComparison.OrdinalIgnoreCase);
 
     private static bool IsEnvFlagSet(string name)
     {

@@ -10,6 +10,8 @@ namespace Visa2026.E2E.Tests;
 /// </summary>
 public class PassportTests : E2ETestBase
 {
+    public PassportTests(EasyTestSessionFixture session) : base(session) { }
+
     [Fact]
     [SupportedOSPlatform("windows")]
     public void Passport_AddOnSeededEmployee_SavesAndShowsPassportNumber()

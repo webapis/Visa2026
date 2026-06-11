@@ -11,6 +11,8 @@ namespace Visa2026.E2E.Tests
     /// </summary>
     public class EmployeeTests : E2ETestBase
     {
+        public EmployeeTests(EasyTestSessionFixture session) : base(session) { }
+
         /// <summary>
         /// Steps: login → New employee → fill required fields → Save → open list row → assert properties.
         /// </summary>

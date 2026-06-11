@@ -54,7 +54,7 @@ new BlazorApplicationOptions(
 | `VISA2026_E2E_HEADLESS=true` | Headless |
 | `VISA2026_E2E_HEADED=true` | Headed (overrides CI / headless) |
 
-CI workflow (`e2e-tests.yml`) sets `VISA2026_E2E_HEADLESS: true` on the test step for an explicit contract; `CI=true` alone would also suffice.
+On **Windows** CI (`windows-latest`), `CI=true` keeps Edge **headed** (headless breaks Blazor `WaitScriptLoading`). Use `VISA2026_E2E_HEADLESS=true` only when you explicitly want headless (e.g. future Linux agents).
 
 ### Edge WebDriver
 

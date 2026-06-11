@@ -18,6 +18,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-06-11 — GHA Windows: headless Edge breaks WaitScriptLoading
+
+- **Outcome**: negative → fix
+- **Context**: `.github/workflows/e2e-tests.yml`, `EasyTestBrowserMode`, `BlazorAppResponseAwaiter.WaitScriptLoading`
+- **Symptom**: All 4 facts fail on CI at `RunApplication()` — `WebDriverTimeoutException: Timed out after 60 seconds` during script loading; local headed runs pass.
+- **Fix / reuse**: On **`CI=true` + Windows**, run **headed** Edge (GHA `windows-latest` has a desktop session). Do **not** set `VISA2026_E2E_HEADLESS=true` on the Windows workflow. Optional `VISA2026_E2E_HEADLESS=true` for Linux agents only. **`EasyTestSessionFixture`** — one host/browser per assembly; **`EasyTestApplicationLauncher`** retries `RunApplication` up to 3× on CI; **`Config.xml` `DefaultTimeout="15"`**.
+- **Reuse**: Windows GHA EasyTest → headed by default; headless only when explicitly requested.
+
 ### 2026-06-11 — Headed local / headless CI via EasyTestBrowserMode
 
 - **Outcome**: positive

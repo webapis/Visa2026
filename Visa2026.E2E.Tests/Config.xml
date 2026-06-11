@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Options xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Options xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTimeout="15">
   <Applications>
     <Application Name="Visa2026Blazor"
                  Url="http://localhost:5050"

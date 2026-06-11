@@ -3,8 +3,6 @@ using DevExpress.EasyTest.Framework;
 using Visa2026.Module.DatabaseUpdate;
 using Xunit;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
-
 namespace Visa2026.E2E.Tests
 {
     /// <summary>
@@ -12,6 +10,8 @@ namespace Visa2026.E2E.Tests
     /// </summary>
     public class SmokeTests : E2ETestBase
     {
+        public SmokeTests(EasyTestSessionFixture session) : base(session) { }
+
         /// <summary>
         /// E2E-001 / scenario <c>login-smoke</c> — see <c>scenarios/ready/login-smoke.yaml</c>.
         /// </summary>

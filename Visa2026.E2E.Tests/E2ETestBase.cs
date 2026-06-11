@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
-using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using Visa2026.Module.DatabaseUpdate;
 using Xunit;
@@ -13,59 +12,17 @@ using Xunit;
 namespace Visa2026.E2E.Tests
 {
     [SupportedOSPlatform("windows")]
-    public abstract class E2ETestBase : IDisposable, IAsyncLifetime
+    [Collection(EasyTestCollection.Name)]
+    public abstract class E2ETestBase
     {
-        protected const string BlazorAppName = "Visa2026Blazor";
-        protected const string AppDBName = "Visa2026EasyTest";
-        private EasyTestFixtureContext FixtureContext { get; }
+        protected const string BlazorAppName = EasyTestSessionFixture.BlazorAppName;
+        protected const string AppDBName = EasyTestSessionFixture.AppDBName;
 
         protected IApplicationContext AppContext { get; }
 
-        private readonly string _blazorServerProjectPath;
-        private bool _teardownCompleted;
-
-        protected E2ETestBase()
+        protected E2ETestBase(EasyTestSessionFixture session)
         {
-            FixtureContext = new EasyTestFixtureContext();
-
-            _blazorServerProjectPath = Path.GetFullPath(
-                Path.Combine(Environment.CurrentDirectory, @"..\..\..\..\Visa2026.Blazor.Server"));
-            string blazorHostExecutable = EasyTestHostLaunch.ResolveHostExecutable(_blazorServerProjectPath);
-
-            var webDriverPath = ResolveWebDriverDirectory();
-
-            // Two-parameter ctor reads launchSettings and can open the wrong port (e.g. 65201 IIS Express).
-            // Always pass Url + Configuration explicitly so browser and Kestrel use the same address.
-            FixtureContext.RegisterApplications(
-                new BlazorApplicationOptions(
-                    name: BlazorAppName,
-                    physicalPath: blazorHostExecutable,
-                    url: EasyTestHostEnvironment.BaseUrl,
-                    configuration: "EasyTest",
-                    ignoreCase: true,
-                    browser: "Edge",
-                    arguments: EasyTestHostLaunch.HostArguments,
-                    webDriverPath: webDriverPath,
-                    browserBinaryPath: string.Empty,
-                    runHeadless: EasyTestBrowserMode.RunHeadless)
-            );
-
-            FixtureContext.RegisterDatabases(
-                new DatabaseOptions(
-                    AppDBName,
-                    "Visa2026EasyTest",
-                    server: @"(localdb)\mssqllocaldb"
-                )
-            );
-
-            AppContext = FixtureContext.CreateApplicationContext(BlazorAppName);
-        }
-
-        public Task InitializeAsync()
-        {
-            EasyTestPreflight.PrepareForTestSession(FixtureContext, AppDBName, _blazorServerProjectPath);
-            AppContext.RunApplication();
-            return Task.CompletedTask;
+            AppContext = session.AppContext;
         }
 
         protected void Login(string userName = "Admin", string password = "")
@@ -561,40 +518,5 @@ namespace Visa2026.E2E.Tests
             }
         }
 
-        public void Dispose() => TeardownTestSession();
-
-        public Task DisposeAsync()
-        {
-            TeardownTestSession();
-            return Task.CompletedTask;
-        }
-
-        private void TeardownTestSession()
-        {
-            if (_teardownCompleted)
-                return;
-
-            _teardownCompleted = true;
-            EasyTestHostLifecycle.StopHost(FixtureContext);
-        }
-
-        private static string ResolveWebDriverDirectory()
-        {
-            var candidates = new[]
-            {
-                Path.Combine(Environment.CurrentDirectory, ".webdrivers"),
-                Path.Combine(Environment.CurrentDirectory, @"..\..\..\.webdrivers"),
-                Path.Combine(Environment.CurrentDirectory, @"..\..\..\..\Visa2026.E2E.Tests\.webdrivers")
-            };
-
-            foreach (var path in candidates)
-            {
-                var fullPath = Path.GetFullPath(path);
-                if (File.Exists(Path.Combine(fullPath, "msedgedriver.exe")))
-                    return fullPath;
-            }
-
-            return string.Empty;
-        }
     }
 }

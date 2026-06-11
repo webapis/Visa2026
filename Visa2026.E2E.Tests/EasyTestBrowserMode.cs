@@ -21,6 +21,11 @@ internal static class EasyTestBrowserMode
             if (IsTruthy(Environment.GetEnvironmentVariable("VISA2026_E2E_HEADLESS")))
                 return true;
 
+            // GitHub Actions windows-latest has a desktop session; headless Edge often never
+            // satisfies Blazor EasyTest WaitScriptLoading (60s) while headed runs work.
+            if (IsTruthy(Environment.GetEnvironmentVariable("CI")) && OperatingSystem.IsWindows())
+                return false;
+
             return IsTruthy(Environment.GetEnvironmentVariable("CI"));
         }
     }
