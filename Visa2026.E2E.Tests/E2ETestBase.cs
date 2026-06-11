@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -60,6 +61,7 @@ namespace Visa2026.E2E.Tests
 
         public Task InitializeAsync()
         {
+            KillStaleEasyTestProcesses();
             FixtureContext.CloseRunningApplications();
 
             if (!_databaseDropped)
@@ -70,6 +72,27 @@ namespace Visa2026.E2E.Tests
 
             AppContext.RunApplication();
             return Task.CompletedTask;
+        }
+
+        private static void KillStaleEasyTestProcesses()
+        {
+            foreach (var process in new[] { "Visa2026.Blazor.Server", "msedgedriver" }
+                         .SelectMany(Process.GetProcessesByName))
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                    process.WaitForExit(5000);
+                }
+                catch (Exception)
+                {
+                    // Ignore already-exited or permission-limited processes.
+                }
+                finally
+                {
+                    process.Dispose();
+                }
+            }
         }
 
         protected void Login(string userName = "Admin", string password = "")
