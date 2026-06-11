@@ -288,31 +288,56 @@ namespace Visa2026.E2E.Tests
         {
             ActivatePersonPassportsTab();
 
-            string[] newActionCaptions = ["Passports.New", "New"];
-            for (var attempt = 0; attempt < 10; attempt++)
+            int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
+            TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
-                foreach (string caption in newActionCaptions)
+                if (TryExecutePassportsNestedNew())
                 {
-                    try
-                    {
-                        var newAction = AppContext.GetAction(caption);
-                        if (newAction != null)
-                        {
-                            newAction.Execute();
-                            WaitForPassportDetailReady();
-                            return;
-                        }
-                    }
-                    catch (AdapterOperationException) when (attempt < 9)
-                    {
-                        // Try next caption or retry after tab content loads.
-                    }
+                    WaitForPassportDetailReady();
+                    return;
                 }
 
-                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                if (attempt < maxAttempts - 1)
+                    Thread.Sleep(delay);
             }
 
-            throw new InvalidOperationException("Could not execute New on Person detail Passports nested list.");
+            throw new InvalidOperationException(
+                $"Could not open nested passport detail after New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private bool TryExecutePassportsNestedNew()
+        {
+            try
+            {
+                var passportsNew = AppContext.GetAction("Passports.New");
+                if (passportsNew != null)
+                {
+                    passportsNew.Execute();
+                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                    if (IsPassportDetailFormReady())
+                        return true;
+                }
+            }
+            catch (AdapterOperationException)
+            {
+                // Fall through to hook click.
+            }
+
+            try
+            {
+                EasyTestBlazorNavigationHelper.ClickByTestId(
+                    AppContext,
+                    E2ETestPersonTabHookTestIds.PassportsNestedNew,
+                    TimeSpan.FromSeconds(15));
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                return IsPassportDetailFormReady();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -323,6 +348,8 @@ namespace Visa2026.E2E.Tests
             string passportTypeDisplay = E2ETestPassportCreateValues.PassportTypeDisplay,
             string issuedCountryDisplay = E2ETestPassportCreateValues.IssuedCountryDisplay)
         {
+            WaitForPassportDetailReady();
+
             FillPassportFormWithRetry(
                 new EasyTestParameter(E2ETestPassportFieldCaptions.PassportNumber, passportNumber),
                 new EasyTestParameter(E2ETestPassportFieldCaptions.PassportType, passportTypeDisplay),
@@ -365,9 +392,21 @@ namespace Visa2026.E2E.Tests
 
         private bool IsPassportDetailFormReady()
         {
+            if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, "Passport_DetailView"))
+                return true;
+
+            if (EasyTestBlazorNavigationHelper.IsHookInputVisible(
+                    AppContext,
+                    E2ETestPassportHookTestIds.PassportNumber))
+                return true;
+
             try
             {
-                return AppContext.GetAction("Save") != null;
+                if (AppContext.GetAction("Save") == null)
+                    return false;
+
+                AppContext.GetForm().GetPropertyValue(E2ETestPassportFieldCaptions.PassportNumber);
+                return true;
             }
             catch (AdapterOperationException)
             {
@@ -380,14 +419,8 @@ namespace Visa2026.E2E.Tests
             DateTime deadline = DateTime.UtcNow + EasyTestCITuning.PassportDetailOpenTimeout;
             while (DateTime.UtcNow < deadline)
             {
-                if (IsPassportDetailFormReady()
-                    || EasyTestBlazorNavigationHelper.UrlContains(AppContext, "Passport_DetailView")
-                    || EasyTestBlazorNavigationHelper.IsHookInputVisible(
-                        AppContext,
-                        E2ETestPassportHookTestIds.PassportNumber))
-                {
+                if (IsPassportDetailFormReady())
                     return;
-                }
 
                 Thread.Sleep(TimeSpan.FromMilliseconds(500));
             }
@@ -420,6 +453,10 @@ namespace Visa2026.E2E.Tests
             int maxAttempts = EasyTestCITuning.FormFieldMaxAttempts;
             TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
 
+            if (PassportFieldHookTestIds.TryGetValue(field.Name, out string? testId)
+                && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
+                return;
+
             for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
                 try
@@ -429,14 +466,14 @@ namespace Visa2026.E2E.Tests
                 }
                 catch (AdapterOperationException)
                 {
+                    if (PassportFieldHookTestIds.TryGetValue(field.Name, out testId)
+                        && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
+                        return;
+
                     if (attempt < maxAttempts - 1)
                         Thread.Sleep(delay);
                 }
             }
-
-            if (PassportFieldHookTestIds.TryGetValue(field.Name, out string? testId)
-                && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
-                return;
 
             throw new InvalidOperationException(
                 $"Could not fill passport form field: {field.Name} " +

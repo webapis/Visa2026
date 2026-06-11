@@ -23,6 +23,9 @@ internal static class EasyTestCITuning
             ? TimeSpan.FromSeconds(90)
             : TimeSpan.FromSeconds(45);
 
+    internal static int NestedListActionMaxAttempts =>
+        IsTruthy(Environment.GetEnvironmentVariable("CI")) ? 20 : 10;
+
     private static bool IsTruthy(string? value) =>
         string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
         || string.Equals(value, "1", StringComparison.OrdinalIgnoreCase);

@@ -432,5 +432,8 @@ dist/
 # E2E — Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)
 Visa2026.E2E.Tests/.webdrivers/
 
+# EasyTest host launcher logs (under test output bin/; explicit for clarity)
+**/easytest-host-logs/
+
 # DevExpress Model Editor auto-creates these beside Model.xafml; use Model.{culture}.xafml from GenerateModelLocalization
 Visa2026.Blazor.Server/Model_*.xafml
