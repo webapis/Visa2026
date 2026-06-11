@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -79,6 +80,38 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Log In").Execute();
         }
 
+        /// <summary>
+        /// Outcome shield after logon (mirrors UiScenario <c>assert-visible: nav-people</c>).
+        /// Navigates to Application list and expects toolbar <c>New</c>.
+        /// </summary>
+        protected void AssertAuthenticatedAppShell()
+        {
+            for (var attempt = 0; attempt < 30; attempt++)
+            {
+                try
+                {
+                    if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, "LoginPage"))
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                        continue;
+                    }
+
+                    AppContext.Navigate("Application");
+                    if (AppContext.GetAction("New") != null)
+                        return;
+                }
+                catch (Exception) when (attempt < 29)
+                {
+                    // Blazor shell may still be loading after logon.
+                }
+
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+
+            throw new InvalidOperationException(
+                $"Authenticated app shell not detected (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
         protected void NavigateEmployeesList()
         {
             const string listViewPath = E2ETestLoginValues.EmployeesListViewPath;
@@ -89,11 +122,8 @@ namespace Visa2026.E2E.Tests
                 {
                     EasyTestBlazorNavigationHelper.GoToRelativeUrl(AppContext, TestAppUrl, listViewPath);
 
-                    if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, listViewPath)
-                        && AppContext.GetAction("New") != null)
-                    {
+                    if (IsEmployeesListActive(listViewPath))
                         return;
-                    }
                 }
                 catch (Exception) when (attempt < 29)
                 {
@@ -104,16 +134,63 @@ namespace Visa2026.E2E.Tests
             }
 
             throw new InvalidOperationException(
-                $"Could not open Employees list at /{listViewPath} (URL must contain '{listViewPath}').");
+                $"Could not open Employees list at /{listViewPath} (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
+        private bool IsEmployeesListActive(string listViewPath)
+        {
+            if (IsEmployeeDetailFormReady())
+                return false;
+
+            if (AppContext.GetAction("New") == null)
+                return false;
+
+            if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, listViewPath))
+                return true;
+
+            return EasyTestBlazorNavigationHelper.ListHasColumnHeader(
+                AppContext,
+                E2ETestPersonFieldCaptions.PersonalNumber);
+        }
+
+        /// <summary>
+        /// After <c>New</c> on the employees list, ensure employee detail (not family member) is active.
+        /// TabbedMDI often keeps the browser URL at <c>/</c> — URL alone is unreliable; fall back to form captions.
+        /// </summary>
         protected void AssertEmployeeDetailViewActive()
         {
             const string detailViewPath = E2ETestLoginValues.EmployeeDetailViewPath;
-            if (!EasyTestBlazorNavigationHelper.UrlContains(AppContext, detailViewPath))
+
+            for (var attempt = 0; attempt < 30; attempt++)
             {
-                throw new InvalidOperationException(
-                    $"Expected employee detail view '/{detailViewPath}' but browser URL is '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}'.");
+                if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, detailViewPath))
+                    return;
+
+                if (IsEmployeeDetailFormReady())
+                    return;
+
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+
+            throw new InvalidOperationException(
+                $"Expected employee detail '/{detailViewPath}' or employee detail form ready, but URL is '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}'.");
+        }
+
+        private bool IsEmployeeDetailFormReady()
+        {
+            try
+            {
+                if (AppContext.GetAction("Save") == null)
+                    return false;
+
+                // Employee detail exposes these; family member detail after wrong-tab New does not.
+                AppContext.GetForm().GetPropertyValue("First Name");
+                AppContext.GetForm().GetPropertyValue("Project Contract");
+                return true;
+            }
+            catch (AdapterOperationException)
+            {
+                return false;
             }
         }
 
@@ -145,22 +222,22 @@ namespace Visa2026.E2E.Tests
         {
             NavigateEmployeesList();
             ExecuteActionWithRetry("New");
-            AssertEmployeeDetailViewActive();
+            AssertEmployeeDetailViewActive(); // URL or employee form (TabbedMDI may stay on /)
 
             FillFormWithRetry(
-                new EasyTestParameter("First Name", firstName),
-                new EasyTestParameter("Last Name", lastName),
-                new EasyTestParameter("Personal Number", personalNumber),
-                new EasyTestParameter("Date of Birth", E2ETestEmployeeCreateValues.DateOfBirth),
-                new EasyTestParameter("Birth Place", E2ETestEmployeeCreateValues.BirthPlace),
-                new EasyTestParameter("Country of Birth", E2ETestEmployeeCreateValues.CountryDisplay),
-                new EasyTestParameter("Gender", E2ETestEmployeeCreateValues.GenderDisplay),
-                new EasyTestParameter("Marital Status", E2ETestEmployeeCreateValues.MaritalStatusDisplay),
-                new EasyTestParameter("Nationality", E2ETestEmployeeCreateValues.CountryDisplay),
-                new EasyTestParameter("Foreign Address", E2ETestEmployeeCreateValues.ForeignAddress),
-                new EasyTestParameter("Foreign Address Country", E2ETestEmployeeCreateValues.CountryDisplay),
-                new EasyTestParameter("Project Contract", E2ETestEmployeeCreateValues.ProjectContractDisplay),
-                new EasyTestParameter("Company (Subcontractor)", E2ETestEmployeeCreateValues.SubcontractorDisplay));
+                new EasyTestParameter(E2ETestPersonFieldCaptions.FirstName, firstName),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.LastName, lastName),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.DateOfBirth, E2ETestEmployeeCreateValues.DateOfBirth),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.BirthPlace, E2ETestEmployeeCreateValues.BirthPlace),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.CountryOfBirth, E2ETestEmployeeCreateValues.CountryDisplay),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.Gender, E2ETestEmployeeCreateValues.GenderDisplay),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.MaritalStatus, E2ETestEmployeeCreateValues.MaritalStatusDisplay),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.Nationality, E2ETestEmployeeCreateValues.CountryDisplay),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.ForeignAddress, E2ETestEmployeeCreateValues.ForeignAddress),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.ForeignAddressCountry, E2ETestEmployeeCreateValues.CountryDisplay),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.ProjectContract, E2ETestEmployeeCreateValues.ProjectContractDisplay),
+                new EasyTestParameter(E2ETestPersonFieldCaptions.Subcontractor, E2ETestEmployeeCreateValues.SubcontractorDisplay));
 
             ExecuteActionWithRetry("Save");
         }
@@ -168,34 +245,114 @@ namespace Visa2026.E2E.Tests
         protected void OpenEmployeeInListByPersonalNumber(string personalNumber)
         {
             NavigateEmployeesList();
-            AppContext.GetGrid().ProcessRow(new EasyTestParameter("Personal Number", personalNumber));
+
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                try
+                {
+                    AppContext.GetGrid().ProcessRow(
+                        new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber));
+                    AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                    return;
+                }
+                catch (AdapterOperationException)
+                {
+                    try
+                    {
+                        AppContext.GetGrid().ProcessRow(
+                            new EasyTestParameter("Full Name", E2ETestEmployeeCreateValues.FullName));
+                        AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                        return;
+                    }
+                    catch (AdapterOperationException) when (attempt < 4)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                    }
+                }
+            }
+
+            EasyTestBlazorNavigationHelper.ClickListRowContaining(AppContext, personalNumber);
+            AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+        }
+
+        private void AssertEmployeeDetailShowsPersonalNumber(string personalNumber)
+        {
             Assert.NotNull(AppContext.GetAction("Save"));
+            string actual = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.PersonalNumber);
+            Assert.Equal(personalNumber, actual);
         }
 
         protected void FillFormWithRetry(params EasyTestParameter[] fields)
         {
-            foreach (var field in fields)
+            foreach (EasyTestParameter field in fields)
             {
                 FillSingleFieldWithRetry(field);
             }
         }
 
+        private static readonly Dictionary<string, string> PersonFieldHookTestIds =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                [E2ETestPersonFieldCaptions.FirstName] = "person-first-name",
+                [E2ETestPersonFieldCaptions.LastName] = "person-last-name",
+                [E2ETestPersonFieldCaptions.PersonalNumber] = "person-personal-number",
+                [E2ETestPersonFieldCaptions.DateOfBirth] = "person-date-of-birth",
+                [E2ETestPersonFieldCaptions.BirthPlace] = "person-birth-place",
+                [E2ETestPersonFieldCaptions.CountryOfBirth] = "person-country-of-birth",
+                [E2ETestPersonFieldCaptions.Gender] = "person-gender",
+                [E2ETestPersonFieldCaptions.MaritalStatus] = "person-marital-status",
+                [E2ETestPersonFieldCaptions.Nationality] = "person-nationality",
+                [E2ETestPersonFieldCaptions.ForeignAddress] = "person-foreign-address",
+                [E2ETestPersonFieldCaptions.ForeignAddressCountry] = "person-foreign-address-country",
+                [E2ETestPersonFieldCaptions.ProjectContract] = "person-project-contract",
+                [E2ETestPersonFieldCaptions.Subcontractor] = "person-subcontractor",
+                ["Date of Birth"] = "person-date-of-birth",
+                ["Country of Birth"] = "person-country-of-birth",
+            };
+
         private void FillSingleFieldWithRetry(EasyTestParameter field)
         {
-            for (var attempt = 0; attempt < 15; attempt++)
+            foreach (string caption in GetCaptionAliases(field.Name))
             {
-                try
+                for (var attempt = 0; attempt < 10; attempt++)
                 {
-                    AppContext.GetForm().FillForm(field);
-                    return;
-                }
-                catch (AdapterOperationException) when (attempt < 14)
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                    try
+                    {
+                        AppContext.GetForm().FillForm(new EasyTestParameter(caption, field.Value));
+                        return;
+                    }
+                    catch (AdapterOperationException) when (attempt < 9)
+                    {
+                        Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                    }
                 }
             }
 
+            if (PersonFieldHookTestIds.TryGetValue(field.Name, out string? testId))
+            {
+                EasyTestBlazorNavigationHelper.FillInputByTestId(AppContext, testId, field.Value);
+                return;
+            }
+
             throw new InvalidOperationException($"Could not fill form field: {field.Name}.");
+        }
+
+        private static IEnumerable<string> GetCaptionAliases(string caption)
+        {
+            yield return caption;
+
+            if (string.Equals(caption, E2ETestPersonFieldCaptions.DateOfBirth, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(caption, "Date of Birth", StringComparison.OrdinalIgnoreCase))
+            {
+                yield return E2ETestPersonFieldCaptions.DateOfBirth;
+                yield return "Date of Birth";
+            }
+            else if (string.Equals(caption, E2ETestPersonFieldCaptions.CountryOfBirth, StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(caption, "Country of Birth", StringComparison.OrdinalIgnoreCase))
+            {
+                yield return E2ETestPersonFieldCaptions.CountryOfBirth;
+                yield return "Country of Birth";
+            }
         }
 
         protected void CreateCountry(string name, string code)

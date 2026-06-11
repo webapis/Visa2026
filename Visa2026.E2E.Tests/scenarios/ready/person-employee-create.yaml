@@ -1,0 +1,50 @@
+# Ready scenario — map: person-employee-create_map.md (promoted scenarios/ready/)
+
+id: person-employee-create
+e2eId: E2E-010
+description: Log in, New employee, fill required fields, Save, verify in list
+user: standarduser
+password: ""
+
+env:
+  personalNumber: E2E-EMP-010
+  firstName: Ferdi
+  lastName: EmployeeCreate
+  dateOfBirth: "22.05.1980"
+  birthPlace: Soma
+  countryDisplay: Türkiye
+  genderDisplay: Male
+  maritalStatusDisplay: Single
+  foreignAddress: E2E employee create foreign address
+  projectContractDisplay: GT-15
+  subcontractorDisplay: Çalyk Enerji
+
+steps:
+  - login:
+      user: standarduser
+      password: ""
+  - goto: Person_ListView_Employees
+  - action: New
+  - assert-url-contains: Person_DetailView_Employee
+  - fill:
+      "First Name": Ferdi
+      "Last Name": EmployeeCreate
+      "Personal Number": E2E-EMP-010
+      "Date Of Birth": "22.05.1980"
+      "Birth Place": Soma
+      "Country Of Birth": Türkiye
+      "Gender": Male
+      "Marital Status": Single
+      "Nationality": Türkiye
+      "Foreign Address": E2E employee create foreign address
+      "Foreign Address Country": Türkiye
+      "Project Contract": GT-15
+      "Company (Subcontractor)": Çalyk Enerji
+  - action: Save
+  - goto: Person_ListView_Employees
+  - open-grid-row:
+      "Personal Number": E2E-EMP-010
+  - assert-property:
+      "First Name": Ferdi
+      "Last Name": EmployeeCreate
+      "Personal Number": E2E-EMP-010

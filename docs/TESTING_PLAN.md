@@ -144,7 +144,7 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 
 | ID | Scenario | Class (suggested) | Status |
 |----|----------|-------------------|--------|
-| E2E-001 | Login as Admin, app loads | `SmokeTests` (consolidate duplicate smokes) | Partial |
+| E2E-001 | Login + app shell + Employees list nav | `SmokeTests` (`login-smoke`, `login-nav-employees`) | Done |
 | E2E-002 | Lookup Country CRUD + validation | `CountryTests` | Done |
 | E2E-003 | Organization singleton save / required field | `OrganizationSettingsTests` | Done |
 
@@ -152,7 +152,7 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 
 | ID | Scenario | Notes | Status |
 |----|----------|-------|--------|
-| E2E-010 | Create Employee (minimal required fields) | Use `CreateEmployee` helper | Planned |
+| E2E-010 | Create Employee (minimal required fields) | `EmployeeTests` + `CreateEmployeeWithRequiredFields` | Done |
 | E2E-011 | Create/link Person for employee | Person detail from employee | Planned |
 | E2E-012 | ApplicationType selection changes visible tabs | [`APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md) | Planned |
 

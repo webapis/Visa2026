@@ -18,7 +18,8 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 ## 3. Project Structure
 
 - **`Visa2026.E2E.Tests.csproj`**: The project file, containing all dependencies and configurations. It references the `Visa2026.Module` project to ensure it has context of the application's business objects.
-- **`Tests.cs`**: The main test fixture class. It contains the xUnit tests that initialize the EasyTest environment, launch the Blazor application, and execute test scripts.
+- **`SmokeTests.cs`**, **`*Tests.cs`**: xUnit test classes inheriting `E2ETestBase` (C# EasyTest API).
+- **`scenarios/`**: Scenario maps (`*_map.md`) and yaml **specs** (Option A — C# executes steps; see [scenarios/README.md](./scenarios/README.md)).
 - **`Config.xml`**: The configuration file for EasyTest, defining application aliases, database connections, and other settings. The browser for testing is also specified here.
 - **`*.ets` files**: These are the EasyTest script files. They contain a sequence of commands that represent user actions (e.g., navigating to a view, filling a form, clicking a button) and assertions to verify outcomes.
 

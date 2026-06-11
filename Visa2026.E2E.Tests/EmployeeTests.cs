@@ -6,11 +6,14 @@ using Xunit;
 namespace Visa2026.E2E.Tests
 {
     /// <summary>
-    /// E2E-010 — create employee with required Person fields on <c>Person_ListView_Employees</c>.
-    /// Mirrors <c>person-employee-create</c> UiScenario (logon as <c>standarduser</c>, empty password).
+    /// E2E-010 / scenario <c>person-employee-create</c> — see <c>scenarios/ready/person-employee-create.yaml</c>.
+    /// Creates employee with required Person fields on <c>Person_ListView_Employees</c>.
     /// </summary>
     public class EmployeeTests : E2ETestBase
     {
+        /// <summary>
+        /// Steps: login → New employee → fill required fields → Save → open list row → assert properties.
+        /// </summary>
         [Fact]
         [SupportedOSPlatform("windows")]
         public void Employee_Create_RequiredFields_SavesAndAppearsInList()

@@ -29,6 +29,24 @@ public static class E2ETestEmployeeCreateValues
     public static string FullName => $"{FirstName} {LastName}";
 }
 
+/// <summary>English Blazor captions for <see cref="BusinessObjects.Person"/> employee detail (XAF title case).</summary>
+public static class E2ETestPersonFieldCaptions
+{
+    public const string FirstName = "First Name";
+    public const string LastName = "Last Name";
+    public const string PersonalNumber = "Personal Number";
+    public const string DateOfBirth = "Date Of Birth";
+    public const string BirthPlace = "Birth Place";
+    public const string CountryOfBirth = "Country Of Birth";
+    public const string Gender = "Gender";
+    public const string MaritalStatus = "Marital Status";
+    public const string Nationality = "Nationality";
+    public const string ForeignAddress = "Foreign Address";
+    public const string ForeignAddressCountry = "Foreign Address Country";
+    public const string ProjectContract = "Project Contract";
+    public const string Subcontractor = "Company (Subcontractor)";
+}
+
 /// <summary>Officer logon for E2E flows that mirror UiScenario (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {

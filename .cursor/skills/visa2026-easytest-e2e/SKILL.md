@@ -37,13 +37,16 @@ Copy-paste catalog: [user-prompts.md](./user-prompts.md). Invoke with **`@visa20
 ## Process (new E2E test)
 
 ```text
-1. SCOPE     — officer journey + TESTING_PLAN backlog id (E2E-xxx) if any
-2. REUSE     — extend E2ETestBase helpers; read learnings.md for same view/nav
-3. IMPLEMENT — *Tests.cs : E2ETestBase; seed constants in E2ETestDataSeed.cs if stable ids needed
+1. MAP       — scenarios/examples/<id>_map.md (caption inventory §3) + E2E-xxx id
+2. YAML      — scenarios/examples/<id>.yaml when map Ready for YAML (Option A: spec only)
+3. C#        — *Tests.cs [Fact] mirroring yaml steps; extend E2ETestBase helpers
 4. BUILD     — dotnet build Visa2026.slnx -c EasyTest
 5. RUN       — dotnet test Visa2026.E2E.Tests -c EasyTest --filter "FullyQualifiedName~YourTests"
-6. RECORD    — append learnings.md on non-obvious fixes (nav, captions, driver, host)
+6. PROMOTE   — move map + yaml to scenarios/ready/ when CI-stable
+7. RECORD    — append learnings.md on non-obvious fixes (nav, captions, driver, host)
 ```
+
+**Scenario metadata (Option A):** YAML documents steps; C# executes them. Map contract: [reference-map-contract.md](./reference-map-contract.md). Inventory: [`Visa2026.E2E.Tests/scenarios/README.md`](../../../Visa2026.E2E.Tests/scenarios/README.md).
 
 ---
 
@@ -123,8 +126,8 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 | Test class | Focus |
 |------------|--------|
-| `GeneralTests` | Login + open employees list |
-| `EmployeeTests` | E2E-010 employee create |
+| `SmokeTests` | E2E-001 / E2E-001-nav (`scenarios/ready/`) |
+| `EmployeeTests` | E2E-010 employee create (`scenarios/ready/person-employee-create`) |
 | `ApplicationTests` | Application + application item |
 | `CountryTests` | Lookup CRUD |
 | `OrganizationSettingsTests` | Organization singletons |
@@ -165,7 +168,9 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 
 - [user-prompts.md](./user-prompts.md) — invoke messages
 - [reference.md](./reference.md) — host, driver, API patterns, CI, three-stack table
+- [reference-map-contract.md](./reference-map-contract.md) — `*_map.md` + yaml + C# (Option A)
 - [learnings.md](./learnings.md) — append-only verified experience
+- [`Visa2026.E2E.Tests/scenarios/`](../../../Visa2026.E2E.Tests/scenarios/README.md) — scenario maps and yaml specs
 - [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — pyramid, backlog E2E-xxx
 - [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md) — hook-based Playwright journeys
 - [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md) — selector prep (not EasyTest)

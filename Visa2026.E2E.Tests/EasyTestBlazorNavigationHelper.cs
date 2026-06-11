@@ -27,6 +27,111 @@ internal static class EasyTestBlazorNavigationHelper
     public static string GetCurrentUrl(IApplicationContext appContext) =>
         TryGetCurrentUrl(appContext, out string? url) ? url : string.Empty;
 
+    /// <summary>
+    /// Fallback when EasyTest <see cref="ApplicationContextExtensions.GetForm"/> cannot resolve a Blazor editor by caption
+    /// (common for date pickers). Uses hook <c>InputId</c> / <c>data-testid</c> from Person E2E selectors.
+    /// </summary>
+    public static void FillInputByTestId(IApplicationContext appContext, string testId, string value)
+    {
+        IWebDriver driver = ResolveWebDriver(appContext)
+            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+
+        string[] selectors =
+        [
+            $"#{testId}",
+            $"[data-testid='{testId}'] input",
+            $"[data-testid='{testId}'] textarea",
+            $".e2e-{testId} input",
+            $".e2e-{testId} textarea",
+            $"[data-testid='{testId}']",
+            $".e2e-{testId}",
+        ];
+
+        Exception? lastError = null;
+        foreach (string selector in selectors)
+        {
+            try
+            {
+                IWebElement element = driver.FindElement(By.CssSelector(selector));
+                if (!element.Displayed)
+                    continue;
+
+                element.Click();
+                element.SendKeys(Keys.Control + "a");
+                element.SendKeys(Keys.Delete);
+                element.SendKeys(value);
+                element.SendKeys(Keys.Tab);
+                return;
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Could not fill hook input '{testId}' with value '{value}'.",
+            lastError);
+    }
+
+    public static bool ListHasColumnHeader(IApplicationContext appContext, string columnCaption)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        try
+        {
+            string xpath =
+                $"//table[contains(@class,'dxbl-grid')]//th[contains(normalize-space(.), '{columnCaption}')]";
+            return driver.FindElements(By.XPath(xpath)).Any(e => e.Displayed);
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Opens a ListView row when EasyTest <see cref="ApplicationContextExtensions.GetGrid"/>.ProcessRow cannot resolve Blazor column captions.
+    /// </summary>
+    public static void ClickListRowContaining(IApplicationContext appContext, string cellText)
+    {
+        IWebDriver driver = ResolveWebDriver(appContext)
+            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+
+        string literal = cellText.Replace("'", "\\'");
+        string xpath =
+            $"//table[contains(@class,'dxbl-grid')]//tr[contains(@class,'dxbl-grid-data-row') and contains(., '{literal}')]";
+
+        Exception? lastError = null;
+        for (var attempt = 0; attempt < 30; attempt++)
+        {
+            try
+            {
+                foreach (IWebElement row in driver.FindElements(By.XPath(xpath)))
+                {
+                    if (!row.Displayed)
+                        continue;
+
+                    row.Click();
+                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(500));
+        }
+
+        throw new InvalidOperationException(
+            $"List row containing '{cellText}' was not found.",
+            lastError);
+    }
+
     private static bool TryGetCurrentUrl(IApplicationContext appContext, out string url)
     {
         url = ResolveWebDriver(appContext)?.Url ?? string.Empty;

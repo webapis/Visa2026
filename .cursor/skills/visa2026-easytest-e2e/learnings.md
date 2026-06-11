@@ -18,6 +18,53 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-06-11 — Promote Tier 0 scenarios to ready/
+
+- **Outcome**: positive
+- **Context**: `scenarios/ready/` — login-smoke, login-nav-employees, person-employee-create
+- **Fix / reuse**: Move map + yaml from `examples/` after green local runs (`SmokeTests` ~22s, `EmployeeTests` ~95s).
+- **Reuse**: Promote only after filtered `dotnet test` pass; keep `_map_TEMPLATE.md` in `examples/`.
+
+### 2026-06-11 — Employees list ProcessRow vs nested Passports grid
+
+- **Outcome**: negative → fix
+- **Context**: `OpenEmployeeInListByPersonalNumber`, TabbedMDI after Save
+- **Symptom**: `Personal Number column was not found` — EasyTest `GetGrid()` targeted nested **Passports** grid on detail tab, not `Person_ListView_Employees`.
+- **Fix / reuse**: `IsEmployeesListActive` waits until employee detail form is gone (+ list URL or **Personal Number** column header); `ClickListRowContaining` Selenium fallback when `ProcessRow` fails.
+- **Reuse**: After Save on detail, confirm list is active before grid ops; do not trust `ProcessRow` alone on Blazor TabbedMDI.
+
+### 2026-06-11 — Date Of Birth caption + hook fallback
+
+- **Outcome**: negative → fix
+- **Context**: `EmployeeTests`, Blazor employee detail, EasyTest `FillForm`
+- **Symptom**: `Cannot find the 'Date of Birth' control` while UI label shows **Date Of Birth**; First/Last name already filled.
+- **Fix / reuse**: `E2ETestPersonFieldCaptions` (XAF title case); `FillSingleFieldWithRetry` tries caption aliases then `EasyTestBlazorNavigationHelper.FillInputByTestId` (`person-date-of-birth`, …).
+- **Reuse**: Person scalars → shared captions in `E2ETestDataSeed.cs`; hook ids for Selenium fallback when EasyTest cannot bind Blazor date/combo editors.
+
+### 2026-06-11 — TabbedMDI detail URL stays at /
+
+- **Outcome**: negative → fix
+- **Context**: `EmployeeTests`, `AssertEmployeeDetailViewActive`, Blazor TabbedMDI on `:5050`
+- **Symptom**: After **New** on employees list, Employee detail is visible but URL is `http://localhost:5050/` → URL-only assert fails while form is open.
+- **Fix / reuse**: Retry **`AssertEmployeeDetailViewActive()`** — accept URL **or** **`Save` + `First Name` + `Project Contract`** form read (employee vs family member shield).
+- **Reuse**: Do not rely on detail view id in browser URL for TabbedMDI **New** flows; use caption/form outcome shield.
+
+### 2026-06-11 — person-employee-create map + yaml (E2E-010)
+
+- **Outcome**: positive (pattern)
+- **Context**: `EmployeeTests`, `scenarios/examples/person-employee-create.yaml`
+- **Symptom**: C# test existed without co-located EasyTest scenario spec.
+- **Fix / reuse**: Map §3 lists English captions from `CreateEmployeeWithRequiredFields`; yaml mirrors steps including `open-grid-row` + `assert-property`; constants from `E2ETestEmployeeCreateValues`.
+- **Reuse**: UiScenario twin uses hook ids — keep business steps aligned, not selector mechanism; `VisaApplicationFamilyMembersText` waived in EasyTest (OnSaving default).
+
+### 2026-06-11 — Phase 0 scenario metadata (Option A)
+
+- **Outcome**: positive
+- **Context**: `SmokeTests`, `scenarios/examples/login-smoke.yaml`, `login-nav-employees.yaml`
+- **Symptom**: Duplicate smokes in `Visa2026Tests` / `GeneralTests`; no shared journey spec with ui-scenarios.
+- **Fix / reuse**: Map + yaml in `Visa2026.E2E.Tests/scenarios/examples/`; C# `[Fact]` mirrors yaml; `AssertAuthenticatedAppShell()` = UiScenario `nav-people` shield (Navigate Application + `New`).
+- **Reuse**: New EasyTest journeys → map first, yaml when captions verified, then C#; promote to `scenarios/ready/` after CI pass.
+
 ### 2026-06-08 — EasyTest port 5050 isolated from IDE
 
 - **Outcome**: positive

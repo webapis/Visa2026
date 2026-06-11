@@ -96,7 +96,7 @@ Use **`FillFormWithRetry`** for Blazor lookup combos (one field per attempt).
 
 ```csharp
 Assert.Equal(expected, AppContext.GetForm().GetPropertyValue("First Name"));
-AssertEmployeeDetailViewActive(); // URL contains Person_DetailView_Employee
+AssertEmployeeDetailViewActive(); // URL or employee form (TabbedMDI may keep URL at /)
 ```
 
 ---
@@ -142,11 +142,34 @@ Both can coexist; align data constants and business steps, not selector mechanis
 
 ---
 
+## Scenario metadata (Option A)
+
+YAML + map document officer journeys; **C# `[Fact]` methods execute** them (no yaml runner yet).
+
+| Path | Role |
+|------|------|
+| `Visa2026.E2E.Tests/scenarios/README.md` | Workflow, Phase 0 inventory |
+| `Visa2026.E2E.Tests/scenarios/examples/` | Draft `*_map.md` + `.yaml` |
+| `Visa2026.E2E.Tests/scenarios/ready/` | Promoted specs (CI-stable) |
+| [reference-map-contract.md](./reference-map-contract.md) | Map sections, yaml vocabulary, caption §3 |
+
+Example yaml step → C#:
+
+| YAML | C# |
+|------|-----|
+| `login:` | `Login(user, password)` |
+| `assert-shell: true` | `AssertAuthenticatedAppShell()` |
+| `goto: Person_ListView_Employees` | `NavigateEmployeesList()` |
+| `assert-action-visible: New` | `Assert.NotNull(AppContext.GetAction("New"))` |
+
+---
+
 ## File map
 
 | Path | Role |
 |------|------|
 | `Visa2026.E2E.Tests/E2ETestBase.cs` | Fixture, helpers |
+| `Visa2026.E2E.Tests/SmokeTests.cs` | E2E-001 / E2E-001-nav Tier 0 smokes |
 | `Visa2026.E2E.Tests/EasyTestBlazorNavigationHelper.cs` | URL navigation |
 | `Visa2026.E2E.Tests/Config.xml` | Legacy EasyTest XML config |
 | `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs` | Shared constants |
