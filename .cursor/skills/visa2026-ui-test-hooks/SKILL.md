@@ -10,8 +10,8 @@ description: >-
   via build/DevTools trial until success, then record. Verify in DevTools or
   VerifyUiTestHooks; record in docs/UI_TEST_HOOKS.md. Use when user asks for UI test
   hooks, CSS selectors, data-testid, e2e-*, hook Person/Application fields, verify
-  selectors, or update UI_TEST_HOOKS.md. Not E2E, EasyTest, ui-scenarios YAML, or
-  scrapers. See user-prompts.md.
+  selectors, or update UI_TEST_HOOKS.md. Not E2E, native EasyTest, ui-scenarios YAML, or
+  scrapers. EasyTest E2E → visa2026-easytest-e2e. See user-prompts.md.
 disable-model-invocation: false
 ---
 
@@ -37,7 +37,7 @@ disable-model-invocation: false
 
 Optional: step 4 uses [`scripts/local/Invoke-UiHookVerify.ps1`](../../../scripts/local/Invoke-UiHookVerify.ps1) (build → isolated host on `:5051` → `VerifyUiTestHooks` → stop) — **no developer IDE host required**. Manual DevTools against `-KeepServer` remains valid.
 
-**Out of scope:** E2E suites, EasyTest, scrapers, CI. This skill only **prepares, tests, and documents** selector access from the UI.
+**Out of scope:** native EasyTest E2E (`Visa2026.E2E.Tests`), scrapers, CI. This skill only **prepares, tests, and documents** selector access for **Playwright / hook-based** automation. EasyTest → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md).
 
 ---
 
@@ -123,7 +123,7 @@ In Cursor, mention **`@visa2026-ui-test-hooks`** (or this skill path) so the age
 | Verify only | `@visa2026-ui-test-hooks Verify **nav-people** with **Invoke-UiHookVerify.ps1** (isolated server).` |
 | Record after verify | `@visa2026-ui-test-hooks DevTools passed for login hooks — update **UI_TEST_HOOKS.md** and **registry.md** to verified.` |
 
-**Wrong skill:** multi-step YAML journeys → [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md).
+**Not this skill:** multi-step YAML journeys → [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md); native EasyTest E2E → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md).
 
 ---
 
@@ -202,7 +202,7 @@ Full steps + pitfalls: [reference.md § Sidebar navigation](./reference.md#sideb
 |-------|------|-------------|
 | **UI accessibility prep** | Stable CSS selectors on real controls | **Yes** — implement + verify + record |
 | **Verified access catalog** | [`docs/UI_TEST_HOOKS.md`](../../../docs/UI_TEST_HOOKS.md) | **Yes** — output of prep work (verified only) |
-| **EasyTest E2E (dev/CI)** | `Visa2026.E2E.Tests` + Selenium | **No** — see [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) |
+| **EasyTest E2E (native)** | `Visa2026.E2E.Tests` + Selenium captions | **No** — [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) |
 | **Playwright / scrapers / E2E runners** | Separate tooling | **No** — may read `docs/UI_TEST_HOOKS.md`; not maintained by this skill |
 
 **Term:** **UI test hook** = stable attribute/class on a real control.
@@ -351,6 +351,56 @@ document.querySelector('[data-testid="login-submit"]')?.click();
 - [ ] **Optional fields:** if hooking a gear-hidden member, gear expanded (`ShowOptionalFields`) before access check.
 
 Hooks avoid localized captions ([`docs/LOCALIZATION_PLAN.md`](../../../docs/LOCALIZATION_PLAN.md)); console checks use English-stable ids only.
+
+### Step 3 — Batch verify (multiple hooks on one view)
+
+After **Step 1** works for one field, run a **batch** on the same open view to catch gaps quickly (developer + agent). Log **`OK`** / **`MISSING`** per hook id; investigate **MISSING** before promoting to `UI_TEST_HOOKS.md`.
+
+**Scalar fields** (light DOM — `#id` then `[data-testid]`):
+
+```javascript
+[
+  'passport-passport-number',
+  'passport-passport-type',
+  'passport-issue-date',
+  'passport-expiration-date',
+  'passport-authority',
+].forEach(function (id) {
+  const el = document.querySelector('#' + id)
+    ?? document.querySelector('[data-testid="' + id + '"]')
+    ?? document.querySelector('.e2e-' + id);
+  console.log(id, el ? 'OK' : 'MISSING', el);
+});
+```
+
+**Toolbar actions** (shadow DOM — apply hook JS first, then `deepQuery`):
+
+```javascript
+function deepQuery(selector, root, results) {
+  root = root || document;
+  results = results || [];
+  root.querySelectorAll(selector).forEach(function (n) { results.push(n); });
+  root.querySelectorAll('*').forEach(function (el) {
+    if (el.shadowRoot) deepQuery(selector, el.shadowRoot, results);
+  });
+  return results;
+}
+
+visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new');
+['person-employee-tab-passports-new', 'passport-detail-save'].forEach(function (id) {
+  const el = deepQuery('[data-testid="' + id + '"]')[0]
+    ?? deepQuery('.e2e-' + id)[0];
+  console.log(id, el ? 'OK' : 'MISSING', el);
+});
+```
+
+| Result | Action |
+|--------|--------|
+| **OK** | Promote row to **verified** in `UI_TEST_HOOKS.md` + `registry.md` |
+| **MISSING** on scalar | Hook not applied, wrong id, or **field not on layout** — check `Model.xafml` / `Removed="True"` before coding more hooks |
+| **MISSING** on toolbar | Run `visa2026E2eHooks.apply…` for that group; confirm tab/view active; use `deepQuery` not top-level `querySelector` |
+
+Optional: add matching ids to `tools/VerifyUiTestHooks/hooks-manifest.json` for Playwright batch runs via `Invoke-UiHookVerify.ps1`.
 
 ---
 

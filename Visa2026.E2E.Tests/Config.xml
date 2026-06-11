@@ -2,7 +2,7 @@
 <Options xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Applications>
     <Application Name="Visa2026Blazor"
-                 Url="http://localhost:5000"
+                 Url="http://localhost:5050"
                  PhysicalPath="[ConfigPath]\..\..\Visa2026.Blazor.Server"
                  Configuration="EasyTest"
                  Browser="Edge"

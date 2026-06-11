@@ -16,7 +16,7 @@ disable-model-invocation: false
 | Layer | Project | Skill |
 |-------|---------|-------|
 | **Unit / integration** | `Visa2026.Module.Tests` *(add to solution when missing)* | **This skill** |
-| **E2E (Blazor UI)** | `Visa2026.E2E.Tests` | Not this skill — see [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md) and [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) |
+| **E2E (Blazor UI)** | `Visa2026.E2E.Tests` | [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) |
 
 **Canonical strategy:** [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) (pyramid, CI). **What to test:** [`docs/UNIT_TESTING_PLAN.md`](../../../docs/UNIT_TESTING_PLAN.md) (BOs, evaluators, helpers, UT-010+ backlog).
 
@@ -51,7 +51,7 @@ READ learnings.md → TRY test/fix → TEST dotnet test → RECORD entry → PRO
 | Pitfall | Do instead |
 |---------|------------|
 | Unit-test Blazor / XAF UI controls | E2E or host testability (`InputId`); unit-test **Module** evaluators/helpers only |
-| Use `Visa2026EasyTest` in Module.Tests | Use **`Visa2026Test`** for integration; E2E owns EasyTest DB |
+| Use `Visa2026EasyTest` in Module.Tests | Use **`Visa2026Test`** for integration; E2E owns EasyTest DB — [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) |
 | Reference `Visa2026.Blazor.Server` from Module.Tests | Reference **`Visa2026.Module`** only |
 
 *(Add rows when learnings entries promote — do not duplicate full stories here.)*
@@ -86,7 +86,7 @@ dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug --filter
 dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug --collect:"XPlat Code Coverage"
 ```
 
-**E2E is separate** (Windows, EasyTest config, Edge driver):
+**E2E is separate** — use [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) (Windows, EasyTest config, Edge driver):
 
 ```powershell
 dotnet build Visa2026.slnx -c EasyTest
@@ -204,5 +204,6 @@ dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug
 
 - [learnings.md](./learnings.md) — append-only positive/negative experience (read before, append after verify)
 - [reference.md](./reference.md) — csproj template, packages, integration notes, troubleshooting
+- [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) — Blazor E2E (`Visa2026.E2E.Tests`, EasyTest config)
 - [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — inventory, CI policy, E2E separation
 - [`docs/BO_STATE_TRACKING.md`](../../../docs/BO_STATE_TRACKING.md) — state codes for evaluator cases

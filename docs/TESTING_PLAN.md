@@ -12,9 +12,9 @@ This document defines **how Visa2026 is tested**: which layers exist, what each 
 
 **Product context** (why testing matters here): officers must trust **application/process tracking**, **document validity states**, and **dashboard → list** consistency for compliance workflows. See [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md).
 
-**Not in scope for this plan:** step-by-step EasyTest API reference (see [`Visa2026.E2E.Tests/README.md`](../Visa2026.E2E.Tests/README.md) and [`EasyTestFixtureContext.md`](../Visa2026.E2E.Tests/EasyTestFixtureContext.md)).
+**Not in scope for this plan:** step-by-step EasyTest API reference (see [`Visa2026.E2E.Tests/README.md`](../Visa2026.E2E.Tests/README.md), [`EasyTestFixtureContext.md`](../Visa2026.E2E.Tests/EasyTestFixtureContext.md), and agent skill [`.cursor/skills/visa2026-easytest-e2e/SKILL.md`](../.cursor/skills/visa2026-easytest-e2e/SKILL.md)).
 
-**Agent skill (unit/integration):** [`.cursor/skills/visa2026-unit-tests/SKILL.md`](../.cursor/skills/visa2026-unit-tests/SKILL.md) (+ [learnings.md](../.cursor/skills/visa2026-unit-tests/learnings.md)) — scaffold `Visa2026.Module.Tests`, write/run xUnit tests, append verified lessons; E2E stays separate.
+**Agent skills:** [unit/integration](../.cursor/skills/visa2026-unit-tests/SKILL.md) (`Visa2026.Module.Tests`); [native EasyTest E2E](../.cursor/skills/visa2026-easytest-e2e/SKILL.md) (`Visa2026.E2E.Tests`, **:5050**); [Playwright ui-scenarios](../.cursor/skills/visa2026-ui-scenarios/SKILL.md) (**:5052**, hook ids).
 
 ---
 

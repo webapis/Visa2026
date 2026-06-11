@@ -2,6 +2,7 @@ using System.Collections;
 using System.Reflection;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor.Components.Models;
+using DevExpress.ExpressApp.Blazor.SystemModule;
 using DevExpress.ExpressApp.Blazor.Templates.Ribbon.ActionControls;
 using DevExpress.ExpressApp.Blazor.Templates.Toolbar.ActionControls;
 
@@ -29,7 +30,7 @@ internal static class E2eActionControlSelectorSupport
         method?.Invoke(action, null);
     }
 
-    internal static bool TryApplyFromActionControl(object control, string testId)
+    internal static bool TryApplyFromActionControl(object control, string testId, ActionBase? action = null)
     {
         object? itemModel = control switch
         {
@@ -46,7 +47,32 @@ internal static class E2eActionControlSelectorSupport
         }
 
         ApplyCssClassAndTestId(itemModel, testId);
+        ApplyModelCustomCssClass(itemModel, action);
         return true;
+    }
+
+    private static void ApplyModelCustomCssClass(object itemModel, ActionBase? action)
+    {
+        if (action?.Model is not IModelActionBlazor actionModel)
+        {
+            return;
+        }
+
+        string? modelClass = actionModel.CustomCSSClassName;
+        if (string.IsNullOrWhiteSpace(modelClass))
+        {
+            return;
+        }
+
+        switch (itemModel)
+        {
+            case DxToolbarItemModel toolbar:
+                toolbar.CssClass = AppendCssClass(toolbar.CssClass, modelClass);
+                break;
+            case DxRibbonItemModel ribbon:
+                ribbon.CssClass = AppendCssClass(ribbon.CssClass, modelClass);
+                break;
+        }
     }
 
     internal static void ApplyCssClassAndTestId(object itemModel, string testId)

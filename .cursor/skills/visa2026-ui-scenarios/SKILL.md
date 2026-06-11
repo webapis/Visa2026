@@ -6,7 +6,8 @@ description: >-
   then YAML, promote to tools/UiScenarioRunner/scenarios/, run with UiScenarioRunner.
   Use for UI scenarios, scenario map, login smoke, Person fill flows, promote scenario,
   run login-smoke, UiScenarioRunner --all, or GitHub Actions ui-scenario-tests.
-  Not hook CSS prep (ui-test-hooks) or EasyTest CI. See user-prompts.md.
+  Not hook CSS prep (ui-test-hooks) or native EasyTest E2E (visa2026-easytest-e2e).
+  See user-prompts.md.
 disable-model-invocation: false
 ---
 
@@ -22,8 +23,9 @@ disable-model-invocation: false
 | **Selector prep** | [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md) | Verified hooks → `UI_TEST_HOOKS.md` |
 | **Scenario file** | **This skill** | `<scenario-id>.yaml` — after all hooks verified |
 | **Execution** | [`tools/UiScenarioRunner`](../../../tools/UiScenarioRunner/README.md) | Playwright runs YAML from **scenarios/** |
+| **Native EasyTest E2E** | [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) | `Visa2026.E2E.Tests`, captions, **:5050** |
 
-**Out of scope:** implementing hooks (**ui-test-hooks**); EasyTest CI; scraping.
+**Out of scope:** implementing hooks (**ui-test-hooks**); **EasyTest** test classes; scraping.
 
 ---
 
@@ -149,7 +151,7 @@ MAP (examples/) → HOOKS → YAML (examples/) → PROMOTE (scenarios/) → RUN 
 | Hook gaps only in chat | Table in map §3 + handoff to **ui-test-hooks** |
 | Duplicate CSS in YAML | Hook ids only; see map §4 |
 | Map and YAML out of sync | Update both when steps change |
-| Confuse with EasyTest | EasyTest = CI; this skill = hook-based smoke |
+| Confuse with EasyTest | Native E2E → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md); this skill = hook-based Playwright |
 | Run against IDE host | Use **:5052** + `Invoke-UiScenarioRun.ps1`; fresh build; stop host after |
 | No screenshots on agent run | Default `--screenshot-steps`; review run folder before closing task |
 | Click before Blazor finished loading | Runner uses **`WaitForBusyOverlayAsync` before/after clicks**; YAML waits on **detail-only** hooks after **New** (see [reference-run-lifecycle.md](./reference-run-lifecycle.md) § Blazor wait discipline) |
@@ -184,4 +186,5 @@ MAP (examples/) → HOOKS → YAML (examples/) → PROMOTE (scenarios/) → RUN 
 - [learnings.md](./learnings.md)
 - [`docs/UI_TEST_HOOKS.md`](../../../docs/UI_TEST_HOOKS.md)
 - [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md)
-- [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md)
+- [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) — native XAF EasyTest E2E (`Visa2026.E2E.Tests`)
+- [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — pyramid, E2E backlog, CI

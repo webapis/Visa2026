@@ -39,9 +39,9 @@ internal sealed record RunOptions(
     int SlowMoMs,
     string? ScreenshotDir,
     bool ScreenshotEachStep,
-    int PauseAfterSaveMs,
     string? TraceDir,
-    string ManifestPath);
+    string ManifestPath,
+    bool Fast = false);
 
 internal sealed record StepResult(int Index, string StepKind, bool Ok, string? Detail, string? Error);
 

@@ -14,6 +14,9 @@ internal sealed class ScenarioRunner
         _options = options;
     }
 
+    private int DefaultStepTimeoutMs(int fastDefault, int normalDefault) =>
+        _options.Fast ? fastDefault : normalDefault;
+
     public async Task<ScenarioRunResult> RunAsync(UiScenario scenario, CancellationToken cancellationToken = default)
     {
         string baseUrl = scenario.BaseUrl ?? _options.BaseUrl;
@@ -166,7 +169,6 @@ internal sealed class ScenarioRunner
             case "goto":
                 string path = ResolveEnv(scenario, value.ToString() ?? "");
                 await page.GotoAsync(ToAbsoluteUrl(baseUrl, path), new PageGotoOptions { WaitUntil = WaitUntilState.Load });
-                await WaitForBlazorAsync(page);
                 await WaitForAppShellAsync(page);
                 await WaitForBusyOverlayAsync(page);
                 return new StepResult(index, kind, true, path, null);
@@ -189,113 +191,338 @@ internal sealed class ScenarioRunner
 
                 return new StepResult(index, kind, true, string.Join(", ", fields.Keys), null);
 
-            case "click":
             case "select-tab":
-                string hookId = value.ToString() ?? "";
-                if (kind == "click" && string.Equals(hookId, "login-submit", StringComparison.Ordinal))
+                HookStep tabStep = ScenarioStepValues.ParseHookStep(value, kind);
+                await SelectLayoutTabAsync(page, tabStep.HookId, tabStep.TimeoutMs);
+                return new StepResult(index, kind, true, ScenarioStepValues.FormatHookStepDetail(tabStep), null);
+
+            case "click":
+                HookStep clickStep = ScenarioStepValues.ParseHookStep(value, kind);
+                string hookId = clickStep.HookId;
+                int? clickTimeoutMs = clickStep.TimeoutMs;
+
+                if (string.Equals(hookId, "login-submit", StringComparison.Ordinal))
                 {
                     await WaitForBusyOverlayAsync(page);
-                    ILocator submit = await LocateHookAsync(page, hookId);
+                    ILocator submit = await LocateHookAsync(page, hookId, clickTimeoutMs);
                     await submit.ClickAsync();
                     await page.WaitForLoadStateAsync(LoadState.Load);
-                    await WaitForBlazorAsync(page);
                     await WaitForAppShellAsync(page);
                     await WaitForBusyOverlayAsync(page);
-                    return new StepResult(index, kind, true, hookId, null);
+                    return new StepResult(index, kind, true, ScenarioStepValues.FormatHookStepDetail(clickStep), null);
                 }
 
-                ILocator target = await LocateHookAsync(page, hookId);
-                if (kind == "click"
-                    && (string.Equals(hookId, "person-detail-employee-save", StringComparison.Ordinal)
-                        || string.Equals(hookId, "person-detail-employee-save-and-close", StringComparison.Ordinal)))
+                if (IsPassportsNestedNewHook(hookId))
+                {
+                    await WaitForBusyOverlayAsync(page);
+                    await ClickPassportsNestedNewAsync(page, clickTimeoutMs);
+                    return new StepResult(index, kind, true, ScenarioStepValues.FormatHookStepDetail(clickStep), null);
+                }
+
+                ILocator target = await LocateHookAsync(page, hookId, clickTimeoutMs);
+                if (string.Equals(hookId, "person-detail-employee-save", StringComparison.Ordinal)
+                    || string.Equals(hookId, "person-detail-employee-save-and-close", StringComparison.Ordinal))
                 {
                     await TryCaptureScreenshotAsync(
                         page,
                         ResolveScreenshotPath(scenario.Id, "before-save"));
                     await target.ClickAsync();
-                    await WaitForBlazorAsync(page);
-                    if (_options.PauseAfterSaveMs > 0)
-                    {
-                        await page.WaitForTimeoutAsync(_options.PauseAfterSaveMs);
-                    }
+                    await WaitForBusyOverlayAsync(page);
 
                     await TryCaptureScreenshotAsync(
                         page,
                         ResolveScreenshotPath(scenario.Id, "after-save"));
-                    return new StepResult(index, kind, true, hookId, null);
+                    return new StepResult(index, kind, true, ScenarioStepValues.FormatHookStepDetail(clickStep), null);
                 }
 
                 await WaitForBusyOverlayAsync(page);
-                await target.ClickAsync();
+                await ClickLocatorReliablyAsync(target, clickTimeoutMs);
                 await WaitForBusyOverlayAsync(page);
-                await WaitForBlazorAsync(page);
                 if (hookId.EndsWith("-new", StringComparison.Ordinal))
                 {
-                    await page.WaitForTimeoutAsync(1500);
                     await WaitForBusyOverlayAsync(page);
                 }
 
-                return new StepResult(index, kind, true, hookId, null);
+                return new StepResult(index, kind, true, ScenarioStepValues.FormatHookStepDetail(clickStep), null);
 
             case "login":
                 var creds = ToStringDictionary(value);
                 string user = creds.GetValueOrDefault("user", _options.DefaultUser);
                 string pass = creds.GetValueOrDefault("password", _options.DefaultPassword);
-                await page.GotoAsync(ToAbsoluteUrl(baseUrl, "/LoginPage"), new PageGotoOptions { WaitUntil = WaitUntilState.Load });
-                await WaitForBlazorAsync(page);
+                await page.GotoAsync(ToAbsoluteUrl(baseUrl, "/LoginPage"), new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
+                await page.WaitForLoadStateAsync(LoadState.Load);
                 await (await LocateHookAsync(page, "login-user-name")).FillAsync(user);
                 await (await LocateHookAsync(page, "login-password")).FillAsync(pass);
                 await (await LocateHookAsync(page, "login-submit")).ClickAsync();
                 await page.WaitForLoadStateAsync(LoadState.Load);
-                await WaitForBlazorAsync(page);
                 await WaitForAppShellAsync(page);
                 return new StepResult(index, kind, true, user, null);
 
             case "wait-for":
             case "assert-visible":
-                hookId = value.ToString() ?? "";
-                await LocateHookAsync(page, hookId);
-                return new StepResult(index, kind, true, hookId, null);
+                HookStep hookStep = ScenarioStepValues.ParseHookStep(value, kind);
+                hookId = hookStep.HookId;
+                if (IsPassportsNestedNewHook(hookId))
+                {
+                    await EnsurePassportsNestedNewReadyAsync(page, hookStep.TimeoutMs);
+                }
+                else
+                {
+                    await LocateHookAsync(page, hookId, hookStep.TimeoutMs);
+                }
+
+                return new StepResult(index, kind, true, ScenarioStepValues.FormatHookStepDetail(hookStep), null);
 
             case "select-listbox-item":
                 string itemText = ResolveEnv(scenario, value.ToString() ?? "");
                 await SelectDevExpressListboxItemAsync(page, itemText);
                 await page.WaitForLoadStateAsync(LoadState.Load);
-                await WaitForBlazorAsync(page);
                 await WaitForBusyOverlayAsync(page);
                 return new StepResult(index, kind, true, itemText, null);
+
+            case "click-text":
+                TextStep textStep = ScenarioStepValues.ParseTextStep(value);
+                string visibleText = ResolveEnv(scenario, textStep.Text);
+                await ClickVisibleTextAsync(page, visibleText, textStep.TimeoutMs);
+                await WaitForBusyOverlayAsync(page);
+                return new StepResult(
+                    index,
+                    kind,
+                    true,
+                    ScenarioStepValues.FormatTextStepDetail(textStep with { Text = visibleText }),
+                    null);
 
             default:
                 return new StepResult(index, kind, false, null, $"Unknown step kind '{kind}'.");
         }
     }
 
-    private async Task<ILocator> LocateHookAsync(IPage page, string hookId)
+    private const string PassportsNestedNewTestId = "person-employee-tab-passports-new";
+
+    private const string PassportsNestedNewPollReadyScript = """
+        () => {
+          const hooks = window.visa2026E2eHooks;
+          if (!hooks) return false;
+          hooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new');
+          return !!hooks.isPersonDetailPassportsListNewClickable('person-employee-tab-passports-new');
+        }
+        """;
+
+    private const string PassportsNestedNewClickScript =
+        "window.visa2026E2eHooks?.clickPersonDetailPassportsListNew?.('person-employee-tab-passports-new')";
+
+    private static bool IsPassportsNestedNewHook(string hookId) =>
+        string.Equals(hookId, PassportsNestedNewTestId, StringComparison.Ordinal);
+
+    private int StepTimeoutOrDefault(int? stepTimeoutMs, int fastDefault, int normalDefault) =>
+        stepTimeoutMs ?? DefaultStepTimeoutMs(fastDefault, normalDefault);
+
+    private static async Task ClickLocatorReliablyAsync(ILocator locator, int? stepTimeoutMs = null)
     {
-        IReadOnlyList<string> selectors = _hooks.GetSelectors(hookId);
-        int perSelectorMs = _options.TimeoutMs;
-
-        foreach (string selector in selectors)
+        int clickTimeoutMs = stepTimeoutMs.HasValue ? Math.Min(stepTimeoutMs.Value, 15_000) : 5_000;
+        try
         {
-            ILocator locator = page.Locator(selector);
-            if (await locator.CountAsync() == 0)
-            {
-                continue;
-            }
+            await locator.ClickAsync(new LocatorClickOptions { Timeout = clickTimeoutMs });
+        }
+        catch (PlaywrightException)
+        {
+            // XAF blazor-error-ui can intercept pointer events during circuit settle — DOM click still works.
+            await locator.EvaluateAsync("el => el.click()");
+        }
+    }
 
+    private int PassportsNestedNewBudgetMs(int? maxWaitMs = null) =>
+        maxWaitMs
+        ?? Math.Min(_options.TimeoutMs, _options.Fast ? 25_000 : 45_000);
+
+    private async Task WaitForPassportsTabContentAsync(IPage page, int? stepTimeoutMs = null)
+    {
+        int timeoutMs = StepTimeoutOrDefault(stepTimeoutMs, 5_000, 8_000);
+        ILocator panel = page.Locator(
+            ".e2e-person-employee-tab-passports-list, .e2e-person-employee-tab-passports-content");
+        await panel.First.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = timeoutMs,
+        });
+    }
+
+    private async Task SelectLayoutTabAsync(IPage page, string hookId, int? stepTimeoutMs = null)
+    {
+        await WaitForBusyOverlayQuickAsync(page, stepTimeoutMs);
+
+        ILocator header = await LocateLayoutTabHeaderAsync(page, hookId, stepTimeoutMs);
+        await ClickLocatorReliablyAsync(header, stepTimeoutMs);
+
+        string activeTabSelector =
+            $"[data-testid=\"{hookId}\"][role=\"tab\"][aria-selected=\"true\"], " +
+            $".e2e-{hookId}[role=\"tab\"][aria-selected=\"true\"]";
+        await page.Locator(activeTabSelector).First.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = StepTimeoutOrDefault(stepTimeoutMs, 8_000, 12_000),
+        });
+
+        if (string.Equals(hookId, "person-employee-tab-passports", StringComparison.Ordinal))
+        {
+            await WaitForPassportsTabContentAsync(page, stepTimeoutMs);
+        }
+    }
+
+    private async Task<ILocator> LocateLayoutTabHeaderAsync(IPage page, string hookId, int? stepTimeoutMs = null)
+    {
+        int perSelectorMs = stepTimeoutMs.HasValue
+            ? Math.Max(1_000, stepTimeoutMs.Value / 4)
+            : (_options.Fast ? 5_000 : 8_000);
+        string[] headerSelectors =
+        [
+            $"[data-testid=\"{hookId}\"][role=\"tab\"]",
+            $".e2e-{hookId}[role=\"tab\"]",
+            $"[role=\"tab\"].e2e-{hookId}",
+        ];
+
+        foreach (string selector in headerSelectors)
+        {
+            ILocator locator = page.Locator(selector).First;
             try
             {
-                await locator.First.WaitForAsync(new LocatorWaitForOptions
+                await locator.WaitForAsync(new LocatorWaitForOptions
                 {
                     State = WaitForSelectorState.Visible,
                     Timeout = perSelectorMs,
                 });
-                await locator.First.ScrollIntoViewIfNeededAsync();
-                return locator.First;
+                return locator;
             }
             catch (TimeoutException)
             {
-                // try next selector
+                // try next header selector
+            }
+        }
+
+        IReadOnlyList<string> selectors = _hooks.GetSelectors(hookId);
+        foreach (string selector in selectors)
+        {
+            ILocator scoped = page.Locator($"{selector}[role=\"tab\"]").First;
+            try
+            {
+                await scoped.WaitForAsync(new LocatorWaitForOptions
+                {
+                    State = WaitForSelectorState.Visible,
+                    Timeout = perSelectorMs,
+                });
+                return scoped;
+            }
+            catch (TimeoutException)
+            {
+                // try manifest selector without role guard as last resort
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Layout tab header '{hookId}' not found. Use role=tab header, not panel content.");
+    }
+
+    private async Task WaitForBusyOverlayQuickAsync(IPage page, int? stepTimeoutMs = null)
+    {
+        ILocator busy = page.Locator(".dxbl-loading-panel, .dx-loadingpanel");
+        if (await busy.CountAsync() == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await busy.First.WaitForAsync(new LocatorWaitForOptions
+            {
+                State = WaitForSelectorState.Hidden,
+                Timeout = StepTimeoutOrDefault(stepTimeoutMs, 15_000, 30_000),
+            });
+        }
+        catch (TimeoutException)
+        {
+            // Overlay class may differ; continue.
+        }
+    }
+
+    private async Task EnsurePassportsNestedNewReadyAsync(IPage page, int? maxWaitMs = null)
+    {
+        int budgetMs = PassportsNestedNewBudgetMs(maxWaitMs);
+        try
+        {
+            await page.WaitForFunctionAsync(
+                PassportsNestedNewPollReadyScript,
+                null,
+                new PageWaitForFunctionOptions { Timeout = budgetMs });
+        }
+        catch (TimeoutException)
+        {
+            throw new InvalidOperationException(
+                $"Hook '{PassportsNestedNewTestId}' not ready after {budgetMs / 1000}s (nested Passports toolbar / shadow DOM).");
+        }
+    }
+
+    private async Task ClickPassportsNestedNewAsync(IPage page, int? stepTimeoutMs = null)
+    {
+        await EnsurePassportsNestedNewReadyAsync(page, stepTimeoutMs);
+        await page.EvaluateAsync(
+            "window.visa2026E2eHooks?.ensurePersonDetailPassportsListNewActionTestId?.('person-employee-tab-passports-new')");
+        bool clicked = await page.EvaluateAsync<bool>($"() => !!({PassportsNestedNewClickScript})");
+        if (!clicked)
+        {
+            throw new InvalidOperationException($"Failed to click '{PassportsNestedNewTestId}'.");
+        }
+
+        await WaitForBusyOverlayAsync(page);
+    }
+
+    private async Task TryReapplyToolbarHookAsync(IPage page, string hookId)
+    {
+        string? script = hookId switch
+        {
+            "passport-detail-save" =>
+                "window.visa2026E2eHooks?.applyPassportDetailActionTestId?.('Save', 'passport-detail-save')",
+            _ => null,
+        };
+
+        if (script == null)
+        {
+            return;
+        }
+
+        try
+        {
+            await page.EvaluateAsync($"() => {{ {script}; }}");
+        }
+        catch (PlaywrightException)
+        {
+            // Hook JS not loaded yet (e.g. LoginPage) — selectors will retry.
+        }
+    }
+
+    private async Task<ILocator> LocateHookAsync(IPage page, string hookId, int? stepTimeoutMs = null)
+    {
+        await TryReapplyToolbarHookAsync(page, hookId);
+        IReadOnlyList<string> selectors = _hooks.GetSelectors(hookId);
+        int budgetMs = stepTimeoutMs ?? _options.TimeoutMs;
+        int perSelectorMs = Math.Max(1_000, budgetMs / Math.Max(1, selectors.Count));
+
+        foreach (string selector in selectors)
+        {
+            ILocator locator = page.Locator(selector).First;
+            try
+            {
+                // Wait for Blazor to render — do not skip when CountAsync is 0 yet.
+                await locator.WaitForAsync(new LocatorWaitForOptions
+                {
+                    State = WaitForSelectorState.Visible,
+                    Timeout = perSelectorMs,
+                });
+                await locator.ScrollIntoViewIfNeededAsync();
+                return locator;
+            }
+            catch (TimeoutException)
+            {
+                // try next selector alias
             }
         }
 
@@ -353,13 +580,7 @@ internal sealed class ScenarioRunner
         return pathOrUrl.StartsWith('/') ? baseNormalized + pathOrUrl : baseNormalized + "/" + pathOrUrl;
     }
 
-    private static async Task WaitForBlazorAsync(IPage page)
-    {
-        await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-        await page.WaitForTimeoutAsync(800);
-    }
-
-    private static async Task WaitForBusyOverlayAsync(IPage page)
+    private async Task WaitForBusyOverlayAsync(IPage page)
     {
         ILocator busy = page.Locator(".dxbl-loading-panel, .dx-loadingpanel");
         if (await busy.CountAsync() == 0)
@@ -377,13 +598,11 @@ internal sealed class ScenarioRunner
         }
         catch (TimeoutException)
         {
-            // Overlay class may differ; continue after one Blazor beat.
+            // Overlay class may differ; continue.
         }
-
-        await WaitForBlazorAsync(page);
     }
 
-    private static async Task WaitForAppShellAsync(IPage page)
+    private async Task WaitForAppShellAsync(IPage page)
     {
         ILocator shell = page.Locator("[data-testid='nav-people'], .xaf-navigation");
         try
@@ -396,12 +615,12 @@ internal sealed class ScenarioRunner
         }
         catch (TimeoutException)
         {
-            // Shell hooks may apply after first paint — one more Blazor beat.
-            await WaitForBlazorAsync(page);
+            // Shell hooks may apply after first paint — load event only, no fixed sleep.
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         }
     }
 
-    private static async Task FillHookValueAsync(IPage page, ILocator locator, string text)
+    private async Task FillHookValueAsync(IPage page, ILocator locator, string text)
     {
         await locator.ScrollIntoViewIfNeededAsync();
         string tagName = await locator.EvaluateAsync<string>("el => el.tagName.toLowerCase()");
@@ -447,8 +666,7 @@ internal sealed class ScenarioRunner
         await input.First.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
         await input.First.ClickAsync();
         await input.First.FillAsync(string.Empty);
-        await input.First.PressSequentiallyAsync(text, new LocatorPressSequentiallyOptions { Delay = 50 });
-        await page.WaitForTimeoutAsync(500);
+        await input.First.PressSequentiallyAsync(text);
         try
         {
             await SelectDevExpressListboxItemAsync(page, text);
@@ -457,8 +675,44 @@ internal sealed class ScenarioRunner
         {
             await input.First.PressAsync("Enter");
         }
+    }
 
-        await page.WaitForTimeoutAsync(300);
+    /// <summary>
+    /// Clicks visible text — used to open a ListView row (e.g. employee PersonalNumber) when no row hook exists.
+    /// Prefers cells inside a DevExpress grid; falls back to the first exact page match.
+    /// </summary>
+    private async Task ClickVisibleTextAsync(IPage page, string text, int? stepTimeoutMs = null)
+    {
+        await WaitForBusyOverlayAsync(page);
+        int timeoutMs = stepTimeoutMs ?? Math.Max(15_000, _options.TimeoutMs);
+
+        ILocator grid = page.Locator(".dxbl-grid, [role='grid']").First;
+        if (await grid.CountAsync() > 0)
+        {
+            ILocator inGrid = grid.GetByText(text, new LocatorGetByTextOptions { Exact = true });
+            try
+            {
+                await inGrid.First.WaitForAsync(new LocatorWaitForOptions
+                {
+                    State = WaitForSelectorState.Visible,
+                    Timeout = timeoutMs,
+                });
+                await ClickLocatorReliablyAsync(inGrid.First, stepTimeoutMs);
+                return;
+            }
+            catch (TimeoutException)
+            {
+                // Row not in grid yet — fall back to page-wide search.
+            }
+        }
+
+        ILocator match = page.GetByText(text, new PageGetByTextOptions { Exact = true });
+        await match.First.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = timeoutMs,
+        });
+        await ClickLocatorReliablyAsync(match.First, stepTimeoutMs);
     }
 
     /// <summary>

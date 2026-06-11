@@ -2,7 +2,7 @@
 
 Copy-paste messages to invoke [visa2026-ui-test-hooks](./SKILL.md) in Cursor. Prefer **`@visa2026-ui-test-hooks`** (or `@.cursor/skills/visa2026-ui-test-hooks`) so the agent loads this skill.
 
-**Not this skill:** multi-step YAML journeys → [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md); EasyTest / CI E2E → [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md).
+**Not this skill:** multi-step YAML journeys → [visa2026-ui-scenarios](../visa2026-ui-scenarios/SKILL.md); native EasyTest E2E → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md).
 
 ---
 
@@ -45,6 +45,8 @@ Default bulk hooks **exclude** gear-hidden optional scalars ([`docs/OPTIONAL_DET
 | **Playwright only** | `@visa2026-ui-test-hooks Verify **person-employee-scalar-fields** via **Invoke-UiHookVerify** with **-StartUrl** `/Person_DetailView_Employee/{guid}`.` |
 | **Family / temporary scalars** | `@visa2026-ui-test-hooks Verify **person-family-member-scalar-fields** / **person-temporary-visitor-scalar-fields** with matching detail **-StartUrl**.` |
 | **Login only** | `@visa2026-ui-test-hooks Verify login hooks: **.\scripts\local\Invoke-UiHookVerify.ps1 -Scenario login**` |
+| **Batch DevTools (scalars)** | `@visa2026-ui-test-hooks Give me a **batch verify** console snippet for these hook ids on the open view: **passport-passport-number**, **passport-authority**, … (see SKILL.md § Batch verify).` |
+| **Batch DevTools (toolbar)** | `@visa2026-ui-test-hooks Batch-verify **person-employee-tab-passports-new** and **passport-detail-save** with **deepQuery** after apply JS.` |
 
 ---
 
@@ -74,7 +76,7 @@ Default bulk hooks **exclude** gear-hidden optional scalars ([`docs/OPTIONAL_DET
 | Plan/run login → fill Person YAML | `@visa2026-ui-scenarios` — map first, then hand hook gaps here |
 | Run **UiScenarioRunner** / CI scenario | `@visa2026-ui-scenarios` |
 | Unit test evaluators in Module | `@visa2026-unit-tests` |
-| Add EasyTest E2E test class | E2E project — not ui-test-hooks |
+| Add EasyTest E2E test class | [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) — not ui-test-hooks |
 
 ---
 

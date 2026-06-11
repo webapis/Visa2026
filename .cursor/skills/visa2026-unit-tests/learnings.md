@@ -53,7 +53,7 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into `SKILL.md` or [ref
 | **3+** or blocks every new test author | Add **Agent workflow** bullet or **Scenarios** table in **`SKILL.md`** |
 | Stable for months | Optional one line in [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) §9–§10 |
 
-**Cross-skill:** Blazor / EasyTest lessons belong in E2E README or a future E2E skill — link from here, do not duplicate full EasyTest steps.
+**Cross-skill:** Blazor / EasyTest E2E lessons → [visa2026-easytest-e2e/learnings.md](../visa2026-easytest-e2e/learnings.md); link from here, do not duplicate full EasyTest steps.
 
 **Developer review:** promoted **`SKILL.md`** text stays short; long logs stay in **`learnings.md`**.
 

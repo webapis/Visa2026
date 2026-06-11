@@ -80,6 +80,8 @@
           "target": "Passports",
           "type": "layout-tab",
           "selectors": [
+            "[data-testid=\"person-employee-tab-passports\"][role=\"tab\"]",
+            ".e2e-person-employee-tab-passports[role=\"tab\"]",
             "[data-testid=\"person-employee-tab-passports\"]",
             ".e2e-person-employee-tab-passports"
           ]
@@ -476,6 +478,68 @@
         { "id": "person-foreign-address-country", "target": "ForeignAddressCountry", "type": "exists", "selectors": ["[data-testid=\"person-foreign-address-country\"]", ".e2e-person-foreign-address-country"] },
         { "id": "person-project-contract", "target": "ProjectContract", "type": "exists", "selectors": ["[data-testid=\"person-project-contract\"]", ".e2e-person-project-contract"] },
         { "id": "person-subcontractor", "target": "Subcontractor", "type": "exists", "selectors": ["[data-testid=\"person-subcontractor\"]", ".e2e-person-subcontractor"] }
+      ]
+    },
+    {
+      "id": "person-employee-tab-passports-new",
+      "description": "Nested Passports ListView New on Person_DetailView_Employee (activate Passports tab first)",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PERSON_URL",
+      "checks": [
+        {
+          "id": "person-employee-tab-passports",
+          "target": "Passports tab",
+          "type": "layout-tab",
+          "selectors": [
+            "[data-testid=\"person-employee-tab-passports\"][role=\"tab\"]",
+            ".e2e-person-employee-tab-passports[role=\"tab\"]",
+            "[data-testid=\"person-employee-tab-passports\"]",
+            ".e2e-person-employee-tab-passports"
+          ],
+          "clickOnBehavior": true
+        },
+        {
+          "id": "person-employee-tab-passports-new",
+          "target": "New",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"person-employee-tab-passports-new\"]",
+            ".e2e-person-employee-tab-passports-new"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "passport-detail-save",
+      "description": "Save toolbar action on Passport_DetailView",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PASSPORT_URL",
+      "checks": [
+        {
+          "id": "passport-detail-save",
+          "target": "Save",
+          "type": "button",
+          "selectors": [
+            "[data-testid=\"passport-detail-save\"]",
+            ".e2e-passport-detail-save"
+          ],
+          "clickOnBehavior": false
+        }
+      ]
+    },
+    {
+      "id": "passport-scalar-fields",
+      "description": "Passport_DetailView — required / always-visible scalar fields",
+      "requiresAuth": true,
+      "startPathEnv": "VISA2026_HOOK_VERIFY_PASSPORT_URL",
+      "checks": [
+        { "id": "passport-passport-number", "target": "PassportNumber", "type": "text-input", "selectors": ["#passport-passport-number", "[data-testid=\"passport-passport-number\"]", ".e2e-passport-passport-number"] },
+        { "id": "passport-passport-type", "target": "PassportType", "type": "exists", "selectors": ["[data-testid=\"passport-passport-type\"]", ".e2e-passport-passport-type"] },
+        { "id": "passport-issue-date", "target": "IssueDate", "type": "exists", "selectors": ["#passport-issue-date", "[data-testid=\"passport-issue-date\"]", ".e2e-passport-issue-date"] },
+        { "id": "passport-expiration-date", "target": "ExpirationDate", "type": "exists", "selectors": ["#passport-expiration-date", "[data-testid=\"passport-expiration-date\"]", ".e2e-passport-expiration-date"] },
+        { "id": "passport-authority", "target": "Authority", "type": "text-input", "selectors": ["#passport-authority", "[data-testid=\"passport-authority\"]", ".e2e-passport-authority"] },
+        { "id": "passport-issued-country", "target": "IssuedCountry", "type": "exists", "selectors": ["[data-testid=\"passport-issued-country\"]", ".e2e-passport-issued-country"] }
       ]
     }
   ]

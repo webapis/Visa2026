@@ -267,7 +267,8 @@ document.querySelector('[data-testid="nav-people-employees"]')?.click();
 
 ## Out of scope (this skill)
 
-- Running E2E suites (EasyTest, Playwright, Selenium)
+- Running native EasyTest E2E (`Visa2026.E2E.Tests`) → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md)
+- Running Playwright UiScenarioRunner journeys
 - Web scraper tooling or CI automation
 - Hooks on **collection properties**, **optional gear-hidden** scalars (unless explicitly requested), or **hidden/computed** members (see SKILL.md § BO member scope)
 - Documenting access without DevTools verify

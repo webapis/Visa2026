@@ -2,7 +2,7 @@
 
 Purpose: this skill **gets smarter over time**. Capture **verified** outcomes from implementing hooks and **DevTools console** access/behavior checks. Agents **read before** similar work; **append after** a lesson is confirmed.
 
-This skill **prepares UI element accessibility** with CSS selectors from the live UI — it does **not** run E2E suites, EasyTest, or scrapers.
+This skill **prepares UI element accessibility** with CSS selectors from the live UI — it does **not** run E2E suites or scrapers. Native EasyTest E2E → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md).
 
 Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls** or [reference.md](./reference.md).
 
@@ -245,6 +245,145 @@ Keep **`SKILL.md`** stable; **promote** repeated lessons into **Known pitfalls**
 - **Family**: **A** — reuse `PersonDetailViewE2eSelectorsController` + `E2ePropertySelectorApplicator`
 - **Fix**: `PersonE2eMemberHooks.GetScalarMembersForDetailView` — Employee (15), Family member (13), Temporary visitor (12); `TargetViewId` on typed views; `OnActivated` re-applies hooks
 - **Verify**: restart; `document.querySelector('#person-first-name')` on each typed detail URL; `Invoke-UiHookVerify.ps1 -Scenario person-{employee|family-member|temporary-visitor}-scalar-fields`
+
+### 2026-06-08 — [-] Nested Passports **New** — dedicated JS finder + tag adaptive group
+
+- **Symptom**: `div.dxbl-adaptive-group` for `+ New` has no `data-testid`; generic JS finder + `isLayoutTabActive` gate returned no candidates
+- **Fix**: `findPassportsNestedListNewButtons()` — visible Passports tab root OR `Passport Number` grid context; `tagPassportsNestedNewButton` sets hook on **button + adaptive group**; tab `ItemCreated` triggers ensure; dropped ineffective `CustomizeControl` path (same as Person ListView New learnings 2026-06-07)
+- **Verify**: restart host → Passports tab → `visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`; inspected `div.dxbl-adaptive-group` shows `data-testid="person-employee-tab-passports-new"`
+
+### 2026-06-08 — [-] Nested Passports **New** — JS-only hook never stuck on DOM; switched to CustomizeControl
+
+- **Symptom**: Passports tab `+ New` visible; outer `div.dxbl-adaptive-group` has no `data-testid`; scenario stuck
+- **Cause**: JS `personDetailNestedPassports` could not reliably tag adaptive toolbar inside shadow DOM; inspecting wrapper div misses hook on inner `<button>`
+- **Fix**: `PassportListViewE2eActionSelectorsController` — `NewObjectAction.CustomizeControl` + `E2eActionControlSelectorSupport` when `PropertyCollectionSource.MasterObject is Person` (same as login Submit); JS remains fallback
+- **Verify**: restart host → Passports tab → Elements search `person-employee-tab-passports-new` (expand `#shadow-root` under toolbar) OR `deepQuery('[data-testid="person-employee-tab-passports-new"]')[0]`
+
+### 2026-06-08 — [-] Nested Passports **New** — hook missing in DOM (`isLayoutTabActive` false)
+
+- **Symptom**: Passports tab open, `+ New` visible, no `data-testid` / `.e2e-person-employee-tab-passports-new` on button; Playwright stuck on click/wait
+- **Cause**: `isLayoutTabActive('person-employee-tab-passports')` only checked `dxbl-active` on tab node with `data-testid`; active class is on tab **header**; content uses `.e2e-*-content` without `dxbl-active`
+- **Fix**: `isLayoutTabActive` — deep-query tab header + treat visible `.e2e-{id}-content` as active; add `.dxbl-adaptive-group` selectors; exclude person-list/person-detail test ids from passport New candidates
+- **Verify**: Passports tab → `visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`; `deepQuery('[data-testid="person-employee-tab-passports-new"]')[0]` on inner `<button>`, not the outer `dxbl-adaptive-group` div
+
+### 2026-06-08 — [+] Passport detail Save — nested new passport; Person Save hook collision fixed
+
+- **Outcome**: positive (`.e2e-passport-detail-save` on nested **New** passport; URL still `Person_DetailView`)
+- **Symptom**: Same toolbar Save had `data-testid="person-detail-employee-save"` plus `e2e-passport-detail-save` class — person hooks overwrote passport `data-testid` because path still matched Person detail
+- **Fix**: `personDetail` toolbar configs: `requirePathContains: 'Person_DetailView'` + `skipWhenPassportDetailActive` when passport form (`passport-passport-number`) or `Passport_DetailView` path is active
+- **Verify**: `deepQuery('.e2e-passport-detail-save')` or `[data-testid="passport-detail-save"]` after restart + apply JS
+
+### 2026-06-08 — [+] Passport detail scalars — all six required fields verified (incl. IssuedCountry)
+
+- **Outcome**: positive (batch verify — all **OK** on `Passport_DetailView` after layout fix)
+- **Fix**: `IssuedCountry` restored in `Passport_col1` (`Model.xafml`); hook `passport-issued-country` on lookup combo
+- **Verify**: batch loop in SKILL.md § Batch verify; includes `passport-issued-country`
+
+### 2026-06-08 — [+] Passport detail scalars — batch verify; IssuedCountry waived (layout)
+
+- **Outcome**: positive (5/5 visible scalars verified); `passport-issued-country` **MISSING** is expected
+- **Cause**: `Passport_DetailView` → `LayoutItem Id="IssuedCountry" Removed="True"` in `Visa2026.Blazor.Server/Model.xafml`; `Passport.OnCreated` sets default `IssuedCountry`
+- **Action**: removed `IssuedCountry` from `PassportE2eMemberHooks`; scenario map **waives** `passport-issued-country` fill
+- **Reuse**: batch console loop (SKILL.md § Batch verify) before promoting hook rows
+
+### 2026-06-08 — [+] Person Passports nested **New** — verified on employee detail (DevTools)
+
+- **Outcome**: positive (verified)
+- **DOM**: `<button data-action-name="New" data-testid="person-employee-tab-passports-new" class="… e2e-person-employee-tab-passports-new">` inside `dxbl-toolbar-item` on Passports tab (`Person_DetailView_Employee`)
+- **Note**: button is under `dxbl-toolbar-item` shadow/slot — if `document.querySelector` is null, expand **dxbl-toolbar-item → #shadow-root** in Elements or use `deepQuery`; hook attributes are on the `<button>` itself
+- **Verify**: Passports tab active → `visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`
+
+### 2026-06-08 — [-] Person Passports nested **New** — nested grid toolbar uses adaptive-item class, not data-action-name
+
+- **Outcome**: negative → fixed (rediscover)
+- **Symptom**: Elements shows `div.dxbl-toolbar-adaptive-item-new` / `dxbl-toolbar-group`; no `data-testid`; `applyPersonDetailPassportsListNewActionTestId` → `false` or tags nothing
+- **Cause**: embedded collection toolbar **New** may lack `data-action-name` on `<button>`; wrapper class is `dxbl-toolbar-adaptive-item-new` (DevExpress adaptive toolbar)
+- **Fix**: add `data-x-action-name` to global action selectors; `personDetailNestedPassports` `extraSelectors`: `.dxbl-toolbar-adaptive-item-new button`; `requireActiveTabTestId: person-employee-tab-passports`; prefer adaptive-new candidates when Passports tab `.dxbl-active`
+- **Verify**: Passports tab active → `applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`; `deepQuery('[data-testid="person-employee-tab-passports-new"]')[0]` non-null
+
+### 2026-06-08 — [-] Person Passports nested **New** — tab-content CSS scope failed DevTools
+
+- **Outcome**: negative → fixed (rediscover)
+- **Symptom**: `[data-testid="person-employee-tab-passports-new"]` null on `Person_DetailView_Employee` with Passports tab active; `.e2e-person-employee-tab-passports-content` scope root not wrapping nested grid toolbar
+- **Try**: `PersonNestedCollectionE2eActionSelectorsController` + pierce inside `.e2e-person-employee-tab-passports-content`
+- **Fix**: `PassportListViewE2eActionSelectorsController` on `Passport_ListView` (same pipeline as Person ListView **New**); JS group `personDetailNestedPassports` with `requirePathContains: 'Person_DetailView'`; skip buttons already tagged `person-list-*-new`
+- **Verify**: restart host; Passports tab active → `visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`; then `document.querySelector('[data-testid="person-employee-tab-passports-new"]')` non-null
+
+### 2026-06-08 — [+] Person Passports nested ListView **New** — Passport_ListView controller (supersedes tab-content scope)
+
+- **Outcome**: positive (implemented — verify with `person-employee-tab-passports-new` scenario)
+- **Family**: **C** — reuse `PersonListViewE2eActionSelectorsController` pattern on `Passport_ListView`
+- **Passport detail**: family **A** `PassportDetailViewE2eSelectorsController` + family **C** `passportDetail` JS group for `passport-detail-save`
+- **Verify**: activate Passports tab first; `Invoke-UiHookVerify.ps1 -Scenario person-employee-tab-passports-new -StartUrl "/Person_DetailView_Employee/{guid}"`; passport fields need `VISA2026_HOOK_VERIFY_PASSPORT_URL`
+
+### 2026-06-10 — `person-employee-tab-passports-new` missing on `:5052` but present on IDE `:5001`
+
+- **Symptom**: DevTools on scenario host `:5052` shows `+ New` on Passports tab but no `data-testid="person-employee-tab-passports-new"`; same build works on IDE `:5001`.
+- **Cause**: `getVisiblePersonDetailPassportsTabRoot()` returned the **tab header** (`.e2e-person-employee-tab-passports`, always visible) instead of the **tab content panel**, so shadow-pierce search never reached the nested ListView toolbar. Header vs content distinction is more visible on `VISA2026_UI_SCENARIOS=true` hosts (ephemeral layout / lazy tab panels).
+- **Fix**: JS — scope to `.e2e-person-employee-tab-passports-content`, skip `role="tab"`, resolve active panel via `aria-controls`; localized grid header fallbacks in `isPassportsNestedListContext`. Runner — `WaitForPassportsNestedNewHookAsync` after `select-tab: person-employee-tab-passports`. Build — copy `wwwroot` into `_scenario_build_out` after `dotnet build -o`; `asp-append-version` on hook script.
+- **Verify**: restart `:5052` host (no `-SkipBuild`), hard-refresh, Passports tab active → `visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`.
+
+### 2026-06-10 — `person-employee-tab-passports-new` lost on Person detail re-open (Passports tab restored)
+
+- **Symptom**: Hook present on first open; missing after close + re-open when Passports tab was left selected; returns after switching Educations → Passports (same family as Person ListView **New** re-nav).
+- **Cause**: `OnViewControlsCreated` / nested `Passport_ListView` activation do not re-run on layout restore; `PassportListViewE2eActionSelectorsController.OnDeactivated` stopped JS `MutationObserver` while Person detail was still open; toolbar DOM recreated without `CustomizeControl` re-fire.
+- **Fix**: `PersonDetailPassportsNestedNewHookSupport` — shared `OnActivated` + `OnViewControlsCreated` ensure, delayed `apply*` passes (400ms–5s), stop watch only on Person detail `OnDeactivated`; `PersonDetailViewE2eTabSelectorsController` wires `DxFormLayoutTabPagesModel.ActiveTabIndexChanged`; JS `reapplyPassportsNestedNewWhenTabActive()` on observer cycle when Passports tab `aria-selected`.
+- **Verify**: open employee → Passports tab → close detail → re-open same employee (Passports still selected) → `data-testid="person-employee-tab-passports-new"` without manual tab switch.
+
+### 2026-06-10 — Passports New toolbar uses `data-dx-toolbar-item-id` (new employee / Person_DetailView)
+
+- **Symptom**: Existing employee hook OK; newly saved employee on `Person_DetailView/Edit/Read?oid=…` → Passports **New** visible, no `data-testid`; Elements show `data-dx-toolbar-item-id="New"` on `div.dxbl-adaptive-group`, not `data-action-name`.
+- **Fix**: Finder/verify/tag `getPassportsNewActionId()` includes `data-dx-toolbar-item-id`; priority selector `[data-dx-toolbar-item-id="New"]`; `isPassportsTabContextReady` uses grid markers when tab header hooks lag; post-save `DelayedPostSaveHookRefreshAsync`.
+- **Verify**: New employee → Save → Passports → `isPersonDetailPassportsListNewHookVisible()` → `true`; hook on adaptive-group with `data-dx-toolbar-item-id="New"`.
+
+### 2026-06-10 — `person-employee-tab-passports-new` missing on newly saved Employee (Passports tab)
+
+- **Symptom**: Hook works opening existing employee; after **Save** on new employee → Passports tab → no `data-testid`; scenario `person-employee-passport-create` fails post-save.
+- **Cause**: `ObjectSpace.Committed` + URL `NavigateTo` recreates nested `ListPropertyEditor.Frame`; retry loop exhausted before Passports tab first opened; stale `CustomizeControl` on old frame.
+- **Fix**: `PersonDetailPassportsListNewE2eAnchorController` handles `ObjectSpace.Committed` → unhook/rebind + burst + retry; tab `ActiveTabIndexChanged` → rebind + retry (48×250ms); `Passport_ListView` OnActivated uses full delayed ensure.
+- **Verify**: New employee → fill → Save → Passports tab → `isPersonDetailPassportsListNewHookVisible()` → `true`.
+
+### 2026-06-10 — `person-employee-tab-passports-new` lost after tab / nav UI re-render
+
+- **Symptom**: Hook on `dxbl-adaptive-group` initially; gone after collection tab switch or XAF nav; toolbar re-renders as `div.dxbl-toolbar-item` without hook.
+- **Cause**: JS interval stopped after first success; `scheduleReapply` skipped when hook thought present; shadow toolbar mutations invisible to body observer; finder missed `div.dxbl-toolbar-item[data-action-name="New"]` (only custom element tag).
+- **Fix**: `startPassportsNestedPersistentWatch` (600ms, until Person detail deactivate) re-applies when hook missing; always start watch on ensure even when apply succeeds; finder includes `.dxbl-toolbar-item[data-action-name="New"]`.
+- **Verify**: Passports → Educations → Passports → hook on New control; close/reopen employee detail → hook without manual tab round-trip.
+
+### 2026-06-10 — `applyPersonDetailPassportsListNewActionTestId` true but hook absent in Elements
+
+- **Symptom**: Console apply → `true`; inspected `dxbl-adaptive-group` / `dxbl-toolbar-item` on Passports tab has no `data-testid`; scenario fails.
+- **Cause**: Verification used document-wide `isPassportsNestedListContext` with generic `"no data to display"` (every empty collection tab); hooked wrong/stale node outside visible Passports panel.
+- **Fix**: Finder + verify scoped to `getVisiblePersonDetailPassportsTabRoot()` only; require Passports tab active; verify `isPassportsNewHookTarget`; tag adaptive-group + `dxbl-toolbar-item` + inner button; `isPersonDetailPassportsListNewHookVisible()` for honest check; runner waits on visible not apply alone.
+- **Verify**: Passports tab → `apply…` → `true` AND `isPersonDetailPassportsListNewHookVisible()` → `true`; `deepQuery('[data-testid="person-employee-tab-passports-new"]')[0]` inside Passports panel.
+
+### 2026-06-10 — `person-employee-tab-passports-new` flicker + missing on first Passports visit
+
+- **Symptom**: DevTools Styles flicker on hook attrs; hook missing on first open of Passports tab; Educations → Passports restores it.
+- **Cause**: MutationObserver watched `data-testid` → strip/tag feedback loop; concurrent `ScheduleEnsure` races; nested toolbar renders after first ensure; `dxbl-toolbar-item[data-action-name="New"]` not in finder.
+- **Fix**: Idempotent apply (skip when hooked); remove `data-testid` from observer filter; interval stops when hooked; debounced C# ensure; burst refresh on tab attach/change; tag `dxbl-toolbar-item` directly.
+- **Verify**: open employee → Passports (first visit) → hook without tab round-trip; DevTools attrs stable.
+
+### 2026-06-10 — `person-employee-tab-passports-new` stripped on failed reapply (re-open / toolbar re-render)
+
+- **Symptom**: Hook present on first open; gone after close+reopen with Passports tab restored; returns after tab switch; missing on new employee Passports tab.
+- **Cause**: `applyActionTestId` for `usePassportsNestedNewFinder` called `stripPassportsNestedNewHooks` **before** finding candidates; MutationObserver/interval reapply during toolbar tear-down removed `data-testid` and left it off.
+- **Fix**: Strip only after candidates found; `PersonDetailPassportsListNewE2eAnchorController` on `ListPropertyEditor` nested frame; JS 1.5s interval via `reapplyPassportsNestedNew()` (no tab-active gate); dedupe tab controller `ActiveTabIndexChanged` (anchor owns ensure).
+- **Verify**: re-open employee with Passports selected → hook without tab switch; new employee → Passports tab → hook; `applyPersonDetailPassportsListNewActionTestId` stays `true` across close/reopen.
+
+### 2026-06-10 — `person-employee-tab-passports-new` regression (missing on `:5001` and `:5052`)
+
+- **Symptom**: `+ New` visible on Passports tab; no `data-testid` on `div.dxbl-adaptive-group` or inner button; JS-only path stopped working on IDE host too.
+- **Cause**: (1) nested collection **New** is often the adaptive `div.dxbl-adaptive-group` with no inner `<button>`; (2) `closest()` / `innerText` context checks fail across open shadow roots; (3) tab-panel lookup via `#id` missed panels inside shadow trees.
+- **Fix**: `PassportListViewE2eActionSelectorsController` — `NewObjectAction.CustomizeControl` + `E2eActionControlSelectorSupport` (primary, same as login Submit). JS — tag adaptive groups directly; `[id="…"]` deep lookup; tabpanel / active-tab fallbacks; parent-walk instead of `closest`.
+- **Verify**: restart host → Passports tab → `data-testid="person-employee-tab-passports-new"` on adaptive group or `visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new')` → `true`.
+
+### 2026-06-08 — `person-employee-tab-passports-new` — scenario workaround: Save and Close + reopen
+
+- **Symptom**: Hook missing on **first** Passports visit after create/save on new employee; present after close detail and reopen same employee.
+- **Cause**: Nested `Passport_ListView` toolbar hook not applied on first detail mount post-save (CustomizeControl / toolbar re-render timing — see §2026-06-10 entries).
+- **Workaround (v1)**: `person-employee-passport-create` YAML — `person-detail-employee-save` → `goto: /Person_ListView_Employees` (not SaveAndClose — absent on **new** detail) → `click-text: ${employeePersonalNumber}` → Passports tab.
+- **Status**: Hook **verified after detail reopen** only; not claimed for first-mount post-create until render-time fix lands.
 
 ### 2026-06-08 — [-] Login `LanguageSwitcher` — not a combo; use DevExpress action selectors
 

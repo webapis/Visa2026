@@ -88,7 +88,7 @@ Settings type: `StateEvaluationSettings` (construct with threshold fields for ex
 
 | Name | Used by |
 |------|---------|
-| `Visa2026EasyTest` | E2E (`E2ETestBase`, EasyTest launch profile) |
+| `Visa2026EasyTest` | E2E — [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) |
 | `Visa2026Test` | Module integration tests (planned) |
 | Dev Docker / `.env.dev` | Manual deploy — not unit test default |
 

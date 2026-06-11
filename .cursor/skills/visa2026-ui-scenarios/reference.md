@@ -117,7 +117,7 @@ Never commit real passwords. Stage credentials via env files (not tracked).
 | Tool | Difference |
 |------|------------|
 | **VerifyUiTestHooks** | Single-view hook checks; no multi-step story |
-| **EasyTest / E2E.Tests** | Caption/Selenium; Windows CI matrix |
+| **Native EasyTest E2E** | `Visa2026.E2E.Tests`, captions, **:5050** — [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) |
 | **UiScenarioRunner** | Multi-step YAML + hook ids; stage smoke |
 
 ---

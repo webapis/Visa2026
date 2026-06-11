@@ -231,7 +231,15 @@ public sealed class HookVerifier
             return false;
         }
 
-        await locator.ClickAsync();
+        try
+        {
+            await locator.ClickAsync(new LocatorClickOptions { Timeout = 5000 });
+        }
+        catch (PlaywrightException)
+        {
+            await locator.EvaluateAsync("el => el.click()");
+        }
+
         return true;
     }
 

@@ -38,6 +38,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(20)]
         [RuleRequiredField]
+        [ModelDefault("CustomCSSClassName", "e2e-passport-passport-number")]
         public virtual string PassportNumber { get; set; }
 
         /// <summary>
@@ -77,22 +78,27 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual string PersonalNumber { get; set; }
         [RuleRequiredField]
+        [ModelDefault("CustomCSSClassName", "e2e-passport-passport-type")]
         public virtual PassportType PassportType { get; set; }
         [RuleRequiredField]
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [ModelDefault("CustomCSSClassName", "e2e-passport-issue-date")]
         public virtual DateTime? IssueDate { get; set; }
         [RuleRequiredField]
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [ModelDefault("CustomCSSClassName", "e2e-passport-expiration-date")]
         public virtual DateTime? ExpirationDate { get; set; }
 
         [MaxLength(100)]
         [RuleRequiredField]
+        [ModelDefault("CustomCSSClassName", "e2e-passport-authority")]
         public virtual string Authority { get; set; }
         [RuleRequiredField]
+        [ModelDefault("CustomCSSClassName", "e2e-passport-issued-country")]
         public virtual Country IssuedCountry { get; set; }
 
         [RuleRequiredField]

@@ -226,6 +226,54 @@ Or: `Invoke-UiHookVerify.ps1 -Scenario person-detail-employee-save -StartUrl "/P
 
 ---
 
+## Person detail — nested collection New (family C, scoped)
+
+Controller: `PassportListViewE2eActionSelectorsController` + `PassportListViewE2eActionHooks`  
+Script: `visa2026-e2e-hooks.js` group `personDetailNestedPassports` — pierce **New** on embedded `Passport_ListView` when URL contains `Person_DetailView`.
+
+| ListView Id | Tab (layout) | data-testid | Status |
+|-------------|--------------|-------------|--------|
+| `Passport_ListView` | `Passports` | `person-employee-tab-passports-new` | verified |
+
+**Verify:** open saved employee Person → click Passports tab → `deepQuery('[data-testid="person-employee-tab-passports-new"]')` (not top-level `document.querySelector` — shadow DOM).  
+`Invoke-UiHookVerify.ps1 -Scenario person-employee-tab-passports-new -StartUrl "/Person_DetailView_Employee/{guid}"`.
+
+---
+
+## Passport detail — scalar fields (family A)
+
+Controller: `PassportDetailViewE2eSelectorsController` + `PassportE2eMemberHooks`  
+Model backup: `[ModelDefault("CustomCSSClassName", "e2e-passport-{member-kebab}")]` on required scalars in `Passport.cs`  
+View: `Passport_DetailView`
+
+| Member | data-testid | CSS class | Status |
+|--------|-------------|-----------|--------|
+| `PassportNumber` | `passport-passport-number` | `.e2e-passport-passport-number` | verified |
+| `PassportType` | `passport-passport-type` | `.e2e-passport-passport-type` | verified |
+| `IssueDate` | `passport-issue-date` | `.e2e-passport-issue-date` | verified |
+| `ExpirationDate` | `passport-expiration-date` | `.e2e-passport-expiration-date` | verified |
+| `Authority` | `passport-authority` | `.e2e-passport-authority` | verified |
+| `IssuedCountry` | `passport-issued-country` | `.e2e-passport-issued-country` | verified |
+
+**Excluded:** `Person` (waived when auto-filled), `IsCancelled`, collections, computed members.
+
+**Batch verify:** see [SKILL.md § Batch verify](./SKILL.md#step-3--batch-verify-multiple-hooks-on-one-view).
+
+**Verify:** `Invoke-UiHookVerify.ps1 -Scenario passport-scalar-fields -StartUrl "/Passport_DetailView/{guid}"` (set `VISA2026_HOOK_VERIFY_PASSPORT_URL`).
+
+---
+
+## Passport DetailView — Save (family C)
+
+Controller: `PassportDetailViewE2eActionSelectorsController` + `PassportDetailViewE2eActionHooks`  
+Script: `visa2026-e2e-hooks.js` group `passportDetail`
+
+| DetailView Id | Action Id | data-testid | Status |
+|---------------|-----------|-------------|--------|
+| `Passport_DetailView` | `Save` | `passport-detail-save` | verified |
+
+---
+
 ## Backlog (not hooked)
 
 | Area | Notes |

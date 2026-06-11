@@ -52,13 +52,14 @@
         "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026UiScenario;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
       }
     },
-    "EasyTest": {
+    "Visa2026 - EasyTest (LocalDB)": {
       "commandName": "Project",
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5000",
+      "applicationUrl": "http://localhost:5050",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026EasyTest;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026EasyTest;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True",
+        "VISA2026_EASYTEST": "true"
       }
     }
   }

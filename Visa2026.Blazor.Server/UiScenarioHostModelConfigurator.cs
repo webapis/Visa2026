@@ -7,7 +7,7 @@ internal static class UiScenarioHostModelConfigurator
 {
     internal static void Apply(XafApplication application)
     {
-        if (!UiScenarioHostMode.IsEnabled)
+        if (!UiScenarioHostMode.IsEnabled && !EasyTestHostMode.IsEnabled)
         {
             return;
         }

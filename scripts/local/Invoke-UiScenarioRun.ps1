@@ -33,6 +33,9 @@
 
 .EXAMPLE
   .\scripts\local\Invoke-UiScenarioRun.ps1 -All -UseBaselineSnapshot
+
+.EXAMPLE
+  .\scripts\local\Invoke-UiScenarioRun.ps1 -Scenario person-employee-passport-create -Fast -SkipBuild -KeepServer
 #>
 [CmdletBinding()]
 param(
@@ -66,6 +69,8 @@ param(
     [switch]$StopOnly,
 
     [switch]$NoScreenshots,
+
+    [switch]$Fast,
 
     [switch]$Headed,
 
@@ -154,8 +159,9 @@ function Invoke-UiScenarioRunnerOnce {
     )
     if ($Headed) { $runnerArgs += '--headed' }
     if ($SlowMo -gt 0) { $runnerArgs += @('--slow-mo', $SlowMo) }
-    if (-not $NoScreenshots) {
-        $runnerArgs += @('--screenshot-dir', $ScreenshotDirValue, '--screenshot-steps', '--pause-after-save', '5000')
+    if ($Fast) { $runnerArgs += '--fast' }
+    if (-not $NoScreenshots -and -not $Fast) {
+        $runnerArgs += @('--screenshot-dir', $ScreenshotDirValue, '--screenshot-steps')
     }
 
     # Pipe runner output to the console only — do not let stdout become the function return value
@@ -205,8 +211,19 @@ if ($BaseUrl -eq '') {
     $BaseUrl = "http://localhost:$Port"
 }
 
+if ($Fast) {
+    $NoScreenshots = $true
+    if ($TimeoutMs -eq 90000) {
+        $TimeoutMs = 45000
+    }
+}
+
 if ($SlowMo -lt 0) {
-    $SlowMo = if ($Headed) { 1000 } else { 0 }
+    if ($Fast) {
+        $SlowMo = 0
+    } else {
+        $SlowMo = if ($Headed) { 150 } else { 0 }
+    }
 }
 
 $shouldResetDatabase = $FreshDatabase -or $UseBaselineSnapshot -or $All
@@ -240,6 +257,12 @@ try {
                 -c $Configuration `
                 -o $BuildOutDir
             if ($LASTEXITCODE -ne 0) { throw "Blazor.Server build failed (exit $LASTEXITCODE)." }
+
+            $wwwSrc = Join-Path $RepoRoot 'Visa2026.Blazor.Server/wwwroot'
+            $wwwDst = Join-Path $BuildOutDir 'wwwroot'
+            if (Test-Path -LiteralPath $wwwSrc) {
+                Copy-Item -LiteralPath $wwwSrc -Destination $wwwDst -Recurse -Force
+            }
         }
 
         $hostDll = Join-Path $BuildOutDir 'Visa2026.Blazor.Server.dll'

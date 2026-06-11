@@ -270,6 +270,115 @@ Open a record on each typed detail view (`/Person_DetailView_Employee/{key}`, et
 
 ---
 
+## Person detail — nested Passports collection New
+
+**Context:** `Person_DetailView_Employee` (and other typed Person details) → **Passports** tab → embedded `Passport_ListView` toolbar **New**. Model anchor on `Person.Passports` `ListPropertyEditor` nested frame (`PersonDetailPassportsListNewE2eAnchorController`) plus JS shadow pierce (`personDetailNestedPassports` dedicated finder, MutationObserver + interval reapply). Controllers: `PersonDetailPassportsListNewE2eAnchorController`, `PassportListViewE2eActionSelectorsController`, `PersonDetailViewE2eTabSelectorsController` (tab `data-testid` only).
+
+**DOM note:** Hook is applied to the inner `<button>` **and** the wrapping `div.dxbl-adaptive-group` (so Elements search finds the group you inspect). Expand open shadow roots under the nested list toolbar if needed.
+
+| Hook id | UI target | Type | Access (primary) | Access (alternates) | DOM target | Expected behavior | Verified |
+|---------|-----------|------|------------------|---------------------|------------|-------------------|----------|
+| `person-employee-tab-passports-new` | Nested ListView action `New` | button | `[data-testid="person-employee-tab-passports-new"]` | `.e2e-person-employee-tab-passports-new` | `<button data-action-name="New">` inside `dxbl-toolbar-item` (Passports tab) | `click()` after `select-tab: person-employee-tab-passports` | 2026-06-08 |
+
+**Scenario note:** On a **newly created** employee, the hook may be missing on the **first** detail mount after Save; it is reliable after **Save and Close** and reopening the employee from the list (`person-employee-passport-create` YAML encodes this workaround).
+
+**DevTools — verify snippet**
+
+Toolbar **New** is inside an **open shadow root** (same as Person ListView **New**). Top-level `document.querySelector` is often **`null` even when the hook is applied** — use `deepQuery` below or Playwright locators.
+
+```javascript
+function deepQuery(selector, root, results) {
+  root = root || document;
+  results = results || [];
+  root.querySelectorAll(selector).forEach(function (n) { results.push(n); });
+  root.querySelectorAll('*').forEach(function (el) {
+    if (el.shadowRoot) deepQuery(selector, el.shadowRoot, results);
+  });
+  return results;
+}
+
+document.querySelector('[data-testid="person-employee-tab-passports"]')?.click();
+// after Passports grid toolbar renders:
+visa2026E2eHooks.applyPersonDetailPassportsListNewActionTestId('person-employee-tab-passports-new');
+visa2026E2eHooks.isPersonDetailPassportsListNewHookVisible('person-employee-tab-passports-new');
+// → should return true
+
+deepQuery('[data-testid="person-employee-tab-passports-new"]')[0];
+// → button or .dxbl-toolbar-adaptive-item-new with data-testid (inside shadow)
+
+// Diagnostic when apply returns false — list adaptive New targets:
+(function () {
+  function deepQuery(sel, root, out) {
+    root = root || document; out = out || [];
+    root.querySelectorAll(sel).forEach(n => out.push(n));
+    root.querySelectorAll('*').forEach(el => { if (el.shadowRoot) deepQuery(sel, el.shadowRoot, out); });
+    return out;
+  }
+  deepQuery('.dxbl-toolbar-adaptive-item-new').forEach((el, i) =>
+    console.log(i, el.tagName, el.className, el.getClientRects().length > 0));
+})();
+```
+
+---
+
+## Passport detail — required scalar fields
+
+**Context:** `Passport_DetailView` (nested from Person → Passports → **New**, or standalone). Required / always-visible direct scalars only. Hooks via `PassportDetailViewE2eSelectorsController` + `E2ePropertySelectorApplicator`; model backup `CustomCSSClassName` on `Passport.cs`.
+
+**Naming:** `passport-{member-kebab}`.
+
+| Member | Type | Access (primary) | Access (alternates) | DOM target | Verified |
+|--------|------|------------------|---------------------|------------|----------|
+| `PassportNumber` | text-input | `#passport-passport-number` | `[data-testid="passport-passport-number"]`, `.e2e-passport-passport-number` | `<input>` | 2026-06-08 |
+| `PassportType` | lookup | `[data-testid="passport-passport-type"]` | `.e2e-passport-passport-type` | combo box | 2026-06-08 |
+| `IssueDate` | date | `#passport-issue-date` | `[data-testid="passport-issue-date"]`, `.e2e-passport-issue-date` | date editor | 2026-06-08 |
+| `ExpirationDate` | date | `#passport-expiration-date` | `[data-testid="passport-expiration-date"]`, `.e2e-passport-expiration-date` | date editor | 2026-06-08 |
+| `Authority` | text-input | `#passport-authority` | `[data-testid="passport-authority"]`, `.e2e-passport-authority` | `<input>` | 2026-06-08 |
+| `IssuedCountry` | lookup | `[data-testid="passport-issued-country"]` | `.e2e-passport-issued-country` | combo box | 2026-06-08 |
+
+**Excluded:** `Person` (pre-filled on nested **New**); gear-hidden `IsCancelled`; collections `Documents` / `Visas` / `Images`; computed `DaysRemaining`.
+
+**DevTools — batch verify (scalar fields on `Passport_DetailView`)**
+
+```javascript
+['passport-passport-number','passport-passport-type','passport-issued-country','passport-issue-date',
+ 'passport-expiration-date','passport-authority'].forEach(id => {
+  const el = document.querySelector('#' + id) ?? document.querySelector('[data-testid="' + id + '"]');
+  console.log(id, el ? 'OK' : 'MISSING', el);
+});
+```
+
+---
+
+## Passport DetailView — Save action
+
+**Context:** `Passport_DetailView` toolbar **Save**. `PassportDetailViewE2eActionSelectorsController` + `visa2026-e2e-hooks.js` group `passportDetail`.
+
+| DetailView Id | Action Id | Type | Access (primary) | Access (alternates) | Verified |
+|---------------|-----------|------|------------------|---------------------|----------|
+| `Passport_DetailView` | `Save` | button | `[data-testid="passport-detail-save"]` | `.e2e-passport-detail-save` | 2026-06-08 |
+
+**Context:** Nested **New** from Person → Passports keeps `Person_DetailView` in the URL; passport Save is the same toolbar button. Person detail Save hooks are suppressed while a passport form is active (`visa2026-e2e-hooks.js` `isPassportDetailActive`).
+
+**DevTools — verify snippet (nested or standalone; use `deepQuery` for shadow DOM)**
+
+```javascript
+function deepQuery(selector, root, results) {
+  root = root || document; results = results || [];
+  root.querySelectorAll(selector).forEach(function (n) { results.push(n); });
+  root.querySelectorAll('*').forEach(function (el) {
+    if (el.shadowRoot) deepQuery(selector, el.shadowRoot, results);
+  });
+  return results;
+}
+visa2026E2eHooks.applyPassportDetailActionTestId('Save', 'passport-detail-save');
+const el = deepQuery('[data-testid="passport-detail-save"]')[0]
+  ?? deepQuery('.e2e-passport-detail-save')[0];
+console.log('passport-detail-save', el ? 'OK' : 'MISSING', el);
+```
+
+---
+
 ## Implemented in code — not yet in this doc
 
 These hooks exist in the repo but **failed or skipped DevTools verify** — **no selectors listed here** until verified.

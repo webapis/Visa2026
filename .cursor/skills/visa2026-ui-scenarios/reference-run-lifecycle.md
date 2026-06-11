@@ -14,7 +14,7 @@ Canonical profile: [`Visa2026.Blazor.Server/Properties/launchSettings.json`](../
 | **URL** | `http://localhost:5052` |
 | **Database** | LocalDB `Visa2026UiScenario` (lookup baseline only — not IDE `Visa2026`) |
 | **Env** | `VISA2026_UI_SCENARIOS=true` — disables XAF **RestoreTabbedMdiLayout** (no MDI tabs restored from prior runs) |
-| **Why** | Isolated from IDE host (`:5000` / `:5001`), hook-verify host (`:5051`), and EasyTest — avoids stale DLLs, wrong model, and port locks |
+| **Why** | Isolated from IDE host (`:5000` / `:5001`), EasyTest (`:5050`), and hook-verify host (`:5051`) — avoids stale DLLs, wrong model, and port locks |
 
 **Rule:** Scenario runs use **only** `:5052` (or an explicit override documented in the map §2). Never point UiScenarioRunner at the Visual Studio debug host unless the user explicitly asks.
 
@@ -61,6 +61,7 @@ Each scenario execution follows this lifecycle:
 | `-SkipServer` | Runner only; host already on `-BaseUrl` |
 | `-StopOnly` | Kill scenario host and exit |
 | `-NoScreenshots` | Skip step screenshots (not recommended for agent runs) |
+| `-Fast` | Implies `-NoScreenshots`, passes `--fast` to runner (shorter settle delays), no headed slow-mo |
 
 ### Fresh database (lookup baseline)
 
@@ -152,11 +153,8 @@ Implementation in [`ScenarioRunner.cs`](../../../tools/UiScenarioRunner/Scenario
 | After `login` | `WaitForBlazorAsync` + `WaitForAppShellAsync` | Shell / nav must exist before `goto` |
 | After `goto` | `WaitForBlazorAsync` + `WaitForAppShellAsync` + **`WaitForBusyOverlayAsync`** | Deep link returns before grid/detail is interactive |
 | **Before every `click`** | **`WaitForBusyOverlayAsync`** | Do not click **New** / nav / **Save** under `.dxbl-loading-panel` |
-| **After every `click`** | **`WaitForBusyOverlayAsync`** + `WaitForBlazorAsync` | Let Blazor process the action |
-| After `*-new` clicks | extra 1.5s + **`WaitForBusyOverlayAsync` again** | List **New** opens detail asynchronously |
-| After `person-detail-*-save` | `WaitForBlazorAsync` + optional `--pause-after-save` | Validation banner / persisted state |
-
-`WaitForBusyOverlayAsync` targets `.dxbl-loading-panel` / `.dx-loadingpanel` and waits until **hidden** (up to 60s), then one Blazor beat.
+| **After every `click`** | **`WaitForBusyOverlayAsync`** | Let Blazor finish the action (no fixed sleep) |
+| After `person-detail-*-save` | `WaitForBusyOverlayAsync` before after-save screenshot | Validation banner / persisted state |
 
 ### YAML authoring implications
 
@@ -222,7 +220,7 @@ dotnet run --project Visa2026.Blazor.Server --launch-profile "Visa2026 - UI Scen
 dotnet run --project tools/UiScenarioRunner -- --scenario person-employee-create `
   --base-url http://localhost:5052 --timeout 90000 --headed --slow-mo 1000 `
   --screenshot-dir tools/UiScenarioRunner/screenshots/person-employee-create `
-  --screenshot-steps --pause-after-save 5000
+  --screenshot-steps
 # stop port 5052 when done
 ```
 

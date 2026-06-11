@@ -2,7 +2,7 @@
 
 Copy-paste messages to invoke [visa2026-ui-scenarios](./SKILL.md) in Cursor. Prefer **`@visa2026-ui-scenarios`** (or `@.cursor/skills/visa2026-ui-scenarios`) so the agent loads this skill.
 
-**Not this skill:** implementing CSS hooks → [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md); EasyTest / Selenium E2E → [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md).
+**Not this skill:** implementing CSS hooks → [visa2026-ui-test-hooks](../visa2026-ui-test-hooks/SKILL.md); native EasyTest E2E → [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md).
 
 **Process reminder:** **Map → Hooks → YAML → Promote → Run** — never skip the map; never put hook-pending drafts in `tools/UiScenarioRunner/scenarios/`.
 
@@ -190,7 +190,7 @@ dotnet run --project tools/UiScenarioRunner -- --all --base-url http://localhost
 | Add **data-testid** / CSS on a field or toolbar button | `@visa2026-ui-test-hooks` — see [user-prompts.md](../visa2026-ui-test-hooks/user-prompts.md) |
 | DevTools verify only (no multi-step YAML) | `@visa2026-ui-test-hooks` + **Invoke-UiHookVerify.ps1** |
 | Record verified hooks in **UI_TEST_HOOKS.md** | `@visa2026-ui-test-hooks` |
-| **EasyTest** / Selenium E2E class | `Visa2026.E2E.Tests` — not ui-scenarios |
+| **EasyTest** / `Visa2026.E2E.Tests` | [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md) — not ui-scenarios |
 | Module unit tests | `@visa2026-unit-tests` |
 
 ---

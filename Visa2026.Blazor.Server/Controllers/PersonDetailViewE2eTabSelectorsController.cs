@@ -1,4 +1,5 @@
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Layout;
 using Visa2026.Module.BusinessObjects;
@@ -49,18 +50,23 @@ public sealed class PersonDetailViewE2eTabSelectorsController : ViewController<D
     protected override void OnActivated()
     {
         base.OnActivated();
-        if (View?.Id == null || !TargetViewIds.Contains(View.Id))
+        if (!IsTargetPersonDetailView())
         {
             return;
         }
 
-        if (View.LayoutManager is not BlazorLayoutManager layoutManager)
+        AttachLayoutManager();
+    }
+
+    protected override void OnViewControlsCreated()
+    {
+        base.OnViewControlsCreated();
+        if (!IsTargetPersonDetailView())
         {
             return;
         }
 
-        _layoutManager = layoutManager;
-        _layoutManager.ItemCreated += LayoutManager_ItemCreated;
+        AttachLayoutManager();
     }
 
     protected override void OnDeactivated()
@@ -72,6 +78,30 @@ public sealed class PersonDetailViewE2eTabSelectorsController : ViewController<D
         }
 
         base.OnDeactivated();
+    }
+
+    private bool IsTargetPersonDetailView() =>
+        View?.Id != null && TargetViewIds.Contains(View.Id);
+
+    private void AttachLayoutManager()
+    {
+        if (View?.LayoutManager is not BlazorLayoutManager layoutManager)
+        {
+            return;
+        }
+
+        if (_layoutManager == layoutManager)
+        {
+            return;
+        }
+
+        if (_layoutManager != null)
+        {
+            _layoutManager.ItemCreated -= LayoutManager_ItemCreated;
+        }
+
+        _layoutManager = layoutManager;
+        _layoutManager.ItemCreated += LayoutManager_ItemCreated;
     }
 
     private void LayoutManager_ItemCreated(object? sender, BlazorLayoutManager.ItemCreatedEventArgs e)

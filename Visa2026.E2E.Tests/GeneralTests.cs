@@ -14,7 +14,7 @@ namespace Visa2026.E2E.Tests
             // We can now interact with it.
             
             Login(); // Logs in as Admin
-            AppContext.Navigate("Employees");
+            NavigateEmployeesList();
         }
     }
 }
