@@ -37,6 +37,49 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c Debug
 
 If your SDK supports testing the whole solution file, you can use `dotnet test Visa2026.slnx -c Debug` instead of the single-project line.
 
+## Cursor Cloud specific instructions
+
+Notes for AI agents running in the Linux (Ubuntu) Cursor Cloud VM. The base image already has the .NET SDKs and Docker installed (the startup update script only runs `dotnet restore Visa2026.slnx`). Services are **not** auto-started — start them yourself with the steps below.
+
+**SDKs / `.slnx`:** Both **.NET 8** and **.NET 10** SDKs are installed. The repo's documented `dotnet build/test Visa2026.slnx` commands require the **.NET 10 SDK** — the .NET 8 SDK's MSBuild (17.8) cannot parse the `<Solution>` element (`MSB4068`). The default `dotnet` resolves to SDK 10, so `dotnet build Visa2026.slnx -c Debug` works. Projects still target `net8.0`; building an individual `.csproj` works under either SDK.
+
+**DevExpress:** Packages (DevExpress 25.2.6) restore from public **nuget.org** — no private/authenticated feed is needed. The runtime license is the committed file `DevExpress.Key/DevExpress_License.txt`; unlicensed Linux runs only show a trial banner.
+
+**Database (no LocalDB on Linux):** LocalDB does not exist on Linux, so the `Visa2026 - LocalDB` launch profile fails with `PlatformNotSupportedException`. Use a SQL Server container instead:
+
+```bash
+sudo dockerd >/tmp/dockerd.log 2>&1 &          # daemon is not auto-started
+sudo docker start visa-sql || sudo docker run -d --name visa-sql \
+  -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Gaptrm@Pass123' -e MSSQL_PID=Express \
+  -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+```
+
+Point the app at it via env var (do **not** rely on a launch profile, which would override it):
+
+```
+ConnectionStrings__DefaultConnection=Server=127.0.0.1,1433;Database=Visa2026Dev;User Id=sa;Password=Gaptrm@Pass123;TrustServerCertificate=True;MultipleActiveResultSets=true
+```
+
+**First-run DB seed (non-obvious):** XAF startup runs `ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing`, which opens the target database directly and **fails if the database does not exist**. So on a fresh SQL instance you must create the empty DB first, then seed schema + users:
+
+```bash
+sudo docker exec visa-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Gaptrm@Pass123' -No \
+  -Q "IF DB_ID('Visa2026Dev') IS NULL CREATE DATABASE [Visa2026Dev];"
+ConnectionStrings__DefaultConnection="...as above..." ASPNETCORE_ENVIRONMENT=Development FORCE_XAF_DB_UPDATE=true \
+  dotnet run --project Visa2026.Blazor.Server -c Debug --no-launch-profile -- --updateDatabase --forceUpdate --silent
+```
+
+**Run the host:** always pass `--no-launch-profile` (or `--launch-profile "Visa2026 - Docker SQL"`) so the env-var connection string is used:
+
+```bash
+ConnectionStrings__DefaultConnection="...as above..." ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://0.0.0.0:5000 \
+  dotnet run --project Visa2026.Blazor.Server -c Debug --no-launch-profile
+```
+
+`/` redirects to `/LoginPage`. Seeded login: user **`Admin`** with a **blank password** (also `User` / `StandardUser`, blank).
+
+**Tests:** unit/integration tests `dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj` need no database. `Visa2026.E2E.Tests` (Selenium + EasyTest) need a browser/driver and a running host.
+
 ## Git: “commit” with verification first
 
 If you want the assistant to **build and test before creating a commit** (and **not** commit when checks fail), say so explicitly, for example: **“commit after verify”** or **“commit if the build passes”**.
