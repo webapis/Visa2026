@@ -10,10 +10,14 @@ internal static class EasyTestHostLaunch
 {
     private const string HostConfiguration = "EasyTest";
 
-    /// <summary>Kestrel URL + <c>appsettings.EasyTest.json</c> (connection string, test DB).</summary>
-    public const string HostArguments = "--urls http://localhost:5050 --environment EasyTest";
+    /// <summary>
+    /// Kestrel on :5050 with <c>Development</c> middleware (matches F5 launch profile).
+    /// EasyTest supplies <c>ConnectionStrings__DefaultConnection</c> for <c>Visa2026EasyTest</c> — do not use
+    /// <c>--environment EasyTest</c> here (enables HTTPS redirect/HSTS on HTTP-only CI and breaks script loading).
+    /// </summary>
+    public const string HostArguments = "--urls http://localhost:5050 --environment Development";
 
-    public const string UpdateDatabaseArguments = "--updateDatabase --silent --environment EasyTest";
+    public const string UpdateDatabaseArguments = "--updateDatabase --silent --environment Development";
 
     /// <summary>
     /// EasyTest must launch the built <c>.exe</c> (not the project folder / <c>dotnet run</c>) so

@@ -18,13 +18,20 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
-### 2026-06-11 — GHA Windows: headless Edge breaks WaitScriptLoading
+### 2026-06-11 — GHA: `--environment EasyTest` breaks HTTP-only :5050 host
 
 - **Outcome**: negative → fix
-- **Context**: `.github/workflows/e2e-tests.yml`, `EasyTestBrowserMode`, `BlazorAppResponseAwaiter.WaitScriptLoading`
-- **Symptom**: All 4 facts fail on CI at `RunApplication()` — `WebDriverTimeoutException: Timed out after 60 seconds` during script loading; local headed runs pass.
-- **Fix / reuse**: On **`CI=true` + Windows**, run **headed** Edge (GHA `windows-latest` has a desktop session). Do **not** set `VISA2026_E2E_HEADLESS=true` on the Windows workflow. Optional `VISA2026_E2E_HEADLESS=true` for Linux agents only. **`EasyTestSessionFixture`** — one host/browser per assembly; **`EasyTestApplicationLauncher`** retries `RunApplication` up to 3× on CI; **`Config.xml` `DefaultTimeout="15"`**.
-- **Reuse**: Windows GHA EasyTest → headed by default; headless only when explicitly requested.
+- **Context**: `EasyTestHostLaunch.HostArguments`, `Startup.cs`, `BlazorAppResponseAwaiter.WaitScriptLoading`, GHA `e2e-tests.yml`
+- **Symptom**: All facts fail at `RunApplication()` — `WebDriverTimeoutException: Timed out after 60 seconds` on CI (headed or headless); local F5 **Visa2026 - EasyTest (LocalDB)** profile works.
+- **Fix / reuse**: Launch built `.exe` with **`--environment Development`** (same as F5 profile), **`--urls http://localhost:5050`**. EasyTest sets **`ConnectionStrings__DefaultConnection`** for `Visa2026EasyTest`. Do **not** use `--environment EasyTest` for the running host — non-Development middleware enables **HTTPS redirect + HSTS** on HTTP-only Kestrel and Blazor EasyTest scripts never load. **`Startup`**: skip `UseHttpsRedirection` when **`EasyTestHostMode.IsEnabled`**. Also: **`EasyTestSessionFixture`**, headed Edge on Windows CI, `RunApplication` retries.
+- **Reuse**: MSBuild config `EasyTest` ≠ `ASPNETCORE_ENVIRONMENT`; E2E host args mirror `launchSettings.json` **Development** + test connection string from EasyTest.
+
+### 2026-06-11 — GHA Windows: headless Edge breaks WaitScriptLoading
+
+- **Outcome**: negative → partial (headed still failed until Development env fix above)
+- **Context**: `.github/workflows/e2e-tests.yml`, `EasyTestBrowserMode`
+- **Fix / reuse**: On **`CI=true` + Windows**, run **headed** Edge; do not set `VISA2026_E2E_HEADLESS=true` on the Windows workflow.
+- **Reuse**: Prefer headed on `windows-latest`; headless only when explicitly requested.
 
 ### 2026-06-11 — Headed local / headless CI via EasyTestBrowserMode
 
@@ -93,8 +100,8 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Outcome**: negative → positive
 - **Context**: `E2ETestBase` `arguments: --launch-profile "Visa2026 - EasyTest (LocalDB)"`, preflight `DropDB` + DB provision
 - **Symptom**: Edge on **`localhost:5050`** → `ERR_CONNECTION_REFUSED`; host process listening on **`:5000`** instead; DB missing after drop until `--updateDatabase`.
-- **Fix / reuse**: EasyTest launches **`bin/EasyTest/net8.0/Visa2026.Blazor.Server.exe`** — **`--launch-profile` only works with `dotnet run`**. Use **`EasyTestHostLaunch.HostArguments`**: `--urls http://localhost:5050 --environment EasyTest` + **`appsettings.EasyTest.json`** (`Visa2026EasyTest` connection string). After `DropDB`, run **`--updateDatabase --silent`** via **`EasyTestDatabaseProvisioner`** (create empty catalog first). **`EasyTestHostReadiness`** polls HTTP after `RunApplication`.
-- **Reuse**: IDE F5 may still use launch profile; E2E must use explicit `--urls` + `--environment EasyTest` on the exe.
+- **Fix / reuse**: EasyTest launches **`bin/EasyTest/net8.0/Visa2026.Blazor.Server.exe`** — **`--launch-profile` only works with `dotnet run`**. Use **`EasyTestHostLaunch.HostArguments`**: `--urls http://localhost:5050 --environment Development` (EasyTest sets **`ConnectionStrings__DefaultConnection`** for `Visa2026EasyTest`). After `DropDB`, run **`--updateDatabase --silent`** via **`EasyTestDatabaseProvisioner`** (create empty catalog first).
+- **Reuse**: IDE F5 may still use launch profile; E2E must use explicit `--urls` + **Development** on the exe (MSBuild config `EasyTest` is separate).
 
 ### 2026-06-08 — msedgedriver CDN
 

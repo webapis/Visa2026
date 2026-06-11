@@ -26,17 +26,24 @@ internal static class EasyTestApplicationLauncher
                     Thread.Sleep(RetryDelay);
                 }
 
-                Trace.WriteLine(
+                string attemptMessage =
                     $"[EasyTest] RunApplication attempt {attempt}/{maxAttempts} " +
-                    $"(headless={EasyTestBrowserMode.RunHeadless}).");
+                    $"(headless={EasyTestBrowserMode.RunHeadless}, args={EasyTestHostLaunch.HostArguments}).";
+                Trace.WriteLine(attemptMessage);
+                Console.WriteLine(attemptMessage);
 
                 appContext.RunApplication();
                 Trace.WriteLine($"[EasyTest] RunApplication succeeded (attempt {attempt}).");
+                Console.WriteLine($"[EasyTest] RunApplication succeeded (attempt {attempt}).");
                 return;
             }
             catch (WebDriverTimeoutException ex) when (attempt < maxAttempts)
             {
-                Trace.WriteLine($"[EasyTest] RunApplication WebDriver timeout (attempt {attempt}): {ex.Message}");
+                string timeoutMessage =
+                    $"[EasyTest] RunApplication WebDriver timeout (attempt {attempt}): {ex.Message}";
+                Trace.WriteLine(timeoutMessage);
+                Console.WriteLine(timeoutMessage);
+                EasyTestHostReadiness.LogHttpProbe($"After timeout (attempt {attempt})");
             }
         }
     }

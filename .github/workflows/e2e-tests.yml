@@ -86,7 +86,7 @@ jobs:
         shell: pwsh
         env:
           CI: true
-        run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "trx;LogFileName=e2e-results.trx"
+        run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=e2e-results.trx"
 
       - name: Upload test results
         if: always()

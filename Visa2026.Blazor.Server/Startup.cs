@@ -257,7 +257,9 @@ namespace Visa2026.Blazor.Server
                 app.ApplicationServices,
                 app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(UserReportTemplateSeedGate)));
 
-            if (env.IsDevelopment())
+            bool easyTestHost = EasyTestHostMode.IsEnabled;
+
+            if (env.IsDevelopment() || easyTestHost)
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -267,7 +269,9 @@ namespace Visa2026.Blazor.Server
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // EasyTest listens on http://localhost:5050 only; HTTPS redirect/HSTS breaks Blazor script loading on CI.
+            if (!easyTestHost)
+                app.UseHttpsRedirection();
             VisaLocalization.UseVisaRequestLocalization(app);
             app.UseStaticFiles();
             app.UseODataBatching();

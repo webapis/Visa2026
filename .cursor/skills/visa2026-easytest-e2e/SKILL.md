@@ -60,7 +60,7 @@ EasyTest must **not** share the IDE dev host (`:5000` / `:5001`).
 
 Full host + driver setup: [reference.md § Host and driver](./reference.md#host-and-driver).
 
-**Preflight (each test):** `EasyTestPreflight` logs LocalDB state, checks **`:5050`** is free (warns if **`:5052`** legacy host is up), drops DB, creates empty catalog + **`--updateDatabase --silent`** (`EasyTestDatabaseProvisioner`), then `RunApplication` on the built **`.exe`** with **`--urls http://localhost:5050 --environment EasyTest`** (not `--launch-profile` — ignored by the exe). Teardown closes host in `DisposeAsync`.
+**Preflight (session):** `EasyTestPreflight` logs LocalDB state, checks **`:5050`** is free, drops DB, creates empty catalog + **`--updateDatabase --silent`** (`EasyTestDatabaseProvisioner`), then `RunApplication` on the built **`.exe`** with **`--urls http://localhost:5050 --environment Development`** (EasyTest supplies test DB connection string; not `--launch-profile`). Teardown closes host in `EasyTestSessionFixture.DisposeAsync`.
 
 ---
 

@@ -35,7 +35,7 @@ new BlazorApplicationOptions(
     physicalPath: hostExe,
     url: "http://localhost:5050",
     configuration: "EasyTest",
-    arguments: EasyTestHostLaunch.HostArguments, // --urls http://localhost:5050 --environment EasyTest
+    arguments: EasyTestHostLaunch.HostArguments, // --urls http://localhost:5050 --environment Development
     browser: "Edge",
     runHeadless: EasyTestBrowserMode.RunHeadless,
     webDriverPath: ResolveWebDriverDirectory())
