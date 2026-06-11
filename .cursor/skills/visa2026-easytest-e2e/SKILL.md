@@ -135,7 +135,7 @@ Implemented in **`EasyTestBrowserMode.RunHeadless`** → `BlazorApplicationOptio
 | `SmokeTests` | E2E-001 / E2E-001-nav (`scenarios/ready/`) |
 | `EmployeeTests` | E2E-010 employee create (`scenarios/ready/person-employee-create`) |
 
-Config: **`Config.xml`**, **`e2e-tests.yml`** (CI). Docs: [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md), [`EasyTestFixtureContext.md`](../../../Visa2026.E2E.Tests/EasyTestFixtureContext.md).
+Config: **`Config.xml`**, **`.github/workflows/e2e-tests.yml`** (CI). Docs: [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md), [`EasyTestFixtureContext.md`](../../../Visa2026.E2E.Tests/EasyTestFixtureContext.md).
 
 ---
 

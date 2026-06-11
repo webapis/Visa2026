@@ -126,9 +126,11 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 **Browser:** headed Edge locally (default); headless on CI via `EasyTestBrowserMode` (`CI=true` or `VISA2026_E2E_HEADLESS=true`). Override locally: `$env:VISA2026_E2E_HEADLESS='true'` before `dotnet test`.
 
+**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, LocalDB, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headless).
+
 **CI policy (recommended):**
 
-- **PR to `main`:** Tier 0 E2E + `dotnet build -c EasyTest`
+- **PR to `main`:** Tier 0 E2E + `dotnet build -c EasyTest` (workflow runs all current facts)
 - **Nightly / pre-release:** Full E2E suite (tier 0–2)
 
 ---

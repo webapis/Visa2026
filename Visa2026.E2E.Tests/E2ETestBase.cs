@@ -22,6 +22,7 @@ namespace Visa2026.E2E.Tests
         protected IApplicationContext AppContext { get; }
 
         private readonly string _blazorServerProjectPath;
+        private bool _teardownCompleted;
 
         protected E2ETestBase()
         {
@@ -570,8 +571,11 @@ namespace Visa2026.E2E.Tests
 
         private void TeardownTestSession()
         {
-            Trace.WriteLine("[EasyTest] Teardown — closing browser and Blazor host.");
-            FixtureContext.CloseRunningApplications();
+            if (_teardownCompleted)
+                return;
+
+            _teardownCompleted = true;
+            EasyTestHostLifecycle.StopHost(FixtureContext);
         }
 
         private static string ResolveWebDriverDirectory()

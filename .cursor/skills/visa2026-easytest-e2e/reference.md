@@ -10,7 +10,7 @@
 | DB | **Visa2026EasyTest** |
 | Selectors | **Captions** / EasyTest actions (`FillFormWithRetry` may fall back to `InputId` / `data-testid`) |
 | Config | **EasyTest** |
-| CI | `e2e-tests.yml` |
+| CI | `.github/workflows/e2e-tests.yml` |
 
 ---
 
@@ -141,7 +141,7 @@ Visual Studio: configuration **EasyTest**, Test Explorer, run headed (Edge opens
 
 ## CI
 
-Workflow: **`Visa2026.E2E.Tests/e2e-tests.yml`** — build `-c EasyTest`, `dotnet test`, Windows + Edge driver steps as configured.
+Workflow: **`.github/workflows/e2e-tests.yml`** — build `-c EasyTest`, `dotnet test`, Windows + Edge driver steps as configured.
 
 ---
 

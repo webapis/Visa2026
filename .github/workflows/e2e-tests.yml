@@ -1,0 +1,98 @@
+# Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + LocalDB + Edge headless.
+# Includes E2E-020 PassportTests and Tier 0 smokes (see docs/TESTING_PLAN.md).
+
+name: EasyTest E2E
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  VISA2026_E2E_HEADLESS: true
+
+jobs:
+  easytest-e2e:
+    name: EasyTest E2E (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Write DevExpress license
+        shell: pwsh
+        env:
+          DEVEXPRESS_LICENSE: ${{ secrets.DEVEXPRESS_LICENSE }}
+          DEVEXPRESS_KEY: ${{ secrets.DEVEXPRESS_KEY }}
+        run: |
+          New-Item -ItemType Directory -Force -Path DevExpress.Key | Out-Null
+          $license = $env:DEVEXPRESS_LICENSE
+          if ([string]::IsNullOrWhiteSpace($license)) { $license = $env:DEVEXPRESS_KEY }
+          if ([string]::IsNullOrWhiteSpace($license)) {
+            throw "Set DEVEXPRESS_LICENSE or DEVEXPRESS_KEY in repository secrets."
+          }
+          Set-Content -Path DevExpress.Key/DevExpress_License.txt -Value $license.Trim() -Encoding utf8 -NoNewline
+
+      - name: Start SQL Server LocalDB
+        shell: pwsh
+        run: |
+          sqllocaldb info mssqllocaldb
+          sqllocaldb start mssqllocaldb
+          sqllocaldb info mssqllocaldb
+
+      - name: Install Microsoft Edge WebDriver
+        shell: pwsh
+        run: |
+          $edgeExe = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+          if (-not (Test-Path $edgeExe)) {
+            $edgeExe = "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
+          }
+          if (-not (Test-Path $edgeExe)) {
+            throw "Microsoft Edge not found on the runner."
+          }
+          $edgeVersion = (Get-Item $edgeExe).VersionInfo.FileVersion
+          Write-Host "Edge version: $edgeVersion"
+          $driverDir = Join-Path $env:GITHUB_WORKSPACE "Visa2026.E2E.Tests\.webdrivers"
+          New-Item -ItemType Directory -Force -Path $driverDir | Out-Null
+          $zipPath = Join-Path $env:RUNNER_TEMP "edgedriver_win64.zip"
+          $zipUrl = "https://msedgedriver.microsoft.com/$edgeVersion/edgedriver_win64.zip"
+          Write-Host "Downloading: $zipUrl"
+          Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
+          $extractRoot = Join-Path $env:RUNNER_TEMP "edgedriver_extract"
+          if (Test-Path $extractRoot) { Remove-Item $extractRoot -Recurse -Force }
+          Expand-Archive -LiteralPath $zipPath -DestinationPath $extractRoot -Force
+          $driverExe = Get-ChildItem -Path $extractRoot -Recurse -Filter msedgedriver.exe | Select-Object -First 1
+          if (-not $driverExe) { throw "msedgedriver.exe not found in downloaded zip." }
+          Copy-Item -LiteralPath $driverExe.FullName -Destination (Join-Path $driverDir "msedgedriver.exe") -Force
+          & (Join-Path $driverDir "msedgedriver.exe") --version
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore Visa2026.slnx
+
+      - name: Build EasyTest configuration
+        shell: pwsh
+        run: dotnet build Visa2026.slnx -c EasyTest --no-restore
+
+      - name: Run EasyTest E2E suite
+        shell: pwsh
+        env:
+          CI: true
+        run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "trx;LogFileName=e2e-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easytest-e2e-results
+          path: "**/e2e-results.trx"
+          if-no-files-found: ignore

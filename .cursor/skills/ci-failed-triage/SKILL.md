@@ -17,7 +17,7 @@ Turn a failed GitHub Actions run into a **short diagnosis**: which **job/step** 
 
 - If the user pasted a log: extract **workflow name**, **job id**, **step name**, and the **first error block** (compiler line, `docker` error, `secrets not found`, `NU1301`, etc.).
 - If they only gave a PR or branch: ask for the **run URL** or permission to use **GitHub MCP** / terminal to fetch logs.
-- Repo workflows live under **`.github/workflows/`** (e.g. `publish-to-docker-hub.yml`).
+- Repo workflows live under **`.github/workflows/`** (e.g. `publish-to-docker-hub.yml`, `e2e-tests.yml`).
 
 Prefer **failed step output** over summaries.
 

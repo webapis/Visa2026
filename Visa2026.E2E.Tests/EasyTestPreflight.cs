@@ -24,8 +24,7 @@ internal static class EasyTestPreflight
         LogPortState(EasyTestHostEnvironment.EasyTestPort, "EasyTest host");
         LogPortState(EasyTestHostEnvironment.LegacyUiScenarioPort, "legacy UI-scenario host (removed — should be idle)");
 
-        fixture.CloseRunningApplications();
-        KillStaleEasyTestProcesses();
+        EasyTestHostLifecycle.StopHost(fixture);
 
         EnsurePortFree(
             EasyTestHostEnvironment.EasyTestPort,
@@ -95,31 +94,5 @@ internal static class EasyTestPreflight
             $"EasyTest port {port} is still in use after cleanup. {remediationHint}");
     }
 
-    private static bool IsPortListening(int port) =>
-        IPGlobalProperties.GetIPGlobalProperties()
-            .GetActiveTcpListeners()
-            .Any(endpoint => endpoint.Port == port);
-
-    private static void KillStaleEasyTestProcesses()
-    {
-        foreach (Process process in new[] { "Visa2026.Blazor.Server", "msedgedriver" }
-                     .SelectMany(Process.GetProcessesByName))
-        {
-            try
-            {
-                process.Kill(entireProcessTree: true);
-                process.WaitForExit(5000);
-            }
-            catch (Exception)
-            {
-                // Ignore already-exited or permission-limited processes.
-            }
-            finally
-            {
-                process.Dispose();
-            }
-        }
-
-        Thread.Sleep(TimeSpan.FromMilliseconds(500));
-    }
+    private static bool IsPortListening(int port) => EasyTestHostLifecycle.IsPortListening(port);
 }
