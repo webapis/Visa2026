@@ -38,9 +38,20 @@ internal static class EasyTestHostReadiness
     internal static void WaitUntilHttpResponds(TimeSpan timeout)
     {
         DateTime deadline = DateTime.UtcNow + timeout;
+        DateTime nextProgressLog = DateTime.UtcNow;
 
         while (DateTime.UtcNow < deadline)
         {
+            if (DateTime.UtcNow >= nextProgressLog)
+            {
+                string progress =
+                    $"[EasyTest] Waiting for host HTTP at {EasyTestHostEnvironment.BaseUrl} " +
+                    $"(port listening: {EasyTestHostLifecycle.IsPortListening(EasyTestHostEnvironment.EasyTestPort)})...";
+                Trace.WriteLine(progress);
+                Console.WriteLine(progress);
+                nextProgressLog = DateTime.UtcNow.AddSeconds(15);
+            }
+
             try
             {
                 using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
@@ -51,7 +62,9 @@ internal static class EasyTestHostReadiness
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Trace.WriteLine($"[EasyTest] Host HTTP ready ({(int)response.StatusCode}).");
+                    string ready = $"[EasyTest] Host HTTP ready ({(int)response.StatusCode}).";
+                    Trace.WriteLine(ready);
+                    Console.WriteLine(ready);
                     return;
                 }
             }
@@ -64,5 +77,8 @@ internal static class EasyTestHostReadiness
         }
 
         LogHttpProbe("Host not ready after wait");
+        throw new TimeoutException(
+            $"EasyTest host did not respond at {EasyTestHostEnvironment.BaseUrl} within {timeout}.{Environment.NewLine}" +
+            EasyTestHostProcessLauncher.BuildDiagnostics());
     }
 }

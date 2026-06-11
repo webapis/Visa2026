@@ -52,6 +52,7 @@ public sealed class EasyTestSessionFixture : IAsyncLifetime
     public Task InitializeAsync()
     {
         EasyTestPreflight.PrepareForTestSession(FixtureContext, AppDBName, _blazorServerProjectPath);
+        EasyTestHostProcessLauncher.EnsureHostRunning(_blazorServerProjectPath);
         EasyTestApplicationLauncher.RunApplication(FixtureContext, AppContext);
         return Task.CompletedTask;
     }

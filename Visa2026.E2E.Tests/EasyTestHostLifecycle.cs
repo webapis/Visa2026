@@ -23,6 +23,7 @@ internal static class EasyTestHostLifecycle
             Trace.WriteLine($"[EasyTest] CloseRunningApplications failed: {ex.Message}");
         }
 
+        EasyTestHostProcessLauncher.StopManagedHost();
         KillHostProcesses();
         WaitForPortReleased(EasyTestHostEnvironment.EasyTestPort, TimeSpan.FromSeconds(15));
     }

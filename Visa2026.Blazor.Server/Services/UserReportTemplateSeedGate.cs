@@ -23,6 +23,12 @@ internal static class UserReportTemplateSeedGate
         if (services == null)
             throw new ArgumentNullException(nameof(services));
 
+        if (EasyTestHostMode.IsEnabled)
+        {
+            logger?.LogInformation("Skipping user report template seed for EasyTest host.");
+            return;
+        }
+
         try
         {
             using var scope = services.CreateScope();

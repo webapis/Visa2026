@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 
 namespace Visa2026.E2E.Tests;
@@ -18,6 +19,14 @@ internal static class EasyTestHostLaunch
     public const string HostArguments = "--urls http://localhost:5050 --environment Development";
 
     public const string UpdateDatabaseArguments = "--updateDatabase --silent --environment Development";
+
+    internal static void ApplyHostEnvironment(ProcessStartInfo startInfo)
+    {
+        startInfo.Environment["ConnectionStrings__DefaultConnection"] = EasyTestHostEnvironment.TestConnectionString;
+        startInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
+        startInfo.Environment["VISA2026_EASYTEST"] = "true";
+        startInfo.Environment["Sentry__Enabled"] = "false";
+    }
 
     /// <summary>
     /// EasyTest must launch the built <c>.exe</c> (not the project folder / <c>dotnet run</c>) so

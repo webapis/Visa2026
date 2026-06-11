@@ -30,9 +30,7 @@ internal static class EasyTestDatabaseProvisioner
             CreateNoWindow = true,
         };
 
-        startInfo.Environment["ConnectionStrings__DefaultConnection"] = EasyTestHostEnvironment.TestConnectionString;
-        startInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
-        startInfo.Environment["VISA2026_EASYTEST"] = "true";
+        EasyTestHostLaunch.ApplyHostEnvironment(startInfo);
 
         using var process = Process.Start(startInfo)
             ?? throw new InvalidOperationException("Failed to start Visa2026.Blazor.Server for --updateDatabase.");

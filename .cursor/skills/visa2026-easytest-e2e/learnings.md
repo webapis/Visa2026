@@ -18,6 +18,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-06-11 — GHA: host never binds :5050 before EasyTest 60s script wait
+
+- **Outcome**: negative → fix
+- **Context**: `EasyTestHostProcessLauncher`, `EasyTestHostReadiness`, CI logs `connection refused (localhost:5050)`
+- **Symptom**: Headed Edge + `Development` env still fail — HTTP probe after timeout shows **port 5050 not listening**; DevExpress `WaitScriptLoading` times out at 60s while Kestrel is still in `Startup.Configure` (fresh DB template seed, schema gates).
+- **Fix / reuse**: **Pre-launch** `Visa2026.Blazor.Server.exe` with redirected logs (`easytest-host-logs/`), **`WaitUntilHttpResponds` up to 12 min on CI**, then `RunApplication`. Skip **`UserReportTemplateSeedGate`** when **`EasyTestHostMode`**. Upload host log artifact from workflow.
+- **Reuse**: EasyTest 60s script wait is not host-startup wait — start host explicitly before `RunApplication` on slow/CI agents.
+
 ### 2026-06-11 — GHA: `--environment EasyTest` breaks HTTP-only :5050 host
 
 - **Outcome**: negative → fix

@@ -44,6 +44,7 @@ internal static class EasyTestApplicationLauncher
                 Trace.WriteLine(timeoutMessage);
                 Console.WriteLine(timeoutMessage);
                 EasyTestHostReadiness.LogHttpProbe($"After timeout (attempt {attempt})");
+                Console.WriteLine(EasyTestHostProcessLauncher.BuildDiagnostics());
             }
         }
     }
