@@ -353,6 +353,7 @@ namespace Visa2026.E2E.Tests
                         if (newAction != null)
                         {
                             newAction.Execute();
+                            WaitForPassportDetailReady();
                             return;
                         }
                     }
@@ -428,6 +429,27 @@ namespace Visa2026.E2E.Tests
             }
         }
 
+        private void WaitForPassportDetailReady()
+        {
+            DateTime deadline = DateTime.UtcNow + EasyTestCITuning.PassportDetailOpenTimeout;
+            while (DateTime.UtcNow < deadline)
+            {
+                if (IsPassportDetailFormReady()
+                    || EasyTestBlazorNavigationHelper.UrlContains(AppContext, "Passport_DetailView")
+                    || EasyTestBlazorNavigationHelper.IsHookInputVisible(
+                        AppContext,
+                        E2ETestPassportHookTestIds.PassportNumber))
+                {
+                    return;
+                }
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            }
+
+            throw new InvalidOperationException(
+                $"Passport detail did not open after nested New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
         private void FillPassportFormWithRetry(params EasyTestParameter[] fields)
         {
             foreach (EasyTestParameter field in fields)
@@ -449,26 +471,30 @@ namespace Visa2026.E2E.Tests
 
         private void FillSinglePassportFieldWithRetry(EasyTestParameter field)
         {
-            for (var attempt = 0; attempt < 10; attempt++)
+            int maxAttempts = EasyTestCITuning.FormFieldMaxAttempts;
+            TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
                 try
                 {
                     AppContext.GetForm().FillForm(new EasyTestParameter(field.Name, field.Value));
                     return;
                 }
-                catch (AdapterOperationException) when (attempt < 9)
+                catch (AdapterOperationException)
                 {
-                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                    if (attempt < maxAttempts - 1)
+                        Thread.Sleep(delay);
                 }
             }
 
-            if (PassportFieldHookTestIds.TryGetValue(field.Name, out string? testId))
-            {
-                EasyTestBlazorNavigationHelper.FillInputByTestId(AppContext, testId, field.Value);
+            if (PassportFieldHookTestIds.TryGetValue(field.Name, out string? testId)
+                && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
                 return;
-            }
 
-            throw new InvalidOperationException($"Could not fill passport form field: {field.Name}.");
+            throw new InvalidOperationException(
+                $"Could not fill passport form field: {field.Name} " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
         private void AssertEmployeeDetailShowsPersonalNumber(string personalNumber)
@@ -525,27 +551,29 @@ namespace Visa2026.E2E.Tests
 
         private void FillSingleFieldWithRetry(EasyTestParameter field)
         {
+            int maxAttempts = EasyTestCITuning.FormFieldMaxAttempts;
+            TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
+
             foreach (string caption in GetCaptionAliases(field.Name))
             {
-                for (var attempt = 0; attempt < 10; attempt++)
+                for (var attempt = 0; attempt < maxAttempts; attempt++)
                 {
                     try
                     {
                         AppContext.GetForm().FillForm(new EasyTestParameter(caption, field.Value));
                         return;
                     }
-                    catch (AdapterOperationException) when (attempt < 9)
+                    catch (AdapterOperationException)
                     {
-                        Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                        if (attempt < maxAttempts - 1)
+                            Thread.Sleep(delay);
                     }
                 }
             }
 
-            if (PersonFieldHookTestIds.TryGetValue(field.Name, out string? testId))
-            {
-                EasyTestBlazorNavigationHelper.FillInputByTestId(AppContext, testId, field.Value);
+            if (PersonFieldHookTestIds.TryGetValue(field.Name, out string? testId)
+                && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
                 return;
-            }
 
             throw new InvalidOperationException($"Could not fill form field: {field.Name}.");
         }

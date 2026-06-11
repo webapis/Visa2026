@@ -10,6 +10,19 @@ internal static class EasyTestCITuning
     internal static int RunApplicationMaxAttempts =>
         IsTruthy(Environment.GetEnvironmentVariable("CI")) ? 3 : 1;
 
+    internal static int FormFieldMaxAttempts =>
+        IsTruthy(Environment.GetEnvironmentVariable("CI")) ? 30 : 10;
+
+    internal static TimeSpan FormFieldRetryDelay =>
+        IsTruthy(Environment.GetEnvironmentVariable("CI"))
+            ? TimeSpan.FromMilliseconds(1000)
+            : TimeSpan.FromMilliseconds(500);
+
+    internal static TimeSpan PassportDetailOpenTimeout =>
+        IsTruthy(Environment.GetEnvironmentVariable("CI"))
+            ? TimeSpan.FromSeconds(90)
+            : TimeSpan.FromSeconds(45);
+
     private static bool IsTruthy(string? value) =>
         string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
         || string.Equals(value, "1", StringComparison.OrdinalIgnoreCase);

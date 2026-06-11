@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reflection;
 using DevExpress.EasyTest.Framework;
 using OpenQA.Selenium;
@@ -31,24 +32,13 @@ internal static class EasyTestBlazorNavigationHelper
     /// Fallback when EasyTest <see cref="ApplicationContextExtensions.GetForm"/> cannot resolve a Blazor editor by caption
     /// (common for date pickers). Uses hook <c>InputId</c> / <c>data-testid</c> from Person E2E selectors.
     /// </summary>
-    public static void FillInputByTestId(IApplicationContext appContext, string testId, string value)
+    public static bool TryFillInputByTestId(IApplicationContext appContext, string testId, string value)
     {
-        IWebDriver driver = ResolveWebDriver(appContext)
-            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
 
-        string[] selectors =
-        [
-            $"#{testId}",
-            $"[data-testid='{testId}'] input",
-            $"[data-testid='{testId}'] textarea",
-            $".e2e-{testId} input",
-            $".e2e-{testId} textarea",
-            $"[data-testid='{testId}']",
-            $".e2e-{testId}",
-        ];
-
-        Exception? lastError = null;
-        foreach (string selector in selectors)
+        foreach (string selector in GetHookInputSelectors(testId))
         {
             try
             {
@@ -61,18 +51,52 @@ internal static class EasyTestBlazorNavigationHelper
                 element.SendKeys(Keys.Delete);
                 element.SendKeys(value);
                 element.SendKeys(Keys.Tab);
-                return;
+                return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                lastError = ex;
+                // Try next selector.
             }
         }
 
-        throw new InvalidOperationException(
-            $"Could not fill hook input '{testId}' with value '{value}'.",
-            lastError);
+        return false;
     }
+
+    public static void FillInputByTestId(IApplicationContext appContext, string testId, string value)
+    {
+        if (TryFillInputByTestId(appContext, testId, value))
+            return;
+
+        throw new InvalidOperationException($"Could not fill hook input '{testId}' with value '{value}'.");
+    }
+
+    public static bool IsHookInputVisible(IApplicationContext appContext, string testId)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        try
+        {
+            return GetHookInputSelectors(testId)
+                .Any(selector => driver.FindElements(By.CssSelector(selector)).Any(e => e.Displayed));
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
+    private static string[] GetHookInputSelectors(string testId) =>
+    [
+        $"#{testId}",
+        $"[data-testid='{testId}'] input",
+        $"[data-testid='{testId}'] textarea",
+        $".e2e-{testId} input",
+        $".e2e-{testId} textarea",
+        $"[data-testid='{testId}']",
+        $".e2e-{testId}",
+    ];
 
     public static bool ListHasColumnHeader(IApplicationContext appContext, string columnCaption)
     {
