@@ -95,6 +95,69 @@ internal static class EasyTestBlazorNavigationHelper
     /// <summary>
     /// Opens a ListView row when EasyTest <see cref="ApplicationContextExtensions.GetGrid"/>.ProcessRow cannot resolve Blazor column captions.
     /// </summary>
+    public static void ClickByTestId(IApplicationContext appContext, string testId, TimeSpan? timeout = null)
+    {
+        IWebDriver driver = ResolveWebDriver(appContext)
+            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+
+        TimeSpan wait = timeout ?? TimeSpan.FromSeconds(30);
+        DateTime deadline = DateTime.UtcNow + wait;
+
+        string[] selectors =
+        [
+            $"[data-testid='{testId}']",
+            $"#{testId}",
+            $".e2e-{testId}",
+        ];
+
+        Exception? lastError = null;
+        while (DateTime.UtcNow < deadline)
+        {
+            foreach (string selector in selectors)
+            {
+                try
+                {
+                    foreach (IWebElement element in driver.FindElements(By.CssSelector(selector)))
+                    {
+                        if (!element.Displayed || !element.Enabled)
+                            continue;
+
+                        element.Click();
+                        Thread.Sleep(TimeSpan.FromMilliseconds(300));
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    lastError = ex;
+                }
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(400));
+        }
+
+        throw new InvalidOperationException(
+            $"Element with test id '{testId}' was not clickable.",
+            lastError);
+    }
+
+    public static bool TryExecuteJavaScript(IApplicationContext appContext, string script, out object? result)
+    {
+        result = null;
+        if (ResolveWebDriver(appContext) is not IJavaScriptExecutor js)
+            return false;
+
+        try
+        {
+            result = js.ExecuteScript(script);
+            return true;
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
     public static void ClickListRowContaining(IApplicationContext appContext, string cellText)
     {
         IWebDriver driver = ResolveWebDriver(appContext)

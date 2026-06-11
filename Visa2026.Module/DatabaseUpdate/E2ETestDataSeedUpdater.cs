@@ -27,15 +27,24 @@ public sealed class E2ETestDataSeedUpdater : ModuleUpdater
         if (!IsEasyTestDatabase())
             return;
 
-        if (ObjectSpace.GetObjectsQuery<Person>()
-            .Any(p => p.PersonalNumber == E2ETestDataSeed.PersonPersonalNumber))
+        Person? existing = ObjectSpace.GetObjectsQuery<Person>()
+            .FirstOrDefault(p => p.PersonalNumber == E2ETestDataSeed.PersonPersonalNumber);
+
+        if (existing != null)
+        {
+            EnsureSeedEmployeeRole(existing);
+            EnsureSeedPassport(existing);
+            ObjectSpace.CommitChanges();
             return;
+        }
 
         var gender = FirstOrDefault<Gender>();
         var country = FirstOrDefault<Country>();
         var maritalStatus = FirstOrDefault<MaritalStatus>();
         var passportType = FirstOrDefault<PassportType>();
-        var projectContract = FirstOrDefault<ProjectContract>();
+        var projectContract = ObjectSpace.GetObjectsQuery<ProjectContract>()
+            .FirstOrDefault(p => p.NameTm != null && p.NameTm.Contains(E2ETestEmployeeCreateValues.ProjectContractDisplay))
+            ?? FirstOrDefault<ProjectContract>();
 
         if (gender == null || country == null || maritalStatus == null || passportType == null || projectContract == null)
         {
@@ -44,7 +53,7 @@ public sealed class E2ETestDataSeedUpdater : ModuleUpdater
         }
 
         var person = ObjectSpace.CreateObject<Person>();
-        person.IsEmployee = true;
+        PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee);
         person.FirstName = E2ETestDataSeed.PersonFirstName;
         person.LastName = E2ETestDataSeed.PersonLastName;
         person.PersonalNumber = E2ETestDataSeed.PersonPersonalNumber;
@@ -59,6 +68,48 @@ public sealed class E2ETestDataSeedUpdater : ModuleUpdater
         person.ProjectContract = projectContract;
         person.HireDate = DateTime.Today.AddYears(-1);
 
+        CreateSeedPassport(person, passportType, country);
+
+        ObjectSpace.CommitChanges();
+
+        Tracing.Tracer.LogText($"E2ETestDataSeedUpdater: seeded employee {E2ETestDataSeed.PersonFullName}.");
+    }
+
+    private static void EnsureSeedEmployeeRole(Person person)
+    {
+        if (person.PersonRole == PersonRecordRole.Employee)
+            return;
+
+        var previousRole = person.PersonRole;
+        PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee);
+        Tracing.Tracer.LogText(
+            $"E2ETestDataSeedUpdater: corrected {E2ETestDataSeed.PersonPersonalNumber} from {previousRole} to Employee.");
+    }
+
+    private void EnsureSeedPassport(Person person)
+    {
+        bool hasSeedPassport = ObjectSpace.GetObjectsQuery<Passport>()
+            .Any(p => p.Person != null
+                      && p.Person.ID == person.ID
+                      && p.PassportNumber == E2ETestDataSeed.PassportNumber);
+
+        if (hasSeedPassport)
+            return;
+
+        var passportType = FirstOrDefault<PassportType>();
+        var country = FirstOrDefault<Country>();
+        if (passportType == null || country == null)
+        {
+            Tracing.Tracer.LogText("E2ETestDataSeedUpdater: skipped seed passport — lookups missing.");
+            return;
+        }
+
+        CreateSeedPassport(person, passportType, country);
+        Tracing.Tracer.LogText($"E2ETestDataSeedUpdater: added seed passport {E2ETestDataSeed.PassportNumber}.");
+    }
+
+    private void CreateSeedPassport(Person person, PassportType passportType, Country country)
+    {
         var passport = ObjectSpace.CreateObject<Passport>();
         passport.Person = person;
         passport.PassportNumber = E2ETestDataSeed.PassportNumber;
@@ -67,10 +118,6 @@ public sealed class E2ETestDataSeedUpdater : ModuleUpdater
         passport.Authority = "E2E Test Authority";
         passport.IssueDate = DateTime.Today.AddYears(-2);
         passport.ExpirationDate = DateTime.Today.AddYears(3);
-
-        ObjectSpace.CommitChanges();
-
-        Tracing.Tracer.LogText($"E2ETestDataSeedUpdater: seeded employee {E2ETestDataSeed.PersonFullName}.");
     }
 
     private bool IsEasyTestDatabase()

@@ -1,0 +1,36 @@
+# Ready scenario — map: person-passport-add-seeded-employee_map.md
+
+id: person-passport-add-seeded-employee
+e2eId: E2E-020
+description: Log in, open seeded employee, add passport on Passports tab, Save, assert passport number
+user: standarduser
+password: ""
+
+env:
+  parentPersonalNumber: E2E-TEST-001
+  passportNumber: E2E-PASS-020
+  passportTypeDisplay: AML — Accredited national passport
+  issuedCountryDisplay: Türkiye
+  issueDate: "15.01.2020"
+  expirationDate: "15.01.2030"
+  authority: E2E second passport authority
+
+steps:
+  - login:
+      user: standarduser
+      password: ""
+  - goto: Person_ListView_Employees
+  - open-grid-row:
+      "Personal Number": E2E-TEST-001
+  - tab: Passports
+  - action: New
+  - fill:
+      "Passport Number": E2E-PASS-020
+      "Passport Type": AML — Accredited national passport
+      "Issue Date": "15.01.2020"
+      "Expiration Date": "15.01.2030"
+      "Authority": E2E second passport authority
+      "Issued Country": Türkiye
+  - action: Save
+  - assert-property:
+      "Passport Number": E2E-PASS-020

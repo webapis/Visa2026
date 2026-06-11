@@ -60,6 +60,7 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 | `login-smoke` | E2E-001 | `SmokeTests.LoginSmoke_AuthenticatedShellLoads` |
 | `login-nav-employees` | E2E-001-nav | `SmokeTests.LoginNavEmployees_ListOpensWithNewAction` |
 | `person-employee-create` | E2E-010 | `EmployeeTests.Employee_Create_RequiredFields_SavesAndAppearsInList` |
+| `person-passport-add-seeded-employee` | E2E-020 | `PassportTests.Passport_AddOnSeededEmployee_SavesAndShowsPassportNumber` |
 
 ### All implemented `[Fact]` tests
 
@@ -67,8 +68,9 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 |------------|-------|---------|
 | `SmokeTests` | 2 | E2E-001, E2E-001-nav |
 | `EmployeeTests` | 1 | E2E-010 |
+| `PassportTests` | 1 | E2E-020 |
 
-**Count:** 3 facts across 2 classes.
+**Count:** 4 facts across 3 classes.
 
 **Full suite:**
 
@@ -94,6 +96,7 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 | ID | Scenario | Status |
 |----|----------|--------|
 | E2E-010 | Create Employee (minimal required fields) | Done |
+| E2E-020 | Add passport on seeded employee (nested Passports tab) | Done |
 | E2E-011 | Create/link Person for employee | Planned |
 | E2E-012 | ApplicationType selection changes visible tabs | Planned |
 
@@ -101,7 +104,7 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-020 | Create Application (canonical type `App_Inv`) | Planned |
+| E2E-030 | Create Application (canonical type `App_Inv`) | Planned |
 | E2E-021 | Add ApplicationItem with person | Planned |
 | E2E-022 | Add ApplicationProgress milestone | Planned |
 | E2E-023 | State Dashboard tile → filtered list | Planned |

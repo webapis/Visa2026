@@ -47,6 +47,46 @@ public static class E2ETestPersonFieldCaptions
     public const string Subcontractor = "Company (Subcontractor)";
 }
 
+/// <summary>Stable values for add-passport-on-seeded-employee E2E (E2E-020).</summary>
+public static class E2ETestPassportCreateValues
+{
+    public const string PassportNumber = "E2E-PASS-020";
+    public const string PassportTypeDisplay = "AML — Accredited national passport";
+    public const string IssuedCountryDisplay = "Türkiye";
+    public const string IssueDate = "15.01.2020";
+    public const string ExpirationDate = "15.01.2030";
+    public const string Authority = "E2E second passport authority";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.Passport"/> detail (required fields).</summary>
+public static class E2ETestPassportFieldCaptions
+{
+    public const string PassportNumber = "Passport Number";
+    public const string PassportType = "Passport Type";
+    public const string IssueDate = "Issue Date";
+    public const string ExpirationDate = "Expiration Date";
+    public const string Authority = "Authority";
+    public const string IssuedCountry = "Issued Country";
+}
+
+/// <summary>Stable <c>data-testid</c> hooks for Person detail tabs and Passport toolbar (Blazor E2E selectors).</summary>
+public static class E2ETestPersonTabHookTestIds
+{
+    public const string PassportsTab = "person-employee-tab-passports";
+    public const string PassportsNestedNew = "person-employee-tab-passports-new";
+}
+
+public static class E2ETestPassportHookTestIds
+{
+    public const string PassportNumber = "passport-passport-number";
+    public const string PassportType = "passport-passport-type";
+    public const string IssueDate = "passport-issue-date";
+    public const string ExpirationDate = "passport-expiration-date";
+    public const string Authority = "passport-authority";
+    public const string IssuedCountry = "passport-issued-country";
+    public const string DetailSave = "passport-detail-save";
+}
+
 /// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {

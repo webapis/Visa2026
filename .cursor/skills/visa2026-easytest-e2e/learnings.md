@@ -117,3 +117,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Context**: `CreateEmployeeWithRequiredFields`, Blazor combos
 - **Fix / reuse**: **`FillSingleFieldWithRetry`** — one `EasyTestParameter` per attempt, not bulk `FillForm(all fields)`.
 - **Reuse**: Lookup fields one-at-a-time with retry.
+
+### 2026-06-11 — E2E seed PersonRole vs IsEmployee
+
+- **Outcome**: negative → fix
+- **Context**: `E2ETestDataSeedUpdater`, `Person_ListView_Employees`, `PassportTests`
+- **Symptom**: Seeded `E2E-TEST-001` missing from Employees list; person exists as **Family Member** (`PersonRole` default). Setting `IsEmployee = true` alone is undone by `Person.OnSaving` → `PersonRoleHelper.SyncIsEmployee`.
+- **Fix / reuse**: Use **`PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee)`** on create; on existing seed row correct role before return. Employees list filters **`PersonRole`**, not `IsEmployee`. EF seed queries: avoid `string.Contains(..., StringComparison)` — not SQL-translatable.
+- **Reuse**: E2E parent Person seed → always `ApplyRole(Employee)`; idempotent role correction for `PersonPersonalNumber`.

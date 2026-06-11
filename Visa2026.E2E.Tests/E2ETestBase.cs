@@ -237,8 +237,11 @@ namespace Visa2026.E2E.Tests
             ExecuteActionWithRetry("Save");
         }
 
-        protected void OpenEmployeeInListByPersonalNumber(string personalNumber)
+        protected void OpenEmployeeInListByPersonalNumber(
+            string personalNumber,
+            string? fullNameFallback = null)
         {
+            fullNameFallback ??= E2ETestEmployeeCreateValues.FullName;
             NavigateEmployeesList();
 
             for (var attempt = 0; attempt < 5; attempt++)
@@ -255,7 +258,7 @@ namespace Visa2026.E2E.Tests
                     try
                     {
                         AppContext.GetGrid().ProcessRow(
-                            new EasyTestParameter("Full Name", E2ETestEmployeeCreateValues.FullName));
+                            new EasyTestParameter("Full Name", fullNameFallback));
                         AssertEmployeeDetailShowsPersonalNumber(personalNumber);
                         return;
                     }
@@ -268,6 +271,213 @@ namespace Visa2026.E2E.Tests
 
             EasyTestBlazorNavigationHelper.ClickListRowContaining(AppContext, personalNumber);
             AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+        }
+
+        /// <summary>
+        /// Opens seeded employee when <see cref="E2ETestDataSeedUpdater"/> ran; otherwise creates the same identity via UI (E2E-020 arrange).
+        /// </summary>
+        protected void EnsureEmployeeParentForChildBoTest()
+        {
+            NavigateEmployeesList();
+
+            if (TryOpenEmployeeRow(E2ETestDataSeed.PersonPersonalNumber, E2ETestDataSeed.PersonFullName))
+                return;
+
+            CreateEmployeeWithRequiredFields(
+                E2ETestDataSeed.PersonPersonalNumber,
+                E2ETestDataSeed.PersonFirstName,
+                E2ETestDataSeed.PersonLastName);
+
+            OpenEmployeeInListByPersonalNumber(
+                E2ETestDataSeed.PersonPersonalNumber,
+                E2ETestDataSeed.PersonFullName);
+        }
+
+        private bool TryOpenEmployeeRow(string personalNumber, string fullNameFallback)
+        {
+            if (!EasyTestBlazorNavigationHelper.ListHasColumnHeader(
+                    AppContext,
+                    E2ETestPersonFieldCaptions.PersonalNumber))
+                return false;
+
+            try
+            {
+                AppContext.GetGrid().ProcessRow(
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber));
+                AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                return true;
+            }
+            catch (AdapterOperationException)
+            {
+                try
+                {
+                    AppContext.GetGrid().ProcessRow(
+                        new EasyTestParameter("Full Name", fullNameFallback));
+                    AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                    return true;
+                }
+                catch (AdapterOperationException)
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>Native EasyTest layout tab — <c>*Action Passports</c> / <see cref="IEasyTestAction.Execute"/>.</summary>
+        protected void ActivatePersonPassportsTab()
+        {
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    var tabAction = AppContext.GetAction("Passports");
+                    if (tabAction != null)
+                    {
+                        tabAction.Execute();
+                        Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                        return;
+                    }
+                }
+                catch (AdapterOperationException) when (attempt < 9)
+                {
+                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                }
+            }
+
+            throw new InvalidOperationException("Could not activate Passports tab on Person detail.");
+        }
+
+        protected void ExecutePersonPassportsNestedNew()
+        {
+            ActivatePersonPassportsTab();
+
+            string[] newActionCaptions = ["Passports.New", "New"];
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                foreach (string caption in newActionCaptions)
+                {
+                    try
+                    {
+                        var newAction = AppContext.GetAction(caption);
+                        if (newAction != null)
+                        {
+                            newAction.Execute();
+                            return;
+                        }
+                    }
+                    catch (AdapterOperationException) when (attempt < 9)
+                    {
+                        // Try next caption or retry after tab content loads.
+                    }
+                }
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            }
+
+            throw new InvalidOperationException("Could not execute New on Person detail Passports nested list.");
+        }
+
+        /// <summary>
+        /// Fills required <see cref="BusinessObjects.Passport"/> detail fields (Person link comes from nested New).
+        /// </summary>
+        protected void FillPassportRequiredFields(
+            string passportNumber = E2ETestPassportCreateValues.PassportNumber,
+            string passportTypeDisplay = E2ETestPassportCreateValues.PassportTypeDisplay,
+            string issuedCountryDisplay = E2ETestPassportCreateValues.IssuedCountryDisplay)
+        {
+            FillPassportFormWithRetry(
+                new EasyTestParameter(E2ETestPassportFieldCaptions.PassportNumber, passportNumber),
+                new EasyTestParameter(E2ETestPassportFieldCaptions.PassportType, passportTypeDisplay),
+                new EasyTestParameter(E2ETestPassportFieldCaptions.IssueDate, E2ETestPassportCreateValues.IssueDate),
+                new EasyTestParameter(E2ETestPassportFieldCaptions.ExpirationDate, E2ETestPassportCreateValues.ExpirationDate),
+                new EasyTestParameter(E2ETestPassportFieldCaptions.Authority, E2ETestPassportCreateValues.Authority),
+                new EasyTestParameter(E2ETestPassportFieldCaptions.IssuedCountry, issuedCountryDisplay));
+        }
+
+        protected void SavePassportDetail()
+        {
+            ExecuteActionWithRetry("Save");
+        }
+
+        protected void AssertPassportDetailShowsNumber(string passportNumber)
+        {
+            for (var attempt = 0; attempt < 20; attempt++)
+            {
+                try
+                {
+                    if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, "Passport_DetailView")
+                        || IsPassportDetailFormReady())
+                    {
+                        string actual = AppContext.GetForm().GetPropertyValue(E2ETestPassportFieldCaptions.PassportNumber);
+                        Assert.Equal(passportNumber, actual);
+                        return;
+                    }
+                }
+                catch (AdapterOperationException) when (attempt < 19)
+                {
+                    // Passport detail may still be opening.
+                }
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            }
+
+            throw new InvalidOperationException(
+                $"Passport detail with number '{passportNumber}' was not detected (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private bool IsPassportDetailFormReady()
+        {
+            try
+            {
+                return AppContext.GetAction("Save") != null;
+            }
+            catch (AdapterOperationException)
+            {
+                return false;
+            }
+        }
+
+        private void FillPassportFormWithRetry(params EasyTestParameter[] fields)
+        {
+            foreach (EasyTestParameter field in fields)
+            {
+                FillSinglePassportFieldWithRetry(field);
+            }
+        }
+
+        private static readonly Dictionary<string, string> PassportFieldHookTestIds =
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                [E2ETestPassportFieldCaptions.PassportNumber] = E2ETestPassportHookTestIds.PassportNumber,
+                [E2ETestPassportFieldCaptions.PassportType] = E2ETestPassportHookTestIds.PassportType,
+                [E2ETestPassportFieldCaptions.IssueDate] = E2ETestPassportHookTestIds.IssueDate,
+                [E2ETestPassportFieldCaptions.ExpirationDate] = E2ETestPassportHookTestIds.ExpirationDate,
+                [E2ETestPassportFieldCaptions.Authority] = E2ETestPassportHookTestIds.Authority,
+                [E2ETestPassportFieldCaptions.IssuedCountry] = E2ETestPassportHookTestIds.IssuedCountry,
+            };
+
+        private void FillSinglePassportFieldWithRetry(EasyTestParameter field)
+        {
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    AppContext.GetForm().FillForm(new EasyTestParameter(field.Name, field.Value));
+                    return;
+                }
+                catch (AdapterOperationException) when (attempt < 9)
+                {
+                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
+                }
+            }
+
+            if (PassportFieldHookTestIds.TryGetValue(field.Name, out string? testId))
+            {
+                EasyTestBlazorNavigationHelper.FillInputByTestId(AppContext, testId, field.Value);
+                return;
+            }
+
+            throw new InvalidOperationException($"Could not fill passport form field: {field.Name}.");
         }
 
         private void AssertEmployeeDetailShowsPersonalNumber(string personalNumber)
