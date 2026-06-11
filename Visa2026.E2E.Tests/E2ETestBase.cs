@@ -288,6 +288,9 @@ namespace Visa2026.E2E.Tests
                     Thread.Sleep(delay);
             }
 
+            EasyTestBlazorNavigationHelper.TryDumpDiagnostics(
+                AppContext, EasyTestHostProcessLauncher.LogDirectory, "passports-tab");
+
             throw new InvalidOperationException(
                 $"Could not activate Passports tab on Person detail (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
@@ -320,6 +323,9 @@ namespace Visa2026.E2E.Tests
                 if (attempt < maxAttempts - 1)
                     Thread.Sleep(delay);
             }
+
+            EasyTestBlazorNavigationHelper.TryDumpDiagnostics(
+                AppContext, EasyTestHostProcessLauncher.LogDirectory, "passport-nested-new");
 
             if (!nestedNewClicked)
             {

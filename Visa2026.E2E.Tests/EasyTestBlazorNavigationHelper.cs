@@ -21,6 +21,43 @@ internal static class EasyTestBlazorNavigationHelper
         WaitForDocumentReady(driver, TimeSpan.FromSeconds(45));
     }
 
+    /// <summary>
+    /// Best-effort capture of the current browser state (URL, page HTML, screenshot)
+    /// into <paramref name="outputDirectory"/> for post-mortem of CI-only failures.
+    /// Never throws — diagnostics must not mask the original test error.
+    /// </summary>
+    public static void TryDumpDiagnostics(IApplicationContext appContext, string outputDirectory, string label)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return;
+
+        string baseName;
+        try
+        {
+            Directory.CreateDirectory(outputDirectory);
+            string stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
+            baseName = Path.Combine(outputDirectory, $"diag-{label}-{stamp}");
+        }
+        catch
+        {
+            return;
+        }
+
+        try { File.WriteAllText(baseName + ".url.txt", driver.Url ?? string.Empty); }
+        catch { /* diagnostics are best-effort */ }
+
+        try { File.WriteAllText(baseName + ".page.html", driver.PageSource ?? string.Empty); }
+        catch { /* diagnostics are best-effort */ }
+
+        try
+        {
+            if (driver is ITakesScreenshot shooter)
+                shooter.GetScreenshot().SaveAsFile(baseName + ".png");
+        }
+        catch { /* diagnostics are best-effort */ }
+    }
+
     public static bool UrlContains(IApplicationContext appContext, string fragment) =>
         TryGetCurrentUrl(appContext, out string? url)
         && url.Contains(fragment, StringComparison.OrdinalIgnoreCase);
