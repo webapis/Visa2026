@@ -51,8 +51,8 @@ Single officer session: **log on** → **Employees list** → **create employee*
 | Person required fields | `Person` employee detail | fill | verified |
 | `Save` | Person detail | employee create | verified |
 | `Personal Number` | grid open | assert employee | verified |
-| *(tab)* | Passports | activate | verified |
-| `New` | nested Passports | passport create | verified |
+| `Passports` | layout tab | activate | verified | native `GetAction("Passports").Execute()` |
+| `Passports.New` | nested Passports list | passport create | verified | fallback `New` |
 | Passport required fields | `Passport` detail | fill | verified |
 | `Save` | Passport detail | passport create | verified |
 | `Passport Number` | assert | verified | `E2E-PASS-020` |

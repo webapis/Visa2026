@@ -28,76 +28,6 @@ internal static class EasyTestBlazorNavigationHelper
     public static string GetCurrentUrl(IApplicationContext appContext) =>
         TryGetCurrentUrl(appContext, out string? url) ? url : string.Empty;
 
-    /// <summary>
-    /// Fallback when EasyTest <see cref="ApplicationContextExtensions.GetForm"/> cannot resolve a Blazor editor by caption
-    /// (common for date pickers). Uses hook <c>InputId</c> / <c>data-testid</c> from Person E2E selectors.
-    /// </summary>
-    public static bool TryFillInputByTestId(IApplicationContext appContext, string testId, string value)
-    {
-        IWebDriver? driver = ResolveWebDriver(appContext);
-        if (driver == null)
-            return false;
-
-        foreach (string selector in GetHookInputSelectors(testId))
-        {
-            try
-            {
-                IWebElement element = driver.FindElement(By.CssSelector(selector));
-                if (!element.Displayed)
-                    continue;
-
-                element.Click();
-                element.SendKeys(Keys.Control + "a");
-                element.SendKeys(Keys.Delete);
-                element.SendKeys(value);
-                element.SendKeys(Keys.Tab);
-                return true;
-            }
-            catch (Exception)
-            {
-                // Try next selector.
-            }
-        }
-
-        return false;
-    }
-
-    public static void FillInputByTestId(IApplicationContext appContext, string testId, string value)
-    {
-        if (TryFillInputByTestId(appContext, testId, value))
-            return;
-
-        throw new InvalidOperationException($"Could not fill hook input '{testId}' with value '{value}'.");
-    }
-
-    public static bool IsHookInputVisible(IApplicationContext appContext, string testId)
-    {
-        IWebDriver? driver = ResolveWebDriver(appContext);
-        if (driver == null)
-            return false;
-
-        try
-        {
-            return GetHookInputSelectors(testId)
-                .Any(selector => driver.FindElements(By.CssSelector(selector)).Any(e => e.Displayed));
-        }
-        catch (WebDriverException)
-        {
-            return false;
-        }
-    }
-
-    private static string[] GetHookInputSelectors(string testId) =>
-    [
-        $"#{testId}",
-        $"[data-testid='{testId}'] input",
-        $"[data-testid='{testId}'] textarea",
-        $".e2e-{testId} input",
-        $".e2e-{testId} textarea",
-        $"[data-testid='{testId}']",
-        $".e2e-{testId}",
-    ];
-
     public static bool ListHasColumnHeader(IApplicationContext appContext, string columnCaption)
     {
         IWebDriver? driver = ResolveWebDriver(appContext);
@@ -114,55 +44,6 @@ internal static class EasyTestBlazorNavigationHelper
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// Opens a ListView row when EasyTest <see cref="ApplicationContextExtensions.GetGrid"/>.ProcessRow cannot resolve Blazor column captions.
-    /// </summary>
-    public static void ClickByTestId(IApplicationContext appContext, string testId, TimeSpan? timeout = null)
-    {
-        IWebDriver driver = ResolveWebDriver(appContext)
-            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
-
-        TimeSpan wait = timeout ?? TimeSpan.FromSeconds(30);
-        DateTime deadline = DateTime.UtcNow + wait;
-
-        string[] selectors =
-        [
-            $"[data-testid='{testId}']",
-            $"#{testId}",
-            $".e2e-{testId}",
-        ];
-
-        Exception? lastError = null;
-        while (DateTime.UtcNow < deadline)
-        {
-            foreach (string selector in selectors)
-            {
-                try
-                {
-                    foreach (IWebElement element in driver.FindElements(By.CssSelector(selector)))
-                    {
-                        if (!element.Displayed || !element.Enabled)
-                            continue;
-
-                        element.Click();
-                        Thread.Sleep(TimeSpan.FromMilliseconds(300));
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    lastError = ex;
-                }
-            }
-
-            Thread.Sleep(TimeSpan.FromMilliseconds(400));
-        }
-
-        throw new InvalidOperationException(
-            $"Element with test id '{testId}' was not clickable.",
-            lastError);
     }
 
     public static bool TryExecuteJavaScript(IApplicationContext appContext, string script, out object? result)

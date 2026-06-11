@@ -263,7 +263,10 @@ namespace Visa2026.E2E.Tests
         /// <summary>Native EasyTest layout tab — <c>*Action Passports</c> / <see cref="IEasyTestAction.Execute"/>.</summary>
         protected void ActivatePersonPassportsTab()
         {
-            for (var attempt = 0; attempt < 10; attempt++)
+            int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
+            TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
                 try
                 {
@@ -271,32 +274,14 @@ namespace Visa2026.E2E.Tests
                     if (tabAction != null)
                     {
                         tabAction.Execute();
-                        Thread.Sleep(TimeSpan.FromMilliseconds(500));
-                        return;
+                        Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+                        if (IsPassportsNestedListReady())
+                            return;
                     }
                 }
-                catch (AdapterOperationException) when (attempt < 9)
+                catch (AdapterOperationException)
                 {
-                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
-                }
-            }
-
-            throw new InvalidOperationException("Could not activate Passports tab on Person detail.");
-        }
-
-        protected void ExecutePersonPassportsNestedNew()
-        {
-            ActivatePersonPassportsTab();
-
-            int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
-            TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
-
-            for (var attempt = 0; attempt < maxAttempts; attempt++)
-            {
-                if (TryExecutePassportsNestedNew())
-                {
-                    WaitForPassportDetailReady();
-                    return;
+                    // Retry after Blazor tab content loads.
                 }
 
                 if (attempt < maxAttempts - 1)
@@ -304,37 +289,59 @@ namespace Visa2026.E2E.Tests
             }
 
             throw new InvalidOperationException(
-                $"Could not open nested passport detail after New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+                $"Could not activate Passports tab on Person detail (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
-        private bool TryExecutePassportsNestedNew()
+        protected void ExecutePersonPassportsNestedNew()
+        {
+            ActivatePersonPassportsTab();
+
+            string[] newActionCaptions = ["Passports.New", "New"];
+            int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
+            TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
+            var nestedNewClicked = false;
+
+            for (var attempt = 0; attempt < maxAttempts && !nestedNewClicked; attempt++)
+            {
+                foreach (string caption in newActionCaptions)
+                {
+                    try
+                    {
+                        var newAction = AppContext.GetAction(caption);
+                        if (newAction == null)
+                            continue;
+
+                        newAction.Execute();
+                        nestedNewClicked = true;
+                        break;
+                    }
+                    catch (AdapterOperationException)
+                    {
+                        // Try next caption or retry after nested list loads.
+                    }
+                }
+
+                if (!nestedNewClicked && attempt < maxAttempts - 1)
+                    Thread.Sleep(delay);
+            }
+
+            if (!nestedNewClicked)
+            {
+                throw new InvalidOperationException(
+                    "Could not execute New on Person detail Passports nested list (native EasyTest actions).");
+            }
+
+            WaitForPassportDetailReady();
+        }
+
+        private bool IsPassportsNestedListReady()
         {
             try
             {
-                var passportsNew = AppContext.GetAction("Passports.New");
-                if (passportsNew != null)
-                {
-                    passportsNew.Execute();
-                    Thread.Sleep(TimeSpan.FromMilliseconds(500));
-                    if (IsPassportDetailFormReady())
-                        return true;
-                }
+                return AppContext.GetAction("Passports.New") != null
+                       || AppContext.GetAction("New") != null;
             }
             catch (AdapterOperationException)
-            {
-                // Fall through to hook click.
-            }
-
-            try
-            {
-                EasyTestBlazorNavigationHelper.ClickByTestId(
-                    AppContext,
-                    E2ETestPersonTabHookTestIds.PassportsNestedNew,
-                    TimeSpan.FromSeconds(15));
-                Thread.Sleep(TimeSpan.FromMilliseconds(500));
-                return IsPassportDetailFormReady();
-            }
-            catch (Exception)
             {
                 return false;
             }
@@ -395,11 +402,6 @@ namespace Visa2026.E2E.Tests
             if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, "Passport_DetailView"))
                 return true;
 
-            if (EasyTestBlazorNavigationHelper.IsHookInputVisible(
-                    AppContext,
-                    E2ETestPassportHookTestIds.PassportNumber))
-                return true;
-
             try
             {
                 if (AppContext.GetAction("Save") == null)
@@ -437,25 +439,10 @@ namespace Visa2026.E2E.Tests
             }
         }
 
-        private static readonly Dictionary<string, string> PassportFieldHookTestIds =
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-                [E2ETestPassportFieldCaptions.PassportNumber] = E2ETestPassportHookTestIds.PassportNumber,
-                [E2ETestPassportFieldCaptions.PassportType] = E2ETestPassportHookTestIds.PassportType,
-                [E2ETestPassportFieldCaptions.IssueDate] = E2ETestPassportHookTestIds.IssueDate,
-                [E2ETestPassportFieldCaptions.ExpirationDate] = E2ETestPassportHookTestIds.ExpirationDate,
-                [E2ETestPassportFieldCaptions.Authority] = E2ETestPassportHookTestIds.Authority,
-                [E2ETestPassportFieldCaptions.IssuedCountry] = E2ETestPassportHookTestIds.IssuedCountry,
-            };
-
         private void FillSinglePassportFieldWithRetry(EasyTestParameter field)
         {
             int maxAttempts = EasyTestCITuning.FormFieldMaxAttempts;
             TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
-
-            if (PassportFieldHookTestIds.TryGetValue(field.Name, out string? testId)
-                && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
-                return;
 
             for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
@@ -466,10 +453,6 @@ namespace Visa2026.E2E.Tests
                 }
                 catch (AdapterOperationException)
                 {
-                    if (PassportFieldHookTestIds.TryGetValue(field.Name, out testId)
-                        && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
-                        return;
-
                     if (attempt < maxAttempts - 1)
                         Thread.Sleep(delay);
                 }
@@ -512,26 +495,6 @@ namespace Visa2026.E2E.Tests
             }
         }
 
-        private static readonly Dictionary<string, string> PersonFieldHookTestIds =
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-                [E2ETestPersonFieldCaptions.FirstName] = "person-first-name",
-                [E2ETestPersonFieldCaptions.LastName] = "person-last-name",
-                [E2ETestPersonFieldCaptions.PersonalNumber] = "person-personal-number",
-                [E2ETestPersonFieldCaptions.DateOfBirth] = "person-date-of-birth",
-                [E2ETestPersonFieldCaptions.BirthPlace] = "person-birth-place",
-                [E2ETestPersonFieldCaptions.CountryOfBirth] = "person-country-of-birth",
-                [E2ETestPersonFieldCaptions.Gender] = "person-gender",
-                [E2ETestPersonFieldCaptions.MaritalStatus] = "person-marital-status",
-                [E2ETestPersonFieldCaptions.Nationality] = "person-nationality",
-                [E2ETestPersonFieldCaptions.ForeignAddress] = "person-foreign-address",
-                [E2ETestPersonFieldCaptions.ForeignAddressCountry] = "person-foreign-address-country",
-                [E2ETestPersonFieldCaptions.ProjectContract] = "person-project-contract",
-                [E2ETestPersonFieldCaptions.Subcontractor] = "person-subcontractor",
-                ["Date of Birth"] = "person-date-of-birth",
-                ["Country of Birth"] = "person-country-of-birth",
-            };
-
         private void FillSingleFieldWithRetry(EasyTestParameter field)
         {
             int maxAttempts = EasyTestCITuning.FormFieldMaxAttempts;
@@ -553,10 +516,6 @@ namespace Visa2026.E2E.Tests
                     }
                 }
             }
-
-            if (PersonFieldHookTestIds.TryGetValue(field.Name, out string? testId)
-                && EasyTestBlazorNavigationHelper.TryFillInputByTestId(AppContext, testId, field.Value))
-                return;
 
             throw new InvalidOperationException($"Could not fill form field: {field.Name}.");
         }

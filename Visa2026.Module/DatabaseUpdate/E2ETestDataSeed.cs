@@ -58,24 +58,6 @@ public static class E2ETestPassportFieldCaptions
     public const string IssuedCountry = "Issued Country";
 }
 
-/// <summary>Stable <c>data-testid</c> hooks for Person detail tabs and Passport toolbar (Blazor E2E selectors).</summary>
-public static class E2ETestPersonTabHookTestIds
-{
-    public const string PassportsTab = "person-employee-tab-passports";
-    public const string PassportsNestedNew = "person-employee-tab-passports-new";
-}
-
-public static class E2ETestPassportHookTestIds
-{
-    public const string PassportNumber = "passport-passport-number";
-    public const string PassportType = "passport-passport-type";
-    public const string IssueDate = "passport-issue-date";
-    public const string ExpirationDate = "passport-expiration-date";
-    public const string Authority = "passport-authority";
-    public const string IssuedCountry = "passport-issued-country";
-    public const string DetailSave = "passport-detail-save";
-}
-
 /// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {
