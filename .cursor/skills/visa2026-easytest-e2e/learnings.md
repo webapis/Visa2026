@@ -80,6 +80,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: Dedicated profile on **`:5050`**; `BlazorApplicationOptions` must pass explicit `url` + `configuration` (not two-arg ctor reading IIS Express).
 - **Reuse**: Never run EasyTest against IDE `:5000`.
 
+### 2026-06-11 — `--launch-profile` ignored by built `.exe` (ERR_CONNECTION_REFUSED on :5050)
+
+- **Outcome**: negative → positive
+- **Context**: `E2ETestBase` `arguments: --launch-profile "Visa2026 - EasyTest (LocalDB)"`, preflight `DropDB` + DB provision
+- **Symptom**: Edge on **`localhost:5050`** → `ERR_CONNECTION_REFUSED`; host process listening on **`:5000`** instead; DB missing after drop until `--updateDatabase`.
+- **Fix / reuse**: EasyTest launches **`bin/EasyTest/net8.0/Visa2026.Blazor.Server.exe`** — **`--launch-profile` only works with `dotnet run`**. Use **`EasyTestHostLaunch.HostArguments`**: `--urls http://localhost:5050 --environment EasyTest` + **`appsettings.EasyTest.json`** (`Visa2026EasyTest` connection string). After `DropDB`, run **`--updateDatabase --silent`** via **`EasyTestDatabaseProvisioner`** (create empty catalog first). **`EasyTestHostReadiness`** polls HTTP after `RunApplication`.
+- **Reuse**: IDE F5 may still use launch profile; E2E must use explicit `--urls` + `--environment EasyTest` on the exe.
+
 ### 2026-06-08 — msedgedriver CDN
 
 - **Outcome**: negative

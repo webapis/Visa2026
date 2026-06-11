@@ -3,12 +3,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.413</AssemblyVersion>
-    <FileVersion>1.0.0.413</FileVersion>
+    <AssemblyVersion>1.0.0.414</AssemblyVersion>
+    <FileVersion>1.0.0.414</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- dotnet user-secrets (Development): optional override for ConnectionStrings:DefaultConnection -->
     <UserSecretsId>7c3f8e2a-4b1d-4e9c-9f6a-2d8e1c0b4a5f</UserSecretsId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'EasyTest'">
+    <DefineConstants>$(DefineConstants);EASYTEST</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <!-- DevExpress Model Editor may create Model_{culture}.xafml stubs; we use Model.{culture}.xafml from GenerateModelLocalization instead. -->
@@ -20,6 +23,9 @@
     <Content Remove="Model_*.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.EasyTest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Model.xafml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -51,6 +57,9 @@
     <!-- JWT bearer authentication for Web API clients -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Spire.PDF" Version="12.2.14" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'EasyTest'">
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="25.2.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Visa2026.Module\Visa2026.Module.csproj" />

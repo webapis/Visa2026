@@ -17,18 +17,19 @@ namespace Visa2026.E2E.Tests
     {
         protected const string BlazorAppName = "Visa2026Blazor";
         protected const string AppDBName = "Visa2026EasyTest";
-        private const string TestAppUrl = "http://localhost:5050";
         private EasyTestFixtureContext FixtureContext { get; }
-        private static bool _databaseDropped;
 
         protected IApplicationContext AppContext { get; }
+
+        private readonly string _blazorServerProjectPath;
 
         protected E2ETestBase()
         {
             FixtureContext = new EasyTestFixtureContext();
 
-            var blazorServerPath = Path.GetFullPath(
+            _blazorServerProjectPath = Path.GetFullPath(
                 Path.Combine(Environment.CurrentDirectory, @"..\..\..\..\Visa2026.Blazor.Server"));
+            string blazorHostExecutable = EasyTestHostLaunch.ResolveHostExecutable(_blazorServerProjectPath);
 
             var webDriverPath = ResolveWebDriverDirectory();
 
@@ -37,12 +38,12 @@ namespace Visa2026.E2E.Tests
             FixtureContext.RegisterApplications(
                 new BlazorApplicationOptions(
                     name: BlazorAppName,
-                    physicalPath: blazorServerPath,
-                    url: TestAppUrl,
+                    physicalPath: blazorHostExecutable,
+                    url: EasyTestHostEnvironment.BaseUrl,
                     configuration: "EasyTest",
                     ignoreCase: true,
                     browser: "Edge",
-                    arguments: "--launch-profile \"Visa2026 - EasyTest (LocalDB)\"",
+                    arguments: EasyTestHostLaunch.HostArguments,
                     webDriverPath: webDriverPath,
                     browserBinaryPath: string.Empty,
                     runHeadless: EasyTestBrowserMode.RunHeadless)
@@ -61,38 +62,9 @@ namespace Visa2026.E2E.Tests
 
         public Task InitializeAsync()
         {
-            KillStaleEasyTestProcesses();
-            FixtureContext.CloseRunningApplications();
-
-            if (!_databaseDropped)
-            {
-                FixtureContext.DropDB(AppDBName);
-                _databaseDropped = true;
-            }
-
+            EasyTestPreflight.PrepareForTestSession(FixtureContext, AppDBName, _blazorServerProjectPath);
             AppContext.RunApplication();
             return Task.CompletedTask;
-        }
-
-        private static void KillStaleEasyTestProcesses()
-        {
-            foreach (var process in new[] { "Visa2026.Blazor.Server", "msedgedriver" }
-                         .SelectMany(Process.GetProcessesByName))
-            {
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                    process.WaitForExit(5000);
-                }
-                catch (Exception)
-                {
-                    // Ignore already-exited or permission-limited processes.
-                }
-                finally
-                {
-                    process.Dispose();
-                }
-            }
         }
 
         protected void Login(string userName = "Admin", string password = "")
@@ -143,7 +115,7 @@ namespace Visa2026.E2E.Tests
             {
                 try
                 {
-                    EasyTestBlazorNavigationHelper.GoToRelativeUrl(AppContext, TestAppUrl, listViewPath);
+                    EasyTestBlazorNavigationHelper.GoToRelativeUrl(AppContext, EasyTestHostEnvironment.BaseUrl, listViewPath);
 
                     if (IsEmployeesListActive(listViewPath))
                         return;
@@ -378,14 +350,18 @@ namespace Visa2026.E2E.Tests
             }
         }
 
-        public void Dispose()
-        {
-            FixtureContext.CloseRunningApplications();
-        }
+        public void Dispose() => TeardownTestSession();
 
         public Task DisposeAsync()
         {
+            TeardownTestSession();
             return Task.CompletedTask;
+        }
+
+        private void TeardownTestSession()
+        {
+            Trace.WriteLine("[EasyTest] Teardown — closing browser and Blazor host.");
+            FixtureContext.CloseRunningApplications();
         }
 
         private static string ResolveWebDriverDirectory()

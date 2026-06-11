@@ -27,16 +27,21 @@ Profile: **`Visa2026 - EasyTest (LocalDB)`**
 ### `E2ETestBase` registration
 
 ```csharp
+// physicalPath must be the built .exe — not the project folder (dotnet run honors launch profiles; the .exe does not).
+string hostExe = EasyTestHostLaunch.ResolveHostExecutable(blazorServerProjectPath);
+
 new BlazorApplicationOptions(
     name: "Visa2026Blazor",
-    physicalPath: blazorServerPath,
+    physicalPath: hostExe,
     url: "http://localhost:5050",
     configuration: "EasyTest",
-    arguments: "--launch-profile \"Visa2026 - EasyTest (LocalDB)\"",
+    arguments: EasyTestHostLaunch.HostArguments, // --urls http://localhost:5050 --environment EasyTest
     browser: "Edge",
     runHeadless: EasyTestBrowserMode.RunHeadless,
     webDriverPath: ResolveWebDriverDirectory())
 ```
+
+**Blazor.Server (EasyTest build):** reference `DevExpress.ExpressApp.EasyTest.BlazorAdapter` (conditional on `Configuration==EasyTest`, `EASYTEST` define) and ship `appsettings.EasyTest.json` (`Visa2026EasyTest` connection string).
 
 ### Headed vs headless
 

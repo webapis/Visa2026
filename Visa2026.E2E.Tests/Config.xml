@@ -3,8 +3,9 @@
   <Applications>
     <Application Name="Visa2026Blazor"
                  Url="http://localhost:5050"
-                 PhysicalPath="[ConfigPath]\..\..\Visa2026.Blazor.Server"
+                 PhysicalPath="[ConfigPath]\..\..\Visa2026.Blazor.Server\bin\EasyTest\net8.0\Visa2026.Blazor.Server.exe"
                  Configuration="EasyTest"
+                 Arguments="--urls http://localhost:5050 --environment EasyTest"
                  Browser="Edge"
                  WebDriverPath="[ConfigPath]\.webdrivers"
                  IgnoreCase="true" />

@@ -73,7 +73,7 @@ The application is configured to find the driver automatically through the syste
 
 ### Troubleshooting: HTTP 404 on `localhost:65201`
 
-EasyTest must open **`http://localhost:5050`** (launch profile **`Visa2026 - EasyTest (LocalDB)`**), not port **5000** (IDE dev) or **65201** (legacy IIS Express). If Edge shows *connection refused* on `:5000`, rebuild with **EasyTest** and ensure `E2ETestBase` uses the full `BlazorApplicationOptions` constructor (explicit `url` and `configuration`). Optional: place `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\` (copied to test output on build).
+EasyTest must open **`http://localhost:5050`**, not **5000** (IDE dev). `E2ETestBase` registers the built **`Visa2026.Blazor.Server.exe`** (not the project folder) with **`--urls http://localhost:5050 --environment EasyTest`** — `--launch-profile` only works with `dotnet run` and leaves the standalone host on **:5000** (`ERR_CONNECTION_REFUSED` on **:5050**). After each test preflight `DropDB`, `EasyTestDatabaseProvisioner` creates the catalog and runs **`--updateDatabase --silent`**. Build **EasyTest** (`dotnet build Visa2026.slnx -c EasyTest`). Optional: `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\`.
 
 ### Expected Results
 - **Test Explorer**:
