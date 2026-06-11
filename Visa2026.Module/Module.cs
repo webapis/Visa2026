@@ -122,8 +122,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.E2ETestDataSeedUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)

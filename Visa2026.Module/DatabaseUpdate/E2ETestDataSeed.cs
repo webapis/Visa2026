@@ -1,17 +1,6 @@
 namespace Visa2026.Module.DatabaseUpdate;
 
-/// <summary>Stable identities for EasyTest / Visa2026EasyTest database runs.</summary>
-public static class E2ETestDataSeed
-{
-    public const string PersonFirstName = "E2E";
-    public const string PersonLastName = "Applicant";
-    public const string PersonPersonalNumber = "E2E-TEST-001";
-    public const string PassportNumber = "E2E-PASS-001";
-
-    public static string PersonFullName => $"{PersonFirstName} {PersonLastName}";
-}
-
-/// <summary>Stable values for employee-create E2E (E2E-010). Lookup display text matches English UI + seeded catalogs.</summary>
+/// <summary>Stable values for employee create in officer journey E2E-001. Lookup display text matches English UI + seeded catalogs.</summary>
 public static class E2ETestEmployeeCreateValues
 {
     public const string PersonalNumber = "E2E-EMP-010";
@@ -47,7 +36,7 @@ public static class E2ETestPersonFieldCaptions
     public const string Subcontractor = "Company (Subcontractor)";
 }
 
-/// <summary>Stable values for add-passport-on-seeded-employee E2E (E2E-020).</summary>
+/// <summary>Stable values for add-passport step in officer journey E2E-001.</summary>
 public static class E2ETestPassportCreateValues
 {
     public const string PassportNumber = "E2E-PASS-020";

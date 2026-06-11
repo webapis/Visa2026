@@ -5,6 +5,7 @@
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)e2e.runsettings</RunSettingsFilePath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.3">

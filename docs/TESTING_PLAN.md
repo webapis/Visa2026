@@ -57,20 +57,15 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 
 | Scenario id | E2E id | C# test |
 |-------------|--------|---------|
-| `login-smoke` | E2E-001 | `SmokeTests.LoginSmoke_AuthenticatedShellLoads` |
-| `login-nav-employees` | E2E-001-nav | `SmokeTests.LoginNavEmployees_ListOpensWithNewAction` |
-| `person-employee-create` | E2E-010 | `EmployeeTests.Employee_Create_RequiredFields_SavesAndAppearsInList` |
-| `person-passport-add-seeded-employee` | E2E-020 | `PassportTests.Passport_AddOnSeededEmployee_SavesAndShowsPassportNumber` |
+| `person-officer-journey` | E2E-001 | `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeAddPassport` |
 
 ### All implemented `[Fact]` tests
 
 | Test class | Tests | Backlog |
 |------------|-------|---------|
-| `SmokeTests` | 2 | E2E-001, E2E-001-nav |
-| `EmployeeTests` | 1 | E2E-010 |
-| `PassportTests` | 1 | E2E-020 |
+| `PersonOfficerJourneyTests` | 1 | E2E-001 (login + employee create + passport) |
 
-**Count:** 4 facts across 3 classes.
+**Count:** 1 fact — single sequential officer journey (login → employee → passport).
 
 **Full suite:**
 
@@ -88,15 +83,13 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-001 | Login + app shell | Done |
-| E2E-001-nav | Login + Employees list nav | Done |
+| E2E-001 | Officer journey: login → create employee → add passport | Done |
 
-### Tier 1 — Foundation data
+### Tier 1 — Extend same journey
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-010 | Create Employee (minimal required fields) | Done |
-| E2E-020 | Add passport on seeded employee (nested Passports tab) | Done |
+| E2E-002 | Add Education on same employee (nested Educations tab) | Planned |
 | E2E-011 | Create/link Person for employee | Planned |
 | E2E-012 | ApplicationType selection changes visible tabs | Planned |
 

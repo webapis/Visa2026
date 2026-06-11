@@ -1,0 +1,39 @@
+# Ready scenario — map: person-officer-journey_map.md
+
+id: person-officer-journey
+e2eId: E2E-001
+description: Log in, create employee, add passport on same employee (single journey)
+user: standarduser
+password: ""
+
+env:
+  personalNumber: E2E-EMP-010
+  firstName: Ferdi
+  lastName: EmployeeCreate
+  passportNumber: E2E-PASS-020
+
+steps:
+  - login:
+      user: standarduser
+      password: ""
+  - navigate: Application
+  - assert-action: New
+  - goto: Person_ListView_Employees
+  - assert-action: New
+  - action: New
+  - assert-employee-detail: true
+  - fill-employee-required: env
+  - action: Save
+  - goto: Person_ListView_Employees
+  - open-grid-row:
+      "Personal Number": E2E-EMP-010
+  - assert-property:
+      "First Name": Ferdi
+      "Last Name": EmployeeCreate
+      "Personal Number": E2E-EMP-010
+  - tab: Passports
+  - action: Passports.New
+  - fill-passport-required: env
+  - action: Save
+  - assert-property:
+      "Passport Number": E2E-PASS-020

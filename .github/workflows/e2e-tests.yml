@@ -1,5 +1,5 @@
 # Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + LocalDB + Edge (headed on GHA).
-# Includes E2E-020 PassportTests and Tier 0 smokes (see docs/TESTING_PLAN.md).
+# Single officer journey E2E-001 (login → employee → passport); see docs/TESTING_PLAN.md.
 
 name: EasyTest E2E
 

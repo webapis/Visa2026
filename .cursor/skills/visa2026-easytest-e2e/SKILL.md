@@ -97,11 +97,11 @@ Constants: **`E2ETestLoginValues`** in `Visa2026.Module/DatabaseUpdate/E2ETestDa
 | `FillFormWithRetry` | One field at a time + retry |
 | `ExecuteActionWithRetry` | Toolbar actions after Blazor load |
 
-### Seed data
+### Test data
 
-- **`E2ETestDataSeedUpdater`** — seeds applicant + passport on **`Visa2026EasyTest`** only.
-- **`E2ETestEmployeeCreateValues`** / **`E2ETestLoginValues`** — stable strings for create/login tests.
-- Use **unique** `PersonalNumber` per test when creating records to avoid collisions across runs.
+- Officer journey creates employee + passport via **UI** — no DB person/passport seed updater.
+- **`E2ETestEmployeeCreateValues`** / **`E2ETestPassportCreateValues`** / **`E2ETestLoginValues`** — stable strings in `E2ETestDataSeed.cs`.
+- Lookup catalogs still come from normal **`ModuleUpdater`** sync on **`Visa2026EasyTest`**.
 
 ---
 

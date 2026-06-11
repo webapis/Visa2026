@@ -36,10 +36,7 @@ namespace Visa2026.E2E.Tests
             AppContext.GetAction("Log In").Execute();
         }
 
-        /// <summary>
-        /// Shared <see cref="EasyTestSessionFixture"/> keeps one browser session for all facts —
-        /// skip logon when a prior test already authenticated.
-        /// </summary>
+        /// <summary>Skip logon when the session is already on the authenticated shell.</summary>
         private bool IsAuthenticatedShellReady()
         {
             for (var attempt = 0; attempt < 10; attempt++)
@@ -197,7 +194,7 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Creates an employee with all required Person detail fields (mirrors person-employee-create scenario).
+        /// Creates an employee with all required Person detail fields (officer journey E2E-001).
         /// Assumes login already completed. Does not verify list row — call <see cref="OpenEmployeeInListByPersonalNumber"/> after Save + navigate.
         /// </summary>
         protected void CreateEmployeeWithRequiredFields(
@@ -261,57 +258,6 @@ namespace Visa2026.E2E.Tests
 
             EasyTestBlazorNavigationHelper.ClickListRowContaining(AppContext, personalNumber);
             AssertEmployeeDetailShowsPersonalNumber(personalNumber);
-        }
-
-        /// <summary>
-        /// Opens seeded employee when <see cref="E2ETestDataSeedUpdater"/> ran; otherwise creates the same identity via UI (E2E-020 arrange).
-        /// </summary>
-        protected void EnsureEmployeeParentForChildBoTest()
-        {
-            NavigateEmployeesList();
-
-            if (TryOpenEmployeeRow(E2ETestDataSeed.PersonPersonalNumber, E2ETestDataSeed.PersonFullName))
-                return;
-
-            CreateEmployeeWithRequiredFields(
-                E2ETestDataSeed.PersonPersonalNumber,
-                E2ETestDataSeed.PersonFirstName,
-                E2ETestDataSeed.PersonLastName);
-
-            OpenEmployeeInListByPersonalNumber(
-                E2ETestDataSeed.PersonPersonalNumber,
-                E2ETestDataSeed.PersonFullName);
-        }
-
-        private bool TryOpenEmployeeRow(string personalNumber, string fullNameFallback)
-        {
-            if (!EasyTestBlazorNavigationHelper.ListHasColumnHeader(
-                    AppContext,
-                    E2ETestPersonFieldCaptions.PersonalNumber))
-                return false;
-
-            try
-            {
-                AppContext.GetGrid().ProcessRow(
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber));
-                if (EmployeeDetailShowsPersonalNumber(personalNumber))
-                    return true;
-            }
-            catch (AdapterOperationException)
-            {
-                // Fall through to full-name row match.
-            }
-
-            try
-            {
-                AppContext.GetGrid().ProcessRow(
-                    new EasyTestParameter("Full Name", fullNameFallback));
-                return EmployeeDetailShowsPersonalNumber(personalNumber);
-            }
-            catch (AdapterOperationException)
-            {
-                return false;
-            }
         }
 
         /// <summary>Native EasyTest layout tab — <c>*Action Passports</c> / <see cref="IEasyTestAction.Execute"/>.</summary>

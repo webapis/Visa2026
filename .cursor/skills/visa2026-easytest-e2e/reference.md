@@ -117,12 +117,12 @@ AssertEmployeeDetailViewActive(); // URL or employee form (TabbedMDI may keep UR
 
 ---
 
-## Seed constants (`E2ETestDataSeed.cs`)
+## E2E constants (`E2ETestDataSeed.cs`)
 
 | Type | Purpose |
 |------|---------|
-| `E2ETestDataSeed` | Shared login + employee create constants |
-| `E2ETestEmployeeCreateValues` | E2E-010 employee field values |
+| `E2ETestEmployeeCreateValues` | Officer journey employee field values |
+| `E2ETestPassportCreateValues` | Officer journey passport field values |
 | `E2ETestLoginValues` | `standarduser`, list/detail view paths |
 
 ---
@@ -173,10 +173,9 @@ Example yaml step → C#:
 |------|------|
 | `Visa2026.E2E.Tests/EasyTestBrowserMode.cs` | Headed (local) vs headless (CI) |
 | `Visa2026.E2E.Tests/E2ETestBase.cs` | Fixture, helpers |
-| `Visa2026.E2E.Tests/SmokeTests.cs` | E2E-001 / E2E-001-nav Tier 0 smokes |
+| `Visa2026.E2E.Tests/PersonOfficerJourneyTests.cs` | E2E-001 officer journey |
 | `Visa2026.E2E.Tests/EasyTestBlazorNavigationHelper.cs` | URL navigation |
 | `Visa2026.E2E.Tests/Config.xml` | Legacy EasyTest XML config |
 | `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs` | Shared constants |
-| `Visa2026.Module/DatabaseUpdate/E2ETestDataSeedUpdater.cs` | DB seed on update |
 | `Visa2026.Blazor.Server/EasyTestHostMode.cs` | Test host detection |
 | `scripts/local/Install-MsEdgeDriver.ps1` | Driver install |
