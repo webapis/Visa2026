@@ -338,12 +338,17 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Clicks the nested Passports list <c>New</c> using native EasyTest actions.
-        /// Prefers the namespaced <c>Passports.New</c>; falls back to the bare <c>New</c>
-        /// surfaced once the Passports tab is active. Returns whether a click executed.
+        /// Opens the nested Passports list <c>New</c>. Tries native EasyTest actions first
+        /// (<c>Passports.New</c> then bare <c>New</c>, confirming the detail opened), then
+        /// falls back to a direct DOM click of the real <c>New Passport</c> toolbar button
+        /// for small/headed CI viewports where the adaptive toolbar virtualizes it.
+        /// Returns whether a click was issued.
         /// </summary>
         private bool TryClickPassportsNestedNew()
         {
+            // Native EasyTest first (matches local runs where the toolbar is not
+            // adaptively collapsed). Confirm the detail actually opened — a returning
+            // Execute does not guarantee the nested New fired (see DOM fallback below).
             foreach (string caption in new[] { "Passports.New", "New" })
             {
                 try
@@ -353,15 +358,22 @@ namespace Visa2026.E2E.Tests
                         continue;
 
                     newAction.Execute();
-                    return true;
+                    if (TryWaitForPassportDetailReady(TimeSpan.FromSeconds(4)))
+                        return true;
                 }
                 catch (AdapterOperationException)
                 {
-                    // Try next caption; nested list may still be loading.
+                    // Try next caption, then the DOM fallback below.
                 }
             }
 
-            return false;
+            // DOM fallback: on small/headed CI viewports XAF renders the nested
+            // ListPropertyEditor New action with an empty data-xaf-action plus an
+            // adaptive virtual clone, and there are sibling "New" buttons (Educations
+            // vs Passports), so EasyTest's Execute is ambiguous and can no-op. Click
+            // the real, displayed "New Passport" toolbar button directly.
+            return EasyTestBlazorNavigationHelper.TryClickToolbarActionByTitle(
+                AppContext, "New Passport", TimeSpan.FromSeconds(10));
         }
 
         private bool IsPassportsNestedListReady()
