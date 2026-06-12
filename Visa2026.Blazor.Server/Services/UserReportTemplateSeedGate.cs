@@ -1,7 +1,10 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module;
@@ -29,6 +32,14 @@ internal static class UserReportTemplateSeedGate
             return;
         }
 
+        if (!UserReportTemplatesTableExists(services))
+        {
+            logger?.LogWarning(
+                "Skipping user report template seed: dbo.UserReportTemplates does not exist yet. " +
+                "Run XAF database update (attach debugger in DEBUG, or set FORCE_XAF_DB_UPDATE=true once).");
+            return;
+        }
+
         try
         {
             using var scope = services.CreateScope();
@@ -53,6 +64,11 @@ internal static class UserReportTemplateSeedGate
                 "User report template seed completed ({Count} template(s) in database).",
                 objectSpace.GetObjectsQuery<UserReportTemplate>().Count());
         }
+        catch (Exception ex) when (IsMissingUserReportTemplatesTableException(ex))
+        {
+            logger?.LogWarning(
+                "Skipping user report template seed: dbo.UserReportTemplates is not available yet.");
+        }
         catch (Exception ex)
         {
             logger?.LogErrorWithCode(
@@ -61,5 +77,39 @@ internal static class UserReportTemplateSeedGate
                 "User report template seed failed.");
             throw;
         }
+    }
+
+    private static bool UserReportTemplatesTableExists(IServiceProvider services)
+    {
+        var connectionString = services.GetService<IConfiguration>()?.GetConnectionString("DefaultConnection")
+            ?? services.GetService<IConfiguration>()?.GetConnectionString("ConnectionString");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return false;
+
+        try
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText =
+                "SELECT CASE WHEN OBJECT_ID(N'dbo.UserReportTemplates', N'U') IS NOT NULL THEN 1 ELSE 0 END";
+            var scalar = command.ExecuteScalar();
+            return Convert.ToInt32(scalar, CultureInfo.InvariantCulture) == 1;
+        }
+        catch (SqlException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsMissingUserReportTemplatesTableException(Exception ex)
+    {
+        for (Exception? current = ex; current != null; current = current.InnerException)
+        {
+            if (current is SqlException sql && sql.Number == 208)
+                return true;
+        }
+
+        return false;
     }
 }
