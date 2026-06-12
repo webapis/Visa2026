@@ -289,7 +289,7 @@ Word templates that reference manual text directly are rare; prefer `Pdf_FamilyM
 
 | File | Role |
 |------|------|
-| `Visa2026.Module.Tests/.../VisaFamilyMemberLinesHelperTests.cs` | Parse/format (add test project only if already used in repo; otherwise test via E2E later) |
+| EasyTest E2E | Parse/format via officer journey when needed ([`visa2026-easytest-e2e`](../.cursor/skills/visa2026-easytest-e2e/SKILL.md)) |
 
 ## Alternatives considered
 

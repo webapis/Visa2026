@@ -426,7 +426,7 @@ function Resolve-Visa2026LogTransport {
         throw "Could not auto-detect log transport for ${TargetHost}:$Port. Pass -Mode Docker or -Mode IisSsh."
     }
 
-    if ($Port -in 5000, 5001, 5051, 5052, 44318) {
+    if ($Port -in 5000, 5001, 5050, 5051, 5052, 44318) {
         throw @"
 Could not attach to console logs for ${TargetHost}:$Port.
 

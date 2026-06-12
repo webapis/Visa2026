@@ -2,11 +2,9 @@
 @using Microsoft.AspNetCore.Components
 @using Visa2026.Module.Services
 
-<div class="visa-family-lines-inline cs-multi-select-inline @E2eCssClass"
-     data-testid="@E2eTestId">
+<div class="visa-family-lines-inline cs-multi-select-inline">
     <DxTextBox Text="@DisplayText"
                ReadOnly="true"
-               InputId="@E2eTestId"
                CssClass="visa-family-lines-inline__summary cs-multi-select-inline__summary" />
     @if (!ReadOnly)
     {
@@ -216,9 +214,6 @@
     [Parameter] public string RelationshipLabel { get; set; } = string.Empty;
     [Parameter] public string CountryLabel { get; set; } = string.Empty;
     [Parameter] public string EditFormIncompleteHint { get; set; } = string.Empty;
-    [Parameter] public string E2eTestId { get; set; } = string.Empty;
-    [Parameter] public string E2eCssClass { get; set; } = string.Empty;
-
     private List<VisaFamilyMemberLineDto> _popupDraft = new();
     private bool _popupOpenRequested;
     private bool _editPopupVisible;

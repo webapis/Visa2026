@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Stop the run when any test fails; later ordered tests are skipped. -->
+    <StopOnFail>true</StopOnFail>
+  </RunConfiguration>
+</RunSettings>

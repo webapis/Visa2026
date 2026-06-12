@@ -32,10 +32,9 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 
 ```powershell
 dotnet build Visa2026.slnx -c Debug
-dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c Debug
+dotnet build Visa2026.slnx -c EasyTest
+dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 ```
-
-If your SDK supports testing the whole solution file, you can use `dotnet test Visa2026.slnx -c Debug` instead of the single-project line.
 
 ## Git: “commit” with verification first
 
@@ -108,14 +107,10 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`** — organization singletons (`CompanyProfile`, signatory, representative, numbering, `SystemSettings`): tenant JSON, sync/prune, `TryGetInstance`, reports vs templates.
 - **`docs/DEPRECATED.md`** — registry of deprecated/legacy business objects, properties, and removed schema (update when deprecating domain members).
 - **`.cursor/skills/visa2026-lookup-data/SKILL.md`** (+ **`reference.md`**) — optional Agent **Skill**: **lookup / ApplicationType** maintenance (links to **`docs/LOOKUP_SEEDING.md`**).
-- **`.cursor/skills/visa2026-unit-tests/SKILL.md`** (+ **`reference.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **unit / integration tests** (`Visa2026.Module.Tests`, xUnit, `dotnet test`; accumulates verified positive/negative experience; not Blazor E2E).
-- **`.cursor/skills/visa2026-ui-test-hooks/SKILL.md`** — **prepare UI accessibility** with CSS selectors: (1) user describes BO/UI targets, (2) skill configures hooks + DevTools test, (3) updates **`docs/UI_TEST_HOOKS.md`**; optional **`tools/VerifyUiTestHooks`**.
-- **`.cursor/skills/visa2026-ui-scenarios/SKILL.md`** (+ **`reference-map-contract.md`**, **`examples/`** drafts, **`tools/UiScenarioRunner/scenarios/`** ready-only, **`learnings.md`**) — Map → Hooks → YAML → **promote** when ready; not hook prep.
-- **[`docs/UI_TEST_HOOKS.md`](docs/UI_TEST_HOOKS.md)** — **prepared, verified** selector access catalog (output of **visa2026-ui-test-hooks**); consumed by **visa2026-ui-scenarios**.
+- **`.cursor/skills/visa2026-easytest-e2e/SKILL.md`** (+ **`reference.md`**, **`user-prompts.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **native XAF EasyTest E2E** (`Visa2026.E2E.Tests`, C# API, Edge/Selenium, **:5050** / `Visa2026EasyTest`).
 - **`.cursor/skills/visa2026-bo-state-colors/SKILL.md`** (+ **`reference.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **BO state codes**, how states are determined (flags, dates, evaluators, progress, linkage, SQL views), color families/tones ([`docs/BO_STATE_COLORS.md`](docs/BO_STATE_COLORS.md)), **`DaysRemaining` vs `DaysElapsed`** ([`docs/BO_STATE_TEMPORAL_TYPES.md`](docs/BO_STATE_TEMPORAL_TYPES.md)), ListView row `[Appearance]` and planned `BoStateAppearanceColors` registrar.
 - **[`docs/APPLICATION_PROGRESS_STATE_VALIDATION.md`](docs/APPLICATION_PROGRESS_STATE_VALIDATION.md)** — `ApplicationProgress` workflow: `ApplicationState` + `ApplicationLocation`, SLA days, transition validation, manual officer advance.
 - **[`docs/APPLICATION_ITEM_DOCUMENT_COPIES.md`](docs/APPLICATION_ITEM_DOCUMENT_COPIES.md)** — **Document copies** dialog on `ApplicationItem` ListView: improved successor to **Generate PDF** (readiness, preview, package download); same `PdfGenerationBatch` ZIP engine.
 - **[`docs/APPLICATION_REPORT_PACKAGE.md`](docs/APPLICATION_REPORT_PACKAGE.md)** — **Resminamalar** report package dialog on `Application` detail: improved successor to one-click Word/Excel ZIP (catalog, readiness, selection, preview); same `WordReportGenerationBatch` engine.
 - **[`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](docs/APPLICATION_LISTVIEW_STATE_COLORS.md)** — **planned** `Application` ListView row background from latest `ApplicationProgress` (`CurrentState`); not implemented.
-- **`docs/TESTING_PLAN.md`** — testing strategy (unit / integration / E2E pyramid), current E2E inventory, backlog IDs, CI notes, BR traceability starter.
-- **`docs/UNIT_TESTING_PLAN.md`** — which Module BOs, evaluators, and helpers to unit-test (P0–P3, UT-010+ backlog, phased roadmap).
+- **`docs/TESTING_PLAN.md`** — EasyTest E2E strategy, current inventory, backlog IDs, CI notes.

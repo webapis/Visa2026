@@ -22,7 +22,7 @@ namespace Visa2026.Blazor.Server
         //}
         void Application_CreateCustomUserModelDifferenceStore(object sender, CreateCustomModelDifferenceStoreEventArgs e)
         {
-            if (UiScenarioHostMode.IsEnabled)
+            if (EasyTestHostMode.IsEnabled)
             {
                 e.Store = new UiScenarioEphemeralUserModelDifferenceStore();
                 e.Handled = true;

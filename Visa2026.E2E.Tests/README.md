@@ -18,7 +18,8 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 ## 3. Project Structure
 
 - **`Visa2026.E2E.Tests.csproj`**: The project file, containing all dependencies and configurations. It references the `Visa2026.Module` project to ensure it has context of the application's business objects.
-- **`Tests.cs`**: The main test fixture class. It contains the xUnit tests that initialize the EasyTest environment, launch the Blazor application, and execute test scripts.
+- **`PersonOfficerJourneyTests.cs`**: Single officer journey (`E2E-001`) — login, create employee, add passport; inherits `E2ETestBase`.
+- **`scenarios/`**: Scenario maps (`*_map.md`) and yaml **specs** (Option A — C# executes steps; see [scenarios/README.md](./scenarios/README.md)).
 - **`Config.xml`**: The configuration file for EasyTest, defining application aliases, database connections, and other settings. The browser for testing is also specified here.
 - **`*.ets` files**: These are the EasyTest script files. They contain a sequence of commands that represent user actions (e.g., navigating to a view, filling a form, clicking a button) and assertions to verify outcomes.
 
@@ -65,14 +66,14 @@ The application is configured to find the driver automatically through the syste
 
 ### Application Behavior
 1.  **Initialization**: The test runner initializes the test fixture. The existing test database (`Visa2026EasyTest`) is dropped and recreated to ensure a clean environment.
-2.  **Launch**: A new Microsoft Edge browser window will automatically open.
-3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5000`).
+2.  **Launch**: On local dev, a visible Microsoft Edge window opens (headed). On CI (`CI=true` / `VISA2026_E2E_HEADLESS`), Edge runs headless — see `EasyTestBrowserMode.cs`.
+3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5050`).
 4.  **Simulation**: You will see the browser automatically interacting with the application based on the `.ets` script.
 5.  **Completion**: Once the script finishes, the browser window will close automatically.
 
 ### Troubleshooting: HTTP 404 on `localhost:65201`
 
-EasyTest must open **`http://localhost:5000`**, not port **65201** (legacy IIS Express). If Edge shows *Not Found* on `65201`, rebuild with **EasyTest** and ensure `E2ETestBase` uses the full `BlazorApplicationOptions` constructor (explicit `url` and `configuration`). Optional: place `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\` (copied to test output on build).
+EasyTest must open **`http://localhost:5050`**, not **5000** (IDE dev). `E2ETestBase` registers the built **`Visa2026.Blazor.Server.exe`** (not the project folder) with **`--urls http://localhost:5050 --environment EasyTest`** — `--launch-profile` only works with `dotnet run` and leaves the standalone host on **:5000** (`ERR_CONNECTION_REFUSED` on **:5050**). After each test preflight `DropDB`, `EasyTestDatabaseProvisioner` creates the catalog and runs **`--updateDatabase --silent`**. Build **EasyTest** (`dotnet build Visa2026.slnx -c EasyTest`). Optional: `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\`.
 
 ### Expected Results
 - **Test Explorer**:

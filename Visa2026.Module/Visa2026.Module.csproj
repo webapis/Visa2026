@@ -4,13 +4,11 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.410</AssemblyVersion>
+    <AssemblyVersion>1.0.0.424</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <ItemGroup>
-    <InternalsVisibleTo Include="Visa2026.Module.Tests" />
-  </ItemGroup>
+  <ItemGroup></ItemGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
     <None Remove="Resources\Visa_Application_TM_QR_08.pdf" />
