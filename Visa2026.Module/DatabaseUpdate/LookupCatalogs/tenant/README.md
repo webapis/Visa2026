@@ -30,4 +30,10 @@ For a new customer deployment, replace these files with that customer's data.
 
 **`department.json`:** Main once shipped an empty file so deploy does not seed another company's department names. This repo keeps a **minimal demo set** (names used by `Visa2026.DataImporter/seed/scenarios`) so reference imports work. Replace with your organization's departments before production; maintain extras in the Blazor UI if needed.
 
+**Tenant application users** (not a lookup catalog — separate seed file):
+
+| JSON file | Purpose |
+|-----------|---------|
+| `tenant-users.json` | Officers for this deployment (`UserName` + `Roles[]`). Synced on every DB update via `TenantUserSeedUpdater`. Disk overlay: `{AppBase}/LookupCatalogs/tenant/tenant-users.json`. Default password: empty (set on first login). |
+
 General lookup architecture: [`docs/LOOKUP_SEEDING.md`](../../../../docs/LOOKUP_SEEDING.md).

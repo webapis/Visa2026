@@ -15,7 +15,7 @@ using System.Linq;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Education")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(EducationDescription))]
     [SupportsOptionalDetailFields]
     public class Education : BaseObject, IOptionalDetailFields

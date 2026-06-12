@@ -45,6 +45,15 @@ internal static class LookupCatalogResourceLoader
         return DeserializeCatalogFile(json);
     }
 
+    /// <summary>Disk overlay under <c>{AppBase}/LookupCatalogs/tenant/</c> (not embedded).</summary>
+    internal static string? TryReadTenantOverlayText(string fileName)
+    {
+        var diskPath = Path.Combine(AppContext.BaseDirectory, "LookupCatalogs", "tenant", fileName);
+        return File.Exists(diskPath) ? File.ReadAllText(diskPath) : null;
+    }
+
+    internal static string? TryReadEmbeddedLookupCatalogText(string fileName) => ReadEmbeddedText(fileName);
+
     private static void MergeManifests(LookupCatalogManifest main, LookupCatalogManifest tenant)
     {
         var byId = new Dictionary<string, LookupCatalogDefinition>(StringComparer.OrdinalIgnoreCase);

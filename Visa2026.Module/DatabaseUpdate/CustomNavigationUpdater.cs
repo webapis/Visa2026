@@ -51,6 +51,31 @@ namespace Visa2026.Module.DatabaseUpdate
             }
 
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
+            RemoveLegacyLookupOperationalNavigation(navigationItems);
+        }
+
+        /// <summary>
+        /// Person, Passport, Visa, etc. use <see cref="NavigationItemAttribute"/>(false); strip stale nodes if the generator re-added them.
+        /// Officers use <c>People</c> (Employees / Family Members / Temporary Visitors) instead of a flat Person list.
+        /// </summary>
+        private static void RemoveLegacyLookupOperationalNavigation(IModelNavigationItems navigationItems)
+        {
+            if (navigationItems["Lookup"] is not IModelNavigationItem lookupGroup)
+                return;
+
+            RemoveNavItemIfPresent(lookupGroup, "Person", "Person");
+            RemoveNavItemIfPresent(lookupGroup, "Person", "AddressOfResidence");
+            RemoveNavItemIfPresent(lookupGroup, "Education", "Education");
+            RemoveNavItemIfPresent(lookupGroup, "Housing", "Lodging");
+            RemoveNavItemIfPresent(lookupGroup, "Medical", "MedicalRecord");
+            RemoveNavItemIfPresent(lookupGroup, "Passport", "Passport");
+            RemoveNavItemIfPresent(lookupGroup, "Visa", "Visa");
+        }
+
+        private static void RemoveNavItemIfPresent(IModelNavigationItem parentGroup, string subgroupId, string itemId)
+        {
+            if (parentGroup.Items[subgroupId]?.Items[itemId] is IModelNavigationItem legacyItem)
+                legacyItem.Remove();
         }
 
         private static void ConfigureApplicationProgressRouteNavigation(

@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [DefaultProperty(nameof(FullAddress))]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem(false)]
     [Appearance("PrivateHouseOnly_ExpirationFields", Visibility = ViewItemVisibility.Hide, TargetItems = "ExpirationDate;DaysRemaining", Criteria = "Not (Type = 'PrivateHouse')", Context = "DetailView,ListView")]
     [Appearance("AddressDocumentsTabHiddenWhenLodging", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "Documents", Criteria = "Type = 'Lodging'", Context = "DetailView")]
     [Appearance("AddressLodgingDocumentsTabHidden", AppearanceItemType = "LayoutItem", Visibility = ViewItemVisibility.Hide, TargetItems = "LodgingDocuments", Context = "DetailView")]

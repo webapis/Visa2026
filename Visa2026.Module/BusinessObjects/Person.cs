@@ -21,7 +21,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Person")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]
     [Appearance("EmployeeOnly", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "Email;HireDate;MaritalStatus;WorkPermitItems;FamilyMembers;Educations;PositionHistory;Salaries;WorkDuties")]
     [Appearance("EmployeeOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "MaritalStatus")]

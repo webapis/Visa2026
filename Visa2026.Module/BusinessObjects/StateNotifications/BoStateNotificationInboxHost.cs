@@ -9,7 +9,7 @@ using Visa2026.Module.Editors;
 namespace Visa2026.Module.BusinessObjects.StateNotifications;
 
 /// <summary>
-/// Non-persistent shell that hosts the state-notification inbox UI (prototype).
+/// Non-persistent shell that hosts the state-notification inbox UI (prototype; super-admin only until a future release).
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]

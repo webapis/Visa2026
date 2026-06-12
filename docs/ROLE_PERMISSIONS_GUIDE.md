@@ -2,12 +2,23 @@
 
 Reference for adjusting XAF security permissions in `Visa2026.Module/DatabaseUpdate/Updater.cs`.
 
+**Agent workflow:** [`.cursor/skills/visa2026-security-access/SKILL.md`](../.cursor/skills/visa2026-security-access/SKILL.md) (symptom triage, verify as `User`, cross-links to deploy/E2E skills).
+
 ---
 
 ## How Permissions Work
 
 The app uses **"Deny all by default"** policy. Every permission must be explicitly granted.  
-Roles are managed in `Updater.cs` → `CreateUserRole()`.
+Roles are managed in `Updater.cs` → `CreateAdminRole()`, `CreateUserRole()`, `CreateVisaOfficeRole()`, `CreateDefaultRole()`.
+
+| Role | Purpose |
+|------|---------|
+| **Administrators** | Super administrator (`IsAdministrative = true`) — full bypass |
+| **Users** | Case officers — applications, people, operational workflows |
+| **VisaOffice** | Organization / tenant configuration + Resminamalar templates |
+| **Default** | Self-service profile, password, culture |
+
+**Tenant users:** `LookupCatalogs/tenant/tenant-users.json` — per-deployment officer accounts (`Updater` + `TenantUserSeedUpdater`). Adds missing users and missing roles; does not remove roles or change passwords on existing accounts. If users do not appear after deploy, run a DB update (`scripts/local/Update-LocalDatabase.ps1 -ForceUpdate`) or restart with debugger attached / `FORCE_XAF_DB_UPDATE=true` once — see `docs/ENVIRONMENTS.md`.
 
 There are two places to set permissions:
 
@@ -69,6 +80,45 @@ Combined string for Read+Write+Create (no Delete):
 private static readonly string ReadWriteCreateWithoutDelete =
     $"{SecurityOperations.Read};{SecurityOperations.Write};{SecurityOperations.Create}";
 ```
+
+---
+
+## Current VisaOffice Role Permissions
+
+Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates. Seeded user: **`VisaOffice`** (`Default` + `VisaOffice`). Does **not** include case processing (Application, Person, …).
+
+### Read + Write (no Create/Delete) — organization singletons
+
+| Type |
+|------|
+| `CompanyProfile`, `AuthorizedSignatory`, `AuthorizedRepresentative`, `ApplicationNumberingProfile` |
+
+### Read + Write + Create (no Delete)
+
+| Type |
+|------|
+| `ProjectContract`, `Ministry`, `FileData` |
+| `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateProjectContract` |
+
+### Full recursive (templates)
+
+| Type | Access |
+|------|--------|
+| `UserReportPlaceholder` | Read, Write, Create, Delete (extract placeholders) |
+
+### Read only
+
+| Type |
+|------|
+| `OrganizationType`, `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` |
+
+### Navigation (allow)
+
+| Area |
+|------|
+| **Organization** — company, signatory, representative, numbering |
+| **Lookup → Organization** — `ProjectContract`, `Ministry` only (other Lookup sub-groups denied) |
+| **Reports** — `UserReportTemplate` |
 
 ---
 
@@ -159,3 +209,5 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 | Apr 2026 | `Show in Report` hidden for `Users` role in production | Added `EnsureTypePermission<ReportDataV2>` and `EnsureTypePermission<ReportVisibility>` outside creation block |
 | Apr 2026 | `EducationInstitution` and `Specialty` not editable for `Users` role | Added `EnsureReadWriteCreatePermission<T>` helper; `PermissionSettingHelper.SetTypePermission` did not correctly persist Allow states |
 | Apr 2026 | `EducationLevel` and `Country` enforced as read-only for `Users` role | Added `EnsureReadOnlyPermission<T>` helper to explicitly strip Write/Create/Delete from existing roles |
+| Jun 2026 | Visa office staff need org singleton + project contract + template screens without full admin | Added **`VisaOffice`** role (`CreateVisaOfficeRole`, `EnsureVisaOfficeConfigurationPermissions`, `EnsureVisaOfficeNavigationPermissions`); seeded user `VisaOffice` |
+| Jun 2026 | Runtime log + state-notification inbox visible to officers | **`EnsureAdminOnlyOperationsDeny`** on Users / VisaOffice — super administrators only; state inbox remains a future-release prototype |

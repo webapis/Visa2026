@@ -1,0 +1,16 @@
+{
+  "rows": [
+    {
+      "UserName": "tumar",
+      "Roles": ["Default", "Users", "VisaOffice"]
+    },
+    {
+      "UserName": "gulshat",
+      "Roles": ["Default", "Users", "VisaOffice"]
+    },
+    {
+      "UserName": "arzygul",
+      "Roles": ["Default", "Users", "VisaOffice"]
+    }
+  ]
+}

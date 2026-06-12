@@ -12,7 +12,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Housing")]
+    [NavigationItem(false)]
     [DefaultProperty(nameof(FullAddress))]
     public class Lodging : BaseObject
     {

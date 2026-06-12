@@ -6,9 +6,10 @@
 @inject NavigationManager NavigationManager
 @inject IBoStateNotificationSummaryService SummaryService
 @inject BoStateNotificationNavigationHelper NavigationHelper
+@inject HttpApplicationRuntimeLogAdminChecker AdminChecker
 @inject Visa2026.Blazor.Server.Services.XafApplicationHolder AppHolder
 
-@if (_visible)
+@if (_visible && _isAdministrator)
 {
     <div class="bo-state-header-badge-host">
         <button type="button"
@@ -32,6 +33,7 @@
 @code {
     private BoStateNotificationSummary _summary = new();
     private bool _visible;
+    private bool _isAdministrator;
     private string _tooltip = VisaUiMessages.Get("StateNotification.Header.Tooltip.Default");
 
     protected override void OnInitialized()
@@ -50,6 +52,7 @@
     {
         var path = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLowerInvariant();
         _visible = !path.StartsWith("loginpage", StringComparison.Ordinal);
+        _isAdministrator = _visible && AdminChecker.IsCurrentUserAdministrator();
         _summary = SummaryService.GetCurrentSummary();
         var missing = _summary.OpenMissingDataCount;
         _tooltip = _summary.OpenCriticalCount > 0

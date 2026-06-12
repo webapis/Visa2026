@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.Feedback;
 using Visa2026.Module.BusinessObjects.Operations;
+using Visa2026.Module.BusinessObjects.StateNotifications;
+using Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
@@ -43,6 +45,7 @@ namespace Visa2026.Module.DatabaseUpdate
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
             var userRole = CreateUserRole();
+            var visaOfficeRole = CreateVisaOfficeRole();
             EnsurePreferredCultureSelfWritePermission(defaultRole);
 
             ObjectSpace.CommitChanges();
@@ -78,11 +81,23 @@ namespace Visa2026.Module.DatabaseUpdate
                 });
             }
 
+            if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "VisaOffice") == null)
+            {
+                string EmptyPassword = "";
+                _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "VisaOffice", EmptyPassword, (user) =>
+                {
+                    user.Roles.Add(defaultRole);
+                    user.Roles.Add(visaOfficeRole);
+                });
+            }
+
             var existingUser = userManager.FindUserByName<ApplicationUser>(ObjectSpace, "User");
             if (existingUser != null && existingUser.Roles.All(r => r.Name != "Users"))
             {
                 existingUser.Roles.Add(userRole);
             }
+
+            TenantUserCatalogSync.Sync(ObjectSpace, userManager);
 
             ObjectSpace.CommitChanges();
         }
@@ -177,6 +192,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             ExecuteNonQueryCommand(sql, false);
         }
 
+        /// <summary>Super administrator — full access bypass (<see cref="PermissionPolicyRole.IsAdministrative"/>).</summary>
         PermissionPolicyRole CreateAdminRole()
         {
             PermissionPolicyRole adminRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Administrators");
@@ -187,6 +203,27 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 adminRole.IsAdministrative = true;
             }
             return adminRole;
+        }
+
+        /// <summary>
+        /// Visa office configuration: organization singletons, project contracts, ministries, and Resminamalar templates.
+        /// Complements <see cref="CreateUserRole"/> (case officers). Assign together with <see cref="CreateDefaultRole"/>.
+        /// </summary>
+        PermissionPolicyRole CreateVisaOfficeRole()
+        {
+            PermissionPolicyRole visaOfficeRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "VisaOffice");
+            if (visaOfficeRole == null)
+            {
+                visaOfficeRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                visaOfficeRole.Name = "VisaOffice";
+            }
+
+            EnsureVisaOfficeConfigurationPermissions(visaOfficeRole);
+            EnsureUserReportTemplateOfficerPermissions(visaOfficeRole);
+            EnsureVisaOfficeNavigationPermissions(visaOfficeRole);
+            EnsureAdminOnlyOperationsDeny(visaOfficeRole);
+
+            return visaOfficeRole;
         }
 
      PermissionPolicyRole CreateUserRole()
@@ -312,16 +349,13 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
 
-        // Operations — state notification inbox (UI prototype)
+        // Operations — UserFeedback only (see EnsureUserFeedbackOfficerPermissions); runtime log + state inbox are admin-only.
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
-        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations/Items/StateNotifications", SecurityPermissionState.Allow);
 
         // Reports — user-defined Word/Excel templates (Resminamalar custom templates + Edit template link)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
 
-        userRole.AddTypePermissionsRecursively<BusinessObjects.StateNotifications.BoStateNotificationInboxHost>(
-            SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationItemDocumentCopiesListHost>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BusinessObjects.ApplicationReportPackageListHost>(
@@ -480,7 +514,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
-    EnsureApplicationRuntimeLogUserDeny(userRole);
+    EnsureAdminOnlyOperationsDeny(userRole);
 
     return userRole;
 }
@@ -652,6 +686,71 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
+        /// Tenant JSON organization singletons + project contracts (not global Lookup catalogs).
+        /// Read/write only on singletons — deploy sync owns row lifecycle (no create/delete).
+        /// </summary>
+        static void EnsureVisaOfficeConfigurationPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureReadWriteOnlyPermission<CompanyProfile>(role);
+            EnsureReadWriteOnlyPermission<AuthorizedSignatory>(role);
+            EnsureReadWriteOnlyPermission<AuthorizedRepresentative>(role);
+            EnsureReadWriteOnlyPermission<ApplicationNumberingProfile>(role);
+            EnsureReadWriteCreatePermission<ProjectContract>(role);
+            EnsureReadWriteCreatePermission<Ministry>(role);
+            EnsureReadOnlyPermission<OrganizationType>(role);
+            EnsureReadWriteCreatePermission<FileData>(role);
+            EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureReadOnlyPermission<PdfFormMapping>(role);
+        }
+
+        /// <summary>Navigation for visa office — Organization screens, project contracts, templates; not case processing.</summary>
+        static void EnsureVisaOfficeNavigationPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/CompanyProfile", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/AuthorizedSignatory", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/AuthorizedRepresentative", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
+
+            // Tenant catalogs only — under Lookup/Organization (not operational Person/Passport/Visa lists).
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Items/ProjectContract", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Items/Ministry", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Education", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Housing", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Medical", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Person", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Passport", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Visa", SecurityPermissionState.Deny);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Application/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Education/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/General/Geography", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Passport/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Person/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Visa/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/WorkPermit/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Documents", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Images", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Auth", SecurityPermissionState.Deny);
+        }
+
+        /// <summary>
         /// Officers maintain Resminamalar custom templates: read/list, open DetailView (navigate), edit file + placeholders.
         /// </summary>
         static void EnsureUserReportTemplateOfficerPermissions(PermissionPolicyRole role)
@@ -704,16 +803,36 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/UserFeedback", SecurityPermissionState.Deny);
         }
 
-        /// <summary>Runtime error rows may contain stack traces — officers cannot read them.</summary>
-        static void EnsureApplicationRuntimeLogUserDeny(PermissionPolicyRole role)
+        /// <summary>
+        /// Application runtime log and state-notification inbox — super administrators only
+        /// (<see cref="PermissionPolicyRole.IsAdministrative"/>). State inbox is a future-release prototype.
+        /// </summary>
+        static void EnsureAdminOnlyOperationsDeny(PermissionPolicyRole role)
         {
             if (role == null)
                 return;
 
-            var targetType = typeof(ApplicationRuntimeLog);
+            DenyTypeRead<ApplicationRuntimeLog>(role);
+            DenyTypeRead<BoStateNotificationInboxHost>(role);
+
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Operations/Items/ApplicationRuntimeLog",
+                SecurityPermissionState.Deny);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Operations/Items/StateNotifications",
+                SecurityPermissionState.Deny);
+        }
+
+        static void DenyTypeRead<T>(PermissionPolicyRole role) where T : class
+        {
+            var targetType = typeof(T);
             var existing = role.TypePermissions.FirstOrDefault(tp => tp.TargetType == targetType);
-            if (existing == null)
-                role.AddTypePermissionsRecursively<ApplicationRuntimeLog>(SecurityOperations.Read, SecurityPermissionState.Deny);
+            if (existing != null)
+                existing.ReadState = SecurityPermissionState.Deny;
+            else
+                role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Deny);
         }
     }
 }
