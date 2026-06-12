@@ -11,23 +11,44 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// </summary>
 public sealed class GridSearchBoxLocalizationController : ViewController<ListView>
 {
-    protected override void OnActivated()
-    {
-        base.OnActivated();
-        ApplyGridLocalization();
-    }
+    private CancellationTokenSource? deferredLocalizationCts;
 
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
         ApplyGridLocalization();
-        _ = ApplyGridLocalizationDeferredAsync();
+        ScheduleDeferredLocalization();
     }
 
-    private async Task ApplyGridLocalizationDeferredAsync()
+    protected override void OnDeactivated()
     {
-        await Task.Delay(150);
-        if (View is null || !View.IsDisposed)
+        deferredLocalizationCts?.Cancel();
+        deferredLocalizationCts?.Dispose();
+        deferredLocalizationCts = null;
+        base.OnDeactivated();
+    }
+
+    private void ScheduleDeferredLocalization()
+    {
+        deferredLocalizationCts?.Cancel();
+        deferredLocalizationCts?.Dispose();
+        deferredLocalizationCts = new CancellationTokenSource();
+        CancellationToken token = deferredLocalizationCts.Token;
+        _ = ApplyGridLocalizationDeferredAsync(token);
+    }
+
+    private async Task ApplyGridLocalizationDeferredAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(150, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (View is { IsDisposed: false })
         {
             ApplyGridLocalization();
         }
@@ -35,7 +56,7 @@ public sealed class GridSearchBoxLocalizationController : ViewController<ListVie
 
     private void ApplyGridLocalization()
     {
-        if (View.Editor is not DxGridListEditor { GridModel: { } gridModel })
+        if (View?.Editor is not DxGridListEditor { GridModel: { } gridModel })
         {
             return;
         }

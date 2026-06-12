@@ -13,6 +13,7 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
 {
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
+    private CancellationTokenSource? deferredAppearanceCts;
 
     public ApplicationProgressRowAppearanceController()
     {
@@ -23,20 +24,41 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
     {
         base.OnViewControlsCreated();
         ApplyRowAppearance();
-        _ = ApplyRowAppearanceDeferredAsync();
+        ScheduleDeferredAppearance();
     }
 
-    private async Task ApplyRowAppearanceDeferredAsync()
+    private void ScheduleDeferredAppearance()
     {
-        await Task.Delay(150);
+        deferredAppearanceCts?.Cancel();
+        deferredAppearanceCts?.Dispose();
+        deferredAppearanceCts = new CancellationTokenSource();
+        CancellationToken token = deferredAppearanceCts.Token;
+        _ = ApplyRowAppearanceDeferredAsync(token);
+    }
+
+    private async Task ApplyRowAppearanceDeferredAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(150, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
         if (View is { IsDisposed: false })
+        {
             ApplyRowAppearance();
+        }
     }
 
     private void ApplyRowAppearance()
     {
-        if (View.Editor is not DxGridListEditor { GridModel: { } gridModel })
+        if (View?.Editor is not DxGridListEditor { GridModel: { } gridModel })
+        {
             return;
+        }
 
         if (customizeElementHandler != null)
         {
@@ -73,9 +95,16 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
 
     protected override void OnDeactivated()
     {
+        deferredAppearanceCts?.Cancel();
+        deferredAppearanceCts?.Dispose();
+        deferredAppearanceCts = null;
+
         if (customizeElementHandler != null
-            && View.Editor is DxGridListEditor { GridModel: { } gridModel })
+            && View?.Editor is DxGridListEditor { GridModel: { } gridModel })
+        {
             gridModel.CustomizeElement = previousCustomizeElement;
+        }
+
         customizeElementHandler = null;
         previousCustomizeElement = null;
         base.OnDeactivated();

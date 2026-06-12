@@ -16,13 +16,27 @@ public static class UserCultureHelper
 {
     public static async Task ApplyStoredCultureAfterLogonAsync(BlazorApplication application)
     {
-        if (SecuritySystem.CurrentUser is not ApplicationUser user
-            || string.IsNullOrWhiteSpace(user.PreferredCulture))
+        if (SecuritySystem.CurrentUser is not ApplicationUser user)
         {
             return;
         }
 
-        if (!VisaLocalization.TryNormalizeCulture(user.PreferredCulture, out string storedCulture))
+        var httpContext = application.ServiceProvider
+            .GetService<IHttpContextAccessor>()?.HttpContext;
+        if (RequestSpecifiesCulture(httpContext))
+        {
+            // Language switcher reload (?culture= / ?ui-culture=). Request culture wins; do not redirect.
+            return;
+        }
+
+        string? preferredCulture;
+        using (IObjectSpace objectSpace = application.CreateObjectSpace(typeof(ApplicationUser)))
+        {
+            preferredCulture = objectSpace.GetObjectByKey<ApplicationUser>(user.ID)?.PreferredCulture;
+        }
+
+        if (string.IsNullOrWhiteSpace(preferredCulture)
+            || !VisaLocalization.TryNormalizeCulture(preferredCulture, out string storedCulture))
         {
             return;
         }
@@ -37,6 +51,12 @@ public static class UserCultureHelper
             .GetRequiredService(typeof(IXafCultureInfoService));
         await cultureService.SetCultureAsync(storedCulture).ConfigureAwait(false);
     }
+
+    /// <summary>True when the current full page load came from the runtime language switcher.</summary>
+    public static bool RequestSpecifiesCulture(HttpContext? httpContext) =>
+        httpContext != null
+        && (httpContext.Request.Query.ContainsKey("culture")
+            || httpContext.Request.Query.ContainsKey("ui-culture"));
 
     public static void PersistCurrentCultureToUser(XafApplication application)
     {

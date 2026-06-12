@@ -1,5 +1,6 @@
 @namespace Visa2026.Blazor.Server.Components
 @using Microsoft.AspNetCore.SignalR.Client
+@using Visa2026.Blazor.Server.Localization
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.BusinessObjects.Operations
 @using Visa2026.Module.Localization
@@ -9,6 +10,7 @@
 @inject ApplicationRuntimeLogNavigationHelper NavigationHelper
 @inject HttpApplicationRuntimeLogAdminChecker AdminChecker
 @inject Visa2026.Blazor.Server.Services.XafApplicationHolder AppHolder
+@inject IHttpContextAccessor HttpContextAccessor
 
 @if (_visible && _isAdministrator)
 {
@@ -78,7 +80,16 @@
         StateHasChanged();
 
         if (_visible && _isAdministrator)
-            await EnsureHubConnectionAsync();
+        {
+            try
+            {
+                await EnsureHubConnectionAsync();
+            }
+            catch
+            {
+                // Runtime log hub is best-effort; never fault the XAF circuit.
+            }
+        }
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -86,10 +97,17 @@
         RefreshVisibility();
         _ = InvokeAsync(async () =>
         {
-            if (_visible && _isAdministrator)
-                await EnsureHubConnectionAsync();
-            else
-                await DisconnectHubAsync();
+            try
+            {
+                if (_visible && _isAdministrator)
+                    await EnsureHubConnectionAsync();
+                else
+                    await DisconnectHubAsync();
+            }
+            catch
+            {
+                // Runtime log hub is best-effort; never fault the XAF circuit.
+            }
 
             StateHasChanged();
         });
@@ -110,12 +128,22 @@
         if (!_isAdministrator || _hubConnection is { State: HubConnectionState.Connected or HubConnectionState.Connecting or HubConnectionState.Reconnecting })
             return;
 
+        // Defer until the post-switch full page load settles (cookie + XAF session).
+        if (UserCultureHelper.RequestSpecifiesCulture(HttpContextAccessor.HttpContext))
+            await Task.Delay(300);
+
         if (_hubConnection == null)
         {
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri(ApplicationRuntimeLogHubPaths.Route))
-                .WithAutomaticReconnect()
-                .Build();
+            string? authCookie = HttpContextAccessor.HttpContext?.Request.Headers.Cookie.ToString();
+            var hubBuilder = new HubConnectionBuilder()
+                .WithUrl(NavigationManager.ToAbsoluteUri(ApplicationRuntimeLogHubPaths.Route), options =>
+                {
+                    if (!string.IsNullOrEmpty(authCookie))
+                        options.Headers.Add("Cookie", authCookie);
+                })
+                .WithAutomaticReconnect();
+
+            _hubConnection = hubBuilder.Build();
 
             _hubConnection.On<ApplicationRuntimeLogNotification>(
                 ApplicationRuntimeLogHubPaths.RuntimeLogRecorded,
@@ -131,7 +159,14 @@
         if (_hubConnection == null)
             return;
 
-        await _hubConnection.StopAsync();
+        try
+        {
+            await _hubConnection.StopAsync();
+        }
+        catch
+        {
+            // Ignore teardown races during navigation.
+        }
     }
 
     private void OnRuntimeLogRecorded(ApplicationRuntimeLogNotification notification)

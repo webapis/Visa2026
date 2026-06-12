@@ -61,23 +61,21 @@ public sealed class UserCultureController : WindowController
             return;
         }
 
+        var httpContext = blazorApplication.ServiceProvider
+            .GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>()?.HttpContext;
+        if (UserCultureHelper.RequestSpecifiesCulture(httpContext))
+        {
+            // Switcher already navigated with ?culture=; PersistCurrentCultureToUser runs on window activation.
+            return;
+        }
+
         if (SecuritySystem.CurrentUser is ApplicationUser user)
         {
-            var httpContext = blazorApplication.ServiceProvider
-                .GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>()?.HttpContext;
             using IObjectSpace objectSpace = Application.CreateObjectSpace(typeof(ApplicationUser));
-            ApplicationUser userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
+            ApplicationUser? userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
             if (userInOs != null)
             {
                 UserCultureHelper.SeedPreferredCultureFromRequestIfEmpty(userInOs, httpContext);
-                if (VisaLocalization.TryNormalizeCulture(
-                        System.Globalization.CultureInfo.CurrentUICulture.Name,
-                        out string currentCulture)
-                    && !string.Equals(userInOs.PreferredCulture, currentCulture, StringComparison.OrdinalIgnoreCase))
-                {
-                    userInOs.PreferredCulture = currentCulture;
-                }
-
                 objectSpace.CommitChanges();
             }
         }
