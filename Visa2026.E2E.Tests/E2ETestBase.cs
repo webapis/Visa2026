@@ -333,72 +333,86 @@ namespace Visa2026.E2E.Tests
                     Thread.Sleep(delay);
             }
 
+            EasyTestBlazorNavigationHelper.TryDumpDiagnostics(
+                AppContext, EasyTestHostProcessLauncher.LogDirectory, "passports-tab");
+
             throw new InvalidOperationException(
                 $"Could not activate Passports tab on Person detail (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
         protected void ExecutePersonPassportsNestedNew()
         {
-            ActivatePersonPassportsTab();
-
-            if (!TryExecutePassportsNestedNew())
-            {
-                throw new InvalidOperationException(
-                    "Could not execute Passports.New on Person detail nested list (native EasyTest).");
-            }
-
-            WaitForPassportDetailReady(retryNestedNew: true);
-        }
-
-        /// <summary>Nested collection New — <c>*Action Passports.New</c> only (never bare <c>New</c> on employee detail).</summary>
-        private bool TryExecutePassportsNestedNew()
-        {
-            int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
+            int maxAttempts = EasyTestCITuning.NestedNewClickMaxAttempts;
             TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
+            var nestedNewClicked = false;
 
+            // Re-verify that the nested passport detail actually opened after each
+            // New click. On slow/headed CI the first Execute can return without
+            // opening the detail; committing to a single click + one long wait then
+            // always times out (the recurring "Passport detail did not open" CI fail).
+            // Re-activate the tab and click again until the detail is detected.
             for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
-                if (!IsPassportsNestedListReady())
+                if (IsPassportDetailFormReady())
+                    return;
+
+                ActivatePersonPassportsTab();
+
+                if (TryClickPassportsNestedNew())
                 {
-                    TryActivatePassportsTabOnce();
-                }
-                else
-                {
-                    try
-                    {
-                        var newAction = AppContext.GetAction("Passports.New");
-                        if (newAction != null)
-                        {
-                            newAction.Execute();
-                            Thread.Sleep(EasyTestCITuning.NestedNewSettleDelay);
-                            return true;
-                        }
-                    }
-                    catch (AdapterOperationException)
-                    {
-                        // Nested list toolbar may still be loading on CI.
-                    }
+                    nestedNewClicked = true;
+                    if (TryWaitForPassportDetailReady(EasyTestCITuning.NestedNewProbeTimeout))
+                        return;
                 }
 
                 if (attempt < maxAttempts - 1)
                     Thread.Sleep(delay);
             }
 
-            return false;
+            EasyTestBlazorNavigationHelper.TryDumpDiagnostics(
+                AppContext, EasyTestHostProcessLauncher.LogDirectory, "passport-nested-new");
+
+            if (!nestedNewClicked)
+            {
+                throw new InvalidOperationException(
+                    "Could not execute Passports.New on Person detail nested list (native EasyTest).");
+            }
+
+            throw new InvalidOperationException(
+                $"Passport detail did not open after nested New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
-        private void TryActivatePassportsTabOnce()
+        /// <summary>
+        /// Opens the nested Passports list <c>New</c>. Tries native EasyTest <c>Passports.New</c>
+        /// (never bare <c>New</c> on employee detail), confirming the detail opened, then falls back
+        /// to a direct DOM click of the real <c>New Passport</c> toolbar button for small/headed CI
+        /// viewports where the adaptive toolbar virtualizes it. Returns whether a click was issued.
+        /// </summary>
+        private bool TryClickPassportsNestedNew()
         {
             try
             {
-                var tabAction = AppContext.GetAction("Passports");
-                tabAction?.Execute();
-                Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+                var newAction = AppContext.GetAction("Passports.New");
+                if (newAction != null)
+                {
+                    newAction.Execute();
+                    Thread.Sleep(EasyTestCITuning.NestedNewSettleDelay);
+                    if (TryWaitForPassportDetailReady(TimeSpan.FromSeconds(4)))
+                        return true;
+                }
             }
             catch (AdapterOperationException)
             {
-                // Retry on next attempt.
+                // Try DOM fallback below.
             }
+
+            // DOM fallback: on small/headed CI viewports XAF renders the nested
+            // ListPropertyEditor New action with an empty data-xaf-action plus an
+            // adaptive virtual clone, and there are sibling "New" buttons (Educations
+            // vs Passports), so EasyTest's Execute is ambiguous and can no-op. Click
+            // the real, displayed "New Passport" toolbar button directly.
+            return EasyTestBlazorNavigationHelper.TryClickToolbarActionByTitle(
+                AppContext, "New Passport", TimeSpan.FromSeconds(10));
         }
 
         private bool IsPassportsNestedListReady()
@@ -487,42 +501,27 @@ namespace Visa2026.E2E.Tests
             }
         }
 
-        private void WaitForPassportDetailReady(bool retryNestedNew = false)
+        private void WaitForPassportDetailReady()
         {
-            DateTime deadline = DateTime.UtcNow + EasyTestCITuning.PassportDetailOpenTimeout;
-            DateTime lastNestedNewAttempt = DateTime.MinValue;
+            if (TryWaitForPassportDetailReady(EasyTestCITuning.PassportDetailOpenTimeout))
+                return;
 
+            throw new InvalidOperationException(
+                $"Passport detail did not open after nested New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private bool TryWaitForPassportDetailReady(TimeSpan timeout)
+        {
+            DateTime deadline = DateTime.UtcNow + timeout;
             while (DateTime.UtcNow < deadline)
             {
                 if (IsPassportDetailFormReady())
-                    return;
-
-                if (retryNestedNew
-                    && DateTime.UtcNow - lastNestedNewAttempt >= EasyTestCITuning.NestedNewSettleDelay
-                    && IsPassportsNestedListReady())
-                {
-                    lastNestedNewAttempt = DateTime.UtcNow;
-                    TryExecutePassportsNestedNewOnly();
-                }
+                    return true;
 
                 Thread.Sleep(TimeSpan.FromMilliseconds(500));
             }
 
-            throw new InvalidOperationException(
-                $"Passport detail did not open after Passports.New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
-        }
-
-        private void TryExecutePassportsNestedNewOnly()
-        {
-            try
-            {
-                AppContext.GetAction("Passports.New")?.Execute();
-                Thread.Sleep(EasyTestCITuning.NestedNewSettleDelay);
-            }
-            catch (AdapterOperationException)
-            {
-                // Wait loop will retry.
-            }
+            return false;
         }
 
         private void FillPassportFormWithRetry(params EasyTestParameter[] fields)

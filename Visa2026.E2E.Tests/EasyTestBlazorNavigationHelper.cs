@@ -21,6 +21,43 @@ internal static class EasyTestBlazorNavigationHelper
         WaitForDocumentReady(driver, TimeSpan.FromSeconds(45));
     }
 
+    /// <summary>
+    /// Best-effort capture of the current browser state (URL, page HTML, screenshot)
+    /// into <paramref name="outputDirectory"/> for post-mortem of CI-only failures.
+    /// Never throws — diagnostics must not mask the original test error.
+    /// </summary>
+    public static void TryDumpDiagnostics(IApplicationContext appContext, string outputDirectory, string label)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return;
+
+        string baseName;
+        try
+        {
+            Directory.CreateDirectory(outputDirectory);
+            string stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
+            baseName = Path.Combine(outputDirectory, $"diag-{label}-{stamp}");
+        }
+        catch
+        {
+            return;
+        }
+
+        try { File.WriteAllText(baseName + ".url.txt", driver.Url ?? string.Empty); }
+        catch { /* diagnostics are best-effort */ }
+
+        try { File.WriteAllText(baseName + ".page.html", driver.PageSource ?? string.Empty); }
+        catch { /* diagnostics are best-effort */ }
+
+        try
+        {
+            if (driver is ITakesScreenshot shooter)
+                shooter.GetScreenshot().SaveAsFile(baseName + ".png");
+        }
+        catch { /* diagnostics are best-effort */ }
+    }
+
     public static bool UrlContains(IApplicationContext appContext, string fragment) =>
         TryGetCurrentUrl(appContext, out string? url)
         && url.Contains(fragment, StringComparison.OrdinalIgnoreCase);
@@ -60,6 +97,86 @@ internal static class EasyTestBlazorNavigationHelper
         catch (WebDriverException)
         {
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Native-DOM click of a DevExpress toolbar action button by its rendered
+    /// <c>title</c> prefix (e.g. a nested list's <c>New Passport</c>). XAF renders an
+    /// empty <c>data-xaf-action</c> on nested ListPropertyEditor actions and, on small
+    /// headed CI viewports, an adaptive <c>dxbl-virtual-el</c> measurement clone, so
+    /// EasyTest's <c>GetAction("New").Execute()</c> is ambiguous between sibling nested
+    /// grids and can no-op. Clicking the real, displayed button is deterministic.
+    /// Mirrors the existing <see cref="ClickListRowContaining"/> DOM helper.
+    /// </summary>
+    public static bool TryClickToolbarActionByTitle(IApplicationContext appContext, string titlePrefix, TimeSpan timeout)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        string literal = titlePrefix.Replace("'", "\\'");
+        string xpath =
+            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]";
+
+        DateTime deadline = DateTime.UtcNow + timeout;
+        do
+        {
+            try
+            {
+                foreach (IWebElement button in driver.FindElements(By.XPath(xpath)))
+                {
+                    if (!button.Displayed || !button.Enabled)
+                        continue;
+
+                    ScrollIntoView(driver, button);
+                    button.Click();
+                    return true;
+                }
+            }
+            catch (WebDriverException)
+            {
+                // Re-query after a Blazor re-render.
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(300));
+        }
+        while (DateTime.UtcNow < deadline);
+
+        return false;
+    }
+
+    /// <summary>
+    /// Maximizes the browser window so DevExpress adaptive toolbars keep their actions
+    /// inline (collapsed toolbars hide nested-list <c>New</c> behind virtual clones on
+    /// small CI viewports). Best-effort — never throws.
+    /// </summary>
+    public static void TryMaximizeWindow(IApplicationContext appContext)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return;
+
+        try
+        {
+            driver.Manage().Window.Maximize();
+        }
+        catch (WebDriverException)
+        {
+            // Headless / unsupported window manager — ignore.
+        }
+    }
+
+    private static void ScrollIntoView(IWebDriver driver, IWebElement element)
+    {
+        try
+        {
+            if (driver is IJavaScriptExecutor js)
+                js.ExecuteScript("arguments[0].scrollIntoView({block:'center'});", element);
+        }
+        catch (WebDriverException)
+        {
+            // Non-fatal — Click still attempts its own scroll.
         }
     }
 

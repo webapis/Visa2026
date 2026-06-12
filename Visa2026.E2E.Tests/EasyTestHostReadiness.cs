@@ -35,7 +35,7 @@ internal static class EasyTestHostReadiness
         }
     }
 
-    internal static void WaitUntilHttpResponds(TimeSpan timeout)
+    internal static void WaitUntilHttpResponds(TimeSpan timeout, Func<bool>? hostHasExited = null)
     {
         DateTime deadline = DateTime.UtcNow + timeout;
         DateTime nextProgressLog = DateTime.UtcNow;
@@ -50,6 +50,15 @@ internal static class EasyTestHostReadiness
                 Trace.WriteLine(progress);
                 Console.WriteLine(progress);
                 nextProgressLog = DateTime.UtcNow.AddSeconds(15);
+            }
+
+            // Fail fast if the host crashed on startup (e.g. the intermittent
+            // DevExpress TypesInfo warm-up race) instead of waiting out the full
+            // timeout — lets the launcher restart the host on a fresh process.
+            if (hostHasExited?.Invoke() == true)
+            {
+                throw new InvalidOperationException(
+                    $"EasyTest host process exited before HTTP became ready at {EasyTestHostEnvironment.BaseUrl}.");
             }
 
             try

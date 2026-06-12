@@ -33,6 +33,7 @@ internal static class EasyTestApplicationLauncher
                 Console.WriteLine(attemptMessage);
 
                 appContext.RunApplication();
+                EasyTestBlazorNavigationHelper.TryMaximizeWindow(appContext);
                 Trace.WriteLine($"[EasyTest] RunApplication succeeded (attempt {attempt}).");
                 Console.WriteLine($"[EasyTest] RunApplication succeeded (attempt {attempt}).");
                 return;
