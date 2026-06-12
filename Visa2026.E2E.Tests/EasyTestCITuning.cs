@@ -10,6 +10,14 @@ internal static class EasyTestCITuning
     internal static int RunApplicationMaxAttempts =>
         IsTruthy(Environment.GetEnvironmentVariable("CI")) ? 3 : 1;
 
+    /// <summary>
+    /// How many times to (re)launch the Blazor host process before giving up, so an
+    /// intermittent startup crash (DevExpress TypesInfo / WebApi OData warm-up race)
+    /// is recovered on a fresh process. Each attempt fails fast when the host exits.
+    /// </summary>
+    internal static int HostStartMaxAttempts =>
+        IsTruthy(Environment.GetEnvironmentVariable("CI")) ? 3 : 1;
+
     internal static int FormFieldMaxAttempts =>
         IsTruthy(Environment.GetEnvironmentVariable("CI")) ? 30 : 10;
 

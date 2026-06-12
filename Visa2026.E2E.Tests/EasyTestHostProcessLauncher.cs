@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 namespace Visa2026.E2E.Tests;
 
 /// <summary>
@@ -26,6 +27,29 @@ internal static class EasyTestHostProcessLauncher
             return;
         }
 
+        // Retry host startup so an intermittent crash (e.g. the DevExpress
+        // TypesInfo / WebApi OData warm-up concurrency race seen on CI) is
+        // recovered on a fresh process instead of failing the whole session.
+        int maxAttempts = EasyTestCITuning.HostStartMaxAttempts;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                StartManagedHostOnce(blazorServerProjectPath, attempt, maxAttempts);
+                return;
+            }
+            catch (Exception ex) when (attempt < maxAttempts)
+            {
+                WriteDiagnostic($"Host start attempt {attempt}/{maxAttempts} failed: {ex.Message}");
+                WriteDiagnostic(BuildDiagnostics());
+                StopManagedHost();
+                Thread.Sleep(TimeSpan.FromSeconds(3));
+            }
+        }
+    }
+
+    private static void StartManagedHostOnce(string blazorServerProjectPath, int attempt, int maxAttempts)
+    {
         string hostExe = EasyTestHostLaunch.ResolveHostExecutable(blazorServerProjectPath);
         Directory.CreateDirectory(LogDirectory);
 
@@ -45,7 +69,7 @@ internal static class EasyTestHostProcessLauncher
 
         EasyTestHostLaunch.ApplyHostEnvironment(startInfo);
 
-        WriteDiagnostic($"Starting host: {hostExe} {EasyTestHostLaunch.HostArguments}");
+        WriteDiagnostic($"Starting host (attempt {attempt}/{maxAttempts}): {hostExe} {EasyTestHostLaunch.HostArguments}");
         WriteDiagnostic($"Host logs: {LogDirectory}");
 
         _stdoutWriter = new StreamWriter(stdoutPath, append: false, Encoding.UTF8) { AutoFlush = true };
@@ -67,20 +91,14 @@ internal static class EasyTestHostProcessLauncher
         _hostProcess.BeginOutputReadLine();
         _hostProcess.BeginErrorReadLine();
 
-        try
-        {
-            EasyTestHostReadiness.WaitUntilHttpResponds(EasyTestCITuning.HostStartupTimeout);
-        }
-        catch
-        {
-            WriteDiagnostic(BuildDiagnostics());
-            throw;
-        }
+        EasyTestHostReadiness.WaitUntilHttpResponds(
+            EasyTestCITuning.HostStartupTimeout,
+            () => _hostProcess?.HasExited == true);
 
         if (_hostProcess.HasExited)
         {
-            string message = $"Host exited before HTTP ready (code {_hostProcess.ExitCode}).{Environment.NewLine}{BuildDiagnostics()}";
-            throw new InvalidOperationException(message);
+            throw new InvalidOperationException(
+                $"Host exited before HTTP ready (code {_hostProcess.ExitCode}).");
         }
 
         WriteDiagnostic("Managed host is running and HTTP-ready.");
@@ -136,7 +154,21 @@ internal static class EasyTestHostProcessLauncher
         if (!File.Exists(path))
             return $"{Path.GetFileName(path)}: (missing)";
 
-        string content = File.ReadAllText(path);
+        string content;
+        try
+        {
+            // The host's StreamWriter still holds this file open for writing while the
+            // host is running; File.ReadAllText (read-only share) would throw a Windows
+            // sharing violation and mask the real startup error. Share read+write.
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            content = reader.ReadToEnd();
+        }
+        catch (IOException ex)
+        {
+            return $"{Path.GetFileName(path)}: (unavailable: {ex.Message})";
+        }
+
         if (content.Length <= maxChars)
             return $"{Path.GetFileName(path)}:{Environment.NewLine}{content}";
 
