@@ -336,6 +336,16 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Нумерация заявок">
+      <OwnMembers>
+        <Member Name="ApplicationNumberPadding" Caption="Длина номера заявки" />
+        <Member Name="ApplicationNumberSeed" Caption="Начальный номер заявки" />
+        <Member Name="AppNumberFormat" Caption="Формат номера заявки" />
+        <Member Name="AppNumberPrefix" Caption="Префикс номера заявки" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Прогресс заявки">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
@@ -539,6 +549,31 @@
         <Member Name="UserName" Caption="Имя пользователя" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Уполномоченный представитель">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="FullName" Caption="ФИО" />
+        <Member Name="PassportAuthority" Caption="Орган выдачи паспорта" />
+        <Member Name="PassportIssueDate" Caption="Дата выдачи паспорта" />
+        <Member Name="PassportLine" Caption="Паспорт (одной строкой)" />
+        <Member Name="PassportNumber" Caption="Номер паспорта" />
+        <Member Name="Phone" Caption="Телефон" />
+        <Member Name="PositionTitleTm" Caption="Должность (Tm)" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedSignatory" Caption="Уполномоченный подписант">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="FullName" Caption="ФИО" />
+        <Member Name="PassportAuthority" Caption="Орган выдачи паспорта" />
+        <Member Name="PassportIssueDate" Caption="Дата выдачи паспорта" />
+        <Member Name="PassportLine" Caption="Паспорт (одной строкой)" />
+        <Member Name="PassportNumber" Caption="Номер паспорта" />
+        <Member Name="PositionTitleTm" Caption="Должность (Tm)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Пограничная зона">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
@@ -638,6 +673,18 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CompanyProfile" Caption="Компания">
+      <OwnMembers>
+        <Member Name="Address" Caption="Адрес" />
+        <Member Name="Code" Caption="Код" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Email" Caption="Эл. почта" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="PhoneNumber" Caption="Телефон" />
+        <Member Name="TaxInformation" Caption="Налоговые данные" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Шаблон договора">
@@ -1108,12 +1155,6 @@
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Министерство">
-      <OwnMembers>
-        <Member Name="DateDeleted" Caption="Дата удаления" />
-        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth" Caption="Глубина проверки министерств">
@@ -2249,6 +2290,8 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Документы" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
+    <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Нумерация заявок" />
+    <ListView Id="ApplicationNumberingProfile_ListView" Caption="Нумерация заявок" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
     <ListView Id="ApplicationProgress_ListView" Caption="Прогресс заявок">
       <Columns>
@@ -2301,6 +2344,10 @@
         <PropertyEditor Id="UserName" Caption="Имя пользователя" />
       </Items>
     </DetailView>
+    <DetailView Id="AuthorizedRepresentative_DetailView" Caption="Уполномоченный представитель" />
+    <ListView Id="AuthorizedRepresentative_ListView" Caption="Уполномоченный представитель" />
+    <DetailView Id="AuthorizedSignatory_DetailView" Caption="Уполномоченный подписант" />
+    <ListView Id="AuthorizedSignatory_ListView" Caption="Уполномоченный подписант" />
     <DetailView Id="BorderZone_DetailView" Caption="Пограничная зона" />
     <ListView Id="BorderZone_ListView" Caption="Пограничные зоны" />
     <DetailView Id="BorderZoneItem_DetailView" Caption="Элемент погран. зоны" />
@@ -2324,6 +2371,14 @@
     <ListView Id="Company_ListView" Caption="Компании" />
     <DetailView Id="CompanyHead_DetailView" Caption="Руководитель компании" />
     <ListView Id="CompanyHead_ListView" Caption="Руководители" />
+    <DetailView Id="CompanyProfile_DetailView" Caption="Компания">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="CompanyProfile" Caption="Компания" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="CompanyProfile_ListView" Caption="Компания" />
     <DetailView Id="ContractTemplate_DetailView" Caption="Шаблон договора" />
     <ListView Id="ContractTemplate_ListView" Caption="Шаблоны договора" />
     <DetailView Id="Country_DetailView" Caption="Страна" />
@@ -2440,8 +2495,6 @@
     </ListView>
     <DetailView Id="MigrationService_DetailView" Caption="Миграционная служба" />
     <ListView Id="MigrationService_ListView" Caption="Миграционные службы" />
-    <DetailView Id="Ministry_DetailView" Caption="Министерство" />
-    <ListView Id="Ministry_ListView" Caption="Министерства" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Место разрешения на перемещение" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Места разрешения" />
     <DetailView Id="OrganizationType_DetailView" Caption="Тип организации" />

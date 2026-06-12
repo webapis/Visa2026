@@ -336,6 +336,16 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Arza belgileme">
+      <OwnMembers>
+        <Member Name="ApplicationNumberPadding" Caption="Arza belgisi uzynlygy" />
+        <Member Name="ApplicationNumberSeed" Caption="Arza belgisi başlangyjy" />
+        <Member Name="AppNumberFormat" Caption="Arza belgisi formaty" />
+        <Member Name="AppNumberPrefix" Caption="Arza belgisi prefiksi" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Arza ösüşi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
@@ -539,6 +549,31 @@
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Ygtyýarly wekil">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="FullName" Caption="Doly ady" />
+        <Member Name="PassportAuthority" Caption="Pasport beren edara" />
+        <Member Name="PassportIssueDate" Caption="Pasport berlen senesi" />
+        <Member Name="PassportLine" Caption="Pasport (bir setir)" />
+        <Member Name="PassportNumber" Caption="Pasport belgisi" />
+        <Member Name="Phone" Caption="Telefon" />
+        <Member Name="PositionTitleTm" Caption="Wezipesi (Tm)" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedSignatory" Caption="Ygtyýarly gol çekiji">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="FullName" Caption="Doly ady" />
+        <Member Name="PassportAuthority" Caption="Pasport beren edara" />
+        <Member Name="PassportIssueDate" Caption="Pasport berlen senesi" />
+        <Member Name="PassportLine" Caption="Pasport (bir setir)" />
+        <Member Name="PassportNumber" Caption="Pasport belgisi" />
+        <Member Name="PositionTitleTm" Caption="Wezipesi (Tm)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Serhet sebiti">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
@@ -638,6 +673,18 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CompanyProfile" Caption="Kompaniýa">
+      <OwnMembers>
+        <Member Name="Address" Caption="Salgy" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Email" Caption="E-poçta" />
+        <Member Name="Name" Caption="Ady" />
+        <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="TaxInformation" Caption="Salgyt maglumaty" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Şertnama şablony">
@@ -1108,12 +1155,6 @@
         <Member Name="StartDate" Caption="Başlanýan senesi" />
         <Member Name="State" Caption="Ýagdaý" />
         <Member Name="ValidityDuration" Caption="Möhleti" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Ministrlik">
-      <OwnMembers>
-        <Member Name="DateDeleted" Caption="Pozulan senesi" />
-        <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth" Caption="Ministrlik barlag çuňlugy">
@@ -2249,6 +2290,8 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Resminamalar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
+    <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Arza belgileme" />
+    <ListView Id="ApplicationNumberingProfile_ListView" Caption="Arza belgileme" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
     <ListView Id="ApplicationProgress_ListView" Caption="Arza ösüşleri">
       <Columns>
@@ -2301,6 +2344,10 @@
         <PropertyEditor Id="UserName" Caption="Ulanyjy ady" />
       </Items>
     </DetailView>
+    <DetailView Id="AuthorizedRepresentative_DetailView" Caption="Ygtyýarly wekil" />
+    <ListView Id="AuthorizedRepresentative_ListView" Caption="Ygtyýarly wekil" />
+    <DetailView Id="AuthorizedSignatory_DetailView" Caption="Ygtyýarly gol çekiji" />
+    <ListView Id="AuthorizedSignatory_ListView" Caption="Ygtyýarly gol çekiji" />
     <DetailView Id="BorderZone_DetailView" Caption="Serhet sebiti" />
     <ListView Id="BorderZone_ListView" Caption="Serhet sebitleri" />
     <DetailView Id="BorderZoneItem_DetailView" Caption="Serhet sebiti elementi" />
@@ -2324,6 +2371,14 @@
     <ListView Id="Company_ListView" Caption="Kompaniýalar" />
     <DetailView Id="CompanyHead_DetailView" Caption="Kompaniýa müdiri" />
     <ListView Id="CompanyHead_ListView" Caption="Kompaniýa müdirleri" />
+    <DetailView Id="CompanyProfile_DetailView" Caption="Kompaniýa">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="CompanyProfile" Caption="Kompaniýa" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="CompanyProfile_ListView" Caption="Kompaniýa" />
     <DetailView Id="ContractTemplate_DetailView" Caption="Şertnama şablony" />
     <ListView Id="ContractTemplate_ListView" Caption="Şertnama şablonlary" />
     <DetailView Id="Country_DetailView" Caption="Ýurt" />
@@ -2440,8 +2495,6 @@
     </ListView>
     <DetailView Id="MigrationService_DetailView" Caption="Migrasiýa gullugy" />
     <ListView Id="MigrationService_ListView" Caption="Migrasiýa gullugylary" />
-    <DetailView Id="Ministry_DetailView" Caption="Ministrlik" />
-    <ListView Id="Ministry_ListView" Caption="Ministrlikler" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Hereket rugsady ýeri" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Hereket rugsady ýerleri" />
     <DetailView Id="OrganizationType_DetailView" Caption="Gurama görnüşi" />

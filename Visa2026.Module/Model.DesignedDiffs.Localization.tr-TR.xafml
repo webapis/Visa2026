@@ -336,6 +336,16 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Başvuru Numaralandırma">
+      <OwnMembers>
+        <Member Name="ApplicationNumberPadding" Caption="Başvuru No Uzunluğu" />
+        <Member Name="ApplicationNumberSeed" Caption="Başvuru No Başlangıç" />
+        <Member Name="AppNumberFormat" Caption="Başvuru No Formatı" />
+        <Member Name="AppNumberPrefix" Caption="Başvuru No Öneki" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgress" Caption="Başvuru İlerlemesi">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
@@ -539,6 +549,31 @@
         <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Yetkili Temsilci">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="FullName" Caption="Ad Soyad" />
+        <Member Name="PassportAuthority" Caption="Pasaport Veren Kurum" />
+        <Member Name="PassportIssueDate" Caption="Pasaport Veriliş Tarihi" />
+        <Member Name="PassportLine" Caption="Pasaport (tek satır)" />
+        <Member Name="PassportNumber" Caption="Pasaport No" />
+        <Member Name="Phone" Caption="Telefon" />
+        <Member Name="PositionTitleTm" Caption="Pozisyon (Tm)" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.AuthorizedSignatory" Caption="Yetkili İmzacı">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="FullName" Caption="Ad Soyad" />
+        <Member Name="PassportAuthority" Caption="Pasaport Veren Kurum" />
+        <Member Name="PassportIssueDate" Caption="Pasaport Veriliş Tarihi" />
+        <Member Name="PassportLine" Caption="Pasaport (tek satır)" />
+        <Member Name="PassportNumber" Caption="Pasaport No" />
+        <Member Name="PositionTitleTm" Caption="Pozisyon (Tm)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZone" Caption="Sınır Bölgesi">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
@@ -638,6 +673,18 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.CompanyProfile" Caption="Şirket">
+      <OwnMembers>
+        <Member Name="Address" Caption="Adres" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Email" Caption="E-posta" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="PhoneNumber" Caption="Telefon" />
+        <Member Name="TaxInformation" Caption="Vergi Bilgisi" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ContractTemplate" Caption="Sözleşme Şablonu">
@@ -1108,12 +1155,6 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.Ministry" Caption="Bakanlık">
-      <OwnMembers>
-        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
-        <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewDepth" Caption="Bakanlık inceleme derinliği">
@@ -2249,6 +2290,8 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Belgeler" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
+    <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Başvuru Numaralandırma" />
+    <ListView Id="ApplicationNumberingProfile_ListView" Caption="Başvuru Numaralandırma" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
     <ListView Id="ApplicationProgress_ListView" Caption="Başvuru İlerlemeleri">
       <Columns>
@@ -2301,6 +2344,10 @@
         <PropertyEditor Id="UserName" Caption="Kullanıcı Adı" />
       </Items>
     </DetailView>
+    <DetailView Id="AuthorizedRepresentative_DetailView" Caption="Yetkili Temsilci" />
+    <ListView Id="AuthorizedRepresentative_ListView" Caption="Yetkili Temsilci" />
+    <DetailView Id="AuthorizedSignatory_DetailView" Caption="Yetkili İmzacı" />
+    <ListView Id="AuthorizedSignatory_ListView" Caption="Yetkili İmzacı" />
     <DetailView Id="BorderZone_DetailView" Caption="Sınır Bölgesi" />
     <ListView Id="BorderZone_ListView" Caption="Sınır Bölgeleri" />
     <DetailView Id="BorderZoneItem_DetailView" Caption="Sınır Bölgesi Kalemi" />
@@ -2324,6 +2371,14 @@
     <ListView Id="Company_ListView" Caption="Şirketler" />
     <DetailView Id="CompanyHead_DetailView" Caption="Şirket Müdürü" />
     <ListView Id="CompanyHead_ListView" Caption="Şirket Müdürleri" />
+    <DetailView Id="CompanyProfile_DetailView" Caption="Şirket">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="CompanyProfile" Caption="Şirket" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="CompanyProfile_ListView" Caption="Şirket" />
     <DetailView Id="ContractTemplate_DetailView" Caption="Sözleşme Şablonu" />
     <ListView Id="ContractTemplate_ListView" Caption="Sözleşme Şablonları" />
     <DetailView Id="Country_DetailView" Caption="Ülke" />
@@ -2440,8 +2495,6 @@
     </ListView>
     <DetailView Id="MigrationService_DetailView" Caption="Göç Dairesi" />
     <ListView Id="MigrationService_ListView" Caption="Göç Daireleri" />
-    <DetailView Id="Ministry_DetailView" Caption="Bakanlık" />
-    <ListView Id="Ministry_ListView" Caption="Bakanlıklar" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Hareket İzni Yeri" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Hareket İzni Yerleri" />
     <DetailView Id="OrganizationType_DetailView" Caption="Organizasyon Türü" />

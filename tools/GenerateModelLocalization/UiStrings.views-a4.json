@@ -71,6 +71,12 @@
     "ApplicationItemReportPackageListHost_DetailView": {
       "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
     },
+    "CompanyProfile_DetailView": {
+      "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+      "layoutGroups": {
+        "CompanyProfile": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }
+      }
+    },
     "Person_DetailView": {
       "caption": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
       "layoutGroups": {

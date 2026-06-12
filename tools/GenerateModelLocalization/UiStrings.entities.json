@@ -120,6 +120,53 @@
     "Education": { "caption": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" }, "listCaption": { "tr-TR": "Eğitimler", "tk-TM": "Bilimler", "ru-RU": "Образование" } },
     "MedicalRecord": { "caption": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" }, "listCaption": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" } },
     "Company": { "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }, "listCaption": { "tr-TR": "Şirketler", "tk-TM": "Kompaniýalar", "ru-RU": "Компании" } },
+    "CompanyProfile": {
+      "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+      "listCaption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
+      "members": {
+        "Name": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+        "Code": { "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
+        "Address": { "tr-TR": "Adres", "tk-TM": "Salgy", "ru-RU": "Адрес" },
+        "PhoneNumber": { "tr-TR": "Telefon", "tk-TM": "Telefon", "ru-RU": "Телефон" },
+        "Email": { "tr-TR": "E-posta", "tk-TM": "E-poçta", "ru-RU": "Эл. почта" },
+        "TaxInformation": { "tr-TR": "Vergi Bilgisi", "tk-TM": "Salgyt maglumaty", "ru-RU": "Налоговые данные" }
+      }
+    },
+    "ApplicationNumberingProfile": {
+      "caption": { "tr-TR": "Başvuru Numaralandırma", "tk-TM": "Arza belgileme", "ru-RU": "Нумерация заявок" },
+      "listCaption": { "tr-TR": "Başvuru Numaralandırma", "tk-TM": "Arza belgileme", "ru-RU": "Нумерация заявок" },
+      "members": {
+        "AppNumberPrefix": { "tr-TR": "Başvuru No Öneki", "tk-TM": "Arza belgisi prefiksi", "ru-RU": "Префикс номера заявки" },
+        "AppNumberFormat": { "tr-TR": "Başvuru No Formatı", "tk-TM": "Arza belgisi formaty", "ru-RU": "Формат номера заявки" },
+        "ApplicationNumberSeed": { "tr-TR": "Başvuru No Başlangıç", "tk-TM": "Arza belgisi başlangyjy", "ru-RU": "Начальный номер заявки" },
+        "ApplicationNumberPadding": { "tr-TR": "Başvuru No Uzunluğu", "tk-TM": "Arza belgisi uzynlygy", "ru-RU": "Длина номера заявки" }
+      }
+    },
+    "AuthorizedSignatory": {
+      "caption": { "tr-TR": "Yetkili İmzacı", "tk-TM": "Ygtyýarly gol çekiji", "ru-RU": "Уполномоченный подписант" },
+      "listCaption": { "tr-TR": "Yetkili İmzacı", "tk-TM": "Ygtyýarly gol çekiji", "ru-RU": "Уполномоченный подписант" },
+      "members": {
+        "FullName": { "tr-TR": "Ad Soyad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "PositionTitleTm": { "tr-TR": "Pozisyon (Tm)", "tk-TM": "Wezipesi (Tm)", "ru-RU": "Должность (Tm)" },
+        "PassportNumber": { "tr-TR": "Pasaport No", "tk-TM": "Pasport belgisi", "ru-RU": "Номер паспорта" },
+        "PassportAuthority": { "tr-TR": "Pasaport Veren Kurum", "tk-TM": "Pasport beren edara", "ru-RU": "Орган выдачи паспорта" },
+        "PassportIssueDate": { "tr-TR": "Pasaport Veriliş Tarihi", "tk-TM": "Pasport berlen senesi", "ru-RU": "Дата выдачи паспорта" },
+        "PassportLine": { "tr-TR": "Pasaport (tek satır)", "tk-TM": "Pasport (bir setir)", "ru-RU": "Паспорт (одной строкой)" }
+      }
+    },
+    "AuthorizedRepresentative": {
+      "caption": { "tr-TR": "Yetkili Temsilci", "tk-TM": "Ygtyýarly wekil", "ru-RU": "Уполномоченный представитель" },
+      "listCaption": { "tr-TR": "Yetkili Temsilci", "tk-TM": "Ygtyýarly wekil", "ru-RU": "Уполномоченный представитель" },
+      "members": {
+        "FullName": { "tr-TR": "Ad Soyad", "tk-TM": "Doly ady", "ru-RU": "ФИО" },
+        "PositionTitleTm": { "tr-TR": "Pozisyon (Tm)", "tk-TM": "Wezipesi (Tm)", "ru-RU": "Должность (Tm)" },
+        "Phone": { "tr-TR": "Telefon", "tk-TM": "Telefon", "ru-RU": "Телефон" },
+        "PassportNumber": { "tr-TR": "Pasaport No", "tk-TM": "Pasport belgisi", "ru-RU": "Номер паспорта" },
+        "PassportAuthority": { "tr-TR": "Pasaport Veren Kurum", "tk-TM": "Pasport beren edara", "ru-RU": "Орган выдачи паспорта" },
+        "PassportIssueDate": { "tr-TR": "Pasaport Veriliş Tarihi", "tk-TM": "Pasport berlen senesi", "ru-RU": "Дата выдачи паспорта" },
+        "PassportLine": { "tr-TR": "Pasaport (tek satır)", "tk-TM": "Pasport (bir setir)", "ru-RU": "Паспорт (одной строкой)" }
+      }
+    },
     "ProjectContract": {
       "caption": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
       "listCaption": { "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" },
