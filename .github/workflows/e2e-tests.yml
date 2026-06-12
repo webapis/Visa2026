@@ -82,11 +82,57 @@ jobs:
         shell: pwsh
         run: dotnet build Visa2026.slnx -c EasyTest --no-restore
 
+      # Record the headed-Edge desktop while the officer journey runs so the
+      # browser session is captured as a downloadable video artifact. Fragmented
+      # MP4 (frag_keyframe+empty_moov) stays playable even after the recorder is
+      # force-stopped. Best-effort: never fail the job on recording problems.
+      - name: Start screen recording
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $recDir = Join-Path $env:GITHUB_WORKSPACE "Visa2026.E2E.Tests\recordings"
+          New-Item -ItemType Directory -Force -Path $recDir | Out-Null
+          $out = Join-Path $recDir "officer-journey.mp4"
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            Write-Host "ffmpeg not found; installing via choco."
+            choco install ffmpeg -y --no-progress | Out-Null
+          }
+          $ffArgs = @(
+            '-y','-f','gdigrab','-framerate','10','-draw_mouse','1','-i','desktop',
+            '-movflags','frag_keyframe+empty_moov','-pix_fmt','yuv420p',$out
+          )
+          $proc = Start-Process -FilePath 'ffmpeg' -ArgumentList $ffArgs -PassThru -WindowStyle Hidden
+          Set-Content -Path (Join-Path $env:RUNNER_TEMP 'ffmpeg.pid') -Value $proc.Id
+          Write-Host "Started ffmpeg (pid $($proc.Id)) recording to $out"
+
       - name: Run EasyTest E2E suite
         shell: pwsh
         env:
           CI: true
         run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=e2e-results.trx"
+
+      - name: Stop screen recording
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $pidFile = Join-Path $env:RUNNER_TEMP 'ffmpeg.pid'
+          if (Test-Path $pidFile) {
+            $ffPid = (Get-Content $pidFile | Select-Object -First 1).Trim()
+            Write-Host "Stopping ffmpeg (pid $ffPid)."
+            try { Stop-Process -Id $ffPid -Force -ErrorAction SilentlyContinue } catch {}
+            Start-Sleep -Seconds 4
+          } else {
+            Write-Host "No ffmpeg pid file found; recording may not have started."
+          }
+
+      - name: Upload E2E recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easytest-e2e-recording
+          path: "**/recordings/*.mp4"
+          if-no-files-found: ignore
 
       - name: Upload test results
         if: always()

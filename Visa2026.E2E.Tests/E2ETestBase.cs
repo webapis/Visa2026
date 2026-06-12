@@ -166,18 +166,20 @@ namespace Visa2026.E2E.Tests
 
         private bool IsEmployeesListActive(string listViewPath)
         {
-            if (IsEmployeeDetailFormReady())
+            // Fast Selenium signals first. GetForm()/GetAction() each block up to the
+            // Config DefaultTimeout on a miss, so a GetForm()-based "is this a detail
+            // view?" probe is very slow while we are actually on the list.
+            bool urlIsList = EasyTestBlazorNavigationHelper.UrlContains(AppContext, listViewPath);
+            bool hasListGrid = EasyTestBlazorNavigationHelper.ListHasColumnHeader(
+                AppContext, E2ETestPersonFieldCaptions.PersonalNumber);
+
+            // The Personal Number column header is unique to the Employees list grid
+            // (the employee detail nests Passports/Educations, not a Personal Number
+            // grid), so its presence already distinguishes list from detail.
+            if (!urlIsList && !hasListGrid)
                 return false;
 
-            if (AppContext.GetAction("New") == null)
-                return false;
-
-            if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, listViewPath))
-                return true;
-
-            return EasyTestBlazorNavigationHelper.ListHasColumnHeader(
-                AppContext,
-                E2ETestPersonFieldCaptions.PersonalNumber);
+            return AppContext.GetAction("New") != null;
         }
 
         /// <summary>
