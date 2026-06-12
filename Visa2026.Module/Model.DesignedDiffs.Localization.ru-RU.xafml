@@ -1422,6 +1422,7 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Documents" Caption="Копии контракта проекта" />
+        <Member Name="MinistryReviewDepth" Caption="Глубина министерского согласования" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Цель поездки">

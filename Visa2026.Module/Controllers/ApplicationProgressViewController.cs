@@ -27,6 +27,21 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
 
     private void ObjectSpace_Committing(object sender, CancelEventArgs e)
     {
+        foreach (var application in ObjectSpace.GetObjectsToSave(false).OfType<BusinessObjects.Application>())
+        {
+            if (ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication(
+                    application, ObjectSpace, out var applicationError))
+                continue;
+
+            e.Cancel = true;
+            Application.ShowViewStrategy.ShowMessage(
+                applicationError ?? VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired"),
+                InformationType.Error,
+                5000,
+                InformationPosition.Top);
+            return;
+        }
+
         foreach (var progress in ObjectSpace.GetObjectsToSave(false).OfType<ApplicationProgress>())
         {
             if (ApplicationProgressTransitionHelper.TryValidateProgressStep(progress, ObjectSpace, out var errorMessage))

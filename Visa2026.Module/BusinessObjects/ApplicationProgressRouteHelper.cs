@@ -55,7 +55,7 @@ namespace Visa2026.Module.BusinessObjects
             if (!route.HasValue)
                 return GetAllStateCodes();
 
-            var depth = application?.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly;
+            var depth = ApplicationProgressProfileResolver.GetMinistryReviewDepth(application);
             return GetAllowedStateCodes(route.Value, depth);
         }
 
@@ -65,7 +65,7 @@ namespace Visa2026.Module.BusinessObjects
             if (!route.HasValue)
                 return GetAllLocationCodes();
 
-            var depth = application?.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly;
+            var depth = ApplicationProgressProfileResolver.GetMinistryReviewDepth(application);
             return GetAllowedLocationCodes(route.Value, depth);
         }
 
@@ -192,6 +192,10 @@ namespace Visa2026.Module.BusinessObjects
         {
             var route = GetTypePickerRouteFilter(application);
             if (!route.HasValue)
+                return null;
+
+            if (ApplicationProgressProfileResolver.RequiresProjectContract(application)
+                && application?.ProjectContract == null)
                 return null;
 
             return route.Value == ApplicationProgressRouteKind.DirectToMigrationService

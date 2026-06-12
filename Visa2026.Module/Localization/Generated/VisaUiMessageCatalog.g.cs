@@ -47,6 +47,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["Application.ProjectContractChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Progress history already exists. Changing the project contract may change which ministry steps apply to new progress rows. Review existing steps.",
+            ["tr-TR"] = "İlerleme geçmişi mevcut. Proje sözleşmesini değiştirmek yeni adımlar için bakanlık sürecini etkileyebilir. Mevcut adımları kontrol edin.",
+            ["tk-TM"] = "Ösüş taryhy bar. Taslama şertnamasyny üýtgetmek täze ädimler üçin ministrlik tapgyrlaryny üýtgedip biler. Bar bolan ädimleri barlaň.",
+            ["ru-RU"] = "История прогресса уже есть. Смена контракта может изменить министерские шаги для новых записей. Проверьте существующие шаги.",
+        },
+        ["Application.ProjectContractMinistryDepthChanged"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ministry approval depth changes from {0} to {1} for this application.",
+            ["tr-TR"] = "Bu başvuru için bakanlık onay derinliği {0} → {1} olur.",
+            ["tk-TM"] = "Bu arza üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
+            ["ru-RU"] = "Глубина министерского согласования для заявки меняется: {0} → {1}.",
+        },
         ["ApplicationDocumentPreview.Window.Controls"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Window controls",
@@ -768,12 +782,40 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "\"{0}\" ýeri {1} ugry üçin rugsat edilmeýär.",
             ["ru-RU"] = "Место «{0}» недоступно для маршрута «{1}».",
         },
+        ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select a project contract before advancing beyond office preparation.",
+            ["tr-TR"] = "Ofis hazırlığından sonraki adıma geçmeden önce proje sözleşmesi seçin.",
+            ["tk-TM"] = "Ofis taýýarlygyndan soňky ädime geçmezden ozal taslama şertnamasyny saýlaň.",
+            ["ru-RU"] = "Выберите контракт проекта перед переходом после подготовки в офисе.",
+        },
         ["ApplicationProgress.StateNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "State \"{0}\" is not allowed for applications on the {1} route.",
             ["tr-TR"] = "\"{0}\" durumu {1} süreci için kullanılamaz.",
             ["tk-TM"] = "\"{0}\" ýagdaýy {1} ugry üçin rugsat edilmeýär.",
             ["ru-RU"] = "Состояние «{0}» недоступно для маршрута «{1}».",
+        },
+        ["ApplicationProgressProfile.MinistryDepth.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "no ministry review",
+            ["tr-TR"] = "bakanlık süreci yok",
+            ["tk-TM"] = "ministrlik barlagy ýok",
+            ["ru-RU"] = "без министерств",
+        },
+        ["ApplicationProgressProfile.MinistryDepth.One"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "one ministry",
+            ["tr-TR"] = "tek bakanlık",
+            ["tk-TM"] = "bir ministrlik",
+            ["ru-RU"] = "одно министерство",
+        },
+        ["ApplicationProgressProfile.MinistryDepth.Two"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "two ministries",
+            ["tr-TR"] = "iki bakanlık",
+            ["tk-TM"] = "iki ministrlik",
+            ["ru-RU"] = "два министерства",
         },
         ["ApplicationProgressRoute.DirectToMigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

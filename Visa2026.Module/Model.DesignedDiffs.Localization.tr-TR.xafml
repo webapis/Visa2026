@@ -1422,6 +1422,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Documents" Caption="Proje sözleşmesi kopyaları" />
+        <Member Name="MinistryReviewDepth" Caption="Bakanlık onay derinliği" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Seyahat Amacı">

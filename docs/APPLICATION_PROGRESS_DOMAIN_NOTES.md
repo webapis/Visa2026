@@ -165,6 +165,8 @@ Add a dedicated enum on **`ApplicationType`**, seeded in **`ApplicationTypeConfi
 
 Keep **`ShowProjectContract`** unchanged — it only controls whether officers capture contract data on the Application form.
 
+**Implemented (Phase 1):** when `ShowProjectContract` and route is `ViaMinistries`, **`ProjectContract.MinistryReviewDepth`** overrides `ApplicationType.MinistryReviewDepth` per application. Contract required before leaving office preparation; warn (do not block) on contract change after progress. Canonical doc: [`APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md).
+
 ### Which `ApplicationState` codes are available per route
 
 Keep one global catalog ([`application-state.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/application-state.json)) for all environments. **Filter at runtime** when officers add `ApplicationProgress` on an `Application` (lookup datasource + save validation), using the parent type’s route + depth.

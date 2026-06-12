@@ -1422,6 +1422,7 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Documents" Caption="Taslama şertnamasy nusgalary" />
+        <Member Name="MinistryReviewDepth" Caption="Ministrlik tassyklama çuňlugy" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Syýahat maksady">

@@ -3,6 +3,7 @@
 > **Purpose:** Specify how `ApplicationProgress` records workflow position for an `Application`, how **`ApplicationState`** and **`ApplicationLocation`** combine, how **`DaysElapsed`** time scopes apply, and what validation/alerts officers need when advancing the process **manually**.
 >
 > **Related:**
+> - [`APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) — **approval flows**, ministry legs, **`ProjectContract`** depth (Phase 1)
 > - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — **living ideation** (officer UI examples, unnamed states, color intent; **not implemented**)
 > - [`APPLICATION_LISTVIEW_STATE_COLORS.md`](APPLICATION_LISTVIEW_STATE_COLORS.md) — **planned** `Application` ListView row color from latest progress (`CurrentState`); **not implemented**
 > - [`BO_STATE_TEMPORAL_TYPES.md`](BO_STATE_TEMPORAL_TYPES.md) — `ApplicationProgress` is **`DaysElapsed`**
@@ -105,7 +106,7 @@ Implement in order. All run when a new or edited `ApplicationProgress` is saved.
 | `ApplicationProgressTransitionHelper.TryValidateProgressStep` on commit | **Implemented** — route, canonical pair, first step, terminal, date order, illegal transition |
 | `ApplicationProgress.OnCreated` → `TryApplySuggestedNextStep` | **Implemented** — generalized suggest from prior/latest step |
 
-Define **per `ApplicationType`** which `(FromState, FromLocation) → (ToState, ToLocation)` edges are legal. The graph is selected from **`ApplicationType.ApplicationProgressRoute`** (+ optional **`MinistryReviewDepth`**), **not** from `ShowProjectContract` or other `Show*` UI flags. See [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) §8.
+Define **per application** which `(FromState, FromLocation) → (ToState, ToLocation)` edges are legal. The graph is selected from **`ApplicationType.ApplicationProgressRoute`** and effective **`MinistryReviewDepth`** ([`ApplicationProgressProfileResolver`](../Visa2026.Module/BusinessObjects/ApplicationProgressProfileResolver.cs): type default, or **`ProjectContract.MinistryReviewDepth`** when `ShowProjectContract` and a contract are set). **Not** from `ShowProjectContract` alone. See [`APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) and [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) §8.
 
 **Route A — `ViaMinistries` (first ministry only):**
 

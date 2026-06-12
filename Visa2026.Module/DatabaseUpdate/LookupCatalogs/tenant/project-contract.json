@@ -2,10 +2,12 @@
   "rows": [
     {
       "NameTm": "GT-15",
+      "MinistryReviewDepth": "FirstMinistryOnly",
       "IsDefault": true
     },
     {
-      "NameTm": "Şatlyk‑1"
+      "NameTm": "Şatlyk‑1",
+      "MinistryReviewDepth": "FirstAndSecondMinistry"
     }
   ]
 }

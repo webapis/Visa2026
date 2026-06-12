@@ -1127,6 +1127,42 @@
     "tk-TM": "Ösüş senesi öňki ädimden ir bolup bilmez.",
     "ru-RU": "Дата прогресса не может быть раньше предыдущего шага."
   },
+  "ApplicationProgress.ProjectContractRequired": {
+    "en": "Select a project contract before advancing beyond office preparation.",
+    "tr-TR": "Ofis hazırlığından sonraki adıma geçmeden önce proje sözleşmesi seçin.",
+    "tk-TM": "Ofis taýýarlygyndan soňky ädime geçmezden ozal taslama şertnamasyny saýlaň.",
+    "ru-RU": "Выберите контракт проекта перед переходом после подготовки в офисе."
+  },
+  "Application.ProjectContractChangedAfterProgress": {
+    "en": "Progress history already exists. Changing the project contract may change which ministry steps apply to new progress rows. Review existing steps.",
+    "tr-TR": "İlerleme geçmişi mevcut. Proje sözleşmesini değiştirmek yeni adımlar için bakanlık sürecini etkileyebilir. Mevcut adımları kontrol edin.",
+    "tk-TM": "Ösüş taryhy bar. Taslama şertnamasyny üýtgetmek täze ädimler üçin ministrlik tapgyrlaryny üýtgedip biler. Bar bolan ädimleri barlaň.",
+    "ru-RU": "История прогресса уже есть. Смена контракта может изменить министерские шаги для новых записей. Проверьте существующие шаги."
+  },
+  "Application.ProjectContractMinistryDepthChanged": {
+    "en": "Ministry approval depth changes from {0} to {1} for this application.",
+    "tr-TR": "Bu başvuru için bakanlık onay derinliği {0} → {1} olur.",
+    "tk-TM": "Bu arza üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
+    "ru-RU": "Глубина министерского согласования для заявки меняется: {0} → {1}."
+  },
+  "ApplicationProgressProfile.MinistryDepth.None": {
+    "en": "no ministry review",
+    "tr-TR": "bakanlık süreci yok",
+    "tk-TM": "ministrlik barlagy ýok",
+    "ru-RU": "без министерств"
+  },
+  "ApplicationProgressProfile.MinistryDepth.One": {
+    "en": "one ministry",
+    "tr-TR": "tek bakanlık",
+    "tk-TM": "bir ministrlik",
+    "ru-RU": "одно министерство"
+  },
+  "ApplicationProgressProfile.MinistryDepth.Two": {
+    "en": "two ministries",
+    "tr-TR": "iki bakanlık",
+    "tk-TM": "iki ministrlik",
+    "ru-RU": "два министерства"
+  },
   "ApplicationTypeQuickCode.NotReadyBlocked": {
     "en": "Application type \"{1}\" (code {0}) is not ready for use.",
     "tr-TR": "\"{1}\" başvuru türü (kod {0}) kullanıma hazır değil.",

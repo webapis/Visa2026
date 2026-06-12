@@ -25,6 +25,12 @@ namespace Visa2026.Module.BusinessObjects
             Documents = new ObservableCollection<ProjectContractDocument>();
         }
 
+        /// <summary>
+        /// Ministry approval legs when linked applications use
+        /// <see cref="ApplicationProgressRouteKind.ViaMinistries"/> and <see cref="ApplicationType.ShowProjectContract"/>.
+        /// </summary>
+        public virtual MinistryReviewDepth MinistryReviewDepth { get; set; } = MinistryReviewDepth.FirstMinistryOnly;
+
         [Browsable(false)]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]

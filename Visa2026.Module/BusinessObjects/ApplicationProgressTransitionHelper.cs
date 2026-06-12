@@ -101,7 +101,7 @@ public static class ApplicationProgressTransitionHelper
         if (!route.HasValue)
             return ApplicationProgressRouteHelper.GetAllowedStateCodes(application);
 
-        var depth = application.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly;
+        var depth = ApplicationProgressProfileResolver.GetMinistryReviewDepth(application);
         var fromStep = ProgressStep.Parse(afterStep);
         var routeAllowed = ApplicationProgressRouteHelper.GetAllowedStateCodes(route.Value, depth)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -276,6 +276,9 @@ public static class ApplicationProgressTransitionHelper
         if (!ApplicationProgressRouteHelper.TryValidateProgressStep(progress, out errorMessage))
             return false;
 
+        if (!ApplicationProgressProfileResolver.TryValidateProjectContractForProgress(progress, objectSpace, out errorMessage))
+            return false;
+
         if (progress.State?.Code != null && progress.Location?.Code != null
             && !IsCanonicalStateLocationPair(progress.State.Code, progress.Location.Code))
         {
@@ -314,7 +317,7 @@ public static class ApplicationProgressTransitionHelper
         if (!route.HasValue)
             return true;
 
-        var depth = progress.Application.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly;
+        var depth = ApplicationProgressProfileResolver.GetMinistryReviewDepth(progress.Application);
         var fromStep = ProgressStep.Parse(previous);
         var toStep = ProgressStep.Parse(progress);
 

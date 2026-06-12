@@ -121,7 +121,17 @@
     "MedicalRecord": { "caption": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" }, "listCaption": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" } },
     "Company": { "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }, "listCaption": { "tr-TR": "Şirketler", "tk-TM": "Kompaniýalar", "ru-RU": "Компании" } },
     "Ministry": { "caption": { "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" }, "listCaption": { "tr-TR": "Bakanlıklar", "tk-TM": "Ministrlikler", "ru-RU": "Министерства" } },
-    "ProjectContract": { "caption": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" }, "listCaption": { "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" } },
+    "ProjectContract": {
+      "caption": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+      "listCaption": { "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" },
+      "members": {
+        "MinistryReviewDepth": {
+          "tr-TR": "Bakanlık onay derinliği",
+          "tk-TM": "Ministrlik tassyklama çuňlugy",
+          "ru-RU": "Глубина министерского согласования"
+        }
+      }
+    },
     "CompanyHead": { "caption": { "tr-TR": "Şirket Müdürü", "tk-TM": "Kompaniýa müdiri", "ru-RU": "Руководитель компании" }, "listCaption": { "tr-TR": "Şirket Müdürleri", "tk-TM": "Kompaniýa müdirleri", "ru-RU": "Руководители" } },
     "Representative": { "caption": { "tr-TR": "Temsilci", "tk-TM": "Wekil", "ru-RU": "Представитель" }, "listCaption": { "tr-TR": "Temsilciler", "tk-TM": "Wekiller", "ru-RU": "Представители" } },
     "LocalEmployee": { "caption": { "tr-TR": "Yerel Çalışan", "tk-TM": "Ýerli işgär", "ru-RU": "Местный сотрудник" }, "listCaption": { "tr-TR": "Yerel Çalışanlar", "tk-TM": "Ýerli işgärler", "ru-RU": "Местные сотрудники" } },
