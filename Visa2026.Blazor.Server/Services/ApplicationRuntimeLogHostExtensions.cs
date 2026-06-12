@@ -12,6 +12,7 @@ public static class ApplicationRuntimeLogHostExtensions
         services.AddSignalR();
         services.AddApplicationRuntimeLogging(configuration);
         services.AddSingleton<IApplicationRuntimeLogUserContext, HttpApplicationRuntimeLogUserContext>();
+        services.AddSingleton<HttpApplicationRuntimeLogAdminChecker>();
         services.AddSingleton<ApplicationRuntimeLogNavigationHelper>();
         services.RemoveAll<IApplicationRuntimeLogNotifier>();
         services.AddSingleton<IApplicationRuntimeLogNotifier, SignalRApplicationRuntimeLogNotifier>();

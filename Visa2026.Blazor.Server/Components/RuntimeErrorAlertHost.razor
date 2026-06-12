@@ -7,6 +7,7 @@
 @implements IAsyncDisposable
 @inject NavigationManager NavigationManager
 @inject ApplicationRuntimeLogNavigationHelper NavigationHelper
+@inject HttpApplicationRuntimeLogAdminChecker AdminChecker
 @inject Visa2026.Blazor.Server.Services.XafApplicationHolder AppHolder
 
 @if (_visible && _isAdministrator)
@@ -73,7 +74,11 @@
         if (!firstRender)
             return;
 
-        await EnsureHubConnectionAsync();
+        RefreshVisibility();
+        StateHasChanged();
+
+        if (_visible && _isAdministrator)
+            await EnsureHubConnectionAsync();
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -94,7 +99,7 @@
     {
         var path = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLowerInvariant();
         _visible = !path.StartsWith("loginpage", StringComparison.Ordinal);
-        _isAdministrator = _visible && ApplicationRuntimeLogAdminHelper.IsCurrentUserAdministrator();
+        _isAdministrator = _visible && AdminChecker.IsCurrentUserAdministrator();
         _tooltip = _newCount > 0
             ? VisaUiMessages.Format("RuntimeLog.Header.Tooltip.New", _newCount)
             : VisaUiMessages.Get("RuntimeLog.Header.Tooltip.Default");
