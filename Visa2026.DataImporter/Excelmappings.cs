@@ -143,7 +143,7 @@ public static class ExcelMappings
 
     private static readonly HashSet<string> TenantLookupCatalogEntities = new(StringComparer.OrdinalIgnoreCase)
     {
-        "ProjectContract", "Position", "Department", "Ministry", "Specialty", "EducationInstitution",
+        "ProjectContract", "Position", "Department", "Specialty", "EducationInstitution",
     };
 
     private static readonly HashSet<string> ModuleManagedLookupEntities = new(StringComparer.OrdinalIgnoreCase)
@@ -423,16 +423,8 @@ public static class ExcelMappings
                 new() { Header = "PdfForm_Code", PayloadProperty = "PdfForm_Code",Kind = ColumnKind.Scalar },
             }
         },
-        new SheetMap { SheetName = "Ministry",         EntityName = "Ministry",         DisplayName = "Ministry",
-            Columns = new() {
-                new() { Header = "Name",           PayloadProperty = "Name",           Kind = ColumnKind.Scalar, Required = true },
-                new() { Header = "RecipientBlock", PayloadProperty = "RecipientBlock", Kind = ColumnKind.Scalar },
-                new() { Header = "FormOfAddress",  PayloadProperty = "FormOfAddress",  Kind = ColumnKind.Scalar },
-            }
-        },
         CompanyProfileSheetMap,
         ApplicationNumberingProfileSheetMap,
-        // --- Depends on Ministry ---
         new SheetMap { SheetName = "ProjectContract", EntityName = "ProjectContract", DisplayName = "Project Contract",
             Columns = new() {
                 new() { Header = "Name",        PayloadProperty = "Name",        Kind = ColumnKind.Scalar, Required = true },
@@ -440,7 +432,6 @@ public static class ExcelMappings
                 new() { Header = "Code",        PayloadProperty = "Code",        Kind = ColumnKind.StringValue },
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
                 new() { Header = "IsDefault",   PayloadProperty = "IsDefault",   Kind = ColumnKind.Bool },
-                new() { Header = "Ministry",    PayloadProperty = "Ministry",    Kind = ColumnKind.LookupByName, LookupEntity = "Ministry" },
             }
         },
 

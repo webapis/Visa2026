@@ -120,7 +120,6 @@
     "Education": { "caption": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" }, "listCaption": { "tr-TR": "Eğitimler", "tk-TM": "Bilimler", "ru-RU": "Образование" } },
     "MedicalRecord": { "caption": { "tr-TR": "Sağlık Kaydı", "tk-TM": "Saglyk ýazgysy", "ru-RU": "Мед. запись" }, "listCaption": { "tr-TR": "Sağlık Kayıtları", "tk-TM": "Saglyk ýazgylary", "ru-RU": "Мед. записи" } },
     "Company": { "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }, "listCaption": { "tr-TR": "Şirketler", "tk-TM": "Kompaniýalar", "ru-RU": "Компании" } },
-    "Ministry": { "caption": { "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" }, "listCaption": { "tr-TR": "Bakanlıklar", "tk-TM": "Ministrlikler", "ru-RU": "Министерства" } },
     "ProjectContract": {
       "caption": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
       "listCaption": { "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" },

@@ -70,6 +70,7 @@ namespace Visa2026.Module.DatabaseUpdate
             RemoveNavItemIfPresent(lookupGroup, "Medical", "MedicalRecord");
             RemoveNavItemIfPresent(lookupGroup, "Passport", "Passport");
             RemoveNavItemIfPresent(lookupGroup, "Visa", "Visa");
+            RemoveNavItemIfPresent(lookupGroup, "Organization", "Ministry");
         }
 
         private static void RemoveNavItemIfPresent(IModelNavigationItem parentGroup, string subgroupId, string itemId)

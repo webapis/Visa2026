@@ -34,14 +34,6 @@
       "optional": true
     },
     {
-      "id": "ministry",
-      "entity": "Ministry",
-      "file": "ministry.json",
-      "matchKey": "Name",
-      "syncMode": "OverwriteScalars",
-      "optional": true
-    },
-    {
       "id": "company-profile",
       "entity": "CompanyProfile",
       "file": "company-profile.json",

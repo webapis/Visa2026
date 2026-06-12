@@ -2,7 +2,7 @@
 
 Rows here are **not** shared across all Visa2026 installations. They belong to one deploying organization.
 
-**Multi-row catalogs:** Position, Specialty, EducationInstitution, Department, Ministry, ProjectContract, **BorderZoneName**, **WorkPermittedLocationName**, **Lodging**.
+**Multi-row catalogs:** Position, Specialty, EducationInstitution, Department, ProjectContract, **BorderZoneName**, **WorkPermittedLocationName**, **Lodging**.
 
 | JSON file | Entity | Used by |
 |-----------|--------|---------|

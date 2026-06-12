@@ -97,7 +97,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 
 | Type |
 |------|
-| `ProjectContract`, `Ministry`, `FileData` |
+| `ProjectContract`, `FileData` |
 | `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateProjectContract` |
 
 ### Full recursive (templates)
@@ -117,7 +117,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Area |
 |------|
 | **Organization** — company, signatory, representative, numbering |
-| **Lookup → Organization** — `ProjectContract`, `Ministry` only (other Lookup sub-groups denied) |
+| **Lookup → Organization** — `ProjectContract` only (other Lookup sub-groups denied) |
 | **Reports** — `UserReportTemplate` |
 
 ---
@@ -156,7 +156,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
 | `VisaCategory`, `VisaIssuedPlace`, `VisaPeriod`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |
-| `Company`, `Ministry`, `ProjectContract` |
+| `Company`, `ProjectContract` |
 | `ReportDataV2`, `ReportVisibility` |
 
 ---

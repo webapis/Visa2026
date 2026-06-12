@@ -62,7 +62,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 |-----------------|----------|--------|-------------|--------|
 | **UserReportTemplate** | `ApplicabilityMode` | Deprecated | Applicable type/contract links + `VisibilityCriteria` | Column retained |
 | **ApplicationType** | `ApplicationTypeFilter`, `ApplicationTypeFilterNames` | Deprecated | `SelectionCode`, quick-code picker | FK / string retained |
-| **ProjectContract** | `Description`, `Ministry`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; Word static text for letters | Columns retained; UI hidden |
+| **ProjectContract** | `Description`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; Word static text for letters | Columns retained; UI hidden |
 | **Application** | `Company`, `CompanyHead`, `Representative` | Removed (Phase 3) | `Application_Company_*` / `Application_CompanyHead_*` aliases + singletons | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
 | **Person** | `Company` | Removed (Phase 3) | Single-tenant: no per-person company FK | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
 | **Person** | `DeclareFamilyMembersOnVisa` | Removed | `VisaApplicationFamilyMembersText` always on employee DetailView | `People.DeclareFamilyMembersOnVisa` column retained until optional schema cleanup |
@@ -95,6 +95,9 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | `ApplicationItem.WorkPermitItemIsChanged`; item `IsCancelled` only |
 | `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 | `Visas.HasInvitation`, `Visas.HistoricalImport` | `VisaVisibilityToggleColumnsCleanupUpdater` | Optional `IssuingApplicationItem` / `InvitationItem` + gear on detail view |
+| **Ministry** lookup BO + `Ministries` table | `MinistrySchemaCleanupUpdater` | Ministry letter addressee text in Word templates; `MinistryReviewDepth` on `ProjectContract` / `ApplicationType` for workflow |
+| `tenant/ministry.json` lookup catalog | Ministry BO removal | Dropped from tenant manifest |
+| `ProjectContracts.MinistryID` FK | `ProjectContractLegacyColumnsCleanupUpdater` | `ProjectContract.MinistryReviewDepth` |
 
 ---
 

@@ -73,7 +73,6 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<InvitationDocument> InvitationDocuments { get; set; }
         public DbSet<MedicalRecordDocument> MedicalRecordDocuments { get; set; }
         public DbSet<ApplicationItem> ApplicationItems { get; set; }
-        public DbSet<Ministry> Ministries { get; set; }
         public DbSet<ProjectContract> ProjectContracts { get; set; }
         public DbSet<ProjectContractImage> ProjectContractImages { get; set; }
         public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }

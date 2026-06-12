@@ -517,7 +517,7 @@ internal static class LookupCatalogEntitySync
     {
         foreach (var (key, value) in row)
         {
-            if (key is "Region" or "RegionName" or "Ministry" or "ApplicationTypeFilter")
+            if (key is "Region" or "RegionName" or "ApplicationTypeFilter")
             {
                 ApplyNavigation(objectSpace, target, key, value);
                 continue;

@@ -78,6 +78,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.PersonRoleMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonFamilyRelationDocumentMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.MinistrySchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),

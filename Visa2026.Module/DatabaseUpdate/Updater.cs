@@ -302,7 +302,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<BorderZoneLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<BorderZoneName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermittedLocationName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<Ministry>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
         // Application number generation reads prefix/format/seed on save; officers must not create or edit org settings.
         userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -699,7 +698,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteOnlyPermission<AuthorizedRepresentative>(role);
             EnsureReadWriteOnlyPermission<ApplicationNumberingProfile>(role);
             EnsureReadWriteCreatePermission<ProjectContract>(role);
-            EnsureReadWriteCreatePermission<Ministry>(role);
             EnsureReadOnlyPermission<OrganizationType>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -723,7 +721,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Items/ProjectContract", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Items/Ministry", SecurityPermissionState.Allow);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Education", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Housing", SecurityPermissionState.Deny);
