@@ -129,6 +129,9 @@ internal static class EasyTestBlazorNavigationHelper
         }
     }
 
+    internal static IWebDriver? TryGetWebDriver(IApplicationContext appContext) =>
+        ResolveWebDriver(appContext);
+
     private static IWebDriver? ResolveWebDriver(IApplicationContext appContext)
     {
         PropertyInfo? adapterProperty = appContext.GetType().GetProperty(

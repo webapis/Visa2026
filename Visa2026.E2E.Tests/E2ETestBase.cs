@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Threading;
 using DevExpress.EasyTest.Framework;
 using Visa2026.Module.DatabaseUpdate;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Visa2026.E2E.Tests
 {
@@ -20,9 +22,52 @@ namespace Visa2026.E2E.Tests
 
         protected IApplicationContext AppContext { get; }
 
-        protected E2ETestBase(EasyTestSessionFixture session)
+        private readonly ITestOutputHelper? _output;
+
+        protected E2ETestBase(EasyTestSessionFixture session, ITestOutputHelper? output = null)
         {
             AppContext = session.AppContext;
+            _output = output;
+        }
+
+        /// <summary>
+        /// Runs a test body and captures a browser screenshot if it throws (assertions or helper failures).
+        /// </summary>
+        protected void RunScenario(Action scenario, [CallerMemberName] string testName = "")
+        {
+            try
+            {
+                scenario();
+            }
+            catch (Exception ex)
+            {
+                CaptureFailureScreenshot(testName, ex);
+                throw;
+            }
+        }
+
+        private void CaptureFailureScreenshot(string testName, Exception ex)
+        {
+            string? path = EasyTestFailureArtifacts.CaptureScreenshot(AppContext, testName);
+            string url = EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext);
+
+            if (path == null)
+            {
+                WriteFailureDiagnostic(
+                    $"[EasyTest] Test failed but no screenshot was captured (URL: '{url}'). " +
+                    $"{ex.GetType().Name}: {ex.Message}");
+                return;
+            }
+
+            WriteFailureDiagnostic(
+                $"[EasyTest] Failure screenshot saved: {path} (URL: '{url}'). " +
+                $"{ex.GetType().Name}: {ex.Message}");
+        }
+
+        private void WriteFailureDiagnostic(string message)
+        {
+            _output?.WriteLine(message);
+            Console.WriteLine(message);
         }
 
         protected void Login(string userName = "Admin", string password = "")
@@ -296,50 +341,76 @@ namespace Visa2026.E2E.Tests
         {
             ActivatePersonPassportsTab();
 
-            string[] newActionCaptions = ["Passports.New", "New"];
+            if (!TryExecutePassportsNestedNew())
+            {
+                throw new InvalidOperationException(
+                    "Could not execute Passports.New on Person detail nested list (native EasyTest).");
+            }
+
+            WaitForPassportDetailReady(retryNestedNew: true);
+        }
+
+        /// <summary>Nested collection New — <c>*Action Passports.New</c> only (never bare <c>New</c> on employee detail).</summary>
+        private bool TryExecutePassportsNestedNew()
+        {
             int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
             TimeSpan delay = EasyTestCITuning.FormFieldRetryDelay;
-            var nestedNewClicked = false;
 
-            for (var attempt = 0; attempt < maxAttempts && !nestedNewClicked; attempt++)
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
-                foreach (string caption in newActionCaptions)
+                if (!IsPassportsNestedListReady())
+                {
+                    TryActivatePassportsTabOnce();
+                }
+                else
                 {
                     try
                     {
-                        var newAction = AppContext.GetAction(caption);
-                        if (newAction == null)
-                            continue;
-
-                        newAction.Execute();
-                        nestedNewClicked = true;
-                        break;
+                        var newAction = AppContext.GetAction("Passports.New");
+                        if (newAction != null)
+                        {
+                            newAction.Execute();
+                            Thread.Sleep(EasyTestCITuning.NestedNewSettleDelay);
+                            return true;
+                        }
                     }
                     catch (AdapterOperationException)
                     {
-                        // Try next caption or retry after nested list loads.
+                        // Nested list toolbar may still be loading on CI.
                     }
                 }
 
-                if (!nestedNewClicked && attempt < maxAttempts - 1)
+                if (attempt < maxAttempts - 1)
                     Thread.Sleep(delay);
             }
 
-            if (!nestedNewClicked)
-            {
-                throw new InvalidOperationException(
-                    "Could not execute New on Person detail Passports nested list (native EasyTest actions).");
-            }
+            return false;
+        }
 
-            WaitForPassportDetailReady();
+        private void TryActivatePassportsTabOnce()
+        {
+            try
+            {
+                var tabAction = AppContext.GetAction("Passports");
+                tabAction?.Execute();
+                Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+            }
+            catch (AdapterOperationException)
+            {
+                // Retry on next attempt.
+            }
         }
 
         private bool IsPassportsNestedListReady()
         {
             try
             {
-                return AppContext.GetAction("Passports.New") != null
-                       || AppContext.GetAction("New") != null;
+                if (AppContext.GetAction("Passports.New") != null)
+                    return true;
+
+                return EasyTestBlazorNavigationHelper.ListHasColumnHeader(
+                    AppContext,
+                    E2ETestPassportFieldCaptions.PassportNumber);
             }
             catch (AdapterOperationException)
             {
@@ -402,11 +473,11 @@ namespace Visa2026.E2E.Tests
             if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, "Passport_DetailView"))
                 return true;
 
+            if (IsEmployeeDetailFormReady())
+                return false;
+
             try
             {
-                if (AppContext.GetAction("Save") == null)
-                    return false;
-
                 AppContext.GetForm().GetPropertyValue(E2ETestPassportFieldCaptions.PassportNumber);
                 return true;
             }
@@ -416,19 +487,42 @@ namespace Visa2026.E2E.Tests
             }
         }
 
-        private void WaitForPassportDetailReady()
+        private void WaitForPassportDetailReady(bool retryNestedNew = false)
         {
             DateTime deadline = DateTime.UtcNow + EasyTestCITuning.PassportDetailOpenTimeout;
+            DateTime lastNestedNewAttempt = DateTime.MinValue;
+
             while (DateTime.UtcNow < deadline)
             {
                 if (IsPassportDetailFormReady())
                     return;
 
+                if (retryNestedNew
+                    && DateTime.UtcNow - lastNestedNewAttempt >= EasyTestCITuning.NestedNewSettleDelay
+                    && IsPassportsNestedListReady())
+                {
+                    lastNestedNewAttempt = DateTime.UtcNow;
+                    TryExecutePassportsNestedNewOnly();
+                }
+
                 Thread.Sleep(TimeSpan.FromMilliseconds(500));
             }
 
             throw new InvalidOperationException(
-                $"Passport detail did not open after nested New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+                $"Passport detail did not open after Passports.New (URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private void TryExecutePassportsNestedNewOnly()
+        {
+            try
+            {
+                AppContext.GetAction("Passports.New")?.Execute();
+                Thread.Sleep(EasyTestCITuning.NestedNewSettleDelay);
+            }
+            catch (AdapterOperationException)
+            {
+                // Wait loop will retry.
+            }
         }
 
         private void FillPassportFormWithRetry(params EasyTestParameter[] fields)

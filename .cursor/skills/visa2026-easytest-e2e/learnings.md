@@ -148,3 +148,18 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Seeded `E2E-TEST-001` missing from Employees list; person exists as **Family Member** (`PersonRole` default). Setting `IsEmployee = true` alone is undone by `Person.OnSaving` → `PersonRoleHelper.SyncIsEmployee`.
 - **Fix / reuse**: Use **`PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee)`** on create; on existing seed row correct role before return. Employees list filters **`PersonRole`**, not `IsEmployee`. EF seed queries: avoid `string.Contains(..., StringComparison)` — not SQL-translatable.
 - **Reuse**: E2E parent Person seed → always `ApplyRole(Employee)`; idempotent role correction for `PersonPersonalNumber`.
+
+### 2026-06-11 — GHA: bare `New` on employee detail vs `Passports.New`
+
+- **Outcome**: negative → fix
+- **Context**: `PersonOfficerJourneyTests`, `ExecutePersonPassportsNestedNew`, GHA `CI=true`
+- **Symptom**: `Passport detail did not open after nested New` — URL stayed `Person_DetailView_Employee` for 90s; `nestedNewClicked` was true but passport form never appeared.
+- **Fix / reuse**: **`IsPassportsNestedListReady`** must require **`Passports.New`** (or nested grid **Passport Number** column) — never bare **`New`** (employee toolbar action). **`IsPassportDetailFormReady`** rejects employee detail via **`IsEmployeeDetailFormReady`** (`Project Contract` shield). Retry **`Passports.New`** during wait loop; **`NestedNewSettleDelay`** 3s on CI after execute.
+- **Reuse**: Nested collection → `*Action Passports.New` only; bare `New` on person detail is a silent no-op on CI.
+
+### 2026-06-11 — Failure screenshots on EasyTest exceptions
+
+- **Outcome**: positive (pattern)
+- **Context**: `EasyTestFailureArtifacts`, `E2ETestBase.RunScenario`, GHA `easytest-failure-screenshots` artifact
+- **Fix / reuse**: Wrap `[Fact]` body in **`RunScenario(() => { … })`** — on any exception, Selenium **`GetScreenshot()`** writes PNG + URL sidecar under **`bin/.../easytest-failure-screenshots/`**; path logged via **`ITestOutputHelper`** + console. CI uploads `**/easytest-failure-screenshots/**`.
+- **Reuse**: New EasyTest facts → always use `RunScenario`; inject `ITestOutputHelper` into test ctor for local/CI log links.

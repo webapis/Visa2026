@@ -31,6 +31,11 @@ internal static class EasyTestCITuning
             ? TimeSpan.FromSeconds(2)
             : TimeSpan.FromMilliseconds(750);
 
+    internal static TimeSpan NestedNewSettleDelay =>
+        IsTruthy(Environment.GetEnvironmentVariable("CI"))
+            ? TimeSpan.FromSeconds(3)
+            : TimeSpan.FromSeconds(1);
+
     private static bool IsTruthy(string? value) =>
         string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
         || string.Equals(value, "1", StringComparison.OrdinalIgnoreCase);
