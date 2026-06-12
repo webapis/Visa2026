@@ -581,7 +581,8 @@ dxd-license,
 }
 
 .cs-multi-select-inline__summary,
-.border-zone-inline__summary {
+.border-zone-inline__summary,
+.visa-family-lines-inline__summary {
     flex: 1 1 auto;
     min-width: 0;
 }
@@ -774,6 +775,36 @@ dxd-license,
     min-width: 0;
 }
 
+/* Visa family members editor — DevExpress popup portals may sit outside [data-bs-theme];
+   use --dxbl-* / currentColor instead of --bs-* with #fff fallbacks. */
+.visa-family-lines-popup,
+.visa-family-lines-edit {
+    --visa-family-lines-border: var(
+        --dxbl-text-edit-border-color,
+        color-mix(in srgb, currentColor 24%, transparent)
+    );
+    --visa-family-lines-surface: color-mix(in srgb, currentColor 6%, transparent);
+    --visa-family-lines-muted: color-mix(in srgb, currentColor 72%, transparent);
+    color: inherit;
+}
+
+.visa-family-lines-popup .cs-multi-select-popup__count,
+.visa-family-lines-popup .cs-multi-select-popup__empty,
+.visa-family-lines-popup__meta,
+.visa-family-lines-edit__hint {
+    color: var(--visa-family-lines-muted);
+}
+
+.visa-family-lines-popup .cs-multi-select-popup__status--ok {
+    background: color-mix(in srgb, var(--dxbl-success, #31bd3d) 18%, transparent);
+    color: inherit;
+}
+
+.visa-family-lines-popup .cs-multi-select-popup__status--error {
+    background: color-mix(in srgb, var(--dxbl-danger, #f31446) 18%, transparent);
+    color: inherit;
+}
+
 .visa-family-lines-popup__list {
     max-height: min(20rem, 50vh);
     overflow-y: auto;
@@ -783,20 +814,20 @@ dxd-license,
 .visa-family-lines-popup__item {
     align-items: center;
     padding: 0.5rem 0.65rem;
-    border: 1px solid var(--bs-border-color, #dee2e6);
-    border-radius: var(--bs-border-radius, 0.375rem);
-    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--visa-family-lines-border);
+    border-radius: var(--dxbl-text-edit-border-radius, 0.375rem);
+    background: var(--visa-family-lines-surface);
 }
 
 .visa-family-lines-popup__item--legacy {
-    border-color: var(--bs-warning-border-subtle, #ffe69c);
-    background: var(--bs-warning-bg-subtle, #fff3cd);
+    border-color: var(--dxbl-warning-color, #fc781b);
+    background: color-mix(in srgb, var(--dxbl-warning-color, #fc781b) 15%, transparent);
 }
 
 .visa-family-lines-popup__item .cs-multi-select-popup__item-actions {
     margin-left: 0.5rem;
     padding-left: 0.5rem;
-    border-left: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.08));
+    border-left: 1px solid var(--visa-family-lines-border);
 }
 
 .visa-family-lines-popup__item-text {
@@ -810,11 +841,11 @@ dxd-license,
 .visa-family-lines-popup__name {
     font-weight: 600;
     word-break: break-word;
+    color: inherit;
 }
 
 .visa-family-lines-popup__meta {
     font-size: 0.875rem;
-    color: var(--bs-secondary-color, #6c757d);
 }
 
 .visa-family-lines-edit {
@@ -827,12 +858,16 @@ dxd-license,
     margin: 0.35rem 0 0;
     font-size: 0.875rem;
     font-weight: 600;
+    color: inherit;
 }
 
 .visa-family-lines-edit__hint {
     margin: 0.5rem 0 0;
     font-size: 0.8125rem;
-    color: var(--bs-secondary-color, #6c757d);
+}
+
+.visa-family-lines-popup .cs-multi-select-popup__confirm-text {
+    color: inherit;
 }
 
 .cs-multi-select-popup__footer {
