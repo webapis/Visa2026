@@ -2903,7 +2903,7 @@
   </Views>
   <Validation>
     <ErrorMessageTemplates>
-      <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; boş bolmaly." />
+      <RuleRequiredField MessageTemplateMustNotBeEmpty="&quot;{TargetPropertyName}&quot; boş bolmamaly." />
     </ErrorMessageTemplates>
     <Rules>
       <RuleCriteria Id="BorderZone_DateRange" TargetType="Visa2026.Module.BusinessObjects.BorderZone" CustomMessageTemplate="Gutarýan senesi başlanýan senesinden soň bolmaly." />

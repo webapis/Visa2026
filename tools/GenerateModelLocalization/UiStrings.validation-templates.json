@@ -4,7 +4,7 @@
       "MessageTemplateMustNotBeEmpty": {
         "en": "\"{TargetPropertyName}\" must not be empty.",
         "tr-TR": "\"{TargetPropertyName}\" boş olamaz.",
-        "tk-TM": "\"{TargetPropertyName}\" boş bolmaly.",
+        "tk-TM": "\"{TargetPropertyName}\" boş bolmamaly.",
         "ru-RU": "\"{TargetPropertyName}\" не может быть пустым."
       }
     }
