@@ -147,6 +147,73 @@ internal static class EasyTestBlazorNavigationHelper
     }
 
     /// <summary>
+    /// Native-DOM click of a DevExpress layout tab by its caption (e.g. the Person
+    /// detail <c>Passports</c> tab). EasyTest's <c>GetAction("Passports")</c> can take
+    /// ~15s per miss to resolve a layout tab after a detail (re)opens; a direct click
+    /// on the rendered <c>role="tab"</c> element is immediate. Returns whether clicked.
+    /// </summary>
+    public static bool TryClickTabByText(IApplicationContext appContext, string tabText, TimeSpan timeout)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        string literal = tabText.Replace("'", "\\'");
+        string xpath = $"//*[@role='tab'][contains(normalize-space(.), '{literal}')]";
+
+        DateTime deadline = DateTime.UtcNow + timeout;
+        do
+        {
+            try
+            {
+                foreach (IWebElement tab in driver.FindElements(By.XPath(xpath)))
+                {
+                    if (!tab.Displayed)
+                        continue;
+
+                    ScrollIntoView(driver, tab);
+                    tab.Click();
+                    return true;
+                }
+            }
+            catch (WebDriverException)
+            {
+                // Re-query after a Blazor re-render.
+            }
+
+            Thread.Sleep(TimeSpan.FromMilliseconds(300));
+        }
+        while (DateTime.UtcNow < deadline);
+
+        return false;
+    }
+
+    /// <summary>
+    /// Fast DOM check for a real (non-virtual), displayed DevExpress toolbar action
+    /// button by its rendered <c>title</c> prefix — avoids EasyTest's slow
+    /// <c>GetAction</c> resolution when probing whether a nested list is ready.
+    /// </summary>
+    public static bool HasToolbarActionByTitle(IApplicationContext appContext, string titlePrefix)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        string literal = titlePrefix.Replace("'", "\\'");
+        string xpath =
+            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]";
+
+        try
+        {
+            return driver.FindElements(By.XPath(xpath)).Any(b => b.Displayed);
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Maximizes the browser window so DevExpress adaptive toolbars keep their actions
     /// inline (collapsed toolbars hide nested-list <c>New</c> behind virtual clones on
     /// small CI viewports). Best-effort — never throws.
