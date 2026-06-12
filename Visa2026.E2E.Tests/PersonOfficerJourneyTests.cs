@@ -25,12 +25,12 @@ public class PersonOfficerJourneyTests : E2ETestBase
 
         CreateEmployeeWithRequiredFields();
 
-        // The saved employee detail stays open after Save; assert on it directly
-        // instead of navigating back to the list and reopening the record.
-        AssertEmployeeDetailValues(
+        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        Assert.Equal(E2ETestEmployeeCreateValues.FirstName, AppContext.GetForm().GetPropertyValue("First Name"));
+        Assert.Equal(E2ETestEmployeeCreateValues.LastName, AppContext.GetForm().GetPropertyValue("Last Name"));
+        Assert.Equal(
             E2ETestEmployeeCreateValues.PersonalNumber,
-            E2ETestEmployeeCreateValues.FirstName,
-            E2ETestEmployeeCreateValues.LastName);
+            AppContext.GetForm().GetPropertyValue("Personal Number"));
 
         ExecutePersonPassportsNestedNew();
         FillPassportRequiredFields();

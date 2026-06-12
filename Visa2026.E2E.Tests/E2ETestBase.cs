@@ -226,20 +226,6 @@ namespace Visa2026.E2E.Tests
             ExecuteActionWithRetry("Save");
         }
 
-        /// <summary>
-        /// Asserts the just-saved employee detail (already open after Save) shows the
-        /// expected scalars — avoids a slow list round-trip + reopen, where each
-        /// negative readiness probe costs the Config DefaultTimeout.
-        /// </summary>
-        protected void AssertEmployeeDetailValues(string personalNumber, string firstName, string lastName)
-        {
-            AssertEmployeeDetailViewActive();
-
-            Assert.Equal(firstName, AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.FirstName));
-            Assert.Equal(lastName, AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.LastName));
-            Assert.Equal(personalNumber, AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.PersonalNumber));
-        }
-
         protected void OpenEmployeeInListByPersonalNumber(
             string personalNumber,
             string? fullNameFallback = null)
@@ -354,32 +340,33 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Opens the nested Passports list <c>New</c>. Tries the namespaced native action
-        /// (<c>Passports.New</c>, confirming the detail opened), then falls back to a direct
-        /// DOM click of the real <c>New Passport</c> toolbar button for small/headed CI
-        /// viewports where the adaptive toolbar virtualizes it. Returns whether a click was issued.
+        /// Opens the nested Passports list <c>New</c>. Tries native EasyTest actions first
+        /// (<c>Passports.New</c> then bare <c>New</c>, confirming the detail opened), then
+        /// falls back to a direct DOM click of the real <c>New Passport</c> toolbar button
+        /// for small/headed CI viewports where the adaptive toolbar virtualizes it.
+        /// Returns whether a click was issued.
         /// </summary>
         private bool TryClickPassportsNestedNew()
         {
-            // Native EasyTest via the namespaced action first (matches local runs where
-            // the toolbar is not adaptively collapsed). The bare "New" caption is
-            // ambiguous on this detail (Educations vs Passports), no-ops on CI, and costs
-            // a full DefaultTimeout to miss — skip it and let the DOM fallback handle CI.
-            // Confirm the detail opened, since a returning Execute does not guarantee the
-            // nested New fired.
-            try
+            // Native EasyTest first (matches local runs where the toolbar is not
+            // adaptively collapsed). Confirm the detail actually opened — a returning
+            // Execute does not guarantee the nested New fired (see DOM fallback below).
+            foreach (string caption in new[] { "Passports.New", "New" })
             {
-                var newAction = AppContext.GetAction("Passports.New");
-                if (newAction != null)
+                try
                 {
+                    var newAction = AppContext.GetAction(caption);
+                    if (newAction == null)
+                        continue;
+
                     newAction.Execute();
-                    if (TryWaitForPassportDetailReady(TimeSpan.FromSeconds(3)))
+                    if (TryWaitForPassportDetailReady(TimeSpan.FromSeconds(4)))
                         return true;
                 }
-            }
-            catch (AdapterOperationException)
-            {
-                // Fall through to the DOM click.
+                catch (AdapterOperationException)
+                {
+                    // Try next caption, then the DOM fallback below.
+                }
             }
 
             // DOM fallback: on small/headed CI viewports XAF renders the nested
