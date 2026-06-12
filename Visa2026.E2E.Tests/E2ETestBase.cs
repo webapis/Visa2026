@@ -121,18 +121,20 @@ namespace Visa2026.E2E.Tests
 
         private bool IsEmployeesListActive(string listViewPath)
         {
-            if (IsEmployeeDetailFormReady())
+            // Fast Selenium signals first. GetForm()/GetAction() each block up to the
+            // Config DefaultTimeout on a miss, so a GetForm()-based "is this a detail
+            // view?" probe is very slow while we are actually on the list.
+            bool urlIsList = EasyTestBlazorNavigationHelper.UrlContains(AppContext, listViewPath);
+            bool hasListGrid = EasyTestBlazorNavigationHelper.ListHasColumnHeader(
+                AppContext, E2ETestPersonFieldCaptions.PersonalNumber);
+
+            // The Personal Number column header is unique to the Employees list grid
+            // (the employee detail nests Passports/Educations, not a Personal Number
+            // grid), so its presence already distinguishes list from detail.
+            if (!urlIsList && !hasListGrid)
                 return false;
 
-            if (AppContext.GetAction("New") == null)
-                return false;
-
-            if (EasyTestBlazorNavigationHelper.UrlContains(AppContext, listViewPath))
-                return true;
-
-            return EasyTestBlazorNavigationHelper.ListHasColumnHeader(
-                AppContext,
-                E2ETestPersonFieldCaptions.PersonalNumber);
+            return AppContext.GetAction("New") != null;
         }
 
         /// <summary>
@@ -260,7 +262,12 @@ namespace Visa2026.E2E.Tests
             AssertEmployeeDetailShowsPersonalNumber(personalNumber);
         }
 
-        /// <summary>Native EasyTest layout tab — <c>*Action Passports</c> / <see cref="IEasyTestAction.Execute"/>.</summary>
+        /// <summary>
+        /// Activates the Person detail <c>Passports</c> layout tab. Prefers a direct DOM
+        /// tab click — EasyTest's <c>GetAction("Passports")</c> can take ~15s per miss to
+        /// resolve a layout tab after the detail (re)opens, which is the dominant idle in
+        /// this journey — with the native action kept as a fallback.
+        /// </summary>
         protected void ActivatePersonPassportsTab()
         {
             int maxAttempts = EasyTestCITuning.NestedListActionMaxAttempts;
@@ -268,6 +275,14 @@ namespace Visa2026.E2E.Tests
 
             for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
+                if (EasyTestBlazorNavigationHelper.TryClickTabByText(
+                        AppContext, "Passports", TimeSpan.FromSeconds(2)))
+                {
+                    Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+                    if (IsPassportsNestedListReady())
+                        return;
+                }
+
                 try
                 {
                     var tabAction = AppContext.GetAction("Passports");
@@ -338,17 +353,20 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Opens the nested Passports list <c>New</c>. Tries native EasyTest actions first
-        /// (<c>Passports.New</c> then bare <c>New</c>, confirming the detail opened), then
-        /// falls back to a direct DOM click of the real <c>New Passport</c> toolbar button
-        /// for small/headed CI viewports where the adaptive toolbar virtualizes it.
-        /// Returns whether a click was issued.
+        /// Opens the nested Passports list <c>New</c>. Prefers a direct DOM click of the
+        /// real <c>New Passport</c> toolbar button (fast and reliable — XAF renders the
+        /// nested action with an empty data-xaf-action plus an adaptive virtual clone, and
+        /// sibling "New" buttons make EasyTest's Execute ambiguous/slow), with the native
+        /// EasyTest actions kept as a fallback. Returns whether a click was issued.
         /// </summary>
         private bool TryClickPassportsNestedNew()
         {
-            // Native EasyTest first (matches local runs where the toolbar is not
-            // adaptively collapsed). Confirm the detail actually opened — a returning
-            // Execute does not guarantee the nested New fired (see DOM fallback below).
+            if (EasyTestBlazorNavigationHelper.TryClickToolbarActionByTitle(
+                    AppContext, "New Passport", TimeSpan.FromSeconds(5)))
+            {
+                return true;
+            }
+
             foreach (string caption in new[] { "Passports.New", "New" })
             {
                 try
@@ -363,21 +381,20 @@ namespace Visa2026.E2E.Tests
                 }
                 catch (AdapterOperationException)
                 {
-                    // Try next caption, then the DOM fallback below.
+                    // Try next caption.
                 }
             }
 
-            // DOM fallback: on small/headed CI viewports XAF renders the nested
-            // ListPropertyEditor New action with an empty data-xaf-action plus an
-            // adaptive virtual clone, and there are sibling "New" buttons (Educations
-            // vs Passports), so EasyTest's Execute is ambiguous and can no-op. Click
-            // the real, displayed "New Passport" toolbar button directly.
-            return EasyTestBlazorNavigationHelper.TryClickToolbarActionByTitle(
-                AppContext, "New Passport", TimeSpan.FromSeconds(10));
+            return false;
         }
 
         private bool IsPassportsNestedListReady()
         {
+            // Fast DOM check first — the real "New Passport" toolbar button is present
+            // once the nested grid renders. Avoids EasyTest's ~15s GetAction miss.
+            if (EasyTestBlazorNavigationHelper.HasToolbarActionByTitle(AppContext, "New Passport"))
+                return true;
+
             try
             {
                 return AppContext.GetAction("Passports.New") != null
