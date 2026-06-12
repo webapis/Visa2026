@@ -249,9 +249,24 @@
     {
         _popupOpenRequested = PopupVisible;
 
-        if (PopupVisible && _popupDraft.Count == 0 && (DraftLines?.Count > 0 || Lines?.Count > 0))
+        if (!PopupVisible)
         {
-            _popupDraft = CloneLines(DraftLines?.Count > 0 ? DraftLines : Lines);
+            return;
+        }
+
+        // While the popup is open, DraftLines is the working copy (may be intentionally empty).
+        // Do not fall back to committed Lines when the draft is empty — that would undo deleting
+        // the last family member before OK is clicked.
+        if (DraftLines != null)
+        {
+            if (_popupDraft.Count != DraftLines.Count)
+            {
+                _popupDraft = CloneLines(DraftLines);
+            }
+        }
+        else if (_popupDraft.Count == 0 && Lines?.Count > 0)
+        {
+            _popupDraft = CloneLines(Lines);
         }
     }
 
