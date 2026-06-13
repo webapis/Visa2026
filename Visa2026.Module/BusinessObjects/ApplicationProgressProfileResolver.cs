@@ -7,7 +7,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Resolves effective progress route settings for an <see cref="Application"/>
-/// (type defaults, <see cref="ProjectContract"/> overrides).
+/// (type defaults, <see cref="ProjectContract"/> ministry legs, snapshots).
 /// </summary>
 public static class ApplicationProgressProfileResolver
 {
@@ -20,28 +20,31 @@ public static class ApplicationProgressProfileResolver
         return route == ApplicationProgressRouteKind.ViaMinistries;
     }
 
-    public static MinistryReviewDepth GetMinistryReviewDepth(Application? application)
+    public static int GetMinistryLegCount(Application? application)
     {
         if (application == null)
-            return MinistryReviewDepth.FirstMinistryOnly;
+            return 1;
 
         var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
-        if (!route.HasValue)
-            return MinistryReviewDepth.FirstMinistryOnly;
+        if (!route.HasValue || route.Value == ApplicationProgressRouteKind.DirectToMigrationService)
+            return 0;
 
-        if (route.Value == ApplicationProgressRouteKind.DirectToMigrationService)
-            return MinistryReviewDepth.None;
+        var snapshotCount = application.ApprovalLegSnapshots?
+            .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+        if (snapshotCount > 0)
+            return snapshotCount;
 
         if (application.ApplicationType?.ShowProjectContract == true && application.ProjectContract != null)
-        {
-            return ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
-                route.Value,
-                application.ProjectContract.MinistryReviewDepth);
-        }
+            return ProjectContractMinistryHelper.GetLegCount(application.ProjectContract);
 
-        return ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
-            route.Value,
+        return MapLegacyDepthToLegCount(
             application.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly);
+    }
+
+    public static MinistryReviewDepth GetMinistryReviewDepth(Application? application)
+    {
+        var legCount = GetMinistryLegCount(application);
+        return MapLegCountToLegacyDepth(legCount);
     }
 
     public static MinistryReviewDepth GetMinistryReviewDepth(ApplicationType? applicationType) =>
@@ -74,7 +77,16 @@ public static class ApplicationProgressProfileResolver
             return true;
 
         if (application.ProjectContract != null)
-            return true;
+        {
+            if (ProjectContractMinistryHelper.HasConfiguredLegs(application.ProjectContract))
+                return true;
+
+            if (!HasProgressBeyondOfficePreparation(application, objectSpace))
+                return true;
+
+            errorMessage = VisaUiMessages.Get("Application.ProjectContractLegsRequired");
+            return false;
+        }
 
         if (!HasProgressBeyondOfficePreparation(application, objectSpace))
             return true;
@@ -93,8 +105,12 @@ public static class ApplicationProgressProfileResolver
         if (application == null || !RequiresProjectContract(application))
             return true;
 
+        if (application.ProjectContract != null
+            && TryValidateProjectContractOnApplication(application, objectSpace, out errorMessage))
+            return errorMessage == null;
+
         if (application.ProjectContract != null)
-            return true;
+            return false;
 
         if (IsPermittedWithoutProjectContract(progress, objectSpace))
             return true;
@@ -115,9 +131,8 @@ public static class ApplicationProgressProfileResolver
         if (application.ApplicationType?.ShowProjectContract != true)
             return false;
 
-        var previousDepth = ResolveDepthForContract(application, previousContract);
-        var newDepth = ResolveDepthForContract(application, newContract);
-        return previousDepth != newDepth;
+        return ResolveLegCountForContract(application, previousContract)
+            != ResolveLegCountForContract(application, newContract);
     }
 
     public static string FormatMinistryReviewDepthLabel(MinistryReviewDepth depth) =>
@@ -127,19 +142,41 @@ public static class ApplicationProgressProfileResolver
                 ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One")
                 : VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None");
 
-    private static MinistryReviewDepth ResolveDepthForContract(Application application, ProjectContract? contract)
-    {
-        if (contract != null)
+    public static string FormatMinistryLegCountLabel(int legCount) =>
+        legCount switch
         {
-            return ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
-                ApplicationProgressRouteKind.ViaMinistries,
-                contract.MinistryReviewDepth);
+            0 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None"),
+            1 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One"),
+            2 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two"),
+            _ => VisaUiMessages.Format("ApplicationProgressProfile.MinistryDepth.Many", legCount)
+        };
+
+    private static int ResolveLegCountForContract(Application application, ProjectContract? contract)
+    {
+        if (contract == null)
+            return GetMinistryLegCount(application);
+
+        if (ReferenceEquals(application.ProjectContract, contract))
+        {
+            var snapshotCount = application.ApprovalLegSnapshots?
+                .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+            if (snapshotCount > 0)
+                return snapshotCount;
         }
 
-        return ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
-            ApplicationProgressRouteKind.ViaMinistries,
-            application.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly);
+        return ProjectContractMinistryHelper.GetLegCount(contract);
     }
+
+    private static int MapLegacyDepthToLegCount(MinistryReviewDepth depth) =>
+        depth == MinistryReviewDepth.FirstAndSecondMinistry ? 2 : 1;
+
+    private static MinistryReviewDepth MapLegCountToLegacyDepth(int legCount) =>
+        legCount switch
+        {
+            <= 0 => MinistryReviewDepth.None,
+            1 => MinistryReviewDepth.FirstMinistryOnly,
+            _ => MinistryReviewDepth.FirstAndSecondMinistry
+        };
 
     private static bool IsPermittedWithoutProjectContract(ApplicationProgress progress, IObjectSpace? objectSpace)
     {

@@ -45,6 +45,7 @@ namespace Visa2026.Module.BusinessObjects
             Rejections = new ObservableCollection<Rejection>();
             WorkPermits = new ObservableCollection<WorkPermit>();
             ProgressHistory = new ObservableCollection<ApplicationProgress>();
+            ApprovalLegSnapshots = new ObservableCollection<ApplicationApprovalLegSnapshot>();
         }
 
         [XafDisplayName("Manual Entry")]
@@ -247,7 +248,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
         [VisibleInListView(false)]
+        [DataSourceCriteria("IsActive = true")]
         public virtual ProjectContract ProjectContract { get; set; }
+
+        [Browsable(false)]
+        [Aggregated]
+        [InverseProperty(nameof(ApplicationApprovalLegSnapshot.Application))]
+        public virtual IList<ApplicationApprovalLegSnapshot> ApprovalLegSnapshots { get; set; }
 
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
         [VisibleInListView(false)]

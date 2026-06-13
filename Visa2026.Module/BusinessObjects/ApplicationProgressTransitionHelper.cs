@@ -32,55 +32,67 @@ public static class ApplicationProgressTransitionHelper
         ApplicationProgressStateCodes.Review2Rejected
     };
 
-    private static readonly IReadOnlyDictionary<string, string[]> CanonicalLocationsByState =
-        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
-        {
-            [ApplicationProgressStateCodes.IsBeingPrepared] = [ApplicationProgressLocationCodes.AtOffice],
-            [ApplicationProgressStateCodes.Review1Started] = [ApplicationProgressLocationCodes.AtMinistry1],
-            [ApplicationProgressStateCodes.Review1Approved] = [ApplicationProgressLocationCodes.AtMinistry1],
-            [ApplicationProgressStateCodes.Review1Rejected] = [ApplicationProgressLocationCodes.AtMinistry1],
-            [ApplicationProgressStateCodes.Review2Started] = [ApplicationProgressLocationCodes.AtMinistry2],
-            [ApplicationProgressStateCodes.Review2Approved] = [ApplicationProgressLocationCodes.AtMinistry2],
-            [ApplicationProgressStateCodes.Review2Rejected] = [ApplicationProgressLocationCodes.AtMinistry2],
-            [ApplicationProgressStateCodes.ProcessStarted] = [ApplicationProgressLocationCodes.AtMigrationService],
-            [ApplicationProgressStateCodes.ProcessIssued] =
-            [
-                ApplicationProgressLocationCodes.AtMigrationService,
-                ApplicationProgressLocationCodes.AtOffice
-            ],
-            [ApplicationProgressStateCodes.ProcessRejected] =
-            [
-                ApplicationProgressLocationCodes.AtMigrationService,
-                ApplicationProgressLocationCodes.AtOffice,
-                ApplicationProgressLocationCodes.AtMinistry1,
-                ApplicationProgressLocationCodes.AtMinistry2
-            ],
-            [ApplicationProgressStateCodes.ProcessCancelled] =
-            [
-                ApplicationProgressLocationCodes.AtOffice,
-                ApplicationProgressLocationCodes.AtMigrationService,
-                ApplicationProgressLocationCodes.AtMinistry1,
-                ApplicationProgressLocationCodes.AtMinistry2
-            ]
-        };
+    static ApplicationProgressTransitionHelper()
+    {
+        for (var leg = 3; leg <= ApplicationProgressLegCodes.MaxLegCount; leg++)
+            TerminalStateCodes.Add(ApplicationProgressLegCodes.ReviewRejected(leg));
+    }
 
-    public static bool IsTerminalStateCode(string? stateCode) =>
-        !string.IsNullOrWhiteSpace(stateCode) && TerminalStateCodes.Contains(stateCode.Trim());
+    public static bool IsTerminalStateCode(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        var trimmed = stateCode.Trim();
+        return TerminalStateCodes.Contains(trimmed)
+            || ApplicationProgressLegCodes.IsReviewRejectedStateCode(trimmed);
+    }
 
     public static bool IsCanonicalStateLocationPair(string? stateCode, string? locationCode)
     {
         if (string.IsNullOrWhiteSpace(stateCode) || string.IsNullOrWhiteSpace(locationCode))
             return false;
 
-        return CanonicalLocationsByState.TryGetValue(stateCode.Trim(), out var locations)
-            && locations.Contains(locationCode.Trim(), StringComparer.OrdinalIgnoreCase);
+        return GetCanonicalLocationCodesForState(stateCode)
+            .Contains(locationCode.Trim(), StringComparer.OrdinalIgnoreCase);
     }
 
-    public static IReadOnlyList<string> GetCanonicalLocationCodesForState(string? stateCode) =>
-        string.IsNullOrWhiteSpace(stateCode)
-            || !CanonicalLocationsByState.TryGetValue(stateCode.Trim(), out var locations)
-            ? Array.Empty<string>()
-            : locations;
+    public static IReadOnlyList<string> GetCanonicalLocationCodesForState(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return Array.Empty<string>();
+
+        var trimmed = stateCode.Trim();
+        if (string.Equals(trimmed, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase))
+            return [ApplicationProgressLocationCodes.AtOffice];
+
+        if (ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(trimmed, out var leg))
+            return [ApplicationProgressLegCodes.AtMinistry(leg)];
+
+        if (string.Equals(trimmed, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase))
+            return [ApplicationProgressLocationCodes.AtMigrationService];
+
+        if (string.Equals(trimmed, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
+            return
+            [
+                ApplicationProgressLocationCodes.AtMigrationService,
+                ApplicationProgressLocationCodes.AtOffice
+            ];
+
+        if (string.Equals(trimmed, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase))
+        {
+            var locations = new List<string>
+            {
+                ApplicationProgressLocationCodes.AtOffice,
+                ApplicationProgressLocationCodes.AtMigrationService
+            };
+            locations.AddRange(ApplicationProgressLegCodes.GetMinistryLocationCodesUpToLegCount(ApplicationProgressLegCodes.MaxLegCount));
+            return locations;
+        }
+
+        return Array.Empty<string>();
+    }
 
     public static IReadOnlyList<string> GetAllowedNextStateCodes(
         Application? application,
@@ -92,7 +104,7 @@ public static class ApplicationProgressTransitionHelper
 
         afterStep ??= GetLatestProgress(application, currentRow, null);
         if (afterStep == null)
-            return new[] { ApplicationProgressStateCodes.IsBeingPrepared };
+            return [ApplicationProgressStateCodes.IsBeingPrepared];
 
         if (IsTerminalStateCode(afterStep.State?.Code))
             return Array.Empty<string>();
@@ -101,12 +113,12 @@ public static class ApplicationProgressTransitionHelper
         if (!route.HasValue)
             return ApplicationProgressRouteHelper.GetAllowedStateCodes(application);
 
-        var depth = ApplicationProgressProfileResolver.GetMinistryReviewDepth(application);
+        var legCount = ApplicationProgressProfileResolver.GetMinistryLegCount(application);
         var fromStep = ProgressStep.Parse(afterStep);
-        var routeAllowed = ApplicationProgressRouteHelper.GetAllowedStateCodes(route.Value, depth)
+        var routeAllowed = ApplicationProgressRouteHelper.GetAllowedStateCodes(route.Value, legCount)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        return GetTransitions(route.Value, depth)
+        return GetTransitions(route.Value, legCount)
             .Where(t => StepsEqual(t.From, fromStep))
             .Select(t => t.To.StateCode)
             .Where(routeAllowed.Contains)
@@ -317,11 +329,11 @@ public static class ApplicationProgressTransitionHelper
         if (!route.HasValue)
             return true;
 
-        var depth = ApplicationProgressProfileResolver.GetMinistryReviewDepth(progress.Application);
+        var legCount = ApplicationProgressProfileResolver.GetMinistryLegCount(progress.Application);
         var fromStep = ProgressStep.Parse(previous);
         var toStep = ProgressStep.Parse(progress);
 
-        if (IsTransitionAllowed(route.Value, depth, fromStep, toStep))
+        if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep))
             return true;
 
         errorMessage = VisaUiMessages.Format(
@@ -363,31 +375,22 @@ public static class ApplicationProgressTransitionHelper
 
     private static bool IsTransitionAllowed(
         ApplicationProgressRouteKind route,
-        MinistryReviewDepth depth,
+        int ministryLegCount,
         ProgressStep from,
         ProgressStep to)
     {
         if (from.IsDefault || to.IsDefault)
             return false;
 
-        return GetTransitions(route, depth).Any(t => StepsEqual(t.From, from) && StepsEqual(t.To, to));
+        return GetTransitions(route, ministryLegCount).Any(t => StepsEqual(t.From, from) && StepsEqual(t.To, to));
     }
 
     private static IEnumerable<ProgressTransition> GetTransitions(
         ApplicationProgressRouteKind route,
-        MinistryReviewDepth depth)
+        int ministryLegCount)
     {
-        depth = ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(route, depth);
-
         var prep = Step(ApplicationProgressStateCodes.IsBeingPrepared, ApplicationProgressLocationCodes.AtOffice);
-        var min1Review = Step(ApplicationProgressStateCodes.Review1Started, ApplicationProgressLocationCodes.AtMinistry1);
-        var min1Approved = Step(ApplicationProgressStateCodes.Review1Approved, ApplicationProgressLocationCodes.AtMinistry1);
-        var min1Rejected = Step(ApplicationProgressStateCodes.Review1Rejected, ApplicationProgressLocationCodes.AtMinistry1);
-        var min2Review = Step(ApplicationProgressStateCodes.Review2Started, ApplicationProgressLocationCodes.AtMinistry2);
-        var min2Approved = Step(ApplicationProgressStateCodes.Review2Approved, ApplicationProgressLocationCodes.AtMinistry2);
-        var min2Rejected = Step(ApplicationProgressStateCodes.Review2Rejected, ApplicationProgressLocationCodes.AtMinistry2);
         var processStarted = Step(ApplicationProgressStateCodes.ProcessStarted, ApplicationProgressLocationCodes.AtMigrationService);
-
         var edges = new List<ProgressTransition>();
 
         if (route == ApplicationProgressRouteKind.DirectToMigrationService)
@@ -397,35 +400,43 @@ public static class ApplicationProgressTransitionHelper
             return edges;
         }
 
-        edges.Add(new ProgressTransition(prep, min1Review));
-        edges.Add(new ProgressTransition(min1Review, min1Approved));
-        edges.Add(new ProgressTransition(min1Review, min1Rejected));
+        var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProgressLegCodes.MaxLegCount);
+        var ministrySteps = new List<ProgressStep>();
 
-        if (depth == MinistryReviewDepth.FirstAndSecondMinistry)
+        for (var leg = 1; leg <= legCount; leg++)
         {
-            edges.Add(new ProgressTransition(min1Approved, min2Review));
-            edges.Add(new ProgressTransition(min2Review, min2Approved));
-            edges.Add(new ProgressTransition(min2Review, min2Rejected));
-            edges.Add(new ProgressTransition(min2Approved, processStarted));
+            var review = Step(ApplicationProgressLegCodes.ReviewStarted(leg), ApplicationProgressLegCodes.AtMinistry(leg));
+            var approved = Step(ApplicationProgressLegCodes.ReviewApproved(leg), ApplicationProgressLegCodes.AtMinistry(leg));
+            var rejected = Step(ApplicationProgressLegCodes.ReviewRejected(leg), ApplicationProgressLegCodes.AtMinistry(leg));
+            ministrySteps.Add(review);
+            ministrySteps.Add(approved);
+
+            if (leg == 1)
+                edges.Add(new ProgressTransition(prep, review));
+            else
+                edges.Add(new ProgressTransition(ministrySteps[(leg - 2) * 2 + 1], review));
+
+            edges.Add(new ProgressTransition(review, approved));
+            edges.Add(new ProgressTransition(review, rejected));
         }
-        else
-        {
-            edges.Add(new ProgressTransition(min1Approved, processStarted));
-        }
+
+        var lastApproved = ministrySteps[^1];
+        edges.Add(new ProgressTransition(lastApproved, processStarted));
 
         AddProcessOutcomes(edges, processStarted);
-        AddCancellationFromActiveSteps(edges,
-            prep, min1Review, min1Approved, min2Review, min2Approved, processStarted);
+        var cancellationFrom = new List<ProgressStep> { prep, processStarted };
+        cancellationFrom.AddRange(ministrySteps.Where((_, i) => i % 2 == 0));
+        AddCancellationFromActiveSteps(edges, cancellationFrom.ToArray());
 
         return edges;
     }
 
     private static void AddProcessOutcomes(List<ProgressTransition> edges, ProgressStep processStarted)
     {
-        foreach (var issuedLoc in CanonicalLocationsByState[ApplicationProgressStateCodes.ProcessIssued])
+        foreach (var issuedLoc in GetCanonicalLocationCodesForState(ApplicationProgressStateCodes.ProcessIssued))
             edges.Add(new ProgressTransition(processStarted, Step(ApplicationProgressStateCodes.ProcessIssued, issuedLoc)));
 
-        foreach (var loc in CanonicalLocationsByState[ApplicationProgressStateCodes.ProcessRejected])
+        foreach (var loc in GetCanonicalLocationCodesForState(ApplicationProgressStateCodes.ProcessRejected))
             edges.Add(new ProgressTransition(processStarted, Step(ApplicationProgressStateCodes.ProcessRejected, loc)));
     }
 
@@ -433,7 +444,7 @@ public static class ApplicationProgressTransitionHelper
     {
         foreach (var from in fromSteps)
         {
-            foreach (var loc in CanonicalLocationsByState[ApplicationProgressStateCodes.ProcessCancelled])
+            foreach (var loc in GetCanonicalLocationCodesForState(ApplicationProgressStateCodes.ProcessCancelled))
                 edges.Add(new ProgressTransition(from, Step(ApplicationProgressStateCodes.ProcessCancelled, loc)));
         }
     }

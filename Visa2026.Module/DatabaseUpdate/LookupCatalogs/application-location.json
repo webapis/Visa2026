@@ -19,6 +19,24 @@
                      "IsDefault":  false
                  },
                  {
+                     "NameTm":  "3-NJI MINISTRLIKDE",
+                     "Code":  "AT_THE_MINISTERY_3",
+                     "LocalizationKey":  "AT_THE_MINISTERY_3",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "4-NJI MINISTRLIKDE",
+                     "Code":  "AT_THE_MINISTERY_4",
+                     "LocalizationKey":  "AT_THE_MINISTERY_4",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "5-NJI MINISTRLIKDE",
+                     "Code":  "AT_THE_MINISTERY_5",
+                     "LocalizationKey":  "AT_THE_MINISTERY_5",
+                     "IsDefault":  false
+                 },
+                 {
                      "NameTm":  "MIGRASIÝA GULLUGYNDA",
                      "Code":  "AT_MIGRATION_SERVICE",
                      "LocalizationKey":  "AT_MIGRATION_SERVICE",

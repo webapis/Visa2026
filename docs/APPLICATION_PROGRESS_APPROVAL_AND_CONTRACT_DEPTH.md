@@ -41,86 +41,82 @@ Workflow is **not** inferred from `ShowProjectContract` (that flag only controls
 
 | `ApplicationProgressRouteKind` | After office preparation | Ministry states |
 |--------------------------------|--------------------------|-----------------|
-| `ViaMinistries` | → first ministry review | `1_REVIEW_*`, optionally `2_REVIEW_*` |
+| `ViaMinistries` | → first ministry review | `1_REVIEW_*`, optionally `2_REVIEW_*`, … up to 5 |
 | `DirectToMigrationService` | → migration service | **No** ministry states |
 
 Seeded per type in [`ApplicationTypeConfigurationCatalog.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/ApplicationTypeConfigurationCatalog.json).
 
 Navigation splits list views by route ([`ApplicationProgressRouteNavigation`](../Visa2026.Module/BusinessObjects/ApplicationProgressRouteNavigation.cs), [`CustomNavigationUpdater`](../Visa2026.Module/DatabaseUpdate/CustomNavigationUpdater.cs)).
 
-### 2.2 Ministry depth (`MinistryReviewDepth`)
+### 2.2 Ministry depth (flattened model)
 
-When route is **`ViaMinistries`**, how many ministry **legs** apply:
+When route is **`ViaMinistries`**, how many ministry **legs** apply is determined by the **selected `ProjectContract`** (each contract row *is* one approval process variant):
 
-| Value | Meaning | Extra states / locations |
-|-------|---------|---------------------------|
-| `FirstMinistryOnly` | One ministry approval | `1_REVIEW_*`, `AT_THE_MINISTERY_1` only |
-| `FirstAndSecondMinistry` | Two ministry approvals | Above + `2_REVIEW_*`, `AT_THE_MINISTERY_2` |
-| `None` | N/A | Used only when route is direct to migration (normalized away for via-ministries) |
+| Source | Meaning |
+|--------|---------|
+| [`ProjectContract.MinistryLegs`](../Visa2026.Module/BusinessObjects/ProjectContractMinistryLeg.cs) | Ordered 1…5 `ApprovingMinistry` rows on the contract |
+| [`Application.ApprovalLegSnapshots`](../Visa2026.Module/BusinessObjects/ApplicationApprovalLegSnapshot.cs) | Immutable copy at contract selection time (shows ministry short names on progress) |
+| Legacy `ApplicationType.MinistryReviewDepth` | Fallback when contract has no legs configured |
 
-**Phase 1 (implemented):** depth is resolved **per application** — see §3.  
-**Phase 2 (planned):** replace enum depth with `MinistryReviewLegCount` (1…N) and build the transition graph in a loop so a third ministry only needs catalog rows + config, not new C# branches.
+**Removed (2026-06 flatten):** nested `ProjectContractApprovalProfile`, second dropdown `Application.ContractApprovalProfile`, visa-period auto-filter (`MinDurationMonths` / `MaxDurationMonths`). Officers pick the **contract row** directly (e.g. Şatlyk‑1 gysga vs Şatlyk‑1 uzyn).
+
+Dynamic transition graph: [`ApplicationProgressLegCodes`](../Visa2026.Module/BusinessObjects/ApplicationProgressLegCodes.cs) (supports 1…5 legs).
 
 ---
 
-## 3. Contract-based ministry depth (Phase 1)
+## 3. Contract-based ministry legs
 
-Some application types show **`Application.ProjectContract`** (`ShowProjectContract = true`) and use the **via ministries** route. For those, **the same type** can require **one or two** ministry legs depending on **which project/contract** the application is under.
+When `ShowProjectContract = true` and route is **via ministries**, each **`ProjectContract`** row defines one approval process. Multiple variants share the same **`Code`** (e.g. both GT-15 rows use `Code = "GT-15"`) but differ by **`NameTm`** and leg count.
 
 ### 3.1 Data
 
-| Entity | Property | Role |
-|--------|----------|------|
-| [`ProjectContract`](../Visa2026.Module/BusinessObjects/ProjectContract.cs) | `MinistryReviewDepth` | **Authoritative** depth for applications linked to this contract (tenant lookup) |
-| [`ApplicationType`](../Visa2026.Module/BusinessObjects/LookupBusinessObjects.cs) | `MinistryReviewDepth` | **Default** when no contract is selected, or when `ShowProjectContract` is false |
-| [`Application`](../Visa2026.Module/BusinessObjects/Application.cs) | `ProjectContract` | Selected contract on the application (when visible) |
+| Entity | Role |
+|--------|------|
+| [`ApprovingMinistry`](../Visa2026.Module/BusinessObjects/ApprovingMinistry.cs) | Tenant lookup — government **review** ministries only (`ShortNameTm` on progress ministry legs). **Not** migration service — that is [`MigrationService`](../Visa2026.Module/BusinessObjects/LookupBusinessObjects.cs) on Application + automatic `AT_MIGRATION_SERVICE` progress step |
+| [`ProjectContract`](../Visa2026.Module/BusinessObjects/ProjectContract.cs) | One approval process per row; `IsActive`, optional `Description`; **`MinistryLegs`** collection |
+| [`ProjectContractMinistryLeg`](../Visa2026.Module/BusinessObjects/ProjectContractMinistryLeg.cs) | Ministry + sequence on the contract |
+| [`Application.ProjectContract`](../Visa2026.Module/BusinessObjects/Application.cs) | Officer's chosen process (single dropdown, active contracts only) |
+| [`ApplicationApprovalLegSnapshot`](../Visa2026.Module/BusinessObjects/ApplicationApprovalLegSnapshot.cs) | Immutable ministry short names at selection time |
 
-Tenant seed example ([`tenant/project-contract.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.json)):
+GT-15 seed example ([`tenant/project-contract.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.json) + [`ProjectContractMinistrySeedUpdater`](../Visa2026.Module/DatabaseUpdate/ProjectContractMinistrySeedUpdater.cs)):
 
-```json
-{ "NameTm": "GT-15", "MinistryReviewDepth": "FirstMinistryOnly", "IsDefault": true },
-{ "NameTm": "Şatlyk‑1", "MinistryReviewDepth": "FirstAndSecondMinistry" }
-```
-
-Deploy: EF schema adds `ProjectContracts.MinistryReviewDepth`; tenant catalog sync applies values on update (see [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md)).
+| Contract row | Legs |
+|--------------|------|
+| GT-15 | 1 (default project contract for reports / E2E) |
+| Şatlyk‑1 — gysga (1 ministrlik) | 1 |
+| Şatlyk‑1 (2 ministrlik) | 2 |
+| Şatlyk‑1 — uzyn (3 ministrlik) | 3 |
 
 ### 3.2 Resolution (`ApplicationProgressProfileResolver`)
 
-Single entry point for runtime depth:
-
 ```text
-GetMinistryReviewDepth(Application)
+GetMinistryLegCount(Application)
 
-1. Route = DirectToMigrationService     → None
-2. Route = ViaMinistries:
-     a. ShowProjectContract AND ProjectContract set
-        → ProjectContract.MinistryReviewDepth (normalized)
-     b. Else → ApplicationType.MinistryReviewDepth (normalized)
+1. Route = DirectToMigrationService → 0
+2. ApprovalLegSnapshots present     → snapshot count
+3. ProjectContract with MinistryLegs → leg count
+4. Else                             → ApplicationType.MinistryReviewDepth (legacy enum → 0/1/2)
 ```
 
-Used by:
+No visa-period filtering — officer selects the appropriate contract row manually.
 
-- [`ApplicationProgressRouteHelper`](../Visa2026.Module/BusinessObjects/ApplicationProgressRouteHelper.cs) — allowed state/location codes, route validation
-- [`ApplicationProgressTransitionHelper`](../Visa2026.Module/BusinessObjects/ApplicationProgressTransitionHelper.cs) — legal next steps and transition graph
-
-`ShowProjectContract` does **not** set depth by itself; it only gates whether contract-based resolution applies.
-
-### 3.3 Business rules (agreed)
+### 3.3 Business rules
 
 | Rule | Enforcement |
 |------|----------------|
-| Contract **required** before leaving office preparation | **Block** on save — first row may be `IS_BEING_PREPARED` @ `AT_OFFICE` without contract; any later progress row requires `ProjectContract` when `RequiresProjectContract(application)` |
-| Cannot clear contract after ministry/migration steps | **Block** on Application save if progress exists beyond office prep |
-| Change contract after progress history exists | **Warn** only ([`ApplicationProjectContractProgressController`](../Visa2026.Module/Controllers/ApplicationProjectContractProgressController.cs)) |
-| Depth change when swapping contracts | **Additional warning** (one ministry ↔ two ministries) |
+| Contract required before leaving office prep | **Block** (unchanged) |
+| Active contract must have ≥1 ministry leg | **Block** on contract save — `ProjectContract.MinistryLegsRequired` |
+| Contract locked after ministry/migration steps | **Block** revert — `Application.ProjectContractLockedAfterProgress` |
+| Contract legs immutable once referenced | **Block** structural leg edits — `ProjectContract.MinistryLegsStructuralEditBlocked` |
+| Progress shows ministry name | `ApplicationProgress.MinistryStepLabel` from snapshot |
 
-UI messages: `ApplicationProgress.ProjectContractRequired`, `Application.ProjectContractChangedAfterProgress`, `Application.ProjectContractMinistryDepthChanged` in [`UiStrings.messages.json`](../tools/GenerateModelLocalization/UiStrings.messages.json).
+Controllers: [`ApplicationProjectContractMinistryController`](../Visa2026.Module/Controllers/ApplicationProjectContractMinistryController.cs), [`ProjectContractMinistryController`](../Visa2026.Module/Controllers/ProjectContractMinistryController.cs).
 
-Suggested next step after office prep is **not** auto-filled until a contract is selected when one is required.
+Migration from Phase 2 profiles: [`ProjectContractApprovalProfileFlattenMigrationUpdater`](../Visa2026.Module/DatabaseUpdate/ProjectContractApprovalProfileFlattenMigrationUpdater.cs) (single-profile contracts), then [`ProjectContractApprovalProfileSchemaCleanupUpdater`](../Visa2026.Module/DatabaseUpdate/ProjectContractApprovalProfileSchemaCleanupUpdater.cs) drops legacy tables.
 
 ---
 
-## 4. Approval process flows (by profile)
+## 4. Approval process flows (by leg count)
 
 Stable codes live in [`ApplicationProgressCatalogCodes`](../Visa2026.Module/BusinessObjects/ApplicationProgressCatalogCodes.cs) and JSON catalogs. Below is the **happy path**; reject/cancel branches exist on the same graph (see state validation doc §5).
 
@@ -134,9 +130,9 @@ flowchart LR
 
 No ministry review states or locations.
 
-### 4.2 Via ministries — one leg (`FirstMinistryOnly`)
+### 4.2 Via ministries — one leg
 
-Typical when `ProjectContract.MinistryReviewDepth = FirstMinistryOnly` (e.g. GT-15).
+Typical when contract has one `MinistryLeg` (e.g. GT-15 or Şatlyk‑1 gysga).
 
 ```mermaid
 flowchart LR
@@ -148,9 +144,9 @@ flowchart LR
 
 After first ministry approval, the file goes **straight to migration** (no `2_REVIEW_*`).
 
-### 4.3 Via ministries — two legs (`FirstAndSecondMinistry`)
+### 4.3 Via ministries — two legs
 
-Typical when contract requires two ministries (e.g. Şatlyk‑1) or type default is two legs without contract override.
+Typical for Şatlyk‑1 (2 ministrlik) or legacy `FirstAndSecondMinistry`.
 
 ```mermaid
 flowchart LR
@@ -162,13 +158,15 @@ flowchart LR
   F --> G["PROCESS_ISSUED"]
 ```
 
+Three or more legs follow the same pattern through `ApplicationProgressLegCodes` (legs 3–5).
+
 ### 4.4 Terminal and rejection codes
 
 Shared across profiles (non-exhaustive):
 
 | State codes | Meaning |
 |-------------|---------|
-| `1_REVIEW_REJECTED`, `2_REVIEW_REJECTED` | Ministry rejection (terminal for that leg) |
+| `1_REVIEW_REJECTED`, `2_REVIEW_REJECTED`, … | Ministry rejection (terminal for that leg) |
 | `PROCESS_REJECTED` | Rejected at migration / general rejection |
 | `PROCESS_CANCELLED` | Application cancelled |
 | `PROCESS_ISSUED` | Completed successfully |
@@ -182,12 +180,13 @@ Officers cannot add progress after a terminal state ([`ApplicationProgressTransi
 | Task | Where |
 |------|--------|
 | Set type route (ministries vs direct) | `ApplicationTypeConfigurationCatalog.json` → `ApplicationProgressRoute` |
-| Set type **default** ministry depth | Same catalog → `MinistryReviewDepth` (fallback) |
-| Set **per-contract** depth | Lookup → Organization → **Project contracts**, or `tenant/project-contract.json` |
-| Verify state/location catalogs | `application-state.json`, `application-location.json` (global; not duplicated per route) |
+| Set type **default** ministry depth (fallback) | Same catalog → `MinistryReviewDepth` |
+| Configure **ministry legs** per contract | Project contract detail → **Ministrlik ädimleri**; ministries under Lookup → Organization → **ApprovingMinistry** |
+| Add contract variants (same `Code`, different legs) | `tenant/project-contract.json` — one row per process |
+| Verify state/location catalogs | `application-state.json`, `application-location.json` (legs 3–5 codes) |
 | Localize contract field / messages | `UiStrings.entities.json`, `UiStrings.messages.json` → run `GenerateModelLocalization` |
 
-**Do not** use `ShowProjectContract` to mean “two ministries” — use `ProjectContract.MinistryReviewDepth` or type default.
+**Do not** use `ShowProjectContract` to mean “two ministries” — configure **`ProjectContract.MinistryLegs`** or add a second contract row.
 
 ---
 
@@ -196,9 +195,7 @@ Officers cannot add progress after a terminal state ([`ApplicationProgressTransi
 | Area | Location |
 |------|----------|
 | Resolver unit tests | [`ApplicationProgressProfileResolverTests.cs`](../Visa2026.Module.Tests/BusinessObjects/ApplicationProgressProfileResolverTests.cs) |
-| Route / transition tests | [`ApplicationProgressRouteHelperTests.cs`](../Visa2026.Module.Tests/BusinessObjects/ApplicationProgressRouteHelperTests.cs), [`ApplicationProgressTransitionHelperTests.cs`](../Visa2026.Module.Tests/BusinessObjects/ApplicationProgressTransitionHelperTests.cs) |
-
-**Phase 2 sketch:** `ProjectContract.MinistryReviewLegCount` (int), dynamic transition builder over `{n}_REVIEW_*` / `AT_THE_MINISTERY_{n}`, snapshot depth on first non-office row if contract changes must not affect existing history.
+| Three-leg transition tests | [`ApplicationProgressTransitionHelperThreeLegTests.cs`](../Visa2026.Module.Tests/BusinessObjects/ApplicationProgressTransitionHelperThreeLegTests.cs) |
 
 ---
 
@@ -206,4 +203,6 @@ Officers cannot add progress after a terminal state ([`ApplicationProgressTransi
 
 | Date | Change |
 |------|--------|
-| 2026-06-01 | Phase 1: `ProjectContract.MinistryReviewDepth`, `ApplicationProgressProfileResolver`, contract required before leaving office prep, warn on contract change after progress |
+| 2026-06-13 | **Flatten:** each `ProjectContract` row = one process; `ProjectContractMinistryLeg`; removed approval profiles + second Application dropdown; migration updaters |
+| 2026-06-13 | Phase 2 (superseded): `ProjectContractApprovalProfile` / legs, `Application.ContractApprovalProfile`, visa-period filter |
+| 2026-06-01 | Phase 1: `ProjectContract.MinistryReviewDepth`, `ApplicationProgressProfileResolver`, contract required before leaving office prep |

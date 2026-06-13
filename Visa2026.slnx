@@ -9,5 +9,6 @@
     <BuildType Solution="EasyTest|*" Project="Release" />
   </Project>
   <Project Path="Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj" />
+  <Project Path="Visa2026.Module.Tests/Visa2026.Module.Tests.csproj" />
   <Project Path="Visa2026.Module/Visa2026.Module.csproj" />
 </Solution>

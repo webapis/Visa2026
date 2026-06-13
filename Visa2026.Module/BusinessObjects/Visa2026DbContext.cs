@@ -76,6 +76,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ProjectContract> ProjectContracts { get; set; }
         public DbSet<ProjectContractImage> ProjectContractImages { get; set; }
         public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }
+        public DbSet<ApprovingMinistry> ApprovingMinistries { get; set; }
+        public DbSet<ProjectContractMinistryLeg> ProjectContractMinistryLegs { get; set; }
+        public DbSet<ApplicationApprovalLegSnapshot> ApplicationApprovalLegSnapshots { get; set; }
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
         public DbSet<VisaCategory> VisaCategories { get; set; }
         public DbSet<Invitation> Invitations { get; set; }

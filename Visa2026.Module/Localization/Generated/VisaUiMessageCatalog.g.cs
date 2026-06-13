@@ -54,6 +54,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ösüş taryhy bar. Taslama şertnamasyny üýtgetmek täze ädimler üçin ministrlik tapgyrlaryny üýtgedip biler. Bar bolan ädimleri barlaň.",
             ["ru-RU"] = "История прогресса уже есть. Смена контракта может изменить министерские шаги для новых записей. Проверьте существующие шаги.",
         },
+        ["Application.ProjectContractLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The selected project contract has no ministry legs configured.",
+            ["tr-TR"] = "Seçilen proje sözleşmesinde bakanlık adımı tanımlı değil.",
+            ["tk-TM"] = "Saýlanan taslama şertnamasynda ministrlik ädimi ýok.",
+            ["ru-RU"] = "У выбранного контракта проекта не настроены этапы министерств.",
+        },
+        ["Application.ProjectContractLockedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project contract cannot change after ministry or migration steps were recorded.",
+            ["tr-TR"] = "Bakanlık veya göç adımları kaydedildikten sonra proje sözleşmesi değiştirilemez.",
+            ["tk-TM"] = "Ministrlik ýa-da migrasiýa ädimleri ýazylan soň taslama şertnamasyny üýtgetmek bolmaýar.",
+            ["ru-RU"] = "Контракт проекта нельзя изменить после записи шагов министерства или миграции.",
+        },
         ["Application.ProjectContractMinistryDepthChanged"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Ministry approval depth changes from {0} to {1} for this application.",
@@ -795,6 +809,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "\"{0}\" durumu {1} süreci için kullanılamaz.",
             ["tk-TM"] = "\"{0}\" ýagdaýy {1} ugry üçin rugsat edilmeýär.",
             ["ru-RU"] = "Состояние «{0}» недоступно для маршрута «{1}».",
+        },
+        ["ApplicationProgressProfile.MinistryDepth.Many"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} ministries",
+            ["tr-TR"] = "{0} bakanlık",
+            ["tk-TM"] = "{0} ministrlik",
+            ["ru-RU"] = "{0} министерств",
         },
         ["ApplicationProgressProfile.MinistryDepth.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1964,6 +1985,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0}",
             ["tk-TM"] = "{0}",
             ["ru-RU"] = "{0}",
+        },
+        ["ProjectContract.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add at least one ministry leg to this project contract.",
+            ["tr-TR"] = "Bu proje sözleşmesine en az bir bakanlık adımı ekleyin.",
+            ["tk-TM"] = "Bu taslama şertnamasyna azyndan bir ministrlik ädimi goşuň.",
+            ["ru-RU"] = "Добавьте хотя бы один этап министерства в этот контракт проекта.",
+        },
+        ["ProjectContract.MinistryLegsStructuralEditBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This project contract is already used by applications. Duplicate it to change ministry legs.",
+            ["tr-TR"] = "Bu proje sözleşmesi başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
+            ["tk-TM"] = "Bu taslama şertnamasy arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin gaýtadan dörediň.",
+            ["ru-RU"] = "Этот контракт проекта уже используется заявками. Скопируйте его, чтобы изменить этапы министерств.",
         },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

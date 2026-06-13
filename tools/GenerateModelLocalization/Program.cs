@@ -952,6 +952,9 @@ static void UpdateBaseModelApplicationEnglish(string moduleDir, JsonObject merge
         ?? throw new InvalidOperationException("Missing BOModel.");
     UpsertBoModelClass(boModel, BoPrefix + "Application", classes[BoPrefix + "Application"]?.AsObject());
     UpsertBoModelClass(boModel, BoPrefix + "ApplicationItem", classes[BoPrefix + "ApplicationItem"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ProjectContract", classes[BoPrefix + "ProjectContract"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ProjectContractMinistryLeg", classes[BoPrefix + "ProjectContractMinistryLeg"]?.AsObject());
+    UpsertBoModelClass(boModel, BoPrefix + "ApprovingMinistry", classes[BoPrefix + "ApprovingMinistry"]?.AsObject());
 
     JsonObject views = merged["views"]!.AsObject();
     XElement viewsRoot = application.Element("Views")
@@ -964,6 +967,22 @@ static void UpdateBaseModelApplicationEnglish(string moduleDir, JsonObject merge
         }
 
         UpsertEnglishView(viewsRoot, viewEntry.Key, viewEntry.Value!.AsObject());
+    }
+
+    foreach (string contractViewId in new[]
+             {
+                 "ProjectContract_DetailView",
+                 "ProjectContract_ListView",
+                 "ProjectContractMinistryLeg_DetailView",
+                 "ProjectContractMinistryLeg_ListView",
+                 "ApprovingMinistry_DetailView",
+                 "ApprovingMinistry_ListView",
+             })
+    {
+        if (views[contractViewId] is JsonObject contractViewNode)
+        {
+            UpsertEnglishView(viewsRoot, contractViewId, contractViewNode);
+        }
     }
 
     WriteXafml(basePath, application);

@@ -549,6 +549,48 @@
         <Member Name="UserName" Caption="Kullanıcı Adı" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovingMinistry" Caption="Onaylayan Bakanlık">
+      <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="Date" Caption="Tarih" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Description" Caption="Açıklama" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
+        <Member Name="Location" Caption="Yer" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
+        <Member Name="ShortNameTm" Caption="Kısa ad" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+        <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Yetkili Temsilci">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
@@ -1460,10 +1502,53 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Proje Sözleşmesi">
       <OwnMembers>
+        <Member Name="Application" Caption="Başvuru" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Şirket" />
+        <Member Name="CurrentState" Caption="Durum" />
+        <Member Name="Date" Caption="Tarih" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DaysRemaining" Caption="Kalan Gün" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Department" Caption="Departman" />
+        <Member Name="Description" Caption="Not" />
+        <Member Name="Documents" Caption="Proje sözleşmesi kopyaları" />
+        <Member Name="EndDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
+        <Member Name="ExpirationState" Caption="Süre Durumu" />
+        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
+        <Member Name="File" Caption="Dosya" />
+        <Member Name="FullAddress" Caption="Tam Adres" />
+        <Member Name="HasInvitation" Caption="Davet Var" />
+        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
+        <Member Name="InvitationItem" Caption="Davet Kalemi" />
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal Edildi" />
+        <Member Name="IsChanged" Caption="Değiştirildi" />
+        <Member Name="IsDefault" Caption="Varsayılan" />
+        <Member Name="IsExtended" Caption="Uzatıldı" />
+        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
+        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
+        <Member Name="Location" Caption="Yer" />
+        <Member Name="MinistryLegs" Caption="Bakanlık adımları" />
+        <Member Name="Name" Caption="Ad" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="Notes" Caption="Notlar" />
+        <Member Name="Passport" Caption="Pasaport" />
+        <Member Name="Person" Caption="Kişi" />
+        <Member Name="Position" Caption="Pozisyon" />
+        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
+        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
+        <Member Name="State" Caption="Durum" />
+        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ProjectContractMinistryLeg" Caption="Bakanlık adımı">
+      <OwnMembers>
+        <Member Name="ApprovingMinistry" Caption="Bakanlık" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Proje sözleşmesi kopyaları" />
-        <Member Name="MinistryReviewDepth" Caption="Bakanlık onay derinliği" />
+        <Member Name="Sequence" Caption="Sıra" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Seyahat Amacı">
@@ -2330,6 +2415,8 @@
         <ColumnInfo Id="Name" Caption="Ad" />
       </Columns>
     </ListView>
+    <DetailView Id="ApprovingMinistry_DetailView" Caption="Onaylayan Bakanlık" />
+    <ListView Id="ApprovingMinistry_ListView" Caption="Onaylayan Bakanlıklar" />
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Giriş">
       <Items>
         <StaticText Id="LogonText" Text="Kullanıcı adınızı ve şifrenizi aşağıya girin." />
@@ -2693,6 +2780,8 @@
     <ListView Id="Position_ListView" Caption="Pozisyonlar" />
     <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi" />
     <ListView Id="ProjectContract_ListView" Caption="Proje Sözleşmeleri" />
+    <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Bakanlık adımı" />
+    <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Bakanlık adımları" />
     <DetailView Id="PurposeOfTravel_DetailView" Caption="Seyahat Amacı" />
     <ListView Id="PurposeOfTravel_ListView" Caption="Seyahat Amaçları" />
     <DetailView Id="Region_DetailView" Caption="Bölge" />

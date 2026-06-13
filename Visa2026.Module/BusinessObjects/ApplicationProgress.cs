@@ -48,6 +48,15 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
+        [XafDisplayName("Ministrlik")]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public string MinistryStepLabel =>
+            ProjectContractMinistryHelper.GetMinistryShortNameForProgressStep(
+                Application,
+                State?.Code,
+                Location?.Code) ?? string.Empty;
+
         public override void OnCreated()
         {
             base.OnCreated();

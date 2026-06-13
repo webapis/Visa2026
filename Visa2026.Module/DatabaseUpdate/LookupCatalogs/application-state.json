@@ -43,6 +43,60 @@
                      "IsDefault":  false
                  },
                  {
+                     "NameTm":  "3-NJI IŞ YLALAŞYKDA",
+                     "Code":  "3_REVIEW_STARTED",
+                     "LocalizationKey":  "3_REVIEW_STARTED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "3-NJI IŞ YLALAŞYK ALYNDY",
+                     "Code":  "3_REVIEW_APPROVED",
+                     "LocalizationKey":  "3_REVIEW_APPROVED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "3-NJI IŞ YLALAŞYK BERILMEDI",
+                     "Code":  "3_REVIEW_REJECTED",
+                     "LocalizationKey":  "3_REVIEW_REJECTED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "4-NJI IŞ YLALAŞYKDA",
+                     "Code":  "4_REVIEW_STARTED",
+                     "LocalizationKey":  "4_REVIEW_STARTED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "4-NJI IŞ YLALAŞYK ALYNDY",
+                     "Code":  "4_REVIEW_APPROVED",
+                     "LocalizationKey":  "4_REVIEW_APPROVED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "4-NJI IŞ YLALAŞYK BERILMEDI",
+                     "Code":  "4_REVIEW_REJECTED",
+                     "LocalizationKey":  "4_REVIEW_REJECTED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "5-NJI IŞ YLALAŞYKDA",
+                     "Code":  "5_REVIEW_STARTED",
+                     "LocalizationKey":  "5_REVIEW_STARTED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "5-NJI IŞ YLALAŞYK ALYNDY",
+                     "Code":  "5_REVIEW_APPROVED",
+                     "LocalizationKey":  "5_REVIEW_APPROVED",
+                     "IsDefault":  false
+                 },
+                 {
+                     "NameTm":  "5-NJI IŞ YLALAŞYK BERILMEDI",
+                     "Code":  "5_REVIEW_REJECTED",
+                     "LocalizationKey":  "5_REVIEW_REJECTED",
+                     "IsDefault":  false
+                 },
+                 {
                      "NameTm":  "İŞLENMEKDE",
                      "Code":  "PROCESS_STARTED",
                      "LocalizationKey":  "PROCESS_STARTED",

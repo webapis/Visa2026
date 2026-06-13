@@ -549,6 +549,48 @@
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovingMinistry" Caption="Tassyklýan ministrlik">
+      <OwnMembers>
+        <Member Name="Application" Caption="Arza" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Kompaniýa" />
+        <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="Date" Caption="Sene" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Department" Caption="Bölüm" />
+        <Member Name="Description" Caption="Düşündiriş" />
+        <Member Name="EndDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
+        <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
+        <Member Name="File" Caption="Faýl" />
+        <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="InvitationItem" Caption="Çakylyk elementi" />
+        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsCancelled" Caption="Ýatyryldy" />
+        <Member Name="IsChanged" Caption="Üýtgedildi" />
+        <Member Name="IsDefault" Caption="Bellenen" />
+        <Member Name="IsExtended" Caption="Uzaldy" />
+        <Member Name="IssueDate" Caption="Berlen senesi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="Location" Caption="Ýer" />
+        <Member Name="Name" Caption="Ady" />
+        <Member Name="NameTm" Caption="Ady (Tm)" />
+        <Member Name="Notes" Caption="Bellikler" />
+        <Member Name="Passport" Caption="Pasport" />
+        <Member Name="Person" Caption="Adam" />
+        <Member Name="Position" Caption="Wezipesi" />
+        <Member Name="RegistrationState" Caption="Hasaba alnyş ýagdaýy" />
+        <Member Name="ShortNameTm" Caption="Gysga ady" />
+        <Member Name="StartDate" Caption="Başlanýan senesi" />
+        <Member Name="State" Caption="Ýagdaý" />
+        <Member Name="ValidityDuration" Caption="Möhleti" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.AuthorizedRepresentative" Caption="Ygtyýarly wekil">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
@@ -1460,10 +1502,53 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ProjectContract" Caption="Taslama şertnamasy">
       <OwnMembers>
+        <Member Name="Application" Caption="Arza" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Kompaniýa" />
+        <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="Date" Caption="Sene" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Department" Caption="Bölüm" />
+        <Member Name="Description" Caption="Bellik" />
+        <Member Name="Documents" Caption="Taslama şertnamasy nusgalary" />
+        <Member Name="EndDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
+        <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
+        <Member Name="File" Caption="Faýl" />
+        <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="InvitationItem" Caption="Çakylyk elementi" />
+        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsCancelled" Caption="Ýatyryldy" />
+        <Member Name="IsChanged" Caption="Üýtgedildi" />
+        <Member Name="IsDefault" Caption="Bellenen" />
+        <Member Name="IsExtended" Caption="Uzaldy" />
+        <Member Name="IssueDate" Caption="Berlen senesi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="Location" Caption="Ýer" />
+        <Member Name="MinistryLegs" Caption="Ministrlik ädimleri" />
+        <Member Name="Name" Caption="Ady" />
+        <Member Name="NameTm" Caption="Ady (Tm)" />
+        <Member Name="Notes" Caption="Bellikler" />
+        <Member Name="Passport" Caption="Pasport" />
+        <Member Name="Person" Caption="Adam" />
+        <Member Name="Position" Caption="Wezipesi" />
+        <Member Name="RegistrationState" Caption="Hasaba alnyş ýagdaýy" />
+        <Member Name="StartDate" Caption="Başlanýan senesi" />
+        <Member Name="State" Caption="Ýagdaý" />
+        <Member Name="ValidityDuration" Caption="Möhleti" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ProjectContractMinistryLeg" Caption="Ministrlik ädimi">
+      <OwnMembers>
+        <Member Name="ApprovingMinistry" Caption="Ministrlik" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Taslama şertnamasy nusgalary" />
-        <Member Name="MinistryReviewDepth" Caption="Ministrlik tassyklama çuňlugy" />
+        <Member Name="Sequence" Caption="Tertip" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.PurposeOfTravel" Caption="Syýahat maksady">
@@ -2330,6 +2415,8 @@
         <ColumnInfo Id="Name" Caption="Ady" />
       </Columns>
     </ListView>
+    <DetailView Id="ApprovingMinistry_DetailView" Caption="Tassyklýan ministrlik" />
+    <ListView Id="ApprovingMinistry_ListView" Caption="Tassyklýan ministrlikler" />
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Girmek">
       <Items>
         <StaticText Id="LogonText" Text="Ulanyjy adyňyzy we parolyňyzy aşakda giriziň." />
@@ -2693,6 +2780,8 @@
     <ListView Id="Position_ListView" Caption="Wezipeler" />
     <DetailView Id="ProjectContract_DetailView" Caption="Taslama şertnamasy" />
     <ListView Id="ProjectContract_ListView" Caption="Taslama şertnamalary" />
+    <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Ministrlik ädimi" />
+    <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Ministrlik ädimleri" />
     <DetailView Id="PurposeOfTravel_DetailView" Caption="Syýahat maksady" />
     <ListView Id="PurposeOfTravel_ListView" Caption="Syýahat maksatlary" />
     <DetailView Id="Region_DetailView" Caption="Welaýat" />

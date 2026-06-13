@@ -95,9 +95,12 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | `ApplicationItem.WorkPermitItemIsChanged`; item `IsCancelled` only |
 | `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 | `Visas.HasInvitation`, `Visas.HistoricalImport` | `VisaVisibilityToggleColumnsCleanupUpdater` | Optional `IssuingApplicationItem` / `InvitationItem` + gear on detail view |
-| **Ministry** lookup BO + `Ministries` table | `MinistrySchemaCleanupUpdater` | Ministry letter addressee text in Word templates; `MinistryReviewDepth` on `ProjectContract` / `ApplicationType` for workflow |
-| `tenant/ministry.json` lookup catalog | Ministry BO removal | Dropped from tenant manifest |
-| `ProjectContracts.MinistryID` FK | `ProjectContractLegacyColumnsCleanupUpdater` | `ProjectContract.MinistryReviewDepth` |
+| **Ministry** lookup BO + `Ministries` table | `MinistrySchemaCleanupUpdater` | **`ApprovingMinistry`** tenant lookup + approval profile legs |
+| `tenant/ministry.json` lookup catalog | Ministry BO removal | **`tenant/approving-ministry.json`** |
+| `ProjectContract.MinistryReviewDepth` | Hidden / obsolete (2026-06) | **`ProjectContract.MinistryLegs`** + **`ProjectContractMinistryLeg`** (1…5 ministries per contract row) |
+| `ProjectContractApprovalProfile`, `ProjectContractApprovalLeg` | Removed (2026-06 flatten) | One **`ProjectContract`** row per process; **`ProjectContractMinistryLeg`** |
+| `Application.ContractApprovalProfile` | Removed (2026-06 flatten) | **`Application.ProjectContract`** only |
+| `ProjectContracts.MinistryID` FK | `ProjectContractLegacyColumnsCleanupUpdater` | Approval profiles |
 
 ---
 

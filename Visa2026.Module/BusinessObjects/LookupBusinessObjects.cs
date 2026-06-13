@@ -25,7 +25,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [RuleRequiredField]
         [MaxLength(200)]
-        [XafDisplayName("Ady")]
+        [XafDisplayName("Name (Tm)")]
         [VisibleInLookupListView(false)]
         public virtual string NameTm { get; set; }
 
@@ -159,7 +159,15 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>Workflow route for <see cref="ApplicationProgress"/> (ministry vs direct to migration).</summary>
         public virtual ApplicationProgressRouteKind ApplicationProgressRoute { get; set; }
 
-        /// <summary>Ministry legs when <see cref="ApplicationProgressRoute"/> is <see cref="ApplicationProgressRouteKind.ViaMinistries"/>.</summary>
+        /// <summary>
+        /// Default ministry legs when route is via ministries and <see cref="ShowProjectContract"/> is false.
+        /// Hidden when contract-based approval profiles apply (<see cref="ShowProjectContract"/>).
+        /// </summary>
+        [DevExpress.ExpressApp.ConditionalAppearance.Appearance(
+            "HideMinistryReviewDepthWhenProjectContract",
+            Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "ShowProjectContract = true",
+            Context = "DetailView")]
         public virtual MinistryReviewDepth MinistryReviewDepth { get; set; }
 
         // --- These flags control the visibility of fields in the main Application Detail View ---

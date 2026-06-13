@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -11,8 +12,9 @@ using DevExpress.Persistent.BaseImpl.EF;
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
-    /// Tenant lookup: project / contract identifier on <see cref="Application"/> and <see cref="Person"/> (<see cref="LookupBase.NameTm"/> only).
-    /// Legacy <see cref="Images"/> and <see cref="Documents"/> remain in the database for import but are hidden from the UI.
+    /// Tenant lookup: one row = one approval process (project/contract + ordered ministry legs).
+    /// Selected on <see cref="Application"/> and <see cref="Person"/> when <see cref="ApplicationType.ShowProjectContract"/> applies.
+    /// Multiple rows may share the same <see cref="LookupBase.Code"/> (e.g. Şatlyk‑1 with 1, 2, or 3 ministry legs).
     /// </summary>
     [DefaultClassOptions]
     [DefaultProperty(nameof(NameTm))]
@@ -23,13 +25,22 @@ namespace Visa2026.Module.BusinessObjects
         {
             Images = new ObservableCollection<ProjectContractImage>();
             Documents = new ObservableCollection<ProjectContractDocument>();
+            MinistryLegs = new ObservableCollection<ProjectContractMinistryLeg>();
         }
 
-        /// <summary>
-        /// Ministry approval legs when linked applications use
-        /// <see cref="ApplicationProgressRouteKind.ViaMinistries"/> and <see cref="ApplicationType.ShowProjectContract"/>.
-        /// </summary>
+        /// <summary>Legacy DB column — not used for workflow.</summary>
+        [Obsolete("Ministry legs are defined on MinistryLegs. Retained for DB/import compatibility only.")]
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
         public virtual MinistryReviewDepth MinistryReviewDepth { get; set; } = MinistryReviewDepth.FirstMinistryOnly;
+
+        [MaxLength(500)]
+        public virtual string Description { get; set; }
+
+        public virtual bool IsActive { get; set; } = true;
 
         [Browsable(false)]
         [VisibleInDetailView(false)]
@@ -48,5 +59,9 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(ProjectContractDocument.ProjectContract))]
         [Aggregated]
         public virtual IList<ProjectContractDocument> Documents { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(ProjectContractMinistryLeg.ProjectContract))]
+        public virtual IList<ProjectContractMinistryLeg> MinistryLegs { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Xunit;
 
@@ -6,20 +7,70 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class ApplicationProgressProfileResolverTests
 {
     [Fact]
-    public void GetMinistryReviewDepth_UsesProjectContract_WhenShowProjectContract()
+    public void GetMinistryLegCount_UsesProjectContractLegs()
     {
         var type = new ApplicationType
         {
             ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
-            MinistryReviewDepth = MinistryReviewDepth.FirstAndSecondMinistry,
             ShowProjectContract = true
         };
-        var contract = new ProjectContract { MinistryReviewDepth = MinistryReviewDepth.FirstMinistryOnly };
+        var contract = new ProjectContract
+        {
+            MinistryLegs =
+            [
+                new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() }
+            ]
+        };
         var app = new Application { ApplicationType = type, ProjectContract = contract };
 
+        Assert.Equal(1, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
         Assert.Equal(
             MinistryReviewDepth.FirstMinistryOnly,
             ApplicationProgressProfileResolver.GetMinistryReviewDepth(app));
+    }
+
+    [Fact]
+    public void GetMinistryLegCount_UsesThreeLegContract()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var contract = new ProjectContract
+        {
+            MinistryLegs =
+            [
+                new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() },
+                new ProjectContractMinistryLeg { Sequence = 2, ApprovingMinistry = new ApprovingMinistry() },
+                new ProjectContractMinistryLeg { Sequence = 3, ApprovingMinistry = new ApprovingMinistry() }
+            ]
+        };
+        var app = new Application { ApplicationType = type, ProjectContract = contract };
+
+        Assert.Equal(3, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
+    }
+
+    [Fact]
+    public void GetMinistryLegCount_UsesSnapshotWhenPresent()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var app = new Application
+        {
+            ApplicationType = type,
+            ProjectContract = new ProjectContract(),
+            ApprovalLegSnapshots =
+            [
+                new ApplicationApprovalLegSnapshot { Sequence = 1, MinistryShortName = "A" },
+                new ApplicationApprovalLegSnapshot { Sequence = 2, MinistryShortName = "B" }
+            ]
+        };
+
+        Assert.Equal(2, ApplicationProgressProfileResolver.GetMinistryLegCount(app));
     }
 
     [Fact]
@@ -47,7 +98,14 @@ public class ApplicationProgressProfileResolverTests
             MinistryReviewDepth = MinistryReviewDepth.FirstMinistryOnly,
             ShowProjectContract = false
         };
-        var contract = new ProjectContract { MinistryReviewDepth = MinistryReviewDepth.FirstAndSecondMinistry };
+        var contract = new ProjectContract
+        {
+            MinistryLegs =
+            [
+                new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() },
+                new ProjectContractMinistryLeg { Sequence = 2, ApprovingMinistry = new ApprovingMinistry() }
+            ]
+        };
         var app = new Application { ApplicationType = type, ProjectContract = contract };
 
         Assert.Equal(
@@ -95,19 +153,29 @@ public class ApplicationProgressProfileResolverTests
     }
 
     [Fact]
-    public void WouldMinistryDepthChange_WhenContractDepthDiffers()
+    public void WouldMinistryDepthChange_WhenContractLegCountDiffers()
     {
         var type = new ApplicationType
         {
             ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
-            ShowProjectContract = true,
-            MinistryReviewDepth = MinistryReviewDepth.FirstAndSecondMinistry
+            ShowProjectContract = true
         };
         var app = new Application { ApplicationType = type };
-        var one = new ProjectContract { MinistryReviewDepth = MinistryReviewDepth.FirstMinistryOnly };
-        var two = new ProjectContract { MinistryReviewDepth = MinistryReviewDepth.FirstAndSecondMinistry };
+        var oneLeg = new ProjectContract
+        {
+            MinistryLegs = [new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() }]
+        };
+        var threeLeg = new ProjectContract
+        {
+            MinistryLegs =
+            [
+                new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() },
+                new ProjectContractMinistryLeg { Sequence = 2, ApprovingMinistry = new ApprovingMinistry() },
+                new ProjectContractMinistryLeg { Sequence = 3, ApprovingMinistry = new ApprovingMinistry() }
+            ]
+        };
 
-        Assert.True(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, one, two));
-        Assert.False(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, one, one));
+        Assert.True(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, threeLeg));
+        Assert.False(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, oneLeg));
     }
 }

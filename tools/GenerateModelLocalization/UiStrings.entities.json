@@ -1,11 +1,11 @@
 {
   "commonMembers": {
-    "Name": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
-    "NameTm": { "tr-TR": "Ad (Tm)", "tk-TM": "Ady (Tm)", "ru-RU": "Название (Tm)" },
-    "Code": { "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
-    "IsDefault": { "tr-TR": "Varsayılan", "tk-TM": "Bellenen", "ru-RU": "По умолчанию" },
+    "Name": { "en-US": "Name", "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Имя" },
+    "NameTm": { "en-US": "Name (Tm)", "tr-TR": "Ad (Tm)", "tk-TM": "Ady (Tm)", "ru-RU": "Название (Tm)" },
+    "Code": { "en-US": "Code", "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
+    "IsDefault": { "en-US": "Default", "tr-TR": "Varsayılan", "tk-TM": "Bellenen", "ru-RU": "По умолчанию" },
     "Notes": { "tr-TR": "Notlar", "tk-TM": "Bellikler", "ru-RU": "Примечания" },
-    "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+    "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
     "FullAddress": { "tr-TR": "Tam Adres", "tk-TM": "Doly salgy", "ru-RU": "Полный адрес" },
     "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
     "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
@@ -22,7 +22,7 @@
     "DateDeleted": { "tr-TR": "Silinme Tarihi", "tk-TM": "Pozulan senesi", "ru-RU": "Дата удаления" },
     "DeletedBy": { "tr-TR": "Silen", "tk-TM": "Pozan", "ru-RU": "Удалил" },
     "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
-    "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
+    "Description": { "en-US": "Description", "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
     "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
     "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
     "File": { "tr-TR": "Dosya", "tk-TM": "Faýl", "ru-RU": "Файл" },
@@ -168,14 +168,34 @@
       }
     },
     "ProjectContract": {
-      "caption": { "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
-      "listCaption": { "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" },
+      "caption": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+      "listCaption": { "en-US": "Project contracts", "tr-TR": "Proje Sözleşmeleri", "tk-TM": "Taslama şertnamalary", "ru-RU": "Контракты проекта" },
+      "lookup": true,
       "members": {
-        "MinistryReviewDepth": {
-          "tr-TR": "Bakanlık onay derinliği",
-          "tk-TM": "Ministrlik tassyklama çuňlugy",
-          "ru-RU": "Глубина министерского согласования"
+        "Description": { "en-US": "Note", "tr-TR": "Not", "tk-TM": "Bellik", "ru-RU": "Примечание" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "MinistryLegs": {
+          "en-US": "Ministry steps",
+          "tr-TR": "Bakanlık adımları",
+          "tk-TM": "Ministrlik ädimleri",
+          "ru-RU": "Этапы министерств"
         }
+      }
+    },
+    "ProjectContractMinistryLeg": {
+      "caption": { "en-US": "Ministry step", "tr-TR": "Bakanlık adımı", "tk-TM": "Ministrlik ädimi", "ru-RU": "Этап министерства" },
+      "listCaption": { "en-US": "Ministry steps", "tr-TR": "Bakanlık adımları", "tk-TM": "Ministrlik ädimleri", "ru-RU": "Этапы министерств" },
+      "members": {
+        "Sequence": { "en-US": "Order", "tr-TR": "Sıra", "tk-TM": "Tertip", "ru-RU": "Порядок" },
+        "ApprovingMinistry": { "en-US": "Ministry", "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" }
+      }
+    },
+    "ApprovingMinistry": {
+      "caption": { "en-US": "Approving ministry", "tr-TR": "Onaylayan Bakanlık", "tk-TM": "Tassyklýan ministrlik", "ru-RU": "Согласующее министерство" },
+      "listCaption": { "en-US": "Approving ministries", "tr-TR": "Onaylayan Bakanlıklar", "tk-TM": "Tassyklýan ministrlikler", "ru-RU": "Согласующие министерства" },
+      "lookup": true,
+      "members": {
+        "ShortNameTm": { "en-US": "Short name", "tr-TR": "Kısa ad", "tk-TM": "Gysga ady", "ru-RU": "Краткое название" }
       }
     },
     "CompanyHead": { "caption": { "tr-TR": "Şirket Müdürü", "tk-TM": "Kompaniýa müdiri", "ru-RU": "Руководитель компании" }, "listCaption": { "tr-TR": "Şirket Müdürleri", "tk-TM": "Kompaniýa müdirleri", "ru-RU": "Руководители" } },

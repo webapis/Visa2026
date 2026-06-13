@@ -2,12 +2,24 @@
   "rows": [
     {
       "NameTm": "GT-15",
-      "MinistryReviewDepth": "FirstMinistryOnly",
-      "IsDefault": true
+      "Code": "GT-15",
+      "IsDefault": true,
+      "IsActive": true
     },
     {
-      "NameTm": "Şatlyk‑1",
-      "MinistryReviewDepth": "FirstAndSecondMinistry"
+      "NameTm": "Şatlyk‑1 — gysga (1 ministrlik)",
+      "Code": "Şatlyk-1",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Şatlyk‑1 (2 ministrlik)",
+      "Code": "Şatlyk-1",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Şatlyk‑1 — uzyn (3 ministrlik)",
+      "Code": "Şatlyk-1",
+      "IsActive": true
     }
   ]
 }

@@ -6,7 +6,8 @@ namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
 /// Drops legacy <see cref="BusinessObjects.ProjectContract"/> columns removed from the EF model
-/// (<see cref="BusinessObjects.LookupBase.Name"/>, <see cref="BusinessObjects.LookupBase.Code"/>, Description, Ministry).
+/// (<see cref="BusinessObjects.LookupBase.Name"/>, <see cref="BusinessObjects.LookupBase.Code"/>, Ministry).
+/// <see cref="BusinessObjects.ProjectContract.Description"/> is retained (reintroduced for contract notes).
 /// </summary>
 public sealed class ProjectContractLegacyColumnsCleanupUpdater : ModuleUpdater
 {
@@ -30,7 +31,6 @@ public sealed class ProjectContractLegacyColumnsCleanupUpdater : ModuleUpdater
     private void DropLegacyColumns()
     {
         DropColumnIfExists("ProjectContracts", "MinistryID");
-        DropColumnIfExists("ProjectContracts", "Description");
         DropColumnIfExists("ProjectContracts", "Name");
         DropColumnIfExists("ProjectContracts", "Code");
     }
