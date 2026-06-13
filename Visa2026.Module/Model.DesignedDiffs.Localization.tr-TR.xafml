@@ -354,6 +354,8 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Description" Caption="Açıklama" />
         <Member Name="Location" Caption="Yer" />
+        <Member Name="MinistryLetterFile" Caption="Bakanlık yazış kopyası" />
+        <Member Name="MinistryStepLabel" Caption="Bakanlık" />
         <Member Name="State" Caption="Durum" />
       </OwnMembers>
     </Class>

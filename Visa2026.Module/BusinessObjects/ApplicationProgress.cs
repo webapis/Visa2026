@@ -4,17 +4,37 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-  
     [DefaultProperty(nameof(State))]
+    [FileAttachment(nameof(MinistryLetterFile))]
+    [Appearance(
+        "HideMinistryLetterFileUnlessDecision",
+        AppearanceItemType = "LayoutItem",
+        TargetItems = nameof(MinistryLetterFile),
+        Criteria = "!IsMinistryDecisionStep",
+        Visibility = ViewItemVisibility.Hide,
+        Context = "DetailView")]
+    [RuleCriteria(
+        "ApplicationProgress_MinistryLetterFileNotEmpty",
+        DefaultContexts.Save,
+        "MinistryLetterFile == null or MinistryLetterFile.Size > 0",
+        "The uploaded ministry letter copy is empty.")]
+    [RuleCriteria(
+        "ApplicationProgress_MinistryLetterFileSize",
+        DefaultContexts.Save,
+        "MinistryLetterFile == null or MinistryLetterFile.Size <= (MaxDocumentSizeInMB * 1024 * 1024)",
+        "The ministry letter copy exceeds the maximum allowed size of {MaxDocumentSizeInMB}MB.")]
     //[RuleCriteria("ApplicationProgressDateNotInFuture", DefaultContexts.Save, "Date <= Now()", "Date cannot be in the future.")]
     //[RuleCriteria("ApplicationProgressDateNotBeforeApplicationDate", DefaultContexts.Save, "Date >= Application.ApplicationDate", "Progress date cannot be earlier than the application date.")]
     public class ApplicationProgress : BaseObject
@@ -44,7 +64,6 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime Date { get; set; }
 
-
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
@@ -56,6 +75,39 @@ namespace Visa2026.Module.BusinessObjects
                 Application,
                 State?.Code,
                 Location?.Code) ?? string.Empty;
+
+        [Browsable(false)]
+        [NotMapped]
+        public bool IsMinistryDecisionStep =>
+            ApplicationProgressLegCodes.IsMinistryDecisionStateCode(State?.Code);
+
+        [Aggregated, ExpandObjectMembers(ExpandObjectMembers.Never)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual FileData MinistryLetterFile { get; set; }
+
+        [NotMapped]
+        [Browsable(false)]
+        public int MaxDocumentSizeInMB
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                return objectSpace == null
+                    ? SystemSettings.DefaultMaxDocumentSizeInMB
+                    : SystemSettings.TryGetInstance(objectSpace)?.MaxDocumentSizeInMB
+                      ?? SystemSettings.DefaultMaxDocumentSizeInMB;
+            }
+        }
+
+        [NotMapped]
+        [Browsable(false)]
+        [RuleFromBoolProperty(
+            "ApplicationProgress_MinistryLetterFileContentValid",
+            DefaultContexts.Save,
+            "The ministry letter copy must use an allowed type (PDF, PNG, JPEG, TIFF, GIF, or BMP) and the file content must match the extension.")]
+        public bool IsMinistryLetterFileContentValid =>
+            MinistryLetterFile == null || DocumentFileUploadConstraints.TryValidate(MinistryLetterFile, out _);
 
         public override void OnCreated()
         {

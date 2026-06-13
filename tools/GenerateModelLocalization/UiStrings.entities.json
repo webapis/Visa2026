@@ -286,7 +286,14 @@
         "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
         "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
-        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
+        "MinistryStepLabel": { "en-US": "Ministry", "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" },
+        "MinistryLetterFile": {
+          "en-US": "Ministry letter copy",
+          "tr-TR": "Bakanlık yazış kopyası",
+          "tk-TM": "Ministrlik hatynyň nusgasy",
+          "ru-RU": "Копия письма министерства"
+        }
       }
     },
     "ApplicationReason": { "caption": { "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина заявки" }, "listCaption": { "tr-TR": "Başvuru Nedenleri", "tk-TM": "Arza sebäpleri", "ru-RU": "Причины заявки" }, "lookup": true },

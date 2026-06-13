@@ -354,6 +354,8 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Description" Caption="Düşündiriş" />
         <Member Name="Location" Caption="Ýer" />
+        <Member Name="MinistryLetterFile" Caption="Ministrlik hatynyň nusgasy" />
+        <Member Name="MinistryStepLabel" Caption="Ministrlik" />
         <Member Name="State" Caption="Ýagdaý" />
       </OwnMembers>
     </Class>

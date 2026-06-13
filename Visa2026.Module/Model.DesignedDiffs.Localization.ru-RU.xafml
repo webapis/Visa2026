@@ -354,6 +354,8 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Description" Caption="Описание" />
         <Member Name="Location" Caption="Место" />
+        <Member Name="MinistryLetterFile" Caption="Копия письма министерства" />
+        <Member Name="MinistryStepLabel" Caption="Министерство" />
         <Member Name="State" Caption="Состояние" />
       </OwnMembers>
     </Class>
