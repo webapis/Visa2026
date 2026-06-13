@@ -81,6 +81,8 @@ internal static class LookupCatalogEntitySync
                 (HasNonEmpty(row, "NameTm") || HasNonEmpty(row, "Name"))
                 && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
             LookupCatalogMatchKey.NameTm => HasNonEmpty(row, "NameTm"),
+            LookupCatalogMatchKey.NameTmTitle => HasNonEmpty(row, "NameTm"),
+            LookupCatalogMatchKey.ShortNameTm => HasNonEmpty(row, "ShortNameTm"),
             _ => HasNonEmpty(row, "Name"),
         };
 
@@ -108,6 +110,9 @@ internal static class LookupCatalogEntitySync
                 FindByProperty(objectSpace, entityType, "BusinessObjectKey", GetString(row, "BusinessObjectKey")),
             LookupCatalogMatchKey.NameAndRegion => FindCity(objectSpace, row),
             LookupCatalogMatchKey.NameTm => FindByNameTm(objectSpace, entityType, row),
+            LookupCatalogMatchKey.NameTmTitle => FindByNameTmTitle(objectSpace, entityType, row),
+            LookupCatalogMatchKey.ShortNameTm =>
+                FindByProperty(objectSpace, entityType, "ShortNameTm", GetString(row, "ShortNameTm")),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
@@ -283,6 +288,24 @@ internal static class LookupCatalogEntitySync
 
     private static string GetCatalogIdentityKey(object row, LookupCatalogDefinition definition)
     {
+        if (definition.MatchKey == LookupCatalogMatchKey.NameTmTitle)
+        {
+            var titleNameTm = row is LookupBase lookupTitle
+                ? lookupTitle.NameTm
+                : GetPropertyString(row, "NameTm");
+            return string.IsNullOrWhiteSpace(titleNameTm)
+                ? string.Empty
+                : "T:" + LookupCatalogMatchHelper.NormalizeKey(titleNameTm);
+        }
+
+        if (definition.MatchKey == LookupCatalogMatchKey.ShortNameTm)
+        {
+            var shortNameTm = GetPropertyString(row, "ShortNameTm");
+            return string.IsNullOrWhiteSpace(shortNameTm)
+                ? string.Empty
+                : "S:" + LookupCatalogMatchHelper.NormalizeKey(shortNameTm);
+        }
+
         if (row is LookupBase lookup)
         {
             if (!string.IsNullOrWhiteSpace(lookup.LocalizationKey))
@@ -433,6 +456,18 @@ internal static class LookupCatalogEntitySync
         return FindByTitle(objectSpace, entityType, nameTm);
     }
 
+    /// <summary>
+    /// Upsert identity for rows that share <see cref="LookupBase.Code"/> but differ by title (e.g. project contract leg variants).
+    /// </summary>
+    private static object? FindByNameTmTitle(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
+    {
+        var nameTm = GetString(row, "NameTm");
+        if (string.IsNullOrWhiteSpace(nameTm))
+            return null;
+
+        return FindByProperty(objectSpace, entityType, "NameTm", nameTm);
+    }
+
     private static object? FindByProperty(IObjectSpace objectSpace, Type entityType, string propertyName, string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -557,6 +592,18 @@ internal static class LookupCatalogEntitySync
         var key = GetString(row, "LocalizationKey");
         if (string.IsNullOrWhiteSpace(key))
             key = GetString(row, "Code");
+
+        // ProjectContract variants share Code but differ by NameTm — do not reuse one LocalizationKey for all.
+        if (target is ProjectContract && string.IsNullOrWhiteSpace(GetString(row, "LocalizationKey")))
+        {
+            var title = GetString(row, "NameTm") ?? lookup.NameTm;
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                lookup.LocalizationKey = LookupCatalogMatchHelper.NormalizeKey(title);
+                return;
+            }
+        }
+
         if (string.IsNullOrWhiteSpace(key))
             return;
 

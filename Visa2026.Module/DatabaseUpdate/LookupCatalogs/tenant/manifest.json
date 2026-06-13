@@ -1,5 +1,5 @@
 {
-  "version": 9,
+  "version": 11,
   "catalogs": [
     {
       "id": "position",
@@ -69,7 +69,7 @@
       "id": "project-contract",
       "entity": "ProjectContract",
       "file": "project-contract.json",
-      "matchKey": "NameTm",
+      "matchKey": "NameTmTitle",
       "syncMode": "OverwriteScalars",
       "optional": true
     },

@@ -36,6 +36,9 @@ internal enum LookupCatalogMatchKey
 {
     Name,
     NameTm,
+    /// <summary>Match by <see cref="LookupBase.NameTm"/> only — multiple rows may share <see cref="LookupBase.Code"/> (e.g. <see cref="BusinessObjects.ProjectContract"/> variants).</summary>
+    NameTmTitle,
+    ShortNameTm,
     FullName,
     FullAddress,
     CodeOrName,

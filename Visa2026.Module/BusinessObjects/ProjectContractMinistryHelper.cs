@@ -12,12 +12,15 @@ public static class ProjectContractMinistryHelper
     public static bool HasConfiguredLegs(ProjectContract? contract) =>
         GetLegCount(contract) > 0;
 
-    public static void ApplySnapshot(Application application, ProjectContract? contract)
+    public static void ApplySnapshot(IObjectSpace objectSpace, Application application, ProjectContract? contract)
     {
         if (application.ApprovalLegSnapshots == null)
             return;
 
-        application.ApprovalLegSnapshots.Clear();
+        // Do not call ObservableCollection.Clear() — EF Core change tracking rejects the Reset notification.
+        foreach (var existing in application.ApprovalLegSnapshots.ToList())
+            objectSpace.Delete(existing);
+
         if (contract?.MinistryLegs == null)
             return;
 
@@ -25,14 +28,13 @@ public static class ProjectContractMinistryHelper
                      .Where(l => l.ApprovingMinistry != null)
                      .OrderBy(l => l.Sequence))
         {
-            application.ApprovalLegSnapshots.Add(new ApplicationApprovalLegSnapshot
-            {
-                Application = application,
-                Sequence = leg.Sequence,
-                ApprovingMinistryId = leg.ApprovingMinistry.ID,
-                MinistryShortName = leg.ApprovingMinistry.ShortNameTm ?? leg.ApprovingMinistry.NameTm ?? string.Empty,
-                MinistryNameTm = leg.ApprovingMinistry.NameTm ?? string.Empty
-            });
+            var snapshot = objectSpace.CreateObject<ApplicationApprovalLegSnapshot>();
+            snapshot.Application = application;
+            snapshot.Sequence = leg.Sequence;
+            snapshot.ApprovingMinistryId = leg.ApprovingMinistry.ID;
+            snapshot.MinistryShortName = leg.ApprovingMinistry.ShortNameTm ?? leg.ApprovingMinistry.NameTm ?? string.Empty;
+            snapshot.MinistryNameTm = leg.ApprovingMinistry.NameTm ?? string.Empty;
+            application.ApprovalLegSnapshots.Add(snapshot);
         }
     }
 

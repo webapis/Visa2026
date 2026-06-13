@@ -85,7 +85,7 @@ Each catalog is a JSON file:
 }
 ```
 
-**Lookup catalog JSON (global + tenant):** use **`NameTm`** for Turkmen titles; use **`LocalizationKey`** and/or **`Code`** for Layer B UI and upsert identity. Do **not** duplicate the same text in `Name` — the DB column is legacy-only. **`matchKey`** in manifests: **`NameTm`** for most catalogs, **`CodeOrName`** for `country` (and `project-contract` tenant), **`NameAndRegion`** for `city` (sync matches `NameTm` + region). Exceptions: **`ApplicationTypeConfigurationCatalog.json`** keeps `Name` as type key; organization singletons use `Name` / `FullName` / `FullAddress` as before.
+**Lookup catalog JSON (global + tenant):** use **`NameTm`** for Turkmen titles; use **`LocalizationKey`** and/or **`Code`** for Layer B UI and upsert identity. Do **not** duplicate the same text in `Name` — the DB column is legacy-only. **`matchKey`** in manifests: **`NameTm`** for most catalogs, **`NameTmTitle`** for `project-contract` (variants share Code), **`CodeOrName`** for `country`, **`NameAndRegion`** for `city` (sync matches `NameTm` + region). Exceptions: **`ApplicationTypeConfigurationCatalog.json`** keeps `Name` as type key; organization singletons use `Name` / `FullName` / `FullAddress` as before.
 
 **Layer B localization:** optional `LocalizationKey` (falls back to `Code` on sync) maps to embedded string tables (`LookupStrings.json`, `VisaLookupStrings.json`, `ApplicationTypeLookupStrings.json`, `CountryLookupStrings.json`). **Country** UI strings (235 rows, ISO alpha-3 keys) are generated with `scripts/local/Generate-CountryLookupStrings.ps1` (CLDR + `scripts/local/data/`). Legacy ministry codes (`UAE`, `ROM`, …) are in `scripts/local/data/country-legacy-overrides.json`. UI uses `LookupBase.LocalizedDisplayName`; `NameTm` stays report/PDF data per `docs/LOCALIZATION_PLAN.md`.
 
@@ -151,7 +151,7 @@ Listed in [`tenant/manifest.json`](../Visa2026.Module/DatabaseUpdate/LookupCatal
 | ApplicationNumberingProfile | `tenant/application-numbering.json` | Name — **singleton** |
 | AuthorizedSignatory | `tenant/authorized-signatory.json` | FullName — **singleton** |
 | AuthorizedRepresentative | `tenant/authorized-representative.json` | FullName — **singleton** |
-| ProjectContract | `tenant/project-contract.json` | Code, else Name |
+| ProjectContract | `tenant/project-contract.json` | NameTm title (`NameTmTitle`) — variants share Code |
 | BorderZoneName | `tenant/border-zone-name.json` | Name — multi-select catalog for `ApplicationItem` / `Visa` border zones |
 | WorkPermittedLocationName | `tenant/work-permitted-location-name.json` | Name — multi-select catalog for work-permitted locations on `ApplicationItem` / `WorkPermitItem` |
 | Lodging | `tenant/lodging.json` | FullAddress — company lodging sites for `AddressOfResidence` |

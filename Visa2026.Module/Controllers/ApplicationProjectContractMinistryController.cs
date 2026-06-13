@@ -45,7 +45,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
             return;
         }
 
-        ProjectContractMinistryHelper.ApplySnapshot(application, newContract);
+        ProjectContractMinistryHelper.ApplySnapshot(ObjectSpace, application, newContract);
 
         Application.ShowViewStrategy.ShowMessage(
             VisaUiMessages.Get("Application.ProjectContractChangedAfterProgress"),
