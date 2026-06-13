@@ -991,6 +991,40 @@ namespace Visa2026.Module.BusinessObjects
                 return $"{l}, {i}";
             }
         }
+
+        /// <summary>
+        /// Item 21 — Okan (okaýan) ýeri on the TM visa XFA PDF, e.g. <c>TUR, SOMA LINYIT YORITE ORTA HUNARMENLIK MEKDEBI</c>.
+        /// </summary>
+        [NotMapped]
+        [XafDisplayName("PDF Education Place of Study"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_EducationPlaceOfStudy => BuildPdfEducationPlaceOfStudy();
+
+        private string BuildPdfEducationPlaceOfStudy()
+        {
+            if (CurrentEducation == null)
+            {
+                return null;
+            }
+
+            var code = Education_CountryCode?.Trim();
+            var institution = Education_InstitutionName?.Trim();
+            if (string.IsNullOrEmpty(code) && string.IsNullOrEmpty(institution))
+            {
+                return null;
+            }
+
+            if (string.IsNullOrEmpty(code))
+            {
+                return institution;
+            }
+
+            if (string.IsNullOrEmpty(institution))
+            {
+                return code;
+            }
+
+            return $"{code}, {institution}";
+        }
         #endregion
 
         #region WorkPermit
@@ -1194,21 +1228,85 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("PDF Family Members Aggregate"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Pdf_FamilyMembersAggregateText => BuildPdfFamilyMembersAggregateText();
 
-        private string BuildPdfFamilyMembersAggregateText()
+        [NotMapped]
+        [XafDisplayName("PDF Family Members Marital Line 1"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_FamilyMembersMaritalLine1 => GetVisaPdfMaritalFamilyLines().line1;
+
+        [NotMapped]
+        [XafDisplayName("PDF Family Members Marital Line 2"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_FamilyMembersMaritalLine2 => GetVisaPdfMaritalFamilyLines().line2;
+
+        [NotMapped]
+        [XafDisplayName("PDF Family Members Marital Line 3"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Pdf_FamilyMembersMaritalLine3 => GetVisaPdfMaritalFamilyLines().line3;
+
+        private string BuildPdfFamilyMembersAggregateText() =>
+            VisaFamilyMemberLinesHelper.FormatVisaPdfMaritalFamilyBlockFromRows(BuildVisaPdfMaritalFamilyRows());
+
+        private (string line1, string line2, string line3) GetVisaPdfMaritalFamilyLines()
+        {
+            var rows = BuildVisaPdfMaritalFamilyRows();
+            return rows == null || rows.Count == 0
+                ? (null, null, null)
+                : VisaFamilyMemberLinesHelper.SplitVisaPdfMaritalFamilyLines(rows);
+        }
+
+        private IReadOnlyList<VisaFamilyMemberLineDto> BuildVisaPdfMaritalFamilyRows()
         {
             var emp = PdfEmployeeForHouseholdOnVisaForm();
-            if (emp == null) return null;
-            var fromMaster = FormatFamilyMembersFromMaster(emp);
-            if (!string.IsNullOrWhiteSpace(fromMaster))
-                return fromMaster.Trim();
-            if (!string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+            if (emp == null)
             {
-                var fromManual = VisaFamilyMemberLinesHelper.FormatForVisaPdfAggregate(
-                    emp.VisaApplicationFamilyMembersText);
-                if (!string.IsNullOrWhiteSpace(fromManual))
-                    return fromManual.Trim();
+                return null;
             }
-            return null;
+
+            var fromMaster = BuildVisaPdfMaritalFamilyRowsFromMaster(emp);
+            if (fromMaster.Count > 0)
+            {
+                return fromMaster;
+            }
+
+            if (string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+            {
+                return Array.Empty<VisaFamilyMemberLineDto>();
+            }
+
+            return VisaFamilyMemberLinesHelper.Parse(emp.VisaApplicationFamilyMembersText);
+        }
+
+        private List<VisaFamilyMemberLineDto> BuildVisaPdfMaritalFamilyRowsFromMaster(Person employee)
+        {
+            if (employee?.FamilyMembers == null)
+            {
+                return new List<VisaFamilyMemberLineDto>();
+            }
+
+            var rows = new List<VisaFamilyMemberLineDto>();
+            foreach (var fm in employee.FamilyMembers
+                         .Where(f => f != null)
+                         .OrderBy(f => f.LastName)
+                         .ThenBy(f => f.FirstName))
+            {
+                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true)
+                {
+                    continue;
+                }
+
+                var rel = (fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(rel) || fm.DateOfBirth == default)
+                {
+                    continue;
+                }
+
+                rows.Add(new VisaFamilyMemberLineDto
+                {
+                    FullName = fm.FullName?.Trim() ?? string.Empty,
+                    BirthDate = fm.DateOfBirth,
+                    RelationshipNameTm = rel,
+                    CountryCode = fm.Nationality?.Code?.Trim(),
+                });
+            }
+
+            return rows;
         }
 
         /// <summary>Employee whose household is listed on the visa form (applicant or sponsor).</summary>
@@ -1216,22 +1314,6 @@ namespace Visa2026.Module.BusinessObjects
         {
             if (Person == null) return null;
             return Person.IsEmployee ? Person : Person.SponsoringEmployee;
-        }
-
-        private string FormatFamilyMembersFromMaster(Person employee)
-        {
-            if (employee?.FamilyMembers == null) return null;
-            var lines = new List<string>();
-            foreach (var fm in employee.FamilyMembers
-                         .Where(f => f != null)
-                         .OrderBy(f => f.LastName)
-                         .ThenBy(f => f.FirstName))
-            {
-                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true) continue;
-                var rel = fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty;
-                lines.Add($"{fm.FullName}; {fm.DateOfBirth:dd.MM.yyyy}; {rel}".Trim());
-            }
-            return lines.Count == 0 ? null : string.Join(Environment.NewLine, lines);
         }
 
         /// <summary>

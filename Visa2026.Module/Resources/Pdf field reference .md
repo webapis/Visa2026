@@ -215,9 +215,9 @@ Type:  textEdit
 Note:  NOT in PdfMappingHelper ⚠️
 
 Key:   topmostSubform[0].Page1[0]._21[0]
-Label: Work address
+Label: 21. Okan (okaýan) ýeri (Place of study)
 Type:  textEdit
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  Mapped ✅ (`Pdf_EducationPlaceOfStudy` — `{EducationCountry.Code}, {EducationInstitution NameTm-first}`)
 
 Key:   topmostSubform[0].Page1[0]._20[0]
 Label: Additional work/contact info
@@ -225,14 +225,14 @@ Type:  textEdit
 Note:  NOT in PdfMappingHelper ⚠️
 
 Key:   topmostSubform[0].Page1[0]._181[0]
-Label: Spouse last name (marital details)
+Label: Family members line 1 (Maşgala ýagdaýy / item 18)
 Type:  textEdit
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  Mapped ✅ (`Pdf_FamilyMembersMaritalLine1` — employee `FamilyMembers` or `VisaApplicationFamilyMembersText`)
 
 Key:   topmostSubform[0].Page1[0]._18[0]
 Label: 25. MASGALA YAGDAY (Marital status)
 Type:  choiceList
-Note:  Currently mapped ✅ (person.MaritalStatus.Name)
+Note:  Currently mapped ✅ (person.MaritalStatus.PdfForm_Code)
        ⚠️  Must pass raw value not display name!
 Valid display: 'Sallah/Durmuşa çykmadyk','Öýlenen/Durmuşa çykan','Aýrylyşan','Dul'
 Valid raw:     '1', '2', '3', '4'
@@ -243,14 +243,14 @@ Type:  textEdit
 Note:  NOT in PdfMappingHelper ⚠️
 
 Key:   topmostSubform[0].Page1[0]._182[0]
-Label: Spouse first name
+Label: Family members line 2 (Maşgala ýagdaýy / item 18)
 Type:  textEdit
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  Mapped ✅ (`Pdf_FamilyMembersMaritalLine2`)
 
 Key:   topmostSubform[0].Page1[0]._183[0]
-Label: Spouse additional info
+Label: Family members line 3 (Maşgala ýagdaýy / item 18)
 Type:  textEdit
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  Mapped ✅ (`Pdf_FamilyMembersMaritalLine3`; country code on last segment)
 
 Key:   topmostSubform[0].Page1[0]._19[0]
 Label: 26. BILIMI (Education level)
@@ -260,9 +260,9 @@ Valid display: 'ORTA','YOKARY','MEKDEP OKUWCYSY','MEKDEP YASYNA YETMEDIK','YORIT
 Valid raw:     '5',    '2',    '3',              '4',                     '1'
 
 Key:   topmostSubform[0].Page1[0]._241[0]
-Label: Additional work/profession text    
+Label: Additional work/profession text (near item 24 — do NOT use for family members)
 Type:  textEdit
-Note:  NOT in PdfMappingHelper ⚠️
+Note:  NOT mapped (was incorrectly used for family aggregate before 2026-06 fix)
 
 ==============================================================
 PAGE 2  (topmostSubform[0].Page2[0])

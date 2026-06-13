@@ -25,6 +25,36 @@ Purpose: **XFA fill, PdfFormMapping rules, template, gates, converters** — not
 
 ## Entries
 
+### 2026-06-05 — Family members mapped to item 18, not _241 (mapping)
+
+- **Symptom**: Visa PDF showed `ESRA AKSOY; 12.10.1989; AYALY` under item 24 (work experience); item 18 family lines empty.
+- **Try**: Dump XFA keys near `_18` / `_24`; compare with officer reference PDF.
+- **Test**: Document copies application form download — family text under item 18 (`_181`–`_183`), item 24 blank.
+- **Root cause**: `PdfFormMapping` pointed `Pdf_FamilyMembersAggregateText` at `_241[0]` (work/profession text near item 24) and used semicolon aggregate format.
+- **Fix**: Map `Pdf_FamilyMembersMaritalLine1/2/3` → `_181`–`_183`; delete `_241` mapping via `FamilyMembersPdfFormMappingUpdater`; format `REL NAME DATE` with country on last segment (`VisaFamilyMemberLinesHelper.FormatForVisaPdfMaritalFamilyBlock`).
+- **Prevent**: Pdf field reference documents `_241` as work text only; seed + migration updater for existing DBs.
+- **Cross-skill**: —
+
+### 2026-06-05 — Stale `_241` DB row bypassed item-18 fix (mapping)
+
+- **Symptom**: After code fix, format correct (`AYALY ESRA AKSOY…`) but still under item 24 / `_241`; item 18 lines empty.
+- **Try**: Inspect XFA template — `_181`–`_183` tooltips = Maşgala ýagdaýy; `_241` tooltip = Wezipe boýunça iş tejribesi.
+- **Test**: Rebuild + regenerate PDF without DB migration — still wrong until mapping load normalized.
+- **Root cause**: `CreateMappingIfNotExists` left legacy `_241` → `Pdf_FamilyMembersAggregateText` in DB; `FamilyMembersPdfFormMappingUpdater` had not run (no module version bump / restart).
+- **Fix**: `PdfMappingHelper.GetMappings` normalizes mappings at fill time (drop `_241` family row, force `_181`–`_183` line paths); `PdfFormMappingUpdater` + `FamilyMembersPdfFormMappingUpdater` persist same correction.
+- **Prevent**: Do not rely on seed-only for mapping corrections — always migrate existing rows or normalize at load.
+- **Cross-skill**: lifecycle-docker (FORCE_XAF_DB_UPDATE if admin rows still stale in UI)
+
+### 2026-06-05 — Item 21 Okan ýeri empty (expression mapping)
+
+- **Symptom**: Field 19–20 (Bilimi, Hünäri) filled; item 21 Okan ýeri blank on generated PDF.
+- **Try**: Compare DB `PdfFormMapping` for `_21` — legacy `Expression` with `Concat(CurrentEducation.EducationCountry.Name, …)`.
+- **Test**: Employee with `CurrentEducation` set → item 21 shows `TUR, INSTITUTION NAME` (uppercased by PDF normalizer).
+- **Root cause**: Criteria `Concat` on nested navigations unreliable; used `Name` instead of country `Code`.
+- **Fix**: `ApplicationItem.Pdf_EducationPlaceOfStudy` (`{Code}, {Institution NameTm-first}`); map `_21` as Property; runtime + `EducationPlacePdfFormMappingUpdater` rewrite legacy rows.
+- **Prevent**: Prefer computed `Pdf_*` properties over expressions for multi-hop BO paths; match `Education_CountryCode` / `Education_InstitutionName` report pattern.
+- **Cross-skill**: —
+
 ### 2026-06-06 — Classify mapping vs document copies bugs
 
 - **Symptom**: Officer reports “Document copies application form wrong.”

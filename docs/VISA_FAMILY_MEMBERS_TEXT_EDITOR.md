@@ -251,7 +251,7 @@ Word templates that reference manual text directly are rare; prefer `Pdf_FamilyM
 3. Apply `[EditorAlias]` on `Person.VisaApplicationFamilyMembersText`.
 4. Localization keys for popup chrome.
 5. CSS for popup layout.
-6. Manual QA: on an employee, add 2 manual family rows, save, open visa application PDF preview and confirm `_241` / aggregate field.
+6. Manual QA: on an employee, add 2 manual family rows, save, open visa application PDF preview and confirm item 18 lines (`_181`–`_183`).
 
 ### Phase 2 — Polish
 

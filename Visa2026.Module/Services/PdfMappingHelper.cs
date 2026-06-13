@@ -102,7 +102,7 @@ namespace Visa2026.Module.Services
 
         public static IList<PdfFormMappingDefinition> GetMappings(IObjectSpace objectSpace)
         {
-            return objectSpace.GetObjectsQuery<PdfFormMapping>()
+            var mappings = objectSpace.GetObjectsQuery<PdfFormMapping>()
                 .Select(m => new PdfFormMappingDefinition
                 {
                     PdfFieldKey = m.PdfFieldKey,
@@ -113,6 +113,110 @@ namespace Visa2026.Module.Services
                     ConstantValue = m.ConstantValue
                 })
                 .ToList();
+
+            return NormalizeFamilyMemberMappings(mappings);
+        }
+
+        /// <summary>
+        /// Item 18 family lines are <c>_181</c>–<c>_183</c>. Legacy DB rows may still map family text to
+        /// <c>_241</c> (Wezipe boýunça iş tejribesi). Normalize on every fill so PDF output is correct even
+        /// before <see cref="DatabaseUpdate.FamilyMembersPdfFormMappingUpdater"/> persists the fix.
+        /// </summary>
+        internal static IList<PdfFormMappingDefinition> NormalizeFamilyMemberMappings(IList<PdfFormMappingDefinition> mappings)
+        {
+            var list = mappings.ToList();
+
+            list.RemoveAll(m =>
+                m.PdfFieldKey == PdfFormMappingFamilyFieldKeys.WrongAggregateKey
+                && IsFamilyMemberPdfMapping(m));
+
+            EnsureFamilyMaritalLineMapping(list, PdfFormMappingFamilyFieldKeys.Line1Key,
+                PdfFormMappingFamilyFieldKeys.MaritalLine1Path, "Family members line 1 (item 18)");
+            EnsureFamilyMaritalLineMapping(list, PdfFormMappingFamilyFieldKeys.Line2Key,
+                PdfFormMappingFamilyFieldKeys.MaritalLine2Path, "Family members line 2 (item 18)");
+            EnsureFamilyMaritalLineMapping(list, PdfFormMappingFamilyFieldKeys.Line3Key,
+                PdfFormMappingFamilyFieldKeys.MaritalLine3Path, "Family members line 3 (item 18)");
+
+            EnsurePropertyMapping(list, PdfFormMappingFamilyFieldKeys.EducationPlaceKey,
+                PdfFormMappingFamilyFieldKeys.EducationPlacePath, "Education place of study (item 21)");
+
+            return list;
+        }
+
+        private static void EnsurePropertyMapping(
+            IList<PdfFormMappingDefinition> mappings,
+            string pdfFieldKey,
+            string propertyPath,
+            string description)
+        {
+            var existing = mappings.FirstOrDefault(m => m.PdfFieldKey == pdfFieldKey);
+            if (existing == null)
+            {
+                mappings.Add(new PdfFormMappingDefinition
+                {
+                    PdfFieldKey = pdfFieldKey,
+                    Description = description,
+                    MappingMode = PdfMappingMode.Property,
+                    PropertyPath = propertyPath,
+                });
+                return;
+            }
+
+            if (existing.MappingMode == PdfMappingMode.Property
+                && string.Equals(existing.PropertyPath, propertyPath, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            existing.Description = description;
+            existing.MappingMode = PdfMappingMode.Property;
+            existing.PropertyPath = propertyPath;
+            existing.Expression = null;
+            existing.ConstantValue = null;
+        }
+
+        private static bool IsFamilyMemberPdfMapping(PdfFormMappingDefinition mapping)
+        {
+            if (mapping.MappingMode != PdfMappingMode.Property || string.IsNullOrEmpty(mapping.PropertyPath))
+            {
+                return false;
+            }
+
+            return mapping.PropertyPath == PdfFormMappingFamilyFieldKeys.AggregatePath
+                   || mapping.PropertyPath.StartsWith("Pdf_FamilyMembers", StringComparison.Ordinal)
+                   || mapping.PropertyPath.StartsWith("Pdf_Spouse", StringComparison.Ordinal);
+        }
+
+        private static void EnsureFamilyMaritalLineMapping(
+            IList<PdfFormMappingDefinition> mappings,
+            string pdfFieldKey,
+            string propertyPath,
+            string description)
+        {
+            var existing = mappings.FirstOrDefault(m => m.PdfFieldKey == pdfFieldKey);
+            if (existing == null)
+            {
+                mappings.Add(new PdfFormMappingDefinition
+                {
+                    PdfFieldKey = pdfFieldKey,
+                    Description = description,
+                    MappingMode = PdfMappingMode.Property,
+                    PropertyPath = propertyPath,
+                });
+                return;
+            }
+
+            if (existing.MappingMode == PdfMappingMode.Property
+                && string.Equals(existing.PropertyPath, propertyPath, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            existing.Description = description;
+            existing.MappingMode = PdfMappingMode.Property;
+            existing.PropertyPath = propertyPath;
+            existing.Expression = null;
+            existing.ConstantValue = null;
         }
 
         public static void RefreshMappingCache(IObjectSpace objectSpace) { }
@@ -454,6 +558,12 @@ namespace Visa2026.Module.Services
                 }
 
                 if (Token(source, "CurrentEducation"))
+                {
+                    if (!TypeOk(x => x.ShowCurrentEducation) || item.CurrentEducation == null)
+                        return false;
+                }
+
+                if (Token(source, "Pdf_EducationPlaceOfStudy"))
                 {
                     if (!TypeOk(x => x.ShowCurrentEducation) || item.CurrentEducation == null)
                         return false;

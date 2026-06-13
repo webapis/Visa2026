@@ -95,6 +95,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.OrganizationLegacySchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationPdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.FamilyMembersPdfFormMappingUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.EducationPlacePdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB),
                 new DatabaseUpdate.UserReportTemplateApplicableTypesMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UserReportTemplateUpdater(Application, objectSpace, versionFromDB),

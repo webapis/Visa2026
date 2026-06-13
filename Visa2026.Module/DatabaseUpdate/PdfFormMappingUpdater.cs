@@ -3,6 +3,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.DatabaseUpdate
 {
@@ -50,7 +51,7 @@ namespace Visa2026.Module.DatabaseUpdate
             // Education
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._19[0]", "CurrentEducation.EducationLevel.PdfForm_Code", "Education Level", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._20[0]", "CurrentEducation.Specialty.NameTm", "Specialty", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._21[0]", null, "Education Place (Country + Institution)", PdfMappingMode.Expression, "Concat(CurrentEducation.EducationCountry.Name, ', ', CurrentEducation.EducationInstitution.NameTm)");
+            CreateMappingIfNotExists(PdfFormMappingFamilyFieldKeys.EducationPlaceKey, PdfFormMappingFamilyFieldKeys.EducationPlacePath, "Education place of study (item 21)", PdfMappingMode.Property);
 
             // Work
             CreateMappingIfNotExists("topmostSubform[0].Page1[0]._23[0]", "CurrentPositionHistory.Position.NameTm", "Work Position", PdfMappingMode.Property);
@@ -73,15 +74,14 @@ namespace Visa2026.Module.DatabaseUpdate
             // Address of Residence
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._35[0]", "CurrentAddressOfResidence.FullAddress", "Stay address", PdfMappingMode.Property);
 
-            // Family members (master FamilyMembers or manual text) — mapped to additional text on page 1; remap in DB if your template uses another field.
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._241[0]", "Pdf_FamilyMembersAggregateText", "Family members aggregate (master or manual)", PdfMappingMode.Property);
+            CreateMappingIfNotExists(PdfFormMappingFamilyFieldKeys.Line1Key, PdfFormMappingFamilyFieldKeys.MaritalLine1Path, "Family members line 1 (item 18)", PdfMappingMode.Property);
+            CreateMappingIfNotExists(PdfFormMappingFamilyFieldKeys.Line2Key, PdfFormMappingFamilyFieldKeys.MaritalLine2Path, "Family members line 2 (item 18)", PdfMappingMode.Property);
+            CreateMappingIfNotExists(PdfFormMappingFamilyFieldKeys.Line3Key, PdfFormMappingFamilyFieldKeys.MaritalLine3Path, "Family members line 3 (item 18)", PdfMappingMode.Property);
 
-            // Spouse (employee master FamilyMembers — Relationship marked spouse)
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._181[0]", "Pdf_SpouseLastName", "Spouse last name", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._182[0]", "Pdf_SpouseFirstName", "Spouse first name", PdfMappingMode.Property);
-            CreateMappingIfNotExists("topmostSubform[0].Page1[0]._183[0]", "Pdf_SpouseAdditional", "Spouse additional (middle name, DOB)", PdfMappingMode.Property);
+            MigrateFamilyMemberPdfMappings();
+            MigrateEducationPlacePdfMapping();
 
-            // Accompanying traveller (co-applicant FM line for employees; sponsoring employee for FM items)
+            // Accompanying traveller
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._46[0]", "Pdf_AccompanyingFullName", "Accompanying person name", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._45[0]", "Pdf_AccompanyingNationalityCode", "Accompanying nationality (ISO alpha-3)", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._47[0]", "Pdf_AccompanyingDetail1", "Accompanying detail — relationship (Tm)", PdfMappingMode.Property);
@@ -89,6 +89,12 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._49[0]", "Pdf_AccompanyingDetail3", "Accompanying detail — passport no.", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._50[0]", "Pdf_AccompanyingDetail4", "Accompanying detail — personal ID", PdfMappingMode.Property);
         }
+
+        private void MigrateFamilyMemberPdfMappings() =>
+            FamilyMembersPdfFormMappingUpdater.MigrateFamilyMemberPdfMappings(ObjectSpace);
+
+        private void MigrateEducationPlacePdfMapping() =>
+            EducationPlacePdfFormMappingUpdater.MigrateEducationPlacePdfMapping(ObjectSpace);
 
         private void CreateMappingIfNotExists(string pdfKey, string propertyPath, string description, PdfMappingMode mode, string expressionOrConstant = null)
         {

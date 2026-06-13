@@ -78,7 +78,9 @@ public static class VisaFamilyMemberLinesHelper
         return formatted.Count == 0 ? null : string.Join(Environment.NewLine, formatted);
     }
 
-    /// <summary>Visa PDF block: three fields per line (no country code).</summary>
+    /// <summary>
+    /// Legacy visa PDF block (semicolon lines). Prefer <see cref="FormatForVisaPdfMaritalFamilyBlock"/>.
+    /// </summary>
     public static string? FormatForVisaPdfAggregate(string? text)
     {
         if (IsNoneValue(text))
@@ -98,6 +100,52 @@ public static class VisaFamilyMemberLinesHelper
             .ToList();
 
         return formatted.Count == 0 ? null : string.Join(Environment.NewLine, formatted);
+    }
+
+    /// <summary>
+    /// Maşgala ýagdaýy family block for the TM visa XFA PDF (item 18 area), e.g.
+    /// <c>AYALY ESRA AKSOY 12.10.1989, OGLY YUSUF METE AKSOY 06.12.2012, GYZY ASYA AKSOY 26.03.2016 TUR.</c>
+    /// </summary>
+    public static string? FormatForVisaPdfMaritalFamilyBlock(string? text)
+    {
+        if (IsNoneValue(text))
+        {
+            return null;
+        }
+
+        return FormatVisaPdfMaritalFamilyBlockFromRows(Parse(text));
+    }
+
+    /// <summary>Same as <see cref="FormatForVisaPdfMaritalFamilyBlock"/> but from parsed rows (master or manual).</summary>
+    public static string? FormatVisaPdfMaritalFamilyBlockFromRows(IReadOnlyList<VisaFamilyMemberLineDto>? rows)
+    {
+        var segments = BuildVisaPdfMaritalFamilySegments(rows ?? Array.Empty<VisaFamilyMemberLineDto>());
+        return segments.Count == 0 ? null : string.Join(", ", segments);
+    }
+
+    /// <summary>
+    /// Splits family segments across the three text fields under item 18 (<c>_181</c>–<c>_183</c>).
+    /// When there are more than three members, segments are packed evenly (comma-separated within each line).
+    /// </summary>
+    public static (string? line1, string? line2, string? line3) SplitVisaPdfMaritalFamilyLines(
+        IReadOnlyList<VisaFamilyMemberLineDto>? rows)
+    {
+        var segments = BuildVisaPdfMaritalFamilySegments(rows ?? Array.Empty<VisaFamilyMemberLineDto>());
+        if (segments.Count == 0)
+        {
+            return (null, null, null);
+        }
+
+        const int lineCount = 3;
+        var chunkSize = (segments.Count + lineCount - 1) / lineCount;
+        var lines = new string?[lineCount];
+        for (var i = 0; i < lineCount; i++)
+        {
+            var slice = segments.Skip(i * chunkSize).Take(chunkSize).ToList();
+            lines[i] = slice.Count == 0 ? null : string.Join(", ", slice);
+        }
+
+        return (lines[0], lines[1], lines[2]);
     }
 
     /// <summary>Şahsy kagyz Maşgala ýagdaýy (comma-separated segments).</summary>
@@ -420,6 +468,48 @@ public static class VisaFamilyMemberLinesHelper
         var rel = row.RelationshipNameTm?.Trim() ?? string.Empty;
         var code = row.CountryCode?.Trim() ?? string.Empty;
         return $"{name}; {row.BirthDate.Value.ToString(DateFormat, CultureInfo.InvariantCulture)}; {rel}; {code}";
+    }
+
+    private static List<string> BuildVisaPdfMaritalFamilySegments(IReadOnlyList<VisaFamilyMemberLineDto> rows)
+    {
+        if (rows == null || rows.Count == 0)
+        {
+            return new List<string>();
+        }
+
+        var segments = new List<string>(rows.Count);
+        for (var i = 0; i < rows.Count; i++)
+        {
+            var segment = FormatVisaPdfMaritalFamilySegment(rows[i], includeCountry: i == rows.Count - 1);
+            if (!string.IsNullOrWhiteSpace(segment))
+            {
+                segments.Add(segment);
+            }
+        }
+
+        return segments;
+    }
+
+    private static string? FormatVisaPdfMaritalFamilySegment(VisaFamilyMemberLineDto row, bool includeCountry)
+    {
+        if (row == null
+            || string.IsNullOrWhiteSpace(row.FullName)
+            || !row.BirthDate.HasValue
+            || string.IsNullOrWhiteSpace(row.RelationshipNameTm))
+        {
+            return null;
+        }
+
+        var rel = row.RelationshipNameTm.Trim().ToUpperInvariant();
+        var name = row.FullName.Trim();
+        var date = row.BirthDate.Value.ToString(DateFormat, CultureInfo.InvariantCulture);
+        if (!includeCountry)
+        {
+            return $"{rel} {name} {date}";
+        }
+
+        var code = row.CountryCode?.Trim() ?? string.Empty;
+        return string.IsNullOrEmpty(code) ? $"{rel} {name} {date}" : $"{rel} {name} {date} {code}.";
     }
 
     private static string FormatVisaPdfLine(VisaFamilyMemberLineDto row)

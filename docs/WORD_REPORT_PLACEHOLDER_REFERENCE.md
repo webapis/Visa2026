@@ -436,14 +436,13 @@ B2200001
 
 ### `Pdf_FamilyMembersAggregateText`
 
-One line per family member from master data:
+Comma-separated Maşgala ýagdaýy block (item 18 area), one segment per family member:
 
 ```
-Firuza Mine Erol; 23.05.1985; ayaly
-Nil Erol; 03.07.2014; gyzy
+AYALY ESRA AKSOY 12.10.1989, OGLY YUSUF METE AKSOY 06.12.2012, GYZY ASYA AKSOY 26.03.2016 TUR.
 ```
 
-(Manual `VisaApplicationFamilyMembersText` uses the same aggregate formatter when master list is empty.)
+(Manual `VisaApplicationFamilyMembersText` or master `FamilyMembers` when master list is non-empty.)
 
 ### Letter body with counts (application header)
 
