@@ -16,6 +16,12 @@ disable-model-invocation: false
 
 # Visa2026 — User Report Templates (embed + register seeds)
 
+## Resminamalar UI / batch / empty catalog
+
+For the **report package dialog** (preview, ZIP, readiness chips, gear toggle, Application vs ApplicationItem scope, **`UserReportTemplateSeedGate`**, batch worker errors that are **not** placeholder merge): use **[`.cursor/skills/visa2026-resminamalar/SKILL.md`](../visa2026-resminamalar/SKILL.md)** — read **`learnings.md`** before debugging; append after verified fixes ([**MATURITY.md**](../visa2026-resminamalar/MATURITY.md)).
+
+This skill covers **template files**, **maps**, **Extract/Validate**, **merge row builders**, and **visibility rules** on the template record.
+
 ## Hard boundaries (always enforce)
 
 ### Directory — `Resources/Templates` (+ `Templates/Excel`)
@@ -26,7 +32,7 @@ disable-model-invocation: false
 | **Excel** | **`Visa2026.Module/Resources/Templates/Excel/*.xlsx`** | **`EnsureExcelTemplateExists`** → same core with **`TemplateOutputFormat.Excel`** |
 
 - **In scope:** user-report **seed** templates above, wired through **`UserReportTemplateUpdater`**. Same **`UserReportTemplate`** BO, **Extract** / **Validate**, **Resminamalar** zip (mixed `.docx` + `.xlsx`).
-- **Out of scope:** Any other `.docx` under **`Visa2026.Module/Resources/`** (e.g. `App_Inv_And_WP_Letter.docx`, `App_Labor_Contract_Item.docx`) — **`visa2026-word-reports`** / **`IWordReportDefinition`**. **`App_Inv`** ministry letters → **`Templates/GT-15_Elyasow_ckl_only.docx`**. **`Visa2026.DataImporter/data.xlsx`** and other import spreadsheets.
+- **Out of scope:** Any other `.docx` under **`Visa2026.Module/Resources/`** outside **`Templates/`** — code-backed reports removed; use **`visa2026-resminamalar`** for dialog/batch only.
 - **Do not** add embedded resources or updater seeds outside **`Templates/`** or **`Templates/Excel/`**.
 
 ### `*_map.md` + scan (blocking — before any other skill step)

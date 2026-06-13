@@ -1,16 +1,29 @@
 ---
 name: visa2026-word-reports
 description: >-
-  Creates and maintains Visa2026 Word (.docx) reports via DocxTemplater, IWordReportDefinition,
-  WordReportsController ("Resminamalar"), tools/GenerateTemplates, tools/PreviewWordReports,
-  FormTemplates, layout families, and BO mapping. L2 stepped ministry letters: clone Inv+WP / Visa+WP Ext
-  helpers (ministry recipient table, spacing merge, preview composites for single-digit counts). Prerequisites before template design: (1) data
-  type(s) documented, (2) reference scan in FormTemplates (code-backed) or Templates (user seeds), (3) *_map.md as build contract, (4) user
-  approves map, (5) PreviewWordReports preset with dump values transcribed from that scan. See
-  docs/WORD_REPORT_GENERATION_IDEA.md; report-predefined-xaf for legacy XtraReports;
-  PdfFormFillerService is separate.
+  DEPRECATED for new work — code-backed IWordReportDefinition, GenerateTemplates, and
+  Resources/*.docx outside Templates/ were removed. Use visa2026-resminamalar (dialog, batch,
+  preview) and visa2026-user-report-templates (Resources/Templates seeds). Retained for
+  historical XtraReports / WORD_REPORT_GENERATION_IDEA.md context and report-predefined-xaf only.
 disable-model-invocation: false
 ---
+
+# Visa2026 — Word report pipeline (DocxTemplater) — **deprecated**
+
+> **Do not use this skill for Resminamalar or new ministry documents.**  
+> - **Dialog, ZIP, preview, catalog, seed gate:** [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../visa2026-resminamalar/SKILL.md)  
+> - **User template seeds (`Resources/Templates/`):** [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../visa2026-user-report-templates/SKILL.md)  
+> - **Legacy XtraReports code:** removed from repo; **`report-predefined-xaf`** skill if maintaining old designer reports elsewhere.
+
+## Canonical reference (historical)
+
+Read **`docs/WORD_REPORT_GENERATION_IDEA.md`** for original architecture. Many sections describe **`IWordReportDefinition`** and **`tools/GenerateTemplates`** — **no longer in the codebase** (2026-06).
+
+**User-seeded templates** are the supported path: **`visa2026-user-report-templates`**.
+
+---
+
+<!-- Legacy body below — consult only for XtraReports migration notes or FormTemplates archives -->
 
 # Visa2026 — Word report pipeline (DocxTemplater)
 
