@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-06-06 — Application Resminamalar disabled with no feedback (empty Application scope)
+
+- **Symptom**: **Resminamalar** on **Application** detail looked dead for types like **App_Inv_And_WP** (no Application-root templates); no message.
+- **Try**: Open **Çakylyk we Iş Rugsatnamasyny Almak** vs **Wiza we Iş Rugsatnamasyny Uzaltmak** on Application detail.
+- **Test**: Saved application with zero Application-scope catalog → button clickable → warning names application type; dialog still does not open.
+- **Root cause**: `Enabled["NoApplicableReports"]` blocked click before `Execute`; warning in `Execute` was unreachable.
+- **Fix**: Enable for persisted applications only; `WordReports.NoApplicationScopeTemplates` warning on click when Application-scope catalog empty.
+- **Prevent**: Distinguish **disabled** (unsaved / no record) vs **empty catalog** (click → explain type + scope); item-scope templates stay on Application items ListView.
+- **Cross-skill**: —
+
 ### 2026-06-06 — Sanaw preview failed from ApplicationItem Resminamalar (ItemRows)
 
 - **Symptom**: **Sanaw** / **Sanaw_uzt.docx** — Extract + Validate OK; Resminamalar **Preview** shows “Preview could not be generated”; dry-run falsely warns `RowNo` empty.

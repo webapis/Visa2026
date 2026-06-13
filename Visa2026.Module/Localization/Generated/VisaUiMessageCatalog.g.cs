@@ -3379,12 +3379,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu arza görnüşi üçin laýyk hasabat ýok.",
             ["ru-RU"] = "Нет подходящих отчётов для этого типа заявки.",
         },
+        ["WordReports.NoApplicationScopeTemplates"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No application-level report templates are configured for “{0}”.",
+            ["tr-TR"] = "“{0}” için uygulama düzeyinde rapor şablonu yapılandırılmamış.",
+            ["tk-TM"] = "“{0}” üçin arza derejesindäki hasabat şablonlary sazlanmady.",
+            ["ru-RU"] = "Для «{0}» не настроены шаблоны отчётов уровня заявки.",
+        },
         ["WordReports.QueuedSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Documents queued ({0} report(s)). Use the download link in the notification when the job completes.",
             ["tr-TR"] = "Belgeler kuyruğa alındı ({0} rapor). İş tamamlandığında bildirimdeki indirme bağlantısını kullanın.",
             ["tk-TM"] = "Resminamalar nobata goýuldy ({0} hasabat). Iş tamamlananda habarnamadaky baglanyşygy ulanyň.",
             ["ru-RU"] = "Документы поставлены в очередь ({0} отчётов). Ссылка для скачивания появится в уведомлении.",
+        },
+        ["WordReports.SaveApplicationBeforeReports"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save the application before opening Resminamalar.",
+            ["tr-TR"] = "Resminamalar'ı açmadan önce başvuruyu kaydedin.",
+            ["tk-TM"] = "Resminamalary açmazdan ozal arzany ýazdyryň.",
+            ["ru-RU"] = "Сохраните заявку перед открытием Resminamalar.",
         },
     };
 

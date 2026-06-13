@@ -48,13 +48,12 @@ public class WordReportsController : ViewController<DetailView>
         var application = View?.CurrentObject as Application;
         if (application == null)
         {
-            resminamalarAction.Enabled["NoApplicableReports"] = false;
+            resminamalarAction.Enabled["NoApplication"] = false;
             return;
         }
 
-        var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        var catalog = catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication());
-        resminamalarAction.Enabled["NoApplicableReports"] = catalog.TotalCount > 0;
+        var applicationId = (Guid)ObjectSpace.GetKeyValue(application);
+        resminamalarAction.Enabled["NoApplication"] = applicationId != Guid.Empty;
     }
 
     private void ResminamalarAction_Execute(object sender, SimpleActionExecuteEventArgs e)
@@ -62,13 +61,18 @@ public class WordReportsController : ViewController<DetailView>
         var application = (Application)e.CurrentObject;
         var applicationId = (Guid)ObjectSpace.GetKeyValue(application);
         if (applicationId == Guid.Empty)
+        {
+            Application.ShowViewStrategy.ShowMessage(
+                VisaUiMessages.Get("WordReports.SaveApplicationBeforeReports"),
+                InformationType.Warning);
             return;
+        }
 
         var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
         if (catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication()).TotalCount == 0)
         {
             Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("WordReports.NoApplicableReports"),
+                VisaUiMessages.Format("WordReports.NoApplicationScopeTemplates", ResolveApplicationTypeLabel(application)),
                 InformationType.Warning);
             return;
         }
@@ -93,5 +97,17 @@ public class WordReportsController : ViewController<DetailView>
         showViewParameters.Controllers.Add(dialogController);
 
         Application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(Frame, null));
+    }
+
+    private static string ResolveApplicationTypeLabel(Application application)
+    {
+        var type = application.ApplicationType;
+        if (type == null)
+            return "—";
+
+        if (!string.IsNullOrWhiteSpace(type.NameTm))
+            return type.NameTm;
+
+        return !string.IsNullOrWhiteSpace(type.Name) ? type.Name : type.ToString();
     }
 }
