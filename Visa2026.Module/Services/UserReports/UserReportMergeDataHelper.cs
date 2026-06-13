@@ -303,6 +303,61 @@ public static class UserReportMergeDataHelper
     }
 
     /// <summary>
+    /// Ministry sanawy Word lists (<c>Sanaw_uzt.docx</c>, <c>Sanaw_ckl.docx</c>): one document with all selected
+    /// application lines in <c>{{#ds.rows}}</c>, not one file per person (unlike Contract).
+    /// </summary>
+    public static bool UsesSingleDocumentItemList(UserReportTemplate? template) =>
+        template != null
+        && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
+        && ShouldUseSanawyStyleRows(template, template.Placeholders);
+
+    /// <summary>Row list for a single-line ItemRows template (Contract, Forma 16, sahsy_kagyz, etc.).</summary>
+    public static List<Dictionary<string, object>> BuildSingleItemRowsForTemplate(
+        ApplicationItem item,
+        UserReportTemplate template,
+        int rowNo = 1)
+    {
+        if (ShouldUseSanawyStyleRows(template, template.Placeholders))
+            return [BuildSanawyRowDictionary(item, rowNo)];
+
+        if (TemplateUsesRegistrationForm16RowPlaceholders(template, template.Placeholders)
+            || IsForma16UserReportTemplate(template))
+            return [BuildRegistrationForm16RowDictionary(item, rowNo)];
+
+        if (TemplateUsesSahsyKagyzRowPlaceholders(template, template.Placeholders)
+            || IsSahsyKagyzUserReportTemplate(template))
+            return [BuildSahsyKagyzRowDictionary(item, rowNo)];
+
+        if (TemplateUsesWizaYatyrylmakSanawRowPlaceholders(template, template.Placeholders)
+            || IsWizaYatyrylmakSanawUserReportTemplate(template))
+            return [BuildWizaYatyrylmakSanawRowDictionary(item, rowNo)];
+
+        return
+        [
+            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Person_FullName"] = item.Person_FullName ?? string.Empty,
+                ["Person_DateOfBirthText"] = item.Person_DateOfBirthText ?? string.Empty,
+                ["Position_PositionTm"] = item.Position_PositionTm ?? string.Empty,
+                ["Passport_Number"] = item.Passport_Number ?? string.Empty,
+                ["Application_SponsorName"] = item.Application_SponsorName ?? string.Empty,
+                ["Application_SponsorSignatory"] = item.Application_SponsorSignatory ?? string.Empty,
+                ["Application_CompanyAddress"] = item.Application_CompanyAddress ?? string.Empty,
+                ["Application_CompanyRegistryAddressLine"] = item.Application_CompanyRegistryAddressLine ?? string.Empty,
+                ["CompanyHead_FullName"] = item.CompanyHead_FullName ?? string.Empty,
+                ["CompanyHead_PassportLine"] = item.CompanyHead_PassportLine ?? string.Empty,
+                ["Representative_FullName"] = item.Representative_FullName ?? string.Empty,
+                ["Representative_PassportLine"] = item.Representative_PassportLine ?? string.Empty,
+                ["Contract_StartDateText"] = item.Contract_StartDateText ?? string.Empty,
+                ["Contract_ExpirationDateText"] = item.Contract_ExpirationDateText ?? string.Empty,
+                ["Contract_PeriodFallbackText"] = item.Contract_PeriodFallbackText ?? string.Empty,
+                ["Contract_SalaryText"] = item.Contract_SalaryText ?? string.Empty,
+                ["Salary_CurrencyCode"] = item.Salary_CurrencyCode ?? string.Empty,
+            }
+        ];
+    }
+
+    /// <summary>
     /// True when merge must use <see cref="BuildSanawyStyleRows"/> (not labor-contract rows).
     /// </summary>
     public static bool ShouldUseSanawyStyleRows(

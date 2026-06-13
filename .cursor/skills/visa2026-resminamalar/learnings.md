@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-06-06 — Sanaw preview failed from ApplicationItem Resminamalar (ItemRows)
+
+- **Symptom**: **Sanaw** / **Sanaw_uzt.docx** — Extract + Validate OK; Resminamalar **Preview** shows “Preview could not be generated”; dry-run falsely warns `RowNo` empty.
+- **Try**: Reproduce from **ApplicationItem** ListView → **Resminamalar** → Preview **Sanaw** (ApplicationItem root, `{{#ds.rows}}`).
+- **Test**: Preview PDF opens; ZIP contains one **Sanaw** docx with all selected lines; no `RowNo` readiness hint.
+- **Root cause**: `UsesPerItemWordOutput` treated every ApplicationItem Word template as one file per person. Sanaw merge then used labor-contract row keys instead of `BuildSanawyRowDictionary`. Dry-run read `RowNo` off `ApplicationItem` (synthetic merge key, not a BO property).
+- **Fix**: `UserReportMergeDataHelper.UsesSingleDocumentItemList` → Sanawy lists generate once via `Application` + selected items; `BuildSingleItemRowsForTemplate` for true per-item templates (Contract, Forma 16); dry-run skips `RowNo`/`RowNumber`.
+- **Prevent**: ItemRows **list** templates (Sanaw, Sanaw_ckl) vs **per-person** templates (Contract) — preview and ZIP must share `ApplicationWordReportEntryGenerator` only; see user-report-templates for row builders.
+- **Cross-skill**: user-report-templates
+
 ### 2026-06-06 — Empty User Report Template list after deploy (seed)
 
 - **Symptom**: **Reports → User Report Template** shows “No data”; Resminamalar dialog empty.

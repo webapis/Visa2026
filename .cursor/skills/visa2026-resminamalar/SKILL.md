@@ -52,6 +52,7 @@ disable-model-invocation: false
 | `'{{…}}' could not be replaced` in batch | `UserReportGenerator` / row builders — not catalog | **user-report-templates** |
 | Extract security error from Edit template | `UserReportPlaceholder` permissions, non-secured OS in controller | **This skill** / security-access |
 | Preview OK, ZIP wrong or empty | Compare `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson` | **This skill** |
+| **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
 
 ---

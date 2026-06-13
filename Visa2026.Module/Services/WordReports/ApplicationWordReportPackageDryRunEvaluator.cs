@@ -77,7 +77,9 @@ public static class ApplicationWordReportPackageDryRunEvaluator
         UserReportPlaceholder placeholder)
     {
         var propertyPath = ResolveRowPropertyPath(placeholder);
-        if (string.IsNullOrWhiteSpace(propertyPath) || IsPhotoProperty(propertyPath))
+        if (string.IsNullOrWhiteSpace(propertyPath)
+            || IsPhotoProperty(propertyPath)
+            || IsSyntheticRowNumberProperty(propertyPath))
             return;
 
         for (int i = 0; i < items.Count; i++)
@@ -181,6 +183,11 @@ public static class ApplicationWordReportPackageDryRunEvaluator
 
     private static bool IsPhotoProperty(string propertyPath) =>
         propertyPath.Contains("Photo", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary><c>RowNo</c> / <c>RowNumber</c> are assigned at merge time, not ApplicationItem BO properties.</summary>
+    private static bool IsSyntheticRowNumberProperty(string propertyPath) =>
+        string.Equals(propertyPath, "RowNo", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(propertyPath, "RowNumber", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsEmptyValue(object? value) =>
         value switch

@@ -40,12 +40,30 @@ namespace Visa2026.Module.Services.UserReports
 
         public async Task GenerateAsync(UserReportTemplate template, ApplicationItem applicationItem, Stream outputStream)
         {
+            if (applicationItem.Application != null
+                && UserReportMergeDataHelper.UsesSingleDocumentItemList(template))
+            {
+                await GenerateAsync(template, applicationItem.Application, outputStream, [applicationItem])
+                    .ConfigureAwait(false);
+                return;
+            }
+
+            var applicationItems = new List<ApplicationItem> { applicationItem };
             var data = BuildDataDictionary(template, applicationItem);
             if (template.RootBoType == UserReportBoType.ApplicationItem)
-                data["rows"] = new List<Dictionary<string, object>> { BuildLaborContractRowDictionary(applicationItem) };
+                data["rows"] = UserReportMergeDataHelper.BuildSingleItemRowsForTemplate(applicationItem, template);
 
-            await EnsureDataCoversDocumentPlaceholdersAsync(template, applicationItem, data).ConfigureAwait(false);
-            await RenderTemplateAsync(template, data, outputStream);
+            if (applicationItem.Application != null)
+            {
+                EnsureForma16RowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
+                EnsureSahsyKagyzRowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
+                EnsureWizaYatyrylmakSanawRowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
+                EnsureSanawyRowsWhenNeeded(template, data, applicationItem.Application, applicationItems);
+            }
+
+            await EnsureDataCoversDocumentPlaceholdersAsync(template, applicationItem, data, applicationItems)
+                .ConfigureAwait(false);
+            await RenderTemplateAsync(template, data, outputStream, applicationItems);
         }
 
         private Dictionary<string, object> BuildDataDictionary(
@@ -268,10 +286,14 @@ namespace Visa2026.Module.Services.UserReports
             var tokens = await _placeholderExtractor.ExtractPlaceholdersAsync(scanStream).ConfigureAwait(false);
             var tokenList = tokens.Distinct(StringComparer.Ordinal).ToList();
 
-            if (rootObject is Application applicationRoot
-                && UserReportMergeDataHelper.ShouldUseSanawyStyleRows(template, template.Placeholders, tokenList))
+            if (UserReportMergeDataHelper.ShouldUseSanawyStyleRows(template, template.Placeholders, tokenList))
             {
-                data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(applicationRoot, applicationItems);
+                if (rootObject is Application applicationRoot)
+                    data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(applicationRoot, applicationItems);
+                else if (rootObject is ApplicationItem item && item.Application != null)
+                    data["rows"] = UserReportMergeDataHelper.BuildSanawyStyleRows(
+                        item.Application,
+                        applicationItems ?? [item]);
             }
 
             foreach (var raw in tokenList)

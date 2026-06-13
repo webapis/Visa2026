@@ -267,7 +267,8 @@ public sealed class ApplicationWordReportEntryGenerator
     private static bool UsesPerItemWordOutput(UserReportTemplate template, WordReportGenerationContext context) =>
         context.Scope == WordReportPackageScope.ApplicationItem
         && template.GetEffectiveOutputFormat() == TemplateOutputFormat.Word
-        && template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person;
+        && template.RootBoType is UserReportBoType.ApplicationItem or UserReportBoType.Person
+        && !UserReportMergeDataHelper.UsesSingleDocumentItemList(template);
 
     private static string BuildPerItemUserTemplateFileName(UserReportTemplate template, ApplicationItem item)
     {
