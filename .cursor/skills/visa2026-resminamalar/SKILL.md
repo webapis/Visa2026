@@ -36,6 +36,8 @@ disable-model-invocation: false
 | Template seeds, maps, placeholders, merge (`RowNo`, Sanaw, Extract/Validate) | [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../visa2026-user-report-templates/SKILL.md) |
 | Roles / navigation to User Report Template | [`.cursor/skills/visa2026-security-access/SKILL.md`](../visa2026-security-access/SKILL.md) |
 | Docker / `FORCE_XAF_DB_UPDATE` / schema columns | [`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../visa2026-lifecycle-docker/SKILL.md) |
+| Document copies (PDF ZIP, scan preview) | [`.cursor/skills/visa2026-document-copies/SKILL.md`](../visa2026-document-copies/SKILL.md) |
+| XFA visa application form mapping | [`.cursor/skills/visa2026-pdf-form-mapping/SKILL.md`](../visa2026-pdf-form-mapping/SKILL.md) |
 | Legacy code-backed Word / XtraReports (removed) | [`.cursor/skills/visa2026-word-reports/SKILL.md`](../visa2026-word-reports/SKILL.md) — **deprecated** |
 
 **Long reference:** [reference.md](./reference.md). **Experience log:** append-only [learnings.md](./learnings.md). **Maturity:** [MATURITY.md](./MATURITY.md).
@@ -64,7 +66,7 @@ disable-model-invocation: false
 | **Resminamalar** dialog UI (`ApplicationReportPackageComponent`) | Designing Word/Excel layout in `.docx`/`.xlsx` |
 | Catalog + readiness + selection + preview + enqueue | New `*_map.md` / placeholder tokens |
 | `UserReportTemplate` **visibility in catalog** (symptom: missing row) | Seed registration in `UserReportTemplateUpdater` (template skill) |
-| `WordReportGenerationBatch` worker / toast / ZIP | PDF form mapping / document copies |
+| `WordReportGenerationBatch` worker / toast / ZIP | [Document copies](../visa2026-document-copies/SKILL.md) / [PDF form mapping](../visa2026-pdf-form-mapping/SKILL.md) |
 | `UserReportTemplateSeedGate` (empty list after deploy) | DevExpress XtraReports / `Reports/` (removed) |
 
 **Reports source:** only **`UserReportTemplate`** rows seeded from **`Visa2026.Module/Resources/Templates/`** (+ DB edits). Catalog keys: **`user:{Guid}`** only.
