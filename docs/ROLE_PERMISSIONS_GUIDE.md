@@ -106,7 +106,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 |------|--------|
 | `UserReportPlaceholder` | Read, Write, Create, Delete (extract placeholders) |
 | `ApplicationMigrationSlaProfile` | Full (migration SLA tiers + link application types) |
-| `SystemSettings` | Full (singleton system settings) |
+| `SystemSettings` | Full (singleton upload size limits) |
 | `ExpirationAlertRule` | Read + Write (edit warn/extension day counts; rows seeded) |
 
 ### Read only
@@ -120,7 +120,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 
 | Area |
 |------|
-| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, migration SLA profiles, document expiration alerts, system settings |
+| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, migration SLA profiles, document expiration alerts, upload limits |
 | **Reports** — `UserReportTemplate` |
 
 ---

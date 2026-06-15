@@ -290,7 +290,7 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Validity state from flags and expiration (see <see cref="VisaValidityStateHelper"/>).
-        /// Expiring window uses per-BO <see cref="ExpirationAlertRule"/> (fallback: <see cref="SystemSettings.DefaultExpiringSoonDays"/>).
+        /// Expiring window uses per-BO <see cref="ExpirationAlertRule"/> (fallback: <see cref="ExpirationAlertRule.DefaultExpiringSoonDays"/>).
         /// </summary>
         [NotMapped]
         [ModelDefault("AllowEdit", "False")]

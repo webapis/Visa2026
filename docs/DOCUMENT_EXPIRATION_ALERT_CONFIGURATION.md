@@ -48,6 +48,8 @@ Defaults: **30** warn days; **90** extension-application days for Visa and WorkP
 
 Users with **Users + VisaOffice** (e.g. `tumar`) get write via VisaOffice when roles are merged.
 
+**Upload limits screen:** `SystemSettings` (nav caption **Upload limits**) no longer shows legacy expiration fields. Use document expiration alerts only.
+
 ## Related docs
 
 - [`BO_STATE_TEMPORAL_TYPES.md`](BO_STATE_TEMPORAL_TYPES.md) — `DaysRemaining` vs migration SLA working days

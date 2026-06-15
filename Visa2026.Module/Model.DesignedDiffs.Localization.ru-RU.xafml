@@ -1831,7 +1831,7 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Настройки системы">
+    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Ограничения загрузки">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -2844,8 +2844,8 @@
     <ListView Id="SyncRule_ListView" Caption="Правила синхронизации" />
     <DetailView Id="SyncRuleLog_DetailView" Caption="Журнал синхронизации" />
     <ListView Id="SyncRuleLog_ListView" Caption="Журналы синхронизации" />
-    <DetailView Id="SystemSettings_DetailView" Caption="Настройки системы" />
-    <ListView Id="SystemSettings_ListView" Caption="Настройки системы" />
+    <DetailView Id="SystemSettings_DetailView" Caption="Ограничения загрузки" />
+    <ListView Id="SystemSettings_ListView" Caption="Ограничения загрузки" />
     <DetailView Id="TravelHistory_DetailView" Caption="История поездок" />
     <ListView Id="TravelHistory_ListView" Caption="История поездок" />
     <DetailView Id="Urgency_DetailView" Caption="Срочность" />

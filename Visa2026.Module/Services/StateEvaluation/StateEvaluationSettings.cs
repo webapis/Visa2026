@@ -24,20 +24,19 @@ namespace Visa2026.Module.Services.StateEvaluation
             if (objectSpace == null)
             {
                 return new StateEvaluationSettings(
-                    SystemSettings.DefaultDefaultExpiringSoonDays,
+                    ExpirationAlertRule.DefaultExpiringSoonDays,
                     new Dictionary<string, ExpirationAlertRule>());
             }
 
-            var settings = SystemSettings.TryGetInstance(objectSpace);
             return new StateEvaluationSettings(
-                settings?.DefaultExpiringSoonDays ?? SystemSettings.DefaultDefaultExpiringSoonDays,
+                ExpirationAlertRule.DefaultExpiringSoonDays,
                 ExpirationAlertRuleHelper.LoadRulesByKey(objectSpace));
         }
 
         /// <summary>Fallback when no <see cref="IObjectSpace"/> is available.</summary>
         public static StateEvaluationSettings FromSystemSettings(SystemSettings? settings) =>
             new(
-                settings?.DefaultExpiringSoonDays ?? SystemSettings.DefaultDefaultExpiringSoonDays,
+                ExpirationAlertRule.DefaultExpiringSoonDays,
                 new Dictionary<string, ExpirationAlertRule>());
 
         public int GetExpiringSoonDays(string businessObjectKey)

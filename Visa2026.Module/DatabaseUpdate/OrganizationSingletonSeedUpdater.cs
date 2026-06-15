@@ -25,7 +25,7 @@ namespace Visa2026.Module.DatabaseUpdate
             _ = SystemSettings.GetOrCreateInstance(ObjectSpace);
 
             var removed = OrganizationSingletonHelper.CollapseToSingleRow(
-                ObjectSpace, (SystemSettings _) => "Settings");
+                ObjectSpace, (SystemSettings _) => "Upload limits");
             if (removed > 0)
             {
                 var line = $"OrganizationSingletonSeedUpdater: removed {removed} duplicate SystemSettings row(s).";

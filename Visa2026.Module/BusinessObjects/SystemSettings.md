@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-The `SystemSettings` business object is a singleton entity designed to hold global configuration values for the application. This provides a centralized, UI-editable location for parameters that affect system-wide behavior.
+The `SystemSettings` business object is a singleton entity for **global technical limits** (upload sizes, lookup catalog manifest version). Document expiration thresholds are configured under **Configuration → Document expiration alerts** (`ExpirationAlertRule`), not here.
 
 ---
 
@@ -12,23 +12,30 @@ This object inherits from `BaseObject`.
 
 ---
 
-## 3. Properties
+## 3. Properties (officer-visible)
 
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
-| `ExpirationWarningThreshold` | `decimal` | The threshold at which an item is considered 'Expiring Soon'. Enter as a decimal (e.g., 0.90 for 90%). | Default: 0.90 |
-| `DefaultExpiringSoonDays` | `int` | The default number of days before expiration to consider an item 'Expiring Soon' when a start date is not available for percentage calculation. | Default: 30; Must be > 0. |
+| `MaxImageSizeInMB` | `int` | Maximum uploaded image size (MB). | Default: 2; cap 15 |
+| `MaxDocumentSizeInMB` | `int` | Maximum file attachment size (MB). | Default: 5; cap 5 |
+
+### Legacy (hidden from UI, retained in schema)
+
+| Property | Notes |
+|----------|--------|
+| `ExpirationWarningThreshold` | Never wired to runtime evaluators. |
+| `DefaultExpiringSoonDays` | Superseded by `ExpirationAlertRule.ExpiringSoonDays`; code fallback uses `ExpirationAlertRule.DefaultExpiringSoonDays` (30). |
 
 ---
 
 ## 4. Business Rules & Logic
 
-- **Singleton Pattern**: The `GetInstance(IObjectSpace objectSpace)` static method ensures that only one instance of `SystemSettings` exists in the database. If no instance is found, it creates one with default values.
-- **`OnCreated`**: When a new `SystemSettings` object is created for the first time, `ExpirationWarningThreshold` is initialized to `0.9m` and `DefaultExpiringSoonDays` is initialized to `30`.
+- **Singleton Pattern**: `GetOrCreateInstance` / `TryGetInstance` ensure one row per tenant.
+- **`OnCreated`**: Initializes upload limits and legacy expiration defaults.
 
 ---
 
 ## 5. UI & Behavior Notes
 
-- **Navigation**: This object appears in the navigation menu under the "System" group.
-- **Editing**: Administrators can modify these settings through the standard Detail View to dynamically adjust application behavior without requiring code changes or a new deployment.
+- **Navigation**: **Configuration → Upload limits**
+- **Editing**: VisaOffice officers adjust max image and document upload sizes; expiration days per document family are on **Document expiration alerts**.

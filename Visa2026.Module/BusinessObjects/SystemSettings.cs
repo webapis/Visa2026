@@ -10,9 +10,12 @@ using Visa2026.Module.Services;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>
+    /// Singleton upload size limits (images and file attachments). Other tenant config lives on dedicated Configuration BOs.
+    /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Configuration")]
-    [DisplayName("Settings")]
+    [DisplayName("Upload limits")]
     public class SystemSettings : BaseObject
     {
         public const decimal DefaultExpirationWarningThreshold = 0.9m;
@@ -25,12 +28,14 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>Hard cap for <see cref="MaxImageSizeInMB"/>.</summary>
         public const int MaxImageSizeInMBCap = 15;
 
+        [Browsable(false)]
         [ModelDefault("DisplayFormat", "{0:N2}")]
         [ModelDefault("EditMask", "N2")]
-        [Description("The threshold at which an item is considered 'Expiring Soon'. E.g., 90% (0.9).")]
+        [Description("Legacy — unused at runtime. Use Configuration → Document expiration alerts.")]
         public virtual decimal ExpirationWarningThreshold { get; set; }
 
-        [Description("The default number of days before expiration to consider an item 'Expiring Soon' when a start date is not available for percentage calculation.")]
+        [Browsable(false)]
+        [Description("Legacy fallback when no ExpirationAlertRule row exists. Officers edit per-document rules under Configuration.")]
         [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
         public virtual int DefaultExpiringSoonDays { get; set; }
 
@@ -63,7 +68,7 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         public static SystemSettings? TryGetInstance(IObjectSpace objectSpace) =>
-            OrganizationSingletonHelper.TryGet(objectSpace, (SystemSettings _) => "Settings");
+            OrganizationSingletonHelper.TryGet(objectSpace, (SystemSettings _) => "Upload limits");
 
         public static SystemSettings GetOrCreateInstance(IObjectSpace objectSpace)
         {

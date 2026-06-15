@@ -1831,7 +1831,7 @@
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Sistem Ayarları">
+    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Yükleme sınırları">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
@@ -2844,8 +2844,8 @@
     <ListView Id="SyncRule_ListView" Caption="Senkronizasyon Kuralları" />
     <DetailView Id="SyncRuleLog_DetailView" Caption="Senkronizasyon Günlüğü" />
     <ListView Id="SyncRuleLog_ListView" Caption="Senkronizasyon Günlükleri" />
-    <DetailView Id="SystemSettings_DetailView" Caption="Sistem Ayarları" />
-    <ListView Id="SystemSettings_ListView" Caption="Sistem Ayarları" />
+    <DetailView Id="SystemSettings_DetailView" Caption="Yükleme sınırları" />
+    <ListView Id="SystemSettings_ListView" Caption="Yükleme sınırları" />
     <DetailView Id="TravelHistory_DetailView" Caption="Seyahat Geçmişi" />
     <ListView Id="TravelHistory_ListView" Caption="Seyahat Geçmişi" />
     <DetailView Id="Urgency_DetailView" Caption="Aciliyet" />

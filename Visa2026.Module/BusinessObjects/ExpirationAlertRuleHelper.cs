@@ -27,8 +27,7 @@ namespace Visa2026.Module.BusinessObjects
                 return rule.ExpiringSoonDays;
             }
 
-            var settings = objectSpace != null ? SystemSettings.TryGetInstance(objectSpace) : null;
-            return settings?.DefaultExpiringSoonDays ?? SystemSettings.DefaultDefaultExpiringSoonDays;
+            return ExpirationAlertRule.DefaultExpiringSoonDays;
         }
 
         public static int? GetExtensionApplicationRequiredDays(IObjectSpace? objectSpace, string businessObjectKey)

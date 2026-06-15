@@ -1831,7 +1831,7 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Ulgam sazlamalary">
+    <Class Name="Visa2026.Module.BusinessObjects.SystemSettings" Caption="Ýükleme çäklendirmeleri">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -2844,8 +2844,8 @@
     <ListView Id="SyncRule_ListView" Caption="Sinhronizasiýa düzgünleri" />
     <DetailView Id="SyncRuleLog_DetailView" Caption="Sinhronizasiýa gündeligi" />
     <ListView Id="SyncRuleLog_ListView" Caption="Sinhronizasiýa gündelikleri" />
-    <DetailView Id="SystemSettings_DetailView" Caption="Ulgam sazlamalary" />
-    <ListView Id="SystemSettings_ListView" Caption="Ulgam sazlamalary" />
+    <DetailView Id="SystemSettings_DetailView" Caption="Ýükleme çäklendirmeleri" />
+    <ListView Id="SystemSettings_ListView" Caption="Ýükleme çäklendirmeleri" />
     <DetailView Id="TravelHistory_DetailView" Caption="Syýahat taryhy" />
     <ListView Id="TravelHistory_ListView" Caption="Syýahat taryhy" />
     <DetailView Id="Urgency_DetailView" Caption="Gyssaglylyk" />
