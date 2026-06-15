@@ -38,4 +38,10 @@ public class ApplicationApprovalLegSnapshot : BaseObject
     [MaxLength(200)]
     [Browsable(false)]
     public virtual string MinistryNameTm { get; set; }
+
+    [XafDisplayName("Maks. iş günleri")]
+    public virtual int? MaxDaysInReview { get; set; }
+
+    [XafDisplayName("Duýduryş (iş günleri)")]
+    public virtual int? WarningDaysBeforeMax { get; set; }
 }

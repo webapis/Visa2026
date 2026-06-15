@@ -71,6 +71,8 @@ public static class BoStateAppearanceColors
             Entry(ApplicationProgressLegCodes.AtMinistry(4), "Thistle", "Indigo", "#c4b5fd", "#4338ca", 110),
             Entry(ApplicationProgressLegCodes.AtMinistry(5), "Lavender", "DarkSlateBlue", "#e9d5ff", "#312e81", 110),
             Entry(ApplicationProgressLocationCodes.AtMigrationService, "LightCyan", "Teal", "#67e8f9", "#0e7490", 110),
+            Entry(ApplicationProgressSlaCodes.Warning, "Moccasin", "DarkOrange", "#fef08a", "#a16207", 320),
+            Entry(ApplicationProgressSlaCodes.Overdue, "LightSalmon", "DarkRed", "#fecaca", "#991b1b", 330),
         };
 
         return entries.ToDictionary(e => e.StateCode, e => e, StringComparer.OrdinalIgnoreCase);

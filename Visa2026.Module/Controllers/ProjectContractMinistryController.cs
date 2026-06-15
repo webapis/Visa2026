@@ -39,6 +39,18 @@ public sealed class ProjectContractMinistryController : ObjectViewController<Det
                 return;
             }
 
+            if (contract.IsActive
+                && !ProjectContractMinistryHelper.TryValidateLegSla(contract, out var slaError))
+            {
+                e.Cancel = true;
+                Application.ShowViewStrategy.ShowMessage(
+                    slaError ?? VisaUiMessages.Get("ProjectContract.MinistryLegMaxDaysRequiredGeneric"),
+                    InformationType.Error,
+                    6000,
+                    InformationPosition.Top);
+                return;
+            }
+
             if (ObjectSpace.IsNewObject(contract))
                 continue;
 

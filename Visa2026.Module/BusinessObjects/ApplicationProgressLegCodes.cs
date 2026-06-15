@@ -24,6 +24,15 @@ public static class ApplicationProgressLegCodes
         && stateCode!.EndsWith("_REJECTED", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Ministry review ended with approval or rejection — officers may attach the issued letter copy.</summary>
+    public static bool IsMinistryReviewStartedStateCode(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        return stateCode.Trim().EndsWith("_REVIEW_STARTED", StringComparison.OrdinalIgnoreCase)
+            && TryParseMinistryLegFromStateCode(stateCode, out _);
+    }
+
     public static bool IsMinistryDecisionStateCode(string? stateCode)
     {
         if (string.IsNullOrWhiteSpace(stateCode))

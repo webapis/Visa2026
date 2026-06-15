@@ -25,6 +25,8 @@ disable-model-invocation: false
 | **ListView row tint** | `[Appearance]` on BOs, future registrar, optional Blazor controller | Target end state; partial today |
 | **Application workflow states** | `ApplicationProgress`, catalogs `application-state.json`, `application-location.json` | Map `State.Code` / `Location.Code` to registry |
 
+**Workflow / transitions / ministry legs:** [visa2026-application-progress](../visa2026-application-progress/SKILL.md) — not this skill.
+
 **Not this skill:** state notification inbox UI ([`docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md`](../../../docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)), E2E list appearance ([`visa2026-easytest-e2e`](../visa2026-easytest-e2e/SKILL.md) for officer-journey tests).
 
 **Experience log:** [learnings.md](./learnings.md) — append-only (read before, append after verified ListView / appearance work).

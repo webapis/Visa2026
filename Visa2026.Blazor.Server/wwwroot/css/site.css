@@ -396,6 +396,10 @@ dxd-license,
 .visa-progress-row.visa-progress-row--state-AT_THE_MINISTERY_2 > td { color: #3730a3; }
 .visa-progress-row.visa-progress-row--state-AT_MIGRATION_SERVICE { --dxbl-grid-row-bg: #67e8f9; }
 .visa-progress-row.visa-progress-row--state-AT_MIGRATION_SERVICE > td { color: #0e7490; }
+.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_WARNING { --dxbl-grid-row-bg: #fef08a; }
+.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_WARNING > td { color: #a16207; }
+.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_OVERDUE { --dxbl-grid-row-bg: #fecaca; }
+.visa-progress-row.visa-progress-row--state-APP_PROGRESS_SLA_OVERDUE > td { color: #991b1b; }
 
 .visa-family-lines-inline,
 .cs-multi-select-inline,

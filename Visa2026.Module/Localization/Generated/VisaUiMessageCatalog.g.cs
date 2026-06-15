@@ -803,6 +803,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ofis taýýarlygyndan soňky ädime geçmezden ozal taslama şertnamasyny saýlaň.",
             ["ru-RU"] = "Выберите контракт проекта перед переходом после подготовки в офисе.",
         },
+        ["ApplicationProgress.Sla.Ok"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: day {1} of {2}",
+            ["tr-TR"] = "{0}: {1}. gün / {2}",
+            ["tk-TM"] = "{0}: {1}-nji gün / {2}",
+            ["ru-RU"] = "{0}: день {1} из {2}",
+        },
+        ["ApplicationProgress.Sla.Overdue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: day {1} of {2} (overdue)",
+            ["tr-TR"] = "{0}: {1}. gün / {2} (süre aşımı)",
+            ["tk-TM"] = "{0}: {1}-nji gün / {2} (möhlet geçdi)",
+            ["ru-RU"] = "{0}: день {1} из {2} (просрочено)",
+        },
+        ["ApplicationProgress.Sla.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: day {1} of {2} (warning)",
+            ["tr-TR"] = "{0}: {1}. gün / {2} (uyarı)",
+            ["tk-TM"] = "{0}: {1}-nji gün / {2} (duýduryş)",
+            ["ru-RU"] = "{0}: день {1} из {2} (предупреждение)",
+        },
         ["ApplicationProgress.StateNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "State \"{0}\" is not allowed for applications on the {1} route.",
@@ -1986,6 +2007,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0}",
             ["ru-RU"] = "{0}",
         },
+        ["ProjectContract.MinistryLegMaxDaysRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Leg {0}: enter the maximum working days in review before this contract can be active.",
+            ["tr-TR"] = "Adım {0}: sözleşme aktif olmadan önce incelemedeki azami iş günlerini girin.",
+            ["tk-TM"] = "Ädim {0}: şertnama işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini giriziň.",
+            ["ru-RU"] = "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать контракт.",
+        },
+        ["ProjectContract.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Every ministry leg needs maximum working days in review before this contract can be active.",
+            ["tr-TR"] = "Sözleşme aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
+            ["tk-TM"] = "Şertnama işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
+            ["ru-RU"] = "Перед активацией контракта для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении.",
+        },
         ["ProjectContract.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Add at least one ministry leg to this project contract.",
@@ -1999,6 +2034,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu proje sözleşmesi başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
             ["tk-TM"] = "Bu taslama şertnamasy arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin gaýtadan dörediň.",
             ["ru-RU"] = "Этот контракт проекта уже используется заявками. Скопируйте его, чтобы изменить этапы министерств.",
+        },
+        ["ProjectContract.MinistryLegWarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Leg {0}: warning days must be less than the maximum review days.",
+            ["tr-TR"] = "Adım {0}: uyarı günleri azami inceleme günlerinden küçük olmalıdır.",
+            ["tk-TM"] = "Ädim {0}: duýduryş günleri iň ýokary barlag günlerinden az bolmaly.",
+            ["ru-RU"] = "Этап {0}: порог предупреждения должен быть меньше максимального числа дней на рассмотрении.",
         },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

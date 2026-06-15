@@ -36,4 +36,8 @@ For a new customer deployment, replace these files with that customer's data.
 |-----------|---------|
 | `tenant-users.json` | Officers for this deployment (`UserName` + `Roles[]`). Synced on every DB update via `TenantUserSeedUpdater`. Disk overlay: `{AppBase}/LookupCatalogs/tenant/tenant-users.json`. Default password: empty (set on first login). |
 
+**Project contract ministry legs** (nested on `project-contract.json`, not a separate manifest catalog):
+
+Each contract row may include a `MinistryLegs` array (`Sequence`, `ApprovingMinistryShortNameTm`, `MaxDaysInReview`, `WarningDaysBeforeMax`). Synced after lookup catalog sync via `ProjectContractMinistrySeedUpdater`. Contracts already used by applications keep leg structure; missing SLA values are backfilled from JSON only.
+
 General lookup architecture: [`docs/LOOKUP_SEEDING.md`](../../../../docs/LOOKUP_SEEDING.md).

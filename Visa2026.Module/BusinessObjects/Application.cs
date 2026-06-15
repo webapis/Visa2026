@@ -157,6 +157,26 @@ namespace Visa2026.Module.BusinessObjects
         public string CurrentState =>
             ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName(this) ?? string.Empty;
 
+        [XafDisplayName("Iş günleri")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public int? WorkingDaysInCurrentStep => ApplicationProgressSlaHelper.Resolve(this).WorkingDaysInCurrentStep;
+
+        [Browsable(false)]
+        [NotMapped]
+        public string ProgressSlaAppearanceCode =>
+            ApplicationProgressSlaHelper.Resolve(this).AppearanceStateCode ?? string.Empty;
+
+        [XafDisplayName("Tassyklama möhleti")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public string ProgressSlaStatement => ApplicationProgressSlaHelper.FormatStatement(
+            ApplicationProgressSlaHelper.Resolve(this));
+
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]
         [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]

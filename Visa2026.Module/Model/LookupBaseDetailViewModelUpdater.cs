@@ -24,7 +24,11 @@ public sealed class LookupBaseDetailViewModelUpdater : ModelNodesGeneratorUpdate
 
             HideMember(classModel, NameMember);
             if (lookupType == typeof(ProjectContract))
+            {
                 HideMember(classModel, CodeMember);
+                HideMember(classModel, nameof(LookupBase.IsDefault));
+                HideMember(classModel, nameof(ProjectContract.Description));
+            }
 
             EnsureNameTmVisible(classModel);
         }

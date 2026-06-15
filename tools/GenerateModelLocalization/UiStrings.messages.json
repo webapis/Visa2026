@@ -1175,6 +1175,42 @@
     "tk-TM": "Bu taslama şertnamasyna azyndan bir ministrlik ädimi goşuň.",
     "ru-RU": "Добавьте хотя бы один этап министерства в этот контракт проекта."
   },
+  "ProjectContract.MinistryLegMaxDaysRequired": {
+    "en": "Leg {0}: enter the maximum working days in review before this contract can be active.",
+    "tr-TR": "Adım {0}: sözleşme aktif olmadan önce incelemedeki azami iş günlerini girin.",
+    "tk-TM": "Ädim {0}: şertnama işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini giriziň.",
+    "ru-RU": "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать контракт."
+  },
+  "ProjectContract.MinistryLegMaxDaysRequiredGeneric": {
+    "en": "Every ministry leg needs maximum working days in review before this contract can be active.",
+    "tr-TR": "Sözleşme aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
+    "tk-TM": "Şertnama işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
+    "ru-RU": "Перед активацией контракта для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении."
+  },
+  "ProjectContract.MinistryLegWarningDaysInvalid": {
+    "en": "Leg {0}: warning days must be less than the maximum review days.",
+    "tr-TR": "Adım {0}: uyarı günleri azami inceleme günlerinden küçük olmalıdır.",
+    "tk-TM": "Ädim {0}: duýduryş günleri iň ýokary barlag günlerinden az bolmaly.",
+    "ru-RU": "Этап {0}: порог предупреждения должен быть меньше максимального числа дней на рассмотрении."
+  },
+  "ApplicationProgress.Sla.Ok": {
+    "en": "{0}: day {1} of {2}",
+    "tr-TR": "{0}: {1}. gün / {2}",
+    "tk-TM": "{0}: {1}-nji gün / {2}",
+    "ru-RU": "{0}: день {1} из {2}"
+  },
+  "ApplicationProgress.Sla.Warning": {
+    "en": "{0}: day {1} of {2} (warning)",
+    "tr-TR": "{0}: {1}. gün / {2} (uyarı)",
+    "tk-TM": "{0}: {1}-nji gün / {2} (duýduryş)",
+    "ru-RU": "{0}: день {1} из {2} (предупреждение)"
+  },
+  "ApplicationProgress.Sla.Overdue": {
+    "en": "{0}: day {1} of {2} (overdue)",
+    "tr-TR": "{0}: {1}. gün / {2} (süre aşımı)",
+    "tk-TM": "{0}: {1}-nji gün / {2} (möhlet geçdi)",
+    "ru-RU": "{0}: день {1} из {2} (просрочено)"
+  },
   "ProjectContract.MinistryLegsStructuralEditBlocked": {
     "en": "This project contract is already used by applications. Duplicate it to change ministry legs.",
     "tr-TR": "Bu proje sözleşmesi başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",

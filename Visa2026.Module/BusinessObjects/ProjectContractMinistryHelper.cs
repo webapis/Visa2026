@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -11,6 +12,42 @@ public static class ProjectContractMinistryHelper
 
     public static bool HasConfiguredLegs(ProjectContract? contract) =>
         GetLegCount(contract) > 0;
+
+    public static bool TryValidateLegSla(ProjectContract? contract, out string? errorMessage)
+    {
+        errorMessage = null;
+        if (contract == null || !contract.IsActive)
+            return true;
+
+        var legs = contract.MinistryLegs?
+            .Where(l => l.ApprovingMinistry != null)
+            .OrderBy(l => l.Sequence)
+            .ToList() ?? [];
+
+        if (legs.Count == 0)
+            return true;
+
+        foreach (var leg in legs)
+        {
+            if (leg.MaxDaysInReview is not > 0)
+            {
+                errorMessage = VisaUiMessages.Format(
+                    "ProjectContract.MinistryLegMaxDaysRequired",
+                    leg.Sequence ?? 0);
+                return false;
+            }
+
+            if (leg.WarningDaysBeforeMax is > 0 && leg.WarningDaysBeforeMax >= leg.MaxDaysInReview)
+            {
+                errorMessage = VisaUiMessages.Format(
+                    "ProjectContract.MinistryLegWarningDaysInvalid",
+                    leg.Sequence ?? 0);
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public static void ApplySnapshot(IObjectSpace objectSpace, Application application, ProjectContract? contract)
     {
@@ -34,6 +71,8 @@ public static class ProjectContractMinistryHelper
             snapshot.ApprovingMinistryId = leg.ApprovingMinistry.ID;
             snapshot.MinistryShortName = leg.ApprovingMinistry.ShortNameTm ?? leg.ApprovingMinistry.NameTm ?? string.Empty;
             snapshot.MinistryNameTm = leg.ApprovingMinistry.NameTm ?? string.Empty;
+            snapshot.MaxDaysInReview = leg.MaxDaysInReview;
+            snapshot.WarningDaysBeforeMax = leg.WarningDaysBeforeMax;
             application.ApprovalLegSnapshots.Add(snapshot);
         }
     }

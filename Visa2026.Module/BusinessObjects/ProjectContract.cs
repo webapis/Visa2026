@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -19,6 +20,12 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [DefaultProperty(nameof(NameTm))]
     [NavigationItem("Lookup/Organization")]
+    [Appearance(
+        "ProjectContract_HideCatalogScalars",
+        AppearanceItemType = "ViewItem",
+        TargetItems = "Code;IsDefault;Description",
+        Visibility = ViewItemVisibility.Hide,
+        Context = "DetailView,ListView,LookupListView")]
     public class ProjectContract : LookupBase
     {
         public ProjectContract()
@@ -37,6 +44,10 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual MinistryReviewDepth MinistryReviewDepth { get; set; } = MinistryReviewDepth.FirstMinistryOnly;
 
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
         [MaxLength(500)]
         public virtual string Description { get; set; }
 

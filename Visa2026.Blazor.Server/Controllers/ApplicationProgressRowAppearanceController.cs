@@ -84,7 +84,9 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
         if (e.Grid.GetDataItem(e.VisibleIndex) is not Application application)
             return;
 
-        var stateCode = application.PrimaryStateCode;
+        var stateCode = application.ProgressSlaAppearanceCode;
+        if (string.IsNullOrEmpty(stateCode))
+            stateCode = application.PrimaryStateCode;
         if (string.IsNullOrEmpty(stateCode)
             || !BoStateAppearanceColors.TryGet(stateCode, out var appearance))
             return;

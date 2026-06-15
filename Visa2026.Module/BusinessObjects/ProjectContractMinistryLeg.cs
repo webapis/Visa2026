@@ -27,4 +27,12 @@ public class ProjectContractMinistryLeg : BaseObject
 
     [Browsable(false)]
     public virtual Guid ApprovingMinistryId { get; set; }
+
+    /// <summary>Max working days allowed in <c>{n}_REVIEW_STARTED</c> for this leg (required before contract is active).</summary>
+    [XafDisplayName("Maks. iş günleri")]
+    public virtual int? MaxDaysInReview { get; set; }
+
+    /// <summary>Optional early warning when working days in review exceed this value (must be &lt; <see cref="MaxDaysInReview"/>).</summary>
+    [XafDisplayName("Duýduryş (iş günleri)")]
+    public virtual int? WarningDaysBeforeMax { get; set; }
 }
