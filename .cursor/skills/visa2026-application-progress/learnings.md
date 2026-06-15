@@ -6,6 +6,16 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-06-15 — Migration service SLA (Phase 2)
+
+- **Scope**: `ApplicationMigrationSlaProfile` tenant lookup + per-`ApplicationType` FK; runtime via `ApplicationMigrationSlaHelper`; ListView columns `WorkingDaysInMigrationStep`, `MigrationSlaStatement`; row tint merged into `ProgressSlaAppearanceCode` (ministry first, then migration).
+- **Clock**: `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE` → terminal `PROCESS_ISSUED` / `PROCESS_REJECTED` / `PROCESS_CANCELLED`; Mon–Fri `WorkingDaysHelper`.
+- **Validation**: Block progress save to migration step when type lacks profile or `MaxDaysInReview` ≤ 0; warn (non-blocking) on `ApplicationType` save without profile; block profile delete when referenced (`DeleteBehavior.Restrict` + controller).
+- **Seed**: `tenant/application-migration-sla-profile.json` (manifest v13); `MigrationSlaProfileCode` on all rows in `ApplicationTypeConfigurationCatalog.json`; wired in `ApplicationTypeConfigurationUpdater` after `LookupCatalogSyncUpdater`.
+- **Docs**: [`docs/APPLICATION_PROGRESS_MIGRATION_SLA.md`](../../../docs/APPLICATION_PROGRESS_MIGRATION_SLA.md). Office prep SLA not in scope.
+- **Prevent**: Do not add new `ApplicationState` for migration SLA — computed signal only (same as ministry). Reuse `APP_PROGRESS_SLA_*` appearance keys.
+- **Cross-skill**: visa2026-bo-state-colors (row CSS) | visa2026-lookup-data (tenant catalog)
+
 ### 2026-06-13 — MinistryLetterFileID schema drift (Invalid column name)
 
 - **Symptom**: `SqlException: Invalid column name 'MinistryLetterFileID'` when opening Applications (via ministry) list — stack through lazy-loaded `ProgressHistory` and `PrimaryStateCode`.
