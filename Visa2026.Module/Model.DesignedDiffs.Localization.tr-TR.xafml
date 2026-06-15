@@ -355,7 +355,9 @@
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Description" Caption="Açıklama" />
         <Member Name="Location" Caption="Yer" />
+        <Member Name="LocationWithMinistryLabel" Caption="Yer" />
         <Member Name="MinistryLetterFile" Caption="Bakanlık yazış kopyası" />
+        <Member Name="MinistryLetterFileName" Caption="Dosya adı" />
         <Member Name="MinistryStepLabel" Caption="Bakanlık" />
         <Member Name="State" Caption="Durum" />
       </OwnMembers>
@@ -2363,7 +2365,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Tarih" />
         <ColumnInfo Id="Description" Caption="Açıklama" />
-        <ColumnInfo Id="Location" Caption="Yer" />
+        <ColumnInfo Id="LocationWithMinistryLabel" Caption="Yer" />
+        <ColumnInfo Id="MinistryLetterFileName" Caption="Dosya adı" />
         <ColumnInfo Id="State" Caption="Durum" />
       </Columns>
     </ListView>

@@ -68,13 +68,31 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Description { get; set; }
 
         [XafDisplayName("Ministrlik")]
-        [VisibleInListView(true)]
+        [VisibleInListView(false)]
         [NotMapped]
         public string MinistryStepLabel =>
             ProjectContractMinistryHelper.GetMinistryShortNameForProgressStep(
                 Application,
                 State?.Code,
                 Location?.Code) ?? string.Empty;
+
+        /// <summary>Progress history list: localized location plus ministry short name when at a ministry leg.</summary>
+        [NotMapped]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        public string LocationWithMinistryLabel
+        {
+            get
+            {
+                var locationLabel = Location?.ToString() ?? string.Empty;
+                var ministry = MinistryStepLabel;
+                if (string.IsNullOrWhiteSpace(ministry))
+                    return locationLabel;
+                if (string.IsNullOrWhiteSpace(locationLabel))
+                    return ministry;
+                return $"{locationLabel} - {ministry}";
+            }
+        }
 
         [Browsable(false)]
         [NotMapped]
@@ -85,6 +103,11 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]
         public virtual FileData MinistryLetterFile { get; set; }
+
+        [NotMapped]
+        [VisibleInListView(false)]
+        [VisibleInDetailView(false)]
+        public string MinistryLetterFileName => MinistryLetterFile?.FileName ?? string.Empty;
 
         [NotMapped]
         [Browsable(false)]

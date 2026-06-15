@@ -286,9 +286,11 @@
         "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
         "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
+        "LocationWithMinistryLabel": { "en-US": "Location", "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
         "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
         "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
         "MinistryStepLabel": { "en-US": "Ministry", "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" },
+        "MinistryLetterFileName": { "en-US": "File name", "tr-TR": "Dosya adı", "tk-TM": "Faýl ady", "ru-RU": "Имя файла" },
         "MinistryLetterFile": {
           "en-US": "Ministry letter copy",
           "tr-TR": "Bakanlık yazış kopyası",

@@ -355,7 +355,9 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Description" Caption="Описание" />
         <Member Name="Location" Caption="Место" />
+        <Member Name="LocationWithMinistryLabel" Caption="Место" />
         <Member Name="MinistryLetterFile" Caption="Копия письма министерства" />
+        <Member Name="MinistryLetterFileName" Caption="Имя файла" />
         <Member Name="MinistryStepLabel" Caption="Министерство" />
         <Member Name="State" Caption="Состояние" />
       </OwnMembers>
@@ -2363,7 +2365,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
-        <ColumnInfo Id="Location" Caption="Место" />
+        <ColumnInfo Id="LocationWithMinistryLabel" Caption="Место" />
+        <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />
         <ColumnInfo Id="State" Caption="Состояние" />
       </Columns>
     </ListView>

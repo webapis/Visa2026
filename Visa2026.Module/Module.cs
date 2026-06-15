@@ -144,6 +144,7 @@ namespace Visa2026.Module
             updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new LookupBaseDetailViewModelUpdater());
             updaters.Add(new ApplicationMigrationSlaProfileViewsUpdater());
+            updaters.Add(new ApplicationProgressHistoryViewsUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxModelUpdater());

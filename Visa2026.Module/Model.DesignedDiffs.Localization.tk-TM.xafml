@@ -355,7 +355,9 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Description" Caption="Düşündiriş" />
         <Member Name="Location" Caption="Ýer" />
+        <Member Name="LocationWithMinistryLabel" Caption="Ýer" />
         <Member Name="MinistryLetterFile" Caption="Ministrlik hatynyň nusgasy" />
+        <Member Name="MinistryLetterFileName" Caption="Faýl ady" />
         <Member Name="MinistryStepLabel" Caption="Ministrlik" />
         <Member Name="State" Caption="Ýagdaý" />
       </OwnMembers>
@@ -2363,7 +2365,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
-        <ColumnInfo Id="Location" Caption="Ýer" />
+        <ColumnInfo Id="LocationWithMinistryLabel" Caption="Ýer" />
+        <ColumnInfo Id="MinistryLetterFileName" Caption="Faýl ady" />
         <ColumnInfo Id="State" Caption="Ýagdaý" />
       </Columns>
     </ListView>
