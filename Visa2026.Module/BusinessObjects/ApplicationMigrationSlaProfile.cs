@@ -19,9 +19,9 @@ namespace Visa2026.Module.BusinessObjects;
 [DefaultProperty(nameof(NameTm))]
 [NavigationItem("Lookup/Application/Config")]
 [Appearance(
-    "ApplicationMigrationSlaProfile_HideIsDefault",
+    "ApplicationMigrationSlaProfile_HideCatalogScalars",
     AppearanceItemType = "ViewItem",
-    TargetItems = nameof(LookupBase.IsDefault),
+    TargetItems = "Code;IsDefault",
     Visibility = ViewItemVisibility.Hide,
     Context = "DetailView,ListView,LookupListView")]
 [RuleCriteria(

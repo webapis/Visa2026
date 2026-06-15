@@ -7,7 +7,7 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Model;
 
-/// <summary>Hides deprecated <see cref="LookupBase.Name"/> on lookup detail views; <see cref="ProjectContract"/> also hides <see cref="LookupBase.Code"/>.</summary>
+/// <summary>Hides deprecated <see cref="LookupBase.Name"/> on lookup detail views; <see cref="ProjectContract"/> and <see cref="ApplicationMigrationSlaProfile"/> also hide <see cref="LookupBase.Code"/>.</summary>
 public sealed class LookupBaseDetailViewModelUpdater : ModelNodesGeneratorUpdater<ModelBOModelClassNodesGenerator>
 {
     private const string NameMember = nameof(LookupBase.Name);
@@ -28,6 +28,11 @@ public sealed class LookupBaseDetailViewModelUpdater : ModelNodesGeneratorUpdate
                 HideMember(classModel, CodeMember);
                 HideMember(classModel, nameof(LookupBase.IsDefault));
                 HideMember(classModel, nameof(ProjectContract.Description));
+            }
+            else if (lookupType == typeof(ApplicationMigrationSlaProfile))
+            {
+                HideMember(classModel, CodeMember);
+                HideMember(classModel, nameof(LookupBase.IsDefault));
             }
 
             EnsureNameTmVisible(classModel);
