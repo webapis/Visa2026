@@ -72,6 +72,7 @@
       </Item>
       <Item Id="Auth" Caption="Безопасность" />
       <Item Id="Config" Caption="Настройка" />
+      <Item Id="Configuration" Caption="Конфигурация" />
       <Item Id="Default" Caption="По умолчанию" />
       <Item Id="Documents" Caption="Документы" />
       <Item Id="Education" Caption="Образование" />
@@ -151,7 +152,7 @@
       </Item>
       <Item Id="Medical" Caption="Медицина" />
       <Item Id="Operations" Caption="Операции" />
-      <Item Id="Configuration" Caption="Конфигурация" />
+      <Item Id="Organization" Caption="Организация" />
       <Item Id="Passport" Caption="Паспорт" />
       <Item Id="People" Caption="Люди">
         <Items>
@@ -939,6 +940,12 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="StartDate" Caption="Дата начала" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExpirationAlertRule" Caption="Предупреждения об истечении документов">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ExpirationState" Caption="Visa2026.Module.BusinessObjects.ExpirationState">
@@ -2515,6 +2522,8 @@
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
       </Columns>
     </ListView>
+    <DetailView Id="ExpirationAlertRule_DetailView" Caption="Предупреждения об истечении документов" />
+    <ListView Id="ExpirationAlertRule_ListView" Caption="Предупреждения об истечении документов" />
     <DetailView Id="ExternalArrival_DetailView" Caption="Внешний въезд" />
     <ListView Id="ExternalArrival_ListView" Caption="Внешние въезды" />
     <DetailView Id="ExternalDeparture_DetailView" Caption="Внешний выезд" />

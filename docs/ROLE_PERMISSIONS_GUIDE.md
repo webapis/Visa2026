@@ -107,6 +107,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `UserReportPlaceholder` | Read, Write, Create, Delete (extract placeholders) |
 | `ApplicationMigrationSlaProfile` | Full (migration SLA tiers + link application types) |
 | `SystemSettings` | Full (singleton system settings) |
+| `ExpirationAlertRule` | Read + Write (edit warn/extension day counts; rows seeded) |
 
 ### Read only
 
@@ -119,7 +120,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 
 | Area |
 |------|
-| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, migration SLA profiles, system settings |
+| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, migration SLA profiles, document expiration alerts, system settings |
 | **Reports** — `UserReportTemplate` |
 
 ---
@@ -159,6 +160,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `VisaCategory`, `VisaIssuedPlace`, `VisaPeriod`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |
 | `Company`, `ProjectContract` |
+| `ExpirationAlertRule` | Read only (runtime state evaluators; no Configuration nav) |
 | `ReportDataV2`, `ReportVisibility` |
 
 ---
@@ -214,3 +216,4 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 | Jun 2026 | Visa office staff need org singleton + project contract + template screens without full admin | Added **`VisaOffice`** role (`CreateVisaOfficeRole`, `EnsureVisaOfficeConfigurationPermissions`, `EnsureVisaOfficeNavigationPermissions`); seeded user `VisaOffice` |
 | Jun 2026 | Runtime log + state-notification inbox visible to officers | **`EnsureAdminOnlyOperationsDeny`** on Users / VisaOffice — super administrators only; state inbox remains a future-release prototype |
 | Jun 2026 | Visa office cannot open migration SLA profiles or system settings | **`EnsureFullAccessRecursivePermission`** for `ApplicationMigrationSlaProfile` and `SystemSettings` on VisaOffice; nav allow for those items; `ApplicationType` read for link popup |
+| Jun 2026 | Document expiration thresholds under System nav for all Users | **`ExpirationAlertRule`** moved to **Configuration**; VisaOffice read/write + nav; Users read-only without System nav ([`DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md`](DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md)) |

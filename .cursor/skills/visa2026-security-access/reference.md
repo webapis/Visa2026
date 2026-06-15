@@ -65,7 +65,8 @@ Examples from `CreateUserRole()`:
 | `Application/Items/Application_ViaMinistries` | Allow |
 | `Reports/Items/UserReportTemplate` | Allow |
 | `Operations/Items/UserFeedback` | Allow |
-| `System/Items/ExpirationAlertRule` | Allow |
+| `System/Items/ExpirationAlertRule` | Deny (Users); runtime read via type permission only |
+| `Configuration/Items/ExpirationAlertRule` | Allow (VisaOffice only) |
 
 To find a path: open `Visa2026.Blazor.Server/Model.xafml` (or Module `Model.DesignedDiffs.xafml`), locate the navigation item `Id`, walk parent `NavigationItems` nodes.
 

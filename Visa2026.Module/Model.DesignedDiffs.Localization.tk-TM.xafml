@@ -72,6 +72,7 @@
       </Item>
       <Item Id="Auth" Caption="Howpsuzlyk" />
       <Item Id="Config" Caption="Sazlama" />
+      <Item Id="Configuration" Caption="Sazlama" />
       <Item Id="Default" Caption="Bellenen" />
       <Item Id="Documents" Caption="Resminamalar" />
       <Item Id="Education" Caption="Bilim" />
@@ -151,7 +152,7 @@
       </Item>
       <Item Id="Medical" Caption="Saglyk" />
       <Item Id="Operations" Caption="Amallar" />
-      <Item Id="Configuration" Caption="Sazlama" />
+      <Item Id="Organization" Caption="Gurama" />
       <Item Id="Passport" Caption="Pasport" />
       <Item Id="People" Caption="Adamlar">
         <Items>
@@ -939,6 +940,12 @@
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="EndDate" Caption="Gutarýan senesi" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ExpirationAlertRule" Caption="Resminama möhleti duýduryşlary">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ExpirationState" Caption="Visa2026.Module.BusinessObjects.ExpirationState">
@@ -2515,6 +2522,8 @@
         <ColumnInfo Id="StartDate" Caption="Başlanýan senesi" />
       </Columns>
     </ListView>
+    <DetailView Id="ExpirationAlertRule_DetailView" Caption="Resminama möhleti duýduryşlary" />
+    <ListView Id="ExpirationAlertRule_ListView" Caption="Resminama möhleti duýduryşlary" />
     <DetailView Id="ExternalArrival_DetailView" Caption="Daşarky geliş" />
     <ListView Id="ExternalArrival_ListView" Caption="Daşarky gelişler" />
     <DetailView Id="ExternalDeparture_DetailView" Caption="Daşarky gidýän" />

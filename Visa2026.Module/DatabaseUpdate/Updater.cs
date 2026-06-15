@@ -308,11 +308,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         // Application number generation reads prefix/format/seed on save; officers must not create or edit org settings.
         userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        // Per-BO expiration alert thresholds — officers edit day counts; rows are seeded (no create/delete).
+        // Per-BO expiration alert thresholds — read at runtime; configuration UI is VisaOffice only.
         userRole.AddTypePermissionsRecursively<ExpirationAlertRule>(SecurityOperations.Read, SecurityPermissionState.Allow);
         {
             var expirationAlertPerm = userRole.TypePermissions.First(p => p.TargetType == typeof(ExpirationAlertRule));
-            expirationAlertPerm.WriteState = SecurityPermissionState.Allow;
+            expirationAlertPerm.WriteState = SecurityPermissionState.Deny;
             expirationAlertPerm.CreateState = SecurityPermissionState.Deny;
             expirationAlertPerm.DeleteState = SecurityPermissionState.Deny;
         }
@@ -512,8 +512,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationType>(userRole);
     EnsureReadOnlyPermission<Urgency>(userRole);
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
-    EnsureReadWriteOnlyPermission<ExpirationAlertRule>(userRole);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
+    EnsureReadOnlyPermission<ExpirationAlertRule>(userRole);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Deny);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
     EnsureAdminOnlyOperationsDeny(userRole);
@@ -709,6 +709,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<PdfFormMapping>(role);
             EnsureFullAccessRecursivePermission<ApplicationMigrationSlaProfile>(role);
             EnsureFullAccessRecursivePermission<SystemSettings>(role);
+            EnsureReadWriteOnlyPermission<ExpirationAlertRule>(role);
             // Link / Unlink application types on migration SLA profile detail.
             EnsureTypePermission<ApplicationType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
         }
@@ -725,6 +726,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/AuthorizedRepresentative", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationMigrationSlaProfile", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/SystemSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ProjectContract", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApprovingMinistry", SecurityPermissionState.Allow);

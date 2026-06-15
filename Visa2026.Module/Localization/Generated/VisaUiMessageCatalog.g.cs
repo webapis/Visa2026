@@ -719,6 +719,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Azyndan bir arza setiri saýlaň.",
             ["ru-RU"] = "Выберите хотя бы одну строку заявки.",
         },
+        ["ApplicationMigration.Sla.Ok"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: day {1} of {2}",
+            ["tr-TR"] = "{0}: {1}. gün / {2}",
+            ["tk-TM"] = "{0}: {1}-nji gün / {2}",
+            ["ru-RU"] = "{0}: день {1} из {2}",
+        },
+        ["ApplicationMigration.Sla.Overdue"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: day {1} of {2} (overdue)",
+            ["tr-TR"] = "{0}: {1}. gün / {2} (süre aşımı)",
+            ["tk-TM"] = "{0}: {1}-nji gün / {2} (möhlet geçdi)",
+            ["ru-RU"] = "{0}: день {1} из {2} (просрочено)",
+        },
+        ["ApplicationMigration.Sla.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}: day {1} of {2} (warning)",
+            ["tr-TR"] = "{0}: {1}. gün / {2} (uyarı)",
+            ["tk-TM"] = "{0}: {1}-nji gün / {2} (duýduryş)",
+            ["ru-RU"] = "{0}: день {1} из {2} (предупреждение)",
+        },
+        ["ApplicationMigrationSlaProfile.DeleteBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This migration SLA profile is used by one or more application types and cannot be deleted.",
+            ["tr-TR"] = "Bu migrasyon SLA profili bir veya daha fazla başvuru türü tarafından kullanılıyor; silinemez.",
+            ["tk-TM"] = "Bu migrasiýa SLA profili bir ýa-da has köp arza görnüşinde ulanylýar; pozup bolmaýar.",
+            ["ru-RU"] = "Этот профиль SLA миграционной службы используется одним или несколькими типами заявок и не может быть удалён.",
+        },
         ["ApplicationPdf.GeneratedSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF for {0} items generated and downloaded.",
@@ -795,6 +823,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "\"{0}\" yeri {1} süreci için kullanılamaz.",
             ["tk-TM"] = "\"{0}\" ýeri {1} ugry üçin rugsat edilmeýär.",
             ["ru-RU"] = "Место «{0}» недоступно для маршрута «{1}».",
+        },
+        ["ApplicationProgress.MigrationSlaProfileRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This application type has no migration SLA profile (or max working days is not set). Assign a profile on the application type before moving to migration service.",
+            ["tr-TR"] = "Bu başvuru türünde migrasyon SLA profili yok (veya azami iş günü tanımlı değil). Migrasyon servisine geçmeden önce başvuru türüne bir profil atayın.",
+            ["tk-TM"] = "Bu arza görnüşinde migrasiýa SLA profili ýok (ýa-da iň ýokary iş günleri bellenmedi). Migrasiýa gullugyna geçmezden öň arza görnüşine profil belläň.",
+            ["ru-RU"] = "У типа заявки не задан профиль SLA миграционной службы (или не указано макс. число рабочих дней). Назначьте профиль типу заявки перед переводом в миграционную службу.",
         },
         ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1188,6 +1223,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar",
             ["ru-RU"] = "Resminamalar",
         },
+        ["ApplicationType.MigrationSlaProfileMissingWarning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No migration SLA profile is assigned. Officers cannot advance applications of this type to migration service until a profile with max working days is set.",
+            ["tr-TR"] = "Migrasyon SLA profili atanmamış. Azami iş günü olan bir profil tanımlanana kadar bu tür başvurular migrasyon servisine ilerletilemez.",
+            ["tk-TM"] = "Migrasiýa SLA profili bellenmedi. Iň ýokary iş günleri bar profil bellänçä bu görnüşli arzalar migrasiýa gullugyna geçirilip bilmez.",
+            ["ru-RU"] = "Профиль SLA миграционной службы не назначен. Заявки этого типа нельзя переводить в миграционную службу, пока не задан профиль с макс. числом рабочих дней.",
+        },
         ["ApplicationTypeQuickCode.NoCodesInDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No application types have a selection code configured.",
@@ -1572,6 +1614,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0}",
             ["tk-TM"] = "{0}",
             ["ru-RU"] = "{0}",
+        },
+        ["ExpirationAlertRule.ConfigurationOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Only configured document expiration rules can be edited here.",
+            ["tr-TR"] = "Burada yalnızca yapılandırılmış belge sona erme kuralları düzenlenebilir.",
+            ["tk-TM"] = "Bu ýerde diňe sazlanan resminama möhleti duýduryş düzgünlerini üýtgetmek bolýar.",
+            ["ru-RU"] = "Здесь можно редактировать только настроенные правила истечения срока документов.",
         },
         ["Grid.TotalCount"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
