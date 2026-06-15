@@ -124,13 +124,14 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SoftDeleteColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupBaseNameTmBackfillUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractMinistrySeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupBaseNameTmPdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractMinistrySeedUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
@@ -142,6 +143,7 @@ namespace Visa2026.Module
             updaters.Add(new LookupLocalizationModelUpdater());
             updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new LookupBaseDetailViewModelUpdater());
+            updaters.Add(new ApplicationMigrationSlaProfileViewsUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxModelUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxDetailViewUpdater());

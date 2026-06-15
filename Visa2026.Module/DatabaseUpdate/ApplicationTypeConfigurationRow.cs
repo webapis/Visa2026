@@ -17,6 +17,7 @@ internal sealed class ApplicationTypeConfigurationRow
 
     public ApplicationProgressRouteKind ApplicationProgressRoute { get; init; }
     public MinistryReviewDepth MinistryReviewDepth { get; init; }
+    public string MigrationSlaProfileCode { get; init; } = "";
 
     public bool ShowProjectContract { get; init; }
     public bool ShowVisaPeriod { get; init; }

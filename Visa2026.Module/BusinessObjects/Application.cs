@@ -164,11 +164,6 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public int? WorkingDaysInCurrentStep => ApplicationProgressSlaHelper.Resolve(this).WorkingDaysInCurrentStep;
 
-        [Browsable(false)]
-        [NotMapped]
-        public string ProgressSlaAppearanceCode =>
-            ApplicationProgressSlaHelper.Resolve(this).AppearanceStateCode ?? string.Empty;
-
         [XafDisplayName("Tassyklama möhleti")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
@@ -176,6 +171,36 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ProgressSlaStatement => ApplicationProgressSlaHelper.FormatStatement(
             ApplicationProgressSlaHelper.Resolve(this));
+
+        [Browsable(false)]
+        [NotMapped]
+        public string ProgressSlaAppearanceCode
+        {
+            get
+            {
+                var ministry = ApplicationProgressSlaHelper.Resolve(this).AppearanceStateCode;
+                if (!string.IsNullOrEmpty(ministry))
+                    return ministry;
+
+                return ApplicationMigrationSlaHelper.Resolve(this).AppearanceStateCode ?? string.Empty;
+            }
+        }
+
+        [XafDisplayName("Migrasiýa iş günleri")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public int? WorkingDaysInMigrationStep =>
+            ApplicationMigrationSlaHelper.Resolve(this).WorkingDaysInCurrentStep;
+
+        [XafDisplayName("Migrasiýa möhleti")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public string MigrationSlaStatement => ApplicationMigrationSlaHelper.FormatStatement(
+            ApplicationMigrationSlaHelper.Resolve(this));
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]

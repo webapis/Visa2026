@@ -1,0 +1,78 @@
+{
+  "rows": [
+    {
+      "Code": "UP-TO-3-DAYS",
+      "NameTm": "3 güne çenli",
+      "MaxDaysInReview": 3,
+      "WarningDaysBeforeMax": 2,
+      "ApplicationTypeNames": [
+        "App_Cancel_App",
+        "App_Cancel_BZ",
+        "App_Cancel_Inv",
+        "App_Cancel_Inv_WP",
+        "App_Cancel_Visa",
+        "App_Cancel_Visa_and_WP",
+        "App_Cancel_Visa_and_WP_Ext",
+        "App_Cancel_Visa_Ext",
+        "App_Cancell_WP"
+      ]
+    },
+    {
+      "Code": "UP-TO-ONE-WEEK",
+      "NameTm": "1 hepdä çenli",
+      "MaxDaysInReview": 5,
+      "WarningDaysBeforeMax": 4,
+      "ApplicationTypeNames": []
+    },
+    {
+      "Code": "UP-TO-TWO-WEEKS",
+      "NameTm": "2 hepdä çenli",
+      "MaxDaysInReview": 10,
+      "WarningDaysBeforeMax": 8,
+      "ApplicationTypeNames": [
+        "App_Border_Zone_Permission",
+        "App_Business_Trip_Arrival",
+        "App_Business_Trip_Departure",
+        "App_Change_Passport",
+        "App_Reg_Check_In",
+        "App_Reg_Check_In_Internal",
+        "App_Reg_Check_Out",
+        "App_Reg_Check_Out_Internal",
+        "App_Reg_ext",
+        "App_Reg_Info_Change_Address",
+        "App_Reg_Info_Change_Passport",
+        "App_Reg_Info_Change_Visa"
+      ]
+    },
+    {
+      "Code": "UP-TO-ONE-MONTH",
+      "NameTm": "1 aýa çenli",
+      "MaxDaysInReview": 20,
+      "WarningDaysBeforeMax": 16,
+      "ApplicationTypeNames": [
+        "App_Additional_WP_location",
+        "App_Change_Inv",
+        "App_Change_Visa_Category",
+        "App_Exit_Visa",
+        "App_Inv",
+        "App_Inv_According_to_WP",
+        "App_Inv_And_WP",
+        "App_Inv_FM",
+        "App_Sevice_Passport",
+        "App_Visa_and_WP_Ext",
+        "App_Visa_Ext",
+        "App_Visa_Ext_According_to_WP",
+        "App_Visa_Ext_FM",
+        "App_Visa_For_New_Born_FM",
+        "App_WP_Ext"
+      ]
+    },
+    {
+      "Code": "UP-TO-45-DAYS",
+      "NameTm": "45 güne çenli",
+      "MaxDaysInReview": 45,
+      "WarningDaysBeforeMax": 36,
+      "ApplicationTypeNames": []
+    }
+  ]
+}

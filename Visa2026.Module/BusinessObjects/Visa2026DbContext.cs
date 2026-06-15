@@ -77,6 +77,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ProjectContractImage> ProjectContractImages { get; set; }
         public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }
         public DbSet<ApprovingMinistry> ApprovingMinistries { get; set; }
+        public DbSet<ApplicationMigrationSlaProfile> ApplicationMigrationSlaProfiles { get; set; }
         public DbSet<ProjectContractMinistryLeg> ProjectContractMinistryLegs { get; set; }
         public DbSet<ApplicationApprovalLegSnapshot> ApplicationApprovalLegSnapshots { get; set; }
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
@@ -266,6 +267,10 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasIndex(t => t.SelectionCode)
                     .IsUnique()
                     .HasFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''");
+                b.HasOne(t => t.MigrationSlaProfile)
+                    .WithMany(p => p.ApplicationTypes)
+                    .HasForeignKey(t => t.MigrationSlaProfileId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<ProjectContract>(b =>

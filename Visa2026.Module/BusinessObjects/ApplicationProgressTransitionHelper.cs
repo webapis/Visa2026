@@ -334,7 +334,18 @@ public static class ApplicationProgressTransitionHelper
         var toStep = ProgressStep.Parse(progress);
 
         if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep))
+        {
+            if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(
+                    progress.State?.Code,
+                    progress.Location?.Code)
+                && progress.Application?.ApplicationType?.MigrationSlaProfile?.MaxDaysInReview is not > 0)
+            {
+                errorMessage = VisaUiMessages.Get("ApplicationProgress.MigrationSlaProfileRequired");
+                return false;
+            }
+
             return true;
+        }
 
         errorMessage = VisaUiMessages.Format(
             "ApplicationProgress.InvalidTransition",

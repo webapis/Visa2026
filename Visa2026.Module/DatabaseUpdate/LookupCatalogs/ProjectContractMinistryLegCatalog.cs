@@ -205,12 +205,19 @@ internal static class ProjectContractMinistryLegCatalogSync
         return changed;
     }
 
-    private static ProjectContract? FindContract(IObjectSpace objectSpace, string nameTm) =>
-        objectSpace.GetObjectsQuery<ProjectContract>()
-            .FirstOrDefault(c => string.Equals(c.NameTm, nameTm.Trim(), StringComparison.OrdinalIgnoreCase));
+    private static ProjectContract? FindContract(IObjectSpace objectSpace, string nameTm)
+    {
+        var trimmed = nameTm.Trim();
+        return objectSpace.GetObjectsQuery<ProjectContract>()
+            .AsEnumerable()
+            .FirstOrDefault(c => LookupCatalogMatchHelper.KeysEqual(c.NameTm, trimmed));
+    }
 
-    private static ApprovingMinistry? FindMinistry(IObjectSpace objectSpace, string shortNameTm) =>
-        objectSpace.GetObjectsQuery<ApprovingMinistry>()
-            .FirstOrDefault(m =>
-                string.Equals(m.ShortNameTm, shortNameTm.Trim(), StringComparison.OrdinalIgnoreCase));
+    private static ApprovingMinistry? FindMinistry(IObjectSpace objectSpace, string shortNameTm)
+    {
+        var trimmed = shortNameTm.Trim();
+        return objectSpace.GetObjectsQuery<ApprovingMinistry>()
+            .AsEnumerable()
+            .FirstOrDefault(m => LookupCatalogMatchHelper.KeysEqual(m.ShortNameTm, trimmed));
+    }
 }
