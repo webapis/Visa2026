@@ -64,51 +64,39 @@
     <DetailView Id="Application_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="39.5945945945946">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="38.206896551724135">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Application" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="49.381188118811885" IsNewNode="True">
-                  <LayoutItem Id="IsForFamily" ViewItem="IsForFamily" Index="0" RelativeSize="1.9157088122605364" IsNewNode="True" />
-                  <LayoutItem Id="OrganizationType" ViewItem="OrganizationType" Index="1" RelativeSize="1.9157088122605364" IsNewNode="True" />
-                  <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ApplicationReason" ViewItem="ApplicationReason" Index="5" RelativeSize="1.9157088122605364" IsNewNode="True" />
-                  <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="6" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="MigrationService" ViewItem="MigrationService" Index="7" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="FromCity" ViewItem="FromCity" Index="8" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ToCity" ViewItem="ToCity" Index="9" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="BusinessTripStartDate" ViewItem="BusinessTripStartDate" Index="10" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="BusinessTripEndDate" ViewItem="BusinessTripEndDate" Index="11" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="BusinessTripPurpose" ViewItem="BusinessTripPurpose" Index="12" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="VisaPeriod" ViewItem="VisaPeriod" Index="13" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="VisaType" ViewItem="VisaType" Index="14" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="15" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="MovementPermitLocation" ViewItem="MovementPermitLocation" Index="16" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="17" RelativeSize="8.42911877394636" IsNewNode="True" />
+                <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="49.26704907584449" IsNewNode="True">
+                  <LayoutItem Id="IsForFamily" ViewItem="IsForFamily" Index="0" RelativeSize="2.0408163265306123" IsNewNode="True" />
+                  <LayoutItem Id="OrganizationType" ViewItem="OrganizationType" Index="1" RelativeSize="2.0408163265306123" IsNewNode="True" />
+                  <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="ApplicationReason" ViewItem="ApplicationReason" Index="4" RelativeSize="2.0408163265306123" IsNewNode="True" />
+                  <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="5" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="MigrationService" ViewItem="MigrationService" Index="6" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="FromCity" ViewItem="FromCity" Index="7" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="ToCity" ViewItem="ToCity" Index="8" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="BusinessTripStartDate" ViewItem="BusinessTripStartDate" Index="9" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="BusinessTripEndDate" ViewItem="BusinessTripEndDate" Index="10" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="BusinessTripPurpose" ViewItem="BusinessTripPurpose" Index="11" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="VisaPeriod" ViewItem="VisaPeriod" Index="12" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="VisaType" ViewItem="VisaType" Index="13" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="VisaCategory" ViewItem="VisaCategory" Index="14" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="MovementPermitLocation" ViewItem="MovementPermitLocation" Index="15" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="16" RelativeSize="8.979591836734693" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Application_col2" ShowCaption="False" Index="1" RelativeSize="50.618811881188115" IsNewNode="True">
-                  <LayoutItem Id="IsManualEntry" ViewItem="IsManualEntry" Index="0" RelativeSize="7.854406130268199" IsNewNode="True" />
-                  <LayoutItem Id="FullApplicationNumber" ViewItem="FullApplicationNumber" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="ApplicationDate" ViewItem="ApplicationDate" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" />
-                  <LayoutItem Id="Urgency" ViewItem="Urgency" Index="3" RelativeSize="79.88505747126437" IsNewNode="True" />
+                <LayoutGroup Id="Application_col2" ShowCaption="False" Index="1" RelativeSize="50.73295092415551" IsNewNode="True">
+                  <LayoutItem Id="IsManualEntry" ViewItem="IsManualEntry" Index="0" RelativeSize="8.36734693877551" IsNewNode="True" />
+                  <LayoutItem Id="FullApplicationNumber" ViewItem="FullApplicationNumber" Index="1" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="ApplicationDate" ViewItem="ApplicationDate" Index="2" RelativeSize="6.530612244897959" IsNewNode="True" />
+                  <LayoutItem Id="Urgency" ViewItem="Urgency" Index="3" RelativeSize="78.57142857142857" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
               <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" RelativeSize="100" Caption="Progress" IsNewNode="True">
                 <LayoutGroup Id="ProgressHistory" ShowCaption="True" Caption="Progress History" Index="0" RelativeSize="100" IsNewNode="True">
                   <LayoutItem Id="ProgressHistory" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
                 </LayoutGroup>
-              </LayoutGroup>
-              <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="2" Caption="State" RelativeSize="100" IsNewNode="True" Removed="True">
-                <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="ExpirationState" ViewItem="ExpirationState" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="2" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="IsActive" ViewItem="IsActive" Index="4" RelativeSize="73.1800766283525" IsNewNode="True" Removed="True" />
-              </LayoutGroup>
-              <LayoutGroup Id="Item4" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="3" Caption="Additional Information" RelativeSize="100" IsNewNode="True" Removed="True">
-                <LayoutItem Id="Representative" ViewItem="Representative" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="Company" ViewItem="Company" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="CompanyHead" ViewItem="CompanyHead" Index="2" RelativeSize="85.44061302681992" IsNewNode="True" Removed="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="Application" RelativeSize="100" Removed="True">
@@ -148,7 +136,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="60.4054054054054" CustomCSSClassName="xaf-show-all-rows-tabbed">
+          <TabbedGroup Id="Tabs" RelativeSize="61.793103448275865" CustomCSSClassName="xaf-show-all-rows-tabbed">
             <LayoutGroup Id="ApplicationItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows">
               <LayoutItem Id="ApplicationItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows" />
             </LayoutGroup>
