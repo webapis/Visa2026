@@ -17,7 +17,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 [DefaultClassOptions]
 [DefaultProperty(nameof(NameTm))]
-[NavigationItem("Lookup/Application/Config")]
+[NavigationItem("Configuration")]
 [Appearance(
     "ApplicationMigrationSlaProfile_HideCatalogScalars",
     AppearanceItemType = "ViewItem",

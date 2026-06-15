@@ -11,7 +11,7 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Organization")]
+    [NavigationItem("Configuration")]
     [DisplayName("Company")]
     [ImageName("BO_Organization")]
     public class CompanyProfile : BaseObject

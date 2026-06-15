@@ -12,7 +12,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Organization")]
+    [NavigationItem("Configuration")]
     [DisplayName("Authorized Signatory")]
     [DefaultProperty(nameof(FullName))]
     [ImageName("BO_Position")]

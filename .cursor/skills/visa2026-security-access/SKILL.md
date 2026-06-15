@@ -48,7 +48,7 @@ disable-model-invocation: false
 |------|-------------------|-------------|
 | **Administrators** | `true` | Super administrator — full bypass; do **not** verify officer access as Admin only |
 | **Users** | `false` | Immigration officers — main permission matrix in `CreateUserRole()` |
-| **VisaOffice** | `false` | Org singletons, project contracts, ministries, Resminamalar templates (`CreateVisaOfficeRole()`) |
+| **VisaOffice** | `false` | Tenant **Configuration** nav, project contracts, ministries, Resminamalar templates (`CreateVisaOfficeRole()`) |
 | **Default** | `false` | Self-service profile / password / culture only |
 
 Seeded accounts (`Updater.UpdateDatabaseAfterUpdateSchema`):

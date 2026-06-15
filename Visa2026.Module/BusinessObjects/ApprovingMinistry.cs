@@ -14,7 +14,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 [DefaultClassOptions]
 [DefaultProperty(nameof(ShortNameTm))]
-[NavigationItem("Lookup/Organization")]
+[NavigationItem("Configuration")]
 public class ApprovingMinistry : LookupBase
 {
     /// <summary>Short label shown on <see cref="ApplicationProgress"/> ministry steps.</summary>

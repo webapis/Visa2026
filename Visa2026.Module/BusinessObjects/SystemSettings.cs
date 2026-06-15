@@ -11,7 +11,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("System")]
+    [NavigationItem("Configuration")]
     [DisplayName("Settings")]
     public class SystemSettings : BaseObject
     {

@@ -151,7 +151,7 @@
       </Item>
       <Item Id="Medical" Caption="Sağlık" />
       <Item Id="Operations" Caption="İşlemler" />
-      <Item Id="Organization" Caption="Organizasyon" />
+      <Item Id="Configuration" Caption="Yapılandırma" />
       <Item Id="Passport" Caption="Pasaport" />
       <Item Id="People" Caption="Kişiler">
         <Items>

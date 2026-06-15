@@ -151,7 +151,7 @@
       </Item>
       <Item Id="Medical" Caption="Saglyk" />
       <Item Id="Operations" Caption="Amallar" />
-      <Item Id="Organization" Caption="Gurama" />
+      <Item Id="Configuration" Caption="Sazlama" />
       <Item Id="Passport" Caption="Pasport" />
       <Item Id="People" Caption="Adamlar">
         <Items>

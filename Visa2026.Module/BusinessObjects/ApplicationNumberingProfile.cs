@@ -15,10 +15,9 @@ namespace Visa2026.Module.BusinessObjects;
 /// Separate from <see cref="CompanyProfile"/> so company identity and numbering can vary per deployment.
 /// </summary>
 [DefaultClassOptions]
-[NavigationItem("Organization")]
+[NavigationItem("Configuration")]
 [DisplayName("Application Numbering")]
 [DefaultProperty(nameof(AppNumberPrefix))]
-[ImageName("BO_Number")]
 public class ApplicationNumberingProfile : BaseObject
 {
     public const string DefaultProfileName = "Default";

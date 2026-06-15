@@ -151,7 +151,7 @@
       </Item>
       <Item Id="Medical" Caption="Медицина" />
       <Item Id="Operations" Caption="Операции" />
-      <Item Id="Organization" Caption="Организация" />
+      <Item Id="Configuration" Caption="Конфигурация" />
       <Item Id="Passport" Caption="Паспорт" />
       <Item Id="People" Caption="Люди">
         <Items>

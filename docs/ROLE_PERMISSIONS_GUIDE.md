@@ -105,19 +105,21 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type | Access |
 |------|--------|
 | `UserReportPlaceholder` | Read, Write, Create, Delete (extract placeholders) |
+| `ApplicationMigrationSlaProfile` | Full (migration SLA tiers + link application types) |
+| `SystemSettings` | Full (singleton system settings) |
 
 ### Read only
 
-| Type |
-|------|
-| `OrganizationType`, `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` |
+| Type | Notes |
+|------|-------|
+| `OrganizationType`, `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
+| `ApplicationType` | Link popup on migration SLA profile detail |
 
 ### Navigation (allow)
 
 | Area |
 |------|
-| **Organization** — company, signatory, representative, numbering |
-| **Lookup → Organization** — `ProjectContract` only (other Lookup sub-groups denied) |
+| **Configuration** — company, signatory, representative, numbering, project contracts, ministries, migration SLA profiles, system settings |
 | **Reports** — `UserReportTemplate` |
 
 ---
@@ -211,3 +213,4 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 | Apr 2026 | `EducationLevel` and `Country` enforced as read-only for `Users` role | Added `EnsureReadOnlyPermission<T>` helper to explicitly strip Write/Create/Delete from existing roles |
 | Jun 2026 | Visa office staff need org singleton + project contract + template screens without full admin | Added **`VisaOffice`** role (`CreateVisaOfficeRole`, `EnsureVisaOfficeConfigurationPermissions`, `EnsureVisaOfficeNavigationPermissions`); seeded user `VisaOffice` |
 | Jun 2026 | Runtime log + state-notification inbox visible to officers | **`EnsureAdminOnlyOperationsDeny`** on Users / VisaOffice — super administrators only; state inbox remains a future-release prototype |
+| Jun 2026 | Visa office cannot open migration SLA profiles or system settings | **`EnsureFullAccessRecursivePermission`** for `ApplicationMigrationSlaProfile` and `SystemSettings` on VisaOffice; nav allow for those items; `ApplicationType` read for link popup |

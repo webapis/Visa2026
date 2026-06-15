@@ -707,25 +707,27 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureReadOnlyPermission<PdfFormMapping>(role);
+            EnsureFullAccessRecursivePermission<ApplicationMigrationSlaProfile>(role);
+            EnsureFullAccessRecursivePermission<SystemSettings>(role);
+            // Link / Unlink application types on migration SLA profile detail.
+            EnsureTypePermission<ApplicationType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
         }
 
-        /// <summary>Navigation for visa office — Organization screens, project contracts, templates; not case processing.</summary>
+        /// <summary>Navigation for visa office — Configuration screens, Resminamalar templates; not case processing.</summary>
         static void EnsureVisaOfficeNavigationPermissions(PermissionPolicyRole role)
         {
             if (role == null)
                 return;
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/CompanyProfile", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/AuthorizedSignatory", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/AuthorizedRepresentative", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Organization/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
-
-            // Tenant catalogs only — under Lookup/Organization (not operational Person/Passport/Visa lists).
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Items/ProjectContract", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Items/ApprovingMinistry", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/CompanyProfile", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/AuthorizedSignatory", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/AuthorizedRepresentative", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationMigrationSlaProfile", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/SystemSettings", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ProjectContract", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApprovingMinistry", SecurityPermissionState.Allow);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Education", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Housing", SecurityPermissionState.Deny);

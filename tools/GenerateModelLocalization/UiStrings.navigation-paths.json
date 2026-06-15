@@ -1,5 +1,10 @@
 {
   "paths": {
+    "Configuration": {
+      "tr-TR": "Yapılandırma",
+      "tk-TM": "Sazlama",
+      "ru-RU": "Конфигурация"
+    },
     "Lookup/Application": {
       "tr-TR": "Başvuru",
       "tk-TM": "Arza",

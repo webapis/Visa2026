@@ -66,6 +66,7 @@
     "System": { "tr-TR": "Sistem", "tk-TM": "Ulgam", "ru-RU": "Система" },
     "Auth": { "tr-TR": "Güvenlik", "tk-TM": "Howpsuzlyk", "ru-RU": "Безопасность" },
     "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+    "Configuration": { "tr-TR": "Yapılandırma", "tk-TM": "Sazlama", "ru-RU": "Конфигурация" },
     "Organization": { "tr-TR": "Organizasyon", "tk-TM": "Gurama", "ru-RU": "Организация" },
     "Geography": { "tr-TR": "Coğrafya", "tk-TM": "Geografiýa", "ru-RU": "География" },
     "Config": { "tr-TR": "Yapılandırma", "tk-TM": "Sazlama", "ru-RU": "Настройка" },
