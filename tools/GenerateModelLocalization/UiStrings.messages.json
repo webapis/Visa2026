@@ -1175,6 +1175,12 @@
     "tk-TM": "Bu taslama şertnamasyna azyndan bir ministrlik ädimi goşuň.",
     "ru-RU": "Добавьте хотя бы один этап министерства в этот контракт проекта."
   },
+  "ProjectContract.SaveBeforeMinistryLeg": {
+    "en": "Save the project contract before saving this ministry leg.",
+    "tr-TR": "Bu bakanlık adımını kaydetmeden önce proje sözleşmesini kaydedin.",
+    "tk-TM": "Bu ministrlik ädimini ýazdyrmazdan ozal taslama şertnamasyny ýazdyryň.",
+    "ru-RU": "Сохраните контракт проекта перед сохранением этого этапа министерства."
+  },
   "ProjectContract.MinistryLegMaxDaysRequired": {
     "en": "Leg {0}: enter the maximum working days in review before this contract can be active.",
     "tr-TR": "Adım {0}: sözleşme aktif olmadan önce incelemedeki azami iş günlerini girin.",

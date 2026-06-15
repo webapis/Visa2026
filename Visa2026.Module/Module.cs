@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.DomainLogics;
+using Visa2026.Module.Controllers;
 using Visa2026.Module.Model;
 using Visa2026.Module.DatabaseUpdate;
 using DevExpress.ExpressApp.Model.NodeGenerators;
@@ -172,7 +173,10 @@ namespace Visa2026.Module
         public override void Setup(XafApplication application)
         {
             base.Setup(application);
-            // Manage various aspects of the application UI and behavior at the module level.
+            application.ObjectSpaceCreated += Application_ObjectSpaceCreated;
         }
+
+        private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e) =>
+            ProjectContractMinistryLegObjectSpaceHooks.Subscribe(e.ObjectSpace);
     }
 }

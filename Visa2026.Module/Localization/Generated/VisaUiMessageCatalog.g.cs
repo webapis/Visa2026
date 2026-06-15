@@ -2091,6 +2091,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ädim {0}: duýduryş günleri iň ýokary barlag günlerinden az bolmaly.",
             ["ru-RU"] = "Этап {0}: порог предупреждения должен быть меньше максимального числа дней на рассмотрении.",
         },
+        ["ProjectContract.SaveBeforeMinistryLeg"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save the project contract before saving this ministry leg.",
+            ["tr-TR"] = "Bu bakanlık adımını kaydetmeden önce proje sözleşmesini kaydedin.",
+            ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal taslama şertnamasyny ýazdyryň.",
+            ["ru-RU"] = "Сохраните контракт проекта перед сохранением этого этапа министерства.",
+        },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Recycle Bin ({0})",

@@ -279,6 +279,18 @@ namespace Visa2026.Module.BusinessObjects
                 b.Ignore(c => c.Code);
             });
 
+            modelBuilder.Entity<ProjectContractMinistryLeg>(b =>
+            {
+                b.HasOne(l => l.ProjectContract)
+                    .WithMany(c => c.MinistryLegs)
+                    .HasForeignKey(l => l.ProjectContractId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApprovingMinistry)
+                    .WithMany()
+                    .HasForeignKey(l => l.ApprovingMinistryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
             modelBuilder.Entity<SystemSettings>()
                 .Property(s => s.ExpirationWarningThreshold)
                 .HasPrecision(5, 4);

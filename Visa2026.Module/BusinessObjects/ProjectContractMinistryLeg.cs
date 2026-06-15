@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -17,6 +18,7 @@ public class ProjectContractMinistryLeg : BaseObject
     public virtual Guid ProjectContractId { get; set; }
 
     [Browsable(false)]
+    [ForeignKey(nameof(ProjectContractId))]
     public virtual ProjectContract ProjectContract { get; set; } = null!;
 
     [RuleRequiredField]
@@ -35,4 +37,20 @@ public class ProjectContractMinistryLeg : BaseObject
     /// <summary>Optional early warning when working days in review exceed this value (must be &lt; <see cref="MaxDaysInReview"/>).</summary>
     [XafDisplayName("Duýduryş (iş günleri)")]
     public virtual int? WarningDaysBeforeMax { get; set; }
+
+    public override void OnSaving()
+    {
+        SyncForeignKeys();
+        base.OnSaving();
+    }
+
+    /// <summary>EF persists explicit FK scalars; XAF may set navigations only.</summary>
+    internal void SyncForeignKeys()
+    {
+        if (ProjectContract != null)
+            ProjectContractId = ProjectContract.ID;
+
+        if (ApprovingMinistry != null)
+            ApprovingMinistryId = ApprovingMinistry.ID;
+    }
 }

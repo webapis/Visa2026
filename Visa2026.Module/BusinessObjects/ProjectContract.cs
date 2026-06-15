@@ -74,5 +74,11 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         [InverseProperty(nameof(ProjectContractMinistryLeg.ProjectContract))]
         public virtual IList<ProjectContractMinistryLeg> MinistryLegs { get; set; }
+
+        public override void OnSaving()
+        {
+            ProjectContractMinistryHelper.WireMinistryLegs(this);
+            base.OnSaving();
+        }
     }
 }
