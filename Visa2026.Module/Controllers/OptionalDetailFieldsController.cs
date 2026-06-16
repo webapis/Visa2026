@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using Visa2026.Module.Appearance;
 using Visa2026.Module.BusinessObjects;
@@ -16,6 +15,7 @@ public sealed class OptionalDetailFieldsController : ViewController<DetailView>
     private static readonly ConditionalWeakTable<DetailView, OptionalDetailFieldsController> ActiveControllers = new();
 
     private bool _initializingOptionalFields;
+    private bool _refreshingOptionalFields;
 
     public static void NotifyShowOptionalFieldsChanged(DetailView detailView)
     {
@@ -71,8 +71,20 @@ public sealed class OptionalDetailFieldsController : ViewController<DetailView>
 
     private void RefreshAfterToggle()
     {
-        ApplyOptionalFieldsVisibility();
-        Frame.GetController<AppearanceController>()?.Refresh();
+        if (_refreshingOptionalFields)
+        {
+            return;
+        }
+
+        _refreshingOptionalFields = true;
+        try
+        {
+            ApplyOptionalFieldsVisibility();
+        }
+        finally
+        {
+            _refreshingOptionalFields = false;
+        }
     }
 
     private void View_CurrentObjectChanged(object sender, EventArgs e)

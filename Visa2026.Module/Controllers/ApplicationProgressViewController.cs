@@ -29,12 +29,12 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
     {
         foreach (var application in ObjectSpace.GetObjectsToSave(false).OfType<BusinessObjects.Application>())
         {
-            if (!ApplicationProgressProfileResolver.TryValidateProjectContractUnchangedAfterProgress(
+            if (!ApplicationProgressProfileResolver.TryValidateApplicationUnchangedAfterProgress(
                     application, ObjectSpace, out var lockError))
             {
                 e.Cancel = true;
                 Application.ShowViewStrategy.ShowMessage(
-                    lockError ?? VisaUiMessages.Get("Application.ProjectContractLockedAfterProgress"),
+                    lockError ?? VisaUiMessages.Get("Application.FieldsLockedAfterProgress"),
                     InformationType.Error,
                     5000,
                     InformationPosition.Top);

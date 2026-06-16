@@ -47,6 +47,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["Application.FieldsLockedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application fields cannot be changed after ministry or migration progress was recorded.",
+            ["tr-TR"] = "Bakanlık veya göç ilerlemesi kaydedildikten sonra arza alanları değiştirilemez.",
+            ["tk-TM"] = "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
+            ["ru-RU"] = "Поля заявки нельзя изменить после записи прогресса министерства или миграции.",
+        },
         ["Application.ProjectContractChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Progress history already exists. Changing the project contract may change which ministry steps apply to new progress rows. Review existing steps.",

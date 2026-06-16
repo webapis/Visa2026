@@ -11,6 +11,13 @@ namespace Visa2026.Module.BusinessObjects;
 /// </summary>
 public static class ApplicationProgressProfileResolver
 {
+    /// <summary>
+    /// Header members locked after approval leaves office preparation. Workflow fields (visa, travel,
+    /// locations, child collections) and optional detail fields remain editable for later process steps.
+    /// </summary>
+    public const string LockedApplicationHeaderTargetItems =
+        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ProjectContract";
+
     public static bool RequiresProjectContract(Application? application)
     {
         if (application?.ApplicationType?.ShowProjectContract != true)
@@ -68,6 +75,15 @@ public static class ApplicationProgressProfileResolver
     }
 
     /// <summary>
+    /// True when header fields and child collections on <see cref="Application"/> must not be edited
+    /// (ministry or migration progress recorded after office preparation).
+    /// </summary>
+    public static bool IsApplicationLockedAfterOfficePreparation(
+        Application? application,
+        IObjectSpace? objectSpace = null) =>
+        HasProgressBeyondOfficePreparation(application, objectSpace);
+
+    /// <summary>
     /// True when <see cref="Application.ProjectContract"/> must not be edited
     /// (ministry or migration progress recorded after office preparation).
     /// </summary>
@@ -76,11 +92,11 @@ public static class ApplicationProgressProfileResolver
         if (application?.ApplicationType?.ShowProjectContract != true)
             return false;
 
-        return HasProgressBeyondOfficePreparation(application, objectSpace);
+        return IsApplicationLockedAfterOfficePreparation(application, objectSpace);
     }
 
-    /// <summary>Blocks <see cref="Application.ProjectContract"/> FK changes once approval has left office preparation.</summary>
-    public static bool TryValidateProjectContractUnchangedAfterProgress(
+    /// <summary>Blocks locked header edits once approval has left office preparation.</summary>
+    public static bool TryValidateApplicationUnchangedAfterProgress(
         Application? application,
         IObjectSpace objectSpace,
         out string? errorMessage)
@@ -96,14 +112,21 @@ public static class ApplicationProgressProfileResolver
         if (original == null)
             return true;
 
-        var originalContractId = original.ProjectContract?.ID ?? Guid.Empty;
-        var currentContractId = application.ProjectContract?.ID ?? Guid.Empty;
-        if (originalContractId == currentContractId)
-            return true;
+        if (ApplicationLockedHeaderScalarsDiffer(original, application))
+        {
+            errorMessage = VisaUiMessages.Get("Application.FieldsLockedAfterProgress");
+            return false;
+        }
 
-        errorMessage = VisaUiMessages.Get("Application.ProjectContractLockedAfterProgress");
-        return false;
+        return true;
     }
+
+    /// <inheritdoc cref="TryValidateApplicationUnchangedAfterProgress"/>
+    public static bool TryValidateProjectContractUnchangedAfterProgress(
+        Application? application,
+        IObjectSpace objectSpace,
+        out string? errorMessage) =>
+        TryValidateApplicationUnchangedAfterProgress(application, objectSpace, out errorMessage);
 
     public static bool TryValidateProjectContractOnApplication(
         Application? application,
@@ -237,4 +260,13 @@ public static class ApplicationProgressProfileResolver
         && progress.Location != null
         && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)
         && string.Equals(progress.Location.Code, ApplicationProgressLocationCodes.AtOffice, StringComparison.OrdinalIgnoreCase);
+
+    private static bool ApplicationLockedHeaderScalarsDiffer(Application original, Application current) =>
+        original.IsManualEntry != current.IsManualEntry
+        || !string.Equals(original.ApplicationNumber, current.ApplicationNumber, StringComparison.Ordinal)
+        || !string.Equals(original.AppNumberPrefix, current.AppNumberPrefix, StringComparison.Ordinal)
+        || !string.Equals(original.FullApplicationNumber, current.FullApplicationNumber, StringComparison.Ordinal)
+        || original.ApplicationDate != current.ApplicationDate
+        || original.ApplicationType?.ID != current.ApplicationType?.ID
+        || original.ProjectContract?.ID != current.ProjectContract?.ID;
 }

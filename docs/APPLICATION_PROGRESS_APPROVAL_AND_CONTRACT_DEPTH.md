@@ -5,6 +5,7 @@
 > **Related:**
 > - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — domain ideation and route-on-type design (§8)
 > - [`APPLICATION_LISTVIEW_STATE_COLORS.md`](APPLICATION_LISTVIEW_STATE_COLORS.md) — ListView row color from latest progress
+> - [`OPTIONAL_DETAIL_FIELDS.md`](OPTIONAL_DETAIL_FIELDS.md) — gear toggle; item optional fields stay editable after office prep (§3.4)
 > - [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md) — tenant catalog sync (`project-contract.json`)
 > - Module: [`ApplicationProgress.cs`](../Visa2026.Module/BusinessObjects/ApplicationProgress.cs), [`ApplicationProgressProfileResolver.cs`](../Visa2026.Module/BusinessObjects/ApplicationProgressProfileResolver.cs), [`ApplicationProgressRouteHelper.cs`](../Visa2026.Module/BusinessObjects/ApplicationProgressRouteHelper.cs), [`ApplicationProgressTransitionHelper.cs`](../Visa2026.Module/BusinessObjects/ApplicationProgressTransitionHelper.cs)
 > - Catalogs: [`application-state.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/application-state.json), [`application-location.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/application-location.json), [`tenant/project-contract.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.json)
@@ -111,6 +112,24 @@ No visa-period filtering — officer selects the appropriate contract row manual
 | Progress shows ministry name | `ApplicationProgress.MinistryStepLabel` from snapshot |
 
 Controllers: [`ApplicationProjectContractMinistryController`](../Visa2026.Module/Controllers/ApplicationProjectContractMinistryController.cs), [`ProjectContractMinistryController`](../Visa2026.Module/Controllers/ProjectContractMinistryController.cs).
+
+### 3.4 Application header lock after office preparation
+
+Once approval has **left office preparation** — any `ApplicationProgress` row that is **not** `IS_BEING_PREPARED @ AT_OFFICE` (`ApplicationProgressProfileResolver.HasProgressBeyondOfficePreparation`) — core **application identity** fields are read-only in the UI and on save. Workflow fields and child data filled **later in the process** stay editable.
+
+| Locked (UI + commit) | Still editable |
+|----------------------|----------------|
+| `IsManualEntry`, `ApplicationNumber`, `AppNumberPrefix`, `FullApplicationNumber`, `ApplicationDate` | Visa / urgency / migration lookups (`VisaPeriod`, `VisaCategory`, `VisaType`, `MigrationService`, `Urgency`, …) |
+| `ApplicationTypeQuickCode` / `ApplicationType` | Business trip and location fields (`BusinessTrip*`, `BorderZoneLocation`, `MovementPermitLocation`, `FromCity`, `ToCity`, …) |
+| `ProjectContract` (also reverted on change in [`ApplicationProjectContractMinistryController`](../Visa2026.Module/Controllers/ApplicationProjectContractMinistryController.cs)) | Child tabs: `ApplicationItems`, `Invitations`, `Rejections`, `WorkPermits` |
+| | `ProgressHistory` (officers keep appending rows) |
+| | `ApplicationItem` lines — including gear-hidden optional fields (`RegistrationDate`, `TravelType`, …); see [`OPTIONAL_DETAIL_FIELDS.md`](OPTIONAL_DETAIL_FIELDS.md) |
+
+**Single source for locked member names:** [`ApplicationProgressProfileResolver.LockedApplicationHeaderTargetItems`](../Visa2026.Module/BusinessObjects/ApplicationProgressProfileResolver.cs) — used by the class-level `[Appearance("ApplicationReadOnlyAfterOfficePreparation", …)]` on [`Application`](../Visa2026.Module/BusinessObjects/Application.cs) and by `TryValidateApplicationUnchangedAfterProgress` on commit ([`ApplicationProgressCommitValidationController`](../Visa2026.Module/Controllers/ApplicationProgressViewController.cs)).
+
+**Officer message:** `Application.FieldsLockedAfterProgress` (`tools/GenerateModelLocalization/UiStrings.messages.json`).
+
+**Not locked by this rule:** `IsProjectContractLocked` / contract UI disable applies only when `ShowProjectContract` is true; the header lock itself applies to all application types once progress has advanced.
 
 Migration from Phase 2 profiles: [`ProjectContractApprovalProfileFlattenMigrationUpdater`](../Visa2026.Module/DatabaseUpdate/ProjectContractApprovalProfileFlattenMigrationUpdater.cs) (single-profile contracts), then [`ProjectContractApprovalProfileSchemaCleanupUpdater`](../Visa2026.Module/DatabaseUpdate/ProjectContractApprovalProfileSchemaCleanupUpdater.cs) drops legacy tables.
 

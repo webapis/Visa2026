@@ -136,3 +136,12 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Root cause**: `ProjectContractMinistryController` blocked commit when `IsActive && !HasConfiguredLegs`.
 - **Fix**: Removed contract-save legs-required check. SLA validation (`TryValidateLegSla`) still runs when legs exist. `ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication` still blocks via-ministries applications without legs once progress moves past office preparation.
 - **Prevent**: Do not require ministry legs on contract save; enforce at application progress / contract selection time instead.
+
+## 2026-06-16 — Application header lock scope + gear StackOverflow
+
+- **Symptom**: `StackOverflowException` when clicking optional-fields gear on `ApplicationItem_DetailView` after ministry progress; officers could not edit gear-hidden registration fields on in-progress applications.
+- **Root cause (gear)**: `OptionalDetailFieldsController.RefreshAfterToggle` called `AppearanceController.Refresh()`, which recursively `ToggleReadOnly` on XAF synthetic layout member `AdditionalFields`.
+- **Root cause (lock)**: `ApplicationReadOnlyAfterOfficePreparation` and `TryValidateApplicationUnchangedAfterProgress` locked visa/travel fields, child tabs, and all `ApplicationItem` saves once progress left office prep — too broad for fields filled later in the workflow.
+- **Fix**: Gear toggle uses imperative `OptionalDetailFieldsVisibilityApplicator` only (+ reentrancy guard). Lock narrowed to `ApplicationProgressProfileResolver.LockedApplicationHeaderTargetItems` (numbering, date, type, contract); child collection commit blocking removed.
+- **Docs**: [`docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](../../../docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) §3.4; [`docs/OPTIONAL_DETAIL_FIELDS.md`](../../../docs/OPTIONAL_DETAIL_FIELDS.md) — interaction + pitfall #6.
+- **Prevent**: Do not add workflow/child fields to header lock without product sign-off; do not call `AppearanceController.Refresh()` from optional-fields gear toggle on Blazor.

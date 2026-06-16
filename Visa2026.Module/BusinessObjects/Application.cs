@@ -20,6 +20,13 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem(false)]
     [XafDisplayName("Application")]
     [DefaultProperty(nameof(ApplicationNumber))]
+    [Appearance(
+        "ApplicationReadOnlyAfterOfficePreparation",
+        AppearanceItemType = "ViewItem",
+        TargetItems = ApplicationProgressProfileResolver.LockedApplicationHeaderTargetItems,
+        Criteria = "IsLockedAfterOfficePreparation",
+        Enabled = false,
+        Context = "DetailView")]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject, IBoListRowState
     {
@@ -295,11 +302,18 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [NotMapped]
+        public bool IsLockedAfterOfficePreparation =>
+            ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(
+                this, ObjectSpaceHelper.Get(this));
+
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [NotMapped]
         public bool IsProjectContractLocked =>
-            ApplicationProgressProfileResolver.IsProjectContractLocked(this, ObjectSpaceHelper.Get(this));
+            ApplicationType?.ShowProjectContract == true && IsLockedAfterOfficePreparation;
 
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
-        [Appearance("ProjectContractReadOnlyAfterProgress", Enabled = false, Criteria = "IsProjectContractLocked", Context = "DetailView")]
         [VisibleInListView(false)]
         [DataSourceCriteria("IsActive = true")]
         public virtual ProjectContract ProjectContract { get; set; }

@@ -15,7 +15,7 @@ Companion to [SKILL.md](./SKILL.md).
 | **Deprecated** enum | `ApplicationStatus.cs` — use `ApplicationState` catalog codes only |
 | Leg code builders | `ApplicationProgressLegCodes.cs` (`MaxLegCount = 5`, `IsMinistryDecisionStateCode`) |
 | Stable constants | `ApplicationProgressCatalogCodes.cs`, `ApplicationProgressStateCodes`, `ApplicationProgressLocationCodes` |
-| Resolver (leg count, contract rules) | `ApplicationProgressProfileResolver.cs` |
+| Resolver (leg count, contract rules, header lock) | `ApplicationProgressProfileResolver.cs` — `LockedApplicationHeaderTargetItems`, `HasProgressBeyondOfficePreparation`, `TryValidateApplicationUnchangedAfterProgress`; see [approval doc §3.4](../../../docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) |
 | Allowed codes / suggestions | `ApplicationProgressRouteHelper.cs` |
 | Transition graph + save validation | `ApplicationProgressTransitionHelper.cs` |
 | Latest row helper | `ApplicationProgressHelper.cs` |
@@ -31,7 +31,7 @@ Companion to [SKILL.md](./SKILL.md).
 |------------|------|
 | `ApplicationProgressCommitValidationController` | Block illegal progress + contract on commit |
 | `ApplicationProgressDetailViewController` | Suggest next state/location on detail |
-| `ApplicationProjectContractMinistryController` | Contract change → snapshot + warnings |
+| `ApplicationProjectContractMinistryController` | Contract change → snapshot + warnings; reverts `ProjectContract` when header locked |
 | `ProjectContractMinistryController` | Block empty legs / structural leg edits when referenced |
 | `ApplicationProgressRowStateRefreshController` | Refresh Application list after progress save |
 
@@ -54,6 +54,7 @@ Companion to [SKILL.md](./SKILL.md).
 
 ```text
 ApplicationProgressCommitValidationController
+  → ApplicationProgressProfileResolver.TryValidateApplicationUnchangedAfterProgress (Application — locked header only; §3.4)
   → ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication (Application)
   → ApplicationProgressTransitionHelper.TryValidateProgressStep (each ApplicationProgress)
        → ApplicationProgressRouteHelper (state/location allowed for route + leg count)

@@ -158,7 +158,7 @@ Auto-expand while editing uses `HasMeaningfulOptionalValue` on the changed prope
 | `BusinessObjects/SupportsOptionalDetailFieldsAttribute.cs` | Type-level opt-in marker |
 | `BusinessObjects/OptionalDetailFieldsSupport.cs` | Public helpers (`Supports`, `HasPopulatedOptionalFields`, `IsOptionalMember`) |
 | `Appearance/OptionalDetailFieldsAppearanceRegistration.cs` | TypesInfo appearance rules + `OptionalDetailFieldsMetadata` |
-| `Controllers/OptionalDetailFieldsController.cs` | Auto-expand, `ObjectChanged`, appearance refresh |
+| `Controllers/OptionalDetailFieldsController.cs` | Auto-expand, `ObjectChanged`, imperative visibility on toggle |
 | `Controllers/OptionalDetailFieldsVisibilityApplicator.cs` | Blazor view-item visibility |
 | `Editors/OptionalDetailFieldsEditorAliases.cs` | Editor alias `OptionalDetailFieldsToggle` |
 | `Module.cs` | Calls `OptionalDetailFieldsAppearanceRegistration.Register` in `CustomizeTypesInfo` |
@@ -190,15 +190,24 @@ Source: `tools/GenerateModelLocalization/UiStrings.messages.json`. Regenerate `V
 ## Pitfalls (from implementation)
 
 1. **Do not use `Func<Task>` on the Blazor component model** — use `EventCallback.Factory.Create` in `CreateComponentModel` (same as `CommaSeparatedMultiSelectPropertyEditor`).
-2. **Do not call `Frame` from a property editor** — use `OptionalDetailFieldsController.NotifyShowOptionalFieldsChanged(DetailView)` for appearance refresh.
+2. **Do not call `Frame` from a property editor** — use `OptionalDetailFieldsController.NotifyShowOptionalFieldsChanged(DetailView)` so the controller runs the imperative visibility applicator.
 3. **Custom `Model.xafml` detail layouts** must include a `LayoutItem` for `ShowOptionalFields` (see `Person_DetailView`, `Visa_DetailView`, `EmployeeSalary_DetailView`). Without it, the gear never appears even when the BO implements `IOptionalDetailFields`.
 4. **Avoid duplicate layout items** for the same property in custom + default layout merge — duplicates of `Amount`-style fields were caused by overlapping layout + default layout.
 5. **One gear per detail view** — add `ShowOptionalFields` once in `Model.xafml` and set `Removed="True"` on any merged duplicate in other layout groups (`Passport_DetailView` and `Visa_DetailView` had duplicate gears from layout merge + `[Index(-1000)]`).
-6. **`DetailView.Refresh()` alone** was insufficient when optional editors were not created while hidden; imperative applicator + appearance refresh after toggle is required.
+6. **Blazor toggle refresh** — `DetailView.Refresh()` alone was insufficient when optional editors were not created while hidden; use **`OptionalDetailFieldsVisibilityApplicator.Apply`** after toggle. **Do not** call `AppearanceController.Refresh()` on gear toggle — it caused `StackOverflowException` (`Unable to set the readonly property 'AdditionalFields'`) via recursive `ToggleReadOnly` on XAF layout members.
 7. **Collapsed on open:** Existing and new records start with gear **off**; optional fields stay hidden until the user toggles the gear or sets an optional value while editing.
 8. **`OnCreated` / default values** — do not rely on auto-expand on open for logic-filled data; use required-on-save + defaults (`ApplyRegistrationMovementDefaults`, `OnCreated`, sync rules) instead.
 9. **Auto-expand while editing** — non-nullable `DateTime` optional fields on **new** objects are ignored for auto-expand so `StartDate = DateTime.Today` does not force the optional section open on every new salary.
 10. **`[RuleRequiredField]` + gear** — required members are omitted from auto gear-hide rules; add explicit `!ShowOptionalFields` appearance on those properties if they should still collapse behind the gear.
+
+## Interaction with application progress lock
+
+After approval leaves office preparation (`Application.IsLockedAfterOfficePreparation`), [`APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) §3.4 locks only **application header identity** (numbering, date, type, contract). It does **not** lock:
+
+- **`ApplicationItem`** detail fields — including gear-hidden registration/travel (`RegistrationDate`, `TravelType`, `MovementType`, `TravelNotes`) that officers fill **later** (see [`ApplicationItem.md`](../Visa2026.Module/BusinessObjects/ApplicationItem.md) §6).
+- **`Application`** workflow fields (visa, migration, business trip, locations) or child collection tabs.
+
+The gear toggle and optional-field editors must remain usable on in-progress applications. Implementation: [`OptionalDetailFieldsController`](../Visa2026.Module/Controllers/OptionalDetailFieldsController.cs) calls only the imperative applicator on toggle (no full appearance refresh).
 
 ## Coverage across business objects
 
@@ -214,6 +223,7 @@ When adding a new detail BO, decide first: **user picks at create** vs **logic f
 ## Related docs
 
 - `AGENTS.md` — Module vs Blazor.Server responsibilities
+- `docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md` §3.4 — which `Application` header fields lock after office preparation (optional / gear fields on items stay editable)
 - `Visa2026.Module/BusinessObjects/ApplicationItem.md` — registration/travel rationale (reference example)
 - `docs/COMMA_SEPARATED_MULTI_SELECT.md` — different pattern (gear on catalog popup, not detail optional fields)
 - `docs/LOCALIZATION_PLAN.md` — UI string workflow

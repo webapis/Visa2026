@@ -230,6 +230,32 @@ public class ApplicationProgressProfileResolverTests
         };
 
         Assert.True(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+        Assert.True(ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(app));
+    }
+
+    [Fact]
+    public void IsApplicationLockedAfterOfficePreparation_TrueAfterMinistryStep_WithoutShowProjectContract()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = false
+        };
+        var app = new Application
+        {
+            ApplicationType = type,
+            ProgressHistory =
+            [
+                new ApplicationProgress
+                {
+                    State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
+                }
+            ]
+        };
+
+        Assert.True(ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(app));
+        Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
     }
 
     [Fact]
@@ -254,5 +280,55 @@ public class ApplicationProgressProfileResolverTests
         };
 
         Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+    }
+
+    [Fact]
+    public void ApplicationLockedHeaderScalarsDiffer_IgnoresWorkflowFields()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var original = new Application
+        {
+            ApplicationType = type,
+            ApplicationNumber = "1",
+            VisaPeriod = new VisaPeriod { LocalizationKey = "Month1" }
+        };
+        var current = new Application
+        {
+            ApplicationType = type,
+            ApplicationNumber = "1",
+            VisaPeriod = new VisaPeriod { LocalizationKey = "Month6" }
+        };
+
+        Assert.False(InvokeApplicationLockedHeaderScalarsDiffer(original, current));
+    }
+
+    [Fact]
+    public void ApplicationLockedHeaderScalarsDiffer_DetectsApplicationTypeChange()
+    {
+        var original = new Application
+        {
+            ApplicationType = new ApplicationType { ID = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), Name = "A" },
+            ApplicationNumber = "1"
+        };
+        var current = new Application
+        {
+            ApplicationType = new ApplicationType { ID = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), Name = "B" },
+            ApplicationNumber = "1"
+        };
+
+        Assert.True(InvokeApplicationLockedHeaderScalarsDiffer(original, current));
+    }
+
+    private static bool InvokeApplicationLockedHeaderScalarsDiffer(Application original, Application current)
+    {
+        var method = typeof(ApplicationProgressProfileResolver).GetMethod(
+            "ApplicationLockedHeaderScalarsDiffer",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        Assert.NotNull(method);
+        return (bool)method.Invoke(null, [original, current])!;
     }
 }

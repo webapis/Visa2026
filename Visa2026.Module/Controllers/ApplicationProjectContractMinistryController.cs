@@ -48,11 +48,11 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
         if (ReferenceEquals(previousContract, newContract))
             return;
 
-        if (ApplicationProgressProfileResolver.HasProgressBeyondOfficePreparation(application, ObjectSpace))
+        if (ApplicationProgressProfileResolver.IsApplicationLockedAfterOfficePreparation(application, ObjectSpace))
         {
             application.ProjectContract = previousContract;
             Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("Application.ProjectContractLockedAfterProgress"),
+                VisaUiMessages.Get("Application.FieldsLockedAfterProgress"),
                 InformationType.Warning,
                 8000,
                 InformationPosition.Top);

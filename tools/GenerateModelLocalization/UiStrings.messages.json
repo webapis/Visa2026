@@ -1163,6 +1163,12 @@
     "tk-TM": "Saýlanan taslama şertnamasynda ministrlik ädimi ýok.",
     "ru-RU": "У выбранного контракта проекта не настроены этапы министерств."
   },
+  "Application.FieldsLockedAfterProgress": {
+    "en": "Application fields cannot be changed after ministry or migration progress was recorded.",
+    "tr-TR": "Bakanlık veya göç ilerlemesi kaydedildikten sonra arza alanları değiştirilemez.",
+    "tk-TM": "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
+    "ru-RU": "Поля заявки нельзя изменить после записи прогресса министерства или миграции."
+  },
   "Application.ProjectContractLockedAfterProgress": {
     "en": "Project contract cannot change after ministry or migration steps were recorded.",
     "tr-TR": "Bakanlık veya göç adımları kaydedildikten sonra proje sözleşmesi değiştirilemez.",
