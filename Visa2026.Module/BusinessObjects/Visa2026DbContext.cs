@@ -259,7 +259,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<Application>(b => {
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
-                 .HasFilter("[IsManualEntry] = 0");
+                 .HasFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL");
             });
 
             modelBuilder.Entity<ApplicationType>(b => {
