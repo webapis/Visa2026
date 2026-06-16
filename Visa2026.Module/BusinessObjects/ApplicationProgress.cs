@@ -94,6 +94,16 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>Progress history list: localized state; appends ministry short name at ministry legs (no location prefix).</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public string StatusListLabel =>
+            ApplicationProgressListLabelHelper.FormatStatusLabel(
+                State?.ToString(),
+                Location?.Code,
+                MinistryStepLabel);
+
         [Browsable(false)]
         [NotMapped]
         public bool IsMinistryDecisionStep =>

@@ -360,6 +360,7 @@
         <Member Name="MinistryLetterFileName" Caption="Имя файла" />
         <Member Name="MinistryStepLabel" Caption="Министерство" />
         <Member Name="State" Caption="Состояние" />
+        <Member Name="StatusListLabel" Caption="Состояние" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="Маршрут прогресса">
@@ -2365,9 +2366,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
-        <ColumnInfo Id="LocationWithMinistryLabel" Caption="Место" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />
-        <ColumnInfo Id="State" Caption="Состояние" />
+        <ColumnInfo Id="StatusListLabel" Caption="Состояние" />
       </Columns>
     </ListView>
     <DetailView Id="ApplicationItem_DetailView" Caption="Позиция" />
@@ -2394,8 +2394,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
-        <ColumnInfo Id="Location" Caption="Место" />
-        <ColumnInfo Id="State" Caption="Состояние" />
+        <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />
+        <ColumnInfo Id="StatusListLabel" Caption="Состояние" />
       </Columns>
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Причина заявки" />

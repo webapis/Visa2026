@@ -8,16 +8,16 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Model;
 
 /// <summary>
-/// Application detail → Progress history nested list: location with ministry, letter file name.
+/// Progress history list views: combined status column (state + ministry), date, description, letter file name.
 /// </summary>
 public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
 {
     private const string NestedListViewId = "Application_ProgressHistory_ListView";
+    private const string StandaloneListViewId = "ApplicationProgress_ListView";
 
     private static readonly string[] ColumnOrder =
     [
-        nameof(ApplicationProgress.State),
-        nameof(ApplicationProgress.LocationWithMinistryLabel),
+        nameof(ApplicationProgress.StatusListLabel),
         nameof(ApplicationProgress.Date),
         nameof(ApplicationProgress.Description),
         nameof(ApplicationProgress.MinistryLetterFileName),
@@ -25,10 +25,12 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
 
     public override void UpdateNode(ModelNode node)
     {
-        if (((IModelViews)node)[NestedListViewId] is not IModelListView listView)
-            return;
+        var views = (IModelViews)node;
+        if (views[NestedListViewId] is IModelListView nestedListView)
+            ConfigureColumns(nestedListView, ColumnOrder);
 
-        ConfigureColumns(listView, ColumnOrder);
+        if (views[StandaloneListViewId] is IModelListView standaloneListView)
+            ConfigureColumns(standaloneListView, ColumnOrder);
     }
 
     private static void ConfigureColumns(IModelListView listView, string[] visiblePropertyNames)

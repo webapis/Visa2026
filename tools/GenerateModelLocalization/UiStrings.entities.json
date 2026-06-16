@@ -285,6 +285,7 @@
       "members": {
         "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
         "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "StatusListLabel": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
         "LocationWithMinistryLabel": { "en-US": "Location", "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
         "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },

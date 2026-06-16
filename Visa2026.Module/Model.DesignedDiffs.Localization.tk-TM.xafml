@@ -360,6 +360,7 @@
         <Member Name="MinistryLetterFileName" Caption="Faýl ady" />
         <Member Name="MinistryStepLabel" Caption="Ministrlik" />
         <Member Name="State" Caption="Ýagdaý" />
+        <Member Name="StatusListLabel" Caption="Ýagdaý" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="Ösüş ugry">
@@ -2365,9 +2366,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
-        <ColumnInfo Id="LocationWithMinistryLabel" Caption="Ýer" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Faýl ady" />
-        <ColumnInfo Id="State" Caption="Ýagdaý" />
+        <ColumnInfo Id="StatusListLabel" Caption="Ýagdaý" />
       </Columns>
     </ListView>
     <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi" />
@@ -2394,8 +2394,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
-        <ColumnInfo Id="Location" Caption="Ýer" />
-        <ColumnInfo Id="State" Caption="Ýagdaý" />
+        <ColumnInfo Id="MinistryLetterFileName" Caption="Faýl ady" />
+        <ColumnInfo Id="StatusListLabel" Caption="Ýagdaý" />
       </Columns>
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Arza sebäbi" />

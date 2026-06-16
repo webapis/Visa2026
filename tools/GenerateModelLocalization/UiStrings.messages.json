@@ -1127,6 +1127,18 @@
     "tk-TM": "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (taýýarlykda @ ofisde).",
     "ru-RU": "Первый шаг прогресса — подготовка в офисе."
   },
+  "ApplicationProgress.ListLabel.Office": {
+    "en": "Office",
+    "tr-TR": "Ofis",
+    "tk-TM": "Ofis",
+    "ru-RU": "Офис"
+  },
+  "ApplicationProgress.ListLabel.MigrationService": {
+    "en": "Migration service",
+    "tr-TR": "Göç Dairesi",
+    "tk-TM": "Migrasiýa gullugy",
+    "ru-RU": "Миграционная служба"
+  },
   "ApplicationProgress.CannotAdvanceFromTerminal": {
     "en": "Cannot add progress after a terminal state (issued, rejected, or cancelled).",
     "tr-TR": "Son durumdan (verildi, reddedildi veya iptal) sonra ilerleme eklenemez.",

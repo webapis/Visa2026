@@ -418,17 +418,23 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (ObjectSpaceHelper.Get(this) == null) return new List<Person>();
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null) return new List<Person>();
 
                 if (Application == null) return new List<Person>();
 
-                var query = ObjectSpaceHelper.Get(this).GetObjectsQuery<Person>();
+                var query = objectSpace.GetObjectsQuery<Person>();
                 var contract = Application.ProjectContract;
                 if (contract != null)
                 {
                     var contractId = contract.ID;
                     query = query.Where(p => p.ProjectContract != null && p.ProjectContract.ID == contractId);
                 }
+
+                var excludedPersonIds = ApplicationItemAvailablePeopleFilter.GetExcludedPersonIds(
+                    Application, ID, objectSpace);
+                if (excludedPersonIds.Count > 0)
+                    query = query.Where(p => !excludedPersonIds.Contains(p.ID));
 
                 var category = Application.ApplicationType?.Category;
                 if (category == ApplicationTypeCategory.Both || category == null)

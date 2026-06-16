@@ -500,8 +500,7 @@
     "Application_ProgressHistory_ListView": {
       "caption": { "en-US": "Progress history", "tr-TR": "İlerleme Geçmişi", "tk-TM": "Ösüş taryhy", "ru-RU": "История прогресса" },
       "columns": {
-        "State": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
-        "LocationWithMinistryLabel": { "en-US": "Location", "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
+        "StatusListLabel": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
         "Date": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
         "Description": { "en-US": "Description", "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
         "MinistryLetterFileName": { "en-US": "File name", "tr-TR": "Dosya adı", "tk-TM": "Faýl ady", "ru-RU": "Имя файла" }
@@ -513,10 +512,10 @@
     "ApplicationProgress_ListView": {
       "caption": { "tr-TR": "Başvuru İlerlemeleri", "tk-TM": "Arza ösüşleri", "ru-RU": "Прогресс заявок" },
       "columns": {
-        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
-        "Location": { "tr-TR": "Yer", "tk-TM": "Ýer", "ru-RU": "Место" },
-        "State": { "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
-        "Description": { "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" }
+        "StatusListLabel": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "Date": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "Description": { "en-US": "Description", "tr-TR": "Açıklama", "tk-TM": "Düşündiriş", "ru-RU": "Описание" },
+        "MinistryLetterFileName": { "en-US": "File name", "tr-TR": "Dosya adı", "tk-TM": "Faýl ady", "ru-RU": "Имя файла" }
       }
     },
     "Person_TravelHistories_ListView": {

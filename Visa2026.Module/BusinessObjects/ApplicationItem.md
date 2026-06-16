@@ -100,6 +100,7 @@ Catalog flags are defined on [`ApplicationType`](LookupBusinessObjects.cs) and s
 
 - Filtered by parent `Application.ProjectContract` when set.
 - Filtered by `Application.ApplicationType.Category`: `Employee` → employees only; `FamilyMember` → family members only; `Both` / null → all persons.
+- Excludes persons already linked on **other** `ApplicationItem` rows on the same `Application` (current line keeps its own `Person` when editing). Mirrors save rule `IsPersonUniqueInApplication` (`ApplicationItemAvailablePeopleFilter`).
 
 ### `ApplyCurrentFieldsFromSelectedPerson`
 

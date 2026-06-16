@@ -824,6 +824,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Nädogry ösüş geçişi: {0} → {1}.",
             ["ru-RU"] = "Недопустимый переход прогресса: {0} → {1}.",
         },
+        ["ApplicationProgress.ListLabel.MigrationService"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Migration service",
+            ["tr-TR"] = "Göç Dairesi",
+            ["tk-TM"] = "Migrasiýa gullugy",
+            ["ru-RU"] = "Миграционная служба",
+        },
+        ["ApplicationProgress.ListLabel.Office"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Office",
+            ["tr-TR"] = "Ofis",
+            ["tk-TM"] = "Ofis",
+            ["ru-RU"] = "Офис",
+        },
         ["ApplicationProgress.LocationNotAllowedForRoute"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Location \"{0}\" is not allowed for applications on the {1} route.",

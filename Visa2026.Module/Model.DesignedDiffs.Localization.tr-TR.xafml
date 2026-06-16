@@ -360,6 +360,7 @@
         <Member Name="MinistryLetterFileName" Caption="Dosya adı" />
         <Member Name="MinistryStepLabel" Caption="Bakanlık" />
         <Member Name="State" Caption="Durum" />
+        <Member Name="StatusListLabel" Caption="Durum" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind" Caption="İlerleme süreci">
@@ -2365,9 +2366,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Tarih" />
         <ColumnInfo Id="Description" Caption="Açıklama" />
-        <ColumnInfo Id="LocationWithMinistryLabel" Caption="Yer" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Dosya adı" />
-        <ColumnInfo Id="State" Caption="Durum" />
+        <ColumnInfo Id="StatusListLabel" Caption="Durum" />
       </Columns>
     </ListView>
     <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi" />
@@ -2394,8 +2394,8 @@
       <Columns>
         <ColumnInfo Id="Date" Caption="Tarih" />
         <ColumnInfo Id="Description" Caption="Açıklama" />
-        <ColumnInfo Id="Location" Caption="Yer" />
-        <ColumnInfo Id="State" Caption="Durum" />
+        <ColumnInfo Id="MinistryLetterFileName" Caption="Dosya adı" />
+        <ColumnInfo Id="StatusListLabel" Caption="Durum" />
       </Columns>
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
