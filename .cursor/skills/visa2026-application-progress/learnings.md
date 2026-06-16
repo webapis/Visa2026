@@ -121,6 +121,15 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Fix**: `TryBringIntoObjectSpace` returns the source instance for new parents (callers resolve owning space via `ObjectSpaceHelper.ResolveObjectSpace`). Walk parent `Frame` chain (`Parent` / `TemplateFrame`). `AttachLegInSpace` always targets the parent's session. SaveGuard wires + `TryCommitParentWithLeg` only (no throw in Executing); finalize stays on leg detail `Committing`.
 - **Prevent**: Cross-session parent resolution for aggregated children must not require `GetObject` on unsaved parents; defer hard guard to Committing after frame wiring.
 
+## 2026-06-16 — StackOverflow on ministry leg Save (reentrant CommitChanges)
+
+- **Symptom**: `System.StackOverflowException` when Save / Save and Close on ministry leg popup (no usable stack trace in VS).
+- **Root cause**: Leg `Committing` redirected to `parentObjectSpace.CommitChanges()`, which re-entered the same leg `Committing` / finalize path (`TryCommitParentWithLeg` → `CommitChanges` loop). `SaveGuard` also called `TryCommitParentWithLeg` from `Executing`, doubling entry points.
+- **Fix**: `LegCommitRedirectScope` (`AsyncLocal` depth) around parent `CommitChanges`; leg detail `Committing` skips redirect when scope active; `SaveGuard` only wires parent in `Executing` (redirect stays on `Committing`).
+- **Follow-up (still overflowed)**: Nested leg `ObjectSpace` still ran `PrepareLegsForCommit` / `EnsureLegInObjectSpace` / `Delete` during parent redirect; `TryFinalizeLegCommit` duplicated redirect calls; `GetRootObjectSpace` had no cycle guard.
+- **Follow-up fix**: `ShouldPrepareLegsOnCommit` skips nested popup OS during redirect; per-OS `PrepareLegsForCommitScope`; `TryFinalizeLegCommit` validates only (no second redirect); no `Delete` on leg copy during redirect; cycle-safe `GetRootObjectSpace` + frame walk.
+- **Prevent**: Never call `CommitChanges` from ministry-leg save handlers without a reentrancy guard; one redirect entry point (`Committing`), not `Executing` + `Committing`.
+
 ## 2026-06-16 — Save contract without ministry legs
 
 - **Symptom**: Officers cannot save active `ProjectContract` (e.g. GT-16) until ≥1 ministry leg is configured.

@@ -178,4 +178,81 @@ public class ApplicationProgressProfileResolverTests
         Assert.True(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, threeLeg));
         Assert.False(ApplicationProgressProfileResolver.WouldMinistryDepthChange(app, oneLeg, oneLeg));
     }
+
+    [Fact]
+    public void IsProjectContractLocked_FalseDuringOfficePreparationOnly()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var app = new Application
+        {
+            ApplicationType = type,
+            ProgressHistory =
+            [
+                new ApplicationProgress
+                {
+                    State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
+                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
+                }
+            ]
+        };
+
+        Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+    }
+
+    [Fact]
+    public void IsProjectContractLocked_TrueAfterMinistryStep()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = true
+        };
+        var app = new Application
+        {
+            ApplicationType = type,
+            ProgressHistory =
+            [
+                new ApplicationProgress
+                {
+                    State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
+                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
+                },
+                new ApplicationProgress
+                {
+                    State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
+                }
+            ]
+        };
+
+        Assert.True(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+    }
+
+    [Fact]
+    public void IsProjectContractLocked_FalseWhenShowProjectContractDisabled()
+    {
+        var type = new ApplicationType
+        {
+            ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
+            ShowProjectContract = false
+        };
+        var app = new Application
+        {
+            ApplicationType = type,
+            ProgressHistory =
+            [
+                new ApplicationProgress
+                {
+                    State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
+                }
+            ]
+        };
+
+        Assert.False(ApplicationProgressProfileResolver.IsProjectContractLocked(app));
+    }
 }

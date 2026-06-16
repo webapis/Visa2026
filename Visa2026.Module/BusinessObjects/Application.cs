@@ -291,7 +291,15 @@ namespace Visa2026.Module.BusinessObjects
             return false;
         }
 
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [NotMapped]
+        public bool IsProjectContractLocked =>
+            ApplicationProgressProfileResolver.IsProjectContractLocked(this, ObjectSpaceHelper.Get(this));
+
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
+        [Appearance("ProjectContractReadOnlyAfterProgress", Enabled = false, Criteria = "IsProjectContractLocked", Context = "DetailView")]
         [VisibleInListView(false)]
         [DataSourceCriteria("IsActive = true")]
         public virtual ProjectContract ProjectContract { get; set; }

@@ -7,7 +7,8 @@ using Visa2026.Module.Localization;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Snapshots ministry legs when <see cref="BusinessObjects.Application.ProjectContract"/> changes; warns after progress exists.
+/// Snapshots ministry legs when <see cref="BusinessObjects.Application.ProjectContract"/> changes;
+/// locks the field after ministry/migration progress; refreshes detail when progress changes.
 /// </summary>
 public sealed class ApplicationProjectContractMinistryController : ObjectViewController<DetailView, BusinessObjects.Application>
 {
@@ -15,16 +16,29 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
     {
         base.OnActivated();
         ObjectSpace.ObjectChanged += ObjectSpace_ObjectChanged;
+        ObjectSpace.Committed += ObjectSpace_Committed;
     }
 
     protected override void OnDeactivated()
     {
         ObjectSpace.ObjectChanged -= ObjectSpace_ObjectChanged;
+        ObjectSpace.Committed -= ObjectSpace_Committed;
         base.OnDeactivated();
     }
 
+    private void ObjectSpace_Committed(object? sender, EventArgs e) => View?.Refresh();
+
     private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
     {
+        if (e.Object is ApplicationProgress progress
+            && progress.Application != null
+            && ReferenceEquals(progress.Application, ViewCurrentObject)
+            && e.PropertyName is nameof(ApplicationProgress.State) or nameof(ApplicationProgress.Location))
+        {
+            View?.Refresh();
+            return;
+        }
+
         if (e.Object is not BusinessObjects.Application application
             || e.PropertyName != nameof(BusinessObjects.Application.ProjectContract))
             return;
@@ -46,6 +60,9 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
         }
 
         ProjectContractMinistryHelper.ApplySnapshot(ObjectSpace, application, newContract);
+
+        if (!ApplicationProgressProfileResolver.HasAnyProgressHistory(application, ObjectSpace))
+            return;
 
         Application.ShowViewStrategy.ShowMessage(
             VisaUiMessages.Get("Application.ProjectContractChangedAfterProgress"),

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Visa2026.Module.DatabaseUpdate.LookupCatalogs;
@@ -40,6 +41,27 @@ internal static class LookupCatalogMatchHelper
         }
 
         return buffer.ToString();
+    }
+
+    /// <summary>Matches <see cref="BusinessObjects.LookupBase.LocalizationKey"/> max length (64).</summary>
+    public const int LocalizationKeyMaxLength = 64;
+
+    /// <summary>
+    /// Normalizes then fits within <see cref="LocalizationKeyMaxLength"/>; long keys get an 8-char hash suffix.
+    /// </summary>
+    public static string ToLocalizationKey(string? value)
+    {
+        var normalized = NormalizeKey(value);
+        if (normalized.Length == 0)
+            return string.Empty;
+
+        if (normalized.Length <= LocalizationKeyMaxLength)
+            return normalized;
+
+        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalized)))
+            .ToLowerInvariant()[..8];
+        var prefixLength = LocalizationKeyMaxLength - 1 - hash.Length;
+        return normalized[..prefixLength] + "_" + hash;
     }
 
     private static string FoldTurkmenChars(string value)

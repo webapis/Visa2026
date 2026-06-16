@@ -599,7 +599,7 @@ internal static class LookupCatalogEntitySync
             var title = GetString(row, "NameTm") ?? lookup.NameTm;
             if (!string.IsNullOrWhiteSpace(title))
             {
-                lookup.LocalizationKey = LookupCatalogMatchHelper.NormalizeKey(title);
+                lookup.LocalizationKey = LookupCatalogMatchHelper.ToLocalizationKey(title);
                 return;
             }
         }
@@ -607,7 +607,7 @@ internal static class LookupCatalogEntitySync
         if (string.IsNullOrWhiteSpace(key))
             return;
 
-        lookup.LocalizationKey = key.Trim();
+        lookup.LocalizationKey = LookupCatalogMatchHelper.ToLocalizationKey(key.Trim());
     }
 
     private static void ApplyNavigation(IObjectSpace objectSpace, object target, string key, JsonElement value)

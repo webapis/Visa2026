@@ -40,6 +40,12 @@ public sealed class ProjectContractMinistryLegDetailDefaultsController
 
         WireParentIfNeeded();
 
+        if (ProjectContractMinistryHelper.IsLegCommitRedirectInProgress
+            || !ProjectContractMinistryHelper.ShouldPrepareLegsOnCommit(ObjectSpace))
+        {
+            return;
+        }
+
         if (ProjectContractMinistryHelper.TryCommitParentWithLeg(ObjectSpace, leg, e))
             return;
 

@@ -1,8 +1,8 @@
 {
   "rows": [
-
     {
       "NameTm": "GT-15 — (2 ylalaşyk: türkmenenergo > energetika)",
+      "LocalizationKey": "GT-15-YL2-TE-EN",
       "Code": "GT-15",
       "IsActive": true,
       "MinistryLegs": [
@@ -22,6 +22,7 @@
     },
     {
       "NameTm": "GT-15 — (4 ylalaşyk: türkmenenergo > energetika > gurluşyk > energetika)",
+      "LocalizationKey": "GT-15-YL4-TE-EN-GU-EN",
       "Code": "GT-15",
       "IsActive": true,
       "MinistryLegs": [
@@ -53,6 +54,7 @@
     },
     {
       "NameTm": "Şatlyk‑1 — (1 ylalaşyk: türkmengaz)",
+      "LocalizationKey": "SATLYK-1-YL1-TG",
       "Code": "Şatlyk-1",
       "IsActive": true,
       "MinistryLegs": [
@@ -64,6 +66,5 @@
         }
       ]
     }
-
   ]
 }

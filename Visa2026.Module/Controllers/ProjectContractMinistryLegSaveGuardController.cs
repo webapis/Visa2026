@@ -49,8 +49,6 @@ public sealed class ProjectContractMinistryLegSaveGuardController
             return;
 
         WireParentFromFrame(leg);
-        ProjectContractMinistryHelper.PrepareLegsForCommit(ObjectSpace);
-        ProjectContractMinistryHelper.TryCommitParentWithLeg(ObjectSpace, leg, e);
     }
 
     private void WireParentFromFrame(ProjectContractMinistryLeg leg)

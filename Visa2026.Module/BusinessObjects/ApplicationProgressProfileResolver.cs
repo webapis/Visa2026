@@ -67,6 +67,44 @@ public static class ApplicationProgressProfileResolver
             && !IsOfficePreparationStep(p));
     }
 
+    /// <summary>
+    /// True when <see cref="Application.ProjectContract"/> must not be edited
+    /// (ministry or migration progress recorded after office preparation).
+    /// </summary>
+    public static bool IsProjectContractLocked(Application? application, IObjectSpace? objectSpace = null)
+    {
+        if (application?.ApplicationType?.ShowProjectContract != true)
+            return false;
+
+        return HasProgressBeyondOfficePreparation(application, objectSpace);
+    }
+
+    /// <summary>Blocks <see cref="Application.ProjectContract"/> FK changes once approval has left office preparation.</summary>
+    public static bool TryValidateProjectContractUnchangedAfterProgress(
+        Application? application,
+        IObjectSpace objectSpace,
+        out string? errorMessage)
+    {
+        errorMessage = null;
+        if (application == null || objectSpace.IsNewObject(application))
+            return true;
+
+        if (!HasProgressBeyondOfficePreparation(application, objectSpace))
+            return true;
+
+        var original = objectSpace.GetObjectByKey<Application>(application.ID);
+        if (original == null)
+            return true;
+
+        var originalContractId = original.ProjectContract?.ID ?? Guid.Empty;
+        var currentContractId = application.ProjectContract?.ID ?? Guid.Empty;
+        if (originalContractId == currentContractId)
+            return true;
+
+        errorMessage = VisaUiMessages.Get("Application.ProjectContractLockedAfterProgress");
+        return false;
+    }
+
     public static bool TryValidateProjectContractOnApplication(
         Application? application,
         IObjectSpace? objectSpace,

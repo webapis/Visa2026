@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -26,10 +27,17 @@ public static class ObjectSpaceHelper
     /// </summary>
     public static IObjectSpace? GetRootObjectSpace(IObjectSpace? objectSpace)
     {
+        if (objectSpace == null)
+            return null;
+
+        var visited = new HashSet<IObjectSpace>();
         var current = objectSpace;
         while (current != null)
         {
-            var parent = GetParentObjectSpace(current);
+            if (!visited.Add(current))
+                return current;
+
+            var parent = TryGetParentObjectSpace(current);
             if (parent == null || ReferenceEquals(parent, current))
                 return current;
 
@@ -38,6 +46,12 @@ public static class ObjectSpaceHelper
 
         return objectSpace;
     }
+
+    internal static bool IsNestedObjectSpace(IObjectSpace objectSpace) =>
+        TryGetParentObjectSpace(objectSpace) != null;
+
+    internal static IObjectSpace? TryGetParentObjectSpace(IObjectSpace objectSpace) =>
+        GetParentObjectSpace(objectSpace);
 
     private static IObjectSpace? GetParentObjectSpace(IObjectSpace objectSpace)
     {

@@ -10,6 +10,13 @@ namespace Visa2026.Module.BusinessObjects;
 
 public static class ProjectContractMinistryHelper
 {
+    /// <summary>True while a leg popup commit is being redirected to a parent object-space commit.</summary>
+    internal static bool IsLegCommitRedirectInProgress => LegCommitRedirectScope.IsActive;
+
+    /// <summary>Skip nested popup sessions during redirect — the parent session prepares legs once.</summary>
+    internal static bool ShouldPrepareLegsOnCommit(IObjectSpace objectSpace) =>
+        !(IsLegCommitRedirectInProgress && ObjectSpaceHelper.IsNestedObjectSpace(objectSpace));
+
     /// <summary>
     /// True when a new parent contract would not be inserted in the same commit batch as its leg.
     /// </summary>
@@ -27,6 +34,13 @@ public static class ProjectContractMinistryHelper
     /// </summary>
     public static void PrepareLegsForCommit(IObjectSpace objectSpace)
     {
+        if (!ShouldPrepareLegsOnCommit(objectSpace))
+            return;
+
+        using var preparing = PrepareLegsForCommitScope.TryEnter(objectSpace);
+        if (preparing == null)
+            return;
+
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
         var contractsToSave = CollectContractsInCommitBatch(objectSpace, rootObjectSpace);
         var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, contractsToSave);
@@ -59,6 +73,9 @@ public static class ProjectContractMinistryHelper
     /// </summary>
     public static bool TryFinalizeLegCommit(IObjectSpace objectSpace, CancelEventArgs e)
     {
+        if (IsLegCommitRedirectInProgress)
+            return true;
+
         PrepareLegsForCommit(objectSpace);
 
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
@@ -69,15 +86,6 @@ public static class ProjectContractMinistryHelper
 
         foreach (var leg in legsToSave)
             EnsureLegParentInCommitBatch(objectSpace, leg);
-
-        foreach (var leg in legsToSave)
-        {
-            if (TryRedirectLegCommitToParentSession(objectSpace, leg, e))
-                return true;
-
-            if (TryCommitParentWithLeg(objectSpace, leg, e))
-                return true;
-        }
 
         if (legsToSave.Any(leg => IsLegForeignKeyOrphaned(objectSpace, leg))
             || legsToSave.Any(leg => leg.ProjectContract == null))
@@ -115,12 +123,8 @@ public static class ProjectContractMinistryHelper
         PrepareLegsForCommit(parentSpace);
         parentSpace.SetModified(parentInSpace);
 
-        if (!ReferenceEquals(parentSpace, legObjectSpace))
-        {
-            e.Cancel = true;
-            parentSpace.CommitChanges();
+        if (TryRedirectCommitToParentSpace(parentSpace, legObjectSpace, e))
             return true;
-        }
 
         return legInSpace.ProjectContract != null && !IsLegForeignKeyOrphaned(parentSpace, legInSpace);
     }
@@ -170,39 +174,24 @@ public static class ProjectContractMinistryHelper
         return false;
     }
 
-    private static bool TryRedirectLegCommitToParentSession(
-        IObjectSpace committingObjectSpace,
-        ProjectContractMinistryLeg leg,
+    private static bool TryRedirectCommitToParentSpace(
+        IObjectSpace parentSpace,
+        IObjectSpace legObjectSpace,
         CancelEventArgs e)
     {
-        var parent = leg.ProjectContract
-            ?? FindParentContract(
-                committingObjectSpace,
-                ObjectSpaceHelper.GetRootObjectSpace(committingObjectSpace) ?? committingObjectSpace,
-                leg);
-        if (parent == null)
+        if (ReferenceEquals(parentSpace, legObjectSpace))
             return false;
 
-        var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(committingObjectSpace, parent);
-        var parentInSpace = ResolveContractInObjectSpace(parentSpace, parent);
-        if (parentInSpace == null || !parentSpace.IsNewObject(parentInSpace))
-            return false;
-
-        var legInSpace = EnsureLegInObjectSpace(parentSpace, parentInSpace, leg);
-        PrepareLegsForCommit(parentSpace);
-        parentSpace.SetModified(parentInSpace);
-
-        if (!ReferenceEquals(parentSpace, committingObjectSpace))
+        using var scope = LegCommitRedirectScope.TryEnter();
+        if (scope == null)
         {
             e.Cancel = true;
-            parentSpace.CommitChanges();
             return true;
         }
 
-        if (NeedsParentInCommitBatch(parentSpace, legInSpace, out _))
-            return false;
-
-        return false;
+        e.Cancel = true;
+        parentSpace.CommitChanges();
+        return true;
     }
 
     public static void WireMinistryLegs(ProjectContract contract)
@@ -391,7 +380,8 @@ public static class ProjectContractMinistryHelper
 
         if (sourceSpace != null
             && !ReferenceEquals(sourceSpace, targetSpace)
-            && sourceSpace.IsNewObject(sourceLeg))
+            && sourceSpace.IsNewObject(sourceLeg)
+            && !IsLegCommitRedirectInProgress)
         {
             sourceSpace.Delete(sourceLeg);
         }
@@ -663,5 +653,58 @@ public static class ProjectContractMinistryHelper
             return GetMinistryShortNameForLeg(application, legFromState);
 
         return null;
+    }
+
+    private static class LegCommitRedirectScope
+    {
+        private static readonly AsyncLocal<int> Depth = new();
+
+        internal static bool IsActive => Depth.Value > 0;
+
+        internal static IDisposable? TryEnter()
+        {
+            if (Depth.Value > 0)
+                return null;
+
+            Depth.Value++;
+            return new PopScope();
+        }
+
+        private sealed class PopScope : IDisposable
+        {
+            public void Dispose() => Depth.Value--;
+        }
+    }
+
+    private static class PrepareLegsForCommitScope
+    {
+        private static readonly AsyncLocal<HashSet<IObjectSpace>?> ActiveSpaces = new();
+
+        internal static IDisposable? TryEnter(IObjectSpace objectSpace)
+        {
+            var spaces = ActiveSpaces.Value ??= new HashSet<IObjectSpace>();
+            if (!spaces.Add(objectSpace))
+                return null;
+
+            return new PopScope(objectSpace);
+        }
+
+        private sealed class PopScope : IDisposable
+        {
+            private readonly IObjectSpace _objectSpace;
+
+            internal PopScope(IObjectSpace objectSpace) => _objectSpace = objectSpace;
+
+            public void Dispose()
+            {
+                var spaces = ActiveSpaces.Value;
+                if (spaces == null)
+                    return;
+
+                spaces.Remove(_objectSpace);
+                if (spaces.Count == 0)
+                    ActiveSpaces.Value = null;
+            }
+        }
     }
 }

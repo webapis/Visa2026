@@ -36,6 +36,9 @@ internal static class ProjectContractMinistryLegObjectSpaceHooks
                 break;
             case ProjectContractMinistryLeg leg when sender is IObjectSpace objectSpace:
             {
+                if (!ProjectContractMinistryHelper.ShouldPrepareLegsOnCommit(objectSpace))
+                    break;
+
                 var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
                 ProjectContractMinistryHelper.TryAttachLegToParent(objectSpace, leg);
                 ProjectContractMinistryHelper.PrepareLegForSave(objectSpace, rootObjectSpace, leg);
@@ -46,8 +49,11 @@ internal static class ProjectContractMinistryLegObjectSpaceHooks
 
     private static void OnCommitting(object? sender, CancelEventArgs e)
     {
-        if (sender is IObjectSpace objectSpace)
+        if (sender is IObjectSpace objectSpace
+            && ProjectContractMinistryHelper.ShouldPrepareLegsOnCommit(objectSpace))
+        {
             ProjectContractMinistryHelper.PrepareLegsForCommit(objectSpace);
+        }
     }
 }
 

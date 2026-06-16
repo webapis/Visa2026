@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -18,8 +19,11 @@ internal static class ProjectContractMinistryLegCreationContext
     {
         projectContract = null;
 
+        var visitedFrames = new HashSet<Frame>();
         for (var current = frame; current != null; current = GetParentFrame(current))
         {
+            if (!visitedFrames.Add(current))
+                break;
             if (current is NestedFrame nestedFrame
                 && TryResolveFromNestedFrame(nestedFrame, objectSpace, out projectContract))
             {
