@@ -6,29 +6,42 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class ProjectContractMinistryLegForeignKeySyncTests
 {
     [Fact]
-    public void SyncForeignKeys_CopiesParentAndMinistryIds()
+    public void SyncForeignKeys_CopiesMinistryId_AndDefersParentIdWithoutObjectSpace()
     {
-        var contract = new ProjectContract { NameTm = "Test contract" };
         var ministry = new ApprovingMinistry { NameTm = "Test ministry" };
         var leg = new ProjectContractMinistryLeg
         {
-            ProjectContract = contract,
+            ProjectContract = new ProjectContract { NameTm = "Test contract" },
             ApprovingMinistry = ministry,
             Sequence = 1,
             MaxDaysInReview = 10,
         };
 
-        Assert.Equal(Guid.Empty, leg.ProjectContractId);
-        Assert.Equal(Guid.Empty, leg.ApprovingMinistryId);
-
         leg.SyncForeignKeys();
 
-        Assert.Equal(contract.ID, leg.ProjectContractId);
+        Assert.Equal(Guid.Empty, leg.ProjectContractId);
         Assert.Equal(ministry.ID, leg.ApprovingMinistryId);
     }
 
     [Fact]
-    public void WireMinistryLegs_SetsParentNavigationAndForeignKey()
+    public void SyncForeignKeys_ClearsParentIdWhenParentIsNewInObjectSpace()
+    {
+        var contract = new ProjectContract { NameTm = "Test contract" };
+        var leg = new ProjectContractMinistryLeg
+        {
+            ProjectContract = contract,
+            Sequence = 1,
+            ApprovingMinistry = new ApprovingMinistry { NameTm = "Ministry" },
+            ProjectContractId = contract.ID,
+        };
+
+        leg.SyncForeignKeys();
+
+        Assert.Equal(Guid.Empty, leg.ProjectContractId);
+    }
+
+    [Fact]
+    public void WireMinistryLegs_SetsParentNavigation()
     {
         var contract = new ProjectContract { NameTm = "Test contract" };
         var leg = new ProjectContractMinistryLeg
@@ -42,7 +55,7 @@ public class ProjectContractMinistryLegForeignKeySyncTests
         ProjectContractMinistryHelper.WireMinistryLegs(contract);
 
         Assert.Same(contract, leg.ProjectContract);
-        Assert.Equal(contract.ID, leg.ProjectContractId);
+        Assert.Equal(Guid.Empty, leg.ProjectContractId);
     }
 
     [Fact]

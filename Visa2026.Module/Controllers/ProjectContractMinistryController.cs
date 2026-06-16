@@ -26,19 +26,10 @@ public sealed class ProjectContractMinistryController : ObjectViewController<Det
 
     private void ObjectSpace_Committing(object sender, CancelEventArgs e)
     {
+        ProjectContractMinistryHelper.PrepareLegsForCommit(ObjectSpace);
+
         foreach (var contract in ObjectSpace.GetObjectsToSave(false).OfType<ProjectContract>())
         {
-            if (contract.IsActive && !ProjectContractMinistryHelper.HasConfiguredLegs(contract))
-            {
-                e.Cancel = true;
-                Application.ShowViewStrategy.ShowMessage(
-                    VisaUiMessages.Get("ProjectContract.MinistryLegsRequired"),
-                    InformationType.Error,
-                    6000,
-                    InformationPosition.Top);
-                return;
-            }
-
             if (contract.IsActive
                 && !ProjectContractMinistryHelper.TryValidateLegSla(contract, out var slaError))
             {

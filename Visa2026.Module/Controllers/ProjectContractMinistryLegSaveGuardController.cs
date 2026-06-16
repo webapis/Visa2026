@@ -2,20 +2,19 @@ using System.ComponentModel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
-using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
-using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Blocks leg-only save when the parent <see cref="ProjectContract"/> is still unsaved,
-/// before EF raises FK_ProjectContractMinistryLegs_ProjectContracts.
+/// Ministry leg popup Save must not commit the leg alone when the parent
+/// <see cref="ProjectContract"/> is still new — commit the parent session instead.
 /// </summary>
 public sealed class ProjectContractMinistryLegSaveGuardController
     : ObjectViewController<DetailView, ProjectContractMinistryLeg>
 {
     private SimpleAction? _saveAction;
+    private SimpleAction? _saveAndCloseAction;
 
     protected override void OnActivated()
     {
@@ -24,6 +23,10 @@ public sealed class ProjectContractMinistryLegSaveGuardController
         _saveAction = modificationsController?.SaveAction;
         if (_saveAction != null)
             _saveAction.Executing += SaveAction_Executing;
+
+        _saveAndCloseAction = modificationsController?.SaveAndCloseAction;
+        if (_saveAndCloseAction != null)
+            _saveAndCloseAction.Executing += SaveAction_Executing;
     }
 
     protected override void OnDeactivated()
@@ -31,6 +34,11 @@ public sealed class ProjectContractMinistryLegSaveGuardController
         if (_saveAction != null)
             _saveAction.Executing -= SaveAction_Executing;
         _saveAction = null;
+
+        if (_saveAndCloseAction != null)
+            _saveAndCloseAction.Executing -= SaveAction_Executing;
+        _saveAndCloseAction = null;
+
         base.OnDeactivated();
     }
 
@@ -41,37 +49,33 @@ public sealed class ProjectContractMinistryLegSaveGuardController
             return;
 
         WireParentFromFrame(leg);
-
-        if (!ProjectContractMinistryHelper.CanCommitLeg(ObjectSpace, leg))
-        {
-            e.Cancel = true;
-            throw new UserFriendlyException(VisaUiMessages.Get("ProjectContract.SaveBeforeMinistryLeg"));
-        }
+        ProjectContractMinistryHelper.PrepareLegsForCommit(ObjectSpace);
+        ProjectContractMinistryHelper.TryCommitParentWithLeg(ObjectSpace, leg, e);
     }
 
     private void WireParentFromFrame(ProjectContractMinistryLeg leg)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(ObjectSpace) ?? ObjectSpace;
-        if (TryResolveAndAttach(ObjectSpace, rootObjectSpace, leg, Frame))
+
+        if (TryResolveAndAttach(ObjectSpace, leg, Frame))
             return;
 
-        if (TryResolveAndAttach(ObjectSpace, rootObjectSpace, leg, Application.MainWindow))
+        if (TryResolveAndAttach(ObjectSpace, leg, Application.MainWindow))
             return;
 
-        ProjectContractMinistryLegCreationContext.TryGetProjectContractFromMainWindow(
-            Application,
-            rootObjectSpace,
-            out var mainContract);
-        if (mainContract != null)
-            AttachLegInSpace(rootObjectSpace, leg, mainContract);
+        if (ProjectContractMinistryLegCreationContext.TryGetProjectContractFromMainWindow(
+                Application,
+                rootObjectSpace,
+                out var mainContract)
+            && mainContract != null)
+        {
+            AttachLegInSpace(ObjectSpace, leg, mainContract);
+        }
     }
 
-    private bool TryResolveAndAttach(
-        IObjectSpace legObjectSpace,
-        IObjectSpace rootObjectSpace,
-        ProjectContractMinistryLeg leg,
-        Frame? frame)
+    private bool TryResolveAndAttach(IObjectSpace legObjectSpace, ProjectContractMinistryLeg leg, Frame? frame)
     {
+        var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(legObjectSpace) ?? legObjectSpace;
         if (!ProjectContractMinistryLegCreationContext.TryGetProjectContract(frame, rootObjectSpace, out var contract)
             || contract == null)
         {
@@ -82,20 +86,20 @@ public sealed class ProjectContractMinistryLegSaveGuardController
             }
         }
 
-        AttachLegInSpace(ObjectSpaceHelper.ResolveObjectSpace(legObjectSpace, contract), leg, contract);
+        AttachLegInSpace(legObjectSpace, leg, contract);
         return true;
     }
 
     private static void AttachLegInSpace(
-        IObjectSpace objectSpace,
+        IObjectSpace legObjectSpace,
         ProjectContractMinistryLeg leg,
         ProjectContract contract)
     {
-        var targetSpace = ObjectSpaceHelper.ResolveObjectSpace(objectSpace, contract);
-        var contractInTarget = targetSpace.IsNewObject(contract)
-            ? targetSpace.GetObject(contract) as ProjectContract ?? contract
-            : targetSpace.GetObjectByKey<ProjectContract>(contract.ID) ?? contract;
-        var legInTarget = targetSpace.GetObject(leg) as ProjectContractMinistryLeg ?? leg;
-        ProjectContractMinistryHelper.AttachLegToContract(contractInTarget, legInTarget, targetSpace);
+        var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(legObjectSpace, contract);
+        var contractInTarget = parentSpace.GetObject(contract) as ProjectContract
+            ?? (parentSpace.IsNewObject(contract) ? contract : null)
+            ?? (contract.ID != Guid.Empty ? parentSpace.GetObjectByKey<ProjectContract>(contract.ID) : null)
+            ?? contract;
+        ProjectContractMinistryHelper.EnsureLegInObjectSpace(parentSpace, contractInTarget, leg);
     }
 }

@@ -32,8 +32,19 @@ public sealed class ProjectContractMinistryLegDetailDefaultsController
             WireParentIfNeeded();
     }
 
-    private void ObjectSpace_Committing(object? sender, CancelEventArgs e) =>
+    private void ObjectSpace_Committing(object? sender, CancelEventArgs e)
+    {
+        var leg = ViewCurrentObject;
+        if (leg == null)
+            return;
+
         WireParentIfNeeded();
+
+        if (ProjectContractMinistryHelper.TryCommitParentWithLeg(ObjectSpace, leg, e))
+            return;
+
+        ProjectContractMinistryHelper.TryFinalizeLegCommit(ObjectSpace, e);
+    }
 
     private void WireParentIfNeeded()
     {
@@ -41,17 +52,17 @@ public sealed class ProjectContractMinistryLegDetailDefaultsController
         if (leg == null)
             return;
 
-        var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(ObjectSpace) ?? ObjectSpace;
-
         if (ProjectContractMinistryHelper.TryAttachLegToParent(ObjectSpace, leg))
             return;
 
         if (TryResolveParentContract(out var contract) && contract != null)
         {
-            var targetSpace = ObjectSpaceHelper.ResolveObjectSpace(ObjectSpace, contract);
-            var legInTarget = targetSpace.GetObject(leg) as ProjectContractMinistryLeg ?? leg;
-            var contractInTarget = targetSpace.GetObject(contract) as ProjectContract ?? contract;
-            ProjectContractMinistryHelper.AttachLegToContract(contractInTarget, legInTarget, targetSpace);
+            var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(ObjectSpace, contract);
+            var contractInTarget = parentSpace.GetObject(contract) as ProjectContract
+                ?? (parentSpace.IsNewObject(contract) ? contract : null)
+                ?? (contract.ID != Guid.Empty ? parentSpace.GetObjectByKey<ProjectContract>(contract.ID) : null)
+                ?? contract;
+            ProjectContractMinistryHelper.EnsureLegInObjectSpace(parentSpace, contractInTarget, leg);
         }
     }
 

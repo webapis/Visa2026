@@ -28,25 +28,26 @@ public static class ProjectContractMinistryHelper
     public static void PrepareLegsForCommit(IObjectSpace objectSpace)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
-        var legsToSave = objectSpace.GetObjectsToSave(false).OfType<ProjectContractMinistryLeg>().ToList();
+        var contractsToSave = CollectContractsInCommitBatch(objectSpace, rootObjectSpace);
+        var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, contractsToSave);
 
         if (!ReferenceEquals(objectSpace, rootObjectSpace))
             WireOrphanLegsInRoot(objectSpace, rootObjectSpace, legsToSave);
 
-        var contractsToSave = objectSpace.GetObjectsToSave(false).OfType<ProjectContract>().ToList();
-        if (!ReferenceEquals(objectSpace, rootObjectSpace))
+        foreach (var contract in contractsToSave)
         {
-            contractsToSave = contractsToSave
-                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ProjectContract>())
-                .Distinct()
-                .ToList();
+            var targetSpace = ResolveObjectSpaceFor(contract, objectSpace, rootObjectSpace);
+            var contractInTarget = ResolveContractInObjectSpace(targetSpace, contract) ?? contract;
+            RehomeContractLegsInObjectSpace(targetSpace, contractInTarget);
+            WireMinistryLegs(contractInTarget);
+            targetSpace.SetModified(contractInTarget);
         }
 
-        foreach (var contract in contractsToSave)
-            WireMinistryLegs(contract);
-
         foreach (var leg in legsToSave)
+        {
             PrepareLegForSave(objectSpace, rootObjectSpace, leg);
+            EnsureLegHasParentNavigation(objectSpace, rootObjectSpace, leg);
+        }
 
         foreach (var contract in CollectParentContracts(objectSpace, rootObjectSpace, legsToSave))
             ResolveObjectSpaceFor(contract, objectSpace, rootObjectSpace).SetModified(contract);
@@ -60,28 +61,68 @@ public static class ProjectContractMinistryHelper
     {
         PrepareLegsForCommit(objectSpace);
 
-        var legsToSave = objectSpace.GetObjectsToSave(false).OfType<ProjectContractMinistryLeg>().ToList();
+        var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
+        var contractsToSave = CollectContractsInCommitBatch(objectSpace, rootObjectSpace);
+        var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, contractsToSave);
         if (legsToSave.Count == 0)
             return true;
 
         foreach (var leg in legsToSave)
             EnsureLegParentInCommitBatch(objectSpace, leg);
 
-        if (legsToSave.Any(leg => IsLegForeignKeyOrphaned(objectSpace, leg)))
+        foreach (var leg in legsToSave)
+        {
+            if (TryRedirectLegCommitToParentSession(objectSpace, leg, e))
+                return true;
+
+            if (TryCommitParentWithLeg(objectSpace, leg, e))
+                return true;
+        }
+
+        if (legsToSave.Any(leg => IsLegForeignKeyOrphaned(objectSpace, leg))
+            || legsToSave.Any(leg => leg.ProjectContract == null))
         {
             e.Cancel = true;
             throw new UserFriendlyException(VisaUiMessages.Get("ProjectContract.SaveBeforeMinistryLeg"));
         }
 
-        var parentObjectSpace = ResolveParentObjectSpaceForLegCommit(objectSpace, legsToSave);
-        if (parentObjectSpace != null && !ReferenceEquals(parentObjectSpace, objectSpace))
+        return true;
+    }
+
+    /// <summary>
+    /// Leg popup Save on a new contract: commit the root session (parent + leg) instead of the popup session.
+    /// </summary>
+    public static bool TryCommitParentWithLeg(
+        IObjectSpace legObjectSpace,
+        ProjectContractMinistryLeg leg,
+        CancelEventArgs e)
+    {
+        PrepareLegsForCommit(legObjectSpace);
+        TryAttachLegToParent(legObjectSpace, leg);
+
+        var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(legObjectSpace) ?? legObjectSpace;
+        var parent = leg.ProjectContract
+            ?? FindParentContract(legObjectSpace, rootObjectSpace, leg);
+        if (parent == null)
+            return false;
+
+        var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(legObjectSpace, parent);
+        var parentInSpace = ResolveContractInObjectSpace(parentSpace, parent);
+        if (parentInSpace == null || !parentSpace.IsNewObject(parentInSpace))
+            return false;
+
+        var legInSpace = EnsureLegInObjectSpace(parentSpace, parentInSpace, leg);
+        PrepareLegsForCommit(parentSpace);
+        parentSpace.SetModified(parentInSpace);
+
+        if (!ReferenceEquals(parentSpace, legObjectSpace))
         {
-            PrepareLegsForCommit(parentObjectSpace);
             e.Cancel = true;
-            parentObjectSpace.CommitChanges();
+            parentSpace.CommitChanges();
+            return true;
         }
 
-        return true;
+        return legInSpace.ProjectContract != null && !IsLegForeignKeyOrphaned(parentSpace, legInSpace);
     }
 
     /// <summary>After frame-based parent resolution, verify the leg can commit without FK orphan.</summary>
@@ -89,7 +130,7 @@ public static class ProjectContractMinistryHelper
     {
         PrepareLegsForCommit(committingObjectSpace);
         EnsureLegParentInCommitBatch(committingObjectSpace, leg);
-        return !IsLegForeignKeyOrphaned(committingObjectSpace, leg);
+        return leg.ProjectContract != null && !IsLegForeignKeyOrphaned(committingObjectSpace, leg);
     }
 
     private static void EnsureLegParentInCommitBatch(
@@ -129,22 +170,39 @@ public static class ProjectContractMinistryHelper
         return false;
     }
 
-    private static IObjectSpace? ResolveParentObjectSpaceForLegCommit(
+    private static bool TryRedirectLegCommitToParentSession(
         IObjectSpace committingObjectSpace,
-        IReadOnlyList<ProjectContractMinistryLeg> legsToSave)
+        ProjectContractMinistryLeg leg,
+        CancelEventArgs e)
     {
-        foreach (var leg in legsToSave)
-        {
-            if (!NeedsParentInCommitBatch(committingObjectSpace, leg, out var parent) || parent == null)
-                continue;
+        var parent = leg.ProjectContract
+            ?? FindParentContract(
+                committingObjectSpace,
+                ObjectSpaceHelper.GetRootObjectSpace(committingObjectSpace) ?? committingObjectSpace,
+                leg);
+        if (parent == null)
+            return false;
 
-            var parentObjectSpace = ObjectSpaceHelper.Get(parent)
-                ?? ObjectSpaceHelper.GetRootObjectSpace(committingObjectSpace);
-            if (parentObjectSpace != null && !ReferenceEquals(parentObjectSpace, committingObjectSpace))
-                return parentObjectSpace;
+        var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(committingObjectSpace, parent);
+        var parentInSpace = ResolveContractInObjectSpace(parentSpace, parent);
+        if (parentInSpace == null || !parentSpace.IsNewObject(parentInSpace))
+            return false;
+
+        var legInSpace = EnsureLegInObjectSpace(parentSpace, parentInSpace, leg);
+        PrepareLegsForCommit(parentSpace);
+        parentSpace.SetModified(parentInSpace);
+
+        if (!ReferenceEquals(parentSpace, committingObjectSpace))
+        {
+            e.Cancel = true;
+            parentSpace.CommitChanges();
+            return true;
         }
 
-        return null;
+        if (NeedsParentInCommitBatch(parentSpace, legInSpace, out _))
+            return false;
+
+        return false;
     }
 
     public static void WireMinistryLegs(ProjectContract contract)
@@ -183,13 +241,11 @@ public static class ProjectContractMinistryHelper
 
         if (leg.ProjectContract != null)
         {
-            leg.SyncForeignKeys();
-            if (leg.ProjectContractId != Guid.Empty)
-            {
-                var parentSpace = ResolveObjectSpaceFor(leg.ProjectContract, objectSpace, rootObjectSpace);
-                parentSpace.SetModified(leg.ProjectContract);
-                return true;
-            }
+            var parentSpace = ResolveObjectSpaceFor(leg.ProjectContract, objectSpace, rootObjectSpace);
+            var parentInSpace = ResolveContractInObjectSpace(parentSpace, leg.ProjectContract) ?? leg.ProjectContract;
+            EnsureLegInObjectSpace(parentSpace, parentInSpace, leg);
+            parentSpace.SetModified(parentInSpace);
+            return true;
         }
 
         var parent = FindParentContract(objectSpace, rootObjectSpace, leg);
@@ -197,8 +253,7 @@ public static class ProjectContractMinistryHelper
             return false;
 
         var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
-        var legInTarget = ResolveLegInObjectSpace(targetSpace, leg, parent) ?? leg;
-        AttachLegToContract(parent, legInTarget, targetSpace);
+        var legInTarget = EnsureLegInObjectSpace(targetSpace, parent, leg);
         return true;
     }
 
@@ -235,10 +290,141 @@ public static class ProjectContractMinistryHelper
             contractIds);
     }
 
-    private static IEnumerable<Guid> CollectContractIdsInCommitBatch(IObjectSpace objectSpace) =>
-        objectSpace.GetObjectsToSave(false).OfType<ProjectContract>().Select(c => c.ID)
-            .Concat(objectSpace.GetObjectsToSave(true).OfType<ProjectContract>().Select(c => c.ID))
-            .Distinct();
+    private static List<ProjectContract> CollectContractsInCommitBatch(
+        IObjectSpace objectSpace,
+        IObjectSpace rootObjectSpace)
+    {
+        var contracts = objectSpace.GetObjectsToSave(false).OfType<ProjectContract>()
+            .Concat(objectSpace.GetObjectsToSave(true).OfType<ProjectContract>())
+            .Concat(objectSpace.ModifiedObjects.OfType<ProjectContract>())
+            .ToList();
+
+        if (!ReferenceEquals(objectSpace, rootObjectSpace))
+        {
+            contracts = contracts
+                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ProjectContract>())
+                .Concat(rootObjectSpace.GetObjectsToSave(true).OfType<ProjectContract>())
+                .Concat(rootObjectSpace.ModifiedObjects.OfType<ProjectContract>())
+                .ToList();
+        }
+
+        return contracts.Distinct().ToList();
+    }
+
+    private static List<ProjectContractMinistryLeg> CollectLegsInCommitBatch(
+        IObjectSpace objectSpace,
+        IObjectSpace rootObjectSpace,
+        IReadOnlyList<ProjectContract> contractsToSave)
+    {
+        var legs = objectSpace.GetObjectsToSave(false).OfType<ProjectContractMinistryLeg>()
+            .Concat(objectSpace.GetObjectsToSave(true).OfType<ProjectContractMinistryLeg>())
+            .ToList();
+
+        foreach (var contract in contractsToSave)
+        {
+            if (contract.MinistryLegs == null)
+                continue;
+
+            foreach (var leg in contract.MinistryLegs)
+            {
+                if (!legs.Contains(leg))
+                    legs.Add(leg);
+            }
+        }
+
+        if (!ReferenceEquals(objectSpace, rootObjectSpace))
+        {
+            legs = legs
+                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ProjectContractMinistryLeg>())
+                .Concat(rootObjectSpace.GetObjectsToSave(true).OfType<ProjectContractMinistryLeg>())
+                .ToList();
+        }
+
+        return legs.Distinct().ToList();
+    }
+
+    private static IEnumerable<Guid> CollectContractIdsInCommitBatch(IObjectSpace objectSpace)
+    {
+        var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
+        return CollectContractsInCommitBatch(objectSpace, rootObjectSpace).Select(c => c.ID).Distinct();
+    }
+
+    private static void RehomeContractLegsInObjectSpace(IObjectSpace targetSpace, ProjectContract contract)
+    {
+        if (contract.MinistryLegs == null)
+            return;
+
+        foreach (var leg in contract.MinistryLegs.ToList())
+            EnsureLegInObjectSpace(targetSpace, contract, leg);
+    }
+
+    /// <summary>
+    /// Ensures the leg instance tracked for commit lives in <paramref name="targetSpace"/>
+    /// and is linked to <paramref name="contractInTarget"/>.
+    /// </summary>
+    internal static ProjectContractMinistryLeg EnsureLegInObjectSpace(
+        IObjectSpace targetSpace,
+        ProjectContract contractInTarget,
+        ProjectContractMinistryLeg sourceLeg)
+    {
+        var resolved = ResolveLegInObjectSpace(targetSpace, sourceLeg, contractInTarget);
+        if (resolved != null)
+        {
+            AttachLegToContract(contractInTarget, resolved, targetSpace);
+            return resolved;
+        }
+
+        var sourceSpace = ObjectSpaceHelper.Get(sourceLeg);
+        if (sourceSpace != null && ReferenceEquals(sourceSpace, targetSpace))
+        {
+            AttachLegToContract(contractInTarget, sourceLeg, targetSpace);
+            return sourceLeg;
+        }
+
+        var copy = targetSpace.CreateObject<ProjectContractMinistryLeg>();
+        copy.Sequence = sourceLeg.Sequence;
+        copy.MaxDaysInReview = sourceLeg.MaxDaysInReview;
+        copy.WarningDaysBeforeMax = sourceLeg.WarningDaysBeforeMax;
+        if (sourceLeg.ApprovingMinistry != null)
+            copy.ApprovingMinistry = targetSpace.GetObject(sourceLeg.ApprovingMinistry);
+        AttachLegToContract(contractInTarget, copy, targetSpace);
+
+        if (sourceSpace != null
+            && !ReferenceEquals(sourceSpace, targetSpace)
+            && sourceSpace.IsNewObject(sourceLeg))
+        {
+            sourceSpace.Delete(sourceLeg);
+        }
+
+        return copy;
+    }
+
+    private static void EnsureLegHasParentNavigation(
+        IObjectSpace objectSpace,
+        IObjectSpace rootObjectSpace,
+        ProjectContractMinistryLeg leg)
+    {
+        if (leg.ProjectContract != null)
+        {
+            leg.SyncForeignKeys();
+            return;
+        }
+
+        TryAttachLegToParent(objectSpace, leg);
+        if (leg.ProjectContract != null)
+        {
+            leg.SyncForeignKeys();
+            return;
+        }
+
+        var parent = FindParentContract(objectSpace, rootObjectSpace, leg);
+        if (parent == null)
+            return;
+
+        var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
+        var parentInTarget = ResolveContractInObjectSpace(targetSpace, parent) ?? parent;
+        EnsureLegInObjectSpace(targetSpace, parentInTarget, leg);
+    }
 
     private static void WireOrphanLegsInRoot(
         IObjectSpace committingObjectSpace,
@@ -254,8 +440,7 @@ public static class ProjectContractMinistryHelper
             if (rootParent == null)
                 continue;
 
-            var rootLeg = ResolveLegInObjectSpace(rootObjectSpace, leg, rootParent) ?? leg;
-            AttachLegToContract(rootParent, rootLeg, rootObjectSpace);
+            var rootLeg = EnsureLegInObjectSpace(rootObjectSpace, rootParent, leg);
         }
     }
 
@@ -281,9 +466,9 @@ public static class ProjectContractMinistryHelper
                 continue;
 
             var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
-            var legInTarget = ResolveLegInObjectSpace(targetSpace, leg, parent) ?? leg;
-            AttachLegToContract(parent, legInTarget, targetSpace);
-            parents.Add(parent);
+            var parentInTarget = ResolveContractInObjectSpace(targetSpace, parent) ?? parent;
+            EnsureLegInObjectSpace(targetSpace, parentInTarget, leg);
+            parents.Add(parentInTarget);
         }
 
         return parents;
@@ -300,8 +485,8 @@ public static class ProjectContractMinistryHelper
             return;
 
         var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
-        var legInTarget = ResolveLegInObjectSpace(targetSpace, leg, parent) ?? leg;
-        AttachLegToContract(parent, legInTarget, targetSpace);
+        var parentInTarget = ResolveContractInObjectSpace(targetSpace, parent) ?? parent;
+        EnsureLegInObjectSpace(targetSpace, parentInTarget, leg);
     }
 
     private static ProjectContract? FindParentContract(
@@ -319,7 +504,7 @@ public static class ProjectContractMinistryHelper
             parent = FindParentContractInObjectSpace(
                 rootObjectSpace,
                 leg,
-                rootObjectSpace.GetObjectsToSave(false).OfType<ProjectContract>().ToList());
+                CollectContractsInCommitBatch(rootObjectSpace, rootObjectSpace));
         }
 
         return parent;

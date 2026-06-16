@@ -80,6 +80,20 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Root cause**: Shadow-only FK did not populate when `ProjectContract` navigation was unset; leg popup save did not always run parent wiring before commit.
 - **Fix**: Restore explicit `ProjectContractId` / `ApprovingMinistryId` + `SyncForeignKeys()` / `OnSaving`. `TryAttachLegToParent` on commit + leg detail `Committing`. Keep navigation wiring + `SetModified(parent)` for insert order.
 
+## 2026-06-16 — Manual UI create vs JSON seed (parent already exists)
+
+- **Symptom**: Seeded `project-contract.json` legs sync fine; manual **New** contract + ministry leg from UI → `FK_ProjectContractMinistryLegs_ProjectContracts_ProjectContractId`.
+- **Root cause**: Seed attaches legs to **persisted** contracts (`FindContract`); UI creates parent + legs together. Explicit `ProjectContractId` scalar on the BO let EF insert the leg before the parent; Blazor leg popup can commit in a separate session.
+- **Fix**: Navigation-only parent FK (shadow column) failed under XAF Blazor — NULL `ProjectContractId` on insert. Restored mapped `ProjectContractId` with deferred sync while parent `IsNewObject`; `EnsureLegInObjectSpace` copies popup-session legs into the parent root session; `[RuleRequiredField]` on `ProjectContract` navigation.
+- **Prevent**: No mapped parent FK scalar on aggregated children; leg popup on unsaved parent must commit root `ObjectSpace`, not popup session.
+
+## 2026-06-16 — ProjectContract ministry leg FK on Save (scalar pre-fill)
+
+- **Symptom**: Save / SaveAndClose on new **Project contract** with ministry legs → `FK_ProjectContractMinistryLegs_ProjectContracts_ProjectContractId`.
+- **Root cause**: `ProjectContractId` scalar was set while the parent contract was still unsaved, so EF inserted the leg before the parent row. Commit-batch detection also missed the parent when legs lived only on `MinistryLegs` (not in `GetObjectsToSave(false)`).
+- **Fix**: `SyncForeignKeys` clears `ProjectContractId` until the parent is persisted; `PrepareLegsForCommit` collects legs from nested collections + `GetObjectsToSave(true)` and always `SetModified` on contracts in batch; restore parent-in-batch detection via root object space.
+- **Prevent**: Never pre-fill parent FK scalar on aggregated children while parent `IsNewObject`; include nested-collection legs in commit prep (not only `GetObjectsToSave(false)`).
+
 ## 2026-06-15 — Blazor NestedFrame parent resolution
 
 - **Symptom**: Leg popup Save still NULL `ProjectContractId`; Link-only wiring missed Blazor nested list.
@@ -92,3 +106,24 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Root cause**: Blazor leg popup can commit in a **nested** `ObjectSpace` while the unsaved parent contract lives in the **root** session — leg-only batch inserts the child before the parent exists.
 - **Fix**: `ObjectSpaceHelper.GetRootObjectSpace` (reflection parent chain when present) and `ObjectSpaceHelper.Get(parent)` for EF Core popup sessions. `PrepareLegsForCommit` / `TryFinalizeLegCommit` wire legs on the parent session, `SetModified(parent)`, and redirect leg-only commits to `parentObjectSpace.CommitChanges()`. `WouldOrphanLegForeignKey` detects new parent missing from batch. Last resort: `ProjectContract.SaveBeforeMinistryLeg` user message.
 - **Prevent**: Aggregated child popup saves on unsaved parents — resolve parent in **root** OS (`ApplicationItemPersonLinkedDefaults` pattern); do not re-add `ProjectContractMinistryLegNestedController` (`ObjectSpace` 1021).
+
+## 2026-06-16 — Save and Close on leg popup (friendly exception before wire)
+
+- **Symptom**: Save and Close on ministry leg popup from new contract → `UserFriendlyException`: “Save the project contract before saving this ministry leg.”
+- **Root cause**: Global `ProjectContractMinistryLegObjectSpaceHooks.OnCommitting` called `TryFinalizeLegCommit` **before** `ProjectContractMinistryLegDetailDefaultsController` could wire parent from `Frame` / main window. `SaveGuard` only hooked `SaveAction`, not `SaveAndCloseAction`.
+- **Fix**: Hooks `OnCommitting` → `PrepareLegsForCommit` only; leg detail `Committing` wires parent then `TryCommitParentWithLeg` then `TryFinalizeLegCommit`. `SaveGuard` hooks both Save and Save and Close. `TryFinalizeLegCommit` retries `TryCommitParentWithLeg` per leg; `FindParentContract` searches root `CollectContractsInCommitBatch`.
+- **Prevent**: Global object-space hooks must not throw on leg commit before frame-aware controllers run; hook **both** Save and SaveAndClose for popup guard controllers.
+
+## 2026-06-16 — SaveGuard throws before parent resolved (cross-session new contract)
+
+- **Symptom**: Save / Save and Close on leg popup → `UserFriendlyException` in `ProjectContractMinistryLegSaveGuardController.SaveAction_Executing` (not Committing).
+- **Root cause**: `TryBringIntoObjectSpace` returned false for an **unsaved** parent contract in the main-window session when the leg popup used a different `ObjectSpace` (`IsNewObject(source)` on target space is false). Parent never wired → `CanCommitLeg` failed in Executing.
+- **Fix**: `TryBringIntoObjectSpace` returns the source instance for new parents (callers resolve owning space via `ObjectSpaceHelper.ResolveObjectSpace`). Walk parent `Frame` chain (`Parent` / `TemplateFrame`). `AttachLegInSpace` always targets the parent's session. SaveGuard wires + `TryCommitParentWithLeg` only (no throw in Executing); finalize stays on leg detail `Committing`.
+- **Prevent**: Cross-session parent resolution for aggregated children must not require `GetObject` on unsaved parents; defer hard guard to Committing after frame wiring.
+
+## 2026-06-16 — Save contract without ministry legs
+
+- **Symptom**: Officers cannot save active `ProjectContract` (e.g. GT-16) until ≥1 ministry leg is configured.
+- **Root cause**: `ProjectContractMinistryController` blocked commit when `IsActive && !HasConfiguredLegs`.
+- **Fix**: Removed contract-save legs-required check. SLA validation (`TryValidateLegSla`) still runs when legs exist. `ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication` still blocks via-ministries applications without legs once progress moves past office preparation.
+- **Prevent**: Do not require ministry legs on contract save; enforce at application progress / contract selection time instead.

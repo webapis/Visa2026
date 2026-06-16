@@ -17,7 +17,7 @@ public class ProjectContractMinistryLeg : BaseObject
     [Browsable(false)]
     public virtual Guid ProjectContractId { get; set; }
 
-    [Browsable(false)]
+    [RuleRequiredField]
     [ForeignKey(nameof(ProjectContractId))]
     public virtual ProjectContract ProjectContract { get; set; } = null!;
 
@@ -44,13 +44,25 @@ public class ProjectContractMinistryLeg : BaseObject
         base.OnSaving();
     }
 
-    /// <summary>EF persists explicit FK scalars; XAF may set navigations only.</summary>
+    /// <summary>
+    /// EF persists explicit FK scalars. Do not set <see cref="ProjectContractId"/> while the parent
+    /// contract is still unsaved in the same session — EF may insert the leg before the parent.
+    /// </summary>
     internal void SyncForeignKeys()
     {
-        if (ProjectContract != null)
-            ProjectContractId = ProjectContract.ID;
-
         if (ApprovingMinistry != null)
             ApprovingMinistryId = ApprovingMinistry.ID;
+
+        if (ProjectContract == null)
+            return;
+
+        var objectSpace = ObjectSpaceHelper.Get(ProjectContract) ?? ObjectSpaceHelper.Get(this);
+        if (objectSpace == null || objectSpace.IsNewObject(ProjectContract))
+        {
+            ProjectContractId = Guid.Empty;
+            return;
+        }
+
+        ProjectContractId = ProjectContract.ID;
     }
 }

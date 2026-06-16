@@ -105,7 +105,7 @@ No visa-period filtering — officer selects the appropriate contract row manual
 | Rule | Enforcement |
 |------|----------------|
 | Contract required before leaving office prep | **Block** (unchanged) |
-| Active contract must have ≥1 ministry leg | **Block** on contract save — `ProjectContract.MinistryLegsRequired` |
+| Active contract ministry legs | **Optional** on contract save — legs can be added later. SLA (`MaxDaysInReview`) validated only when legs exist. Applications on via-ministries routes still require configured legs before progress beyond office preparation (`Application.ProjectContractLegsRequired`). |
 | Contract locked after ministry/migration steps | **Block** revert — `Application.ProjectContractLockedAfterProgress` |
 | Contract legs immutable once referenced | **Block** structural leg edits — `ProjectContract.MinistryLegsStructuralEditBlocked` |
 | Progress shows ministry name | `ApplicationProgress.MinistryStepLabel` from snapshot |
