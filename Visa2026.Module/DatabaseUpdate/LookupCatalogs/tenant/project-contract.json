@@ -1,75 +1,69 @@
 {
   "rows": [
+
     {
-      "NameTm": "GT-15",
+      "NameTm": "GT-15 — (2 ylalaşyk: türkmenenergo > energetika)",
       "Code": "GT-15",
-      "IsDefault": true,
       "IsActive": true,
       "MinistryLegs": [
         {
           "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Gurluşyk",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        }
-      ]
-    },
-    {
-      "NameTm": "Şatlyk‑1 — gysga (1 ministrlik)",
-      "Code": "Şatlyk-1",
-      "IsActive": true,
-      "MinistryLegs": [
-        {
-          "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Gurluşyk",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        }
-      ]
-    },
-    {
-      "NameTm": "Şatlyk‑1 (2 ministrlik)",
-      "Code": "Şatlyk-1",
-      "IsActive": true,
-      "MinistryLegs": [
-        {
-          "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Gurluşyk",
+          "ApprovingMinistryShortNameTm": "Türkmenenergo",
           "MaxDaysInReview": 10,
           "WarningDaysBeforeMax": 8
         },
         {
           "Sequence": 2,
-          "ApprovingMinistryShortNameTm": "Söwda",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        }
-      ]
-    },
-    {
-      "NameTm": "Şatlyk‑1 — uzyn (3 ministrlik)",
-      "Code": "Şatlyk-1",
-      "IsActive": true,
-      "MinistryLegs": [
-        {
-          "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Gurluşyk",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        },
-        {
-          "Sequence": 2,
-          "ApprovingMinistryShortNameTm": "Söwda",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        },
-        {
-          "Sequence": 3,
           "ApprovingMinistryShortNameTm": "Energetika",
           "MaxDaysInReview": 10,
           "WarningDaysBeforeMax": 8
         }
       ]
+    },
+    {
+      "NameTm": "GT-15 — (4 ylalaşyk: türkmenenergo > energetika > gurluşyk > energetika)",
+      "Code": "GT-15",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "Türkmenenergo",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 2,
+          "ApprovingMinistryShortNameTm": "Energetika",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 3,
+          "ApprovingMinistryShortNameTm": "Gurluşyk",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 4,
+          "ApprovingMinistryShortNameTm": "Energetika",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "NameTm": "Şatlyk‑1 — (1 ylalaşyk: türkmengaz)",
+      "Code": "Şatlyk-1",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "Türkmengaz",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
     }
+
   ]
 }

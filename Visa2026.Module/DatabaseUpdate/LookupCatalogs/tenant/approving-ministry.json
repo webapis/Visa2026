@@ -1,16 +1,20 @@
 {
   "rows": [
     {
-      "NameTm": "Gurluşyk ministrligi",
+      "NameTm": "Türkmenistanyň Energetika ministrligi",
+      "ShortNameTm": "Energetika"
+    },
+    {
+      "NameTm": "\"Türkmenenergo\" Döwlet elektroenergetika",
+      "ShortNameTm": "Türkmenenergo"
+    },
+    {
+      "NameTm": "Türkmenistanyň Gurluşyk we binagärlik ministrligi",
       "ShortNameTm": "Gurluşyk"
     },
     {
-      "NameTm": "Söwda we daşky guramalar ministrligi",
-      "ShortNameTm": "Söwda"
-    },
-    {
-      "NameTm": "Energetika ministrligi",
-      "ShortNameTm": "Energetika"
+      "NameTm": "\"Türkmengaz\" döwlet konserni",
+      "ShortNameTm": "Türkmengaz"
     }
   ]
 }
