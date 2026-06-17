@@ -89,6 +89,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<RejectionImage> RejectionImages { get; set; }
         public DbSet<RejectionDocument> RejectionDocuments { get; set; }
         public DbSet<BorderZone> BorderZones { get; set; }
+        public DbSet<BorderZoneDocument> BorderZoneDocuments { get; set; }
         public DbSet<CheckPoint> CheckPoints { get; set; }
         public DbSet<VisaIssuedPlace> VisaIssuedPlaces { get; set; }
         public DbSet<PurposeOfTravel> PurposeOfTravels { get; set; }

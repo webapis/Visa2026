@@ -75,7 +75,9 @@
     "Visa2026.Module.BusinessObjects.RejectionItem": {
       "members": {
         "RejectionItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
-        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" }
       }
     },
     "Visa2026.Module.BusinessObjects.WorkPermitItem": {

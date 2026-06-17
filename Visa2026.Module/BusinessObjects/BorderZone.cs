@@ -16,7 +16,7 @@ using DevExpress.ExpressApp.DC;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
-    [NavigationItem("Lookup/Invitation")]
+    [NavigationItem("BorderZone")]
     [DefaultProperty(nameof(BorderZoneNumber))]
     [RuleCriteria("BorderZone_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
     public class BorderZone : BaseObject, IExpirationLogic, IPersonLinkParent
@@ -24,6 +24,7 @@ namespace Visa2026.Module.BusinessObjects
         public BorderZone()
         {
             BorderZoneItems = new ObservableCollection<BorderZoneItem>();
+            Documents = new ObservableCollection<BorderZoneDocument>();
         }
 
         [MaxLength(50)]
@@ -56,6 +57,10 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         [InverseProperty(nameof(BorderZoneItem.BorderZone))]
         public virtual IList<BorderZoneItem> BorderZoneItems { get; set; }
+
+        [Aggregated]
+        [InverseProperty(nameof(BorderZoneDocument.BorderZone))]
+        public virtual IList<BorderZoneDocument> Documents { get; set; }
 
         public int DaysRemaining
         {
@@ -127,6 +132,14 @@ namespace Visa2026.Module.BusinessObjects
                 ValidityDuration = objectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
             }
         }
+
+        /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DocumentCopiesListLink =>
+            Visa2026.Module.Localization.VisaUiMessages.Get("BorderZoneDocumentCopies.List.ColumnLink");
 
     }
 }

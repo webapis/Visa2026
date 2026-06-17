@@ -1412,6 +1412,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Arzany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
             ["ru-RU"] = "Код {0} ({1}) относится к маршруту «{3}». Откройте заявку из списка «{2}» или выберите другой код.",
         },
+        ["BorderZoneDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copies",
+            ["tr-TR"] = "Kopyalar",
+            ["tk-TM"] = "Nusgalar",
+            ["ru-RU"] = "Копии",
+        },
+        ["BorderZoneDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select exactly one border zone line to view document copies.",
+            ["tr-TR"] = "Belge kopyalarını görmek için tam olarak bir sınır bölgesi satırı seçin.",
+            ["tk-TM"] = "Resminama nusgalaryny görmek üçin diňe bir serhet sebiti setirini saýlaň.",
+            ["ru-RU"] = "Выберите ровно одну строку пограничной зоны для просмотра копий документов.",
+        },
+        ["BorderZoneDocumentCopies.Subtitle.FromItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} — border zone {1}",
+            ["tr-TR"] = "{0} — sınır bölgesi {1}",
+            ["tk-TM"] = "{0} — serhet sebiti {1}",
+            ["ru-RU"] = "{0} — пограничная зона {1}",
+        },
+        ["BorderZoneDocumentCopies.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone document copies",
+            ["tr-TR"] = "Sınır bölgesi belge kopyaları",
+            ["tk-TM"] = "Serhet sebiti resminama nusgalary",
+            ["ru-RU"] = "Копии документов пограничной зоны",
+        },
         ["Cache.PdfMappingsRefreshed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "PDF Mappings cache refreshed successfully.",
@@ -1684,6 +1712,83 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Toplam: {0}",
             ["tk-TM"] = "Jemi: {0}",
             ["ru-RU"] = "Итого: {0}",
+        },
+        ["HeaderDocumentCopies.Empty.NoParent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No record selected.",
+            ["tr-TR"] = "Kayıt seçilmedi.",
+            ["tk-TM"] = "Ýazgy saýlanmady.",
+            ["ru-RU"] = "Запись не выбрана.",
+        },
+        ["HeaderDocumentCopies.Empty.NoRecords"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No document copies attached yet.",
+            ["tr-TR"] = "Henüz belge kopyası eklenmedi.",
+            ["tk-TM"] = "Entek resminama nusgasy goşulmady.",
+            ["ru-RU"] = "Копии документов пока не прикреплены.",
+        },
+        ["HeaderDocumentCopies.Hint.SharedParentScans"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scanned copies are shared for all employees on this record.",
+            ["tr-TR"] = "Taranmış kopyalar bu kayıttaki tüm çalışanlar için ortaktır.",
+            ["tk-TM"] = "Skan nusgalar bu ýazgydaky ähli işgärler üçin umumy.",
+            ["ru-RU"] = "Скан-копии общие для всех сотрудников в этой записи.",
+        },
+        ["HeaderDocumentCopies.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not open document preview.",
+            ["tr-TR"] = "Belge önizlemesi açılamadı.",
+            ["tk-TM"] = "Resminama öňünden görüş açylmady.",
+            ["ru-RU"] = "Не удалось открыть предпросмотр документа.",
+        },
+        ["HeaderDocumentCopies.Preview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document preview",
+            ["tr-TR"] = "Belge önizleme",
+            ["tk-TM"] = "Resminama öňünden görüş",
+            ["ru-RU"] = "Предпросмотр документа",
+        },
+        ["HeaderDocumentCopies.Record.Unnamed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document",
+            ["tr-TR"] = "Belge",
+            ["tk-TM"] = "Resminama",
+            ["ru-RU"] = "Документ",
+        },
+        ["HeaderDocumentCopies.Subtitle.Application"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application {0}",
+            ["tr-TR"] = "Başvuru {0}",
+            ["tk-TM"] = "Arza {0}",
+            ["ru-RU"] = "Заявка {0}",
+        },
+        ["InvitationDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copies",
+            ["tr-TR"] = "Kopyalar",
+            ["tk-TM"] = "Nusgalar",
+            ["ru-RU"] = "Копии",
+        },
+        ["InvitationDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select exactly one invitation line to view document copies.",
+            ["tr-TR"] = "Belge kopyalarını görmek için tam olarak bir davet satırı seçin.",
+            ["tk-TM"] = "Resminama nusgalaryny görmek üçin diňe bir çakylyk setirini saýlaň.",
+            ["ru-RU"] = "Выберите ровно одну строку приглашения для просмотра копий документов.",
+        },
+        ["InvitationDocumentCopies.Subtitle.FromItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} — invitation {1}",
+            ["tr-TR"] = "{0} — davet {1}",
+            ["tk-TM"] = "{0} — çakylyk {1}",
+            ["ru-RU"] = "{0} — приглашение {1}",
+        },
+        ["InvitationDocumentCopies.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation document copies",
+            ["tr-TR"] = "Davet belge kopyaları",
+            ["tk-TM"] = "Çakylyk resminama nusgalary",
+            ["ru-RU"] = "Копии документов приглашения",
         },
         ["Pdf.Packaging.ApplicationId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2433,6 +2538,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} numaralı ret — {1}",
             ["tk-TM"] = "{0} belgili ret — {1}",
             ["ru-RU"] = "Отказ {0} от {1}",
+        },
+        ["RejectionDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copies",
+            ["tr-TR"] = "Kopyalar",
+            ["tk-TM"] = "Nusgalar",
+            ["ru-RU"] = "Копии",
+        },
+        ["RejectionDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select exactly one rejection line to view document copies.",
+            ["tr-TR"] = "Belge kopyalarını görmek için tam olarak bir ret satırı seçin.",
+            ["tk-TM"] = "Resminama nusgalaryny görmek üçin diňe bir ret setirini saýlaň.",
+            ["ru-RU"] = "Выберите ровно одну строку отказа для просмотра копий документов.",
+        },
+        ["RejectionDocumentCopies.Subtitle.FromItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} — rejected on {1}",
+            ["tr-TR"] = "{0} — ret tarihi {1}",
+            ["tk-TM"] = "{0} — ret senesi {1}",
+            ["ru-RU"] = "{0} — отказ от {1}",
+        },
+        ["RejectionDocumentCopies.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection document copies",
+            ["tr-TR"] = "Ret belge kopyaları",
+            ["tk-TM"] = "Ret resminama nusgalary",
+            ["ru-RU"] = "Копии документов отказа",
         },
         ["RuntimeLog.Header.Tooltip.Default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3854,6 +3987,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Resminamalar'ı açmadan önce başvuruyu kaydedin.",
             ["tk-TM"] = "Resminamalary açmazdan ozal arzany ýazdyryň.",
             ["ru-RU"] = "Сохраните заявку перед открытием Resminamalar.",
+        },
+        ["WorkPermitDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copies",
+            ["tr-TR"] = "Kopyalar",
+            ["tk-TM"] = "Nusgalar",
+            ["ru-RU"] = "Копии",
+        },
+        ["WorkPermitDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select exactly one work permit line to view document copies.",
+            ["tr-TR"] = "Belge kopyalarını görmek için tam olarak bir çalışma izni satırı seçin.",
+            ["tk-TM"] = "Resminama nusgalaryny görmek üçin diňe bir iş rugsady setirini saýlaň.",
+            ["ru-RU"] = "Выберите ровно одну строку РНТ для просмотра копий документов.",
+        },
+        ["WorkPermitDocumentCopies.Subtitle.FromItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} — work permit {1}",
+            ["tr-TR"] = "{0} — çalışma izni {1}",
+            ["tk-TM"] = "{0} — iş rugsady {1}",
+            ["ru-RU"] = "{0} — РНТ {1}",
+        },
+        ["WorkPermitDocumentCopies.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit document copies",
+            ["tr-TR"] = "Çalışma izni belge kopyaları",
+            ["tk-TM"] = "Iş rugsady resminama nusgalary",
+            ["ru-RU"] = "Копии документов РНТ",
         },
     };
 

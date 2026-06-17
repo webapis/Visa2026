@@ -18,6 +18,7 @@ Officers who need ministry packaging today use **ApplicationItem** document copi
 | Scope | Doc / skill |
 |-------|-------------|
 | Application line(s) — ministry ZIP + application form | [`APPLICATION_ITEM_DOCUMENT_COPIES.md`](APPLICATION_ITEM_DOCUMENT_COPIES.md) · [`visa2026-document-copies`](../.cursor/skills/visa2026-document-copies/SKILL.md) |
+| Invitation / Work permit / Rejection / Border zone header + item copies *(planned)* | [`INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md`](INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md) · [`visa2026-invitation-work-permit-document-copies`](../.cursor/skills/visa2026-invitation-work-permit-document-copies/SKILL.md) |
 | Preview slot shell (resize, catalog card CSS, occupants) | [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) · [`visa2026-preview-slot`](../.cursor/skills/visa2026-preview-slot/SKILL.md) |
 | Person BO collections & roles | [`Visa2026.Module/BusinessObjects/Person.md`](../Visa2026.Module/BusinessObjects/Person.md) |
 | Which `*Document` types exist in ZIP packaging | [`APPLICATION_DIPLOMA_PACKAGE_PLAN.md`](APPLICATION_DIPLOMA_PACKAGE_PLAN.md) |

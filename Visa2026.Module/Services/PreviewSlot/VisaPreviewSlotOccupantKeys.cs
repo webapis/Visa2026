@@ -1,3 +1,4 @@
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Services.PreviewSlot;
@@ -67,4 +68,21 @@ public static class VisaPreviewSlotOccupantKeys
 
     public static string ForPersonDocumentCopies(PersonDocumentCopiesSlotRequest request) =>
         ForPersonDocumentCopies(request?.PersonIds ?? Array.Empty<Guid>());
+
+    public static string ForHeaderDocumentCopies(HeaderDocumentCopiesSlotRequest request)
+    {
+        if (request == null || request.ParentId == Guid.Empty)
+            return "header-document-copies:empty";
+
+        var prefix = request.Family switch
+        {
+            HeaderDocumentCopiesFamily.WorkPermit => "work-permit-document-copies:work-permit",
+            HeaderDocumentCopiesFamily.Invitation => "invitation-document-copies:invitation",
+            HeaderDocumentCopiesFamily.Rejection => "rejection-document-copies:rejection",
+            HeaderDocumentCopiesFamily.BorderZone => "border-zone-document-copies:border-zone",
+            _ => "header-document-copies:unknown",
+        };
+
+        return $"{prefix}:{request.ParentId:N}";
+    }
 }

@@ -250,6 +250,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<MedicalRecordImage>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Invitation>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<InvitationItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<BorderZone>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<BorderZoneItem>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<EducationInstitution>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Specialty>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Lodging>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -351,6 +353,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
 
+        // BorderZone group (separate from Invitation)
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Allow);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Allow);
+
         // Operations — UserFeedback only (see EnsureUserFeedbackOfficerPermissions); runtime log + state inbox are admin-only.
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
 
@@ -436,6 +443,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<RejectionItem>(userRole);
     EnsureReadWriteCreatePermission<Invitation>(userRole);
     EnsureReadWriteCreatePermission<InvitationItem>(userRole);
+    EnsureReadWriteCreatePermission<BorderZone>(userRole);
+    EnsureReadWriteCreatePermission<BorderZoneItem>(userRole);
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
@@ -497,6 +506,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
     EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
+
+    // Users: BorderZone group (separate from Invitation)
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Allow);
+    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Allow);
 
     // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);
@@ -596,10 +610,13 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 existingPerm.WriteState = SecurityPermissionState.Allow;
                 existingPerm.CreateState = SecurityPermissionState.Allow;
                 existingPerm.DeleteState = null;
+                existingPerm.NavigateState = SecurityPermissionState.Allow;
             }
             else
             {
                 role.AddTypePermissionsRecursively<T>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+                var newPerm = role.TypePermissions.First(p => p.TargetType == targetType);
+                newPerm.NavigateState = SecurityPermissionState.Allow;
             }
         }
 

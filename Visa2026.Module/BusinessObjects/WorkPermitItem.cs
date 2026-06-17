@@ -282,5 +282,13 @@ namespace Visa2026.Module.BusinessObjects
                     : 0;
             }
         }
+
+        /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DocumentCopiesListLink =>
+            Visa2026.Module.Localization.VisaUiMessages.Get("WorkPermitDocumentCopies.List.ColumnLink");
     }
 }

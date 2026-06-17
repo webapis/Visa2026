@@ -149,6 +149,7 @@ namespace Visa2026.Module.BusinessObjects
                 "CurrentMedicalRecord" => GetCurrentMedicalRecord(person),
                 "CurrentEducation" => GetCurrentEducation(person),
                 "CurrentInvitationItem" => GetCurrentInvitationItem(person),
+                "CurrentRejectionItem" => GetCurrentRejectionItem(person),
                 "CurrentWorkPermitItem" => GetCurrentWorkPermitItem(person),
                 "CurrentSalary" => GetCurrentSalary(person),
                 _ => null

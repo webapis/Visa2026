@@ -1,9 +1,12 @@
 using System;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 
@@ -19,10 +22,35 @@ namespace Visa2026.Module.BusinessObjects
 
         public override Rejection ParentObject => Rejection;
 
+        /// <summary>Required; always visible on detail view (with <see cref="Passport"/>).</summary>
+        [RuleRequiredField]
+        [DataSourceProperty("ParentObject.AvailablePeople")]
+        public override Person Person
+        {
+            get => base.Person;
+            set
+            {
+                if (base.Person != value)
+                {
+                    base.Person = value;
+                    if (base.Person != null && Rejection?.Application != null)
+                    {
+                        var appItem = Rejection.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == base.Person.ID);
+                        if (appItem != null)
+                            Passport = appItem.CurrentPassport;
+                    }
+                }
+            }
+        }
+
+        /// <summary>Required; always visible on detail view (with <see cref="Person"/>).</summary>
+        [RuleRequiredField]
+        public virtual Passport Passport { get; set; }
+
         public virtual string Reason { get; set; }
 
-        [NotMapped]
-        public string RejectionItemName => $"{Person?.FullName} - Rejected on {Rejection?.Date:d}";
+        [MaxLength(255)]
+        public virtual string RejectionItemName { get; set; }
 
         [RuleFromBoolProperty("RejectionItem_PersonIsValid", DefaultContexts.Save, "The selected person is not part of the parent application.")]
         [Browsable(false)]
@@ -45,13 +73,33 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             base.OnSaving();
+            RejectionItemName = $"{Person?.FullName} - Rejected on {Rejection?.Date:d}";
+            MarkLinkedApplicationItemRejected();
             CrossObjectSyncHelper.SyncOnSave(this);
         }
 
-        // This method should be called by a Controller handling the ObjectDeleting event.
+        private void MarkLinkedApplicationItemRejected()
+        {
+            if (Person == null || Rejection?.Application?.ApplicationItems == null)
+                return;
+
+            var appItem = Rejection.Application.ApplicationItems
+                .FirstOrDefault(ai => ai.Person?.ID == Person.ID);
+            if (appItem != null)
+                appItem.RejectionIssued = true;
+        }
+
         public virtual void OnDeleting()
         {
             CrossObjectSyncHelper.SyncOnDelete(this);
         }
+
+        /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DocumentCopiesListLink =>
+            Visa2026.Module.Localization.VisaUiMessages.Get("RejectionDocumentCopies.List.ColumnLink");
     }
 }

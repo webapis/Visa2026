@@ -52,6 +52,21 @@ namespace Visa2026.Module.DatabaseUpdate
 
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
             RemoveLegacyLookupOperationalNavigation(navigationItems);
+            RemoveStaleInvitationBorderZoneNavigation(navigationItems);
+        }
+
+        /// <summary>
+        /// Border zone permits live under the top-level <c>BorderZone</c> nav group; strip stale nodes under <c>Invitation</c>.
+        /// </summary>
+        private static void RemoveStaleInvitationBorderZoneNavigation(IModelNavigationItems navigationItems)
+        {
+            if (navigationItems["Invitation"] is not IModelNavigationItem invitationGroup)
+                return;
+
+            if (invitationGroup.Items["BorderZone"] is IModelNavigationItem legacyBorderZone)
+                legacyBorderZone.Remove();
+            if (invitationGroup.Items["BorderZoneItem"] is IModelNavigationItem legacyBorderZoneItem)
+                legacyBorderZoneItem.Remove();
         }
 
         /// <summary>
@@ -71,6 +86,8 @@ namespace Visa2026.Module.DatabaseUpdate
             RemoveNavItemIfPresent(lookupGroup, "Passport", "Passport");
             RemoveNavItemIfPresent(lookupGroup, "Visa", "Visa");
             RemoveNavItemIfPresent(lookupGroup, "Organization", "Ministry");
+            RemoveNavItemIfPresent(lookupGroup, "Invitation", "BorderZone");
+            RemoveNavItemIfPresent(lookupGroup, "Invitation", "BorderZoneItem");
         }
 
         private static void RemoveNavItemIfPresent(IModelNavigationItem parentGroup, string subgroupId, string itemId)

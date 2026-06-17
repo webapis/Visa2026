@@ -565,6 +565,79 @@
                 }, true);
             })();
 
+            (function installHeaderDocumentCopiesLinkCapture() {
+                if (window.visaPreviewDrawer._headerDocumentCopiesLinkCaptureInstalled) {
+                    return;
+                }
+                window.visaPreviewDrawer._headerDocumentCopiesLinkCaptureInstalled = true;
+
+                function findDocumentCopiesLinkCell(target) {
+                    return target && target.closest
+                        ? target.closest(".app-header-document-copies-link")
+                        : null;
+                }
+
+                function blockGridRowActivation(event) {
+                    var cell = findDocumentCopiesLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    if (window.visaPreviewDrawer._hostRef) {
+                        window.visaPreviewDrawer._hostRef.invokeMethodAsync("MarkHeaderDocumentCopiesLinkClickPending");
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+
+                function openDocumentCopiesFromCell(event) {
+                    var cell = findDocumentCopiesLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var family = cell.getAttribute("data-header-doc-family") || "";
+                    var parentId = cell.getAttribute("data-header-doc-parent-id") || "";
+                    if (!family || !parentId) {
+                        return;
+                    }
+                    var contextItemId = cell.getAttribute("data-header-doc-context-item-id") || "";
+                    if (window.visaPreviewDrawer.openHeaderDocumentCopies) {
+                        window.visaPreviewDrawer.openHeaderDocumentCopies(family, parentId, contextItemId, event);
+                    }
+                }
+
+                document.addEventListener("pointerdown", blockGridRowActivation, true);
+                document.addEventListener("mousedown", blockGridRowActivation, true);
+                document.addEventListener("click", openDocumentCopiesFromCell, true);
+                document.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter" && event.key !== " ") {
+                        return;
+                    }
+                    var cell = findDocumentCopiesLinkCell(event.target);
+                    if (!cell || document.activeElement !== cell) {
+                        return;
+                    }
+                    openDocumentCopiesFromCell(event);
+                }, true);
+            })();
+
+            window.visaPreviewDrawer.openHeaderDocumentCopies = function (family, parentId, contextItemId, event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                if (window.visaPreviewDrawer._hostRef) {
+                    window.visaPreviewDrawer._hostRef.invokeMethodAsync(
+                        "OpenHeaderDocumentCopiesFromJsAsync",
+                        family || "",
+                        parentId || "",
+                        contextItemId || "");
+                }
+            };
+
             window.visaPreviewDrawer.syncInlinePreviewHeight = function () {
                 var panel = document.querySelector(".resminamalar-slot-panel--preview .resminamalar-slot-panel__body")
                     || document.querySelector(".resminamalar-slot-panel__body--split");

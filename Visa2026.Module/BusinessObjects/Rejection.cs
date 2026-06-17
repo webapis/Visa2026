@@ -67,5 +67,13 @@ namespace Visa2026.Module.BusinessObjects
             "Rejection.DisplayTitle",
             RejectedDocNumber ?? string.Empty,
             Date.ToString("d", CultureInfo.CurrentUICulture));
+
+        /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DocumentCopiesListLink =>
+            VisaUiMessages.Get("RejectionDocumentCopies.List.ColumnLink");
     }
 }

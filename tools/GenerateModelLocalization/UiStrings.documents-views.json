@@ -15,12 +15,9 @@
     "Invitation_ListView": {
       "columns": {
         "InvitationNumber": { "tr-TR": "Davet No", "tk-TM": "Çakylyk belgisi", "ru-RU": "Номер приглашения" },
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
         "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
         "ExpirationDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Срок действия" },
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
-        "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
-        "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
-        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" }
       }
@@ -45,10 +42,11 @@
     "Rejection_ListView": {
       "columns": {
         "RejectionTitle": { "tr-TR": "Ret Başlığı", "tk-TM": "Ret ady", "ru-RU": "Заголовок отказа" },
-        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
+        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
         "RejectedDocNumber": { "tr-TR": "Reddedilen Belge No", "tk-TM": "Ret edilen resminama belgisi", "ru-RU": "Номер отклонённого док." },
-        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" },
-        "Date": { "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" }
+        "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
+        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" }
       }
     },
     "Rejection_DetailView": {
@@ -61,17 +59,42 @@
     "Rejection_RejectionItems_ListView": {
       "caption": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" }
     },
+    "InvitationItem_ListView": {
+      "columns": {
+        "InvitationItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" }
+      }
+    },
     "RejectionItem_ListView": {
       "columns": {
         "RejectionItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
-        "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
-        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" },
-        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" }
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "Reason": { "tr-TR": "Neden", "tk-TM": "Sebäp", "ru-RU": "Причина" }
+      }
+    },
+    "BorderZoneItem_ListView": {
+      "columns": {
+        "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
+        "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
+        "BorderZone": { "tr-TR": "Sınır Bölgesi", "tk-TM": "Serhet sebiti", "ru-RU": "Пограничная зона" }
+      }
+    },
+    "WorkPermit_ListView": {
+      "columns": {
+        "WorkPermitNumber": { "tr-TR": "İş İzni No", "tk-TM": "Iş rugsady belgisi", "ru-RU": "Номер РНТ" },
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
+        "IssuedDate": { "tr-TR": "Veriliş Tarihi", "tk-TM": "Berlen senesi", "ru-RU": "Дата выдачи" }
       }
     },
     "WorkPermitItem_ListView": {
       "columns": {
         "WorkPermitItemName": { "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" },
+        "DocumentCopiesListLink": { "tr-TR": " ", "tk-TM": " ", "ru-RU": " " },
         "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
         "Passport": { "tr-TR": "Pasaport", "tk-TM": "Pasport", "ru-RU": "Паспорт" },
         "CurrentPositionHistory": { "tr-TR": "Güncel Pozisyon", "tk-TM": "Häzirki wezipesi", "ru-RU": "Текущая должность" },

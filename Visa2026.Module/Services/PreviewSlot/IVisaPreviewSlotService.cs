@@ -1,4 +1,5 @@
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Services.PreviewSlot;
@@ -11,6 +12,7 @@ public enum VisaPreviewSlotMode
     DocumentCopies = 3,
     ProgressLetters = 4,
     PersonDocumentCopies = 5,
+    HeaderDocumentCopies = 6,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -47,6 +49,8 @@ public sealed class VisaPreviewSlotState
 
     public PersonDocumentCopiesSlotRequest? PersonDocumentCopies { get; init; }
 
+    public HeaderDocumentCopiesSlotRequest? HeaderDocumentCopies { get; init; }
+
     public int Version { get; init; }
 }
 
@@ -68,6 +72,15 @@ public sealed class PersonDocumentCopiesSlotRequest
     public IReadOnlyList<Guid> PersonIds { get; init; } = Array.Empty<Guid>();
 }
 
+public sealed class HeaderDocumentCopiesSlotRequest
+{
+    public HeaderDocumentCopiesFamily Family { get; init; }
+
+    public Guid ParentId { get; init; }
+
+    public Guid? ContextItemId { get; init; }
+}
+
 /// <summary>
 /// Global right-side preview slot orchestrator (file preview + inline Resminamalar).
 /// Implemented in the Blazor host; callable from XAF Module controllers via DI.
@@ -85,6 +98,8 @@ public interface IVisaPreviewSlotService
     Task OpenProgressLettersAsync(ProgressLettersSlotRequest request, string? ownerViewId = null);
 
     Task OpenPersonDocumentCopiesAsync(PersonDocumentCopiesSlotRequest request, string? ownerViewId = null);
+
+    Task OpenHeaderDocumentCopiesAsync(HeaderDocumentCopiesSlotRequest request, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 
@@ -123,6 +138,17 @@ public sealed class ProgressLettersInlinePreviewRequest
 
 public sealed class PersonDocumentCopiesInlinePreviewRequest
 {
+    public required string RecordKey { get; init; }
+
+    public required string DisplayName { get; init; }
+}
+
+public sealed class HeaderDocumentCopiesInlinePreviewRequest
+{
+    public HeaderDocumentCopiesFamily Family { get; init; }
+
+    public Guid ParentId { get; init; }
+
     public required string RecordKey { get; init; }
 
     public required string DisplayName { get; init; }

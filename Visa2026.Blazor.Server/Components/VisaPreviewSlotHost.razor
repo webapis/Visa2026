@@ -2,6 +2,7 @@
 @using Microsoft.JSInterop
 @using System.Text.Json
 @using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Services.HeaderLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
 @using Visa2026.Blazor.Server.Services
@@ -36,6 +37,12 @@ else if (_state.Mode == VisaPreviewSlotMode.PersonDocumentCopies && _state.Perso
 {
     <PersonDocumentCopiesSlotPanel @key="_state.Version"
                                    Request="_state.PersonDocumentCopies"
+                                   CloseRequested="CloseFromPanelAsync" />
+}
+else if (_state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies && _state.HeaderDocumentCopies != null)
+{
+    <HeaderDocumentCopiesSlotPanel @key="_state.Version"
+                                   Request="_state.HeaderDocumentCopies"
                                    CloseRequested="CloseFromPanelAsync" />
 }
 
@@ -189,6 +196,30 @@ else if (_state.Mode == VisaPreviewSlotMode.PersonDocumentCopies && _state.Perso
 
     [JSInvokable]
     public void MarkPersonDocumentCopiesLinkClickPending() => PersonDocumentCopiesLinkClickGate.MarkPending();
+
+    [JSInvokable]
+    public Task OpenHeaderDocumentCopiesFromJsAsync(string familyText, string parentIdText, string contextItemIdText)
+    {
+        if (!Enum.TryParse<HeaderDocumentCopiesFamily>(familyText, ignoreCase: true, out var family))
+            return Task.CompletedTask;
+
+        if (!Guid.TryParse(parentIdText, out var parentId) || parentId == Guid.Empty)
+            return Task.CompletedTask;
+
+        Guid? contextItemId = Guid.TryParse(contextItemIdText, out var contextId) && contextId != Guid.Empty
+            ? contextId
+            : null;
+
+        return SlotService.OpenHeaderDocumentCopiesAsync(new HeaderDocumentCopiesSlotRequest
+        {
+            Family = family,
+            ParentId = parentId,
+            ContextItemId = contextItemId,
+        });
+    }
+
+    [JSInvokable]
+    public void MarkHeaderDocumentCopiesLinkClickPending() => HeaderDocumentCopiesLinkClickGate.MarkPending();
 
     [JSInvokable]
     public Task CloseFromJsAsync() => SlotService.CloseAsync();

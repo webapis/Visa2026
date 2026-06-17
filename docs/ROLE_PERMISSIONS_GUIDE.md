@@ -138,6 +138,8 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `Registration` | Full |
 | `Invitation` | Read, Write, Create |
 | `InvitationItem` | Read, Write, Create |
+| `BorderZone` | Read, Write, Create |
+| `BorderZoneItem` | Read, Write, Create |
 
 ### Read + Write + Create (no Delete)
 | Type | Access |

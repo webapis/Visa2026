@@ -38,7 +38,7 @@
           <Item Id="StateNotifications" Caption="State notifications" ViewId="BoStateNotificationInboxHost_DetailView" ImageName="BO_Validation" IsNewNode="True" />
         </Items>
       </Item>
-    <Item Id="Application" Caption="Applications"><Items><Item Id="Application_DirectMigration" Caption="Applications (direct migration)"><Items><Item Id="ApplicationItem_DirectMigration" Caption="Application items (migration)" /></Items></Item><Item Id="Application_ViaMinistries" Caption="Applications (via ministry)"><Items><Item Id="ApplicationItem_ViaMinistries" Caption="Application items (ministry)" /></Items></Item></Items></Item></Items>
+      <Item Id="Application" Caption="Applications"><Items><Item Id="Application_DirectMigration" Caption="Applications (direct migration)"><Items><Item Id="ApplicationItem_DirectMigration" Caption="Application items (migration)" /></Items></Item><Item Id="Application_ViaMinistries" Caption="Applications (via ministry)"><Items><Item Id="ApplicationItem_ViaMinistries" Caption="Application items (ministry)" /></Items></Item></Items></Item></Items>
   </NavigationItems>
   <BOModel>
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser" Caption="Base User" />

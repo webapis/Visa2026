@@ -29,6 +29,10 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `Resminamalar` | `ResminamalarSlotPanel` | `OpenResminamalarAsync` | [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) |
 | `DocumentCopies` | `DocumentCopiesSlotPanel` | `OpenDocumentCopiesAsync` | [`APPLICATION_ITEM_DOCUMENT_COPIES.md`](APPLICATION_ITEM_DOCUMENT_COPIES.md) |
 | `PersonDocumentCopies` | `PersonDocumentCopiesSlotPanel` | `OpenPersonDocumentCopiesAsync` | [`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md) |
+| `InvitationDocumentCopies` *(planned)* | `HeaderDocumentCopiesSlotPanel` *(planned)* | `OpenInvitationDocumentCopiesAsync` *(planned)* | [`INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md`](INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md) |
+| `WorkPermitDocumentCopies` *(planned)* | ↑ shared or per-family | `OpenWorkPermitDocumentCopiesAsync` *(planned)* | ↑ |
+| `RejectionDocumentCopies` *(planned)* | ↑ | `OpenRejectionDocumentCopiesAsync` *(planned)* | ↑ |
+| `BorderZoneDocumentCopies` *(planned)* | ↑ | `OpenBorderZoneDocumentCopiesAsync` *(planned)* | ↑ — **`BorderZoneDocument` + `Documents` same release** (mirror Invitation/WorkPermit) |
 | `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters (controller + catalog builder) |
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry |
 

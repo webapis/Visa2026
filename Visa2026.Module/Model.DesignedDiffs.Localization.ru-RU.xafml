@@ -1663,6 +1663,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Passport" Caption="Паспорт" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Reason" Caption="Причина" />
         <Member Name="Rejection" Caption="Отказ" />
@@ -2448,10 +2449,25 @@
     <ListView Id="AuthorizedRepresentative_ListView" Caption="Уполномоченный представитель" />
     <DetailView Id="AuthorizedSignatory_DetailView" Caption="Уполномоченный подписант" />
     <ListView Id="AuthorizedSignatory_ListView" Caption="Уполномоченный подписант" />
-    <DetailView Id="BorderZone_DetailView" Caption="Пограничная зона" />
+    <DetailView Id="BorderZone_DetailView" Caption="Пограничная зона">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <TabbedGroup Id="Tabs">
+            <LayoutGroup Id="Documents" Caption="Копии пограничной зоны" />
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="BorderZone_ListView" Caption="Пограничные зоны" />
     <DetailView Id="BorderZoneItem_DetailView" Caption="Элемент погран. зоны" />
-    <ListView Id="BorderZoneItem_ListView" Caption="Элементы погран. зоны" />
+    <ListView Id="BorderZoneItem_ListView" Caption="Элементы погран. зоны">
+      <Columns>
+        <ColumnInfo Id="BorderZone" Caption="Пограничная зона" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
+        <ColumnInfo Id="Passport" Caption="Паспорт" />
+        <ColumnInfo Id="Person" Caption="Лицо" />
+      </Columns>
+    </ListView>
     <DetailView Id="BorderZoneLocation_DetailView" Caption="Место погран. зоны" />
     <ListView Id="BorderZoneLocation_ListView" Caption="Места погран. зоны" />
     <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="Уведомления о состоянии" />
@@ -2558,13 +2574,10 @@
     </ListView>
     <ListView Id="Invitation_ListView" Caption="Приглашения">
       <Columns>
-        <ColumnInfo Id="Application" Caption="Заявка" />
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="ExpirationDate" Caption="Срок действия" />
         <ColumnInfo Id="InvitationNumber" Caption="Номер приглашения" />
-        <ColumnInfo Id="IsActive" Caption="Активен" />
-        <ColumnInfo Id="IsCancelled" Caption="Отменено" />
-        <ColumnInfo Id="IsChanged" Caption="Изменено" />
         <ColumnInfo Id="StartDate" Caption="Дата начала" />
         <ColumnInfo Id="ValidityDuration" Caption="Срок действия" />
       </Columns>
@@ -2572,7 +2585,9 @@
     <DetailView Id="InvitationItem_DetailView" Caption="Позиция приглашения" />
     <ListView Id="InvitationItem_ListView" Caption="Позиции приглашения">
       <Columns>
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="InvitationItemName" Caption="Наименование" />
+        <ColumnInfo Id="Passport" Caption="Паспорт" />
         <ColumnInfo Id="Person" Caption="Лицо" />
       </Columns>
     </ListView>
@@ -2814,6 +2829,7 @@
       <Columns>
         <ColumnInfo Id="Application" Caption="Заявка" />
         <ColumnInfo Id="Date" Caption="Дата" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="Reason" Caption="Причина" />
         <ColumnInfo Id="RejectedDocNumber" Caption="Номер отклонённого док." />
         <ColumnInfo Id="RejectionTitle" Caption="Заголовок отказа" />
@@ -2823,9 +2839,10 @@
     <DetailView Id="RejectionItem_DetailView" Caption="Позиция отказа" />
     <ListView Id="RejectionItem_ListView" Caption="Позиции отказа">
       <Columns>
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
+        <ColumnInfo Id="Passport" Caption="Паспорт" />
         <ColumnInfo Id="Person" Caption="Лицо" />
         <ColumnInfo Id="Reason" Caption="Причина" />
-        <ColumnInfo Id="Rejection" Caption="Отказ" />
         <ColumnInfo Id="RejectionItemName" Caption="Наименование" />
       </Columns>
     </ListView>
@@ -2941,7 +2958,13 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermit_ListView" Caption="Разрешения на работу" />
+    <ListView Id="WorkPermit_ListView" Caption="Разрешения на работу">
+      <Columns>
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
+        <ColumnInfo Id="IssuedDate" Caption="Дата выдачи" />
+        <ColumnInfo Id="WorkPermitNumber" Caption="Номер РНТ" />
+      </Columns>
+    </ListView>
     <ListView Id="WorkPermit_WorkPermitItems_ListView" Caption="Позиции РНТ">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="Номер AS" />
@@ -2978,6 +3001,7 @@
         <ColumnInfo Id="ASNumber" Caption="Номер AS" />
         <ColumnInfo Id="CurrentPositionHistory" Caption="Текущая должность" />
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="ExpirationDate" Caption="Срок действия" />
         <ColumnInfo Id="Passport" Caption="Паспорт" />
         <ColumnInfo Id="Person" Caption="Лицо" />

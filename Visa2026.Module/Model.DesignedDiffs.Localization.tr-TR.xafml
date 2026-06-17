@@ -1663,6 +1663,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Passport" Caption="Pasaport" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Reason" Caption="Neden" />
         <Member Name="Rejection" Caption="Ret" />
@@ -2448,10 +2449,25 @@
     <ListView Id="AuthorizedRepresentative_ListView" Caption="Yetkili Temsilci" />
     <DetailView Id="AuthorizedSignatory_DetailView" Caption="Yetkili İmzacı" />
     <ListView Id="AuthorizedSignatory_ListView" Caption="Yetkili İmzacı" />
-    <DetailView Id="BorderZone_DetailView" Caption="Sınır Bölgesi" />
+    <DetailView Id="BorderZone_DetailView" Caption="Sınır Bölgesi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <TabbedGroup Id="Tabs">
+            <LayoutGroup Id="Documents" Caption="Sınır bölgesi kopyaları" />
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="BorderZone_ListView" Caption="Sınır Bölgeleri" />
     <DetailView Id="BorderZoneItem_DetailView" Caption="Sınır Bölgesi Kalemi" />
-    <ListView Id="BorderZoneItem_ListView" Caption="Sınır Bölgesi Kalemleri" />
+    <ListView Id="BorderZoneItem_ListView" Caption="Sınır Bölgesi Kalemleri">
+      <Columns>
+        <ColumnInfo Id="BorderZone" Caption="Sınır Bölgesi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
+        <ColumnInfo Id="Passport" Caption="Pasaport" />
+        <ColumnInfo Id="Person" Caption="Kişi" />
+      </Columns>
+    </ListView>
     <DetailView Id="BorderZoneLocation_DetailView" Caption="Sınır Bölgesi Yeri" />
     <ListView Id="BorderZoneLocation_ListView" Caption="Sınır Bölgesi Yerleri" />
     <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="Durum bildirimleri" />
@@ -2558,13 +2574,10 @@
     </ListView>
     <ListView Id="Invitation_ListView" Caption="Davetler">
       <Columns>
-        <ColumnInfo Id="Application" Caption="Başvuru" />
         <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
         <ColumnInfo Id="InvitationNumber" Caption="Davet No" />
-        <ColumnInfo Id="IsActive" Caption="Aktif" />
-        <ColumnInfo Id="IsCancelled" Caption="İptal Edildi" />
-        <ColumnInfo Id="IsChanged" Caption="Değiştirildi" />
         <ColumnInfo Id="StartDate" Caption="Başlangıç Tarihi" />
         <ColumnInfo Id="ValidityDuration" Caption="Geçerlilik Süresi" />
       </Columns>
@@ -2572,7 +2585,9 @@
     <DetailView Id="InvitationItem_DetailView" Caption="Davet Kalemi" />
     <ListView Id="InvitationItem_ListView" Caption="Davet Kalemleri">
       <Columns>
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="InvitationItemName" Caption="Ad" />
+        <ColumnInfo Id="Passport" Caption="Pasaport" />
         <ColumnInfo Id="Person" Caption="Kişi" />
       </Columns>
     </ListView>
@@ -2814,6 +2829,7 @@
       <Columns>
         <ColumnInfo Id="Application" Caption="Başvuru" />
         <ColumnInfo Id="Date" Caption="Tarih" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="Reason" Caption="Neden" />
         <ColumnInfo Id="RejectedDocNumber" Caption="Reddedilen Belge No" />
         <ColumnInfo Id="RejectionTitle" Caption="Ret Başlığı" />
@@ -2823,9 +2839,10 @@
     <DetailView Id="RejectionItem_DetailView" Caption="Ret Kalemi" />
     <ListView Id="RejectionItem_ListView" Caption="Ret Kalemleri">
       <Columns>
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
+        <ColumnInfo Id="Passport" Caption="Pasaport" />
         <ColumnInfo Id="Person" Caption="Kişi" />
         <ColumnInfo Id="Reason" Caption="Neden" />
-        <ColumnInfo Id="Rejection" Caption="Ret" />
         <ColumnInfo Id="RejectionItemName" Caption="Ad" />
       </Columns>
     </ListView>
@@ -2941,7 +2958,13 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermit_ListView" Caption="Çalışma İzinleri" />
+    <ListView Id="WorkPermit_ListView" Caption="Çalışma İzinleri">
+      <Columns>
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
+        <ColumnInfo Id="IssuedDate" Caption="Veriliş Tarihi" />
+        <ColumnInfo Id="WorkPermitNumber" Caption="İş İzni No" />
+      </Columns>
+    </ListView>
     <ListView Id="WorkPermit_WorkPermitItems_ListView" Caption="İş İzni Kalemleri">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="AS Numarası" />
@@ -2978,6 +3001,7 @@
         <ColumnInfo Id="ASNumber" Caption="AS Numarası" />
         <ColumnInfo Id="CurrentPositionHistory" Caption="Güncel Pozisyon" />
         <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption=" " />
         <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
         <ColumnInfo Id="Passport" Caption="Pasaport" />
         <ColumnInfo Id="Person" Caption="Kişi" />

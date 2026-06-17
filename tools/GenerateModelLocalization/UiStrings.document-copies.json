@@ -146,6 +146,20 @@
         }
       }
     },
+    "BorderZone_DetailView": {
+      "nestedLayoutGroups": [
+        {
+          "path": ["Tabs"],
+          "groups": {
+            "Documents": {
+              "tr-TR": "Sınır bölgesi kopyaları",
+              "tk-TM": "Serhet sebiti nusgalary",
+              "ru-RU": "Копии пограничной зоны"
+            }
+          }
+        }
+      ]
+    },
     "WorkPermit_DetailView": {
       "nestedLayoutGroups": [
         {

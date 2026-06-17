@@ -1,0 +1,16 @@
+# learnings.md — invitation & work permit document copies
+
+Append-only notes from verified implementation runs. Read before implementing.
+
+## 2026-06-06 — Phases 0–2 initial implementation
+
+- **`SupportingDocumentsPdfSharpHelper.TryWriteSinglePagePdfFromRasterBytes`** uses positional parameter `landscape`, not `landscapePage:` — mirror `PersonDocumentCopyPdfMerger` call style.
+- **Blazor list-link controller** needs `using Visa2026.Module.BusinessObjects;` — do not use `typeof(BusinessObjects.WorkPermit)` without that alias.
+- **`Startup.cs`** must `using Visa2026.Module.Services.HeaderLinkedDocuments;` for `HeaderDocumentCopyPdfMerger` DI.
+- **`BorderZone_DetailView`** Documents tab lives in `Visa2026.Blazor.Server/Model.xafml` (tabbed with `BorderZoneItems`); localization captions via `UiStrings.document-copies.json` + `GenerateModelLocalization`.
+- **EF schema:** `BorderZoneDocument` table is created on next XAF DB update / deploy (`FORCE_XAF_DB_UPDATE` if needed on an already-current DB).
+- **Not in v1:** `PersonLinkedDocumentsResolver` border-zone section; Phases 3–4 (cross-links, images, ZIP).
+- **ListView NRE in `DxGridListEditorBase.AddColumnCore`:** Do **not** use `[Browsable(false)]` on `DocumentCopiesListLink` — XAF cannot resolve the member for the grid column. Match `Person.DocumentCopiesListLink`: `[VisibleInDetailView(false)]`, `[VisibleInLookupListView(false)]`, `[ModelDefault("AllowEdit", "False")]`.
+- **Parent ListView empty columns:** `HeaderDocumentCopiesListViewColumnUpdater` must seed **data columns + link** for parent ListViews. Adding only `DocumentCopiesListLink` switches the grid to an explicit one-column model. Mirror `Person_ListView_Employees` in `Model.xafml`.
+- **Person vs header ListView (why Person works):** Person navigation uses **typed** `Person_ListView_Employees` etc. — `CustomViewClonerUpdater` **CopyColumns** from `Person_ListView` first; `PersonDocumentCopiesListViewColumnUpdater` adds **only** the link column. Header BOs use default `Invitation_ListView` / `WorkPermit_ListView` / `Rejection_ListView` — early doc-copies work poisoned these ids (link-only column set + `ModelDifference` per user). Fix: generator adds link only (Person pattern); `HeaderParentListViewConfigurator.Wire` reapplies full parent columns on **`SetupComplete` and `LoggedOn`** (after user model merge).
+- **Item ListViews (`*Item_ListView`):** Same collapse as parent views when only `DocumentCopiesListLink` gets `Index=1` from `HeaderDocumentCopiesListViewColumnUpdater` while localization columns lack `Index`/`Width`. Extend `HeaderParentListViewColumns` with item layouts; add explicit columns in `Visa2026.Blazor.Server/Model.xafml` for `RejectionItem_ListView`, `InvitationItem_ListView`, `BorderZoneItem_ListView`; shift `WorkPermitItem_ListView` indices after link at index 1. Update `UiStrings.documents-views.json` (not only `person-detail.json`) and re-run `GenerateModelLocalization`.

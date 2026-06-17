@@ -169,6 +169,11 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public string DocumentCopiesListLink => VisaUiMessages.Get("PersonDocumentCopies.List.ColumnLink");
 
+        /// <summary>Latest rejection line for this person (replaces removed <c>CurrentRejectionItemID</c> FK).</summary>
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        public RejectionItem CurrentRejectionItem => PersonCurrentItems.GetCurrentRejectionItem(this);
+
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         [ModelDefault("CustomCSSClassName", "e2e-person-birth-place")]
         public virtual string BirthPlace { get; set; }
