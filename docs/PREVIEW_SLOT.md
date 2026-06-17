@@ -28,6 +28,7 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 |------|-------|----------|------------|
 | `Resminamalar` | `ResminamalarSlotPanel` | `OpenResminamalarAsync` | [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) |
 | `DocumentCopies` | `DocumentCopiesSlotPanel` | `OpenDocumentCopiesAsync` | [`APPLICATION_ITEM_DOCUMENT_COPIES.md`](APPLICATION_ITEM_DOCUMENT_COPIES.md) |
+| `PersonDocumentCopies` *(planned)* | `PersonDocumentCopiesSlotPanel` | `OpenPersonDocumentCopiesAsync` | [`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md) |
 | `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters (controller + catalog builder) |
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry |
 

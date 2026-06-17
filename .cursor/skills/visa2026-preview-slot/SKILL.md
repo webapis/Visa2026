@@ -33,6 +33,7 @@ disable-model-invocation: false
 |-------|--------|
 | Resminamalar catalog, readiness, Word ZIP batch | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |
 | Document copies slots, scan merge, PDF ZIP | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
+| Person document copies (planned — master Person catalog) | [visa2026-person-document-copies](../visa2026-person-document-copies/SKILL.md) |
 | ApplicationProgress ministry letters domain | [visa2026-application-progress](../visa2026-application-progress/SKILL.md) |
 | User template merge / placeholders | [visa2026-user-report-templates](../visa2026-user-report-templates/SKILL.md) |
 | Docker / deploy | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
@@ -50,7 +51,7 @@ disable-model-invocation: false
 | Slot text invisible (dark theme) | `visaPreviewDrawer.syncSlotTheme()`; slot outside `<app>` | **This skill** |
 | Resize handle not draggable | Grid on `#visa-app-shell`, handle `z-index`, `--visa-preview-slot-width` | **This skill** |
 | Slot closes when nested ListView still active | `OwnerViewId` + `VisaPreviewSlotCloseController` | **This skill** |
-| Catalog empty / Check chips / ZIP fail | Feature domain | **resminamalar** / **document-copies** |
+| Catalog empty / Check chips / ZIP fail | Feature domain | **resminamalar** / **document-copies** / **person-document-copies** |
 | Preview generates but wrong PDF bytes | Generator / merge path | **resminamalar** / **document-copies** / **pdf-form-mapping** |
 
 ---
