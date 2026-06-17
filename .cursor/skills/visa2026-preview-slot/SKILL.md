@@ -36,6 +36,7 @@ disable-model-invocation: false
 | Person document copies (planned — master Person catalog) | [visa2026-person-document-copies](../visa2026-person-document-copies/SKILL.md) |
 | ApplicationProgress ministry letters domain | [visa2026-application-progress](../visa2026-application-progress/SKILL.md) |
 | User template merge / placeholders | [visa2026-user-report-templates](../visa2026-user-report-templates/SKILL.md) |
+| Template in-app editing (planned) | [visa2026-user-report-template-editing](../visa2026-user-report-template-editing/SKILL.md) — Word `DxRichEdit`; Excel **Univer** / ONLYOFFICE |
 | Docker / deploy | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 
 **Long reference:** [reference.md](./reference.md). **Experience log:** [learnings.md](./learnings.md). **Maturity:** [MATURITY.md](./MATURITY.md).

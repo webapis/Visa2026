@@ -20,6 +20,8 @@ disable-model-invocation: false
 
 For the **report package dialog** (preview, ZIP, readiness chips, gear toggle, Application vs ApplicationItem scope, **`UserReportTemplateSeedGate`**, batch worker errors that are **not** placeholder merge): use **[`.cursor/skills/visa2026-resminamalar/SKILL.md`](../visa2026-resminamalar/SKILL.md)** — read **`learnings.md`** before debugging; append after verified fixes ([**MATURITY.md**](../visa2026-resminamalar/MATURITY.md)).
 
+For **in-app template editing** in the preview slot (`TemplateEditor`, `DxRichEdit`, Excel upload / Univer / ONLYOFFICE): use **[`.cursor/skills/visa2026-user-report-template-editing/SKILL.md`](../visa2026-user-report-template-editing/SKILL.md)** — canonical plan **`docs/USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md`**.
+
 This skill covers **template files**, **maps**, **Extract/Validate**, **merge row builders**, and **visibility rules** on the template record.
 
 ## Hard boundaries (always enforce)

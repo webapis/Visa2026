@@ -34,6 +34,7 @@ Officer-facing **right-side panel** for inline catalogs and document preview. Re
 | `RejectionDocumentCopies` *(planned)* | ↑ | `OpenRejectionDocumentCopiesAsync` *(planned)* | ↑ |
 | `BorderZoneDocumentCopies` *(planned)* | ↑ | `OpenBorderZoneDocumentCopiesAsync` *(planned)* | ↑ — **`BorderZoneDocument` + `Documents` same release** (mirror Invitation/WorkPermit) |
 | `ProgressLetters` | `ProgressLettersSlotPanel` | `OpenProgressLettersAsync` | Application progress ministry letters (controller + catalog builder) |
+| `TemplateEditor` *(planned)* | `TemplateEditorSlotPanel` *(planned)* | `OpenTemplateEditorAsync` *(planned)* | [`USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md`](USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md) — Word `DxRichEdit`; Excel **Univer** / ONLYOFFICE |
 | `File` | `VisaFilePreviewDrawer` | `OpenFileAsync` / JS bridge | File preview sources registry |
 
 **Occupant keys:** `VisaPreviewSlotOccupantKeys` (e.g. `resminamalar:app:{id}`, `document-copies:items:{ids}`, `file:{source}:{id}`).

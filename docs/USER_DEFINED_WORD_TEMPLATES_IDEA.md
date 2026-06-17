@@ -502,6 +502,7 @@ headerDict["rows"] = rows;
 
 ## Related Files
 
+- `docs/USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md` — **Planned** in-app template editor (Word save-to-DB; Excel options)
 - `docs/USER_TEMPLATE_AUTHOR_GUIDE.md` — **End-user guide** for creating Word templates
 - `docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md` — Available BO properties reference
 - `docs/WORD_REPORT_GENERATION_IDEA.md` — Existing Word pipeline architecture

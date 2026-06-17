@@ -56,7 +56,7 @@ The **`GenerateWordReports`** / **`ViewApplicationItemWordReports`** actions use
 
 
 
-Related: user templates [`docs/USER_DEFINED_WORD_TEMPLATES_IDEA.md`](USER_DEFINED_WORD_TEMPLATES_IDEA.md). Legacy code-backed Word / XtraReports: removed — see [`docs/DEPRECATED.md`](DEPRECATED.md).
+Related: user templates [`docs/USER_DEFINED_WORD_TEMPLATES_IDEA.md`](USER_DEFINED_WORD_TEMPLATES_IDEA.md). In-app template editing plan: [`docs/USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md`](USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md). Legacy code-backed Word / XtraReports: removed — see [`docs/DEPRECATED.md`](DEPRECATED.md).
 
 
 
@@ -305,7 +305,7 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
 
 
-Users with **Write** on **`UserReportTemplate`** see **Edit template** when the footer **gear** is toggled on. **Users role** has Read/Write/Create on templates and full access on **`UserReportPlaceholder`** for Extract. See `UserReportTemplateEditLinkService`, `UserReportTemplateEditAccess`.
+Users with **Write** on **`UserReportTemplate`** see **Edit template** when the footer **gear** is toggled on. **Users role** has Read/Write/Create on templates and full access on **`UserReportPlaceholder`** for Extract. See `UserReportTemplateEditLinkService`, `UserReportTemplateEditAccess`. Planned: **Edit document** in-app (Word) — **`docs/USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md`**.
 
 
 

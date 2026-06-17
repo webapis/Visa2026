@@ -300,6 +300,7 @@ EnsureReadWriteCreatePermission<FileData>(userRole);
 |----------|---------|
 | **`docs/EXCEL_PLACEHOLDER_REFERENCE.md`** (new) | Tokens for `ApplicationItem` / list headers; link to Word reference for shared names |
 | **`docs/EXCEL_TEMPLATE_AUTHOR_GUIDE.md`** (new) | Short author guide: Excel layout rules, loop row, Extract/Validate |
+| **`docs/USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md`** | In-app editing UX plan (Word `DxRichEdit`; Excel **Univer** / ONLYOFFICE; POC §7) |
 | **`docs/WORD_REPORT_PLACEHOLDER_REFERENCE.md`** | Remains canonical for shared property names; Excel doc references same `[NotMapped]` fields |
 | **`Visa2026.Module/Resources/Templates/Excel/README.md`** | Seed registration checklist |
 

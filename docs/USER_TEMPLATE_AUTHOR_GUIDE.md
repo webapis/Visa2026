@@ -2,6 +2,8 @@
 
 How to create custom Word report templates for the Visa 2026 application.
 
+> **Planned:** In-app editing in the **preview slot** (`TemplateEditor` occupant). Word: **DxRichEdit**. Excel: **Univer** (open source) after POC, or **ONLYOFFICE Community** fallback — see **`docs/USER_REPORT_TEMPLATE_IN_APP_EDITING_PLAN.md`** §7.
+
 ---
 
 ## Prerequisites (before Word or Excel design)
