@@ -48,4 +48,23 @@ public static class VisaPreviewSlotOccupantKeys
 
     public static string ForProgressLetters(ProgressLettersSlotRequest request) =>
         ForProgressLetters(request?.ApplicationId ?? Guid.Empty);
+
+    public static string ForPersonDocumentCopies(IReadOnlyList<Guid> personIds)
+    {
+        var ids = personIds?
+            .Where(id => id != Guid.Empty)
+            .OrderBy(id => id)
+            .ToArray() ?? Array.Empty<Guid>();
+
+        if (ids.Length == 0)
+            return "person-document-copies:empty";
+
+        if (ids.Length == 1)
+            return $"person-document-copies:person:{ids[0]:N}";
+
+        return $"person-document-copies:persons:{string.Join(',', ids.Select(id => id.ToString("N")))}";
+    }
+
+    public static string ForPersonDocumentCopies(PersonDocumentCopiesSlotRequest request) =>
+        ForPersonDocumentCopies(request?.PersonIds ?? Array.Empty<Guid>());
 }

@@ -10,6 +10,7 @@ public enum VisaPreviewSlotMode
     Resminamalar = 2,
     DocumentCopies = 3,
     ProgressLetters = 4,
+    PersonDocumentCopies = 5,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -44,6 +45,8 @@ public sealed class VisaPreviewSlotState
 
     public ProgressLettersSlotRequest? ProgressLetters { get; init; }
 
+    public PersonDocumentCopiesSlotRequest? PersonDocumentCopies { get; init; }
+
     public int Version { get; init; }
 }
 
@@ -58,6 +61,11 @@ public sealed class ProgressLettersSlotRequest
 
     /// <summary>When set, the catalog opens and previews this progress row if it has a ministry letter file.</summary>
     public Guid? FocusProgressId { get; init; }
+}
+
+public sealed class PersonDocumentCopiesSlotRequest
+{
+    public IReadOnlyList<Guid> PersonIds { get; init; } = Array.Empty<Guid>();
 }
 
 /// <summary>
@@ -75,6 +83,8 @@ public interface IVisaPreviewSlotService
     Task OpenDocumentCopiesAsync(DocumentCopiesSlotRequest request, string? ownerViewId = null);
 
     Task OpenProgressLettersAsync(ProgressLettersSlotRequest request, string? ownerViewId = null);
+
+    Task OpenPersonDocumentCopiesAsync(PersonDocumentCopiesSlotRequest request, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 
@@ -107,6 +117,13 @@ public sealed class ProgressLettersInlinePreviewRequest
     public Guid ApplicationId { get; init; }
 
     public Guid ProgressId { get; init; }
+
+    public required string DisplayName { get; init; }
+}
+
+public sealed class PersonDocumentCopiesInlinePreviewRequest
+{
+    public required string RecordKey { get; init; }
 
     public required string DisplayName { get; init; }
 }

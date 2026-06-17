@@ -31,6 +31,12 @@ else if (_state.Mode == VisaPreviewSlotMode.ProgressLetters && _state.ProgressLe
                               Request="_state.ProgressLetters"
                               CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.PersonDocumentCopies && _state.PersonDocumentCopies != null)
+{
+    <PersonDocumentCopiesSlotPanel @key="_state.Version"
+                                   Request="_state.PersonDocumentCopies"
+                                   CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;

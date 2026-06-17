@@ -1,0 +1,150 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.Extensions.DependencyInjection
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PersonLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="resminamalar-slot-panel person-document-copies-slot-panel document-copies-slot-panel @(_previewActive ? "resminamalar-slot-panel--preview" : string.Empty)">
+    @if (!_previewActive)
+    {
+        <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+            <span class="visa-preview-drawer__title">@Title</span>
+            <div class="visa-preview-drawer__header-actions">
+                <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                        type="button"
+                        title="@CloseLabel"
+                        @onclick="ClosePanelAsync">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="resminamalar-slot-panel__body">
+        @if (!_previewActive)
+        {
+            <div class="resminamalar-slot-panel__catalog">
+                <PersonDocumentCopiesComponent PersonId="_personId"
+                                               Snapshot="_snapshot"
+                                               UiCultureName="_uiCultureName"
+                                               UseInlinePreview="true"
+                                               RefreshRequested="_refreshRequested"
+                                               OnInlinePreviewRequested="HandleInlinePreviewAsync" />
+            </div>
+        }
+        else
+        {
+            <PersonDocumentCopiesInlinePreview @ref="_inlinePreview"
+                                               PersonId="_personId"
+                                               UiCultureName="_uiCultureName"
+                                               PreviewClosed="OnPreviewClosedAsync" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public PersonDocumentCopiesSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+
+    private Guid _personId;
+    private PersonLinkedDocumentsSnapshot _snapshot = new();
+    private string _uiCultureName = string.Empty;
+    private bool _previewActive;
+    private PersonDocumentCopiesInlinePreview? _inlinePreview;
+    private EventCallback _refreshRequested;
+    private string? _boundOccupantKey;
+
+    private string Title => VisaUiMessages.Get("PersonDocumentCopies.Title", _uiCultureName);
+    private string CloseLabel => VisaUiMessages.Get("PersonDocumentCopies.Action.Close", _uiCultureName);
+
+    protected override void OnInitialized()
+    {
+        _refreshRequested = EventCallback.Factory.Create(this, ReloadSnapshotAsync);
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+    }
+
+    protected override void OnParametersSet()
+    {
+        var personIds = Request?.PersonIds?
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList() ?? new List<Guid>();
+
+        if (personIds.Count == 0)
+        {
+            _personId = Guid.Empty;
+            _snapshot = new PersonLinkedDocumentsSnapshot();
+            _boundOccupantKey = null;
+            _previewActive = false;
+            return;
+        }
+
+        var occupantKey = Request != null
+            ? VisaPreviewSlotOccupantKeys.ForPersonDocumentCopies(Request)
+            : VisaPreviewSlotOccupantKeys.ForPersonDocumentCopies(personIds);
+
+        if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
+        {
+            _boundOccupantKey = occupantKey;
+            _previewActive = false;
+        }
+
+        _personId = personIds[0];
+        ReloadSnapshot();
+    }
+
+    private void ReloadSnapshot()
+    {
+        if (_personId == Guid.Empty)
+        {
+            _snapshot = new PersonLinkedDocumentsSnapshot();
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Person>();
+        var person = objectSpace.GetObjectByKey<Person>(_personId);
+        _snapshot = person == null
+            ? new PersonLinkedDocumentsSnapshot { PersonId = _personId }
+            : PersonLinkedDocumentsResolver.Resolve(objectSpace, person);
+    }
+
+    private Task ReloadSnapshotAsync()
+    {
+        ReloadSnapshot();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleInlinePreviewAsync(PersonDocumentCopiesInlinePreviewRequest request)
+    {
+        _previewActive = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        if (_inlinePreview != null)
+            await _inlinePreview.OpenAsync(request);
+    }
+
+    private async Task OnPreviewClosedAsync()
+    {
+        _previewActive = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClosePanelAsync()
+    {
+        _previewActive = false;
+        if (CloseRequested.HasDelegate)
+            await CloseRequested.InvokeAsync();
+        else
+            await SlotService.CloseAsync();
+    }
+}

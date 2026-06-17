@@ -1,6 +1,6 @@
 # Person document copies (planned)
 
-**Status:** **Not implemented** — design + agent skill only. Use this doc when building Person-scoped document preview in the global **`#visa-preview-slot`**.
+**Status:** **Phase 1 implemented** — Person DetailView toolbar, `PersonLinkedDocumentsResolver`, preview-slot occupant, sectioned catalog, per-record Preview + Refresh. ListView column and cross-links: later phases.
 
 **Agent skill:** [`.cursor/skills/visa2026-person-document-copies/SKILL.md`](../.cursor/skills/visa2026-person-document-copies/SKILL.md)
 

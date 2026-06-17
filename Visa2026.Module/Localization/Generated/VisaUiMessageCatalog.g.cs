@@ -866,13 +866,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ministrlik hatynyň nusgasy",
             ["ru-RU"] = "Копия письма министерства",
         },
-        ["ApplicationProgress.MinistryLetters.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Ministry letter copies",
-            ["tr-TR"] = "Bakanlık yazısı kopyaları",
-            ["tk-TM"] = "Ministrlik hatlarynyň nusgalary",
-            ["ru-RU"] = "Копии писем министерства",
-        },
         ["ApplicationProgress.MinistryLetters.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No ministry letter copies are attached to this application's progress history.",
@@ -886,6 +879,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bakanlık yazısı kopyalarını bir başvurunun ilerleme geçmişinden açın.",
             ["tk-TM"] = "Ministrlik hatlarynyň nusgalaryny arzanyň ösüş taryhyndan açyň.",
             ["ru-RU"] = "Откройте копии писем министерства из истории прогресса заявки.",
+        },
+        ["ApplicationProgress.MinistryLetters.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ministry letter copies",
+            ["tr-TR"] = "Bakanlık yazısı kopyaları",
+            ["tk-TM"] = "Ministrlik hatlarynyň nusgalary",
+            ["ru-RU"] = "Копии писем министерства",
         },
         ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2104,6 +2104,251 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Aile üyesi",
             ["tk-TM"] = "Maşgala agzy",
             ["ru-RU"] = "Член семьи",
+        },
+        ["PersonDocumentCopies.Action.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Close",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["PersonDocumentCopies.Action.Download"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download",
+            ["tr-TR"] = "İndir",
+            ["tk-TM"] = "Göçür",
+            ["ru-RU"] = "Скачать",
+        },
+        ["PersonDocumentCopies.Action.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preview",
+            ["tr-TR"] = "Önizle",
+            ["tk-TM"] = "Deslapky görnüş",
+            ["ru-RU"] = "Просмотр",
+        },
+        ["PersonDocumentCopies.Action.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refresh",
+            ["tr-TR"] = "Yenile",
+            ["tk-TM"] = "Täzele",
+            ["ru-RU"] = "Обновить",
+        },
+        ["PersonDocumentCopies.Action.ShowDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show file details",
+            ["tr-TR"] = "Dosya ayrıntılarını göster",
+            ["tk-TM"] = "Faýl jikme-jikliklerini görkez",
+            ["ru-RU"] = "Показать сведения о файлах",
+        },
+        ["PersonDocumentCopies.Badge.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current",
+            ["tr-TR"] = "Güncel",
+            ["tk-TM"] = "Häzirki",
+            ["ru-RU"] = "Текущий",
+        },
+        ["PersonDocumentCopies.Empty.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No person selected.",
+            ["tr-TR"] = "Kişi seçilmedi.",
+            ["tk-TM"] = "Adam saýlanmady.",
+            ["ru-RU"] = "Лицо не выбрано.",
+        },
+        ["PersonDocumentCopies.Empty.NoRecords"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No document records found for this person.",
+            ["tr-TR"] = "Bu kişi için belge kaydı bulunamadı.",
+            ["tk-TM"] = "Bu adam üçin resminama ýazgysy tapylmady.",
+            ["ru-RU"] = "Записи документов для этого лица не найдены.",
+        },
+        ["PersonDocumentCopies.Hint.NoFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No scanned copies attached yet.",
+            ["tr-TR"] = "Henüz taranmış kopya eklenmedi.",
+            ["tk-TM"] = "Entek skan nusga goşulmady.",
+            ["ru-RU"] = "Скан-копии пока не прикреплены.",
+        },
+        ["PersonDocumentCopies.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not open document preview.",
+            ["tr-TR"] = "Belge önizlemesi açılamadı.",
+            ["tk-TM"] = "Resminama deslapky görnüşini açyp bolmady.",
+            ["ru-RU"] = "Не удалось открыть просмотр документа.",
+        },
+        ["PersonDocumentCopies.Preview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document preview",
+            ["tr-TR"] = "Belge önizleme",
+            ["tk-TM"] = "Resminama deslapky görnüşi",
+            ["ru-RU"] = "Просмотр документа",
+        },
+        ["PersonDocumentCopies.Record.Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address {0}",
+            ["tr-TR"] = "Adres {0}",
+            ["tk-TM"] = "Salgy {0}",
+            ["ru-RU"] = "Адрес {0}",
+        },
+        ["PersonDocumentCopies.Record.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education {0}",
+            ["tr-TR"] = "Eğitim {0}",
+            ["tk-TM"] = "Bilim {0}",
+            ["ru-RU"] = "Образование {0}",
+        },
+        ["PersonDocumentCopies.Record.FamilyRelationDocument"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family relation file {0}",
+            ["tr-TR"] = "Aile ilişkisi dosyası {0}",
+            ["tk-TM"] = "Maşgala gatnaşygy faýly {0}",
+            ["ru-RU"] = "Файл о родстве {0}",
+        },
+        ["PersonDocumentCopies.Record.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation {0}",
+            ["tr-TR"] = "Davet {0}",
+            ["tk-TM"] = "Çakylyk {0}",
+            ["ru-RU"] = "Приглашение {0}",
+        },
+        ["PersonDocumentCopies.Record.Lodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lodging {0}",
+            ["tr-TR"] = "Konaklama {0}",
+            ["tk-TM"] = "Ýaşaýyş {0}",
+            ["ru-RU"] = "Проживание {0}",
+        },
+        ["PersonDocumentCopies.Record.MedicalRecord"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record {0}",
+            ["tr-TR"] = "Sağlık kaydı {0}",
+            ["tk-TM"] = "Saglyk ýazgysy {0}",
+            ["ru-RU"] = "Мед. запись {0}",
+        },
+        ["PersonDocumentCopies.Record.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport {0}",
+            ["tr-TR"] = "Pasaport {0}",
+            ["tk-TM"] = "Pasport {0}",
+            ["ru-RU"] = "Паспорт {0}",
+        },
+        ["PersonDocumentCopies.Record.PersonDocument"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "File {0}",
+            ["tr-TR"] = "Dosya {0}",
+            ["tk-TM"] = "Faýl {0}",
+            ["ru-RU"] = "Файл {0}",
+        },
+        ["PersonDocumentCopies.Record.Rejection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection {0}",
+            ["tr-TR"] = "Ret {0}",
+            ["tk-TM"] = "Ret {0}",
+            ["ru-RU"] = "Отказ {0}",
+        },
+        ["PersonDocumentCopies.Record.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa {0}",
+            ["tr-TR"] = "Vize {0}",
+            ["tk-TM"] = "Wiza {0}",
+            ["ru-RU"] = "Виза {0}",
+        },
+        ["PersonDocumentCopies.Record.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit {0}",
+            ["tr-TR"] = "Çalışma izni {0}",
+            ["tk-TM"] = "Iş rugsady {0}",
+            ["ru-RU"] = "РНТ {0}",
+        },
+        ["PersonDocumentCopies.Section.Addresses"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Addresses of residence",
+            ["tr-TR"] = "İkamet adresleri",
+            ["tk-TM"] = "Ýaşaýyş salgylary",
+            ["ru-RU"] = "Адреса проживания",
+        },
+        ["PersonDocumentCopies.Section.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["PersonDocumentCopies.Section.FamilyRelationDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family relation documents",
+            ["tr-TR"] = "Aile ilişkisi belgeleri",
+            ["tk-TM"] = "Maşgala gatnaşygy resminamalary",
+            ["ru-RU"] = "Документы о родстве",
+        },
+        ["PersonDocumentCopies.Section.Invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitations",
+            ["tr-TR"] = "Davetler",
+            ["tk-TM"] = "Çakylyklar",
+            ["ru-RU"] = "Приглашения",
+        },
+        ["PersonDocumentCopies.Section.MedicalRecords"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical records",
+            ["tr-TR"] = "Sağlık kayıtları",
+            ["tk-TM"] = "Saglyk ýazgylary",
+            ["ru-RU"] = "Мед. записи",
+        },
+        ["PersonDocumentCopies.Section.Passports"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passports",
+            ["tr-TR"] = "Pasaportlar",
+            ["tk-TM"] = "Pasportlar",
+            ["ru-RU"] = "Паспорта",
+        },
+        ["PersonDocumentCopies.Section.PersonDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person files",
+            ["tr-TR"] = "Kişi dosyaları",
+            ["tk-TM"] = "Adam faýllary",
+            ["ru-RU"] = "Файлы лица",
+        },
+        ["PersonDocumentCopies.Section.Rejections"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejections",
+            ["tr-TR"] = "Retler",
+            ["tk-TM"] = "Retler",
+            ["ru-RU"] = "Отказы",
+        },
+        ["PersonDocumentCopies.Section.WorkPermits"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permits",
+            ["tr-TR"] = "Çalışma izinleri",
+            ["tk-TM"] = "Iş rugsatlary",
+            ["ru-RU"] = "РНТ",
+        },
+        ["PersonDocumentCopies.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scanned files for {0}.",
+            ["tr-TR"] = "{0} için taranmış dosyalar.",
+            ["tk-TM"] = "{0} üçin skan faýllar.",
+            ["ru-RU"] = "Скан-копии для {0}.",
+        },
+        ["PersonDocumentCopies.Subtitle.WithNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Scanned files for {0} ({1}).",
+            ["tr-TR"] = "{0} ({1}) için taranmış dosyalar.",
+            ["tk-TM"] = "{0} ({1}) üçin skan faýllar.",
+            ["ru-RU"] = "Скан-копии для {0} ({1}).",
+        },
+        ["PersonDocumentCopies.Summary.Files"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} file(s)",
+            ["tr-TR"] = "{0} dosya",
+            ["tk-TM"] = "{0} faýl",
+            ["ru-RU"] = "{0} файл(ов)",
+        },
+        ["PersonDocumentCopies.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person document copies",
+            ["tr-TR"] = "Kişi belge kopyaları",
+            ["tk-TM"] = "Adam resminama nusgalary",
+            ["ru-RU"] = "Копии документов лица",
         },
         ["PositionHistory.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

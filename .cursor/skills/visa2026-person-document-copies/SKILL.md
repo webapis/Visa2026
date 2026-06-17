@@ -13,7 +13,7 @@ disable-model-invocation: false
 
 **User prompts:** [prompts.md](./prompts.md) (`@visa2026-person-document-copies`).
 
-**Implementation status:** **Not started** — canonical design [`docs/PERSON_DOCUMENT_COPIES.md`](../../../docs/PERSON_DOCUMENT_COPIES.md). Do not assume files in the reference map exist until the doc status changes.
+**Implementation status:** **Phase 1** — DetailView action, `PersonLinkedDocumentsResolver`, preview-slot occupant, sectioned catalog, per-record Preview + Refresh. ListView column / cross-links: later phases.
 
 ## Agent workflow (when implementing)
 

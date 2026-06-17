@@ -1,0 +1,294 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Http
+@using DevExpress.ExpressApp.Blazor.Services
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PersonLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="app-item-doc-copies app-person-doc-copies @(UseInlinePreview ? "app-item-doc-copies--inline-slot" : string.Empty)">
+    <div class="app-item-doc-copies__body">
+        @if (PersonId == Guid.Empty)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@EmptyNoPerson</p>
+            </div>
+            <div class="app-item-doc-copies__top-actions">
+                <DxButton Text="@ActionRefresh"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          Click="@OnRefreshClick" />
+            </div>
+        }
+        else if (Snapshot.Sections.Count == 0)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@EmptyNoRecords</p>
+                @if (!string.IsNullOrWhiteSpace(Subtitle))
+                {
+                    <p class="app-item-doc-copies__hint">@Subtitle</p>
+                }
+            </div>
+            <div class="app-item-doc-copies__top-actions">
+                <DxButton Text="@ActionRefresh"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          Click="@OnRefreshClick" />
+            </div>
+        }
+        else
+        {
+            @if (!string.IsNullOrWhiteSpace(Subtitle))
+            {
+                <p class="app-person-doc-copies__subtitle app-item-doc-copies__hint">@Subtitle</p>
+            }
+
+            <div class="app-person-doc-copies__sections app-item-doc-copies__groups">
+                @foreach (var section in Snapshot.Sections)
+                {
+                    <section class="app-person-doc-copies__section" aria-label="@section.SectionLabel">
+                        <h4 class="app-person-doc-copies__section-title">@section.SectionLabel</h4>
+
+                        @foreach (var record in section.Records)
+                        {
+                            <div class="@GetRecordCssClass(record)" aria-label="@record.RecordLabel">
+                                <div class="app-item-doc-copies__group-head">
+                                    <div class="app-item-doc-copies__group-title">
+                                        <span class="app-item-doc-copies__group-label">@record.RecordLabel</span>
+                                        @if (record.IsCurrent)
+                                        {
+                                            <span class="app-person-doc-copies__badge">@CurrentBadge</span>
+                                        }
+                                    </div>
+                                    @if (record.Files.Any(file => file.HasContent))
+                                    {
+                                        <div class="app-item-doc-copies__group-actions">
+                                            @if (IsPreviewLoading(record.RecordKey))
+                                            {
+                                                <span class="app-report-package__preview-busy-label" role="status">
+                                                    @_previewStatusMessage
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <DxButton Text="@ActionPreview"
+                                                          RenderStyle="ButtonRenderStyle.Link"
+                                                          SizeMode="SizeMode.Small"
+                                                          CssClass="app-item-doc-copies__action-btn"
+                                                          Enabled="@(!IsAnyPreviewLoading)"
+                                                          Click="@(() => PreviewRecordAsync(record))" />
+                                            }
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (IsPreviewLoading(record.RecordKey))
+                                {
+                                    <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                         aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", record.RecordLabel)">
+                                        <div class="app-report-package__preview-progress-track">
+                                            <div class="app-report-package__preview-progress-indeterminate"></div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="app-item-doc-copies__status">
+                                    @if (!record.Files.Any(file => file.HasContent))
+                                    {
+                                        <p class="app-item-doc-copies__hint">@HintNoFiles</p>
+                                    }
+                                    else
+                                    {
+                                        <p class="app-item-doc-copies__summary">@GetRecordSummary(record)</p>
+                                    }
+                                </div>
+
+                                @if (ShowDetails && record.Files.Any(file => file.HasContent))
+                                {
+                                    <ul class="app-item-doc-copies__files">
+                                        @foreach (var file in record.Files.Where(f => f.HasContent))
+                                        {
+                                            <li class="app-item-doc-copies__file-row app-item-doc-copies__file-row--summary">
+                                                <span class="app-item-doc-copies__file-name" title="@file.FileName">@file.FileName</span>
+                                                <span class="app-item-doc-copies__file-size">@FormatSize(file.SizeBytes)</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        }
+                    </section>
+                }
+            </div>
+        }
+    </div>
+
+    @if (PersonId != Guid.Empty)
+    {
+        <footer class="app-item-doc-copies__footer">
+            <div class="app-item-doc-copies__footer-actions">
+                <DxButton Text="@ActionRefresh"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          CssClass="app-item-doc-copies__action-btn"
+                          Click="@OnRefreshClick" />
+            </div>
+            <button type="button"
+                    class="@GearButtonCssClass"
+                    title="@GearToolTip"
+                    aria-label="@GearToolTip"
+                    aria-pressed="@ShowDetails"
+                    @onclick="ToggleDetailsAsync">
+                <svg class="cs-multi-select-popup__gear-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81a.488.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87a.488.488 0 0 0 .12.61l2.03 1.58c-.05.3-.07.63-.07.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.488.488 0 0 0-.12-.61l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 15.6 12 3.6 3.6 0 0 1 12 15.6z" />
+                </svg>
+            </button>
+        </footer>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid PersonId { get; set; }
+    [Parameter] public PersonLinkedDocumentsSnapshot Snapshot { get; set; } = new();
+    [Parameter] public EventCallback RefreshRequested { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+    [Parameter] public bool UseInlinePreview { get; set; }
+    [Parameter] public EventCallback<PersonDocumentCopiesInlinePreviewRequest> OnInlinePreviewRequested { get; set; }
+
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    private bool ShowDetails;
+    private string? _previewLoadingKey;
+    private string _previewStatusMessage = string.Empty;
+
+    private static readonly TimeSpan MinimumPreviewProgressDuration = TimeSpan.FromSeconds(1.5);
+
+    private bool IsAnyPreviewLoading => !string.IsNullOrEmpty(_previewLoadingKey);
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string Subtitle
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Snapshot.PersonDisplayName))
+                return string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(Snapshot.PersonalNumber))
+                return FormatMsg("PersonDocumentCopies.Subtitle.WithNumber", Snapshot.PersonDisplayName, Snapshot.PersonalNumber);
+
+            return FormatMsg("PersonDocumentCopies.Subtitle", Snapshot.PersonDisplayName);
+        }
+    }
+
+    private string CurrentBadge => PersonDocumentCopiesLocalization.CurrentBadge(EffectiveUiCulture);
+    private string EmptyNoPerson => Msg("PersonDocumentCopies.Empty.NoPerson");
+    private string EmptyNoRecords => Msg("PersonDocumentCopies.Empty.NoRecords");
+    private string HintNoFiles => Msg("PersonDocumentCopies.Hint.NoFiles");
+    private string ActionPreview => Msg("PersonDocumentCopies.Action.Preview");
+    private string ActionRefresh => Msg("PersonDocumentCopies.Action.Refresh");
+    private string GearToolTip => Msg("PersonDocumentCopies.Action.ShowDetails");
+    private string GearButtonCssClass => ShowDetails
+        ? "cs-multi-select-popup__gear-btn cs-multi-select-popup__gear-btn--active"
+        : "cs-multi-select-popup__gear-btn";
+
+    private bool IsPreviewLoading(string recordKey) =>
+        string.Equals(_previewLoadingKey, recordKey, StringComparison.Ordinal);
+
+    private string GetRecordCssClass(PersonLinkedDocumentRecord record)
+    {
+        var classes = new List<string> { "app-item-doc-copies__group", "app-person-doc-copies__record" };
+        if (record.IsNested)
+            classes.Add("app-person-doc-copies__record--nested");
+
+        if (!record.Files.Any(file => file.HasContent))
+            classes.Add("app-item-doc-copies__group--empty");
+
+        return string.Join(' ', classes);
+    }
+
+    private string GetRecordSummary(PersonLinkedDocumentRecord record)
+    {
+        var count = record.Files.Count(file => file.HasContent);
+        return FormatMsg("PersonDocumentCopies.Summary.Files", count);
+    }
+
+    private static string FormatSize(int bytes)
+    {
+        if (bytes < 1024)
+            return $"{bytes} B";
+
+        if (bytes < 1024 * 1024)
+            return $"{bytes / 1024.0:0.#} KB";
+
+        return $"{bytes / (1024.0 * 1024.0):0.#} MB";
+    }
+
+    private async Task PreviewRecordAsync(PersonLinkedDocumentRecord record)
+    {
+        if (IsAnyPreviewLoading || string.IsNullOrWhiteSpace(record.RecordKey))
+            return;
+
+        if (!UseInlinePreview || !OnInlinePreviewRequested.HasDelegate)
+            return;
+
+        _previewLoadingKey = record.RecordKey;
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", record.RecordLabel);
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        await Task.Delay(100);
+
+        var progressStartedUtc = DateTime.UtcNow;
+        var previewSucceeded = false;
+
+        try
+        {
+            await OnInlinePreviewRequested.InvokeAsync(new PersonDocumentCopiesInlinePreviewRequest
+            {
+                RecordKey = record.RecordKey,
+                DisplayName = record.RecordLabel,
+            });
+            previewSucceeded = true;
+        }
+        finally
+        {
+            if (previewSucceeded)
+                await WaitRemainingPreviewProgressTimeAsync(progressStartedUtc);
+
+            _previewLoadingKey = null;
+            _previewStatusMessage = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task WaitRemainingPreviewProgressTimeAsync(DateTime startedUtc)
+    {
+        var elapsed = DateTime.UtcNow - startedUtc;
+        var remaining = MinimumPreviewProgressDuration - elapsed;
+        if (remaining > TimeSpan.Zero)
+            await Task.Delay(remaining);
+    }
+
+    private async Task OnRefreshClick()
+    {
+        if (RefreshRequested.HasDelegate)
+            await RefreshRequested.InvokeAsync();
+    }
+
+    private Task ToggleDetailsAsync()
+    {
+        ShowDetails = !ShowDetails;
+        return InvokeAsync(StateHasChanged);
+    }
+}

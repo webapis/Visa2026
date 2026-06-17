@@ -61,6 +61,23 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         return Task.CompletedTask;
     }
 
+    public Task OpenPersonDocumentCopiesAsync(PersonDocumentCopiesSlotRequest request, string? ownerViewId = null)
+    {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+
+        _state = new VisaPreviewSlotState
+        {
+            Mode = VisaPreviewSlotMode.PersonDocumentCopies,
+            OccupantKey = VisaPreviewSlotOccupantKeys.ForPersonDocumentCopies(request),
+            OwnerViewId = NormalizeOwnerViewId(ownerViewId),
+            PersonDocumentCopies = request,
+            Version = _state.Version + 1,
+        };
+        StateChanged?.Invoke();
+        return Task.CompletedTask;
+    }
+
     public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null)
     {
         if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)
