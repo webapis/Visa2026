@@ -92,7 +92,7 @@ public class WordReportsController : ViewController<DetailView>
             ApplicationId = applicationId,
             Scope = WordReportPackageScope.Application,
             EmptyCatalogMessage = emptyMessage,
-        }).GetAwaiter().GetResult();
+        }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
     }
 
     private static string ResolveApplicationTypeLabel(Application application)

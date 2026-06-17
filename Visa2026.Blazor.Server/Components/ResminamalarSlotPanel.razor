@@ -78,6 +78,7 @@
     private bool _previewActive;
     private ReportPackageInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
+    private string? _boundOccupantKey;
 
     private string Title => VisaUiMessages.Get("ApplicationReportPackage.Title", _uiCultureName);
     private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
@@ -95,7 +96,16 @@
             _applicationId = Guid.Empty;
             _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
             _emptyMessage = string.Empty;
+            _boundOccupantKey = null;
+            _previewActive = false;
             return;
+        }
+
+        var occupantKey = VisaPreviewSlotOccupantKeys.ForResminamalar(Request);
+        if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
+        {
+            _boundOccupantKey = occupantKey;
+            _previewActive = false;
         }
 
         _applicationId = Request.ApplicationId;

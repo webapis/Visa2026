@@ -116,7 +116,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
             Scope = WordReportPackageScope.ApplicationItem,
             ApplicationItemIds = itemIds,
             EmptyCatalogMessage = emptyMessage,
-        }).GetAwaiter().GetResult();
+        }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
     }
 
     private List<Guid> GetSelectedItemIds()

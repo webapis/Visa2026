@@ -7,12 +7,14 @@
 
 @if (_state.Mode == VisaPreviewSlotMode.File)
 {
-    <VisaFilePreviewDrawer @ref="_fileDrawer"
+    <VisaFilePreviewDrawer @key="_state.Version"
+                           @ref="_fileDrawer"
                            HostManaged="true" />
 }
 else if (_state.Mode == VisaPreviewSlotMode.Resminamalar && _state.Resminamalar != null)
 {
-    <ResminamalarSlotPanel Request="_state.Resminamalar"
+    <ResminamalarSlotPanel @key="_state.Version"
+                           Request="_state.Resminamalar"
                            CloseRequested="CloseFromPanelAsync" />
 }
 

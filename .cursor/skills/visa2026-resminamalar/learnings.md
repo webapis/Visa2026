@@ -25,6 +25,16 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-06-06 — Application Resminamalar not replaced by ApplicationItem Resminamalar
+
+- **Symptom**: Application DetailView Resminamalar open (catalog or PDF); nested ApplicationItem ListView Resminamalar left previous preview visible.
+- **Try**: Open app-scope slot, select item row, click Resminamalar on ListView.
+- **Test**: Slot shows item-scoped catalog; any open PDF closes; Application DetailView can stay active without closing slot until its owning view deactivates.
+- **Root cause**: `OpenResminamalarAsync` updated service state but Blazor reused `ResminamalarSlotPanel` (`_previewActive` stuck true); close controller closed on any view deactivate.
+- **Fix**: `OccupantKey` + `OwnerViewId` on state; `@key="_state.Version"` on panel; occupant change resets preview in panel; controllers pass `View.Id`; owner-aware `VisaPreviewSlotCloseController`.
+- **Prevent**: Any new slot occupant must bump `Version` and use distinct `OccupantKey`; never rely on parameter set alone when local UI state exists.
+- **Cross-skill**: —
+
 ### 2026-06-06 — Resizable preview slot splitter (drag + session persist)
 
 - **Symptom**: Fixed ~40vw slot width; officers could not widen/narrow for long template names or PDF reading.

@@ -44,6 +44,8 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 | `Controllers/WordReportsController.cs` | Application DetailView → `IVisaPreviewSlotService.OpenResminamalarAsync` |
 | `Controllers/ApplicationItemWordReportsController.cs` | ApplicationItem ListView → inline slot (item scope) |
 | `Services/PreviewSlot/IVisaPreviewSlotService.cs` | Slot orchestrator contract + `ResminamalarSlotRequest` |
+| `Services/PreviewSlot/VisaPreviewSlotOccupantKeys.cs` | Stable occupant keys (app vs items vs file) |
+| `Services/PreviewSlot/VisaPreviewSlotViewHelper.cs` | `View.Id` for slot owner tracking |
 | `BusinessObjects/ApplicationReportPackageListHost.cs` | Non-persistent host |
 | `BusinessObjects/ApplicationItemReportPackageListHost.cs` | Item-scoped host |
 | `BusinessObjects/WordReportGenerationBatch.cs` | Batch + JSON selection columns |
@@ -61,7 +63,7 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 | `Components/VisaPreviewSlotHost.razor` | File vs Resminamalar mode in `#visa-preview-slot` |
 | `Components/ResminamalarSlotPanel.razor` | Catalog + inline preview shell |
 | `Components/VisaFilePreviewDrawer.razor` | File mode (ministry letter; `HostManaged` when under slot host) |
-| `Controllers/VisaPreviewSlotCloseController.cs` | Close slot on view deactivate |
+| `Controllers/VisaPreviewSlotCloseController.cs` | Owner-aware close when opening view deactivates |
 | `Editors/ApplicationReportPackageListPropertyEditor.cs` | Application scope editor (modal hosts — legacy) |
 | `Editors/ApplicationItemReportPackageListPropertyEditor.cs` | Item scope editor (modal hosts — legacy) |
 | `Editors/ApplicationReportPackageModel.cs` | Component model |

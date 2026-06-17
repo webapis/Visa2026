@@ -25,6 +25,12 @@ public sealed class VisaPreviewSlotState
 {
     public VisaPreviewSlotMode Mode { get; init; } = VisaPreviewSlotMode.Closed;
 
+    /// <summary>Stable key for the current slot occupant (Resminamalar scope, file source, etc.).</summary>
+    public string? OccupantKey { get; init; }
+
+    /// <summary>XAF <see cref="View.Id"/> that opened the current occupant; used for owner-aware auto-close.</summary>
+    public string? OwnerViewId { get; init; }
+
     public string? FileSourceType { get; init; }
 
     public Guid FileObjectId { get; init; }
@@ -44,9 +50,9 @@ public interface IVisaPreviewSlotService
 
     event Action? StateChanged;
 
-    Task OpenResminamalarAsync(ResminamalarSlotRequest request);
+    Task OpenResminamalarAsync(ResminamalarSlotRequest request, string? ownerViewId = null);
 
-    Task OpenFileAsync(string sourceType, Guid objectId);
+    Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 
     Task CloseAsync();
 }

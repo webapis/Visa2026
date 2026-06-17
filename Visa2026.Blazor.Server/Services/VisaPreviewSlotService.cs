@@ -10,7 +10,7 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
 
     public event Action? StateChanged;
 
-    public Task OpenResminamalarAsync(ResminamalarSlotRequest request)
+    public Task OpenResminamalarAsync(ResminamalarSlotRequest request, string? ownerViewId = null)
     {
         if (request == null)
             throw new ArgumentNullException(nameof(request));
@@ -18,6 +18,8 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         _state = new VisaPreviewSlotState
         {
             Mode = VisaPreviewSlotMode.Resminamalar,
+            OccupantKey = VisaPreviewSlotOccupantKeys.ForResminamalar(request),
+            OwnerViewId = NormalizeOwnerViewId(ownerViewId),
             Resminamalar = request,
             Version = _state.Version + 1,
         };
@@ -25,15 +27,18 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         return Task.CompletedTask;
     }
 
-    public Task OpenFileAsync(string sourceType, Guid objectId)
+    public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null)
     {
         if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)
             return Task.CompletedTask;
 
+        var normalizedSource = sourceType.Trim();
         _state = new VisaPreviewSlotState
         {
             Mode = VisaPreviewSlotMode.File,
-            FileSourceType = sourceType.Trim(),
+            OccupantKey = VisaPreviewSlotOccupantKeys.ForFile(normalizedSource, objectId),
+            OwnerViewId = NormalizeOwnerViewId(ownerViewId),
+            FileSourceType = normalizedSource,
             FileObjectId = objectId,
             Version = _state.Version + 1,
         };
@@ -54,4 +59,7 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         StateChanged?.Invoke();
         return Task.CompletedTask;
     }
+
+    private static string? NormalizeOwnerViewId(string? ownerViewId) =>
+        string.IsNullOrWhiteSpace(ownerViewId) ? null : ownerViewId.Trim();
 }

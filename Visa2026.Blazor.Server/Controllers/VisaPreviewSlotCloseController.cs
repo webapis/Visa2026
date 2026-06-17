@@ -5,15 +5,24 @@ using Visa2026.Module.Services.PreviewSlot;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Closes the global preview slot when the officer navigates away from the current view.
+/// Closes the global preview slot when the view that opened it deactivates.
+/// A new open from another view preempts content without requiring close first.
 /// </summary>
 public sealed class VisaPreviewSlotCloseController : ViewController
 {
     protected override void OnDeactivated()
     {
         var slotService = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
-        if (slotService?.State.Mode != VisaPreviewSlotMode.Closed)
-            _ = slotService!.CloseAsync();
+        var state = slotService?.State;
+        var ownerViewId = VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
+
+        if (slotService != null
+            && state?.Mode != VisaPreviewSlotMode.Closed
+            && !string.IsNullOrEmpty(ownerViewId)
+            && string.Equals(state.OwnerViewId, ownerViewId, StringComparison.Ordinal))
+        {
+            _ = slotService.CloseAsync();
+        }
 
         base.OnDeactivated();
     }

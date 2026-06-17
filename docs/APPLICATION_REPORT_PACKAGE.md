@@ -86,6 +86,36 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 
 | **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
 
+| **Slot policy** | Single global occupant — **last open wins** (`OccupantKey` + `Version`); `@key` remount on switch; **owner-aware** auto-close (`OwnerViewId` = XAF `View.Id`) |
+
+
+
+### Preview slot switching (single occupant)
+
+
+
+One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope) and file preview. **`OpenResminamalarAsync`** / **`OpenFileAsync`** always **preempt** the current occupant (no stacking).
+
+
+
+| Concept | Implementation |
+
+|---------|----------------|
+
+| **Occupant identity** | `VisaPreviewSlotOccupantKeys` — e.g. `resminamalar:app:{id}`, `resminamalar:items:{appId}:{itemIds}`, `file:{source}:{id}` |
+
+| **UI remount** | `VisaPreviewSlotHost` — `@key="_state.Version"` on `ResminamalarSlotPanel` / file drawer (resets catalog + inline PDF state) |
+
+| **Owner** | Controllers pass `VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)` |
+
+| **Auto-close** | `VisaPreviewSlotCloseController` closes only when the **owning** view deactivates (nested ApplicationItem ListView does not close Application-owned slot until a new open preempts) |
+
+
+
+**Typical flow:** Application DetailView Resminamalar open → officer selects items and clicks Resminamalar on nested ListView → item-scoped catalog replaces application catalog (and any open PDF preview).
+
+
+
 | **Template seed** | `UserReportTemplateUpdater` + **`UserReportTemplateSeedGate`** (host startup when XAF DB update had no DI) |
 
 
