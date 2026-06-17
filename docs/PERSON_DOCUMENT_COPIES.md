@@ -1,6 +1,6 @@
 # Person document copies (planned)
 
-**Status:** **Phase 1 implemented** — Person DetailView toolbar, `PersonLinkedDocumentsResolver`, preview-slot occupant, sectioned catalog, per-record Preview + Refresh. ListView column and cross-links: later phases.
+**Status:** **Phase 1–2 implemented** — Person DetailView + ListView toolbar (single selection), per-row ListView link column, sectioned catalog, per-record Preview + Refresh. Cross-link to ApplicationItem copies: Phase 3.
 
 **Agent skill:** [`.cursor/skills/visa2026-person-document-copies/SKILL.md`](../.cursor/skills/visa2026-person-document-copies/SKILL.md)
 
@@ -42,8 +42,8 @@ Do **not** extend `ApplicationItemLinkedDocumentsResolver` for Person — differ
 | Where | Control | Behaviour |
 |-------|---------|-----------|
 | **`Person` DetailView** | Toolbar **Document copies** | Opens global preview slot for current person |
-| **`Person` ListView** | Toolbar action (phase 1) | Same, when exactly one row selected |
-| **`Person` ListView** | Dedicated column button (phase 2) | Per-row icon/link → slot for that `Person.ID` |
+| **`Person` ListView** | Toolbar **Document copies** | Opens slot when **exactly one** row is selected |
+| **`Person` ListView** | **Copies** link column | Per-row link → slot for that `Person.ID` |
 
 ### Panel layout (catalog mode)
 

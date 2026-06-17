@@ -13,7 +13,7 @@ disable-model-invocation: false
 
 **User prompts:** [prompts.md](./prompts.md) (`@visa2026-person-document-copies`).
 
-**Implementation status:** **Phase 1** — DetailView action, `PersonLinkedDocumentsResolver`, preview-slot occupant, sectioned catalog, per-record Preview + Refresh. ListView column / cross-links: later phases.
+**Implementation status:** **Phase 1–2** — DetailView + ListView toolbar (single row) + ListView **Copies** column, resolver, preview-slot occupant, sectioned catalog, Preview + Refresh. Cross-link / ZIP: later phases.
 
 ## Agent workflow (when implementing)
 

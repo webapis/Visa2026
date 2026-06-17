@@ -3328,3 +3328,16 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 .app-progress-letter-link:hover {
     text-decoration: underline;
 }
+
+.app-person-document-copies-link {
+    color: var(--dxbl-link-color, #0d6efd);
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.app-person-document-copies-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+}

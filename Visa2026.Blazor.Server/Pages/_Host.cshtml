@@ -434,6 +434,18 @@
                 }
             };
 
+            window.visaPreviewDrawer.openPersonDocumentCopies = function (personId, event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (ref) {
+                    ref.invokeMethodAsync("OpenPersonDocumentCopiesFromJsAsync", personId || "");
+                }
+            };
+
             (function installProgressLetterLinkCapture() {
                 if (window.visaPreviewDrawer._progressLetterLinkCaptureInstalled) {
                     return;
@@ -491,6 +503,65 @@
                         return;
                     }
                     openLetterFromCell(event);
+                }, true);
+            })();
+
+            (function installPersonDocumentCopiesLinkCapture() {
+                if (window.visaPreviewDrawer._personDocumentCopiesLinkCaptureInstalled) {
+                    return;
+                }
+                window.visaPreviewDrawer._personDocumentCopiesLinkCaptureInstalled = true;
+
+                function findDocumentCopiesLinkCell(target) {
+                    return target && target.closest
+                        ? target.closest(".app-person-document-copies-link")
+                        : null;
+                }
+
+                function blockGridRowActivation(event) {
+                    var cell = findDocumentCopiesLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    if (window.visaPreviewDrawer._hostRef) {
+                        window.visaPreviewDrawer._hostRef.invokeMethodAsync("MarkPersonDocumentCopiesLinkClickPending");
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+
+                function openDocumentCopiesFromCell(event) {
+                    var cell = findDocumentCopiesLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var personId = cell.getAttribute("data-person-id") || "";
+                    if (!personId) {
+                        return;
+                    }
+                    window.visaPreviewDrawer._personDocumentCopiesLinkClickPending = true;
+                    window.visaPreviewDrawer.openPersonDocumentCopies(personId, event);
+                    window.setTimeout(function () {
+                        window.visaPreviewDrawer._personDocumentCopiesLinkClickPending = false;
+                    }, 250);
+                }
+
+                document.addEventListener("pointerdown", blockGridRowActivation, true);
+                document.addEventListener("mousedown", blockGridRowActivation, true);
+                document.addEventListener("click", openDocumentCopiesFromCell, true);
+                document.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter" && event.key !== " ") {
+                        return;
+                    }
+                    var cell = findDocumentCopiesLinkCell(event.target);
+                    if (!cell || document.activeElement !== cell) {
+                        return;
+                    }
+                    openDocumentCopiesFromCell(event);
                 }, true);
             })();
 

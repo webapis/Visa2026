@@ -4,6 +4,7 @@
     <Actions>
       <Action Id="GenerateApplicationPdfBatch" Caption="Generate PDF" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Document copies" />
+      <Action Id="ViewPersonDocumentCopies" Caption="Person document copies" />
       <Action Id="ShowMyPdfBatches" Caption="My PDF Jobs" />
       <Action Id="ShowInReport" Caption="Show in Report" />
       <Action Id="ShowInDocument" Caption="Show in document" />

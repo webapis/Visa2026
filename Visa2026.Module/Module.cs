@@ -155,6 +155,7 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.UserFeedbackDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationRuntimeLogModelUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationRuntimeLogViewsUpdater());
+            updaters.Add(new DatabaseUpdate.PersonDocumentCopiesListViewColumnUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()
         {

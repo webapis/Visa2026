@@ -1,6 +1,7 @@
 @namespace Visa2026.Blazor.Server.Components
 @using Microsoft.JSInterop
 @using System.Text.Json
+@using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
 @using Visa2026.Blazor.Server.Services
@@ -173,6 +174,21 @@ else if (_state.Mode == VisaPreviewSlotMode.PersonDocumentCopies && _state.Perso
 
     [JSInvokable]
     public void MarkLetterLinkClickPending() => ProgressLetterLinkClickGate.MarkPending();
+
+    [JSInvokable]
+    public Task OpenPersonDocumentCopiesFromJsAsync(string personIdText)
+    {
+        if (!Guid.TryParse(personIdText, out var personId) || personId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return SlotService.OpenPersonDocumentCopiesAsync(new PersonDocumentCopiesSlotRequest
+        {
+            PersonIds = new[] { personId },
+        });
+    }
+
+    [JSInvokable]
+    public void MarkPersonDocumentCopiesLinkClickPending() => PersonDocumentCopiesLinkClickGate.MarkPending();
 
     [JSInvokable]
     public Task CloseFromJsAsync() => SlotService.CloseAsync();

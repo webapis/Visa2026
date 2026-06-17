@@ -946,14 +946,15 @@
     <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_Employee">
       <Columns>
         <ColumnInfo Id="FullName" Width="87" />
-        <ColumnInfo Id="PersonalNumber" Index="1" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="2" Width="88" />
-        <ColumnInfo Id="Age" Index="3" Width="41" />
-        <ColumnInfo Id="Gender" Index="4" Width="58" />
-        <ColumnInfo Id="MaritalStatus" Index="5" Width="92" />
-        <ColumnInfo Id="Nationality" Index="6" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="7" Width="106" />
-        <ColumnInfo Id="Subcontractor" Index="8" Width="158" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="PersonalNumber" Index="2" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="3" Width="88" />
+        <ColumnInfo Id="Age" Index="4" Width="41" />
+        <ColumnInfo Id="Gender" Index="5" Width="58" />
+        <ColumnInfo Id="MaritalStatus" Index="6" Width="92" />
+        <ColumnInfo Id="Nationality" Index="7" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="9" Width="158" />
         <ColumnInfo Id="CurrentPositionHistory" Index="10" Removed="True" />
         <ColumnInfo Id="IsArchived" Index="18" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
@@ -974,16 +975,17 @@
     <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMember">
       <Columns>
         <ColumnInfo Id="FullName" Width="87" />
-        <ColumnInfo Id="PersonalNumber" Index="1" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="2" Width="88" />
-        <ColumnInfo Id="Age" Index="3" Width="41" />
-        <ColumnInfo Id="Gender" Index="4" Width="58" />
-        <ColumnInfo Id="Nationality" Index="5" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="6" Width="106" />
-        <ColumnInfo Id="Subcontractor" Index="7" Width="158" />
-        <ColumnInfo Id="Relationship" Index="8" Width="85" />
-        <ColumnInfo Id="SponsoringEmployee" Index="9" Width="120" />
-        <ColumnInfo Id="IsArchived" Index="10" Width="78" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="PersonalNumber" Index="2" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="3" Width="88" />
+        <ColumnInfo Id="Age" Index="4" Width="41" />
+        <ColumnInfo Id="Gender" Index="5" Width="58" />
+        <ColumnInfo Id="Nationality" Index="6" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="7" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="8" Width="158" />
+        <ColumnInfo Id="Relationship" Index="9" Width="85" />
+        <ColumnInfo Id="SponsoringEmployee" Index="10" Width="120" />
+        <ColumnInfo Id="IsArchived" Index="11" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
@@ -1001,14 +1003,15 @@
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Temporary visitor" DetailViewID="Person_DetailView_TemporaryVisitor">
       <Columns>
         <ColumnInfo Id="FullName" Width="87" />
-        <ColumnInfo Id="PersonalNumber" Index="1" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="2" Width="88" />
-        <ColumnInfo Id="Age" Index="3" Width="41" />
-        <ColumnInfo Id="Gender" Index="4" Width="58" />
-        <ColumnInfo Id="Nationality" Index="5" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="6" Width="106" />
-        <ColumnInfo Id="Subcontractor" Index="7" Width="158" />
-        <ColumnInfo Id="IsArchived" Index="8" Width="78" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="PersonalNumber" Index="2" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="3" Width="88" />
+        <ColumnInfo Id="Age" Index="4" Width="41" />
+        <ColumnInfo Id="Gender" Index="5" Width="58" />
+        <ColumnInfo Id="Nationality" Index="6" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="7" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="8" Width="158" />
+        <ColumnInfo Id="IsArchived" Index="9" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />

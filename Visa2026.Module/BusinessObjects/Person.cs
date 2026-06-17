@@ -17,6 +17,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using Visa2026.Module.Services;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -160,6 +161,14 @@ namespace Visa2026.Module.BusinessObjects
                 return CalculateAge(DateOfBirth);
             }
         }
+
+        /// <summary>ListView link column that opens person document copies in the preview slot.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DocumentCopiesListLink => VisaUiMessages.Get("PersonDocumentCopies.List.ColumnLink");
+
         [RuleRequiredField(TargetCriteria = RequiredWhenActiveCriteria)]
         [ModelDefault("CustomCSSClassName", "e2e-person-birth-place")]
         public virtual string BirthPlace { get; set; }

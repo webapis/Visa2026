@@ -2168,6 +2168,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Entek skan nusga goşulmady.",
             ["ru-RU"] = "Скан-копии пока не прикреплены.",
         },
+        ["PersonDocumentCopies.List.ColumnCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " ",
+            ["tr-TR"] = " ",
+            ["tk-TM"] = " ",
+            ["ru-RU"] = " ",
+        },
+        ["PersonDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copies",
+            ["tr-TR"] = "Kopyalar",
+            ["tk-TM"] = "Nusgalar",
+            ["ru-RU"] = "Копии",
+        },
+        ["PersonDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select exactly one person to view document copies.",
+            ["tr-TR"] = "Belge kopyalarını görmek için tam olarak bir kişi seçin.",
+            ["tk-TM"] = "Resminama nusgalaryny görmek üçin diňe bir adam saýlaň.",
+            ["ru-RU"] = "Выберите ровно одно лицо для просмотра копий документов.",
+        },
         ["PersonDocumentCopies.Preview.Error"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Could not open document preview.",
