@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -18,13 +17,6 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [DefaultProperty(nameof(State))]
     [FileAttachment(nameof(MinistryLetterFile))]
-    [Appearance(
-        "HideMinistryLetterFileUnlessDecision",
-        AppearanceItemType = "LayoutItem",
-        TargetItems = nameof(MinistryLetterFile),
-        Criteria = "!IsMinistryDecisionStep",
-        Visibility = ViewItemVisibility.Hide,
-        Context = "DetailView")]
     [RuleCriteria(
         "ApplicationProgress_MinistryLetterFileNotEmpty",
         DefaultContexts.Save,

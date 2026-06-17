@@ -41,53 +41,6 @@
                 @foreach (var entry in CatalogEntries)
                 {
                     <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
-                        @if (UseInlinePreview)
-                        {
-                            <div class="app-report-package__slot-entry">
-                                <label class="app-report-package__slot-include">
-                                    <input type="checkbox"
-                                           class="app-report-package__slot-checkbox"
-                                           checked="@IsSelected(entry)"
-                                           @onchange="e => OnIncludeChanged(entry, e)" />
-                                    <span class="app-report-package__slot-title">
-                                        <span class="app-item-doc-copies__group-label">@entry.DisplayName</span>
-                                        <span class="app-report-package__format-badge">@FormatKind(entry.Kind)</span>
-                                    </span>
-                                </label>
-                                <div class="app-report-package__slot-actions">
-                                    <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
-                                        @ReadinessLabel(entry)
-                                    </span>
-                                    @if (IsPreviewingEntry(entry))
-                                    {
-                                        <span class="app-report-package__preview-busy-label" role="status">
-                                            @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        @if (ShowDetails && CanEditTemplate(entry))
-                                        {
-                                            <a class="app-item-doc-copies__action-btn app-report-package__edit-link"
-                                               href="@GetEditTemplateUrl(entry)"
-                                               target="_blank"
-                                               rel="noopener noreferrer"
-                                               title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")">
-                                                @Msg("ApplicationReportPackage.EditTemplate")
-                                            </a>
-                                        }
-                                        <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
-                                                  RenderStyle="ButtonRenderStyle.Link"
-                                                  SizeMode="SizeMode.Small"
-                                                  CssClass="app-item-doc-copies__action-btn"
-                                                  Enabled="@(!_packageBusy && !_previewBusy)"
-                                                  Click="@(() => PreviewEntryAsync(entry))" />
-                                    }
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
                         <div class="app-item-doc-copies__group-head">
                             <label class="app-report-package__include">
                                 <input type="checkbox"
@@ -127,7 +80,6 @@
                                 }
                             </div>
                         </div>
-                        }
                         @if (IsPreviewingEntry(entry))
                         {
                             <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
@@ -138,7 +90,7 @@
                             </div>
                         }
                         <div class="app-item-doc-copies__status">
-                            @if (!string.IsNullOrWhiteSpace(entry.OutputFileName))
+                            @if (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))
                             {
                                 <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
                             }
