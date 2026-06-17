@@ -1,3 +1,4 @@
+using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Services.PreviewSlot;
@@ -7,6 +8,7 @@ public enum VisaPreviewSlotMode
     Closed = 0,
     File = 1,
     Resminamalar = 2,
+    DocumentCopies = 3,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -37,7 +39,14 @@ public sealed class VisaPreviewSlotState
 
     public ResminamalarSlotRequest? Resminamalar { get; init; }
 
+    public DocumentCopiesSlotRequest? DocumentCopies { get; init; }
+
     public int Version { get; init; }
+}
+
+public sealed class DocumentCopiesSlotRequest
+{
+    public IReadOnlyList<Guid> ApplicationItemIds { get; init; } = Array.Empty<Guid>();
 }
 
 /// <summary>
@@ -51,6 +60,8 @@ public interface IVisaPreviewSlotService
     event Action? StateChanged;
 
     Task OpenResminamalarAsync(ResminamalarSlotRequest request, string? ownerViewId = null);
+
+    Task OpenDocumentCopiesAsync(DocumentCopiesSlotRequest request, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 
@@ -66,4 +77,14 @@ public sealed class ReportPackagePreviewRequest
     public required string DisplayName { get; init; }
 
     public IReadOnlyList<Guid>? ApplicationItemIds { get; init; }
+}
+
+public sealed class DocumentCopiesInlinePreviewRequest
+{
+    public required string SlotKey { get; init; }
+
+    public required string DisplayName { get; init; }
+
+    public ApplicationItemDocumentPackageOptions PackageOptions { get; init; } =
+        ApplicationItemDocumentPackageOptions.CreateDefaults();
 }

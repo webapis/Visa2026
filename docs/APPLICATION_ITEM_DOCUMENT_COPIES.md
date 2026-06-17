@@ -154,23 +154,21 @@ Reference UI (representative layout; replace with a live capture from your envir
 
 Multi-select on **Application items** → **Document copies**. Scan slots appear first; **Application form** is last. Package actions and subtitle sit in the footer.
 
-### Preview modal
+### Preview (inline slot or modal)
 
-![Document copies preview — merged PDF viewer with download actions](images/application-item-document-copies/document-copies-preview.png)
-
-**Preview** on a scan slot opens a resizable modal. **Download** and **Batch summary** (multi-line) are in the header. The **Application form** row does not open this modal — **Preview** generates and downloads the filled form immediately.
+**Preview** on a scan slot shows merged PDF in the global right-side preview slot (ListView) or in a resizable modal (legacy `ApplicationItemDocumentCopiesListHost` path). **Download** and **Batch summary** (multi-line) are in the preview header. The **Application form** row does not open preview — **Preview** generates and downloads the filled form immediately.
 
 ## User-facing behaviour
 
-### Opening the dialog
+### Opening document copies
 
 1. On an **`Application`** detail view, open the **Application items** nested ListView (or any ListView of `ApplicationItem`).
 2. Select one or more lines (or focus a single row).
 3. Click **Document copies** (`ViewApplicationItemDocumentCopies`).
 
-The action is enabled only when at least one line is selected.
+The action is enabled only when at least one line is selected. Content opens in the **global preview slot** (same shell as Resminamalar), not a modal.
 
-### Dialog layout (top → bottom)
+### Panel layout (top → bottom)
 
 1. **Document slot list** — scrollable cards with spacing between rows (`gap` on `.app-item-doc-copies__groups`).
    - Scan slots from linked documents (passport, visa, work permit, education, address, lodging, medical record, family relationship, …) in resolver/merger order.
@@ -183,10 +181,10 @@ The action is enabled only when at least one line is selected.
    - Status / gap-confirm hints when queuing or after errors
    - **Gear** — toggles per-file detail rows (file names, sizes, missing-line breakdown)
 
-### Preview modal
+### Inline preview
 
-- **Scan slots:** merged PDF in an iframe; header offers **Download** and **Batch summary** (when 2+ lines and merge options allow).
-- **Application form:** **Preview** on the main dialog row shows generating progress, then triggers browser download (single PDF or `PDF_Form/` ZIP for multiple lines). A short notice may appear in the footer. Uses raw `FillForm` output per line — **no Spire merge** (see `ApplicationFilledFormPdfGenerator`). No preview popup.
+- **Scan slots:** merged PDF in the preview slot iframe; header offers **Download** and **Batch summary** (when 2+ lines and merge options allow). Exclusive mode hides the slot list while previewing (same pattern as Resminamalar).
+- **Application form:** **Preview** on the main panel row shows generating progress, then triggers browser download (single PDF or `PDF_Form/` ZIP for multiple lines). A short notice may appear in the footer. Uses raw `FillForm` output per line — **no Spire merge** (see `ApplicationFilledFormPdfGenerator`). No preview popup.
 
 ### Download package (replaces Generate PDF accept)
 
@@ -204,14 +202,16 @@ Default package options mirror `PdfBatchEnqueueOptions` / full supporting-docume
 flowchart TB
   subgraph entry [ListView entry]
     ACT[ApplicationItemDocumentCopiesController]
-    HOST[ApplicationItemDocumentCopiesListHost non-persistent]
-    DV[DetailView modal]
+    SLOT[IVisaPreviewSlotService OpenDocumentCopiesAsync]
   end
   subgraph blazor [Visa2026.Blazor.Server]
-    PE[ApplicationItemDocumentCopiesListPropertyEditor]
+    HOST[VisaPreviewSlotHost]
+    PANEL[DocumentCopiesSlotPanel.razor]
+    INLINE[DocumentCopiesInlinePreview.razor]
+    PE[ApplicationItemDocumentCopiesListPropertyEditor legacy modal]
     CM[ApplicationItemDocumentCopiesModel]
     UI[ApplicationItemDocumentCopiesComponent.razor]
-    PRE[ApplicationItemDocumentCopiesPreviewDialog.razor]
+    PRE[ApplicationItemDocumentCopiesPreviewDialog.razor modal only]
     FA[ApplicationItemDocumentFileAccess]
     ENQ[ApplicationItemDocumentPackageEnqueueService]
   end
@@ -224,10 +224,12 @@ flowchart TB
     FORM[ApplicationFilledFormPdfGenerator]
     WORK[PdfGenerationBatchWorkerService in Blazor host]
   end
-  ACT -->|ItemIdsJson| HOST --> DV --> PE
-  PE -->|ResolveMany + MergeBySlot| RES --> MER
+  ACT --> SLOT --> HOST --> PANEL
+  PANEL -->|ResolveMany + MergeBySlot| RES --> MER
+  PANEL --> UI
+  UI -->|UseInlinePreview| INLINE
   PE --> CM --> UI
-  UI --> PRE
+  UI -->|modal path| PRE
   UI -->|Preview / download| FA
   UI -->|Download package| ENQ --> BATCH
   BATCH -->|Queued batch| WORK
@@ -244,8 +246,8 @@ Visa2026 uses the standard **non-persistent host + custom Blazor property editor
 
 | Piece | Role |
 |-------|------|
-| `ApplicationItemDocumentCopiesController` | ListView `SimpleAction`; serializes selected `ApplicationItem` GUIDs into `ItemIdsJson`; opens modal `DetailView`. |
-| `ApplicationItemDocumentCopiesListHost` | `[DomainComponent]` shell; `ListUi` property with `[EditorAlias(ApplicationItemDocumentCopiesEditorAliases.ListPanel)]`. |
+| `ApplicationItemDocumentCopiesController` | ListView `SimpleAction`; opens `IVisaPreviewSlotService.OpenDocumentCopiesAsync` with selected item GUIDs. |
+| `ApplicationItemDocumentCopiesListHost` | `[DomainComponent]` shell for legacy modal path; `ListUi` property with `[EditorAlias(ApplicationItemDocumentCopiesEditorAliases.ListPanel)]`. |
 | `ApplicationItemDocumentCopiesListPropertyEditor` | Loads items, calls resolver + merger, binds `ApplicationItemDocumentCopiesModel`. |
 | `ApplicationItemDocumentCopiesComponent.razor` | Custom UI (not generated XAF layout beyond the single `ListUi` editor). |
 | `Model.DesignedDiffs.xafml` | `ApplicationItemDocumentCopiesListHost_DetailView` with `CustomCSSClassName="app-item-doc-copies-list-detail"` for full-height modal layout. |

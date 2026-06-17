@@ -1,0 +1,156 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.Extensions.DependencyInjection
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="resminamalar-slot-panel document-copies-slot-panel @(_previewActive ? "resminamalar-slot-panel--preview" : string.Empty)">
+    @if (!_previewActive)
+    {
+        <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+            <span class="visa-preview-drawer__title">@Title</span>
+            <div class="visa-preview-drawer__header-actions">
+                <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                        type="button"
+                        title="@CloseLabel"
+                        @onclick="ClosePanelAsync">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="resminamalar-slot-panel__body">
+        @if (!_previewActive)
+        {
+            <div class="resminamalar-slot-panel__catalog">
+                <ApplicationItemDocumentCopiesComponent ApplicationItemIds="_applicationItemIds"
+                                                        MergedGroups="_mergedGroups"
+                                                        UiCultureName="_uiCultureName"
+                                                        UseInlinePreview="true"
+                                                        RefreshRequested="_refreshRequested"
+                                                        OnInlinePreviewRequested="HandleInlinePreviewAsync" />
+            </div>
+        }
+        else
+        {
+            <DocumentCopiesInlinePreview @ref="_inlinePreview"
+                                         ApplicationItemIds="_applicationItemIds"
+                                         UiCultureName="_uiCultureName"
+                                         PreviewClosed="OnPreviewClosedAsync" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public DocumentCopiesSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+
+    private IReadOnlyList<Guid> _applicationItemIds = Array.Empty<Guid>();
+    private IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> _mergedGroups =
+        Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+    private string _uiCultureName = string.Empty;
+    private bool _previewActive;
+    private DocumentCopiesInlinePreview? _inlinePreview;
+    private EventCallback _refreshRequested;
+    private string? _boundOccupantKey;
+
+    private string Title => VisaUiMessages.Get("ApplicationItemDocumentCopies.Title", _uiCultureName);
+    private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
+
+    protected override void OnInitialized()
+    {
+        _refreshRequested = EventCallback.Factory.Create(this, ReloadMergedGroupsAsync);
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+    }
+
+    protected override void OnParametersSet()
+    {
+        var itemIds = Request?.ApplicationItemIds?
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList() ?? new List<Guid>();
+
+        if (itemIds.Count == 0)
+        {
+            _applicationItemIds = Array.Empty<Guid>();
+            _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            _boundOccupantKey = null;
+            _previewActive = false;
+            return;
+        }
+
+        var occupantKey = Request != null
+            ? VisaPreviewSlotOccupantKeys.ForDocumentCopies(Request)
+            : VisaPreviewSlotOccupantKeys.ForDocumentCopies(itemIds);
+
+        if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
+        {
+            _boundOccupantKey = occupantKey;
+            _previewActive = false;
+        }
+
+        _applicationItemIds = itemIds;
+        ReloadMergedGroups();
+    }
+
+    private void ReloadMergedGroups()
+    {
+        if (_applicationItemIds.Count == 0)
+        {
+            _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationItem>();
+        var items = _applicationItemIds
+            .Select(id => objectSpace.GetObjectByKey<ApplicationItem>(id))
+            .Where(item => item != null)
+            .Cast<ApplicationItem>()
+            .ToList();
+
+        _applicationItemIds = items.Select(item => item.ID).ToList();
+        var lines = ApplicationItemLinkedDocumentsResolver.ResolveMany(objectSpace, items);
+        _mergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines);
+    }
+
+    private Task ReloadMergedGroupsAsync()
+    {
+        ReloadMergedGroups();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleInlinePreviewAsync(DocumentCopiesInlinePreviewRequest request)
+    {
+        _previewActive = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        if (_inlinePreview != null)
+            await _inlinePreview.OpenAsync(request);
+    }
+
+    private async Task OnPreviewClosedAsync()
+    {
+        _previewActive = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClosePanelAsync()
+    {
+        _previewActive = false;
+        if (CloseRequested.HasDelegate)
+            await CloseRequested.InvokeAsync();
+        else
+            await SlotService.CloseAsync();
+    }
+}

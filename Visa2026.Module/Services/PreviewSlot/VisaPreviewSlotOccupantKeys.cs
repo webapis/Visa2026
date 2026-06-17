@@ -26,4 +26,20 @@ public static class VisaPreviewSlotOccupantKeys
 
     public static string ForFile(string sourceType, Guid objectId) =>
         $"file:{sourceType?.Trim()}:{objectId:N}";
+
+    public static string ForDocumentCopies(IReadOnlyList<Guid> applicationItemIds)
+    {
+        var ids = applicationItemIds?
+            .Where(id => id != Guid.Empty)
+            .OrderBy(id => id)
+            .ToArray() ?? Array.Empty<Guid>();
+
+        if (ids.Length == 0)
+            return "document-copies:empty";
+
+        return $"document-copies:items:{string.Join(',', ids.Select(id => id.ToString("N")))}";
+    }
+
+    public static string ForDocumentCopies(DocumentCopiesSlotRequest request) =>
+        ForDocumentCopies(request?.ApplicationItemIds ?? Array.Empty<Guid>());
 }

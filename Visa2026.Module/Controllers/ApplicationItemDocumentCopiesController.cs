@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.SystemModule;
+using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Module.Controllers;
 
@@ -70,26 +69,19 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
         if (itemIds.Count < 1)
             return;
 
-        var objectSpace = Application.CreateObjectSpace(typeof(ApplicationItemDocumentCopiesListHost));
-        var host = objectSpace.CreateObject<ApplicationItemDocumentCopiesListHost>();
-        host.ItemIdsJson = JsonSerializer.Serialize(itemIds);
-
-        var detailView = Application.CreateDetailView(objectSpace, host);
-        detailView.ViewEditMode = ViewEditMode.View;
-        detailView.Caption = VisaUiMessages.Get("ApplicationItemDocumentCopies.Title");
-
-        var showViewParameters = new ShowViewParameters(detailView)
+        var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
+        if (slotService == null)
         {
-            TargetWindow = TargetWindow.NewModalWindow
-        };
+            Application.ShowViewStrategy.ShowMessage(
+                VisaUiMessages.Get("ApplicationItemDocumentCopies.Preview.Error"),
+                InformationType.Error);
+            return;
+        }
 
-        var dialogController = Application.CreateController<DialogController>();
-        dialogController.SaveOnAccept = false;
-        dialogController.AcceptAction.Active.SetItemValue("DocumentCopiesReadOnly", false);
-        dialogController.CancelAction.Active.SetItemValue("DocumentCopiesReadOnly", false);
-        showViewParameters.Controllers.Add(dialogController);
-
-        Application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(Frame, null));
+        slotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
+        {
+            ApplicationItemIds = itemIds,
+        }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
     }
 
     private List<ApplicationItem> GetSelectedItems()

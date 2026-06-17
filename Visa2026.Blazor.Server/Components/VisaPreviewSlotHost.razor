@@ -17,6 +17,12 @@ else if (_state.Mode == VisaPreviewSlotMode.Resminamalar && _state.Resminamalar 
                            Request="_state.Resminamalar"
                            CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.DocumentCopies && _state.DocumentCopies != null)
+{
+    <DocumentCopiesSlotPanel @key="_state.Version"
+                             Request="_state.DocumentCopies"
+                             CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;

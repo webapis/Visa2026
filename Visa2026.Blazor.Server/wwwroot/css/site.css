@@ -2712,7 +2712,8 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 }
 
 /* Resminamalar inline slot — catalog + PDF preview vertical split */
-.resminamalar-slot-panel {
+.resminamalar-slot-panel,
+.document-copies-slot-panel {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -2853,6 +2854,33 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     bottom: 0;
     background: inherit;
     z-index: 1;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot {
+    height: 100%;
+    max-height: none;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0;
+    color: inherit;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__body,
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__groups {
+    width: 100%;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__footer {
+    flex: 0 0 auto;
 }
 
 .report-package-inline-preview__body {
