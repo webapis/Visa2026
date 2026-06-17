@@ -1,0 +1,249 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using System.IO
+@using Microsoft.JSInterop
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.RuntimeLogging
+@implements IAsyncDisposable
+
+<div class="report-package-inline-preview app-item-doc-copies-preview">
+    <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
+        <h3 class="app-item-doc-copies-preview__title">@HeaderText</h3>
+        <div class="app-item-doc-copies-preview__header-actions">
+            @if (!_loading && _downloadContent != null)
+            {
+                <DxButton Text="@ActionDownload"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          Click="@DownloadPreviewPdfAsync" />
+            }
+            <DxButton Text="@ActionClose"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      Click="@ClosePreviewAsync" />
+        </div>
+    </div>
+
+    <div class="report-package-inline-preview__body app-item-doc-copies-preview">
+        @if (_loading)
+        {
+            <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--loading" role="status" aria-live="polite">
+                <div class="app-item-doc-copies-preview__loading">
+                    <span class="app-report-package__preview-busy-label">@_previewLoadingLabel</span>
+                    <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                         aria-label="@_previewLoadingLabel">
+                        <div class="app-report-package__preview-progress-track">
+                            <div class="app-report-package__preview-progress-indeterminate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">@_error</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
+        {
+            <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell">
+                <iframe class="app-item-doc-copies-preview__iframe"
+                        src="@_pdfBlobUrl"
+                        title="@_fileName"
+                        allow="fullscreen"></iframe>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_imageBlobUrl))
+        {
+            <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell report-package-inline-preview__viewer-shell--image">
+                <img class="visa-preview-drawer__image" src="@_imageBlobUrl" alt="@_fileName" />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback PreviewClosed { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    [Inject] private ApplicationProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+
+    private string _fileName = string.Empty;
+    private string _error = string.Empty;
+    private bool _loading;
+    private string? _pdfBlobUrl;
+    private string? _imageBlobUrl;
+    private byte[]? _downloadContent;
+    private string _downloadFileName = string.Empty;
+    private string _previewLoadingLabel = string.Empty;
+    private int _layoutSyncGeneration;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string HeaderText =>
+        string.IsNullOrWhiteSpace(_fileName)
+            ? PreviewTitle
+            : $"{PreviewTitle}: {_fileName}";
+
+    private string PreviewTitle => Msg("ApplicationProgress.MinistryLetterPreview.Title");
+    private string PreviewError => Msg("ApplicationItemDocumentCopies.Preview.Error");
+    private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
+    private string ActionDownload => Msg("ApplicationItemDocumentCopies.Action.Download");
+
+    public async Task OpenAsync(ProgressLettersInlinePreviewRequest request)
+    {
+        if (request == null || request.ApplicationId == Guid.Empty || request.ProgressId == Guid.Empty)
+            return;
+
+        _fileName = request.DisplayName;
+        _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
+        _error = string.Empty;
+        _loading = true;
+        _downloadContent = null;
+        _downloadFileName = string.Empty;
+
+        await RevokeBlobUrlsAsync();
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            if (!FileAccess.TryGetFile(request.ApplicationId, request.ProgressId, out var result) || result == null)
+            {
+                SetPreviewError(PreviewError);
+                return;
+            }
+
+            _fileName = string.IsNullOrWhiteSpace(result.FileName) ? request.DisplayName : result.FileName;
+            _downloadContent = result.Content;
+            _downloadFileName = string.IsNullOrWhiteSpace(result.FileName) ? "ministry-letter.pdf" : result.FileName;
+
+            if (IsImageContentType(result.ContentType))
+            {
+                _imageBlobUrl = await JS.InvokeAsync<string>(
+                    "visaPreviewDrawer.createImageBlobUrl",
+                    result.Content,
+                    result.ContentType);
+            }
+            else
+            {
+                _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", result.Content);
+            }
+        }
+        catch (Exception ex)
+        {
+            SetPreviewError(PreviewError, ex);
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+            await ScheduleViewerLayoutSyncAsync();
+        }
+    }
+
+    public async Task CloseAsync()
+    {
+        await ResetStateAsync();
+        if (PreviewClosed.HasDelegate)
+            await PreviewClosed.InvokeAsync();
+    }
+
+    private static bool IsImageContentType(string contentType) =>
+        contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+
+    private void SetPreviewError(string message, Exception? exception = null)
+    {
+        _error = message;
+        ErrorReporter.ReportDocumentCopiesError(
+            message,
+            ApplicationRuntimeLogCategories.ProgressMinistryLetterPreviewPane,
+            exception);
+    }
+
+    private async Task ClosePreviewAsync() => await CloseAsync();
+
+    private async Task DownloadPreviewPdfAsync()
+    {
+        if (_downloadContent == null || _downloadContent.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_downloadContent, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_downloadFileName) ? "ministry-letter.pdf" : _downloadFileName,
+            stream);
+    }
+
+    private async Task ScheduleViewerLayoutSyncAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_pdfBlobUrl) && string.IsNullOrWhiteSpace(_imageBlobUrl))
+            return;
+
+        var generation = ++_layoutSyncGeneration;
+        await Task.Delay(150);
+        if (generation != _layoutSyncGeneration)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.syncInlinePreviewHeight");
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    private async Task ResetStateAsync()
+    {
+        _layoutSyncGeneration++;
+        _fileName = string.Empty;
+        _error = string.Empty;
+        _loading = false;
+        _previewLoadingLabel = string.Empty;
+        _downloadContent = null;
+        _downloadFileName = string.Empty;
+        await RevokeBlobUrlsAsync();
+    }
+
+    private async Task RevokeBlobUrlsAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", _pdfBlobUrl);
+            }
+            catch (JSDisconnectedException) { }
+
+            _pdfBlobUrl = null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_imageBlobUrl))
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", _imageBlobUrl);
+            }
+            catch (JSDisconnectedException) { }
+
+            _imageBlobUrl = null;
+        }
+    }
+
+    public async ValueTask DisposeAsync() => await RevokeBlobUrlsAsync();
+}

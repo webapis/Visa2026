@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
+@using Visa2026.Blazor.Server.Services
 @implements IAsyncDisposable
 
 @if (_state.Mode == VisaPreviewSlotMode.File)
@@ -24,9 +25,17 @@ else if (_state.Mode == VisaPreviewSlotMode.DocumentCopies && _state.DocumentCop
                              CloseRequested="CloseFromPanelAsync" />
 }
 
+else if (_state.Mode == VisaPreviewSlotMode.ProgressLetters && _state.ProgressLetters != null)
+{
+    <ProgressLettersSlotPanel @key="_state.Version"
+                              Request="_state.ProgressLetters"
+                              CloseRequested="CloseFromPanelAsync" />
+}
+
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private ApplicationProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
 
     private VisaPreviewSlotState _state = new();
     private VisaFilePreviewDrawer? _fileDrawer;
@@ -128,6 +137,36 @@ else if (_state.Mode == VisaPreviewSlotMode.DocumentCopies && _state.DocumentCop
             ApplicationItemIds = itemIds,
         });
     }
+
+    [JSInvokable]
+    public Task OpenProgressLettersFromJsAsync(string applicationIdText, string focusProgressIdText)
+    {
+        var applicationId = Guid.TryParse(applicationIdText, out var parsedApplicationId)
+            ? parsedApplicationId
+            : Guid.Empty;
+        Guid? focusProgressId = Guid.TryParse(focusProgressIdText, out var parsedFocusId) && parsedFocusId != Guid.Empty
+            ? parsedFocusId
+            : null;
+
+        if (applicationId == Guid.Empty
+            && focusProgressId is Guid progressId
+            && FileAccess.TryGetApplicationIdForProgress(progressId, out var resolvedApplicationId))
+        {
+            applicationId = resolvedApplicationId;
+        }
+
+        if (applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return SlotService.OpenProgressLettersAsync(new ProgressLettersSlotRequest
+        {
+            ApplicationId = applicationId,
+            FocusProgressId = focusProgressId,
+        });
+    }
+
+    [JSInvokable]
+    public void MarkLetterLinkClickPending() => ProgressLetterLinkClickGate.MarkPending();
 
     [JSInvokable]
     public Task CloseFromJsAsync() => SlotService.CloseAsync();

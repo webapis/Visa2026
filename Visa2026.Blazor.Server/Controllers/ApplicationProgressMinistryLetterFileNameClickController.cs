@@ -1,28 +1,72 @@
 using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
+using DevExpress.ExpressApp.SystemModule;
+using System.ComponentModel;
+using Visa2026.Blazor.Server.Services;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Controllers;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Makes ministry letter file names clickable in the nested progress history grid.
+/// Makes ministry letter file names clickable in progress history grids; opens the progress letters catalog slot.
 /// </summary>
 public sealed class ApplicationProgressMinistryLetterFileNameClickController : ViewController<ListView>
 {
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
+    private CancellationTokenSource? deferredApplyCts;
+    private ListViewProcessCurrentObjectController? processCurrentObjectController;
 
     public ApplicationProgressMinistryLetterFileNameClickController()
     {
         TargetObjectType = typeof(ApplicationProgress);
-        TargetViewId = "Application_ProgressHistory_ListView";
+    }
+
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        processCurrentObjectController = Frame.GetController<ListViewProcessCurrentObjectController>();
+        if (processCurrentObjectController != null)
+            processCurrentObjectController.CustomHandleProcessSelectedItem += OnCustomHandleProcessSelectedItem;
     }
 
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
         ApplyFileNameClickHandlers();
+        ScheduleDeferredApply();
+    }
+
+    private void ScheduleDeferredApply()
+    {
+        deferredApplyCts?.Cancel();
+        deferredApplyCts?.Dispose();
+        deferredApplyCts = new CancellationTokenSource();
+        var token = deferredApplyCts.Token;
+        _ = ApplyDeferredAsync(token);
+    }
+
+    private async Task ApplyDeferredAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(150, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (View is { IsDisposed: false })
+            ApplyFileNameClickHandlers();
+    }
+
+    private void OnCustomHandleProcessSelectedItem(object? sender, HandledEventArgs e)
+    {
+        if (ProgressLetterLinkClickGate.ConsumePending())
+            e.Handled = true;
     }
 
     private void ApplyFileNameClickHandlers()
@@ -46,7 +90,7 @@ public sealed class ApplicationProgressMinistryLetterFileNameClickController : V
         gridModel.CustomizeElement = customizeElementHandler;
     }
 
-    private static void ApplyFileNameCellStyle(GridCustomizeElementEventArgs e)
+    private void ApplyFileNameCellStyle(GridCustomizeElementEventArgs e)
     {
         if (e.ElementType != GridElementType.DataCell || e.VisibleIndex < 0)
             return;
@@ -60,21 +104,21 @@ public sealed class ApplicationProgressMinistryLetterFileNameClickController : V
         if (progress.MinistryLetterFile == null || string.IsNullOrWhiteSpace(progress.MinistryLetterFileName))
             return;
 
+        var applicationId = ApplicationProgressParentContext.GetApplicationId(Frame, ObjectSpace, View);
+        if (applicationId == Guid.Empty && progress.Application != null)
+        {
+            var key = ObjectSpace.GetKeyValue(progress.Application);
+            if (key is Guid guid)
+                applicationId = guid;
+        }
+
         var linkClass = "app-progress-letter-link";
         e.CssClass = string.IsNullOrEmpty(e.CssClass) ? linkClass : $"{e.CssClass} {linkClass}";
         e.Attributes["role"] = "button";
         e.Attributes["tabindex"] = "0";
         e.Attributes["title"] = progress.MinistryLetterFileName;
-
-        // Block the grid's default row-open on pointer/mouse down, then trigger the drawer on click.
-        var clickHandler =
-            $"window.visaPreviewDrawer.open('progress-letter','{progress.ID}',event); return false;";
-        e.Attributes["onclick"] = clickHandler;
-        e.Attributes["onpointerdown"] = "event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();";
-        e.Attributes["onmousedown"] = "event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();";
-        e.Attributes["onkeydown"] =
-            $"if(event.key==='Enter'||event.key===' ')" +
-            $"{{window.visaPreviewDrawer.open('progress-letter','{progress.ID}',event); return false;}}";
+        e.Attributes["data-application-id"] = applicationId.ToString("D");
+        e.Attributes["data-progress-id"] = progress.ID.ToString("D");
     }
 
     private static bool IsMinistryLetterFileNameColumn(IGridColumn? column)
@@ -98,6 +142,16 @@ public sealed class ApplicationProgressMinistryLetterFileNameClickController : V
 
     protected override void OnDeactivated()
     {
+        deferredApplyCts?.Cancel();
+        deferredApplyCts?.Dispose();
+        deferredApplyCts = null;
+
+        if (processCurrentObjectController != null)
+        {
+            processCurrentObjectController.CustomHandleProcessSelectedItem -= OnCustomHandleProcessSelectedItem;
+            processCurrentObjectController = null;
+        }
+
         if (customizeElementHandler != null
             && View?.Editor is DxGridListEditor { GridModel: { } gridModel })
         {

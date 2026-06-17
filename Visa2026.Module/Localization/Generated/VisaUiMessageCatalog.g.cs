@@ -859,6 +859,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Deslapky görmek üçin ösüş taryhyndaky ministrlik haty faýl adyna basyň.",
             ["ru-RU"] = "Выберите имя файла письма министерства в истории прогресса для предпросмотра.",
         },
+        ["ApplicationProgress.MinistryLetterPreview.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ministry letter copy",
+            ["tr-TR"] = "Bakanlık yazısı kopyası",
+            ["tk-TM"] = "Ministrlik hatynyň nusgasy",
+            ["ru-RU"] = "Копия письма министерства",
+        },
+        ["ApplicationProgress.MinistryLetters.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ministry letter copies",
+            ["tr-TR"] = "Bakanlık yazısı kopyaları",
+            ["tk-TM"] = "Ministrlik hatlarynyň nusgalary",
+            ["ru-RU"] = "Копии писем министерства",
+        },
+        ["ApplicationProgress.MinistryLetters.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No ministry letter copies are attached to this application's progress history.",
+            ["tr-TR"] = "Bu başvurunun ilerleme geçmişine ekli bakanlık yazısı kopyası yok.",
+            ["tk-TM"] = "Bu arzanyň ösüş taryhynda ministrlik hatynyň nusgasy ýok.",
+            ["ru-RU"] = "К истории прогресса этой заявки не прикреплены копии писем министерства.",
+        },
+        ["ApplicationProgress.MinistryLetters.NoApplication"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open ministry letter copies from an application's progress history.",
+            ["tr-TR"] = "Bakanlık yazısı kopyalarını bir başvurunun ilerleme geçmişinden açın.",
+            ["tk-TM"] = "Ministrlik hatlarynyň nusgalaryny arzanyň ösüş taryhyndan açyň.",
+            ["ru-RU"] = "Откройте копии писем министерства из истории прогресса заявки.",
+        },
         ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select a project contract before advancing beyond office preparation.",

@@ -42,4 +42,10 @@ public static class VisaPreviewSlotOccupantKeys
 
     public static string ForDocumentCopies(DocumentCopiesSlotRequest request) =>
         ForDocumentCopies(request?.ApplicationItemIds ?? Array.Empty<Guid>());
+
+    public static string ForProgressLetters(Guid applicationId) =>
+        applicationId == Guid.Empty ? "progress-letters:empty" : $"progress-letters:app:{applicationId:N}";
+
+    public static string ForProgressLetters(ProgressLettersSlotRequest request) =>
+        ForProgressLetters(request?.ApplicationId ?? Guid.Empty);
 }

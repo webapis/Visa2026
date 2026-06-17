@@ -44,6 +44,23 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         return Task.CompletedTask;
     }
 
+    public Task OpenProgressLettersAsync(ProgressLettersSlotRequest request, string? ownerViewId = null)
+    {
+        if (request == null)
+            throw new ArgumentNullException(nameof(request));
+
+        _state = new VisaPreviewSlotState
+        {
+            Mode = VisaPreviewSlotMode.ProgressLetters,
+            OccupantKey = VisaPreviewSlotOccupantKeys.ForProgressLetters(request),
+            OwnerViewId = NormalizeOwnerViewId(ownerViewId),
+            ProgressLetters = request,
+            Version = _state.Version + 1,
+        };
+        StateChanged?.Invoke();
+        return Task.CompletedTask;
+    }
+
     public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null)
     {
         if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)

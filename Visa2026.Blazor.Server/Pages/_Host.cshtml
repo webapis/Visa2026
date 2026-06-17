@@ -419,6 +419,81 @@
                 }
             };
 
+            window.visaPreviewDrawer.openProgressLetters = function (applicationId, focusProgressId, event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (ref) {
+                    ref.invokeMethodAsync(
+                        "OpenProgressLettersFromJsAsync",
+                        applicationId || "",
+                        focusProgressId || "");
+                }
+            };
+
+            (function installProgressLetterLinkCapture() {
+                if (window.visaPreviewDrawer._progressLetterLinkCaptureInstalled) {
+                    return;
+                }
+                window.visaPreviewDrawer._progressLetterLinkCaptureInstalled = true;
+
+                function findLetterLinkCell(target) {
+                    return target && target.closest
+                        ? target.closest(".app-progress-letter-link")
+                        : null;
+                }
+
+                function blockGridRowActivation(event) {
+                    var cell = findLetterLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    if (window.visaPreviewDrawer._hostRef) {
+                        window.visaPreviewDrawer._hostRef.invokeMethodAsync("MarkLetterLinkClickPending");
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+
+                function openLetterFromCell(event) {
+                    var cell = findLetterLinkCell(event.target);
+                    if (!cell) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    var applicationId = cell.getAttribute("data-application-id") || "";
+                    var progressId = cell.getAttribute("data-progress-id") || "";
+                    if (!progressId) {
+                        return;
+                    }
+                    window.visaPreviewDrawer._letterLinkClickPending = true;
+                    window.visaPreviewDrawer.openProgressLetters(applicationId, progressId, event);
+                    window.setTimeout(function () {
+                        window.visaPreviewDrawer._letterLinkClickPending = false;
+                    }, 250);
+                }
+
+                document.addEventListener("pointerdown", blockGridRowActivation, true);
+                document.addEventListener("mousedown", blockGridRowActivation, true);
+                document.addEventListener("click", openLetterFromCell, true);
+                document.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter" && event.key !== " ") {
+                        return;
+                    }
+                    var cell = findLetterLinkCell(event.target);
+                    if (!cell || document.activeElement !== cell) {
+                        return;
+                    }
+                    openLetterFromCell(event);
+                }, true);
+            })();
+
             window.visaPreviewDrawer.syncInlinePreviewHeight = function () {
                 var panel = document.querySelector(".resminamalar-slot-panel--preview .resminamalar-slot-panel__body")
                     || document.querySelector(".resminamalar-slot-panel__body--split");

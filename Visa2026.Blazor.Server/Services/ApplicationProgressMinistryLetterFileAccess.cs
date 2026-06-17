@@ -25,6 +25,21 @@ public sealed class ApplicationProgressMinistryLetterFileAccess
         this.nonSecuredObjectSpaceFactory = nonSecuredObjectSpaceFactory;
 
     /// <summary>Loads the ministry letter file for a progress row without requiring the parent application ID (used by the global preview drawer).</summary>
+    public bool TryGetApplicationIdForProgress(Guid progressId, out Guid applicationId)
+    {
+        applicationId = Guid.Empty;
+        if (progressId == Guid.Empty)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationProgress>();
+        applicationId = objectSpace.GetObjectsQuery<ApplicationProgress>()
+            .Where(p => p.ID == progressId && p.Application != null)
+            .Select(p => p.Application!.ID)
+            .FirstOrDefault();
+
+        return applicationId != Guid.Empty;
+    }
+
     public bool TryGetFileByProgressId(Guid progressId, out ApplicationProgressMinistryLetterFileResult? result)
     {
         result = null;

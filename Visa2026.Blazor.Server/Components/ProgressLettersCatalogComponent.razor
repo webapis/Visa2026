@@ -1,0 +1,172 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="progress-letters-catalog app-item-doc-copies app-item-doc-copies--inline-slot">
+    <div class="app-item-doc-copies__body">
+        @if (Entries.Count == 0)
+        {
+            <div class="app-item-doc-copies__empty" role="status">
+                <p>@EmptyMessage</p>
+            </div>
+        }
+        else
+        {
+            <div class="app-item-doc-copies__groups">
+                @foreach (var entry in Entries)
+                {
+                    <section class="@GetEntryCssClass(entry)"
+                             aria-label="@entry.StatusLabel"
+                             id="@GetEntryDomId(entry.ProgressId)">
+                        <div class="app-item-doc-copies__group-head">
+                            <div class="app-item-doc-copies__group-title">
+                                <span class="app-item-doc-copies__group-label">@entry.StatusLabel</span>
+                                <span class="progress-letters-catalog__date">@FormatDate(entry.Date)</span>
+                            </div>
+                            <div class="app-item-doc-copies__group-actions">
+                                @if (IsPreviewLoading(entry.ProgressId))
+                                {
+                                    <span class="app-report-package__preview-busy-label" role="status">
+                                        @_previewStatusMessage
+                                    </span>
+                                }
+                                else
+                                {
+                                    <DxButton Text="@ActionPreview"
+                                              RenderStyle="ButtonRenderStyle.Link"
+                                              SizeMode="SizeMode.Small"
+                                              CssClass="app-item-doc-copies__action-btn"
+                                              Enabled="@(!IsAnyPreviewLoading)"
+                                              Click="@(() => PreviewAsync(entry))" />
+                                }
+                            </div>
+                        </div>
+
+                        @if (IsPreviewLoading(entry.ProgressId))
+                        {
+                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                 aria-label="@_previewStatusMessage">
+                                <div class="app-report-package__preview-progress-track">
+                                    <div class="app-report-package__preview-progress-indeterminate"></div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="app-item-doc-copies__status">
+                            <p class="app-item-doc-copies__summary">@entry.FileName</p>
+                        </div>
+                    </section>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProgressLetterCatalogEntry> Entries { get; set; } =
+        Array.Empty<ApplicationProgressLetterCatalogEntry>();
+    [Parameter] public Guid? FocusProgressId { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+    [Parameter] public EventCallback<ProgressLettersInlinePreviewRequest> OnInlinePreviewRequested { get; set; }
+
+    private string? _previewLoadingProgressId;
+    private string _previewStatusMessage = string.Empty;
+    private Guid? _handledFocusProgressId;
+
+    private static readonly TimeSpan MinimumPreviewProgressDuration = TimeSpan.FromSeconds(1.5);
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(componentCultureName: UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string EmptyMessage => Msg("ApplicationProgress.MinistryLetters.Empty");
+    private string ActionPreview => Msg("ApplicationItemDocumentCopies.Action.Preview");
+
+    private bool IsAnyPreviewLoading => !string.IsNullOrEmpty(_previewLoadingProgressId);
+
+    private bool IsPreviewLoading(Guid progressId) =>
+        string.Equals(_previewLoadingProgressId, progressId.ToString("D"), StringComparison.OrdinalIgnoreCase);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (FocusProgressId is not { } focusId
+            || focusId == Guid.Empty
+            || _handledFocusProgressId == focusId
+            || Entries.Count == 0)
+        {
+            return;
+        }
+
+        var entry = Entries.FirstOrDefault(e => e.ProgressId == focusId);
+        if (entry == null)
+            return;
+
+        _handledFocusProgressId = focusId;
+        await PreviewAsync(entry);
+    }
+
+    private string GetEntryCssClass(ApplicationProgressLetterCatalogEntry entry)
+    {
+        var css = "app-item-doc-copies__group app-item-doc-copies__group--ready";
+        if (FocusProgressId == entry.ProgressId)
+            css += " progress-letters-catalog__entry--focused";
+        if (IsPreviewLoading(entry.ProgressId))
+            css += " app-report-package__entry--previewing";
+        return css;
+    }
+
+    private static string GetEntryDomId(Guid progressId) => $"progress-letter-entry-{progressId:N}";
+
+    private static string FormatDate(DateTime date) => date.ToString("dd.MM.yyyy");
+
+    private async Task PreviewAsync(ApplicationProgressLetterCatalogEntry entry)
+    {
+        if (ApplicationId == Guid.Empty || entry.ProgressId == Guid.Empty || IsAnyPreviewLoading)
+            return;
+
+        if (!OnInlinePreviewRequested.HasDelegate)
+            return;
+
+        var displayName = string.IsNullOrWhiteSpace(entry.FileName) ? entry.StatusLabel : entry.FileName;
+        _previewLoadingProgressId = entry.ProgressId.ToString("D");
+        _previewStatusMessage = FormatMsg("ApplicationReportPackage.Preview.Downloading", displayName);
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+        await Task.Delay(100);
+
+        var progressStartedUtc = DateTime.UtcNow;
+        var previewSucceeded = false;
+
+        try
+        {
+            await OnInlinePreviewRequested.InvokeAsync(new ProgressLettersInlinePreviewRequest
+            {
+                ApplicationId = ApplicationId,
+                ProgressId = entry.ProgressId,
+                DisplayName = displayName,
+            });
+            previewSucceeded = true;
+        }
+        finally
+        {
+            if (previewSucceeded)
+            {
+                var remaining = MinimumPreviewProgressDuration - (DateTime.UtcNow - progressStartedUtc);
+                if (remaining > TimeSpan.Zero)
+                    await Task.Delay(remaining);
+            }
+
+            _previewLoadingProgressId = null;
+            _previewStatusMessage = string.Empty;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
