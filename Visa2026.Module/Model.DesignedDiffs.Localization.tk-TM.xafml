@@ -287,6 +287,7 @@
         <Member Name="TravelDate" Caption="Syýahat senesi" />
         <Member Name="TravelNotes" Caption="Syýahat bellikleri" />
         <Member Name="TravelType" Caption="Syýahat görnüşi" />
+        <Member Name="WorkPermittedLocations" Caption="Rugsat berlen ýerler" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage" Caption="Durmuş tapgyry">

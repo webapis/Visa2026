@@ -14,4 +14,7 @@ public static class ApplicationRuntimeLogCategories
 
     public const string ReportPackagePreviewDialog =
         "Visa2026.Blazor.Server.Editors.ApplicationReportPackagePreviewDialog";
+
+    public const string ProgressMinistryLetterPreviewPane =
+        "Visa2026.Blazor.Server.Editors.ApplicationProgressMinistryLetterPreviewPane";
 }

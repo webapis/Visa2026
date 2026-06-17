@@ -7,7 +7,9 @@ Canonical narrative: [`docs/APPLICATION_REPORT_PACKAGE.md`](../../../docs/APPLIC
 ```mermaid
 flowchart LR
   BTN[WordReportsController / ApplicationItemWordReportsController]
-  HOST[ApplicationReportPackageListHost / ApplicationItemReportPackageListHost]
+  SLOT[IVisaPreviewSlotService]
+  HOST[VisaPreviewSlotHost]
+  PANEL[ResminamalarSlotPanel]
   UI[ApplicationReportPackageComponent]
   CAT[ApplicationWordReportPackageCatalogService]
   GEN[ApplicationWordReportEntryGenerator]
@@ -15,7 +17,7 @@ flowchart LR
   BATCH[WordReportGenerationBatch]
   WORK[WordReportGenerationBatchWorkerService]
   ZIP[WordReportBundleBuilder]
-  BTN --> HOST --> UI
+  BTN --> SLOT --> HOST --> PANEL --> UI
   UI --> CAT
   UI -->|Preview| GEN
   UI -->|Download| ENQ --> BATCH --> WORK --> ZIP --> GEN
@@ -39,8 +41,9 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 | `Services/WordReports/WordReportGenerationContext.cs` | Application vs Item scope + selected items |
 | `Services/WordReports/WordReportDefinitionScopeHelper.cs` | `MatchesUserTemplateScope` |
 | `Services/WordReports/ApplicationItemReportPackageValidation.cs` | Item ListView selection rules |
-| `Controllers/WordReportsController.cs` | Application DetailView entry |
-| `Controllers/ApplicationItemWordReportsController.cs` | ApplicationItem ListView entry |
+| `Controllers/WordReportsController.cs` | Application DetailView → `IVisaPreviewSlotService.OpenResminamalarAsync` |
+| `Controllers/ApplicationItemWordReportsController.cs` | ApplicationItem ListView → inline slot (item scope) |
+| `Services/PreviewSlot/IVisaPreviewSlotService.cs` | Slot orchestrator contract + `ResminamalarSlotRequest` |
 | `BusinessObjects/ApplicationReportPackageListHost.cs` | Non-persistent host |
 | `BusinessObjects/ApplicationItemReportPackageListHost.cs` | Item-scoped host |
 | `BusinessObjects/WordReportGenerationBatch.cs` | Batch + JSON selection columns |
@@ -54,11 +57,17 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 
 | File | Role |
 |------|------|
-| `Editors/ApplicationReportPackageListPropertyEditor.cs` | Application scope editor |
-| `Editors/ApplicationItemReportPackageListPropertyEditor.cs` | Item scope editor |
+| `Services/VisaPreviewSlotService.cs` | Scoped slot state + `StateChanged` |
+| `Components/VisaPreviewSlotHost.razor` | File vs Resminamalar mode in `#visa-preview-slot` |
+| `Components/ResminamalarSlotPanel.razor` | Catalog + inline preview shell |
+| `Components/VisaFilePreviewDrawer.razor` | File mode (ministry letter; `HostManaged` when under slot host) |
+| `Controllers/VisaPreviewSlotCloseController.cs` | Close slot on view deactivate |
+| `Editors/ApplicationReportPackageListPropertyEditor.cs` | Application scope editor (modal hosts — legacy) |
+| `Editors/ApplicationItemReportPackageListPropertyEditor.cs` | Item scope editor (modal hosts — legacy) |
 | `Editors/ApplicationReportPackageModel.cs` | Component model |
-| `Editors/ApplicationReportPackageComponent.razor` | Dialog UI |
-| `Editors/ApplicationReportPackagePreviewDialog.razor` | PDF preview popup |
+| `Editors/ApplicationReportPackageComponent.razor` | Catalog UI (`UseInlinePreview` for slot) |
+| `Editors/ReportPackageInlinePreview.razor` | In-slot PDF viewer |
+| `Editors/ApplicationReportPackagePreviewDialog.razor` | Legacy PDF preview popup (property editors) |
 | `Controllers/WordReportPackagePreviewController.cs` | Preview/download API |
 | `Services/ApplicationWordReportPackageFileAccess.cs` | Preview file access |
 | `Services/ApplicationWordReportOfficePreviewPdfConverter.cs` | Word/Excel → PDF |
@@ -68,6 +77,7 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 | `Services/UserReportTemplateEditLinkService.cs` | Edit template deep link |
 | `Components/WordReportBatchToastHost.razor` | Progress + Download ZIP |
 | `Startup.cs` | DI registrations; calls `UserReportTemplateSeedGate.EnsureSeeded` in `Configure` |
+| `Pages/_Host.cshtml` | `#visa-app-shell`, `visaPreviewDrawer.open` / `openResminamalar` JS |
 
 ---
 

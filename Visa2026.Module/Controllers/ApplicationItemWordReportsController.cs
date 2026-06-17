@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.SystemModule;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.PreviewSlot;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Controllers;
@@ -61,17 +59,14 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
         if (!ApplicationItemReportPackageValidation.TryResolveApplication(
                 ObjectSpace,
                 itemIds,
-                out var application,
+                out _,
                 out _))
         {
             resminamalarAction.Enabled["NoApplicableReports"] = false;
             return;
         }
 
-        var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        var context = WordReportGenerationContext.ForApplicationItems(itemIds);
-        var catalog = catalogService.Build(ObjectSpace, application!, context);
-        resminamalarAction.Enabled["NoApplicableReports"] = catalog.TotalCount > 0;
+        resminamalarAction.Enabled["NoApplicableReports"] = true;
     }
 
     private void ResminamalarAction_Execute(object sender, SimpleActionExecuteEventArgs e)
@@ -99,34 +94,29 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
 
         var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
         var context = WordReportGenerationContext.ForApplicationItems(itemIds);
-        if (catalogService.Build(ObjectSpace, application!, context).TotalCount == 0)
+        var catalog = catalogService.Build(ObjectSpace, application!, context);
+
+        string? emptyMessage = null;
+        if (catalog.TotalCount == 0)
+            emptyMessage = VisaUiMessages.Get("WordReports.NoApplicableReports");
+
+        var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
+        if (slotService == null)
         {
             Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("WordReports.NoApplicableReports"),
+                emptyMessage ?? VisaUiMessages.Get("ApplicationReportPackage.Empty"),
                 InformationType.Warning);
             return;
         }
 
-        var objectSpace = Application.CreateObjectSpace(typeof(ApplicationItemReportPackageListHost));
-        var host = objectSpace.CreateObject<ApplicationItemReportPackageListHost>();
-        host.ItemIdsJson = JsonSerializer.Serialize(itemIds);
-
-        var detailView = Application.CreateDetailView(objectSpace, host);
-        detailView.ViewEditMode = ViewEditMode.View;
-        detailView.Caption = VisaUiMessages.Get("ApplicationReportPackage.Title");
-
-        var showViewParameters = new ShowViewParameters(detailView)
+        var applicationId = (Guid)ObjectSpace.GetKeyValue(application!);
+        slotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            TargetWindow = TargetWindow.NewModalWindow
-        };
-
-        var dialogController = Application.CreateController<DialogController>();
-        dialogController.SaveOnAccept = false;
-        dialogController.AcceptAction.Active.SetItemValue("ReportPackageReadOnly", false);
-        dialogController.CancelAction.Active.SetItemValue("ReportPackageReadOnly", false);
-        showViewParameters.Controllers.Add(dialogController);
-
-        Application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(Frame, null));
+            ApplicationId = applicationId,
+            Scope = WordReportPackageScope.ApplicationItem,
+            ApplicationItemIds = itemIds,
+            EmptyCatalogMessage = emptyMessage,
+        }).GetAwaiter().GetResult();
     }
 
     private List<Guid> GetSelectedItemIds()

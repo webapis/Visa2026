@@ -9,9 +9,10 @@
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
 @using Visa2026.Module.Services.WordReports
+@using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.RuntimeLogging
 
-<div class="app-report-package app-item-doc-copies">
+<div class="app-report-package app-item-doc-copies @(UseInlinePreview ? "app-report-package--inline-slot" : string.Empty)">
     @if (ApplicationId != Guid.Empty && CatalogEntries.Count > 0)
     {
         <div class="app-item-doc-copies__top-actions app-report-package__top-selection">
@@ -40,6 +41,53 @@
                 @foreach (var entry in CatalogEntries)
                 {
                     <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
+                        @if (UseInlinePreview)
+                        {
+                            <div class="app-report-package__slot-entry">
+                                <label class="app-report-package__slot-include">
+                                    <input type="checkbox"
+                                           class="app-report-package__slot-checkbox"
+                                           checked="@IsSelected(entry)"
+                                           @onchange="e => OnIncludeChanged(entry, e)" />
+                                    <span class="app-report-package__slot-title">
+                                        <span class="app-item-doc-copies__group-label">@entry.DisplayName</span>
+                                        <span class="app-report-package__format-badge">@FormatKind(entry.Kind)</span>
+                                    </span>
+                                </label>
+                                <div class="app-report-package__slot-actions">
+                                    <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
+                                        @ReadinessLabel(entry)
+                                    </span>
+                                    @if (IsPreviewingEntry(entry))
+                                    {
+                                        <span class="app-report-package__preview-busy-label" role="status">
+                                            @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @if (ShowDetails && CanEditTemplate(entry))
+                                        {
+                                            <a class="app-item-doc-copies__action-btn app-report-package__edit-link"
+                                               href="@GetEditTemplateUrl(entry)"
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")">
+                                                @Msg("ApplicationReportPackage.EditTemplate")
+                                            </a>
+                                        }
+                                        <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn"
+                                                  Enabled="@(!_packageBusy && !_previewBusy)"
+                                                  Click="@(() => PreviewEntryAsync(entry))" />
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
                         <div class="app-item-doc-copies__group-head">
                             <label class="app-report-package__include">
                                 <input type="checkbox"
@@ -79,6 +127,7 @@
                                 }
                             </div>
                         </div>
+                        }
                         @if (IsPreviewingEntry(entry))
                         {
                             <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
@@ -179,7 +228,10 @@
     }
 </div>
 
-<ApplicationReportPackagePreviewDialog @ref="_previewDialog" />
+@if (!UseInlinePreview)
+{
+    <ApplicationReportPackagePreviewDialog @ref="_previewDialog" />
+}
 
 @code {
     [Parameter] public Guid ApplicationId { get; set; }
@@ -190,6 +242,8 @@
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     [Parameter] public EventCallback RefreshRequested { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
+    [Parameter] public bool UseInlinePreview { get; set; }
+    [Parameter] public EventCallback<ReportPackagePreviewRequest> OnInlinePreviewRequested { get; set; }
 
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
     [Inject] private UserReportTemplateEditLinkService TemplateEditLinkService { get; set; } = null!;
@@ -388,7 +442,10 @@
 
     private async Task PreviewEntryAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
-        if (ApplicationId == Guid.Empty || _previewBusy || _packageBusy || _previewDialog == null)
+        if (ApplicationId == Guid.Empty || _previewBusy || _packageBusy)
+            return;
+
+        if (!UseInlinePreview && _previewDialog == null)
             return;
 
         ClearStatusMessages();
@@ -399,7 +456,20 @@
 
         try
         {
-            await _previewDialog.OpenAsync(ApplicationId, entry.EntryKey, entry.DisplayName, ApplicationItemIds);
+            if (UseInlinePreview && OnInlinePreviewRequested.HasDelegate)
+            {
+                await OnInlinePreviewRequested.InvokeAsync(new ReportPackagePreviewRequest
+                {
+                    ApplicationId = ApplicationId,
+                    EntryKey = entry.EntryKey,
+                    DisplayName = entry.DisplayName,
+                    ApplicationItemIds = ApplicationItemIds,
+                });
+            }
+            else if (_previewDialog != null)
+            {
+                await _previewDialog.OpenAsync(ApplicationId, entry.EntryKey, entry.DisplayName, ApplicationItemIds);
+            }
         }
         finally
         {

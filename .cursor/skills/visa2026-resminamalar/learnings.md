@@ -25,6 +25,40 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-06-06 — Resizable preview slot splitter (drag + session persist)
+
+- **Symptom**: Fixed ~40vw slot width; officers could not widen/narrow for long template names or PDF reading.
+- **Try**: Drag left edge of `#visa-preview-slot` while Resminamalar or file preview open.
+- **Test**: Width clamps 320–720px (max 75% shell); persists in `sessionStorage` key `visa.previewSlot.widthPx`; double-click handle resets to CSS default 40vw; `syncInlinePreviewHeight()` runs after resize.
+- **Root cause**: Phase 1 slot used static `flex: 0 0 40vw` only.
+- **Fix**: `.visa-preview-slot__resize-handle` + `visaPreviewDrawer.initSlotResize()` / `applySlotWidth` / `restoreSlotWidth` in `_Host.cshtml`; `--resizing` disables transition during drag.
+- **Prevent**: Any inline PDF viewer in the slot should call `syncInlinePreviewHeight` after layout width changes.
+- **Follow-up**: Handle visible but not draggable — slot child (`ResminamalarSlotPanel`) painted above handle; `overflow:hidden` clipped hit area. Raised handle `z-index:200`, `pointer-events:auto`, content `z-index:1`; open slot `overflow:visible`; `pointerdown` + `setPointerCapture` on handle.
+- **Follow-up**: Increase (drag left) still stuck — `lostpointercapture` ended drag over main app; flex `flex-basis` on slot could not take space from `<app>`. Switched open layout to **CSS grid** on `#visa-app-shell` (`1fr` + `--visa-preview-slot-width`); resize sets shell CSS var; removed pointer capture / `lostpointercapture` stop.
+- **Cross-skill**: —
+
+### 2026-06-06 — Inline slot: template names and Preview invisible (dark theme)
+
+- **Symptom**: Resminamalar slot showed checkboxes + green **Ready** only; template titles and **Preview** link buttons missing.
+- **Try**: Open slot from ApplicationItem ListView / Application detail in dark theme.
+- **Test**: After fix — names, Preview, Select all, Download package visible; theme matches main app.
+- **Root cause**: `#visa-preview-slot` renders outside `<app>`; `background` fell back to light `--bs-body-bg` while `color: inherit` kept dark-theme light text; only `.app-report-package__readiness--ready` had explicit color.
+- **Fix**: `visaPreviewDrawer.syncSlotTheme()` copies `--dxbl-*` / `--bs-*` vars from app root; slot CSS uses inherited colors; inline-slot layout stacks row actions vertically.
+- **Follow-up**: Template titles still crushed — modal `group-head` 2-col grid + `min-width:0` flex shrink in narrow slot; added `app-report-package__slot-entry` stacked markup for `UseInlinePreview`.
+- **Follow-up**: Theme switch while slot open left stale dark inline vars — `ensureThemeWatcher()` + clear/copy on `class`/`data-bs-theme`/stylesheet changes; apply `dxbl-application` + theme classes on `#visa-preview-slot`.
+- **Prevent**: Any global UI outside `<app>` must sync theme on open, not rely on `color: inherit` alone.
+- **Cross-skill**: —
+
+### 2026-06-06 — Resminamalar moved from modal to global inline preview slot (phase 1)
+
+- **Symptom**: Resminamalar opened a modal DetailView; ministry letters already used `#visa-preview-slot` split pane.
+- **Try**: Click **Resminamalar** on Application detail / ApplicationItem ListView; preview PDF; ministry letter click regression.
+- **Test**: `dotnet build` Module + Blazor (full slnx may fail if app running locks DLLs).
+- **Root cause**: Controllers opened `ApplicationReportPackageListHost` modal; preview used `ApplicationReportPackagePreviewDialog` popup.
+- **Fix**: `IVisaPreviewSlotService` + `VisaPreviewSlotHost` / `ResminamalarSlotPanel` / `ReportPackageInlinePreview`; controllers call `OpenResminamalarAsync`; empty catalog shows message in slot.
+- **Prevent**: Reuse slot orchestrator for future document-copies / FileData preview (phase 2); do not duplicate generation path.
+- **Cross-skill**: —
+
 ### 2026-06-06 — Application Resminamalar disabled with no feedback (empty Application scope)
 
 - **Symptom**: **Resminamalar** on **Application** detail looked dead for types like **App_Inv_And_WP** (no Application-root templates); no message.

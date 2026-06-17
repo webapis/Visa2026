@@ -202,9 +202,22 @@
         })();
     </script>
 
-    <app class="d-none">
-        <component type="typeof(App)" render-mode="Server" />
-    </app>
+    <div id="visa-app-shell">
+        <app class="d-none">
+            <component type="typeof(App)" render-mode="Server" />
+        </app>
+
+        <div id="visa-preview-slot-resize-handle"
+             class="visa-preview-slot__resize-handle"
+             role="separator"
+             aria-orientation="vertical"
+             aria-label="Resize preview panel"
+             title="Drag to resize; double-click to reset"></div>
+
+        <div id="visa-preview-slot" aria-label="File preview panel">
+            <component type="typeof(Visa2026.Blazor.Server.Components.VisaPreviewSlotHost)" render-mode="Server" />
+        </div>
+    </div>
 
     <component type="typeof(AlertsHandler)" render-mode="Server" />
     <component type="typeof(Visa2026.Blazor.Server.Components.PdfBatchToastHost)" render-mode="Server" />
@@ -353,6 +366,644 @@
                 iframe.style.height = viewerHeight + "px";
                 iframe.style.border = "0";
             };
+        })();
+    </script>
+
+    <script>
+        (function () {
+            // Global file preview drawer — triggered from anywhere via window.visaPreviewDrawer.open(sourceType, objectId, event?)
+            window.visaPreviewDrawer = window.visaPreviewDrawer || {};
+
+            window.visaPreviewDrawer._hostRef = null;
+
+            window.visaPreviewDrawer.registerHost = function (hostRef) {
+                window.visaPreviewDrawer._hostRef = hostRef;
+            };
+
+            window.visaPreviewDrawer.unregisterHost = function () {
+                window.visaPreviewDrawer._hostRef = null;
+            };
+
+            window.visaPreviewDrawer.open = function (sourceType, objectId, event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (ref) {
+                    ref.invokeMethodAsync("OpenFileFromJsAsync", sourceType, objectId);
+                }
+            };
+
+            window.visaPreviewDrawer.close = function () {
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (ref) {
+                    ref.invokeMethodAsync("CloseFromJsAsync");
+                }
+            };
+
+            window.visaPreviewDrawer.openResminamalar = function (applicationId, scope, itemIdsJson, event) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                }
+                var ref = window.visaPreviewDrawer._hostRef;
+                if (ref) {
+                    ref.invokeMethodAsync(
+                        "OpenResminamalarFromJsAsync",
+                        applicationId,
+                        scope || "Application",
+                        itemIdsJson || "[]");
+                }
+            };
+
+            window.visaPreviewDrawer.syncInlinePreviewHeight = function () {
+                var panel = document.querySelector(".resminamalar-slot-panel--preview .resminamalar-slot-panel__body")
+                    || document.querySelector(".resminamalar-slot-panel__body--split");
+                if (!panel) {
+                    return;
+                }
+
+                var preview = panel.querySelector(".report-package-inline-preview");
+                var shell = panel.querySelector(".report-package-inline-preview__viewer-shell");
+                var iframe = panel.querySelector(".app-item-doc-copies-preview__iframe");
+                if (!preview || !shell || !iframe) {
+                    return;
+                }
+
+                var panelHeight = panel.clientHeight;
+                if (panelHeight <= 0) {
+                    return;
+                }
+
+                var previewHeader = preview.querySelector(".report-package-inline-preview__header");
+                var reserved = (previewHeader ? previewHeader.getBoundingClientRect().height : 0) + 12;
+                var isExclusive = panel.closest(".resminamalar-slot-panel--preview") != null;
+                var viewerHeight = Math.max(
+                    280,
+                    Math.floor(isExclusive ? panelHeight - reserved : (panelHeight * 0.5) - reserved));
+
+                shell.style.width = "100%";
+                shell.style.height = viewerHeight + "px";
+                shell.style.minHeight = viewerHeight + "px";
+                shell.style.maxHeight = viewerHeight + "px";
+                iframe.style.width = "100%";
+                iframe.style.height = viewerHeight + "px";
+                iframe.style.border = "0";
+            };
+
+            window.visaPreviewDrawer.createImageBlobUrl = function (byteArray, contentType) {
+                var bytes = byteArray instanceof Uint8Array ? byteArray : new Uint8Array(byteArray);
+                var blob = new Blob([bytes], { type: contentType || "image/png" });
+                return URL.createObjectURL(blob);
+            };
+
+            window.visaPreviewDrawer.setSlotOpen = function (open) {
+                var slot = document.getElementById('visa-preview-slot');
+                var shell = document.getElementById('visa-app-shell');
+                if (slot) slot.classList.toggle('visa-preview-slot--open', !!open);
+                if (shell) shell.classList.toggle('visa-app-shell--preview-open', !!open);
+                if (!open) {
+                    window.visaPreviewDrawer.setNavCollapsedForSlot(false);
+                    window.visaPreviewDrawer.clearSlotWidth();
+                }
+                if (open) {
+                    window.visaPreviewDrawer.setNavCollapsedForSlot(true);
+                    window.visaPreviewDrawer.syncSlotTheme();
+                    window.visaPreviewDrawer.ensureSlotResize();
+                    window.requestAnimationFrame(function () {
+                        window.visaPreviewDrawer.restoreSlotWidth();
+                    });
+                }
+            };
+
+            window.visaPreviewDrawer._slotWidthStorageKey = 'visa.previewSlot.widthPx.v4';
+            window.visaPreviewDrawer._slotLayoutVersion = 4;
+            window.visaPreviewDrawer._slotDefaultVw = 0.5;
+            window.visaPreviewDrawer._slotWidthMin = 320;
+            window.visaPreviewDrawer._slotLiveWidthPx = 0;
+
+            window.visaPreviewDrawer.getDefaultSlotWidth = function () {
+                var shell = document.getElementById('visa-app-shell');
+                var vwPx = Math.round(window.innerWidth * window.visaPreviewDrawer._slotDefaultVw);
+                if (shell && shell.clientWidth > 0) {
+                    vwPx = Math.round(shell.clientWidth * window.visaPreviewDrawer._slotDefaultVw);
+                }
+                return window.visaPreviewDrawer.clampSlotWidth(vwPx);
+            };
+
+            window.visaPreviewDrawer.getSlotWidthLimits = function () {
+                var shell = document.getElementById('visa-app-shell');
+                var max = window.innerWidth;
+                if (shell && shell.clientWidth > 0) {
+                    max = shell.clientWidth;
+                }
+                return {
+                    min: window.visaPreviewDrawer._slotWidthMin,
+                    max: Math.max(window.visaPreviewDrawer._slotWidthMin, Math.floor(max))
+                };
+            };
+
+            window.visaPreviewDrawer.clampSlotWidth = function (width) {
+                var limits = window.visaPreviewDrawer.getSlotWidthLimits();
+                return Math.max(limits.min, Math.min(limits.max, Math.round(width)));
+            };
+
+            window.visaPreviewDrawer.setSlotWidthLive = function (widthPx) {
+                var slot = document.getElementById('visa-preview-slot');
+                var shell = document.getElementById('visa-app-shell');
+                if (!slot || !shell || !slot.classList.contains('visa-preview-slot--open')) {
+                    return 0;
+                }
+                var width = window.visaPreviewDrawer.clampSlotWidth(widthPx);
+                if (width === window.visaPreviewDrawer._slotLiveWidthPx) {
+                    return width;
+                }
+                window.visaPreviewDrawer._slotLiveWidthPx = width;
+                slot.classList.add('visa-preview-slot--user-sized');
+                shell.style.setProperty('--visa-preview-slot-width', width + 'px');
+                return width;
+            };
+
+            window.visaPreviewDrawer.finalizeSlotWidth = function (widthPx, persist) {
+                var width = window.visaPreviewDrawer.setSlotWidthLive(widthPx);
+                if (width <= 0) {
+                    return;
+                }
+                if (persist !== false) {
+                    try {
+                        sessionStorage.setItem(window.visaPreviewDrawer._slotWidthStorageKey, JSON.stringify({
+                            version: window.visaPreviewDrawer._slotLayoutVersion,
+                            width: width
+                        }));
+                    } catch { }
+                }
+                window.requestAnimationFrame(function () {
+                    try {
+                        window.visaPreviewDrawer.syncInlinePreviewHeight();
+                    } catch { }
+                });
+            };
+
+            window.visaPreviewDrawer.applySlotWidth = function (widthPx, persist) {
+                window.visaPreviewDrawer.finalizeSlotWidth(widthPx, persist);
+            };
+
+            window.visaPreviewDrawer.clearSlotWidth = function () {
+                var slot = document.getElementById('visa-preview-slot');
+                var shell = document.getElementById('visa-app-shell');
+                window.visaPreviewDrawer._slotLiveWidthPx = 0;
+                if (slot) {
+                    slot.classList.remove('visa-preview-slot--user-sized');
+                }
+                if (shell) {
+                    shell.style.removeProperty('--visa-preview-slot-width');
+                    shell.classList.remove('visa-app-shell--slot-resizing');
+                }
+            };
+
+            window.visaPreviewDrawer.restoreSlotWidth = function () {
+                var slot = document.getElementById('visa-preview-slot');
+                var shell = document.getElementById('visa-app-shell');
+                if (!slot || !shell || !slot.classList.contains('visa-preview-slot--open')) {
+                    return;
+                }
+                var saved = null;
+                try {
+                    var raw = sessionStorage.getItem(window.visaPreviewDrawer._slotWidthStorageKey);
+                    if (raw) {
+                        saved = JSON.parse(raw);
+                    }
+                } catch { }
+                if (saved
+                    && saved.version === window.visaPreviewDrawer._slotLayoutVersion
+                    && saved.width > 0) {
+                    window.visaPreviewDrawer.applySlotWidth(saved.width, false);
+                    return;
+                }
+                try {
+                    sessionStorage.removeItem(window.visaPreviewDrawer._slotWidthStorageKey);
+                    sessionStorage.removeItem('visa.previewSlot.widthPx');
+                    sessionStorage.removeItem('visa.previewSlot.widthPx.v2');
+                    sessionStorage.removeItem('visa.previewSlot.widthPx.v3');
+                } catch { }
+                window.visaPreviewDrawer.clearSlotWidth();
+                window.visaPreviewDrawer.applySlotWidth(window.visaPreviewDrawer.getDefaultSlotWidth(), false);
+            };
+
+            window.visaPreviewDrawer.initSlotResize = function () {
+                var shell = document.getElementById('visa-app-shell');
+                var slot = document.getElementById('visa-preview-slot');
+                var handle = document.getElementById('visa-preview-slot-resize-handle');
+                if (!shell || !slot || !handle) {
+                    return;
+                }
+                if (window.visaPreviewDrawer._slotResizeInitialized) {
+                    return;
+                }
+                window.visaPreviewDrawer._slotResizeInitialized = true;
+
+                var dragging = false;
+                var activePointerId = null;
+                var resizeRafId = 0;
+                var pendingClientX = 0;
+
+                var detachDocDrag = function () {
+                    document.removeEventListener('pointermove', onDocPointerMove);
+                    document.removeEventListener('pointerup', onDocPointerUp);
+                    document.removeEventListener('pointercancel', onDocPointerUp);
+                };
+
+                var flushResizeFrame = function () {
+                    resizeRafId = 0;
+                    if (!dragging) {
+                        return;
+                    }
+                    var shellRect = shell.getBoundingClientRect();
+                    var width = shellRect.right - pendingClientX;
+                    window.visaPreviewDrawer.setSlotWidthLive(width);
+                };
+
+                var scheduleResize = function (clientX) {
+                    pendingClientX = clientX;
+                    if (resizeRafId) {
+                        return;
+                    }
+                    resizeRafId = window.requestAnimationFrame(flushResizeFrame);
+                };
+
+                var stopDrag = function () {
+                    if (!dragging) {
+                        return;
+                    }
+                    dragging = false;
+                    activePointerId = null;
+                    detachDocDrag();
+                    if (resizeRafId) {
+                        window.cancelAnimationFrame(resizeRafId);
+                        resizeRafId = 0;
+                        flushResizeFrame();
+                    }
+                    slot.classList.remove('visa-preview-slot--resizing');
+                    shell.classList.remove('visa-app-shell--slot-resizing');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    window.visaPreviewDrawer.finalizeSlotWidth(window.visaPreviewDrawer._slotLiveWidthPx, true);
+                };
+
+                var onDocPointerMove = function (event) {
+                    if (!dragging || event.pointerId !== activePointerId) {
+                        return;
+                    }
+                    event.preventDefault();
+                    scheduleResize(event.clientX);
+                };
+
+                var onDocPointerUp = function (event) {
+                    if (!dragging || (event.pointerId != null && event.pointerId !== activePointerId)) {
+                        return;
+                    }
+                    stopDrag();
+                };
+
+                var beginDrag = function (clientX, pointerId) {
+                    if (dragging) {
+                        return;
+                    }
+                    dragging = true;
+                    activePointerId = pointerId != null ? pointerId : -1;
+                    slot.classList.add('visa-preview-slot--resizing');
+                    shell.classList.add('visa-app-shell--slot-resizing');
+                    document.body.style.cursor = 'col-resize';
+                    document.body.style.userSelect = 'none';
+                    document.addEventListener('pointermove', onDocPointerMove, { passive: false });
+                    document.addEventListener('pointerup', onDocPointerUp);
+                    document.addEventListener('pointercancel', onDocPointerUp);
+                    scheduleResize(clientX);
+                };
+
+                handle.addEventListener('pointerdown', function (event) {
+                    if (!window.visaPreviewDrawer.isSlotOpen()) {
+                        return;
+                    }
+                    if (event.button !== 0) {
+                        return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    beginDrag(event.clientX, event.pointerId);
+                });
+
+                handle.addEventListener('dblclick', function (event) {
+                    if (!window.visaPreviewDrawer.isSlotOpen()) {
+                        return;
+                    }
+                    event.preventDefault();
+                    try {
+                        sessionStorage.removeItem(window.visaPreviewDrawer._slotWidthStorageKey);
+                        sessionStorage.removeItem('visa.previewSlot.widthPx');
+                        sessionStorage.removeItem('visa.previewSlot.widthPx.v2');
+                    sessionStorage.removeItem('visa.previewSlot.widthPx.v3');
+                    } catch { }
+                    window.visaPreviewDrawer.clearSlotWidth();
+                    window.visaPreviewDrawer.applySlotWidth(window.visaPreviewDrawer.getDefaultSlotWidth(), false);
+                });
+            };
+
+            window.visaPreviewDrawer.ensureSlotResize = function () {
+                window.visaPreviewDrawer.initSlotResize();
+            };
+
+            window.visaPreviewDrawer.setNavCollapsedForSlot = function (collapse) {
+                var shell = document.getElementById('visa-app-shell');
+                if (!shell) {
+                    return;
+                }
+                shell.classList.toggle('visa-app-shell--nav-collapsed-for-slot', !!collapse);
+            };
+
+            // Back-compat alias
+            window.visaPreviewDrawer.setNavCollapsedForPreview = window.visaPreviewDrawer.setNavCollapsedForSlot;
+
+            window.visaPreviewDrawer.closeSlotBecauseNavExpanded = function () {
+                if (!window.visaPreviewDrawer.isSlotOpen()) {
+                    return;
+                }
+                if (window.visaPreviewDrawer._closingForNav) {
+                    return;
+                }
+                window.visaPreviewDrawer._closingForNav = true;
+                try {
+                    window.visaPreviewDrawer.close();
+                } finally {
+                    window.setTimeout(function () {
+                        window.visaPreviewDrawer._closingForNav = false;
+                    }, 300);
+                }
+            };
+
+            window.visaPreviewDrawer.isNavToggleClick = function (target) {
+                if (!target || !target.closest) {
+                    return false;
+                }
+                if (target.closest('#visa-preview-slot')) {
+                    return false;
+                }
+
+                var btn = target.closest('button, a[role="button"], .dxbl-btn, .dxbl-menu-item');
+                if (!btn) {
+                    return false;
+                }
+
+                if (btn.querySelector('.dx-icon-menu, .menu-icon-menu, [class*="menu-icon-menu"], .dx-icon-hamburger')) {
+                    return true;
+                }
+
+                var label = (btn.getAttribute('aria-label') || btn.getAttribute('title') || btn.textContent || '').toLowerCase();
+                if (label.indexOf('navigation') >= 0 || label.indexOf('nawig') >= 0) {
+                    return true;
+                }
+
+                return btn.classList.contains('collapse-toggle')
+                    || !!btn.closest('.collapse-toggle');
+            };
+
+            window.visaPreviewDrawer.onNavExpandWhileSlotOpen = function () {
+                if (!window.visaPreviewDrawer.isSlotOpen()) {
+                    return;
+                }
+                var shell = document.getElementById('visa-app-shell');
+                if (!shell || !shell.classList.contains('visa-app-shell--nav-collapsed-for-slot')) {
+                    return;
+                }
+                window.visaPreviewDrawer.closeSlotBecauseNavExpanded();
+            };
+
+            window.visaPreviewDrawer.ensureNavToggleWatcher = function () {
+                if (window.visaPreviewDrawer._navToggleWatcherAttached) {
+                    return;
+                }
+                window.visaPreviewDrawer._navToggleWatcherAttached = true;
+
+                document.addEventListener('click', function (event) {
+                    if (!window.visaPreviewDrawer.isSlotOpen()) {
+                        return;
+                    }
+                    if (window.visaPreviewDrawer.isNavToggleClick(event.target)) {
+                        window.visaPreviewDrawer.closeSlotBecauseNavExpanded();
+                    }
+                }, true);
+
+                var watchNavExpand = function (root) {
+                    if (!root) {
+                        return;
+                    }
+                    new MutationObserver(function (mutations) {
+                        for (var i = 0; i < mutations.length; i++) {
+                            if (mutations[i].attributeName !== 'class') {
+                                continue;
+                            }
+                            if (root.classList.contains('collapse-toggle')) {
+                                window.visaPreviewDrawer.onNavExpandWhileSlotOpen();
+                                return;
+                            }
+                        }
+                    }).observe(root, { attributes: true, attributeFilter: ['class'] });
+                };
+
+                var attachNavObservers = function () {
+                    watchNavExpand(document.querySelector('app .app'));
+                    watchNavExpand(document.querySelector('app'));
+                    watchNavExpand(document.body);
+                    return !!document.querySelector('app');
+                };
+
+                if (!attachNavObservers()) {
+                    var appWait = window.setInterval(function () {
+                        if (attachNavObservers()) {
+                            window.clearInterval(appWait);
+                        }
+                    }, 400);
+                }
+            };
+
+            window.visaPreviewDrawer.ensureNavToggleWatcher();
+
+            window.visaPreviewDrawer._themeVarNames = [
+                '--dxbl-text-color',
+                '--dxbl-body-bg',
+                '--dxbl-background-color',
+                '--dxbl-border-color',
+                '--dxbl-link-color',
+                '--dxbl-link-hover-color',
+                '--dxbl-primary',
+                '--dxbl-secondary',
+                '--dxbl-success',
+                '--dxbl-danger',
+                '--bs-body-bg',
+                '--bs-body-color',
+                '--bs-link-color',
+                '--bs-link-hover-color',
+                '--bs-border-color'
+            ];
+
+            window.visaPreviewDrawer.isSlotOpen = function () {
+                var slot = document.getElementById('visa-preview-slot');
+                return !!(slot && slot.classList.contains('visa-preview-slot--open'));
+            };
+
+            window.visaPreviewDrawer.resolveThemeRoot = function () {
+                var selectors = [
+                    'app .dxbl-application',
+                    'app [class*="dxbl-theme-"]',
+                    '.dxbl-application',
+                    'app',
+                    'body',
+                    'html'
+                ];
+                for (var i = 0; i < selectors.length; i++) {
+                    var candidate = document.querySelector(selectors[i]);
+                    if (candidate && getComputedStyle(candidate).getPropertyValue('--dxbl-text-color').trim()) {
+                        return candidate;
+                    }
+                }
+                return document.querySelector('app .dxbl-application')
+                    || document.querySelector('app')
+                    || document.body;
+            };
+
+            window.visaPreviewDrawer.clearSlotThemeInline = function (slot) {
+                (window.visaPreviewDrawer._themeVarNames || []).forEach(function (name) {
+                    slot.style.removeProperty(name);
+                });
+            };
+
+            window.visaPreviewDrawer.copyThemeClasses = function (slot, themeRoot) {
+                Array.from(slot.classList).forEach(function (cls) {
+                    if (cls.indexOf('dxbl-theme-') === 0 || cls.indexOf('dxbl-mode-') === 0) {
+                        slot.classList.remove(cls);
+                    }
+                });
+
+                slot.classList.add('dxbl-application');
+
+                function addThemeClasses(el) {
+                    if (!el || !el.classList) {
+                        return;
+                    }
+                    Array.from(el.classList).forEach(function (cls) {
+                        if (cls.indexOf('dxbl-theme-') === 0 || cls.indexOf('dxbl-mode-') === 0) {
+                            slot.classList.add(cls);
+                        }
+                    });
+                }
+
+                addThemeClasses(themeRoot);
+                addThemeClasses(document.querySelector('app'));
+                addThemeClasses(document.body);
+                addThemeClasses(document.documentElement);
+            };
+
+            window.visaPreviewDrawer.syncSlotTheme = function () {
+                var slot = document.getElementById('visa-preview-slot');
+                if (!slot) {
+                    return;
+                }
+
+                var themeRoot = window.visaPreviewDrawer.resolveThemeRoot();
+                if (!themeRoot) {
+                    return;
+                }
+
+                window.visaPreviewDrawer.clearSlotThemeInline(slot);
+
+                var sources = [themeRoot, document.body, document.documentElement];
+                var seen = {};
+                sources.forEach(function (source) {
+                    if (!source || seen[source]) {
+                        return;
+                    }
+                    seen[source] = true;
+                    var sourceStyles = getComputedStyle(source);
+                    window.visaPreviewDrawer._themeVarNames.forEach(function (name) {
+                        var value = sourceStyles.getPropertyValue(name);
+                        if (value && value.trim()) {
+                            slot.style.setProperty(name, value.trim());
+                        }
+                    });
+                });
+
+                var themeAttr = themeRoot.getAttribute('data-bs-theme')
+                    || document.body.getAttribute('data-bs-theme')
+                    || document.documentElement.getAttribute('data-bs-theme');
+                if (themeAttr) {
+                    slot.setAttribute('data-bs-theme', themeAttr);
+                } else {
+                    slot.removeAttribute('data-bs-theme');
+                }
+
+                window.visaPreviewDrawer.copyThemeClasses(slot, themeRoot);
+            };
+
+            window.visaPreviewDrawer.scheduleSlotThemeSync = function () {
+                if (!window.visaPreviewDrawer.isSlotOpen()) {
+                    return;
+                }
+                window.requestAnimationFrame(function () {
+                    window.visaPreviewDrawer.syncSlotTheme();
+                });
+            };
+
+            window.visaPreviewDrawer.ensureThemeWatcher = function () {
+                if (window.visaPreviewDrawer._themeWatcherAttached) {
+                    return;
+                }
+                window.visaPreviewDrawer._themeWatcherAttached = true;
+
+                var onThemeMutation = function () {
+                    window.visaPreviewDrawer.scheduleSlotThemeSync();
+                };
+
+                var attrObserver = new MutationObserver(onThemeMutation);
+                var watchAttrs = { attributes: true, attributeFilter: ['class', 'data-bs-theme', 'data-theme', 'style'] };
+
+                attrObserver.observe(document.documentElement, watchAttrs);
+                attrObserver.observe(document.body, watchAttrs);
+
+                var attachAppObserver = function () {
+                    var app = document.querySelector('app');
+                    if (!app) {
+                        return false;
+                    }
+                    attrObserver.observe(app, {
+                        attributes: true,
+                        subtree: true,
+                        attributeFilter: ['class', 'data-bs-theme', 'data-theme', 'style']
+                    });
+                    return true;
+                };
+
+                if (!attachAppObserver()) {
+                    var appWait = window.setInterval(function () {
+                        if (attachAppObserver()) {
+                            window.clearInterval(appWait);
+                        }
+                    }, 400);
+                }
+
+                var headObserver = new MutationObserver(onThemeMutation);
+                headObserver.observe(document.head, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['href', 'rel', 'media']
+                });
+            };
+
+            window.visaPreviewDrawer.ensureThemeWatcher();
+            window.visaPreviewDrawer.ensureSlotResize();
         })();
     </script>
 

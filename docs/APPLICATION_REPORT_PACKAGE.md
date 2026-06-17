@@ -52,7 +52,7 @@ This document describes **why** it replaced one-click Resminamalar, **what** off
 
 
 
-The **`GenerateWordReports`** / **`ViewApplicationItemWordReports`** actions use caption **Resminamalar**; they **open the dialog** instead of enqueueing directly.
+The **`GenerateWordReports`** / **`ViewApplicationItemWordReports`** actions use caption **Resminamalar**; they **open the global inline preview slot** (right panel, default **50vw**, **draggable resize** 320px–100vw, persisted in `sessionStorage` v4) instead of enqueueing directly or opening a modal. While the slot is open, the **left nav collapses**; expanding nav via the menu toggler **closes** the slot.
 
 
 
@@ -84,7 +84,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 
 | **Catalog / readiness** | `ApplicationWordReportPackageCatalogService`, `ApplicationWordReportPackageReadinessEvaluator`, dry-run hints |
 
-| **UI** | Custom Blazor dialog — `ApplicationReportPackageComponent.razor` |
+| **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
 
 | **Template seed** | `UserReportTemplateUpdater` + **`UserReportTemplateSeedGate`** (host startup when XAF DB update had no DI) |
 
@@ -98,17 +98,19 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 
 |------------------|---------------------|
 
-| Click **Resminamalar** → queue | Click **Resminamalar** → **dialog** |
+| Click **Resminamalar** → queue | Click **Resminamalar** → **inline slot** (main content shrinks left) |
 
 | — | Review template list (checkboxes, Ready / Check) |
 
 | — | Optional **gear**: **Edit template** + hint lines (hidden by default) |
 
-| — | **Preview** → in-app PDF popup |
+| — | **Preview** → in-slot **PDF viewer** (catalog **or** preview — exclusive toggle; **Close** returns to catalog) |
 
 | — | **Download package** → optional gap confirm → queue |
 
 | Toast / **Download ZIP** | Same **`WordReportBatchToastHost`** + `visaWordBatchToast.setCurrentBatchId` |
+
+**Empty catalog:** slot still opens; localized message inside the panel (e.g. no Application-scope templates for this application type). No modal.
 
 
 
@@ -120,19 +122,25 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 
 flowchart LR
 
-  subgraph current [Report package v2]
+  subgraph current [Report package v2 — inline slot]
 
     BTN[WordReportsController / ApplicationItemWordReportsController]
 
-    HOST[ApplicationReportPackageListHost / ApplicationItemReportPackageListHost]
+    SLOT[IVisaPreviewSlotService]
+
+    HOST[VisaPreviewSlotHost in #visa-preview-slot]
+
+    PANEL[ResminamalarSlotPanel]
 
     UI[ApplicationReportPackageComponent]
 
+    PREVIEW[ReportPackageInlinePreview]
+
     ENQ[ApplicationWordReportPackageEnqueueService]
 
-    BTN --> HOST --> UI
+    BTN --> SLOT --> HOST --> PANEL --> UI
 
-    UI -->|Preview| PREVIEW[ApplicationReportPackagePreviewDialog]
+    UI -->|Preview| PREVIEW
 
     PREVIEW -->|generate| GEN[ApplicationWordReportEntryGenerator]
 
@@ -160,7 +168,7 @@ flowchart LR
 
 
 
-**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API**, and shows the PDF in a resizable popup (same iframe pattern as Document copies).
+**Preview** generates the same file as the ZIP (`ApplicationWordReportEntryGenerator`), converts **Word (`.docx`)** and **Excel (`.xlsx`)** to PDF with **DevExpress Office File API**, and shows the PDF in the **inline slot** (`ReportPackageInlinePreview` — same iframe/blob pattern as Document copies). Legacy modal `ApplicationReportPackagePreviewDialog` remains for property-editor hosts only.
 
 
 

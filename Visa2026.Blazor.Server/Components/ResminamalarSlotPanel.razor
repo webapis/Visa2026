@@ -1,0 +1,161 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp
+@using Microsoft.Extensions.DependencyInjection
+@using Visa2026.Blazor.Server.Editors
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.WordReports
+
+<div class="resminamalar-slot-panel @(_previewActive ? "resminamalar-slot-panel--preview" : string.Empty)">
+    @if (!_previewActive)
+    {
+        <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+            <span class="visa-preview-drawer__title">@Title</span>
+            <div class="visa-preview-drawer__header-actions">
+                <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                        type="button"
+                        title="@CloseLabel"
+                        @onclick="ClosePanelAsync">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="resminamalar-slot-panel__body">
+        @if (!_previewActive)
+        {
+            <div class="resminamalar-slot-panel__catalog">
+                @if (!string.IsNullOrWhiteSpace(_emptyMessage))
+                {
+                    <div class="app-item-doc-copies__empty" role="status">
+                        <p>@_emptyMessage</p>
+                    </div>
+                }
+                else if (_applicationId != Guid.Empty)
+                {
+                    <ApplicationReportPackageComponent ApplicationId="_applicationId"
+                                                     PackageScope="_packageScope"
+                                                     ApplicationItemIds="_applicationItemIds"
+                                                     ApplicationNumber="_applicationNumber"
+                                                     CatalogEntries="_catalogEntries"
+                                                     UiCultureName="_uiCultureName"
+                                                     UseInlinePreview="true"
+                                                     RefreshRequested="_refreshRequested"
+                                                     OnInlinePreviewRequested="HandleInlinePreviewAsync" />
+                }
+            </div>
+        }
+        else
+        {
+            <ReportPackageInlinePreview @ref="_inlinePreview"
+                                        UiCultureName="_uiCultureName"
+                                        PreviewClosed="OnPreviewClosedAsync" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public ResminamalarSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+
+    private Guid _applicationId;
+    private WordReportPackageScope _packageScope = WordReportPackageScope.Application;
+    private IReadOnlyList<Guid> _applicationItemIds = Array.Empty<Guid>();
+    private string _applicationNumber = string.Empty;
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private string _emptyMessage = string.Empty;
+    private string _uiCultureName = string.Empty;
+    private bool _previewActive;
+    private ReportPackageInlinePreview? _inlinePreview;
+    private EventCallback _refreshRequested;
+
+    private string Title => VisaUiMessages.Get("ApplicationReportPackage.Title", _uiCultureName);
+    private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
+
+    protected override void OnInitialized()
+    {
+        _refreshRequested = EventCallback.Factory.Create(this, ReloadCatalogAsync);
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Request == null || Request.ApplicationId == Guid.Empty)
+        {
+            _applicationId = Guid.Empty;
+            _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _emptyMessage = string.Empty;
+            return;
+        }
+
+        _applicationId = Request.ApplicationId;
+        _packageScope = Request.Scope;
+        _applicationItemIds = Request.ApplicationItemIds ?? Array.Empty<Guid>();
+        _emptyMessage = Request.EmptyCatalogMessage ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_emptyMessage))
+            ReloadCatalog();
+    }
+
+    private void ReloadCatalog()
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Application>();
+        var application = objectSpace.GetObjectByKey<Application>(_applicationId);
+        if (application == null)
+        {
+            _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _applicationNumber = string.Empty;
+            return;
+        }
+
+        var context = _packageScope == WordReportPackageScope.ApplicationItem
+            ? WordReportGenerationContext.ForApplicationItems(_applicationItemIds.ToList())
+            : WordReportGenerationContext.ForApplication();
+
+        var catalog = CatalogService.Build(objectSpace, application, context);
+        _catalogEntries = catalog.Entries;
+        _applicationNumber = application.FullApplicationNumber ?? string.Empty;
+    }
+
+    private Task ReloadCatalogAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_emptyMessage))
+            ReloadCatalog();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleInlinePreviewAsync(ReportPackagePreviewRequest request)
+    {
+        _previewActive = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        if (_inlinePreview != null)
+            await _inlinePreview.OpenAsync(request);
+    }
+
+    private async Task OnPreviewClosedAsync()
+    {
+        _previewActive = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClosePanelAsync()
+    {
+        _previewActive = false;
+        if (CloseRequested.HasDelegate)
+            await CloseRequested.InvokeAsync();
+        else
+            await SlotService.CloseAsync();
+    }
+}

@@ -2557,3 +2557,461 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 .app-report-package__entry--previewing {
     outline: 1px solid color-mix(in srgb, var(--bs-primary, #2563eb) 45%, transparent);
 }
+
+/* ─── Global file preview slot + drawer ───────────────────────────────────────
+   #visa-app-shell  = flex row wrapping <app> + #visa-preview-slot
+   #visa-preview-slot  = 0-width collapsed; expands to 50vw when open, pushing
+                         <app> content left (no overlay, no position:fixed).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Shell: full-height row containing XAF <app> + preview slot */
+#visa-app-shell {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Grid split when preview is open — column width is authoritative (flex fights growth) */
+#visa-app-shell.visa-app-shell--preview-open {
+    position: relative;
+    --visa-preview-slot-default: max(320px, 50vw);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--visa-preview-slot-width, var(--visa-preview-slot-default));
+}
+
+#visa-app-shell.visa-app-shell--slot-resizing {
+    transition: none !important;
+    will-change: grid-template-columns;
+}
+
+#visa-app-shell.visa-app-shell--slot-resizing > app,
+#visa-app-shell.visa-app-shell--slot-resizing #visa-preview-slot {
+    transition: none !important;
+    pointer-events: none;
+}
+
+#visa-app-shell.visa-app-shell--slot-resizing .visa-preview-slot__resize-handle {
+    pointer-events: auto;
+}
+
+/* XAF app fills remaining space; min-width:0 lets it shrink when preview grows */
+#visa-app-shell > app {
+    flex: 1 1 auto;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#visa-app-shell.visa-app-shell--preview-open > app {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Hide left navigation while the preview slot is open (catalog or document preview). */
+#visa-app-shell.visa-app-shell--nav-collapsed-for-slot app .sidebar {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden;
+}
+
+/* Preview slot: collapsed by default */
+#visa-preview-slot {
+    flex: 0 0 0;
+    width: 0;
+    overflow: hidden;
+    transition: flex-basis 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    /* Outside <app> — theme vars synced via visaPreviewDrawer.syncSlotTheme() */
+    color: var(--dxbl-text-color, var(--bs-body-color, #212529));
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, #fff)));
+}
+
+/* Open state: slot column in grid (width from --visa-preview-slot-width on shell) */
+#visa-preview-slot.visa-preview-slot--open {
+    position: relative;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    overflow: visible;
+    border-left: 1px solid var(--dxbl-border-color, var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.13)));
+    box-shadow: -4px 0 20px rgba(15, 23, 42, 0.09);
+    color: var(--dxbl-text-color, var(--bs-body-color, inherit));
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, inherit)));
+}
+
+#visa-preview-slot.visa-preview-slot--open.visa-preview-slot--user-sized {
+    width: 100%;
+    max-width: none;
+}
+
+#visa-preview-slot.visa-preview-slot--resizing {
+    transition: none !important;
+}
+
+.visa-preview-slot__resize-handle {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: var(--visa-preview-slot-width, var(--visa-preview-slot-default, max(320px, 50vw)));
+    width: 14px;
+    transform: translateX(50%);
+    cursor: col-resize;
+    z-index: 1200;
+    pointer-events: auto;
+    touch-action: none;
+}
+
+#visa-app-shell.visa-app-shell--preview-open .visa-preview-slot__resize-handle {
+    display: block;
+}
+
+#visa-preview-slot.visa-preview-slot--open .visa-preview-slot__resize-handle {
+    display: none;
+}
+
+.visa-preview-slot__resize-handle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 2.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--dxbl-text-color, currentColor) 28%, transparent);
+    opacity: 0.55;
+    transition: opacity 0.12s, background 0.12s;
+}
+
+.visa-preview-slot__resize-handle:hover::after,
+#visa-preview-slot.visa-preview-slot--resizing .visa-preview-slot__resize-handle::after {
+    opacity: 1;
+    background: color-mix(in srgb, var(--dxbl-primary, #2563eb) 55%, transparent);
+}
+
+#visa-preview-slot > * {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Resminamalar inline slot — catalog + PDF preview vertical split */
+.resminamalar-slot-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+    color: inherit;
+    background: inherit;
+}
+
+.resminamalar-slot-panel__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.resminamalar-slot-panel__body--split {
+    gap: 0.5rem;
+}
+
+/* Exclusive preview mode — catalog hidden, PDF uses full slot height */
+.resminamalar-slot-panel--preview .resminamalar-slot-panel__body {
+    padding: 0;
+}
+
+.resminamalar-slot-panel--preview .report-package-inline-preview {
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem 0.75rem 0.75rem;
+    box-sizing: border-box;
+}
+
+.resminamalar-slot-panel__catalog {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.5rem 0.75rem 0.75rem;
+}
+
+.resminamalar-slot-panel__body--split .resminamalar-slot-panel__catalog {
+    flex: 1 1 45%;
+    max-height: 50%;
+    border-bottom: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.1));
+}
+
+.resminamalar-slot-panel__body--split .report-package-inline-preview {
+    flex: 1 1 50%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.08));
+}
+
+.resminamalar-slot-panel .app-report-package {
+    min-height: 0;
+}
+
+/* Inline Resminamalar catalog — full-width stacked rows in narrow slot */
+.resminamalar-slot-panel .app-report-package--inline-slot,
+.resminamalar-slot-panel .app-report-package.app-item-doc-copies {
+    height: 100%;
+    max-height: none;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0;
+    color: inherit;
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__body,
+.resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__groups {
+    width: 100%;
+}
+
+.resminamalar-slot-panel .app-report-package__slot-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+}
+
+.resminamalar-slot-panel .app-report-package__slot-include {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    cursor: pointer;
+}
+
+.resminamalar-slot-panel .app-report-package__slot-checkbox {
+    margin-top: 0.15rem;
+}
+
+.resminamalar-slot-panel .app-report-package__slot-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.resminamalar-slot-panel .app-report-package__slot-title .app-item-doc-copies__group-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    color: inherit;
+}
+
+.resminamalar-slot-panel .app-report-package__slot-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    padding-left: 1.6rem;
+    width: 100%;
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .dxbl-btn-link,
+.resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__action-btn {
+    color: var(--dxbl-link-color, var(--bs-link-color, #0d6efd));
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .dxbl-btn-link:hover {
+    color: var(--dxbl-link-hover-color, var(--bs-link-hover-color, #0a58ca));
+}
+
+.resminamalar-slot-panel .app-item-doc-copies__footer {
+    position: sticky;
+    bottom: 0;
+    background: inherit;
+    z-index: 1;
+}
+
+.report-package-inline-preview__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.report-package-inline-preview__viewer-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-package-inline-preview__header {
+    flex: 0 0 auto;
+}
+
+/* Drawer itself: always in-flow, fills the slot */
+.visa-preview-drawer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background: var(--bs-body-bg, #fff);
+    overflow: hidden;
+}
+
+.visa-preview-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.1));
+    flex: 0 0 auto;
+    min-height: 2.75rem;
+    background: color-mix(in srgb, var(--bs-body-bg, #fff) 90%, var(--bs-secondary-bg, #f8f9fa));
+}
+
+.visa-preview-drawer__title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.visa-preview-drawer__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
+}
+
+.visa-preview-drawer__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--bs-body-color, #212529);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.visa-preview-drawer__btn:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.visa-preview-drawer__btn--close {
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.visa-preview-drawer__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0.75rem;
+    overflow: hidden;
+}
+
+.visa-preview-drawer__state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-height: 8rem;
+    padding: 1rem;
+    text-align: center;
+}
+
+.visa-preview-drawer__state--loading {
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.visa-preview-drawer__state--error {
+    color: var(--dxbl-danger-color, #dc3545);
+}
+
+.visa-preview-drawer__viewer-shell {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 0;
+    overflow: auto;
+}
+
+.visa-preview-drawer__a4-frame {
+    aspect-ratio: 210 / 297;
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.12));
+    border-radius: 0.25rem;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.visa-preview-drawer__a4-frame--image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visa-preview-drawer__iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    border: 0;
+    background: #fff;
+}
+
+.visa-preview-drawer__image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.app-progress-letter-link {
+    color: var(--dxbl-link-color, #0d6efd);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+}
+
+.app-progress-letter-link:hover {
+    text-decoration: underline;
+}

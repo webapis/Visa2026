@@ -229,6 +229,10 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<ApplicationItemDocumentBatchSummaryPdfBuilder>();
             services.AddScoped<ApplicationItemDocumentFileAccess>();
+            services.AddScoped<ApplicationProgressMinistryLetterFileAccess>();
+            services.AddScoped<IFilePreviewSource, ApplicationProgressLetterPreviewSource>();
+            services.AddScoped<FilePreviewSourceRegistry>();
+            services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
             services.AddScoped<ApplicationItemPdfBatchEnqueueService>();
             services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
             services.AddScoped<ApplicationWordReportPackageCatalogService>();

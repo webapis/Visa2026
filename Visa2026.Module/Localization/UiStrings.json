@@ -186,6 +186,7 @@
         "CurrentWorkDuty": { "en-US": "Purpose of visit", "tr-TR": "Gelmeginiň Maksady", "tk-TM": "Gelmeginiň maksady", "ru-RU": "Цель визита" },
         "CurrentMedicalRecord": { "en-US": "Current medical record", "tr-TR": "Güncel Sağlık Kaydı", "tk-TM": "Häzirki saglyk ýazgysy", "ru-RU": "Текущая мед. запись" },
         "BorderZoneLocation": { "en-US": "Border zone location", "tr-TR": "Sınır Bölgesi Yeri", "tk-TM": "Serhet sebiti ýeri", "ru-RU": "Место погран. зоны" },
+        "WorkPermittedLocations": { "en-US": "Work permitted locations", "tr-TR": "İzin Verilen Yerler", "tk-TM": "Rugsat berlen ýerler", "ru-RU": "Разрешённые места" },
         "BusinessTripAddress": { "en-US": "Business trip address", "tr-TR": "İş Seyahati Adresi", "tk-TM": "Iş sapary salgysy", "ru-RU": "Адрес командировки" },
         "ApplicationItemName": { "en-US": "Name", "tr-TR": "Ad", "tk-TM": "Ady", "ru-RU": "Наименование" }
       }

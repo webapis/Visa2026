@@ -1,0 +1,310 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
+@using System.IO
+@using System.IO.Compression
+@using Microsoft.JSInterop
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.AspNetCore.Http
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.RuntimeLogging
+@using Visa2026.Module.Services.WordReports
+@implements IAsyncDisposable
+
+<div class="report-package-inline-preview app-item-doc-copies-preview">
+    <div class="report-package-inline-preview__header app-item-doc-copies-preview__header">
+        <h3 class="app-item-doc-copies-preview__title">@HeaderText</h3>
+        <div class="app-item-doc-copies-preview__header-actions">
+            @if (!_loading && HasOfficeDownload)
+            {
+                <DxButton Text="@ActionDownloadOffice"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          Click="@DownloadOfficeFileAsync" />
+            }
+            @if (!_loading && _pdfDownloadContent != null)
+            {
+                <DxButton Text="@ActionDownloadPdf"
+                          RenderStyle="ButtonRenderStyle.Link"
+                          SizeMode="SizeMode.Small"
+                          Click="@DownloadPreviewPdfAsync" />
+            }
+            <DxButton Text="@ActionClosePreview"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      Click="@ClosePreviewAsync" />
+        </div>
+    </div>
+
+    <div class="report-package-inline-preview__body app-item-doc-copies-preview">
+        @if (_loading)
+        {
+            <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--loading" role="status" aria-live="polite">
+                <div class="app-item-doc-copies-preview__loading">
+                    <span class="app-report-package__preview-busy-label">@_previewLoadingLabel</span>
+                    <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                         aria-label="@_previewLoadingLabel">
+                        <div class="app-report-package__preview-progress-track">
+                            <div class="app-report-package__preview-progress-indeterminate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="app-item-doc-copies-preview__state app-item-doc-copies-preview__state--error" role="alert">
+                <p>@_error</p>
+                @if (HasOfficeDownload)
+                {
+                    <DxButton Text="@ActionDownloadOffice"
+                              RenderStyle="ButtonRenderStyle.Secondary"
+                              SizeMode="SizeMode.Small"
+                              Click="@DownloadOfficeFileAsync" />
+                }
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(_pdfBlobUrl))
+        {
+            <div class="app-item-doc-copies-preview__viewer-shell report-package-inline-preview__viewer-shell">
+                <iframe class="app-item-doc-copies-preview__iframe"
+                        src="@_pdfBlobUrl"
+                        title="@_fileName"
+                        allow="fullscreen"></iframe>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback PreviewClosed { get; set; }
+    [Parameter] public string UiCultureName { get; set; } = string.Empty;
+
+    [Inject] private ApplicationWordReportPackageFileAccess PreviewFileAccess { get; set; } = null!;
+    [Inject] private IFileDownloader FileDownloader { get; set; } = null!;
+    [Inject] private IXafCultureInfoService CultureInfoService { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+    [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+
+    private string _fileName = string.Empty;
+    private string _error = string.Empty;
+    private bool _loading;
+    private string? _pdfBlobUrl;
+    private byte[]? _pdfDownloadContent;
+    private string _pdfDownloadFileName = string.Empty;
+    private byte[]? _officeDownloadContent;
+    private string _officeDownloadFileName = string.Empty;
+    private string _officeContentType = "application/octet-stream";
+    private IReadOnlyList<ApplicationWordReportGeneratedFile> _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
+    private string _previewLoadingLabel = string.Empty;
+    private int _layoutSyncGeneration;
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext, UiCultureName);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string FormatMsg(string key, params object[] args) =>
+        VisaUiMessages.FormatForCulture(EffectiveUiCulture, key, args);
+
+    private string HeaderText =>
+        string.IsNullOrWhiteSpace(_fileName)
+            ? PreviewTitle
+            : $"{PreviewTitle}: {_fileName}";
+
+    private bool HasOfficeDownload =>
+        _officeOriginals.Count > 0 || (_officeDownloadContent != null && _officeDownloadContent.Length > 0);
+
+    private string ActionDownloadOffice =>
+        _officeOriginals.Count > 1
+            ? Msg("ApplicationReportPackage.Preview.DownloadOfficeZip")
+            : Msg("ApplicationReportPackage.Preview.DownloadOffice");
+
+    private string PreviewTitle => Msg("ApplicationReportPackage.Preview.Title");
+    private string PreviewError => Msg("ApplicationReportPackage.Preview.Error");
+    private string PdfConversionError => Msg("ApplicationReportPackage.Preview.PdfConversionError");
+    private string ActionClosePreview => Msg("ApplicationItemDocumentCopies.Action.Close");
+    private string ActionDownloadPdf => Msg("ApplicationItemDocumentCopies.Action.Download");
+
+    public async Task OpenAsync(ReportPackagePreviewRequest request)
+    {
+        if (request == null)
+            return;
+
+        _officeDownloadContent = null;
+        _officeDownloadFileName = string.Empty;
+        _officeContentType = "application/octet-stream";
+        _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
+        _pdfDownloadContent = null;
+        _pdfDownloadFileName = string.Empty;
+        _fileName = request.DisplayName;
+        _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Downloading", request.DisplayName);
+        _error = string.Empty;
+        _loading = true;
+
+        await RevokePdfBlobUrlAsync();
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        try
+        {
+            var bundle = await PreviewFileAccess
+                .TryBuildPreviewBundleAsync(request.ApplicationId, request.EntryKey, request.ApplicationItemIds)
+                .ConfigureAwait(false);
+
+            if (bundle == null || bundle.Originals.Count == 0)
+            {
+                SetPreviewError(PreviewError);
+                return;
+            }
+
+            _officeOriginals = bundle.Originals;
+            _fileName = bundle.Originals.Count == 1
+                ? (string.IsNullOrWhiteSpace(bundle.Original.FileName) ? request.DisplayName : bundle.Original.FileName)
+                : request.DisplayName;
+
+            if (bundle.Originals.Count == 1)
+            {
+                _officeDownloadContent = bundle.Original.Content;
+                _officeDownloadFileName = bundle.Original.FileName;
+                _officeContentType = bundle.Original.ContentType;
+            }
+
+            _previewLoadingLabel = FormatMsg("ApplicationReportPackage.Preview.Converting", request.DisplayName);
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            var pdfContent = bundle.PdfContent;
+            if (pdfContent == null || pdfContent.Length == 0)
+            {
+                SetPreviewError(PdfConversionError);
+                return;
+            }
+
+            _pdfDownloadContent = pdfContent;
+            _pdfDownloadFileName = bundle.PdfFileName;
+            _pdfBlobUrl = await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", pdfContent);
+        }
+        catch (Exception ex)
+        {
+            SetPreviewError(PreviewError, ex);
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+            await ScheduleViewerLayoutSyncAsync();
+        }
+    }
+
+    public async Task CloseAsync()
+    {
+        await ResetStateAsync();
+        if (PreviewClosed.HasDelegate)
+            await PreviewClosed.InvokeAsync();
+    }
+
+    private void SetPreviewError(string message, Exception? exception = null)
+    {
+        _error = message;
+        ErrorReporter.ReportReportPackageError(
+            message,
+            ApplicationRuntimeLogCategories.ReportPackagePreviewDialog,
+            exception);
+    }
+
+    private async Task ClosePreviewAsync() => await CloseAsync();
+
+    private async Task DownloadPreviewPdfAsync()
+    {
+        if (_pdfDownloadContent == null || _pdfDownloadContent.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_pdfDownloadContent, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_pdfDownloadFileName) ? "report-preview.pdf" : _pdfDownloadFileName,
+            stream);
+    }
+
+    private async Task DownloadOfficeFileAsync()
+    {
+        if (_officeOriginals.Count > 1)
+        {
+            using var zipStream = new MemoryStream();
+            using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                var usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var file in _officeOriginals)
+                {
+                    var entryName = ZipEntryFileNameSanitizer.EnsureUnique(file.FileName, usedNames);
+                    var entry = archive.CreateEntry(entryName, CompressionLevel.Fastest);
+                    await using var entryStream = entry.Open();
+                    await entryStream.WriteAsync(file.Content);
+                }
+            }
+
+            zipStream.Position = 0;
+            await FileDownloader.DownloadAsync("report-preview.zip", zipStream, "application/zip");
+            return;
+        }
+
+        if (_officeDownloadContent == null || _officeDownloadContent.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_officeDownloadContent, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_officeDownloadFileName) ? "report.docx" : _officeDownloadFileName,
+            stream,
+            _officeContentType);
+    }
+
+    private async Task ScheduleViewerLayoutSyncAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            return;
+
+        var generation = ++_layoutSyncGeneration;
+        await Task.Delay(150);
+        if (generation != _layoutSyncGeneration || string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            return;
+
+        await JS.InvokeVoidAsync("visaPreviewDrawer.syncInlinePreviewHeight");
+    }
+
+    private async Task ResetStateAsync()
+    {
+        _layoutSyncGeneration++;
+        _fileName = string.Empty;
+        _error = string.Empty;
+        _loading = false;
+        _previewLoadingLabel = string.Empty;
+        _pdfDownloadContent = null;
+        _pdfDownloadFileName = string.Empty;
+        _officeDownloadContent = null;
+        _officeDownloadFileName = string.Empty;
+        _officeContentType = "application/octet-stream";
+        _officeOriginals = Array.Empty<ApplicationWordReportGeneratedFile>();
+        await RevokePdfBlobUrlAsync();
+    }
+
+    private async Task RevokePdfBlobUrlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_pdfBlobUrl))
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", _pdfBlobUrl);
+        }
+        catch (JSDisconnectedException) { }
+
+        _pdfBlobUrl = null;
+    }
+
+    public async ValueTask DisposeAsync() => await RevokePdfBlobUrlAsync();
+}

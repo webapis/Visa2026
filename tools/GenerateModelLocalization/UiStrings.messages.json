@@ -3040,5 +3040,11 @@
     "tr-TR": "Uyarı",
     "tk-TM": "Duýduryş",
     "ru-RU": "Предупреждение"
+  },
+  "ApplicationProgress.MinistryLetterPreview.Empty": {
+    "en": "Select a ministry letter file name in the progress history list to preview it here.",
+    "tr-TR": "Önizlemek için ilerleme geçmişindeki bakanlık yazısı dosya adına tıklayın.",
+    "tk-TM": "Deslapky görmek üçin ösüş taryhyndaky ministrlik haty faýl adyna basyň.",
+    "ru-RU": "Выберите имя файла письма министерства в истории прогресса для предпросмотра."
   }
 }

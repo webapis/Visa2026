@@ -1,0 +1,260 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.ExpressApp.Blazor.Services
+@using Microsoft.JSInterop
+@using System.IO
+@using Visa2026.Blazor.Server.Services
+@using Visa2026.Module.Services
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.RuntimeLogging
+@implements IAsyncDisposable
+@inject FilePreviewSourceRegistry PreviewRegistry
+@inject IFileDownloader FileDownloader
+@inject IJSRuntime JS
+@inject IApplicationErrorReporter ErrorReporter
+@inject IVisaPreviewSlotService SlotService
+
+<div class="visa-preview-drawer"
+     role="complementary"
+     aria-label="File preview"
+     aria-modal="false"
+     style="@(_open ? "" : "visibility:hidden; pointer-events:none;")">
+
+        <div class="visa-preview-drawer__header">
+            <span class="visa-preview-drawer__title" title="@_fileName">@_fileName</span>
+            <div class="visa-preview-drawer__header-actions">
+                @if (_downloadContent is { Length: > 0 })
+                {
+                    <button class="visa-preview-drawer__btn visa-preview-drawer__btn--download"
+                            type="button"
+                            title="Download"
+                            @onclick="DownloadAsync">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path d="M8 1v9M4 7l4 4 4-4M2 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                }
+                <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                        type="button"
+                        title="Close preview"
+                        @onclick="Close">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="visa-preview-drawer__body">
+            @if (_loading)
+            {
+                <div class="visa-preview-drawer__state visa-preview-drawer__state--loading" role="status" aria-live="polite">
+                    <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true" aria-label="Loading…">
+                        <div class="app-report-package__preview-progress-track">
+                            <div class="app-report-package__preview-progress-indeterminate"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!string.IsNullOrWhiteSpace(_error))
+            {
+                <div class="visa-preview-drawer__state visa-preview-drawer__state--error" role="alert">@_error</div>
+            }
+            else if (_previewKind == DocumentCopyPreviewKind.Pdf && !string.IsNullOrWhiteSpace(_blobUrl))
+            {
+                <div class="visa-preview-drawer__viewer-shell">
+                    <div class="visa-preview-drawer__a4-frame">
+                        <iframe class="visa-preview-drawer__iframe"
+                                src="@_blobUrl"
+                                title="@_fileName"
+                                allow="fullscreen"></iframe>
+                    </div>
+                </div>
+            }
+            else if (_previewKind == DocumentCopyPreviewKind.Image && !string.IsNullOrWhiteSpace(_blobUrl))
+            {
+                <div class="visa-preview-drawer__viewer-shell">
+                    <div class="visa-preview-drawer__a4-frame visa-preview-drawer__a4-frame--image">
+                        <img class="visa-preview-drawer__image" src="@_blobUrl" alt="@_fileName" />
+                    </div>
+                </div>
+            }
+        </div>
+</div>
+
+@code {
+    /// <summary>When true, JS registration and slot open/close are managed by <see cref="VisaPreviewSlotHost"/>.</summary>
+    [Parameter] public bool HostManaged { get; set; }
+
+    private bool _open;
+    private bool _loading;
+    private string _error = string.Empty;
+    private string _fileName = string.Empty;
+    private string? _blobUrl;
+    private byte[]? _downloadContent;
+    private string _downloadFileName = string.Empty;
+    private DocumentCopyPreviewKind _previewKind = DocumentCopyPreviewKind.None;
+    private DotNetObjectReference<VisaFilePreviewDrawer>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || HostManaged)
+            return;
+
+        _dotNetRef = DotNetObjectReference.Create(this);
+        await JS.InvokeVoidAsync("visaPreviewDrawer.registerHost", _dotNetRef);
+    }
+
+    public Task OpenFilePreviewAsync(string sourceType, Guid objectId) =>
+        LoadAsync(sourceType, objectId);
+
+    [JSInvokable]
+    public Task OpenAsync(string sourceType, string objectIdText)
+    {
+        if (!Guid.TryParse(objectIdText, out var objectId) || objectId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return LoadAsync(sourceType, objectId);
+    }
+
+    [JSInvokable]
+    public Task CloseFromJsAsync()
+    {
+        Close();
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadAsync(string sourceType, Guid objectId)
+    {
+        var source = PreviewRegistry.TryResolve(sourceType);
+        if (source == null)
+        {
+            _error = $"Unknown preview source: {sourceType}";
+            _open = true;
+            _loading = false;
+            if (!HostManaged)
+                await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", true);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _open = true;
+        _loading = true;
+        _error = string.Empty;
+        _previewKind = DocumentCopyPreviewKind.None;
+        _fileName = string.Empty;
+        _downloadContent = null;
+        _downloadFileName = string.Empty;
+        await RevokeBlobUrlAsync();
+        if (!HostManaged)
+            await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", true);
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            var result = await source.TryLoadAsync(objectId);
+            if (result == null)
+            {
+                _error = "File not found or access denied.";
+                return;
+            }
+
+            _fileName = result.FileName;
+            var kind = DocumentCopyPreviewFormats.GetKind(result.FileName);
+            if (kind == DocumentCopyPreviewKind.None)
+            {
+                _error = "This file type cannot be previewed.";
+                return;
+            }
+
+            _downloadContent = result.Content;
+            _downloadFileName = result.FileName;
+            _previewKind = kind;
+            _blobUrl = kind switch
+            {
+                DocumentCopyPreviewKind.Pdf =>
+                    await JS.InvokeAsync<string>("visaDocumentCopyPreview.createPdfBlobUrl", result.Content),
+                DocumentCopyPreviewKind.Image =>
+                    await JS.InvokeAsync<string>("visaPreviewDrawer.createImageBlobUrl", result.Content, result.ContentType),
+                _ => null
+            };
+        }
+        catch (Exception ex)
+        {
+            _error = "Could not load the file preview.";
+            ErrorReporter.ReportDocumentCopiesError(
+                _error,
+                ApplicationRuntimeLogCategories.ProgressMinistryLetterPreviewPane,
+                ex);
+        }
+        finally
+        {
+            _loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void Close()
+    {
+        _open = false;
+        if (HostManaged)
+            _ = SlotService.CloseAsync();
+        else
+            _ = CloseSlotAsync();
+    }
+
+    private async Task CloseSlotAsync()
+    {
+        _previewKind = DocumentCopyPreviewKind.None;
+        _fileName = string.Empty;
+        _error = string.Empty;
+        _downloadContent = null;
+        if (!HostManaged)
+        {
+            try { await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", false); } catch (JSDisconnectedException) { }
+        }
+        await RevokeBlobUrlAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DownloadAsync()
+    {
+        if (_downloadContent == null || _downloadContent.Length == 0)
+            return;
+
+        using var stream = new MemoryStream(_downloadContent, writable: false);
+        await FileDownloader.DownloadAsync(
+            string.IsNullOrWhiteSpace(_downloadFileName) ? "preview.pdf" : _downloadFileName,
+            stream);
+    }
+
+    private async Task RevokeBlobUrlAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_blobUrl))
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaDocumentCopyPreview.revokePdfBlobUrl", _blobUrl);
+        }
+        catch (JSDisconnectedException) { }
+
+        _blobUrl = null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!HostManaged && _dotNetRef != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaPreviewDrawer.unregisterHost");
+            }
+            catch (JSDisconnectedException) { }
+
+            _dotNetRef.Dispose();
+            _dotNetRef = null;
+        }
+
+        await RevokeBlobUrlAsync();
+    }
+}

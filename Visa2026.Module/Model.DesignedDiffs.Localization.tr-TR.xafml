@@ -287,6 +287,7 @@
         <Member Name="TravelDate" Caption="Seyahat Tarihi" />
         <Member Name="TravelNotes" Caption="Seyahat Notları" />
         <Member Name="TravelType" Caption="Seyahat Türü" />
+        <Member Name="WorkPermittedLocations" Caption="İzin Verilen Yerler" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage" Caption="Döngü aşaması">

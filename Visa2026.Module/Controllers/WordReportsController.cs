@@ -1,17 +1,16 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Editors;
-using DevExpress.ExpressApp.SystemModule;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.PreviewSlot;
 using Visa2026.Module.Services.WordReports;
 
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// "Resminamalar" on the Application detail view — opens the report package dialog (v2).
+/// "Resminamalar" on the Application detail view — opens the inline report package slot (v2).
 /// </summary>
 public class WordReportsController : ViewController<DetailView>
 {
@@ -69,34 +68,31 @@ public class WordReportsController : ViewController<DetailView>
         }
 
         var catalogService = Application.ServiceProvider.GetRequiredService<ApplicationWordReportPackageCatalogService>();
-        if (catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication()).TotalCount == 0)
+        var catalog = catalogService.Build(ObjectSpace, application, WordReportGenerationContext.ForApplication());
+
+        string? emptyMessage = null;
+        if (catalog.TotalCount == 0)
+        {
+            emptyMessage = VisaUiMessages.Format(
+                "WordReports.NoApplicationScopeTemplates",
+                ResolveApplicationTypeLabel(application));
+        }
+
+        var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
+        if (slotService == null)
         {
             Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Format("WordReports.NoApplicationScopeTemplates", ResolveApplicationTypeLabel(application)),
+                emptyMessage ?? VisaUiMessages.Get("ApplicationReportPackage.Empty"),
                 InformationType.Warning);
             return;
         }
 
-        var objectSpace = Application.CreateObjectSpace(typeof(ApplicationReportPackageListHost));
-        var host = objectSpace.CreateObject<ApplicationReportPackageListHost>();
-        host.ApplicationId = applicationId;
-
-        var detailView = Application.CreateDetailView(objectSpace, host);
-        detailView.ViewEditMode = ViewEditMode.View;
-        detailView.Caption = VisaUiMessages.Get("ApplicationReportPackage.Title");
-
-        var showViewParameters = new ShowViewParameters(detailView)
+        slotService.OpenResminamalarAsync(new ResminamalarSlotRequest
         {
-            TargetWindow = TargetWindow.NewModalWindow
-        };
-
-        var dialogController = Application.CreateController<DialogController>();
-        dialogController.SaveOnAccept = false;
-        dialogController.AcceptAction.Active.SetItemValue("ReportPackageReadOnly", false);
-        dialogController.CancelAction.Active.SetItemValue("ReportPackageReadOnly", false);
-        showViewParameters.Controllers.Add(dialogController);
-
-        Application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(Frame, null));
+            ApplicationId = applicationId,
+            Scope = WordReportPackageScope.Application,
+            EmptyCatalogMessage = emptyMessage,
+        }).GetAwaiter().GetResult();
     }
 
     private static string ResolveApplicationTypeLabel(Application application)

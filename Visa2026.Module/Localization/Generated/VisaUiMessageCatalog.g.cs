@@ -852,6 +852,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu arza görnüşinde migrasiýa SLA profili ýok (ýa-da iň ýokary iş günleri bellenmedi). Migrasiýa gullugyna geçmezden öň arza görnüşine profil belläň.",
             ["ru-RU"] = "У типа заявки не задан профиль SLA миграционной службы (или не указано макс. число рабочих дней). Назначьте профиль типу заявки перед переводом в миграционную службу.",
         },
+        ["ApplicationProgress.MinistryLetterPreview.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select a ministry letter file name in the progress history list to preview it here.",
+            ["tr-TR"] = "Önizlemek için ilerleme geçmişindeki bakanlık yazısı dosya adına tıklayın.",
+            ["tk-TM"] = "Deslapky görmek üçin ösüş taryhyndaky ministrlik haty faýl adyna basyň.",
+            ["ru-RU"] = "Выберите имя файла письма министерства в истории прогресса для предпросмотра.",
+        },
         ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select a project contract before advancing beyond office preparation.",

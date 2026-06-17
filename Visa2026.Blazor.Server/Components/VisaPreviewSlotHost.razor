@@ -1,0 +1,145 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Microsoft.JSInterop
+@using System.Text.Json
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.WordReports
+@implements IAsyncDisposable
+
+@if (_state.Mode == VisaPreviewSlotMode.File)
+{
+    <VisaFilePreviewDrawer @ref="_fileDrawer"
+                           HostManaged="true" />
+}
+else if (_state.Mode == VisaPreviewSlotMode.Resminamalar && _state.Resminamalar != null)
+{
+    <ResminamalarSlotPanel Request="_state.Resminamalar"
+                           CloseRequested="CloseFromPanelAsync" />
+}
+
+@code {
+    [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private VisaPreviewSlotState _state = new();
+    private VisaFilePreviewDrawer? _fileDrawer;
+    private DotNetObjectReference<VisaPreviewSlotHost>? _dotNetRef;
+    private int _lastFileOpenVersion;
+
+    protected override void OnInitialized()
+    {
+        _state = SlotService.State;
+        SlotService.StateChanged += OnSlotStateChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("visaPreviewDrawer.registerHost", _dotNetRef);
+        }
+
+        await ApplyStateAsync();
+
+        if (_state.Mode != VisaPreviewSlotMode.Closed)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaPreviewDrawer.syncSlotTheme");
+            }
+            catch (JSDisconnectedException) { }
+        }
+    }
+
+    private void OnSlotStateChanged()
+    {
+        _state = SlotService.State;
+        _ = InvokeAsync(async () =>
+        {
+            await ApplyStateAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task ApplyStateAsync()
+    {
+        var open = _state.Mode != VisaPreviewSlotMode.Closed;
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.setSlotOpen", open);
+        }
+        catch (JSDisconnectedException) { }
+
+        if (_state.Mode == VisaPreviewSlotMode.File
+            && !string.IsNullOrWhiteSpace(_state.FileSourceType)
+            && _state.FileObjectId != Guid.Empty
+            && _state.Version != _lastFileOpenVersion
+            && _fileDrawer != null)
+        {
+            _lastFileOpenVersion = _state.Version;
+            await _fileDrawer.OpenFilePreviewAsync(_state.FileSourceType, _state.FileObjectId);
+        }
+    }
+
+    [JSInvokable]
+    public Task OpenAsync(string sourceType, string objectIdText) =>
+        OpenFileFromJsAsync(sourceType, objectIdText);
+
+    [JSInvokable]
+    public Task OpenFileFromJsAsync(string sourceType, string objectIdText)
+    {
+        if (!Guid.TryParse(objectIdText, out var objectId) || objectId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return SlotService.OpenFileAsync(sourceType, objectId);
+    }
+
+    [JSInvokable]
+    public Task OpenResminamalarFromJsAsync(string applicationIdText, string scopeText, string itemIdsJson)
+    {
+        if (!Guid.TryParse(applicationIdText, out var applicationId) || applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        if (!Enum.TryParse<WordReportPackageScope>(scopeText, ignoreCase: true, out var scope))
+            scope = WordReportPackageScope.Application;
+
+        IReadOnlyList<Guid> itemIds = Array.Empty<Guid>();
+        if (!string.IsNullOrWhiteSpace(itemIdsJson))
+        {
+            try
+            {
+                itemIds = JsonSerializer.Deserialize<List<Guid>>(itemIdsJson) ?? new List<Guid>();
+            }
+            catch (JsonException) { }
+        }
+
+        return SlotService.OpenResminamalarAsync(new ResminamalarSlotRequest
+        {
+            ApplicationId = applicationId,
+            Scope = scope,
+            ApplicationItemIds = itemIds,
+        });
+    }
+
+    [JSInvokable]
+    public Task CloseFromJsAsync() => SlotService.CloseAsync();
+
+    private Task CloseFromPanelAsync() => SlotService.CloseAsync();
+
+    public async ValueTask DisposeAsync()
+    {
+        SlotService.StateChanged -= OnSlotStateChanged;
+
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("visaPreviewDrawer.unregisterHost");
+            }
+            catch (JSDisconnectedException) { }
+
+            _dotNetRef.Dispose();
+            _dotNetRef = null;
+        }
+    }
+}
