@@ -1,6 +1,15 @@
-# Person document copies (planned)
+# Person document copies
 
-**Status:** **Phase 1–2 implemented** — Person DetailView + ListView toolbar (single selection), per-row ListView link column, sectioned catalog, per-record Preview + Refresh. Cross-link to ApplicationItem copies: Phase 3.
+**Status:** **Phases 1–2 shipped** — Person DetailView + ListView toolbar (single selection), per-row **Copies** column, sectioned catalog, per-record Preview + Refresh.
+
+**Deferred (product decision — do not implement without explicit approval):**
+
+| Phase | Topic |
+|-------|--------|
+| **3** | Footer cross-link → ApplicationItem document copies (`OpenDocumentCopiesAsync`) when person has application lines |
+| **4** | Person-scoped ZIP export (separate from ministry `PdfGenerationBatch`) |
+
+Officers who need ministry packaging today use **ApplicationItem** document copies ([`APPLICATION_ITEM_DOCUMENT_COPIES.md`](APPLICATION_ITEM_DOCUMENT_COPIES.md)).
 
 **Agent skill:** [`.cursor/skills/visa2026-person-document-copies/SKILL.md`](../.cursor/skills/visa2026-person-document-copies/SKILL.md)
 
@@ -65,9 +74,9 @@ Same pattern as existing document copies: catalog hides; merged PDF or image pre
 - Reuse `ApplicationItemDocumentCopyPdfMerger` logic or extract shared `DocumentCopyPdfMerger` for single-record file sets.
 - Header: **Download**, **Close** (no ministry batch summary unless multi-file export added later).
 
-### Cross-link (optional, later)
+### Cross-link (deferred — Phase 3)
 
-When person has `ApplicationItems`, footer link **Open application copies** → `OpenDocumentCopiesAsync` with those item IDs (existing occupant).
+When person has `ApplicationItems`, a footer link **Open application copies** → `OpenDocumentCopiesAsync` with those item IDs was planned. **Not implemented** — revisit only after product signs off (which lines to include, UX when switching occupants).
 
 ---
 
@@ -204,12 +213,12 @@ Keep **`DocumentCopiesSlotPanel`** for ApplicationItem only — separate occupan
 
 ## Phased delivery
 
-| Phase | Deliverable |
-|-------|-------------|
-| **1 — MVP** | Resolver + DetailView action + slot panel + sectioned catalog + per-record Preview + Refresh |
-| **2** | ListView dedicated column; gear file details; current badges; nested visa rows |
-| **3** | Link to ApplicationItem document copies when `ApplicationItems` exist |
-| **4 (optional)** | Person document ZIP export (separate from ministry `PdfGenerationBatch`) |
+| Phase | Deliverable | Status |
+|-------|-------------|--------|
+| **1 — MVP** | Resolver + DetailView action + slot panel + sectioned catalog + per-record Preview + Refresh | **Shipped** |
+| **2** | ListView toolbar + **Copies** column; gear file details; current badges; nested visa rows | **Shipped** |
+| **3** | Link to ApplicationItem document copies when `ApplicationItems` exist | **Deferred** — product decision |
+| **4 (optional)** | Person document ZIP export (separate from ministry `PdfGenerationBatch`) | **Deferred** — product decision |
 
 ---
 
@@ -225,9 +234,11 @@ Manual: open employee Person with passport + education scans → Document copies
 
 ## Open product questions
 
-Record decisions here when implementation starts:
+Record decisions here before **Phase 3** or **4** work starts:
 
-1. Include **RejectionItem** / **TravelHistory** sections in v1?
-2. Show **historical** passports/visas only, or filter to current + previous (like application slots)?
-3. **Lodging** documents — separate rows or folded under address?
-4. ListView column: icon-only vs text link?
+1. **Phase 3** — Which `ApplicationItems` to pass when cross-linking (all lines vs current application / contract)?
+2. Include **RejectionItem** / **TravelHistory** sections in catalog (currently included)?
+3. Show **historical** passports/visas only, or filter to current + previous (like application slots)?
+4. **Lodging** documents — separate rows or folded under address (current: nested under address)?
+5. ListView column: icon-only vs text link (current: **Copies** text)?
+6. **Phase 4** — Is person ZIP export needed at all vs preview-only + ApplicationItem ministry ZIP?

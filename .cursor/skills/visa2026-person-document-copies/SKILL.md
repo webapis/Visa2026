@@ -1,19 +1,18 @@
 ---
 name: visa2026-person-document-copies
 description: >-
-  Planned Person-scoped document copies in the global preview slot: sectioned catalog of
-  child BO attachments (Passport, Visa, Education, WorkPermitItem, etc.), per-record Preview,
-  Person DetailView and ListView entry points. Not ministry PdfGenerationBatch — use
-  visa2026-document-copies for ApplicationItem ZIP. Shell UX via visa2026-preview-slot.
-  Skill is design + implementation guide until code lands; read learnings.md when present.
+  Person-scoped document copies in the global preview slot: sectioned catalog of
+  child BO attachments, DetailView and ListView entry, per-record Preview.
+  Phases 1-2 shipped; phases 3-4 deferred. Not ministry PdfGenerationBatch —
+  use visa2026-document-copies for ApplicationItem ZIP. Shell UX via visa2026-preview-slot.
 disable-model-invocation: false
 ---
 
-# Visa2026 — Person document copies (planned)
+# Visa2026 — Person document copies
 
 **User prompts:** [prompts.md](./prompts.md) (`@visa2026-person-document-copies`).
 
-**Implementation status:** **Phase 1–2** — DetailView + ListView toolbar (single row) + ListView **Copies** column, resolver, preview-slot occupant, sectioned catalog, Preview + Refresh. Cross-link / ZIP: later phases.
+**Implementation status:** **Phases 1–2 shipped.** **Phases 3–4 deferred** until product approves (cross-link to ApplicationItem copies; optional person ZIP). Do not implement Phase 3/4 from this skill without an explicit user request.
 
 ## Agent workflow (when implementing)
 
@@ -64,12 +63,14 @@ disable-model-invocation: false
 
 ## Phased delivery
 
-| Phase | Focus |
-|-------|--------|
-| **1** | Resolver, DetailView action, slot panel, catalog, Preview, Refresh |
-| **2** | ListView column button, gear details, current badges |
-| **3** | Cross-link to ApplicationItem document copies |
-| **4** | Optional person ZIP export (new service, not `PdfGenerationBatch`) |
+| Phase | Focus | Status |
+|-------|--------|--------|
+| **1** | Resolver, DetailView action, slot panel, catalog, Preview, Refresh | **Shipped** |
+| **2** | ListView toolbar + **Copies** column, gear details, current badges | **Shipped** |
+| **3** | Cross-link to ApplicationItem document copies | **Deferred** |
+| **4** | Optional person ZIP export (new service, not `PdfGenerationBatch`) | **Deferred** |
+
+For ministry ZIP / application form, officers use **[document-copies](../visa2026-document-copies/SKILL.md)** on **ApplicationItem** — not Person catalog.
 
 ---
 
