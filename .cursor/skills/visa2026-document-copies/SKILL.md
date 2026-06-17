@@ -34,6 +34,7 @@ disable-model-invocation: false
 |-------|--------|
 | XFA field empty/wrong, `PdfFormMapping`, `PdfMappingHelper`, template swap | [`.cursor/skills/visa2026-pdf-form-mapping/SKILL.md`](../visa2026-pdf-form-mapping/SKILL.md) |
 | Resminamalar UX patterns (row progress CSS) — Word batch, not PDF ZIP | [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../visa2026-resminamalar/SKILL.md) |
+| Global `#visa-preview-slot` shell, catalog card layout, resize/theme | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../visa2026-preview-slot/SKILL.md) |
 | `PdfGenerationBatch` worker failures, Docker, schema drift | [`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../visa2026-lifecycle-docker/SKILL.md) |
 | Slot eligibility / diploma packaging rules (domain) | [`docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md`](../../../docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md) |
 

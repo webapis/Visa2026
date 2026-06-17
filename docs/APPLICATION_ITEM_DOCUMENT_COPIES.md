@@ -4,6 +4,8 @@
 
 This document describes **why** it replaces Generate PDF, **what** officers get in the UI, **how it builds on the PDF batch pipeline**, and **how** it is implemented in Visa2026 (Module domain + Blazor custom editor).
 
+**Agent skills:** [`.cursor/skills/visa2026-document-copies/SKILL.md`](../.cursor/skills/visa2026-document-copies/SKILL.md) (scans, package, readiness). Global preview slot shell: [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../.cursor/skills/visa2026-preview-slot/SKILL.md) + [`docs/PREVIEW_SLOT.md`](PREVIEW_SLOT.md).
+
 ## Why it is needed (improvements over Generate PDF)
 
 **Generate PDF** (v1) queued a background ZIP job but gave officers little visibility before export:

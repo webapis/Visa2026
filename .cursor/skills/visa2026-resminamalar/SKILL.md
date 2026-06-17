@@ -37,6 +37,7 @@ disable-model-invocation: false
 | Roles / navigation to User Report Template | [`.cursor/skills/visa2026-security-access/SKILL.md`](../visa2026-security-access/SKILL.md) |
 | Docker / `FORCE_XAF_DB_UPDATE` / schema columns | [`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../visa2026-lifecycle-docker/SKILL.md) |
 | Document copies (PDF ZIP, scan preview) | [`.cursor/skills/visa2026-document-copies/SKILL.md`](../visa2026-document-copies/SKILL.md) |
+| Global preview slot shell (layout, occupants, catalog card CSS) | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../visa2026-preview-slot/SKILL.md) |
 | XFA visa application form mapping | [`.cursor/skills/visa2026-pdf-form-mapping/SKILL.md`](../visa2026-pdf-form-mapping/SKILL.md) |
 | Legacy code-backed Word / XtraReports (removed) | [`.cursor/skills/visa2026-word-reports/SKILL.md`](../visa2026-word-reports/SKILL.md) — **deprecated** |
 
