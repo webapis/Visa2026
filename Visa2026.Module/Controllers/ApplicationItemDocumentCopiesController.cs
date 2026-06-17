@@ -41,7 +41,11 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
         base.OnDeactivated();
     }
 
-    private void View_SelectionChanged(object sender, EventArgs e) => UpdateActionState();
+    private void View_SelectionChanged(object sender, EventArgs e)
+    {
+        UpdateActionState();
+        CloseOwnedDocumentCopiesSlotIfOpen();
+    }
 
     private void UpdateActionState()
     {
@@ -50,8 +54,8 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
 
     private void ViewDocumentCopiesAction_Execute(object sender, SimpleActionExecuteEventArgs e)
     {
-        var selectedItems = GetSelectedItems();
-        if (selectedItems.Count < 1)
+        var itemIds = GetSelectedItemIds();
+        if (itemIds.Count < 1)
         {
             Application.ShowViewStrategy.ShowMessage(
                 VisaUiMessages.Get("Pdf.SelectAtLeastOneItem"),
@@ -59,17 +63,41 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
             return;
         }
 
-        var itemIds = selectedItems
-            .Select(item => View.ObjectSpace.GetKeyValue(item))
-            .Where(key => key != null)
-            .Select(key => key is Guid guid ? guid : Guid.Parse(Convert.ToString(key, System.Globalization.CultureInfo.InvariantCulture)))
-            .Distinct()
-            .ToList();
+        OpenDocumentCopiesSlot(itemIds);
+    }
 
+    /// <summary>
+    /// Selection after open is stale — close the catalog so the officer re-opens for the new scope.
+    /// </summary>
+    private void CloseOwnedDocumentCopiesSlotIfOpen()
+    {
+        var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
+        if (slotService == null)
+            return;
+
+        var state = slotService.State;
+        if (state.Mode != VisaPreviewSlotMode.DocumentCopies)
+            return;
+
+        var ownerViewId = VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
+        if (string.IsNullOrEmpty(ownerViewId)
+            || !string.Equals(state.OwnerViewId, ownerViewId, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        slotService.CloseAsync().GetAwaiter().GetResult();
+    }
+
+    private void OpenDocumentCopiesSlot(
+        IReadOnlyList<Guid> itemIds,
+        IVisaPreviewSlotService? slotService = null,
+        string? ownerViewId = null)
+    {
         if (itemIds.Count < 1)
             return;
 
-        var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
+        slotService ??= Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
         if (slotService == null)
         {
             Application.ShowViewStrategy.ShowMessage(
@@ -78,10 +106,22 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
             return;
         }
 
+        ownerViewId ??= VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
         slotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
         {
             ApplicationItemIds = itemIds,
-        }, VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
+        }, ownerViewId).GetAwaiter().GetResult();
+    }
+
+    private List<Guid> GetSelectedItemIds()
+    {
+        return GetSelectedItems()
+            .Select(item => View.ObjectSpace.GetKeyValue(item))
+            .Where(key => key != null)
+            .Select(key => key is Guid guid ? guid : Guid.Parse(Convert.ToString(key, System.Globalization.CultureInfo.InvariantCulture)))
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
     }
 
     private List<ApplicationItem> GetSelectedItems()
