@@ -1,0 +1,20 @@
+{
+  "reportTitle": "Team list (smoke test)",
+  "people": [
+    {
+      "name": "Alice",
+      "role": "Engineer",
+      "hours": 40
+    },
+    {
+      "name": "Bob",
+      "role": "Analyst",
+      "hours": 32
+    },
+    {
+      "name": "Carol",
+      "role": "Designer",
+      "hours": 36
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+# Local Carbone for Phase 0 spike (optional).
+# Prod: on-prem only — see docs/CARBONE_INTEGRATION_PLAN.md
+#
+# Start: docker compose -f docker-compose.carbone-spike.yml up -d
+# Studio UI: http://127.0.0.1:4000 (requires CARBONE_EE_STUDIO=true below)
+# API health at root without Studio shows JSON only: {"success":true,...}
+
+services:
+  carbone:
+    image: carbone/carbone-ee:latest
+    ports:
+      - "127.0.0.1:4000:4000"
+    environment:
+      # Set in shell or .env.dev — never commit real license keys
+      - CARBONE_EE_LICENSE=${CARBONE_EE_LICENSE:-}
+      # Without this, :4000 is render API only (JSON health check, no designer UI)
+      - CARBONE_EE_STUDIO=true
+    volumes:
+      - ./tools/CarboneSpike/carbone-data/template:/app/template
+      - ./tools/CarboneSpike/carbone-data/render:/app/render
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
