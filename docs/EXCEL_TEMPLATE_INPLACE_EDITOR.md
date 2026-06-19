@@ -53,3 +53,4 @@ Same as today: `UserReportTemplate` + `FileData` read/write via role grants. Use
 - [`USER_TEMPLATE_AUTHOR_GUIDE.md`](USER_TEMPLATE_AUTHOR_GUIDE.md)
 - [`EXCEL_TEMPLATE_REPORTING_PLAN.md`](EXCEL_TEMPLATE_REPORTING_PLAN.md)
 - [`EXCEL_PLACEHOLDER_REFERENCE.md`](EXCEL_PLACEHOLDER_REFERENCE.md)
+- Agent skill: [`.cursor/skills/visa2026-excel-inplace-editor/SKILL.md`](../.cursor/skills/visa2026-excel-inplace-editor/SKILL.md)

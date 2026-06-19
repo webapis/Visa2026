@@ -22,6 +22,10 @@ For the **report package dialog** (preview, ZIP, readiness chips, gear toggle, A
 
 This skill covers **template files**, **maps**, **Extract/Validate**, **merge row builders**, and **visibility rules** on the template record.
 
+## Excel in-browser editor (DB blob, not repo seeds)
+
+Officers can edit **existing** Excel templates on **User Report Template → Spreadsheet** tab (DevExpress Spreadsheet iframe, **Save to template**). Iframe host, layout, reload, npm: **[`visa2026-excel-inplace-editor`](../visa2026-excel-inplace-editor/SKILL.md)**. This skill still owns **seed** `.xlsx` under **`Resources/Templates/Excel/`** and **must not** edit layout in the repo.
+
 ## Hard boundaries (always enforce)
 
 ### Directory — `Resources/Templates` (+ `Templates/Excel`)
