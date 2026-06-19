@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "name": "visa2026.blazor.server",
+  "private": true,
+  "dependencies": {
+    "devextreme-dist": "25.2.3",
+    "devexpress-aspnetcore-spreadsheet": "25.2.3"
+  }
+}

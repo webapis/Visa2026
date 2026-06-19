@@ -14,6 +14,8 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 
+using Visa2026.Module.Editors;
+
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>User-defined Word or Excel report template uploaded via XAF UI.</summary>
@@ -110,6 +112,17 @@ namespace Visa2026.Module.BusinessObjects
 
         [Browsable(false)]
         public virtual IList<UserReportPlaceholder> Placeholders { get; set; }
+
+        /// <summary>Hosts the in-browser Excel editor on the Spreadsheet tab (Excel templates only).</summary>
+        [NotMapped]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [VisibleInDetailView(true)]
+        [ModelDefault("ShowCaption", "False")]
+        [EditorAlias(UserReportTemplateExcelEditorAliases.SpreadsheetPanel)]
+        [Appearance("HideExcelSpreadsheetHostForWord", Visibility = ViewItemVisibility.Hide,
+            Criteria = "TemplateOutputFormat != ##Enum#Visa2026.Module.BusinessObjects.TemplateOutputFormat,Excel# And Not(EndsWith(TemplateFile.FileName, '.xlsx')) And Not(EndsWith(TemplateFile.FileName, '.xlsm'))")]
+        public virtual string ExcelSpreadsheetHost { get; set; } = string.Empty;
 
         [NotMapped]
         [ModelDefault("Caption", "Validation Status")]

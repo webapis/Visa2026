@@ -235,6 +235,18 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Main">
+            <LayoutGroup Id="UserReportTemplateTabs">
+              <LayoutGroup Id="UserReportTemplateGeneral" Caption="Общие" />
+              <LayoutGroup Id="UserReportTemplateSpreadsheetTab" Caption="Таблица" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
   </Views>
   <NavigationItems>
     <Items>

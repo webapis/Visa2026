@@ -2889,7 +2889,18 @@
         <ColumnInfo Id="ViewId" Caption="Görünüm" />
       </Columns>
     </ListView>
-    <DetailView Id="UserReportTemplate_DetailView" Caption="Rapor Şablonu" />
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Rapor Şablonu">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Main">
+            <LayoutGroup Id="UserReportTemplateTabs">
+              <LayoutGroup Id="UserReportTemplateGeneral" Caption="Genel" />
+              <LayoutGroup Id="UserReportTemplateSpreadsheetTab" Caption="Elektron Tablo" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="UserReportTemplate_ListView" Caption="Rapor Şablonları" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Geçerlilik Süresi" />
     <ListView Id="ValidityDuration_ListView" Caption="Geçerlilik Süreleri" />

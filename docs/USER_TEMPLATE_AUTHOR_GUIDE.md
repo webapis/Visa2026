@@ -43,6 +43,12 @@ The UI **does not** automatically rescan **Template File** when you attach or re
 
 **Seeded templates** (embedded `.docx` applied by `DatabaseUpdate/UserReportTemplateUpdater` on database update) already run extract + validate in that pipeline. Use **Extract** and **Validate** in the app only after you replace the file in the UI or if the grid looks out of sync with the current Word file (for example, old row counts after an upload).
 
+### Excel: in-app Spreadsheet tab
+
+For templates with **Output Format = Excel**, the detail view includes a **Spreadsheet** tab with an embedded editor (DevExpress ASP.NET Core Spreadsheet). You can edit the `.xlsx` in the browser and click **Save to template** instead of downloading and re-uploading **Template File**.
+
+After saving from the Spreadsheet tab, run **Extract Placeholders** and **Validate Placeholders** on the **General** tab whenever `{{…}}` tokens change. See **`docs/EXCEL_TEMPLATE_INPLACE_EDITOR.md`** for workflow, limitations, and QA checklist.
+
 ---
 
 ## Model prefix `ds` (required)

@@ -58,6 +58,7 @@ This document describes how to add Excel template reporting **alongside** the ex
 
 - Separate **author guide** PDF/page: **`EXCEL_TEMPLATE_AUTHOR_GUIDE.md`** vs **`USER_TEMPLATE_AUTHOR_GUIDE.md`** — same steps, Excel-specific loop-row pictures.
 - **Preview** tool for Excel (Word has `tools/PreviewWordReports` for ministry `.docx` only) — optional v2.
+- **In-place Excel editor** on User Report Template DetailView (**Spreadsheet** tab) — see **`docs/EXCEL_TEMPLATE_INPLACE_EDITOR.md`** (shipped).
 
 ---
 

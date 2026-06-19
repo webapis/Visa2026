@@ -3666,6 +3666,83 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ähli {0} ýer tutujy dogry!",
             ["ru-RU"] = "Все {0} заполнителей корректны!",
         },
+        ["UserReport.ExcelSpreadsheet.NoFile"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Upload a template file on the General tab first.",
+            ["tr-TR"] = "Önce Genel sekmesinden bir şablon dosyası yükleyin.",
+            ["tk-TM"] = "Ilki bilen Umumy sekme-de şablon faýly ýükläň.",
+            ["ru-RU"] = "Сначала загрузите файл шаблона на вкладке «Общие».",
+        },
+        ["UserReport.ExcelSpreadsheet.ReadOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Read-only",
+            ["tr-TR"] = "Salt okunur",
+            ["tk-TM"] = "Diňe okamak",
+            ["ru-RU"] = "Только чтение",
+        },
+        ["UserReport.ExcelSpreadsheet.ReloadConfirm"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reload and discard unsaved changes?",
+            ["tr-TR"] = "Yeniden yükleyip kaydedilmemiş değişiklikleri silmek istiyor musunuz?",
+            ["tk-TM"] = "Täzeden ýükläp ýazdyrylmadyk üýtgeşmeleri pozmak isleýärsiňizmi?",
+            ["ru-RU"] = "Перезагрузить и отменить несохранённые изменения?",
+        },
+        ["UserReport.ExcelSpreadsheet.ReloadFromDatabase"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reload from database",
+            ["tr-TR"] = "Veritabanından yeniden yükle",
+            ["tk-TM"] = "Maglumat bazasyndan täzeden ýükle",
+            ["ru-RU"] = "Перезагрузить из базы данных",
+        },
+        ["UserReport.ExcelSpreadsheet.SaveError"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Error saving template: {0}",
+            ["tr-TR"] = "Şablon kaydedilirken hata: {0}",
+            ["tk-TM"] = "Şablony ýazanda ýalňyşlyk: {0}",
+            ["ru-RU"] = "Ошибка сохранения шаблона: {0}",
+        },
+        ["UserReport.ExcelSpreadsheet.SaveFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not save template.",
+            ["tr-TR"] = "Şablon kaydedilemedi.",
+            ["tk-TM"] = "Şablony ýazyp bolmady.",
+            ["ru-RU"] = "Не удалось сохранить шаблон.",
+        },
+        ["UserReport.ExcelSpreadsheet.SaveSuccess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template saved. Run Extract Placeholders if tokens changed.",
+            ["tr-TR"] = "Şablon kaydedildi. Belirteçler değiştiyse Yer Tutucuları Çıkar'ı çalıştırın.",
+            ["tk-TM"] = "Şablon ýazdyryldy. Bellikler üýtgedilse Ýer tutujylary çykar düwmesini basyň.",
+            ["ru-RU"] = "Шаблон сохранён. Если изменились метки, выполните «Извлечь заполнители».",
+        },
+        ["UserReport.ExcelSpreadsheet.SaveToTemplate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save to template",
+            ["tr-TR"] = "Şablona kaydet",
+            ["tk-TM"] = "Şablona ýaz",
+            ["ru-RU"] = "Сохранить в шаблон",
+        },
+        ["UserReport.ExcelSpreadsheet.StatusSaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Saved",
+            ["tr-TR"] = "Kaydedildi",
+            ["tk-TM"] = "Ýazdyryldy",
+            ["ru-RU"] = "Сохранено",
+        },
+        ["UserReport.ExcelSpreadsheet.StatusUnsaved"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unsaved changes",
+            ["tr-TR"] = "Kaydedilmemiş değişiklikler",
+            ["tk-TM"] = "Ýazdyrylmadyk üýtgeşmeler",
+            ["ru-RU"] = "Несохранённые изменения",
+        },
+        ["UserReport.ExcelSpreadsheet.UnsavedCloseWarning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The Spreadsheet tab has unsaved changes. Save to template or reload before leaving.",
+            ["tr-TR"] = "Elektron tablo sekmesinde kaydedilmemiş değişiklikler var. Ayrılmadan önce şablona kaydedin veya yeniden yükleyin.",
+            ["tk-TM"] = "Elektron tablisa sekme-de ýazdyrylmadyk üýtgeşmeler bar. Çykmazdan öň şablona ýazyň ýa-da täzeden ýükläň.",
+            ["ru-RU"] = "На вкладке таблицы есть несохранённые изменения. Сохраните в шаблон или перезагрузите перед выходом.",
+        },
         ["UserReport.ExtractedPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Extracted {0} placeholder(s). Run validation to check against BO properties.",

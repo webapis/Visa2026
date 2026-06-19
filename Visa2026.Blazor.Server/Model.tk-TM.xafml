@@ -235,6 +235,18 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Hasabat şablony">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Main">
+            <LayoutGroup Id="UserReportTemplateTabs">
+              <LayoutGroup Id="UserReportTemplateGeneral" Caption="Umumy" />
+              <LayoutGroup Id="UserReportTemplateSpreadsheetTab" Caption="Elektron tablisa" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
   </Views>
   <NavigationItems>
     <Items>

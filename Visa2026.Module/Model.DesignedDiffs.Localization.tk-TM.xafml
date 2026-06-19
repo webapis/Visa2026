@@ -2889,7 +2889,18 @@
         <ColumnInfo Id="ViewId" Caption="Görnüş" />
       </Columns>
     </ListView>
-    <DetailView Id="UserReportTemplate_DetailView" Caption="Hasabat şablony" />
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Hasabat şablony">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Main">
+            <LayoutGroup Id="UserReportTemplateTabs">
+              <LayoutGroup Id="UserReportTemplateGeneral" Caption="Umumy" />
+              <LayoutGroup Id="UserReportTemplateSpreadsheetTab" Caption="Elektron tablisa" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="UserReportTemplate_ListView" Caption="Hasabat şablonlary" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Möhleti" />
     <ListView Id="ValidityDuration_ListView" Caption="Möhletler" />

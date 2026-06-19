@@ -2889,7 +2889,18 @@
         <ColumnInfo Id="ViewId" Caption="Представление" />
       </Columns>
     </ListView>
-    <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта" />
+    <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Main">
+            <LayoutGroup Id="UserReportTemplateTabs">
+              <LayoutGroup Id="UserReportTemplateGeneral" Caption="Общие" />
+              <LayoutGroup Id="UserReportTemplateSpreadsheetTab" Caption="Таблица" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="UserReportTemplate_ListView" Caption="Шаблоны отчётов" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Срок действия" />
     <ListView Id="ValidityDuration_ListView" Caption="Сроки действия" />

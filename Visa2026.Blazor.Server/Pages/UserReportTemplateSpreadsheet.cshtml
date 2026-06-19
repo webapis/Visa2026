@@ -1,0 +1,77 @@
+@page "/user-report-template-spreadsheet/{templateId:guid}"
+@model Visa2026.Blazor.Server.Pages.UserReportTemplateSpreadsheetModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    Layout = null;
+    var tokens = Antiforgery.GetAndStoreTokens(HttpContext);
+    var spreadsheet = Model.Spreadsheet;
+}
+<!DOCTYPE html>
+<html lang="en" class="@(spreadsheet.HideToolbar ? "urt-spreadsheet-html--embed" : null)">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@spreadsheet.FileName</title>
+    <link href="~/node_modules/devextreme-dist/css/dx.light.css" rel="stylesheet" />
+    <link href="~/node_modules/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.css" rel="stylesheet" />
+    <link href="~/css/user-report-template-spreadsheet.css" rel="stylesheet" asp-append-version="true" />
+    <script src="~/node_modules/devextreme-dist/js/dx.all.js"></script>
+    <script src="~/node_modules/devexpress-aspnetcore-spreadsheet/dist/dx-aspnetcore-spreadsheet.js"></script>
+    <script src="~/js/user-report-template-spreadsheet.js" asp-append-version="true"></script>
+    <script>
+        window.__urtSpreadsheetPageConfig = {
+            antiforgeryToken: "@tokens.RequestToken",
+            saveUrl: "@spreadsheet.SaveUrl",
+            reloadUrl: "@spreadsheet.ReloadUrl",
+            templateId: "@spreadsheet.TemplateId",
+            statusSaved: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(spreadsheet.StatusSavedText)),
+            statusUnsaved: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(spreadsheet.StatusUnsavedText)),
+            saveSuccess: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(spreadsheet.SaveSuccessMessage)),
+            saveFailed: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(spreadsheet.SaveFailedMessage)),
+            reloadConfirm: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(spreadsheet.ReloadConfirmMessage)),
+            canEdit: @(spreadsheet.CanEdit ? "true" : "false")
+        };
+    </script>
+</head>
+<body class="urt-spreadsheet-page@(spreadsheet.HideToolbar ? " urt-spreadsheet-page--embed" : "")">
+    @if (!spreadsheet.HideToolbar)
+    {
+        <div class="urt-spreadsheet-toolbar">
+            <div class="urt-spreadsheet-toolbar__left">
+                @if (spreadsheet.CanEdit)
+                {
+                    <button type="button" id="urt-spreadsheet-save" class="urt-spreadsheet-btn urt-spreadsheet-btn--primary">@spreadsheet.SaveButtonText</button>
+                }
+                <button type="button" id="urt-spreadsheet-reload" class="urt-spreadsheet-btn">@spreadsheet.ReloadButtonText</button>
+                @if (!spreadsheet.CanEdit)
+                {
+                    <span class="urt-spreadsheet-badge urt-spreadsheet-badge--readonly">@spreadsheet.ReadOnlyText</span>
+                }
+            </div>
+            <div class="urt-spreadsheet-toolbar__right">
+                <span id="urt-spreadsheet-status" class="urt-spreadsheet-status urt-spreadsheet-status--saved">@spreadsheet.StatusSavedText</span>
+            </div>
+        </div>
+    }
+
+    @if (!spreadsheet.HasContent)
+    {
+        <div class="urt-spreadsheet-empty">@spreadsheet.NoFileText</div>
+    }
+    else
+    {
+        <div class="urt-spreadsheet-host">
+            @(Html.DevExpress().Spreadsheet("urtSpreadsheet")
+                .Height("100%")
+                .Width("100%")
+                .ReadOnly(!spreadsheet.CanEdit)
+                .DocumentRequestHandlerUrl(Url.Page(pageName: null, pageHandler: "DxSpreadsheetRequest"))
+                .Open(spreadsheet.DocumentId, DocumentFormat.Xlsx, spreadsheet.ContentAccessor)
+                .ClientSideEvents(events => events
+                    .OnBeforeSend("urtSpreadsheet_onBeforeSend")
+                    .OnInit("urtSpreadsheet_onInit")
+                    .OnDocumentChanged("urtSpreadsheet_onDocumentChanged")))
+        </div>
+    }
+</body>
+</html>

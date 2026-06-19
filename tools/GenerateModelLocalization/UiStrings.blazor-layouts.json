@@ -78,6 +78,17 @@
       "layoutGroups": {
         "WorkPermitItemPermittedCity": { "tr-TR": "İzin Verilen Şehir", "tk-TM": "Rugsat berlen şäher", "ru-RU": "Разрешённый город" }
       }
+    },
+    "UserReportTemplate_DetailView": {
+      "nestedLayoutGroups": [
+        {
+          "path": ["Main", "UserReportTemplateTabs"],
+          "groups": {
+            "UserReportTemplateGeneral": { "en-US": "General", "tr-TR": "Genel", "tk-TM": "Umumy", "ru-RU": "Общие" },
+            "UserReportTemplateSpreadsheetTab": { "en-US": "Spreadsheet", "tr-TR": "Elektron Tablo", "tk-TM": "Elektron tablisa", "ru-RU": "Таблица" }
+          }
+        }
+      ]
     }
   },
   "detailViewsWithHostLayout": [
@@ -100,6 +111,7 @@
     "Rejection_DetailView",
     "WorkPermit_DetailView",
     "WorkPermitItem_DetailView",
-    "WorkPermitItemPermittedCity_DetailView"
+    "WorkPermitItemPermittedCity_DetailView",
+    "UserReportTemplate_DetailView"
   ]
 }

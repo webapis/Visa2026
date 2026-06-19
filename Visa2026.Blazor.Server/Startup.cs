@@ -1,4 +1,6 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+﻿using DevExpress.AspNetCore;
+using DevExpress.ExpressApp.ApplicationBuilder;
+using Microsoft.Extensions.FileProviders;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -58,6 +60,25 @@ namespace Visa2026.Blazor.Server
             services.AddServerSideBlazor();
             services.AddHttpClient();
             services.AddHttpContextAccessor();
+            services.AddDevExpressControls(options =>
+            {
+                options.AddSpreadsheet(spreadsheetOptions =>
+                {
+                    spreadsheetOptions.AddHibernation(hibernationOptions =>
+                    {
+                        var storagePath = Path.Combine(AppContext.BaseDirectory, "App_Data", "SpreadsheetHibernation");
+                        Directory.CreateDirectory(storagePath);
+                        hibernationOptions.StoragePath = storagePath;
+                        hibernationOptions.Timeout = TimeSpan.FromMinutes(20);
+                        hibernationOptions.DocumentsDisposeTimeout = TimeSpan.FromDays(1);
+                        hibernationOptions.AllDocumentsOnApplicationEnd = true;
+                    });
+                });
+            });
+            services.AddScoped<UserReportTemplateSpreadsheetHttpAccess>();
+            services.AddScoped<UserReportTemplateSpreadsheetFileService>();
+            services.AddSingleton<UserReportTemplateSpreadsheetSessionService>();
+            services.AddSingleton<UserReportTemplateSpreadsheetDirtyTracker>();
             services.AddVisaApplicationRuntimeLogging(Configuration);
             services.AddVisaSentry(Configuration);
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
@@ -284,6 +305,15 @@ namespace Visa2026.Blazor.Server
                 app.UseHttpsRedirection();
             VisaLocalization.UseVisaRequestLocalization(app);
             app.UseStaticFiles();
+            var nodeModulesPath = Path.Combine(env.ContentRootPath, "node_modules");
+            if (Directory.Exists(nodeModulesPath))
+            {
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(nodeModulesPath),
+                    RequestPath = "/node_modules"
+                });
+            }
             app.UseODataBatching();
             app.UseRouting();
             app.UseSentryTracing();
@@ -297,6 +327,7 @@ namespace Visa2026.Blazor.Server
             app.UseAuthorization();
             app.UseAntiforgery();
             app.UseXaf();
+            app.UseDevExpressControls();
 
             // Redirect root "/" to the login page
             app.Use(async (context, next) =>
@@ -311,6 +342,7 @@ namespace Visa2026.Blazor.Server
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapXafEndpoints();
                 endpoints.MapBlazorHub();
                 endpoints.MapHub<ApplicationRuntimeLogHub>(ApplicationRuntimeLogHubPaths.Route);

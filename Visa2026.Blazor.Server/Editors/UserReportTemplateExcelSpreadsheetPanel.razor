@@ -1,0 +1,226 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+
+<div class="user-report-template-spreadsheet-panel" @ref="_panelRef">
+    @if (!IsExcelTemplate || TemplateId == Guid.Empty)
+    {
+        <div class="urt-spreadsheet-empty">@NoEditorText</div>
+    }
+    else
+    {
+        <div class="urt-spreadsheet-panel-toolbar" role="toolbar" aria-label="Excel template editor">
+            <div class="urt-spreadsheet-panel-toolbar__left">
+                @if (CanEdit)
+                {
+                    <button type="button"
+                            class="urt-spreadsheet-btn urt-spreadsheet-btn--primary"
+                            @onclick="RequestSaveAsync">
+                        @SaveButtonText
+                    </button>
+                }
+                <button type="button"
+                        class="urt-spreadsheet-btn"
+                        @onclick="RequestReloadAsync">
+                    @ReloadButtonText
+                </button>
+                @if (!CanEdit)
+                {
+                    <span class="urt-spreadsheet-badge urt-spreadsheet-badge--readonly">@ReadOnlyText</span>
+                }
+            </div>
+            <div class="urt-spreadsheet-panel-toolbar__right">
+                <span class="urt-spreadsheet-panel-status @_statusCssClass">@_statusText</span>
+            </div>
+        </div>
+        <iframe class="user-report-template-spreadsheet-panel__iframe"
+                data-src="@_iframeSrc"
+                title="@IframeTitle"
+                @ref="_iframeRef"></iframe>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid TemplateId { get; set; }
+
+    [Parameter] public bool IsExcelTemplate { get; set; }
+
+    [Parameter] public string SpreadsheetUrl { get; set; } = string.Empty;
+
+    [Parameter] public bool CanEdit { get; set; }
+
+    [Parameter] public string SaveButtonText { get; set; } = "Save to template";
+
+    [Parameter] public string ReloadButtonText { get; set; } = "Reload from database";
+
+    [Parameter] public string StatusSavedText { get; set; } = "Saved";
+
+    [Parameter] public string StatusUnsavedText { get; set; } = "Unsaved changes";
+
+    [Parameter] public string ReadOnlyText { get; set; } = "Read-only";
+
+    [Parameter] public string ReloadConfirmMessage { get; set; } = "Reload and discard unsaved changes?";
+
+    [Parameter] public EventCallback<string> ShowMessageRequested { get; set; }
+
+    [Parameter] public EventCallback<bool> DirtyStateChanged { get; set; }
+
+    private ElementReference _panelRef;
+    private ElementReference _iframeRef;
+    private DotNetObjectReference<UserReportTemplateExcelSpreadsheetPanel> _dotNetRef = null!;
+    private IJSObjectReference _listenerModule = null!;
+    private Guid _loadedTemplateId;
+    private string _iframeSrc = "about:blank";
+    private bool _panelAttached;
+    private bool _isDirty;
+    private string _statusText = "Saved";
+    private string _statusCssClass = "urt-spreadsheet-panel-status--saved";
+
+    private string IframeTitle => "Excel template editor";
+    private string NoEditorText => "Spreadsheet editor is available for Excel templates only.";
+
+    protected override void OnParametersSet()
+    {
+        if (TemplateId != _loadedTemplateId)
+        {
+            _loadedTemplateId = TemplateId;
+            _panelAttached = false;
+            _isDirty = false;
+            _statusText = StatusSavedText;
+            _statusCssClass = "urt-spreadsheet-panel-status--saved";
+            _iframeSrc = IsExcelTemplate && TemplateId != Guid.Empty && !string.IsNullOrWhiteSpace(SpreadsheetUrl)
+                ? BuildIframeUrl()
+                : "about:blank";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!IsExcelTemplate || TemplateId == Guid.Empty)
+            return;
+
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            _listenerModule = await JS.InvokeAsync<IJSObjectReference>(
+                "import",
+                "./js/user-report-template-spreadsheet-host.js");
+            await _listenerModule.InvokeVoidAsync("attachHostListener", _dotNetRef);
+        }
+
+        if (_listenerModule != null && !_panelAttached)
+        {
+            _panelAttached = true;
+            await _listenerModule.InvokeVoidAsync(
+                "attachSpreadsheetPanel",
+                _panelRef,
+                _iframeRef,
+                _iframeSrc);
+        }
+    }
+
+    private string BuildIframeUrl(bool reloadFromDatabase = false)
+    {
+        if (string.IsNullOrWhiteSpace(SpreadsheetUrl))
+            return "about:blank";
+
+        var separator = SpreadsheetUrl.Contains('?', StringComparison.Ordinal) ? '&' : '?';
+        var reloadPart = reloadFromDatabase ? "reload=true&" : string.Empty;
+        var cacheToken = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        return $"{SpreadsheetUrl}{separator}{reloadPart}_={cacheToken}";
+    }
+
+    private async Task RequestSaveAsync()
+    {
+        if (_listenerModule == null || !CanEdit)
+            return;
+
+        await _listenerModule.InvokeVoidAsync("postToSpreadsheetIframe", _iframeRef, "urt-spreadsheet-resize");
+        await _listenerModule.InvokeVoidAsync("postToSpreadsheetIframe", _iframeRef, "urt-spreadsheet-save-request");
+    }
+
+    private async Task RequestReloadAsync()
+    {
+        if (_isDirty)
+        {
+            var confirmed = await JS.InvokeAsync<bool>("confirm", ReloadConfirmMessage);
+            if (!confirmed)
+                return;
+        }
+
+        _isDirty = false;
+        SetSavedStatus();
+        _iframeSrc = BuildIframeUrl(reloadFromDatabase: true);
+
+        if (_listenerModule != null)
+        {
+            await _listenerModule.InvokeVoidAsync(
+                "reloadSpreadsheetIframe",
+                _iframeRef,
+                _iframeSrc);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SetSavedStatus()
+    {
+        _statusText = StatusSavedText;
+        _statusCssClass = "urt-spreadsheet-panel-status--saved";
+    }
+
+    private void SetUnsavedStatus()
+    {
+        _statusText = StatusUnsavedText;
+        _statusCssClass = "urt-spreadsheet-panel-status--unsaved";
+    }
+
+    [JSInvokable]
+    public async Task OnSpreadsheetMessageAsync(string type, string message, bool dirty)
+    {
+        switch (type)
+        {
+            case "urt-spreadsheet-saved":
+                _isDirty = false;
+                SetSavedStatus();
+                if (!string.IsNullOrWhiteSpace(message))
+                    await ShowMessageRequested.InvokeAsync(message);
+                await DirtyStateChanged.InvokeAsync(false);
+                break;
+            case "urt-spreadsheet-error":
+                if (!string.IsNullOrWhiteSpace(message))
+                    await ShowMessageRequested.InvokeAsync(message);
+                break;
+            case "urt-spreadsheet-dirty":
+                _isDirty = dirty;
+                if (dirty)
+                    SetUnsavedStatus();
+                else
+                    SetSavedStatus();
+                await DirtyStateChanged.InvokeAsync(dirty);
+                break;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_listenerModule != null)
+        {
+            try
+            {
+                await _listenerModule.InvokeVoidAsync("detachHostListener");
+                await _listenerModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+
+        _dotNetRef?.Dispose();
+    }
+
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+}

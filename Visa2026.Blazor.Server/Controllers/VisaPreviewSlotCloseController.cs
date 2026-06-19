@@ -10,9 +10,19 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// </summary>
 public sealed class VisaPreviewSlotCloseController : ViewController
 {
+    private IVisaPreviewSlotService? _slotService;
+
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        _slotService = TryGetService<IVisaPreviewSlotService>();
+    }
+
     protected override void OnDeactivated()
     {
-        var slotService = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+        var slotService = _slotService;
+        _slotService = null;
+
         var state = slotService?.State;
         var ownerViewId = VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
 
@@ -25,5 +35,17 @@ public sealed class VisaPreviewSlotCloseController : ViewController
         }
 
         base.OnDeactivated();
+    }
+
+    private T? TryGetService<T>() where T : class
+    {
+        try
+        {
+            return Application?.ServiceProvider?.GetService<T>();
+        }
+        catch (ObjectDisposedException)
+        {
+            return null;
+        }
     }
 }

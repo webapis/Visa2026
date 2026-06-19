@@ -1335,5 +1335,42 @@
         <ColumnInfo Id="IsCancelled" Index="-1" />
       </Columns>
     </ListView>
+    <DetailView Id="UserReportTemplate_DetailView">
+      <Items>
+        <PropertyEditor Id="ExcelSpreadsheetHost" PropertyName="ExcelSpreadsheetHost" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <TabbedGroup Id="UserReportTemplateTabs" CaptionLocation="Top" RelativeSize="100">
+            <LayoutGroup Id="UserReportTemplateGeneral" Caption="General" ShowCaption="True" Index="0" RelativeSize="100">
+              <LayoutGroup Id="SimpleEditors" RelativeSize="35">
+                <LayoutGroup Id="UserReportTemplate" Direction="Horizontal" RelativeSize="100">
+                  <LayoutGroup Id="UserReportTemplate_col1" RelativeSize="50">
+                    <LayoutItem Id="TemplateName" RelativeSize="15" />
+                    <LayoutItem Id="Description" RelativeSize="15" />
+                    <LayoutItem Id="TemplateOutputFormat" RelativeSize="10" />
+                    <LayoutItem Id="ExcelMergeMode" RelativeSize="10" />
+                    <LayoutItem Id="RootBoType" RelativeSize="10" />
+                    <LayoutItem Id="ValidationStatus" RelativeSize="10" />
+                    <LayoutItem Id="IsActive" RelativeSize="10" />
+                    <LayoutItem Id="SortOrder" RelativeSize="10" />
+                  </LayoutGroup>
+                  <LayoutGroup Id="UserReportTemplate_col2" RelativeSize="50">
+                    <LayoutItem Id="TemplateFile" RelativeSize="25" />
+                    <LayoutItem Id="VisibilityCriteria" RelativeSize="25" />
+                    <LayoutItem Id="ApplicableTypeLinks" RelativeSize="25" />
+                    <LayoutItem Id="ApplicableProjectContractLinks" RelativeSize="25" />
+                  </LayoutGroup>
+                </LayoutGroup>
+              </LayoutGroup>
+              <LayoutItem Id="Placeholders" RelativeSize="65" />
+            </LayoutGroup>
+            <LayoutGroup Id="UserReportTemplateSpreadsheetTab" Caption="Spreadsheet" ShowCaption="True" Index="1" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="ExcelSpreadsheetHost" ShowCaption="False" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
   </Views>
 </Application>
