@@ -17,6 +17,21 @@ public static class UserThemeHelper
     static readonly TimeSpan ApplyRetryDelay = TimeSpan.FromMilliseconds(100);
 
     static int applyDepth;
+    static int suppressPersistDepth;
+
+    /// <summary>
+    /// Blocks persist while the main window attaches theme handlers and before stored theme is applied.
+    /// Prevents startup default theme from overwriting saved preferences (timing-sensitive on IIS).
+    /// </summary>
+    public static void SuppressPersist() => Interlocked.Increment(ref suppressPersistDepth);
+
+    public static void AllowPersist()
+    {
+        if (Interlocked.Decrement(ref suppressPersistDepth) < 0)
+        {
+            Interlocked.Increment(ref suppressPersistDepth);
+        }
+    }
 
     public static async Task ApplyStoredThemeAfterLogonAsync(BlazorApplication application)
     {
@@ -35,27 +50,27 @@ public static class UserThemeHelper
             return;
         }
 
-        for (int attempt = 0; attempt < ApplyRetryCount; attempt++)
+        applyDepth++;
+        try
         {
-            IServiceProvider services = application.ServiceProvider;
-            IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
-            IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
-
-            if (themeService?.CurrentTheme == null)
+            for (int attempt = 0; attempt < ApplyRetryCount; attempt++)
             {
-                await Task.Delay(ApplyRetryDelay).ConfigureAwait(false);
-                continue;
-            }
+                IServiceProvider services = application.ServiceProvider;
+                IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
+                IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
 
-            if (!string.IsNullOrWhiteSpace(themeCaption)
-                && ThemeAlreadyMatchesStored(themeService, sizeModeService, themeCaption, themeMode, sizeMode))
-            {
-                return;
-            }
+                if (themeService?.CurrentTheme == null)
+                {
+                    await Task.Delay(ApplyRetryDelay).ConfigureAwait(false);
+                    continue;
+                }
 
-            applyDepth++;
-            try
-            {
+                if (!string.IsNullOrWhiteSpace(themeCaption)
+                    && ThemeAlreadyMatchesStored(themeService, sizeModeService, themeCaption, themeMode, sizeMode))
+                {
+                    return;
+                }
+
                 await ApplyThemeStateAsync(themeService, sizeModeService, themeCaption, themeMode, sizeMode)
                     .ConfigureAwait(false);
 
@@ -64,19 +79,19 @@ public static class UserThemeHelper
                 {
                     return;
                 }
-            }
-            finally
-            {
-                applyDepth--;
-            }
 
-            await Task.Delay(ApplyRetryDelay).ConfigureAwait(false);
+                await Task.Delay(ApplyRetryDelay).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            applyDepth--;
         }
     }
 
     public static void PersistCurrentThemeToUser(XafApplication application)
     {
-        if (applyDepth > 0 || SecuritySystem.CurrentUser is not ApplicationUser user)
+        if (suppressPersistDepth > 0 || applyDepth > 0 || SecuritySystem.CurrentUser is not ApplicationUser user)
         {
             return;
         }
@@ -95,6 +110,11 @@ public static class UserThemeHelper
             SizeMode.Medium => "Standard",
             _ => null
         };
+
+        if (string.IsNullOrWhiteSpace(currentCaption) && string.IsNullOrWhiteSpace(currentMode) && string.IsNullOrWhiteSpace(currentSizeMode))
+        {
+            return;
+        }
 
         using IObjectSpace objectSpace = CreateUserObjectSpace(application);
         ApplicationUser userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
@@ -239,6 +259,12 @@ public static class UserThemeHelper
         if (IsClassicTheme(theme))
         {
             return theme.Caption;
+        }
+
+        DxThemeFluent? fluent = themeService.CurrentFluentTheme;
+        if (fluent != null)
+        {
+            return FormatFluentAccentCaption(fluent.AccentColor);
         }
 
         return FormatFluentAccentCaption(theme.AccentColor);

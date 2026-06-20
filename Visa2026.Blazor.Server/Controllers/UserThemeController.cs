@@ -27,6 +27,7 @@ public sealed class UserThemeController : WindowController
         base.OnActivated();
         AttachLoggedOnHandler();
         AttachLoggingOffHandler();
+        UserThemeHelper.SuppressPersist();
         AttachThemeHandlers();
         ApplyStoredThemeOnMainWindowActivated();
     }
@@ -44,6 +45,7 @@ public sealed class UserThemeController : WindowController
     {
         if (Application is not BlazorApplication blazorApplication)
         {
+            UserThemeHelper.AllowPersist();
             return;
         }
 
@@ -59,6 +61,10 @@ public sealed class UserThemeController : WindowController
         catch
         {
             // Theme apply may fail if the circuit is tearing down; ignore.
+        }
+        finally
+        {
+            UserThemeHelper.AllowPersist();
         }
     }
 
@@ -153,10 +159,13 @@ public sealed class UserThemeController : WindowController
 
     async void Application_LoggedOn(object sender, LogonEventArgs e)
     {
-        if (Application is BlazorApplication blazorApplication)
+        if (Application is not BlazorApplication blazorApplication)
         {
-            await ApplyStoredThemeSafeAsync(blazorApplication).ConfigureAwait(false);
+            return;
         }
+
+        UserThemeHelper.SuppressPersist();
+        await ApplyStoredThemeSafeAsync(blazorApplication).ConfigureAwait(false);
     }
 
     void Application_LoggingOff(object sender, LoggingOffEventArgs e) =>
