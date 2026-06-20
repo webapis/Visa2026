@@ -42,25 +42,36 @@ public static class UserThemeHelper
             return;
         }
 
+        IServiceProvider services = application.ServiceProvider;
+        IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
+        IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
+
+        if (themeService != null
+            && !string.IsNullOrWhiteSpace(themeCaption)
+            && ThemeAlreadyMatchesStored(themeService, sizeModeService, themeCaption, themeMode, sizeMode))
+        {
+            return;
+        }
+
         applyDepth++;
         try
         {
-            IServiceProvider services = application.ServiceProvider;
-            IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
-            IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
-
             if (!string.IsNullOrWhiteSpace(themeCaption) && themeService != null)
             {
                 Theme? theme = themeService.GetThemeByCaption(themeCaption);
+                theme ??= TryResolveFluentTheme(themeService, themeCaption);
+
                 if (theme != null)
                 {
                     await themeService.SetCurrentThemeAsync(theme).ConfigureAwait(false);
 
                     if (TryParseThemeMode(themeMode, out ThemeMode parsedMode))
                     {
+                        ThemeFluentAccentColor accent = TryParseFluentAccentFromCaption(themeCaption)
+                            ?? theme.AccentColor;
                         await themeService.SetCurrentFluentThemeAsync(
                             parsedMode,
-                            theme.AccentColor,
+                            accent,
                             themeCaption).ConfigureAwait(false);
                     }
                 }
@@ -90,9 +101,8 @@ public static class UserThemeHelper
         IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
         IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
 
-        Theme? currentTheme = themeService?.CurrentTheme;
-        string? currentCaption = currentTheme?.Caption;
-        string? currentMode = IsClassicTheme(currentTheme)
+        string? currentCaption = GetPersistedThemeCaption(themeService);
+        string? currentMode = IsClassicTheme(themeService?.CurrentTheme)
             ? null
             : FormatThemeMode(themeService?.CurrentFluentTheme?.Mode);
         string? currentSizeMode = sizeModeService?.SizeMode switch
@@ -120,6 +130,88 @@ public static class UserThemeHelper
         userInOs.PreferredThemeMode = currentMode;
         userInOs.PreferredSizeMode = currentSizeMode;
         objectSpace.CommitChanges();
+    }
+
+    static bool ThemeAlreadyMatchesStored(
+        IThemeService themeService,
+        IXafSizeModeService? sizeModeService,
+        string themeCaption,
+        string? themeMode,
+        string? sizeMode)
+    {
+        if (!string.Equals(GetPersistedThemeCaption(themeService), themeCaption, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (!IsClassicTheme(themeService.CurrentTheme))
+        {
+            string? currentMode = FormatThemeMode(themeService.CurrentFluentTheme?.Mode);
+            if (!string.Equals(currentMode, themeMode, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(sizeMode))
+        {
+            return true;
+        }
+
+        string? currentSizeMode = sizeModeService?.SizeMode switch
+        {
+            SizeMode.Small => "Compact",
+            SizeMode.Medium => "Standard",
+            _ => null
+        };
+        return string.Equals(currentSizeMode, sizeMode, StringComparison.OrdinalIgnoreCase);
+    }
+
+    static string? GetPersistedThemeCaption(IThemeService? themeService)
+    {
+        Theme? theme = themeService?.CurrentTheme;
+        if (theme == null)
+        {
+            return null;
+        }
+
+        if (IsClassicTheme(theme))
+        {
+            return theme.Caption;
+        }
+
+        return FormatFluentAccentCaption(theme.AccentColor);
+    }
+
+    static Theme? TryResolveFluentTheme(IThemeService themeService, string themeCaption)
+    {
+        ThemeFluentAccentColor? accent = TryParseFluentAccentFromCaption(themeCaption);
+        if (accent == null)
+        {
+            return null;
+        }
+
+        return themeService.GetThemeByCaption(themeCaption)
+            ?? themeService.GetThemeByCaption("DevExpress Fluent");
+    }
+
+    static string FormatFluentAccentCaption(ThemeFluentAccentColor accent) =>
+        accent switch
+        {
+            ThemeFluentAccentColor.CoolBlue => "Cool Blue",
+            _ => accent.ToString()
+        };
+
+    static ThemeFluentAccentColor? TryParseFluentAccentFromCaption(string caption)
+    {
+        if (string.Equals(caption, "Cool Blue", StringComparison.OrdinalIgnoreCase))
+        {
+            return ThemeFluentAccentColor.CoolBlue;
+        }
+
+        return Enum.TryParse(caption, true, out ThemeFluentAccentColor parsed)
+            ? parsed
+            : null;
     }
 
     static bool IsClassicTheme(Theme? theme) =>

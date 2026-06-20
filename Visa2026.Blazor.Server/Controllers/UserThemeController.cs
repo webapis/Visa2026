@@ -14,6 +14,7 @@ public sealed class UserThemeController : WindowController
     IThemeService? themeService;
     IXafSizeModeService? sizeModeService;
     bool loggedOnHandlerAttached;
+    bool loggingOffHandlerAttached;
     bool themeHandlersAttached;
 
     public UserThemeController()
@@ -25,14 +26,40 @@ public sealed class UserThemeController : WindowController
     {
         base.OnActivated();
         AttachLoggedOnHandler();
+        AttachLoggingOffHandler();
         AttachThemeHandlers();
+        ApplyStoredThemeOnMainWindowActivated();
     }
 
     protected override void OnDeactivated()
     {
+        UserThemeHelper.PersistCurrentThemeToUser(Application);
         DetachThemeHandlers();
+        DetachLoggingOffHandler();
         DetachLoggedOnHandler();
         base.OnDeactivated();
+    }
+
+    void ApplyStoredThemeOnMainWindowActivated()
+    {
+        if (Application is not BlazorApplication blazorApplication)
+        {
+            return;
+        }
+
+        _ = ApplyStoredThemeSafeAsync(blazorApplication);
+    }
+
+    static async Task ApplyStoredThemeSafeAsync(BlazorApplication blazorApplication)
+    {
+        try
+        {
+            await UserThemeHelper.ApplyStoredThemeAfterLogonAsync(blazorApplication).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Theme apply may fail if the circuit is tearing down; ignore.
+        }
     }
 
     void AttachLoggedOnHandler()
@@ -55,6 +82,28 @@ public sealed class UserThemeController : WindowController
 
         Application.LoggedOn -= Application_LoggedOn;
         loggedOnHandlerAttached = false;
+    }
+
+    void AttachLoggingOffHandler()
+    {
+        if (loggingOffHandlerAttached)
+        {
+            return;
+        }
+
+        Application.LoggingOff += Application_LoggingOff;
+        loggingOffHandlerAttached = true;
+    }
+
+    void DetachLoggingOffHandler()
+    {
+        if (!loggingOffHandlerAttached)
+        {
+            return;
+        }
+
+        Application.LoggingOff -= Application_LoggingOff;
+        loggingOffHandlerAttached = false;
     }
 
     void AttachThemeHandlers()
@@ -104,20 +153,14 @@ public sealed class UserThemeController : WindowController
 
     async void Application_LoggedOn(object sender, LogonEventArgs e)
     {
-        if (Application is not BlazorApplication blazorApplication)
+        if (Application is BlazorApplication blazorApplication)
         {
-            return;
-        }
-
-        try
-        {
-            await UserThemeHelper.ApplyStoredThemeAfterLogonAsync(blazorApplication).ConfigureAwait(false);
-        }
-        catch
-        {
-            // Theme apply may fail if the circuit is tearing down; ignore.
+            await ApplyStoredThemeSafeAsync(blazorApplication).ConfigureAwait(false);
         }
     }
+
+    void Application_LoggingOff(object sender, LoggingOffEventArgs e) =>
+        UserThemeHelper.PersistCurrentThemeToUser(Application);
 
     void ThemeService_CurrentThemeChanged(object? sender, EventArgs e) =>
         UserThemeHelper.PersistCurrentThemeToUser(Application);
