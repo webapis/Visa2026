@@ -132,7 +132,10 @@ namespace Visa2026.Blazor.Server
                     var connectionString = Configuration.GetConnectionString("DefaultConnection")
                         ?? Configuration.GetConnectionString("ConnectionString");
                     if (!string.IsNullOrWhiteSpace(connectionString))
+                    {
                         ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
+                    }
                 });
                 builder.ObjectSpaceProviders
                     .AddSecuredEFCore()
