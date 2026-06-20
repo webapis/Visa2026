@@ -419,6 +419,11 @@ FodyWeavers.xsd
 agent-local/
 
 # Local-only env (secrets); use .env.*.example files in repo
+
+# Resminamalar desktop template edit staging (dev); keep README + .gitkeep
+Visa2026.Blazor.Server/TemplateEdit/*
+!Visa2026.Blazor.Server/TemplateEdit/README.md
+!Visa2026.Blazor.Server/TemplateEdit/.gitkeep
 .env.prod
 *.bak
 .env.dev

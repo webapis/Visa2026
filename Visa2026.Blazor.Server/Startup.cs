@@ -217,6 +217,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IExcelTemplatePlaceholderExtractor, ExcelTemplatePlaceholderExtractor>();
             services.AddScoped<IExcelReportValidationService, ExcelReportValidationService>();
             services.AddScoped<IExcelReportGenerator, ExcelReportGenerator>();
+            services.AddUserReportTemplateStaging(Configuration);
             services.AddHostedService<TempFileCleanupService>();
             services.AddHostedService<PdfGenerationBatchWorkerService>();
             services.AddHostedService<WordReportGenerationBatchWorkerService>();
@@ -248,6 +249,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationWordReportBatchEnqueueService>();
             services.AddSingleton<IWordReportBatchTrackNotifier, WordReportBatchTrackNotifier>();
             services.AddScoped<ApplicationWordReportPackageFileAccess>();
+            services.AddScoped<UserReportTemplateStagingUiService>();
             services.AddScoped<UserReportTemplateEditLinkService>();
             services.AddScoped<ApplicationWordReportPackageEnqueueService>();
         }

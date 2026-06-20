@@ -17,6 +17,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Set-ForceXafDbUpdate.ps1` | **` -Enable`** / **` -Disable`**: set or remove **`FORCE_XAF_DB_UPDATE`** in an env file (default **`.env.prod`**) and **`docker compose … up -d --force-recreate --no-deps app`** (omit recreate with **`-NoCompose`**). |
 | `Seed-DataYaml.ps1` | Run **`db-updater`** (imports bundled **`data.yaml`** by default, or **`-HostYamlPath`** to bind-mount another file). Requires **app + SQL** up; fresh DB: start **app** once so lookup catalogs sync first. |
 | `Run-DataImporter.ps1` | Interactive launcher for local `dotnet run --project Visa2026.DataImporter` (import / clear / sync / validate / prune) so you don’t need to remember flags. |
+| `Ensure-TemplateEditDevShare.ps1` | **Resminamalar template edit:** verify UNC share `\\127.0.0.1\Visa2026TemplateEdit` (or `-UncPath`). Staging is **UNC-only** — see `docs/TEMPLATE_STAGING_EDIT.md`. |
 | `Update-LocalDatabase.ps1` | **XAF `--updateDatabase`** on your PC (LocalDB, Docker dev, or custom connection) — **no login**, no browser. |
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. See [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md). |
 

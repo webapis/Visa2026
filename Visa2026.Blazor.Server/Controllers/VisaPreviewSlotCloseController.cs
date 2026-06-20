@@ -12,16 +12,23 @@ public sealed class VisaPreviewSlotCloseController : ViewController
 {
     protected override void OnDeactivated()
     {
-        var slotService = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
-        var state = slotService?.State;
-        var ownerViewId = VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
-
-        if (slotService != null
-            && state?.Mode != VisaPreviewSlotMode.Closed
-            && !string.IsNullOrEmpty(ownerViewId)
-            && string.Equals(state.OwnerViewId, ownerViewId, StringComparison.Ordinal))
+        try
         {
-            _ = slotService.CloseAsync();
+            var slotService = Application?.ServiceProvider?.GetService<IVisaPreviewSlotService>();
+            var state = slotService?.State;
+            var ownerViewId = VisaPreviewSlotViewHelper.ResolveOwnerViewId(View);
+
+            if (slotService != null
+                && state?.Mode != VisaPreviewSlotMode.Closed
+                && !string.IsNullOrEmpty(ownerViewId)
+                && string.Equals(state.OwnerViewId, ownerViewId, StringComparison.Ordinal))
+            {
+                _ = slotService.CloseAsync();
+            }
+        }
+        catch (ObjectDisposedException)
+        {
+            // Application scope may already be torn down during host shutdown.
         }
 
         base.OnDeactivated();

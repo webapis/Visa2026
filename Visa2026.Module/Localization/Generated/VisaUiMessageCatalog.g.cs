@@ -992,12 +992,54 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Şablony redaktirle",
             ["ru-RU"] = "Редактировать шаблон",
         },
+        ["ApplicationReportPackage.EditTemplate.CopyPath"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Copy path",
+            ["tr-TR"] = "Yolu kopyala",
+            ["tk-TM"] = "Ýoly göçür",
+            ["ru-RU"] = "Копировать путь",
+        },
+        ["ApplicationReportPackage.EditTemplate.ExportedOpenPath"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exported \"{0}\". Open in Word/Excel: {1}",
+            ["tr-TR"] = "\"{0}\" dışa aktarıldı. Word/Excel'de açın: {1}",
+            ["tk-TM"] = "\"{0}\" eksport edildi. Word/Excel-de açyň: {1}",
+            ["ru-RU"] = "Экспортирован «{0}». Откройте в Word/Excel: {1}",
+        },
+        ["ApplicationReportPackage.EditTemplate.ExportFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not export the template to the edit folder.",
+            ["tr-TR"] = "Şablon düzenleme klasörüne aktarılamadı.",
+            ["tk-TM"] = "Şablon redaktirleme papkasyna eksport edilmedi.",
+            ["ru-RU"] = "Не удалось экспортировать шаблон в папку редактирования.",
+        },
+        ["ApplicationReportPackage.EditTemplate.Exporting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exporting template…",
+            ["tr-TR"] = "Şablon dışa aktarılıyor…",
+            ["tk-TM"] = "Şablon eksport edilýär…",
+            ["ru-RU"] = "Экспорт шаблона…",
+        },
+        ["ApplicationReportPackage.EditTemplate.OnShare"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "On share",
+            ["tr-TR"] = "Paylaşımda",
+            ["tk-TM"] = "Paýlaşykda",
+            ["ru-RU"] = "На шаре",
+        },
+        ["ApplicationReportPackage.EditTemplate.PathCopied"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Path copied. Paste into Word File → Open if the document did not open: {0}",
+            ["tr-TR"] = "Yol kopyalandı. Belge açılmadıysa Word Dosya → Aç'a yapıştırın: {0}",
+            ["tk-TM"] = "Ýol göçürildi. Resminama açylmadyk bolsa Word Faýl → Aç-a goýuň: {0}",
+            ["ru-RU"] = "Путь скопирован. Если документ не открылся, вставьте в Word Файл → Открыть: {0}",
+        },
         ["ApplicationReportPackage.EditTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Opens the template in a new tab. After saving, return here and click Refresh.",
-            ["tr-TR"] = "Şablonu yeni sekmede açar. Kaydettikten sonra buraya dönüp Yenile'ye tıklayın.",
-            ["tk-TM"] = "Şablony täze goýmada açýar. Ýazdyranyňyzdan soň bu ýere gaýdyp Täzele basyň.",
-            ["ru-RU"] = "Открывает шаблон в новой вкладке. После сохранения вернитесь сюда и нажмите «Обновить».",
+            ["en-US"] = "Exports the template to the shared edit folder and opens it in Word or Excel. After saving, click Refresh.",
+            ["tr-TR"] = "Şablonu paylaşılan düzenleme klasörüne aktarır ve Word veya Excel'de açar. Kaydettikten sonra Yenile'ye tıklayın.",
+            ["tk-TM"] = "Şablony umumy redaktirleme papkasyna çykaryp, Word ýa-da Excel-de açýar. Ýazdyranyňyzdan soň Täzele basyň.",
+            ["ru-RU"] = "Экспортирует шаблон в общую папку редактирования и открывает в Word или Excel. После сохранения нажмите «Обновить».",
         },
         ["ApplicationReportPackage.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1237,6 +1279,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Täzele",
             ["ru-RU"] = "Обновить",
         },
+        ["ApplicationReportPackage.Refresh.FileLocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A template file is still open in Word or Excel. Close it and click Refresh again.",
+            ["tr-TR"] = "Bir şablon dosyası hâlâ Word veya Excel'de açık. Kapatıp Yenile'ye tekrar tıklayın.",
+            ["tk-TM"] = "Şablon faýly entek Word ýa-da Excel-de açyk. Ony ýapyp Täzele basyň.",
+            ["ru-RU"] = "Файл шаблона всё ещё открыт в Word или Excel. Закройте его и нажмите «Обновить» снова.",
+        },
+        ["ApplicationReportPackage.Refresh.ImportFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not import templates from the edit folder.",
+            ["tr-TR"] = "Düzenleme klasöründen şablonlar içe aktarılamadı.",
+            ["tk-TM"] = "Redaktirleme papkasyndan şablonlar import edilmedi.",
+            ["ru-RU"] = "Не удалось импортировать шаблоны из папки редактирования.",
+        },
+        ["ApplicationReportPackage.Refresh.Importing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Importing templates from the edit folder…",
+            ["tr-TR"] = "Düzenleme klasöründen şablonlar içe aktarılıyor…",
+            ["tk-TM"] = "Redaktirleme papkasyndan şablonlar import edilýär…",
+            ["ru-RU"] = "Импорт шаблонов из папки редактирования…",
+        },
+        ["ApplicationReportPackage.Refresh.ImportSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refresh: {0} imported, {1} unchanged, {2} failed.",
+            ["tr-TR"] = "Yenile: {0} içe aktarıldı, {1} değişmedi, {2} başarısız.",
+            ["tk-TM"] = "Täzele: {0} import edildi, {1} üýtgemedi, {2} şowsuz.",
+            ["ru-RU"] = "Обновить: {0} импортировано, {1} без изменений, {2} ошибок.",
+        },
         ["ApplicationReportPackage.SectionCustom"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Custom templates",
@@ -1271,6 +1341,34 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Başvuru {2} için {1} rapordan {0} tanesi seçildi (ZIP yalnızca işaretli satırları içerir).",
             ["tk-TM"] = "Arza {2} üçin {1} hasabatdan {0} saýlandy (ZIP diňe bellikli setirleri goýýar).",
             ["ru-RU"] = "Выбрано {0} из {1} отчёт(ов) для заявки {2} (ZIP только с отмеченными строками).",
+        },
+        ["ApplicationReportPackage.SyncTemplates"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sync to database",
+            ["tr-TR"] = "Veritabanına senkronize et",
+            ["tk-TM"] = "Maglumat bazasyna sinhronla",
+            ["ru-RU"] = "Синхронизировать с базой",
+        },
+        ["ApplicationReportPackage.SyncTemplates.FileLocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "A template file is still open in Word or Excel. Close it and click Sync to database again.",
+            ["tr-TR"] = "Bir şablon dosyası hâlâ Word veya Excel'de açık. Kapatıp Veritabanına senkronize et'e tekrar tıklayın.",
+            ["tk-TM"] = "Şablon faýly entek Word ýa-da Excel-de açyk. Ony ýapyp Maglumat bazasyna sinhronla basyň.",
+            ["ru-RU"] = "Файл шаблона всё ещё открыт в Word или Excel. Закройте его и нажмите «Синхронизировать с базой» снова.",
+        },
+        ["ApplicationReportPackage.SyncTemplates.ImportFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not import templates from the edit share.",
+            ["tr-TR"] = "Düzenleme paylaşımından şablonlar içe aktarılamadı.",
+            ["tk-TM"] = "Redaktirleme paýlaşygynan şablonlar import edilmedi.",
+            ["ru-RU"] = "Не удалось импортировать шаблоны из папки редактирования.",
+        },
+        ["ApplicationReportPackage.SyncTemplates.ImportSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sync: {0} imported, {1} unchanged, {2} failed.",
+            ["tr-TR"] = "Senkron: {0} içe aktarıldı, {1} değişmedi, {2} başarısız.",
+            ["tk-TM"] = "Sinhron: {0} import edildi, {1} üýtgemedi, {2} şowsuz.",
+            ["ru-RU"] = "Синхронизация: {0} импортировано, {1} без изменений, {2} ошибок.",
         },
         ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
