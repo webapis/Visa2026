@@ -81,6 +81,7 @@ $scriptFiles = @(
     "Run-Visa2026DbUpdateOnServer.ps1",
     "Set-Visa2026EnvDbName.ps1",
     "Remove-Visa2026ForceXafDbUpdate.ps1",
+    "Set-Visa2026ForceXafDbUpdate.ps1",
     "Get-Visa2026RecentIisErrors.ps1",
     "Test-Visa2026Startup.ps1",
     "Enable-Visa2026StdoutLog.ps1",
@@ -118,12 +119,8 @@ if ($LASTEXITCODE -ne 0) { throw "Set-Visa2026AppPoolEnvironment.ps1 failed (exi
 
 if ($EnableForceXafDbUpdate) {
     Write-Host "==> Enable FORCE_XAF_DB_UPDATE on $($ctx.AppPoolName)" -ForegroundColor Cyan
-    $forceCmd = @"
-`$appcmd = Join-Path `$env:Windir 'System32\inetsrv\appcmd.exe'
-& `$appcmd set config -section:system.applicationHost/applicationPools /-"[name='$($ctx.AppPoolName)'].environmentVariables.[name='FORCE_XAF_DB_UPDATE']" 2>`$null | Out-Null
-& `$appcmd set config -section:system.applicationHost/applicationPools /+"[name='$($ctx.AppPoolName)'].environmentVariables.[name='FORCE_XAF_DB_UPDATE',value='true']"
-"@
-    ssh $SshHost "powershell -NoProfile -Command `"$forceCmd`""
+    ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Set-Visa2026ForceXafDbUpdate.ps1 -Profile $Profile"
+    if ($LASTEXITCODE -ne 0) { throw "Set-Visa2026ForceXafDbUpdate.ps1 failed (exit $LASTEXITCODE)." }
 }
 
 if (-not $SkipDbUpdate) {

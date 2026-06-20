@@ -31,7 +31,15 @@ if ($LASTEXITCODE -ne 0) {
 
 $vars = Get-Content -Raw -LiteralPath $EnvJsonPath | ConvertFrom-Json
 
-# Remove existing environment variables for this pool
+# Preserve one-shot FORCE_XAF_DB_UPDATE; only Remove-Visa2026ForceXafDbUpdate.ps1 clears it.
+$preserveForceXaf = $false
+$forceCheck = & $appcmd list config -section:system.applicationHost/applicationPools `
+    /"[name='$AppPoolName'].environmentVariables.[name='FORCE_XAF_DB_UPDATE']" /text:value 2>$null
+if ($forceCheck -match 'true|1') {
+    $preserveForceXaf = $true
+}
+
+# Remove managed environment variables for this pool (not FORCE_XAF when preserved)
 & $appcmd list config -section:system.applicationHost/applicationPools /"[name='$AppPoolName'].environmentVariables.[name='ASPNETCORE_ENVIRONMENT']" 2>$null | Out-Null
 foreach ($prop in $vars.PSObject.Properties) {
     $name = $prop.Name
@@ -43,6 +51,17 @@ foreach ($prop in $vars.PSObject.Properties) {
     if ($LASTEXITCODE -ne 0) {
         throw "appcmd failed setting $name (exit $LASTEXITCODE)"
     }
+}
+
+if ($preserveForceXaf) {
+    & $appcmd set config -section:system.applicationHost/applicationPools `
+        /-"[name='$AppPoolName'].environmentVariables.[name='FORCE_XAF_DB_UPDATE']" 2>$null | Out-Null
+    & $appcmd set config -section:system.applicationHost/applicationPools `
+        /+"[name='$AppPoolName'].environmentVariables.[name='FORCE_XAF_DB_UPDATE',value='true']"
+    if ($LASTEXITCODE -ne 0) {
+        throw "appcmd failed re-applying FORCE_XAF_DB_UPDATE (exit $LASTEXITCODE)"
+    }
+    Write-Host "Preserved FORCE_XAF_DB_UPDATE=true on $AppPoolName." -ForegroundColor Yellow
 }
 
 Write-Host "App pool $AppPoolName environment variables set (appcmd)." -ForegroundColor Green
