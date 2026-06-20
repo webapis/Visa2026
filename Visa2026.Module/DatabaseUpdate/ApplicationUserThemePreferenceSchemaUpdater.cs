@@ -25,6 +25,7 @@ public sealed class ApplicationUserThemePreferenceSchemaUpdater : ModuleUpdater
     {
         base.UpdateDatabaseAfterUpdateSchema();
         ApplySchemaSql();
+        ApplicationUserThemePreferencePermissions.EnsureDefaultRoleSelfWrite(ObjectSpace);
     }
 
     void ApplySchemaSql()

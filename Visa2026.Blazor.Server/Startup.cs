@@ -270,6 +270,10 @@ namespace Visa2026.Blazor.Server
                 app.ApplicationServices,
                 app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(UserReportTemplateSeedGate)));
 
+            ApplicationUserThemePreferenceStartupGate.EnsureReady(
+                app.ApplicationServices,
+                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationUserThemePreferenceStartupGate)));
+
             bool easyTestHost = EasyTestHostMode.IsEnabled;
 
             if (env.IsDevelopment() || easyTestHost)

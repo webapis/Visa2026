@@ -2,6 +2,7 @@ using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Services;
+using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Security;
 using Visa2026.Module.BusinessObjects;
 
@@ -12,6 +13,9 @@ namespace Visa2026.Blazor.Server.Theming;
 /// </summary>
 public static class UserThemeHelper
 {
+    const int ApplyRetryCount = 20;
+    static readonly TimeSpan ApplyRetryDelay = TimeSpan.FromMilliseconds(100);
+
     static int applyDepth;
 
     public static async Task ApplyStoredThemeAfterLogonAsync(BlazorApplication application)
@@ -21,20 +25,9 @@ public static class UserThemeHelper
             return;
         }
 
-        string? themeCaption;
-        string? themeMode;
-        string? sizeMode;
-        using (IObjectSpace objectSpace = application.CreateObjectSpace(typeof(ApplicationUser)))
+        if (!TryLoadStoredPreferences(application, user.ID, out string? themeCaption, out string? themeMode, out string? sizeMode))
         {
-            ApplicationUser? storedUser = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
-            if (storedUser == null)
-            {
-                return;
-            }
-
-            themeCaption = storedUser.PreferredThemeCaption;
-            themeMode = storedUser.PreferredThemeMode;
-            sizeMode = storedUser.PreferredSizeMode;
+            return;
         }
 
         if (string.IsNullOrWhiteSpace(themeCaption) && string.IsNullOrWhiteSpace(sizeMode))
@@ -42,51 +35,42 @@ public static class UserThemeHelper
             return;
         }
 
-        IServiceProvider services = application.ServiceProvider;
-        IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
-        IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
-
-        if (themeService != null
-            && !string.IsNullOrWhiteSpace(themeCaption)
-            && ThemeAlreadyMatchesStored(themeService, sizeModeService, themeCaption, themeMode, sizeMode))
+        for (int attempt = 0; attempt < ApplyRetryCount; attempt++)
         {
-            return;
-        }
+            IServiceProvider services = application.ServiceProvider;
+            IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
+            IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
 
-        applyDepth++;
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(themeCaption) && themeService != null)
+            if (themeService?.CurrentTheme == null)
             {
-                Theme? theme = themeService.GetThemeByCaption(themeCaption);
-                theme ??= TryResolveFluentTheme(themeService, themeCaption);
+                await Task.Delay(ApplyRetryDelay).ConfigureAwait(false);
+                continue;
+            }
 
-                if (theme != null)
+            if (!string.IsNullOrWhiteSpace(themeCaption)
+                && ThemeAlreadyMatchesStored(themeService, sizeModeService, themeCaption, themeMode, sizeMode))
+            {
+                return;
+            }
+
+            applyDepth++;
+            try
+            {
+                await ApplyThemeStateAsync(themeService, sizeModeService, themeCaption, themeMode, sizeMode)
+                    .ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(themeCaption)
+                    || ThemeAlreadyMatchesStored(themeService, sizeModeService, themeCaption, themeMode, sizeMode))
                 {
-                    await themeService.SetCurrentThemeAsync(theme).ConfigureAwait(false);
-
-                    if (TryParseThemeMode(themeMode, out ThemeMode parsedMode))
-                    {
-                        ThemeFluentAccentColor accent = TryParseFluentAccentFromCaption(themeCaption)
-                            ?? theme.AccentColor;
-                        await themeService.SetCurrentFluentThemeAsync(
-                            parsedMode,
-                            accent,
-                            themeCaption).ConfigureAwait(false);
-                    }
+                    return;
                 }
             }
-
-            if (!string.IsNullOrWhiteSpace(sizeMode)
-                && sizeModeService != null
-                && TryParseSizeMode(sizeMode, out SizeMode parsedSizeMode))
+            finally
             {
-                await sizeModeService.SetSizeModeAsync(parsedSizeMode).ConfigureAwait(false);
+                applyDepth--;
             }
-        }
-        finally
-        {
-            applyDepth--;
+
+            await Task.Delay(ApplyRetryDelay).ConfigureAwait(false);
         }
     }
 
@@ -112,16 +96,16 @@ public static class UserThemeHelper
             _ => null
         };
 
-        if (string.Equals(user.PreferredThemeCaption, currentCaption, StringComparison.Ordinal)
-            && string.Equals(user.PreferredThemeMode, currentMode, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(user.PreferredSizeMode, currentSizeMode, StringComparison.OrdinalIgnoreCase))
+        using IObjectSpace objectSpace = CreateUserObjectSpace(application);
+        ApplicationUser userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
+        if (userInOs == null)
         {
             return;
         }
 
-        using IObjectSpace objectSpace = application.CreateObjectSpace(typeof(ApplicationUser));
-        ApplicationUser userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
-        if (userInOs == null)
+        if (string.Equals(userInOs.PreferredThemeCaption, currentCaption, StringComparison.Ordinal)
+            && string.Equals(userInOs.PreferredThemeMode, currentMode, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(userInOs.PreferredSizeMode, currentSizeMode, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
@@ -131,6 +115,83 @@ public static class UserThemeHelper
         userInOs.PreferredSizeMode = currentSizeMode;
         objectSpace.CommitChanges();
     }
+
+    static async Task ApplyThemeStateAsync(
+        IThemeService themeService,
+        IXafSizeModeService? sizeModeService,
+        string? themeCaption,
+        string? themeMode,
+        string? sizeMode)
+    {
+        if (!string.IsNullOrWhiteSpace(themeCaption))
+        {
+            Theme? theme = themeService.GetThemeByCaption(themeCaption);
+            theme ??= TryResolveFluentTheme(themeService, themeCaption);
+
+            if (theme != null)
+            {
+                await themeService.SetCurrentThemeAsync(theme).ConfigureAwait(false);
+
+                if (!IsClassicTheme(theme))
+                {
+                    ThemeMode parsedMode = TryParseThemeMode(themeMode, out ThemeMode mode)
+                        ? mode
+                        : ThemeMode.Dark;
+                    ThemeFluentAccentColor accent = TryParseFluentAccentFromCaption(themeCaption)
+                        ?? theme.AccentColor;
+                    await themeService.SetCurrentFluentThemeAsync(
+                        parsedMode,
+                        accent,
+                        themeCaption).ConfigureAwait(false);
+                }
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(sizeMode)
+            && sizeModeService != null
+            && TryParseSizeMode(sizeMode, out SizeMode parsedSizeMode))
+        {
+            await sizeModeService.SetSizeModeAsync(parsedSizeMode).ConfigureAwait(false);
+        }
+    }
+
+    static bool TryLoadStoredPreferences(
+        XafApplication application,
+        Guid userId,
+        out string? themeCaption,
+        out string? themeMode,
+        out string? sizeMode)
+    {
+        using IObjectSpace objectSpace = CreateUserObjectSpace(application);
+        ApplicationUser? storedUser = objectSpace.GetObjectByKey<ApplicationUser>(userId);
+        if (storedUser == null)
+        {
+            themeCaption = null;
+            themeMode = null;
+            sizeMode = null;
+            return false;
+        }
+
+        themeCaption = NormalizeStoredThemeCaption(storedUser.PreferredThemeCaption);
+        themeMode = storedUser.PreferredThemeMode;
+        sizeMode = storedUser.PreferredSizeMode;
+        return true;
+    }
+
+    static IObjectSpace CreateUserObjectSpace(XafApplication application)
+    {
+        INonSecuredObjectSpaceFactory? factory = application.ServiceProvider
+            .GetService(typeof(INonSecuredObjectSpaceFactory)) as INonSecuredObjectSpaceFactory;
+        return factory != null
+            ? factory.CreateNonSecuredObjectSpace(typeof(ApplicationUser))
+            : application.CreateObjectSpace(typeof(ApplicationUser));
+    }
+
+    static string? NormalizeStoredThemeCaption(string? caption) =>
+        string.IsNullOrWhiteSpace(caption)
+        || string.Equals(caption, "DevExpress Fluent", StringComparison.Ordinal)
+            ? null
+            : caption;
 
     static bool ThemeAlreadyMatchesStored(
         IThemeService themeService,
@@ -183,17 +244,9 @@ public static class UserThemeHelper
         return FormatFluentAccentCaption(theme.AccentColor);
     }
 
-    static Theme? TryResolveFluentTheme(IThemeService themeService, string themeCaption)
-    {
-        ThemeFluentAccentColor? accent = TryParseFluentAccentFromCaption(themeCaption);
-        if (accent == null)
-        {
-            return null;
-        }
-
-        return themeService.GetThemeByCaption(themeCaption)
-            ?? themeService.GetThemeByCaption("DevExpress Fluent");
-    }
+    static Theme? TryResolveFluentTheme(IThemeService themeService, string themeCaption) =>
+        themeService.GetThemeByCaption(themeCaption)
+        ?? themeService.GetThemeByCaption("DevExpress Fluent");
 
     static string FormatFluentAccentCaption(ThemeFluentAccentColor accent) =>
         accent switch
