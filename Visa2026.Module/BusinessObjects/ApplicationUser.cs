@@ -23,6 +23,21 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(10)]
         public virtual string PreferredCulture { get; set; }
 
+        /// <summary>Theme switcher item caption (e.g. Blue, Blazing Dark). Restored on logon.</summary>
+        [Browsable(false)]
+        [MaxLength(64)]
+        public virtual string PreferredThemeCaption { get; set; }
+
+        /// <summary>Fluent light/dark mode (Light or Dark). Null for classic themes.</summary>
+        [Browsable(false)]
+        [MaxLength(8)]
+        public virtual string PreferredThemeMode { get; set; }
+
+        /// <summary>Size mode from theme switcher (Standard or Compact).</summary>
+        [Browsable(false)]
+        [MaxLength(16)]
+        public virtual string PreferredSizeMode { get; set; }
+
         [Browsable(false)]
         [NonCloneable]
         [DevExpress.ExpressApp.DC.Aggregated]

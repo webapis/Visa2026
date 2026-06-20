@@ -47,6 +47,7 @@ namespace Visa2026.Module.DatabaseUpdate
             var userRole = CreateUserRole();
             var visaOfficeRole = CreateVisaOfficeRole();
             EnsurePreferredCultureSelfWritePermission(defaultRole);
+            EnsurePreferredThemeSelfWritePermission(defaultRole);
 
             ObjectSpace.CommitChanges();
 
@@ -702,6 +703,38 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 memberName,
                 cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(),
                 SecurityPermissionState.Allow);
+        }
+
+        static void EnsurePreferredThemeSelfWritePermission(PermissionPolicyRole defaultRole)
+        {
+            if (defaultRole == null)
+            {
+                return;
+            }
+
+            string[] memberNames =
+            [
+                nameof(ApplicationUser.PreferredThemeCaption),
+                nameof(ApplicationUser.PreferredThemeMode),
+                nameof(ApplicationUser.PreferredSizeMode)
+            ];
+
+            foreach (string memberName in memberNames)
+            {
+                bool alreadyGranted = defaultRole.TypePermissions
+                    .SelectMany(tp => tp.MemberPermissions)
+                    .Any(mp => string.Equals(mp.Members, memberName, StringComparison.Ordinal));
+                if (alreadyGranted)
+                {
+                    continue;
+                }
+
+                defaultRole.AddMemberPermissionFromLambda<ApplicationUser>(
+                    SecurityOperations.Write,
+                    memberName,
+                    cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(),
+                    SecurityPermissionState.Allow);
+            }
         }
 
         /// <summary>
