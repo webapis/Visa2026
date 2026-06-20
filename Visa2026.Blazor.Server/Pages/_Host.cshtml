@@ -690,7 +690,8 @@
                 }
                 if (open) {
                     window.visaPreviewDrawer.setNavCollapsedForSlot(true);
-                    window.visaPreviewDrawer.syncSlotTheme();
+                    window.visaPreviewDrawer._themeSyncAttempts = 0;
+                    window.visaPreviewDrawer.scheduleSlotThemeSync();
                     window.visaPreviewDrawer.ensureSlotResize();
                     window.requestAnimationFrame(function () {
                         window.visaPreviewDrawer.restoreSlotWidth();
@@ -1061,8 +1062,13 @@
                 '--dxbl-secondary',
                 '--dxbl-success',
                 '--dxbl-danger',
+                '--dxbl-text-edit-bg',
+                '--dxbl-text-edit-color',
+                '--dxbl-text-edit-border-color',
                 '--bs-body-bg',
                 '--bs-body-color',
+                '--bs-secondary-bg',
+                '--bs-secondary-color',
                 '--bs-link-color',
                 '--bs-link-hover-color',
                 '--bs-border-color'
@@ -1128,18 +1134,19 @@
             window.visaPreviewDrawer.syncSlotTheme = function () {
                 var slot = document.getElementById('visa-preview-slot');
                 if (!slot) {
-                    return;
+                    return false;
                 }
 
                 var themeRoot = window.visaPreviewDrawer.resolveThemeRoot();
                 if (!themeRoot) {
-                    return;
+                    return false;
                 }
 
                 window.visaPreviewDrawer.clearSlotThemeInline(slot);
 
                 var sources = [themeRoot, document.body, document.documentElement];
                 var seen = {};
+                var hasTheme = false;
                 sources.forEach(function (source) {
                     if (!source || seen[source]) {
                         return;
@@ -1150,6 +1157,11 @@
                         var value = sourceStyles.getPropertyValue(name);
                         if (value && value.trim()) {
                             slot.style.setProperty(name, value.trim());
+                            if (name === '--dxbl-text-color'
+                                || name === '--dxbl-body-bg'
+                                || name === '--bs-body-bg') {
+                                hasTheme = true;
+                            }
                         }
                     });
                 });
@@ -1164,6 +1176,7 @@
                 }
 
                 window.visaPreviewDrawer.copyThemeClasses(slot, themeRoot);
+                return hasTheme;
             };
 
             window.visaPreviewDrawer.scheduleSlotThemeSync = function () {
@@ -1171,7 +1184,21 @@
                     return;
                 }
                 window.requestAnimationFrame(function () {
-                    window.visaPreviewDrawer.syncSlotTheme();
+                    var synced = window.visaPreviewDrawer.syncSlotTheme();
+                    if (synced) {
+                        window.visaPreviewDrawer._themeSyncAttempts = 0;
+                        return;
+                    }
+
+                    var attempts = window.visaPreviewDrawer._themeSyncAttempts || 0;
+                    if (attempts >= 15) {
+                        return;
+                    }
+
+                    window.visaPreviewDrawer._themeSyncAttempts = attempts + 1;
+                    window.setTimeout(function () {
+                        window.visaPreviewDrawer.scheduleSlotThemeSync();
+                    }, 120);
                 });
             };
 

@@ -1,6 +1,7 @@
 @namespace Visa2026.Blazor.Server.Components
 @using DevExpress.ExpressApp
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
@@ -66,6 +67,7 @@
     [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private Guid _applicationId;
     private WordReportPackageScope _packageScope = WordReportPackageScope.Application;
@@ -115,6 +117,18 @@
 
         if (string.IsNullOrWhiteSpace(_emptyMessage))
             ReloadCatalog();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_previewActive || _applicationId == Guid.Empty)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.scheduleSlotThemeSync");
+        }
+        catch (JSDisconnectedException) { }
     }
 
     private void ReloadCatalog()

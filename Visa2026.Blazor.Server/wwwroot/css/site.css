@@ -2633,8 +2633,8 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     display: flex;
     flex-direction: column;
     /* Outside <app> — theme vars synced via visaPreviewDrawer.syncSlotTheme() */
-    color: var(--dxbl-text-color, var(--bs-body-color, #212529));
-    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, #fff)));
+    color: var(--dxbl-text-color, inherit);
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, transparent));
 }
 
 /* Open state: slot column in grid (width from --visa-preview-slot-width on shell) */
@@ -2645,10 +2645,10 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     min-width: 0;
     max-width: none;
     overflow: visible;
-    border-left: 1px solid var(--dxbl-border-color, var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.13)));
-    box-shadow: -4px 0 20px rgba(15, 23, 42, 0.09);
-    color: var(--dxbl-text-color, var(--bs-body-color, inherit));
-    background: var(--dxbl-body-bg, var(--dxbl-background-color, var(--bs-body-bg, inherit)));
+    border-left: 1px solid var(--dxbl-border-color, color-mix(in srgb, currentColor 14%, transparent));
+    box-shadow: -4px 0 20px color-mix(in srgb, #000 9%, transparent);
+    color: var(--dxbl-text-color, inherit);
+    background: var(--dxbl-body-bg, var(--dxbl-background-color, transparent));
 }
 
 #visa-preview-slot.visa-preview-slot--open.visa-preview-slot--user-sized {
@@ -2712,6 +2712,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 }
 
 /* Resminamalar inline slot — catalog + PDF preview vertical split */
+/* Preview-slot catalog panels — inherit synced theme; avoid --bs-* with #fff fallbacks. */
 .resminamalar-slot-panel,
 .document-copies-slot-panel,
 .person-document-copies-slot-panel,
@@ -2723,13 +2724,13 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     min-height: 0;
     color: inherit;
     background: inherit;
-}
-
-.resminamalar-slot-panel {
     --resminamalar-slot-inset-x: clamp(0.875rem, 3vw, 1.75rem);
     --resminamalar-slot-content-max: 100%;
-    --resminamalar-slot-border: color-mix(in srgb, currentColor 14%, transparent);
-    --resminamalar-slot-surface: color-mix(in srgb, var(--bs-body-bg, #fff) 90%, var(--bs-secondary-bg, #f8f9fa));
+    --resminamalar-slot-border: var(
+        --dxbl-border-color,
+        color-mix(in srgb, currentColor 14%, transparent)
+    );
+    --resminamalar-slot-surface: color-mix(in srgb, currentColor 6%, transparent);
     --resminamalar-slot-surface-muted: color-mix(in srgb, currentColor 5%, transparent);
     --resminamalar-slot-radius: 0.625rem;
     --resminamalar-slot-shadow: 0 1px 2px color-mix(in srgb, #000 6%, transparent),
@@ -2739,7 +2740,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 .resminamalar-slot-panel .visa-preview-drawer__header {
     padding-left: var(--resminamalar-slot-inset-x);
     padding-right: var(--resminamalar-slot-inset-x);
-    background: color-mix(in srgb, var(--bs-body-bg, #fff) 96%, transparent);
+    background: var(--resminamalar-slot-surface-muted);
     border-bottom: 1px solid var(--resminamalar-slot-border);
 }
 
@@ -2811,7 +2812,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 .resminamalar-slot-panel__body--split .resminamalar-slot-panel__catalog {
     flex: 1 1 45%;
     max-height: 50%;
-    border-bottom: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.1));
+    border-bottom: 1px solid var(--resminamalar-slot-border);
 }
 
 .resminamalar-slot-panel__body--split .report-package-inline-preview {
@@ -2819,7 +2820,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     min-height: 0;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.08));
+    border-top: 1px solid var(--resminamalar-slot-border);
 }
 
 .resminamalar-slot-panel .app-report-package {
@@ -3191,7 +3192,8 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     flex-direction: column;
     height: 100%;
     width: 100%;
-    background: var(--bs-body-bg, #fff);
+    color: inherit;
+    background: inherit;
     overflow: hidden;
 }
 
@@ -3201,10 +3203,16 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     justify-content: space-between;
     gap: 0.5rem;
     padding: 0.625rem 0.875rem;
-    border-bottom: 1px solid var(--app-item-doc-copies-border, rgba(0, 0, 0, 0.1));
+    border-bottom: 1px solid var(
+        --resminamalar-slot-border,
+        var(--dxbl-border-color, color-mix(in srgb, currentColor 14%, transparent))
+    );
     flex: 0 0 auto;
     min-height: 2.75rem;
-    background: color-mix(in srgb, var(--bs-body-bg, #fff) 90%, var(--bs-secondary-bg, #f8f9fa));
+    background: var(
+        --resminamalar-slot-surface-muted,
+        color-mix(in srgb, currentColor 5%, transparent)
+    );
 }
 
 .visa-preview-drawer__title {

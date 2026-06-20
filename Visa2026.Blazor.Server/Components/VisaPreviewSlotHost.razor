@@ -76,7 +76,7 @@ else if (_state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies && _state.Heade
         {
             try
             {
-                await JS.InvokeVoidAsync("visaPreviewDrawer.syncSlotTheme");
+                await JS.InvokeVoidAsync("visaPreviewDrawer.scheduleSlotThemeSync");
             }
             catch (JSDisconnectedException) { }
         }
