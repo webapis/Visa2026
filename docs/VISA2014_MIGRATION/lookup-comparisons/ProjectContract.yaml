@@ -1,0 +1,131 @@
+# Lookup comparison — ProjectContract (machine-readable)
+# Human table: ProjectContract.md
+
+version: 1
+catalog: ProjectContract
+comparedAt: 2026-06-21
+legacyDatabase: VISA2015
+legacyTable: dbo.Contract
+legacyColumns:
+  - NumberOfContract   # nvarchar(100) — primary layer-3 key → Code
+  - ContentOfContract  # nvarchar(max) — optional Description seed source
+  - AppliedMinistery   # uniqueidentifier — single legacy ministry FK
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.json
+targetMatchProperty: Code
+targetCatalogKind: tenant
+tenantManifestMatchKey: NameTmTitle
+personScope: dbo.Person WHERE GCRecord IS NULL
+personWithFkCount: 2410
+personWithoutFkCount: 159
+applicationWithFkCount: 2391
+transactionalDistinctCodes: 15
+
+summary:
+  verdict: approved_experimental_remap
+  layer3CurrentPolicy: allow_null
+  approvedAt: 2026-06-21
+  approvedDecision: "All legacy NumberOfContract → Code GT-15 (Gap Insaat legacy on Calik Enerji tenant pilot)"
+  canonicalTargetCode: GT-15
+  canonicalTargetNameTm: "GT-15 — (2 ylalaşyk: türkmenenergo > energetika)"
+  recommendedNextStep: Re-export Person-preview.xlsx; human Person importConfirmed review
+
+targetCatalogDevSeed:
+  - code: GT-15
+    nameTm: "GT-15 — (2 ylalaşyk: türkmenenergo > energetika)"
+    ministryLegCount: 2
+    inLegacyProd: false
+  - code: GT-15
+    nameTm: "GT-15 — (4 ylalaşyk: türkmenenergo > energetika > gurluşyk > energetika)"
+    ministryLegCount: 4
+    inLegacyProd: false
+  - code: Şatlyk-1
+    nameTm: "Şatlyk‑1 — (1 ylalaşyk: türkmengaz)"
+    ministryLegCount: 1
+    inLegacyProd: false
+
+comparisons:
+  - legacyDisplay: KGF-13811
+    targetCode: GT-15
+    personCount: 1087
+    match: approved
+  - legacyDisplay: ARM-2462
+    targetCode: GT-15
+    personCount: 323
+    match: approved
+  - legacyDisplay: TLP-13678
+    targetCode: GT-15
+    personCount: 294
+    match: approved
+  - legacyDisplay: FIZ-2464
+    targetCode: GT-15
+    personCount: 163
+    match: approved
+  - legacyDisplay: YAN-640
+    targetCode: GT-15
+    personCount: 140
+    match: approved
+  - legacyDisplay: "?MRK-1609-050"
+    targetCode: GT-15
+    personCount: 127
+    match: approved
+  - legacyDisplay: ESTETIK-938
+    targetCode: GT-15
+    personCount: 67
+    match: approved
+  - legacyDisplay: ONK-421
+    targetCode: GT-15
+    personCount: 66
+    match: approved
+  - legacyDisplay: ATP-744
+    targetCode: GT-15
+    personCount: 55
+    match: approved
+  - legacyDisplay: DH2-422
+    targetCode: GT-15
+    personCount: 30
+    match: approved
+  - legacyDisplay: PDR-420
+    targetCode: GT-15
+    personCount: 27
+    match: approved
+  - legacyDisplay: HKB-2465
+    targetCode: GT-15
+    personCount: 21
+    match: approved
+  - legacyDisplay: END-14339
+    targetCode: GT-15
+    personCount: 6
+    match: approved
+  - legacyDisplay: "Elektron ?14999"
+    targetCode: GT-15
+    personCount: 2
+    match: approved
+  - legacyDisplay: TAPT-314
+    targetCode: GT-15
+    personCount: 0
+    applicationCount: 5
+    match: approved
+    importNote: Application-only in legacy sample
+
+legacyOnlyUnused:
+  - legacyDisplay: Infuzion-11754
+    personCount: 0
+    match: legacy_only
+  - legacyDisplay: Kambin
+    personCount: 0
+    match: legacy_only
+  - legacyDisplay: MOR-17757.
+    personCount: 0
+    match: legacy_only
+  - legacyDisplay: "? WAS-323"
+    personCount: 0
+    match: legacy_only
+
+proposedTranslationsAfterSeed:
+  strategy: semantic_remap_all_to_gt15
+  targetCode: GT-15
+  unmappedPolicyEmployees: allow_null
+  unmappedPolicyNoFk: allow_null
+  rows: 15
+
+decisionsPending: []

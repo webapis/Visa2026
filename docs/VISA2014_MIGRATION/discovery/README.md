@@ -23,6 +23,7 @@ Do not maintain a separate discovery queue. When adding a BO, append or insert i
 | [`../table-mappings.yaml`](../table-mappings.yaml) | Layer 1 — legacy table → OData entity |
 | [`../lookup-translations.yaml`](../lookup-translations.yaml) | Layer 3 — lookup value map |
 | [`../property-gap-registry.yaml`](../property-gap-registry.yaml) | Cross-BO gap + dedupe summary |
+| [`../migration-status.yaml`](../migration-status.yaml) | **Workstreams, issues, lookup audit** — [`../STATUS.md`](../STATUS.md) dashboard |
 | [`../../Visa2026.DataImporter/legacy/visa2014/field-maps/`](../../Visa2026.DataImporter/legacy/visa2014/field-maps/) | Layer 2 — column maps |
 | [`../schema-snapshot.md`](../schema-snapshot.md) | Bootstrap only — global table index |
 
@@ -40,7 +41,7 @@ Do not maintain a separate discovery queue. When adding a BO, append or insert i
 
 1. Pick next BO using rules above (one `in_progress` at a time).
 2. Complete dossier checklist (or `blocked` / `skip` with reason).
-3. Sync `entity-inventory.yaml`, `property-gap-registry.yaml`, and `order.yaml` `discoveryStatus`.
+3. Sync `entity-inventory.yaml`, `property-gap-registry.yaml`, `migration-status.yaml`, and `order.yaml` `discoveryStatus`.
 4. **Do not import yet** — export **Excel preview** (Phase 1c), then wait for Phase **1b** (`importConfirmed: true`) after workbook review.
 5. Only then pick the next BO in dependency order (or proceed to pilot if confirmed).
 

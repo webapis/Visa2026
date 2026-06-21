@@ -36,6 +36,8 @@ fields:
     default: null
     defaultValue: null
     mismatchNotes: null
+    # Binary / file fields — see FILE_AND_IMAGE_IMPORT.md:
+    # importWave: file-follow-up | excelExport.mode: stub | stubColumns: [_hasPhoto, ...]
 
 import:
   rowFilter: null

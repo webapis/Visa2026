@@ -3,23 +3,29 @@
 
 version: 1
 
-# Example (uncomment when Person discovery confirms tables):
-#
-# mappings:
-#   - id: person-employee
-#     legacy:
-#       schema: dbo
-#       table: Employee
-#       boClass: Employee
-#       boPath: null
-#     target:
-#       odataEntity: Person
-#       boPath: Visa2026.Module/BusinessObjects/Person.cs
-#     relationship: merge
-#     legacyTablesExtra: []
-#     fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Person.yaml
-#     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
-#     status: pending
-#     notes: ""
-
-mappings: []
+mappings:
+  - id: person-main
+    legacy:
+      schema: dbo
+      table: Person
+      boClass: Person
+      boPath: VISA2014.Module/DC/IPerson.cs
+    target:
+      odataEntity: Person
+      boPath: Visa2026.Module/BusinessObjects/Person.cs
+    relationship: primary_with_extension
+    legacyTablesExtra:
+      - schema: dbo
+        table: Employee
+        join: Employee.Oid = Person.Oid
+        role: one_to_one_extension
+      - schema: dbo
+        table: Passport
+        join: Passport.Person = Person.Oid AND Passport.GCRecord IS NULL
+        role: child_for_scalar_coalesce
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Person.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
+    status: mapped
+    notes: |
+      2,569 active Person rows. Passport import remains separate Visa2026 BO.
+      Extract uses canonical passport per person for PersonalNumber and Nationality.

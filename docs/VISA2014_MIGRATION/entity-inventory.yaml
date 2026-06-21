@@ -14,14 +14,14 @@ target:
 entities:
   - targetODataEntity: Person
     discoveryDossier: discovery/Person.yaml
-    tableMappingId: person-employee
-    discoveryStatus: not_started
-    importConfirmed: false
+    tableMappingId: person-main
+    discoveryStatus: complete
+    importConfirmed: true
     importStatus: pending
-    legacyTable: null
-    legacyBo: null
+    legacyTable: Person
+    legacyBo: Person
     blockReason: null
-    notes: "First in order.yaml — no dependsOn. Complete before Application."
+    notes: "2,569 active rows → ~2,553 import + 5 dedupe + 11 skipped. importConfirmed 2026-06-21 after Person-preview.xlsx review. Pilot OData next."
 
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml
@@ -31,7 +31,7 @@ entities:
     legacyTable: null
     legacyBo: null
     blockReason: null
-    notes: "dependsOn Person — discover only after Person dossier complete."
+    notes: "dependsOn Person — discover only after Person dossier complete (Person discovery complete 2026-06-20)."
 
   - targetODataEntity: ApplicationItem
     discoveryDossier: discovery/ApplicationItem.yaml

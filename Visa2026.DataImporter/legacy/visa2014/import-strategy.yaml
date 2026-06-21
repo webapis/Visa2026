@@ -9,11 +9,11 @@
 
 version: 1
 
-status: draft                    # draft | review | approved
-approvedAt: null
-approvedBy: null
+status: approved                 # draft | review | approved
+approvedAt: 2026-06-21
+approvedBy: developer sign-off (chat)
 
-implementationBlocked: true      # set false only when status: approved
+implementationBlocked: false     # set false only when status: approved
 
 strategy:
   legacyDatabase: VISA2015
@@ -23,9 +23,17 @@ strategy:
   cliFlag: --import-visa2014
   mappingArtifacts: yaml
   legacyGuidPolicy: id-map         # do not reuse legacy GUIDs as Visa2026 ID
+  lookupPolicy: translate_only     # never import VISA2015 lookup tables; use Visa2026 seed + lookup-translations.yaml
   dedupePolicy: before_post
   firstTargetDatabase: Visa2026DbDev
   attachmentsWave: last
+  fileImageImport:
+    canonicalDoc: docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md
+    excelPreviewExcludesBinary: true     # stub audit columns only (_hasPhoto, length, hash)
+    personPhotoFollowUp: after_scalar_person   # Person OData first → Photo PATCH
+    plannedCliFlags:
+      - --import-visa2014-files
+      - --skip-file-properties              # scalar pass omits bytes
   excelPreview:
     enabled: true
     cliFlag: --export-visa2014-preview
@@ -68,5 +76,19 @@ openDecisions:
     question: Default unmappedPolicy for required lookups
     decision: null
   - id: file-blob-strategy
-    question: Copy scan blobs vs re-link paths
+    question: How to load legacy blobs into Visa2026 (OData base64 vs stream vs staged files vs FileData two-step)
     decision: null
+    options:
+      - id: odata-base64
+        label: OData JSON base64 PATCH (Person.Photo; small/medium blobs)
+      - id: odata-stream
+        label: OData property $value / stream upload
+      - id: staged-files
+        label: Batch copy to Visa2026 file store + OData metadata reference
+      - id: filedata-two-step
+        label: POST FileData then link on DocumentBase / child *Document
+    recommendation: |
+      Person.Photo → odata-base64 (fallback odata-stream if size limits hit).
+      PassportCopy / *Document → filedata-two-step.
+      Staged-files optional for prod volume after staging UAT.
+    doc: docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md

@@ -3,14 +3,18 @@
 # BO discovery order is NOT listed here — use the canonical dependency-ordered list:
 #   Visa2026.DataImporter/legacy/visa2014/order.yaml  →  entities[]
 #
+# Cross-cutting progress (workstreams, issues, lookup audit):
+#   docs/VISA2014_MIGRATION/migration-status.yaml  →  human dashboard STATUS.md
+#
 # That same file drives OData import order. Keep one ordered list; do not maintain a separate queue.
 
 version: 1
 sourceOfTruth: Visa2026.DataImporter/legacy/visa2014/order.yaml
+statusTracker: docs/VISA2014_MIGRATION/migration-status.yaml
 
 bootstrapOnce:
   - id: global-schema-index
     description: Table list + row counts; identify XAF/system tables to skip
     artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
-    status: not_started
+    status: complete
     note: Mirror status in order.yaml bootstrapOnce when complete

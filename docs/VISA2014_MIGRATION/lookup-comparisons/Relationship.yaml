@@ -1,0 +1,177 @@
+# Lookup comparison — Relationship (machine-readable)
+# Human table: Relationship.md
+
+version: 1
+catalog: Relationship
+comparedAt: 2026-06-21
+legacyDatabase: VISA2015
+legacyTable: dbo.Relation
+legacyColumns:
+  - RelativeAsL       # nvarchar(100) — primary layer-3 key (normalize to NameTm)
+  - RelativeAs        # int 0-8 — ambiguous; do not use alone
+  - EndingLI          # nvarchar(100) — not used on Person import
+  - EndingLV          # nvarchar(100) — not used on Person import
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/relationship.json
+targetMatchProperty: NameTm
+personScope: dbo.Person WHERE GCRecord IS NULL
+personWithFkCount: 159
+personWithoutFkCount: 2410
+
+summary:
+  verdict: approved
+  layer3CurrentPolicy: allow_null
+  approvedAt: 2026-06-21
+  catalogRowsAdded: [Mother, BrotherInLaw]
+  recommendedNextStep: ProjectContract comparison (last person-wave lookup)
+
+targetCatalog:
+  - nameTm: aýaly
+    reverseNameTm: adamsy
+    localizationKey: Wife
+  - nameTm: adamsy
+    reverseNameTm: aýaly
+    localizationKey: Husband
+  - nameTm: ogly
+    reverseNameTm: kakasy
+    localizationKey: Son
+  - nameTm: ejesi
+    reverseNameTm: ogly
+    localizationKey: Mother
+  - nameTm: aýal doganyň adamsy (giýewisi)
+    reverseNameTm: aýal dogany
+    localizationKey: BrotherInLaw
+  - nameTm: gyzy
+    reverseNameTm: kakasy
+    localizationKey: Daughter
+  - nameTm: kakasy
+    reverseNameTm: ogly
+    localizationKey: Father
+  - nameTm: aýal dogany
+    reverseNameTm: erkek dogany
+    localizationKey: Sister
+  - nameTm: İnisi
+    reverseNameTm: agasy
+    localizationKey: YoungerSister
+  - nameTm: baldyzy
+    reverseNameTm: baldyzy
+    localizationKey: Grandchild
+  - nameTm: (gaýny) aýalynyň ejesi
+    reverseNameTm: giýewisi
+    localizationKey: MotherInLaw
+
+comparisons:
+  - legacyDisplay: ayaly
+    legacyRelativeAs: 0
+    targetNameTm: aýaly
+    targetLocalizationKey: Wife
+    personCount: 58
+    match: proposed
+    importNote: Normalize RelativeAsL to NameTm
+
+  - legacyDisplay: ogly
+    legacyRelativeAs: 1
+    targetNameTm: ogly
+    targetLocalizationKey: Son
+    personCount: 49
+    match: proposed
+    importNote: Same
+
+  - legacyDisplay: Ogly
+    legacyRelativeAs: 1
+    targetNameTm: ogly
+    targetLocalizationKey: Son
+    personCount: 1
+    match: proposed
+    importNote: Case variant
+
+  - legacyDisplay: gyzy
+    legacyRelativeAs: 2
+    targetNameTm: gyzy
+    targetLocalizationKey: Daughter
+    personCount: 32
+    match: proposed
+    importNote: Same
+
+  - legacyDisplay: kakasy
+    legacyRelativeAs: 4
+    targetNameTm: kakasy
+    targetLocalizationKey: Father
+    personCount: 6
+    match: proposed
+    importNote: Same
+
+  - legacyDisplay: ayal dogany
+    legacyRelativeAs: 6
+    targetNameTm: aýal dogany
+    targetLocalizationKey: Sister
+    personCount: 1
+    match: proposed
+    importNote: Same
+
+  - legacyDisplay: ejesi
+    legacyRelativeAs: 3
+    targetNameTm: ejesi
+    targetLocalizationKey: Mother
+    personCount: 11
+    match: approved
+    importNote: Added to Visa2026 relationship.json 2026-06-21
+
+  - legacyDisplay: Ayal doganynyn adamsy (giyewisi)
+    legacyRelativeAs: 6
+    targetNameTm: aýal doganyň adamsy (giýewisi)
+    targetLocalizationKey: BrotherInLaw
+    personCount: 1
+    match: approved
+    importNote: Added to Visa2026 relationship.json 2026-06-21
+
+targetOnly:
+  - targetNameTm: adamsy
+    targetLocalizationKey: Husband
+    personCount: 0
+    match: target_only
+  - targetNameTm: İnisi
+    targetLocalizationKey: YoungerSister
+    personCount: 0
+    match: target_only
+  - targetNameTm: baldyzy
+    targetLocalizationKey: Grandchild
+    personCount: 0
+    match: target_only
+  - targetNameTm: (gaýny) aýalynyň ejesi
+    targetLocalizationKey: MotherInLaw
+    personCount: 0
+    match: target_only
+
+proposedTranslations:
+  - legacy: ayaly
+    target: aýaly
+    status: proposed
+  - legacy: ogly
+    target: ogly
+    status: proposed
+  - legacy: Ogly
+    target: ogly
+    status: proposed
+  - legacy: gyzy
+    target: gyzy
+    status: proposed
+  - legacy: kakasy
+    target: kakasy
+    status: proposed
+  - legacy: ayal dogany
+    target: aýal dogany
+    status: proposed
+  - legacy: ejesi
+    target: ejesi
+    status: approved
+  - legacy: Ayal doganynyn adamsy (giyewisi)
+    target: aýal doganyň adamsy (giýewisi)
+    status: approved
+
+relativeAsAmbiguity:
+  - relativeAs: 3
+    labels: [ejesi, "(gayny) ayalynyn ejesi"]
+    personUses: [ejesi]
+  - relativeAs: 6
+    labels: [ayal dogany, "Ayal doganynyn adamsy (giyewisi)"]
+    personUses: [ayal dogany, "Ayal doganynyn adamsy (giyewisi)"]

@@ -8,7 +8,7 @@ internal static partial class LookupLocalizationKeys
 {
     private static readonly HashSet<string> RelationshipSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Grandchild", "Sister", "Father", "MotherInLaw", "Daughter", "YoungerSister", "Wife", "Husband", "Son",
+        "Grandchild", "Sister", "Father", "MotherInLaw", "Mother", "BrotherInLaw", "Daughter", "YoungerSister", "Wife", "Husband", "Son",
     };
 
     private static readonly Dictionary<string, string> RelationshipNameToKey =
@@ -28,6 +28,10 @@ internal static partial class LookupLocalizationKeys
             ["ayaly"] = "Wife",
             ["adamsy"] = "Husband",
             ["ogly"] = "Son",
+            ["ejesi"] = "Mother",
+            ["aýal doganyň adamsy (giýewisi)"] = "BrotherInLaw",
+            ["ayal doganyn adamsy (giyewisi)"] = "BrotherInLaw",
+            ["Ayal doganynyn adamsy (giyewisi)"] = "BrotherInLaw",
         };
 
     private static string ResolveRelationship(LookupBase row) =>

@@ -4,7 +4,7 @@
 
 **Spec:** [docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md](../../../../docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)
 
-**Planned CLI:**
+**Planned CLI** (Person **shipped**):
 
 ```powershell
 dotnet run --project Visa2026.DataImporter -- `

@@ -1,0 +1,282 @@
+# Lookup review queue — gate before main BO importConfirmed
+#
+# Human dashboard: lookup-comparisons/README.md
+# Layer 3 output: lookup-translations.yaml
+#
+# Gate rules:
+#   personWaveComplete   → required before Person importConfirmed (order.yaml)
+#   applicationWaveComplete → required before Application importConfirmed / discovery close
+#
+# Do NOT import legacy lookup tables. Translate DISTINCT values used on transactional FKs only.
+
+version: 1
+lastUpdated: 2026-06-21
+updatedBy: developer — Person importConfirmed
+
+gateRules:
+  personWaveComplete:
+    requiredBefore: Person.importConfirmed
+    blocksUntil: all personWave entries have auditStatus approved | done
+    currentStatus: complete
+    remaining: []
+    notes: |
+      All person-wave lookups approved 2026-06-21.
+      ProjectContract uses experimental GT-15 remap (Gap Insaat legacy → Calik Enerji tenant).
+      Person importConfirmed true 2026-06-21.
+
+  applicationWaveComplete:
+    requiredBefore: Application.importConfirmed
+    blocksUntil: all applicationWave entries have auditStatus approved | done
+    currentStatus: not_started
+    notes: Application discovery may start in parallel; importConfirmed blocked until wave complete
+
+waves:
+  personWave:
+    label: Person-domain lookup catalogs
+    entries:
+      - catalog: Gender
+        legacyTable: dbo.Gender
+        legacyColumn: TypeOfGenderL
+        usedBy: [Person]
+        auditStatus: done
+        comparisonDoc: null
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        notes: 2 values mapped (Ayal→Aýal, Erkek→Erkek)
+
+      - catalog: Country
+        legacyTable: dbo.Country
+        legacyColumn: NameOfCountryL
+        usedBy: [Person]
+        auditStatus: done
+        comparisonDoc: null
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        notes: Person-scope 64 identity Code mappings (2026-06-20)
+
+      - catalog: MaritalStatus
+        legacyTable: dbo.MaritalStatus
+        legacyColumn: Status
+        usedBy: [Person]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MaritalStatus.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-21
+        notes: |
+          Status int 0–5 → Visa2026 Code; Status=0 → Öýlenen approved.
+          StatusL narrative → VisaApplicationFamilyMembersText (not catalog).
+          Legacy table: 2369 total / 1965 active rows; 2569 Person rows with FK.
+
+      - catalog: Relationship
+        legacyTable: dbo.Relation
+        legacyColumn: RelativeAsL
+        usedBy: [Person]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Relationship.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-21
+        legacyStats:
+          tableRowsAll: 54
+          tableRowsActive: 12
+          personFkHits: 159
+          valuesMapped: 8
+        notes: |
+          Approved 2026-06-21: all 159 Person FK rows map via RelativeAsL → NameTm.
+          Mother (ejesi) + BrotherInLaw added to Visa2026 relationship.json.
+
+      - catalog: ProjectContract
+        legacyTable: dbo.Contract
+        legacyColumn: NumberOfContract
+        usedBy: [Person, Application]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-21
+        legacyStats:
+          personFkHits: 2410
+          transactionalDistinctCodes: 15
+          targetRemap: GT-15
+        notes: |
+          Approved 2026-06-21: experimental pilot — all legacy codes → GT-15.
+          Gap Insaat VISA2015 data on Calik Enerji tenant seed; not production contract fidelity.
+
+  applicationWave:
+    label: Application-domain lookup catalogs
+    entries:
+      - catalog: ApplicationType
+        legacyTable: dbo.ApplicationType
+        usedBy: [Application, ApplicationItem]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 231
+        notes: Layer 3 required; also see ApplicationTypeForEmployee, ApplicationTypeForFamilyMember, BaseApplicationType
+
+      - catalog: VisaType
+        legacyTable: dbo.VisaType
+        usedBy: [Application, ApplicationItem]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 6
+
+      - catalog: VisaCategory
+        legacyTable: dbo.VisaCategory
+        usedBy: [Application, ApplicationItem]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 4
+        notes: Legacy PrefferedVisaCategory table (72 rows) may also need audit
+
+      - catalog: Region
+        legacyTable: dbo.Region
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 50
+
+      - catalog: EducationLevel
+        legacyTable: dbo.EducationLevel
+        usedBy: [Application, Person]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 24
+
+      - catalog: PassportType
+        legacyTable: dbo.PassportType
+        usedBy: [Passport, ApplicationItem]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 24
+
+      - catalog: Department
+        legacyTable: dbo.Department
+        usedBy: [Application, Employee]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 49
+        notes: DepartmentForRegistration (44 rows) may overlap
+
+      - catalog: Position
+        legacyTable: dbo.Position
+        usedBy: [Application, Employee]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 689
+
+      - catalog: Urgency
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        notes: Confirm legacy table name during Application discovery
+
+      - catalog: PurposeOfTravel
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: CheckPoint
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: VisaIssuedPlace
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: MigrationService
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: ApplicationLocation
+        legacyTable: null
+        usedBy: [ApplicationProgress]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: ApplicationState
+        legacyTable: null
+        usedBy: [ApplicationProgress]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: ValidityDuration
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: VisaPeriod
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: BusinessTripPurpose
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: City
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        notes: Visa2026 matchKey NameAndRegion — audit with Region first
+
+nextComparisons: []

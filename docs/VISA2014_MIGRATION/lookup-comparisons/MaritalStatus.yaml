@@ -1,0 +1,153 @@
+# Lookup comparison — MaritalStatus (machine-readable)
+# Human table: MaritalStatus.md
+
+version: 1
+catalog: MaritalStatus
+comparedAt: 2026-06-21
+legacyDatabase: VISA2015
+legacyTable: dbo.MaritalStatus
+legacyColumns:
+  - Status          # int 0-5 — coarse category (use for layer 3)
+  - StatusL         # nvarchar(500) — family narrative (NOT catalog)
+  - mgCode          # nvarchar(100) — sub-code
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/marital-status.json
+targetMatchProperty: Code
+personScope: dbo.Person WHERE GCRecord IS NULL
+personWithFkCount: 2569
+
+summary:
+  verdict: approved_status_int_to_code_map
+  layer3CurrentPolicy: allow_null
+  approvedAt: 2026-06-21
+  approvedDecision: "Status=0 → Öýlenen (Married)"
+  recommendedNextStep: complete Relationship + ProjectContract comparisons (lookup-review-queue.yaml)
+
+targetCatalog:
+  - code: Sallah
+    localizationKey: Single
+    pdfForm_Code: 1
+  - code: Çaga
+    localizationKey: Minor
+    pdfForm_Code: 0
+  - code: Aýrylşan
+    localizationKey: Divorced
+    pdfForm_Code: 3
+  - code: Öýlenen
+    localizationKey: Married
+    pdfForm_Code: 2
+  - code: Durmuşa Çykmadyk
+    localizationKey: WidowedNotRemarried
+    pdfForm_Code: 1
+  - code: Durmuşa Çykan
+    localizationKey: WidowedRemarried
+    pdfForm_Code: 2
+  - code: Dul
+    localizationKey: Widow
+    pdfForm_Code: 4
+
+comparisons:
+  - legacyDisplay: "Status=0, mgCode=2"
+    legacyDetail: "StatusL family block (spouse/children narrative)"
+    targetCode: Öýlenen
+    targetLocalizationKey: Married
+    personCount: 1543
+    match: approved
+    importNote: "Map to Married; copy StatusL to VisaApplicationFamilyMembersText; do not import lookup rows"
+
+  - legacyDisplay: "Status=0, mgCode=1"
+    legacyDetail: "StatusL married narrative variant"
+    targetCode: Öýlenen
+    targetLocalizationKey: Married
+    personCount: 17
+    match: approved
+    importNote: same as Status=0 mgCode=2
+
+  - legacyDisplay: "Status=0, mgCode=3"
+    legacyDetail: "StatusL married narrative variant"
+    targetCode: Öýlenen
+    targetLocalizationKey: Married
+    personCount: 1
+    match: approved
+    importNote: same as Status=0 mgCode=2
+
+  - legacyDisplay: "Status=1, mgCode=1"
+    legacyDetail: "StatusL often '.' or Sallah"
+    targetCode: Sallah
+    targetLocalizationKey: Single
+    personCount: 707
+    match: approved
+    importNote: strong Single match
+
+  - legacyDisplay: "Status=2, mgCode=2"
+    legacyDetail: "StatusL Adamsy (husband) line"
+    targetCode: Öýlenen
+    targetLocalizationKey: Married
+    personCount: 117
+    match: approved
+    importNote: Married
+
+  - legacyDisplay: "Status=3, mgCode=1"
+    legacyDetail: "StatusL spouse/child lines"
+    targetCode: Öýlenen
+    targetLocalizationKey: Married
+    personCount: 41
+    match: approved
+    importNote: Married
+
+  - legacyDisplay: "Status=4, mgCode=3"
+    legacyDetail: "StatusL Ayrylysan / divorced"
+    targetCode: Aýrylşan
+    targetLocalizationKey: Divorced
+    personCount: 66
+    match: approved
+    importNote: strong Divorced match
+
+  - legacyDisplay: "Status=5, mgCode=null"
+    legacyDetail: "StatusL Çaga / minor"
+    targetCode: Çaga
+    targetLocalizationKey: Minor
+    personCount: 76
+    match: approved
+    importNote: strong Minor match
+
+  - legacyDisplay: "Status=5, mgCode=1"
+    legacyDetail: "StatusL child line variant"
+    targetCode: Çaga
+    targetLocalizationKey: Minor
+    personCount: 1
+    match: approved
+    importNote: Minor
+
+targetOnly:
+  - targetCode: Durmuşa Çykmadyk
+    localizationKey: WidowedNotRemarried
+    match: target_only
+    importNote: no Person rows in distinct Status int buckets
+
+  - targetCode: Durmuşa Çykan
+    localizationKey: WidowedRemarried
+    match: target_only
+    importNote: same
+
+  - targetCode: Dul
+    localizationKey: Widow
+    match: target_only
+    importNote: same
+
+proposedTranslationByStatusInt:
+  "0": Öýlenen
+  "1": Sallah
+  "2": Öýlenen
+  "3": Öýlenen
+  "4": Aýrylşan
+  "5": Çaga
+
+approvedTranslationByStatusInt:
+  "0": Öýlenen
+  "1": Sallah
+  "2": Öýlenen
+  "3": Öýlenen
+  "4": Aýrylşan
+  "5": Çaga
+approvedAt: 2026-06-21
+approvedBy: developer

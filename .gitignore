@@ -436,6 +436,7 @@ visa2026-prod.bak.20260525-1713
 # VISA2014 → Visa2026 legacy migration (local PII — do not commit)
 Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
 Visa2026.DataImporter/legacy/visa2014/preview-export/*.xlsx
+Visa2026.DataImporter/legacy/visa2014/id-maps/*.json
 Visa2026.DataImporter/legacy/visa2014/id-map/
 dist/
 

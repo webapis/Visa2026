@@ -1,4 +1,5 @@
 using Visa2026.DataImporter;
+using Visa2026.DataImporter.Legacy.Visa2014;
 
 // -----------------------------------------------------------------------
 // Logging — writes timestamped entries to console AND a rolling log file.
@@ -148,6 +149,18 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--dump-lookups",
         "--export-lookup-catalogs",
         "--export-seed",
+        "--export-visa2014-preview",
+        "--import-visa2014",
+        "--entity",
+        "--output",
+        "--connection",
+        "--max-rows",
+        "--dry-run",
+        "--api-base-url",
+        "--user",
+        "--password",
+        "--id-map-output",
+        "--no-wait",
         "--validate-seed",
         "--prune-seed",
         "--skip-visibility-preflight",
@@ -174,7 +187,15 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
                 i++;
             }
             else if ((string.Equals(token, "--sync-scenario", StringComparison.OrdinalIgnoreCase) ||
-                      string.Equals(token, "--clear-scenario", StringComparison.OrdinalIgnoreCase)) &&
+                      string.Equals(token, "--clear-scenario", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--entity", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--output", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--connection", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--max-rows", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--api-base-url", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--user", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--password", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--id-map-output", StringComparison.OrdinalIgnoreCase)) &&
                      i + 1 < args.Count &&
                      !args[i + 1].StartsWith('-'))
             {
@@ -214,6 +235,11 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
+    Console.WriteLine("  --export-visa2014-preview   VISA2015 SQL → Excel preview (legacy migration; requires --entity Person).");
+    Console.WriteLine("      Options: --entity Person [--output path.xlsx] [--connection conn] [--max-rows N]");
+    Console.WriteLine("  --import-visa2014           VISA2015 SQL → Visa2026 OData (legacy migration; requires --entity Person).");
+    Console.WriteLine("      Options: --entity Person [--connection conn] [--max-rows N] [--dry-run]");
+    Console.WriteLine("                [--api-base-url url] [--user Admin] [--password pwd] [--id-map-output path.json] [--no-wait]");
     Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
     Console.WriteLine("  --prune-seed [path]         Same as --validate-seed and rewrite scenario yaml on disk.");
     Console.WriteLine();
@@ -304,6 +330,26 @@ if (HasArg(args, "--export-lookup-catalogs"))
     LookupCatalogExporter.Export(lookupPath, outDir);
     Log.Ok("Lookup catalog JSON export complete.");
     Log.Close();
+    return;
+}
+
+if (HasArg(args, "--export-visa2014-preview"))
+{
+    Log.Phase("VISA2014 Excel preview export — server not required");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014PreviewExportCommand.Run(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--import-visa2014"))
+{
+    Log.Phase("VISA2014 OData import");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ImportCommand.RunAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
     return;
 }
 

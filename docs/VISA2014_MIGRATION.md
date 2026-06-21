@@ -2,7 +2,7 @@
 
 Plan for importing production data from the legacy **VISA2014** application into **Visa2026**. The legacy system has its own git repository and SQL Server database; schemas differ, so migration requires explicit mapping and a controlled import protocol.
 
-**Status:** scaffolding in place — connect MCP to **`VISA2015`** and run Phase 1 discovery.
+**Status:** Phase 1 in progress — see **[STATUS.md](VISA2014_MIGRATION/STATUS.md)** (dashboard) and **[migration-status.yaml](VISA2014_MIGRATION/migration-status.yaml)** (machine-readable tracker).
 
 **Agent skill:** [`.cursor/skills/visa2014-to-visa2026-import/SKILL.md`](../.cursor/skills/visa2014-to-visa2026-import/SKILL.md)
 
@@ -547,12 +547,12 @@ deduplication:
 | **0 — Access** | Local `VISA2015`, MCP servers, restore script verified | MCP preflight passes |
 | **0b — Import strategy** | Plan waves, environments, cutover **before code** | [IMPORT_PLAN_AND_STRATEGY.md](VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md), `import-strategy.yaml` `approved` |
 | **1 — Discovery** | **Atomic per-BO** in dependency order + **3-layer mapping** | `order.yaml`, `table-mappings.yaml`, `field-maps/`, `lookup-translations.yaml`, dossiers `complete` |
-| **1b — Excel preview** | Consolidated legacy → **Excel** for human review | `preview-export/*.xlsx` per BO ([EXCEL_PREVIEW_EXPORT.md](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)) |
+| **1b — Excel preview** | Consolidated legacy → **Excel** for human review | `preview-export/*.xlsx` per BO ([EXCEL_PREVIEW_EXPORT.md](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)) — **scalar + file stubs only** |
 | **1c — Confirm** | **Human sign-off** per BO after Excel review | `importConfirmed: true` on dossier + `order.yaml` |
 | **2 — Lookup value audit** | Every legacy distinct value has `legacy → target` row | `lookup-translations.yaml` complete per catalog |
 | **3 — Pilot** | One **confirmed** entity end-to-end (candidate: **Person**) | Importer code (after strategy approved) + OData import + reconciliation |
 | **4 — Core transactional** | Applications, items, visas, permits | Ordered import runs, id-map populated |
-| **5 — Attachments** | Binary files linked to BOs | File copy + OData file property updates |
+| **5 — Attachments** | Binary files linked to BOs | File copy + OData file property updates ([FILE_AND_IMAGE_IMPORT.md](VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md)) |
 | **6 — Validation & cutover** | UAT, reconciliation, prod runbook | Checklist signed off |
 
 **First import target:** empty or disposable **`Visa2026DbDev`** — never first-run against production Visa2026.
@@ -793,7 +793,8 @@ Mapping stays in **YAML**; code implements extract/transform/load only.
 
 | Resource | Use |
 |----------|-----|
-| [EXCEL_PREVIEW_EXPORT.md](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) | **Consolidated legacy → Excel** before import |
+| [EXCEL_PREVIEW_EXPORT.md](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) | **Consolidated legacy → Excel** before import (scalar only; binary stubs) |
+| [FILE_AND_IMAGE_IMPORT.md](VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md) | **Binary files / images** — separate wave from Excel preview |
 | [IMPORT_PLAN_AND_STRATEGY.md](VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) | **Import plan — approve before implementation** |
 | [visa2014-to-visa2026-import](../.cursor/skills/visa2014-to-visa2026-import/SKILL.md) | MCP preflight, discovery, mapping, pilot import; [MATURITY.md](../.cursor/skills/visa2014-to-visa2026-import/MATURITY.md) experience loop |
 | [import-practices.md](../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) | **OData ETL, upsert, reconciliation, cutover** (Phase 3+) |
@@ -808,14 +809,15 @@ Mapping stays in **YAML**; code implements extract/transform/load only.
 
 ## Next steps
 
-1. [x] Scaffolding: MCP entries, Cursor rule, skill, mapping artifact folders (2026-06-20).
-2. [ ] Reload MCP; verify `visa2014-sql-local` → **`VISA2015`** on `localhost\SQLEXPRESS`.
-3. [ ] (Optional) Restore prod `.bak` as **`VISA2015`** — `.\scripts\local\Restore-Visa2014Db.ps1`.
-4. [ ] Run **Phase 1 discovery** — bootstrap, then BO dossiers in **`order.yaml` order** (start with **Person**).
-5. [ ] Draft and approve **[IMPORT_PLAN_AND_STRATEGY.md](VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md)** — `import-strategy.yaml` → `approved` **before import code**.
-6. [ ] **Excel preview Person** — [`--export-visa2014-preview`](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) after discovery complete (when implemented).
-7. [ ] **Confirm Person** — review preview workbook; set `importConfirmed: true`.
-8. [ ] **Pilot Person** (after strategy + confirmation) on `Visa2026DbDev` per [import-practices.md](../.cursor/skills/visa2014-to-visa2026-import/import-practices.md).
+**Live tracker:** [STATUS.md](VISA2014_MIGRATION/STATUS.md) · [migration-status.yaml](VISA2014_MIGRATION/migration-status.yaml) — workstreams, entities, lookup audit, open issues.
+
+High-level backlog (detail in tracker):
+
+1. [x] Approve import strategy (`import-strategy.yaml` → `approved`, 2026-06-21)
+2. [ ] Implement `--export-visa2014-preview` (Person pilot)
+3. [ ] **Confirm Person** — Excel review + mapping sign-off; set `importConfirmed: true`
+4. [ ] **Application** discovery (next in `order.yaml`)
+5. [ ] Add Passport to `order.yaml`; pilot Person on `Visa2026DbDev` (after 2–3)
 
 ---
 
@@ -835,3 +837,5 @@ Mapping stays in **YAML**; code implements extract/transform/load only.
 | 2026-06-20 | **Import confirmation gate:** document + `importConfirmed` before import code or OData load |
 | 2026-06-20 | **IMPORT_PLAN_AND_STRATEGY.md** + strategy approval gate; skill MATURITY / mandatory learnings loop |
 | 2026-06-20 | **Excel preview export** — consolidated VISA2015 → xlsx before import ([EXCEL_PREVIEW_EXPORT.md](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)) |
+| 2026-06-20 | **Status tracker** — [STATUS.md](VISA2014_MIGRATION/STATUS.md) + [migration-status.yaml](VISA2014_MIGRATION/migration-status.yaml) (workstreams, issues, lookup audit) |
+| 2026-06-21 | **File/image import track** — [FILE_AND_IMAGE_IMPORT.md](VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md); Excel excludes binary bytes |

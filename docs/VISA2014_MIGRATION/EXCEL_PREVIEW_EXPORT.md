@@ -4,9 +4,11 @@
 
 This is **not** a raw SQL dump. The export uses the **same transform pipeline** as import (dedupe → column map → lookup translation → defaults) but writes **`.xlsx`** instead of POST/PATCH.
 
-**Status:** specified — CLI **`--export-visa2014-preview`** planned (not implemented until strategy approved).
+**Binary exclusion:** Excel preview is **scalar / tabular review only**. Photo bytes, scan attachments, PDFs, and other blobs are **not** exported to cells — use **audit stub columns** (e.g. `_hasPhoto`, `_photoByteLength`, `_photoSha256`) and import files in a **separate wave** after the owning BO id-map exists. Canonical detail: [FILE_AND_IMAGE_IMPORT.md](./FILE_AND_IMAGE_IMPORT.md).
 
-**Related:** [IMPORT_PLAN_AND_STRATEGY.md](./IMPORT_PLAN_AND_STRATEGY.md) · [field-maps/](../../Visa2026.DataImporter/legacy/visa2014/field-maps/) · [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md)
+**Status:** **Person implemented** — `--export-visa2014-preview --entity Person` (2026-06-21). Other entities TBD.
+
+**Related:** [IMPORT_PLAN_AND_STRATEGY.md](./IMPORT_PLAN_AND_STRATEGY.md) · [FILE_AND_IMAGE_IMPORT.md](./FILE_AND_IMAGE_IMPORT.md) · [field-maps/](../../Visa2026.DataImporter/legacy/visa2014/field-maps/) · [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md)
 
 ---
 
@@ -32,10 +34,13 @@ VISA2015 SQL extract
   → lookup translation (lookup-translations.yaml)
   → apply target-only defaults
   → classify each row (import | skip | duplicate_merged)
+  → strip or stub binary fields (never write bytes to cells)
   → write Excel (no OData)
 ```
 
 If the preview looks wrong, **fix mapping YAML** and re-export — do not POST to Visa2026 to “see what happens”.
+
+**Binary fields:** fields with `transform: bytes`, `FileData`, or `excelExport.mode: stub` | `exclude` are handled per [FILE_AND_IMAGE_IMPORT.md](./FILE_AND_IMAGE_IMPORT.md) — the transform pipeline may read blob metadata from SQL for stubs, but the Excel sink **never** receives raw bytes.
 
 ---
 
@@ -69,10 +74,13 @@ One **`.xlsx`** per entity export (or `--entity all` for multi-sheet workbook �
 |-------------|--------|---------|
 | **Target** | Visa2026 **property names** from `field-maps/{Entity}.yaml` `fields[].target` | Values **after** transform + lookup translation (what OData would receive) |
 | **Audit** (optional, recommended) | `_legacyRowId`, `_legacyTable`, `_dedupeGroupId`, `_importAction` | Traceability; `_importAction` ∈ `import` · `skip` · `duplicate_merged` |
+| **File stub** (binary sources only) | `_hasPhoto`, `_photoByteLength`, `_photoSha256` (or per-field names from field-map `excelExport.stubColumns`) | Presence / size / hash for reconcile — **not** image data |
 
-Column order: audit columns first (if enabled), then target properties in field-map order.
+Column order: audit columns first (if enabled), then file stubs for binary-mapped fields, then scalar target properties in field-map order.
 
 Lookup fields show **translated target** values (catalog `Name`/`Code`), not raw legacy strings.
+
+**Excluded from main sheet:** any column where `excelExport.mode: exclude` — those properties import only in the [file wave](./FILE_AND_IMAGE_IMPORT.md).
 
 ### Sheet `_Skipped`
 
@@ -130,6 +138,7 @@ Open the preview workbook and verify:
 - [ ] `_UnmappedLookups` empty or waived in `lookup-translations.yaml`
 - [ ] `_DedupeSummary` groups and canonical picks match business rules
 - [ ] No surprise empty required target columns (fix `propertyGaps.targetOnly` defaults)
+- [ ] Binary fields show **stubs only** (`_hasPhoto`, lengths, hashes) — no bytes in cells; file import planned separately ([FILE_AND_IMAGE_IMPORT.md](./FILE_AND_IMAGE_IMPORT.md))
 
 Record export path in dossier `importConfirmation.reviewNotes`.
 
@@ -178,3 +187,4 @@ Reuse from existing DataImporter where possible:
 | Date | Change |
 |------|--------|
 | 2026-06-20 | Initial Excel preview export spec (consolidated transform → xlsx before import) |
+| 2026-06-21 | Binary exclusion — stub audit columns; link to FILE_AND_IMAGE_IMPORT.md |

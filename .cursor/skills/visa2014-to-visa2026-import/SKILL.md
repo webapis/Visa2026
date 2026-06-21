@@ -12,9 +12,13 @@ disable-model-invocation: false
 
 **Import plan and strategy (approve before implementation):** [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) · [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml)
 
-**Excel preview (before importConfirmed):** [EXCEL_PREVIEW_EXPORT.md](../../../docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)
+**Excel preview (before importConfirmed):** [EXCEL_PREVIEW_EXPORT.md](../../../docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) — scalar columns only; binary fields use audit stubs, not bytes.
+
+**File/image import (separate wave):** [FILE_AND_IMAGE_IMPORT.md](../../../docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md)
 
 **Dependency order (discovery + import):** [order.yaml](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml)
+
+**Status tracker (done / in progress / issues):** [STATUS.md](../../../docs/VISA2014_MIGRATION/STATUS.md) · [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml)
 
 **Three-layer mapping:** [table-mappings.yaml](../../../docs/VISA2014_MIGRATION/table-mappings.yaml) · [field-maps/](../../../Visa2026.DataImporter/legacy/visa2014/field-maps/) · [lookup-translations.yaml](../../../docs/VISA2014_MIGRATION/lookup-translations.yaml)
 
@@ -36,9 +40,9 @@ disable-model-invocation: false
 
 Follow [MATURITY.md](./MATURITY.md) on **every** migration session:
 
-1. **READ** [learnings.md](./learnings.md) (`## Entries`) and [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) `status`.
+1. **READ** [learnings.md](./learnings.md) (`## Entries`), [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) (`currentFocus`, open `issues`), and [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) `status`.
 2. **WORK** — discovery, strategy draft, or import (respect gates below).
-3. **RECORD** — append [learnings.md](./learnings.md) when a dossier closes, a strategy decision is locked, a pilot reconciles, or a fix is verified.
+3. **RECORD** — update [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) (workstreams, issues, lookup audit); append [learnings.md](./learnings.md) when a dossier closes, a strategy decision is locked, a pilot reconciles, or a fix is verified.
 4. **PROMOTE** — same issue **2+** times → update Troubleshooting or a scenario here; **3+** → [reference.md](./reference.md).
 
 Do not skip step 1 or 3. Optional learnings defeats the purpose of this skill.
@@ -47,7 +51,7 @@ Do not skip step 1 or 3. Optional learnings defeats the purpose of this skill.
 
 ## Preflight (every session)
 
-0. **Read [learnings.md](./learnings.md)** and check **`import-strategy.yaml`** → `status` (`approved` required before any import **implementation**).
+0. **Read** [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) (`currentFocus`, open `issues`) and [learnings.md](./learnings.md); check **`import-strategy.yaml`** → `status` (`approved` required before any import **implementation**).
 1. Workspace root is **Visa2026** — not VISA2014.
 2. **`visa2014-sql-local`** → **`VISA2015`** — **legacy source of truth** (schema, data, lookup values). Read-only.
 3. **`visa2026-sql-local`** → Visa2026 DB (target validation only).
@@ -87,6 +91,9 @@ BO documented — export consolidated preview to Excel?
 
 BO preview reviewed — ready for human sign-off?
   → § Phase 1b — Import confirmation (importConfirmed)
+
+Binary photos / scans / attachments after scalar BO import?
+  → § File and image import (FILE_AND_IMAGE_IMPORT.md)
 
 Strategy approved + BO confirmed — build importer?
   → § Phase 2 — Implementation (shell then per entity)
@@ -298,7 +305,26 @@ Output: `legacy/visa2014/preview-export/` — **`.xlsx` gitignored** (PII).
 3. Set dossier checklist `excel_preview_exported: true`.
 4. Proceed to Phase **1b** confirmation (or fix mapping and re-export).
 
+**Binary fields:** Photo and file attachments are **not** in Excel cells — stub columns only. Import bytes in a **file follow-up pass** after scalar OData ([FILE_AND_IMAGE_IMPORT.md](../../../docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md)).
+
 **Append [learnings.md](./learnings.md)** if export surfaced mapping gaps or surprise row counts.
+
+---
+
+## File and image import (after scalar BO + id-map)
+
+**Canonical spec:** [FILE_AND_IMAGE_IMPORT.md](../../../docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md)
+
+### When to run
+
+After owning BO scalar import reconciled and `id-map/` populated. **Person.Photo** immediately after Person pilot; `PassportCopy` / scans in **attachments** wave last.
+
+### Rules
+
+- Excel preview never embeds bytes — `_hasPhoto`, `_photoByteLength`, `_photoSha256` stubs only.
+- Planned CLI: `--import-visa2014-files` (after strategy approved).
+- Idempotency via hash + byte length; quarantine corrupt/oversize files.
+- Resolve `openDecisions.file-blob-strategy` before prod cutover.
 
 ---
 

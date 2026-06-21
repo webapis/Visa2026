@@ -2,7 +2,7 @@
 
 **Purpose:** Define **how** production data will be imported **before** any `--import-visa2014` implementation or OData load. Discovery and per-BO mapping answer *what* maps where; this document answers *when*, *where*, *in what order*, and *with what safeguards*.
 
-**Status:** `draft` — **no import code until strategy is `approved`** ([`import-strategy.yaml`](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml)).
+**Status:** `approved` (2026-06-21) — [`import-strategy.yaml`](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml). Per-BO `importConfirmed` and Excel preview still required before OData load.
 
 **Related:**
 
@@ -54,9 +54,10 @@ These are **defaults** until changed here and in `import-strategy.yaml`. Update 
 | Legacy GUIDs | **Do not reuse** as Visa2026 `ID` | Use natural-key upsert + `id-map/` for FK resolution |
 | Lookup alignment | **Module seed + `lookup-translations.yaml`** | No string-equality match between DBs |
 | Dedupe | **Before POST**, one row per business key | Document keys in field-map `deduplication` |
-| **Import preview** | **Excel export** of consolidated transform output | Same pipeline as OData; [EXCEL_PREVIEW_EXPORT.md](../VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) |
+| **Import preview** | **Excel export** of consolidated transform output | Same pipeline as OData; [EXCEL_PREVIEW_EXPORT.md](../VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) — **scalar only**; binary stubs, not bytes |
+| **Files / images** | **Separate track** after owning BO id-map | [FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md); attachments wave last |
 | First target DB | **`Visa2026DbDev`** (disposable) | Never first full run on production |
-| Attachments / files | **Separate wave, last** | After owning BOs and id-map stable |
+| Attachments / files | **Separate wave, last** | After owning BOs and id-map stable; Person Photo = follow-up after scalar Person |
 | Prod cutover | **Staging UAT → prod runbook → rollback plan** | See § 8 |
 
 ### Open decisions (fill before `approved`)
@@ -67,7 +68,7 @@ These are **defaults** until changed here and in `import-strategy.yaml`. Update 
 | 2 | Staging DB for UAT | `Visa2026DbStaging` on IIS slot vs Docker dev | _TBD_ | | |
 | 3 | Partial prod cutover | Big-bang vs domain waves (person → application → permits) | _TBD_ | | |
 | 4 | Legacy rows with unmapped lookups | `block_row` vs quarantine table vs manual fix first | _TBD_ | | |
-| 5 | File storage for scans | Copy blobs to Visa2026 file store vs re-link paths | _TBD_ | | |
+| 5 | File storage for scans | Copy blobs to Visa2026 file store vs re-link paths | _TBD_ | | See [FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md) § options |
 
 ---
 
@@ -83,7 +84,9 @@ Waves match [`importPhases`](../../Visa2026.DataImporter/legacy/visa2014/order.y
 | **3 — Application domain** | `application-domain` | Application, ApplicationItem | Person imported + id-map; dossiers confirmed |
 | **4 — Permits & visas** | `permits-and-visas` | Invitation, WorkPermit, Visa, BorderZone, Rejection | Application domain stable |
 | **5 — Progress & history** | `progress-and-history` | ApplicationProgress, legacy state | Owning applications imported |
-| **6 — Attachments** | `attachments` | File blobs, scan links | Parent BO id-map complete |
+| **6 — Attachments** | `attachments` | File blobs, scan links (`PassportCopy`, `FileData`, …) | Parent BO id-map complete; scalar OData reconciled |
+
+**Person pilot:** wave 2 loads **scalar Person** first; **`Person.Photo`** in a **file follow-up pass** (same pilot, after id-map) — not in Excel preview bytes. See [FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md).
 
 **Pilot rule:** first OData load in each wave = **one BO**, verbose logging, count reconciliation, learnings appended — then expand within the wave.
 
@@ -114,7 +117,7 @@ When strategy is `approved`, implement in this order:
 - [ ] CLI flag `--import-visa2014` on `Visa2026.DataImporter`
 - [ ] CLI flag **`--export-visa2014-preview`** — consolidated SQL → Excel ([EXCEL_PREVIEW_EXPORT.md](../VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md))
 - [ ] Read `legacy/visa2014/order.yaml`, `field-maps/`, `lookup-translations.yaml`
-- [ ] **Shared transform** used by preview export and OData load (no duplicate mapping logic)
+- [ ] **Shared transform** used by preview export and OData load (no duplicate mapping logic); **binary fields stubbed in Excel**, loaded in file pass ([FILE_AND_IMAGE_IMPORT.md](../VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md))
 - [ ] SQL extract from **`VISA2015`** (connection from env — not hardcoded prod)
 - [ ] Shared pipeline: extract → dedupe → transform → id-map resolve → OData upsert → reconcile
 - [ ] Import summary: success / failed / skipped / dedupeMerged
@@ -212,7 +215,7 @@ When this plan and open decisions are acceptable:
 2. Append a learnings entry (strategy locked).
 3. Only then start **§ 5.1 Shell** implementation.
 
-Until approved: discovery and mapping work continue; **no import code**.
+**Approved** 2026-06-21 — import implementation may proceed after per-BO gates (Excel preview + `importConfirmed`).
 
 ---
 
@@ -220,5 +223,7 @@ Until approved: discovery and mapping work continue; **no import code**.
 
 | Date | Change |
 |------|--------|
+| 2026-06-21 | Strategy **approved** — `import-strategy.yaml` status: approved; implementation unblocked |
 | 2026-06-20 | Initial import plan and strategy (draft); gates strategy before implementation |
 | 2026-06-20 | **Excel preview export** — consolidated VISA2015 → xlsx before import confirmation |
+| 2026-06-21 | **File/image import track** — separate from Excel; link FILE_AND_IMAGE_IMPORT.md |

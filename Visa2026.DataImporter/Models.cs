@@ -1131,6 +1131,9 @@ public class ProjectContract
     [JsonPropertyName("NameTm")]
     public string NameTm { get; set; } = "";
 
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }
 }

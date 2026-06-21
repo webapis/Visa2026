@@ -87,4 +87,82 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 
 ## Entries
 
-_(None yet — append after verified discovery, strategy approval, or pilot import.)_
+### 2026-06-20 — Person — bootstrap + discovery complete
+
+- **Phase**: discovery
+- **Dossier**: docs/VISA2014_MIGRATION/discovery/Person.yaml
+- **Legacy table(s)**: dbo.Person (2,569 active), dbo.Employee (1:1), dbo.Passport (child)
+- **Symptom / surprise**:
+  - `Person.IDNumber` holds employer names, not civil ID — use `Passport.PersonalNumber`
+  - Legacy `MaritalStatus.Status` is free-text family narrative, not Visa2026 catalog
+  - 270 persons with multiple passports; 6 PersonalNumber collisions across different Person Oids
+- **SQL / MCP that helped**: sqlcmd to `localhost\SQLEXPRESS` / VISA2015 (MCP visa2014-sql-local not in mcps folder — reload Cursor MCP)
+- **Fix / mapping change**: table-mappings `person-main`, field-map with canonical passport join, Gender layer-3 rows
+- **Reconciliation**: 2,569 active Person; 2,410 IsEmployee; 159 IsFamilyMember; 0 active without passport
+- **Prevent**: Always read Passport for PersonalNumber; do not map IDNumber; audit MaritalStatus at importConfirmed
+- **Artifacts**: schema-snapshot.md, Person.yaml, field-maps/Person.yaml, lookup-translations.yaml (Gender; Country completed in follow-up entry)
+
+### 2026-06-20 — Person — Passport.PersonalNumber deep dive
+
+- **Phase**: discovery
+- **Legacy table(s)**: dbo.Passport (2,860 active rows)
+- **Symptom / surprise**:
+  - Civil ID lives on **Passport.PersonalNumber**, not Person (Person has no PersonalNumber column)
+  - Person.**IDNumber** = employer/subcontractor text in production samples; legacy ImpPersonID → IDNumber link unused (0 rows)
+  - Placeholders: **822** passports with `-`, **282** with `.` — map to Visa2026 sentinel `0`
+  - **781** persons share PersonalNumber `-` (not unique across persons)
+  - **29** persons have different PersonalNumber on different passports for same person
+  - Dominant real ID length **11 digits** (Turkish TC-style)
+- **Fix / mapping change**: canonical passport ORDER BY non-sentinel first, then PassportIssuedDate DESC; normalize `-`/`.` → `0`
+- **Prevent**: Never upsert Person from Person.IDNumber; Passport import BO keeps per-passport PersonalNumber copy (Visa2026 Passport.PersonalNumber is hidden/legacy)
+
+### 2026-06-20 — Person — Visa2026 PersonalNumber uniqueness
+
+- **Phase**: discovery
+- **Visa2026 rules**: `IX_People_PersonalNumber` (unique except NULL/''/'0'); `Person_PersonalNumberUniqueAmongActive` on save
+- **Legacy impact**: ~1,024 persons → `"0"` (OK); **5 real PN values** each on **2 Person Oids** (same name+DOB — duplicate legacy rows)
+- **Fix**: Dedupe merge on real PN before POST; **upsert/id-map on legacy Person.Oid** — not PersonalNumber as sole OData upsert key
+- **Prevent**: Importer must normalize `-`/`.` → `"0"` and merge PN duplicates or OData/DB will reject second insert
+
+### 2026-06-20 — Country — Person-scope lookup audit complete
+
+- **Phase**: mapping
+- **Legacy table(s)**: dbo.Country (1,861 rows, 240 distinct codes; many duplicate Oids per code)
+- **Symptom / surprise**: Only **64** DISTINCT `NameOfCountryL` codes used on active Person (BirthCountry, ForeignAddressCountry, Passport.Citizenship) — all match Visa2026 `country.json` `Code` **1:1** (including `UAE`, not `ARE`)
+- **SQL / MCP that helped**: sqlcmd UNION DISTINCT across three Person FK paths on VISA2015
+- **Fix / mapping change**: 64 identity rows in `lookup-translations.yaml`; resolve by string Code not legacy Oid; `unmappedPolicy: block_row` safe for Person import
+- **Prevent**: Re-audit Country DISTINCT when Application/other BOs add country FKs; do not import legacy Country table
+- **Artifacts**: lookup-translations.yaml (Country audit block + values[]), migration-status.yaml (ISS-002 resolved)
+
+### 2026-06-21 — strategy — file/image import separate from Excel
+
+- **Phase**: strategy
+- **Open decision id** (import-strategy.yaml): file-blob-strategy
+- **Chosen option**: Planning locked — two tracks (scalar Excel/OData vs file wave); Person.Photo follow-up after scalar Person; attachments wave last. Transport TBD (recommend base64 PATCH for Photo, FileData two-step for scans).
+- **Why**: Excel cannot hold photo/scan bytes for human review; 2,567/2,569 active Person rows have Photo (avg ~473 KB, max ~15 MB). PassportCopy ~9,157 rows deferred to attachments wave.
+- **Artifacts**: FILE_AND_IMAGE_IMPORT.md, EXCEL_PREVIEW_EXPORT.md, import-strategy.yaml, field-maps/Person.yaml (Photo stubs)
+
+### 2026-06-21 — strategy — import plan approved
+
+- **Phase**: strategy
+- **Open decision id** (import-strategy.yaml): (global approval — openDecisions[] remain for prod cutover)
+- **Chosen option**: Baseline strategy in IMPORT_PLAN_AND_STRATEGY.md approved; `implementationBlocked: false`
+- **Why**: Developer sign-off in chat; unblocks Excel preview CLI and `--import-visa2014` scaffolding. OData load still gated per BO by Excel preview + `importConfirmed`.
+- **Artifacts**: import-strategy.yaml (status approved), IMPORT_PLAN_AND_STRATEGY.md, migration-status.yaml (ISS-001 resolved)
+
+### 2026-06-21 — Person — excel preview export
+
+- **Phase**: excel-preview
+- **Export path**: Visa2026.DataImporter/legacy/visa2014/preview-export/Person-preview.xlsx
+- **Counts**: legacy 2569 → import 2553 + duplicate_merged 5 + skipped 11
+- **Surprises**: 3 sqlcmd parse junk rows skipped; 22 distinct unmapped Relationship/ProjectContract values on _UnmappedLookups sheet
+- **Ready for importConfirmed**: pending human review
+
+### 2026-06-21 — MaritalStatus — Status int approved + lookup review gate
+
+- **Phase**: mapping | strategy
+- **Legacy table(s)**: dbo.MaritalStatus (Status int 0–5 + StatusL narrative; 1,965 lookup rows)
+- **Symptom / surprise**: Not free-text-only — coarse bucket is `Status` int; StatusL is family narrative (1,582 distinct prefixes for Status=0 alone)
+- **Fix / mapping change**: Approved map Status 0–5 → Visa2026 `Code` (0→Öýlenen per user sign-off); StatusL → `VisaApplicationFamilyMembersText`; layer 3 in lookup-translations.yaml; preview exporter joins ms and translates
+- **Prevent**: Do not set Person `importConfirmed` until person-wave queue complete (Relationship + ProjectContract next); application-wave gate before Application importConfirmed
+- **Artifacts**: lookup-translations.yaml (MaritalStatus values[]), lookup-comparisons/lookup-review-queue.yaml, MaritalStatus.md/.yaml (approved), ISS-003 resolved, ISS-012 open

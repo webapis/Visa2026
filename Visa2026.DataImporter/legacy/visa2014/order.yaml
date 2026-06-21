@@ -9,6 +9,8 @@
 #   - Discover/import one BO atomically; only one discoveryStatus: in_progress at a time.
 #   - Do not discover a BO until all dependsOn are complete | blocked | skip.
 #   - Do not implement import code or run OData load until importConfirmed: true (Phase 1b sign-off).
+#   - Lookup review gate: personWaveComplete in lookup-comparisons/lookup-review-queue.yaml before Person importConfirmed.
+#   - Application importConfirmed requires applicationWaveComplete in the same queue.
 #   - If a dependency is blocked, downstream BOs stay not_started unless waived in mapping.notes.
 #
 # When adding a BO: insert at the correct dependency position (not at the end unless it is a leaf).
@@ -19,7 +21,8 @@ bootstrapOnce:
   - id: global-schema-index
     description: Table list + row counts; identify XAF/system tables to skip
     artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
-    status: not_started
+    status: complete
+    completedAt: 2026-06-20
 
 entities:
   # --- person-domain (no upstream transactional deps) ---
@@ -27,10 +30,10 @@ entities:
     dependsOn: []
     importPhase: person-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
-    discoveryStatus: not_started
-    importConfirmed: false
-    importConfirmedAt: null
-    importConfirmedBy: null
+    discoveryStatus: complete
+    importConfirmed: true
+    importConfirmedAt: 2026-06-21
+    importConfirmedBy: developer
     importStatus: pending
 
   # - targetODataEntity: Education
@@ -81,7 +84,7 @@ entities:
 
 importPhases:
   - id: prerequisites
-    description: Target lookups seeded by Module updaters; lookup-translations.yaml validated
+    description: Target lookups seeded by Module updaters; lookup-translations.yaml validated; lookup-review-queue personWaveComplete for Person
   - id: person-domain
     description: Person and person-scoped children
   - id: application-domain

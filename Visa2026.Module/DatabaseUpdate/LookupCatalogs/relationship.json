@@ -44,6 +44,16 @@
                      "NameTm":  "ogly",
                      "LocalizationKey":  "Son",
                      "ReverseNameTm":  "kakasy"
+                 },
+                 {
+                     "NameTm":  "ejesi",
+                     "LocalizationKey":  "Mother",
+                     "ReverseNameTm":  "ogly"
+                 },
+                 {
+                     "NameTm":  "aýal doganyň adamsy (giýewisi)",
+                     "LocalizationKey":  "BrotherInLaw",
+                     "ReverseNameTm":  "aýal dogany"
                  }
              ]
 }

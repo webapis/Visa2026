@@ -1,0 +1,344 @@
+# VISA2014 → Visa2026 — migration status tracker
+#
+# Human dashboard: STATUS.md (same folder)
+#
+# Update rules:
+#   - Set lastUpdated + updatedBy on every edit.
+#   - Entity discovery/import flags: canonical in order.yaml — mirror summary only in entity-inventory.yaml.
+#   - Add/close issues here; do not bury blockers only in dossier notes.
+#   - When an issue is resolved, set status: resolved + resolvedAt; keep the row for history.
+#   - When a workstream completes, set status: done + completedAt.
+#
+# Status values:
+#   workstreams: not_started | in_progress | blocked | done
+#   issues: open | in_progress | resolved | deferred | wont_fix
+
+version: 1
+lastUpdated: 2026-06-21
+updatedBy: developer — Person importConfirmed
+
+entityStatusSource: Visa2026.DataImporter/legacy/visa2014/order.yaml
+entitySummarySource: docs/VISA2014_MIGRATION/entity-inventory.yaml
+
+currentFocus:
+  - Person pilot OData import (--import-visa2014 Person) when implemented
+  - ApplicationType lookup comparison → Application discovery
+  - Passport in order.yaml (ISS-005) before ApplicationItem
+
+workstreams:
+  - id: bootstrap
+    label: VISA2015 schema bootstrap (table index + row counts)
+    status: done
+    artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
+    completedAt: 2026-06-20
+    notes: 94 tables indexed in schema-snapshot.md
+
+  - id: lookup-strategy
+    label: Lookup resolution strategy (translate only — no legacy lookup import)
+    status: done
+    artifact: docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md
+    completedAt: 2026-06-20
+
+  - id: import-strategy
+    label: Import plan and strategy approved
+    status: done
+    artifact: Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml
+    completedAt: 2026-06-21
+    notes: |
+      Approved 2026-06-21 (developer sign-off). implementationBlocked: false.
+      openDecisions[] remain TBD for prod cutover; do not block dev pilot scaffolding.
+
+  - id: lookup-audit
+    label: Layer 3 lookup value audit (lookup-translations.yaml)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/lookup-translations.yaml
+    notes: |
+      Gender: done (2 values).
+      Country: done for Person scope (64 identity Code mappings, 2026-06-20).
+      MaritalStatus: approved 2026-06-21 — Status int 0–5 → Visa2026 Code (6 values).
+      Relationship: approved 2026-06-21 — RelativeAsL → NameTm (8 values); Mother + BrotherInLaw catalog rows.
+      ProjectContract: approved 2026-06-21 — experimental remap all legacy codes → GT-15.
+      ApplicationType + other catalogs: not started (application-wave gate).
+      Queue: lookup-comparisons/lookup-review-queue.yaml
+
+  - id: phase1-discovery
+    label: Phase 1 per-BO discovery (dossiers + layers 1–3)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/discovery/
+    notes: Person complete; Application + ApplicationItem not started.
+
+  - id: excel-preview
+    label: Excel preview export (--export-visa2014-preview)
+    status: done
+    artifact: docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md
+    completedAt: 2026-06-21
+    notes: |
+      Person export complete; Person-preview.xlsx reviewed; importConfirmed 2026-06-21.
+      Other entities not started.
+
+  - id: file-image-import
+    label: File and image import (binary wave — separate from Excel)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md
+    blockedBy: [import-implementation, pilot-import]
+    notes: |
+      Planning complete 2026-06-21. Person.Photo follow-up after scalar Person;
+      PassportCopy / FileData in attachments wave. openDecisions.file-blob-strategy TBD.
+
+  - id: import-implementation
+    label: OData import implementation (--import-visa2014)
+    status: not_started
+    artifact: Visa2026.DataImporter/
+    blockedBy: [excel-preview]
+    notes: Strategy approved. Shell/scaffolding may start; OData load still requires per-BO importConfirmed.
+
+  - id: pilot-import
+    label: Pilot OData load (Visa2026DbDev)
+    status: not_started
+    blockedBy: [import-implementation, phase1-discovery]
+    notes: Person is pilot entity after importConfirmed.
+
+# Per-catalog lookup audit (subset of lookup-audit workstream)
+lookupCatalogAudit:
+  - catalog: Gender
+    usedBy: [Person]
+    auditStatus: done
+    valuesMapped: 2
+    unmappedPolicy: allow_null
+    notes: Ayal→Aýal, Erkek→Erkek
+
+  - catalog: Country
+    usedBy: [Person]
+    auditStatus: done
+    valuesMapped: 64
+    unmappedPolicy: block_row
+    auditedAt: 2026-06-20
+    notes: |
+      Person-scope: BirthCountry, ForeignAddressCountry, Passport.Citizenship.
+      All 64 DISTINCT NameOfCountryL codes map 1:1 to Visa2026 Country.Code (identity).
+      Re-audit when Application/other BOs add Country FKs. Legacy duplicate Oids per code — resolve by string.
+
+  - catalog: MaritalStatus
+    usedBy: [Person]
+    auditStatus: approved
+    valuesMapped: 6
+    unmappedPolicy: allow_null
+    auditedAt: 2026-06-21
+    comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MaritalStatus.md
+    notes: |
+      Approved 2026-06-21: Status int 0–5 → Visa2026 Code; Status=0 → Öýlenen.
+      StatusL narrative → VisaApplicationFamilyMembersText (not catalog).
+      2569 Person rows with FK; 6 coarse buckets mapped.
+
+  - catalog: Relationship
+    usedBy: [Person]
+    auditStatus: approved
+    valuesMapped: 8
+    unmappedPolicy: allow_null
+    auditedAt: 2026-06-21
+    comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Relationship.md
+    notes: |
+      Approved 2026-06-21: RelativeAsL → NameTm; 159 Person FK hits all mapped.
+      Mother + BrotherInLaw added to relationship.json.
+
+  - catalog: ProjectContract
+    usedBy: [Person, Application]
+    auditStatus: approved
+    valuesMapped: 15
+    unmappedPolicy: allow_null
+    auditedAt: 2026-06-21
+    comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.md
+    notes: |
+      Approved 2026-06-21: experimental pilot — all 15 legacy NumberOfContract → GT-15.
+      Gap Insaat VISA2015 on Calik Enerji tenant; not production contract fidelity.
+
+  - catalog: ApplicationType
+    usedBy: [Application, ApplicationItem]
+    auditStatus: not_started
+    valuesMapped: null
+    unmappedPolicy: null
+    notes: Required before Application discovery closes
+
+issues:
+  - id: ISS-001
+    title: Import strategy not approved
+    status: resolved
+    severity: blocker
+    category: strategy
+    relatedTo: [import-strategy]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: Approved 2026-06-21; import-strategy.yaml status approved, implementationBlocked false.
+
+  - id: ISS-002
+    title: Country lookup values[] empty while unmappedPolicy is block_row
+    status: resolved
+    severity: high
+    category: lookup
+    relatedTo: [Person, Country]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-20
+    owner: null
+    notes: |
+      Person-scope audit complete: 64 DISTINCT NameOfCountryL → identity Country.Code in lookup-translations.yaml.
+      Legacy dbo.Country has duplicate Oids per code — importer resolves by translated Code string.
+
+  - id: ISS-003
+    title: MaritalStatus legacy shape is not Visa2026 catalog
+    status: resolved
+    severity: medium
+    category: lookup
+    relatedTo: [Person, MaritalStatus]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Approved 2026-06-21: Status int 0–5 → Visa2026 Code in lookup-translations.yaml.
+      Status=0 → Öýlenen (Married); StatusL → VisaApplicationFamilyMembersText.
+      Comparison: lookup-comparisons/MaritalStatus.md
+
+  - id: ISS-012
+    title: Person importConfirmed blocked — person-wave lookup review incomplete
+    status: resolved
+    severity: medium
+    category: lookup
+    relatedTo: [Person, Relationship, ProjectContract, lookup-audit]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Resolved 2026-06-21: person-wave complete in lookup-review-queue.yaml.
+      Gender, Country, MaritalStatus, Relationship, ProjectContract all approved.
+      ProjectContract uses GT-15 experimental remap (Gap Insaat → Calik Energi tenant).
+      Person importConfirmed true 2026-06-21 (ISS-007 resolved).
+
+  - id: ISS-013
+    title: Relationship lookup gaps — ejesi and giyewisi not in Visa2026 catalog
+    status: resolved
+    severity: medium
+    category: lookup
+    relatedTo: [Person, Relationship]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Resolved 2026-06-21: Mother (ejesi) + BrotherInLaw added to relationship.json;
+      lookup-translations.yaml values[] complete; preview exporter wired.
+
+  - id: ISS-014
+    title: ProjectContract — 15 legacy codes missing from tenant catalog (E1 seed)
+    status: resolved
+    severity: high
+    category: lookup
+    relatedTo: [Person, Application, ProjectContract]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Resolved 2026-06-21: waived E1 for pilot — all legacy NumberOfContract → GT-15.
+      Gap Insaat legacy data on Calik Enerji tenant seed; lookup-translations.yaml complete.
+
+  - id: ISS-004
+    title: Five real PersonalNumber duplicate person pairs (10 legacy Oids)
+    status: open
+    severity: medium
+    category: data-quality
+    relatedTo: [Person]
+    openedAt: 2026-06-20
+    owner: null
+    notes: Merge before POST; upsert on legacy Oid; ~2,564 persons after dedupe.
+
+  - id: ISS-005
+    title: Passport BO not in order.yaml
+    status: open
+    severity: medium
+    category: discovery
+    relatedTo: [Person, Passport, ApplicationItem]
+    openedAt: 2026-06-20
+    owner: null
+    notes: PersonalNumber lives on Passport; child import likely needed before ApplicationItem.
+
+  - id: ISS-006
+    title: Excel preview CLI not implemented
+    status: resolved
+    severity: high
+    category: tooling
+    relatedTo: [excel-preview, Person]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Person --export-visa2014-preview implemented and reviewed 2026-06-21.
+      Output: Visa2026.DataImporter/legacy/visa2014/preview-export/Person-preview.xlsx
+
+  - id: ISS-007
+    title: Person importConfirmed false — awaiting human review
+    status: resolved
+    severity: medium
+    category: discovery
+    relatedTo: [Person]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      importConfirmed true 2026-06-21 (developer) after Person-preview.xlsx review.
+      Person-wave lookups complete; GT-15 contract pilot remap documented.
+
+  - id: ISS-008
+    title: Application discovery not started
+    status: open
+    severity: medium
+    category: discovery
+    relatedTo: [Application]
+    openedAt: 2026-06-20
+    owner: null
+    notes: |
+      Blocked on applicationWaveComplete in lookup-review-queue.yaml for importConfirmed.
+      Discovery may start in parallel after Person person-wave gate progresses.
+
+  - id: ISS-009
+    title: Open strategic decisions (service account, staging DB, cutover, files)
+    status: open
+    severity: medium
+    category: strategy
+    relatedTo: [import-strategy]
+    openedAt: 2026-06-20
+    owner: null
+    notes: See import-strategy.yaml openDecisions[] and IMPORT_PLAN_AND_STRATEGY.md §2.
+
+  - id: ISS-010
+    title: Legacy lookup tables may contain duplicate/unused rows
+    status: in_progress
+    severity: low
+    category: lookup
+    relatedTo: [lookup-audit, Country]
+    openedAt: 2026-06-20
+    owner: null
+    notes: |
+      Process defined in LOOKUP_RESOLUTION_STRATEGY.md — inventory DISTINCT from transactional FKs only;
+      consolidate aliases in lookup-translations.yaml; investigate gaps (E1–E5).
+      Country Person-scope: duplicate Oids documented; resolve by NameOfCountryL not Oid.
+
+  - id: ISS-011
+    title: Binary fields must not go to Excel preview — separate file import wave
+    status: in_progress
+    severity: medium
+    category: strategy
+    relatedTo: [file-image-import, excel-preview, Person]
+    openedAt: 2026-06-21
+    owner: null
+    notes: |
+      FILE_AND_IMAGE_IMPORT.md specifies stub columns (_hasPhoto, length, hash) and ordering:
+      scalar OData → Person Photo → application scans → attachments wave last.
+      openDecisions.file-blob-strategy still TBD at strategy approval.
+
+resolvedIssues:
+  - ISS-001
+  - ISS-002
+  - ISS-003
+  - ISS-006
+  - ISS-007
+  - ISS-012
+  - ISS-013
+  - ISS-014
