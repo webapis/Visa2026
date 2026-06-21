@@ -1,0 +1,55 @@
+# Discovery dossier — Person (pilot BO)
+# dependsOn: [] — first in order.yaml. Finish before Application.
+
+targetODataEntity: Person
+discoveryStatus: not_started
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |
+
+legacy:
+  boClass: null
+  boPath: null
+  tables: []
+  rowCount: null
+  primaryKey: null
+  softDeleteColumn: null
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Person.cs
+  docPath: Visa2026.Module/BusinessObjects/Person.md
+  odataExposed: unknown
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Person.yaml
+  tableMappingId: person-employee
+  cardinality: null
+  upsertKeys:
+    - PassportNumber
+  lookupDependencies:
+    - Department
+    - Gender
+    - MaritalStatus
+    - Country
+  blockedReason: null
+  notes: |
+    Pilot entity. Layer 1 table-mappings.yaml + layer 3 lookup-translations.yaml for each lookupDependency.
+
+checklist:
+  target_bo_reviewed: false
+  legacy_bo_located: false
+  legacy_schema_documented: false
+  table_mapping_registered: false
+  column_mapping_complete: false
+  lookup_values_mapped: false
+  property_gaps_documented: false
+  dedupe_rules_defined: false
+  excel_preview_exported: false
+  inventory_updated: false
+  learnings_appended: false
+
+completedAt: null
+completedBy: null

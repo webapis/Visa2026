@@ -1,0 +1,94 @@
+# VISA2014 → Visa2026 — canonical dependency order
+#
+# Single source of truth for:
+#   - Phase 1 discovery (walk `entities` top-to-bottom, respect dependsOn)
+#   - Phase 4+ OData import (same sequence)
+#
+# Rules:
+#   - Array order MUST be a topological sort: every dependsOn target appears earlier in the list.
+#   - Discover/import one BO atomically; only one discoveryStatus: in_progress at a time.
+#   - Do not discover a BO until all dependsOn are complete | blocked | skip.
+#   - Do not implement import code or run OData load until importConfirmed: true (Phase 1b sign-off).
+#   - If a dependency is blocked, downstream BOs stay not_started unless waived in mapping.notes.
+#
+# When adding a BO: insert at the correct dependency position (not at the end unless it is a leaf).
+
+version: 1
+
+bootstrapOnce:
+  - id: global-schema-index
+    description: Table list + row counts; identify XAF/system tables to skip
+    artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
+    status: not_started
+
+entities:
+  # --- person-domain (no upstream transactional deps) ---
+  - targetODataEntity: Person
+    dependsOn: []
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
+    discoveryStatus: not_started
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+
+  # - targetODataEntity: Education
+  #   dependsOn: [Person]
+  #   importPhase: person-domain
+  #   discoveryDossier: docs/VISA2014_MIGRATION/discovery/Education.yaml
+  #   discoveryStatus: not_started
+  #   importStatus: pending
+
+  # --- application-domain ---
+  - targetODataEntity: Application
+    dependsOn:
+      - Person
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Application.yaml
+    discoveryStatus: not_started
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+
+  - targetODataEntity: ApplicationItem
+    dependsOn:
+      - Person
+      - Application
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
+    discoveryStatus: not_started
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+
+  # --- permits-and-visas (after application-domain) ---
+  # - targetODataEntity: Invitation
+  #   dependsOn: [Application]
+  #   importPhase: permits-and-visas
+  #   ...
+
+  # --- progress-and-history ---
+  # - targetODataEntity: ApplicationProgress
+  #   dependsOn: [Application]
+  #   importPhase: progress-and-history
+  #   ...
+
+  # --- attachments (last) ---
+  # File blobs / scan links — often separate pipeline; discover after owning BOs.
+
+importPhases:
+  - id: prerequisites
+    description: Target lookups seeded by Module updaters; lookup-translations.yaml validated
+  - id: person-domain
+    description: Person and person-scoped children
+  - id: application-domain
+    description: Application header and items
+  - id: permits-and-visas
+    description: Invitation, WorkPermit, Visa, BorderZone, Rejection
+  - id: progress-and-history
+    description: ApplicationProgress and legacy state history
+  - id: attachments
+    description: File blobs and scan links

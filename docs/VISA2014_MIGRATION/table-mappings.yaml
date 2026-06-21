@@ -1,0 +1,25 @@
+# VISA2014 table → Visa2026 OData entity mapping
+# Layer 1 — see docs/VISA2014_MIGRATION.md § Mapping protocol
+
+version: 1
+
+# Example (uncomment when Person discovery confirms tables):
+#
+# mappings:
+#   - id: person-employee
+#     legacy:
+#       schema: dbo
+#       table: Employee
+#       boClass: Employee
+#       boPath: null
+#     target:
+#       odataEntity: Person
+#       boPath: Visa2026.Module/BusinessObjects/Person.cs
+#     relationship: merge
+#     legacyTablesExtra: []
+#     fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Person.yaml
+#     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
+#     status: pending
+#     notes: ""
+
+mappings: []

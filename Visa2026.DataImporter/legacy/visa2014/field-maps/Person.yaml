@@ -1,0 +1,90 @@
+# Person pilot field map — layer 2 column mapping
+# Layer 1: table-mappings.yaml (id: person-employee)
+# Layer 3: lookup-translations.yaml (Department, Gender, …)
+
+tableMappingId: person-employee
+
+source:
+  table: null
+  schema: dbo
+target:
+  odataEntity: Person
+
+deduplication:
+  enabled: true
+  keys:
+    - PassportNumber
+  canonicalRule: most_complete
+  tieBreakColumn: null
+  mergeBeforeImport: coalesce_non_null
+  action: import_one
+  discoveryQuery: |
+    -- SELECT PassportNumber, COUNT(*) AS cnt FROM dbo.YourLegacyPersonTable
+    -- WHERE PassportNumber IS NOT NULL
+    -- GROUP BY PassportNumber HAVING COUNT(*) > 1
+
+propertyGaps:
+  legacyOnly: []
+  targetOnly: []
+  mismatches: []
+
+fields:
+  - source: null
+    target: PassportNumber
+    upsertKey: true
+    transform: identity
+    missingBehavior: skip_row
+    notes: Confirm legacy column name
+
+  - source: null
+    target: FirstName
+    transform: identity
+    missingBehavior: use_default
+    default: constant
+    defaultValue: ""
+
+  - source: null
+    target: LastName
+    transform: identity
+    missingBehavior: use_default
+    default: constant
+    defaultValue: ""
+
+  - source: null
+    target: BirthDate
+    transform: date
+    missingBehavior: allow_null
+
+  - source: null
+    target: Department
+    transform: lookup
+    lookupCatalog: Department
+    lookupMatch: Name
+    missingBehavior: allow_null
+    notes: Map each legacy value in lookup-translations.yaml catalogs[Department].values
+
+  - source: null
+    target: Gender
+    transform: lookup
+    lookupCatalog: Gender
+    lookupMatch: Name
+    missingBehavior: use_default
+
+import:
+  rowFilter: null
+  rowFilterNote: null
+
+export:
+  sheetName: Person
+  includeAuditColumns: true
+  auditColumns:
+    - _legacyRowId
+    - _legacyTable
+    - _dedupeGroupId
+    - _importAction
+  lastExportedAt: null
+  lastExportPath: null
+
+notes: |
+  Register legacy table in table-mappings.yaml when confirmed.
+  Duplicate passports — deduplication block before OData POST.

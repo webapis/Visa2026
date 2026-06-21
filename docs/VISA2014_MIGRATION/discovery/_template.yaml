@@ -1,0 +1,54 @@
+# Per-BO discovery dossier — copy to {TargetODataEntity}.yaml and work atomically.
+# Discovery order: Visa2026.DataImporter/legacy/visa2014/order.yaml → entities[] (dependsOn).
+# Do not start this BO until all dependsOn dossiers are complete | blocked | skip.
+
+targetODataEntity: null          # Visa2026 OData entity set name (e.g. Person)
+discoveryStatus: not_started       # not_started | in_progress | complete | blocked | skip
+
+legacy:
+  boClass: null                    # VISA2014 class name — hint from repo; table/columns from VISA2015 SQL
+  boPath: null                     # path in VISA2014 repo (via visa2014-readonly-files) — supplementary
+  tables: []                       # from VISA2015 (visa2014-sql-local) — authoritative
+  rowCount: null
+  primaryKey: null
+  softDeleteColumn: null           # e.g. GCRecord, IsDeleted — or null
+
+visa2026:
+  boPath: null                     # e.g. Visa2026.Module/BusinessObjects/Person.cs
+  docPath: null                    # e.g. Visa2026.Module/BusinessObjects/Person.md
+  odataExposed: null               # true | false | unknown — WebApiServiceExtensions.cs
+
+mapping:
+  fieldMapFile: null
+  tableMappingId: null             # table-mappings.yaml id
+  cardinality: null
+  upsertKeys: []
+  lookupDependencies: []
+  duplicateGroups: null          # count from dedupe SQL probe (0 = none found)
+  legacyOnlyCount: null
+  targetOnlyCount: null
+  mismatchCount: null
+  blockedReason: null
+  notes: |
+
+checklist:
+  target_bo_reviewed: false
+  legacy_bo_located: false         # optional repo hint; legacy_schema_documented is required from VISA2015
+  legacy_schema_documented: false  # required — from visa2014-sql-local (VISA2015)
+  table_mapping_registered: false   # table-mappings.yaml
+  column_mapping_complete: false    # field-maps fields[] + legacyOnly
+  lookup_values_mapped: false       # lookup-translations.yaml per lookupCatalog
+  property_gaps_documented: false
+  dedupe_rules_defined: false
+  excel_preview_exported: false    # true after --export-visa2014-preview reviewed
+  inventory_updated: false
+  learnings_appended: false
+
+completedAt: null
+completedBy: null                  # human | agent session note
+
+importConfirmation:
+  importConfirmed: false             # true only after human sign-off — required before import code / OData load
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |

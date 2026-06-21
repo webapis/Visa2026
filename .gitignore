@@ -432,6 +432,11 @@ Visa2026.Blazor.Server/TemplateEdit/*
 Visa2026.Module/Resources/Templates/_c/
 Visa2026.Module/Resources/Templates/*.zip
 visa2026-prod.bak.20260525-1713
+
+# VISA2014 → Visa2026 legacy migration (local PII — do not commit)
+Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
+Visa2026.DataImporter/legacy/visa2014/preview-export/*.xlsx
+Visa2026.DataImporter/legacy/visa2014/id-map/
 dist/
 
 # E2E — Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)

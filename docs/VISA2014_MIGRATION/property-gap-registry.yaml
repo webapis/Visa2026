@@ -1,0 +1,20 @@
+# Cross-BO index of property gaps and dedupe posture.
+# Detail lives in each field-maps/{Entity}.yaml — update when a dossier closes.
+
+version: 1
+
+# Example entry (uncomment and fill when Person discovery closes):
+#
+# entities:
+#   - targetODataEntity: Person
+#     fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Person.yaml
+#     deduplicationEnabled: true
+#     dedupeKeys: [PassportNumber]
+#     duplicateGroups: null
+#     legacyOnlyCount: 0
+#     targetOnlyCount: 0
+#     mismatchCount: 0
+#     importBlocked: false
+#     notes: ""
+
+entities: []

@@ -19,6 +19,6 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 **Docker:** `docs/ENVIRONMENTS.md`. Typical dev: `docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up -d`.
 
-**Secrets:** never commit passwords, license keys, or prod connection strings. MCP: **`SA_PASSWORD`** and **`GITHUB_PERSONAL_ACCESS_TOKEN`** → Windows user env (see `.cursor/mcp.json`). GitHub MCP runs via **Docker**; start Docker before enabling that server.
+**Secrets:** never commit passwords, license keys, or prod connection strings. MCP: **`SA_PASSWORD`** and **`GITHUB_PERSONAL_ACCESS_TOKEN`** → Windows user env (see `.cursor/mcp.json`). Legacy VISA2014: **`visa2014-sql-local`** + **`visa2014-readonly-files`** only — see **`docs/VISA2014_MIGRATION.md`**. GitHub MCP runs via **Docker**; start Docker before enabling that server.
 
 **Scope:** implement only what the user asked; no drive-by refactors. Match existing patterns; full detail in **`AGENTS.md`**.

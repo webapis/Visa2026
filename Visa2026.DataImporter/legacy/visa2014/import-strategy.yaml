@@ -1,0 +1,72 @@
+# VISA2014 → Visa2026 — import strategy status (machine-readable gate)
+#
+# Canonical narrative: docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md
+#
+# Rules:
+#   - status MUST be approved before ANY --import-visa2014 implementation or OData load.
+#   - Per-BO importConfirmed is still required after strategy is approved.
+#   - Update this file when strategic decisions in the plan change.
+
+version: 1
+
+status: draft                    # draft | review | approved
+approvedAt: null
+approvedBy: null
+
+implementationBlocked: true      # set false only when status: approved
+
+strategy:
+  legacyDatabase: VISA2015
+  legacySourceOfTruth: sql         # sql | repo — always sql for this project
+  targetWritePath: OData
+  importer: Visa2026.DataImporter
+  cliFlag: --import-visa2014
+  mappingArtifacts: yaml
+  legacyGuidPolicy: id-map         # do not reuse legacy GUIDs as Visa2026 ID
+  dedupePolicy: before_post
+  firstTargetDatabase: Visa2026DbDev
+  attachmentsWave: last
+  excelPreview:
+    enabled: true
+    cliFlag: --export-visa2014-preview
+    outputDir: Visa2026.DataImporter/legacy/visa2014/preview-export
+    requiredBeforeImportConfirmed: true   # reviewer should open xlsx before sign-off
+    usesSameTransformAsImport: true
+
+waves:
+  - id: prerequisites
+    importPhase: prerequisites
+    status: not_started
+  - id: person-domain
+    importPhase: person-domain
+    status: not_started
+    pilotEntity: Person
+  - id: application-domain
+    importPhase: application-domain
+    status: not_started
+  - id: permits-and-visas
+    importPhase: permits-and-visas
+    status: not_started
+  - id: progress-and-history
+    importPhase: progress-and-history
+    status: not_started
+  - id: attachments
+    importPhase: attachments
+    status: not_started
+
+openDecisions:
+  - id: odata-service-account
+    question: Service account for OData import
+    decision: null
+  - id: staging-database
+    question: Staging DB for full-wave UAT
+    decision: null
+  - id: cutover-mode
+    question: Big-bang vs domain waves on prod
+    decision: null
+  - id: unmapped-lookup-policy
+    question: Default unmappedPolicy for required lookups
+    decision: null
+  - id: file-blob-strategy
+    question: Copy scan blobs vs re-link paths
+    decision: null

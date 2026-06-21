@@ -14,14 +14,38 @@
         "@connorbritain/mssql-mcp-reader@latest"
       ],
       "env": {
-        "SERVER_NAME": "127.0.0.1",
+        "SERVER_NAME": "localhost\\SQLEXPRESS",
         "SQL_PORT": "1433",
-        "DATABASE_NAME": "Visa2026DbProd",
+        "DATABASE_NAME": "Visa2026DbDev",
         "SQL_AUTH_MODE": "sql",
         "SQL_USERNAME": "sa",
         "SQL_PASSWORD": "${env:SA_PASSWORD}",
         "TRUST_SERVER_CERTIFICATE": "true"
       }
+    },
+    "visa2014-sql-local": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@connorbritain/mssql-mcp-reader@latest"
+      ],
+      "env": {
+        "SERVER_NAME": "localhost\\SQLEXPRESS",
+        "SQL_PORT": "1433",
+        "DATABASE_NAME": "VISA2015",
+        "SQL_AUTH_MODE": "sql",
+        "SQL_USERNAME": "sa",
+        "SQL_PASSWORD": "${env:SA_PASSWORD}",
+        "TRUST_SERVER_CERTIFICATE": "true"
+      }
+    },
+    "visa2014-readonly-files": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\webap\\Documents\\GitHub\\VISA2014"
+      ]
     },
     "github": {
       "command": "docker",

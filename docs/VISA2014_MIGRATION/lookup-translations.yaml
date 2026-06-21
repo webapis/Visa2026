@@ -1,0 +1,44 @@
+# Lookup value translation — same meaning, different representation in VISA2014 vs Visa2026
+#
+# Visa2026 target values must exist before import (Module updaters / LookupCatalogs JSON).
+# ApplicationType.Name → ApplicationTypeConfigurationCatalog.json
+# Other catalogs → Visa2026.Module/DatabaseUpdate/LookupCatalogs/*.json
+#
+# Rule: never match by string equality alone — every legacy distinct value needs an explicit
+#       legacy → target row here (or documented unmappedPolicy).
+
+version: 1
+
+catalogs: []
+  # - targetCatalog: ApplicationType       # Visa2026 lookup OData entity
+  #   targetMatchProperty: Name             # property used to resolve target row (Name | Code)
+  #   legacy:
+  #     storage: inline_on_bo               # inline_on_bo | legacy_lookup_table | fk_guid
+  #     table: null                         # dbo.ApplicationTypes — when legacy_lookup_table
+  #     column: null                        # column on transactional or lookup table
+  #     valueKind: string                   # string | int | guid — how legacy stores the value
+  #     sampleQuery: |
+  #       SELECT DISTINCT SomeColumn, COUNT(*) FROM dbo.SomeTable GROUP BY SomeColumn
+  #   values:                               # semantic map — different text/code, same meaning
+  #     - legacy: "Invitation"
+  #       target: "App_Inv"
+  #       notes: ""
+  #     - legacy: "INV"
+  #       target: "App_Inv"
+  #       notes: "Legacy code column"
+  #   unmappedPolicy: block_row             # block_row | skip_row | quarantine | use_default
+  #   unmappedDefault: null
+
+# --- Seed catalog names (add entries as discovery samples legacy values) ---
+
+# ApplicationType:
+# Country:
+# Department:
+# Position:
+# Gender:
+# MaritalStatus:
+# Region:
+# EducationLevel:
+# PassportType:
+# VisaType:
+# ApplicationState:

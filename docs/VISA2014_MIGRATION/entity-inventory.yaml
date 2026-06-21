@@ -1,0 +1,44 @@
+# VISA2014 → Visa2026 entity inventory
+# Summary index — sync when each dossier closes.
+# Discovery/import order: Visa2026.DataImporter/legacy/visa2014/order.yaml
+
+version: 1
+legacy:
+  product: VISA2014
+  database: VISA2015               # source of truth for legacy schema and data
+  repo: VISA2014                   # supplementary — BO/EF hints only
+target:
+  product: Visa2026
+  importTransport: OData
+
+entities:
+  - targetODataEntity: Person
+    discoveryDossier: discovery/Person.yaml
+    tableMappingId: person-employee
+    discoveryStatus: not_started
+    importConfirmed: false
+    importStatus: pending
+    legacyTable: null
+    legacyBo: null
+    blockReason: null
+    notes: "First in order.yaml — no dependsOn. Complete before Application."
+
+  - targetODataEntity: Application
+    discoveryDossier: discovery/Application.yaml
+    discoveryStatus: not_started
+    importConfirmed: false
+    importStatus: pending
+    legacyTable: null
+    legacyBo: null
+    blockReason: null
+    notes: "dependsOn Person — discover only after Person dossier complete."
+
+  - targetODataEntity: ApplicationItem
+    discoveryDossier: discovery/ApplicationItem.yaml
+    discoveryStatus: not_started
+    importConfirmed: false
+    importStatus: pending
+    legacyTable: null
+    legacyBo: null
+    blockReason: null
+    notes: "dependsOn Person + Application — see order.yaml."
