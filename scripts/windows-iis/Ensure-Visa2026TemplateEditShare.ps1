@@ -63,7 +63,7 @@ function Ensure-Visa2026TemplateEditShareForSlot {
     $slot = Get-Visa2026IisSlotDefinition -Profile $SlotProfile
     $localPath = $slot.TemplateEditLocalPath
     $shareName = $slot.TemplateEditShareName
-    $appPoolGrantee = "IIS AppPool\$($slot.AppPoolName):(OI)(CI)M"
+    $appPoolGrantee = "IIS AppPool\$($slot.AppPoolName)`:(OI)(CI)M"
 
     $envMap = Read-Visa2026DotEnvMap -Path $slot.EnvFile
     if ([string]::IsNullOrWhiteSpace($OfficersPrincipal) -and -not $SkipOfficersAcl) {
@@ -75,7 +75,7 @@ function Ensure-Visa2026TemplateEditShareForSlot {
     $stagingUnc = Get-Visa2026TemplateEditStagingUnc -Profile $SlotProfile -UncHost $UncHost -EnvFile $slot.EnvFile
 
     Write-Host ""
-    Write-Host "Template edit share — $($slot.Profile)" -ForegroundColor Cyan
+    Write-Host "Template edit share - $($slot.Profile)" -ForegroundColor Cyan
     Write-Host "  Local path : $localPath"
     Write-Host "  SMB share  : $shareName"
     Write-Host "  UNC        : $stagingUnc"
