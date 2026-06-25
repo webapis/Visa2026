@@ -87,7 +87,7 @@ cd C:\visa2026-deploy\iis
 ```powershell
 C:\Windows\System32\inetsrv\appcmd stop apppool Visa2026-Prod
 # Copy new publish into C:\inetpub\visa2026-prod (keep appsettings + keys)
-C:\visa2026-deploy\iis\Ensure-Visa2026TemplateEditShare.ps1 -Profile Production
+C:\visa2026-deploy\iis\Enable-Visa2026IisHttps.ps1 -Profile Production -RedirectHttpToHttps
 C:\visa2026-deploy\iis\Configure-Visa2026Production.ps1 -Profile Production
 C:\visa2026-deploy\iis\Set-Visa2026AppPoolEnvironment.ps1 -Profile Production
 C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -Profile Production

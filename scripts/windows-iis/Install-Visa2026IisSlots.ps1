@@ -76,11 +76,6 @@ foreach ($name in $profiles) {
 
     Grant-Visa2026IisAppPoolDataProtectionAcl -AppPoolName $ctx.AppPoolName -DataProtectionKeysPath $ctx.DataProtectionKeysPath
 
-    $ensureShare = Join-Path $PSScriptRoot "Ensure-Visa2026TemplateEditShare.ps1"
-    if (Test-Path -LiteralPath $ensureShare) {
-        & $ensureShare -Profile $name | Out-Null
-    }
-
     if (-not $SkipConfigure) {
         & $configure -Profile $name -SqlServer $SqlServer
         & $setPoolEnv -Profile $name

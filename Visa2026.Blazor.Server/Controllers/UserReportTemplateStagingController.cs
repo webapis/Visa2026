@@ -38,45 +38,6 @@ public sealed class UserReportTemplateStagingController : ControllerBase
         }
     }
 
-    [HttpPost("staging/import-all")]
-    public async Task<ActionResult<StagingImportAllResponse>> ImportAll(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var result = await _stagingService.ImportAllChangedAsync(cancellationToken).ConfigureAwait(false);
-            return Ok(StagingImportAllResponse.From(result));
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Forbid();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-
-    [HttpPost("{templateId:guid}/staging/import")]
-    public async Task<ActionResult<StagingImportResponse>> ImportOne(Guid templateId, CancellationToken cancellationToken)
-    {
-        if (templateId == Guid.Empty)
-            return BadRequest();
-
-        try
-        {
-            var result = await _stagingService.TryImportAsync(templateId, cancellationToken).ConfigureAwait(false);
-            return Ok(StagingImportResponse.From(result));
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Forbid();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-
     [HttpPost("{templateId:guid}/staging/upload")]
     [RequestSizeLimit(52_428_800)]
     [RequestFormLimits(MultipartBodyLengthLimit = 52_428_800)]
@@ -123,12 +84,6 @@ public sealed class StagingExportResponse
 
     public string DocumentFileName { get; init; } = string.Empty;
 
-    public string Mode { get; init; } = TemplateEditStagingMode.Share.ToString();
-
-    public string UncPath { get; init; } = string.Empty;
-
-    public string? OfficeOpenUrl { get; init; }
-
     public string? SourceContentHashSha256 { get; init; }
 
     public string OutputFormat { get; init; } = string.Empty;
@@ -139,9 +94,6 @@ public sealed class StagingExportResponse
             TemplateId = result.TemplateId,
             DisplayName = result.DisplayName,
             DocumentFileName = result.DocumentFileName,
-            Mode = result.Mode.ToString(),
-            UncPath = result.UncPath,
-            OfficeOpenUrl = result.OfficeOpenUrl,
             SourceContentHashSha256 = result.SourceContentHashSha256,
             OutputFormat = result.OutputFormat.ToString(),
         };
@@ -170,28 +122,5 @@ public sealed class StagingImportResponse
             ErrorMessage = result.ErrorMessage,
             ExtractValidateRan = result.ExtractValidateRan,
             InvalidPlaceholderCount = result.InvalidPlaceholderCount,
-        };
-}
-
-public sealed class StagingImportAllResponse
-{
-    public int ImportedCount { get; init; }
-
-    public int SkippedUnchangedCount { get; init; }
-
-    public int SkippedNotFoundCount { get; init; }
-
-    public int FailedCount { get; init; }
-
-    public IReadOnlyList<StagingImportResponse> Results { get; init; } = Array.Empty<StagingImportResponse>();
-
-    public static StagingImportAllResponse From(UserReportTemplateStagingImportAllResult result) =>
-        new()
-        {
-            ImportedCount = result.ImportedCount,
-            SkippedUnchangedCount = result.SkippedUnchangedCount,
-            SkippedNotFoundCount = result.SkippedNotFoundCount,
-            FailedCount = result.FailedCount,
-            Results = result.Results.Select(StagingImportResponse.From).ToList(),
         };
 }

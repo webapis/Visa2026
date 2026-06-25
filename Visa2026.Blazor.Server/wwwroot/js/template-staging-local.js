@@ -8,6 +8,19 @@
     var STORE = "settings";
     var DIR_HANDLE_KEY = "directoryHandle";
     var PATH_HINT_KEY = "folderPathHint";
+    var DEFAULT_SUBFOLDER = "TemplateEdit";
+    var PROTECTED_ROOT_NAMES = [
+        "documents", "desktop", "downloads", "music", "pictures", "videos",
+        "belge", "documentos", "dokumente", "документы"
+    ];
+
+    function isProtectedRootFolder(name) {
+        if (!name) {
+            return false;
+        }
+
+        return PROTECTED_ROOT_NAMES.indexOf(String(name).trim().toLowerCase()) >= 0;
+    }
 
     function supportsLocalFolder() {
         return typeof window.showDirectoryPicker === "function" && typeof window.crypto !== "undefined"
@@ -75,6 +88,22 @@
             return handle;
         }
         return null;
+    }
+
+    function normalizeOptions(options) {
+        if (!options || typeof options !== "string") {
+            return {
+                subfolderName: (options && options.subfolderName) || DEFAULT_SUBFOLDER,
+                suggestedPathHint: (options && options.suggestedPathHint) || ""
+            };
+        }
+
+        return { subfolderName: DEFAULT_SUBFOLDER, suggestedPathHint: options };
+    }
+
+    async function getStoredPathHint() {
+        var hint = await idbGet(PATH_HINT_KEY);
+        return (hint || "").trim();
     }
 
     function base64ToBytes(base64) {
@@ -145,20 +174,25 @@
         }
     }
 
+    function toFileUri(windowsPath) {
+        var normalized = windowsPath.replace(/\\/g, "/");
+        if (/^[a-zA-Z]:\//.test(normalized)) {
+            return "file:///" + normalized;
+        }
+
+        return "file://" + normalized;
+    }
+
     function buildLocalOfficeUrl(folderPathHint, fileName, outputFormat) {
         if (!folderPathHint || !fileName) {
             return "";
         }
 
         var trimmed = folderPathHint.trim().replace(/[\\/]+$/, "");
-        var normalized = trimmed.replace(/\\/g, "/");
-        if (/^[A-Za-z]:/.test(normalized)) {
-            normalized = "/" + normalized;
-        }
-
+        var fullPath = trimmed + "\\" + fileName;
         var protocol = (outputFormat || "").toLowerCase() === "excel" ? "ms-excel" : "ms-word";
-        var path = normalized + "/" + fileName;
-        return protocol + ":ofe|u|file://" + encodeURI(path).replace(/#/g, "%23");
+        // Full schema: ofe|u|file:///C:/... (abbreviated ms-word:C:\... is invalid — Office parses "C" as the command).
+        return protocol + ":ofe|u|" + toFileUri(fullPath);
     }
 
     function tryOpenOfficeUrl(url) {
@@ -197,7 +231,12 @@
         return !!handle;
     };
 
-    window.visaTemplateStagingLocal.chooseFolder = async function (optionalPathHint) {
+    window.visaTemplateStagingLocal.getFolderName = async function () {
+        var handle = await getDirectoryHandle();
+        return handle ? handle.name : "";
+    };
+
+    window.visaTemplateStagingLocal.chooseFolder = async function (options) {
         if (!supportsLocalFolder()) {
             return { success: false, error: "File System Access API is not available in this browser." };
         }
@@ -209,29 +248,47 @@
             };
         }
 
+        var opts = normalizeOptions(options);
+
         try {
             var handle = await window.showDirectoryPicker({
                 id: "visa2026-template-edit",
-                mode: "readwrite",
-                startIn: "documents"
+                mode: "readwrite"
             });
+
+            if (isProtectedRootFolder(handle.name)) {
+                return {
+                    success: false,
+                    needsSubfolder: true,
+                    error: "Select the Visa2026 TemplateEdit folder under AppData\\Local, not a system folder."
+                };
+            }
 
             if (!await verifyPermission(handle, "readwrite")) {
                 return { success: false, error: "Write permission was not granted for the template folder." };
             }
 
             await idbSet(DIR_HANDLE_KEY, handle);
-            if (optionalPathHint) {
-                await idbSet(PATH_HINT_KEY, optionalPathHint);
-            }
 
-            return { success: true, folderName: handle.name };
+            return {
+                success: true,
+                folderName: handle.name
+            };
         } catch (e) {
             if (e && e.name === "AbortError") {
                 return { success: false, error: "Folder selection was cancelled." };
             }
 
-            return { success: false, error: (e && e.message) || "Could not choose template folder." };
+            var message = (e && e.message) || "Could not choose template folder.";
+            if (/system files/i.test(message)) {
+                return {
+                    success: false,
+                    needsSubfolder: true,
+                    error: message
+                };
+            }
+
+            return { success: false, error: message };
         }
     };
 
@@ -258,29 +315,32 @@
 
         var handle = await getDirectoryHandle();
         if (!handle) {
-            var chosen = await window.visaTemplateStagingLocal.chooseFolder();
-            if (!chosen.success) {
-                return chosen;
-            }
-
-            handle = await getDirectoryHandle();
+            return {
+                success: false,
+                needsFolder: true,
+                error: "Choose template folder first (button below), then click Edit template."
+            };
         }
 
         try {
+            var pathHint = await getStoredPathHint();
             var bytes = base64ToBytes(payload.fileBase64);
             await writeFile(handle, payload.fileName, bytes);
             var meta = buildMeta(payload);
             var metaJson = JSON.stringify(meta, null, 2);
             await writeFile(handle, metaFileName(payload.fileName), new TextEncoder().encode(metaJson));
 
-            var pathHint = await idbGet(PATH_HINT_KEY);
             var officeUrl = buildLocalOfficeUrl(pathHint, payload.fileName, payload.outputFormat);
             var opened = tryOpenOfficeUrl(officeUrl);
+            var fullPath = pathHint
+                ? pathHint.trim().replace(/[\\/]+$/, "") + "\\" + payload.fileName
+                : "";
 
             return {
                 success: true,
                 folderName: handle.name,
                 fileName: payload.fileName,
+                fullPath: fullPath,
                 opened: opened,
                 officeUrl: officeUrl,
                 needsPathHint: !pathHint
@@ -418,5 +478,35 @@
         var metaJson = JSON.stringify(meta, null, 2);
         await writeFile(handle, metaFileName(documentFileName), new TextEncoder().encode(metaJson));
         return true;
+    };
+
+    window.visaTemplateStagingLocal.copyPath = async function (filePath) {
+        if (!filePath) {
+            return false;
+        }
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(filePath);
+                return true;
+            }
+        } catch (e) {
+            // fall through to legacy copy
+        }
+
+        try {
+            var textarea = document.createElement("textarea");
+            textarea.value = filePath;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "absolute";
+            textarea.style.left = "-9999px";
+            document.body.appendChild(textarea);
+            textarea.select();
+            var copied = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            return copied;
+        } catch (e) {
+            return false;
+        }
     };
 })();

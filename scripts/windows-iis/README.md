@@ -32,7 +32,7 @@ Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates
 | `Deploy-Visa2026IisSlotRemote.ps1` | Dev PC (SSH) | Same; explicit slot deploy implementation |
 | `Install-Visa2026IisSlots.ps1` | Windows Server | Create all slot sites, env files, databases |
 | `Ensure-Visa2026SlotDatabases.ps1` | Windows Server | `CREATE DATABASE` for slot DBs if missing |
-| `Ensure-Visa2026TemplateEditShare.ps1` | Windows Server | SMB share + ACLs for Resminamalar template staging per slot |
+| `Set-Visa2026TemplateEditOfficeTrust.ps1` | Officer PC | Office intranet trust for ms-word: from HTTPS site |
 | `Enable-Visa2026IisHttps.ps1` | Windows Server | HTTPS binding + optional HTTP redirect (LocalFolder FSA requires HTTPS) |
 | `Set-Visa2026TemplateEditOfficeTrust.ps1` | **Officer PC** | IE/Office intranet zone + `UNCAsIntranet` (Share mode only) |
 | `Set-Visa2026IisSlotsAutoStart.ps1` | Windows Server | Auto-start all slots; Default Web Site → `127.0.0.1:8090` |
@@ -90,7 +90,7 @@ C:\ProgramData\Visa2026\
     demo\     # SMB Visa2026TemplateEdit-Demo
 ```
 
-Resminamalar **Edit template** / **Sync to database**: [`docs/TEMPLATE_STAGING_EDIT.md`](../../docs/TEMPLATE_STAGING_EDIT.md). Per-slot UNC is written to `appsettings.Production.json` by `Configure-Visa2026Production.ps1` after `Ensure-Visa2026TemplateEditShare.ps1` runs.
+Resminamalar **Edit template** / **Sync to database**: [`docs/TEMPLATE_STAGING_EDIT.md`](../../docs/TEMPLATE_STAGING_EDIT.md). Local sandbox config is written to `appsettings.Production.json` by `Configure-Visa2026Production.ps1` (requires HTTPS on IIS).
 
 First deploy per slot:
 

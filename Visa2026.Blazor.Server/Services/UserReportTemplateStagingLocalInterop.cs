@@ -11,9 +11,13 @@ public sealed class UserReportTemplateStagingLocalExportJsResult
 
     public string? FileName { get; init; }
 
+    public string? FullPath { get; init; }
+
     public bool Opened { get; init; }
 
     public bool NeedsPathHint { get; init; }
+
+    public bool NeedsFolder { get; init; }
 }
 
 /// <summary>JS interop result from <c>visaTemplateStagingLocal.chooseFolder</c>.</summary>
@@ -24,6 +28,8 @@ public sealed class UserReportTemplateStagingChooseFolderJsResult
     public string? Error { get; init; }
 
     public string? FolderName { get; init; }
+
+    public bool NeedsSubfolder { get; init; }
 }
 
 /// <summary>JS interop payload from <c>visaTemplateStagingLocal.collectChangedUploads</c>.</summary>

@@ -999,6 +999,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Şablon papkasyny saýla",
             ["ru-RU"] = "Выбрать папку шаблонов",
         },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolderFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Choose a template folder first (button below). Use AppData: paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar, create the folder if needed, then Select Folder.",
+            ["tr-TR"] = "Önce şablon klasörü seçin (aşağıdaki düğme). AppData: seçicide %LOCALAPPDATA%\\Visa2026\\TemplateEdit yapıştırın, gerekirse klasörü oluşturun, Klasörü Seç.",
+            ["tk-TM"] = "Ilki şablon papkasyny saýlaň (aşakdaky düwme). AppData: saýlawda %LOCALAPPDATA%\\Visa2026\\TemplateEdit goýuň, gerek bolsa papka dörediň, Papkany saýla.",
+            ["ru-RU"] = "Сначала выберите папку шаблонов (кнопка ниже). AppData: вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку, создайте папку при необходимости, затем «Выбрать папку».",
+        },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolderHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In the folder picker, paste this path in the address bar, press Enter, then Select Folder: {0}",
+            ["tr-TR"] = "Klasör seçicide adres çubuğuna bu yolu yapıştırın, Enter'a basın, ardından Klasörü Seç: {0}",
+            ["tk-TM"] = "Papka saýlawda salgy setirine şu ýoly goýuň, Enter basyň, soň Papkany saýla: {0}",
+            ["ru-RU"] = "В окне выбора папки вставьте этот путь в адресную строку, нажмите Enter, затем «Выбрать папку»: {0}",
+        },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "That folder is blocked by the browser. Paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar (create folders if needed), then Select Folder.",
+            ["tr-TR"] = "Tarayıcı bu klasörü engelledi. Seçicide %LOCALAPPDATA%\\Visa2026\\TemplateEdit yapıştırın (gerekirse oluşturun), Klasörü Seç.",
+            ["tk-TM"] = "Brauzer bu papkany bloklady. Saýlawda %LOCALAPPDATA%\\Visa2026\\TemplateEdit goýuň (gerek bolsa dörediň), Papkany saýla.",
+            ["ru-RU"] = "Браузер заблокировал эту папку. Вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку (создайте папки при необходимости), затем «Выбрать папку».",
+        },
         ["ApplicationReportPackage.EditTemplate.CopyPath"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Copy path",
@@ -1029,10 +1050,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.FolderReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Template folder ready: {0}",
-            ["tr-TR"] = "Şablon klasörü hazır: {0}",
-            ["tk-TM"] = "Şablon papkasy taýýar: {0}",
-            ["ru-RU"] = "Папка шаблонов готова: {0}",
+            ["en-US"] = "Template folder ready: {0}. You can now click Edit template; Word or Excel opens automatically.",
+            ["tr-TR"] = "Şablon klasörü hazır: {0}. Artık Şablonu düzenle'ye tıklayabilirsiniz; Word veya Excel otomatik açılır.",
+            ["tk-TM"] = "Şablon papkasy taýýar: {0}. Indi Şablony redaktirle basyp bilersiňiz; Word ýa-da Excel awtomatik açylýar.",
+            ["ru-RU"] = "Папка шаблонов готова: {0}. Теперь можно нажать «Редактировать шаблон»; Word или Excel откроется автоматически.",
         },
         ["ApplicationReportPackage.EditTemplate.LocalExported"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1078,7 +1099,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Exports the template to the shared edit folder and opens it in Word or Excel. After saving, click Sync to database.",
+            ["en-US"] = "Exports the template to your local sandbox folder and opens it in Word or Excel. After saving, click Sync to database.",
             ["tr-TR"] = "Şablonu paylaşılan düzenleme klasörüne aktarır ve Word veya Excel'de açar. Kaydettikten sonra Yenile'ye tıklayın.",
             ["tk-TM"] = "Şablony umumy redaktirleme papkasyna çykaryp, Word ýa-da Excel-de açýar. Ýazdyranyňyzdan soň Täzele basyň.",
             ["ru-RU"] = "Экспортирует шаблон в общую папку редактирования и открывает в Word или Excel. После сохранения нажмите «Обновить».",

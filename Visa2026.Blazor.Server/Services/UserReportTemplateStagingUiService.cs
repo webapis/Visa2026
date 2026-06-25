@@ -28,14 +28,98 @@ public sealed class UserReportTemplateStagingUiService
 
     public bool IsEnabled => _options.Enabled;
 
-    public bool IsLocalFolderMode =>
-        _options.Enabled && _options.Mode == TemplateEditStagingMode.LocalFolder;
-
-    public bool IsShareMode =>
-        _options.Enabled && _options.Mode == TemplateEditStagingMode.Share;
-
     public bool CanEditTemplates() =>
         IsEnabled && UserReportTemplateEditAccess.CanEditTemplates();
+
+    public string LocalSandboxRelativePath =>
+        string.IsNullOrWhiteSpace(_options.LocalFolderSubfolderName)
+            ? @"Visa2026\TemplateEdit"
+            : _options.LocalFolderSubfolderName.Trim().Trim('\\', '/');
+
+    /// <summary>
+    /// Best-effort Windows path for Office <c>ms-word:</c> / <c>ms-excel:</c> open URLs when FSA cannot expose a real path.
+    /// Uses the signed-in user name to build <c>%LOCALAPPDATA%\{relative}</c> on the officer PC.
+    /// </summary>
+    public string BuildSuggestedLocalFolderPathHint()
+    {
+        var relative = LocalSandboxRelativePath;
+        var userName = ResolveUserName();
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            var shortName = userName;
+            var slash = userName.IndexOf('\\');
+            if (slash >= 0 && slash < userName.Length - 1)
+            {
+                shortName = userName[(slash + 1)..];
+            }
+            else
+            {
+                var at = userName.IndexOf('@');
+                if (at > 0)
+                {
+                    shortName = userName[..at];
+                }
+            }
+
+            return Path.Combine($@"C:\Users\{shortName}\AppData\Local", relative);
+        }
+
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            relative);
+    }
+
+    /// <summary>
+    /// Best-effort full path from the folder name returned by the browser picker (leaf segment only).
+    /// AppData default when the picked folder matches <see cref="LocalSandboxRelativePath"/> leaf; otherwise Documents.
+    /// </summary>
+    public string BuildLocalFolderPathHint(string? pickedFolderName)
+    {
+        if (string.IsNullOrWhiteSpace(pickedFolderName))
+        {
+            return BuildSuggestedLocalFolderPathHint();
+        }
+
+        var relativeLeaf = LocalSandboxRelativePath
+            .Split('/', '\\')
+            .LastOrDefault(segment => !string.IsNullOrWhiteSpace(segment))
+            ?? "TemplateEdit";
+
+        if (string.Equals(pickedFolderName.Trim(), relativeLeaf, StringComparison.OrdinalIgnoreCase))
+        {
+            return BuildSuggestedLocalFolderPathHint();
+        }
+
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            pickedFolderName.Trim());
+    }
+
+    /// <summary>Updates IndexedDB path hint from the configured FSA folder name (for Copy path / ms-word:).</summary>
+    public async Task SyncLocalFolderPathHintAsync()
+    {
+        try
+        {
+            var folderName = await _jsRuntime
+                .InvokeAsync<string>("visaTemplateStagingLocal.getFolderName")
+                .ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                return;
+            }
+
+            var pathHint = BuildLocalFolderPathHint(folderName);
+            await _jsRuntime
+                .InvokeAsync<bool>("visaTemplateStagingLocal.setFolderPathHint", pathHint)
+                .ConfigureAwait(false);
+        }
+        catch (JSException)
+        {
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
 
     public async Task<UserReportTemplateStagingUiExportOutcome> ExportForEditAsync(Guid templateId)
     {
@@ -58,32 +142,13 @@ public sealed class UserReportTemplateStagingUiService
         }
     }
 
-    public async Task<UserReportTemplateStagingUiImportAllOutcome> ImportAllChangedAsync()
+    public async Task<UserReportTemplateStagingUiImportAllOutcome> ImportSandboxChangedAsync(
+        IReadOnlyCollection<Guid> templateIds)
     {
         if (!CanEditTemplates())
         {
             return UserReportTemplateStagingUiImportAllOutcome.Fail(
                 "Template edit access denied or staging is disabled.");
-        }
-
-        try
-        {
-            var result = await _stagingService.ImportAllChangedAsync().ConfigureAwait(false);
-            return UserReportTemplateStagingUiImportAllOutcome.Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(ex.Message);
-        }
-    }
-
-    public async Task<UserReportTemplateStagingUiImportAllOutcome> ImportLocalFolderChangedAsync(
-        IReadOnlyCollection<Guid> templateIds)
-    {
-        if (!CanEditTemplates() || !IsLocalFolderMode)
-        {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(
-                "Template edit access denied or local-folder staging is disabled.");
         }
 
         try

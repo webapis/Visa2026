@@ -552,7 +552,7 @@
     "ru-RU": "Редактировать шаблон"
   },
   "ApplicationReportPackage.EditTemplate.Tooltip": {
-    "en": "Exports the template to the shared edit folder and opens it in Word or Excel. After saving, click Sync to database.",
+    "en": "Exports the template to your local sandbox folder and opens it in Word or Excel. After saving, click Sync to database.",
     "tr-TR": "Şablonu paylaşılan düzenleme klasörüne aktarır ve Word veya Excel'de açar. Kaydettikten sonra Yenile'ye tıklayın.",
     "tk-TM": "Şablony umumy redaktirleme papkasyna çykaryp, Word ýa-da Excel-de açýar. Ýazdyranyňyzdan soň Täzele basyň.",
     "ru-RU": "Экспортирует шаблон в общую папку редактирования и открывает в Word или Excel. После сохранения нажмите «Обновить»."
@@ -593,11 +593,29 @@
     "tk-TM": "Şablon papkasyny saýla",
     "ru-RU": "Выбрать папку шаблонов"
   },
+  "ApplicationReportPackage.EditTemplate.ChooseFolderHint": {
+    "en": "In the folder picker, paste this path in the address bar, press Enter, then Select Folder: {0}",
+    "tr-TR": "Klasör seçicide adres çubuğuna bu yolu yapıştırın, Enter'a basın, ardından Klasörü Seç: {0}",
+    "tk-TM": "Papka saýlawda salgy setirine şu ýoly goýuň, Enter basyň, soň Papkany saýla: {0}",
+    "ru-RU": "В окне выбора папки вставьте этот путь в адресную строку, нажмите Enter, затем «Выбрать папку»: {0}"
+  },
+  "ApplicationReportPackage.EditTemplate.ChooseFolderFirst": {
+    "en": "Choose a template folder first (button below). Use AppData: paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar, create the folder if needed, then Select Folder.",
+    "tr-TR": "Önce şablon klasörü seçin (aşağıdaki düğme). AppData: seçicide %LOCALAPPDATA%\\Visa2026\\TemplateEdit yapıştırın, gerekirse klasörü oluşturun, Klasörü Seç.",
+    "tk-TM": "Ilki şablon papkasyny saýlaň (aşakdaky düwme). AppData: saýlawda %LOCALAPPDATA%\\Visa2026\\TemplateEdit goýuň, gerek bolsa papka dörediň, Papkany saýla.",
+    "ru-RU": "Сначала выберите папку шаблонов (кнопка ниже). AppData: вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку, создайте папку при необходимости, затем «Выбрать папку»."
+  },
+  "ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot": {
+    "en": "That folder is blocked by the browser. Paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar (create folders if needed), then Select Folder.",
+    "tr-TR": "Tarayıcı bu klasörü engelledi. Seçicide %LOCALAPPDATA%\\Visa2026\\TemplateEdit yapıştırın (gerekirse oluşturun), Klasörü Seç.",
+    "tk-TM": "Brauzer bu papkany bloklady. Saýlawda %LOCALAPPDATA%\\Visa2026\\TemplateEdit goýuň (gerek bolsa dörediň), Papkany saýla.",
+    "ru-RU": "Браузер заблокировал эту папку. Вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку (создайте папки при необходимости), затем «Выбрать папку»."
+  },
   "ApplicationReportPackage.EditTemplate.FolderReady": {
-    "en": "Template folder ready: {0}",
-    "tr-TR": "Şablon klasörü hazır: {0}",
-    "tk-TM": "Şablon papkasy taýýar: {0}",
-    "ru-RU": "Папка шаблонов готова: {0}"
+    "en": "Template folder ready: {0}. You can now click Edit template; Word or Excel opens automatically.",
+    "tr-TR": "Şablon klasörü hazır: {0}. Artık Şablonu düzenle'ye tıklayabilirsiniz; Word veya Excel otomatik açılır.",
+    "tk-TM": "Şablon papkasy taýýar: {0}. Indi Şablony redaktirle basyp bilersiňiz; Word ýa-da Excel awtomatik açylýar.",
+    "ru-RU": "Папка шаблонов готова: {0}. Теперь можно нажать «Редактировать шаблон»; Word или Excel откроется автоматически."
   },
   "ApplicationReportPackage.EditTemplate.LocalExported": {
     "en": "Exported \"{0}\" to your template folder ({1}\\{2}). Open the file in Word or Excel.",

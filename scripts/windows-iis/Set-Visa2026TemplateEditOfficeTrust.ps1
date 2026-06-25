@@ -4,37 +4,32 @@
   Trust the Visa2026 IIS server for Office template editing (officer workstation).
 
 .DESCRIPTION
-  Resminamalar "Edit template" opens desktop Word via ms-word: while the .docx lives on an
-  SMB share (\\server\Visa2026TemplateEdit-Prod). Office may block with:
+  Resminamalar "Edit template" opens desktop Word/Excel via ms-word:/ms-excel: after exporting
+  to the officer PC local sandbox. Office may block with:
 
     "Unsafe Content — coming from a site in the Restricted Sites zone"
 
-  This script configures Internet Explorer security zones (used by Office) so the Visa2026
-  server and UNC paths are treated as Local intranet:
+  This script maps the Visa2026 HTTPS origin to the Local intranet zone (Internet Explorer
+  zone settings still used by Office protocol handlers).
 
-    - UNCAsIntranet = 1  (UNC shares → intranet zone)
-    - Zone map for http(s)://<server> and file://<server>
-    - Optional removal of the host from Restricted Sites (zone 4) if present
-
-  Run on each officer PC (e.g. 10.100.64.x), not on the IIS server. Sign out/in or reboot
-  after running if Word was already open.
-
-  Fleet deploy: mirror these registry values with Group Policy — see NOTES.
+  Run on each officer PC, not on the IIS server. Sign out/in or reboot after running if Word
+  was already open.
 
 .PARAMETER ServerHost
-  Host name or IP officers use in the browser and UNC paths. Default: 10.100.128.25
+  Host name or IP officers use in the browser (HTTPS). Default: 10.100.128.25
 
 .PARAMETER Profile
-  IIS slot — used only to print the expected SMB share name in verification output.
+  IIS slot label for log output only.
 
 .PARAMETER AllUsers
   Write HKLM instead of HKCU (requires Administrator). Use for shared PCs.
 
-.PARAMETER SkipShareTest
-  Do not run Test-Path on the template-edit UNC share.
+.PARAMETER IncludeLocalhost
+  Also trust http://localhost and https://localhost (and 127.0.0.1) for F5 dev.
 
 .EXAMPLE
-  .\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1
+  # Local dev (F5 on localhost:5001) + production server
+  .\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -IncludeLocalhost
 
 .EXAMPLE
   .\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -ServerHost ENJ18VWSPVIZE2
@@ -45,9 +40,6 @@
 
 .NOTES
   Feature: docs/TEMPLATE_STAGING_EDIT.md
-  Server share setup: Ensure-Visa2026TemplateEditShare.ps1 (run on Windows Server)
-
-  GPO equivalent (user scope):
     User Configuration → Administrative Templates → Windows Components →
     Internet Explorer → Internet Control Panel → Security Page →
     Site to Zone Assignment List → http://10.100.128.25 = 1
@@ -65,7 +57,7 @@ param(
     [string]$Profile = "Production",
 
     [switch]$AllUsers,
-    [switch]$SkipShareTest
+    [switch]$IncludeLocalhost
 )
 
 $ErrorActionPreference = "Stop"
@@ -84,10 +76,6 @@ if ([string]::IsNullOrWhiteSpace($ServerHost)) {
 }
 
 $slot = Get-Visa2026IisSlotDefinition -Profile $Profile
-$shareName = $slot.TemplateEditShareName
-$uncShare = "\\$ServerHost\$shareName"
-$httpOrigin = if ($ServerHost -match '^\d') { "http://$ServerHost" } else { "http://$ServerHost" }
-$httpsOrigin = if ($ServerHost -match '^\d') { "https://$ServerHost" } else { "https://$ServerHost" }
 
 $hive = if ($AllUsers) { "HKLM" } else { "HKCU" }
 $baseKey = "$hive`:\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
@@ -121,6 +109,12 @@ function Remove-RestrictedSiteEntry {
         Get-ChildItem -LiteralPath $domainsKey -Recurse -ErrorAction SilentlyContinue |
             Where-Object { $_.PSChildName -eq $HostName -or $_.Name -match $escaped } |
             ForEach-Object {
+                $props = Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction SilentlyContinue
+                $isRestricted = ($props.http -eq 4) -or ($props.https -eq 4) -or ($props.file -eq 4)
+                if (-not $isRestricted) {
+                    return
+                }
+
                 if ($PSCmdlet.ShouldProcess($_.PSPath, "Remove restricted-site zone entry")) {
                     Remove-Item -LiteralPath $_.PSPath -Recurse -Force -ErrorAction SilentlyContinue
                 }
@@ -143,14 +137,71 @@ function Remove-RestrictedSiteEntry {
     }
 }
 
+function Set-ZoneRange {
+    param(
+        [Parameter(Mandatory = $true)][string]$KeyName,
+        [Parameter(Mandatory = $true)][string]$RangeValue,
+        [Parameter(Mandatory = $true)][ValidateSet(1, 2)][int]$Zone
+    )
+
+    $path = Join-Path $rangesKey $KeyName
+    if (-not (Test-Path -LiteralPath $path)) {
+        if ($PSCmdlet.ShouldProcess($path, "Create zone range")) {
+            New-Item -Path $path -Force | Out-Null
+        }
+    }
+
+    if ($PSCmdlet.ShouldProcess($path, "Map $RangeValue to zone $Zone")) {
+        Set-ItemProperty -LiteralPath $path -Name ":Range" -Value $RangeValue -Force
+        Set-DwordRegistryValue -Path $path -Name "http" -Value $Zone
+        Set-DwordRegistryValue -Path $path -Name "https" -Value $Zone
+        Set-DwordRegistryValue -Path $path -Name "file" -Value $Zone
+    }
+}
+
+function Set-ZoneDomain {
+    param(
+        [Parameter(Mandatory = $true)][string]$DomainName,
+        [Parameter(Mandatory = $true)][ValidateSet(1, 2)][int]$Zone
+    )
+
+    $path = Join-Path (Join-Path $zoneMapKey "Domains") $DomainName
+    if (-not (Test-Path -LiteralPath $path)) {
+        if ($PSCmdlet.ShouldProcess($path, "Create zone domain")) {
+            New-Item -Path $path -Force | Out-Null
+        }
+    }
+
+    if ($PSCmdlet.ShouldProcess($path, "Map $DomainName to zone $Zone")) {
+        Set-DwordRegistryValue -Path $path -Name "http" -Value $Zone
+        Set-DwordRegistryValue -Path $path -Name "https" -Value $Zone
+        Set-DwordRegistryValue -Path $path -Name "file" -Value $Zone
+    }
+
+    Remove-RestrictedSiteEntry -HostName $DomainName
+}
+
+function Set-IntranetZoneRange {
+    param(
+        [Parameter(Mandatory = $true)][string]$KeyName,
+        [Parameter(Mandatory = $true)][string]$RangeValue
+    )
+
+    Set-ZoneRange -KeyName $KeyName -RangeValue $RangeValue -Zone 1
+}
+
+function Set-IntranetZoneDomain {
+    param([Parameter(Mandatory = $true)][string]$DomainName)
+
+    Set-ZoneDomain -DomainName $DomainName -Zone 1
+}
+
 $rangeKeyName = "Visa2026TemplateEdit_" + ($ServerHost -replace '[^a-zA-Z0-9]', '_')
-$rangeKeyPath = Join-Path $rangesKey $rangeKeyName
 
 Write-Host ""
-Write-Host "Visa2026 template edit - Office / intranet trust ($hive)" -ForegroundColor Cyan
+Write-Host "Visa2026 template edit - Office trust ($hive)" -ForegroundColor Cyan
 Write-Host "  Server host : $ServerHost"
-Write-Host "  SMB share   : $uncShare"
-Write-Host "  Web origin  : $httpOrigin"
+Write-Host "  Web origin  : https://$ServerHost"
 Write-Host ""
 
 if ($PSCmdlet.ShouldProcess($baseKey, "Configure UNCAsIntranet and intranet zone map")) {
@@ -161,16 +212,16 @@ if ($PSCmdlet.ShouldProcess($baseKey, "Configure UNCAsIntranet and intranet zone
         New-Item -Path $rangesKey -Force | Out-Null
     }
 
-    if (-not (Test-Path -LiteralPath $rangeKeyPath)) {
-        New-Item -Path $rangeKeyPath -Force | Out-Null
-    }
-
-    Set-ItemProperty -LiteralPath $rangeKeyPath -Name ":Range" -Value $ServerHost -Force
-    Set-DwordRegistryValue -Path $rangeKeyPath -Name "http" -Value 1
-    Set-DwordRegistryValue -Path $rangeKeyPath -Name "https" -Value 1
-    Set-DwordRegistryValue -Path $rangeKeyPath -Name "file" -Value 1
-
+    Set-IntranetZoneRange -KeyName $rangeKeyName -RangeValue $ServerHost
     Remove-RestrictedSiteEntry -HostName $ServerHost
+
+    if ($IncludeLocalhost) {
+        # Office ms-word: from localhost often needs Trusted Sites (zone 2), not only intranet (zone 1).
+        Set-ZoneDomain -DomainName "localhost" -Zone 2
+        Set-ZoneRange -KeyName "Visa2026TemplateEdit_localhost" -RangeValue "127.0.0.1" -Zone 2
+        Remove-RestrictedSiteEntry -HostName "127.0.0.1"
+        Write-Host "  localhost + 127.0.0.1 -> trusted sites (zone 2) for F5 dev" -ForegroundColor Green
+    }
 
     Write-Host "Registry updated:" -ForegroundColor Green
     Write-Host "  $baseKey"
@@ -182,18 +233,11 @@ if ($PSCmdlet.ShouldProcess($baseKey, "Configure UNCAsIntranet and intranet zone
 $uncAsIntranet = (Get-ItemProperty -LiteralPath $baseKey -Name "UNCAsIntranet" -ErrorAction SilentlyContinue).UNCAsIntranet
 Write-Host "Verification ($hive):" -ForegroundColor Cyan
 Write-Host "  UNCAsIntranet = $uncAsIntranet"
-
-if (-not $SkipShareTest) {
-    Write-Host ""
-    Write-Host "SMB share reachability (current Windows user):" -ForegroundColor Cyan
-    if (Test-Path -LiteralPath $uncShare) {
-        Write-Host "  OK - $uncShare is reachable." -ForegroundColor Green
-    }
-    else {
-        Write-Host "  NOT reachable - $uncShare" -ForegroundColor Yellow
-        Write-Host "  Port 445 may be open but SMB auth/share ACL can still block access."
-        Write-Host "  Try: net use $uncShare /user:DOMAIN\YourUsername"
-        Write-Host "  Server script: Ensure-Visa2026TemplateEditShare.ps1 -Profile $Profile"
+if ($IncludeLocalhost) {
+    $localhostZone = (Get-ItemProperty -LiteralPath (Join-Path $zoneMapKey "Domains\localhost") -Name "http" -ErrorAction SilentlyContinue).http
+    Write-Host "  localhost http zone = $localhostZone (2 = trusted sites, 1 = intranet, 4 = restricted)"
+    if ($localhostZone -ne 2) {
+        Write-Warning "localhost is not in trusted sites (zone 2). Re-run without -WhatIf or check permissions."
     }
 }
 
@@ -201,6 +245,6 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Close Word and Edge completely (or sign out / reboot)."
 Write-Host "  2. Hard-refresh Visa2026 (Ctrl+F5), click Edit template again."
-Write-Host "  3. If Office still blocks, open the file from Explorer:"
-Write-Host ('       explorer.exe "' + $uncShare + '"')
+Write-Host "  3. If Office still blocks, open the file from Explorer (your chosen sandbox folder),"
+Write-Host "     or use Copy path from Resminamalar after Edit template."
 Write-Host ""

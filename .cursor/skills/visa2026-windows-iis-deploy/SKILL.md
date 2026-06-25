@@ -64,7 +64,7 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 | Class | Examples | OK required? |
 |-------|----------|--------------|
 | **Read-only** | `appcmd list site`, `sc query MSSQL$SQLEXPRESS`, curl LoginPage per port, `Diagnose-Port80.ps1` | No |
-| **Deploy / mutate** | Copy publish, `Ensure-Visa2026TemplateEditShare.ps1 -Profile …`, `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
+| **Deploy / mutate** | Copy publish, `Enable-Visa2026IisHttps.ps1` (when template staging), `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
 | **Destructive** | `RESTORE … WITH REPLACE` on **prod** DB, removing portproxy, SQL single-user `-m` bootstrap | **Yes** |
 
 Take a **SQL `.bak`** before restore or risky schema update on **Production**.
@@ -102,7 +102,7 @@ Full steps: [reference.md](./reference.md). Phases: [ON_PREM_WINDOWS_IIS.md](../
 2. **Publish** on dev PC.
 3. **Stop** that slot’s app pool (`Visa2026-Prod` / `-Staging` / `-Demo`).
 4. Copy publish to that slot’s **`C:\inetpub\visa2026-*`** — keep slot’s `appsettings.Production.json` and **`DataProtection-Keys-*`**.
-5. **`Ensure-Visa2026TemplateEditShare.ps1 -Profile <slot>`** (Resminamalar template staging SMB share; idempotent).
+5. **`Enable-Visa2026IisHttps.ps1 -Profile <slot>`** when `HTTPS_ENABLED=true` (required for local sandbox template editing).
 6. **`Configure-Visa2026Production.ps1 -Profile <slot>`** (rewrites `appsettings.Production.json` including `TemplateEditStaging`).
 7. **`Run-Visa2026DbUpdateOnServer.ps1 -Profile <slot>`** (`-ForceUpdate` if drift).
 8. Start app pool + site; smoke that slot’s LoginPage URL (see table in § Goal).

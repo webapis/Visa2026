@@ -18,19 +18,13 @@ public sealed class UserReportTemplateStagingExportResult
 
     public required string DocumentFileName { get; init; }
 
-    public TemplateEditStagingMode Mode { get; init; } = TemplateEditStagingMode.Share;
-
-    public string UncPath { get; init; } = string.Empty;
-
-    public string? OfficeOpenUrl { get; init; }
-
-    /// <summary>SHA-256 (hex) of exported DB content. Used by local-folder client metadata.</summary>
+    /// <summary>SHA-256 (hex) of exported DB content. Used by local sandbox client metadata.</summary>
     public string? SourceContentHashSha256 { get; init; }
 
-    /// <summary>Word or Excel — local-folder client uses this for Office protocol.</summary>
+    /// <summary>Word or Excel — client uses this for Office protocol.</summary>
     public TemplateOutputFormat OutputFormat { get; init; }
 
-    /// <summary>Raw template bytes when <see cref="Mode"/> is <see cref="TemplateEditStagingMode.LocalFolder"/>.</summary>
+    /// <summary>Raw template bytes written to the officer PC sandbox folder.</summary>
     public byte[]? FileContent { get; init; }
 }
 

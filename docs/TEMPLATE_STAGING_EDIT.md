@@ -1,27 +1,21 @@
-# Template staging edit (Resminamalar desktop Word/Excel)
+# Template staging edit — local sandbox (Resminamalar)
 
-> **Status:** Phases 1–3 implemented (Module services, API, Resminamalar catalog UI). Enable via `TemplateEditStaging:Enabled` and configure UNC share.  
-> **Related:** [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) (Resminamalar catalog), [`USER_TEMPLATE_AUTHOR_GUIDE.md`](USER_TEMPLATE_AUTHOR_GUIDE.md), [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../.cursor/skills/visa2026-resminamalar/SKILL.md).
+> **Status:** Implemented — officers edit Word/Excel templates from the Resminamalar catalog via a **local PC sandbox folder** (browser File System Access API). SMB/UNC share mode has been removed.  
+> **Related:** [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md), [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../.cursor/skills/visa2026-resminamalar/SKILL.md).
 
-Officers edit **user report templates** (Word `.docx` / Excel `.xlsx`) from the **Resminamalar catalog** without opening **User Report Template** DetailView or manually downloading and re-uploading files.
-
-## Prerequisites (confirmed)
-
-- **Staging** is a **network share** both the app (service account) and officers can read/write.
-- Officers have **Microsoft Word / Excel** installed on their workstations.
-- **In-browser** Spreadsheet / Rich Edit on DetailView is **out of scope** for this feature (desktop edit via share only).
+Officers edit **user report templates** (`.docx` / `.xlsx`) from **Resminamalar** without opening User Report Template DetailView or manually downloading and re-uploading files. Templates are exported to a folder on the **officer PC**, edited in desktop Word/Excel, then synced back to the database.
 
 ---
 
 ## Officer workflow
 
-| Step | Officer action | System behavior |
-|------|----------------|-----------------|
-| 1 | Click **Edit template** on a catalog row (gear panel) | Export `FileData` from DB → write to network share → attempt open in Word/Excel |
-| 2 | Edit, **Save**, **Close** in desktop app | File remains on the share |
-| 3 | Click **Sync to database** in catalog footer | Import all **changed** staged files → replace DB blobs → Extract + Validate when hash changed → reload catalog readiness |
-
-The officer stays in **Resminamalar**. The database is canonical **after Sync to database**. Use **Refresh** only to reload catalog readiness without importing from the share.
+| Step | Action | System |
+|------|--------|--------|
+| 1 | **Once:** Choose template folder (footer) | Officer grants write access to `%LOCALAPPDATA%\Visa2026\TemplateEdit` (browser remembers folder) |
+| 2 | **Edit template** on a catalog row | Server returns template bytes → browser writes file + `.meta.json` → attempts Word/Excel open |
+| 3 | Edit, **Save**, **Close** in Word/Excel | File stays in local sandbox |
+| 4 | **Sync to database** (footer) | Browser uploads changed files → server replaces DB blobs → Extract + Validate when hash changed |
+| 5 | **Refresh** (optional) | Reload catalog readiness only — does **not** import |
 
 ```mermaid
 sequenceDiagram
@@ -30,44 +24,115 @@ sequenceDiagram
     participant API as Staging API
     participant Module as StagingService
     participant DB as SQL FileData
-    participant Share as UNC share
+    participant FSA as Browser FSA folder
     participant Office as Word / Excel
 
+    Officer->>Catalog: Choose template folder (once)
+    Catalog->>FSA: showDirectoryPicker + Visa2026Templates
     Officer->>Catalog: Edit template
     Catalog->>API: POST export
     API->>Module: ExportForEditAsync
     Module->>DB: Read TemplateFile
-    Module->>Share: Write .docx / .xlsx + .meta.json
-    API->>Officer: UNC path + ms-word/ms-excel link
+    API->>Catalog: bytes + metadata
+    Catalog->>FSA: Write .docx/.xlsx + .meta.json
+    Catalog->>Office: ms-word:/ms-excel: (best effort)
     Officer->>Office: Edit, Save, Close
     Officer->>Catalog: Sync to database
-    Catalog->>API: POST import-all
-    API->>Module: ImportAllChangedAsync
-    Module->>Share: Read changed files
-    Module->>DB: Replace FileData
-    Module->>Module: Extract + Validate if hash changed
+    Catalog->>FSA: collectChangedUploads
+    Catalog->>API: POST upload per changed file
+    API->>Module: ImportFromUploadAsync
+    Module->>DB: Replace FileData + Extract/Validate
     Catalog->>Officer: Updated readiness
 ```
 
 ---
 
-## Design decisions (locked)
+## Prerequisites
 
-| # | Decision | Choice |
-|---|----------|--------|
-| 1 | **Import scope on Refresh** | Import **all changed files on the share** (not limited to current session) — **superseded:** import is on **Sync to database** only; **Refresh** reloads catalog |
-| 2 | Extract + Validate on import | Run **only when file hash changed** since last import |
-| 3 | **Open file after export** | **Try** `ms-word:` / `ms-excel:` Office protocol; **fallback** UNC path + **Copy path** button |
-| 4 | **DetailView link in catalog** | **Remove** — catalog **Edit template** is the only entry point; DetailView remains in nav for admins |
+| Requirement | Notes |
+|-------------|--------|
+| **HTTPS** (production) | File System Access API requires a [secure context](https://developer.mozilla.org/en-US/docs/Web/API/Window/isSecureContext). `localhost` works for F5 dev; IIS prod needs HTTPS (`Enable-Visa2026IisHttps.ps1`). |
+| **Edge or Chrome** | `showDirectoryPicker` support; officers use Windows workstations. |
+| **Word / Excel** | Desktop apps for editing. |
+| **Permissions** | `UserReportTemplateEditAccess.CanEditTemplates()` (same gate as template DetailView maintenance). |
 
 ---
 
-## Non-goals
+## Configuration
 
-- In-browser Spreadsheet / Rich Edit on User Report Template DetailView
-- Editing ministry **seed files in git** (`Resources/Templates/`)
-- Version history, check-out UI, or multi-user merge conflict resolution (v1: last import wins)
-- Auto-sync without officer clicking **Sync to database**
+### `TemplateEditStaging` (appsettings)
+
+```json
+{
+  "TemplateEditStaging": {
+    "Enabled": true,
+    "LocalFolderSubfolderName": "Visa2026\\TemplateEdit",
+    "FileNamePattern": "{safeName}{extension}",
+    "AutoExtractValidateOnImport": true,
+    "MaxFileSizeBytes": 52428800
+  }
+}
+```
+
+| Setting | Purpose |
+|---------|---------|
+| `Enabled` | Master switch; when false, Edit template / Sync are hidden |
+| `LocalFolderSubfolderName` | Relative path under `%LOCALAPPDATA%` (default `Visa2026\TemplateEdit`) |
+| `FileNamePattern` | Tokens: `{templateId}`, `{safeName}`, `{extension}` |
+| `AutoExtractValidateOnImport` | Run Extract + Validate after successful import when hash changed |
+| `MaxFileSizeBytes` | Upload size limit (default 50 MB) |
+
+### Development (`appsettings.Development.json`)
+
+- `TemplateEditStaging:Enabled: true`
+- F5 on `https://localhost:5001` or `http://localhost:5001` (localhost is a secure context)
+
+### Production (IIS slot env)
+
+In `C:\visa2026\env\prod.env` (see `scripts/windows-iis/env/prod.env.example`):
+
+```env
+TEMPLATE_EDIT_STAGING_ENABLED=true
+HTTPS_ENABLED=true
+HTTPS_PORT=443
+```
+
+Then deploy and run `Enable-Visa2026IisHttps.ps1` for the slot. `Configure-Visa2026Production.ps1` writes `TemplateEditStaging` into `appsettings.Production.json`.
+
+---
+
+## Officer PC setup (one-time)
+
+### 1. Choose template folder
+
+In Resminamalar footer: **Choose template folder**.
+
+1. In the picker **address bar**, paste: `%LOCALAPPDATA%\Visa2026\TemplateEdit`
+2. Press **Enter** (create `Visa2026` and `TemplateEdit` if Windows asks)
+3. With **TemplateEdit** selected, click **Select Folder**
+4. Grant write permission when the browser asks
+
+Default full path example: `C:\Users\<you>\AppData\Local\Visa2026\TemplateEdit`
+
+**Do not** select protected roots (Documents, Desktop, Downloads) — the browser blocks them.
+
+### 2. Office trust (if Word blocks auto-open)
+
+Office may show *"Unsafe Content — Restricted Sites zone"* when launching from the browser.
+
+**Production** (officers open `https://10.100.128.25`):
+
+```powershell
+.\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -ServerHost 10.100.128.25
+```
+
+**Local dev** (`localhost:5001`):
+
+```powershell
+.\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -IncludeLocalhost
+```
+
+Close Word/Edge, hard-refresh, try **Edit template** again. Fallback: open file from `%LOCALAPPDATA%\Visa2026\TemplateEdit` or use **Copy path**.
 
 ---
 
@@ -75,318 +140,88 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    subgraph ui [Blazor — Resminamalar catalog]
-        EDIT[Edit template button]
-        SYNC[Sync to database button]
-        REF[Refresh button]
+    subgraph ui [Blazor — Resminamalar]
+        EDIT[Edit template]
+        CHOOSE[Choose template folder]
+        SYNC[Sync to database]
+        JS[template-staging-local.js]
     end
-
-    subgraph api [Visa2026.Blazor.Server]
-        CTRL[UserReportTemplateStagingController]
+    subgraph api [Blazor API]
+        EXP[POST .../staging/export]
+        UPL[POST .../staging/upload]
     end
-
     subgraph module [Visa2026.Module]
-        STG[UserReportTemplateStagingService]
-        MAINT[UserReportTemplateMaintenanceService]
+        SVC[UserReportTemplateStagingService]
+        DB[(UserReportTemplate.FileData)]
+    end
+    subgraph pc [Officer PC]
+        FSA[IndexedDB + FSA folder]
+        DOC[AppData/Local/Visa2026/TemplateEdit]
     end
 
-    subgraph storage [Storage]
-        DB[(SQL — FileData)]
-        SHARE[UNC TemplateEdit share]
-        META[Sidecar .meta.json]
-    end
-
-    EDIT --> CTRL --> STG
-    SYNC --> CTRL
-    STG --> DB
-    STG --> SHARE
-    STG --> META
-    STG --> MAINT
-    MAINT --> DB
+    CHOOSE --> JS
+    EDIT --> EXP --> SVC --> DB
+    EXP --> JS --> FSA --> DOC
+    SYNC --> JS --> UPL --> SVC --> DB
 ```
 
-### Layer responsibilities
+### Key files
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| **Staging service** | `Visa2026.Module/Services/UserReports/` | Export/import bytes, path rules, hash compare, lock detection, metadata |
-| **Maintenance service** | `Visa2026.Module/Services/UserReports/` | Shared Extract + Validate (refactored from `UserReportTemplateController`) |
-| **API controller** | `Visa2026.Blazor.Server/Controllers/` | Auth, permission checks, return UNC + open URL |
-| **Catalog UI** | `ApplicationReportPackageComponent.razor` | Edit button, **Sync to database**, Refresh (catalog only), copy-path JS |
-| **Slot host** | `ResminamalarSlotPanel.razor` | Wire import result into catalog reload |
-
-### Current behavior (to replace)
-
-| Control | Today | After this feature |
-|---------|-------|-------------------|
-| **Edit template** | Opens `UserReportTemplate_DetailView/{id}` in new tab | Export to share + open in Office |
-| **Refresh** | Reloads catalog from DB only | Reloads catalog from DB only (no share import) |
-| **Sync to database** | — | Import changed share files → DB → Extract/Validate when hash changed → reload catalog |
-
----
-
-## Configuration
-
-Add to `appsettings.json` (and environment-specific overrides / `docs/ENVIRONMENTS.md`):
-
-```json
-"TemplateEditStaging": {
-  "Enabled": true,
-  "StagingRootUnc": "\\\\fileserver\\Visa2026\\TemplateEdit",
-  "FileNamePattern": "{templateId}_{safeName}{extension}",
-  "AutoExtractValidateOnImport": true,
-  "MaxFileSizeBytes": 52428800
-}
-```
-
-| Setting | Purpose |
-|---------|---------|
-| `Enabled` | Kill switch if share unavailable |
-| `StagingRootUnc` | **UNC only** (`\\server\share`) — app pool identity **and** officers need read/write |
-| `FileNamePattern` | Stable mapping; `{templateId}` ties file to DB row |
-| `AutoExtractValidateOnImport` | After import with hash change, run Extract + Validate |
-| `MaxFileSizeBytes` | Reject oversized imports |
-
-**Do not** set `StagingRootUnc` to a local drive (`D:\`, `C:\`) or a relative project folder — always use the **share UNC** (e.g. `\\127.0.0.1\Visa2026TemplateEdit`).
-
-**Deploy checklist**
-
-- App pool / container service account: **Modify** on share
-- Officers: **Modify** on same share
-- Document UNC path per environment (dev / staging / prod)
-
-### Local development (F5 / `dotnet run`)
-
-| Item | Value |
+| Area | Files |
 |------|--------|
-| **UNC** | `\\127.0.0.1\Visa2026TemplateEdit` (share name on your dev PC) |
-| **Config** | `appsettings.Development.json` → `StagingRootUnc: "\\\\127.0.0.1\\\\Visa2026TemplateEdit"` |
-| **Verify** | `.\scripts\local\Ensure-TemplateEditDevShare.ps1` |
+| **Module** | `UserReportTemplateStagingService`, `TemplateEditStagingOptions`, `UserReportTemplateStagingPathHelper`, `UserReportTemplateStagingMeta` |
+| **Blazor** | `ApplicationReportPackageComponent.razor`, `UserReportTemplateStagingUiService`, `UserReportTemplateStagingController` |
+| **JS** | `wwwroot/js/template-staging-local.js` |
+| **IIS** | `Enable-Visa2026IisHttps.ps1`, `Configure-Visa2026Production.ps1`, `Set-Visa2026TemplateEditOfficeTrust.ps1` |
 
-Word/Excel opens via `ms-word:` / `ms-excel:` links to the UNC path. Use **Copy path** in the catalog if the browser blocks the protocol handler.
+### API endpoints
 
-### Windows Server IIS (on-prem slots)
-
-| Item | Value |
-|------|--------|
-| **Script** | `scripts/windows-iis/Ensure-Visa2026TemplateEditShare.ps1` (run on server; also invoked by deploy) |
-| **When** | Greenfield `Install-Visa2026IisSlots.ps1` and each `Deploy-Visa2026IisRemote.ps1` before `Configure-Visa2026Production.ps1` |
-| **Local folders** | `C:\ProgramData\Visa2026\TemplateEdit\{prod,staging,demo}` |
-| **SMB shares** | `Visa2026TemplateEdit-Prod`, `-Staging`, `-Demo` |
-| **UNC examples** | `\\<server>\Visa2026TemplateEdit-Prod` (per slot — see [Visa2026-IisSlots.ps1](../scripts/windows-iis/Visa2026-IisSlots.ps1)) |
-| **App config** | `Configure-Visa2026Production.ps1` writes `TemplateEditStaging` into `appsettings.Production.json` (`StagingRootUnc` for officers, `StagingLocalPath` for app pool I/O) |
-| **Slot env** | `C:\visa2026\env\prod.env` — optional `TEMPLATE_EDIT_UNC_HOST`, `TEMPLATE_EDIT_OFFICERS_PRINCIPAL`, `TEMPLATE_EDIT_STAGING_ENABLED=false` to disable |
-
-Officers need **Modify** on the share NTFS ACL — set `TEMPLATE_EDIT_OFFICERS_PRINCIPAL=DOMAIN\Group` in the slot env file, or pass `-OfficersPrincipal` when running the ensure script.
-
-Runbook: [docs/ON_PREM_WINDOWS_IIS.md](ON_PREM_WINDOWS_IIS.md) · skill [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md).
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/api/user-report-templates/{id}/staging/export` | Return template bytes + file name (used by Blazor interop) |
+| `POST` | `/api/user-report-templates/{id}/staging/upload` | Import one changed file from officer PC |
 
 ---
 
-## Staging file layout
+## Rollout checklist (production)
 
-```
-\\fileserver\Visa2026\TemplateEdit\
-  {templateId}_{safeName}.docx
-  {templateId}_{safeName}.docx.meta.json
-  {templateId}_{safeName}.xlsx
-  {templateId}_{safeName}.xlsx.meta.json
-```
-
-Example sidecar `{templateId}_{safeName}.docx.meta.json`:
-
-```json
-{
-  "templateId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "templateName": "GT-15 Elyasow ckl",
-  "outputFormat": "Word",
-  "exportedAtUtc": "2026-06-20T10:15:00Z",
-  "exportedByUserName": "officer1",
-  "sourceContentHashSha256": "...",
-  "lastImportedAtUtc": null,
-  "lastImportedContentHashSha256": null
-}
-```
-
-- **Export** writes/overwrites document + meta (`sourceContentHashSha256` = DB content at export time).
-- **Import** compares staged file hash to `lastImportedContentHashSha256`; skip if unchanged.
+1. Set slot env: `TEMPLATE_EDIT_STAGING_ENABLED=true`, `HTTPS_ENABLED=true`, `HTTPS_PORT=443`
+2. Deploy publish output to IIS slot
+3. Run `Enable-Visa2026IisHttps.ps1 -Profile Production -RedirectHttpToHttps`
+4. Run `Configure-Visa2026Production.ps1 -Profile Production`
+5. Officers use **`https://`** URL (not `http://`)
+6. On each officer PC: `Set-Visa2026TemplateEditOfficeTrust.ps1 -ServerHost <server>`
+7. Officer onboarding: Choose template folder → Edit template → Sync to database
 
 ---
 
-## Implementation phases
+## Non-goals
 
-### Phase 1 — Module services
-
-#### `UserReportTemplateStagingService`
-
-**`ExportForEditAsync(templateId, userName)`**
-
-1. `UserReportTemplateEditAccess.CanEditTemplates()`
-2. Load template + `FileData` from DB
-3. Build path: `{StagingRootUnc}\{templateId}_{safeName}.docx|.xlsx`
-4. Write bytes; write/update `.meta.json`
-5. Return `StagingExportResult` (UNC path, template id, display name, extension)
-
-**`TryImportAsync(templateId)`**
-
-1. Read staged file + meta; validate `templateId` and extension vs `TemplateOutputFormat`
-2. If missing → skip
-3. If locked (`IOException`) → fail with user-friendly message
-4. If SHA-256 unchanged since last import → skip
-5. Non-secured object space (same as `UserReportTemplateController` maintenance)
-6. Replace `TemplateFile.Content`; commit
-7. If hash changed and `AutoExtractValidateOnImport` → call maintenance service
-8. Update meta timestamps and `lastImportedContentHashSha256`
-
-**`ImportAllChangedAsync()`**
-
-- Scan share for `*.meta.json` entries
-- Import each template whose staged file hash differs from last imported hash
-- Return summary: imported / skipped / failed (+ per-template errors)
-
-#### `UserReportTemplateMaintenanceService`
-
-Extract reusable logic from `UserReportTemplateController`:
-
-- `ExtractPlaceholdersAsync(templateId)` — Word: `IUserReportPlaceholderExtractor`; Excel: `IExcelTemplatePlaceholderExtractor`
-- `ValidatePlaceholdersAsync(templateId)` — Word: `IUserReportValidationService`; Excel: `IExcelReportValidationService`
-
-#### `TemplateEditStagingOptions`
-
-Options class bound from config; register in `Startup.cs`.
+- SMB/UNC network shares for template staging (removed)
+- In-browser Spreadsheet / Rich Edit on DetailView
+- Editing ministry seed files in git (`Resources/Templates/`)
+- Version history or check-out UI (v1: last sync wins)
+- Auto-sync without officer clicking **Sync to database**
 
 ---
 
-### Phase 2 — API
+## Troubleshooting
 
-**`UserReportTemplateStagingController`** (`Visa2026.Blazor.Server/Controllers/`)
-
-| Method | Route | Purpose |
-|--------|-------|---------|
-| POST | `/api/user-report-templates/{templateId}/staging/export` | Export + return open info |
-| POST | `/api/user-report-templates/staging/import-all` | Import all changed (**Sync to database**) |
-| POST | `/api/user-report-templates/{templateId}/staging/import` | Optional single-template import |
-
-- `[Authorize]` on all endpoints
-- Same permission gate as `UserReportTemplateEditAccess.CanEditTemplates()`
-
-**Export response (example)**
-
-```json
-{
-  "uncPath": "\\\\fileserver\\Visa2026\\TemplateEdit\\{id}_name.docx",
-  "openUrl": "ms-word:ofe|u|file://fileserver/Visa2026/TemplateEdit/...",
-  "displayName": "GT-15 Elyasow ckl",
-  "templateId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
-}
-```
-
-**Opening the file (browser)**
-
-1. Attempt `window.open(openUrl)` for Office protocol (best-effort on Windows + Office).
-2. Always show UNC path + **Copy path** (`navigator.clipboard.writeText`).
-3. Toast if protocol blocked: “Open this path in Word: `\\fileserver\...`”
+| Symptom | Check |
+|---------|--------|
+| Folder picker on every Edit | Click **Choose template folder** first; folder handle is stored in IndexedDB |
+| Export failed / staging disabled | `TemplateEditStaging:Enabled`, user has edit permission |
+| Sync finds nothing | File saved in Word? Same sandbox folder? `.meta.json` present? |
+| Word "Restricted Sites" | Run Office trust script; use HTTPS; or open file from Explorer |
+| HTTPS required message | Production must use HTTPS; run `Enable-Visa2026IisHttps.ps1` |
 
 ---
 
-### Phase 3 — UI (Resminamalar catalog)
+## Removed (SMB share mode)
 
-**File:** `Visa2026.Blazor.Server/Editors/ApplicationReportPackageComponent.razor`
+The following were removed when switching to local sandbox only:
 
-1. Replace `<a href="...DetailView...">` with `DxButton` → `EditTemplateAsync(entry)`.
-2. Remove `UserReportTemplateEditLinkService.GetDetailViewUrl` usage from catalog (service may remain for other callers).
-3. **Sync to database:** call import-all API → show summary toast → `ReloadCatalogAsync()`.
-4. **Refresh:** reload catalog only (no share import).
-5. Optional session hint: badge **“On share”** for templates exported in current browser session until sync imports that template.
-
-**JS helper:** `wwwroot/js/template-staging-edit.js` — copy UNC, optional Office open attempt.
-
-**Remove:** DetailView link from catalog entirely (decision #4).
-
----
-
-### Phase 4 — Security and safety
-
-| Risk | Mitigation |
-|------|------------|
-| Unauthorized access | `CanEditTemplates()` on every API call |
-| Path traversal | Paths built only from `templateId` + sanitized name; never accept client paths |
-| Wrong file type | Extension must match `TemplateOutputFormat` |
-| Word/Excel lock | Catch `IOException`; message: close app and click **Sync to database** again |
-| Concurrent edit | v1: last import wins; meta records `exportedByUserName` / timestamps |
-| Oversized file | `MaxFileSizeBytes` on import |
-| Broken placeholders | Extract + Validate after hash-changed import; readiness Warning in catalog |
-
----
-
-### Phase 5 — Localization
-
-New `VisaUiMessages` keys (and `UiStrings.messages.json` / `tk-TM`):
-
-- `ApplicationReportPackage.EditTemplate.Exporting`
-- `ApplicationReportPackage.EditTemplate.ExportedOpenPath`
-- `ApplicationReportPackage.EditTemplate.ExportFailed`
-- `ApplicationReportPackage.EditTemplate.CopyPath`
-- `ApplicationReportPackage.SyncTemplates` (+ `.ImportSummary`, `.ImportFailed`, `.FileLocked`)
-
----
-
-### Phase 6 — Testing
-
-| Test | Type |
-|------|------|
-| Export writes bytes + meta | Unit |
-| Import updates `FileData` | Unit |
-| Import skips unchanged hash | Unit |
-| Import triggers extract/validate when hash changed | Unit |
-| Locked file → clear error | Unit |
-| API 403 without write permission | Integration |
-| LAN manual: export → edit → refresh → preview | Manual QA |
-
-**Manual QA checklist**
-
-- [ ] Resminamalar → gear → Edit template → file on share
-- [ ] Edit in Word → Save → Close → **Sync to database** → Preview reflects change
-- [ ] Same for `.xlsx`
-- [ ] Word still open → **Sync to database** shows lock message
-- [ ] User without template write → Edit hidden / API 403
-- [ ] **Sync to database** with no share changes → “0 imported” + catalog reload
-- [ ] Placeholder edit → **Sync to database** → Extract/Validate runs; readiness updates
-
----
-
-### Phase 7 — Documentation and ops
-
-- This file (`docs/TEMPLATE_STAGING_EDIT.md`) — canonical plan
-- Update [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) — done (Edit / Sync / Refresh)
-- Update [`ENVIRONMENTS.md`](ENVIRONMENTS.md) — share path and ACLs per environment
-- Append to [`.cursor/skills/visa2026-resminamalar/learnings.md`](../.cursor/skills/visa2026-resminamalar/learnings.md) after first deploy
-
----
-
-## Suggested implementation order
-
-| # | Task |
-|---|------|
-| 1 | `TemplateEditStagingOptions` + config |
-| 2 | `UserReportTemplateStagingService` |
-| 3 | `UserReportTemplateMaintenanceService` (refactor from controller) |
-| 4 | `UserReportTemplateStagingController` + DI |
-| 5 | Catalog UI: Edit button + export flow |
-| 6 | Catalog UI: **Sync to database** + Refresh (catalog only) + messages |
-| 7 | JS: copy UNC + Office open attempt |
-| 8 | Unit tests |
-| 9 | Localization + cross-doc updates |
-
----
-
-## References (existing code)
-
-| Area | Path |
-|------|------|
-| Catalog UI | `Visa2026.Blazor.Server/Editors/ApplicationReportPackageComponent.razor` |
-| Edit link (to remove from catalog) | `Visa2026.Blazor.Server/Services/UserReportTemplateEditLinkService.cs` |
-| Extract / Validate | `Visa2026.Module/Controllers/UserReportTemplateController.cs` |
-| Edit permission | `Visa2026.Module/Services/UserReports/UserReportTemplateEditAccess.cs` |
-| Template BO | `Visa2026.Module/BusinessObjects/UserReportTemplate.cs` |
-| Catalog entries | `Visa2026.Module/Services/WordReports/ApplicationWordReportPackageCatalog.cs` |
+- `TemplateEditStaging:StagingRootUnc`, `StagingLocalPath`, `Mode` enum
+- `Ensure-Visa2026TemplateEditShare.ps1`, `Ensure-TemplateEditDevShare.ps1`
+- `template-staging-edit.js`, server-side share scan (`ImportAllChangedAsync`)
+- Port 445 / SMB ACL / `TEMPLATE_EDIT_UNC_HOST` / `TEMPLATE_EDIT_OFFICERS_PRINCIPAL`
