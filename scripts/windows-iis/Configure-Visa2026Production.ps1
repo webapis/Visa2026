@@ -119,21 +119,46 @@ $config = @{
 }
 
 $templateStagingEnabled = Resolve-Visa2026TemplateEditStagingEnabled -EnvFile $EnvFile -DefaultEnabled:$true
+$templateStagingMode = Resolve-Visa2026TemplateEditStagingMode -EnvFile $EnvFile
+$httpsEnabled = Resolve-Visa2026HttpsEnabled -EnvFile $EnvFile
+$httpsPort = Resolve-Visa2026HttpsPort -EnvFile $EnvFile
+$stagingUnc = ""
+$slot = $null
+
+if ($httpsEnabled) {
+    $config["Https"] = @{
+        Port = $httpsPort
+    }
+    $config["FileUpload"] = @{ MaxRequestBodyBytes = 52428800 }
+}
+else {
+    $config["FileUpload"] = @{ MaxRequestBodyBytes = 10485760 }
+}
+
 if ($templateStagingEnabled) {
-    $stagingUnc = Get-Visa2026TemplateEditStagingUnc -Profile $ctx.Profile -EnvFile $EnvFile
-    $config["TemplateEditStaging"] = @{
+    $slot = Get-Visa2026IisSlotDefinition -Profile $ctx.Profile
+    $stagingBlock = @{
         Enabled = $true
-        StagingRootUnc = $stagingUnc
-        FileNamePattern = "{templateId}_{safeName}{extension}"
+        Mode = $templateStagingMode
+        FileNamePattern = "{safeName}{extension}"
         AutoExtractValidateOnImport = $true
         MaxFileSizeBytes = 52428800
     }
+
+    if ($templateStagingMode -eq 'Share') {
+        $stagingUnc = Get-Visa2026TemplateEditStagingUnc -Profile $ctx.Profile -EnvFile $EnvFile
+        $stagingBlock["StagingRootUnc"] = $stagingUnc
+        $stagingBlock["StagingLocalPath"] = $slot.TemplateEditLocalPath
+    }
+
+    $config["TemplateEditStaging"] = $stagingBlock
 }
 else {
     $config["TemplateEditStaging"] = @{
         Enabled = $false
+        Mode = "Share"
         StagingRootUnc = ""
-        FileNamePattern = "{templateId}_{safeName}{extension}"
+        FileNamePattern = "{safeName}{extension}"
         AutoExtractValidateOnImport = $true
         MaxFileSizeBytes = 52428800
     }
@@ -154,7 +179,13 @@ $poolEnv = @{
 Write-Host "Wrote $outPath" -ForegroundColor Green
 Write-Host "Slot: $($ctx.Profile)  Database: $dbName on $serverPart (sa)"
 if ($templateStagingEnabled) {
-    Write-Host "Template staging: enabled  UNC=$stagingUnc" -ForegroundColor Green
+    Write-Host "Template staging: enabled  Mode=$templateStagingMode" -ForegroundColor Green
+    if ($templateStagingMode -eq 'Share') {
+        Write-Host "  UNC=$stagingUnc  Local=$($slot.TemplateEditLocalPath)" -ForegroundColor Green
+    }
+    if ($templateStagingMode -eq 'LocalFolder' -and -not $httpsEnabled) {
+        Write-Host "  WARNING: LocalFolder mode requires HTTPS (set HTTPS_ENABLED=true and run Enable-Visa2026IisHttps.ps1)." -ForegroundColor Yellow
+    }
 }
 else {
     Write-Host "Template staging: disabled (set TEMPLATE_EDIT_STAGING_ENABLED=true in $EnvFile)" -ForegroundColor Yellow

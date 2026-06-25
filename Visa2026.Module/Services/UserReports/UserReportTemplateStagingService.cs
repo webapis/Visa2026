@@ -53,6 +53,22 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             templateId,
             template.TemplateName,
             outputFormat);
+        var sourceHash = ComputeSha256Hex(content);
+
+        if (_options.Mode == TemplateEditStagingMode.LocalFolder)
+        {
+            return new UserReportTemplateStagingExportResult
+            {
+                TemplateId = templateId,
+                DisplayName = template.TemplateName,
+                DocumentFileName = documentFileName,
+                Mode = TemplateEditStagingMode.LocalFolder,
+                SourceContentHashSha256 = sourceHash,
+                OutputFormat = outputFormat,
+                FileContent = content,
+            };
+        }
+
         var documentPath = UserReportTemplateStagingPathHelper.BuildDocumentPath(
             _options,
             templateId,
@@ -60,12 +76,11 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             outputFormat);
         var metaPath = UserReportTemplateStagingPathHelper.BuildMetaFilePath(documentPath);
 
-        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingRoot(_options);
+        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingIoRoot(_options);
         Directory.CreateDirectory(stagingRoot);
 
         await WriteAllBytesAsync(documentPath, content, cancellationToken).ConfigureAwait(false);
 
-        var sourceHash = ComputeSha256Hex(content);
         var meta = new UserReportTemplateStagingMeta
         {
             TemplateId = templateId,
@@ -86,8 +101,11 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             TemplateId = templateId,
             DisplayName = template.TemplateName,
             DocumentFileName = documentFileName,
+            Mode = TemplateEditStagingMode.Share,
             UncPath = uncPath,
             OfficeOpenUrl = UserReportTemplateStagingPathHelper.TryBuildOfficeOpenUrl(uncPath, outputFormat),
+            SourceContentHashSha256 = sourceHash,
+            OutputFormat = outputFormat,
         };
     }
 
@@ -96,6 +114,20 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         CancellationToken cancellationToken = default) =>
         ImportCoreAsync(templateId, cancellationToken);
 
+    public Task<UserReportTemplateStagingImportResult> ImportFromUploadAsync(
+        Guid templateId,
+        byte[] content,
+        CancellationToken cancellationToken = default)
+    {
+        if (_options.Mode != TemplateEditStagingMode.LocalFolder)
+        {
+            throw new InvalidOperationException(
+                "Template upload import is only available in LocalFolder staging mode.");
+        }
+
+        return ImportUploadedContentAsync(templateId, content, cancellationToken);
+    }
+
     public async Task<UserReportTemplateStagingImportAllResult> ImportAllChangedAsync(
         CancellationToken cancellationToken = default)
     {
@@ -103,7 +135,13 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         EnsureEnabled();
         EnsureEditAccess();
 
-        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingRoot(_options);
+        if (_options.Mode == TemplateEditStagingMode.LocalFolder)
+        {
+            throw new InvalidOperationException(
+                "ImportAllChanged is not used in LocalFolder mode. Sync uploads from the officer PC folder.");
+        }
+
+        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingIoRoot(_options);
         if (!Directory.Exists(stagingRoot))
         {
             return new UserReportTemplateStagingImportAllResult
@@ -139,6 +177,11 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
 
     private async Task<UserReportTemplateStagingImportResult> ImportCoreAsync(
         Guid templateId,
+        CancellationToken cancellationToken) =>
+        await ImportFromShareAsync(templateId, cancellationToken).ConfigureAwait(false);
+
+    private async Task<UserReportTemplateStagingImportResult> ImportFromShareAsync(
+        Guid templateId,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -154,21 +197,13 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
 
         var displayName = template.TemplateName;
         var outputFormat = template.GetEffectiveOutputFormat();
+        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingIoRoot(_options);
         var documentPath = UserReportTemplateStagingPathHelper.BuildDocumentPath(
             _options,
             templateId,
             template.TemplateName,
             outputFormat);
         var metaPath = UserReportTemplateStagingPathHelper.BuildMetaFilePath(documentPath);
-
-        if (!File.Exists(documentPath))
-        {
-            return SkippedImport(
-                templateId,
-                displayName,
-                UserReportTemplateStagingImportStatus.SkippedNotFound,
-                "Staged file not found.");
-        }
 
         UserReportTemplateStagingMeta meta;
         try
@@ -180,6 +215,23 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         catch (Exception ex)
         {
             return FailedImport(templateId, displayName, $"Invalid meta file: {ex.Message}");
+        }
+
+        if (!File.Exists(documentPath)
+            && !string.IsNullOrWhiteSpace(meta.DocumentFileName))
+        {
+            var legacyPath = Path.Combine(stagingRoot, meta.DocumentFileName);
+            if (File.Exists(legacyPath))
+                documentPath = legacyPath;
+        }
+
+        if (!File.Exists(documentPath))
+        {
+            return SkippedImport(
+                templateId,
+                displayName,
+                UserReportTemplateStagingImportStatus.SkippedNotFound,
+                "Staged file not found.");
         }
 
         if (meta.TemplateId != Guid.Empty && meta.TemplateId != templateId)
@@ -201,9 +253,91 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
                 "The staged file is locked. Close Word or Excel and try again.");
         }
 
-        if (stagedContent.Length == 0)
-            return FailedImport(templateId, displayName, "Staged file is empty.");
+        return await ApplyImportedContentAsync(
+            objectSpace,
+            template,
+            templateId,
+            displayName,
+            outputFormat,
+            stagedContent,
+            meta,
+            metaPath,
+            Path.GetFileName(documentPath),
+            cancellationToken).ConfigureAwait(false);
+    }
 
+    private async Task<UserReportTemplateStagingImportResult> ImportUploadedContentAsync(
+        Guid templateId,
+        byte[] stagedContent,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        EnsureEnabled();
+        EnsureEditAccess();
+
+        using var objectSpace = _objectSpaceFactory.CreateNonSecuredObjectSpace<UserReportTemplate>();
+        var template = LoadTemplate(objectSpace, templateId);
+        if (template == null)
+        {
+            return FailedImport(templateId, "Unknown template", "Template not found.");
+        }
+
+        var displayName = template.TemplateName;
+        var outputFormat = template.GetEffectiveOutputFormat();
+
+        if (stagedContent.Length == 0)
+            return FailedImport(templateId, displayName, "Uploaded file is empty.");
+
+        if (stagedContent.Length > _options.MaxFileSizeBytes)
+        {
+            return FailedImport(
+                templateId,
+                displayName,
+                $"Uploaded file exceeds maximum size ({_options.MaxFileSizeBytes} bytes).");
+        }
+
+        var currentContent = ReadFileContent(objectSpace, template.TemplateFile) ?? Array.Empty<byte>();
+        var stagedHash = ComputeSha256Hex(stagedContent);
+        var currentHash = currentContent.Length > 0 ? ComputeSha256Hex(currentContent) : string.Empty;
+        if (!string.IsNullOrEmpty(currentHash)
+            && string.Equals(currentHash, stagedHash, StringComparison.OrdinalIgnoreCase))
+        {
+            return SkippedImport(
+                templateId,
+                displayName,
+                UserReportTemplateStagingImportStatus.SkippedUnchanged,
+                null);
+        }
+
+        return await ApplyImportedContentAsync(
+            objectSpace,
+            template,
+            templateId,
+            displayName,
+            outputFormat,
+            stagedContent,
+            meta: null,
+            metaPath: null,
+            documentFileName: UserReportTemplateStagingPathHelper.BuildDocumentFileName(
+                _options,
+                templateId,
+                template.TemplateName,
+                outputFormat),
+            cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<UserReportTemplateStagingImportResult> ApplyImportedContentAsync(
+        IObjectSpace objectSpace,
+        UserReportTemplate template,
+        Guid templateId,
+        string displayName,
+        TemplateOutputFormat outputFormat,
+        byte[] stagedContent,
+        UserReportTemplateStagingMeta? meta,
+        string? metaPath,
+        string documentFileName,
+        CancellationToken cancellationToken)
+    {
         if (stagedContent.Length > _options.MaxFileSizeBytes)
         {
             return FailedImport(
@@ -213,7 +347,8 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
         }
 
         var stagedHash = ComputeSha256Hex(stagedContent);
-        if (!string.IsNullOrEmpty(meta.LastImportedContentHashSha256)
+        if (meta != null
+            && !string.IsNullOrEmpty(meta.LastImportedContentHashSha256)
             && string.Equals(meta.LastImportedContentHashSha256, stagedHash, StringComparison.OrdinalIgnoreCase))
         {
             return SkippedImport(
@@ -248,13 +383,16 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             invalidCount = maintenance.Validate?.InvalidCount;
         }
 
-        meta.TemplateId = templateId;
-        meta.TemplateName = template.TemplateName;
-        meta.OutputFormat = outputFormat;
-        meta.DocumentFileName = Path.GetFileName(documentPath);
-        meta.LastImportedAtUtc = DateTime.UtcNow;
-        meta.LastImportedContentHashSha256 = stagedHash;
-        meta.WriteToFile(metaPath);
+        if (meta != null && !string.IsNullOrEmpty(metaPath))
+        {
+            meta.TemplateId = templateId;
+            meta.TemplateName = template.TemplateName;
+            meta.OutputFormat = outputFormat;
+            meta.DocumentFileName = documentFileName;
+            meta.LastImportedAtUtc = DateTime.UtcNow;
+            meta.LastImportedContentHashSha256 = stagedHash;
+            meta.WriteToFile(metaPath);
+        }
 
         return new UserReportTemplateStagingImportResult
         {

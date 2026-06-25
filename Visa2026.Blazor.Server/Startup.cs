@@ -277,6 +277,7 @@ namespace Visa2026.Blazor.Server
                 app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationUserThemePreferenceStartupGate)));
 
             bool easyTestHost = EasyTestHostMode.IsEnabled;
+            var httpsPort = Configuration.GetValue<int?>("Https:Port") ?? 0;
 
             if (env.IsDevelopment() || easyTestHost)
             {
@@ -285,11 +286,12 @@ namespace Visa2026.Blazor.Server
             else
             {
                 app.UseExceptionHandler("/Error");
-                app.UseHsts();
+                if (httpsPort > 0)
+                    app.UseHsts();
             }
 
             // EasyTest listens on http://localhost:5050 only; HTTPS redirect/HSTS breaks Blazor script loading on CI.
-            if (!easyTestHost)
+            if (!easyTestHost && httpsPort > 0)
                 app.UseHttpsRedirection();
             VisaLocalization.UseVisaRequestLocalization(app);
             app.UseStaticFiles();

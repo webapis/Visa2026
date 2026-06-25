@@ -99,15 +99,31 @@ function Ensure-Visa2026TemplateEditShareForSlot {
             Write-Host "  Created SMB share." -ForegroundColor Green
         }
 
+        $sharePrincipal = if (-not [string]::IsNullOrWhiteSpace($OfficersPrincipal)) {
+            $OfficersPrincipal
+        }
+        elseif (-not $SkipOfficersAcl) {
+            'NT AUTHORITY\Authenticated Users'
+        }
+        else {
+            $null
+        }
+
+        if ($sharePrincipal) {
+            Grant-SmbShareAccess -Name $shareName -AccountName $sharePrincipal -AccessRight Change -Force | Out-Null
+            Write-Host "  SMB share access (Change): $sharePrincipal" -ForegroundColor DarkGray
+        }
+
         icacls $localPath /inheritance:e | Out-Null
         icacls $localPath /grant $appPoolGrantee | Out-Null
 
         if (-not $SkipOfficersAcl -and -not [string]::IsNullOrWhiteSpace($OfficersPrincipal)) {
             icacls $localPath /grant "${OfficersPrincipal}:(OI)(CI)M" | Out-Null
-            Write-Host "  Officers ACL: $OfficersPrincipal" -ForegroundColor DarkGray
+            Write-Host "  NTFS officers ACL: $OfficersPrincipal" -ForegroundColor DarkGray
         }
         elseif (-not $SkipOfficersAcl) {
-            Write-Warning "No TEMPLATE_EDIT_OFFICERS_PRINCIPAL in $($slot.EnvFile). Officers may not have Modify on the share until you grant ACLs or re-run with -OfficersPrincipal."
+            icacls $localPath /grant 'NT AUTHORITY\Authenticated Users:(OI)(CI)M' | Out-Null
+            Write-Host "  NTFS officers ACL (default): NT AUTHORITY\Authenticated Users" -ForegroundColor DarkGray
         }
 
         if (-not (Test-Path -LiteralPath $stagingUnc)) {

@@ -13,4 +13,9 @@ public interface IUserReportTemplateStagingService
 
     Task<UserReportTemplateStagingImportAllResult> ImportAllChangedAsync(
         CancellationToken cancellationToken = default);
+
+    Task<UserReportTemplateStagingImportResult> ImportFromUploadAsync(
+        Guid templateId,
+        byte[] content,
+        CancellationToken cancellationToken = default);
 }

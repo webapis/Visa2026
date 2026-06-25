@@ -1,5 +1,7 @@
 namespace Visa2026.Module.Services.UserReports;
 
+using Visa2026.Module.BusinessObjects;
+
 public enum UserReportTemplateStagingImportStatus
 {
     Imported = 0,
@@ -16,9 +18,20 @@ public sealed class UserReportTemplateStagingExportResult
 
     public required string DocumentFileName { get; init; }
 
-    public required string UncPath { get; init; }
+    public TemplateEditStagingMode Mode { get; init; } = TemplateEditStagingMode.Share;
+
+    public string UncPath { get; init; } = string.Empty;
 
     public string? OfficeOpenUrl { get; init; }
+
+    /// <summary>SHA-256 (hex) of exported DB content. Used by local-folder client metadata.</summary>
+    public string? SourceContentHashSha256 { get; init; }
+
+    /// <summary>Word or Excel — local-folder client uses this for Office protocol.</summary>
+    public TemplateOutputFormat OutputFormat { get; init; }
+
+    /// <summary>Raw template bytes when <see cref="Mode"/> is <see cref="TemplateEditStagingMode.LocalFolder"/>.</summary>
+    public byte[]? FileContent { get; init; }
 }
 
 public sealed class UserReportTemplateStagingImportResult

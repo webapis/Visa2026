@@ -9,7 +9,7 @@ public static partial class UserReportTemplateStagingPathHelper
     private static readonly Regex InvalidFileNameChars = InvalidFileNameCharsRegex();
 
     /// <summary>Returns the configured UNC share root (trimmed, no trailing slash).</summary>
-    public static string ResolveStagingRoot(TemplateEditStagingOptions options)
+    public static string ResolveStagingUncRoot(TemplateEditStagingOptions options)
     {
         var configured = options.StagingRootUnc?.Trim().TrimEnd('\\', '/') ?? string.Empty;
         if (string.IsNullOrEmpty(configured))
@@ -19,11 +19,24 @@ public static partial class UserReportTemplateStagingPathHelper
         {
             throw new InvalidOperationException(
                 "TemplateEditStaging:StagingRootUnc must be a UNC path (\\\\server\\share). " +
-                "Do not use local drive paths such as D:\\ — use the share UNC instead.");
+                "Use StagingLocalPath for server-side file I/O on IIS.");
         }
 
         return configured;
     }
+
+    /// <summary>Root path for export/import file I/O (local path when configured, else UNC).</summary>
+    public static string ResolveStagingIoRoot(TemplateEditStagingOptions options)
+    {
+        var local = options.StagingLocalPath?.Trim().TrimEnd('\\', '/') ?? string.Empty;
+        if (!string.IsNullOrEmpty(local))
+            return local;
+
+        return ResolveStagingUncRoot(options);
+    }
+
+    public static string ResolveStagingRoot(TemplateEditStagingOptions options) =>
+        ResolveStagingIoRoot(options);
 
     public static bool IsUncPath(string path) =>
         !string.IsNullOrWhiteSpace(path) && path.TrimStart().StartsWith(@"\\", StringComparison.Ordinal);
@@ -52,14 +65,18 @@ public static partial class UserReportTemplateStagingPathHelper
         TemplateOutputFormat outputFormat)
     {
         var pattern = string.IsNullOrWhiteSpace(options.FileNamePattern)
-            ? "{templateId}_{safeName}{extension}"
+            ? "{templateId}{extension}"
             : options.FileNamePattern;
 
         var extension = GetExtension(outputFormat);
         var safeName = SanitizeTemplateName(templateName);
+        var templateIdD = templateId.ToString("D");
+        var templateIdN = templateId.ToString("N");
 
         return pattern
-            .Replace("{templateId}", templateId.ToString("D"), StringComparison.OrdinalIgnoreCase)
+            .Replace("{templateId}", templateIdN, StringComparison.OrdinalIgnoreCase)
+            .Replace("{templateIdN}", templateIdN, StringComparison.OrdinalIgnoreCase)
+            .Replace("{templateIdD}", templateIdD, StringComparison.OrdinalIgnoreCase)
             .Replace("{safeName}", safeName, StringComparison.OrdinalIgnoreCase)
             .Replace("{extension}", extension, StringComparison.OrdinalIgnoreCase);
     }
@@ -70,7 +87,7 @@ public static partial class UserReportTemplateStagingPathHelper
         string templateName,
         TemplateOutputFormat outputFormat)
     {
-        var root = ResolveStagingRoot(options);
+        var root = ResolveStagingIoRoot(options);
         var fileName = BuildDocumentFileName(options, templateId, templateName, outputFormat);
         return Path.Combine(root, fileName);
     }
@@ -79,19 +96,21 @@ public static partial class UserReportTemplateStagingPathHelper
 
     public static string BuildUncPath(TemplateEditStagingOptions options, string documentFileName)
     {
-        var root = ResolveStagingRoot(options);
+        var root = ResolveStagingUncRoot(options);
         return Path.Combine(root, documentFileName);
     }
 
-    /// <summary>Office protocol URL (<c>ms-word:ofe|u|file://server/share/...</c>) for UNC paths only.</summary>
+    /// <summary>
+    /// Office protocol URL for UNC paths. Uses a percent-encoded UNC in the <c>u</c> parameter
+    /// (<c>ms-word:ofe|u|%5C%5Cserver%5Cshare%5Cfile.docx</c>) — not <c>file://</c>, which Word maps to <c>\\\server\...</c>.
+    /// </summary>
     public static string? TryBuildOfficeOpenUrl(string uncPath, TemplateOutputFormat outputFormat)
     {
         if (string.IsNullOrWhiteSpace(uncPath) || !IsUncPath(uncPath))
             return null;
 
         var protocol = outputFormat == TemplateOutputFormat.Excel ? "ms-excel" : "ms-word";
-        var normalized = uncPath.Trim().Replace('\\', '/');
-        return $"{protocol}:ofe|u|file:{normalized}";
+        return $"{protocol}:ofe|u|{Uri.EscapeDataString(uncPath.Trim())}";
     }
 
     [GeneratedRegex(@"[<>:""/\\|?*\x00-\x1F]")]

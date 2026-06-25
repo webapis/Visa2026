@@ -992,6 +992,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Şablony redaktirle",
             ["ru-RU"] = "Редактировать шаблон",
         },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Choose template folder",
+            ["tr-TR"] = "Şablon klasörü seç",
+            ["tk-TM"] = "Şablon papkasyny saýla",
+            ["ru-RU"] = "Выбрать папку шаблонов",
+        },
         ["ApplicationReportPackage.EditTemplate.CopyPath"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Copy path",
@@ -1020,6 +1027,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Şablon eksport edilýär…",
             ["ru-RU"] = "Экспорт шаблона…",
         },
+        ["ApplicationReportPackage.EditTemplate.FolderReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template folder ready: {0}",
+            ["tr-TR"] = "Şablon klasörü hazır: {0}",
+            ["tk-TM"] = "Şablon papkasy taýýar: {0}",
+            ["ru-RU"] = "Папка шаблонов готова: {0}",
+        },
+        ["ApplicationReportPackage.EditTemplate.LocalExported"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exported \"{0}\" to your template folder ({1}\\{2}). Open the file in Word or Excel.",
+            ["tr-TR"] = "\"{0}\" şablon klasörünüze aktarıldı ({1}\\{2}). Word veya Excel'de açın.",
+            ["tk-TM"] = "\"{0}\" şablon papkaňyza geçirildi ({1}\\{2}). Word ýa-da Excel-de açyň.",
+            ["ru-RU"] = "«{0}» экспортирован в папку шаблонов ({1}\\{2}). Откройте файл в Word или Excel.",
+        },
+        ["ApplicationReportPackage.EditTemplate.LocalExportedOpen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exported \"{0}\" to {1}\\{2} and opened in Word or Excel.",
+            ["tr-TR"] = "\"{0}\" {1}\\{2} konumuna aktarıldı ve Word/Excel'de açıldı.",
+            ["tk-TM"] = "\"{0}\" {1}\\{2} - a geçirildi we Word/Excel-de açyldy.",
+            ["ru-RU"] = "«{0}» экспортирован в {1}\\{2} и открыт в Word или Excel.",
+        },
+        ["ApplicationReportPackage.EditTemplate.LocalFolderFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not use the local template folder. Use HTTPS and choose a folder first.",
+            ["tr-TR"] = "Yerel şablon klasörü kullanılamadı. HTTPS kullanın ve önce klasör seçin.",
+            ["tk-TM"] = "Ýerli şablon papkasy ulanylmady. HTTPS ulanyň we ilki papka saýlaň.",
+            ["ru-RU"] = "Не удалось использовать локальную папку шаблонов. Используйте HTTPS и сначала выберите папку.",
+        },
+        ["ApplicationReportPackage.EditTemplate.OnLocalFolder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In folder",
+            ["tr-TR"] = "Klasörde",
+            ["tk-TM"] = "Papkada",
+            ["ru-RU"] = "В папке",
+        },
         ["ApplicationReportPackage.EditTemplate.OnShare"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "On share",
@@ -1029,14 +1071,14 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.PathCopied"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Path copied. Paste into Word File → Open if the document did not open: {0}",
+            ["en-US"] = "Path copied. If Word did not open, use File → Open (Ctrl+V) or open the folder in Explorer and double-click the file: {0}",
             ["tr-TR"] = "Yol kopyalandı. Belge açılmadıysa Word Dosya → Aç'a yapıştırın: {0}",
             ["tk-TM"] = "Ýol göçürildi. Resminama açylmadyk bolsa Word Faýl → Aç-a goýuň: {0}",
             ["ru-RU"] = "Путь скопирован. Если документ не открылся, вставьте в Word Файл → Открыть: {0}",
         },
         ["ApplicationReportPackage.EditTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Exports the template to the shared edit folder and opens it in Word or Excel. After saving, click Refresh.",
+            ["en-US"] = "Exports the template to the shared edit folder and opens it in Word or Excel. After saving, click Sync to database.",
             ["tr-TR"] = "Şablonu paylaşılan düzenleme klasörüne aktarır ve Word veya Excel'de açar. Kaydettikten sonra Yenile'ye tıklayın.",
             ["tk-TM"] = "Şablony umumy redaktirleme papkasyna çykaryp, Word ýa-da Excel-de açýar. Ýazdyranyňyzdan soň Täzele basyň.",
             ["ru-RU"] = "Экспортирует шаблон в общую папку редактирования и открывает в Word или Excel. После сохранения нажмите «Обновить».",

@@ -33,6 +33,8 @@ Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates
 | `Install-Visa2026IisSlots.ps1` | Windows Server | Create all slot sites, env files, databases |
 | `Ensure-Visa2026SlotDatabases.ps1` | Windows Server | `CREATE DATABASE` for slot DBs if missing |
 | `Ensure-Visa2026TemplateEditShare.ps1` | Windows Server | SMB share + ACLs for Resminamalar template staging per slot |
+| `Enable-Visa2026IisHttps.ps1` | Windows Server | HTTPS binding + optional HTTP redirect (LocalFolder FSA requires HTTPS) |
+| `Set-Visa2026TemplateEditOfficeTrust.ps1` | **Officer PC** | IE/Office intranet zone + `UNCAsIntranet` (Share mode only) |
 | `Set-Visa2026IisSlotsAutoStart.ps1` | Windows Server | Auto-start all slots; Default Web Site → `127.0.0.1:8090` |
 | `Enable-Visa2026IisSlotFirewall.ps1` | Windows Server | Inbound TCP firewall for Staging `:8080` and Demo `:8081` |
 | `Get-Visa2026RuntimeErrorsForPull.ps1` | Windows Server | Query `ApplicationRuntimeLogs` JSON for Cursor inbox pull |

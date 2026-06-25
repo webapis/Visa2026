@@ -179,7 +179,7 @@ function Get-Visa2026IisSlotEnvTemplate {
         "# FORCE_XAF_DB_UPDATE=true"
         "# Resminamalar template staging (Ensure-Visa2026TemplateEditShare.ps1):"
         "# TEMPLATE_EDIT_STAGING_ENABLED=true"
-        "# TEMPLATE_EDIT_UNC_HOST=visa2026-server"
+        "# TEMPLATE_EDIT_UNC_HOST=10.100.128.25"
         "# TEMPLATE_EDIT_OFFICERS_PRINCIPAL=DOMAIN\VisaOfficers"
     ) -join "`r`n"
 }
@@ -310,4 +310,58 @@ function Resolve-Visa2026TemplateEditStagingEnabled {
 
     $raw = $envMap['TEMPLATE_EDIT_STAGING_ENABLED'].Trim().ToLowerInvariant()
     return $raw -in @('1', 'true', 'yes', 'on')
+}
+
+function Resolve-Visa2026TemplateEditStagingMode {
+    param(
+        [string]$EnvFile = ""
+    )
+
+    if ($EnvFile -and (Test-Path -LiteralPath $EnvFile)) {
+        $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+        if ($envMap.ContainsKey('TEMPLATE_EDIT_STAGING_MODE') -and $envMap['TEMPLATE_EDIT_STAGING_MODE']) {
+            $raw = $envMap['TEMPLATE_EDIT_STAGING_MODE'].Trim()
+            if ($raw -eq 'LocalFolder') { return 'LocalFolder' }
+            if ($raw -eq 'Share') { return 'Share' }
+        }
+    }
+
+    return 'Share'
+}
+
+function Resolve-Visa2026HttpsEnabled {
+    param(
+        [string]$EnvFile = ""
+    )
+
+    if (-not $EnvFile -or -not (Test-Path -LiteralPath $EnvFile)) {
+        return $false
+    }
+
+    $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+    if (-not $envMap.ContainsKey('HTTPS_ENABLED')) {
+        return $false
+    }
+
+    $raw = $envMap['HTTPS_ENABLED'].Trim().ToLowerInvariant()
+    return $raw -in @('1', 'true', 'yes', 'on')
+}
+
+function Resolve-Visa2026HttpsPort {
+    param(
+        [string]$EnvFile = "",
+        [int]$DefaultPort = 443
+    )
+
+    if ($EnvFile -and (Test-Path -LiteralPath $EnvFile)) {
+        $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+        if ($envMap.ContainsKey('HTTPS_PORT') -and $envMap['HTTPS_PORT']) {
+            $parsed = 0
+            if ([int]::TryParse($envMap['HTTPS_PORT'].Trim(), [ref]$parsed) -and $parsed -gt 0) {
+                return $parsed
+            }
+        }
+    }
+
+    return $DefaultPort
 }

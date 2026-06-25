@@ -174,7 +174,7 @@ Word/Excel opens via `ms-word:` / `ms-excel:` links to the UNC path. Use **Copy 
 | **Local folders** | `C:\ProgramData\Visa2026\TemplateEdit\{prod,staging,demo}` |
 | **SMB shares** | `Visa2026TemplateEdit-Prod`, `-Staging`, `-Demo` |
 | **UNC examples** | `\\<server>\Visa2026TemplateEdit-Prod` (per slot — see [Visa2026-IisSlots.ps1](../scripts/windows-iis/Visa2026-IisSlots.ps1)) |
-| **App config** | `Configure-Visa2026Production.ps1` writes `TemplateEditStaging` into `appsettings.Production.json` (enabled by default on IIS) |
+| **App config** | `Configure-Visa2026Production.ps1` writes `TemplateEditStaging` into `appsettings.Production.json` (`StagingRootUnc` for officers, `StagingLocalPath` for app pool I/O) |
 | **Slot env** | `C:\visa2026\env\prod.env` — optional `TEMPLATE_EDIT_UNC_HOST`, `TEMPLATE_EDIT_OFFICERS_PRINCIPAL`, `TEMPLATE_EDIT_STAGING_ENABLED=false` to disable |
 
 Officers need **Modify** on the share NTFS ACL — set `TEMPLATE_EDIT_OFFICERS_PRINCIPAL=DOMAIN\Group` in the slot env file, or pass `-OfficersPrincipal` when running the ensure script.

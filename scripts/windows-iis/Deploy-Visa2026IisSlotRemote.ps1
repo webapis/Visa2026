@@ -88,6 +88,7 @@ $scriptFiles = @(
     "Enable-Visa2026StdoutLog.ps1",
     "Diagnose-Port80.ps1",
     "Enable-Visa2026IisSlotFirewall.ps1",
+    "Enable-Visa2026IisHttps.ps1",
     "Get-Visa2026RuntimeErrorsForPull.ps1"
 )
 Write-Host "==> Copy scripts to server" -ForegroundColor Cyan
@@ -113,10 +114,12 @@ Write-Host "==> Copy publish output" -ForegroundColor Cyan
 scp -r -q "$PublishPath/*" "${SshHost}:${remotePublishScp}/"
 
 Write-Host "==> Configure slot" -ForegroundColor Cyan
-ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Ensure-Visa2026TemplateEditShare.ps1 -Profile $Profile"
-if ($LASTEXITCODE -ne 0) { throw "Ensure-Visa2026TemplateEditShare.ps1 failed (exit $LASTEXITCODE)." }
-ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Configure-Visa2026Production.ps1 -Profile $Profile -SqlServer 'localhost\SQLEXPRESS'"
-if ($LASTEXITCODE -ne 0) { throw "Configure-Visa2026Production.ps1 failed (exit $LASTEXITCODE)." }
+$remoteSlots = "$remoteDeployWin\Visa2026-IisSlots.ps1"
+$configureRemote = @"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "& { . '$remoteSlots'; `$slot = Get-Visa2026IisSlotDefinition -Profile '$Profile'; `$envFile = `$slot.EnvFile; if ((Resolve-Visa2026TemplateEditStagingMode -EnvFile `$envFile) -eq 'Share') { & '$remoteDeployWin\Ensure-Visa2026TemplateEditShare.ps1' -Profile '$Profile' }; if (Resolve-Visa2026HttpsEnabled -EnvFile `$envFile) { & '$remoteDeployWin\Enable-Visa2026IisHttps.ps1' -Profile '$Profile' -RedirectHttpToHttps }; & '$remoteDeployWin\Configure-Visa2026Production.ps1' -Profile '$Profile' -SqlServer 'localhost\SQLEXPRESS' }"
+"@
+ssh $SshHost $configureRemote
+if ($LASTEXITCODE -ne 0) { throw "Slot configure failed (exit $LASTEXITCODE)." }
 ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Set-Visa2026AppPoolEnvironment.ps1 -Profile $Profile"
 if ($LASTEXITCODE -ne 0) { throw "Set-Visa2026AppPoolEnvironment.ps1 failed (exit $LASTEXITCODE)." }
 
