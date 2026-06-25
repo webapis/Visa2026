@@ -22,7 +22,7 @@ public sealed class UserReportTemplateStagingLocalExportJsResult
     public bool NeedsSync { get; init; }
 }
 
-/// <summary>JS interop result from <c>visaTemplateStagingLocal.chooseFolder</c>.</summary>
+/// <summary>JS interop result from <c>visaTemplateStagingLocal.chooseFolder</c> and <c>ensureFolder</c>.</summary>
 public sealed class UserReportTemplateStagingChooseFolderJsResult
 {
     public bool Success { get; init; }
@@ -32,6 +32,9 @@ public sealed class UserReportTemplateStagingChooseFolderJsResult
     public string? FolderName { get; init; }
 
     public bool NeedsSubfolder { get; init; }
+
+    /// <summary>True when the OS folder-picker dialog was explicitly dismissed by the user (AbortError). Not an error.</summary>
+    public bool WasCancelled { get; init; }
 }
 
 /// <summary>JS interop payload from <c>visaTemplateStagingLocal.collectChangedUploads</c>.</summary>

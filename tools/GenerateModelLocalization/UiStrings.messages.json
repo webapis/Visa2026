@@ -588,16 +588,22 @@
     "ru-RU": "В папке"
   },
   "ApplicationReportPackage.EditTemplate.ChooseFolder": {
-    "en": "Choose template folder",
-    "tr-TR": "Şablon klasörü seç",
-    "tk-TM": "Şablon papkasyny saýla",
-    "ru-RU": "Выбрать папку шаблонов"
+    "en": "Change template folder",
+    "tr-TR": "Şablon klasörünü değiştir",
+    "tk-TM": "Şablon papkasyny çalyş",
+    "ru-RU": "Изменить папку шаблонов"
   },
   "ApplicationReportPackage.EditTemplate.ChooseFolderHint": {
     "en": "In the folder picker, paste this path in the address bar, press Enter, then Select Folder: {0}",
     "tr-TR": "Klasör seçicide adres çubuğuna bu yolu yapıştırın, Enter'a basın, ardından Klasörü Seç: {0}",
     "tk-TM": "Papka saýlawda salgy setirine şu ýoly goýuň, Enter basyň, soň Papkany saýla: {0}",
     "ru-RU": "В окне выбора папки вставьте этот путь в адресную строку, нажмите Enter, затем «Выбрать папку»: {0}"
+  },
+  "ApplicationReportPackage.EditTemplate.SelectFolderFirst": {
+    "en": "Click 'Change template folder' to set up your template editing folder, then click Edit template.",
+    "tr-TR": "Şablon düzenleme klasörünü ayarlamak için 'Şablon klasörünü değiştir'e tıklayın, ardından Şablonu düzenle'ye tıklayın.",
+    "tk-TM": "Şablon redaktirlemek üçin 'Şablon papkasyny çalyş' basyň, soň Şablony redaktirle basyň.",
+    "ru-RU": "Нажмите «Изменить папку шаблонов», чтобы настроить папку редактирования, затем нажмите «Редактировать шаблон»."
   },
   "ApplicationReportPackage.EditTemplate.ChooseFolderFirst": {
     "en": "Choose a template folder first (button below). Use AppData: paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar, create the folder if needed, then Select Folder.",
@@ -612,10 +618,10 @@
     "ru-RU": "Браузер заблокировал эту папку. Вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку (создайте папки при необходимости), затем «Выбрать папку»."
   },
   "ApplicationReportPackage.EditTemplate.FolderReady": {
-    "en": "Template folder ready: {0}. You can now click Edit template; Word or Excel opens automatically.",
-    "tr-TR": "Şablon klasörü hazır: {0}. Artık Şablonu düzenle'ye tıklayabilirsiniz; Word veya Excel otomatik açılır.",
-    "tk-TM": "Şablon papkasy taýýar: {0}. Indi Şablony redaktirle basyp bilersiňiz; Word ýa-da Excel awtomatik açylýar.",
-    "ru-RU": "Папка шаблонов готова: {0}. Теперь можно нажать «Редактировать шаблон»; Word или Excel откроется автоматически."
+    "en": "Template folder changed: {0}.",
+    "tr-TR": "Şablon klasörü değiştirildi: {0}.",
+    "tk-TM": "Şablon papkasy çalşyryldy: {0}.",
+    "ru-RU": "Папка шаблонов изменена: {0}."
   },
   "ApplicationReportPackage.EditTemplate.LocalExported": {
     "en": "Exported \"{0}\" to your template folder ({1}\\{2}). Open the file in Word or Excel.",

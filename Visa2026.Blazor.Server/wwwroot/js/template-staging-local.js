@@ -3,6 +3,38 @@
 
     window.visaTemplateStagingLocal = window.visaTemplateStagingLocal || {};
 
+    // .NET object reference injected from OnAfterRenderAsync — used by chooseFolderDirect to
+    // notify the Blazor component after the OS folder picker closes.
+    var _dotNetRef = null;
+
+    window.visaTemplateStagingLocal.initDotNetRef = function (dotNetRef) {
+        _dotNetRef = dotNetRef;
+    };
+
+    window.visaTemplateStagingLocal.disposeDotNetRef = function () {
+        _dotNetRef = null;
+    };
+
+    // Called directly from a native onclick="" attribute (NOT from Blazor JS interop) so that
+    // showDirectoryPicker() has a fresh user-activation token from the original button click.
+    window.visaTemplateStagingLocal.chooseFolderDirect = async function (options) {
+        var result = await window.visaTemplateStagingLocal.chooseFolder(options || {});
+        if (_dotNetRef) {
+            try {
+                await _dotNetRef.invokeMethodAsync(
+                    "OnFolderSelectionResult",
+                    result.success === true,
+                    result.folderName || "",
+                    result.error || "",
+                    result.wasCancelled === true,
+                    result.needsSubfolder === true
+                );
+            } catch (e) {
+                // Component was disposed or SignalR disconnected — ignore.
+            }
+        }
+    };
+
     var DB_NAME = "visa2026-template-staging";
     var DB_VERSION = 1;
     var STORE = "settings";
@@ -289,7 +321,7 @@
             };
         } catch (e) {
             if (e && e.name === "AbortError") {
-                return { success: false, error: "Folder selection was cancelled." };
+                return { success: false, wasCancelled: true };
             }
 
             var message = (e && e.message) || "Could not choose template folder.";
@@ -303,6 +335,29 @@
 
             return { success: false, error: message };
         }
+    };
+
+    // Like chooseFolder but skips the picker when a folder handle is already stored and still
+    // has permission granted.  Call this at the very start of EditTemplateAsync (before any
+    // server round-trips) so the browser's user-activation window from the button click is still
+    // valid if showDirectoryPicker() needs to run.
+    window.visaTemplateStagingLocal.ensureFolder = async function (options) {
+        if (!supportsLocalFolder()) {
+            return { success: false, error: "File System Access API is not available in this browser." };
+        }
+
+        if (!window.isSecureContext) {
+            return { success: false, error: "Local template folder requires HTTPS (or localhost)." };
+        }
+
+        var handle = await getDirectoryHandle();
+        if (handle) {
+            // Folder is already selected and permission is active — nothing to do.
+            return { success: true, folderName: handle.name };
+        }
+
+        // No folder yet: show the picker (same logic as chooseFolder).
+        return window.visaTemplateStagingLocal.chooseFolder(options);
     };
 
     window.visaTemplateStagingLocal.setFolderPathHint = async function (pathHint) {

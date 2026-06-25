@@ -994,10 +994,17 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.ChooseFolder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Choose template folder",
-            ["tr-TR"] = "Şablon klasörü seç",
-            ["tk-TM"] = "Şablon papkasyny saýla",
-            ["ru-RU"] = "Выбрать папку шаблонов",
+            ["en-US"] = "Change template folder",
+            ["tr-TR"] = "Şablon klasörünü değiştir",
+            ["tk-TM"] = "Şablon papkasyny çalyş",
+            ["ru-RU"] = "Изменить папку шаблонов",
+        },
+        ["ApplicationReportPackage.EditTemplate.SelectFolderFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Click 'Change template folder' to set up your template editing folder, then click Edit template.",
+            ["tr-TR"] = "Şablon düzenleme klasörünü ayarlamak için 'Şablon klasörünü değiştir'e tıklayın, ardından Şablonu düzenle'ye tıklayın.",
+            ["tk-TM"] = "Şablon redaktirlemek üçin 'Şablon papkasyny çalyş' basyň, soň Şablony redaktirle basyň.",
+            ["ru-RU"] = "Нажмите «Изменить папку шаблонов», чтобы настроить папку редактирования, затем нажмите «Редактировать шаблон».",
         },
         ["ApplicationReportPackage.EditTemplate.ChooseFolderFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1050,10 +1057,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.FolderReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Template folder ready: {0}. You can now click Edit template; Word or Excel opens automatically.",
-            ["tr-TR"] = "Şablon klasörü hazır: {0}. Artık Şablonu düzenle'ye tıklayabilirsiniz; Word veya Excel otomatik açılır.",
-            ["tk-TM"] = "Şablon papkasy taýýar: {0}. Indi Şablony redaktirle basyp bilersiňiz; Word ýa-da Excel awtomatik açylýar.",
-            ["ru-RU"] = "Папка шаблонов готова: {0}. Теперь можно нажать «Редактировать шаблон»; Word или Excel откроется автоматически.",
+            ["en-US"] = "Template folder changed: {0}.",
+            ["tr-TR"] = "Şablon klasörü değiştirildi: {0}.",
+            ["tk-TM"] = "Şablon papkasy çalşyryldy: {0}.",
+            ["ru-RU"] = "Папка шаблонов изменена: {0}.",
         },
         ["ApplicationReportPackage.EditTemplate.LocalExported"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

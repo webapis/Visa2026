@@ -1,3 +1,4 @@
+@implements IDisposable
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
@@ -176,18 +177,19 @@
                     }
                     @if (_canEditUserTemplates)
                     {
-                        <DxButton Text="@Msg("ApplicationReportPackage.EditTemplate.ChooseFolder")"
-                                  RenderStyle="ButtonRenderStyle.Link"
-                                  SizeMode="SizeMode.Small"
-                                  CssClass="app-item-doc-copies__action-btn"
-                                  Enabled="@(!_syncBusy && !_packageBusy && !_refreshBusy)"
-                                  Click="@ChooseLocalTemplateFolderAsync" />
                         <DxButton Text="@Msg("ApplicationReportPackage.SyncTemplates")"
                                   RenderStyle="ButtonRenderStyle.Link"
                                   SizeMode="SizeMode.Small"
                                   CssClass="app-item-doc-copies__action-btn"
                                   Enabled="@(!_syncBusy && !_packageBusy && !_refreshBusy)"
                                   Click="@OnSyncTemplatesClickAsync" />
+                        @* Native button — bypasses Blazor/SignalR so showDirectoryPicker() runs with a live user-activation token. *@
+                        <button type="button"
+                                class="app-item-doc-copies__action-btn app-report-package__change-folder-btn"
+                                disabled="@(_syncBusy || _packageBusy || _refreshBusy)"
+                                onclick="visaTemplateStagingLocal.chooseFolderDirect()">
+                            @Msg("ApplicationReportPackage.EditTemplate.ChooseFolder")
+                        </button>
                     }
                     <DxButton Text="@Msg("ApplicationReportPackage.Refresh")"
                               RenderStyle="ButtonRenderStyle.Link"
@@ -236,6 +238,7 @@
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
 
     private ApplicationReportPackagePreviewDialog? _previewDialog;
+    private DotNetObjectReference<ApplicationReportPackageComponent>? _dotNetRef;
 
     private readonly HashSet<string> _selectedKeys = new(StringComparer.Ordinal);
     private bool _selectionInitialized;
@@ -258,6 +261,71 @@
 
     private ApplicationWordReportPackageReadinessSummary SelectedReadinessSummary =>
         ApplicationWordReportPackageReadinessSummary.Compute(CatalogEntries, _selectedKeys);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _canEditUserTemplates)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JS.InvokeVoidAsync("visaTemplateStagingLocal.initDotNetRef", _dotNetRef);
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+            catch (JSException)
+            {
+            }
+        }
+    }
+
+    /// <summary>Called by <c>visaTemplateStagingLocal.chooseFolderDirect()</c> (native onclick) after the OS folder picker closes.</summary>
+    [JSInvokable]
+    public async Task OnFolderSelectionResult(bool success, string folderName, string error, bool wasCancelled, bool needsSubfolder)
+    {
+        if (wasCancelled)
+        {
+            ClearStatusMessages();
+        }
+        else if (!success)
+        {
+            _packageStatusMessage = needsSubfolder
+                ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot")
+                : !string.IsNullOrWhiteSpace(error)
+                    ? error
+                    : Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
+            _packageStatusIsError = true;
+        }
+        else
+        {
+            await TemplateStagingUiService.SyncLocalFolderPathHintAsync();
+            _packageStatusMessage = FormatMsg(
+                "ApplicationReportPackage.EditTemplate.FolderReady",
+                folderName);
+            _packageStatusIsError = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                JS.InvokeVoidAsync("visaTemplateStagingLocal.disposeDotNetRef").AsTask().GetAwaiter();
+            }
+            catch
+            {
+                // Best-effort; component is being disposed.
+            }
+
+            _dotNetRef.Dispose();
+            _dotNetRef = null;
+        }
+    }
 
     protected override void OnParametersSet()
     {
@@ -368,10 +436,45 @@
 
         ClearStatusMessages();
         _editTemplateId = templateId;
-        await InvokeAsync(StateHasChanged);
+        // StateHasChanged is intentionally deferred until AFTER ensureFolder returns.
+        // Calling it here first triggers a complex DOM re-render (many buttons disabled via
+        // _editTemplateId) that consumes the browser's transient user-activation window before
+        // showDirectoryPicker() inside ensureFolder gets a chance to run.
 
         try
         {
+            // ensureFolder runs before StateHasChanged so showDirectoryPicker() still has a
+            // valid user-activation when no folder is stored yet (first-time use).
+            var folderResult = await JS.InvokeAsync<UserReportTemplateStagingChooseFolderJsResult>(
+                "visaTemplateStagingLocal.ensureFolder",
+                new
+                {
+                    subfolderName = TemplateStagingUiService.LocalSandboxRelativePath,
+                    suggestedPathHint = TemplateStagingUiService.BuildSuggestedLocalFolderPathHint()
+                });
+
+            // Now safe to re-render — user activation is no longer needed.
+            await InvokeAsync(StateHasChanged);
+
+            if (folderResult == null || !folderResult.Success)
+            {
+                if (folderResult?.WasCancelled == true)
+                {
+                    // showDirectoryPicker() was blocked (no user-activation in JS interop) or
+                    // the user dismissed the picker. Either way, no folder is set yet.
+                    _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.SelectFolderFirst");
+                    _packageStatusIsError = false;
+                    return;
+                }
+
+                _packageStatusMessage = folderResult?.NeedsSubfolder == true
+                    ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot")
+                    : folderResult?.Error
+                        ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
+                _packageStatusIsError = true;
+                return;
+            }
+
             var outcome = await TemplateStagingUiService.ExportForEditAsync(templateId);
             if (!outcome.Success || outcome.Result == null)
             {
@@ -410,12 +513,10 @@
 
             if (localResult == null || !localResult.Success)
             {
-                _packageStatusMessage = localResult?.NeedsFolder == true
-                    ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderFirst")
-                    : localResult?.NeedsSync == true
-                        ? Msg("ApplicationReportPackage.EditTemplate.NeedsSyncFirst")
-                        : localResult?.Error
-                            ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
+                _packageStatusMessage = localResult?.NeedsSync == true
+                    ? Msg("ApplicationReportPackage.EditTemplate.NeedsSyncFirst")
+                    : localResult?.Error
+                        ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
                 _packageStatusIsError = true;
                 return;
             }
@@ -531,6 +632,12 @@
                 new { });
             if (result == null || !result.Success)
             {
+                if (result?.WasCancelled == true)
+                {
+                    ClearStatusMessages();
+                    return;
+                }
+
                 _packageStatusMessage = result?.NeedsSubfolder == true
                     ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot")
                     : result?.Error
