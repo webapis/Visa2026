@@ -111,7 +111,7 @@ function Ensure-Visa2026TemplateEditShareForSlot {
         }
 
         if (-not (Test-Path -LiteralPath $stagingUnc)) {
-            Write-Warning "UNC not reachable from this session: $stagingUnc (share created; verify from officer PC and app pool identity)."
+            Write-Warning "UNC not reachable from this session: $stagingUnc. Share created; verify from officer PC and app pool identity."
         }
         else {
             Write-Host "  UNC reachable from this account." -ForegroundColor Green
