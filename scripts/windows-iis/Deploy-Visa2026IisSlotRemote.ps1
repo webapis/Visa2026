@@ -60,9 +60,11 @@ $remoteDeployScp = "C:/visa2026-deploy/iis"
 $remotePublishWin = $ctx.PublishPath
 $remotePublishScp = ($ctx.PublishPath -replace '\\', '/')
 
-Write-Host "==> Deploy slot: $($ctx.Profile) (port $($ctx.HttpPort), DB $($ctx.DbName))" -ForegroundColor Cyan
+$defaultHttpsPort = Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile
+
+Write-Host "==> Deploy slot: $($ctx.Profile) (HTTP $($ctx.HttpPort), HTTPS default $defaultHttpsPort, DB $($ctx.DbName))" -ForegroundColor Cyan
 Write-Host "    Publish -> $remotePublishWin" -ForegroundColor DarkGray
-Write-Host "    Smoke     -> $($ctx.LoginPageUrl)" -ForegroundColor DarkGray
+Write-Host "    Smoke     -> https://127.0.0.1:$defaultHttpsPort/LoginPage (on server)" -ForegroundColor DarkGray
 
 Write-Host "==> SSH test $SshHost" -ForegroundColor Cyan
 ssh -o BatchMode=yes -o ConnectTimeout=15 $SshHost "whoami"
@@ -88,6 +90,9 @@ $scriptFiles = @(
     "Diagnose-Port80.ps1",
     "Enable-Visa2026IisSlotFirewall.ps1",
     "Enable-Visa2026IisHttps.ps1",
+    "Invoke-Visa2026IisSlotConfigure.ps1",
+    "Invoke-Visa2026IisSlotSmokeTest.ps1",
+    "Ensure-Visa2026SlotHttpsEnv.ps1",
     "Get-Visa2026RuntimeErrorsForPull.ps1"
 )
 Write-Host "==> Copy scripts to server" -ForegroundColor Cyan
@@ -106,6 +111,10 @@ if ($LASTEXITCODE -ne 0) {
     throw "Install-Visa2026IisSlots.ps1 failed (exit $LASTEXITCODE)."
 }
 
+Write-Host "==> Ensure HTTPS env for $Profile" -ForegroundColor Cyan
+ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Ensure-Visa2026SlotHttpsEnv.ps1 -Profile $Profile -UncHost 10.100.128.25"
+if ($LASTEXITCODE -ne 0) { throw "Ensure-Visa2026SlotHttpsEnv.ps1 failed (exit $LASTEXITCODE)." }
+
 Write-Host "==> Stop app pool $($ctx.AppPoolName)" -ForegroundColor Cyan
 ssh $SshHost "C:\Windows\System32\inetsrv\appcmd stop apppool $($ctx.AppPoolName) 2>nul"
 
@@ -113,11 +122,7 @@ Write-Host "==> Copy publish output" -ForegroundColor Cyan
 scp -r -q "$PublishPath/*" "${SshHost}:${remotePublishScp}/"
 
 Write-Host "==> Configure slot" -ForegroundColor Cyan
-$remoteSlots = "$remoteDeployWin\Visa2026-IisSlots.ps1"
-$configureRemote = @"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& { . '$remoteSlots'; `$slot = Get-Visa2026IisSlotDefinition -Profile '$Profile'; `$envFile = `$slot.EnvFile; if (Resolve-Visa2026HttpsEnabled -EnvFile `$envFile) { & '$remoteDeployWin\Enable-Visa2026IisHttps.ps1' -Profile '$Profile' -RedirectHttpToHttps }; & '$remoteDeployWin\Configure-Visa2026Production.ps1' -Profile '$Profile' -SqlServer 'localhost\SQLEXPRESS' }"
-"@
-ssh $SshHost $configureRemote
+ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Invoke-Visa2026IisSlotConfigure.ps1 -Profile $Profile"
 if ($LASTEXITCODE -ne 0) { throw "Slot configure failed (exit $LASTEXITCODE)." }
 ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Set-Visa2026AppPoolEnvironment.ps1 -Profile $Profile"
 if ($LASTEXITCODE -ne 0) { throw "Set-Visa2026AppPoolEnvironment.ps1 failed (exit $LASTEXITCODE)." }
@@ -137,20 +142,19 @@ if (-not $SkipDbUpdate) {
 }
 
 Write-Host "==> Start app pool + site" -ForegroundColor Cyan
-ssh $SshHost "C:\Windows\System32\inetsrv\appcmd start apppool $($ctx.AppPoolName)"
-ssh $SshHost "C:\Windows\System32\inetsrv\appcmd start site $($ctx.SiteName)"
+ssh $SshHost "C:\Windows\System32\inetsrv\appcmd start apppool $($ctx.AppPoolName) 2>nul"
+ssh $SshHost "C:\Windows\System32\inetsrv\appcmd start site $($ctx.SiteName) 2>nul"
 
 Write-Host "==> Smoke test" -ForegroundColor Cyan
-$smokeUrl = $ctx.LoginPageUrl
-$smokeResult = ssh $SshHost "powershell -NoProfile -Command `"try { (Invoke-WebRequest -Uri '$smokeUrl' -UseBasicParsing -TimeoutSec 180).StatusCode } catch { `$_.Exception.Message }`""
+$smokeResult = ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Invoke-Visa2026IisSlotSmokeTest.ps1 -Profile $Profile"
 Write-Host $smokeResult
-if ($smokeResult -ne "200") {
+if ($LASTEXITCODE -ne 0 -or $smokeResult -ne "200") {
     throw "Smoke test failed for $($ctx.Profile): $smokeResult"
 }
 
 Write-Host ""
-Write-Host "Deploy finished - $($ctx.Profile) on port $($ctx.HttpPort)." -ForegroundColor Green
-Write-Host "  $($ctx.LoginPageUrl)" -ForegroundColor Green
+Write-Host "Deploy finished - $($ctx.Profile)." -ForegroundColor Green
+Write-Host "  Officer URL: https://10.100.128.25:$defaultHttpsPort/LoginPage" -ForegroundColor Green
 if ($EnableForceXafDbUpdate) {
     Write-Host "  FORCE_XAF_DB_UPDATE is ON for $($ctx.AppPoolName). Remove after verify:" -ForegroundColor Yellow
     Write-Host "  Remove-Visa2026ForceXafDbUpdate.ps1 -Profile $Profile" -ForegroundColor Yellow

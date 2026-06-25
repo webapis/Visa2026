@@ -170,8 +170,8 @@ function Get-Visa2026IisSlotEnvTemplate {
         "# FORCE_XAF_DB_UPDATE=true"
         "# Resminamalar local sandbox template editing (HTTPS required):"
         "# TEMPLATE_EDIT_STAGING_ENABLED=true"
-        "# HTTPS_ENABLED=true"
-        "# HTTPS_PORT=443"
+        "HTTPS_ENABLED=true"
+        "HTTPS_PORT=$(Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)"
     ) -join "`r`n"
 }
 
@@ -283,7 +283,7 @@ function Resolve-Visa2026HttpsEnabled {
 function Resolve-Visa2026HttpsPort {
     param(
         [string]$EnvFile = "",
-        [int]$DefaultPort = 443
+        [int]$DefaultPort = 0
     )
 
     if ($EnvFile -and (Test-Path -LiteralPath $EnvFile)) {
@@ -296,5 +296,50 @@ function Resolve-Visa2026HttpsPort {
         }
     }
 
-    return $DefaultPort
+    if ($DefaultPort -gt 0) {
+        return $DefaultPort
+    }
+
+    return 443
+}
+
+function Resolve-Visa2026DefaultHttpsPortForProfile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Production", "Staging", "Demo", "Legacy")]
+        [string]$Profile
+    )
+
+    switch ($Profile) {
+        "Staging" { return 8080 }
+        "Demo" { return 8081 }
+        default { return 443 }
+    }
+}
+
+function Get-Visa2026SlotSmokeLoginPageUrl {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Production", "Staging", "Demo", "Legacy")]
+        [string]$Profile,
+
+        [string]$EnvFile = "",
+        [string]$HostName = "127.0.0.1"
+    )
+
+    $slot = Get-Visa2026IisSlotDefinition -Profile $Profile
+    if (-not $EnvFile) {
+        $EnvFile = $slot.EnvFile
+    }
+
+    if (-not (Resolve-Visa2026HttpsEnabled -EnvFile $EnvFile)) {
+        return $slot.LoginPageUrl
+    }
+
+    $httpsPort = Resolve-Visa2026HttpsPort -EnvFile $EnvFile -DefaultPort (Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)
+    if ($httpsPort -eq 443) {
+        return "https://${HostName}/LoginPage"
+    }
+
+    return "https://${HostName}:$httpsPort/LoginPage"
 }

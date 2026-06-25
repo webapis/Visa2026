@@ -101,8 +101,9 @@ else {
 
     $san = ($sanParts -join "&")
     if ($PSCmdlet.ShouldProcess($DnsName, "Create self-signed certificate ($san)")) {
+        # Use SubjectAlternativeName extension only; -DnsName conflicts with -TextExtension SAN.
         $cert = New-SelfSignedCertificate `
-            -DnsName $DnsName, "localhost" `
+            -Subject "CN=$DnsName" `
             -CertStoreLocation "Cert:\LocalMachine\My" `
             -FriendlyName "Visa2026-$($slot.Profile)-HTTPS" `
             -KeyExportPolicy Exportable `
@@ -133,6 +134,30 @@ if ($PSCmdlet.ShouldProcess($siteName, "Bind HTTPS on port $HttpsPort")) {
     Write-Host "  HTTPS binding ready: https://localhost:$HttpsPort/LoginPage" -ForegroundColor Green
     if ($IpAddress) {
         Write-Host "  Officer URL (after trusting cert): https://${IpAddress}:$HttpsPort/LoginPage" -ForegroundColor Green
+    }
+
+    # Staging/Demo bind HTTPS on the same port as HTTP (8080/8081). IIS on Windows Server
+    # fails to start the site when both http and https share one port (HRESULT 800700b7).
+    # Use HTTPS-only on that port; production keeps :80 + :443 with redirect.
+    if ($HttpsPort -eq $slot.HttpPort) {
+        if ($PSCmdlet.ShouldProcess($siteName, "Replace HTTP:$($slot.HttpPort) with HTTPS-only")) {
+            $wasStarted = (Get-Website -Name $siteName -ErrorAction SilentlyContinue).State -eq "Started"
+            if ($wasStarted) {
+                Stop-Website -Name $siteName -ErrorAction SilentlyContinue | Out-Null
+            }
+
+            $httpBinding = Get-WebBinding -Name $siteName -Protocol "http" -ErrorAction SilentlyContinue |
+                Where-Object { $_.bindingInformation -like "*:$($slot.HttpPort):" }
+            if ($httpBinding) {
+                Remove-WebBinding -Name $siteName -Protocol "http" -BindingInformation $httpBinding.bindingInformation
+                Write-Host "  Removed HTTP :$($slot.HttpPort) binding (HTTPS-only on this port)." -ForegroundColor Green
+            }
+
+            if ($wasStarted) {
+                Start-Website -Name $siteName -ErrorAction Stop | Out-Null
+            }
+        }
+        $RedirectHttpToHttps = $false
     }
 }
 
