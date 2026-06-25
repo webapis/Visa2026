@@ -1076,6 +1076,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýerli şablon papkasy ulanylmady. HTTPS ulanyň we ilki papka saýlaň.",
             ["ru-RU"] = "Не удалось использовать локальную папку шаблонов. Используйте HTTPS и сначала выберите папку.",
         },
+        ["ApplicationReportPackage.EditTemplate.NeedsSyncFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Local template has unsaved changes. Click Sync to database before Edit template again.",
+            ["tr-TR"] = "Yerel şablonda kaydedilmemiş değişiklikler var. Düzenlemeden önce Veritabanına senkronize et'e tıklayın.",
+            ["tk-TM"] = "Ýerli şablonda maglumat bazasyna geçirilmedik üýtgeşmeler bar. Täzeden redaktir etmezden ozal Maglumat bazasyna sinhronla basyň.",
+            ["ru-RU"] = "В локальном шаблоне есть несинхронизированные изменения. Сначала нажмите «Синхронизировать с базой».",
+        },
         ["ApplicationReportPackage.EditTemplate.OnLocalFolder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "In folder",
@@ -1432,6 +1439,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Senkron: {0} içe aktarıldı, {1} değişmedi, {2} başarısız.",
             ["tk-TM"] = "Sinhron: {0} import edildi, {1} üýtgemedi, {2} şowsuz.",
             ["ru-RU"] = "Синхронизация: {0} импортировано, {1} без изменений, {2} ошибок.",
+        },
+        ["ApplicationReportPackage.SyncTemplates.NoLocalChanges"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No template changes found in the sandbox folder. In Word, use File → Save (not Save As), close Word completely, then click Sync to database again.",
+            ["tr-TR"] = "Şablon klasöründe değişiklik bulunamadı. Word'de Dosya → Kaydet kullanın (Farklı Kaydet değil), Word'ü tamamen kapatın, sonra tekrar senkronize edin.",
+            ["tk-TM"] = "Şablon papkasynda üýtgeşme tapylmady. Word-de Faýl → Ýatda sakla ulanyň, Word-i doly ýapyň, soňra täzeden sinhronlaň.",
+            ["ru-RU"] = "В папке шаблонов изменений не найдено. В Word выберите «Файл → Сохранить» (не «Сохранить как»), полностью закройте Word и снова нажмите «Синхронизировать с базой».",
         },
         ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

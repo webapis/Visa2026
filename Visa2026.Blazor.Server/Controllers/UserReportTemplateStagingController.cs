@@ -70,6 +70,16 @@ public sealed class UserReportTemplateStagingController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+        catch (Exception ex)
+        {
+            return Ok(StagingImportResponse.From(new UserReportTemplateStagingImportResult
+            {
+                TemplateId = templateId,
+                DisplayName = string.Empty,
+                Status = UserReportTemplateStagingImportStatus.Failed,
+                ErrorMessage = ex.Message,
+            }));
+        }
     }
 
     private string ResolveUserName() =>

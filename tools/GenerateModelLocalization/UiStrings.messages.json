@@ -647,6 +647,12 @@
     "tk-TM": "Ýol göçürildi. Resminama açylmadyk bolsa Word Faýl → Aç-a goýuň: {0}",
     "ru-RU": "Путь скопирован. Если документ не открылся, вставьте в Word Файл → Открыть: {0}"
   },
+  "ApplicationReportPackage.EditTemplate.NeedsSyncFirst": {
+    "en": "Local template has unsaved changes. Click Sync to database before Edit template again.",
+    "tr-TR": "Yerel şablonda kaydedilmemiş değişiklikler var. Düzenlemeden önce Veritabanına senkronize et'e tıklayın.",
+    "tk-TM": "Ýerli şablonda maglumat bazasyna geçirilmedik üýtgeşmeler bar. Täzeden redaktir etmezden ozal Maglumat bazasyna sinhronla basyň.",
+    "ru-RU": "В локальном шаблоне есть несинхронизированные изменения. Сначала нажмите «Синхронизировать с базой»."
+  },
   "ApplicationReportPackage.Gear.ShowDetails": {
     "en": "Show template editor and readiness hints",
     "tr-TR": "Şablon düzenleyici ve hazırlık ipuçlarını göster",
@@ -761,8 +767,14 @@
     "tk-TM": "Sinhron: {0} import edildi, {1} üýtgemedi, {2} şowsuz.",
     "ru-RU": "Синхронизация: {0} импортировано, {1} без изменений, {2} ошибок."
   },
+  "ApplicationReportPackage.SyncTemplates.NoLocalChanges": {
+    "en": "No template changes found in the sandbox folder. In Word, use File → Save (not Save As), close Word completely, then click Sync to database again.",
+    "tr-TR": "Şablon klasöründe değişiklik bulunamadı. Word'de Dosya → Kaydet kullanın (Farklı Kaydet değil), Word'ü tamamen kapatın, sonra tekrar senkronize edin.",
+    "tk-TM": "Şablon papkasynda üýtgeşme tapylmady. Word-de Faýl → Ýatda sakla ulanyň, Word-i doly ýapyň, soňra täzeden sinhronlaň.",
+    "ru-RU": "В папке шаблонов изменений не найдено. В Word выберите «Файл → Сохранить» (не «Сохранить как»), полностью закройте Word и снова нажмите «Синхронизировать с базой»."
+  },
   "ApplicationReportPackage.SyncTemplates.ImportFailed": {
-    "en": "Could not import templates from the edit share.",
+    "en": "Could not import templates from the local sandbox folder.",
     "tr-TR": "Düzenleme paylaşımından şablonlar içe aktarılamadı.",
     "tk-TM": "Redaktirleme paýlaşygynan şablonlar import edilmedi.",
     "ru-RU": "Не удалось импортировать шаблоны из папки редактирования."

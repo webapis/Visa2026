@@ -412,8 +412,10 @@
             {
                 _packageStatusMessage = localResult?.NeedsFolder == true
                     ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderFirst")
-                    : localResult?.Error
-                        ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
+                    : localResult?.NeedsSync == true
+                        ? Msg("ApplicationReportPackage.EditTemplate.NeedsSyncFirst")
+                        : localResult?.Error
+                            ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
                 _packageStatusIsError = true;
                 return;
             }
@@ -576,12 +578,30 @@
             }
 
             var result = outcome.Result;
-            _packageStatusMessage = FormatMsg(
-                "ApplicationReportPackage.SyncTemplates.ImportSummary",
-                result.ImportedCount,
-                result.SkippedUnchangedCount,
-                result.FailedCount);
-            _packageStatusIsError = result.FailedCount > 0;
+            if (result.ImportedCount == 0
+                && result.FailedCount == 0
+                && result.SkippedUnchangedCount > 0)
+            {
+                _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.NoLocalChanges");
+                _packageStatusIsError = true;
+            }
+            else
+            {
+                _packageStatusMessage = FormatMsg(
+                    "ApplicationReportPackage.SyncTemplates.ImportSummary",
+                    result.ImportedCount,
+                    result.SkippedUnchangedCount,
+                    result.FailedCount);
+                _packageStatusIsError = result.FailedCount > 0;
+
+                var firstFailure = result.Results.FirstOrDefault(r =>
+                    r.Status == UserReportTemplateStagingImportStatus.Failed
+                    && !string.IsNullOrWhiteSpace(r.ErrorMessage));
+                if (firstFailure?.ErrorMessage != null)
+                {
+                    _packageStatusMessage += " " + firstFailure.ErrorMessage;
+                }
+            }
 
             foreach (var imported in result.Results.Where(r =>
                          r.Status == UserReportTemplateStagingImportStatus.Imported))
@@ -602,6 +622,11 @@
 
             if (RefreshRequested.HasDelegate)
                 await RefreshRequested.InvokeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.ImportFailed");
+            _packageStatusIsError = true;
         }
         catch (Exception ex)
         {

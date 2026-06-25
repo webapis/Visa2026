@@ -155,80 +155,50 @@ public sealed class UserReportTemplateStagingUiService
         {
             var collect = await _jsRuntime
                 .InvokeAsync<UserReportTemplateStagingLocalCollectJsResult>(
-                    "visaTemplateStagingLocal.collectChangedUploads",
+                    "visaTemplateStagingLocal.syncToDatabase",
                     templateIds.Select(id => id.ToString()).ToArray())
                 .ConfigureAwait(false);
 
-            var results = new List<UserReportTemplateStagingImportResult>();
-            foreach (var item in collect.Uploads)
-            {
-                if (string.Equals(item.Status, "SkippedUnchanged", StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(new UserReportTemplateStagingImportResult
-                    {
-                        TemplateId = item.TemplateId,
-                        DisplayName = string.Empty,
-                        Status = UserReportTemplateStagingImportStatus.SkippedUnchanged,
-                    });
-                    continue;
-                }
-
-                if (string.Equals(item.Status, "SkippedNotFound", StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(new UserReportTemplateStagingImportResult
-                    {
-                        TemplateId = item.TemplateId,
-                        DisplayName = string.Empty,
-                        Status = UserReportTemplateStagingImportStatus.SkippedNotFound,
-                    });
-                    continue;
-                }
-
-                if (string.Equals(item.Status, "Failed", StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(new UserReportTemplateStagingImportResult
-                    {
-                        TemplateId = item.TemplateId,
-                        DisplayName = string.Empty,
-                        Status = UserReportTemplateStagingImportStatus.Failed,
-                        ErrorMessage = item.ErrorMessage,
-                    });
-                    continue;
-                }
-
-                if (!string.Equals(item.Status, "Pending", StringComparison.OrdinalIgnoreCase)
-                    || string.IsNullOrWhiteSpace(item.FileBase64))
-                {
-                    continue;
-                }
-
-                var bytes = Convert.FromBase64String(item.FileBase64);
-                var importResult = await _stagingService
-                    .ImportFromUploadAsync(item.TemplateId, bytes)
-                    .ConfigureAwait(false);
-                results.Add(importResult);
-
-                if (importResult.Status == UserReportTemplateStagingImportStatus.Imported
-                    && !string.IsNullOrWhiteSpace(item.FileName)
-                    && !string.IsNullOrWhiteSpace(item.ContentHash))
-                {
-                    await _jsRuntime
-                        .InvokeVoidAsync(
-                            "visaTemplateStagingLocal.markImported",
-                            item.FileName,
-                            item.ContentHash)
-                        .ConfigureAwait(false);
-                }
-            }
+            var results = collect.Uploads
+                .Select(MapStagingUploadResult)
+                .ToList();
 
             return UserReportTemplateStagingUiImportAllOutcome.Ok(
                 new UserReportTemplateStagingImportAllResult { Results = results });
+        }
+        catch (JSDisconnectedException)
+        {
+            return UserReportTemplateStagingUiImportAllOutcome.Fail(
+                "Browser connection was lost during sync. Refresh the page and try again.");
+        }
+        catch (JSException ex)
+        {
+            return UserReportTemplateStagingUiImportAllOutcome.Fail(ex.Message);
         }
         catch (Exception ex)
         {
             return UserReportTemplateStagingUiImportAllOutcome.Fail(ex.Message);
         }
     }
+
+    private static UserReportTemplateStagingImportResult MapStagingUploadResult(
+        UserReportTemplateStagingLocalUploadJsItem item) =>
+        new()
+        {
+            TemplateId = item.TemplateId,
+            DisplayName = item.DisplayName ?? string.Empty,
+            Status = ParseStagingUploadStatus(item.Status),
+            ErrorMessage = item.ErrorMessage,
+        };
+
+    private static UserReportTemplateStagingImportStatus ParseStagingUploadStatus(string? status) =>
+        status switch
+        {
+            nameof(UserReportTemplateStagingImportStatus.Imported) => UserReportTemplateStagingImportStatus.Imported,
+            nameof(UserReportTemplateStagingImportStatus.SkippedUnchanged) => UserReportTemplateStagingImportStatus.SkippedUnchanged,
+            nameof(UserReportTemplateStagingImportStatus.SkippedNotFound) => UserReportTemplateStagingImportStatus.SkippedNotFound,
+            _ => UserReportTemplateStagingImportStatus.Failed,
+        };
 
     private string ResolveUserName() =>
         _httpContextAccessor.HttpContext?.User?.Identity?.Name

@@ -18,6 +18,8 @@ public sealed class UserReportTemplateStagingLocalExportJsResult
     public bool NeedsPathHint { get; init; }
 
     public bool NeedsFolder { get; init; }
+
+    public bool NeedsSync { get; init; }
 }
 
 /// <summary>JS interop result from <c>visaTemplateStagingLocal.chooseFolder</c>.</summary>
@@ -55,6 +57,8 @@ public sealed class UserReportTemplateStagingLocalUploadJsItem
     public string? ErrorMessage { get; init; }
 
     public string? FileName { get; init; }
+
+    public string? DisplayName { get; init; }
 
     public string? FileBase64 { get; init; }
 

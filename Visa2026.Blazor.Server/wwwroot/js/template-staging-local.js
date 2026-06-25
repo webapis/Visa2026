@@ -164,6 +164,19 @@
         return documentFileName + ".meta.json";
     }
 
+    function normalizeHash(hash) {
+        return (hash || "").trim().toUpperCase();
+    }
+
+    async function isFileLockedInOffice(handle, fileName) {
+        try {
+            await handle.getFileHandle("~$" + fileName);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
     async function readMeta(handle, documentFileName) {
         try {
             var bytes = await readFileBytes(handle, metaFileName(documentFileName));
@@ -324,9 +337,50 @@
 
         try {
             var pathHint = await getStoredPathHint();
+            var existingMeta = await readMeta(handle, payload.fileName);
+            var lastImported = existingMeta && existingMeta.lastImportedContentHashSha256
+                ? existingMeta.lastImportedContentHashSha256
+                : (payload.lastImportedContentHashSha256 || null);
+
+            if (existingMeta) {
+                if (await isFileLockedInOffice(handle, payload.fileName)) {
+                    return {
+                        success: false,
+                        error: "Close Word or Excel before exporting this template again."
+                    };
+                }
+
+                try {
+                    var existingBytes = await readFileBytes(handle, payload.fileName);
+                    var existingHash = normalizeHash(await sha256Hex(existingBytes));
+                    var metaSource = normalizeHash(existingMeta.sourceContentHashSha256);
+                    var lastImp = normalizeHash(lastImported);
+                    if (metaSource
+                        && existingHash !== metaSource
+                        && (!lastImp || existingHash !== lastImp)) {
+                        return {
+                            success: false,
+                            needsSync: true,
+                            error: "Local template has changes not yet synced to the database."
+                        };
+                    }
+                } catch (e) {
+                    // no existing document file yet
+                }
+            }
+
             var bytes = base64ToBytes(payload.fileBase64);
             await writeFile(handle, payload.fileName, bytes);
-            var meta = buildMeta(payload);
+            var meta = buildMeta({
+                templateId: payload.templateId,
+                displayName: payload.displayName,
+                outputFormat: payload.outputFormat,
+                fileName: payload.fileName,
+                exportedAtUtc: payload.exportedAtUtc,
+                exportedByUserName: payload.exportedByUserName,
+                sourceHash: payload.sourceHash,
+                lastImportedContentHashSha256: lastImported
+            });
             var metaJson = JSON.stringify(meta, null, 2);
             await writeFile(handle, metaFileName(payload.fileName), new TextEncoder().encode(metaJson));
 
@@ -372,48 +426,38 @@
         return map;
     }
 
-    window.visaTemplateStagingLocal.collectChangedUploads = async function (templateIds) {
-        var uploads = [];
-        if (!templateIds || !templateIds.length) {
-            return {
-                importedCount: 0,
-                skippedUnchangedCount: 0,
-                skippedNotFoundCount: 0,
-                failedCount: 0,
-                uploads: uploads
-            };
-        }
+    function summarizeUploadResults(uploads) {
+        return {
+            importedCount: uploads.filter(function (u) { return u.status === "Imported"; }).length,
+            skippedUnchangedCount: uploads.filter(function (u) { return u.status === "SkippedUnchanged"; }).length,
+            skippedNotFoundCount: uploads.filter(function (u) { return u.status === "SkippedNotFound"; }).length,
+            failedCount: uploads.filter(function (u) { return u.status === "Failed"; }).length,
+            uploads: uploads
+        };
+    }
 
+    async function collectUploadItems(templateIds) {
+        var uploads = [];
         var handle = await getDirectoryHandle();
         if (!handle) {
-            return {
-                importedCount: 0,
-                skippedUnchangedCount: 0,
-                skippedNotFoundCount: 0,
-                failedCount: templateIds.length,
-                uploads: templateIds.map(function (id) {
-                    return {
-                        templateId: id,
-                        status: "Failed",
-                        errorMessage: "Template folder is not configured."
-                    };
-                })
-            };
+            return summarizeUploadResults([{
+                templateId: "00000000-0000-0000-0000-000000000000",
+                status: "Failed",
+                errorMessage: "Choose template folder first (button below)."
+            }]);
         }
 
         var metaByTemplateId = await loadMetaByTemplateId(handle);
-        var targetIds = templateIds && templateIds.length
+        var targetIds = (templateIds && templateIds.length)
             ? templateIds
             : Object.keys(metaByTemplateId);
 
         if (!targetIds.length) {
-            return {
-                importedCount: 0,
-                skippedUnchangedCount: 0,
-                skippedNotFoundCount: 0,
-                failedCount: 0,
-                uploads: uploads
-            };
+            return summarizeUploadResults([{
+                templateId: "00000000-0000-0000-0000-000000000000",
+                status: "Failed",
+                errorMessage: "No templates in the local sandbox yet. Click Edit template on a report first."
+            }]);
         }
 
         for (var i = 0; i < targetIds.length; i++) {
@@ -425,10 +469,26 @@
             }
 
             try {
+                if (await isFileLockedInOffice(handle, knownMeta.documentFileName)) {
+                    uploads.push({
+                        templateId: templateId,
+                        status: "Failed",
+                        errorMessage: "Template file is still open in Word or Excel."
+                    });
+                    continue;
+                }
+
                 var contentBytes = await readFileBytes(handle, knownMeta.documentFileName);
-                var hash = await sha256Hex(contentBytes);
-                if (knownMeta.lastImportedContentHashSha256
-                    && String(knownMeta.lastImportedContentHashSha256).toUpperCase() === hash) {
+                var hash = normalizeHash(await sha256Hex(contentBytes));
+                var sourceHash = normalizeHash(knownMeta.sourceContentHashSha256);
+                var lastImported = normalizeHash(knownMeta.lastImportedContentHashSha256);
+
+                if (lastImported && hash === lastImported) {
+                    uploads.push({ templateId: templateId, status: "SkippedUnchanged" });
+                    continue;
+                }
+
+                if (sourceHash && hash === sourceHash) {
                     uploads.push({ templateId: templateId, status: "SkippedUnchanged" });
                     continue;
                 }
@@ -437,29 +497,96 @@
                     templateId: templateId,
                     status: "Pending",
                     fileName: knownMeta.documentFileName,
-                    fileBase64: bytesToBase64(contentBytes),
+                    contentBytes: contentBytes,
                     contentHash: hash
                 });
             } catch (e) {
+                var fileLabel = knownMeta.documentFileName || templateId;
                 uploads.push({
                     templateId: templateId,
                     status: "Failed",
-                    errorMessage: (e && e.message) || "Could not read local template file."
+                    errorMessage: ((e && e.message) || "Could not read local template file.")
+                        + " (" + fileLabel + ")"
                 });
             }
         }
 
-        var skippedUnchangedCount = uploads.filter(function (u) { return u.status === "SkippedUnchanged"; }).length;
-        var skippedNotFoundCount = uploads.filter(function (u) { return u.status === "SkippedNotFound"; }).length;
-        var failedCount = uploads.filter(function (u) { return u.status === "Failed"; }).length;
+        return summarizeUploadResults(uploads);
+    }
 
-        return {
-            importedCount: 0,
-            skippedUnchangedCount: skippedUnchangedCount,
-            skippedNotFoundCount: skippedNotFoundCount,
-            failedCount: failedCount,
-            uploads: uploads
-        };
+    window.visaTemplateStagingLocal.syncToDatabase = async function (templateIds) {
+        var collected = await collectUploadItems(templateIds);
+        var finalUploads = [];
+
+        for (var i = 0; i < collected.uploads.length; i++) {
+            var item = collected.uploads[i];
+            if (item.status !== "Pending") {
+                finalUploads.push({
+                    templateId: item.templateId,
+                    status: item.status,
+                    errorMessage: item.errorMessage || null,
+                    displayName: item.displayName || null
+                });
+                continue;
+            }
+
+            try {
+                var blob = new Blob([item.contentBytes]);
+                var formData = new FormData();
+                formData.append("file", blob, item.fileName);
+                var url = "/api/user-report-templates/"
+                    + encodeURIComponent(item.templateId)
+                    + "/staging/upload";
+                var response = await fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    credentials: "same-origin"
+                });
+
+                if (!response.ok) {
+                    var errText = await response.text();
+                    var errMessage = errText;
+                    try {
+                        var errJson = JSON.parse(errText);
+                        errMessage = errJson.error || errJson.title || errText;
+                    } catch (parseError) {
+                        // keep raw text
+                    }
+
+                    finalUploads.push({
+                        templateId: item.templateId,
+                        status: "Failed",
+                        errorMessage: errMessage || ("Upload failed (" + response.status + ").")
+                    });
+                    continue;
+                }
+
+                var body = await response.json();
+                var apiStatus = (body && body.status) ? String(body.status) : "Failed";
+                if (apiStatus === "Imported") {
+                    await window.visaTemplateStagingLocal.markImported(item.fileName, item.contentHash);
+                }
+
+                finalUploads.push({
+                    templateId: item.templateId,
+                    status: apiStatus,
+                    errorMessage: body && body.errorMessage ? body.errorMessage : null,
+                    displayName: body && body.displayName ? body.displayName : null
+                });
+            } catch (e) {
+                finalUploads.push({
+                    templateId: item.templateId,
+                    status: "Failed",
+                    errorMessage: (e && e.message) || "Upload request failed."
+                });
+            }
+        }
+
+        return summarizeUploadResults(finalUploads);
+    };
+
+    window.visaTemplateStagingLocal.collectChangedUploads = async function (templateIds) {
+        return window.visaTemplateStagingLocal.syncToDatabase(templateIds);
     };
 
     window.visaTemplateStagingLocal.markImported = async function (documentFileName, contentHash) {
@@ -475,6 +602,7 @@
 
         meta.lastImportedAtUtc = new Date().toISOString();
         meta.lastImportedContentHashSha256 = contentHash;
+        meta.sourceContentHashSha256 = contentHash;
         var metaJson = JSON.stringify(meta, null, 2);
         await writeFile(handle, metaFileName(documentFileName), new TextEncoder().encode(metaJson));
         return true;

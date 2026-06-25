@@ -96,9 +96,10 @@ public static class UserThemeHelper
             return;
         }
 
-        IServiceProvider services = application.ServiceProvider;
-        IThemeService? themeService = services.GetService(typeof(IThemeService)) as IThemeService;
-        IXafSizeModeService? sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
+        if (!TryGetThemeServices(application, out IThemeService? themeService, out IXafSizeModeService? sizeModeService))
+        {
+            return;
+        }
 
         string? currentCaption = GetPersistedThemeCaption(themeService);
         string? currentMode = IsClassicTheme(themeService?.CurrentTheme)
@@ -116,7 +117,12 @@ public static class UserThemeHelper
             return;
         }
 
-        using IObjectSpace objectSpace = CreateUserObjectSpace(application);
+        using IObjectSpace? objectSpace = TryCreateUserObjectSpace(application);
+        if (objectSpace == null)
+        {
+            return;
+        }
+
         ApplicationUser userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
         if (userInOs == null)
         {
@@ -198,14 +204,46 @@ public static class UserThemeHelper
         return true;
     }
 
-    static IObjectSpace CreateUserObjectSpace(XafApplication application)
+    static bool TryGetThemeServices(
+        XafApplication application,
+        out IThemeService? themeService,
+        out IXafSizeModeService? sizeModeService)
     {
-        INonSecuredObjectSpaceFactory? factory = application.ServiceProvider
-            .GetService(typeof(INonSecuredObjectSpaceFactory)) as INonSecuredObjectSpaceFactory;
-        return factory != null
-            ? factory.CreateNonSecuredObjectSpace(typeof(ApplicationUser))
-            : application.CreateObjectSpace(typeof(ApplicationUser));
+        themeService = null;
+        sizeModeService = null;
+
+        try
+        {
+            IServiceProvider services = application.ServiceProvider;
+            themeService = services.GetService(typeof(IThemeService)) as IThemeService;
+            sizeModeService = services.GetService(typeof(IXafSizeModeService)) as IXafSizeModeService;
+            return themeService != null || sizeModeService != null;
+        }
+        catch (ObjectDisposedException)
+        {
+            return false;
+        }
     }
+
+    static IObjectSpace? TryCreateUserObjectSpace(XafApplication application)
+    {
+        try
+        {
+            INonSecuredObjectSpaceFactory? factory = application.ServiceProvider
+                .GetService(typeof(INonSecuredObjectSpaceFactory)) as INonSecuredObjectSpaceFactory;
+            return factory != null
+                ? factory.CreateNonSecuredObjectSpace(typeof(ApplicationUser))
+                : application.CreateObjectSpace(typeof(ApplicationUser));
+        }
+        catch (ObjectDisposedException)
+        {
+            return null;
+        }
+    }
+
+    static IObjectSpace CreateUserObjectSpace(XafApplication application) =>
+        TryCreateUserObjectSpace(application)
+        ?? throw new InvalidOperationException("Application services are not available.");
 
     static string? NormalizeStoredThemeCaption(string? caption) =>
         string.IsNullOrWhiteSpace(caption)
