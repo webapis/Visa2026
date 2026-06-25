@@ -55,8 +55,8 @@ sequenceDiagram
 
 | # | Decision | Choice |
 |---|----------|--------|
-| 1 | **Import scope on Refresh** | Import **all changed files on the share** (not limited to current session) |
-| 2 | **Extract + Validate on import** | Run **only when file hash changed** since last import |
+| 1 | **Import scope on Refresh** | Import **all changed files on the share** (not limited to current session) — **superseded:** import is on **Sync to database** only; **Refresh** reloads catalog |
+| 2 | Extract + Validate on import | Run **only when file hash changed** since last import |
 | 3 | **Open file after export** | **Try** `ms-word:` / `ms-excel:` Office protocol; **fallback** UNC path + **Copy path** button |
 | 4 | **DetailView link in catalog** | **Remove** — catalog **Edit template** is the only entry point; DetailView remains in nav for admins |
 
@@ -67,7 +67,7 @@ sequenceDiagram
 - In-browser Spreadsheet / Rich Edit on User Report Template DetailView
 - Editing ministry **seed files in git** (`Resources/Templates/`)
 - Version history, check-out UI, or multi-user merge conflict resolution (v1: last import wins)
-- Auto-sync without officer clicking **Refresh**
+- Auto-sync without officer clicking **Sync to database**
 
 ---
 
@@ -77,6 +77,7 @@ sequenceDiagram
 flowchart TB
     subgraph ui [Blazor — Resminamalar catalog]
         EDIT[Edit template button]
+        SYNC[Sync to database button]
         REF[Refresh button]
     end
 
@@ -96,7 +97,7 @@ flowchart TB
     end
 
     EDIT --> CTRL --> STG
-    REF --> CTRL
+    SYNC --> CTRL
     STG --> DB
     STG --> SHARE
     STG --> META
@@ -111,7 +112,7 @@ flowchart TB
 | **Staging service** | `Visa2026.Module/Services/UserReports/` | Export/import bytes, path rules, hash compare, lock detection, metadata |
 | **Maintenance service** | `Visa2026.Module/Services/UserReports/` | Shared Extract + Validate (refactored from `UserReportTemplateController`) |
 | **API controller** | `Visa2026.Blazor.Server/Controllers/` | Auth, permission checks, return UNC + open URL |
-| **Catalog UI** | `ApplicationReportPackageComponent.razor` | Edit button, extended Refresh, copy-path JS |
+| **Catalog UI** | `ApplicationReportPackageComponent.razor` | Edit button, **Sync to database**, Refresh (catalog only), copy-path JS |
 | **Slot host** | `ResminamalarSlotPanel.razor` | Wire import result into catalog reload |
 
 ### Current behavior (to replace)
@@ -119,7 +120,8 @@ flowchart TB
 | Control | Today | After this feature |
 |---------|-------|-------------------|
 | **Edit template** | Opens `UserReportTemplate_DetailView/{id}` in new tab | Export to share + open in Office |
-| **Refresh** | Reloads catalog from DB only | Import changed share files → then reload catalog |
+| **Refresh** | Reloads catalog from DB only | Reloads catalog from DB only (no share import) |
+| **Sync to database** | — | Import changed share files → DB → Extract/Validate when hash changed → reload catalog |
 
 ---
 
@@ -162,6 +164,22 @@ Add to `appsettings.json` (and environment-specific overrides / `docs/ENVIRONMEN
 | **Verify** | `.\scripts\local\Ensure-TemplateEditDevShare.ps1` |
 
 Word/Excel opens via `ms-word:` / `ms-excel:` links to the UNC path. Use **Copy path** in the catalog if the browser blocks the protocol handler.
+
+### Windows Server IIS (on-prem slots)
+
+| Item | Value |
+|------|--------|
+| **Script** | `scripts/windows-iis/Ensure-Visa2026TemplateEditShare.ps1` (run on server; also invoked by deploy) |
+| **When** | Greenfield `Install-Visa2026IisSlots.ps1` and each `Deploy-Visa2026IisRemote.ps1` before `Configure-Visa2026Production.ps1` |
+| **Local folders** | `C:\ProgramData\Visa2026\TemplateEdit\{prod,staging,demo}` |
+| **SMB shares** | `Visa2026TemplateEdit-Prod`, `-Staging`, `-Demo` |
+| **UNC examples** | `\\<server>\Visa2026TemplateEdit-Prod` (per slot — see [Visa2026-IisSlots.ps1](../scripts/windows-iis/Visa2026-IisSlots.ps1)) |
+| **App config** | `Configure-Visa2026Production.ps1` writes `TemplateEditStaging` into `appsettings.Production.json` (enabled by default on IIS) |
+| **Slot env** | `C:\visa2026\env\prod.env` — optional `TEMPLATE_EDIT_UNC_HOST`, `TEMPLATE_EDIT_OFFICERS_PRINCIPAL`, `TEMPLATE_EDIT_STAGING_ENABLED=false` to disable |
+
+Officers need **Modify** on the share NTFS ACL — set `TEMPLATE_EDIT_OFFICERS_PRINCIPAL=DOMAIN\Group` in the slot env file, or pass `-OfficersPrincipal` when running the ensure script.
+
+Runbook: [docs/ON_PREM_WINDOWS_IIS.md](ON_PREM_WINDOWS_IIS.md) · skill [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md).
 
 ---
 
@@ -246,7 +264,7 @@ Options class bound from config; register in `Startup.cs`.
 | Method | Route | Purpose |
 |--------|-------|---------|
 | POST | `/api/user-report-templates/{templateId}/staging/export` | Export + return open info |
-| POST | `/api/user-report-templates/staging/import-all` | Import all changed (Refresh) |
+| POST | `/api/user-report-templates/staging/import-all` | Import all changed (**Sync to database**) |
 | POST | `/api/user-report-templates/{templateId}/staging/import` | Optional single-template import |
 
 - `[Authorize]` on all endpoints
@@ -277,8 +295,9 @@ Options class bound from config; register in `Startup.cs`.
 
 1. Replace `<a href="...DetailView...">` with `DxButton` → `EditTemplateAsync(entry)`.
 2. Remove `UserReportTemplateEditLinkService.GetDetailViewUrl` usage from catalog (service may remain for other callers).
-3. **Refresh:** call import-all API → show summary toast → existing `ReloadCatalogAsync()`.
-4. Optional session hint: badge **“On share”** for templates exported in current browser session until Refresh succeeds.
+3. **Sync to database:** call import-all API → show summary toast → `ReloadCatalogAsync()`.
+4. **Refresh:** reload catalog only (no share import).
+5. Optional session hint: badge **“On share”** for templates exported in current browser session until sync imports that template.
 
 **JS helper:** `wwwroot/js/template-staging-edit.js` — copy UNC, optional Office open attempt.
 
@@ -293,7 +312,7 @@ Options class bound from config; register in `Startup.cs`.
 | Unauthorized access | `CanEditTemplates()` on every API call |
 | Path traversal | Paths built only from `templateId` + sanitized name; never accept client paths |
 | Wrong file type | Extension must match `TemplateOutputFormat` |
-| Word/Excel lock | Catch `IOException`; message: close app and Refresh again |
+| Word/Excel lock | Catch `IOException`; message: close app and click **Sync to database** again |
 | Concurrent edit | v1: last import wins; meta records `exportedByUserName` / timestamps |
 | Oversized file | `MaxFileSizeBytes` on import |
 | Broken placeholders | Extract + Validate after hash-changed import; readiness Warning in catalog |
@@ -308,9 +327,7 @@ New `VisaUiMessages` keys (and `UiStrings.messages.json` / `tk-TM`):
 - `ApplicationReportPackage.EditTemplate.ExportedOpenPath`
 - `ApplicationReportPackage.EditTemplate.ExportFailed`
 - `ApplicationReportPackage.EditTemplate.CopyPath`
-- `ApplicationReportPackage.Refresh.Importing`
-- `ApplicationReportPackage.Refresh.ImportSummary`
-- `ApplicationReportPackage.Refresh.FileLocked`
+- `ApplicationReportPackage.SyncTemplates` (+ `.ImportSummary`, `.ImportFailed`, `.FileLocked`)
 
 ---
 
@@ -329,19 +346,19 @@ New `VisaUiMessages` keys (and `UiStrings.messages.json` / `tk-TM`):
 **Manual QA checklist**
 
 - [ ] Resminamalar → gear → Edit template → file on share
-- [ ] Edit in Word → Save → Close → Refresh → Preview reflects change
+- [ ] Edit in Word → Save → Close → **Sync to database** → Preview reflects change
 - [ ] Same for `.xlsx`
-- [ ] Word still open → Refresh shows lock message
+- [ ] Word still open → **Sync to database** shows lock message
 - [ ] User without template write → Edit hidden / API 403
-- [ ] Refresh with no share changes → “0 imported” + catalog reload
-- [ ] Placeholder edit → Refresh → Extract/Validate runs; readiness updates
+- [ ] **Sync to database** with no share changes → “0 imported” + catalog reload
+- [ ] Placeholder edit → **Sync to database** → Extract/Validate runs; readiness updates
 
 ---
 
 ### Phase 7 — Documentation and ops
 
 - This file (`docs/TEMPLATE_STAGING_EDIT.md`) — canonical plan
-- Update [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) — Edit / Refresh behavior when implemented
+- Update [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md) — done (Edit / Sync / Refresh)
 - Update [`ENVIRONMENTS.md`](ENVIRONMENTS.md) — share path and ACLs per environment
 - Append to [`.cursor/skills/visa2026-resminamalar/learnings.md`](../.cursor/skills/visa2026-resminamalar/learnings.md) after first deploy
 
@@ -356,7 +373,7 @@ New `VisaUiMessages` keys (and `UiStrings.messages.json` / `tk-TM`):
 | 3 | `UserReportTemplateMaintenanceService` (refactor from controller) |
 | 4 | `UserReportTemplateStagingController` + DI |
 | 5 | Catalog UI: Edit button + export flow |
-| 6 | Catalog UI: Refresh import + messages |
+| 6 | Catalog UI: **Sync to database** + Refresh (catalog only) + messages |
 | 7 | JS: copy UNC + Office open attempt |
 | 8 | Unit tests |
 | 9 | Localization + cross-doc updates |

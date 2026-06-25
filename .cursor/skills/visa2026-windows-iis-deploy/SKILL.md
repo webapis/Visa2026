@@ -64,7 +64,7 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 | Class | Examples | OK required? |
 |-------|----------|--------------|
 | **Read-only** | `appcmd list site`, `sc query MSSQL$SQLEXPRESS`, curl LoginPage per port, `Diagnose-Port80.ps1` | No |
-| **Deploy / mutate** | Copy publish, `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
+| **Deploy / mutate** | Copy publish, `Ensure-Visa2026TemplateEditShare.ps1 -Profile …`, `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
 | **Destructive** | `RESTORE … WITH REPLACE` on **prod** DB, removing portproxy, SQL single-user `-m` bootstrap | **Yes** |
 
 Take a **SQL `.bak`** before restore or risky schema update on **Production**.
@@ -80,7 +80,7 @@ Full steps: [reference.md](./reference.md). Phases: [ON_PREM_WINDOWS_IIS.md](../
 | Publish (dev PC) | `Publish-Visa2026ForIis.ps1` |
 | SQL Express | `Install-SqlServerExpress.ps1` or `Configure-SqlExpressSaLogin.ps1` |
 | IIS + Hosting Bundle | `Install-Visa2026ServerPrerequisites.ps1` |
-| **All three slots** | `Install-Visa2026IisSlots.ps1 -SourceEnvFile C:\visa2026\.env.prod` (creates sites, env templates, DBs) |
+| **All three slots** | `Install-Visa2026IisSlots.ps1 -SourceEnvFile C:\visa2026\.env.prod` (creates sites, env templates, DBs, template-edit shares) |
 | Copy publish | Same build into each `C:\inetpub\visa2026-{prod,staging,demo}\` (or deploy one slot at a time) |
 | Per-slot DB update | `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate` (etc.) |
 | Auto-start | `Set-Visa2026IisSlotsAutoStart.ps1` (prod :80 + staging :8080 + demo :8081) |
@@ -102,8 +102,10 @@ Full steps: [reference.md](./reference.md). Phases: [ON_PREM_WINDOWS_IIS.md](../
 2. **Publish** on dev PC.
 3. **Stop** that slot’s app pool (`Visa2026-Prod` / `-Staging` / `-Demo`).
 4. Copy publish to that slot’s **`C:\inetpub\visa2026-*`** — keep slot’s `appsettings.Production.json` and **`DataProtection-Keys-*`**.
-5. **`Run-Visa2026DbUpdateOnServer.ps1 -Profile <slot>`** (`-ForceUpdate` if drift).
-6. Start app pool + site; smoke that slot’s LoginPage URL (see table in § Goal).
+5. **`Ensure-Visa2026TemplateEditShare.ps1 -Profile <slot>`** (Resminamalar template staging SMB share; idempotent).
+6. **`Configure-Visa2026Production.ps1 -Profile <slot>`** (rewrites `appsettings.Production.json` including `TemplateEditStaging`).
+7. **`Run-Visa2026DbUpdateOnServer.ps1 -Profile <slot>`** (`-ForceUpdate` if drift).
+8. Start app pool + site; smoke that slot’s LoginPage URL (see table in § Goal).
 
 Track version via `publish-version.txt` in the publish folder.
 

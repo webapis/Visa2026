@@ -3,12 +3,13 @@ name: visa2026-resminamalar
 description: >-
   Resminamalar report package dialog (Application + ApplicationItem): catalog, readiness chips,
   checkboxes, in-app PDF preview, ZIP batch enqueue, WordReportGenerationBatch worker, empty template
-  list / UserReportTemplateSeedGate, permissions, gear toggle, gap confirm, UX improvements.
+  list / UserReportTemplateSeedGate, desktop template staging (UNC share Edit template / Sync to database),
+  permissions, gear toggle, gap confirm, UX improvements.
   User templates only (UserReportTemplate from Resources/Templates). Use for Resminamalar bugs,
-  batch ZIP failures, preview errors, template missing from catalog, officer workflow UX — not for
-  authoring new .docx/.xlsx seeds (visa2026-user-report-templates). Always read learnings.md first;
-  append after verified fixes; skill accumulates experience per MATURITY.md. User prompts:
-  prompts.md.
+  batch ZIP failures, preview errors, template missing from catalog, template staging sync/import,
+  officer workflow UX — not for authoring new .docx/.xlsx seeds (visa2026-user-report-templates).
+  Always read learnings.md first; append after verified fixes; skill accumulates experience per MATURITY.md.
+  User prompts: prompts.md.
 disable-model-invocation: false
 ---
 
@@ -28,6 +29,8 @@ disable-model-invocation: false
 ## Canonical doc
 
 **[`docs/APPLICATION_REPORT_PACKAGE.md`](../../../docs/APPLICATION_REPORT_PACKAGE.md)** — officer workflow, architecture, file map summary.
+
+**Desktop template edit (UNC staging):** [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md) — canonical plan for **Edit template** / **Sync to database**; implementation and manual QA checklist.
 
 **Related skills (do not duplicate):**
 
@@ -58,6 +61,11 @@ disable-model-invocation: false
 | Preview OK, ZIP wrong or empty | Compare `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson` | **This skill** |
 | **Sanaw** preview fails; `RowNo` empty hint | `UsesSingleDocumentItemList` / `BuildSanawyStyleRows` — not labor-contract per-item path | **This skill** + user-report-templates |
 | `Invalid column name` on batch table | `BatchWorkerSchemaGate`, updaters, `FORCE_XAF_DB_UPDATE` | **lifecycle-docker** |
+| **Edit template** does nothing / export failed | `TemplateEditStaging:Enabled`, UNC ACL, `StagingRootUnc` | **This skill** — [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md); dev: `Ensure-TemplateEditDevShare.ps1` |
+| **Sync to database** — file locked / 0 imported | Close Word/Excel; hash unchanged skips import | **This skill** |
+| Preview stale after sync | Run **Sync to database** (imports share) then **Refresh** if needed | **This skill** |
+| Placeholder errors **after** sync import | `UserReportTemplateMaintenanceService` Extract/Validate | **user-report-templates** |
+| Share ACL / app pool cannot write UNC | Service account **Modify** on share | **lifecycle-docker** / **windows-iis-deploy** (`Ensure-Visa2026TemplateEditShare.ps1`) |
 
 ---
 
@@ -66,6 +74,7 @@ disable-model-invocation: false
 | In scope | Out of scope |
 |----------|----------------|
 | **Resminamalar** dialog UI (`ApplicationReportPackageComponent`) | Designing Word/Excel layout in `.docx`/`.xlsx` |
+| **Desktop template staging** — export to UNC, **Sync to database**, `UserReportTemplateStagingService` | In-browser Rich Edit / Spreadsheet in catalog |
 | Catalog + readiness + selection + preview + enqueue | New `*_map.md` / placeholder tokens |
 | `UserReportTemplate` **visibility in catalog** (symptom: missing row) | Seed registration in `UserReportTemplateUpdater` (template skill) |
 | `WordReportGenerationBatch` worker / toast / ZIP | [Document copies](../visa2026-document-copies/SKILL.md) / [PDF form mapping](../visa2026-pdf-form-mapping/SKILL.md) |
@@ -90,8 +99,9 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 
 1. Open dialog → see **user templates** (checkboxes, Ready / Check chips).
 2. Optional **gear** (footer): show **Edit template** + readiness hint lines (hidden by default).
-3. **Preview** → generate same bytes as ZIP → Office → PDF in popup.
-4. **Download package** → gap confirm if checked rows have warnings → `WordReportGenerationBatch` → toast **Download ZIP**.
+3. **Edit template** (when staging enabled + write permission): export to UNC share → desktop Word/Excel → **Sync to database** to import changes; **Refresh** reloads catalog only.
+4. **Preview** → generate same bytes as ZIP → Office → PDF in popup.
+5. **Download package** → gap confirm if checked rows have warnings → `WordReportGenerationBatch` → toast **Download ZIP**.
 
 **Parity rule:** preview and ZIP must use **`ApplicationWordReportEntryGenerator`** only — no second merge path.
 
@@ -109,6 +119,8 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 | Preview works, ZIP fails (or reverse) | Same generator — diff is selection keys / item filter JSON; check `SelectedReportKeysJson`, `SelectedApplicationItemIdsJson`. |
 | Old batch includes wrong files | Legacy batches with null keys = all applicable; new batches store explicit `user:{id}` array. |
 | `Invalid column name` on batch | `BatchWorkerSchemaGate`, `WordReportGenerationBatchSelected*Updater`, or `FORCE_XAF_DB_UPDATE`. |
+| Staging export/import / Sync button | [`TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md); `TemplateEditStaging` config; `UserReportTemplateStagingUiService` |
+| Word/Excel won't open from Edit template | Use **Copy path**; `template-staging-edit.js`; UNC must be reachable from officer PC |
 
 *(Extend this table when a learnings entry is promoted — see [MATURITY.md](./MATURITY.md).)*
 
@@ -121,8 +133,8 @@ Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 3. Regenerate: `dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.csproj`
 4. **Model:** `Model.DesignedDiffs.xafml` — action captions, detail view for hosts.
 5. **Permissions:** `DatabaseUpdate/Updater.cs` — host BOs, `UserReportTemplate` officer block.
-6. **Docs:** update [`docs/APPLICATION_REPORT_PACKAGE.md`](../../../docs/APPLICATION_REPORT_PACKAGE.md) if behaviour changes.
-7. **Verify:** Application + ApplicationItem scopes; preview + ZIP for Word and Excel rows.
+6. **Docs:** update [`docs/APPLICATION_REPORT_PACKAGE.md`](../../../docs/APPLICATION_REPORT_PACKAGE.md) if behaviour changes; staging-specific detail in [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md).
+7. **Verify:** Application + ApplicationItem scopes; preview + ZIP for Word and Excel rows; staging: export → edit on share → **Sync to database** → preview reflects change.
 
 ---
 

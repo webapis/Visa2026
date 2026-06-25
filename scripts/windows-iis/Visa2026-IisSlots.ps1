@@ -26,6 +26,8 @@ function Get-Visa2026IisSlotDefinition {
             EnvFile                = "C:\visa2026\env\prod.env"
             DbName                 = "Visa2026DbProd"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys-Prod"
+            TemplateEditLocalPath  = "C:\ProgramData\Visa2026\TemplateEdit\prod"
+            TemplateEditShareName  = "Visa2026TemplateEdit-Prod"
             BackupSubfolder        = "prod"
             LoginPageUrl           = "http://localhost/LoginPage"
         }
@@ -38,6 +40,8 @@ function Get-Visa2026IisSlotDefinition {
             EnvFile                = "C:\visa2026\env\staging.env"
             DbName                 = "Visa2026DbStaging"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys-Staging"
+            TemplateEditLocalPath  = "C:\ProgramData\Visa2026\TemplateEdit\staging"
+            TemplateEditShareName  = "Visa2026TemplateEdit-Staging"
             BackupSubfolder        = "staging"
             LoginPageUrl           = "http://localhost:8080/LoginPage"
         }
@@ -50,6 +54,8 @@ function Get-Visa2026IisSlotDefinition {
             EnvFile                = "C:\visa2026\env\demo.env"
             DbName                 = "Visa2026DbDemo"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys-Demo"
+            TemplateEditLocalPath  = "C:\ProgramData\Visa2026\TemplateEdit\demo"
+            TemplateEditShareName  = "Visa2026TemplateEdit-Demo"
             BackupSubfolder        = "demo"
             LoginPageUrl           = "http://localhost:8081/LoginPage"
         }
@@ -62,6 +68,8 @@ function Get-Visa2026IisSlotDefinition {
             EnvFile                = "C:\visa2026\.env.prod"
             DbName                 = "Visa2026DbProd"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys"
+            TemplateEditLocalPath  = "C:\ProgramData\Visa2026\TemplateEdit\legacy"
+            TemplateEditShareName  = "Visa2026TemplateEdit"
             BackupSubfolder        = "legacy"
             LoginPageUrl           = "http://localhost/LoginPage"
         }
@@ -139,6 +147,7 @@ function Initialize-Visa2026IisServerFolders {
         $ctx = Resolve-Visa2026IisSlotContext -Profile $name
         $paths += $ctx.PublishPath
         $paths += $ctx.DataProtectionKeysPath
+        $paths += $ctx.TemplateEditLocalPath
         $paths += (Join-Path $ctx.BackupRoot $ctx.BackupSubfolder)
     }
 
@@ -168,6 +177,10 @@ function Get-Visa2026IisSlotEnvTemplate {
         "DB_NAME=$($slot.DbName)"
         "# One-shot: FORCE_XAF_DB_UPDATE=true (then remove from app pool) - see docs/ENVIRONMENTS.md"
         "# FORCE_XAF_DB_UPDATE=true"
+        "# Resminamalar template staging (Ensure-Visa2026TemplateEditShare.ps1):"
+        "# TEMPLATE_EDIT_STAGING_ENABLED=true"
+        "# TEMPLATE_EDIT_UNC_HOST=visa2026-server"
+        "# TEMPLATE_EDIT_OFFICERS_PRINCIPAL=DOMAIN\VisaOfficers"
     ) -join "`r`n"
 }
 
@@ -214,4 +227,87 @@ function Grant-Visa2026IisAppPoolDataProtectionAcl {
     New-Item -ItemType Directory -Force -Path $DataProtectionKeysPath | Out-Null
     $grantee = "IIS AppPool\$AppPoolName`:(OI)(CI)M"
     icacls $DataProtectionKeysPath /grant $grantee 2>$null | Out-Null
+}
+
+function Read-Visa2026DotEnvMap {
+    param([string]$Path)
+
+    $map = @{}
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $map
+    }
+
+    Get-Content -LiteralPath $Path | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -match '^\s*#' -or $line -eq '') { return }
+        if ($line -match '^\s*([^#=]+)=(.*)$') {
+            $k = $matches[1].Trim()
+            $v = $matches[2].Trim()
+            if ($v.Length -ge 2 -and $v.StartsWith('"') -and $v.EndsWith('"')) {
+                $v = $v.Substring(1, $v.Length - 2)
+            }
+            $map[$k] = $v
+        }
+    }
+    $map
+}
+
+function Resolve-Visa2026TemplateEditUncHost {
+    param(
+        [string]$EnvFile = "",
+        [string]$UncHost = ""
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($UncHost)) {
+        return $UncHost.Trim().TrimEnd('\')
+    }
+
+    if ($EnvFile -and (Test-Path -LiteralPath $EnvFile)) {
+        $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+        if ($envMap.ContainsKey('TEMPLATE_EDIT_UNC_HOST') -and $envMap['TEMPLATE_EDIT_UNC_HOST']) {
+            return $envMap['TEMPLATE_EDIT_UNC_HOST'].Trim().TrimEnd('\')
+        }
+    }
+
+    $dns = [System.Net.Dns]::GetHostEntry('localhost').HostName
+    if ($dns -and $dns -notmatch '^\d') {
+        return $dns.Split('.')[0]
+    }
+
+    return $env:COMPUTERNAME
+}
+
+function Get-Visa2026TemplateEditStagingUnc {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Production", "Staging", "Demo", "Legacy")]
+        [string]$Profile,
+
+        [string]$UncHost = "",
+        [string]$EnvFile = ""
+    )
+
+    $slot = Get-Visa2026IisSlotDefinition -Profile $Profile
+    if (-not $EnvFile) { $EnvFile = $slot.EnvFile }
+    $hostName = Resolve-Visa2026TemplateEditUncHost -EnvFile $EnvFile -UncHost $UncHost
+    return "\\$hostName\$($slot.TemplateEditShareName)"
+}
+
+function Resolve-Visa2026TemplateEditStagingEnabled {
+    param(
+        [string]$EnvFile = "",
+        [switch]$DefaultEnabled
+    )
+
+    if (-not $EnvFile -or -not (Test-Path -LiteralPath $EnvFile)) {
+        return [bool]$DefaultEnabled
+    }
+
+    $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+    if (-not $envMap.ContainsKey('TEMPLATE_EDIT_STAGING_ENABLED')) {
+        return [bool]$DefaultEnabled
+    }
+
+    $raw = $envMap['TEMPLATE_EDIT_STAGING_ENABLED'].Trim().ToLowerInvariant()
+    return $raw -in @('1', 'true', 'yes', 'on')
 }

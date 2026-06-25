@@ -74,6 +74,7 @@ $scriptFiles = @(
     "Install-Visa2026IisSite.ps1",
     "Install-Visa2026IisSlots.ps1",
     "Ensure-Visa2026SlotDatabases.ps1",
+    "Ensure-Visa2026TemplateEditShare.ps1",
     "Configure-Visa2026Production.ps1",
     "Set-Visa2026AppPoolEnvironment.ps1",
     "Set-Visa2026IisSlotsAutoStart.ps1",
@@ -112,6 +113,8 @@ Write-Host "==> Copy publish output" -ForegroundColor Cyan
 scp -r -q "$PublishPath/*" "${SshHost}:${remotePublishScp}/"
 
 Write-Host "==> Configure slot" -ForegroundColor Cyan
+ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Ensure-Visa2026TemplateEditShare.ps1 -Profile $Profile"
+if ($LASTEXITCODE -ne 0) { throw "Ensure-Visa2026TemplateEditShare.ps1 failed (exit $LASTEXITCODE)." }
 ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Configure-Visa2026Production.ps1 -Profile $Profile -SqlServer 'localhost\SQLEXPRESS'"
 if ($LASTEXITCODE -ne 0) { throw "Configure-Visa2026Production.ps1 failed (exit $LASTEXITCODE)." }
 ssh $SshHost "powershell -NoProfile -ExecutionPolicy Bypass -File $remoteDeployWin\Set-Visa2026AppPoolEnvironment.ps1 -Profile $Profile"

@@ -38,20 +38,7 @@ function Read-DotEnvMap([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Env file not found: $Path"
     }
-    $map = @{}
-    Get-Content -LiteralPath $Path | ForEach-Object {
-        $line = $_.Trim()
-        if ($line -match '^\s*#' -or $line -eq "") { return }
-        if ($line -match '^\s*([^#=]+)=(.*)$') {
-            $k = $matches[1].Trim()
-            $v = $matches[2].Trim()
-            if ($v.Length -ge 2 -and $v.StartsWith('"') -and $v.EndsWith('"')) {
-                $v = $v.Substring(1, $v.Length - 2)
-            }
-            $map[$k] = $v
-        }
-    }
-    $map
+    Read-Visa2026DotEnvMap -Path $Path
 }
 
 $envMap = Read-DotEnvMap $EnvFile
@@ -131,6 +118,27 @@ $config = @{
     }
 }
 
+$templateStagingEnabled = Resolve-Visa2026TemplateEditStagingEnabled -EnvFile $EnvFile -DefaultEnabled:$true
+if ($templateStagingEnabled) {
+    $stagingUnc = Get-Visa2026TemplateEditStagingUnc -Profile $ctx.Profile -EnvFile $EnvFile
+    $config["TemplateEditStaging"] = @{
+        Enabled = $true
+        StagingRootUnc = $stagingUnc
+        FileNamePattern = "{templateId}_{safeName}{extension}"
+        AutoExtractValidateOnImport = $true
+        MaxFileSizeBytes = 52428800
+    }
+}
+else {
+    $config["TemplateEditStaging"] = @{
+        Enabled = $false
+        StagingRootUnc = ""
+        FileNamePattern = "{templateId}_{safeName}{extension}"
+        AutoExtractValidateOnImport = $true
+        MaxFileSizeBytes = 52428800
+    }
+}
+
 $outPath = Join-Path $PublishPath "appsettings.Production.json"
 $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $outPath -Encoding UTF8
 
@@ -145,6 +153,12 @@ $poolEnv = @{
 
 Write-Host "Wrote $outPath" -ForegroundColor Green
 Write-Host "Slot: $($ctx.Profile)  Database: $dbName on $serverPart (sa)"
+if ($templateStagingEnabled) {
+    Write-Host "Template staging: enabled  UNC=$stagingUnc" -ForegroundColor Green
+}
+else {
+    Write-Host "Template staging: disabled (set TEMPLATE_EDIT_STAGING_ENABLED=true in $EnvFile)" -ForegroundColor Yellow
+}
 Write-Host "Set app pool environment variables:" -ForegroundColor Yellow
 $poolEnv.GetEnumerator() | ForEach-Object { Write-Host "  $($_.Key)=***" }
 
