@@ -22,4 +22,10 @@ public sealed class TemplateEditStagingOptions
 
     /// <summary>Reject imports larger than this size (default 50 MB).</summary>
     public long MaxFileSizeBytes { get; set; } = 52_428_800;
+
+    /// <summary>
+    /// Optional Windows profile folder name on officer PCs (<c>C:\Users\{this}\...</c>) when XAF login
+    /// does not match the local profile (e.g. login <c>officer1</c>, profile <c>serdar</c>).
+    /// </summary>
+    public string? WindowsProfileUserName { get; set; }
 }

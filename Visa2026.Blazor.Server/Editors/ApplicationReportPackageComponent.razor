@@ -12,6 +12,7 @@
 @using Visa2026.Module.Services.WordReports
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.UserReports
+@using System.Text.Json
 @using Visa2026.Module.Services.RuntimeLogging
 
 <div class="app-report-package app-item-doc-copies @(UseInlinePreview ? "app-report-package--inline-slot" : string.Empty)">
@@ -72,10 +73,10 @@
                                                   title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")"
                                                   Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null)"
                                                   Click="@(() => EditTemplateAsync(entry))" />
-                                        @if (IsExportedToSandbox(entry))
+                                        @if (IsDownloadedForEdit(entry))
                                         {
                                             <span class="app-report-package__staging-badge" role="status">
-                                                @Msg("ApplicationReportPackage.EditTemplate.OnLocalFolder")
+                                                @Msg("ApplicationReportPackage.EditTemplate.OnDownloaded")
                                             </span>
                                         }
                                     }
@@ -141,14 +142,6 @@
                            role="@(_packageStatusIsError ? "alert" : "status")">
                             @_packageStatusMessage
                         </p>
-                        @if (!string.IsNullOrWhiteSpace(_lastExportedFilePath))
-                        {
-                            <DxButton Text="@Msg("ApplicationReportPackage.EditTemplate.CopyPath")"
-                                      RenderStyle="ButtonRenderStyle.Link"
-                                      SizeMode="SizeMode.Small"
-                                      CssClass="app-item-doc-copies__action-btn app-report-package__copy-path-btn"
-                                      Click="@CopyLastExportedPathAsync" />
-                        }
                     }
                 </div>
                 <div class="app-item-doc-copies__package-bar-actions">
@@ -177,18 +170,12 @@
                     }
                     @if (_canEditUserTemplates)
                     {
-                        <DxButton Text="@Msg("ApplicationReportPackage.SyncTemplates")"
-                                  RenderStyle="ButtonRenderStyle.Link"
-                                  SizeMode="SizeMode.Small"
-                                  CssClass="app-item-doc-copies__action-btn"
-                                  Enabled="@(!_syncBusy && !_packageBusy && !_refreshBusy)"
-                                  Click="@OnSyncTemplatesClickAsync" />
-                        @* Native button — bypasses Blazor/SignalR so showDirectoryPicker() runs with a live user-activation token. *@
+                        @* Native button — file picker needs a live user-activation token from onclick. *@
                         <button type="button"
-                                class="app-item-doc-copies__action-btn app-report-package__change-folder-btn"
+                                class="dxbl-btn dxbl-btn-link dxbl-btn-sm app-item-doc-copies__action-btn app-report-package__sync-templates-btn"
                                 disabled="@(_syncBusy || _packageBusy || _refreshBusy)"
-                                onclick="visaTemplateStagingLocal.chooseFolderDirect()">
-                            @Msg("ApplicationReportPackage.EditTemplate.ChooseFolder")
+                                onclick="visaTemplateStagingLocal.syncFromFilePickerDirect()">
+                            @Msg("ApplicationReportPackage.SyncTemplates")
                         </button>
                     }
                     <DxButton Text="@Msg("ApplicationReportPackage.Refresh")"
@@ -253,9 +240,13 @@
     private bool _refreshBusy;
     private bool _syncBusy;
     private Guid? _editTemplateId;
-    private readonly HashSet<Guid> _exportedTemplateIds = new();
-    private string? _lastExportedFilePath;
+    private readonly HashSet<Guid> _downloadedTemplateIds = new();
     private bool ShowDetails;
+
+    private static readonly JsonSerializerOptions SyncResultJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
 
     private int SelectedCount => _selectedKeys.Count;
 
@@ -280,33 +271,60 @@
         }
     }
 
-    /// <summary>Called by <c>visaTemplateStagingLocal.chooseFolderDirect()</c> (native onclick) after the OS folder picker closes.</summary>
+    /// <summary>Called by <c>visaTemplateStagingLocal.syncFromFilePickerDirect()</c> before the file picker opens.</summary>
     [JSInvokable]
-    public async Task OnFolderSelectionResult(bool success, string folderName, string error, bool wasCancelled, bool needsSubfolder)
+    public async Task OnSyncFromFilePickerStarted()
     {
-        if (wasCancelled)
-        {
-            ClearStatusMessages();
-        }
-        else if (!success)
-        {
-            _packageStatusMessage = needsSubfolder
-                ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot")
-                : !string.IsNullOrWhiteSpace(error)
-                    ? error
-                    : Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
-            _packageStatusIsError = true;
-        }
-        else
-        {
-            await TemplateStagingUiService.SyncLocalFolderPathHintAsync();
-            _packageStatusMessage = FormatMsg(
-                "ApplicationReportPackage.EditTemplate.FolderReady",
-                folderName);
-            _packageStatusIsError = false;
-        }
+        if (!_canEditUserTemplates)
+            return;
 
+        _packageConfirmPending = false;
+        ClearStatusMessages();
+        _syncBusy = true;
         await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Called by <c>visaTemplateStagingLocal.syncFromFilePickerDirect()</c> after uploads finish.</summary>
+    [JSInvokable]
+    public async Task OnSyncFromFilePickerResult(string json)
+    {
+        try
+        {
+            if (!_canEditUserTemplates || string.IsNullOrWhiteSpace(json))
+                return;
+
+            var collect = JsonSerializer.Deserialize<UserReportTemplateStagingLocalCollectJsResult>(
+                json,
+                SyncResultJsonOptions);
+            if (collect == null)
+            {
+                _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.ImportFailed");
+                _packageStatusIsError = true;
+                return;
+            }
+
+            if (collect.Cancelled)
+            {
+                ClearStatusMessages();
+                return;
+            }
+
+            await ApplySyncCollectResultAsync(collect);
+        }
+        catch (Exception ex)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.ImportFailed");
+            _packageStatusIsError = true;
+            ErrorReporter.ReportReportPackageError(
+                "Resminamalar template staging import failed.",
+                ApplicationRuntimeLogCategories.ReportPackageComponent,
+                ex);
+        }
+        finally
+        {
+            _syncBusy = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     public void Dispose()
@@ -417,9 +435,9 @@
         && entry.UserReportTemplateId is Guid templateId
         && templateId != Guid.Empty;
 
-    private bool IsExportedToSandbox(ApplicationWordReportPackageCatalogEntry entry) =>
+    private bool IsDownloadedForEdit(ApplicationWordReportPackageCatalogEntry entry) =>
         entry.UserReportTemplateId is Guid templateId
-        && _exportedTemplateIds.Contains(templateId);
+        && _downloadedTemplateIds.Contains(templateId);
 
     private async Task EditTemplateAsync(ApplicationWordReportPackageCatalogEntry entry)
     {
@@ -436,45 +454,10 @@
 
         ClearStatusMessages();
         _editTemplateId = templateId;
-        // StateHasChanged is intentionally deferred until AFTER ensureFolder returns.
-        // Calling it here first triggers a complex DOM re-render (many buttons disabled via
-        // _editTemplateId) that consumes the browser's transient user-activation window before
-        // showDirectoryPicker() inside ensureFolder gets a chance to run.
+        await InvokeAsync(StateHasChanged);
 
         try
         {
-            // ensureFolder runs before StateHasChanged so showDirectoryPicker() still has a
-            // valid user-activation when no folder is stored yet (first-time use).
-            var folderResult = await JS.InvokeAsync<UserReportTemplateStagingChooseFolderJsResult>(
-                "visaTemplateStagingLocal.ensureFolder",
-                new
-                {
-                    subfolderName = TemplateStagingUiService.LocalSandboxRelativePath,
-                    suggestedPathHint = TemplateStagingUiService.BuildSuggestedLocalFolderPathHint()
-                });
-
-            // Now safe to re-render — user activation is no longer needed.
-            await InvokeAsync(StateHasChanged);
-
-            if (folderResult == null || !folderResult.Success)
-            {
-                if (folderResult?.WasCancelled == true)
-                {
-                    // showDirectoryPicker() was blocked (no user-activation in JS interop) or
-                    // the user dismissed the picker. Either way, no folder is set yet.
-                    _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.SelectFolderFirst");
-                    _packageStatusIsError = false;
-                    return;
-                }
-
-                _packageStatusMessage = folderResult?.NeedsSubfolder == true
-                    ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot")
-                    : folderResult?.Error
-                        ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
-                _packageStatusIsError = true;
-                return;
-            }
-
             var outcome = await TemplateStagingUiService.ExportForEditAsync(templateId);
             if (!outcome.Success || outcome.Result == null)
             {
@@ -483,8 +466,6 @@
                 return;
             }
 
-            _exportedTemplateIds.Add(templateId);
-
             if (outcome.Result.FileContent == null || outcome.Result.FileContent.Length == 0)
             {
                 _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
@@ -492,67 +473,30 @@
                 return;
             }
 
-            await TemplateStagingUiService.SyncLocalFolderPathHintAsync();
+            var downloadResult = await JS.InvokeAsync<UserReportTemplateStagingDownloadJsResult>(
+                "visaTemplateStagingLocal.downloadTemplate",
+                new
+                {
+                    fileName = outcome.Result.DocumentFileName,
+                    templateId = templateId.ToString(),
+                    displayName = outcome.Result.DisplayName,
+                    fileBase64 = Convert.ToBase64String(outcome.Result.FileContent),
+                    exportedAtUtc = DateTime.UtcNow.ToString("o"),
+                });
 
-            var localPayload = new
+            if (downloadResult == null || !downloadResult.Success)
             {
-                fileName = outcome.Result.DocumentFileName,
-                templateId = templateId.ToString(),
-                displayName = outcome.Result.DisplayName,
-                sourceHash = outcome.Result.SourceContentHashSha256 ?? string.Empty,
-                outputFormat = outcome.Result.OutputFormat.ToString(),
-                fileBase64 = Convert.ToBase64String(outcome.Result.FileContent),
-                exportedAtUtc = DateTime.UtcNow.ToString("o"),
-                exportedByUserName = string.Empty,
-                lastImportedContentHashSha256 = (string?)null,
-            };
-
-            var localResult = await JS.InvokeAsync<UserReportTemplateStagingLocalExportJsResult>(
-                "visaTemplateStagingLocal.exportDocument",
-                localPayload);
-
-            if (localResult == null || !localResult.Success)
-            {
-                _packageStatusMessage = localResult?.NeedsSync == true
-                    ? Msg("ApplicationReportPackage.EditTemplate.NeedsSyncFirst")
-                    : localResult?.Error
-                        ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
+                _packageStatusMessage = downloadResult?.Error
+                    ?? Msg("ApplicationReportPackage.EditTemplate.ExportFailed");
                 _packageStatusIsError = true;
                 return;
             }
 
-            _lastExportedFilePath = !string.IsNullOrWhiteSpace(localResult.FullPath)
-                ? localResult.FullPath
-                : localResult.FileName;
-
-            var copied = false;
-            if (!string.IsNullOrWhiteSpace(_lastExportedFilePath))
-            {
-                copied = await JS.InvokeAsync<bool>(
-                    "visaTemplateStagingLocal.copyPath",
-                    _lastExportedFilePath);
-            }
-
-            if (copied && !string.IsNullOrWhiteSpace(localResult.FullPath))
-            {
-                _packageStatusMessage = FormatMsg(
-                    "ApplicationReportPackage.EditTemplate.PathCopied",
-                    localResult.FullPath);
-            }
-            else
-            {
-                _packageStatusMessage = localResult.Opened
-                    ? FormatMsg(
-                        "ApplicationReportPackage.EditTemplate.LocalExportedOpen",
-                        outcome.Result.DisplayName,
-                        localResult.FolderName ?? string.Empty,
-                        localResult.FileName ?? outcome.Result.DocumentFileName)
-                    : FormatMsg(
-                        "ApplicationReportPackage.EditTemplate.LocalExported",
-                        outcome.Result.DisplayName,
-                        localResult.FolderName ?? string.Empty,
-                        localResult.FileName ?? outcome.Result.DocumentFileName);
-            }
+            _downloadedTemplateIds.Add(templateId);
+            _packageStatusMessage = FormatMsg(
+                "ApplicationReportPackage.EditTemplate.Downloaded",
+                outcome.Result.DisplayName,
+                outcome.Result.DocumentFileName);
             _packageStatusIsError = false;
         }
         catch (Exception ex)
@@ -571,25 +515,52 @@
         }
     }
 
-    private async Task CopyLastExportedPathAsync()
+    private async Task ApplySyncCollectResultAsync(UserReportTemplateStagingLocalCollectJsResult collect)
     {
-        if (string.IsNullOrWhiteSpace(_lastExportedFilePath))
+        var result = UserReportTemplateStagingUiService.MapCollectResult(collect);
+        if (result.ImportedCount == 0
+            && result.FailedCount == 0
+            && result.SkippedUnchangedCount > 0)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.NoLocalChanges");
+            _packageStatusIsError = true;
             return;
+        }
 
-        try
+        _packageStatusMessage = FormatMsg(
+            "ApplicationReportPackage.SyncTemplates.ImportSummary",
+            result.ImportedCount,
+            result.SkippedUnchangedCount,
+            result.FailedCount);
+        _packageStatusIsError = result.FailedCount > 0;
+
+        var firstFailure = result.Results.FirstOrDefault(r =>
+            r.Status == UserReportTemplateStagingImportStatus.Failed
+            && !string.IsNullOrWhiteSpace(r.ErrorMessage));
+        if (firstFailure?.ErrorMessage != null)
         {
-            var copied = await JS.InvokeAsync<bool>("visaTemplateStagingLocal.copyPath", _lastExportedFilePath);
-            if (copied)
-            {
-                _packageStatusMessage = FormatMsg(
-                    "ApplicationReportPackage.EditTemplate.PathCopied",
-                    _lastExportedFilePath);
-                _packageStatusIsError = false;
-            }
+            _packageStatusMessage += " " + firstFailure.ErrorMessage;
         }
-        catch (JSDisconnectedException)
+
+        foreach (var imported in result.Results.Where(r =>
+                     r.Status == UserReportTemplateStagingImportStatus.Imported))
         {
+            _downloadedTemplateIds.Remove(imported.TemplateId);
         }
+
+        var locked = result.Results.FirstOrDefault(r =>
+            r.Status == UserReportTemplateStagingImportStatus.Failed
+            && !string.IsNullOrWhiteSpace(r.ErrorMessage)
+            && r.ErrorMessage.Contains("locked", StringComparison.OrdinalIgnoreCase));
+        if (locked != null)
+        {
+            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.FileLocked");
+            _packageStatusIsError = true;
+            return;
+        }
+
+        if (RefreshRequested.HasDelegate)
+            await RefreshRequested.InvokeAsync();
     }
 
     private async Task OnRefreshClickAsync()
@@ -609,144 +580,6 @@
         finally
         {
             _refreshBusy = false;
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async Task ChooseLocalTemplateFolderAsync()
-    {
-        if (!_canEditUserTemplates || _syncBusy || _packageBusy || _refreshBusy)
-            return;
-
-        ClearStatusMessages();
-        _packageStatusMessage = FormatMsg(
-            "ApplicationReportPackage.EditTemplate.ChooseFolderHint",
-            TemplateStagingUiService.BuildSuggestedLocalFolderPathHint());
-        _packageStatusIsError = false;
-        await InvokeAsync(StateHasChanged);
-
-        try
-        {
-            var result = await JS.InvokeAsync<UserReportTemplateStagingChooseFolderJsResult>(
-                "visaTemplateStagingLocal.chooseFolder",
-                new { });
-            if (result == null || !result.Success)
-            {
-                if (result?.WasCancelled == true)
-                {
-                    ClearStatusMessages();
-                    return;
-                }
-
-                _packageStatusMessage = result?.NeedsSubfolder == true
-                    ? Msg("ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot")
-                    : result?.Error
-                        ?? Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
-                _packageStatusIsError = true;
-                return;
-            }
-
-            await TemplateStagingUiService.SyncLocalFolderPathHintAsync();
-
-            _packageStatusMessage = FormatMsg(
-                "ApplicationReportPackage.EditTemplate.FolderReady",
-                result.FolderName ?? string.Empty);
-            _packageStatusIsError = false;
-        }
-        catch (Exception ex)
-        {
-            _packageStatusMessage = Msg("ApplicationReportPackage.EditTemplate.LocalFolderFailed");
-            _packageStatusIsError = true;
-            ErrorReporter.ReportReportPackageError(
-                "Resminamalar local template folder selection failed.",
-                ApplicationRuntimeLogCategories.ReportPackageComponent,
-                ex);
-        }
-    }
-
-    private async Task OnSyncTemplatesClickAsync()
-    {
-        if (!_canEditUserTemplates || _syncBusy || _packageBusy || _refreshBusy)
-            return;
-
-        _packageConfirmPending = false;
-        ClearStatusMessages();
-        _syncBusy = true;
-        await InvokeAsync(StateHasChanged);
-
-        try
-        {
-            var outcome = await TemplateStagingUiService.ImportSandboxChangedAsync(Array.Empty<Guid>());
-            if (!outcome.Success || outcome.Result == null)
-            {
-                _packageStatusMessage = outcome.ErrorMessage ?? Msg("ApplicationReportPackage.SyncTemplates.ImportFailed");
-                _packageStatusIsError = true;
-                return;
-            }
-
-            var result = outcome.Result;
-            if (result.ImportedCount == 0
-                && result.FailedCount == 0
-                && result.SkippedUnchangedCount > 0)
-            {
-                _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.NoLocalChanges");
-                _packageStatusIsError = true;
-            }
-            else
-            {
-                _packageStatusMessage = FormatMsg(
-                    "ApplicationReportPackage.SyncTemplates.ImportSummary",
-                    result.ImportedCount,
-                    result.SkippedUnchangedCount,
-                    result.FailedCount);
-                _packageStatusIsError = result.FailedCount > 0;
-
-                var firstFailure = result.Results.FirstOrDefault(r =>
-                    r.Status == UserReportTemplateStagingImportStatus.Failed
-                    && !string.IsNullOrWhiteSpace(r.ErrorMessage));
-                if (firstFailure?.ErrorMessage != null)
-                {
-                    _packageStatusMessage += " " + firstFailure.ErrorMessage;
-                }
-            }
-
-            foreach (var imported in result.Results.Where(r =>
-                         r.Status == UserReportTemplateStagingImportStatus.Imported))
-            {
-                _exportedTemplateIds.Remove(imported.TemplateId);
-            }
-
-            var locked = result.Results.FirstOrDefault(r =>
-                r.Status == UserReportTemplateStagingImportStatus.Failed
-                && !string.IsNullOrWhiteSpace(r.ErrorMessage)
-                && r.ErrorMessage.Contains("locked", StringComparison.OrdinalIgnoreCase));
-            if (locked != null)
-            {
-                _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.FileLocked");
-                _packageStatusIsError = true;
-                return;
-            }
-
-            if (RefreshRequested.HasDelegate)
-                await RefreshRequested.InvokeAsync();
-        }
-        catch (JSDisconnectedException)
-        {
-            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.ImportFailed");
-            _packageStatusIsError = true;
-        }
-        catch (Exception ex)
-        {
-            _packageStatusMessage = Msg("ApplicationReportPackage.SyncTemplates.ImportFailed");
-            _packageStatusIsError = true;
-            ErrorReporter.ReportReportPackageError(
-                "Resminamalar template staging import failed.",
-                ApplicationRuntimeLogCategories.ReportPackageComponent,
-                ex);
-        }
-        finally
-        {
-            _syncBusy = false;
             await InvokeAsync(StateHasChanged);
         }
     }

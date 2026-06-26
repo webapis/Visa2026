@@ -3,8 +3,7 @@
 
     window.visaTemplateStagingLocal = window.visaTemplateStagingLocal || {};
 
-    // .NET object reference injected from OnAfterRenderAsync — used by chooseFolderDirect to
-    // notify the Blazor component after the OS folder picker closes.
+    var EXPORTS_KEY = "visa2026-template-downloads";
     var _dotNetRef = null;
 
     window.visaTemplateStagingLocal.initDotNetRef = function (dotNetRef) {
@@ -15,127 +14,51 @@
         _dotNetRef = null;
     };
 
-    // Called directly from a native onclick="" attribute (NOT from Blazor JS interop) so that
-    // showDirectoryPicker() has a fresh user-activation token from the original button click.
-    window.visaTemplateStagingLocal.chooseFolderDirect = async function (options) {
-        var result = await window.visaTemplateStagingLocal.chooseFolder(options || {});
-        if (_dotNetRef) {
-            try {
-                await _dotNetRef.invokeMethodAsync(
-                    "OnFolderSelectionResult",
-                    result.success === true,
-                    result.folderName || "",
-                    result.error || "",
-                    result.wasCancelled === true,
-                    result.needsSubfolder === true
-                );
-            } catch (e) {
-                // Component was disposed or SignalR disconnected — ignore.
+    function readExports() {
+        try {
+            var raw = sessionStorage.getItem(EXPORTS_KEY);
+            if (!raw) {
+                return [];
             }
+
+            var parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
         }
-    };
-
-    var DB_NAME = "visa2026-template-staging";
-    var DB_VERSION = 1;
-    var STORE = "settings";
-    var DIR_HANDLE_KEY = "directoryHandle";
-    var PATH_HINT_KEY = "folderPathHint";
-    var DEFAULT_SUBFOLDER = "TemplateEdit";
-    var PROTECTED_ROOT_NAMES = [
-        "documents", "desktop", "downloads", "music", "pictures", "videos",
-        "belge", "documentos", "dokumente", "документы"
-    ];
-
-    function isProtectedRootFolder(name) {
-        if (!name) {
-            return false;
-        }
-
-        return PROTECTED_ROOT_NAMES.indexOf(String(name).trim().toLowerCase()) >= 0;
     }
 
-    function supportsLocalFolder() {
-        return typeof window.showDirectoryPicker === "function" && typeof window.crypto !== "undefined"
-            && typeof window.crypto.subtle !== "undefined";
+    function writeExports(list) {
+        sessionStorage.setItem(EXPORTS_KEY, JSON.stringify(list));
     }
 
-    function openDb() {
-        return new Promise(function (resolve, reject) {
-            var request = indexedDB.open(DB_NAME, DB_VERSION);
-            request.onupgradeneeded = function () {
-                var db = request.result;
-                if (!db.objectStoreNames.contains(STORE)) {
-                    db.createObjectStore(STORE);
-                }
-            };
-            request.onsuccess = function () { resolve(request.result); };
-            request.onerror = function () { reject(request.error); };
+    function registerExport(record) {
+        var templateId = String(record.templateId || "").toLowerCase();
+        var list = readExports().filter(function (x) {
+            return String(x.templateId || "").toLowerCase() !== templateId;
         });
-    }
-
-    async function idbGet(key) {
-        var db = await openDb();
-        return new Promise(function (resolve, reject) {
-            var tx = db.transaction(STORE, "readonly");
-            var store = tx.objectStore(STORE);
-            var req = store.get(key);
-            req.onsuccess = function () { resolve(req.result); };
-            req.onerror = function () { reject(req.error); };
+        list.push({
+            templateId: String(record.templateId),
+            fileName: record.fileName,
+            displayName: record.displayName || "",
+            exportedAtUtc: record.exportedAtUtc || new Date().toISOString()
         });
+        writeExports(list);
     }
 
-    async function idbSet(key, value) {
-        var db = await openDb();
-        return new Promise(function (resolve, reject) {
-            var tx = db.transaction(STORE, "readwrite");
-            var store = tx.objectStore(STORE);
-            var req = store.put(value, key);
-            req.onsuccess = function () { resolve(); };
-            req.onerror = function () { reject(req.error); };
+    function removeExport(templateId) {
+        var id = String(templateId || "").toLowerCase();
+        writeExports(readExports().filter(function (x) {
+            return String(x.templateId || "").toLowerCase() !== id;
+        }));
+    }
+
+    function resolveTemplateId(fileName) {
+        var lower = String(fileName || "").toLowerCase();
+        var match = readExports().find(function (x) {
+            return String(x.fileName || "").toLowerCase() === lower;
         });
-    }
-
-    async function verifyPermission(handle, mode) {
-        if (!handle || typeof handle.queryPermission !== "function") {
-            return false;
-        }
-
-        var opts = { mode: mode || "readwrite" };
-        var state = await handle.queryPermission(opts);
-        if (state === "granted") {
-            return true;
-        }
-
-        if (typeof handle.requestPermission === "function") {
-            state = await handle.requestPermission(opts);
-            return state === "granted";
-        }
-
-        return false;
-    }
-
-    async function getDirectoryHandle() {
-        var handle = await idbGet(DIR_HANDLE_KEY);
-        if (handle && await verifyPermission(handle, "readwrite")) {
-            return handle;
-        }
-        return null;
-    }
-
-    function normalizeOptions(options) {
-        if (!options || typeof options !== "string") {
-            return {
-                subfolderName: (options && options.subfolderName) || DEFAULT_SUBFOLDER,
-                suggestedPathHint: (options && options.suggestedPathHint) || ""
-            };
-        }
-
-        return { subfolderName: DEFAULT_SUBFOLDER, suggestedPathHint: options };
-    }
-
-    async function getStoredPathHint() {
-        var hint = await idbGet(PATH_HINT_KEY);
-        return (hint || "").trim();
+        return match ? match.templateId : null;
     }
 
     function base64ToBytes(base64) {
@@ -147,549 +70,202 @@
         return bytes;
     }
 
-    async function writeFile(handle, fileName, bytes) {
-        var fileHandle = await handle.getFileHandle(fileName, { create: true });
-        var writable = await fileHandle.createWritable();
-        await writable.write(bytes);
-        await writable.close();
-    }
-
-    async function readFileBytes(handle, fileName) {
-        var fileHandle = await handle.getFileHandle(fileName);
-        var file = await fileHandle.getFile();
-        var buffer = await file.arrayBuffer();
-        return new Uint8Array(buffer);
-    }
-
-    async function sha256Hex(bytes) {
-        var digest = await window.crypto.subtle.digest("SHA-256", bytes);
-        return Array.from(new Uint8Array(digest))
-            .map(function (b) { return b.toString(16).padStart(2, "0"); })
-            .join("")
-            .toUpperCase();
-    }
-
-    function bytesToBase64(bytes) {
-        var binary = "";
-        var chunk = 0x8000;
-        for (var i = 0; i < bytes.length; i += chunk) {
-            binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    function mimeForFileName(fileName) {
+        if (/\.xlsx$/i.test(fileName || "")) {
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         }
-        return btoa(binary);
+
+        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     }
 
-    function buildMeta(payload) {
+    function emptySummary() {
         return {
-            templateId: payload.templateId,
-            templateName: payload.displayName,
-            outputFormat: payload.outputFormat,
-            documentFileName: payload.fileName,
-            exportedAtUtc: payload.exportedAtUtc,
-            exportedByUserName: payload.exportedByUserName || "",
-            sourceContentHashSha256: payload.sourceHash,
-            lastImportedAtUtc: null,
-            lastImportedContentHashSha256: payload.lastImportedContentHashSha256 || null
+            importedCount: 0,
+            skippedUnchangedCount: 0,
+            skippedNotFoundCount: 0,
+            failedCount: 0,
+            cancelled: false,
+            uploads: []
         };
     }
 
-    function metaFileName(documentFileName) {
-        return documentFileName + ".meta.json";
-    }
+    function summarizeUploadResults(uploads, cancelled) {
+        var imported = 0;
+        var skippedUnchanged = 0;
+        var skippedNotFound = 0;
+        var failed = 0;
 
-    function normalizeHash(hash) {
-        return (hash || "").trim().toUpperCase();
-    }
-
-    async function isFileLockedInOffice(handle, fileName) {
-        try {
-            await handle.getFileHandle("~$" + fileName);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    async function readMeta(handle, documentFileName) {
-        try {
-            var bytes = await readFileBytes(handle, metaFileName(documentFileName));
-            var text = new TextDecoder().decode(bytes);
-            return JSON.parse(text);
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function toFileUri(windowsPath) {
-        var normalized = windowsPath.replace(/\\/g, "/");
-        if (/^[a-zA-Z]:\//.test(normalized)) {
-            return "file:///" + normalized;
-        }
-
-        return "file://" + normalized;
-    }
-
-    function buildLocalOfficeUrl(folderPathHint, fileName, outputFormat) {
-        if (!folderPathHint || !fileName) {
-            return "";
-        }
-
-        var trimmed = folderPathHint.trim().replace(/[\\/]+$/, "");
-        var fullPath = trimmed + "\\" + fileName;
-        var protocol = (outputFormat || "").toLowerCase() === "excel" ? "ms-excel" : "ms-word";
-        // Full schema: ofe|u|file:///C:/... (abbreviated ms-word:C:\... is invalid — Office parses "C" as the command).
-        return protocol + ":ofe|u|" + toFileUri(fullPath);
-    }
-
-    function tryOpenOfficeUrl(url) {
-        if (!url) {
-            return false;
-        }
-
-        try {
-            var anchor = document.createElement("a");
-            anchor.href = url;
-            anchor.style.display = "none";
-            anchor.setAttribute("rel", "noopener noreferrer");
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    window.visaTemplateStagingLocal.isSupported = function () {
-        return supportsLocalFolder();
-    };
-
-    window.visaTemplateStagingLocal.isSecureContext = function () {
-        return window.isSecureContext === true;
-    };
-
-    window.visaTemplateStagingLocal.hasFolder = async function () {
-        if (!supportsLocalFolder()) {
-            return false;
-        }
-
-        var handle = await getDirectoryHandle();
-        return !!handle;
-    };
-
-    window.visaTemplateStagingLocal.getFolderName = async function () {
-        var handle = await getDirectoryHandle();
-        return handle ? handle.name : "";
-    };
-
-    window.visaTemplateStagingLocal.chooseFolder = async function (options) {
-        if (!supportsLocalFolder()) {
-            return { success: false, error: "File System Access API is not available in this browser." };
-        }
-
-        if (!window.isSecureContext) {
-            return {
-                success: false,
-                error: "Local template folder requires HTTPS (or localhost). Open Visa2026 with https://."
-            };
-        }
-
-        var opts = normalizeOptions(options);
-
-        try {
-            var handle = await window.showDirectoryPicker({
-                id: "visa2026-template-edit",
-                mode: "readwrite"
-            });
-
-            if (isProtectedRootFolder(handle.name)) {
-                return {
-                    success: false,
-                    needsSubfolder: true,
-                    error: "Select the Visa2026 TemplateEdit folder under AppData\\Local, not a system folder."
-                };
-            }
-
-            if (!await verifyPermission(handle, "readwrite")) {
-                return { success: false, error: "Write permission was not granted for the template folder." };
-            }
-
-            await idbSet(DIR_HANDLE_KEY, handle);
-
-            return {
-                success: true,
-                folderName: handle.name
-            };
-        } catch (e) {
-            if (e && e.name === "AbortError") {
-                return { success: false, wasCancelled: true };
-            }
-
-            var message = (e && e.message) || "Could not choose template folder.";
-            if (/system files/i.test(message)) {
-                return {
-                    success: false,
-                    needsSubfolder: true,
-                    error: message
-                };
-            }
-
-            return { success: false, error: message };
-        }
-    };
-
-    // Like chooseFolder but skips the picker when a folder handle is already stored and still
-    // has permission granted.  Call this at the very start of EditTemplateAsync (before any
-    // server round-trips) so the browser's user-activation window from the button click is still
-    // valid if showDirectoryPicker() needs to run.
-    window.visaTemplateStagingLocal.ensureFolder = async function (options) {
-        if (!supportsLocalFolder()) {
-            return { success: false, error: "File System Access API is not available in this browser." };
-        }
-
-        if (!window.isSecureContext) {
-            return { success: false, error: "Local template folder requires HTTPS (or localhost)." };
-        }
-
-        var handle = await getDirectoryHandle();
-        if (handle) {
-            // Folder is already selected and permission is active — nothing to do.
-            return { success: true, folderName: handle.name };
-        }
-
-        // No folder yet: show the picker (same logic as chooseFolder).
-        return window.visaTemplateStagingLocal.chooseFolder(options);
-    };
-
-    window.visaTemplateStagingLocal.setFolderPathHint = async function (pathHint) {
-        if (!pathHint) {
-            return false;
-        }
-
-        await idbSet(PATH_HINT_KEY, pathHint.trim());
-        return true;
-    };
-
-    window.visaTemplateStagingLocal.exportDocument = async function (payload) {
-        if (!payload || !payload.fileName || !payload.fileBase64) {
-            return { success: false, error: "Export payload is incomplete." };
-        }
-
-        if (!window.isSecureContext) {
-            return {
-                success: false,
-                error: "Local template folder requires HTTPS (or localhost)."
-            };
-        }
-
-        var handle = await getDirectoryHandle();
-        if (!handle) {
-            return {
-                success: false,
-                needsFolder: true,
-                error: "Choose template folder first (button below), then click Edit template."
-            };
-        }
-
-        try {
-            var pathHint = await getStoredPathHint();
-            var existingMeta = await readMeta(handle, payload.fileName);
-            var lastImported = existingMeta && existingMeta.lastImportedContentHashSha256
-                ? existingMeta.lastImportedContentHashSha256
-                : (payload.lastImportedContentHashSha256 || null);
-
-            if (existingMeta) {
-                if (await isFileLockedInOffice(handle, payload.fileName)) {
-                    return {
-                        success: false,
-                        error: "Close Word or Excel before exporting this template again."
-                    };
-                }
-
-                try {
-                    var existingBytes = await readFileBytes(handle, payload.fileName);
-                    var existingHash = normalizeHash(await sha256Hex(existingBytes));
-                    var metaSource = normalizeHash(existingMeta.sourceContentHashSha256);
-                    var lastImp = normalizeHash(lastImported);
-                    if (metaSource
-                        && existingHash !== metaSource
-                        && (!lastImp || existingHash !== lastImp)) {
-                        return {
-                            success: false,
-                            needsSync: true,
-                            error: "Local template has changes not yet synced to the database."
-                        };
-                    }
-                } catch (e) {
-                    // no existing document file yet
-                }
-            }
-
-            var bytes = base64ToBytes(payload.fileBase64);
-            await writeFile(handle, payload.fileName, bytes);
-            var meta = buildMeta({
-                templateId: payload.templateId,
-                displayName: payload.displayName,
-                outputFormat: payload.outputFormat,
-                fileName: payload.fileName,
-                exportedAtUtc: payload.exportedAtUtc,
-                exportedByUserName: payload.exportedByUserName,
-                sourceHash: payload.sourceHash,
-                lastImportedContentHashSha256: lastImported
-            });
-            var metaJson = JSON.stringify(meta, null, 2);
-            await writeFile(handle, metaFileName(payload.fileName), new TextEncoder().encode(metaJson));
-
-            var officeUrl = buildLocalOfficeUrl(pathHint, payload.fileName, payload.outputFormat);
-            var opened = tryOpenOfficeUrl(officeUrl);
-            var fullPath = pathHint
-                ? pathHint.trim().replace(/[\\/]+$/, "") + "\\" + payload.fileName
-                : "";
-
-            return {
-                success: true,
-                folderName: handle.name,
-                fileName: payload.fileName,
-                fullPath: fullPath,
-                opened: opened,
-                officeUrl: officeUrl,
-                needsPathHint: !pathHint
-            };
-        } catch (e) {
-            return { success: false, error: (e && e.message) || "Could not write template to local folder." };
-        }
-    };
-
-    async function loadMetaByTemplateId(handle) {
-        var map = {};
-        for await (var entry of handle.values()) {
-            if (entry.kind !== "file" || !entry.name.endsWith(".meta.json")) {
-                continue;
-            }
-
-            try {
-                var file = await entry.getFile();
-                var text = await file.text();
-                var meta = JSON.parse(text);
-                if (meta && meta.templateId) {
-                    map[String(meta.templateId).toLowerCase()] = meta;
-                }
-            } catch (e) {
-                // skip invalid meta
+        for (var i = 0; i < uploads.length; i++) {
+            var status = uploads[i].status;
+            if (status === "Imported") {
+                imported++;
+            } else if (status === "SkippedUnchanged") {
+                skippedUnchanged++;
+            } else if (status === "SkippedNotFound") {
+                skippedNotFound++;
+            } else if (status === "Failed") {
+                failed++;
             }
         }
 
-        return map;
-    }
-
-    function summarizeUploadResults(uploads) {
         return {
-            importedCount: uploads.filter(function (u) { return u.status === "Imported"; }).length,
-            skippedUnchangedCount: uploads.filter(function (u) { return u.status === "SkippedUnchanged"; }).length,
-            skippedNotFoundCount: uploads.filter(function (u) { return u.status === "SkippedNotFound"; }).length,
-            failedCount: uploads.filter(function (u) { return u.status === "Failed"; }).length,
+            importedCount: imported,
+            skippedUnchangedCount: skippedUnchanged,
+            skippedNotFoundCount: skippedNotFound,
+            failedCount: failed,
+            cancelled: cancelled === true,
             uploads: uploads
         };
     }
 
-    async function collectUploadItems(templateIds) {
-        var uploads = [];
-        var handle = await getDirectoryHandle();
-        if (!handle) {
-            return summarizeUploadResults([{
-                templateId: "00000000-0000-0000-0000-000000000000",
-                status: "Failed",
-                errorMessage: "Choose template folder first (button below)."
-            }]);
+    window.visaTemplateStagingLocal.downloadTemplate = function (payload) {
+        if (!payload || !payload.fileName || !payload.fileBase64) {
+            return { success: false, error: "Download payload is incomplete." };
         }
 
-        var metaByTemplateId = await loadMetaByTemplateId(handle);
-        var targetIds = (templateIds && templateIds.length)
-            ? templateIds
-            : Object.keys(metaByTemplateId);
+        try {
+            var bytes = base64ToBytes(payload.fileBase64);
+            var blob = new Blob([bytes], { type: mimeForFileName(payload.fileName) });
+            var url = URL.createObjectURL(blob);
+            var anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = payload.fileName;
+            anchor.style.display = "none";
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(url);
 
-        if (!targetIds.length) {
-            return summarizeUploadResults([{
-                templateId: "00000000-0000-0000-0000-000000000000",
-                status: "Failed",
-                errorMessage: "No templates in the local sandbox yet. Click Edit template on a report first."
-            }]);
+            registerExport({
+                templateId: payload.templateId,
+                fileName: payload.fileName,
+                displayName: payload.displayName,
+                exportedAtUtc: payload.exportedAtUtc
+            });
+
+            return { success: true, fileName: payload.fileName };
+        } catch (e) {
+            return { success: false, error: (e && e.message) || "Could not download template." };
         }
+    };
 
-        for (var i = 0; i < targetIds.length; i++) {
-            var templateId = String(targetIds[i]);
-            var knownMeta = metaByTemplateId[templateId.toLowerCase()];
-            if (!knownMeta || !knownMeta.documentFileName) {
-                uploads.push({ templateId: templateId, status: "SkippedNotFound" });
-                continue;
+    function pickFilesAsync() {
+        return new Promise(function (resolve) {
+            var input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".docx,.xlsx";
+            input.multiple = true;
+            input.style.display = "none";
+
+            function cleanup() {
+                if (input.parentNode) {
+                    input.parentNode.removeChild(input);
+                }
             }
 
-            try {
-                if (await isFileLockedInOffice(handle, knownMeta.documentFileName)) {
-                    uploads.push({
-                        templateId: templateId,
-                        status: "Failed",
-                        errorMessage: "Template file is still open in Word or Excel."
-                    });
-                    continue;
-                }
+            input.addEventListener("change", function () {
+                var files = input.files ? Array.prototype.slice.call(input.files) : [];
+                cleanup();
+                resolve(files);
+            });
 
-                var contentBytes = await readFileBytes(handle, knownMeta.documentFileName);
-                var hash = normalizeHash(await sha256Hex(contentBytes));
-                var sourceHash = normalizeHash(knownMeta.sourceContentHashSha256);
-                var lastImported = normalizeHash(knownMeta.lastImportedContentHashSha256);
-
-                if (lastImported && hash === lastImported) {
-                    uploads.push({ templateId: templateId, status: "SkippedUnchanged" });
-                    continue;
-                }
-
-                if (sourceHash && hash === sourceHash) {
-                    uploads.push({ templateId: templateId, status: "SkippedUnchanged" });
-                    continue;
-                }
-
-                uploads.push({
-                    templateId: templateId,
-                    status: "Pending",
-                    fileName: knownMeta.documentFileName,
-                    contentBytes: contentBytes,
-                    contentHash: hash
-                });
-            } catch (e) {
-                var fileLabel = knownMeta.documentFileName || templateId;
-                uploads.push({
-                    templateId: templateId,
-                    status: "Failed",
-                    errorMessage: ((e && e.message) || "Could not read local template file.")
-                        + " (" + fileLabel + ")"
-                });
-            }
-        }
-
-        return summarizeUploadResults(uploads);
+            document.body.appendChild(input);
+            input.click();
+        });
     }
 
-    window.visaTemplateStagingLocal.syncToDatabase = async function (templateIds) {
-        var collected = await collectUploadItems(templateIds);
-        var finalUploads = [];
+    async function uploadFile(templateId, file) {
+        var formData = new FormData();
+        formData.append("file", file, file.name);
+        var url = "/api/user-report-templates/"
+            + encodeURIComponent(templateId)
+            + "/staging/upload";
+        var response = await fetch(url, {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+        });
 
-        for (var i = 0; i < collected.uploads.length; i++) {
-            var item = collected.uploads[i];
-            if (item.status !== "Pending") {
-                finalUploads.push({
-                    templateId: item.templateId,
-                    status: item.status,
-                    errorMessage: item.errorMessage || null,
-                    displayName: item.displayName || null
+        if (!response.ok) {
+            var errText = await response.text();
+            var errMessage = errText;
+            try {
+                var errJson = JSON.parse(errText);
+                errMessage = errJson.error || errJson.title || errText;
+            } catch (parseError) {
+                // keep raw text
+            }
+
+            return {
+                templateId: templateId,
+                status: "Failed",
+                errorMessage: errMessage || ("Upload failed (" + response.status + ")."),
+                fileName: file.name
+            };
+        }
+
+        var body = await response.json();
+        var apiStatus = (body && body.status) ? String(body.status) : "Failed";
+        if (apiStatus === "Imported") {
+            removeExport(templateId);
+        }
+
+        return {
+            templateId: templateId,
+            status: apiStatus,
+            errorMessage: body && body.errorMessage ? body.errorMessage : null,
+            displayName: body && body.displayName ? body.displayName : null,
+            fileName: file.name
+        };
+    }
+
+    window.visaTemplateStagingLocal.syncFromFilePicker = async function () {
+        var files = await pickFilesAsync();
+        if (!files.length) {
+            return summarizeUploadResults([], true);
+        }
+
+        var uploads = [];
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var templateId = resolveTemplateId(file.name);
+            if (!templateId) {
+                uploads.push({
+                    templateId: "00000000-0000-0000-0000-000000000000",
+                    status: "Failed",
+                    errorMessage: "Could not match file to a downloaded template. Click Edit template first, then choose this file on sync.",
+                    fileName: file.name
                 });
                 continue;
             }
 
             try {
-                var blob = new Blob([item.contentBytes]);
-                var formData = new FormData();
-                formData.append("file", blob, item.fileName);
-                var url = "/api/user-report-templates/"
-                    + encodeURIComponent(item.templateId)
-                    + "/staging/upload";
-                var response = await fetch(url, {
-                    method: "POST",
-                    body: formData,
-                    credentials: "same-origin"
-                });
-
-                if (!response.ok) {
-                    var errText = await response.text();
-                    var errMessage = errText;
-                    try {
-                        var errJson = JSON.parse(errText);
-                        errMessage = errJson.error || errJson.title || errText;
-                    } catch (parseError) {
-                        // keep raw text
-                    }
-
-                    finalUploads.push({
-                        templateId: item.templateId,
-                        status: "Failed",
-                        errorMessage: errMessage || ("Upload failed (" + response.status + ").")
-                    });
-                    continue;
-                }
-
-                var body = await response.json();
-                var apiStatus = (body && body.status) ? String(body.status) : "Failed";
-                if (apiStatus === "Imported") {
-                    await window.visaTemplateStagingLocal.markImported(item.fileName, item.contentHash);
-                }
-
-                finalUploads.push({
-                    templateId: item.templateId,
-                    status: apiStatus,
-                    errorMessage: body && body.errorMessage ? body.errorMessage : null,
-                    displayName: body && body.displayName ? body.displayName : null
-                });
+                uploads.push(await uploadFile(templateId, file));
             } catch (e) {
-                finalUploads.push({
-                    templateId: item.templateId,
+                uploads.push({
+                    templateId: templateId,
                     status: "Failed",
-                    errorMessage: (e && e.message) || "Upload request failed."
+                    errorMessage: (e && e.message) || "Upload request failed.",
+                    fileName: file.name
                 });
             }
         }
 
-        return summarizeUploadResults(finalUploads);
+        return summarizeUploadResults(uploads, false);
     };
 
-    window.visaTemplateStagingLocal.collectChangedUploads = async function (templateIds) {
-        return window.visaTemplateStagingLocal.syncToDatabase(templateIds);
-    };
-
-    window.visaTemplateStagingLocal.markImported = async function (documentFileName, contentHash) {
-        var handle = await getDirectoryHandle();
-        if (!handle || !documentFileName) {
-            return false;
-        }
-
-        var meta = await readMeta(handle, documentFileName);
-        if (!meta) {
-            return false;
-        }
-
-        meta.lastImportedAtUtc = new Date().toISOString();
-        meta.lastImportedContentHashSha256 = contentHash;
-        meta.sourceContentHashSha256 = contentHash;
-        var metaJson = JSON.stringify(meta, null, 2);
-        await writeFile(handle, metaFileName(documentFileName), new TextEncoder().encode(metaJson));
-        return true;
-    };
-
-    window.visaTemplateStagingLocal.copyPath = async function (filePath) {
-        if (!filePath) {
-            return false;
+    // Native onclick entry point — keeps a live user-activation token for the file picker.
+    window.visaTemplateStagingLocal.syncFromFilePickerDirect = async function () {
+        if (!_dotNetRef) {
+            return;
         }
 
         try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(filePath);
-                return true;
-            }
+            await _dotNetRef.invokeMethodAsync("OnSyncFromFilePickerStarted");
+            var result = await window.visaTemplateStagingLocal.syncFromFilePicker();
+            await _dotNetRef.invokeMethodAsync("OnSyncFromFilePickerResult", JSON.stringify(result));
         } catch (e) {
-            // fall through to legacy copy
-        }
-
-        try {
-            var textarea = document.createElement("textarea");
-            textarea.value = filePath;
-            textarea.setAttribute("readonly", "");
-            textarea.style.position = "absolute";
-            textarea.style.left = "-9999px";
-            document.body.appendChild(textarea);
-            textarea.select();
-            var copied = document.execCommand("copy");
-            document.body.removeChild(textarea);
-            return copied;
-        } catch (e) {
-            return false;
+            // Component disposed or SignalR disconnected.
         }
     };
 })();

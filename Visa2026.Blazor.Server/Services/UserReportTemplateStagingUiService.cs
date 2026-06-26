@@ -1,7 +1,6 @@
-using System.Security.Claims;
+using DevExpress.ExpressApp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using Microsoft.JSInterop;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -11,18 +10,15 @@ public sealed class UserReportTemplateStagingUiService
 {
     private readonly IUserReportTemplateStagingService _stagingService;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly IJSRuntime _jsRuntime;
     private readonly TemplateEditStagingOptions _options;
 
     public UserReportTemplateStagingUiService(
         IUserReportTemplateStagingService stagingService,
         IHttpContextAccessor httpContextAccessor,
-        IJSRuntime jsRuntime,
         IOptions<TemplateEditStagingOptions> options)
     {
         _stagingService = stagingService;
         _httpContextAccessor = httpContextAccessor;
-        _jsRuntime = jsRuntime;
         _options = options.Value;
     }
 
@@ -30,96 +26,6 @@ public sealed class UserReportTemplateStagingUiService
 
     public bool CanEditTemplates() =>
         IsEnabled && UserReportTemplateEditAccess.CanEditTemplates();
-
-    public string LocalSandboxRelativePath =>
-        string.IsNullOrWhiteSpace(_options.LocalFolderSubfolderName)
-            ? @"Visa2026\TemplateEdit"
-            : _options.LocalFolderSubfolderName.Trim().Trim('\\', '/');
-
-    /// <summary>
-    /// Best-effort Windows path for Office <c>ms-word:</c> / <c>ms-excel:</c> open URLs when FSA cannot expose a real path.
-    /// Uses the signed-in user name to build <c>%LOCALAPPDATA%\{relative}</c> on the officer PC.
-    /// </summary>
-    public string BuildSuggestedLocalFolderPathHint()
-    {
-        var relative = LocalSandboxRelativePath;
-        var userName = ResolveUserName();
-        if (!string.IsNullOrWhiteSpace(userName))
-        {
-            var shortName = userName;
-            var slash = userName.IndexOf('\\');
-            if (slash >= 0 && slash < userName.Length - 1)
-            {
-                shortName = userName[(slash + 1)..];
-            }
-            else
-            {
-                var at = userName.IndexOf('@');
-                if (at > 0)
-                {
-                    shortName = userName[..at];
-                }
-            }
-
-            return Path.Combine($@"C:\Users\{shortName}\AppData\Local", relative);
-        }
-
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            relative);
-    }
-
-    /// <summary>
-    /// Best-effort full path from the folder name returned by the browser picker (leaf segment only).
-    /// AppData default when the picked folder matches <see cref="LocalSandboxRelativePath"/> leaf; otherwise Documents.
-    /// </summary>
-    public string BuildLocalFolderPathHint(string? pickedFolderName)
-    {
-        if (string.IsNullOrWhiteSpace(pickedFolderName))
-        {
-            return BuildSuggestedLocalFolderPathHint();
-        }
-
-        var relativeLeaf = LocalSandboxRelativePath
-            .Split('/', '\\')
-            .LastOrDefault(segment => !string.IsNullOrWhiteSpace(segment))
-            ?? "TemplateEdit";
-
-        if (string.Equals(pickedFolderName.Trim(), relativeLeaf, StringComparison.OrdinalIgnoreCase))
-        {
-            return BuildSuggestedLocalFolderPathHint();
-        }
-
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            pickedFolderName.Trim());
-    }
-
-    /// <summary>Updates IndexedDB path hint from the configured FSA folder name (for Copy path / ms-word:).</summary>
-    public async Task SyncLocalFolderPathHintAsync()
-    {
-        try
-        {
-            var folderName = await _jsRuntime
-                .InvokeAsync<string>("visaTemplateStagingLocal.getFolderName")
-                .ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(folderName))
-            {
-                return;
-            }
-
-            var pathHint = BuildLocalFolderPathHint(folderName);
-            await _jsRuntime
-                .InvokeAsync<bool>("visaTemplateStagingLocal.setFolderPathHint", pathHint)
-                .ConfigureAwait(false);
-        }
-        catch (JSException)
-        {
-        }
-        catch (JSDisconnectedException)
-        {
-        }
-    }
 
     public async Task<UserReportTemplateStagingUiExportOutcome> ExportForEditAsync(Guid templateId)
     {
@@ -142,44 +48,14 @@ public sealed class UserReportTemplateStagingUiService
         }
     }
 
-    public async Task<UserReportTemplateStagingUiImportAllOutcome> ImportSandboxChangedAsync(
-        IReadOnlyCollection<Guid> templateIds)
-    {
-        if (!CanEditTemplates())
+    public static UserReportTemplateStagingImportAllResult MapCollectResult(
+        UserReportTemplateStagingLocalCollectJsResult collect) =>
+        new()
         {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(
-                "Template edit access denied or staging is disabled.");
-        }
-
-        try
-        {
-            var collect = await _jsRuntime
-                .InvokeAsync<UserReportTemplateStagingLocalCollectJsResult>(
-                    "visaTemplateStagingLocal.syncToDatabase",
-                    templateIds.Select(id => id.ToString()).ToArray())
-                .ConfigureAwait(false);
-
-            var results = collect.Uploads
+            Results = collect.Uploads
                 .Select(MapStagingUploadResult)
-                .ToList();
-
-            return UserReportTemplateStagingUiImportAllOutcome.Ok(
-                new UserReportTemplateStagingImportAllResult { Results = results });
-        }
-        catch (JSDisconnectedException)
-        {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(
-                "Browser connection was lost during sync. Refresh the page and try again.");
-        }
-        catch (JSException ex)
-        {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(ex.Message);
-        }
-    }
+                .ToList(),
+        };
 
     private static UserReportTemplateStagingImportResult MapStagingUploadResult(
         UserReportTemplateStagingLocalUploadJsItem item) =>
@@ -200,10 +76,22 @@ public sealed class UserReportTemplateStagingUiService
             _ => UserReportTemplateStagingImportStatus.Failed,
         };
 
-    private string ResolveUserName() =>
-        _httpContextAccessor.HttpContext?.User?.Identity?.Name
-        ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name)
-        ?? string.Empty;
+    private string ResolveUserName()
+    {
+        try
+        {
+            var xafUserName = SecuritySystem.CurrentUserName;
+            if (!string.IsNullOrWhiteSpace(xafUserName))
+            {
+                return xafUserName;
+            }
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        return _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+    }
 }
 
 public sealed class UserReportTemplateStagingUiExportOutcome
@@ -218,20 +106,5 @@ public sealed class UserReportTemplateStagingUiExportOutcome
         new() { Success = true, Result = result };
 
     public static UserReportTemplateStagingUiExportOutcome Fail(string message) =>
-        new() { Success = false, ErrorMessage = message };
-}
-
-public sealed class UserReportTemplateStagingUiImportAllOutcome
-{
-    public bool Success { get; init; }
-
-    public UserReportTemplateStagingImportAllResult? Result { get; init; }
-
-    public string? ErrorMessage { get; init; }
-
-    public static UserReportTemplateStagingUiImportAllOutcome Ok(UserReportTemplateStagingImportAllResult result) =>
-        new() { Success = true, Result = result };
-
-    public static UserReportTemplateStagingUiImportAllOutcome Fail(string message) =>
         new() { Success = false, ErrorMessage = message };
 }
