@@ -5,8 +5,23 @@
 **/[Rr]elease/
 **/artifacts/
 
+# Local build / publish outputs (gitignored but may exist on disk)
+dist/
+_build_out/
+_build_out*/
+_agent_build_out/
+_agent_reflect/
+_scenario_build_out/
+_scenario_build_out*/
+agent-local/
+*.binlog
+
+# JS tooling
+**/node_modules/
+
 # IDE / tooling caches
 .vs/
+.idea/
 *.user
 *.suo
 *.rsuser
@@ -19,6 +34,11 @@ coverage*.info
 *.coverage
 *.coveragexml
 
+# E2E binaries and recordings
+Visa2026.E2E.Tests/.webdrivers/
+Visa2026.E2E.Tests/recordings/
+**/easytest-host-logs/
+
 # Local secrets (keep *.example available for the model).
 .env
 .env.*
@@ -29,3 +49,37 @@ coverage*.info
 publish/
 *.pubxml
 *.publishproj
+
+# VISA2014 migration — local PII / id maps
+Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
+Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsm
+Visa2026.DataImporter/legacy/visa2014/preview-export/_*.txt
+Visa2026.DataImporter/legacy/visa2014/id-maps/
+Visa2026.DataImporter/legacy/visa2014/id-map/
+
+# Runtime error inbox (may contain prod stack traces)
+.cursor/runtime-errors/inbox/*
+!.cursor/runtime-errors/inbox/README.md
+
+# Template staging scratch
+Visa2026.Blazor.Server/TemplateEdit/*
+!Visa2026.Blazor.Server/TemplateEdit/README.md
+Visa2026.Module/Resources/Templates/_c/
+Visa2026.Module/Resources/Templates/*.zip
+
+# Binary blobs in Resources (keep *_map.md and README indexed)
+Visa2026.Module/Resources/existing_forms/
+Visa2026.Module/Resources/**/*.jpg
+Visa2026.Module/Resources/**/*.jpeg
+Visa2026.Module/Resources/**/*.png
+Visa2026.Module/Resources/**/*.gif
+Visa2026.Module/Resources/**/*.pdf
+Visa2026.Module/Resources/**/*.docx
+Visa2026.Module/Resources/**/*.xlsx
+Visa2026.Module/Resources/**/*.rtf
+
+# Docker fonts (local only)
+docker/fonts/msttcore/
+
+# Doc screenshots
+docs/images/
