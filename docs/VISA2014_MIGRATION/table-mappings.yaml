@@ -29,3 +29,29 @@ mappings:
     notes: |
       2,569 active Person rows. Passport import remains separate Visa2026 BO.
       Extract uses canonical passport per person for PersonalNumber and Nationality.
+
+  - id: passport-main
+    legacy:
+      schema: dbo
+      table: Passport
+      boClass: Passport
+      boPath: VISA2014.Module/DC/IPassport.cs
+    target:
+      odataEntity: Passport
+      boPath: Visa2026.Module/BusinessObjects/Passport.cs
+    relationship: primary
+    legacyTablesExtra:
+      - schema: dbo
+        table: PassportType
+        join: PassportType.Oid = Passport.PassportType
+        role: lookup_fk
+      - schema: dbo
+        table: Country
+        join: Country.Oid = Passport.PassportIssuedCountry
+        role: lookup_fk
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Passport.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Passport.yaml
+    status: mapped
+    notes: |
+      3,684 active Passport rows on Çalik VISA2015; 3,241 persons; 353 multi-passport.
+      Depends on Person id-map. PassportType + IssuedCountry layer-3 approved 2026-06-26.

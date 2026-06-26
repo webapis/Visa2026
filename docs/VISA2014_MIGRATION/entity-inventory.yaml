@@ -17,11 +17,22 @@ entities:
     tableMappingId: person-main
     discoveryStatus: complete
     importConfirmed: true
-    importStatus: pending
+    importStatus: done
     legacyTable: Person
     legacyBo: Person
     blockReason: null
-    notes: "2,569 active rows → ~2,553 import + 5 dedupe + 11 skipped. importConfirmed 2026-06-21 after Person-preview.xlsx review. Pilot OData next."
+    notes: "Full import 2026-06-26: 2915 posted, 9 PN collisions; id-map 3087; 2925 People in LocalDB."
+
+  - targetODataEntity: Passport
+    discoveryDossier: discovery/Passport.yaml
+    tableMappingId: passport-main
+    discoveryStatus: complete
+    importConfirmed: false
+    importStatus: pending
+    legacyTable: Passport
+    legacyBo: Passport
+    blockReason: null
+    notes: "3684 active rows; dependsOn Person id-map. PassportType layer-3 approved 2026-06-26."
 
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml

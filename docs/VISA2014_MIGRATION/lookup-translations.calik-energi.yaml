@@ -1,0 +1,52 @@
+# Çalik Energi — company-specific lookup overrides (legacy DB: VISA2015)
+
+# Merged after lookup-translations.yaml (shared catalogs).
+# ProjectContract: legacy NumberOfContract → same Visa2026 Code (tenant catalog identity).
+
+version: 1
+
+catalogs:
+  - targetCatalog: ProjectContract
+    targetMatchProperty: Code
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Contract
+      column: NumberOfContract
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(c.NumberOfContract)) AS NumberOfContract, COUNT(*) AS cnt
+        FROM dbo.Person p
+        INNER JOIN dbo.Contract c ON p.Contract = c.Oid
+        WHERE p.GCRecord IS NULL AND c.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(c.NumberOfContract))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Person, Application
+      legacyDatabase: VISA2015
+      company: calik-energi
+      status: complete
+      activeContractRows: 95
+      distinctNumberOfContractInTable: 83
+      maxNumberOfContractLength: 56
+      distinctLegacyContractCodesOnPerson: 60
+      distinctLegacyContractCodesOnApplication: 34
+      distinctLegacyContractCodesUnion: 73
+      orphanContractCodesNotOnPersonOrApplication: 10
+      personRowsWithContract: 2950
+      applicationRowsWithContract: 3845
+      contractsWithAppliedMinistery: 42
+      ministryTable: dbo.AppliedMinistery
+      tenantSeedOverlapExactCode: 0
+      gt15InLegacyData: false
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.calik-energi.md
+    values: []
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Legacy SQL database name is VISA2015 (not VISA2014). Çalik production data on SQLEXPRESS.
+      identityPassThrough maps NumberOfContract → same Visa2026 ProjectContract.Code for OData resolve.
+      Seed tenant project-contract.calik-energi.json (73 rows) before import; deploy via disk overlay as project-contract.json.
+      Add explicit values[] rows only for aliases (e.g. Satlyk-1 → Şatlyk-1) if product requires.
+      Do NOT use Gap İnşaat GT-15 blanket remap (see lookup-translations.gap-insaat.yaml).

@@ -31,10 +31,29 @@ entities:
     importPhase: person-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
     discoveryStatus: complete
+    legacySource: calik-energi
     importConfirmed: true
-    importConfirmedAt: 2026-06-21
+    importConfirmedAt: 2026-06-26
     importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Full OData import 2026-06-26: 2915/2924 posted, 9 failed (duplicate PersonalNumber collisions).
+      Id-map 3087 entries after alias expand. Target People: 2925 rows (GCRecord=0).
+
+  - targetODataEntity: Passport
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Passport.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
     importStatus: pending
+    notes: |
+      Discovery complete 2026-06-26 (3684 rows, PassportType approved).
+      Blocked on full Person id-map + Passport preview review before importConfirmed.
 
   # - targetODataEntity: Education
   #   dependsOn: [Person]

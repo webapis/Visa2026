@@ -27,7 +27,10 @@ public sealed class LookupBaseDetailViewModelUpdater : ModelNodesGeneratorUpdate
             {
                 HideMember(classModel, CodeMember);
                 HideMember(classModel, nameof(LookupBase.IsDefault));
-                HideMember(classModel, nameof(ProjectContract.Description));
+                if (classModel.OwnMembers?[nameof(ProjectContract.Description)] is IModelMember description)
+                {
+                    description.Index = 1;
+                }
             }
             else if (lookupType == typeof(ApplicationMigrationSlaProfile))
             {

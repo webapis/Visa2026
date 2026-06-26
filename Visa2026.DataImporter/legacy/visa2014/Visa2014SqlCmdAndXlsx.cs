@@ -1,6 +1,7 @@
-using System.Diagnostics;
 using System.Globalization;
+using System.Security;
 using System.Text;
+using Microsoft.Data.SqlClient;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -11,127 +12,44 @@ internal static class Visa2014SqlCmdReader
         string sql,
         bool verbose)
     {
-        var builder = ParseConnectionString(connectionString);
-        var args = new StringBuilder();
-        args.Append("-S \"").Append(builder.Server).Append('"');
-        args.Append(" -d \"").Append(builder.Database).Append('"');
-        if (builder.TrustedConnection)
-            args.Append(" -E");
-        else if (!string.IsNullOrEmpty(builder.UserId))
-        {
-            args.Append(" -U \"").Append(builder.UserId).Append('"');
-            args.Append(" -P \"").Append(builder.Password).Append('"');
-        }
-
-        args.Append(" -C -W -s \"|\"");
-        args.Append(" -Q \"").Append(EscapeSqlCmdQuery(sql)).Append('"');
-
-        var psi = new ProcessStartInfo
-        {
-            FileName = "sqlcmd",
-            Arguments = args.ToString(),
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-        };
-
-        using var process = Process.Start(psi)
-            ?? throw new InvalidOperationException("Failed to start sqlcmd.");
-
-        var stdout = process.StandardOutput.ReadToEnd();
-        var stderr = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-
-        if (process.ExitCode != 0)
-            throw new InvalidOperationException($"sqlcmd failed ({process.ExitCode}): {stderr.Trim()}");
-
-        var lines = stdout
-            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-            .Where(l => !string.IsNullOrWhiteSpace(l))
-            .ToList();
-
-        if (lines.Count == 0)
-            return [];
-
-        var headers = SplitRow(lines[0]);
         var rows = new List<IReadOnlyDictionary<string, string?>>();
 
-        for (int i = 1; i < lines.Count; i++)
+        using var connection = new SqlConnection(connectionString);
+        connection.Open();
+
+        using var command = new SqlCommand(sql, connection) { CommandTimeout = 180 };
+        using var reader = command.ExecuteReader();
+
+        var fieldCount = reader.FieldCount;
+        var columnNames = new string[fieldCount];
+        for (int i = 0; i < fieldCount; i++)
+            columnNames[i] = reader.GetName(i);
+
+        while (reader.Read())
         {
-            var line = lines[i];
-            if (line.StartsWith('(') && line.Contains("rows affected"))
-                continue;
-            if (line.All(c => c == '-' || c == '|' || c == ' '))
-                continue;
-
-            var values = SplitRow(line);
-            if (values.Length == 0)
-                continue;
-
             var dict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-            for (int c = 0; c < headers.Length && c < values.Length; c++)
-                dict[headers[c]] = NullIfEmpty(values[c]);
+            for (int i = 0; i < fieldCount; i++)
+                dict[columnNames[i]] = reader.IsDBNull(i) ? null : FormatSqlValue(reader.GetValue(i));
 
             rows.Add(dict);
         }
 
         if (verbose)
-            Console.WriteLine($"  sqlcmd returned {rows.Count} row(s).");
+            Console.WriteLine($"  SQL reader returned {rows.Count} row(s).");
 
         return rows;
     }
 
-    private static string? NullIfEmpty(string value) =>
-        string.IsNullOrWhiteSpace(value) || value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
-            ? null
-            : value;
-
-    private static string[] SplitRow(string line) =>
-        line.Split('|').Select(v => v.Trim()).ToArray();
-
-    private static string EscapeSqlCmdQuery(string sql) =>
-        sql.Replace("\"", "\"\"");
-
-    private static SqlCmdConnection ParseConnectionString(string connectionString)
+    private static string? FormatSqlValue(object value) => value switch
     {
-        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var part in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
-        {
-            var idx = part.IndexOf('=');
-            if (idx <= 0) continue;
-            map[part[..idx].Trim()] = part[(idx + 1)..].Trim();
-        }
-
-        map.TryGetValue("Server", out var server);
-        map.TryGetValue("Data Source", out var dataSource);
-        map.TryGetValue("Database", out var database);
-        map.TryGetValue("Initial Catalog", out var catalog);
-        map.TryGetValue("User ID", out var userId);
-        map.TryGetValue("Password", out var password);
-
-        bool trusted = map.TryGetValue("Trusted_Connection", out var tc) &&
-                       (tc.Equals("True", StringComparison.OrdinalIgnoreCase) || tc.Equals("SSPI", StringComparison.OrdinalIgnoreCase));
-
-        return new SqlCmdConnection
-        {
-            Server = server ?? dataSource ?? "localhost\\SQLEXPRESS",
-            Database = database ?? catalog ?? "VISA2015",
-            TrustedConnection = trusted || string.IsNullOrEmpty(userId),
-            UserId = userId ?? "",
-            Password = password ?? "",
-        };
-    }
-
-    private sealed class SqlCmdConnection
-    {
-        public required string Server { get; init; }
-        public required string Database { get; init; }
-        public bool TrustedConnection { get; init; }
-        public string UserId { get; init; } = "";
-        public string Password { get; init; } = "";
-    }
+        null => null,
+        DateTime dt => dt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+        DateTimeOffset dto => dto.ToString("yyyy-MM-dd HH:mm:ss.fffffff zzz", CultureInfo.InvariantCulture),
+        bool b => b ? "1" : "0",
+        byte[] bytes => Convert.ToBase64String(bytes),
+        Guid g => g.ToString("D"),
+        _ => Convert.ToString(value, CultureInfo.InvariantCulture),
+    };
 }
 
 internal static class Visa2014MinimalXlsxWriter
@@ -366,7 +284,7 @@ internal static class Visa2014MinimalXlsxWriter
     }
 
     private static string EscapeXml(string text) =>
-        text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
+        SecurityElement.Escape(text) ?? "";
 }
 
 internal sealed class Visa2014Worksheet

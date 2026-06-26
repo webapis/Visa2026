@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Visa2026.DataImporter;
+using Visa2026.Module.Services;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -20,7 +21,7 @@ internal static class Visa2014PersonODataImporter
     public static async Task<Visa2014PersonImportResult> RunAsync(
         ApiClient api,
         string legacyConnectionString,
-        string lookupTranslationsPath,
+        IReadOnlyList<string> lookupTranslationPaths,
         string? idMapOutputPath,
         int? maxRows,
         bool dryRun,
@@ -28,7 +29,7 @@ internal static class Visa2014PersonODataImporter
     {
         var batch = Visa2014PersonTransform.PrepareImportBatch(
             legacyConnectionString,
-            lookupTranslationsPath,
+            lookupTranslationPaths,
             maxRows,
             verbose);
 
@@ -122,22 +123,19 @@ internal static class Visa2014PersonODataImporter
             ["FirstName"] = row["FirstName"],
             ["LastName"] = row["LastName"],
             ["DateOfBirth"] = DateTime.SpecifyKind((DateTime)row["DateOfBirth"]!, DateTimeKind.Utc),
-            ["IsEmployee"] = isEmployee,
-            ["PersonRole"] = isEmployee ? 0 : 1,
-            ["Email"] = row.GetValueOrDefault("Email") ?? "",
+            ["PersonRole"] = isEmployee ? "Employee" : "FamilyMember",
             ["PersonalNumber"] = row.GetValueOrDefault("PersonalNumber") ?? "0",
-            ["IsArchived"] = row.GetValueOrDefault("IsArchived") is bool archived && archived,
         };
 
+        if (row.GetValueOrDefault("Email") is string email && !string.IsNullOrWhiteSpace(email))
+            payload["Email"] = email;
+
         if (row.GetValueOrDefault("MiddleName") is string middle && !string.IsNullOrWhiteSpace(middle))
-            payload["MiddleName"] = middle;
+            payload["MiddleName"] = middle.Length > 100 ? middle[..100] : middle;
         if (row.GetValueOrDefault("BirthPlace") is string bp && !string.IsNullOrWhiteSpace(bp))
             payload["BirthPlace"] = bp;
         if (row.GetValueOrDefault("ForeignAddress") is string fa && !string.IsNullOrWhiteSpace(fa))
             payload["ForeignAddress"] = fa;
-        if (row.GetValueOrDefault("VisaApplicationFamilyMembersText") is string fam &&
-            !string.IsNullOrWhiteSpace(fam))
-            payload["VisaApplicationFamilyMembersText"] = fam;
 
         TrySetLookup(payload, "Gender", resolver.ResolveGender(row.GetValueOrDefault("Gender") as string));
         TrySetLookup(payload, "CountryOfBirth", resolver.ResolveCountry(row.GetValueOrDefault("CountryOfBirth") as string));
@@ -146,12 +144,28 @@ internal static class Visa2014PersonODataImporter
         TrySetLookup(payload, "MaritalStatus", resolver.ResolveMaritalStatus(row.GetValueOrDefault("MaritalStatus") as string));
         TrySetLookup(payload, "Relationship", resolver.ResolveRelationship(row.GetValueOrDefault("Relationship") as string));
         TrySetLookup(payload, "ProjectContract", resolver.ResolveProjectContract(row.GetValueOrDefault("ProjectContract") as string));
+        TrySetLookup(payload, "Subcontractor", resolver.ResolveDefaultSubcontractor());
 
         if (row.GetValueOrDefault("SponsoringEmployee") is string sponsorText &&
             Guid.TryParse(sponsorText, out var legacySponsorOid) &&
             idMap.TryGetValue(legacySponsorOid, out var sponsorId))
         {
             payload["SponsoringEmployee"] = new { ID = sponsorId };
+        }
+
+        if (isEmployee)
+        {
+            var maritalCode = row.GetValueOrDefault("MaritalStatus") as string;
+            if (string.Equals(maritalCode, "Sallah", StringComparison.OrdinalIgnoreCase))
+            {
+                payload["VisaApplicationFamilyMembersText"] = VisaFamilyMemberLinesHelper.NoneValue;
+            }
+            else if (row.GetValueOrDefault("VisaApplicationFamilyMembersText") is string familyText
+                     && !string.IsNullOrWhiteSpace(familyText)
+                     && !VisaFamilyMemberLinesHelper.IsNoneValue(familyText))
+            {
+                payload["VisaApplicationFamilyMembersText"] = familyText;
+            }
         }
 
         return payload;

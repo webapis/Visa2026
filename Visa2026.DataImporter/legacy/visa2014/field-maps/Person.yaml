@@ -215,8 +215,9 @@ fields:
     lookupLegacyColumn: NumberOfContract
     missingBehavior: allow_null
     notes: |
-      Experimental pilot: all legacy Gap Insaat contract codes → tenant GT-15 (Calik Enerji seed).
-      See lookup-translations.yaml ProjectContract; canonical target Code GT-15 (2-leg NameTm variant at OData resolve).
+      Company-specific via --legacy-source:
+      Çalik (calik-energi): identityPassThrough — legacy NumberOfContract → same Visa2026 Code.
+      Gap (gap-insaat): experimental remap → GT-15. See lookup-translations.*.yaml.
 
   - source: ActivePerson
     target: IsArchived

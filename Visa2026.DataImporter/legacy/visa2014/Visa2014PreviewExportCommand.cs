@@ -25,25 +25,31 @@ internal static class Visa2014PreviewExportCommand
         }
 
         var solutionRoot = Visa2014ContentRoot.FindSolutionRoot();
-        var lookupPath = Visa2014ContentRoot.LookupTranslationsPath(solutionRoot);
-        if (lookupPath == null || !File.Exists(lookupPath))
+        Visa2014LegacySourceProfile source;
+        try
         {
-            Console.Error.WriteLine("ERR lookup-translations.yaml not found under docs/VISA2014_MIGRATION/.");
+            source = Visa2014LegacySource.Resolve(dataImporterRoot, solutionRoot, args);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"ERR {ex.Message}");
             return 1;
         }
 
         var output = GetOptionValue(args, "--output")
-                     ?? Visa2014ContentRoot.DefaultPreviewOutputPath(dataImporterRoot, entity);
+                     ?? source.PreviewOutputPath(dataImporterRoot, entity);
 
-        var connection = Visa2014ContentRoot.ResolveConnectionString(GetOptionValue(args, "--connection"));
         int? maxRows = null;
         var maxRowsText = GetOptionValue(args, "--max-rows");
         if (int.TryParse(maxRowsText, out var parsedMax) && parsedMax > 0)
             maxRows = parsedMax;
 
         Console.WriteLine($"=== VISA2014 Excel preview export — {entity}");
-        Console.WriteLine($"INF Database: {MaskConnectionForLog(connection)}");
-        Console.WriteLine($"INF Lookup translations: {Path.GetFullPath(lookupPath)}");
+        Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
+        Console.WriteLine($"INF Database: {MaskConnectionForLog(source.ConnectionString)}");
+        Console.WriteLine($"INF Lookup translations:");
+        foreach (var path in source.LookupTranslationPaths)
+            Console.WriteLine($"INF   - {path}");
         Console.WriteLine($"INF Output: {Path.GetFullPath(output)}");
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
@@ -51,11 +57,12 @@ internal static class Visa2014PreviewExportCommand
         try
         {
             var result = Visa2014PersonPreviewExporter.Export(
-                connection,
-                lookupPath,
+                source.ConnectionString,
+                source.LookupTranslationPaths,
                 output,
                 maxRows,
-                verbose);
+                verbose,
+                source.Id);
 
             Console.WriteLine($" OK Wrote {result.ImportRowCount} import row(s) (+ {result.DedupeMergedCount} duplicate_merged, {result.SkippedRowCount} skipped).");
             Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");

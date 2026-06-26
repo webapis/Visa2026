@@ -151,6 +151,10 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--export-seed",
         "--export-visa2014-preview",
         "--import-visa2014",
+        "--expand-visa2014-id-map",
+        "--import-visa2014-files",
+        "--property",
+        "--id-map",
         "--entity",
         "--output",
         "--connection",
@@ -235,11 +239,16 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
-    Console.WriteLine("  --export-visa2014-preview   VISA2015 SQL → Excel preview (legacy migration; requires --entity Person).");
-    Console.WriteLine("      Options: --entity Person [--output path.xlsx] [--connection conn] [--max-rows N]");
-    Console.WriteLine("  --import-visa2014           VISA2015 SQL → Visa2026 OData (legacy migration; requires --entity Person).");
-    Console.WriteLine("      Options: --entity Person [--connection conn] [--max-rows N] [--dry-run]");
-    Console.WriteLine("                [--api-base-url url] [--user Admin] [--password pwd] [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person).");
+    Console.WriteLine("      Options: --entity Person [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
+    Console.WriteLine("                [--connection conn] [--max-rows N]");
+    Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 OData (requires --entity Person).");
+    Console.WriteLine("      Options: --entity Person [--legacy-source calik-energi|gap-insaat] [--connection conn]");
+    Console.WriteLine("                [--max-rows N] [--dry-run] [--api-base-url url] [--user Admin] [--password pwd]");
+    Console.WriteLine("                [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs/fields → OData PATCH (requires scalar import + id-map).");
+    Console.WriteLine("      Options: --entity Person --property Photo|VisaApplicationFamilyMembersText");
+    Console.WriteLine("                [--id-map path.json] [--max-rows N] [--dry-run] [--api-base-url url] [--no-wait]");
     Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
     Console.WriteLine("  --prune-seed [path]         Same as --validate-seed and rewrite scenario yaml on disk.");
     Console.WriteLine();
@@ -343,11 +352,31 @@ if (HasArg(args, "--export-visa2014-preview"))
     return;
 }
 
+if (HasArg(args, "--expand-visa2014-id-map"))
+{
+    Log.Phase("VISA2014 id-map expand");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ImportCommand.RunExpandIdMapAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--import-visa2014"))
 {
     Log.Phase("VISA2014 OData import");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ImportCommand.RunAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--import-visa2014-files"))
+{
+    Log.Phase("VISA2014 file import");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014FilesImportCommand.RunAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

@@ -126,6 +126,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SoftDeleteColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupBaseNameTmBackfillUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractTitleDescriptionMergeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupBaseNameTmPdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),

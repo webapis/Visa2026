@@ -47,15 +47,40 @@ internal static class Visa2014ContentRoot
     public static string DefaultPreviewOutputPath(string dataImporterRoot, string entity) =>
         Path.Combine(LegacyRoot(dataImporterRoot), "preview-export", $"{entity}-preview.xlsx");
 
-    public static string ResolveConnectionString(string? overrideConnection)
+    public static string ResolveConnectionString(string? overrideConnection, string? sourceDefaultConnection = null)
     {
+        string cs;
         if (!string.IsNullOrWhiteSpace(overrideConnection))
-            return overrideConnection.Trim();
+            cs = overrideConnection.Trim();
+        else if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("VISA2014_SQL_CONNECTION")))
+            cs = Environment.GetEnvironmentVariable("VISA2014_SQL_CONNECTION")!.Trim();
+        else if (!string.IsNullOrWhiteSpace(sourceDefaultConnection))
+            cs = sourceDefaultConnection.Trim();
+        else
+            cs = "Server=localhost\\SQLEXPRESS;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true";
 
-        var fromEnv = Environment.GetEnvironmentVariable("VISA2014_SQL_CONNECTION");
-        if (!string.IsNullOrWhiteSpace(fromEnv))
-            return fromEnv.Trim();
+        return ApplySqlPasswordFromEnvironment(cs);
+    }
 
-        return "Server=localhost\\SQLEXPRESS;Database=VISA2015;Trusted_Connection=True;TrustServerCertificate=True";
+    /// <summary>
+    /// When connection uses User Id without Password, inject from VISA2014_SQL_PASSWORD (OS env).
+    /// </summary>
+    internal static string ApplySqlPasswordFromEnvironment(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return connectionString;
+
+        if (connectionString.Contains("Password=", StringComparison.OrdinalIgnoreCase))
+            return connectionString;
+
+        if (!connectionString.Contains("User Id=", StringComparison.OrdinalIgnoreCase) &&
+            !connectionString.Contains("UserID=", StringComparison.OrdinalIgnoreCase))
+            return connectionString;
+
+        var password = Environment.GetEnvironmentVariable("VISA2014_SQL_PASSWORD");
+        if (string.IsNullOrWhiteSpace(password))
+            return connectionString;
+
+        return connectionString.TrimEnd(';') + ";Password=" + password.Trim();
     }
 }

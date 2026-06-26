@@ -1,19 +1,34 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal static class Visa2014ImportCommand
+internal static class Visa2014FilesImportCommand
 {
     public static async Task<int> RunAsync(IReadOnlyList<string> args, bool verbose)
     {
         var entity = GetOptionValue(args, "--entity");
         if (string.IsNullOrWhiteSpace(entity))
         {
-            Console.Error.WriteLine("ERR --import-visa2014 requires --entity <Name> (e.g. Person).");
+            Console.Error.WriteLine("ERR --import-visa2014-files requires --entity <Name> (e.g. Person).");
+            return 1;
+        }
+
+        var property = GetOptionValue(args, "--property");
+        if (string.IsNullOrWhiteSpace(property))
+        {
+            Console.Error.WriteLine("ERR --import-visa2014-files requires --property <Name> (e.g. Photo).");
             return 1;
         }
 
         if (!string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
         {
             Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person.");
+            return 1;
+        }
+
+        var isPhoto = string.Equals(property, "Photo", StringComparison.OrdinalIgnoreCase);
+        var isFamilyText = string.Equals(property, "VisaApplicationFamilyMembersText", StringComparison.OrdinalIgnoreCase);
+        if (!isPhoto && !isFamilyText)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported yet. Supported: Photo, VisaApplicationFamilyMembersText.");
             return 1;
         }
 
@@ -43,7 +58,8 @@ internal static class Visa2014ImportCommand
         var userName = GetOptionValue(args, "--user") ?? "Admin";
         var password = GetOptionValue(args, "--password") ?? "";
 
-        var idMapPath = GetOptionValue(args, "--id-map-output")
+        var idMapPath = GetOptionValue(args, "--id-map")
+            ?? GetOptionValue(args, "--id-map-output")
             ?? source.IdMapPath(dataImporterRoot, entity);
 
         int? maxRows = null;
@@ -54,17 +70,15 @@ internal static class Visa2014ImportCommand
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
 
-        Console.WriteLine($"=== VISA2014 OData import — {entity}");
+        Console.WriteLine($"=== VISA2014 file import — {entity}.{property}");
         Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
         Console.WriteLine($"INF Legacy SQL: {MaskConnectionForLog(source.ConnectionString)}");
         Console.WriteLine($"INF Target API: {apiBaseUrl}");
-        Console.WriteLine($"INF Lookup translations:");
-        foreach (var path in source.LookupTranslationPaths)
-            Console.WriteLine($"INF   - {path}");
+        Console.WriteLine($"INF Id-map: {idMapPath}");
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
         if (dryRun)
-            Console.WriteLine("INF Mode: dry-run (no POST)");
+            Console.WriteLine("INF Mode: dry-run (no PATCH)");
 
         var api = new Visa2026.DataImporter.ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
 
@@ -77,42 +91,51 @@ internal static class Visa2014ImportCommand
 
         try
         {
-            var result = await Visa2014PersonODataImporter.RunAsync(
+            if (isPhoto)
+            {
+                var result = await Visa2014PersonPhotoImporter.RunAsync(
+                    api,
+                    source.ConnectionString,
+                    idMapPath,
+                    maxRows,
+                    dryRun,
+                    verbose);
+
+                Console.WriteLine($"INF Id-map entries: {result.IdMapEntries}");
+                Console.WriteLine($"INF Processed: {result.Processed}  Patched: {result.Patched}  No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
+
+                foreach (var error in result.Errors.Take(20))
+                    Console.Error.WriteLine($"ERR {error}");
+                if (result.Errors.Count > 20)
+                    Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
+
+                return result.Failed > 0 ? 1 : 0;
+            }
+
+            var familyResult = await Visa2014PersonVisaFamilyTextImporter.RunAsync(
                 api,
                 source.ConnectionString,
-                source.LookupTranslationPaths,
-                dryRun ? null : idMapPath,
+                idMapPath,
                 maxRows,
                 dryRun,
                 verbose);
 
-            Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
-            Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
-            if (!dryRun)
-            {
-                Console.WriteLine($"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}");
-                if (result.IdMapPath != null)
-                {
-                    Console.WriteLine($"INF Id-map: {result.IdMapPath}");
-                    var targetCs = GetOptionValue(args, "--target-connection")
-                        ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
-                        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
-                    var expandCode = await Visa2014PersonIdMapExpander.ExpandAsync(
-                        source.ConnectionString,
-                        source.LookupTranslationPaths,
-                        result.IdMapPath,
-                        targetCs,
-                        verbose);
-                    if (expandCode != 0)
-                        return expandCode;
-                }
-            }
+            Console.WriteLine($"INF Id-map entries: {familyResult.IdMapEntries}");
+            Console.WriteLine(
+                $"INF Processed: {familyResult.Processed}  Patched: {familyResult.Patched}  " +
+                $"Single→Ýok: {familyResult.PatchedSingleNone}  " +
+                $"Not employee: {familyResult.SkippedNotEmployee}  No StatusL text: {familyResult.SkippedNoText}  Failed: {familyResult.Failed}");
 
-            return result.FailedCount > 0 ? 1 : 0;
+            foreach (var error in familyResult.Errors.Take(20))
+                Console.Error.WriteLine($"ERR {error}");
+            if (familyResult.Errors.Count > 20)
+                Console.Error.WriteLine($"ERR ... and {familyResult.Errors.Count - 20} more");
+
+            return familyResult.Failed > 0 ? 1 : 0;
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"ERR Import failed: {ex.Message}");
+            Console.Error.WriteLine($"ERR File import failed: {ex.Message}");
             if (verbose)
                 Console.Error.WriteLine(ex);
             return 1;
@@ -135,37 +158,6 @@ internal static class Visa2014ImportCommand
         }
 
         return null;
-    }
-
-    public static async Task<int> RunExpandIdMapAsync(IReadOnlyList<string> args, bool verbose)
-    {
-        var entity = GetOptionValue(args, "--entity");
-        if (!string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
-        {
-            Console.Error.WriteLine("ERR --expand-visa2014-id-map requires --entity Person.");
-            return 1;
-        }
-
-        var dataImporterRoot = Visa2014ContentRoot.FindDataImporterRoot();
-        if (dataImporterRoot == null)
-        {
-            Console.Error.WriteLine("ERR Could not locate Visa2026.DataImporter content root.");
-            return 1;
-        }
-        var solutionRoot = Visa2014ContentRoot.FindSolutionRoot();
-        var source = Visa2014LegacySource.Resolve(dataImporterRoot, solutionRoot, args);
-        var idMapPath = GetOptionValue(args, "--id-map-output")
-            ?? source.IdMapPath(dataImporterRoot, entity);
-        var targetCs = GetOptionValue(args, "--target-connection")
-            ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
-            ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
-
-        return await Visa2014PersonIdMapExpander.ExpandAsync(
-            source.ConnectionString,
-            source.LookupTranslationPaths,
-            idMapPath,
-            targetCs,
-            verbose);
     }
 
     private static string MaskConnectionForLog(string connectionString)

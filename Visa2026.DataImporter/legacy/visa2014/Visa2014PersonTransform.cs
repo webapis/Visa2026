@@ -98,11 +98,11 @@ internal static class Visa2014PersonTransform
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
         string connectionString,
-        string lookupTranslationsPath,
+        IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
         bool verbose)
     {
-        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationsPath);
+        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
         var sql = maxRows is > 0
             ? $"SELECT TOP ({maxRows}) * FROM ({ExtractSql}) AS q"
             : ExtractSql;
@@ -224,6 +224,46 @@ internal static class Visa2014PersonTransform
         return new TransformBatchResult(importRows, dedupeMergedCount);
     }
 
+    /// <summary>
+    /// Legacy Person Oids marked duplicate_merged → canonical legacy Oid (for id-map alias expansion).
+    /// </summary>
+    internal static IReadOnlyDictionary<Guid, Guid> BuildDedupeLegacyAliases(
+        string connectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        int? maxRows,
+        bool verbose)
+    {
+        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
+        var sql = maxRows is > 0
+            ? $"SELECT TOP ({maxRows}) * FROM ({ExtractSql}) AS q"
+            : ExtractSql;
+
+        var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
+        var rawRows = new List<Visa2014PersonRawRow>();
+        foreach (var dict in dictRows)
+        {
+            if (TryParseRawRow(dict, out var parsed))
+                rawRows.Add(parsed);
+        }
+
+        var working = rawRows.Select(r => new WorkingRow(r)).ToList();
+        var dedupeSummary = new List<Dictionary<string, object?>>();
+        ApplyPersonalNumberDedupe(working, dedupeSummary);
+
+        var aliases = new Dictionary<Guid, Guid>();
+        foreach (var group in working
+                     .Where(r => r.ImportAction == "duplicate_merged")
+                     .GroupBy(r => r.DedupeGroupId, StringComparer.Ordinal))
+        {
+            var canonical = working.First(r =>
+                r.DedupeGroupId == group.Key && r.ImportAction == "import");
+            foreach (var merged in group)
+                aliases[merged.Raw.LegacyOid] = canonical.Raw.LegacyOid;
+        }
+
+        return aliases;
+    }
+
     internal sealed record TransformBatchResult(List<Dictionary<string, object?>> ImportRows, int DedupeMergedCount);
 
     private sealed class WorkingRow(Visa2014PersonRawRow Raw)
@@ -341,7 +381,9 @@ internal static class Visa2014PersonTransform
         row["_legacy_MaritalStatusText"] = raw.LegacyMaritalStatusText;
 
         row["VisaApplicationFamilyMembersText"] =
-            string.IsNullOrWhiteSpace(raw.LegacyMaritalStatusText) ? null : raw.LegacyMaritalStatusText.Trim();
+            Visa2014FamilyMembersTextMapper.FromLegacyStatusL(
+                raw.LegacyMaritalStatusText,
+                raw.LegacyMaritalStatusStatus);
 
         return row;
     }

@@ -1,0 +1,46 @@
+# VISA legacy SQL sources — one profile per company deployment
+#
+# NAMING (do not confuse):
+#   VISA2014 = legacy application / git repo name (folder legacy/visa2014/, CLI --import-visa2014)
+#   VISA2015 = legacy SQL Server DATABASE name (Initial Catalog in connection strings)
+#   There is no database named VISA2014 or VISA2025 in this migration.
+#
+# Each company: one legacy VISA2015 database (or separate attach) → one Visa2026 deployment.
+# Default CLI: --legacy-source calik-energi
+#
+# Override connection: --connection "..." or env VISA2014_SQL_CONNECTION
+# SQL auth password: env VISA2014_SQL_PASSWORD (never commit passwords to this file)
+# Canonical doc: docs/VISA2014_MIGRATION/MULTI_COMPANY_LEGACY_SOURCES.md
+#
+# Company is selected by --legacy-source (calik-energi | gap-insaat), not by SQL database name alone.
+# Both companies use database name VISA2015 when attached on SQLEXPRESS (swap .mdf between imports).
+
+version: 1
+defaultSource: calik-energi
+
+sources:
+  - id: calik-energi
+    label: Çalik Enerji
+    companyProfile: Çalyk Enerji Sanaýi we Tijaret A.Ş.
+    legacyDatabase: VISA2015
+    connectionString: "Server=localhost\\SQLEXPRESS;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: local-calik
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    previewOutput:
+      Person: preview-export/Person-preview.calik-energi.xlsx
+    idMapDir: id-maps/calik-energi
+
+  - id: gap-insaat
+    label: Gap İnşaat
+    companyProfile: Gap İnşaat (legacy VISA2015 snapshot)
+    legacyDatabase: VISA2015
+    connectionString: "Server=localhost\\SQLEXPRESS;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: gap-on-prem
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.gap-insaat.yaml
+    previewOutput:
+      Person: preview-export/Person-preview.gap-insaat.xlsx
+    idMapDir: id-maps/gap-insaat

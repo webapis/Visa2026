@@ -1,0 +1,62 @@
+# Gap İnşaat — company-specific lookup overrides (VISA2015)
+#
+# Merged after lookup-translations.yaml (shared catalogs).
+# ProjectContract: experimental pilot — all legacy Gap contract codes → tenant GT-15 on Calik-style seed.
+
+version: 1
+
+catalogs:
+  - targetCatalog: ProjectContract
+    targetMatchProperty: Code
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Contract
+      column: NumberOfContract
+      valueKind: string
+    audit:
+      completedAt: 2026-06-21
+      scope: Person
+      legacySource: VISA2015
+      company: gap-insaat
+      distinctLegacyValuesPersonUnionApplication: 15
+      approvedDecision: "Experimental pilot — all legacy Gap codes → GT-15 when target tenant is Calik Enerji seed"
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.md
+      canonicalTargetCode: GT-15
+    values:
+      - legacy: KGF-13811
+        target: GT-15
+      - legacy: ARM-2462
+        target: GT-15
+      - legacy: TLP-13678
+        target: GT-15
+      - legacy: FIZ-2464
+        target: GT-15
+      - legacy: YAN-640
+        target: GT-15
+      - legacy: "?MRK-1609-050"
+        target: GT-15
+      - legacy: ESTETIK-938
+        target: GT-15
+      - legacy: ONK-421
+        target: GT-15
+      - legacy: ATP-744
+        target: GT-15
+      - legacy: DH2-422
+        target: GT-15
+      - legacy: PDR-420
+        target: GT-15
+      - legacy: HKB-2465
+        target: GT-15
+      - legacy: END-14339
+        target: GT-15
+      - legacy: "Elektron ?14999"
+        target: GT-15
+      - legacy: TAPT-314
+        target: GT-15
+        notes: Application-only in legacy sample
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Gap İnşaat VISA2015 — legacy NumberOfContract values do not exist in Calik Energi tenant seed.
+      Use only when importing Gap legacy into a deployment that shares Calik tenant contract catalog.
+      For Gap's own deployment, seed Gap-specific project-contract.json rows instead of GT-15 remap.

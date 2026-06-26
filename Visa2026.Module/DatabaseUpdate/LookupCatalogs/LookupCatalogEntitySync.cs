@@ -290,6 +290,13 @@ internal static class LookupCatalogEntitySync
     {
         if (definition.MatchKey == LookupCatalogMatchKey.NameTmTitle)
         {
+            if (row is ProjectContract contract && !string.IsNullOrWhiteSpace(contract.LocalizationKey))
+                return "L:" + LookupCatalogMatchHelper.NormalizeKey(contract.LocalizationKey);
+
+            var titleLocKey = GetPropertyString(row, "LocalizationKey");
+            if (!string.IsNullOrWhiteSpace(titleLocKey))
+                return "L:" + LookupCatalogMatchHelper.NormalizeKey(titleLocKey);
+
             var titleNameTm = row is LookupBase lookupTitle
                 ? lookupTitle.NameTm
                 : GetPropertyString(row, "NameTm");
@@ -461,11 +468,104 @@ internal static class LookupCatalogEntitySync
     /// </summary>
     private static object? FindByNameTmTitle(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
     {
+        if (entityType == typeof(ProjectContract))
+        {
+            var byProjectContract = FindProjectContractForCatalogRow(objectSpace, row);
+            if (byProjectContract != null)
+                return byProjectContract;
+        }
+
         var nameTm = GetString(row, "NameTm");
         if (string.IsNullOrWhiteSpace(nameTm))
             return null;
 
         return FindByProperty(objectSpace, entityType, "NameTm", nameTm);
+    }
+
+    private static object? FindProjectContractForCatalogRow(
+        IObjectSpace objectSpace,
+        Dictionary<string, JsonElement> row)
+    {
+        var localizationKey = GetString(row, "LocalizationKey");
+        if (!string.IsNullOrWhiteSpace(localizationKey))
+        {
+            var byKey = FindProjectContractsByProperty(objectSpace, nameof(LookupBase.LocalizationKey), localizationKey);
+            if (byKey.Count > 0)
+                return SelectProjectContractKeeper(objectSpace, byKey);
+        }
+
+        var nameTm = GetString(row, "NameTm");
+        var code = GetString(row, "Code") ?? nameTm;
+        if (!string.IsNullOrWhiteSpace(nameTm))
+        {
+            var byNameTm = FindByProperty(objectSpace, typeof(ProjectContract), "NameTm", nameTm);
+            if (byNameTm != null)
+                return byNameTm;
+        }
+
+        if (string.IsNullOrWhiteSpace(code))
+            return null;
+
+        var legacyMatches = objectSpace.GetObjects(typeof(ProjectContract))
+            .Cast<ProjectContract>()
+            .Where(c =>
+                LegacyProjectContractTitleStartsWithCode(c.NameTm, code)
+                || (!string.IsNullOrWhiteSpace(nameTm) && TitleMatches(c, nameTm)))
+            .ToList();
+
+        if (legacyMatches.Count == 0)
+            return null;
+
+        return SelectProjectContractKeeper(objectSpace, legacyMatches);
+    }
+
+    private static List<ProjectContract> FindProjectContractsByProperty(
+        IObjectSpace objectSpace,
+        string propertyName,
+        string value) =>
+        objectSpace.GetObjects(typeof(ProjectContract))
+            .Cast<ProjectContract>()
+            .Where(c => CatalogFieldEquals(c, propertyName, value))
+            .ToList();
+
+    private static ProjectContract SelectProjectContractKeeper(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ProjectContract> matches) =>
+        matches
+            .OrderByDescending(c => CountProjectContractReferences(objectSpace, c))
+            .ThenByDescending(c => c.Description?.Length ?? 0)
+            .ThenBy(c => c.NameTm?.Length ?? int.MaxValue)
+            .ThenBy(c => c.ID)
+            .First();
+
+    private static int CountProjectContractReferences(IObjectSpace objectSpace, ProjectContract contract)
+    {
+        var id = contract.ID;
+        int count = objectSpace.GetObjects(typeof(Person)).Cast<Person>()
+            .Count(p => p.ProjectContract?.ID == id);
+        count += objectSpace.GetObjects(typeof(Application)).Cast<Application>()
+            .Count(a => a.ProjectContract?.ID == id);
+        count += objectSpace.GetObjects(typeof(UserReportTemplateProjectContract))
+            .Cast<UserReportTemplateProjectContract>()
+            .Count(l => l.ProjectContractId == id);
+        return count;
+    }
+
+    private static bool LegacyProjectContractTitleStartsWithCode(string? nameTm, string? code)
+    {
+        if (string.IsNullOrWhiteSpace(nameTm) || string.IsNullOrWhiteSpace(code))
+            return false;
+
+        var title = nameTm.Trim();
+        var shortCode = code.Trim();
+        if (!title.StartsWith(shortCode, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (title.Length == shortCode.Length)
+            return true;
+
+        var separator = title[shortCode.Length];
+        return separator is ' ' or '-' or '—';
     }
 
     private static object? FindByProperty(IObjectSpace objectSpace, Type entityType, string propertyName, string? value)

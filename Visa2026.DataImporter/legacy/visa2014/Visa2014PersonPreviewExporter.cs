@@ -14,21 +14,22 @@ internal static class Visa2014PersonPreviewExporter
 {
     public static Visa2014PersonImportBatch PrepareImportBatch(
         string connectionString,
-        string lookupTranslationsPath,
+        IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
         bool verbose) =>
-        Visa2014PersonTransform.PrepareImportBatch(connectionString, lookupTranslationsPath, maxRows, verbose);
+        Visa2014PersonTransform.PrepareImportBatch(connectionString, lookupTranslationPaths, maxRows, verbose);
 
     public static Visa2014PreviewExportResult Export(
         string connectionString,
-        string lookupTranslationsPath,
+        IReadOnlyList<string> lookupTranslationPaths,
         string outputPath,
         int? maxRows,
-        bool verbose)
+        bool verbose,
+        string? legacySourceId = null)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outputPath))!);
 
-        var batch = PrepareImportBatch(connectionString, lookupTranslationsPath, maxRows, verbose);
+        var batch = PrepareImportBatch(connectionString, lookupTranslationPaths, maxRows, verbose);
 
         var metaRows = new List<IReadOnlyDictionary<string, object?>>
         {
@@ -41,6 +42,8 @@ internal static class Visa2014PersonPreviewExporter
             Row("_key", "dedupeMergedCount", batch.DedupeMergedCount),
             Row("_key", "fieldMap", "legacy/visa2014/field-maps/Person.yaml"),
         };
+        if (!string.IsNullOrWhiteSpace(legacySourceId))
+            metaRows.Add(Row("_key", "legacySource", legacySourceId));
 
         var writtenPath = Visa2014MinimalXlsxWriter.WriteWorkbook(outputPath,
         [

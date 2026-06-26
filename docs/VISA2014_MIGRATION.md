@@ -32,7 +32,7 @@ Plan for importing production data from the legacy **VISA2014** application into
 
 ## Environment layout
 
-**Naming:** legacy **git repo / app** = **VISA2014**; legacy **SQL database** = **`VISA2015`** (as in SSMS).
+**Naming:** legacy **git repo / app** = **VISA2014**; legacy **SQL database** = **`VISA2015`** only (as in SSMS). There is **no** database named `VISA2014`. CLI flags and folders may say `visa2014` for the product — that does **not** change the SQL catalog name.
 
 ### Source of truth (legacy side)
 

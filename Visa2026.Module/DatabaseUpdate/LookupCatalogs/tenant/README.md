@@ -28,6 +28,8 @@ Full behavior: [`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`](../../../../docs/LOOKU
 
 For a new customer deployment, replace these files with that customer's data.
 
+**Çalik Energi (VISA2015 import):** canonical catalog is `project-contract.calik-energi.json` (73 union `NumberOfContract` codes). The embedded `project-contract.json` stays a **3-row greenfield demo** (GT-15 / Şatlyk-1). For Çalik LocalDB or pilot deploy, copy the calik file to disk overlay as `project-contract.json` (see `docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.calik-energi.md`). Regenerate from VISA2015: `scripts/local/Generate-ProjectContractCalikEnergiCatalog.ps1`.
+
 **`department.json`:** Main once shipped an empty file so deploy does not seed another company's department names. This repo keeps a **minimal demo set** (names used by `Visa2026.DataImporter/seed/scenarios`) so reference imports work. Replace with your organization's departments before production; maintain extras in the Blazor UI if needed.
 
 **Tenant application users** (not a lookup catalog — separate seed file):

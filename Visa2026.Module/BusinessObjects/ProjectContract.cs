@@ -23,7 +23,7 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance(
         "ProjectContract_HideCatalogScalars",
         AppearanceItemType = "ViewItem",
-        TargetItems = "Code;IsDefault;Description",
+        TargetItems = "Code;IsDefault",
         Visibility = ViewItemVisibility.Hide,
         Context = "DetailView,ListView,LookupListView")]
     public class ProjectContract : LookupBase
@@ -44,11 +44,12 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual MinistryReviewDepth MinistryReviewDepth { get; set; } = MinistryReviewDepth.FirstMinistryOnly;
 
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        [VisibleInLookupListView(false)]
-        [MaxLength(500)]
+       // [Browsable(false)]
+       // [VisibleInDetailView(false)]
+       // [VisibleInListView(false)]
+       // [VisibleInLookupListView(false)]
+        [MaxLength(2000)]
+        [ModelDefault("RowCount", "4")]
         public virtual string Description { get; set; }
 
         public virtual bool IsActive { get; set; } = true;

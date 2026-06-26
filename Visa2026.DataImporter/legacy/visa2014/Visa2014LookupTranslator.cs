@@ -10,45 +10,57 @@ internal sealed class Visa2014LookupCatalog
     public required string TargetCatalog { get; init; }
     public required string TargetMatchProperty { get; init; }
     public required string UnmappedPolicy { get; init; }
+    public bool IdentityPassThrough { get; init; }
     public Dictionary<string, string> LegacyToTarget { get; init; } = new(StringComparer.Ordinal);
 }
 
 internal static class Visa2014LookupTranslator
 {
-    public static IReadOnlyDictionary<string, Visa2014LookupCatalog> Load(string yamlPath)
-    {
-        if (!File.Exists(yamlPath))
-            throw new FileNotFoundException("lookup-translations.yaml not found.", yamlPath);
+    public static IReadOnlyDictionary<string, Visa2014LookupCatalog> Load(string yamlPath) =>
+        Load(new[] { yamlPath });
 
-        var yaml = File.ReadAllText(yamlPath);
+    public static IReadOnlyDictionary<string, Visa2014LookupCatalog> Load(IReadOnlyList<string> yamlPaths)
+    {
+        if (yamlPaths.Count == 0)
+            throw new ArgumentException("At least one lookup translations path is required.", nameof(yamlPaths));
+
         var deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
             .Build();
 
-        var root = deserializer.Deserialize<LookupRoot>(yaml);
         var result = new Dictionary<string, Visa2014LookupCatalog>(StringComparer.Ordinal);
 
-        foreach (var catalog in root.Catalogs ?? [])
+        foreach (var yamlPath in yamlPaths)
         {
-            if (string.IsNullOrWhiteSpace(catalog.TargetCatalog))
-                continue;
+            if (!File.Exists(yamlPath))
+                throw new FileNotFoundException("Lookup translations file not found.", yamlPath);
 
-            var map = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var row in catalog.Values ?? [])
+            var yaml = File.ReadAllText(yamlPath);
+            var root = deserializer.Deserialize<LookupRoot>(yaml);
+
+            foreach (var catalog in root.Catalogs ?? [])
             {
-                if (string.IsNullOrWhiteSpace(row.Legacy) || string.IsNullOrWhiteSpace(row.Target))
+                if (string.IsNullOrWhiteSpace(catalog.TargetCatalog))
                     continue;
-                map[row.Legacy.Trim()] = row.Target.Trim();
-            }
 
-            result[catalog.TargetCatalog] = new Visa2014LookupCatalog
-            {
-                TargetCatalog = catalog.TargetCatalog,
-                TargetMatchProperty = catalog.TargetMatchProperty ?? "Name",
-                UnmappedPolicy = catalog.UnmappedPolicy ?? "block_row",
-                LegacyToTarget = map,
-            };
+                var map = new Dictionary<string, string>(StringComparer.Ordinal);
+                foreach (var row in catalog.Values ?? [])
+                {
+                    if (string.IsNullOrWhiteSpace(row.Legacy) || string.IsNullOrWhiteSpace(row.Target))
+                        continue;
+                    map[row.Legacy.Trim()] = row.Target.Trim();
+                }
+
+                result[catalog.TargetCatalog] = new Visa2014LookupCatalog
+                {
+                    TargetCatalog = catalog.TargetCatalog,
+                    TargetMatchProperty = catalog.TargetMatchProperty ?? "Name",
+                    UnmappedPolicy = catalog.UnmappedPolicy ?? "block_row",
+                    IdentityPassThrough = catalog.IdentityPassThrough,
+                    LegacyToTarget = map,
+                };
+            }
         }
 
         return result;
@@ -89,6 +101,12 @@ internal static class Visa2014LookupTranslator
             }
         }
 
+        if (catalog.IdentityPassThrough)
+        {
+            targetValue = trimmed;
+            return true;
+        }
+
         unmappedReason = $"unmapped_lookup:{catalogName}:{trimmed}";
         return catalog.UnmappedPolicy is "allow_null" or "skip_row";
     }
@@ -103,6 +121,7 @@ internal static class Visa2014LookupTranslator
         public string? TargetCatalog { get; set; }
         public string? TargetMatchProperty { get; set; }
         public string? UnmappedPolicy { get; set; }
+        public bool IdentityPassThrough { get; set; }
         public List<ValueNode>? Values { get; set; }
     }
 

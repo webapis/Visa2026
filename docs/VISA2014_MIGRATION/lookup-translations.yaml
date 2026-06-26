@@ -6,8 +6,8 @@
 # Person discovery (2026-06-20): Gender + Country samples below.
 # MaritalStatus: approved 2026-06-21 — Status int 0–5 → Visa2026 Code (not StatusL narrative).
 # Relationship: approved 2026-06-21 — RelativeAsL → NameTm; Mother + BrotherInLaw added to target catalog.
-# ProjectContract: approved 2026-06-21 — experimental remap all legacy codes → tenant GT-15 (Gap Insaat → Calik Enerji pilot).
-# Lookup review gate: complete person-wave in lookup-comparisons/lookup-review-queue.yaml before Person importConfirmed.
+# ProjectContract: company-specific — see lookup-translations.calik-energi.yaml / lookup-translations.gap-insaat.yaml
+# Lookup review gate: person-wave in lookup-comparisons/lookup-review-queue.yaml (per legacy source).
 
 version: 1
 
@@ -308,67 +308,48 @@ catalogs:
       Do NOT use RelativeAs int alone (codes 3 and 6 are ambiguous in legacy table).
       Only 159/2569 Person rows have FamilyMemberRelation FK (family members).
 
-  - targetCatalog: ProjectContract
-    targetMatchProperty: Code
+  - targetCatalog: PassportType
+    targetMatchProperty: LocalizationKey
     legacy:
       storage: legacy_lookup_table
-      table: dbo.Contract
-      column: NumberOfContract
-      valueKind: string
+      table: dbo.PassportType
+      column: TypeOfPassportL
+      valueKind: composite
+      compositeColumns: [TypeOfPassportL, mgCode]
+      compositeKeyFormat: "{0}:{1}"
       sampleQuery: |
-        SELECT LTRIM(RTRIM(c.NumberOfContract)) AS NumberOfContract, COUNT(*) AS cnt
-        FROM dbo.Person p
-        INNER JOIN dbo.Contract c ON p.Contract = c.Oid
-        WHERE p.GCRecord IS NULL AND c.GCRecord IS NULL
-        GROUP BY LTRIM(RTRIM(c.NumberOfContract))
+        SELECT pt.TypeOfPassportL, ISNULL(pt.mgCode, '') AS mgCode, COUNT(*) AS cnt
+        FROM dbo.Passport pp
+        INNER JOIN dbo.PassportType pt ON pp.PassportType = pt.Oid
+        WHERE pp.GCRecord IS NULL
+        GROUP BY pt.TypeOfPassportL, pt.mgCode
         ORDER BY cnt DESC;
     audit:
-      completedAt: 2026-06-21
-      scope: Person
-      distinctLegacyValuesUsed: 14
-      distinctLegacyValuesPersonUnionApplication: 15
+      completedAt: 2026-06-26
+      scope: Passport
+      distinctLegacyValuesUsed: 5
       allMappedToTarget: true
-      approvedDecision: "Experimental pilot — all legacy Gap Insaat codes → tenant GT-15 (Calik Enerji seed)"
-      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.md
-      canonicalTargetCode: GT-15
-      canonicalTargetNameTm: "GT-15 — (2 ylalaşyk: türkmenenergo > energetika)"
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/PassportType.md
     values:
-      - legacy: KGF-13811
-        target: GT-15
-      - legacy: ARM-2462
-        target: GT-15
-      - legacy: TLP-13678
-        target: GT-15
-      - legacy: FIZ-2464
-        target: GT-15
-      - legacy: YAN-640
-        target: GT-15
-      - legacy: "?MRK-1609-050"
-        target: GT-15
-      - legacy: ESTETIK-938
-        target: GT-15
-      - legacy: ONK-421
-        target: GT-15
-      - legacy: ATP-744
-        target: GT-15
-      - legacy: DH2-422
-        target: GT-15
-      - legacy: PDR-420
-        target: GT-15
-      - legacy: HKB-2465
-        target: GT-15
-      - legacy: END-14339
-        target: GT-15
-      - legacy: "Elektron ?14999"
-        target: GT-15
-      - legacy: TAPT-314
-        target: GT-15
-        notes: Application-only in legacy sample; same pilot remap
-    unmappedPolicy: allow_null
-    unmappedDefault: null
+      - legacy: "AD:P"
+        target: P
+        notes: National passport — 3383 rows
+      - legacy: "AD:"
+        target: P
+        notes: Deleted legacy type row — 228 rows
+      - legacy: "GL:PG"
+        target: PG
+        notes: Service passport — 70 rows
+      - legacy: "GL:"
+        target: PG
+        notes: Deleted legacy type row — 2 rows
+      - legacy: "DP:PD"
+        target: PD
+      - legacy: "DP:"
+        target: PD
+        notes: Diplomatic — 1 row (deleted type)
+    unmappedPolicy: use_default
+    unmappedDefault: P
     notes: |
-      Tenant catalog (Calik Enerji dev seed). Legacy VISA2015 data is Gap Insaat — not a 1:1 contract catalog import.
-      Approved 2026-06-21: semantic remap every legacy NumberOfContract → Code GT-15 for experimental OData pilot.
-      Two GT-15 rows exist in tenant JSON (2-leg vs 4-leg); OData resolve uses Code GT-15 — prefer 2-leg NameTm variant if disambiguation required.
-      Family members (159) have null Contract — allow_null. Employees (2410) all map to GT-15.
-      Production cutover will require real tenant contract rows (E1) or company-specific tenant JSON.
+      Approved 2026-06-26 for Passport import. mgCode null → empty suffix in composite key.
+      See lookup-comparisons/PassportType.md. ApplicationItem FK audit deferred to Application wave.

@@ -17,13 +17,29 @@ implementationBlocked: false     # set false only when status: approved
 
 strategy:
   legacyDatabase: VISA2015
+  defaultLegacySource: calik-energi
+  legacySqlAuth:
+    user: ReadOnlyUser
+    passwordEnv: VISA2014_SQL_PASSWORD
+  multiCompany:
+    model: one_legacy_db_per_deployment
+    canonicalArtifact: Visa2026.DataImporter/legacy/visa2014/legacy-sources.yaml
+    doc: docs/VISA2014_MIGRATION/MULTI_COMPANY_LEGACY_SOURCES.md
+    sources:
+      - id: calik-energi
+        legacyDatabase: VISA2015
+        targetTenant: Çalik Enerji (tenant JSON seed)
+        notes: SQL database may be named VISA2015 on SQLEXPRESS; use ReadOnlyUser + VISA2014_SQL_PASSWORD
+      - id: gap-insaat
+        legacyDatabase: VISA2015
+        targetTenant: Gap İnşaat (future deployment)
   legacySourceOfTruth: sql         # sql | repo — always sql for this project
   targetWritePath: OData
   importer: Visa2026.DataImporter
   cliFlag: --import-visa2014
   mappingArtifacts: yaml
   legacyGuidPolicy: id-map         # do not reuse legacy GUIDs as Visa2026 ID
-  lookupPolicy: translate_only     # never import VISA2015 lookup tables; use Visa2026 seed + lookup-translations.yaml
+  lookupPolicy: translate_only     # never import legacy lookup tables; use Visa2026 seed + lookup-translations*.yaml
   dedupePolicy: before_post
   firstTargetDatabase: Visa2026DbDev
   attachmentsWave: last

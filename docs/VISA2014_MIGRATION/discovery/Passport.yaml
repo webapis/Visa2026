@@ -1,0 +1,100 @@
+# Discovery dossier — Passport (person-domain child BO)
+# dependsOn: Person — full Person id-map required before OData POST.
+
+targetODataEntity: Passport
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  legacySource: calik-energi
+  reviewNotes: |
+    SQL discovery complete 2026-06-26 (VISA2015, calik-energi).
+    PassportType layer-3 approved in lookup-comparisons/PassportType.md.
+    Excel preview export not yet run (CLI supports Person only today).
+    importConfirmed after Passport-preview Excel + full Person id-map on target.
+
+legacy:
+  boClass: Passport
+  boPath: VISA2014.Module/DC/IPassport.cs
+  tables:
+    - dbo.Passport
+    - dbo.PassportType
+    - dbo.Country
+  rowCount: 3684
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Passport.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Passport.yaml
+  tableMappingId: passport-main
+  cardinality: one_legacy_row_per_passport
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - PassportType
+    - Country
+  duplicateGroups: 4
+  legacyOnlyCount: 8
+  targetOnlyCount: 2
+  mismatchCount: 1
+  blockedReason: null
+  notes: |
+    Import ALL active passport rows (353 persons have >1 passport — expected).
+    Person FK via Person id-map (legacy Passport.Person → Visa2026 Person.ID).
+    Skip 18 rows where Person FK missing or person soft-deleted.
+    PassportType: composite TypeOfPassportL + mgCode → Visa2026 LocalizationKey (see PassportType.md).
+    IssuedCountry ← PassportIssuedCountry (Country.Code); Citizenship legacy column not on Visa2026 Passport BO.
+    4 duplicate PassportNumber groups (2 real + 2 sentinel placeholders) — see field-map dedupe rules.
+    Requires full Person OData import + id-map before pilot POST.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: false
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-26
+completedBy: agent session — Passport discovery (Çalik VISA2015)
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 3684
+  distinctPersons: 3241
+  multiPassportPersons: 353
+  orphanPersonFk: 18
+  distinctPassportNumbers: 3668
+  duplicatePassportNumberGroups: 4
+  nullRequiredScalars: 0
+  passportTypeBreakdown:
+    - legacy: "AD + mgCode P"
+      rows: 3383
+      target: "P (Milli pasport)"
+    - legacy: "AD + mgCode null (deleted type row)"
+      rows: 228
+      target: "P"
+    - legacy: "GL + mgCode PG"
+      rows: 70
+      target: "PG (Gulluk pasporty)"
+    - legacy: "GL + mgCode null"
+      rows: 2
+      target: "PG"
+    - legacy: "DP + mgCode PD"
+      rows: 0
+      target: "PD"
+    - legacy: "DP + mgCode null (deleted type row)"
+      rows: 1
+      target: "PD"

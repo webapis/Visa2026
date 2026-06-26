@@ -6,13 +6,15 @@ discoveryStatus: complete
 
 importConfirmation:
   importConfirmed: true
-  importConfirmedAt: 2026-06-21
+  importConfirmedAt: 2026-06-26
   importConfirmedBy: developer
+  legacySource: calik-energi
   reviewNotes: |
-    Person-preview.xlsx reviewed; person-wave lookups complete 2026-06-21.
-    MaritalStatus, Relationship, ProjectContract layer 3 approved.
-    ProjectContract: experimental remap all legacy codes → GT-15 (Gap Insaat data / Calik Energi tenant).
-    Pilot OData import may proceed when --import-visa2014 Person is implemented.
+    Person-preview.calik-energi.xlsx reviewed 2026-06-26 (VISA2015 on SQLEXPRESS, ReadOnlyUser).
+    3241 legacy rows → 2924 import + 274 dedupe merged + 43 skipped; 25 unmapped lookups.
+    Unicode fix: SqlClient replaces sqlcmd for Turkish/Turkmen text.
+    ProjectContract: identity pass-through; tenant seed still needs expansion for 60 legacy codes.
+    Pilot OData import (--import-visa2014 --entity Person) may proceed.
 
 legacy:
   boClass: Person

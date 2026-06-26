@@ -9,6 +9,7 @@ internal sealed class Visa2014ODataLookupResolver
     private List<MaritalStatus> _maritalStatuses = [];
     private List<Relationship> _relationships = [];
     private List<ProjectContract> _projectContracts = [];
+    private List<Subcontractor> _subcontractors = [];
 
     public async Task LoadAsync(ApiClient api)
     {
@@ -17,6 +18,7 @@ internal sealed class Visa2014ODataLookupResolver
         _maritalStatuses = await api.GetAllAsync<MaritalStatus>("MaritalStatus");
         _relationships = await api.GetAllAsync<Relationship>("Relationship");
         _projectContracts = await api.GetAllAsync<ProjectContract>("ProjectContract");
+        _subcontractors = await api.GetAllAsync<Subcontractor>("Subcontractor");
     }
 
     public Guid? ResolveGender(string? translatedCode) =>
@@ -36,8 +38,10 @@ internal sealed class Visa2014ODataLookupResolver
         if (string.IsNullOrWhiteSpace(translatedCode))
             return null;
 
+        // ProjectContract.Code is not mapped in EF — OData rows match by NameTm title prefix.
         var matches = _projectContracts
-            .Where(c => Visa2014CatalogMatchHelper.KeysEqual(c.Code, translatedCode))
+            .Where(c => ProjectContractTitleMatches(c.NameTm, translatedCode)
+                        || Visa2014CatalogMatchHelper.KeysEqual(c.Code, translatedCode))
             .ToList();
 
         if (matches.Count == 0)
@@ -51,6 +55,28 @@ internal sealed class Visa2014ODataLookupResolver
             c.NameTm.Contains("2 ylalasyk", StringComparison.OrdinalIgnoreCase));
 
         return (preferred ?? matches[0]).Id;
+    }
+
+    public Guid? ResolveDefaultSubcontractor()
+    {
+        var preferred = _subcontractors.FirstOrDefault(s => s.IsDefault);
+        if (preferred != null)
+            return preferred.Id;
+
+        return _subcontractors.Count > 0 ? _subcontractors[0].Id : null;
+    }
+
+    private static bool ProjectContractTitleMatches(string? nameTm, string legacyCode)
+    {
+        if (string.IsNullOrWhiteSpace(nameTm))
+            return false;
+
+        var title = nameTm.Trim();
+        var code = legacyCode.Trim();
+        if (title.StartsWith(code, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return Visa2014CatalogMatchHelper.KeysEqual(title, code);
     }
 
     private static Guid? ResolveByCode<T>(
@@ -94,6 +120,7 @@ internal sealed class Visa2014ODataLookupResolver
         MaritalStatus m => m.Id,
         Relationship r => r.Id,
         ProjectContract p => p.Id,
+        Subcontractor s => s.Id,
         _ => throw new InvalidOperationException($"Unsupported lookup type {typeof(T).Name}"),
     };
 }
