@@ -60,11 +60,11 @@ $remoteDeployScp = "C:/visa2026-deploy/iis"
 $remotePublishWin = $ctx.PublishPath
 $remotePublishScp = ($ctx.PublishPath -replace '\\', '/')
 
-$defaultHttpsPort = Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile
+$smokeUrlHint = Get-Visa2026SlotSmokeLoginPageUrl -Profile $Profile -HostName "127.0.0.1"
 
-Write-Host "==> Deploy slot: $($ctx.Profile) (HTTP $($ctx.HttpPort), HTTPS default $defaultHttpsPort, DB $($ctx.DbName))" -ForegroundColor Cyan
+Write-Host "==> Deploy slot: $($ctx.Profile) (HTTP $($ctx.HttpPort), DB $($ctx.DbName))" -ForegroundColor Cyan
 Write-Host "    Publish -> $remotePublishWin" -ForegroundColor DarkGray
-Write-Host "    Smoke     -> https://127.0.0.1:$defaultHttpsPort/LoginPage (on server)" -ForegroundColor DarkGray
+Write-Host "    Smoke     -> $smokeUrlHint (on server)" -ForegroundColor DarkGray
 
 Write-Host "==> SSH test $SshHost" -ForegroundColor Cyan
 ssh -o BatchMode=yes -o ConnectTimeout=15 $SshHost "whoami"
@@ -90,6 +90,7 @@ $scriptFiles = @(
     "Diagnose-Port80.ps1",
     "Enable-Visa2026IisSlotFirewall.ps1",
     "Enable-Visa2026IisHttps.ps1",
+    "Disable-Visa2026IisHttps.ps1",
     "Invoke-Visa2026IisSlotConfigure.ps1",
     "Invoke-Visa2026IisSlotSmokeTest.ps1",
     "Ensure-Visa2026SlotHttpsEnv.ps1",
@@ -154,7 +155,8 @@ if ($LASTEXITCODE -ne 0 -or $smokeResult -ne "200") {
 
 Write-Host ""
 Write-Host "Deploy finished - $($ctx.Profile)." -ForegroundColor Green
-Write-Host "  Officer URL: https://10.100.128.25:$defaultHttpsPort/LoginPage" -ForegroundColor Green
+$officerUrl = Get-Visa2026SlotSmokeLoginPageUrl -Profile $Profile -HostName "10.100.128.25"
+Write-Host "  Officer URL: $officerUrl" -ForegroundColor Green
 if ($EnableForceXafDbUpdate) {
     Write-Host "  FORCE_XAF_DB_UPDATE is ON for $($ctx.AppPoolName). Remove after verify:" -ForegroundColor Yellow
     Write-Host "  Remove-Visa2026ForceXafDbUpdate.ps1 -Profile $Profile" -ForegroundColor Yellow
