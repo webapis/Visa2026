@@ -992,12 +992,47 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Şablony redaktirle",
             ["ru-RU"] = "Редактировать шаблон",
         },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Change template folder",
+            ["tr-TR"] = "Şablon klasörünü değiştir",
+            ["tk-TM"] = "Şablon papkasyny çalyş",
+            ["ru-RU"] = "Изменить папку шаблонов",
+        },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolderFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Choose a template folder first (button below). Use AppData: paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar, create the folder if needed, then Select Folder.",
+            ["tr-TR"] = "Önce şablon klasörü seçin (aşağıdaki düğme). AppData: seçicide %LOCALAPPDATA%\\Visa2026\\TemplateEdit yapıştırın, gerekirse klasörü oluşturun, Klasörü Seç.",
+            ["tk-TM"] = "Ilki şablon papkasyny saýlaň (aşakdaky düwme). AppData: saýlawda %LOCALAPPDATA%\\Visa2026\\TemplateEdit goýuň, gerek bolsa papka dörediň, Papkany saýla.",
+            ["ru-RU"] = "Сначала выберите папку шаблонов (кнопка ниже). AppData: вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку, создайте папку при необходимости, затем «Выбрать папку».",
+        },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolderHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In the folder picker, paste this path in the address bar, press Enter, then Select Folder: {0}",
+            ["tr-TR"] = "Klasör seçicide adres çubuğuna bu yolu yapıştırın, Enter'a basın, ardından Klasörü Seç: {0}",
+            ["tk-TM"] = "Papka saýlawda salgy setirine şu ýoly goýuň, Enter basyň, soň Papkany saýla: {0}",
+            ["ru-RU"] = "В окне выбора папки вставьте этот путь в адресную строку, нажмите Enter, затем «Выбрать папку»: {0}",
+        },
+        ["ApplicationReportPackage.EditTemplate.ChooseFolderProtectedRoot"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "That folder is blocked by the browser. Paste %LOCALAPPDATA%\\Visa2026\\TemplateEdit in the picker address bar (create folders if needed), then Select Folder.",
+            ["tr-TR"] = "Tarayıcı bu klasörü engelledi. Seçicide %LOCALAPPDATA%\\Visa2026\\TemplateEdit yapıştırın (gerekirse oluşturun), Klasörü Seç.",
+            ["tk-TM"] = "Brauzer bu papkany bloklady. Saýlawda %LOCALAPPDATA%\\Visa2026\\TemplateEdit goýuň (gerek bolsa dörediň), Papkany saýla.",
+            ["ru-RU"] = "Браузер заблокировал эту папку. Вставьте %LOCALAPPDATA%\\Visa2026\\TemplateEdit в адресную строку (создайте папки при необходимости), затем «Выбрать папку».",
+        },
         ["ApplicationReportPackage.EditTemplate.CopyPath"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Copy path",
             ["tr-TR"] = "Yolu kopyala",
             ["tk-TM"] = "Ýoly göçür",
             ["ru-RU"] = "Копировать путь",
+        },
+        ["ApplicationReportPackage.EditTemplate.Downloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Downloaded \"{0}\" ({1}). Open it in Word or Excel, save, then click Sync to database and choose this file.",
+            ["tr-TR"] = "\"{0}\" indirildi ({1}). Word veya Excel'de açın, kaydedin, ardından Veritabanına senkronize et'e tıklayıp bu dosyayı seçin.",
+            ["tk-TM"] = "\"{0}\" göçürildi ({1}). Word ýa-da Excel-de açyň, ýazdyryň, soň Maglumat bazasyna sinhronla basyp bu faýly saýlaň.",
+            ["ru-RU"] = "Скачан «{0}» ({1}). Откройте в Word или Excel, сохраните, затем нажмите «Синхронизировать с базой» и выберите этот файл.",
         },
         ["ApplicationReportPackage.EditTemplate.ExportedOpenPath"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1008,10 +1043,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.ExportFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Could not export the template to the edit folder.",
-            ["tr-TR"] = "Şablon düzenleme klasörüne aktarılamadı.",
-            ["tk-TM"] = "Şablon redaktirleme papkasyna eksport edilmedi.",
-            ["ru-RU"] = "Не удалось экспортировать шаблон в папку редактирования.",
+            ["en-US"] = "Could not download the template file.",
+            ["tr-TR"] = "Şablon dosyası indirilemedi.",
+            ["tk-TM"] = "Şablon faýly göçürilmedi.",
+            ["ru-RU"] = "Не удалось скачать файл шаблона.",
         },
         ["ApplicationReportPackage.EditTemplate.Exporting"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1019,6 +1054,55 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Şablon dışa aktarılıyor…",
             ["tk-TM"] = "Şablon eksport edilýär…",
             ["ru-RU"] = "Экспорт шаблона…",
+        },
+        ["ApplicationReportPackage.EditTemplate.FolderReady"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Template folder changed: {0}.",
+            ["tr-TR"] = "Şablon klasörü değiştirildi: {0}.",
+            ["tk-TM"] = "Şablon papkasy çalşyryldy: {0}.",
+            ["ru-RU"] = "Папка шаблонов изменена: {0}.",
+        },
+        ["ApplicationReportPackage.EditTemplate.LocalExported"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exported \"{0}\" to your template folder ({1}\\{2}). Open the file in Word or Excel.",
+            ["tr-TR"] = "\"{0}\" şablon klasörünüze aktarıldı ({1}\\{2}). Word veya Excel'de açın.",
+            ["tk-TM"] = "\"{0}\" şablon papkaňyza geçirildi ({1}\\{2}). Word ýa-da Excel-de açyň.",
+            ["ru-RU"] = "«{0}» экспортирован в папку шаблонов ({1}\\{2}). Откройте файл в Word или Excel.",
+        },
+        ["ApplicationReportPackage.EditTemplate.LocalExportedOpen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exported \"{0}\" to {1}\\{2} and opened in Word or Excel.",
+            ["tr-TR"] = "\"{0}\" {1}\\{2} konumuna aktarıldı ve Word/Excel'de açıldı.",
+            ["tk-TM"] = "\"{0}\" {1}\\{2} - a geçirildi we Word/Excel-de açyldy.",
+            ["ru-RU"] = "«{0}» экспортирован в {1}\\{2} и открыт в Word или Excel.",
+        },
+        ["ApplicationReportPackage.EditTemplate.LocalFolderFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Could not use the local template folder. Use HTTPS and choose a folder first.",
+            ["tr-TR"] = "Yerel şablon klasörü kullanılamadı. HTTPS kullanın ve önce klasör seçin.",
+            ["tk-TM"] = "Ýerli şablon papkasy ulanylmady. HTTPS ulanyň we ilki papka saýlaň.",
+            ["ru-RU"] = "Не удалось использовать локальную папку шаблонов. Используйте HTTPS и сначала выберите папку.",
+        },
+        ["ApplicationReportPackage.EditTemplate.NeedsSyncFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Local template has unsaved changes. Click Sync to database before Edit template again.",
+            ["tr-TR"] = "Yerel şablonda kaydedilmemiş değişiklikler var. Düzenlemeden önce Veritabanına senkronize et'e tıklayın.",
+            ["tk-TM"] = "Ýerli şablonda maglumat bazasyna geçirilmedik üýtgeşmeler bar. Täzeden redaktir etmezden ozal Maglumat bazasyna sinhronla basyň.",
+            ["ru-RU"] = "В локальном шаблоне есть несинхронизированные изменения. Сначала нажмите «Синхронизировать с базой».",
+        },
+        ["ApplicationReportPackage.EditTemplate.OnDownloaded"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Downloaded",
+            ["tr-TR"] = "İndirildi",
+            ["tk-TM"] = "Göçürildi",
+            ["ru-RU"] = "Скачан",
+        },
+        ["ApplicationReportPackage.EditTemplate.OnLocalFolder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "In folder",
+            ["tr-TR"] = "Klasörde",
+            ["tk-TM"] = "Papkada",
+            ["ru-RU"] = "В папке",
         },
         ["ApplicationReportPackage.EditTemplate.OnShare"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1029,17 +1113,24 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.EditTemplate.PathCopied"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Path copied. Paste into Word File → Open if the document did not open: {0}",
+            ["en-US"] = "Path copied. If Word did not open, use File → Open (Ctrl+V) or open the folder in Explorer and double-click the file: {0}",
             ["tr-TR"] = "Yol kopyalandı. Belge açılmadıysa Word Dosya → Aç'a yapıştırın: {0}",
             ["tk-TM"] = "Ýol göçürildi. Resminama açylmadyk bolsa Word Faýl → Aç-a goýuň: {0}",
             ["ru-RU"] = "Путь скопирован. Если документ не открылся, вставьте в Word Файл → Открыть: {0}",
         },
+        ["ApplicationReportPackage.EditTemplate.SelectFolderFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Click 'Change template folder' to set up your template editing folder, then click Edit template.",
+            ["tr-TR"] = "Şablon düzenleme klasörünü ayarlamak için 'Şablon klasörünü değiştir'e tıklayın, ardından Şablonu düzenle'ye tıklayın.",
+            ["tk-TM"] = "Şablon redaktirlemek üçin 'Şablon papkasyny çalyş' basyň, soň Şablony redaktirle basyň.",
+            ["ru-RU"] = "Нажмите «Изменить папку шаблонов», чтобы настроить папку редактирования, затем нажмите «Редактировать шаблон».",
+        },
         ["ApplicationReportPackage.EditTemplate.Tooltip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Exports the template to the shared edit folder and opens it in Word or Excel. After saving, click Refresh.",
-            ["tr-TR"] = "Şablonu paylaşılan düzenleme klasörüne aktarır ve Word veya Excel'de açar. Kaydettikten sonra Yenile'ye tıklayın.",
-            ["tk-TM"] = "Şablony umumy redaktirleme papkasyna çykaryp, Word ýa-da Excel-de açýar. Ýazdyranyňyzdan soň Täzele basyň.",
-            ["ru-RU"] = "Экспортирует шаблон в общую папку редактирования и открывает в Word или Excel. После сохранения нажмите «Обновить».",
+            ["en-US"] = "Downloads the template file. Open it in Word or Excel, save your changes, then click Sync to database and choose the edited file.",
+            ["tr-TR"] = "Şablon dosyasını indirir. Word veya Excel'de açın, kaydedin, ardından Veritabanına senkronize et'e tıklayıp düzenlenen dosyayı seçin.",
+            ["tk-TM"] = "Şablon faýlyny göçürýär. Word ýa-da Excel-de açyň, ýazdyryň, soň Maglumat bazasyna sinhronla basyp redaktirlenen faýly saýlaň.",
+            ["ru-RU"] = "Скачивает файл шаблона. Откройте в Word или Excel, сохраните изменения, затем нажмите «Синхронизировать с базой» и выберите отредактированный файл.",
         },
         ["ApplicationReportPackage.Empty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1358,10 +1449,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.SyncTemplates.ImportFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Could not import templates from the edit share.",
-            ["tr-TR"] = "Düzenleme paylaşımından şablonlar içe aktarılamadı.",
-            ["tk-TM"] = "Redaktirleme paýlaşygynan şablonlar import edilmedi.",
-            ["ru-RU"] = "Не удалось импортировать шаблоны из папки редактирования.",
+            ["en-US"] = "Could not import the selected template file.",
+            ["tr-TR"] = "Seçilen şablon dosyası içe aktarılamadı.",
+            ["tk-TM"] = "Saýlanan şablon faýly import edilmedi.",
+            ["ru-RU"] = "Не удалось импортировать выбранный файл шаблона.",
         },
         ["ApplicationReportPackage.SyncTemplates.ImportSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1369,6 +1460,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Senkron: {0} içe aktarıldı, {1} değişmedi, {2} başarısız.",
             ["tk-TM"] = "Sinhron: {0} import edildi, {1} üýtgemedi, {2} şowsuz.",
             ["ru-RU"] = "Синхронизация: {0} импортировано, {1} без изменений, {2} ошибок.",
+        },
+        ["ApplicationReportPackage.SyncTemplates.NoLocalChanges"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No changes were imported. Choose the edited template file you saved after Edit template.",
+            ["tr-TR"] = "İçe aktarılan değişiklik yok. Şablonu düzenle'den sonra kaydettiğiniz dosyayı seçin.",
+            ["tk-TM"] = "Import edilen üýtgeşme ýok. Şablony redaktirle-den soň ýazdyran faýly saýlaň.",
+            ["ru-RU"] = "Изменения не импортированы. Выберите отредактированный файл, сохранённый после «Редактировать шаблон».",
         },
         ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

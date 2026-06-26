@@ -62,10 +62,20 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Deploy:** Republish → copy `C:\inetpub\visa2026` → `Run-Visa2026DbUpdateOnServer.ps1 -ForceUpdate` (exit 0) → `appcmd start apppool Visa2026`. Verify: `sys.views` has `View_VisaExtensionStatus`; `SELECT COUNT(*)` returns 0 on empty demo.
 - **Prevent:** Do not leave `FORCE_XAF_DB_UPDATE` on the app pool after greenfield update; use normal DB update on release unless schema drift.
 
-### 2026-06-01 — Multi-slot IIS (prod :80 / staging :8080 / demo :8081) (10.100.128.25)
+### 2026-06-01 — Multi-slot IIS (prod / staging / demo) (10.100.128.25)
 
 - **Problem:** Single site `Visa2026` + `Set-Visa2026EnvDbName.ps1` made it easy to point prod URL at demo DB by mistake.
 - **Fix:** [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots.ps1) + `Install-Visa2026IisSlots.ps1` — three sites/pools/publish folders/env files/DBs on one SQL Express instance.
-- **Ports:** Production **80**, Staging **8080**, Demo **8081**. Default Web Site moved to **`127.0.0.1:8090`** (not 8080) via `Set-Visa2026IisSlotsAutoStart.ps1`.
+- **Ports (HTTP bindings):** Production **80**, Staging **8080**, Demo **8081**. Default Web Site moved to **`127.0.0.1:8090`** (not 8080) via `Set-Visa2026IisSlotsAutoStart.ps1`.
 - **Deploy:** `Deploy-Visa2026IisRemote.ps1 -Profile Production|Staging|Demo`; DB update `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`.
 - **Migration:** Legacy `C:\inetpub\visa2026` → copy to slot folders; stop old `Visa2026` site; `-Profile Legacy` during transition.
+
+### 2026-06-25 — HTTPS mandatory for all IIS slots (prod / staging / demo)
+
+- **Policy:** Officers browse **`https://`** only on all three slots. HTTP on :80 / :8080 / :8081 may remain for redirect (`-RedirectHttpToHttps`) but is not the officer URL.
+- **Ports:** Production **HTTPS 443**, Staging **HTTPS 8080**, Demo **HTTPS 8081** (`HTTPS_PORT` in each `C:\visa2026\env\*.env` must match `Enable-Visa2026IisHttps.ps1 -HttpsPort`).
+- **Env:** `HTTPS_ENABLED=true` required in `prod.env`, `staging.env`, `demo.env` before deploy. `Deploy-Visa2026IisRemote.ps1` runs `Enable-Visa2026IisHttps.ps1` when enabled.
+- **Why:** Resminamalar **Edit template** (File System Access API) requires a [secure context](https://developer.mozilla.org/en-US/docs/Web/API/Window/isSecureContext); `http://` LAN URLs fail FSA / Office `ms-word:` open.
+- **Certs:** Self-signed via `Enable-Visa2026IisHttps.ps1 -IpAddress <LAN-IP>` or enterprise CA; officers import to Trusted Root or use GPO. Run **`Set-Visa2026TemplateEditOfficeTrust.ps1`** on officer PCs.
+- **Smoke:** `https://<server>/LoginPage`, `https://<server>:8080/LoginPage`, `https://<server>:8081/LoginPage` (use `-SkipCertificateCheck` / `curl -k` only for ops smoke on self-signed).
+- **Firewall:** TCP **443** inbound for production; `Enable-Visa2026IisSlotFirewall.ps1` for 8080/8081 (same ports, HTTPS binding).

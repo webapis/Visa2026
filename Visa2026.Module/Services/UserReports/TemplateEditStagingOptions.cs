@@ -1,6 +1,6 @@
 namespace Visa2026.Module.Services.UserReports;
 
-/// <summary>Network-share staging for desktop Word/Excel template editing from Resminamalar.</summary>
+/// <summary>Local sandbox staging for desktop Word/Excel template editing from Resminamalar.</summary>
 public sealed class TemplateEditStagingOptions
 {
     public const string SectionName = "TemplateEditStaging";
@@ -9,17 +9,23 @@ public sealed class TemplateEditStagingOptions
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// UNC share root only, e.g. <c>\\fileserver\Visa2026TemplateEdit</c> or <c>\\127.0.0.1\Visa2026TemplateEdit</c>.
-    /// Local drive paths (e.g. <c>D:\...</c>) are not supported — use the share UNC.
+    /// Relative path under each officer's <c>%LOCALAPPDATA%</c> for the template sandbox
+    /// (e.g. <c>Visa2026\TemplateEdit</c> → <c>%LOCALAPPDATA%\Visa2026\TemplateEdit</c>).
     /// </summary>
-    public string StagingRootUnc { get; set; } = string.Empty;
+    public string LocalFolderSubfolderName { get; set; } = @"Visa2026\TemplateEdit";
 
-    /// <summary>Document file name under the staging root. Tokens: <c>{templateId}</c>, <c>{safeName}</c>, <c>{extension}</c>.</summary>
-    public string FileNamePattern { get; set; } = "{templateId}_{safeName}{extension}";
+    /// <summary>Document file name under the local sandbox. Tokens: <c>{templateId}</c>, <c>{safeName}</c>, <c>{extension}</c>.</summary>
+    public string FileNamePattern { get; set; } = "{safeName}{extension}";
 
     /// <summary>After import when file hash changed, run Extract then Validate placeholders.</summary>
     public bool AutoExtractValidateOnImport { get; set; } = true;
 
     /// <summary>Reject imports larger than this size (default 50 MB).</summary>
     public long MaxFileSizeBytes { get; set; } = 52_428_800;
+
+    /// <summary>
+    /// Optional Windows profile folder name on officer PCs (<c>C:\Users\{this}\...</c>) when XAF login
+    /// does not match the local profile (e.g. login <c>officer1</c>, profile <c>serdar</c>).
+    /// </summary>
+    public string? WindowsProfileUserName { get; set; }
 }

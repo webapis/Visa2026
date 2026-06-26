@@ -8,11 +8,21 @@
 
 ## Deployment slots (one Windows Server)
 
-| Slot | Port | Smoke URL (LAN) | Site | App pool | Publish | Env | DB |
-|------|------|-----------------|------|----------|---------|-----|-----|
-| **Production** | 80 | `http://<server>/LoginPage` | `Visa2026-Prod` | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
-| **Staging** | 8080 | `http://<server>:8080/LoginPage` | `Visa2026-Staging` | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
-| **Demo** | 8081 | `http://<server>:8081/LoginPage` | `Visa2026-Demo` | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+Officers use **HTTPS** on every slot. HTTP on the same port may redirect via URL Rewrite (`-RedirectHttpToHttps`).
+
+| Slot | HTTPS smoke URL (LAN) | `HTTPS_PORT` | HTTP (redirect) | Site | App pool | Publish | Env | DB |
+|------|----------------------|--------------|-----------------|------|----------|---------|-----|-----|
+| **Production** | `https://<server>/LoginPage` | 443 | :80 | `Visa2026-Prod` | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
+| **Staging** | `https://<server>:8080/LoginPage` | 8080 | :8080 | `Visa2026-Staging` | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
+| **Demo** | `https://<server>:8081/LoginPage` | 8081 | :8081 | `Visa2026-Demo` | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+
+**Per-slot env (required):**
+
+```ini
+HTTPS_ENABLED=true
+HTTPS_PORT=443    # prod — use 8080 / 8081 for staging / demo
+# TEMPLATE_EDIT_STAGING_ENABLED=true   # Resminamalar local sandbox
+```
 
 **Shared on server:**
 
@@ -21,6 +31,7 @@
 | `C:\visa2026-deploy\iis\` | Scripts from repo |
 | `C:\visa2026\backups\{prod,staging,demo}\` | SQL `.bak` per slot |
 | `C:\ProgramData\Visa2026\DataProtection-Keys-{Prod,Staging,Demo}\` | Auth cookies per slot |
+| `C:\ProgramData\Visa2026\TemplateEdit\{prod,staging,demo}\` | Resminamalar template staging (local sandbox; HTTPS required) |
 | `C:\visa2026\.env.prod` | Legacy secrets file (can seed `env\*.env`) |
 
 **SQL:** `localhost\SQLEXPRESS` — three databases on one instance.
@@ -75,7 +86,13 @@ cd C:\visa2026-deploy\iis
 .\Run-Visa2026DbUpdateOnServer.ps1 -Profile Staging -ForceUpdate
 .\Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate
 
+# HTTPS bindings (required — run once per slot, then on each release if cert/port changes)
+.\Enable-Visa2026IisHttps.ps1 -Profile Production -HttpsPort 443 -IpAddress 10.100.128.25 -RedirectHttpToHttps
+.\Enable-Visa2026IisHttps.ps1 -Profile Staging -HttpsPort 8080 -IpAddress 10.100.128.25 -RedirectHttpToHttps
+.\Enable-Visa2026IisHttps.ps1 -Profile Demo -HttpsPort 8081 -IpAddress 10.100.128.25 -RedirectHttpToHttps
+
 .\Set-Visa2026IisSlotsAutoStart.ps1
+.\Enable-Visa2026IisSlotFirewall.ps1
 .\Diagnose-Port80.ps1
 ```
 
@@ -86,13 +103,22 @@ cd C:\visa2026-deploy\iis
 ```powershell
 C:\Windows\System32\inetsrv\appcmd stop apppool Visa2026-Prod
 # Copy new publish into C:\inetpub\visa2026-prod (keep appsettings + keys)
+C:\visa2026-deploy\iis\Enable-Visa2026IisHttps.ps1 -Profile Production -HttpsPort 443 -RedirectHttpToHttps
 C:\visa2026-deploy\iis\Configure-Visa2026Production.ps1 -Profile Production
 C:\visa2026-deploy\iis\Set-Visa2026AppPoolEnvironment.ps1 -Profile Production
 C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -Profile Production
 C:\Windows\System32\inetsrv\appcmd start apppool Visa2026-Prod
 ```
 
-Replace `Production` / `Visa2026-Prod` / `visa2026-prod` with **Staging** or **Demo** as needed.
+Replace `Production` / `Visa2026-Prod` / `visa2026-prod` / `-HttpsPort 443` with **Staging** (`8080`) or **Demo** (`8081`) as needed.
+
+**Officer PCs (Resminamalar Edit template):**
+
+```powershell
+.\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -ServerHost 10.100.128.25
+```
+
+Run once per officer workstation after HTTPS is live; officers must browse **`https://`** URLs.
 
 ---
 
@@ -107,23 +133,26 @@ C:\visa2026-deploy\iis\Run-Visa2026DbUpdateOnServer.ps1 -Profile Production
 
 ## Health checks
 
-**On server:**
+**On server (HTTPS — primary):**
 
 ```powershell
 sc query MSSQL`$SQLEXPRESS
 C:\Windows\System32\inetsrv\appcmd list site
-Invoke-WebRequest http://127.0.0.1/LoginPage -UseBasicParsing | Select-Object StatusCode
-Invoke-WebRequest http://127.0.0.1:8080/LoginPage -UseBasicParsing | Select-Object StatusCode
-Invoke-WebRequest http://127.0.0.1:8081/LoginPage -UseBasicParsing | Select-Object StatusCode
+# Skip certificate validation for self-signed smoke only:
+Invoke-WebRequest https://127.0.0.1/LoginPage -UseBasicParsing -SkipCertificateCheck | Select-Object StatusCode
+Invoke-WebRequest https://127.0.0.1:8080/LoginPage -UseBasicParsing -SkipCertificateCheck | Select-Object StatusCode
+Invoke-WebRequest https://127.0.0.1:8081/LoginPage -UseBasicParsing -SkipCertificateCheck | Select-Object StatusCode
 ```
 
 **From workstation (`10.100.128.25` example):**
 
 ```powershell
-curl.exe -s -o NUL -w "%{http_code}" http://10.100.128.25/LoginPage
-curl.exe -s -o NUL -w "%{http_code}" http://10.100.128.25:8080/LoginPage
-curl.exe -s -o NUL -w "%{http_code}" http://10.100.128.25:8081/LoginPage
+curl.exe -k -s -o NUL -w "%{http_code}" https://10.100.128.25/LoginPage
+curl.exe -k -s -o NUL -w "%{http_code}" https://10.100.128.25:8080/LoginPage
+curl.exe -k -s -o NUL -w "%{http_code}" https://10.100.128.25:8081/LoginPage
 ```
+
+(`-k` skips cert verify for self-signed smoke; officers should trust the cert instead.)
 
 ---
 
@@ -134,9 +163,9 @@ Old layout: site **`Visa2026`**, path **`C:\inetpub\visa2026`**, env **`C:\visa2
 Suggested cutover on `10.100.128.25`:
 
 1. `Install-Visa2026IisSlots.ps1 -SourceEnvFile C:\visa2026\.env.prod`
-2. **Prod:** restore/copy prod data → `Visa2026DbProd`; publish → `visa2026-prod`; smoke `:80`
-3. **Demo:** if current single site used demo DB, copy publish to `visa2026-demo`; smoke `:8081`
-4. **Staging:** greenfield `Visa2026DbStaging`; smoke `:8080`
+2. **Prod:** restore/copy prod data → `Visa2026DbProd`; publish → `visa2026-prod`; smoke `https://<server>/LoginPage`
+3. **Demo:** if current single site used demo DB, copy publish to `visa2026-demo`; smoke `https://<server>:8081/LoginPage`
+4. **Staging:** greenfield `Visa2026DbStaging`; smoke `https://<server>:8080/LoginPage`
 5. Stop legacy site: `appcmd stop site Visa2026`
 6. `Set-Visa2026IisSlotsAutoStart.ps1`
 

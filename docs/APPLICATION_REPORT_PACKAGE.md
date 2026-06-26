@@ -10,7 +10,7 @@ This document describes **why** it replaced one-click Resminamalar, **what** off
 
 
 
-**Agent skill:** [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../.cursor/skills/visa2026-resminamalar/SKILL.md) (bugs, UX, batch). **Chat prompts:** [`.cursor/skills/visa2026-resminamalar/prompts.md`](../.cursor/skills/visa2026-resminamalar/prompts.md). **Template seeds / merge:** [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../.cursor/skills/visa2026-user-report-templates/SKILL.md).
+**Agent skill:** [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../.cursor/skills/visa2026-resminamalar/SKILL.md) (bugs, UX, batch, **desktop template staging**). **Chat prompts:** [`.cursor/skills/visa2026-resminamalar/prompts.md`](../.cursor/skills/visa2026-resminamalar/prompts.md). **Template seeds / merge:** [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../.cursor/skills/visa2026-user-report-templates/SKILL.md). **Desktop Word/Excel edit (local sandbox):** [`docs/TEMPLATE_STAGING_EDIT.md`](TEMPLATE_STAGING_EDIT.md).
 
 
 
@@ -133,7 +133,9 @@ One **`#visa-preview-slot`** serves Resminamalar (application scope, item scope)
 
 | — | Review template list (checkboxes, Ready / Check) |
 
-| — | Optional **gear**: **Edit template** + hint lines (hidden by default) |
+| — | Optional **gear**: **Edit template** (local sandbox → desktop Word/Excel) + hint lines (hidden by default) |
+
+| — | **Choose template folder** (once), **Sync to database** after editing; **Refresh** reloads catalog only |
 
 | — | **Preview** → in-slot **PDF viewer** (catalog **or** preview — exclusive toggle; **Close** returns to catalog) |
 
@@ -287,7 +289,7 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
    - Subtitle: selected count for application / items
 
-   - **Select all** | **Clear selection** | **Download package** | **Refresh** | **gear**
+   - **Select all** | **Clear selection** | **Download package** | **Sync to database** (when staging enabled + write permission) | **Refresh** | **gear**
 
 
 
@@ -301,11 +303,39 @@ Shared types: `WordReportGenerationContext`, `WordReportDefinitionScopeHelper`, 
 
 
 
-### Edit custom template
+### Edit custom template (desktop Word/Excel — local sandbox)
 
 
 
-Users with **Write** on **`UserReportTemplate`** see **Edit template** when the footer **gear** is toggled on. **Users role** has Read/Write/Create on templates and full access on **`UserReportPlaceholder`** for Extract. See `UserReportTemplateEditLinkService`, `UserReportTemplateEditAccess`.
+When **`TemplateEditStaging:Enabled`** is true and the user has **Write** on **`UserReportTemplate`**, the footer **gear** exposes **Edit template** on each catalog row. This is the **officer entry point** for template edits — the catalog no longer links to **`UserReportTemplate` DetailView**.
+
+
+
+| Step | Officer action | System behavior |
+
+|------|----------------|-----------------|
+
+| 1 | **Once:** **Choose template folder** (footer) | Browser grants write access; creates `Documents\Visa2026Templates` |
+
+| 2 | **Edit template** (gear on) | Export from DB → write to local sandbox → try Word/Excel open; **Copy path** fallback |
+
+| 3 | Edit, **Save**, **Close** in desktop Word/Excel | File remains in sandbox; **In folder** badge on the row |
+
+| 4 | **Sync to database** | Upload changed files → replace DB blobs → **Extract + Validate** when hash changed |
+
+| 5 | **Refresh** | Reload catalog readiness **only** — does **not** import |
+
+
+
+**Permissions:** `UserReportTemplateEditAccess.CanEditTemplates()` (same gate as DetailView maintenance). **Users role** has Read/Write/Create on templates and full access on **`UserReportPlaceholder`** for Extract after sync.
+
+
+
+**Configuration:** `TemplateEditStaging` in `appsettings` (`Enabled`, `LocalFolderSubfolderName`, …). Production requires **HTTPS** — see [`docs/TEMPLATE_STAGING_EDIT.md`](TEMPLATE_STAGING_EDIT.md).
+
+
+
+**Not in scope:** in-browser Spreadsheet / Rich Edit in the catalog — desktop Word/Excel via local sandbox only ([`docs/TEMPLATE_STAGING_EDIT.md`](TEMPLATE_STAGING_EDIT.md) § Non-goals).
 
 
 
@@ -388,6 +418,8 @@ Same XAF pattern as Document copies: **non-persistent host + custom Blazor prope
 
 | **5** | Done | ApplicationItem scope; user templates only (code-backed reports removed) |
 
+| **6** | Done | Desktop template staging — local sandbox, **Sync to database**, **Refresh** ([`docs/TEMPLATE_STAGING_EDIT.md`](TEMPLATE_STAGING_EDIT.md)) |
+
 
 
 ## Related code
@@ -399,5 +431,7 @@ Same XAF pattern as Document copies: **non-persistent host + custom Blazor prope
 - Worker: `Visa2026.Blazor.Server/Services/WordReportGenerationBatchWorkerService.cs`
 
 - Seed gate: `Visa2026.Blazor.Server/Services/UserReportTemplateSeedGate.cs`
+
+- Template staging: [`docs/TEMPLATE_STAGING_EDIT.md`](TEMPLATE_STAGING_EDIT.md) — `UserReportTemplateStagingService`, `UserReportTemplateStagingController`, `UserReportTemplateStagingUiService`, `wwwroot/js/template-staging-local.js`
 
 

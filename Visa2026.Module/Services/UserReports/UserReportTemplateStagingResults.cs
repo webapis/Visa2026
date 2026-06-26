@@ -1,5 +1,7 @@
 namespace Visa2026.Module.Services.UserReports;
 
+using Visa2026.Module.BusinessObjects;
+
 public enum UserReportTemplateStagingImportStatus
 {
     Imported = 0,
@@ -16,9 +18,14 @@ public sealed class UserReportTemplateStagingExportResult
 
     public required string DocumentFileName { get; init; }
 
-    public required string UncPath { get; init; }
+    /// <summary>SHA-256 (hex) of exported DB content. Used by local sandbox client metadata.</summary>
+    public string? SourceContentHashSha256 { get; init; }
 
-    public string? OfficeOpenUrl { get; init; }
+    /// <summary>Word or Excel — client uses this for Office protocol.</summary>
+    public TemplateOutputFormat OutputFormat { get; init; }
+
+    /// <summary>Raw template bytes written to the officer PC sandbox folder.</summary>
+    public byte[]? FileContent { get; init; }
 }
 
 public sealed class UserReportTemplateStagingImportResult

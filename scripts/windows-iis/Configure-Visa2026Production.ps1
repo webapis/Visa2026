@@ -38,20 +38,7 @@ function Read-DotEnvMap([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Env file not found: $Path"
     }
-    $map = @{}
-    Get-Content -LiteralPath $Path | ForEach-Object {
-        $line = $_.Trim()
-        if ($line -match '^\s*#' -or $line -eq "") { return }
-        if ($line -match '^\s*([^#=]+)=(.*)$') {
-            $k = $matches[1].Trim()
-            $v = $matches[2].Trim()
-            if ($v.Length -ge 2 -and $v.StartsWith('"') -and $v.EndsWith('"')) {
-                $v = $v.Substring(1, $v.Length - 2)
-            }
-            $map[$k] = $v
-        }
-    }
-    $map
+    Read-Visa2026DotEnvMap -Path $Path
 }
 
 $envMap = Read-DotEnvMap $EnvFile
@@ -131,6 +118,41 @@ $config = @{
     }
 }
 
+$templateStagingEnabled = Resolve-Visa2026TemplateEditStagingEnabled -EnvFile $EnvFile -DefaultEnabled:$true
+$httpsEnabled = Resolve-Visa2026HttpsEnabled -EnvFile $EnvFile
+$httpsPort = Resolve-Visa2026HttpsPort -EnvFile $EnvFile
+
+if ($httpsEnabled) {
+    $config["Https"] = @{
+        Port = $httpsPort
+    }
+    $config["FileUpload"] = @{ MaxRequestBodyBytes = 52428800 }
+}
+else {
+    $config["FileUpload"] = @{ MaxRequestBodyBytes = 10485760 }
+}
+
+if ($templateStagingEnabled) {
+    $stagingBlock = @{
+        Enabled = $true
+        LocalFolderSubfolderName = "Visa2026\TemplateEdit"
+        FileNamePattern = "{safeName}{extension}"
+        AutoExtractValidateOnImport = $true
+        MaxFileSizeBytes = 52428800
+    }
+
+    $config["TemplateEditStaging"] = $stagingBlock
+}
+else {
+    $config["TemplateEditStaging"] = @{
+        Enabled = $false
+        LocalFolderSubfolderName = "Visa2026\TemplateEdit"
+        FileNamePattern = "{safeName}{extension}"
+        AutoExtractValidateOnImport = $true
+        MaxFileSizeBytes = 52428800
+    }
+}
+
 $outPath = Join-Path $PublishPath "appsettings.Production.json"
 $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $outPath -Encoding UTF8
 
@@ -145,6 +167,15 @@ $poolEnv = @{
 
 Write-Host "Wrote $outPath" -ForegroundColor Green
 Write-Host "Slot: $($ctx.Profile)  Database: $dbName on $serverPart (sa)"
+if ($templateStagingEnabled) {
+    Write-Host "Template staging: enabled (local sandbox)" -ForegroundColor Green
+    if (-not $httpsEnabled) {
+        Write-Host "  WARNING: Local sandbox requires HTTPS (set HTTPS_ENABLED=true and run Enable-Visa2026IisHttps.ps1)." -ForegroundColor Yellow
+    }
+}
+else {
+    Write-Host "Template staging: disabled (set TEMPLATE_EDIT_STAGING_ENABLED=true in $EnvFile)" -ForegroundColor Yellow
+}
 Write-Host "Set app pool environment variables:" -ForegroundColor Yellow
 $poolEnv.GetEnumerator() | ForEach-Object { Write-Host "  $($_.Key)=***" }
 

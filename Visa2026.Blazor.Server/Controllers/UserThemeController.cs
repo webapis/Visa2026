@@ -34,7 +34,15 @@ public sealed class UserThemeController : WindowController
 
     protected override void OnDeactivated()
     {
-        UserThemeHelper.PersistCurrentThemeToUser(Application);
+        try
+        {
+            UserThemeHelper.PersistCurrentThemeToUser(Application);
+        }
+        catch (ObjectDisposedException)
+        {
+            // Main window can tear down during Blazor re-render (e.g. catalog refresh).
+        }
+
         DetachThemeHandlers();
         DetachLoggingOffHandler();
         DetachLoggedOnHandler();

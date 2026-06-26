@@ -38,33 +38,28 @@ public sealed class UserReportTemplateStagingController : ControllerBase
         }
     }
 
-    [HttpPost("staging/import-all")]
-    public async Task<ActionResult<StagingImportAllResponse>> ImportAll(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var result = await _stagingService.ImportAllChangedAsync(cancellationToken).ConfigureAwait(false);
-            return Ok(StagingImportAllResponse.From(result));
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return Forbid();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-
-    [HttpPost("{templateId:guid}/staging/import")]
-    public async Task<ActionResult<StagingImportResponse>> ImportOne(Guid templateId, CancellationToken cancellationToken)
+    [HttpPost("{templateId:guid}/staging/upload")]
+    [RequestSizeLimit(52_428_800)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 52_428_800)]
+    public async Task<ActionResult<StagingImportResponse>> Upload(
+        Guid templateId,
+        IFormFile file,
+        CancellationToken cancellationToken)
     {
         if (templateId == Guid.Empty)
             return BadRequest();
 
+        if (file == null || file.Length == 0)
+            return BadRequest(new { error = "Template file is required." });
+
         try
         {
-            var result = await _stagingService.TryImportAsync(templateId, cancellationToken).ConfigureAwait(false);
+            await using var stream = file.OpenReadStream();
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory, cancellationToken).ConfigureAwait(false);
+            var result = await _stagingService
+                .ImportFromUploadAsync(templateId, memory.ToArray(), cancellationToken)
+                .ConfigureAwait(false);
             return Ok(StagingImportResponse.From(result));
         }
         catch (UnauthorizedAccessException)
@@ -74,6 +69,16 @@ public sealed class UserReportTemplateStagingController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Ok(StagingImportResponse.From(new UserReportTemplateStagingImportResult
+            {
+                TemplateId = templateId,
+                DisplayName = string.Empty,
+                Status = UserReportTemplateStagingImportStatus.Failed,
+                ErrorMessage = ex.Message,
+            }));
         }
     }
 
@@ -89,9 +94,9 @@ public sealed class StagingExportResponse
 
     public string DocumentFileName { get; init; } = string.Empty;
 
-    public string UncPath { get; init; } = string.Empty;
+    public string? SourceContentHashSha256 { get; init; }
 
-    public string? OfficeOpenUrl { get; init; }
+    public string OutputFormat { get; init; } = string.Empty;
 
     public static StagingExportResponse From(UserReportTemplateStagingExportResult result) =>
         new()
@@ -99,8 +104,8 @@ public sealed class StagingExportResponse
             TemplateId = result.TemplateId,
             DisplayName = result.DisplayName,
             DocumentFileName = result.DocumentFileName,
-            UncPath = result.UncPath,
-            OfficeOpenUrl = result.OfficeOpenUrl,
+            SourceContentHashSha256 = result.SourceContentHashSha256,
+            OutputFormat = result.OutputFormat.ToString(),
         };
 }
 
@@ -127,28 +132,5 @@ public sealed class StagingImportResponse
             ErrorMessage = result.ErrorMessage,
             ExtractValidateRan = result.ExtractValidateRan,
             InvalidPlaceholderCount = result.InvalidPlaceholderCount,
-        };
-}
-
-public sealed class StagingImportAllResponse
-{
-    public int ImportedCount { get; init; }
-
-    public int SkippedUnchangedCount { get; init; }
-
-    public int SkippedNotFoundCount { get; init; }
-
-    public int FailedCount { get; init; }
-
-    public IReadOnlyList<StagingImportResponse> Results { get; init; } = Array.Empty<StagingImportResponse>();
-
-    public static StagingImportAllResponse From(UserReportTemplateStagingImportAllResult result) =>
-        new()
-        {
-            ImportedCount = result.ImportedCount,
-            SkippedUnchangedCount = result.SkippedUnchangedCount,
-            SkippedNotFoundCount = result.SkippedNotFoundCount,
-            FailedCount = result.FailedCount,
-            Results = result.Results.Select(StagingImportResponse.From).ToList(),
         };
 }

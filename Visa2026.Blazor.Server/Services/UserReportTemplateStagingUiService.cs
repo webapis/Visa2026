@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using DevExpress.ExpressApp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Visa2026.Module.Services.UserReports;
@@ -48,29 +48,50 @@ public sealed class UserReportTemplateStagingUiService
         }
     }
 
-    public async Task<UserReportTemplateStagingUiImportAllOutcome> ImportAllChangedAsync()
-    {
-        if (!CanEditTemplates())
+    public static UserReportTemplateStagingImportAllResult MapCollectResult(
+        UserReportTemplateStagingLocalCollectJsResult collect) =>
+        new()
         {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(
-                "Template edit access denied or staging is disabled.");
-        }
+            Results = collect.Uploads
+                .Select(MapStagingUploadResult)
+                .ToList(),
+        };
 
+    private static UserReportTemplateStagingImportResult MapStagingUploadResult(
+        UserReportTemplateStagingLocalUploadJsItem item) =>
+        new()
+        {
+            TemplateId = item.TemplateId,
+            DisplayName = item.DisplayName ?? string.Empty,
+            Status = ParseStagingUploadStatus(item.Status),
+            ErrorMessage = item.ErrorMessage,
+        };
+
+    private static UserReportTemplateStagingImportStatus ParseStagingUploadStatus(string? status) =>
+        status switch
+        {
+            nameof(UserReportTemplateStagingImportStatus.Imported) => UserReportTemplateStagingImportStatus.Imported,
+            nameof(UserReportTemplateStagingImportStatus.SkippedUnchanged) => UserReportTemplateStagingImportStatus.SkippedUnchanged,
+            nameof(UserReportTemplateStagingImportStatus.SkippedNotFound) => UserReportTemplateStagingImportStatus.SkippedNotFound,
+            _ => UserReportTemplateStagingImportStatus.Failed,
+        };
+
+    private string ResolveUserName()
+    {
         try
         {
-            var result = await _stagingService.ImportAllChangedAsync().ConfigureAwait(false);
-            return UserReportTemplateStagingUiImportAllOutcome.Ok(result);
+            var xafUserName = SecuritySystem.CurrentUserName;
+            if (!string.IsNullOrWhiteSpace(xafUserName))
+            {
+                return xafUserName;
+            }
         }
-        catch (Exception ex)
+        catch (InvalidOperationException)
         {
-            return UserReportTemplateStagingUiImportAllOutcome.Fail(ex.Message);
         }
-    }
 
-    private string ResolveUserName() =>
-        _httpContextAccessor.HttpContext?.User?.Identity?.Name
-        ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name)
-        ?? string.Empty;
+        return _httpContextAccessor.HttpContext?.User?.Identity?.Name ?? string.Empty;
+    }
 }
 
 public sealed class UserReportTemplateStagingUiExportOutcome
@@ -85,20 +106,5 @@ public sealed class UserReportTemplateStagingUiExportOutcome
         new() { Success = true, Result = result };
 
     public static UserReportTemplateStagingUiExportOutcome Fail(string message) =>
-        new() { Success = false, ErrorMessage = message };
-}
-
-public sealed class UserReportTemplateStagingUiImportAllOutcome
-{
-    public bool Success { get; init; }
-
-    public UserReportTemplateStagingImportAllResult? Result { get; init; }
-
-    public string? ErrorMessage { get; init; }
-
-    public static UserReportTemplateStagingUiImportAllOutcome Ok(UserReportTemplateStagingImportAllResult result) =>
-        new() { Success = true, Result = result };
-
-    public static UserReportTemplateStagingUiImportAllOutcome Fail(string message) =>
         new() { Success = false, ErrorMessage = message };
 }

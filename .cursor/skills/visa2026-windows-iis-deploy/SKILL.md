@@ -2,8 +2,9 @@
 name: visa2026-windows-iis-deploy
 description: >-
   Deploy and update Visa2026 on company Windows Server with IIS + native SQL Server Express (no Docker/WSL).
-  Three slots on one host — Production :80, Staging :8080, Demo :8081 — each with its own DB, publish folder,
-  app pool, and env file. Publish, SSH copy, -Profile deploy, DB update, .bak restore, FORCE_XAF_DB_UPDATE per pool.
+  Three HTTPS slots on one host — Production :443, Staging :8080, Demo :8081 (HTTP bindings optional redirect only)
+  — each with its own DB, publish folder, app pool, and env file. Enable-Visa2026IisHttps.ps1 + HTTPS_ENABLED=true
+  required (Resminamalar local sandbox). Publish, SSH copy, -Profile deploy, DB update, .bak restore per pool.
   Use for on-prem IIS, localhost\SQLEXPRESS, scripts/windows-iis, visa2026-onprem, Login failed for user sa.
 disable-model-invocation: false
 ---
@@ -14,15 +15,21 @@ disable-model-invocation: false
 
 Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server Express** on the same host — **no Docker**, **no WSL**.
 
-One server runs **three independent slots** (separate site, app pool, publish folder, database, data-protection keys):
+One server runs **three independent slots** (separate site, app pool, publish folder, database, data-protection keys).
 
-| Slot | Port | Site / pool | Publish path | Env file | Database |
-|------|------|-------------|--------------|----------|----------|
-| **Production** | **80** | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
-| **Staging** | **8080** | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
-| **Demo** | **8081** | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+**Officers browse HTTPS only** (required for Resminamalar **Edit template** / File System Access API). HTTP bindings on the same ports may remain for **redirect to HTTPS** (`-RedirectHttpToHttps`).
+
+| Slot | HTTPS (officers) | `HTTPS_PORT` in env | HTTP (optional redirect) | Site / pool | Publish path | Env file | Database |
+|------|------------------|---------------------|--------------------------|-------------|--------------|----------|----------|
+| **Production** | `https://<server>/LoginPage` | **443** | :80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
+| **Staging** | `https://<server>:8080/LoginPage` | **8080** | :8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
+| **Demo** | `https://<server>:8081/LoginPage` | **8081** | :8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+
+Example host `10.100.128.25`: production `https://10.100.128.25/LoginPage`, staging `https://10.100.128.25:8080/LoginPage`, demo `https://10.100.128.25:8081/LoginPage`.
 
 Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots.ps1). Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts.
+
+**Per-slot env (required for HTTPS deploy):** in each `C:\visa2026\env\*.env` set `HTTPS_ENABLED=true` and `HTTPS_PORT` as in the table. Optional: `TEMPLATE_EDIT_STAGING_ENABLED=true` (local sandbox; see [TEMPLATE_STAGING_EDIT.md](../../../docs/TEMPLATE_STAGING_EDIT.md)).
 
 **Canonical runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md)
 
@@ -43,7 +50,7 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 ### Chat openers
 
 - `@visa2026-windows-iis-deploy` — deploy or update IIS slot (prod / staging / demo) ([user-prompts.md](./user-prompts.md)).
-- **IIS Login failed for user sa** / **port 80 in use** / **restore .bak to SQLEXPRESS** / **500.30 after reboot**.
+- **IIS Login failed for user sa** / **port 80 in use** / **HTTPS cert / Edit template blocked** / **restore .bak to SQLEXPRESS** / **500.30 after reboot**.
 
 ---
 
@@ -52,8 +59,9 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 1. Read **[learnings.md](./learnings.md)** (append-only fixes from real hosts, e.g. `10.100.128.25`).
 2. Confirm path: **IIS + native SQL**, not Docker.
 3. **Ask which slot** if the user did not say (default **Production** for production releases; **Demo** for greenfield/playground).
-4. Secrets live in **`C:\visa2026\env\*.env`** (`SA_PASSWORD`, `DEVEXPRESS_LICENSEKEY`, `DB_NAME` per slot). Legacy **`C:\visa2026\.env.prod`** can seed new env files — **never commit** or paste into chat.
-5. SSH host **`visa2026-onprem`**; scripts on server under **`C:\visa2026-deploy\iis\`**.
+4. Secrets live in **`C:\visa2026\env\*.env`** (`SA_PASSWORD`, `DEVEXPRESS_LICENSEKEY`, `DB_NAME`, **`HTTPS_ENABLED`**, **`HTTPS_PORT`** per slot). Legacy **`C:\visa2026\.env.prod`** can seed new env files — **never commit** or paste into chat.
+5. **HTTPS is mandatory** for all slots (not optional). Greenfield and every app update must run **`Enable-Visa2026IisHttps.ps1`** with **`-HttpsPort`** matching that slot’s `HTTPS_PORT` (see table in § Goal). Officers must open **`https://`** URLs; trust cert (enterprise CA or import self-signed) and run **`Set-Visa2026TemplateEditOfficeTrust.ps1`** on officer PCs when using Resminamalar template edit.
+6. SSH host **`visa2026-onprem`**; scripts on server under **`C:\visa2026-deploy\iis\`**.
 
 **Legacy single site** (`Visa2026` on `C:\inetpub\visa2026`) — use **`-Profile Legacy`** or migrate via [reference.md § Migration](./reference.md).
 
@@ -64,7 +72,7 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 | Class | Examples | OK required? |
 |-------|----------|--------------|
 | **Read-only** | `appcmd list site`, `sc query MSSQL$SQLEXPRESS`, curl LoginPage per port, `Diagnose-Port80.ps1` | No |
-| **Deploy / mutate** | Copy publish, `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
+| **Deploy / mutate** | Copy publish, **`Enable-Visa2026IisHttps.ps1 -Profile … -HttpsPort … -RedirectHttpToHttps`** (every slot), `Configure-Visa2026Production.ps1 -Profile …`, `Run-Visa2026DbUpdateOnServer.ps1 -Profile …`, restore `.bak`, recycle app pool | **Yes** (unless user said “go ahead”) |
 | **Destructive** | `RESTORE … WITH REPLACE` on **prod** DB, removing portproxy, SQL single-user `-m` bootstrap | **Yes** |
 
 Take a **SQL `.bak`** before restore or risky schema update on **Production**.
@@ -80,10 +88,12 @@ Full steps: [reference.md](./reference.md). Phases: [ON_PREM_WINDOWS_IIS.md](../
 | Publish (dev PC) | `Publish-Visa2026ForIis.ps1` |
 | SQL Express | `Install-SqlServerExpress.ps1` or `Configure-SqlExpressSaLogin.ps1` |
 | IIS + Hosting Bundle | `Install-Visa2026ServerPrerequisites.ps1` |
-| **All three slots** | `Install-Visa2026IisSlots.ps1 -SourceEnvFile C:\visa2026\.env.prod` (creates sites, env templates, DBs) |
+| **All three slots** | `Install-Visa2026IisSlots.ps1 -SourceEnvFile C:\visa2026\.env.prod` (creates sites, env templates, DBs, template-edit shares) |
 | Copy publish | Same build into each `C:\inetpub\visa2026-{prod,staging,demo}\` (or deploy one slot at a time) |
+| Per-slot HTTPS | Set `HTTPS_ENABLED=true` + `HTTPS_PORT` in each `env\*.env`; per slot: `Enable-Visa2026IisHttps.ps1 -Profile Production -HttpsPort 443 -IpAddress <server-ip> -RedirectHttpToHttps` (Staging **8080**, Demo **8081**) |
 | Per-slot DB update | `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate` (etc.) |
-| Auto-start | `Set-Visa2026IisSlotsAutoStart.ps1` (prod :80 + staging :8080 + demo :8081) |
+| Auto-start | `Set-Visa2026IisSlotsAutoStart.ps1` (HTTP :80 / :8080 / :8081 + HTTPS bindings) |
+| Firewall | `Enable-Visa2026IisSlotFirewall.ps1` (TCP 8080, 8081); ensure **443** inbound for production HTTPS |
 | Port 80 | `Diagnose-Port80.ps1`; remove WSL **portproxy** if present |
 
 **Remote (dev PC, one slot):**
@@ -102,8 +112,10 @@ Full steps: [reference.md](./reference.md). Phases: [ON_PREM_WINDOWS_IIS.md](../
 2. **Publish** on dev PC.
 3. **Stop** that slot’s app pool (`Visa2026-Prod` / `-Staging` / `-Demo`).
 4. Copy publish to that slot’s **`C:\inetpub\visa2026-*`** — keep slot’s `appsettings.Production.json` and **`DataProtection-Keys-*`**.
-5. **`Run-Visa2026DbUpdateOnServer.ps1 -Profile <slot>`** (`-ForceUpdate` if drift).
-6. Start app pool + site; smoke that slot’s LoginPage URL (see table in § Goal).
+5. **`Enable-Visa2026IisHttps.ps1 -Profile <slot> -HttpsPort <HTTPS_PORT from env> -RedirectHttpToHttps`** — **every release**, all slots (not optional). Use **`-IpAddress`** when officers browse by LAN IP. `Deploy-Visa2026IisRemote.ps1` runs this when `HTTPS_ENABLED=true` in the slot env file.
+6. **`Configure-Visa2026Production.ps1 -Profile <slot>`** (rewrites `appsettings.Production.json` including `Https` + `TemplateEditStaging`).
+7. **`Run-Visa2026DbUpdateOnServer.ps1 -Profile <slot>`** (`-ForceUpdate` if drift).
+8. Start app pool + site; smoke that slot’s **HTTPS** LoginPage URL (see table in § Goal). Do not treat plain `http://` as success for officer workflows.
 
 Track version via `publish-version.txt` in the publish folder.
 
@@ -131,7 +143,10 @@ Use **`-Profile Staging`** only when intentionally cloning data to staging.
 | **502.5 / 500.30** | Hosting Bundle / runtime | [ON_PREM_WINDOWS_IIS.md § Troubleshooting](../../../docs/ON_PREM_WINDOWS_IIS.md) |
 | **Logged out after recycle** | Wrong data-protection path for slot | Per-slot `ASPNETCORE_DATA_PROTECTION_KEYS` via `Configure-Visa2026Production.ps1 -Profile …` |
 | **`FORCE_XAF_DB_UPDATE` left on** | Slow startup / 500.30 | `Remove-Visa2026ForceXafDbUpdate.ps1 -Profile …` |
-| **Wrong data shown** | Deployed to wrong slot or old single-site swap | Confirm `-Profile` and smoke URL port |
+| **Wrong data shown** | Deployed to wrong slot or old single-site swap | Confirm `-Profile` and smoke HTTPS URL / port |
+| **Edit template / FSA blocked** | Officers use `http://` or untrusted cert | HTTPS URL + cert trust; `Set-Visa2026TemplateEditOfficeTrust.ps1`; confirm `HTTPS_ENABLED=true` in slot env |
+| **HTTPS smoke fails / cert warning** | Binding on wrong port or self-signed not trusted | `Enable-Visa2026IisHttps.ps1 -HttpsPort` must match `HTTPS_PORT` (443 / 8080 / 8081); import cert to officer Trusted Root |
+| **HTTP 200 but HTTPS fails** | HTTPS binding missing after deploy | Re-run `Enable-Visa2026IisHttps.ps1`; check `appcmd list site` for `https` bindings |
 
 **Avoid** swapping `DB_NAME` on one site (`Set-Visa2026EnvDbName.ps1`) — prefer **slot deploy**.
 

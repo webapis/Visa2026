@@ -52,6 +52,24 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 | `DatabaseUpdate/UserReportTemplateUpdater.cs` | Seed from embedded `Resources/Templates/` |
 | `DatabaseUpdate/WordReportGenerationBatchSelectedReportKeysUpdater.cs` | Schema migration |
 | `DatabaseUpdate/WordReportGenerationBatchSelectedApplicationItemIdsUpdater.cs` | Item scope JSON column |
+| `Services/UserReports/UserReportTemplateStagingService.cs` | Export/import staged templates on UNC share |
+| `Services/UserReports/UserReportTemplateMaintenanceService.cs` | Extract + Validate (DetailView + post-sync import) |
+| `Services/UserReports/TemplateEditStagingOptions.cs` | `TemplateEditStaging` config binding |
+
+---
+
+## Template staging (desktop Word/Excel)
+
+Canonical: [`docs/TEMPLATE_STAGING_EDIT.md`](../../../docs/TEMPLATE_STAGING_EDIT.md).
+
+| File | Role |
+|------|------|
+| `Services/UserReports/UserReportTemplateStagingPathHelper.cs` | UNC paths, sanitize names, `ms-word`/`ms-excel` URLs |
+| `Services/UserReports/UserReportTemplateStagingMeta.cs` | Sidecar `.meta.json` on share |
+| `Module.Tests/UserReports/UserReportTemplateStagingPathHelperTests.cs` | Path/helper unit tests |
+**Officer flow:** gear → **Edit template** → edit on share → **Sync to database** → **Refresh** (catalog only, no import).
+
+Config: `TemplateEditStaging:Enabled`, `LocalFolderSubfolderName` in `appsettings` / `appsettings.Development.json`. Production requires HTTPS — see `docs/TEMPLATE_STAGING_EDIT.md`.
 
 ---
 
@@ -76,7 +94,10 @@ Generators: **`UserReportGenerator`**, **`ExcelReportGenerator`** (not code-back
 | `Services/ApplicationWordReportPackageEnqueueService.cs` | Enqueue + toast |
 | `Services/WordReportGenerationBatchWorkerService.cs` | Background ZIP |
 | `Services/UserReportTemplateSeedGate.cs` | Post-DI template seed (fixes null ServiceProvider during XAF DB update) |
-| `Services/UserReportTemplateEditLinkService.cs` | Edit template deep link |
+| `Services/UserReportTemplateEditLinkService.cs` | Legacy DetailView URL helper (catalog uses staging export, not this link) |
+| `Controllers/UserReportTemplateStagingController.cs` | Staging API — export / import-all |
+| `Services/UserReportTemplateStagingUiService.cs` | Catalog wrapper for staging service |
+| `wwwroot/js/template-staging-local.js` | FSA folder picker, export, sync uploads, copy path, Office open |
 | `Components/WordReportBatchToastHost.razor` | Progress + Download ZIP |
 | `Startup.cs` | DI registrations; calls `UserReportTemplateSeedGate.EnsureSeeded` in `Configure` |
 | `Pages/_Host.cshtml` | `#visa-app-shell`, `visaPreviewDrawer.open` / `openResminamalar` JS |
@@ -126,7 +147,7 @@ Embedded resources: **`Visa2026.Module/Resources/Templates/`** (+ `Templates/Exc
 
 - `ApplicationReportPackageListHost`, `ApplicationItemReportPackageListHost` — read in `Updater.cs`.
 - Preview API: auth + entry key must match catalog for application.
-- **Edit template:** Write on `UserReportTemplate`; Extract needs delete on `UserReportPlaceholder` (Users role).
+- **Edit template:** Export bytes to officer PC sandbox; sync uploads to DB. Gated by `UserReportTemplateEditAccess.CanEditTemplates()`. Extract needs delete on `UserReportPlaceholder` (Users role).
 
 ---
 

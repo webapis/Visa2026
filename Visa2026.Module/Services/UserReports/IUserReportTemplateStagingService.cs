@@ -7,10 +7,8 @@ public interface IUserReportTemplateStagingService
         string exportedByUserName,
         CancellationToken cancellationToken = default);
 
-    Task<UserReportTemplateStagingImportResult> TryImportAsync(
+    Task<UserReportTemplateStagingImportResult> ImportFromUploadAsync(
         Guid templateId,
-        CancellationToken cancellationToken = default);
-
-    Task<UserReportTemplateStagingImportAllResult> ImportAllChangedAsync(
+        byte[] content,
         CancellationToken cancellationToken = default);
 }

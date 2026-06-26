@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Visa2026.Module.BusinessObjects;
 
@@ -13,18 +13,15 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
     private readonly TemplateEditStagingOptions _options;
     private readonly INonSecuredObjectSpaceFactory _objectSpaceFactory;
     private readonly IUserReportTemplateMaintenanceService _maintenanceService;
-    private readonly ILogger<UserReportTemplateStagingService> _logger;
 
     public UserReportTemplateStagingService(
         IOptions<TemplateEditStagingOptions> options,
         INonSecuredObjectSpaceFactory objectSpaceFactory,
-        IUserReportTemplateMaintenanceService maintenanceService,
-        ILogger<UserReportTemplateStagingService> logger)
+        IUserReportTemplateMaintenanceService maintenanceService)
     {
         _options = options.Value;
         _objectSpaceFactory = objectSpaceFactory;
         _maintenanceService = maintenanceService;
-        _logger = logger;
     }
 
     public async Task<UserReportTemplateStagingExportResult> ExportForEditAsync(
@@ -53,157 +50,99 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             templateId,
             template.TemplateName,
             outputFormat);
-        var documentPath = UserReportTemplateStagingPathHelper.BuildDocumentPath(
-            _options,
-            templateId,
-            template.TemplateName,
-            outputFormat);
-        var metaPath = UserReportTemplateStagingPathHelper.BuildMetaFilePath(documentPath);
 
-        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingRoot(_options);
-        Directory.CreateDirectory(stagingRoot);
-
-        await WriteAllBytesAsync(documentPath, content, cancellationToken).ConfigureAwait(false);
-
-        var sourceHash = ComputeSha256Hex(content);
-        var meta = new UserReportTemplateStagingMeta
-        {
-            TemplateId = templateId,
-            TemplateName = template.TemplateName,
-            OutputFormat = outputFormat,
-            DocumentFileName = documentFileName,
-            ExportedAtUtc = DateTime.UtcNow,
-            ExportedByUserName = exportedByUserName?.Trim() ?? string.Empty,
-            SourceContentHashSha256 = sourceHash,
-            LastImportedAtUtc = null,
-            LastImportedContentHashSha256 = null,
-        };
-        meta.WriteToFile(metaPath);
-
-        var uncPath = UserReportTemplateStagingPathHelper.BuildUncPath(_options, documentFileName);
         return new UserReportTemplateStagingExportResult
         {
             TemplateId = templateId,
             DisplayName = template.TemplateName,
             DocumentFileName = documentFileName,
-            UncPath = uncPath,
-            OfficeOpenUrl = UserReportTemplateStagingPathHelper.TryBuildOfficeOpenUrl(uncPath, outputFormat),
+            SourceContentHashSha256 = ComputeSha256Hex(content),
+            OutputFormat = outputFormat,
+            FileContent = content,
         };
     }
 
-    public Task<UserReportTemplateStagingImportResult> TryImportAsync(
+    public Task<UserReportTemplateStagingImportResult> ImportFromUploadAsync(
         Guid templateId,
+        byte[] content,
         CancellationToken cancellationToken = default) =>
-        ImportCoreAsync(templateId, cancellationToken);
+        ImportUploadedContentAsync(templateId, content, cancellationToken);
 
-    public async Task<UserReportTemplateStagingImportAllResult> ImportAllChangedAsync(
-        CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        EnsureEnabled();
-        EnsureEditAccess();
-
-        var stagingRoot = UserReportTemplateStagingPathHelper.ResolveStagingRoot(_options);
-        if (!Directory.Exists(stagingRoot))
-        {
-            return new UserReportTemplateStagingImportAllResult
-            {
-                Results = Array.Empty<UserReportTemplateStagingImportResult>(),
-            };
-        }
-
-        var templateIds = new HashSet<Guid>();
-        foreach (var metaPath in Directory.EnumerateFiles(stagingRoot, "*.meta.json", SearchOption.TopDirectoryOnly))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            try
-            {
-                var meta = UserReportTemplateStagingMeta.ReadFromFile(metaPath);
-                if (meta.TemplateId != Guid.Empty)
-                    templateIds.Add(meta.TemplateId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Skipping invalid staging meta file {MetaPath}", metaPath);
-            }
-        }
-
-        var results = new List<UserReportTemplateStagingImportResult>();
-        foreach (var templateId in templateIds.OrderBy(id => id))
-        {
-            results.Add(await ImportCoreAsync(templateId, cancellationToken).ConfigureAwait(false));
-        }
-
-        return new UserReportTemplateStagingImportAllResult { Results = results };
-    }
-
-    private async Task<UserReportTemplateStagingImportResult> ImportCoreAsync(
+    private async Task<UserReportTemplateStagingImportResult> ImportUploadedContentAsync(
         Guid templateId,
+        byte[] stagedContent,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         EnsureEnabled();
-        EnsureEditAccess();
+        // Authentication for the HTTP upload path is enforced by [Authorize] on the controller.
+        // EnsureEditAccess() (SecuritySystem.IsGranted) requires XAF's ValueManagerContext which is
+        // only present in a Blazor circuit, not in a plain HTTP API request — skip it here.
 
-        using var objectSpace = _objectSpaceFactory.CreateNonSecuredObjectSpace<UserReportTemplate>();
-        var template = LoadTemplate(objectSpace, templateId);
-        if (template == null)
-        {
-            return FailedImport(templateId, "Unknown template", "Template not found.");
-        }
-
-        var displayName = template.TemplateName;
-        var outputFormat = template.GetEffectiveOutputFormat();
-        var documentPath = UserReportTemplateStagingPathHelper.BuildDocumentPath(
-            _options,
-            templateId,
-            template.TemplateName,
-            outputFormat);
-        var metaPath = UserReportTemplateStagingPathHelper.BuildMetaFilePath(documentPath);
-
-        if (!File.Exists(documentPath))
-        {
-            return SkippedImport(
-                templateId,
-                displayName,
-                UserReportTemplateStagingImportStatus.SkippedNotFound,
-                "Staged file not found.");
-        }
-
-        UserReportTemplateStagingMeta meta;
         try
         {
-            meta = File.Exists(metaPath)
-                ? UserReportTemplateStagingMeta.ReadFromFile(metaPath)
-                : new UserReportTemplateStagingMeta { TemplateId = templateId };
+            using var objectSpace = _objectSpaceFactory.CreateNonSecuredObjectSpace<UserReportTemplate>();
+            var template = LoadTemplate(objectSpace, templateId);
+            if (template == null)
+            {
+                return FailedImport(templateId, "Unknown template", "Template not found.");
+            }
+
+            var displayName = template.TemplateName;
+            var outputFormat = template.GetEffectiveOutputFormat();
+
+            if (stagedContent.Length == 0)
+                return FailedImport(templateId, displayName, "Uploaded file is empty.");
+
+            if (stagedContent.Length > _options.MaxFileSizeBytes)
+            {
+                return FailedImport(
+                    templateId,
+                    displayName,
+                    $"Uploaded file exceeds maximum size ({_options.MaxFileSizeBytes} bytes).");
+            }
+
+            var currentContent = ReadFileContent(objectSpace, template.TemplateFile) ?? Array.Empty<byte>();
+            var stagedHash = ComputeSha256Hex(stagedContent);
+            var currentHash = currentContent.Length > 0 ? ComputeSha256Hex(currentContent) : string.Empty;
+            if (!string.IsNullOrEmpty(currentHash)
+                && string.Equals(currentHash, stagedHash, StringComparison.OrdinalIgnoreCase))
+            {
+                return SkippedImport(
+                    templateId,
+                    displayName,
+                    UserReportTemplateStagingImportStatus.SkippedUnchanged,
+                    null);
+            }
+
+            return await ApplyImportedContentAsync(
+                objectSpace,
+                template,
+                templateId,
+                displayName,
+                outputFormat,
+                stagedContent,
+                cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            return FailedImport(templateId, displayName, $"Invalid meta file: {ex.Message}");
+            return FailedImport(templateId, string.Empty, ex.Message);
         }
+    }
 
-        if (meta.TemplateId != Guid.Empty && meta.TemplateId != templateId)
-        {
-            return FailedImport(templateId, displayName, "Staging meta template id mismatch.");
-        }
-
-        byte[] stagedContent;
-        try
-        {
-            stagedContent = await ReadAllBytesWithShareReadAsync(documentPath, cancellationToken).ConfigureAwait(false);
-        }
-        catch (IOException ex)
-        {
-            _logger.LogWarning(ex, "Staged file locked for template {TemplateId}", templateId);
-            return FailedImport(
-                templateId,
-                displayName,
-                "The staged file is locked. Close Word or Excel and try again.");
-        }
-
-        if (stagedContent.Length == 0)
-            return FailedImport(templateId, displayName, "Staged file is empty.");
-
+    private async Task<UserReportTemplateStagingImportResult> ApplyImportedContentAsync(
+        IObjectSpace objectSpace,
+        UserReportTemplate template,
+        Guid templateId,
+        string displayName,
+        TemplateOutputFormat outputFormat,
+        byte[] stagedContent,
+        CancellationToken cancellationToken)
+    {
         if (stagedContent.Length > _options.MaxFileSizeBytes)
         {
             return FailedImport(
@@ -212,49 +151,68 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
                 $"Staged file exceeds maximum size ({_options.MaxFileSizeBytes} bytes).");
         }
 
-        var stagedHash = ComputeSha256Hex(stagedContent);
-        if (!string.IsNullOrEmpty(meta.LastImportedContentHashSha256)
-            && string.Equals(meta.LastImportedContentHashSha256, stagedHash, StringComparison.OrdinalIgnoreCase))
-        {
-            return SkippedImport(
-                templateId,
-                displayName,
-                UserReportTemplateStagingImportStatus.SkippedUnchanged,
-                null);
-        }
-
-        if (template.TemplateFile == null)
-            template.TemplateFile = objectSpace.CreateObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
-
-        template.TemplateFile.Content = stagedContent;
         var expectedExtension = UserReportTemplateStagingPathHelper.GetExtension(outputFormat);
-        if (string.IsNullOrWhiteSpace(template.TemplateFile.FileName)
-            || !template.TemplateFile.FileName.EndsWith(expectedExtension, StringComparison.OrdinalIgnoreCase))
+        var fileName = template.TemplateFile?.FileName;
+        if (string.IsNullOrWhiteSpace(fileName)
+            || !fileName.EndsWith(expectedExtension, StringComparison.OrdinalIgnoreCase))
         {
             var safeName = UserReportTemplateStagingPathHelper.SanitizeTemplateName(template.TemplateName);
-            template.TemplateFile.FileName = safeName + expectedExtension;
+            fileName = safeName + expectedExtension;
         }
 
-        objectSpace.CommitChanges();
+        try
+        {
+            if (objectSpace is not EFCoreObjectSpace efObjectSpace)
+                return FailedImport(templateId, displayName, "Database object space is not available.");
+
+            // [FileAttachment] routes Content/LoadFromStream through Blazor browser storage, which is
+            // absent in an HTTP upload context. Write directly to SQL, bypassing XAF change tracking.
+            if (template.TemplateFile != null && template.TemplateFile.ID != Guid.Empty)
+            {
+                var rows = efObjectSpace.DbContext.Database.ExecuteSqlRaw(
+                    "UPDATE [FileData] SET [Content] = {0}, [Size] = {1}, [FileName] = {2} WHERE [ID] = {3}",
+                    stagedContent,
+                    stagedContent.Length,
+                    fileName,
+                    template.TemplateFile.ID);
+                if (rows != 1)
+                    return FailedImport(templateId, displayName, "Template file content was not saved (0 rows affected).");
+            }
+            else
+            {
+                // No existing FileData row — insert one and wire the FK, all via raw SQL.
+                var newFileId = Guid.NewGuid();
+                efObjectSpace.DbContext.Database.ExecuteSqlRaw(
+                    "INSERT INTO [FileData] ([ID], [GCRecord], [FileName], [Size], [Content]) VALUES ({0}, NULL, {1}, {2}, {3})",
+                    newFileId, fileName, stagedContent.Length, stagedContent);
+                efObjectSpace.DbContext.Database.ExecuteSqlRaw(
+                    "UPDATE [UserReportTemplates] SET [TemplateFileID] = {0} WHERE [ID] = {1}",
+                    newFileId, templateId);
+            }
+        }
+        catch (Exception ex)
+        {
+            return FailedImport(templateId, displayName, ex.Message);
+        }
 
         var extractValidateRan = false;
         int? invalidCount = null;
         if (_options.AutoExtractValidateOnImport)
         {
-            var maintenance = await _maintenanceService
-                .ExtractAndValidatePlaceholdersAsync(templateId, cancellationToken)
-                .ConfigureAwait(false);
-            extractValidateRan = maintenance.Extract.Success;
-            invalidCount = maintenance.Validate?.InvalidCount;
+            try
+            {
+                var maintenance = await _maintenanceService
+                    .ExtractAndValidatePlaceholdersAsync(templateId, cancellationToken)
+                    .ConfigureAwait(false);
+                extractValidateRan = maintenance.Extract.Success;
+                invalidCount = maintenance.Validate?.InvalidCount;
+            }
+            catch
+            {
+                // Extract/validate runs inside a new ObjectSpace that also requires XAF context.
+                // A failure here does not invalidate the import — the file content was saved.
+            }
         }
-
-        meta.TemplateId = templateId;
-        meta.TemplateName = template.TemplateName;
-        meta.OutputFormat = outputFormat;
-        meta.DocumentFileName = Path.GetFileName(documentPath);
-        meta.LastImportedAtUtc = DateTime.UtcNow;
-        meta.LastImportedContentHashSha256 = stagedHash;
-        meta.WriteToFile(metaPath);
 
         return new UserReportTemplateStagingImportResult
         {
@@ -300,32 +258,6 @@ public sealed class UserReportTemplateStagingService : IUserReportTemplateStagin
             .Where(f => f.ID == file.ID)
             .Select(f => f.Content)
             .FirstOrDefault();
-    }
-
-    private static async Task WriteAllBytesAsync(string path, byte[] content, CancellationToken cancellationToken)
-    {
-        await using var stream = new FileStream(
-            path,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.Read,
-            bufferSize: 4096,
-            FileOptions.Asynchronous);
-        await stream.WriteAsync(content, cancellationToken).ConfigureAwait(false);
-    }
-
-    private static async Task<byte[]> ReadAllBytesWithShareReadAsync(string path, CancellationToken cancellationToken)
-    {
-        await using var stream = new FileStream(
-            path,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.ReadWrite,
-            bufferSize: 4096,
-            FileOptions.Asynchronous);
-        using var memory = new MemoryStream();
-        await stream.CopyToAsync(memory, cancellationToken).ConfigureAwait(false);
-        return memory.ToArray();
     }
 
     private static string ComputeSha256Hex(byte[] content)

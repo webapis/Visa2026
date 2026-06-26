@@ -1,15 +1,5 @@
-# Template staging (UNC only)
+# Local sandbox template editing
 
-Resminamalar **Edit template** writes to a **Windows SMB share** configured in `TemplateEditStaging:StagingRootUnc`.
+Resminamalar **Edit template** exports to a folder on the **officer PC** (`Documents\Visa2026Templates` by default) via the browser File System Access API. **Sync to database** uploads changes back to SQL.
 
-**Development:** `\\127.0.0.1\Visa2026TemplateEdit` (see `appsettings.Development.json`).
-
-Do not use local drive paths (`D:\`, `C:\`) or folders under this project — UNC only.
-
-Verify share access:
-
-```powershell
-.\scripts\local\Ensure-TemplateEditDevShare.ps1
-```
-
-See [`docs/TEMPLATE_STAGING_EDIT.md`](../../docs/TEMPLATE_STAGING_EDIT.md).
+See **[`docs/TEMPLATE_STAGING_EDIT.md`](../../docs/TEMPLATE_STAGING_EDIT.md)** for the full workflow, HTTPS requirements, and rollout checklist.

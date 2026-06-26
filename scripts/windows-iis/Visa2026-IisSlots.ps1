@@ -168,6 +168,10 @@ function Get-Visa2026IisSlotEnvTemplate {
         "DB_NAME=$($slot.DbName)"
         "# One-shot: FORCE_XAF_DB_UPDATE=true (then remove from app pool) - see docs/ENVIRONMENTS.md"
         "# FORCE_XAF_DB_UPDATE=true"
+        "# Resminamalar local sandbox template editing (HTTPS required):"
+        "# TEMPLATE_EDIT_STAGING_ENABLED=true"
+        "HTTPS_ENABLED=true"
+        "HTTPS_PORT=$(Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)"
     ) -join "`r`n"
 }
 
@@ -214,4 +218,128 @@ function Grant-Visa2026IisAppPoolDataProtectionAcl {
     New-Item -ItemType Directory -Force -Path $DataProtectionKeysPath | Out-Null
     $grantee = "IIS AppPool\$AppPoolName`:(OI)(CI)M"
     icacls $DataProtectionKeysPath /grant $grantee 2>$null | Out-Null
+}
+
+function Read-Visa2026DotEnvMap {
+    param([string]$Path)
+
+    $map = @{}
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $map
+    }
+
+    Get-Content -LiteralPath $Path | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -match '^\s*#' -or $line -eq '') { return }
+        if ($line -match '^\s*([^#=]+)=(.*)$') {
+            $k = $matches[1].Trim()
+            $v = $matches[2].Trim()
+            if ($v.Length -ge 2 -and $v.StartsWith('"') -and $v.EndsWith('"')) {
+                $v = $v.Substring(1, $v.Length - 2)
+            }
+            $map[$k] = $v
+        }
+    }
+    $map
+}
+
+function Resolve-Visa2026TemplateEditStagingEnabled {
+    param(
+        [string]$EnvFile = "",
+        [switch]$DefaultEnabled
+    )
+
+    if (-not $EnvFile -or -not (Test-Path -LiteralPath $EnvFile)) {
+        return [bool]$DefaultEnabled
+    }
+
+    $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+    if (-not $envMap.ContainsKey('TEMPLATE_EDIT_STAGING_ENABLED')) {
+        return [bool]$DefaultEnabled
+    }
+
+    $raw = $envMap['TEMPLATE_EDIT_STAGING_ENABLED'].Trim().ToLowerInvariant()
+    return $raw -in @('1', 'true', 'yes', 'on')
+}
+
+function Resolve-Visa2026HttpsEnabled {
+    param(
+        [string]$EnvFile = ""
+    )
+
+    if (-not $EnvFile -or -not (Test-Path -LiteralPath $EnvFile)) {
+        return $false
+    }
+
+    $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+    if (-not $envMap.ContainsKey('HTTPS_ENABLED')) {
+        return $false
+    }
+
+    $raw = $envMap['HTTPS_ENABLED'].Trim().ToLowerInvariant()
+    return $raw -in @('1', 'true', 'yes', 'on')
+}
+
+function Resolve-Visa2026HttpsPort {
+    param(
+        [string]$EnvFile = "",
+        [int]$DefaultPort = 0
+    )
+
+    if ($EnvFile -and (Test-Path -LiteralPath $EnvFile)) {
+        $envMap = Read-Visa2026DotEnvMap -Path $EnvFile
+        if ($envMap.ContainsKey('HTTPS_PORT') -and $envMap['HTTPS_PORT']) {
+            $parsed = 0
+            if ([int]::TryParse($envMap['HTTPS_PORT'].Trim(), [ref]$parsed) -and $parsed -gt 0) {
+                return $parsed
+            }
+        }
+    }
+
+    if ($DefaultPort -gt 0) {
+        return $DefaultPort
+    }
+
+    return 443
+}
+
+function Resolve-Visa2026DefaultHttpsPortForProfile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Production", "Staging", "Demo", "Legacy")]
+        [string]$Profile
+    )
+
+    switch ($Profile) {
+        "Staging" { return 8080 }
+        "Demo" { return 8081 }
+        default { return 443 }
+    }
+}
+
+function Get-Visa2026SlotSmokeLoginPageUrl {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Production", "Staging", "Demo", "Legacy")]
+        [string]$Profile,
+
+        [string]$EnvFile = "",
+        [string]$HostName = "127.0.0.1"
+    )
+
+    $slot = Get-Visa2026IisSlotDefinition -Profile $Profile
+    if (-not $EnvFile) {
+        $EnvFile = $slot.EnvFile
+    }
+
+    if (-not (Resolve-Visa2026HttpsEnabled -EnvFile $EnvFile)) {
+        return $slot.LoginPageUrl
+    }
+
+    $httpsPort = Resolve-Visa2026HttpsPort -EnvFile $EnvFile -DefaultPort (Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)
+    if ($httpsPort -eq 443) {
+        return "https://${HostName}/LoginPage"
+    }
+
+    return "https://${HostName}:$httpsPort/LoginPage"
 }

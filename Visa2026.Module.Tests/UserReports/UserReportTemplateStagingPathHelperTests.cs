@@ -6,12 +6,11 @@ namespace Visa2026.Module.Tests.UserReports;
 
 public class UserReportTemplateStagingPathHelperTests
 {
-    private static TemplateEditStagingOptions CreateOptions(string uncRoot) =>
+    private static TemplateEditStagingOptions CreateOptions() =>
         new()
         {
             Enabled = true,
-            StagingRootUnc = uncRoot,
-            FileNamePattern = "{templateId}_{safeName}{extension}",
+            FileNamePattern = "{safeName}{extension}",
         };
 
     [Fact]
@@ -24,10 +23,10 @@ public class UserReportTemplateStagingPathHelperTests
     }
 
     [Fact]
-    public void BuildDocumentFileName_uses_template_id_and_extension()
+    public void BuildDocumentFileName_uses_safe_template_name_and_extension()
     {
         var templateId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
-        var options = CreateOptions(@"\\127.0.0.1\Visa2026TemplateEdit");
+        var options = CreateOptions();
 
         var fileName = UserReportTemplateStagingPathHelper.BuildDocumentFileName(
             options,
@@ -35,55 +34,23 @@ public class UserReportTemplateStagingPathHelperTests
             "GT-15 Elyasow ckl",
             TemplateOutputFormat.Word);
 
-        Assert.Equal("3fa85f64-5717-4562-b3fc-2c963f66afa6_GT-15 Elyasow ckl.docx", fileName);
+        Assert.Equal("GT-15 Elyasow ckl.docx", fileName);
     }
 
     [Fact]
-    public void BuildUncPath_uses_configured_unc_root()
+    public void BuildDocumentFileName_supports_template_id_token_when_configured()
     {
-        var options = CreateOptions(@"\\127.0.0.1\Visa2026TemplateEdit");
-        var unc = UserReportTemplateStagingPathHelper.BuildUncPath(options, "sample.docx");
-        Assert.Equal(@"\\127.0.0.1\Visa2026TemplateEdit\sample.docx", unc);
-    }
+        var templateId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6");
+        var options = CreateOptions();
+        options.FileNamePattern = "{templateId}{extension}";
 
-    [Fact]
-    public void ResolveStagingRoot_rejects_local_drive_path()
-    {
-        var options = CreateOptions(@"D:\Visa2026TemplateEdit");
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            UserReportTemplateStagingPathHelper.ResolveStagingRoot(options));
-        Assert.Contains("UNC", ex.Message, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void ResolveStagingRoot_rejects_relative_path()
-    {
-        var options = CreateOptions("TemplateEdit");
-        var ex = Assert.Throws<InvalidOperationException>(() =>
-            UserReportTemplateStagingPathHelper.ResolveStagingRoot(options));
-        Assert.Contains("UNC", ex.Message, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void TryBuildOfficeOpenUrl_builds_ms_word_link_for_unc_path()
-    {
-        var url = UserReportTemplateStagingPathHelper.TryBuildOfficeOpenUrl(
-            @"\\127.0.0.1\Visa2026TemplateEdit\sample.docx",
+        var fileName = UserReportTemplateStagingPathHelper.BuildDocumentFileName(
+            options,
+            templateId,
+            "GT-15 Elyasow ckl",
             TemplateOutputFormat.Word);
 
-        Assert.NotNull(url);
-        Assert.StartsWith("ms-word:ofe|u|file://", url, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("127.0.0.1", url, StringComparison.OrdinalIgnoreCase);
-    }
-
-    [Fact]
-    public void TryBuildOfficeOpenUrl_returns_null_for_local_drive_path()
-    {
-        var url = UserReportTemplateStagingPathHelper.TryBuildOfficeOpenUrl(
-            @"C:\Visa2026TemplateEdit\sample.docx",
-            TemplateOutputFormat.Word);
-
-        Assert.Null(url);
+        Assert.Equal("3fa85f6457174562b3fc2c963f66afa6.docx", fileName);
     }
 
     [Fact]
