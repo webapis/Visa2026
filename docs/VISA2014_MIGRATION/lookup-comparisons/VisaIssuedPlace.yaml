@@ -1,0 +1,158 @@
+# Lookup comparison — VisaIssuedPlace (machine-readable)
+# Human table: VisaIssuedPlace.md
+
+version: 1
+catalog: VisaIssuedPlace
+comparedAt: 2026-06-21
+legacyDatabase: VISA2015
+legacyTable: dbo.VisaIssuedPlace
+legacyColumn: IssuedPlaceOfVisaL
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/visa-issued-place.json
+targetMatchProperty: NameTm
+visaScope: dbo.Visa WHERE GCRecord IS NULL
+visaWithFkCount: 6041
+visaWithoutFkCount: 0
+
+summary:
+  verdict: approved
+  layer3KeyFormat: IssuedPlaceOfVisaL
+  approvedAt: 2026-06-21
+  distinctLegacyLabelsOnVisa: 22
+  mappedVisaRows: 6023
+  unmappedVisaRows: 18
+  recommendedNextStep: BorderZoneName comparison
+
+comparisons:
+  - legacyIssuedPlaceOfVisaL: Aşgabat şäheri
+    targetNameTm: Aşgabat şäheri
+    visaCount: 2853
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: Aşgabat şäher howa menzilindäki MGP
+    targetNameTm: Aşgabat şäher howa menzilindäki MGP
+    visaCount: 2799
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: Daşoguz G.Ý
+    targetNameTm: Daşoguz G.Ý
+    visaCount: 121
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: Türkmenbaşy H.M.
+    targetNameTm: Türkmenbaşy howa menzilindäki MGP
+    visaCount: 65
+    match: approved
+    notes: Legacy abbrev H.M. = howa menzili MGP
+
+  - legacyIssuedPlaceOfVisaL: Ankara
+    targetNameTm: Ankara
+    visaCount: 62
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: Stambul
+    targetNameTm: Stambul
+    visaCount: 58
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: T-abat H.M.
+    targetNameTm: Türkmenabat Howa Menzili
+    visaCount: 18
+    match: approved
+    notes: Legacy abbrev for Türkmenabat airport MGP
+
+  - legacyIssuedPlaceOfVisaL: Farap G.Y.
+    targetNameTm: Farap MGP
+    visaCount: 17
+    match: approved
+    notes: Border G.Y. label; nearest catalog row Farap MGP
+
+  - legacyIssuedPlaceOfVisaL: Howdan MGP
+    targetNameTm: Howdan MGP
+    visaCount: 17
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: BERLİN
+    targetNameTm: Berlin
+    visaCount: 4
+    match: approved
+    notes: Case and Turkish İ → catalog Latin title
+
+  - legacyIssuedPlaceOfVisaL: Garabogaz
+    targetNameTm: Garabogaz GY
+    visaCount: 4
+    match: approved
+    notes: Short legacy label
+
+  - legacyIssuedPlaceOfVisaL: Farap MGP
+    targetNameTm: Farap MGP
+    visaCount: 3
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: Waşington
+    targetNameTm: Waşington
+    visaCount: 1
+    match: approved
+    notes: Identity
+
+  - legacyIssuedPlaceOfVisaL: Kiýew
+    targetNameTm: Kiýew
+    visaCount: 1
+    match: approved
+    notes: Identity
+
+unmapped:
+  - legacyIssuedPlaceOfVisaL: DELİ
+    visaCount: 5
+    policy: skip_row
+    notes: Delhi — not in Visa2026 seed catalog
+
+  - legacyIssuedPlaceOfVisaL: Pekin
+    visaCount: 3
+    policy: skip_row
+    notes: Beijing — not in seed catalog
+
+  - legacyIssuedPlaceOfVisaL: Serhetabat
+    visaCount: 2
+    policy: skip_row
+
+  - legacyIssuedPlaceOfVisaL: London
+    visaCount: 2
+    policy: skip_row
+
+  - legacyIssuedPlaceOfVisaL: Kazan
+    visaCount: 2
+    policy: skip_row
+
+  - legacyIssuedPlaceOfVisaL: Taşkent
+    visaCount: 2
+    policy: skip_row
+    notes: Catalog has Astana, not Taşkent
+
+  - legacyIssuedPlaceOfVisaL: Mary H.M.
+    visaCount: 1
+    policy: skip_row
+
+  - legacyIssuedPlaceOfVisaL: BAKU
+    visaCount: 1
+    policy: skip_row
+
+targetUnusedOnVisa:
+  - Wena
+  - Astana
+  - Moskwa
+
+unmappedPolicy:
+  policy: skip_row
+  unmappedVisaRows: 18
+  notes: Do not use catalog IsDefault for missing embassy labels
+
+nullFkPolicy:
+  policy: skip_row
+  visaCount: 0

@@ -1,10 +1,13 @@
 {
     "rows":  [
                  {
-                     "NameTm":  "Serhetabat etr"
+                     "NameTm":  "Daşoguz şäher"
                  },
                  {
-                     "NameTm":  "Serhetabat şäheri"
+                     "NameTm":  "Etrek etrap"
+                 },
+                 {
+                     "NameTm":  "Farap etrap"
                  },
                  {
                      "NameTm":  "Garabogaz şäheri"
@@ -14,6 +17,21 @@
                  },
                  {
                      "NameTm":  "Sarahs etrabyna"
+                 },
+                 {
+                     "NameTm":  "Serhetabat etr"
+                 },
+                 {
+                     "NameTm":  "Serhetabat etrap"
+                 },
+                 {
+                     "NameTm":  "Serhetabat şäheri"
+                 },
+                 {
+                     "NameTm":  "Tagtabazar etrap"
+                 },
+                 {
+                     "NameTm":  "Ýolöten etrap"
                  }
              ]
 }

@@ -72,6 +72,8 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._26[0]", "Application.VisaCategory.PdfForm_Code", "Visa Category", PdfMappingMode.Property);
 
             // Address of Residence
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._33[0]", "CurrentAddressOfResidence.Region.PdfForm_Code", "Region of stay", PdfMappingMode.Property);
+            CreateMappingIfNotExists("topmostSubform[0].Page2[0]._34[0]", "CurrentAddressOfResidence.City.PdfForm_Code", "District of stay", PdfMappingMode.Property);
             CreateMappingIfNotExists("topmostSubform[0].Page2[0]._35[0]", "CurrentAddressOfResidence.FullAddress", "Stay address", PdfMappingMode.Property);
 
             CreateMappingIfNotExists(PdfFormMappingFamilyFieldKeys.Line1Key, PdfFormMappingFamilyFieldKeys.MaritalLine1Path, "Family members line 1 (item 18)", PdfMappingMode.Property);

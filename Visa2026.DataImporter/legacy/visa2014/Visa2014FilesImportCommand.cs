@@ -78,7 +78,10 @@ internal static class Visa2014FilesImportCommand
             if (string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase))
                 return await RunPassportFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport.");
+            if (string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase))
+                return await RunVisaFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa.");
             return 1;
         }
         catch (Exception ex)
@@ -201,6 +204,59 @@ internal static class Visa2014FilesImportCommand
             $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}");
         if (result.CopyIdMapPath != null)
             Console.WriteLine($"INF Copy id-map: {result.CopyIdMapPath}");
+
+        foreach (var error in result.Errors.Take(20))
+            Console.Error.WriteLine($"ERR {error}");
+        if (result.Errors.Count > 20)
+            Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
+
+        return result.Failed > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunVisaFileImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string property,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var isVisaDocument = string.Equals(property, "VisaDocument", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "GöçürmeNusga", StringComparison.OrdinalIgnoreCase);
+        if (!isVisaDocument)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported for Visa. Supported: VisaDocument (GöçürmeNusga).");
+            return 1;
+        }
+
+        var visaIdMapPath = GetOptionValue(args, "--visa-id-map")
+            ?? GetOptionValue(args, "--id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Visa");
+        var documentIdMapPath = GetOptionValue(args, "--document-id-map-output")
+            ?? source.IdMapPath(dataImporterRoot, "VisaDocument");
+
+        Console.WriteLine($"INF Visa id-map: {visaIdMapPath}");
+        Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
+
+        var result = await Visa2014VisaDocumentImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            visaIdMapPath,
+            dryRun ? null : documentIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Visa id-map entries: {result.VisaIdMapEntries}");
+        Console.WriteLine($"INF Rows with blob processed: {result.LegacyRowsWithBlob}");
+        Console.WriteLine(
+            $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
+            $"No visa map: {result.SkippedNoVisaMap}  No blob: {result.SkippedNoBlob}  " +
+            $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}");
+        if (result.DocumentIdMapPath != null)
+            Console.WriteLine($"INF Document id-map: {result.DocumentIdMapPath}");
 
         foreach (var error in result.Errors.Take(20))
             Console.Error.WriteLine($"ERR {error}");

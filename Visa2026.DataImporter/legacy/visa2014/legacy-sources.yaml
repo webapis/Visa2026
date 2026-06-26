@@ -31,6 +31,9 @@ sources:
     previewOutput:
       Person: preview-export/Person-preview.calik-energi.xlsx
       Passport: preview-export/Passport-preview.calik-energi.xlsx
+      Visa: preview-export/Visa-preview.calik-energi.xlsx
+      Education: preview-export/Education-preview.calik-energi.xlsx
+      EmployeePositionHistory: preview-export/EmployeePositionHistory-preview.calik-energi.xlsx
     idMapDir: id-maps/calik-energi
 
   - id: gap-insaat

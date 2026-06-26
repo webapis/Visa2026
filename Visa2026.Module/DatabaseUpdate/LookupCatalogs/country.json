@@ -439,6 +439,12 @@
                      "LocalizationKey":  "ARM"
                  },
                  {
+                     "NameTm":  "Albaniya",
+                     "Code":  "ALB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ALB"
+                 },
+                 {
                      "NameTm":  "Müsür",
                      "Code":  "EGY",
                      "IsDefault":  false,

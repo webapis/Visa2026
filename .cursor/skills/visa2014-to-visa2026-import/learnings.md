@@ -218,3 +218,159 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Dedupe**: Visa2026 PassportNumber unique among active — sentinel `AF000000000` / `JL000000000` need Oid suffix strategy
 - **Artifacts**: discovery/Passport.yaml, field-maps/Passport.yaml, lookup-comparisons/PassportType.md, order.yaml entry (ISS-005 resolved)
 - **Blocked**: `--import-visa2014 --entity Passport` not implemented; importConfirmed false; needs full Person id-map first
+
+### 2026-06-26 — Visa discovery (Çalik VISA2015)
+
+- **Phase**: discovery | mapping
+- **Dossier**: docs/VISA2014_MIGRATION/discovery/Visa.yaml
+- **Legacy table(s)**: dbo.Visa, dbo.VisaType, dbo.IVisaType_Data, dbo.VisaCategory, dbo.VisaIssuedPlace, dbo.BorderZoneForVisa
+- **Counts**: 6041 active visas; 4581 passports; 1460 multi-visa; 0 orphan Passport FK; 7 duplicate VisaNumber groups; 5976 inline scan blobs
+- **Surprise**: VisaType labels live on IVisaType_Data (TypeOfVisaL + mgCode); 58 rows GL with null mgCode — no GL in Visa2026 visa-type.json; BorderZone is bit-matrix not comma-separated text
+- **SQL / MCP that helped**: sys.columns on dbo.Visa; join counts via sqlcmd on VISA2015 SQLEXPRESS
+- **Fix / mapping change**: field-maps/Visa.yaml — Passport id-map FK; sentinel AFV0000000/JLV0000000 dedupe; GöçürmeNusga → VisaDocument file wave
+- **Prevent**: Approve VisaType/VisaCategory/VisaIssuedPlace/BorderZoneName layer-3 before importConfirmed; export Excel preview next
+- **Artifacts**: discovery/Visa.yaml, field-maps/Visa.yaml, table-mappings visa-main, order.yaml, entity-inventory
+
+### 2026-06-26 — VisaType lookup comparison (Çalik VISA2015)
+
+- **Phase**: discovery | mapping
+- **Scope**: dbo.Visa → IVisaType_Data (6041 rows)
+- **Verdict**: Approved — 5 buckets; composite TypeOfVisaL:mgCode → LocalizationKey
+- **Key mapping**: GL→OF (official/Gulluk visa, not Passport GL→PG); BS:14→BS1; default WP
+- **Artifacts**: lookup-comparisons/VisaType.md, VisaType.yaml, lookup-translations.yaml
+
+### 2026-06-26 — VisaCategory lookup comparison (Çalik VISA2015)
+
+- **Phase**: discovery | mapping
+- **Scope**: dbo.Visa → VisaCategory (6040 with FK; 1 null → skip)
+- **Verdict**: Approved — köp/iki/bir gezeklik + mgCode 4/2/1 → Multiple/Double/Single (perfect 1:1)
+- **Artifacts**: lookup-comparisons/VisaCategory.md, VisaCategory.yaml, lookup-translations.yaml
+
+### 2026-06-21 — VisaIssuedPlace lookup comparison (Çalik VISA2015)
+
+- **Phase**: discovery | mapping
+- **Scope**: dbo.Visa → VisaIssuedPlace (6041 with FK; 0 null)
+- **Verdict**: Approved — 22 distinct labels; 14 map to catalog (6023 rows); 8 embassy labels (18 rows) → skip_row
+- **Key aliases**: Türkmenbaşy H.M.→Türkmenbaşy howa menzilindäki MGP; T-abat H.M.→Türkmenabat Howa Menzili; Farap G.Y.→Farap MGP; BERLİN→Berlin; Garabogaz→Garabogaz GY
+- **Policy**: Do not default unmapped to catalog IsDefault (Aşgabat MGP) — skip preserves embassy accuracy
+- **Artifacts**: lookup-comparisons/VisaIssuedPlace.md, VisaIssuedPlace.yaml, lookup-translations.yaml
+
+### 2026-06-21 — BorderZoneName lookup comparison (Çalik VISA2015)
+
+- **Phase**: discovery | mapping
+- **Scope**: dbo.Visa → BorderZoneForVisa bit matrix (589 FK; 5452 null → Ýok)
+- **Verdict**: Approved — 8 bits map to NameTm; Garabogaz şäher → Garabogaz şäheri; Sarahs unused on visas
+- **Catalog**: Added 6 rows to tenant border-zone-name.json (Daşoguz şäher, Tagtabazar/Serhetabat/Farap/Etrek etrap, Ýolöten etrap)
+- **Transform**: comma-separated labels in Helper bit order (not legacy space-concat)
+- **Artifacts**: lookup-comparisons/BorderZoneName.md, BorderZoneName.yaml, lookup-translations.yaml
+
+### 2026-06-21 — Visa Excel preview export (Çalik VISA2015)
+
+- **Phase**: mapping | preview
+- **CLI**: `--export-visa2014-preview --entity Visa --legacy-source calik-energi`
+- **Counts**: 6041 legacy → 6016 import, 19 skipped (18 embassy + 1 null VisaCategory), 6 duplicate_merged
+- **Code**: Visa2014VisaTransform.cs, Visa2014VisaPreviewExporter.cs (shared transform with future OData importer)
+- **Output**: preview-export/Visa-preview.calik-energi.xlsx
+- **Next**: human review → importConfirmed → Visa OData importer + VisaDocument file wave
+
+### 2026-06-21 — Visa OData scalar + VisaDocument file import (implementation)
+
+- **Phase**: import code
+- **Files**: Visa2014VisaODataImporter.cs, Visa2014VisaDocumentImporter.cs; OData resolver extended (VisaType/VisaCategory/VisaIssuedPlace)
+- **Web API**: VisaDocument registered (like PassportDocument)
+- **Dry-run**: 6016 prepared, 251 would skip (Passport not in id-map) — expected orphan-passport gap
+- **Blocked**: Blazor not running on :5001 for live POST; restart host then full import
+
+### 2026-06-26 — Visa — pilot OData fix (ShowOptionalFields)
+
+- **Phase**: import
+- **Environment**: Visa2026DbDev (localhost:5001)
+- **Symptom**: All Visa POSTs returned **400 Bad Request** / **"Incorrect body."**
+- **Root cause**: `BuildPayload` included `ShowOptionalFields`, which is `[NotMapped]` on `Visa` — XAF OData rejects non-EDM properties (same pattern as omitting `Category` on Application POST).
+- **Fix**: Drop `ShowOptionalFields` from `Visa2014VisaODataImporter.BuildPayload`; keep scalar flags (`IsCancelled`, `IsChanged`, `IsExtended`, `ExtensionRequired`) and lookups.
+- **Pilot**: `--import-visa2014 --entity Visa --legacy-source calik-energi --max-rows 5` → **Posted: 5, Failed: 0**
+- **Prevent**: Never POST `[NotMapped]` UI-only members (`ShowOptionalFields`, computed state) — mirror `VisaImporter.cs` / `Visa2014PassportODataImporter.cs` payload shape.
+
+### 2026-06-26 — Visa full scalar OData import (calik-energi)
+
+- **Phase**: import
+- **CLI**: `--import-visa2014 --entity Visa --legacy-source calik-energi --no-wait`
+- **Resume**: `Visa2014VisaODataImporter` loads existing `Visa.json` id-map; skips legacy OIDs already mapped (SkippedAlreadyImported) before POST — required after 5-row pilot.
+- **Counts**: legacy 6041 → prepared 6016 (19 transform skip, 6 dedupe); **posted 5760**, failed 0, 251 no Passport id-map, 5 already imported; id-map **5765** entries.
+- **Next**: `--import-visa2014-files` VisaDocument wave (GörmeNusga).
+
+### 2026-06-26 — Education discovery started (calik-energi)
+
+- **Phase**: discovery (in_progress)
+- **Legacy**: `dbo.Education` — 3133 active rows, 3109 persons, 19 orphan Person FK; no varbinary (no file wave).
+- **Visa2026 BO**: `Education.cs` — required lookups + optional `GraduationYear` (derived from `EducationEndDate` year; 2959 rows omit).
+- **EducationLevel**: approved — mgCode → LocalizationKey (`lookup-comparisons/EducationLevel.md`).
+- **Blocked**: EducationInstitution + Specialty NameTm catalog audits (1537 / 1254 distinct on data).
+- **Artifacts**: `discovery/Education.yaml`, `field-maps/Education.yaml`, `education-main` in table-mappings; registered in `order.yaml`.
+- **Next**: Institution/Specialty lookup comparisons → Excel preview → `importConfirmed`.
+
+### 2026-06-26 — Education Institution + Specialty lookup gap analysis
+
+- **Tool**: `preview-export/_education-lookup-gap/` (EduGap) — normalize match via `Visa2014CatalogMatchHelper` rules.
+- **EducationInstitution**: 1037/3133 rows mapped on current 953-row seed; **2096 rows** need **1471** DISTINCT legacy labels seeded (`education-institution.calik-energi.json`).
+- **Specialty**: 956/3133 mapped; **2177 rows** need **1063** DISTINCT `TitleOfSpeciality` seeded (`specialty.calik-energi.json`). Top gap: Tehniki howpsuzlyk we zähmeti goramak (401 rows).
+- **Verdict**: `approved_with_catalog_seed` — identity pass-through like ProjectContract; reject skip_row without seed.
+- **Artifacts**: `lookup-comparisons/EducationInstitution.md|.yaml`, `Specialty.md|.yaml`, `lookup-translations.calik-energi.yaml`, `analysis.json`.
+- **Next**: generate tenant JSON seeds + manifest entries → Excel preview.
+
+### 2026-06-26 — Education calik-energi catalogs + Excel preview
+
+- **Script**: `scripts/local/Generate-EducationLookupCalikEnergiCatalogs.ps1` — union DISTINCT Education labels + existing seed rows.
+- **Catalogs**: `education-institution.calik-energi.json` **1471** rows; `specialty.calik-energi.json` **1063** rows; tenant `manifest.json` v21.
+- **Preview**: `Education-preview.calik-energi.xlsx` — **3108** import rows, 6 skipped (orphan Person FK), 25 unmapped lookup distinct (mostly edge labels); legacy SQL 3114 with-valid-Person rows.
+- **Build fix**: exclude `preview-export/_education-lookup-gap/` from DataImporter csproj (nested EduGap.csproj caused duplicate assembly attributes).
+- **Next**: deploy catalogs to dev DB (copy calik JSON → `education-institution.json` / `specialty.json` + `FORCE_XAF_DB_UPDATE`), human `importConfirmed`, `Visa2014EducationODataImporter`.
+
+### 2026-06-26 — Education OData import complete (calik-energi)
+
+- **CLI**: `--import-visa2014 --entity Education --legacy-source calik-energi`
+- **Counts**: **2958 posted**, 0 failed, 150 no Person id-map, 6 transform skipped (orphan Person FK).
+- **Id-map**: `id-maps/calik-energi/Education.json`
+- **Country**: legacy `mgCode` often `ISO3-SUFFIX` (e.g. `GBR-WELIKOBRITANIYA`) — `NormalizeLegacyCountryMgCode` strips prefix; **ALB** added to global `country.json` manifest v3.
+- **Institution**: OData import does not POST `EducationInstitution`; resolver uses normalized NameTm keeper when duplicates exist.
+- **importConfirmed** 2026-06-26. Next BO: **Application** discovery.
+
+### 2026-06-26 — EmployeePositionHistory discovery started (calik-energi)
+
+- **Legacy**: `dbo.WorkHistoryOfEmployee` — **2993** active rows; FK `Employee` → Person (0 orphan); no `EndDate` column.
+- **Visa2026 BO**: `Position` + `ActualPosition` (required) + `Department` + `StartDate`/`EndDate`; omit `ShowOptionalFields` on POST.
+- **EndDate**: derive next `StartDateOnThisPosition` per Person (41 multi-history employees).
+- **Lookups**: **1579** distinct `TitleOfPosition` vs tenant `position.json` **259**; **74** departments vs seed **3** — calik-energi catalog seeds pending.
+- **ActualPosition**: mirror legacy position title (find-or-create by `Name`); not in tenant manifest.
+- **Artifacts**: `discovery/EmployeePositionHistory.yaml`, `field-maps/EmployeePositionHistory.yaml`, `employee-position-history-main` in table-mappings; registered in `order.yaml`.
+- **Next**: gap analysis scripts + `position.calik-energi.json` / `department.calik-energi.json` → Excel preview → `importConfirmed`.
+
+### 2026-06-26 — EmployeePositionHistory catalogs + Excel preview (calik-energi)
+
+- **Catalogs**: `position.calik-energi.json` **1579** rows, `department.calik-energi.json` **74** rows (from VISA2015 WorkHistory DISTINCT + seed union).
+- **Preview**: `EmployeePositionHistory-preview.calik-energi.xlsx` — **2993** import rows, **0** skipped, **0** unmapped lookups; EndDate derived per Person.
+- **ActualPosition**: `trim(Position.Code)` or `"-"` on **2289** empty-code rows.
+- **Next**: deploy catalogs (`Deploy-PositionDepartmentLookupCalikEnergiCatalogs.ps1` + manifest v25), ensure `ActualPosition` Name `"-"` in target DB, OData importer + pilot.
+
+### 2026-06-26 — EmployeePositionHistory OData import (calik-energi)
+
+- **Deploy**: manifest v25; LookupCatalogSync position created=1377 updated=202, department created=74.
+- **OData**: **2838 posted**, 0 failed, 151 no Person id-map, 4 pilot skip-already-imported; **194** ActualPositions find-or-create (~2.3 min).
+- **Id-map**: `id-maps/calik-energi/EmployeePositionHistory.json`
+- **Code**: `Visa2014EmployeePositionHistoryODataImporter.cs`; resolver Position/Department/ActualPosition.
+- **Sign-off**: `discovery/EmployeePositionHistory.yaml` + `order.yaml` — `importConfirmed: true`, `importStatus: done`.
+
+### 2026-06-26 — Visa VisaDocument file wave (calik-energi)
+
+- **CLI**: `--import-visa2014-files --entity Visa --property VisaDocument --legacy-source calik-energi`
+- **Counts**: **5571 posted**, 0 failed, 276 no visa map, 45 no blob, 149 oversize (>5MB); ~18 min.
+- **Id-map**: `id-maps/calik-energi/VisaDocument.json`
+- **Visa entity** scalar + files complete for calik-energi.
+
+### 2026-06-26 — EmployeePositionHistory calik-energi catalogs + Excel preview
+
+- **Scripts**: `Generate-PositionDepartmentLookupCalikEnergiCatalogs.ps1`, `Deploy-PositionDepartmentLookupCalikEnergiCatalogs.ps1` (overlay manifest v25).
+- **Catalogs**: `position.calik-energi.json` **1579** rows; `department.calik-energi.json` **74** rows (union DISTINCT WorkHistory labels + tenant seed).
+- **Preview**: `EmployeePositionHistory-preview.calik-energi.xlsx` — **2993** import rows, 0 skipped, 0 unmapped lookup distinct; EndDate derived per Person from next StartDate.
+- **Transform**: `Visa2014EmployeePositionHistoryTransform` + preview exporter; ActualPosition = trim(Position.Code) or `"-"`.
+- **Next**: human `importConfirmed`, `Visa2014EmployeePositionHistoryODataImporter` (not implemented yet).

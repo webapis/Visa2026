@@ -112,6 +112,28 @@ namespace Visa2026.Module.BusinessObjects
             set => fullAddress = value;
         }
 
+        private Region region;
+        [RuleRequiredField]
+        [ImmediatePostData]
+        [VisibleInListView(false)]
+        public virtual Region Region
+        {
+            get => region;
+            set
+            {
+                if (region == value)
+                    return;
+
+                region = value;
+                City = null;
+            }
+        }
+
+        [RuleRequiredField]
+        [DataSourceCriteria("[Region] = '@This.Region'")]
+        [VisibleInListView(false)]
+        public virtual City City { get; set; }
+
         [RuleRequiredField(TargetCriteria = "Type = 'PrivateHouse'")]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]

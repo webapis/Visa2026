@@ -15,14 +15,12 @@
 
 version: 1
 lastUpdated: 2026-06-26
-updatedBy: developer — Passport discovery complete (ISS-005 resolved)
+updatedBy: developer - EmployeePositionHistory OData import done (calik-energi)
 
 entityStatusSource: Visa2026.DataImporter/legacy/visa2014/order.yaml
 entitySummarySource: docs/VISA2014_MIGRATION/entity-inventory.yaml
 
 currentFocus:
-  - Full Person OData import + Person.Photo files wave
-  - Passport import implementation after Person id-map + importConfirmed
   - ApplicationType lookup comparison → Application discovery
 
 workstreams:
@@ -71,7 +69,7 @@ workstreams:
     label: Phase 1 per-BO discovery (dossiers + layers 1Ã¢â‚¬â€œ3)
     status: in_progress
     artifact: docs/VISA2014_MIGRATION/discovery/
-    notes: Person complete; Passport discovery complete 2026-06-26; Application + ApplicationItem not started.
+    notes: Person complete; Passport scalar + copies done 2026-06-26; Visa scalar import done 2026-06-26 (5760 posted); Application + ApplicationItem not started.
 
   - id: excel-preview
     label: Excel preview export (--export-visa2014-preview)
@@ -98,76 +96,15 @@ workstreams:
     notes: |
       Person importer implemented; --legacy-source wired. OData load requires importConfirmed + running Blazor.Server.
 
-  - id: pilot-import
-    label: Pilot OData load (LocalDB Visa2026 — Çalik)
-    status: in_progress
-    blockedBy: []
-    notes: |
-      ProjectContract catalog synced 2026-06-26 (87 ProjectContracts in LocalDB).
-      Person dry-run 10/10 prepared. Next: live --max-rows 10 with Blazor on :5001.
 
-# Per-catalog lookup audit (subset of lookup-audit workstream)
-lookupCatalogAudit:
-  - catalog: Gender
-    usedBy: [Person]
-    auditStatus: done
-    valuesMapped: 2
-    unmappedPolicy: allow_null
-    notes: AyalÃ¢â€ â€™AÃƒÂ½al, ErkekÃ¢â€ â€™Erkek
-
-  - catalog: Country
-    usedBy: [Person]
-    auditStatus: done
-    valuesMapped: 64
-    unmappedPolicy: block_row
-    auditedAt: 2026-06-20
-    notes: |
-      Person-scope: BirthCountry, ForeignAddressCountry, Passport.Citizenship.
-      All 64 DISTINCT NameOfCountryL codes map 1:1 to Visa2026 Country.Code (identity).
-      Re-audit when Application/other BOs add Country FKs. Legacy duplicate Oids per code Ã¢â‚¬â€ resolve by string.
-
-  - catalog: MaritalStatus
-    usedBy: [Person]
-    auditStatus: approved
-    valuesMapped: 6
-    unmappedPolicy: allow_null
-    auditedAt: 2026-06-21
-    comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MaritalStatus.md
-    notes: |
-      Approved 2026-06-21: Status int 0Ã¢â‚¬â€œ5 Ã¢â€ â€™ Visa2026 Code; Status=0 Ã¢â€ â€™ Ãƒâ€“ÃƒÂ½lenen.
-      StatusL narrative Ã¢â€ â€™ VisaApplicationFamilyMembersText (not catalog).
-      2569 Person rows with FK; 6 coarse buckets mapped.
-
-  - catalog: Relationship
-    usedBy: [Person]
-    auditStatus: approved
-    valuesMapped: 8
-    unmappedPolicy: allow_null
-    auditedAt: 2026-06-21
-    comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Relationship.md
-    notes: |
-      Approved 2026-06-21: RelativeAsL Ã¢â€ â€™ NameTm; 159 Person FK hits all mapped.
-      Mother + BrotherInLaw added to relationship.json.
-
-  - catalog: ProjectContract
-    usedBy: [Person, Application]
-    auditStatus: complete
-    valuesMapped: null
-    unmappedPolicy: allow_null
-    auditedAt: 2026-06-26
-    comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.calik-energi.md
-    notes: |
-      Gap VISA2015: 15 codes Ã¢â€ â€™ GT-15 (gap-insaat override) Ã¢â‚¬â€ approved for Gap path only.
-      Çalik VISA2015: identity pass-through on Code; 73 union distinct codes; seed catalog before import.
-
-  - catalog: ApplicationType
-    usedBy: [Application, ApplicationItem]
-    auditStatus: not_started
-    valuesMapped: null
-    unmappedPolicy: null
-    notes: Required before Application discovery closes
-
-issues:
+    param($match)
+    $head = $match.Groups[1].Value
+    $body = $match.Groups[2].Value
+    if ($body -notmatch 'Visa scalar 2026-06-26') {
+      $body = $body.TrimEnd() + "`n      Visa scalar 2026-06-26: 5760 posted, 0 failed, 251 skipped (Passport map), 5 resume-skipped; id-map 5765.`n"
+    }
+    $head + $body
+  
   - id: ISS-001
     title: Import strategy not approved
     status: resolved

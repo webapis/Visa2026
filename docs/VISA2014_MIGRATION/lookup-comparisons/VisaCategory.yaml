@@ -1,0 +1,67 @@
+# Lookup comparison — VisaCategory (machine-readable)
+# Human table: VisaCategory.md
+
+version: 1
+catalog: VisaCategory
+comparedAt: 2026-06-26
+legacyDatabase: VISA2015
+legacyTable: dbo.VisaCategory
+legacyColumns:
+  - CategoryOfVisaL
+  - mgCode
+  - CategoryOfVisa
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/visa-category.json
+targetMatchProperty: LocalizationKey
+visaScope: dbo.Visa WHERE GCRecord IS NULL
+visaWithFkCount: 6040
+visaWithoutFkCount: 1
+
+summary:
+  verdict: approved
+  layer3KeyFormat: "{CategoryOfVisaL}:{mgCode}"
+  approvedAt: 2026-06-26
+  distinctLegacyBucketsOnVisa: 3
+  recommendedNextStep: BorderZoneName comparison
+
+comparisons:
+  - legacyKey: "köp gezeklik:4"
+    legacyCategoryOfVisaL: köp gezeklik
+    legacyMgCode: "4"
+    legacyCategoryOfVisa: 0
+    targetLocalizationKey: Multiple
+    targetNameTm: köp gezeklik
+    visaCount: 4301
+    match: approved
+
+  - legacyKey: "iki gezeklik:2"
+    legacyCategoryOfVisaL: iki gezeklik
+    legacyMgCode: "2"
+    legacyCategoryOfVisa: 2
+    targetLocalizationKey: Double
+    targetNameTm: iki gezeklik
+    visaCount: 1431
+    match: approved
+
+  - legacyKey: "bir gezeklik:1"
+    legacyCategoryOfVisaL: bir gezeklik
+    legacyMgCode: "1"
+    legacyCategoryOfVisa: 1
+    targetLocalizationKey: Single
+    targetNameTm: bir gezeklik
+    visaCount: 308
+    match: approved
+
+nullFkPolicy:
+  policy: skip_row
+  visaCount: 1
+  sampleVisaNumber: A0794542
+
+legacyUnusedRows:
+  - categoryOfVisa: 3
+    categoryOfVisaL: iş gezeklik
+    mgCode: null
+    visaCount: 0
+
+unmappedPolicy:
+  policy: use_default
+  defaultLocalizationKey: Multiple

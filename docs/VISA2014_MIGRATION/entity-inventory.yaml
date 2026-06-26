@@ -28,11 +28,44 @@ entities:
     tableMappingId: passport-main
     discoveryStatus: complete
     importConfirmed: true
-    importStatus: pending
+    importStatus: done
     legacyTable: Passport
     legacyBo: Passport
     blockReason: null
-    notes: "importConfirmed 2026-06-26; preview 3534 import rows. OData importer pending."
+    notes: "Scalar + PassportCopy done 2026-06-26: 3410 passports, 3392 scans."
+
+  - targetODataEntity: Visa
+    discoveryDossier: discovery/Visa.yaml
+    tableMappingId: visa-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Visa
+    legacyBo: Visa
+    blockReason: null
+    notes: "Scalar + VisaDocument done 2026-06-26: 5760 visas, 5571 scans posted; id-maps Visa.json + VisaDocument.json."
+
+  - targetODataEntity: Education
+    discoveryDossier: discovery/Education.yaml
+    tableMappingId: education-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Education
+    legacyBo: Education
+    blockReason: null
+    notes: "OData import 2026-06-26: 2958 posted, 150 no Person map, 6 skipped."
+
+  - targetODataEntity: EmployeePositionHistory
+    discoveryDossier: discovery/EmployeePositionHistory.yaml
+    tableMappingId: employee-position-history-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: WorkHistoryOfEmployee
+    legacyBo: WorkHistoryOfEmployee
+    blockReason: null
+    notes: "OData import 2026-06-26: 2838 posted, 151 no Person map, 194 ActualPositions created."
 
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml

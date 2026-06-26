@@ -26,6 +26,9 @@ public class VisaType
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
 
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
+
     public override string ToString() =>
         $"[{Id}] Name={Name}, Code={Code}, IsDefault={IsDefault}";
 }
@@ -456,6 +459,12 @@ public class AddressOfResidence
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
 
+    [JsonPropertyName("Region")]
+    public Region? Region { get; set; }
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
 
@@ -646,6 +655,15 @@ public class Country
     public bool IsDefault { get; set; }
 }
 
+public class ActualPosition
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+}
+
 public class Department
 {
     [JsonPropertyName("ID")]
@@ -738,6 +756,9 @@ public class EmployeePositionHistory
     [JsonPropertyName("Position")]
     public Position? Position { get; set; }
 
+    [JsonPropertyName("ActualPosition")]
+    public ActualPosition? ActualPosition { get; set; }
+
     [JsonPropertyName("Department")]
     public Department? Department { get; set; }
 
@@ -785,6 +806,9 @@ public class EducationLevel
 
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class Gender
@@ -1124,6 +1148,9 @@ public class VisaCategory
 
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class ProjectContract

@@ -13,7 +13,7 @@ internal static class Visa2014PreviewExportCommand
 
         if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory.");
             return 1;
         }
 
@@ -56,7 +56,31 @@ internal static class Visa2014PreviewExportCommand
 
         try
         {
-            var result = string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
+            var result = string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014EmployeePositionHistoryPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014EducationPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014VisaPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
                 ? Visa2014PassportPreviewExporter.Export(
                     source.ConnectionString,
                     source.LookupTranslationPaths,
@@ -91,7 +115,10 @@ internal static class Visa2014PreviewExportCommand
 
     private static bool IsSupportedEntity(string entity) =>
         string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase);
+        || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase);
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
     {

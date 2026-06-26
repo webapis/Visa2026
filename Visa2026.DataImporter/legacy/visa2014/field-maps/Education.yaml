@@ -1,0 +1,114 @@
+# Education field map — layer 2
+# Layer 1: table-mappings.yaml (id: education-main)
+# Layer 3: lookup-translations.yaml (EducationLevel, Country) + NameTm resolve (Institution, Specialty)
+
+tableMappingId: education-main
+
+source:
+  table: Education
+  schema: dbo
+
+target:
+  odataEntity: Education
+
+deduplication:
+  enabled: true
+  keys:
+    - Oid
+  action: import_one_per_legacy_oid
+  notes: |
+    No composite dedupe — multiple Education rows per Person are valid (5 persons × 2 rows on Çalik data).
+
+propertyGaps:
+  legacyOnly:
+    - column: HasEducationPeriod
+      disposition: drop
+    - column: EducationStartDate
+      disposition: drop
+    - column: EducationEndDate
+      disposition: derive
+      notes: Only YEAR → GraduationYear when end date present; dates not on Visa2026 Education BO
+    - column: OptimisticLockField
+      disposition: drop
+    - column: Spcialty
+      disposition: map
+      notes: Legacy typo column name; FK to dbo.Speciality
+  targetOnly:
+    - property: ShowOptionalFields
+      default: false
+      missingBehavior: omit_from_post
+      notes: "[NotMapped] — omit on OData POST"
+    - property: Images
+      disposition: defer
+      notes: No legacy blob source on dbo.Education
+    - property: Documents
+      disposition: defer
+      notes: No legacy blob source on dbo.Education (VISA2015)
+  mismatches:
+    - property: GraduationYear
+      legacyColumn: EducationEndDate
+      notes: Visa2026 stores year string; legacy stores full datetime range
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map only — not OData ID
+
+  - source: Person
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+    notes: Requires Person id-map from Person OData import
+
+  - source: EducationLevel
+    target: EducationLevel
+    transform: lookup_composite
+    lookupCatalog: EducationLevel
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - EducationLevel.TitleOfEducationLevel
+      - EducationLevel.mgCode
+    lookupLegacyKeyFormat: "{TitleOfEducationLevel}:{mgCode}"
+    layer3Key: mgCode_to_pdfForm_code
+    missingBehavior: use_default
+    default: SpecialSecondary
+    notes: See lookup-comparisons/EducationLevel.md — mgCode equals Visa2026 PdfForm_Code
+
+  - source: EducationInstitution
+    target: EducationInstitution
+    transform: lookup_nametm
+    lookupCatalog: EducationInstitution
+    lookupLegacyColumn: EducationInstitution.TitleOfIEducationInstitution
+    lookupMatch: NameTm
+    missingBehavior: skip_row
+    notes: Tenant catalog; comparison pending — 1,537 distinct institutions on data
+
+  - source: EducationCountry
+    target: EducationCountry
+    transform: lookup_country_mgcode
+    lookupCatalog: Country
+    lookupLegacyColumn: Country.mgCode
+    lookupMatch: Code
+    missingBehavior: skip_row
+    notes: Reuse Person-wave Country layer-3 (ISO alpha-3)
+
+  - source: Spcialty
+    target: Specialty
+    transform: lookup_nametm
+    lookupCatalog: Specialty
+    lookupLegacyTable: Speciality
+    lookupLegacyColumn: Speciality.TitleOfSpeciality
+    lookupMatch: NameTm
+    missingBehavior: skip_row
+    notes: Legacy table dbo.Speciality; comparison pending — 1,254 distinct on data
+
+  - source: EducationEndDate
+    target: GraduationYear
+    transform: year_string_from_datetime
+    whenNull: omit_property
+    missingBehavior: omit_property
+    notes: |
+      174 rows have end date; 2,959 omit GraduationYear (allowed — IsValidGraduationYear true for empty).
+      Range rule 1950..Today+10 — 0 out-of-range on Çalik end dates (2026-06-26 SQL check).

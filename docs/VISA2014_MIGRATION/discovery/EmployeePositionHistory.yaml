@@ -1,0 +1,100 @@
+# Discovery dossier — EmployeePositionHistory (person-domain child BO)
+# dependsOn: Person — full Person id-map required before OData POST.
+
+targetODataEntity: EmployeePositionHistory
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-26
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    SQL discovery started 2026-06-26 (VISA2015, calik-energi).
+    Catalogs deployed: position 1579, department 74. Excel preview 2993 rows, 0 skipped.
+    OData import 2026-06-26: 2838 posted, 0 failed, 151 no Person id-map, 4 already imported (pilot).
+    ActualPosition find-or-create: 194 distinct titles + "-".
+
+legacy:
+  boClass: WorkHistoryOfEmployee
+  boPath: VISA2014.Module/DC/IWorkHistoryOfEmployee.cs
+  tables:
+    - dbo.WorkHistoryOfEmployee
+    - dbo.Position
+    - dbo.Department
+  rowCount: 2993
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/EmployeePositionHistory.cs
+  docPath: Visa2026.Module/BusinessObjects/EmployeePositionHistory.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/EmployeePositionHistory.yaml
+  tableMappingId: employee-position-history-main
+  cardinality: one_legacy_row_per_work_history
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - Position
+    - Department
+    - ActualPosition
+  lookupAuditStatus:
+    Position: deployed_calik_energi_2026-06-26
+    Department: deployed_calik_energi_2026-06-26
+    ActualPosition: find_or_create_by_name_2026-06-26
+  duplicateGroups: 0
+  legacyOnlyCount: 6
+  targetOnlyCount: 2
+  mismatchCount: 2
+  blockedReason: null
+  notes: |
+    Legacy table WorkHistoryOfEmployee; FK column Employee → Visa2026 Person (not a separate Employee BO).
+    Position.TitleOfPosition → Position.NameTm (visa-report title). ActualPosition.Name ← Position.Code when non-empty; else literal "-" (required field placeholder on Çalik import).
+    Department.TitleOfDepartment → Department.NameTm (required on BO; legacy always has Department FK on Çalik data).
+    StartDate ← StartDateOnThisPosition. No legacy EndDate — derive EndDate = next row StartDate per Person (ordered); last row null.
+    hasPositionStartDate bit is legacy UI flag only (528 true / 2465 false); StartDate populated on all active rows.
+    Drop Company FK, ImpCompany/ImpDepartment/ImpPosition/ImpIDNumber (unused on Çalik sample).
+    Omit ShowOptionalFields on OData POST ([NotMapped]).
+    No legacy attachment table — EmployeePositionHistoryDocument file wave N/A for VISA2015 Çalik data.
+    41 persons with 2+ history rows (max 3) — multiple rows per Person expected.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-26
+completedBy: developer
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 2993
+  softDeletedRows: 1923
+  distinctEmployees: 2950
+  multiHistoryEmployees: 41
+  orphanEmployeeFk: 0
+  nullStartDate: 0
+  hasPositionStartDateTrue: 528
+  hasPositionStartDateFalse: 2465
+  distinctPositionLabels: 1579
+  distinctActualPositionLabels: 1535
+  distinctPositionCodeLabels: 196
+  workHistoryRowsWithNonemptyCode: 704
+  workHistoryRowsEmptyCode: 2289
+  distinctDepartmentLabels: 74
+  nullDepartmentFk: 0
+  tenantSeedPositionRows: 259
+  tenantSeedDepartmentRows: 3
+  impPositionPopulated: 0

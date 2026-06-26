@@ -29,9 +29,11 @@
               <LayoutGroup Id="AddressOfResidence_col1" RelativeSize="100">
                 <LayoutItem Id="Type" RelativeSize="23.529411764705884" />
                 <LayoutItem Id="Lodging" RelativeSize="17.647058823529413" />
-                <LayoutItem Id="FullAddress" RelativeSize="17.647058823529413" />
-                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="3" RelativeSize="17.647058823529413" IsNewNode="True" />
-                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="4" RelativeSize="23.529411764705884" IsNewNode="True" />
+                <LayoutItem Id="Region" ViewItem="Region" Index="2" RelativeSize="17.647058823529413" IsNewNode="True" />
+                <LayoutItem Id="City" ViewItem="City" Index="3" RelativeSize="17.647058823529413" IsNewNode="True" />
+                <LayoutItem Id="FullAddress" RelativeSize="17.647058823529413" Index="4" />
+                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="5" RelativeSize="17.647058823529413" IsNewNode="True" />
+                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="6" RelativeSize="23.529411764705884" IsNewNode="True" />
               </LayoutGroup>
               <LayoutGroup Id="AddressOfResidence_col2" RelativeSize="50" Caption="AddressOfResidence_col2" Removed="True">
                 <LayoutItem Id="DaysRemaining" RelativeSize="100" Index="0" Removed="True" />

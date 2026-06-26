@@ -239,16 +239,16 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
-    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport).");
-    Console.WriteLine("      Options: --entity Person|Passport [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
+    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory).");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
     Console.WriteLine("                [--connection conn] [--max-rows N]");
-    Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 OData (requires --entity Person|Passport).");
-    Console.WriteLine("      Options: --entity Person|Passport [--legacy-source calik-energi|gap-insaat] [--connection conn]");
+    Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 OData (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory).");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory [--legacy-source calik-energi|gap-insaat] [--connection conn]");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--api-base-url url] [--user Admin] [--password pwd]");
-    Console.WriteLine("                [--id-map-output path.json] [--person-id-map path.json] [--no-wait]");
+    Console.WriteLine("                [--id-map-output path.json] [--person-id-map path.json] [--passport-id-map path.json] [--no-wait]");
     Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs/fields → OData PATCH/POST (requires scalar import + id-map).");
-    Console.WriteLine("      Options: --entity Person|Passport --property Photo|VisaApplicationFamilyMembersText|PassportDocument");
-    Console.WriteLine("                [--legacy-source calik-energi|gap-insaat] [--id-map path.json] [--passport-id-map path.json]");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa --property Photo|VisaApplicationFamilyMembersText|PassportDocument|VisaDocument");
+    Console.WriteLine("                [--legacy-source calik-energi|gap-insaat] [--id-map path.json] [--passport-id-map path.json] [--visa-id-map path.json]");
     Console.WriteLine("                [--copy-id-map-output path.json] [--max-rows N] [--dry-run] [--api-base-url url] [--no-wait]");
     Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
     Console.WriteLine("  --prune-seed [path]         Same as --validate-seed and rewrite scenario yaml on disk.");
@@ -865,7 +865,7 @@ try
         {
             Log.Ok($"Lodging: {lodging.Id}");
             Log.Step("Creating address of residence...");
-            var cities = await api.QueryAsync<City>("City", "$filter=Name eq 'Ashgabat'&$top=1");
+            var cities = await api.QueryAsync<City>("City", "$filter=Name eq 'Ashgabat'&$expand=Region&$top=1");
             var city = cities.FirstOrDefault();
             if (city == null)
             {
@@ -873,7 +873,14 @@ try
             }
             else
             {
-                await addressImporter.CreateOneAsync(person.Id, ResidenceType.Lodging, lodging.FullAddress, DateTime.Today.AddYears(1), lodging.Id);
+                await addressImporter.CreateOneAsync(
+                    person.Id,
+                    ResidenceType.Lodging,
+                    lodging.FullAddress,
+                    city.Region?.Id,
+                    city.Id,
+                    DateTime.Today.AddYears(1),
+                    lodging.Id);
             }
             Log.Ok("AddressOfResidence created.");
         }

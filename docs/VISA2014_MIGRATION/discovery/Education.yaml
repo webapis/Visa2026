@@ -1,0 +1,112 @@
+# Discovery dossier — Education (person-domain child BO)
+# dependsOn: Person — full Person id-map required before OData POST.
+
+targetODataEntity: Education
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-26
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    Full OData import 2026-06-26: 2958 posted, 0 failed, 150 no Person id-map, 6 transform skipped.
+    Institution + Specialty calik-energi catalogs (1471 + 1063). Country mgCode ISO3-prefix normalize; ALB added to global country.json.
+
+legacy:
+  boClass: Education
+  boPath: VISA2014.Module/DC/IEducation.cs
+  tables:
+    - dbo.Education
+    - dbo.EducationLevel
+    - dbo.EducationInstitution
+    - dbo.Speciality
+    - dbo.Country
+  rowCount: 3133
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Education.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Education.yaml
+  tableMappingId: education-main
+  cardinality: one_legacy_row_per_education
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - EducationLevel
+    - EducationInstitution
+    - Country
+    - Specialty
+  lookupAuditStatus:
+    EducationLevel: approved_2026-06-26
+    Country: approved_person_wave
+    EducationInstitution: approved_with_catalog_seed_2026-06-26
+    Specialty: approved_with_catalog_seed_2026-06-26
+  duplicateGroups: 0
+  legacyOnlyCount: 4
+  targetOnlyCount: 2
+  mismatchCount: 1
+  blockedReason: null
+  notes: |
+    Import ALL active education rows (5 persons have 2 education rows — expected).
+    Person FK via Person id-map (legacy Education.Person → Visa2026 Person.ID).
+    Skip 19 rows: null Person FK or person soft-deleted / missing.
+    EducationLevel: TitleOfEducationLevel + mgCode → LocalizationKey (mgCode = PdfForm_Code) — see EducationLevel.md.
+    EducationInstitution: TitleOfIEducationInstitution → EducationInstitution.NameTm (tenant catalog 1471 rows).
+    Specialty: legacy column Spcialty → Speciality.TitleOfSpeciality → Specialty.NameTm (tenant catalog 1063 rows).
+    EducationCountry: Country.mgCode → Country.Code (reuse Person-wave Country layer-3).
+    GraduationYear: derived from YEAR(EducationEndDate) when set; null when no end date (2,959 rows — allowed on Visa2026).
+    No varbinary on dbo.Education — EducationDocument / EducationImage file wave not applicable for VISA2015 Çalik data.
+    Omit ShowOptionalFields on OData POST ([NotMapped] — same as Visa).
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-26
+completedBy: developer
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 3133
+  softDeletedRows: 1968
+  distinctPersons: 3109
+  multiEducationPersons: 5
+  orphanPersonFk: 19
+  withValidPersonFk: 3114
+  nullRequiredLookups: 0
+  hasEducationEndDate: 174
+  noEducationEndDate: 2959
+  distinctInstitutionsUsed: 1537
+  distinctSpecialtiesUsed: 1254
+  educationLevelBreakdown:
+    - legacy: "Yokary + mgCode 2"
+      rows: 1496
+      target: "Higher"
+    - legacy: "Ýörite Orta + mgCode 1"
+      rows: 937
+      target: "SpecialSecondary"
+    - legacy: "Orta + mgCode 5"
+      rows: 700
+      target: "Secondary"
+  topEducationCountries:
+    - code: TUR
+      rows: 2359
+    - code: IND
+      rows: 90
+    - code: RUS
+      rows: 73

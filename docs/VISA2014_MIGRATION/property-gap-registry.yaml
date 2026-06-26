@@ -18,3 +18,46 @@ entities:
     notes: |
       PersonalNumber from Passport; Visa2026 unique except "0". Merge 5 real-PN duplicate person pairs.
       Upsert on legacy Oid — not PersonalNumber alone.
+
+  - targetODataEntity: Visa
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Visa.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - Oid
+      - VisaNumber
+    duplicateGroups: 7
+    legacyOnlyCount: 11
+    targetOnlyCount: 8
+    mismatchCount: 2
+    importBlocked: false
+    notes: |
+      Passport FK via Passport id-map. Sentinel VisaNumber AFV0000000 / JLV0000000 (8 rows each).
+      Layer-3 lookup audits pending before importConfirmed.
+
+  - targetODataEntity: Education
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Education.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - Oid
+    duplicateGroups: 0
+    legacyOnlyCount: 4
+    targetOnlyCount: 2
+    mismatchCount: 1
+    importBlocked: false
+    notes: |
+      Person FK via Person id-map. GraduationYear derived from EducationEndDate year only.
+      Import done 2026-06-26 (2958 posted).
+
+  - targetODataEntity: EmployeePositionHistory
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/EmployeePositionHistory.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - Oid
+    duplicateGroups: 0
+    legacyOnlyCount: 6
+    targetOnlyCount: 2
+    mismatchCount: 2
+    importBlocked: true
+    notes: |
+      Legacy Employee FK → Person id-map. EndDate derived from next StartDate per Person.
+      ActualPosition mirrors Position title (Visa2026-only). Position + Department tenant catalog seeds pending.

@@ -1,0 +1,114 @@
+# EmployeePositionHistory field map — layer 2
+# Layer 1: table-mappings.yaml (id: employee-position-history-main)
+# Layer 3: lookup-translations.calik-energi.yaml (Position, Department NameTm)
+
+tableMappingId: employee-position-history-main
+
+source:
+  table: WorkHistoryOfEmployee
+  schema: dbo
+
+target:
+  odataEntity: EmployeePositionHistory
+
+deduplication:
+  enabled: true
+  keys:
+    - Oid
+  action: import_one_per_legacy_oid
+  notes: |
+    Multiple history rows per Person are valid (41 employees × 2–3 rows on Çalik data).
+    Do not dedupe by Position+StartDate — titles can repeat across periods.
+
+propertyGaps:
+  legacyOnly:
+    - column: Company
+      disposition: drop
+      notes: No Company FK on Visa2026 EmployeePositionHistory
+    - column: hasPositionStartDate
+      disposition: drop
+      notes: Legacy UI flag; StartDateOnThisPosition is authoritative on Çalik data
+    - column: ImpCompany
+      disposition: drop
+    - column: ImpDepartment
+      disposition: drop
+    - column: ImpPosition
+      disposition: drop
+    - column: ImpIDNumber
+      disposition: drop
+  targetOnly:
+    - property: ShowOptionalFields
+      default: false
+      missingBehavior: omit_from_post
+      notes: "[NotMapped] — omit on OData POST"
+    - property: ActualPosition
+      disposition: derive
+      notes: |
+        Legacy Position.Code on same FK (no separate ActualPosition BO). Import rule:
+        ActualPosition.Name = trim(Code) when non-empty; else "-" (required field; 2289 Çalik rows have empty Code).
+    - property: Title
+      disposition: computed
+      notes: Computed from Position.NameTm — not posted
+  mismatches:
+    - property: EndDate
+      legacyColumn: null
+      notes: Derive from next StartDateOnThisPosition per Employee (asc); last row per Person → null
+    - property: Person
+      legacyColumn: Employee
+      notes: Legacy FK column is Employee; references dbo.Person.Oid
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map only — not OData ID
+
+  - source: Employee
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+    notes: Requires Person id-map from Person OData import
+
+  - source: Position
+    target: Position
+    transform: lookup_join
+    lookupCatalog: Position
+    lookupLegacyColumn: Position.TitleOfPosition
+    lookupMatch: NameTm
+    missingBehavior: skip_row
+    notes: Tenant position catalog seed required (~1579 distinct labels on Çalik data)
+
+  - source: Position
+    target: ActualPosition
+    transform: position_code_or_default
+    lookupLegacyColumns:
+      - Position.Code
+    lookupMatch: Name
+    default: "-"
+    missingBehavior: use_default
+    notes: |
+      ActualPosition.Name = trim(Code) when non-empty; else "-".
+      OData resolve or create ActualPosition by Name (ensure "-" row exists once in target DB).
+
+  - source: Department
+    target: Department
+    transform: lookup_join
+    lookupCatalog: Department
+    lookupLegacyColumn: Department.TitleOfDepartment
+    lookupMatch: NameTm
+    missingBehavior: skip_row
+    notes: Tenant department catalog seed required (~74 distinct labels)
+
+  - source: StartDateOnThisPosition
+    target: StartDate
+    transform: scalar_datetime
+    missingBehavior: skip_row
+
+  - source: null
+    target: EndDate
+    transform: derive_next_start_per_person
+    missingBehavior: allow_null
+    notes: |
+      Sort active rows by Employee + StartDateOnThisPosition asc.
+      EndDate = next row StartDate for same Employee; null on latest row.

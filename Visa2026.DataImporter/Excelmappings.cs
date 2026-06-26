@@ -689,6 +689,8 @@ public static class ExcelMappings
                 new() { Header = "Person",           PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
                 new() { Header = "Type",             PayloadProperty = "Type",             Kind = ColumnKind.Scalar, ValueMap = new() { {"0","Lodging"}, {"1","Hotel"}, {"2","PrivateHouse"} } },
                 new() { Header = "Full Address",     PayloadProperty = "FullAddress",      Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Region",           PayloadProperty = "Region",           Kind = ColumnKind.LookupByName, LookupEntity = "Region", Required = true },
+                new() { Header = "City",             PayloadProperty = "City",             Kind = ColumnKind.LookupByName, LookupEntity = "City", Required = true },
                 new() { Header = "Lodging",          PayloadProperty = "Lodging",          Kind = ColumnKind.LookupByName, LookupEntity = "Lodging" },
                 new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",   Kind = ColumnKind.Scalar },
             }

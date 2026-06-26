@@ -55,3 +55,102 @@ mappings:
     notes: |
       3,684 active Passport rows on Çalik VISA2015; 3,241 persons; 353 multi-passport.
       Depends on Person id-map. PassportType + IssuedCountry layer-3 approved 2026-06-26.
+
+  - id: visa-main
+    legacy:
+      schema: dbo
+      table: Visa
+      boClass: Visa
+      boPath: VISA2014.Module/DC/IVisa.cs
+    target:
+      odataEntity: Visa
+      boPath: Visa2026.Module/BusinessObjects/Visa.cs
+    relationship: primary
+    legacyTablesExtra:
+      - schema: dbo
+        table: VisaType
+        join: VisaType.Oid = Visa.VisaType
+        role: lookup_fk
+      - schema: dbo
+        table: IVisaType_Data
+        join: IVisaType_Data.Oid = VisaType.IVisaType_Data
+        role: lookup_extension
+      - schema: dbo
+        table: VisaCategory
+        join: VisaCategory.Oid = Visa.VisaCategory
+        role: lookup_fk
+      - schema: dbo
+        table: VisaIssuedPlace
+        join: VisaIssuedPlace.Oid = Visa.VisaIssuedPlace
+        role: lookup_fk
+      - schema: dbo
+        table: BorderZoneForVisa
+        join: BorderZoneForVisa.Oid = Visa.BorderZone
+        role: border_zone_matrix
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Visa.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Visa.yaml
+    status: mapped
+    notes: |
+      6,041 active Visa rows on Çalik VISA2015; 4,581 passports; 1,460 multi-visa.
+      Depends on Passport id-map. Layer-3 audits pending (VisaType, VisaCategory, VisaIssuedPlace, BorderZoneName).
+
+  - id: education-main
+    legacy:
+      schema: dbo
+      table: Education
+      boClass: Education
+      boPath: VISA2014.Module/DC/IEducation.cs
+    target:
+      odataEntity: Education
+      boPath: Visa2026.Module/BusinessObjects/Education.cs
+    relationship: primary
+    legacyTablesExtra:
+      - schema: dbo
+        table: EducationLevel
+        join: EducationLevel.Oid = Education.EducationLevel
+        role: lookup_fk
+      - schema: dbo
+        table: EducationInstitution
+        join: EducationInstitution.Oid = Education.EducationInstitution
+        role: lookup_fk
+      - schema: dbo
+        table: Speciality
+        join: Speciality.Oid = Education.Spcialty
+        role: lookup_fk
+      - schema: dbo
+        table: Country
+        join: Country.Oid = Education.EducationCountry
+        role: lookup_fk
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Education.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Education.yaml
+    status: mapped
+    notes: |
+      3,133 active Education rows; 3,109 persons; 5 multi-education. Depends on Person id-map.
+      EducationLevel approved 2026-06-26; Institution + Specialty seeded calik-energi 2026-06-26. Import done.
+
+  - id: employee-position-history-main
+    legacy:
+      schema: dbo
+      table: WorkHistoryOfEmployee
+      boClass: WorkHistoryOfEmployee
+      boPath: VISA2014.Module/DC/IWorkHistoryOfEmployee.cs
+    target:
+      odataEntity: EmployeePositionHistory
+      boPath: Visa2026.Module/BusinessObjects/EmployeePositionHistory.cs
+    relationship: primary
+    legacyTablesExtra:
+      - schema: dbo
+        table: Position
+        join: Position.Oid = WorkHistoryOfEmployee.Position
+        role: lookup_fk
+      - schema: dbo
+        table: Department
+        join: Department.Oid = WorkHistoryOfEmployee.Department
+        role: lookup_fk
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/EmployeePositionHistory.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/EmployeePositionHistory.yaml
+    status: mapped
+    notes: |
+      2,993 active WorkHistoryOfEmployee rows; Employee FK → Person. No legacy EndDate column.
+      Position (1579 distinct) + Department (74 distinct) tenant catalog seeds pending before import.
+      ActualPosition derived from same Position title (Visa2026-only BO).

@@ -4,13 +4,13 @@
 
 **Spec:** [docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md](../../../../docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)
 
-**Planned CLI** (Person **shipped**):
+**Planned CLI** (Person, Passport, **Visa** shipped):
 
 ```powershell
 dotnet run --project Visa2026.DataImporter -- `
   --export-visa2014-preview `
-  --entity Person `
-  --output Visa2026.DataImporter/legacy/visa2014/preview-export/Person-preview.xlsx
+  --entity Visa `
+  --legacy-source calik-energi
 ```
 
 **Git:** `*.xlsx` in this folder is **gitignored** (production PII). Only this README is tracked.

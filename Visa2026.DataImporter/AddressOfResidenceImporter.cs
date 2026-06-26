@@ -38,6 +38,8 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
         Guid personId,
         ResidenceType type,
         string fullAddress,
+        Guid? regionId = null,
+        Guid? cityId = null,
         DateTime? expirationDate = null,
         Guid? lodgingId = null)
     {
@@ -48,6 +50,8 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
             Person = new { ID = personId },
             Type = type,
             FullAddress = fullAddress,
+            Region = regionId.HasValue ? new { ID = regionId.Value } : null,
+            City = cityId.HasValue ? new { ID = cityId.Value } : null,
             ExpirationDate = expirationDate,
             Lodging = (type == ResidenceType.Lodging && lodgingId.HasValue) ? new { ID = lodgingId.Value } : null
         };
@@ -82,6 +86,8 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
                     Person = record.Person != null ? new { ID = record.Person.Id } : null,
                     Type = record.Type,
                     FullAddress = record.FullAddress,
+                    Region = record.Region != null ? new { ID = record.Region.Id } : null,
+                    City = record.City != null ? new { ID = record.City.Id } : null,
                     ExpirationDate = record.ExpirationDate,
                     Lodging = record.Lodging != null ? new { ID = record.Lodging.Id } : null
                 };

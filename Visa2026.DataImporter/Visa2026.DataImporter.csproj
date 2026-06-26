@@ -35,6 +35,10 @@
     <ProjectReference Include="..\Visa2026.Module\Visa2026.Module.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="legacy\visa2014\preview-export\_education-lookup-gap\**\*" />
+    <None Include="legacy\visa2014\preview-export\_education-lookup-gap\**\*" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.8.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
