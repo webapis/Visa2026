@@ -11,9 +11,9 @@ internal static class Visa2014PreviewExportCommand
             return 1;
         }
 
-        if (!string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
+        if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport.");
             return 1;
         }
 
@@ -56,13 +56,21 @@ internal static class Visa2014PreviewExportCommand
 
         try
         {
-            var result = Visa2014PersonPreviewExporter.Export(
-                source.ConnectionString,
-                source.LookupTranslationPaths,
-                output,
-                maxRows,
-                verbose,
-                source.Id);
+            var result = string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014PassportPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : Visa2014PersonPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id);
 
             Console.WriteLine($" OK Wrote {result.ImportRowCount} import row(s) (+ {result.DedupeMergedCount} duplicate_merged, {result.SkippedRowCount} skipped).");
             Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
@@ -80,6 +88,10 @@ internal static class Visa2014PreviewExportCommand
             return 1;
         }
     }
+
+    private static bool IsSupportedEntity(string entity) =>
+        string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase);
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
     {

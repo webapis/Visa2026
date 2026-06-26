@@ -30,6 +30,7 @@ sources:
       - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
     previewOutput:
       Person: preview-export/Person-preview.calik-energi.xlsx
+      Passport: preview-export/Passport-preview.calik-energi.xlsx
     idMapDir: id-maps/calik-energi
 
   - id: gap-insaat

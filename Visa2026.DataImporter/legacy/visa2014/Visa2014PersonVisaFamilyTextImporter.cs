@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Visa2026.DataImporter;
 using Visa2026.Module.Services;
@@ -40,10 +39,10 @@ internal static class Visa2014PersonVisaFamilyTextImporter
         if (!File.Exists(idMapPath))
             throw new FileNotFoundException("Person id-map not found. Run scalar --import-visa2014 first.", idMapPath);
 
-        var idMap = LoadIdMap(idMapPath);
+        var idMap = Visa2014IdMapHelper.Load(idMapPath);
         var entries = maxRows is > 0
-            ? idMap.Take(maxRows.Value).ToList()
-            : idMap;
+            ? idMap.Select(kvp => kvp).Take(maxRows.Value).ToList()
+            : idMap.Select(kvp => kvp).ToList();
 
         var errors = new List<string>();
         int patched = 0;
@@ -149,24 +148,5 @@ internal static class Visa2014PersonVisaFamilyTextImporter
         var status = reader.IsDBNull(1) ? null : reader.GetString(1);
         var statusL = reader.IsDBNull(2) ? null : reader.GetString(2);
         return new LegacyEmployeeStatusL(isEmployee, status, statusL);
-    }
-
-    private static List<KeyValuePair<Guid, Guid>> LoadIdMap(string path)
-    {
-        var json = File.ReadAllText(path);
-        var raw = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
-            ?? throw new InvalidOperationException($"Id-map is empty or invalid: {path}");
-
-        var list = new List<KeyValuePair<Guid, Guid>>(raw.Count);
-        foreach (var (legacyText, targetText) in raw)
-        {
-            if (!Guid.TryParse(legacyText, out var legacyOid))
-                continue;
-            if (!Guid.TryParse(targetText, out var targetId))
-                continue;
-            list.Add(new KeyValuePair<Guid, Guid>(legacyOid, targetId));
-        }
-
-        return list;
     }
 }

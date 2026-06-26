@@ -5,15 +5,15 @@ targetODataEntity: Passport
 discoveryStatus: complete
 
 importConfirmation:
-  importConfirmed: false
-  importConfirmedAt: null
-  importConfirmedBy: null
+  importConfirmed: true
+  importConfirmedAt: 2026-06-26
+  importConfirmedBy: developer
   legacySource: calik-energi
   reviewNotes: |
     SQL discovery complete 2026-06-26 (VISA2015, calik-energi).
     PassportType layer-3 approved in lookup-comparisons/PassportType.md.
-    Excel preview export not yet run (CLI supports Person only today).
-    importConfirmed after Passport-preview Excel + full Person id-map on target.
+    Excel preview reviewed: Passport-preview.calik-energi.xlsx (3666 legacy → 3534 import, 130 skipped, 2 dedupe merged).
+    Approved for OData import implementation (calik-energi).
 
 legacy:
   boClass: Passport
@@ -62,7 +62,7 @@ checklist:
   lookup_values_mapped: true
   property_gaps_documented: true
   dedupe_rules_defined: true
-  excel_preview_exported: false
+  excel_preview_exported: true
   inventory_updated: true
   learnings_appended: true
 

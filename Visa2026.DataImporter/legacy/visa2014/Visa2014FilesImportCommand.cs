@@ -7,28 +7,14 @@ internal static class Visa2014FilesImportCommand
         var entity = GetOptionValue(args, "--entity");
         if (string.IsNullOrWhiteSpace(entity))
         {
-            Console.Error.WriteLine("ERR --import-visa2014-files requires --entity <Name> (e.g. Person).");
+            Console.Error.WriteLine("ERR --import-visa2014-files requires --entity <Name> (e.g. Person, Passport).");
             return 1;
         }
 
         var property = GetOptionValue(args, "--property");
         if (string.IsNullOrWhiteSpace(property))
         {
-            Console.Error.WriteLine("ERR --import-visa2014-files requires --property <Name> (e.g. Photo).");
-            return 1;
-        }
-
-        if (!string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
-        {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person.");
-            return 1;
-        }
-
-        var isPhoto = string.Equals(property, "Photo", StringComparison.OrdinalIgnoreCase);
-        var isFamilyText = string.Equals(property, "VisaApplicationFamilyMembersText", StringComparison.OrdinalIgnoreCase);
-        if (!isPhoto && !isFamilyText)
-        {
-            Console.Error.WriteLine($"ERR Property '{property}' is not supported yet. Supported: Photo, VisaApplicationFamilyMembersText.");
+            Console.Error.WriteLine("ERR --import-visa2014-files requires --property <Name> (e.g. Photo, PassportDocument).");
             return 1;
         }
 
@@ -58,10 +44,6 @@ internal static class Visa2014FilesImportCommand
         var userName = GetOptionValue(args, "--user") ?? "Admin";
         var password = GetOptionValue(args, "--password") ?? "";
 
-        var idMapPath = GetOptionValue(args, "--id-map")
-            ?? GetOptionValue(args, "--id-map-output")
-            ?? source.IdMapPath(dataImporterRoot, entity);
-
         int? maxRows = null;
         var maxRowsText = GetOptionValue(args, "--max-rows");
         if (int.TryParse(maxRowsText, out var parsedMax) && parsedMax > 0)
@@ -74,11 +56,10 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
         Console.WriteLine($"INF Legacy SQL: {MaskConnectionForLog(source.ConnectionString)}");
         Console.WriteLine($"INF Target API: {apiBaseUrl}");
-        Console.WriteLine($"INF Id-map: {idMapPath}");
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
         if (dryRun)
-            Console.WriteLine("INF Mode: dry-run (no PATCH)");
+            Console.WriteLine("INF Mode: dry-run (no POST)");
 
         var api = new Visa2026.DataImporter.ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
 
@@ -91,47 +72,14 @@ internal static class Visa2014FilesImportCommand
 
         try
         {
-            if (isPhoto)
-            {
-                var result = await Visa2014PersonPhotoImporter.RunAsync(
-                    api,
-                    source.ConnectionString,
-                    idMapPath,
-                    maxRows,
-                    dryRun,
-                    verbose);
+            if (string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
+                return await RunPersonFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
-                Console.WriteLine($"INF Id-map entries: {result.IdMapEntries}");
-                Console.WriteLine($"INF Processed: {result.Processed}  Patched: {result.Patched}  No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
+            if (string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase))
+                return await RunPassportFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
-                foreach (var error in result.Errors.Take(20))
-                    Console.Error.WriteLine($"ERR {error}");
-                if (result.Errors.Count > 20)
-                    Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
-
-                return result.Failed > 0 ? 1 : 0;
-            }
-
-            var familyResult = await Visa2014PersonVisaFamilyTextImporter.RunAsync(
-                api,
-                source.ConnectionString,
-                idMapPath,
-                maxRows,
-                dryRun,
-                verbose);
-
-            Console.WriteLine($"INF Id-map entries: {familyResult.IdMapEntries}");
-            Console.WriteLine(
-                $"INF Processed: {familyResult.Processed}  Patched: {familyResult.Patched}  " +
-                $"Single→Ýok: {familyResult.PatchedSingleNone}  " +
-                $"Not employee: {familyResult.SkippedNotEmployee}  No StatusL text: {familyResult.SkippedNoText}  Failed: {familyResult.Failed}");
-
-            foreach (var error in familyResult.Errors.Take(20))
-                Console.Error.WriteLine($"ERR {error}");
-            if (familyResult.Errors.Count > 20)
-                Console.Error.WriteLine($"ERR ... and {familyResult.Errors.Count - 20} more");
-
-            return familyResult.Failed > 0 ? 1 : 0;
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport.");
+            return 1;
         }
         catch (Exception ex)
         {
@@ -140,6 +88,126 @@ internal static class Visa2014FilesImportCommand
                 Console.Error.WriteLine(ex);
             return 1;
         }
+    }
+
+    private static async Task<int> RunPersonFileImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string property,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var idMapPath = GetOptionValue(args, "--id-map")
+            ?? GetOptionValue(args, "--id-map-output")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+
+        Console.WriteLine($"INF Id-map: {idMapPath}");
+
+        var isPhoto = string.Equals(property, "Photo", StringComparison.OrdinalIgnoreCase);
+        var isFamilyText = string.Equals(property, "VisaApplicationFamilyMembersText", StringComparison.OrdinalIgnoreCase);
+        if (!isPhoto && !isFamilyText)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported for Person. Supported: Photo, VisaApplicationFamilyMembersText.");
+            return 1;
+        }
+
+        if (isPhoto)
+        {
+            var result = await Visa2014PersonPhotoImporter.RunAsync(
+                api,
+                source.ConnectionString,
+                idMapPath,
+                maxRows,
+                dryRun,
+                verbose);
+
+            Console.WriteLine($"INF Id-map entries: {result.IdMapEntries}");
+            Console.WriteLine($"INF Processed: {result.Processed}  Patched: {result.Patched}  No blob: {result.SkippedNoBlob}  Failed: {result.Failed}");
+
+            foreach (var error in result.Errors.Take(20))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 20)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
+
+            return result.Failed > 0 ? 1 : 0;
+        }
+
+        var familyResult = await Visa2014PersonVisaFamilyTextImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            idMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Id-map entries: {familyResult.IdMapEntries}");
+        Console.WriteLine(
+            $"INF Processed: {familyResult.Processed}  Patched: {familyResult.Patched}  " +
+            $"Single→Ýok: {familyResult.PatchedSingleNone}  " +
+            $"Not employee: {familyResult.SkippedNotEmployee}  No StatusL text: {familyResult.SkippedNoText}  Failed: {familyResult.Failed}");
+
+        foreach (var error in familyResult.Errors.Take(20))
+            Console.Error.WriteLine($"ERR {error}");
+        if (familyResult.Errors.Count > 20)
+            Console.Error.WriteLine($"ERR ... and {familyResult.Errors.Count - 20} more");
+
+        return familyResult.Failed > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunPassportFileImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string property,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var isPassportDocument = string.Equals(property, "PassportDocument", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "PassportCopy", StringComparison.OrdinalIgnoreCase);
+        if (!isPassportDocument)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported for Passport. Supported: PassportDocument (PassportCopy).");
+            return 1;
+        }
+
+        var passportIdMapPath = GetOptionValue(args, "--passport-id-map")
+            ?? GetOptionValue(args, "--id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Passport");
+        var copyIdMapPath = GetOptionValue(args, "--copy-id-map-output")
+            ?? source.IdMapPath(dataImporterRoot, "PassportCopy");
+
+        Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
+        Console.WriteLine($"INF Copy id-map: {copyIdMapPath}");
+
+        var result = await Visa2014PassportCopyImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            passportIdMapPath,
+            dryRun ? null : copyIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Passport id-map entries: {result.PassportIdMapEntries}");
+        Console.WriteLine($"INF Legacy copy rows: {result.LegacyCopyRows}");
+        Console.WriteLine(
+            $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
+            $"No passport map: {result.SkippedNoPassportMap}  No blob: {result.SkippedNoBlob}  " +
+            $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}");
+        if (result.CopyIdMapPath != null)
+            Console.WriteLine($"INF Copy id-map: {result.CopyIdMapPath}");
+
+        foreach (var error in result.Errors.Take(20))
+            Console.Error.WriteLine($"ERR {error}");
+        if (result.Errors.Count > 20)
+            Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
+
+        return result.Failed > 0 ? 1 : 0;
     }
 
     private static bool HasArg(IReadOnlyList<string> args, string flag) =>

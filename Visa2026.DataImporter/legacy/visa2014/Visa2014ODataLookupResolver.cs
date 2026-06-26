@@ -9,6 +9,7 @@ internal sealed class Visa2014ODataLookupResolver
     private List<MaritalStatus> _maritalStatuses = [];
     private List<Relationship> _relationships = [];
     private List<ProjectContract> _projectContracts = [];
+    private List<PassportType> _passportTypes = [];
     private List<Subcontractor> _subcontractors = [];
 
     public async Task LoadAsync(ApiClient api)
@@ -18,6 +19,7 @@ internal sealed class Visa2014ODataLookupResolver
         _maritalStatuses = await api.GetAllAsync<MaritalStatus>("MaritalStatus");
         _relationships = await api.GetAllAsync<Relationship>("Relationship");
         _projectContracts = await api.GetAllAsync<ProjectContract>("ProjectContract");
+        _passportTypes = await api.GetAllAsync<PassportType>("PassportType");
         _subcontractors = await api.GetAllAsync<Subcontractor>("Subcontractor");
     }
 
@@ -26,6 +28,20 @@ internal sealed class Visa2014ODataLookupResolver
 
     public Guid? ResolveCountry(string? translatedCode) =>
         ResolveByCode(_countries, translatedCode, c => c.Code);
+
+    public Guid? ResolvePassportType(string? localizationKey)
+    {
+        if (string.IsNullOrWhiteSpace(localizationKey))
+            return ResolveDefaultPassportType();
+
+        foreach (var row in _passportTypes)
+        {
+            if (PassportTypeKeyMatches(row, localizationKey))
+                return row.Id;
+        }
+
+        return ResolveDefaultPassportType();
+    }
 
     public Guid? ResolveMaritalStatus(string? translatedCode) =>
         ResolveByCode(_maritalStatuses, translatedCode, m => m.Code);
@@ -55,6 +71,35 @@ internal sealed class Visa2014ODataLookupResolver
             c.NameTm.Contains("2 ylalasyk", StringComparison.OrdinalIgnoreCase));
 
         return (preferred ?? matches[0]).Id;
+    }
+
+    private Guid? ResolveDefaultPassportType()
+    {
+        var preferred = _passportTypes.FirstOrDefault(p => p.IsDefault);
+        if (preferred != null)
+            return preferred.Id;
+
+        preferred = _passportTypes.FirstOrDefault(p =>
+            string.Equals(p.LocalizationKey, "P", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(p.Code, "P", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(p.PdfFormCode, "P", StringComparison.OrdinalIgnoreCase));
+        if (preferred != null)
+            return preferred.Id;
+
+        return _passportTypes.Count > 0 ? _passportTypes[0].Id : null;
+    }
+
+    private static bool PassportTypeKeyMatches(PassportType row, string key)
+    {
+        if (Visa2014CatalogMatchHelper.KeysEqual(row.LocalizationKey, key))
+            return true;
+        if (Visa2014CatalogMatchHelper.KeysEqual(row.Code, key))
+            return true;
+        if (Visa2014CatalogMatchHelper.KeysEqual(row.PdfFormCode, key))
+            return true;
+        return string.Equals(row.LocalizationKey, key, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(row.Code, key, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(row.PdfFormCode, key, StringComparison.OrdinalIgnoreCase);
     }
 
     public Guid? ResolveDefaultSubcontractor()
@@ -120,6 +165,7 @@ internal sealed class Visa2014ODataLookupResolver
         MaritalStatus m => m.Id,
         Relationship r => r.Id,
         ProjectContract p => p.Id,
+        PassportType pt => pt.Id,
         Subcontractor s => s.Id,
         _ => throw new InvalidOperationException($"Unsupported lookup type {typeof(T).Name}"),
     };

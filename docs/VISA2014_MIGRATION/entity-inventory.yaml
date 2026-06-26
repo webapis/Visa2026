@@ -27,12 +27,12 @@ entities:
     discoveryDossier: discovery/Passport.yaml
     tableMappingId: passport-main
     discoveryStatus: complete
-    importConfirmed: false
+    importConfirmed: true
     importStatus: pending
     legacyTable: Passport
     legacyBo: Passport
     blockReason: null
-    notes: "3684 active rows; dependsOn Person id-map. PassportType layer-3 approved 2026-06-26."
+    notes: "importConfirmed 2026-06-26; preview 3534 import rows. OData importer pending."
 
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml

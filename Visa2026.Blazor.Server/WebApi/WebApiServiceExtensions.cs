@@ -163,6 +163,8 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.Invitation>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.InvitationItem>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Passport>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.PassportDocument>();
+            options.BusinessObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Lodging>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.MedicalRecord>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Person>();

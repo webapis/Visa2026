@@ -7,13 +7,15 @@ internal static class Visa2014ImportCommand
         var entity = GetOptionValue(args, "--entity");
         if (string.IsNullOrWhiteSpace(entity))
         {
-            Console.Error.WriteLine("ERR --import-visa2014 requires --entity <Name> (e.g. Person).");
+            Console.Error.WriteLine("ERR --import-visa2014 requires --entity <Name> (e.g. Person, Passport).");
             return 1;
         }
 
-        if (!string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
+        var supported = string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase);
+        if (!supported)
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport.");
             return 1;
         }
 
@@ -77,38 +79,10 @@ internal static class Visa2014ImportCommand
 
         try
         {
-            var result = await Visa2014PersonODataImporter.RunAsync(
-                api,
-                source.ConnectionString,
-                source.LookupTranslationPaths,
-                dryRun ? null : idMapPath,
-                maxRows,
-                dryRun,
-                verbose);
+            if (string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
+                return await RunPersonImportAsync(api, source, args, idMapPath, maxRows, dryRun, verbose);
 
-            Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
-            Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
-            if (!dryRun)
-            {
-                Console.WriteLine($"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}");
-                if (result.IdMapPath != null)
-                {
-                    Console.WriteLine($"INF Id-map: {result.IdMapPath}");
-                    var targetCs = GetOptionValue(args, "--target-connection")
-                        ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
-                        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
-                    var expandCode = await Visa2014PersonIdMapExpander.ExpandAsync(
-                        source.ConnectionString,
-                        source.LookupTranslationPaths,
-                        result.IdMapPath,
-                        targetCs,
-                        verbose);
-                    if (expandCode != 0)
-                        return expandCode;
-                }
-            }
-
-            return result.FailedCount > 0 ? 1 : 0;
+            return await RunPassportImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
         }
         catch (Exception ex)
         {
@@ -118,6 +92,94 @@ internal static class Visa2014ImportCommand
             return 1;
         }
     }
+
+    private static async Task<int> RunPersonImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        IReadOnlyList<string> args,
+        string idMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var result = await Visa2014PersonODataImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            dryRun ? null : idMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine($"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}");
+            if (result.IdMapPath != null)
+            {
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+                var targetCs = GetTargetConnection(args);
+                var expandCode = await Visa2014PersonIdMapExpander.ExpandAsync(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    result.IdMapPath,
+                    targetCs,
+                    verbose);
+                if (expandCode != 0)
+                    return expandCode;
+            }
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunPassportImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string passportIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+
+        Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+
+        var result = await Visa2014PassportODataImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            personIdMapPath,
+            dryRun ? null : passportIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+        else if (result.SkippedNoPersonMap > 0)
+        {
+            Console.WriteLine($"INF Would skip (no Person map): {result.SkippedNoPersonMap}");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static string GetTargetConnection(IReadOnlyList<string> args) =>
+        GetOptionValue(args, "--target-connection")
+        ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
+        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
 
     private static bool HasArg(IReadOnlyList<string> args, string flag) =>
         args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
@@ -156,9 +218,7 @@ internal static class Visa2014ImportCommand
         var source = Visa2014LegacySource.Resolve(dataImporterRoot, solutionRoot, args);
         var idMapPath = GetOptionValue(args, "--id-map-output")
             ?? source.IdMapPath(dataImporterRoot, entity);
-        var targetCs = GetOptionValue(args, "--target-connection")
-            ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
-            ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
+        var targetCs = GetTargetConnection(args);
 
         return await Visa2014PersonIdMapExpander.ExpandAsync(
             source.ConnectionString,

@@ -47,13 +47,16 @@ entities:
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Passport.yaml
     discoveryStatus: complete
     legacySource: calik-energi
-    importConfirmed: false
-    importConfirmedAt: null
-    importConfirmedBy: null
-    importStatus: pending
+    importConfirmed: true
+    importConfirmedAt: 2026-06-26
+    importConfirmedBy: developer
+    importStatus: done
     notes: |
-      Discovery complete 2026-06-26 (3684 rows, PassportType approved).
-      Blocked on full Person id-map + Passport preview review before importConfirmed.
+      importConfirmed 2026-06-26 after Passport-preview.calik-energi.xlsx review.
+      Full OData import 2026-06-26: 3410/3534 posted, 0 failed, 124 skipped (Person not in id-map).
+      Legacy 3666 rows; 130 transform skipped, 2 dedupe merged. Id-map in id-maps/calik-energi/Passport.json.
+      PassportCopy files 2026-06-26: 3392/3615 posted (3 pilot + 3389 full), 190 no passport map, 32 oversize, 1 no blob.
+      Copy id-map: id-maps/calik-energi/PassportCopy.json.
 
   # - targetODataEntity: Education
   #   dependsOn: [Person]

@@ -902,6 +902,9 @@ public class PassportType
 
     [JsonPropertyName("PdfForm_Code")]
     public string PdfFormCode { get; set; } = "";
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class Position
