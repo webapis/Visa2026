@@ -59,10 +59,10 @@ internal static class Visa2014ImportCommand
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
 
-        Console.WriteLine($"=== VISA2014 OData import â€” {entity}");
+        Console.WriteLine($"=== VISA2014 OData import — {entity}");
         Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
-        Console.WriteLine($"INF Legacy SQL: {MaskConnectionForLog(source.ConnectionString)}");
-        Console.WriteLine($"INF Target API: {apiBaseUrl}");
+        Console.WriteLine($"INF Legacy (read-only): {Visa2014LegacySqlGuard.DescribeLegacyConnection(source.ConnectionString, source.LegacyDatabase)}");
+        Console.WriteLine($"INF Target (write): Visa2026 via OData at {apiBaseUrl}");
         Console.WriteLine($"INF Lookup translations:");
         foreach (var path in source.LookupTranslationPaths)
             Console.WriteLine($"INF   - {path}");
@@ -70,6 +70,20 @@ internal static class Visa2014ImportCommand
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no POST)");
+
+        if (!dryRun)
+        {
+            try
+            {
+                Visa2014LegacySqlGuard.EnsureLegacyReadCredentials(source.ConnectionString);
+                await Visa2014LegacySqlGuard.EnsureLegacyConnectionAsync(source.ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"ERR {ex.Message}");
+                return 1;
+            }
+        }
 
         var api = new Visa2026.DataImporter.ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
 

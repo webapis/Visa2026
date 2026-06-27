@@ -92,6 +92,7 @@ entities:
       Institution/Specialty calik-energi catalogs (1471 + 1063). No file wave.
       OData import 2026-06-26: 2958 posted, 0 failed, 150 no Person id-map, 6 transform skipped.
       Id-map: id-maps/calik-energi/Education.json. Country mgCode prefix normalize; ALB in country.json v3.
+      Diploma file wave: PassportCopy.Education FK → EducationDocument (--import-visa2014-files --property EducationDocument).
 
   - targetODataEntity: EmployeePositionHistory
     dependsOn:

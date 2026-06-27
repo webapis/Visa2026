@@ -60,7 +60,8 @@ mapping:
     Specialty: legacy column Spcialty → Speciality.TitleOfSpeciality → Specialty.NameTm (tenant catalog 1063 rows).
     EducationCountry: Country.mgCode → Country.Code (reuse Person-wave Country layer-3).
     GraduationYear: derived from YEAR(EducationEndDate) when set; null when no end date (2,959 rows — allowed on Visa2026).
-    No varbinary on dbo.Education — EducationDocument / EducationImage file wave not applicable for VISA2015 Çalik data.
+    Diploma copies: dbo.PassportCopy rows with Education FK (4,317 active; 4,287 with blob; max 15 per Education).
+    File wave → EducationDocument + FileData via --import-visa2014-files --property EducationDocument.
     Omit ShowOptionalFields on OData POST ([NotMapped] — same as Visa).
 
 checklist:

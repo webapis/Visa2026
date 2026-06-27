@@ -24,7 +24,9 @@ internal static class Visa2014VisaDocumentImporter
     private const int MaxDocumentBytes = 5 * 1024 * 1024;
 
     private const string ListVisasWithBlobSql = """
-        SELECT CAST(v.Oid AS varchar(36)) AS LegacyVisaOid
+        SELECT
+            CAST(v.Oid AS varchar(36)) AS LegacyVisaOid,
+            v.VisaNumber
         FROM dbo.Visa v
         INNER JOIN dbo.Passport p ON v.Passport = p.Oid AND p.GCRecord IS NULL
         WHERE v.GCRecord IS NULL
@@ -47,7 +49,7 @@ internal static class Visa2014VisaDocumentImporter
         await connection.OpenAsync();
         var blobColumn = Visa2014LegacyBlobColumnResolver.GetVarbinaryColumnName(connection, "dbo.Visa");
 
-        var legacyVisaOids = await ListLegacyVisaOidsAsync(connection, maxRows);
+        var legacyVisaRows = await ListLegacyVisaRowsAsync(connection, maxRows);
         var errors = new List<string>();
         var newDocMap = new Dictionary<Guid, Guid>(existingDocMap);
         int posted = 0;
@@ -58,7 +60,7 @@ internal static class Visa2014VisaDocumentImporter
         int skippedAlreadyImported = 0;
         int rowsWithBlob = 0;
 
-        foreach (var legacyVisaOid in legacyVisaOids)
+        foreach (var (legacyVisaOid, visaNumber) in legacyVisaRows)
         {
             if (existingDocMap.ContainsKey(legacyVisaOid))
             {
@@ -102,7 +104,7 @@ internal static class Visa2014VisaDocumentImporter
                 continue;
             }
 
-            var fileName = Visa2014LegacyFileNameHelper.BuildFileName(legacyVisaOid, blob);
+            var fileName = Visa2014LegacyFileNameHelper.BuildVisaCopyFileName(visaNumber, blob);
 
             if (dryRun)
             {
@@ -182,19 +184,24 @@ internal static class Visa2014VisaDocumentImporter
         };
     }
 
-    private static async Task<List<Guid>> ListLegacyVisaOidsAsync(SqlConnection connection, int? maxRows)
+    private static async Task<List<(Guid LegacyVisaOid, string? VisaNumber)>> ListLegacyVisaRowsAsync(
+        SqlConnection connection,
+        int? maxRows)
     {
         var sql = maxRows is > 0
             ? ListVisasWithBlobSql.Replace("SELECT", $"SELECT TOP ({maxRows.Value})", StringComparison.Ordinal)
             : ListVisasWithBlobSql;
 
-        var result = new List<Guid>();
+        var result = new List<(Guid, string?)>();
         await using var command = new SqlCommand(sql, connection);
         await using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
             if (Guid.TryParse(reader.GetString(0), out var oid))
-                result.Add(oid);
+            {
+                var visaNumber = reader.IsDBNull(1) ? null : reader.GetString(1);
+                result.Add((oid, visaNumber));
+            }
         }
 
         return result;

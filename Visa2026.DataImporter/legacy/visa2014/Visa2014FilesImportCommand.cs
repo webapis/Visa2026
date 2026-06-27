@@ -54,12 +54,26 @@ internal static class Visa2014FilesImportCommand
 
         Console.WriteLine($"=== VISA2014 file import — {entity}.{property}");
         Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
-        Console.WriteLine($"INF Legacy SQL: {MaskConnectionForLog(source.ConnectionString)}");
-        Console.WriteLine($"INF Target API: {apiBaseUrl}");
+        Console.WriteLine($"INF Legacy (read-only): {Visa2014LegacySqlGuard.DescribeLegacyConnection(source.ConnectionString, source.LegacyDatabase)}");
+        Console.WriteLine($"INF Target (write): Visa2026 via OData at {apiBaseUrl}");
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
         if (dryRun)
             Console.WriteLine("INF Mode: dry-run (no POST)");
+
+        if (!dryRun)
+        {
+            try
+            {
+                Visa2014LegacySqlGuard.EnsureLegacyReadCredentials(source.ConnectionString);
+                await Visa2014LegacySqlGuard.EnsureLegacyConnectionAsync(source.ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"ERR {ex.Message}");
+                return 1;
+            }
+        }
 
         var api = new Visa2026.DataImporter.ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
 
@@ -81,7 +95,10 @@ internal static class Visa2014FilesImportCommand
             if (string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase))
                 return await RunVisaFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa.");
+            if (string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase))
+                return await RunEducationFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education.");
             return 1;
         }
         catch (Exception ex)
@@ -201,7 +218,8 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine(
             $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
             $"No passport map: {result.SkippedNoPassportMap}  No blob: {result.SkippedNoBlob}  " +
-            $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}");
+            $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}  " +
+            $"Duplicate blob: {result.SkippedDuplicateBlob}");
         if (result.CopyIdMapPath != null)
             Console.WriteLine($"INF Copy id-map: {result.CopyIdMapPath}");
 
@@ -255,6 +273,61 @@ internal static class Visa2014FilesImportCommand
             $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
             $"No visa map: {result.SkippedNoVisaMap}  No blob: {result.SkippedNoBlob}  " +
             $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}");
+        if (result.DocumentIdMapPath != null)
+            Console.WriteLine($"INF Document id-map: {result.DocumentIdMapPath}");
+
+        foreach (var error in result.Errors.Take(20))
+            Console.Error.WriteLine($"ERR {error}");
+        if (result.Errors.Count > 20)
+            Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
+
+        return result.Failed > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunEducationFileImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string property,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var isEducationDocument = string.Equals(property, "EducationDocument", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "DiplomaCopy", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "Diploma", StringComparison.OrdinalIgnoreCase);
+        if (!isEducationDocument)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported for Education. Supported: EducationDocument (DiplomaCopy).");
+            return 1;
+        }
+
+        var educationIdMapPath = GetOptionValue(args, "--education-id-map")
+            ?? GetOptionValue(args, "--id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Education");
+        var documentIdMapPath = GetOptionValue(args, "--document-id-map-output")
+            ?? source.IdMapPath(dataImporterRoot, "EducationDocument");
+
+        Console.WriteLine($"INF Education id-map: {educationIdMapPath}");
+        Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
+
+        var result = await Visa2014EducationDocumentImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            educationIdMapPath,
+            dryRun ? null : documentIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Education id-map entries: {result.EducationIdMapEntries}");
+        Console.WriteLine($"INF Legacy diploma copy rows: {result.LegacyCopyRows}");
+        Console.WriteLine(
+            $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
+            $"No education map: {result.SkippedNoEducationMap}  No blob: {result.SkippedNoBlob}  " +
+            $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}  " +
+            $"Duplicate blob: {result.SkippedDuplicateBlob}");
         if (result.DocumentIdMapPath != null)
             Console.WriteLine($"INF Document id-map: {result.DocumentIdMapPath}");
 

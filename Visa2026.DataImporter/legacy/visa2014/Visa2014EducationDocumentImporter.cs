@@ -1,53 +1,58 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.SqlClient;
-using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed class Visa2014PassportCopyImportResult
+internal sealed class Visa2014EducationDocumentImportResult
 {
-    public int PassportIdMapEntries { get; init; }
+    public int EducationIdMapEntries { get; init; }
     public int LegacyCopyRows { get; init; }
-    public int Processed { get; init; }
     public int Posted { get; init; }
-    public int SkippedNoPassportMap { get; init; }
+    public int SkippedNoEducationMap { get; init; }
     public int SkippedNoBlob { get; init; }
     public int SkippedOversize { get; init; }
     public int SkippedAlreadyImported { get; init; }
     public int SkippedDuplicateBlob { get; init; }
     public int Failed { get; init; }
-    public string? CopyIdMapPath { get; init; }
+    public string? DocumentIdMapPath { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
-internal static class Visa2014PassportCopyImporter
+/// <summary>
+/// Legacy diploma scans live on <c>dbo.PassportCopy</c> rows with <c>Education</c> FK (not on dbo.Education).
+/// </summary>
+internal static class Visa2014EducationDocumentImporter
 {
     private const int MaxDocumentBytes = 5 * 1024 * 1024;
 
-    private const string ListCopiesSql = """
+    private const string ListEducationCopiesSql = """
         SELECT
             CAST(pc.Oid AS varchar(36)) AS LegacyCopyOid,
-            CAST(pc.Passport AS varchar(36)) AS LegacyPassportOid,
-            p.PassportNumber
+            CAST(pc.Education AS varchar(36)) AS LegacyEducationOid,
+            LTRIM(RTRIM(
+                COALESCE(per.FirstName, N'') + N' ' + COALESCE(per.LastName, N'')
+            )) AS PersonFullName
         FROM dbo.PassportCopy pc
-        INNER JOIN dbo.Passport p ON pc.Passport = p.Oid AND p.GCRecord IS NULL
+        INNER JOIN dbo.Education e ON pc.Education = e.Oid AND e.GCRecord IS NULL
+        INNER JOIN dbo.Person per ON e.Person = per.Oid AND per.GCRecord IS NULL
         WHERE pc.GCRecord IS NULL
-          AND pc.Passport IS NOT NULL
-        ORDER BY pc.Passport, pc.Oid
+          AND pc.Education IS NOT NULL
+        ORDER BY pc.Education, pc.Oid
         """;
 
-    public static async Task<Visa2014PassportCopyImportResult> RunAsync(
+    public static async Task<Visa2014EducationDocumentImportResult> RunAsync(
         ApiClient api,
         string legacyConnectionString,
-        string passportIdMapPath,
-        string? copyIdMapOutputPath,
+        string educationIdMapPath,
+        string? documentIdMapOutputPath,
         int? maxRows,
         bool dryRun,
         bool verbose)
     {
-        var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
-        var existingCopyMap = LoadOptionalCopyIdMap(copyIdMapOutputPath);
+        var educationIdMap = Visa2014IdMapHelper.Load(educationIdMapPath);
+        var docMap = LoadOptionalDocumentIdMap(documentIdMapOutputPath);
+        int mapEntriesAtStart = docMap.Count;
 
         await using var connection = new SqlConnection(legacyConnectionString);
         await connection.OpenAsync();
@@ -55,24 +60,24 @@ internal static class Visa2014PassportCopyImporter
 
         var copyRows = await ListLegacyCopyRowsAsync(connection, maxRows);
         var errors = new List<string>();
-        var newCopyMap = new Dictionary<Guid, Guid>(existingCopyMap);
+        var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
+        var copyIndexByEducation = new Dictionary<Guid, int>();
         int posted = 0;
         int failed = 0;
-        int skippedNoPassportMap = 0;
+        int skippedNoEducationMap = 0;
         int skippedNoBlob = 0;
         int skippedOversize = 0;
         int skippedAlreadyImported = 0;
         int skippedDuplicateBlob = 0;
-        var importedBlobKeys = new HashSet<string>(StringComparer.Ordinal);
-        var copyIndexByPassport = new Dictionary<Guid, int>();
+        int postedSinceLastSave = 0;
 
-        foreach (var (legacyCopyOid, legacyPassportOid, passportNumber) in copyRows)
+        foreach (var (legacyCopyOid, legacyEducationOid, personFullName) in copyRows)
         {
-            if (!passportIdMap.TryGetValue(legacyPassportOid, out var targetPassportId))
+            if (!educationIdMap.TryGetValue(legacyEducationOid, out var targetEducationId))
             {
-                skippedNoPassportMap++;
+                skippedNoEducationMap++;
                 if (verbose)
-                    Console.WriteLine($"  SKIP copy {legacyCopyOid}: Passport {legacyPassportOid} not in id-map");
+                    Console.WriteLine($"  SKIP copy {legacyCopyOid}: Education {legacyEducationOid} not in id-map");
                 continue;
             }
 
@@ -102,29 +107,29 @@ internal static class Visa2014PassportCopyImporter
                 continue;
             }
 
-            if (existingCopyMap.ContainsKey(legacyCopyOid))
+            if (docMap.ContainsKey(legacyCopyOid))
             {
                 skippedAlreadyImported++;
                 Visa2014LegacyBlobDedupeHelper.RegisterExistingBlob(
-                    importedBlobKeys, copyIndexByPassport, targetPassportId, blob);
+                    importedBlobKeys, copyIndexByEducation, targetEducationId, blob);
                 continue;
             }
 
             if (!Visa2014LegacyBlobDedupeHelper.TryRegisterDistinctBlob(
-                    importedBlobKeys, copyIndexByPassport, targetPassportId, blob, out var copyIndex))
+                    importedBlobKeys, copyIndexByEducation, targetEducationId, blob, out var copyIndex))
             {
                 skippedDuplicateBlob++;
                 if (verbose)
-                    Console.WriteLine($"  SKIP copy {legacyCopyOid}: duplicate blob for Passport {targetPassportId} ({blob.Length} bytes)");
+                    Console.WriteLine($"  SKIP copy {legacyCopyOid}: duplicate blob for Education {targetEducationId} ({blob.Length} bytes)");
                 continue;
             }
 
-            var fileName = Visa2014LegacyFileNameHelper.BuildPassportCopyFileName(passportNumber, blob, copyIndex);
+            var fileName = Visa2014LegacyFileNameHelper.BuildDiplomaCopyFileName(personFullName, blob, copyIndex);
 
             if (dryRun)
             {
                 Console.WriteLine(
-                    $"DRY RUN: POST PassportDocument ← copy {legacyCopyOid} passport {targetPassportId} ({blob.Length} bytes, {fileName})");
+                    $"DRY RUN: POST EducationDocument ← copy {legacyCopyOid} education {targetEducationId} ({blob.Length} bytes, {fileName})");
                 posted++;
                 continue;
             }
@@ -145,22 +150,32 @@ internal static class Visa2014PassportCopyImporter
 
                 var payload = new Dictionary<string, object?>
                 {
-                    ["Passport"] = new { ID = targetPassportId },
+                    ["Education"] = new { ID = targetEducationId },
                     ["File"] = new { ID = fileCreated.Id },
                 };
 
-                var created = await api.CreateAsync<PassportDocumentImportRow>("PassportDocument", payload);
+                var created = await api.CreateAsync<EducationDocumentImportRow>("EducationDocument", payload);
                 if (created == null)
                 {
                     failed++;
-                    errors.Add($"{legacyCopyOid}: POST returned null");
+                    errors.Add($"{legacyCopyOid}: EducationDocument POST returned null");
                     continue;
                 }
 
-                newCopyMap[legacyCopyOid] = created.Id;
+                docMap[legacyCopyOid] = created.Id;
                 posted++;
+                postedSinceLastSave++;
+                if (posted % 100 == 0)
+                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported, {skippedNoEducationMap} no education map...");
                 if (verbose)
-                    Console.WriteLine($"  POST PassportDocument {created.Id} ← copy {legacyCopyOid}");
+                    Console.WriteLine($"  POST EducationDocument {created.Id} ← copy {legacyCopyOid}");
+
+                if (postedSinceLastSave >= 100 &&
+                    !string.IsNullOrWhiteSpace(documentIdMapOutputPath))
+                {
+                    await Visa2014IdMapHelper.SaveAsync(documentIdMapOutputPath, docMap);
+                    postedSinceLastSave = 0;
+                }
             }
             catch (Exception ex)
             {
@@ -169,46 +184,36 @@ internal static class Visa2014PassportCopyImporter
             }
         }
 
-        string? copyIdMapPath = null;
-        if (!dryRun && newCopyMap.Count > existingCopyMap.Count && !string.IsNullOrWhiteSpace(copyIdMapOutputPath))
+        string? documentIdMapPath = null;
+        if (!dryRun && docMap.Count > mapEntriesAtStart && !string.IsNullOrWhiteSpace(documentIdMapOutputPath))
         {
-            copyIdMapPath = Path.GetFullPath(copyIdMapOutputPath);
-            Directory.CreateDirectory(Path.GetDirectoryName(copyIdMapPath)!);
-            var serializable = newCopyMap.ToDictionary(
-                kvp => kvp.Key.ToString(),
-                kvp => kvp.Value.ToString());
-            await File.WriteAllTextAsync(
-                copyIdMapPath,
-                JsonSerializer.Serialize(serializable, new JsonSerializerOptions { WriteIndented = true }));
+            documentIdMapPath = Path.GetFullPath(documentIdMapOutputPath);
+            await Visa2014IdMapHelper.SaveAsync(documentIdMapPath, docMap);
         }
 
-        return new Visa2014PassportCopyImportResult
+        return new Visa2014EducationDocumentImportResult
         {
-            PassportIdMapEntries = passportIdMap.Count,
+            EducationIdMapEntries = educationIdMap.Count,
             LegacyCopyRows = copyRows.Count,
-            Processed = copyRows.Count,
             Posted = posted,
-            SkippedNoPassportMap = skippedNoPassportMap,
+            SkippedNoEducationMap = skippedNoEducationMap,
             SkippedNoBlob = skippedNoBlob,
             SkippedOversize = skippedOversize,
             SkippedAlreadyImported = skippedAlreadyImported,
             SkippedDuplicateBlob = skippedDuplicateBlob,
             Failed = failed,
-            CopyIdMapPath = copyIdMapPath,
+            DocumentIdMapPath = documentIdMapPath,
             Errors = errors,
         };
     }
 
-    private static async Task<List<(Guid LegacyCopyOid, Guid LegacyPassportOid, string? PassportNumber)>> ListLegacyCopyRowsAsync(
+    private static async Task<List<(Guid LegacyCopyOid, Guid LegacyEducationOid, string? PersonFullName)>> ListLegacyCopyRowsAsync(
         SqlConnection connection,
         int? maxRows)
     {
         var sql = maxRows is > 0
-            ? ListCopiesSql.Replace(
-                "SELECT",
-                $"SELECT TOP ({maxRows.Value})",
-                StringComparison.Ordinal)
-            : ListCopiesSql;
+            ? ListEducationCopiesSql.Replace("SELECT", $"SELECT TOP ({maxRows.Value})", StringComparison.Ordinal)
+            : ListEducationCopiesSql;
 
         var rows = new List<(Guid, Guid, string?)>();
         await using var command = new SqlCommand(sql, connection);
@@ -217,10 +222,10 @@ internal static class Visa2014PassportCopyImporter
         {
             if (!Guid.TryParse(reader.GetString(0), out var copyOid))
                 continue;
-            if (!Guid.TryParse(reader.GetString(1), out var passportOid))
+            if (!Guid.TryParse(reader.GetString(1), out var educationOid))
                 continue;
-            var passportNumber = reader.IsDBNull(2) ? null : reader.GetString(2);
-            rows.Add((copyOid, passportOid, passportNumber));
+            var personFullName = reader.IsDBNull(2) ? null : reader.GetString(2);
+            rows.Add((copyOid, educationOid, personFullName));
         }
 
         return rows;
@@ -239,7 +244,7 @@ internal static class Visa2014PassportCopyImporter
         return value is DBNull or null ? null : (byte[])value;
     }
 
-    private static Dictionary<Guid, Guid> LoadOptionalCopyIdMap(string? path)
+    private static Dictionary<Guid, Guid> LoadOptionalDocumentIdMap(string? path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return new Dictionary<Guid, Guid>();
@@ -248,13 +253,7 @@ internal static class Visa2014PassportCopyImporter
     }
 }
 
-internal sealed class PassportDocumentImportRow
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-}
-
-internal sealed class FileDataImportRow
+internal sealed class EducationDocumentImportRow
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }

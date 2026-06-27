@@ -153,6 +153,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--import-visa2014",
         "--expand-visa2014-id-map",
         "--import-visa2014-files",
+        "--cleanup-visa2014-education-documents",
+        "--purge-visa2014-education-documents",
         "--property",
         "--id-map",
         "--entity",
@@ -247,9 +249,13 @@ static void PrintHelp()
     Console.WriteLine("                [--max-rows N] [--dry-run] [--api-base-url url] [--user Admin] [--password pwd]");
     Console.WriteLine("                [--id-map-output path.json] [--person-id-map path.json] [--passport-id-map path.json] [--no-wait]");
     Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs/fields → OData PATCH/POST (requires scalar import + id-map).");
-    Console.WriteLine("      Options: --entity Person|Passport|Visa --property Photo|VisaApplicationFamilyMembersText|PassportDocument|VisaDocument");
-    Console.WriteLine("                [--legacy-source calik-energi|gap-insaat] [--id-map path.json] [--passport-id-map path.json] [--visa-id-map path.json]");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education --property Photo|VisaApplicationFamilyMembersText|PassportDocument|VisaDocument|EducationDocument");
+    Console.WriteLine("                [--legacy-source calik-energi|gap-insaat] [--id-map path.json] [--person-id-map path.json] [--passport-id-map path.json] [--visa-id-map path.json] [--education-id-map path.json]");
     Console.WriteLine("                [--copy-id-map-output path.json] [--max-rows N] [--dry-run] [--api-base-url url] [--no-wait]");
+    Console.WriteLine("  --cleanup-visa2014-education-documents  DELETE duplicate EducationDocument rows + rename FileData to diploma-*.");
+    Console.WriteLine("  --purge-visa2014-education-documents    DELETE ALL EducationDocument rows + clear id-map.");
+    Console.WriteLine("      Options: [--legacy-source calik-energi|gap-insaat] [--target-connection conn] [--document-id-map-output path.json]");
+    Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait]");
     Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
     Console.WriteLine("  --prune-seed [path]         Same as --validate-seed and rewrite scenario yaml on disk.");
     Console.WriteLine();
@@ -378,6 +384,26 @@ if (HasArg(args, "--import-visa2014-files"))
     Log.Phase("VISA2014 file import");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014FilesImportCommand.RunAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--cleanup-visa2014-education-documents"))
+{
+    Log.Phase("VISA2014 EducationDocument cleanup");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014EducationDocumentCleanup.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--purge-visa2014-education-documents"))
+{
+    Log.Phase("VISA2014 EducationDocument purge");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014EducationDocumentPurge.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

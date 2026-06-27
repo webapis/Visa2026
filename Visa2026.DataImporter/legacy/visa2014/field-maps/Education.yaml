@@ -38,12 +38,14 @@ propertyGaps:
       default: false
       missingBehavior: omit_from_post
       notes: "[NotMapped] — omit on OData POST"
+    - property: Documents
+      disposition: file_wave
+      notes: |
+        Legacy diploma scans on dbo.PassportCopy (Education FK + Göçürme varbinary), not on dbo.Education.
+        Import via --import-visa2014-files --entity Education --property EducationDocument after Education OData + id-map.
     - property: Images
       disposition: defer
-      notes: No legacy blob source on dbo.Education
-    - property: Documents
-      disposition: defer
-      notes: No legacy blob source on dbo.Education (VISA2015)
+      notes: No legacy EducationImage source on VISA2015 Çalik data
   mismatches:
     - property: GraduationYear
       legacyColumn: EducationEndDate
@@ -112,3 +114,12 @@ fields:
     notes: |
       174 rows have end date; 2,959 omit GraduationYear (allowed — IsValidGraduationYear true for empty).
       Range rule 1950..Today+10 — 0 out-of-range on Çalik end dates (2026-06-26 SQL check).
+
+postImport:
+  - wave: attachments
+    property: EducationDocument
+    legacyTable: PassportCopy
+    legacyLink: Education
+    notes: |
+      Diploma scans on PassportCopy.Göçürme where Education FK is set (not Passport FK).
+      CLI: --import-visa2014-files --entity Education --property EducationDocument

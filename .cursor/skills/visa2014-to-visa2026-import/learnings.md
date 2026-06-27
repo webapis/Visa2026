@@ -374,3 +374,28 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Preview**: `EmployeePositionHistory-preview.calik-energi.xlsx` — **2993** import rows, 0 skipped, 0 unmapped lookup distinct; EndDate derived per Person from next StartDate.
 - **Transform**: `Visa2014EmployeePositionHistoryTransform` + preview exporter; ActualPosition = trim(Position.Code) or `"-"`.
 - **Next**: human `importConfirmed`, `Visa2014EmployeePositionHistoryODataImporter` (not implemented yet).
+
+### 2026-06-26 — Education diploma copies file wave (calik-energi)
+
+- **Legacy source**: `dbo.PassportCopy` rows with `Education` FK (not `Passport` FK) — **4317** rows, **4287** with blob, **40** oversize; up to **15** copies per Education.
+- **Target**: `EducationDocument` + `FileData` on parent `Education` (id-map required).
+- **CLI**: `--import-visa2014-files --entity Education --property EducationDocument --legacy-source calik-energi`
+- **Code**: `Visa2014EducationDocumentImporter.cs`; register `EducationDocument` on OData in `WebApiServiceExtensions.cs` (was missing vs PassportDocument).
+- **Gate**: restart Blazor after OData registration rebuild before POST (F5 file lock).
+
+### 2026-06-26 — File copy naming + blob dedupe (Passport / Visa / Education)
+
+- **Naming**: `passport-{PassportNumber}-copy`, `visa-{VisaNumber}-copy`, `diploma-{PersonFirstName LastName}-copy` (+ `-2` suffix when multiple distinct blobs per parent).
+- **Dedupe**: SHA256 per target parent; on resume, seed dedupe set from id-map rows (read legacy blob before skip) so duplicate diploma copies are not re-posted.
+- **Already imported** (~2360 EducationDocument): still show old `passport-copy-{guid}` names — cleanup/rename separately if needed; duplicates already in DB must be deleted manually.
+
+### 2026-06-27 — EducationDocument cleanup + resume import (calik-energi)
+
+- **Phase**: import | tooling
+- **Environment**: Visa2026DbDev (localhost:5001, LocalDB Visa2026)
+- **Pre-cleanup state**: 3903 active EducationDocument rows; 3903 id-map entries; all FileName `passport-copy-{guid}`; 3 duplicate blobs (same SHA256 per Education); 1217 educations with multiple docs
+- **Cleanup CLI**: `--cleanup-visa2014-education-documents` (`Visa2014EducationDocumentCleanup.cs`) — OData DELETE duplicates (XAF soft-delete GCRecord=1), PATCH FileData.FileName → `diploma-{FirstName LastName}-copy`, prune id-map for removed rows
+- **Cleanup result**: 3 duplicates removed, 3900 renamed, 0 failed; id-map 3900 entries
+- **Resume import**: `--import-visa2014-files --entity Education --property EducationDocument --legacy-source calik-energi --no-wait`
+- **Counts**: legacy 4317 → **posted 109**, skipped already imported 3900, duplicate blob 15, no education map 231, no blob 28, oversize 34, failed 0; id-map **4009**; active DB rows **4009** (all `diploma-*` named)
+- **Prevent**: Run cleanup before resuming after partial import with old naming; dry-run import does not load id-map (Already imported always 0 in dry-run summary)

@@ -25,4 +25,15 @@ internal static class Visa2014IdMapHelper
 
         return map;
     }
+
+    public static async Task SaveAsync(string path, IReadOnlyDictionary<Guid, Guid> map)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        var serializable = map.ToDictionary(
+            kvp => kvp.Key.ToString(),
+            kvp => kvp.Value.ToString());
+        await File.WriteAllTextAsync(
+            path,
+            JsonSerializer.Serialize(serializable, new JsonSerializerOptions { WriteIndented = true }));
+    }
 }
