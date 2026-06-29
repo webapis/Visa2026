@@ -3,6 +3,7 @@
   <ActionDesign>
     <Actions>
       <Action Id="Logon" CustomCSSClassName="e2e-login-submit" />
+      <Action Id="ListViewTotalCount" CustomCSSClassName="visa-list-total-action" />
     </Actions>
   </ActionDesign>
   <NavigationItems NavigationStyle="Accordion">

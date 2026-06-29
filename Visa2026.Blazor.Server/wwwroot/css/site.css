@@ -364,6 +364,38 @@ dxd-license,
     overflow: visible !important;
 }
 
+/* ListView total count — caption-only toolbar action, pushed to the far right (ListViewTotalCountController). */
+.visa-list-total-action {
+    pointer-events: none;
+    margin-inline-start: auto !important;
+}
+
+/* Push the whole toolbar item (and the trailing edge) to the right when XAF wraps the action. */
+.dxbl-toolbar-item.visa-list-total-action,
+.dxbl-toolbar-item:has(> .visa-list-total-action) {
+    margin-inline-start: auto !important;
+}
+
+.visa-list-total-action .dxbl-btn,
+.visa-list-total-action.dxbl-btn,
+.visa-list-total-action button {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    cursor: default !important;
+    opacity: 1 !important;
+    font-weight: 500;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.visa-list-total-action .dxbl-btn:hover,
+.visa-list-total-action .dxbl-btn:focus,
+.visa-list-total-action.dxbl-btn:hover,
+.visa-list-total-action.dxbl-btn:focus {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
 /* Soft-deleted rows in DxGrid (including nested ListViews such as Person.FamilyMembers). */
 /* Application ListView — row tint from latest ApplicationProgress (see BoStateAppearanceColors). */
 .visa-progress-row.visa-progress-row--state-IS_BEING_PREPARED { --dxbl-grid-row-bg: #fef9c3; }
