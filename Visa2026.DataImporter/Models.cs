@@ -438,6 +438,13 @@ public class ApplicationProgress
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
+public enum EmployeeCurrency
+{
+    TMT,
+    USD,
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ResidenceType
 {
     Lodging,
@@ -772,6 +779,27 @@ public class EmployeePositionHistory
 
     [JsonPropertyName("Department")]
     public Department? Department { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+}
+
+public class EmployeeSalary
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Amount")]
+    public string Amount { get; set; } = "";
+
+    [JsonPropertyName("Currency")]
+    public EmployeeCurrency Currency { get; set; }
+
+    [JsonPropertyName("StartDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("EndDate")]
+    public DateTime? EndDate { get; set; }
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }

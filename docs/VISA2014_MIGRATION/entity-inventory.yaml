@@ -78,6 +78,17 @@ entities:
     blockReason: null
     notes: "OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 pilot resume-skipped; OData total 3786."
 
+  - targetODataEntity: EmployeeSalary
+    discoveryDossier: discovery/EmployeeSalary.yaml
+    tableMappingId: employee-salary-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Employee
+    legacyBo: Employee
+    blockReason: null
+    notes: "OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 63 transform skipped."
+
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml
     discoveryStatus: not_started

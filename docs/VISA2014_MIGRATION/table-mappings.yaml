@@ -155,6 +155,31 @@ mappings:
       Position (1579 distinct) + Department (74 distinct) tenant catalog seeds pending before import.
       ActualPosition derived from same Position title (Visa2026-only BO).
 
+  - id: employee-salary-main
+    legacy:
+      schema: dbo
+      table: Employee
+      boClass: Employee
+    target:
+      odataEntity: EmployeeSalary
+      boPath: Visa2026.Module/BusinessObjects/EmployeeSalary.cs
+    relationship: primary
+    legacyTablesExtra:
+      - schema: dbo
+        table: Salary
+        join: Salary.Oid = Employee.Salary
+        role: lookup_fk
+      - schema: dbo
+        table: WorkHistoryOfEmployee
+        join: WorkHistoryOfEmployee.Employee = Employee.Oid
+        role: derive_start_date
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/EmployeeSalary.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/EmployeeSalary.yaml
+    status: mapped
+    notes: |
+      2,950 active employees (Employee ⋈ Person); one salary per employee via Salary.Detail lookup text.
+      No legacy history or currency column — import as open EmployeeSalary row (EndDate null).
+
   - id: address-of-residence-main
     legacy:
       schema: dbo

@@ -16,10 +16,11 @@ internal static class Visa2014ImportCommand
             || string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase);
         if (!supported)
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, AddressOfResidence.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence.");
             return 1;
         }
 
@@ -111,6 +112,9 @@ internal static class Visa2014ImportCommand
 
             if (string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase))
                 return await RunAddressOfResidenceImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+
+            if (string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase))
+                return await RunEmployeeSalaryImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
 
             return await RunEmployeePositionHistoryImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
         }
@@ -379,6 +383,56 @@ internal static class Visa2014ImportCommand
         {
             Console.WriteLine(
                 $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}  ActualPositions created: {result.ActualPositionsCreated}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+        else if (result.SkippedNoPersonMap > 0)
+        {
+            Console.WriteLine($"INF Would skip (no Person map): {result.SkippedNoPersonMap}");
+        }
+
+        if (result.FailedCount > 0)
+        {
+            foreach (var error in result.Errors.Take(10))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 10)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunEmployeeSalaryImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string salaryIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+
+        Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+
+        var result = await Visa2014EmployeeSalaryODataImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            personIdMapPath,
+            dryRun ? null : salaryIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
         }

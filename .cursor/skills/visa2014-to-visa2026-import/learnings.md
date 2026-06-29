@@ -491,3 +491,23 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Known gaps**: **182** Person-missing rows; **3** transform skips (Patent, no Region/City FK) — unchanged from preview.
 - **Docs**: `order.yaml` + `entity-inventory.yaml` `importStatus: done`; discovery dossier `complete` + `odataImport` block.
 - **Next**: Application wave (`order.yaml` application-domain); optional backfill of 182 rows if Person id-map grows.
+
+### 2026-06-29 — EmployeeSalary discovery + Excel preview (calik-energi)
+
+- **Phase**: discovery | excel-preview
+- **Legacy shape**: `dbo.Employee.Salary` FK → `dbo.Salary.Detail` (lookup text, not history). **2950** active employees; **no** legacy `Currency` or `StartDate` columns.
+- **Target**: one `EmployeeSalary` per employee — `Amount` (normalized string), `Currency` **USD** (all rows; legacy dtm ignored), `StartDate` = MAX(`WorkHistoryOfEmployee.StartDateOnThisPosition`), `EndDate` null.
+- **Normalizer**: `Visa2014SalaryAmountNormalizer` — extract numeric from labor-contract sentences; `1.667,00` → `1.667.00`; skip unparseable (e.g. `Alesta`).
+- **Preview**: `EmployeeSalary-preview.calik-energi.xlsx` — **2887** import, **63** skipped (empty/unparseable Detail); `_AmountParse` audit sheet.
+- **Blockers before OData**: `importConfirmed: false`; register `EmployeeSalary` on OData; implement importer + id-map (Person Oid key).
+- **Next**: human review `_AmountParse`; then `importConfirmed: true` → OData implementation.
+
+### 2026-06-29 — EmployeeSalary importConfirmed + OData importer
+
+- **Phase**: importConfirmed | implementation
+- **Sign-off**: `importConfirmed: true` 2026-06-29; currency fixed USD.
+- **Code**: `Visa2014EmployeeSalaryODataImporter.cs`, `WebApiServiceExtensions` + `EmployeeSalary` OData, `Models.EmployeeSalary`.
+- **Dry-run**: 2887 POST-ready, 63 transform skipped, 145 missing Person id-map.
+- **Pilot**: 400 on POST — **restart Blazor** after `EmployeeSalary` OData registration (running host has old Web API model).
+- **Fix**: OData `Currency` must be string `"USD"` not int `1` (400 Incorrect body).
+- **Full import** 2026-06-29: **2740** posted, **0** failed, **145** no Person map, **2** pilot resume-skipped, **63** transform skipped. Id-map: `id-maps/calik-energi/EmployeeSalary.json`.

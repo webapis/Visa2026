@@ -129,6 +129,22 @@ entities:
       Lodging-preview.calik-energi.xlsx reviewed 2026-06-21; lodging dedupe fingerprint + OData resolver aligned.
       OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 resume-skipped (pilot); OData total 3786.
 
+  - targetODataEntity: EmployeeSalary
+    dependsOn:
+      - Person
+      - EmployeePositionHistory
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/EmployeeSalary.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-29: legacy Employee.Salary FK → dbo.Salary.Detail.
+      importConfirmed 2026-06-29. OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 2 pilot resume-skipped, 63 transform skipped.
+
   # --- application-domain ---
   - targetODataEntity: Application
     dependsOn:

@@ -1,0 +1,87 @@
+# Discovery dossier — EmployeeSalary (person-domain child BO)
+# dependsOn: Person, EmployeePositionHistory (StartDate derivation uses work history)
+
+targetODataEntity: EmployeeSalary
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-29
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    SQL discovery 2026-06-29 (VISA2015, calik-energi).
+    Excel preview: 2950 employees → 2887 import, 63 skipped.
+    Currency USD sign-off 2026-06-29. importConfirmed 2026-06-29.
+    OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 2 pilot resume-skipped.
+
+legacy:
+  boClass: Employee
+  boPath: null
+  tables:
+    - dbo.Employee
+    - dbo.Salary
+    - dbo.WorkHistoryOfEmployee
+  rowCount: 2950
+  primaryKey: Oid
+  softDeleteColumn: null
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/EmployeeSalary.cs
+  docPath: docs/OPTIONAL_DETAIL_FIELDS.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/EmployeeSalary.yaml
+  tableMappingId: employee-salary-main
+  cardinality: one_legacy_row_per_employee
+  upsertKeys:
+    - Person
+  lookupDependencies: []
+  lookupAuditStatus: {}
+  duplicateGroups: 0
+  legacyOnlyCount: 11
+  targetOnlyCount: 2
+  mismatchCount: 4
+  blockedReason: null
+  notes: |
+    Extract: Employee ⋈ Person (GCRecord IS NULL) LEFT JOIN Salary ON Employee.Salary.
+    Amount ← normalize Salary.Detail (free text; ~34 distinct values on Çalik data).
+    Currency: fixed USD for all rows (import sign-off; legacy dtm text not used).
+    StartDate ← MAX(WorkHistoryOfEmployee.StartDateOnThisPosition) per employee.
+    EndDate null (current snapshot). id-map key = Employee.Oid (= Person.Oid).
+    Skip: missing Salary FK (4), empty/unparseable Detail (59 incl. "Alesta" and blanks).
+    EmployeeContract removed from Visa2026 — do not map to deprecated BO.
+    OData not registered in WebApiServiceExtensions yet — required before import implementation.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-29
+completedBy: developer
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeEmployees: 2950
+  withSalaryFk: 2946
+  missingSalaryFk: 4
+  previewImportRows: 2887
+  previewSkippedRows: 63
+  odataPosted: 2740
+  odataFailed: 0
+  skippedNoPersonMap: 145
+  distinctSalaryDetailValues: 34
+  distinctSalaryLookupOids: 40
+  usdDetailRows: 0
+  employeesWithoutWorkHistory: 0
