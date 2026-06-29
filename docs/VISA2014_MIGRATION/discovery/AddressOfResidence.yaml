@@ -1,0 +1,132 @@
+# Discovery dossier — AddressOfResidence (person-domain child BO)
+# dependsOn: Person, Region, City, Lodging (tenant catalog)
+
+targetODataEntity: AddressOfResidence
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-21
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    Lodging-preview.calik-energi.xlsx reviewed 2026-06-21 (37 catalog rows after dedupe).
+    Site catalogs deployed manifest v31: Lodging 37, Hotel 34, Hospital 4, OtherSite 24.
+    AddressOfResidence pilot import approved after lodging catalog sign-off.
+
+legacy:
+  boClass: AddressOfResidence
+  tables:
+    - dbo.AddressOfResidence
+    - dbo.Address
+    - dbo.Region
+    - dbo.ŞäherEtrap
+    - dbo.DocumentOfAddress
+  rowCount: 4083
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/AddressOfResidence.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/AddressOfResidence.yaml
+  tableMappingId: address-of-residence-main
+  cardinality: many_per_person
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - Region
+    - City
+    - Lodging
+    - Hotel
+    - Hospital
+  lookupAuditStatus:
+    Region: approved_2026-06-27
+    City: approved_2026-06-27
+    Lodging: confirmed_2026-06-21
+    Hotel: deployed_2026-06-27_split
+    Hospital: deployed_2026-06-27
+    OtherSite: deployed_2026-06-21
+  notes: |
+    Legacy Address holds Region + ŞäherEtrap FK and AddressLine text (table name uses U+015E U+00E4, not "Seher").
+    Type from DocumentOfAddress (Lojman 2551, Patent 1163, myhmanhana 269).
+    MapResidenceType: Lojman + IsHotelAddressLine -> Hotel; IsHospitalAddressLine -> Hospital;
+    IsLodgingSiteLine -> Lodging; else Other (Visa2014ResidenceClassifier.MapLojmanResidenceType).
+    Tenant catalogs (calik-energi, manifest v31): lodging 37, hotel 34, hospital 4, other-site 24 rows.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 4083
+  withRegionFk: 2752
+  withoutRegionFk: 1331
+  withCityFk: 2753
+  withoutCityFk: 1330
+  typeBreakdown:
+    Lojman: 2551
+    Patent: 1163
+    myhmanhana: 269
+  distinctLojmanAddressLines: 102
+  distinctAllAddressLines: 825
+
+previewExport:
+  exportedAt: 2026-06-27
+  path: Visa2026.DataImporter/legacy/visa2014/preview-export/AddressOfResidence-preview.calik-energi.xlsx
+  analysisPath: Visa2026.DataImporter/legacy/visa2014/preview-export/_address-lookup-gap/analysis.json
+  legacySqlRows: 3971
+  importRows: 3968
+  skippedRows: 3
+  unmappedLookupDistinct: 3
+  importTypeBreakdown:
+    Lodging: 2378
+    PrivateHouse: 1148
+    Hotel: 442
+  skipBreakdown:
+    cityOnly: 0
+    bothRegionAndCity: 3
+  priorExport:
+    importRows: 2762
+    skippedRows: 1209
+  lodgingHotelSplitReExportAt: 2026-06-27
+  importConfirmedBlockedBy: null
+  inferencePassAt: 2026-06-27
+  notes: |
+    SQL row count < activeRows due to Person GCRecord filter on join.
+    Inference pass 2026-06-27: 2762→3968 import rows, 1209→3 skipped (99.92%).
+    Lodging/hotel split re-export 2026-06-27: same 3968/3 counts; Hotel FK now used for Lojman lines with myhmanhan in AddressLine.
+    Remaining 3 skips: Patent rows with bare street text, no Region/City FK (Türkmenabat Asudalyk köçe ×2, Aşgabat 1955 köç ×1).
+    Ready for human importConfirmed after spot-check of import sheet (Hotel vs Lodging columns).
+
+odataImport:
+  importedAt: 2026-06-29
+  legacySource: calik-energi
+  legacySqlRows: 3971
+  preparedRows: 3968
+  transformSkipped: 3
+  posted: 3737
+  failed: 0
+  skippedNoPersonMap: 182
+  skippedAlreadyImported: 49
+  odataCountAfterImport: 3786
+  idMap: Visa2026.DataImporter/legacy/visa2014/id-maps/calik-energi/AddressOfResidence.json
+  resolverNotes: |
+    OData omits City/RegionName on site lookups — enrich cities from city.json; lodging/other-site dedupe + region-scoped scalar;
+    hotel name fallback when CityId missing on OData row.
+  knownGaps: |
+    182 rows skipped — Person not in id-maps/calik-energi/Person.json.
+    3 transform skips — Patent rows without Region/City FK (preview _Skipped sheet).

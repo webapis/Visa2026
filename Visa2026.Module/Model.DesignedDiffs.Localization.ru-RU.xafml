@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
   <ActionDesign>
     <Actions>
@@ -1726,6 +1726,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="Тип проживания">
       <OwnMembers>
         <Member Name="Hotel" Caption="Гостиница" />
+        <Member Name="Hospital" Caption="Больница" />
         <Member Name="Lodging" Caption="Проживание" />
         <Member Name="PrivateHouse" Caption="Частный дом" />
       </OwnMembers>
@@ -3122,6 +3123,7 @@
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Гостиница" />
+        <LocalizationItem Name="Hospital" Value="Больница" />
         <LocalizationItem Name="Lodging" Value="Проживание" />
         <LocalizationItem Name="PrivateHouse" Value="Частный дом" />
       </LocalizationGroup>

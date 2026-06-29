@@ -1,0 +1,118 @@
+# AddressOfResidence field map — layer 2
+# Layer 1: table-mappings.yaml (id: address-of-residence-main)
+# Layer 3: lookup-translations.yaml (Region, City, CityByName) + Lodging/Hotel/Hospital tenant catalogs
+
+tableMappingId: address-of-residence-main
+
+source:
+  table: AddressOfResidence
+  schema: dbo
+
+target:
+  odataEntity: AddressOfResidence
+
+deduplication:
+  enabled: false
+  notes: Multiple concurrent residence records per Person are valid in legacy data.
+
+propertyGaps:
+  legacyOnly:
+    - column: ShowAddressStartDate
+      disposition: drop
+    - column: StartDateOfResidence
+      disposition: drop
+      notes: StartDate removed from Visa2026 AddressOfResidence BO
+    - column: AppConf
+      disposition: drop
+    - column: IRemainingDays_Data
+      disposition: drop
+    - column: OptimisticLockField
+      disposition: drop
+  targetOnly:
+    - property: Documents
+      disposition: defer
+      notes: Legacy DocumentOfAddress is type discriminator (Lojman/Patent/myhmanhana), not file blob — file wave TBD
+    - property: Images
+      disposition: defer
+  mismatches:
+    - property: FullAddress
+      legacyColumn: Address.AddressLine
+      notes: PrivateHouse street address; Lodging/Hotel/Hospital use lookup FK (derived display only)
+    - property: Type
+      legacyColumn: Address.DocumentOfAddress.TypeOfDocument
+      notes: Lojman→classify by address line; Patent→PrivateHouse unless myhmanhanasy/otel→Hotel or UÝJ/lojman→Lodging (MapPatentResidenceType)
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map only
+
+  - source: Person
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+
+  - source: Address.DocumentOfAddress.TypeOfDocument
+    target: Type
+    transform: value_map
+    map:
+      Lojman: Lodging
+      Patent: classify_by_address_line_else_PrivateHouse
+      myhmanhana: classify_hotel_or_hospital_by_address_line
+    default: Lodging
+
+  - source: Address.Region
+    target: Region
+    transform: lookup_scalar
+    lookupCatalog: Region
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - Region.mgCode
+    missingBehavior: infer_from_address_line
+
+  - source: Address.ŞeherEtrap
+    target: City
+    transform: lookup_composite
+    lookupCatalog: City
+    lookupMatch: PdfForm_Code
+    lookupLegacyColumns:
+      - ŞeherEtrap.mgCode
+      - ŞeherEtrap.ŞeherEtrapL
+    fallbackCatalog: CityByName
+    missingBehavior: skip_row
+
+  - source: Address.AddressLine
+    target: FullAddress
+    transform: strip_region_city_prefix
+    notes: Visa2014AddressLineNormalizer after Region/City resolved
+
+  - source: Address.AddressLine
+    target: Lodging
+    transform: lodging_lookup_by_full_address
+    when: Type=Lodging
+    lookupCatalog: Lodging
+    lookupMatch: FullAddress
+    missingBehavior: block_row
+
+  - source: Address.AddressLine
+    target: Hotel
+    transform: hotel_lookup_by_name
+    when: Type=Hotel
+    lookupCatalog: Hotel
+    lookupMatch: Name
+    missingBehavior: block_row
+
+  - source: Address.AddressLine
+    target: Hospital
+    transform: hospital_lookup_by_name
+    when: Type=Hospital
+    lookupCatalog: Hospital
+    lookupMatch: Name
+    missingBehavior: block_row
+
+  - source: Address.ExpiringDateOfAddressDocument
+    target: ExpirationDate
+    transform: date
+    when: Type=PrivateHouse

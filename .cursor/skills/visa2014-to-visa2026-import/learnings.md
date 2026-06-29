@@ -398,4 +398,96 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Cleanup result**: 3 duplicates removed, 3900 renamed, 0 failed; id-map 3900 entries
 - **Resume import**: `--import-visa2014-files --entity Education --property EducationDocument --legacy-source calik-energi --no-wait`
 - **Counts**: legacy 4317 → **posted 109**, skipped already imported 3900, duplicate blob 15, no education map 231, no blob 28, oversize 34, failed 0; id-map **4009**; active DB rows **4009** (all `diploma-*` named)
-- **Prevent**: Run cleanup before resuming after partial import with old naming; dry-run import does not load id-map (Already imported always 0 in dry-run summary)
+### 2026-06-27 — AddressOfResidence — inference pass + re-export
+
+- **Phase**: excel-preview | mapping
+- **Export path**: `preview-export/AddressOfResidence-preview.calik-energi.xlsx`
+- **Counts**: legacy **3971** → import **3968** (99.92%), skipped **3** (was 1209), unmapped lookups **3** (was 80)
+- **Transform**: expanded `InferRegionMgCode` (ş./s. Aşgabat, Askabat typo, Türkmenabat/Daşoguz/Türkmenbaşy ş prefixes) and `InferCityFromAddressLine` (Mary/Lebap/Balkan/Ahal etrap defaults, hotel lines, S.Türkmenbaşy şäherçesi)
+- **Remaining skips**: ~3 bare Aşgabat street lines (`1955 köç…`) with no welaýat prefix — accept or add manual override
+- **Ready for importConfirmed**: **yes** after spot-check (pending human flag)
+
+### 2026-06-27 — AddressOfResidence — Lodging orphan admin strip
+
+- **Phase**: mapping | excel-preview
+- **Problem**: after Region/City prefix removal, Lodging kept fragments like `nyn`, `etr.,`, `aýatynyň`, `Mary etrabynyň`, `etr.Guwlymayak`.
+- **Root causes**: (1) `StripKnownPrefix` cut on catalog `welaýaty` left glued `nyn` when legacy used ASCII `welayatynyn`; (2) `wel\.?` regex matched only `wel` inside `welayatynyn`; (3) `etr.` glued to next word without space.
+- **Fix** (`Visa2014AddressLineNormalizer.cs`): run `StripWelPrefix`/`StripEtrapPrefix` before catalog prefix match; folded-index cut + Turkmen glued suffix extension; tighten wel/etr regex; expand `StripOrphanAdministrativeFragments` (incl. `çäginde`, glued `etr.`).
+- **Re-export**: import **3968**, skipped **3**; orphan Lodging prefix scan **0** bad rows (was ~72).
+
+### 2026-06-27 — Hotel catalog — ş./şäher/wel. name cleanup
+
+- **Phase**: excel-preview | mapping
+- **Export path**: `preview-export/Hotel-preview.calik-energi.xlsx`
+- **Problem**: legacy hotel `AddressLine` values kept city/region admin fragments in catalog `Name` (`ş."Mary"`, `şäh.`, `Serhetabat ş.`, `wel.Milli syýahatçylyk zolagy "Awaza"`, glued `ş."Ýyldyz"myhmanhanasy`).
+- **Fix** (`Visa2014AddressLineNormalizer.NormalizeHotelCatalogName`): hotel-specific strip after Region/City; require `ş.` dot before unquoted capture (avoid eating `şaher` as `ş`+`aher`); partial `äher`/`äh.` orphans; quote unwrap + glued `"myhmanhan` spacing; restore `{city} myhmanhanasy` when strip leaves generic suffix only.
+- **Wiring**: `TryBuildHotelSiteAddress` + `Visa2014HotelTransform`; AddressOfResidence Hotel column uses same normalizer.
+- **Re-export**: legacy **52** → **26** catalog names (+ **26** dedupe-merged), **0** skipped.
+
+### 2026-06-27 — Hotel + Hospital tenant catalogs (calik-energi)
+
+- **Phase**: lookup | excel-preview
+- **Generate**: `scripts/local/Generate-HotelHospitalCalikEnergiCatalog.ps1` from preview xlsx (`Import-Visa2014PreviewCatalogRows.ps1` — C# normalizer output, not PS strip).
+- **Output**: `hotel.calik-energi.json` **22** rows; `hospital.calik-energi.json` **4** rows.
+- **Deploy**: `scripts/local/Deploy-HotelHospitalLookupCalikEnergiCatalog.ps1` → copy to embedded `hotel.json` / `hospital.json`, manifest **v30**, then `Update-LocalDatabase.ps1 -ForceUpdate`.
+
+### 2026-06-27 — Lodging catalog — wel./ş./w, prefix cleanup (round 2)
+
+- **Phase**: excel-preview | mapping
+- **Problem**: `FullAddress` still led with `wel.`, `wel-ň`, `w,`, `we.`, `ş.`, `S.`, `Balkanabat ş,`, orphan `ň`, `etr-n` after region/city strip (lodging used `StripRegionAndCityPrefixes` only; PS generate script was out of sync with C#).
+- **Fix** (`NormalizeLodgingCatalogAddress`): lodging-specific admin strip (extends hotel patterns) + `etr-n` / ASCII `s,` şäher shorthand; `TryBuildLodgingSiteAddress` + AddressOfResidence Lodging column; `Generate-LodgingCalikEnergiCatalog.ps1` now reads **Lodging-preview** xlsx (no stale seed merge).
+- **Re-export**: legacy **106** → **85** catalog rows (+ **19** dedupe-merged), orphan prefix scan **0** bad rows.
+
+### 2026-06-27 — Lodging/hotel split — Lojman myhmanhan lines → Hotel catalog
+
+- **Phase**: lookup | excel-preview | mapping
+- **Pattern**: legacy `DocumentOfAddress=Lojman` rows whose `AddressLine` contains `myhmanhan` (folded) are **Hotel**, not Lodging — `Visa2014ResidenceClassifier.IsHotelAddressLine`; `MapResidenceType` in `Visa2014AddressOfResidenceTransform.cs`.
+- **Catalog generate**: move hotel-named lines out of Lodging preview into Hotel preview; regenerate `lodging.calik-energi.json` **67** rows + `hotel.calik-energi.json` **33** rows (no myhmanhan left in lodging catalog).
+- **Deploy**: tenant overlay to LocalDB before AddressOfResidence re-export (lodging/hotel FK resolution uses deployed catalogs).
+- **AddressOfResidence re-export**: legacy **3971** → import **3968**, skipped **3** (unchanged vs inference pass); Type **Lodging 2378** / **PrivateHouse 1148** / **Hotel 442**; unmapped **3** (Region/City on skipped Patent-only rows — not hotel/lodging gaps).
+- **Shell**: `$env:VISA2014_SQL_PASSWORD = [Environment]::GetEnvironmentVariable('VISA2014_SQL_PASSWORD','User')` — User-level env is not inherited by Cursor agent shells by default.
+
+- **Phase**: discovery | excel-preview | lookup
+- **Export path**: `preview-export/AddressOfResidence-preview.calik-energi.xlsx`
+- **Counts**: legacy SQL **3971** → import **2762** → skipped **1209** → unmapped lookups **80** distinct
+- **Surprises**:
+  - VISA2015 city table/column is **`ŞäherEtrap`** (U+015E + U+00E4), not `ŞeherEtrap` — `OBJECT_ID` fails on wrong spelling; use `UNICODE(SUBSTRING(name,1,2))` on `sys.tables` to verify.
+  - SQL row count < 4083 active because extract joins `Person` with `GCRecord IS NULL`.
+  - `LookupCatalogResourceLoader.LoadCatalogFile` preferred embedded tenant JSON over disk overlay — F5 lock kept 7-row embedded `lodging.json` in running app; **fixed** to prefer `{AppBase}/LookupCatalogs/tenant/` first.
+- **Lodging catalog**: `lodging.calik-energi.json` **96** rows; manifest **v28**; DB sync pending **Shift+F5 + rebuild** (Module.dll locked by debug session).
+- **Ready for importConfirmed**: **no** — review `_Skipped` + `_UnmappedLookups` sheets first.
+
+## 2026-06-27 — AddressOfResidence OData importer (calik-energi)
+
+- **Phase**: import-code
+- **Pattern**: `Visa2014AddressOfResidenceODataImporter` mirrors Education/EmployeePositionHistory — transform `PrepareImportBatch`, Person id-map, `Visa2014ODataLookupResolver` for Region/City/Lodging/Hotel/Hospital, POST + id-map.
+- **CLI**: `--import-visa2014 --entity AddressOfResidence --legacy-source calik-energi [--dry-run] [--max-rows N]`
+- **Gate**: `importConfirmed` still **false** in discovery — dry-run/pilot before full 3968-row load.
+
+### 2026-06-29 — AddressOfResidence OData importer verified (dry-run + pilot gate)
+
+- **Phase**: import-code | pilot
+- **Code**: `Visa2014AddressOfResidenceODataImporter.cs`; `Visa2014ODataLookupResolver` extended with Region/City/Lodging/Hotel/Hospital; wired in `Visa2014ImportCommand.cs`.
+- **Dry-run** (`--dry-run --no-wait`): legacy **3971** → prepared **3968**, transform skipped **3**, dedupe **0**, would skip **182** (Person not in id-map).
+- **Pilot** (`--max-rows 5 --no-wait`): auth OK; **failed** loading lookups — `GET Hotel` returned HTML (`'<' is an invalid start of a value`) because **Hotel/Hospital were not on OData** (only Lodging was registered).
+- **Fix**: register `Hotel` + `Hospital` in `WebApiServiceExtensions.cs` (same as Lodging). **Restart Blazor** after rebuild before retrying pilot.
+- **Full-import blockers**: `importConfirmed: false`; ~182 rows lack Person id-map; tenant lodging/hotel/hospital catalogs must match deployed LocalDB; server must expose all five lookup entities on OData.
+
+## 2026-06-21 — Lodging dedupe + site catalog deploy + AddressOfResidence importConfirmed (calik-energi)
+
+- **Phase**: excel-preview | deploy | import-pilot
+- **Lodging dedupe**: `BuildLodgingDedupeKey` in `Visa2014AddressLineNormalizer` — strip location fluff, compact alphanumeric key, typo folds (`Enerjy`, `Çalik`/`Çalık`, `UÝJf`); `_dedupeKey` column in preview; `ResolveLodging` falls back to dedupe key match.
+- **Counts**: Lodging catalog **48 → 37** import rows (**22** duplicate_merged).
+- **Deploy**: `scripts/local/Deploy-SiteLookupCalikEnergiCatalogs.ps1` (lodging + hotel + hospital + other-site); `Update-LocalDatabase.ps1 -ForceUpdate -SkipBuild` — sync created lodging **37**, hotel **34**, hospital **4**, other-site **24**.
+- **Sign-off**: `Lodging-preview.calik-energi.xlsx` reviewed; `importConfirmed: true` on AddressOfResidence dossier + order.yaml **2026-06-21**.
+- **Pilot**: restart Blazor after OData entity registration; use `--max-rows` for first POST batch; expect ~182 skips without full Person id-map on full run.
+
+### 2026-06-29 — AddressOfResidence full OData import (calik-energi)
+
+- **Phase**: pilot | batch | reconcile
+- **Dry-run**: legacy **3971** → prepared **3968**, transform skipped **3**, **182** missing Person id-map.
+- **Pilot** (`--max-rows 50`): **49** posted + **1** resume on full run; resolver fixes in `Visa2014ODataLookupResolver` (city `RegionName` enrich from `city.json`; lodging/other-site dedupe without OData row `CityId`; region-scoped scalar; hotel name fallback).
+- **Full import**: **3737** posted, **0** failed, **182** skipped (no Person map), **49** already imported (pilot id-map); **OData count 3786** matches posted + pilot.
+- **Known gaps**: **182** Person-missing rows; **3** transform skips (Patent, no Region/City FK) — unchanged from preview.
+- **Docs**: `order.yaml` + `entity-inventory.yaml` `importStatus: done`; discovery dossier `complete` + `odataImport` block.
+- **Next**: Application wave (`order.yaml` application-domain); optional backfill of 182 rows if Person id-map grows.

@@ -154,3 +154,36 @@ mappings:
       2,993 active WorkHistoryOfEmployee rows; Employee FK → Person. No legacy EndDate column.
       Position (1579 distinct) + Department (74 distinct) tenant catalog seeds pending before import.
       ActualPosition derived from same Position title (Visa2026-only BO).
+
+  - id: address-of-residence-main
+    legacy:
+      schema: dbo
+      table: AddressOfResidence
+      boClass: AddressOfResidence
+    target:
+      odataEntity: AddressOfResidence
+      boPath: Visa2026.Module/BusinessObjects/AddressOfResidence.cs
+    relationship: primary
+    legacyTablesExtra:
+      - schema: dbo
+        table: Address
+        join: Address.Oid = AddressOfResidence.Address
+        role: detail_fk
+      - schema: dbo
+        table: Region
+        join: Region.Oid = Address.Region
+        role: lookup_fk
+      - schema: dbo
+        table: ŞeherEtrap
+        join: ŞeherEtrap.Oid = Address.ŞeherEtrap
+        role: lookup_fk
+      - schema: dbo
+        table: DocumentOfAddress
+        join: DocumentOfAddress.Oid = Address.DocumentOfAddress
+        role: lookup_fk
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/AddressOfResidence.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/AddressOfResidence.yaml
+    status: mapped
+    notes: |
+      4,083 active rows; Address detail holds Region, ŞeherEtrap, AddressLine, expiration.
+      Type from DocumentOfAddress. Person id-map required. Lodging tenant catalog prerequisite.

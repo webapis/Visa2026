@@ -68,6 +68,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Lodging> Lodgings { get; set; }
         public DbSet<LodgingDocument> LodgingDocuments { get; set; }
         public DbSet<LodgingImage> LodgingImages { get; set; }
+        public DbSet<Hotel> Hotels { get; set; }
+        public DbSet<Hospital> Hospitals { get; set; }
+        public DbSet<OtherSite> OtherSites { get; set; }
         public DbSet<EducationImage> EducationImages { get; set; }
         public DbSet<InvitationImage> InvitationImages { get; set; }
         public DbSet<InvitationDocument> InvitationDocuments { get; set; }

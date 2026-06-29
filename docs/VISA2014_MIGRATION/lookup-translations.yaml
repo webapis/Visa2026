@@ -610,3 +610,85 @@ catalogs:
     notes: |
       Approved 2026-06-21 for Visa import. 5452 null FK + 2 all-bits-false → Ýok.
       Tenant border-zone-name.json expanded (6 rows). Application BorderZone re-validation deferred.
+
+  - targetCatalog: Region
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Region
+      column: mgCode
+      valueKind: scalar
+      sampleQuery: |
+        SELECT r.mgCode, r.NameOfRegion, COUNT(*) AS cnt
+        FROM dbo.AddressOfResidence aor
+        INNER JOIN dbo.Address a ON aor.Address = a.Oid AND a.GCRecord IS NULL
+        INNER JOIN dbo.Region r ON a.Region = r.Oid
+        WHERE aor.GCRecord IS NULL
+        GROUP BY r.mgCode, r.NameOfRegion
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      distinctLegacyValuesUsed: 6
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Region.md
+    values:
+      - legacy: BN
+        target: BN
+      - legacy: MR
+        target: MR
+      - legacy: AH
+        target: AH
+      - legacy: AS
+        target: AS
+      - legacy: LB
+        target: LB
+      - legacy: DZ
+        target: DZ
+    identityPassThrough: true
+    unmappedPolicy: block_row
+    notes: |
+      Approved 2026-06-27 for AddressOfResidence. mgCode equals Visa2026 LocalizationKey/PdfForm_Code.
+      Rows without Region FK use AddressLine prefix inference in transform.
+
+  - targetCatalog: City
+    targetMatchProperty: PdfForm_Code
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.ŞeherEtrap
+      column: mgCode
+      valueKind: scalar
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+    identityPassThrough: true
+    unmappedPolicy: block_row
+    notes: Primary City resolve on AddressOfResidence rows with ŞeherEtrap.mgCode.
+
+  - targetCatalog: CityByName
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.ŞeherEtrap
+      column: ŞeherEtrapL
+      valueKind: scalar
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+    values:
+      - legacy: Asgabat şäheri
+        target: Aşgabat şäheri
+      - legacy: Akbugday etraby
+        target: Akbugdaý etraby
+      - legacy: Dasoguz şäheri
+        target: Daşoguz şäheri
+      - legacy: Serdar etraby
+        target: Serdar etraby
+      - legacy: Yolöten etraby
+        target: Ýolöten etraby
+      - legacy: Türkmenbaşy etraby
+        target: Türkmenbaşy etraby
+    unmappedPolicy: block_row
+    notes: Fallback when ŞeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.

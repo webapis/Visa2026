@@ -442,7 +442,9 @@ public enum ResidenceType
 {
     Lodging,
     Hotel,
-    PrivateHouse
+    PrivateHouse,
+    Hospital,
+    Other,
 }
 
 public class AddressOfResidence
@@ -455,6 +457,15 @@ public class AddressOfResidence
 
     [JsonPropertyName("Lodging")]
     public Lodging? Lodging { get; set; }
+
+    [JsonPropertyName("Hotel")]
+    public Hotel? Hotel { get; set; }
+
+    [JsonPropertyName("Hospital")]
+    public Hospital? Hospital { get; set; }
+
+    [JsonPropertyName("OtherSite")]
+    public OtherSite? OtherSite { get; set; }
 
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
@@ -1624,6 +1635,66 @@ public class Lodging
 
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
+public class Hotel
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
+public class Hospital
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
+public class OtherSite
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("FullAddress")]
+    public string FullAddress { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
 
     [JsonPropertyName("Notes")]
     public string Notes { get; set; } = "";

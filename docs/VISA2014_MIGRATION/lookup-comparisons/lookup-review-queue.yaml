@@ -167,13 +167,16 @@ waves:
 
       - catalog: Region
         legacyTable: dbo.Region
-        usedBy: [Application]
-        auditStatus: not_started
-        comparisonDoc: null
-        lookupTranslations: null
-        blocksImportUntilApproved: true
+        usedBy: [Application, AddressOfResidence]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Region.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-27
         legacyStats:
           tableRowsAll: 50
+          distinctOnAddressOfResidenceData: 6
+        notes: mgCode identity map for AddressOfResidence; Application wave still validates separately.
 
       - catalog: EducationLevel
         legacyTable: dbo.EducationLevel
@@ -364,12 +367,13 @@ waves:
         blocksImportUntilApproved: true
 
       - catalog: City
-        legacyTable: null
-        usedBy: [Application]
-        auditStatus: not_started
-        comparisonDoc: null
-        lookupTranslations: null
-        blocksImportUntilApproved: true
-        notes: Visa2026 matchKey NameAndRegion — audit with Region first
+        legacyTable: dbo.ŞeherEtrap
+        usedBy: [Application, AddressOfResidence]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-27
+        notes: mgCode → PdfForm_Code; CityByName fallback for legacy spelling variants.
 
 nextComparisons: []

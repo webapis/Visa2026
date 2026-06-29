@@ -26,6 +26,9 @@ namespace Visa2026.Module.BusinessObjects
         [RuleRequiredField]
         public virtual string FullAddress { get; set; }
 
+        [RuleRequiredField]
+        public virtual City City { get; set; }
+
         [FieldSize(FieldSizeAttribute.Unlimited)]
         public virtual string Notes { get; set; }
 

@@ -34,5 +34,17 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         public virtual string PdfForm_Code { get; set; }
+
+        [InverseProperty(nameof(Lodging.City))]
+        public virtual IList<Lodging> Lodgings { get; set; } = new ObservableCollection<Lodging>();
+
+        [InverseProperty(nameof(Hotel.City))]
+        public virtual IList<Hotel> Hotels { get; set; } = new ObservableCollection<Hotel>();
+
+        [InverseProperty(nameof(Hospital.City))]
+        public virtual IList<Hospital> Hospitals { get; set; } = new ObservableCollection<Hospital>();
+
+        [InverseProperty(nameof(OtherSite.City))]
+        public virtual IList<OtherSite> OtherSites { get; set; } = new ObservableCollection<OtherSite>();
     }
 }

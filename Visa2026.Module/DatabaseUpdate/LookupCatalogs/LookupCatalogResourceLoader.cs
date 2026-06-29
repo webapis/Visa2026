@@ -32,17 +32,16 @@ internal static class LookupCatalogResourceLoader
 
     public static LookupCatalogFile? LoadCatalogFile(string fileName)
     {
-        var embedded = LoadCatalogFromEmbedded(fileName)
-            ?? LoadCatalogFromEmbedded("tenant/" + fileName);
-        if (embedded != null)
-            return embedded;
-
         var diskPath = Path.Combine(AppContext.BaseDirectory, "LookupCatalogs", "tenant", fileName);
-        if (!File.Exists(diskPath))
-            return null;
+        if (File.Exists(diskPath))
+        {
+            var disk = DeserializeCatalogFile(File.ReadAllText(diskPath));
+            if (disk != null)
+                return disk;
+        }
 
-        var json = File.ReadAllText(diskPath);
-        return DeserializeCatalogFile(json);
+        return LoadCatalogFromEmbedded(fileName)
+            ?? LoadCatalogFromEmbedded("tenant/" + fileName);
     }
 
     /// <summary>Disk overlay under <c>{AppBase}/LookupCatalogs/tenant/</c> (not embedded).</summary>

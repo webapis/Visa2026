@@ -155,6 +155,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--import-visa2014-files",
         "--cleanup-visa2014-education-documents",
         "--purge-visa2014-education-documents",
+        "--purge-visa2014-address-of-residence",
         "--property",
         "--id-map",
         "--entity",
@@ -241,11 +242,11 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
-    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory).");
+    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite).");
     Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
     Console.WriteLine("                [--connection conn] [--max-rows N]");
-    Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 OData (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory).");
-    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory [--legacy-source calik-energi|gap-insaat] [--connection conn]");
+    Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 OData (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence).");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence [--legacy-source calik-energi|gap-insaat] [--connection conn]");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--api-base-url url] [--user Admin] [--password pwd]");
     Console.WriteLine("                [--id-map-output path.json] [--person-id-map path.json] [--passport-id-map path.json] [--no-wait]");
     Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs/fields → OData PATCH/POST (requires scalar import + id-map).");
@@ -255,6 +256,9 @@ static void PrintHelp()
     Console.WriteLine("  --cleanup-visa2014-education-documents  DELETE duplicate EducationDocument rows + rename FileData to diploma-*.");
     Console.WriteLine("  --purge-visa2014-education-documents    DELETE ALL EducationDocument rows + clear id-map.");
     Console.WriteLine("      Options: [--legacy-source calik-energi|gap-insaat] [--target-connection conn] [--document-id-map-output path.json]");
+    Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait]");
+    Console.WriteLine("  --purge-visa2014-address-of-residence   DELETE ALL AddressOfResidence rows + clear id-map.");
+    Console.WriteLine("      Options: [--legacy-source calik-energi|gap-insaat] [--target-connection conn] [--id-map-output path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait]");
     Console.WriteLine("  --validate-seed [path]      Report obsolete/hidden columns vs ApplicationType Show* flags.");
     Console.WriteLine("  --prune-seed [path]         Same as --validate-seed and rewrite scenario yaml on disk.");
@@ -404,6 +408,16 @@ if (HasArg(args, "--purge-visa2014-education-documents"))
     Log.Phase("VISA2014 EducationDocument purge");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014EducationDocumentPurge.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--purge-visa2014-address-of-residence"))
+{
+    Log.Phase("VISA2014 AddressOfResidence purge");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014AddressOfResidencePurge.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

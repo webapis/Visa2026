@@ -83,6 +83,14 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.NameTm => HasNonEmpty(row, "NameTm"),
             LookupCatalogMatchKey.NameTmTitle => HasNonEmpty(row, "NameTm"),
             LookupCatalogMatchKey.ShortNameTm => HasNonEmpty(row, "ShortNameTm"),
+            LookupCatalogMatchKey.CityAndFullAddress =>
+                HasNonEmpty(row, "FullAddress")
+                && (HasNonEmpty(row, "City") || HasNonEmpty(row, "NameTm"))
+                && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
+            LookupCatalogMatchKey.CityAndName =>
+                HasNonEmpty(row, "Name")
+                && (HasNonEmpty(row, "City") || HasNonEmpty(row, "NameTm"))
+                && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
             _ => HasNonEmpty(row, "Name"),
         };
 
@@ -113,6 +121,8 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.NameTmTitle => FindByNameTmTitle(objectSpace, entityType, row),
             LookupCatalogMatchKey.ShortNameTm =>
                 FindByProperty(objectSpace, entityType, "ShortNameTm", GetString(row, "ShortNameTm")),
+            LookupCatalogMatchKey.CityAndFullAddress => FindByCityAndProperty(objectSpace, entityType, row, "FullAddress"),
+            LookupCatalogMatchKey.CityAndName => FindByCityAndProperty(objectSpace, entityType, row, "Name"),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
@@ -341,6 +351,12 @@ internal static class LookupCatalogEntitySync
             var fullAddress = GetPropertyString(row, "FullAddress");
             return fullAddress == null ? string.Empty : "A:" + LookupCatalogMatchHelper.NormalizeKey(fullAddress);
         }
+
+        if (definition.MatchKey == LookupCatalogMatchKey.CityAndFullAddress)
+            return BuildCityAndScalarSyncKey(row, "FullAddress");
+
+        if (definition.MatchKey == LookupCatalogMatchKey.CityAndName)
+            return BuildCityAndScalarSyncKey(row, "Name");
 
         if (definition.MatchKey == LookupCatalogMatchKey.NameAndRegion && row is City city)
         {
@@ -658,6 +674,12 @@ internal static class LookupCatalogEntitySync
                 continue;
             }
 
+            if (key == "City")
+            {
+                ApplyCityNavigation(objectSpace, target, row);
+                continue;
+            }
+
             if (SkipPropertyNames.Contains(key))
                 continue;
 
@@ -708,6 +730,83 @@ internal static class LookupCatalogEntitySync
             return;
 
         lookup.LocalizationKey = LookupCatalogMatchHelper.ToLocalizationKey(key.Trim());
+    }
+
+    private static City? FindCityReference(IObjectSpace objectSpace, Dictionary<string, JsonElement> row)
+    {
+        var cityTitle = GetString(row, "City") ?? GetString(row, "NameTm");
+        var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
+        if (string.IsNullOrWhiteSpace(cityTitle) || string.IsNullOrWhiteSpace(regionName))
+            return null;
+
+        return objectSpace.GetObjects(typeof(City))
+            .Cast<City>()
+            .FirstOrDefault(c =>
+                TitleMatches(c, cityTitle)
+                && c.Region != null
+                && TitleMatches(c.Region, regionName));
+    }
+
+    private static object? FindByCityAndProperty(
+        IObjectSpace objectSpace,
+        Type entityType,
+        Dictionary<string, JsonElement> row,
+        string scalarProperty)
+    {
+        var city = FindCityReference(objectSpace, row);
+        var scalar = GetString(row, scalarProperty);
+        if (city == null || string.IsNullOrWhiteSpace(scalar))
+            return null;
+
+        return objectSpace.GetObjects(entityType)
+            .Cast<object>()
+            .FirstOrDefault(item =>
+            {
+                var itemCity = item.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public)?.GetValue(item) as City;
+                if (itemCity == null || itemCity.ID != city.ID)
+                    return false;
+
+                var itemScalar = GetPropertyString(item, scalarProperty);
+                return LookupCatalogMatchHelper.KeysEqual(itemScalar, scalar)
+                    || string.Equals(itemScalar?.Trim(), scalar.Trim(), StringComparison.Ordinal);
+            });
+    }
+
+    private static string BuildCityAndScalarSyncKey(Dictionary<string, JsonElement> row, string scalarProperty)
+    {
+        var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
+        var cityName = GetString(row, "City") ?? GetString(row, "NameTm");
+        var scalar = GetString(row, scalarProperty);
+        return BuildCityAndScalarSyncKeyFromParts(regionName, cityName, scalar);
+    }
+
+    private static string BuildCityAndScalarSyncKey(object row, string scalarProperty) =>
+        BuildCityAndScalarSyncKeyFromParts(
+            GetPropertyString(row, "Region") ?? GetPropertyString(row, "RegionName"),
+            GetPropertyString(row, "City") ?? GetPropertyString(row, "NameTm"),
+            GetPropertyString(row, scalarProperty));
+
+    private static string BuildCityAndScalarSyncKeyFromParts(string? regionName, string? cityName, string? scalar)
+    {
+        if (string.IsNullOrWhiteSpace(regionName) || string.IsNullOrWhiteSpace(cityName) || string.IsNullOrWhiteSpace(scalar))
+            return string.Empty;
+
+        return "R:" + LookupCatalogMatchHelper.NormalizeKey(regionName)
+            + "|C:" + LookupCatalogMatchHelper.NormalizeKey(cityName)
+            + "|S:" + LookupCatalogMatchHelper.NormalizeKey(scalar);
+    }
+
+    private static void ApplyCityNavigation(IObjectSpace objectSpace, object target, Dictionary<string, JsonElement> row)
+    {
+        var city = FindCityReference(objectSpace, row);
+        if (city == null)
+            return;
+
+        var prop = target.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public);
+        if (prop == null || !prop.CanWrite)
+            return;
+
+        prop.SetValue(target, city);
     }
 
     private static void ApplyNavigation(IObjectSpace objectSpace, object target, string key, JsonElement value)

@@ -1,4 +1,4 @@
-﻿namespace Visa2026.DataImporter.Legacy.Visa2014;
+namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 internal static class Visa2014ImportCommand
 {
@@ -15,10 +15,11 @@ internal static class Visa2014ImportCommand
             || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase);
+            || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase);
         if (!supported)
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, AddressOfResidence.");
             return 1;
         }
 
@@ -107,6 +108,9 @@ internal static class Visa2014ImportCommand
 
             if (string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase))
                 return await RunEducationImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+
+            if (string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase))
+                return await RunAddressOfResidenceImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
 
             return await RunEmployeePositionHistoryImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
         }
@@ -265,6 +269,56 @@ internal static class Visa2014ImportCommand
             source.LookupTranslationPaths,
             personIdMapPath,
             dryRun ? null : educationIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+        else if (result.SkippedNoPersonMap > 0)
+        {
+            Console.WriteLine($"INF Would skip (no Person map): {result.SkippedNoPersonMap}");
+        }
+
+        if (result.FailedCount > 0)
+        {
+            foreach (var error in result.Errors.Take(10))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 10)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunAddressOfResidenceImportAsync(
+        Visa2026.DataImporter.ApiClient api,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string addressIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+
+        Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+
+        var result = await Visa2014AddressOfResidenceODataImporter.RunAsync(
+            api,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            personIdMapPath,
+            dryRun ? null : addressIdMapPath,
             maxRows,
             dryRun,
             verbose);

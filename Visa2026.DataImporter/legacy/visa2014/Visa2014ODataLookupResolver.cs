@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -20,8 +21,14 @@ internal sealed class Visa2014ODataLookupResolver
     private List<Position> _positions = [];
     private List<Department> _departments = [];
     private List<ActualPosition> _actualPositions = [];
+    private List<Region> _regions = [];
+    private List<City> _cities = [];
+    private List<Lodging> _lodgings = [];
+    private List<Hotel> _hotels = [];
+    private List<Hospital> _hospitals = [];
+    private List<OtherSite> _otherSites = [];
 
-    public async Task LoadAsync(ApiClient api)
+    public async Task LoadAsync(ApiClient api, string? tenantCatalogDirectory = null)
     {
         _genders = await api.GetAllAsync<Gender>("Gender");
         _countries = await api.GetAllAsync<Country>("Country");
@@ -39,6 +46,188 @@ internal sealed class Visa2014ODataLookupResolver
         _positions = await api.GetAllAsync<Position>("Position");
         _departments = await api.GetAllAsync<Department>("Department");
         _actualPositions = await api.GetAllAsync<ActualPosition>("ActualPosition");
+        _regions = await api.GetAllAsync<Region>("Region");
+        _cities = await api.GetAllAsync<City>("City");
+        _lodgings = await api.GetAllAsync<Lodging>("Lodging");
+        _hotels = await api.GetAllAsync<Hotel>("Hotel");
+        _hospitals = await api.GetAllAsync<Hospital>("Hospital");
+        _otherSites = await api.GetAllAsync<OtherSite>("OtherSite");
+
+        var lookupCatalogDir = string.IsNullOrWhiteSpace(tenantCatalogDirectory)
+            ? null
+            : Path.GetDirectoryName(tenantCatalogDirectory);
+        if (!string.IsNullOrWhiteSpace(lookupCatalogDir))
+            EnrichCityRegionNames(Path.Combine(lookupCatalogDir, "city.json"));
+
+        if (!string.IsNullOrWhiteSpace(tenantCatalogDirectory))
+            EnrichSiteCityIdsFromTenantCatalogs(tenantCatalogDirectory);
+    }
+
+    private sealed record CityCatalogRow(string NameTm, string Region);
+
+    private void EnrichCityRegionNames(string catalogPath)
+    {
+        if (!File.Exists(catalogPath))
+            return;
+
+        var rows = LoadCityCatalogRows(catalogPath);
+        foreach (var city in _cities)
+        {
+            if (!string.IsNullOrWhiteSpace(city.RegionName))
+                continue;
+
+            var catalogRow = rows.FirstOrDefault(r =>
+                Visa2014CatalogMatchHelper.KeysEqual(r.NameTm, city.NameTm));
+            if (catalogRow != null)
+                city.RegionName = catalogRow.Region;
+        }
+    }
+
+    private static List<CityCatalogRow> LoadCityCatalogRows(string catalogPath)
+    {
+        using var stream = File.OpenRead(catalogPath);
+        using var doc = JsonDocument.Parse(stream);
+        if (!doc.RootElement.TryGetProperty("rows", out var rowsElement) || rowsElement.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var rows = new List<CityCatalogRow>();
+        foreach (var row in rowsElement.EnumerateArray())
+        {
+            var nameTm = row.TryGetProperty("NameTm", out var nameEl) ? nameEl.GetString() : null;
+            var region = row.TryGetProperty("Region", out var regionEl) ? regionEl.GetString() : null;
+            if (string.IsNullOrWhiteSpace(nameTm) || string.IsNullOrWhiteSpace(region))
+                continue;
+
+            rows.Add(new CityCatalogRow(nameTm, region));
+        }
+
+        return rows;
+    }
+
+    private sealed record TenantCatalogRow(string Region, string City, string Scalar);
+
+    private void EnrichSiteCityIdsFromTenantCatalogs(string tenantCatalogDirectory)
+    {
+        EnrichSiteCityIds(
+            _lodgings,
+            Path.Combine(tenantCatalogDirectory, "lodging.json"),
+            l => l.FullAddress,
+            (l, cityId) => l.CityId = cityId,
+            useLodgingDedupe: true);
+        EnrichSiteCityIds(
+            _hotels,
+            Path.Combine(tenantCatalogDirectory, "hotel.json"),
+            h => h.Name,
+            (h, cityId) => h.CityId = cityId,
+            useLodgingDedupe: false);
+        EnrichSiteCityIds(
+            _hospitals,
+            Path.Combine(tenantCatalogDirectory, "hospital.json"),
+            h => h.Name,
+            (h, cityId) => h.CityId = cityId,
+            useLodgingDedupe: false);
+        EnrichSiteCityIds(
+            _otherSites,
+            Path.Combine(tenantCatalogDirectory, "other-site.json"),
+            s => s.FullAddress,
+            (s, cityId) => s.CityId = cityId,
+            useLodgingDedupe: true);
+    }
+
+    private void EnrichSiteCityIds<T>(
+        List<T> sites,
+        string catalogPath,
+        Func<T, string> scalarSelector,
+        Action<T, Guid> assignCityId,
+        bool useLodgingDedupe)
+    {
+        if (!File.Exists(catalogPath))
+            return;
+
+        var rows = LoadTenantCatalogRows(catalogPath);
+        foreach (var site in sites)
+        {
+            if (GetRowCityId(site).HasValue)
+                continue;
+
+            var scalar = scalarSelector(site);
+            var catalogRow = FindTenantCatalogRow(rows, scalar, useLodgingDedupe);
+            if (catalogRow == null)
+                continue;
+
+            var cityId = ResolveCity(catalogRow.City, catalogRow.Region);
+            if (cityId.HasValue)
+                assignCityId(site, cityId.Value);
+        }
+    }
+
+    private static List<TenantCatalogRow> LoadTenantCatalogRows(string catalogPath)
+    {
+        using var stream = File.OpenRead(catalogPath);
+        using var doc = JsonDocument.Parse(stream);
+        if (!doc.RootElement.TryGetProperty("rows", out var rowsElement) || rowsElement.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var rows = new List<TenantCatalogRow>();
+        foreach (var row in rowsElement.EnumerateArray())
+        {
+            var region = row.TryGetProperty("Region", out var regionEl) ? regionEl.GetString() : null;
+            var city = row.TryGetProperty("City", out var cityEl) ? cityEl.GetString() : null;
+            var scalar = row.TryGetProperty("FullAddress", out var addressEl)
+                ? addressEl.GetString()
+                : row.TryGetProperty("Name", out var nameEl) ? nameEl.GetString() : null;
+            if (string.IsNullOrWhiteSpace(city) || string.IsNullOrWhiteSpace(scalar))
+                continue;
+
+            rows.Add(new TenantCatalogRow(region ?? string.Empty, city, scalar));
+        }
+
+        return rows;
+    }
+
+    private static TenantCatalogRow? FindTenantCatalogRow(
+        IReadOnlyList<TenantCatalogRow> rows,
+        string? scalar,
+        bool useLodgingDedupe)
+    {
+        if (string.IsNullOrWhiteSpace(scalar))
+            return null;
+
+        foreach (var row in rows)
+        {
+            if (Visa2014CatalogMatchHelper.KeysEqual(row.Scalar, scalar))
+                return row;
+        }
+
+        if (!useLodgingDedupe)
+            return null;
+
+        foreach (var row in rows)
+        {
+            var wantKey = Visa2014AddressLineNormalizer.BuildLodgingDedupeKey(row.City, scalar);
+            var rowKey = Visa2014AddressLineNormalizer.BuildLodgingDedupeKey(row.City, row.Scalar);
+            if (!string.IsNullOrEmpty(wantKey) && wantKey == rowKey)
+                return row;
+        }
+
+        var scalarPart = Visa2014AddressLineNormalizer.ExtractLodgingDedupeScalar(scalar);
+        if (string.IsNullOrEmpty(scalarPart))
+            return null;
+
+        TenantCatalogRow? sole = null;
+        foreach (var row in rows)
+        {
+            var catalogScalarPart = Visa2014AddressLineNormalizer.ExtractLodgingDedupeScalar(row.Scalar);
+            if (catalogScalarPart != scalarPart)
+                continue;
+
+            if (sole != null)
+                return null;
+
+            sole = row;
+        }
+
+        return sole;
     }
 
     public void RegisterActualPosition(ActualPosition row)
@@ -238,6 +427,228 @@ internal sealed class Visa2014ODataLookupResolver
     public Guid? ResolveActualPosition(string? name) =>
         ResolveByName(_actualPositions, name, a => a.Name);
 
+    public Guid? ResolveRegion(string? nameTm) =>
+        ResolveByNameTm(_regions, nameTm, r => r.NameTm);
+
+    public Guid? ResolveCity(string? nameTm, string? regionNameTm = null)
+    {
+        if (string.IsNullOrWhiteSpace(regionNameTm))
+            return ResolveByNameTm(_cities, nameTm, c => c.NameTm);
+
+        foreach (var city in _cities)
+        {
+            if (!Visa2014CatalogMatchHelper.KeysEqual(city.NameTm, nameTm)
+                && !string.Equals(city.NameTm?.Trim(), nameTm?.Trim(), StringComparison.Ordinal))
+                continue;
+
+            if (city.Region != null && Visa2014CatalogMatchHelper.KeysEqual(city.Region.NameTm, regionNameTm))
+                return city.Id;
+            if (Visa2014CatalogMatchHelper.KeysEqual(city.RegionName, regionNameTm))
+                return city.Id;
+        }
+
+        return ResolveByNameTm(_cities, nameTm, c => c.NameTm);
+    }
+
+    public Guid? ResolveLodging(string? cityNameTm, string? regionNameTm, string? fullAddress)
+    {
+        var exact = ResolveSiteByCityAndScalar(_lodgings, cityNameTm, regionNameTm, fullAddress, l => l.FullAddress);
+        if (exact.HasValue)
+            return exact;
+
+        var wantKey = Visa2014AddressLineNormalizer.BuildLodgingDedupeKey(cityNameTm, fullAddress);
+        if (string.IsNullOrEmpty(wantKey))
+            return null;
+
+        if (!ResolveCity(cityNameTm, regionNameTm).HasValue)
+            return null;
+
+        var byDedupe = ResolveSiteByLodgingDedupeKey(_lodgings, cityNameTm, regionNameTm, wantKey, l => l.FullAddress);
+        if (byDedupe.HasValue)
+            return byDedupe;
+
+        return ResolveSiteByRegionScopedDedupeScalar(_lodgings, regionNameTm, fullAddress, l => l.FullAddress);
+    }
+
+    public Guid? ResolveHotel(string? cityNameTm, string? regionNameTm, string? name)
+    {
+        var exact = ResolveSiteByCityAndScalar(_hotels, cityNameTm, regionNameTm, name, h => h.Name);
+        if (exact.HasValue)
+            return exact;
+
+        if (string.IsNullOrWhiteSpace(name) || !ResolveCity(cityNameTm, regionNameTm).HasValue)
+            return null;
+
+        Guid? fallback = null;
+        foreach (var row in _hotels)
+        {
+            if (!Visa2014CatalogMatchHelper.KeysEqual(row.Name, name)
+                && !string.Equals(row.Name?.Trim(), name.Trim(), StringComparison.Ordinal))
+                continue;
+
+            var rowCityId = GetRowCityId(row);
+            if (rowCityId.HasValue && CityBelongsToRegion(rowCityId.Value, regionNameTm!))
+                return row.Id;
+
+            fallback ??= row.Id;
+        }
+
+        return fallback;
+    }
+
+    public Guid? ResolveHospital(string? cityNameTm, string? regionNameTm, string? name) =>
+        ResolveSiteByCityAndScalar(_hospitals, cityNameTm, regionNameTm, name, h => h.Name);
+
+    public Guid? ResolveOtherSite(string? cityNameTm, string? regionNameTm, string? fullAddress)
+    {
+        var exact = ResolveSiteByCityAndScalar(_otherSites, cityNameTm, regionNameTm, fullAddress, s => s.FullAddress);
+        if (exact.HasValue)
+            return exact;
+
+        var wantKey = Visa2014AddressLineNormalizer.BuildLodgingDedupeKey(cityNameTm, fullAddress);
+        if (string.IsNullOrEmpty(wantKey))
+            return null;
+
+        if (!ResolveCity(cityNameTm, regionNameTm).HasValue)
+            return null;
+
+        var byDedupe = ResolveSiteByLodgingDedupeKey(_otherSites, cityNameTm, regionNameTm, wantKey, s => s.FullAddress);
+        if (byDedupe.HasValue)
+            return byDedupe;
+
+        return ResolveSiteByRegionScopedDedupeScalar(_otherSites, regionNameTm, fullAddress, s => s.FullAddress);
+    }
+
+    private Guid? ResolveSiteByRegionScopedDedupeScalar<T>(
+        IEnumerable<T> rows,
+        string? regionNameTm,
+        string? scalar,
+        Func<T, string?> scalarSelector) where T : class
+    {
+        if (string.IsNullOrWhiteSpace(regionNameTm) || string.IsNullOrWhiteSpace(scalar))
+            return null;
+        if (!ResolveRegion(regionNameTm).HasValue)
+            return null;
+
+        var wantScalar = Visa2014AddressLineNormalizer.ExtractLodgingDedupeScalar(scalar);
+        if (string.IsNullOrEmpty(wantScalar))
+            return null;
+
+        Guid? fallback = null;
+        foreach (var row in rows)
+        {
+            var rowScalar = Visa2014AddressLineNormalizer.ExtractLodgingDedupeScalar(scalarSelector(row));
+            if (rowScalar != wantScalar)
+                continue;
+
+            var rowCityId = GetRowCityId(row);
+            if (rowCityId.HasValue && CityBelongsToRegion(rowCityId.Value, regionNameTm))
+                return GetId(row);
+
+            fallback ??= GetId(row);
+        }
+
+        return fallback;
+    }
+
+    private bool CityBelongsToRegion(Guid cityId, string regionNameTm)
+    {
+        var city = _cities.FirstOrDefault(c => c.Id == cityId);
+        if (city == null)
+            return false;
+
+        if (Visa2014CatalogMatchHelper.KeysEqual(city.RegionName, regionNameTm))
+            return true;
+
+        return city.Region != null
+            && Visa2014CatalogMatchHelper.KeysEqual(city.Region.NameTm, regionNameTm);
+    }
+
+    private Guid? ResolveSiteByLodgingDedupeKey<T>(
+        IEnumerable<T> rows,
+        string? cityNameTm,
+        string? regionNameTm,
+        string wantKey,
+        Func<T, string?> scalarSelector) where T : class
+    {
+        var cityId = ResolveCity(cityNameTm, regionNameTm);
+        T? preferred = default;
+        T? fallback = default;
+
+        foreach (var row in rows)
+        {
+            var rowKey = Visa2014AddressLineNormalizer.BuildLodgingDedupeKey(cityNameTm, scalarSelector(row));
+            if (rowKey != wantKey)
+                continue;
+
+            if (cityId.HasValue)
+            {
+                var rowCityId = GetRowCityId(row);
+                if (rowCityId.HasValue && rowCityId.Value == cityId.Value)
+                {
+                    preferred = row;
+                    break;
+                }
+            }
+
+            fallback ??= row;
+        }
+
+        var match = preferred ?? fallback;
+        return match != null ? GetId(match) : null;
+    }
+
+    private Guid? ResolveSiteByCityAndScalar<T>(
+        IEnumerable<T> rows,
+        string? cityNameTm,
+        string? regionNameTm,
+        string? scalar,
+        Func<T, string> scalarSelector) where T : class
+    {
+        var cityId = ResolveCity(cityNameTm, regionNameTm);
+        if (!cityId.HasValue || string.IsNullOrWhiteSpace(scalar))
+            return null;
+
+        foreach (var row in rows)
+        {
+            var rowCityId = GetRowCityId(row);
+            if (!rowCityId.HasValue || rowCityId.Value != cityId.Value)
+                continue;
+
+            var value = scalarSelector(row);
+            if (Visa2014CatalogMatchHelper.KeysEqual(value, scalar)
+                || string.Equals(value?.Trim(), scalar.Trim(), StringComparison.Ordinal))
+                return GetId(row);
+        }
+
+        return null;
+    }
+
+    private Guid? GetRowCityId<T>(T row)
+    {
+        var city = GetCity(row);
+        if (city != null && city.Id != Guid.Empty)
+            return city.Id;
+
+        return row switch
+        {
+            Lodging l when l.CityId.HasValue => l.CityId,
+            Hotel h when h.CityId.HasValue => h.CityId,
+            Hospital hs when hs.CityId.HasValue => hs.CityId,
+            OtherSite o when o.CityId.HasValue => o.CityId,
+            _ => null,
+        };
+    }
+
+    private static City? GetCity<T>(T row) => row switch
+    {
+        Lodging l => l.City,
+        Hotel h => h.City,
+        Hospital hs => hs.City,
+        OtherSite o => o.City,
+        _ => null,
+    };
+
     private Guid? ResolveDefaultEducationLevel()
     {
         var preferred = _educationLevels.FirstOrDefault(e => e.IsDefault);
@@ -345,6 +756,12 @@ internal sealed class Visa2014ODataLookupResolver
         Position p => p.Id,
         Department d => d.Id,
         ActualPosition ap => ap.Id,
+        Region r => r.Id,
+        City c => c.Id,
+        Lodging l => l.Id,
+        Hotel h => h.Id,
+        Hospital hs => hs.Id,
+        OtherSite os => os.Id,
         _ => throw new InvalidOperationException($"Unsupported lookup type {typeof(T).Name}"),
     };
 }

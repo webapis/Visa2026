@@ -41,7 +41,9 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
         Guid? regionId = null,
         Guid? cityId = null,
         DateTime? expirationDate = null,
-        Guid? lodgingId = null)
+        Guid? lodgingId = null,
+        Guid? hotelId = null,
+        Guid? hospitalId = null)
     {
         Console.WriteLine($"=== POST {Entity} for Person ID: {personId} ===");
 
@@ -49,11 +51,13 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
         {
             Person = new { ID = personId },
             Type = type,
-            FullAddress = fullAddress,
+            FullAddress = type == ResidenceType.PrivateHouse ? fullAddress : null,
             Region = regionId.HasValue ? new { ID = regionId.Value } : null,
             City = cityId.HasValue ? new { ID = cityId.Value } : null,
             ExpirationDate = expirationDate,
-            Lodging = (type == ResidenceType.Lodging && lodgingId.HasValue) ? new { ID = lodgingId.Value } : null
+            Lodging = (type == ResidenceType.Lodging && lodgingId.HasValue) ? new { ID = lodgingId.Value } : null,
+            Hotel = (type == ResidenceType.Hotel && hotelId.HasValue) ? new { ID = hotelId.Value } : null,
+            Hospital = (type == ResidenceType.Hospital && hospitalId.HasValue) ? new { ID = hospitalId.Value } : null
         };
 
         try
@@ -89,7 +93,9 @@ public class AddressOfResidenceImporter : BaseImporter<AddressOfResidence>
                     Region = record.Region != null ? new { ID = record.Region.Id } : null,
                     City = record.City != null ? new { ID = record.City.Id } : null,
                     ExpirationDate = record.ExpirationDate,
-                    Lodging = record.Lodging != null ? new { ID = record.Lodging.Id } : null
+                    Lodging = record.Lodging != null ? new { ID = record.Lodging.Id } : null,
+                    Hotel = record.Hotel != null ? new { ID = record.Hotel.Id } : null,
+                    Hospital = record.Hospital != null ? new { ID = record.Hospital.Id } : null
                 };
 
                 await Api.CreateAsync<AddressOfResidence>(Entity, payload);

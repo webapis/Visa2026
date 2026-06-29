@@ -82,6 +82,9 @@ namespace Visa2026.Module.DatabaseUpdate
             RemoveNavItemIfPresent(lookupGroup, "Person", "AddressOfResidence");
             RemoveNavItemIfPresent(lookupGroup, "Education", "Education");
             RemoveNavItemIfPresent(lookupGroup, "Housing", "Lodging");
+            RemoveNavItemIfPresent(lookupGroup, "Housing", "Hotel");
+            RemoveNavItemIfPresent(lookupGroup, "Housing", "Hospital");
+            RemoveNavItemIfPresent(lookupGroup, "Housing", "OtherSite");
             RemoveNavItemIfPresent(lookupGroup, "Medical", "MedicalRecord");
             RemoveNavItemIfPresent(lookupGroup, "Passport", "Passport");
             RemoveNavItemIfPresent(lookupGroup, "Visa", "Visa");

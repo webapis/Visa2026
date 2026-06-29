@@ -112,6 +112,23 @@ entities:
       OData import 2026-06-26: 2838 posted, 0 failed, 151 no Person id-map, 194 ActualPositions created.
       Id-map: id-maps/calik-energi/EmployeePositionHistory.json. No legacy file blobs.
 
+  - targetODataEntity: AddressOfResidence
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/AddressOfResidence.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-21
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-27: 4083 active rows; Address FK holds Region/City/AddressLine.
+      Region+City lookup approved; site catalogs manifest v31 deployed 2026-06-21 (lodging 37, hotel 34, hospital 4, other-site 24).
+      Lodging-preview.calik-energi.xlsx reviewed 2026-06-21; lodging dedupe fingerprint + OData resolver aligned.
+      OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 resume-skipped (pilot); OData total 3786.
+
   # --- application-domain ---
   - targetODataEntity: Application
     dependsOn:

@@ -13,7 +13,7 @@ internal static class Visa2014PreviewExportCommand
 
         if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, AddressOfResidence, PrivateHouse, Lodging, Hotel, Hospital, OtherSite.");
             return 1;
         }
 
@@ -56,7 +56,55 @@ internal static class Visa2014PreviewExportCommand
 
         try
         {
-            var result = string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
+            var result = string.Equals(entity, "Hospital", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014HospitalPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "Hotel", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014HotelPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "Lodging", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014LodgingPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "OtherSite", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014OtherSitePreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "PrivateHouse", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014PrivateHousePreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014AddressOfResidencePreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
                 ? Visa2014EmployeePositionHistoryPreviewExporter.Export(
                     source.ConnectionString,
                     source.LookupTranslationPaths,
@@ -118,7 +166,13 @@ internal static class Visa2014PreviewExportCommand
         || string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase);
+        || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "PrivateHouse", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Lodging", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Hotel", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Hospital", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "OtherSite", StringComparison.OrdinalIgnoreCase);
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
     {

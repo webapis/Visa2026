@@ -124,10 +124,12 @@ public class ApiClient
     // ------------------------------------------------------------------
 
     /// <summary>GET all records from an OData entity set.</summary>
-    public async Task<List<T>> GetAllAsync<T>(string entityName)
+    public async Task<List<T>> GetAllAsync<T>(string entityName, string? odataQuery = null)
     {
         var all = new List<T>();
         var url = $"{_baseUrl}/api/odata/{entityName}";
+        if (!string.IsNullOrWhiteSpace(odataQuery))
+            url += odataQuery.StartsWith('?') ? odataQuery : "?" + odataQuery;
 
         while (!string.IsNullOrEmpty(url))
         {

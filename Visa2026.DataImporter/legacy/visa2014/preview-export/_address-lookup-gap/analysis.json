@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "exportedAt": "2026-06-27T08:25:06.2838604Z",
+    "entity": "AddressOfResidence",
+    "database": "VISA2015",
+    "legacyRowCount": "3971",
+    "importRowCount": "3968",
+    "skippedRowCount": "3",
+    "dedupeMergedCount": "0",
+    "fieldMap": "legacy/visa2014/field-maps/AddressOfResidence.yaml",
+    "legacySource": "calik-energi"
+  },
+  "skipReasonCategories": {
+    "RegionOnly": 0,
+    "CityOnly": 0,
+    "Both": 3
+  },
+  "skipReasonTopValues": {
+    "RegionOnly": [],
+    "CityOnly": [],
+    "Both": [
+      {},
+      {}
+    ]
+  },
+  "unmappedByCatalog": {
+    "City": 1,
+    "Region": 2
+  },
+  "unmappedTopLegacyValues": {
+    "Region": [
+      {},
+      {}
+    ],
+    "City": [
+      {}
+    ]
+  },
+  "importTypeCounts": {
+    "Lodging": 2378,
+    "PrivateHouse": 1148,
+    "Hotel": 442
+  },
+  "skippedTypeBreakdown": {
+    "Patent": 3
+  },
+  "skippedFkPatterns": {
+    "RegionFK=N, CityFK=N, RegionMg=empty, CityMg=empty": 3
+  },
+  "skippedAddressPrefixPatterns": {
+    "other/unrecognized prefix": 3
+  },
+  "skippedRegionOnlyTop": [],
+  "skippedCityOnlyTop": [],
+  "skippedBothTop": [
+    {
+      "value": "type=Patent | addr=T\u00FCrkmenabat \u015F\u00E4heri, Asudalyk k\u00F6\u00E7esi, ja\u00FD-2, \u00F6\u00FD-4",
+      "count": 2
+    },
+    {
+      "value": "type=Patent | addr=1955 k\u00F6\u00E7, jay 78 \u00F6y 21",
+      "count": 1
+    }
+  ],
+  "allRowFkCoverage": {
+    "Both FK set": 2728,
+    "City FK only": 1,
+    "Neither FK": 1242
+  }
+}

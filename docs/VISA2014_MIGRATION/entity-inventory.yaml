@@ -67,6 +67,17 @@ entities:
     blockReason: null
     notes: "OData import 2026-06-26: 2838 posted, 151 no Person map, 194 ActualPositions created."
 
+  - targetODataEntity: AddressOfResidence
+    discoveryDossier: discovery/AddressOfResidence.yaml
+    tableMappingId: address-of-residence-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: AddressOfResidence
+    legacyBo: AddressOfResidence
+    blockReason: null
+    notes: "OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 pilot resume-skipped; OData total 3786."
+
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml
     discoveryStatus: not_started

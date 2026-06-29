@@ -153,7 +153,7 @@ public static class LookupCatalogExporter
     private static bool IsTenantCatalog(string entityName) =>
         entityName is "Position" or "CompanyProfile" or "ProjectContract"
             or "Specialty" or "EducationInstitution" or "Department"
-            or "BorderZoneName" or "WorkPermittedLocationName" or "Lodging";
+            or "BorderZoneName" or "WorkPermittedLocationName" or "Lodging" or "Hotel" or "Hospital";
 
     /// <summary>Excluded from JSON catalog export and deploy sync (maintained in app if needed).</summary>
     private static bool ShouldSkipCatalogExport(string entityName) =>

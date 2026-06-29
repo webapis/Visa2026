@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
@@ -1726,6 +1726,7 @@
     <Class Name="Visa2026.Module.BusinessObjects.ResidenceType" Caption="Ýaşaýyş görnüşi">
       <OwnMembers>
         <Member Name="Hotel" Caption="Myhmanhana" />
+        <Member Name="Hospital" Caption="Hassahanasy" />
         <Member Name="Lodging" Caption="Umumy ýaşaýyş jaýy" />
         <Member Name="PrivateHouse" Caption="Şahsy jaý" />
       </OwnMembers>
@@ -3122,6 +3123,7 @@
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ResidenceType">
         <LocalizationItem Name="Hotel" Value="Myhmanhana" />
+        <LocalizationItem Name="Hospital" Value="Hassahanasy" />
         <LocalizationItem Name="Lodging" Value="Umumy ýaşaýyş jaýy" />
         <LocalizationItem Name="PrivateHouse" Value="Şahsy jaý" />
       </LocalizationGroup>

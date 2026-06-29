@@ -1,5 +1,5 @@
 {
-  "version": 25,
+  "version": 31,
   "catalogs": [
     {
       "id": "position",
@@ -125,7 +125,31 @@
       "id": "lodging",
       "entity": "Lodging",
       "file": "lodging.json",
-      "matchKey": "FullAddress",
+      "matchKey": "CityAndFullAddress",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "hotel",
+      "entity": "Hotel",
+      "file": "hotel.json",
+      "matchKey": "CityAndName",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "hospital",
+      "entity": "Hospital",
+      "file": "hospital.json",
+      "matchKey": "CityAndName",
+      "syncMode": "OverwriteScalars",
+      "optional": true
+    },
+    {
+      "id": "other-site",
+      "entity": "OtherSite",
+      "file": "other-site.json",
+      "matchKey": "CityAndFullAddress",
       "syncMode": "OverwriteScalars",
       "optional": true
     }

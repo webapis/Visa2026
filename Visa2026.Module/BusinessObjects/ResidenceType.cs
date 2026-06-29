@@ -4,6 +4,8 @@ namespace Visa2026.Module.BusinessObjects
     {
         Lodging,
         Hotel,
-        PrivateHouse
+        PrivateHouse,
+        Hospital,
+        Other,
     }
 }

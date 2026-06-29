@@ -37,6 +37,8 @@
   <ItemGroup>
     <Compile Remove="legacy\visa2014\preview-export\_education-lookup-gap\**\*" />
     <None Include="legacy\visa2014\preview-export\_education-lookup-gap\**\*" />
+    <Compile Remove="legacy\visa2014\preview-export\_address-lookup-gap\**\*" />
+    <None Include="legacy\visa2014\preview-export\_address-lookup-gap\**\*" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.8.0" />
