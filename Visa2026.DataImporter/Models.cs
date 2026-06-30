@@ -1103,6 +1103,9 @@ public class Urgency
 
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class ValidityDuration
@@ -1121,6 +1124,9 @@ public class ValidityDuration
 
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 
     [JsonPropertyName("NumberOfDays")]
     public int NumberOfDays { get; set; }
@@ -1166,6 +1172,9 @@ public class VisaPeriod
 
     [JsonPropertyName("PdfForm_Count")]
     public int PdfFormCount { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class VisaCategory

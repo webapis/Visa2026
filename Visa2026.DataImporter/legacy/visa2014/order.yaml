@@ -1,4 +1,4 @@
-# VISA2014 → Visa2026 — canonical dependency order
+﻿# VISA2014 → Visa2026 — canonical dependency order
 #
 # Single source of truth for:
 #   - Phase 1 discovery (walk `entities` top-to-bottom, respect dependsOn)
@@ -143,7 +143,24 @@ entities:
     importStatus: done
     notes: |
       Discovery 2026-06-29: legacy Employee.Salary FK → dbo.Salary.Detail.
-      importConfirmed 2026-06-29. OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 2 pilot resume-skipped, 63 transform skipped.
+      importConfirmed 2026-06-29.       OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 2 pilot resume-skipped, 63 transform skipped.
+
+  - targetODataEntity: MedicalRecord
+    dependsOn:
+      - Person
+    importPhase: attachments
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/MedicalRecord.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-29: SpidKepilnama → Copy → FileData (not legacy scalar medical fields).
+      importConfirmed 2026-06-29. File import 2026-06-29: 0 posted (2 orphan Spid links, 0 blobs on Çalik).
+      Scalars: DocumentNumber "0"; IssueDate from audit ObjectCreated; ValidityDuration Month3 (90d).
+      CLI: --import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument.
 
   # --- application-domain ---
   - targetODataEntity: Application
@@ -151,11 +168,17 @@ entities:
       - Person
     importPhase: application-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/Application.yaml
-    discoveryStatus: not_started
-    importConfirmed: false
-    importConfirmedAt: null
-    importConfirmedBy: null
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
     importStatus: pending
+    notes: |
+      Discovery 2026-06-29: 12,237 active dbo.Application rows; IRegistration_Data numbering.
+      Excel preview reviewed 2026-06-29: 12,129 import / 108 skipped; IsManualEntry=true all rows.
+      Layer 3 ApplicationType approved with skip_row — E:44 (92) + E:55 (13) skipped; 105 headers / 204 items.
+      ApplicationItem discovery complete — see ApplicationItem row.
 
   - targetODataEntity: ApplicationItem
     dependsOn:
@@ -163,23 +186,68 @@ entities:
       - Application
     importPhase: application-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-30
+    importConfirmedBy: developer
+    importStatus: in_progress
+    notes: |
+      Discovery 2026-06-29: dbo.PersonInApplication — 21,794 active rows (40,414 total incl. soft-deleted).
+      Preview 21,588 import / 206 skipped (204 parent E:44/E:55, 2 dedupe_duplicate). OData importer shipped 2026-06-30.
+      CheckPoint via OData NameTm; BorderZoneLocation comma-separated string; PurposeOfTravel omitted (dropped from BO).
+      CurrentWorkPermitItem allow_null until WorkPermitItem id-map wave; WorkPermittedLocations null pending audit.
+
+  # --- permits-and-visas (after application-domain) ---
+  - targetODataEntity: WorkPermit
+    dependsOn:
+      - Application
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermit.yaml
     discoveryStatus: not_started
     importConfirmed: false
     importConfirmedAt: null
     importConfirmedBy: null
     importStatus: pending
+    notes: |
+      PLAN 2026-06-29: Legacy has no header — synthesize from dbo.WorkPermitLetter (~398).
+      Application FK optional on pilot (ProcessNumber → PersonInApplication.Application).
+      See discovery/WorkPermit.yaml.
 
-  # --- permits-and-visas (after application-domain) ---
-  # - targetODataEntity: Invitation
-  #   dependsOn: [Application]
-  #   importPhase: permits-and-visas
-  #   ...
+  - targetODataEntity: WorkPermitItem
+    dependsOn:
+      - WorkPermit
+      - Person
+      - Passport
+      - EmployeePositionHistory
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermitItem.yaml
+    discoveryStatus: not_started
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      PLAN 2026-06-29: 1:1 dbo.WorkPermit row → item. WorkPermitLocation bit matrix → WorkPermittedLocations.
+      Expand WorkPermittedLocationName catalog before layer-3 sign-off. See discovery/WorkPermitItem.yaml.
+
+  # --- permits-and-visas (commented templates) ---
 
   # --- progress-and-history ---
-  # - targetODataEntity: ApplicationProgress
-  #   dependsOn: [Application]
-  #   importPhase: progress-and-history
-  #   ...
+  - targetODataEntity: ApplicationProgress
+    dependsOn:
+      - Application
+    importPhase: progress-and-history
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationProgress.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: complete
+    notes: |
+      importConfirmed 2026-06-29 after preview review (32,177 synthesized rows / 108 parent skips).
+      Live OData 2026-06-30 calik-energi: seeds removed 8135; posted 0; failed 0; skipped (already imported) 32177; parent-skipped 108; prepared 32177; id-map 32177 at legacy/visa2014/id-maps/calik-energi/ApplicationProgress.json (idempotent re-run).
 
   # --- attachments (last) ---
   # File blobs / scan links — often separate pipeline; discover after owning BOs.

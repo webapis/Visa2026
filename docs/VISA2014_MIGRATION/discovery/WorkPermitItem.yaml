@@ -1,0 +1,97 @@
+# Discovery dossier — WorkPermitItem (permits-and-visas line BO)
+# PLANNING DRAFT 2026-06-29 — discovery not started.
+
+targetODataEntity: WorkPermitItem
+discoveryStatus: not_started
+
+legacy:
+  boClass: IWorkPermit
+  boPath: VISA2014.Module/DC/IWorkPermit.cs
+  tables:
+    - dbo.WorkPermit
+    - dbo.WorkPermitLocation
+    - dbo.PersonInApplication
+  rowCount: 6363
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/WorkPermitItem.cs
+  docPath: Visa2026.Module/BusinessObjects/WorkPermitItem.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/WorkPermitItem.yaml
+  tableMappingId: work-permit-item
+  cardinality: one_legacy_workpermit_row_per_item
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - WorkPermittedLocationName
+  lookupAuditStatus:
+    WorkPermittedLocationName: pending
+  duplicateGroups: null
+  legacyOnlyCount: null
+  targetOnlyCount: null
+  mismatchCount: null
+  blockedReason: null
+  notes: |
+    LEGACY ROW → ITEM (1:1):
+      Each active dbo.WorkPermit row becomes one WorkPermitItem.
+
+    PROPOSED COLUMN MAP:
+      Employee → Person (id-map; employees only)
+      Passport → Passport (id-map)
+      Position → EmployeePositionHistory (id-map; legacy WorkHistoryOfEmployee)
+      StartDateOfWorkPermit → StartDate
+      ExpiringDateOfWorkPermit → ExpirationDate
+      AppruvalNumber → WorkPermitNumber (item-level approval number; required on item)
+      ASNumber → ASNumber
+      WorkPermitLetter → WorkPermit (header id-map from letter Oid)
+      WorkPermitLocation → WorkPermittedLocations (see below)
+      ProcessNumber → (no direct FK) used to validate / set parent WorkPermit.Application
+      WorkPermitState → IsCancelled when Cancelled|Rejected (TBD full enum map)
+
+    WORK PERMITTED LOCATIONS (high risk — layer 3):
+      Legacy: dbo.WorkPermitLocation — 73 bit columns per row.
+      Legacy UI string: Helper.Get_WPL_Сollection (VISA2014.Module/BusinessObjects/Helper.cs)
+        e.g. true AşgabatŞäheri → "Aşgabat şäheri, " then trimmed/joined.
+      Target: WorkPermitItem.WorkPermittedLocations — comma-separated WorkPermittedLocationName.NameTm.
+      Çalik tenant catalog currently 8 rows (work-permitted-location-name.json) — likely INCOMPLETE vs legacy 73 flags.
+      Discovery must: DISTINCT legacy label strings from bit matrix; align/expand tenant catalog before import.
+      Pattern: same as Visa BorderZoneLocation bit matrix → BorderZoneName (field-maps/Visa.yaml).
+
+    FK RESOLUTION / SKIPS (expect Passport/Visa pattern):
+      Skip when Person / Passport / EmployeePositionHistory not in id-map.
+      1553 employees have >1 legacy WorkPermit row (history) — all import as separate items.
+      1 row with null WorkPermitLocation — default empty or block_row (required field on target).
+
+    PERSON CURRENT ITEMS:
+      After import, Person.CurrentWorkPermitItem may need sync (latest non-cancelled by ExpirationDate?) — verify XAF evaluator vs import default.
+
+    IMPORT ORDER:
+      1) WorkPermit headers (letters)
+      2) WorkPermitItem rows (this entity)
+      id-map: legacy WorkPermit.Oid → WorkPermitItem.ID
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: partial
+  table_mapping_registered: false
+  column_mapping_complete: false
+  lookup_values_mapped: false
+  property_gaps_documented: false
+  dedupe_rules_defined: false
+  excel_preview_exported: false
+  inventory_updated: false
+  learnings_appended: false
+
+completedAt: null
+completedBy: null
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |

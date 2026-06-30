@@ -171,6 +171,7 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>Latest rejection line for this person (replaces removed <c>CurrentRejectionItemID</c> FK).</summary>
         [NotMapped]
+        [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         public RejectionItem CurrentRejectionItem => PersonCurrentItems.GetCurrentRejectionItem(this);
 
@@ -265,6 +266,10 @@ namespace Visa2026.Module.BusinessObjects
         // --- Properties from FamilyMember ---
         [DataSourceCriteria(PersonRoleHelper.EmployeeCriteria)]
         [InverseProperty(nameof(FamilyMembers))]
+        [ExcludeFromOptionalDetailFields]
+        [ImmediatePostData]
+        [RuleRequiredField("Person_SponsoringEmployee_RequiredForFamilyMember", DefaultContexts.Save, TargetCriteria = FamilyMemberRoleCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-sponsoring-employee")]
         public virtual Person SponsoringEmployee { get; set; }
 
         [RuleRequiredField("Person_Relationship_RequiredForFamilyMember", DefaultContexts.Save, TargetCriteria = RelationshipRequiredCriteria)]
@@ -446,6 +451,17 @@ namespace Visa2026.Module.BusinessObjects
             return age < 0 ? 0 : age;
         }
 
+        /// <summary>Family members inherit project contract from the sponsoring employee (legacy + UI).</summary>
+        public void SyncProjectContractFromSponsoringEmployee()
+        {
+            if (PersonRole != PersonRecordRole.FamilyMember)
+                return;
+
+            var sponsorContract = SponsoringEmployee?.ProjectContract;
+            if (sponsorContract != null)
+                ProjectContract = sponsorContract;
+        }
+
         public override void OnSaving()
         {
             base.OnSaving();
@@ -457,6 +473,8 @@ namespace Visa2026.Module.BusinessObjects
             PersonRoleHelper.SyncIsEmployee(this);
             if (PersonRole == PersonRecordRole.TemporaryVisitor)
                 PersonRoleHelper.ClearFamilyMemberLinks(this);
+
+            SyncProjectContractFromSponsoringEmployee();
 
             if (PersonRole == PersonRecordRole.Employee)
                 VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(this);

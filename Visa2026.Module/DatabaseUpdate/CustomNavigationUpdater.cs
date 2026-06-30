@@ -297,8 +297,18 @@ namespace Visa2026.Module.DatabaseUpdate
                 ApplicationProgressRouteNavigation.ListViewItemsDirectMigration,
                 ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration);
 
+            HideCurrentRejectionItemColumn(modelViews, "Person_ListView_Employees");
+            HideCurrentRejectionItemColumn(modelViews, "Person_ListView_FamilyMembers");
+            HideCurrentRejectionItemColumn(modelViews, "Person_ListView_TemporaryVisitors");
+
             if (node is ModelNode viewsNode && viewsNode.Root is IModelApplication modelApplication)
                 PersonTypedDetailViewConfigurator.EnsureConfigured(modelApplication);
+        }
+
+        private static void HideCurrentRejectionItemColumn(IModelViews modelViews, string viewId)
+        {
+            if (modelViews[viewId] is IModelListView listView)
+                SetColumnVisibility(listView, "CurrentRejectionItem", false);
         }
 
         private static void CloneApplicationItemListViewIfMissing(

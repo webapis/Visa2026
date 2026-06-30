@@ -73,12 +73,13 @@ internal static class Visa2014PersonTransform
                 pp.PassportIssuedDate DESC,
                 pp.Oid
         ) Passport
+        LEFT JOIN dbo.Person empSponsor ON p.IsFamilyMember = 1 AND p.Employee = empSponsor.Oid AND empSponsor.GCRecord IS NULL
         LEFT JOIN dbo.Country bc ON p.BirthCountry = bc.Oid
         LEFT JOIN dbo.Country fac ON p.ForeignAddressCountry = fac.Oid
         LEFT JOIN dbo.Gender g ON p.Gender = g.Oid
         LEFT JOIN dbo.Country nc ON Passport.Citizenship = nc.Oid
         LEFT JOIN dbo.Relation rel ON p.FamilyMemberRelation = rel.Oid
-        LEFT JOIN dbo.Contract c ON p.Contract = c.Oid
+        LEFT JOIN dbo.Contract c ON c.Oid = COALESCE(p.Contract, empSponsor.Contract)
         LEFT JOIN dbo.MaritalStatus ms ON p.MaritalStatus = ms.Oid
         WHERE p.GCRecord IS NULL
         """;
@@ -87,12 +88,12 @@ internal static class Visa2014PersonTransform
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
         "_hasPhoto", "_photoByteLength", "_photoSha256",
-        "FirstName", "LastName", "MiddleName", "DateOfBirth", "BirthPlace",
+        "FirstName", "LastName", "DateOfBirth", "BirthPlace",
         "CountryOfBirth", "ForeignAddress", "ForeignAddressCountry", "Gender",
         "PersonalNumber", "Nationality", "Email", "IsEmployee", "PersonRole",
         "IsArchived", "SponsoringEmployee", "Relationship", "ProjectContract",
         "MaritalStatus", "VisaApplicationFamilyMembersText",
-        "_legacy_Relationship", "_legacy_ProjectContract",
+        "_legacy_MiddleName", "_legacy_Relationship", "_legacy_ProjectContract",
         "_legacy_MaritalStatusStatus", "_legacy_MaritalStatusText",
     ];
 
@@ -356,7 +357,10 @@ internal static class Visa2014PersonTransform
 
         row["FirstName"] = raw.FirstName.Trim();
         row["LastName"] = raw.LastName.Trim();
-        row["MiddleName"] = string.IsNullOrWhiteSpace(raw.MiddleName) ? null : raw.MiddleName.Trim();
+        // Legacy Person.MiddleName actually held free-text work-position/title (no dedicated field in VISA2014).
+        // It is NOT a real middle name → do not map to Visa2026 Person.MiddleName (was polluting FullName).
+        // The value is migrated to EmployeePositionHistory.ActualPosition (current row); kept here as audit only.
+        row["_legacy_MiddleName"] = string.IsNullOrWhiteSpace(raw.MiddleName) ? null : raw.MiddleName.Trim();
         row["DateOfBirth"] = raw.BirthDate;
         row["BirthPlace"] = string.IsNullOrWhiteSpace(raw.BirthPlace) ? null : raw.BirthPlace.Trim();
         row["ForeignAddress"] = string.IsNullOrWhiteSpace(raw.ForeignAddress) ? null : raw.ForeignAddress.Trim();

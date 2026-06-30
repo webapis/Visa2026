@@ -15,13 +15,15 @@
 
 version: 1
 lastUpdated: 2026-06-29
-updatedBy: developer - AddressOfResidence full OData import (3786 rows)
+updatedBy: agent - ApplicationItem Excel preview export
 
 entityStatusSource: Visa2026.DataImporter/legacy/visa2014/order.yaml
 entitySummarySource: docs/VISA2014_MIGRATION/entity-inventory.yaml
 
 currentFocus:
-  - ApplicationType lookup comparison → Application discovery
+  - ApplicationItem Excel preview review → importConfirmed
+  - Application OData pilot (--max-rows then full ~12,129; Blazor on :5001 + legacy ReadOnlyUser)
+  - ApplicationProgress OData (after Application id-map)
 
 workstreams:
   - id: bootstrap
@@ -69,7 +71,9 @@ workstreams:
     label: Phase 1 per-BO discovery (dossiers + layers 1Ã¢â‚¬â€œ3)
     status: in_progress
     artifact: docs/VISA2014_MIGRATION/discovery/
-    notes: Person complete; Passport scalar + copies done 2026-06-26; Visa scalar import done 2026-06-26 (5760 posted); AddressOfResidence done 2026-06-29 (3786 OData rows); Application + ApplicationItem not started.
+    notes: |
+      Phase1-discovery: Person through MedicalRecord + Application + ApplicationItem complete on Çalik VISA2015.
+      ApplicationItem 2026-06-29: 21,794 active PersonInApplication rows mapped.
 
   - id: excel-preview
     label: Excel preview export (--export-visa2014-preview)
@@ -78,6 +82,7 @@ workstreams:
     notes: |
       Çalik Person-preview.calik-energi.xlsx exported 2026-06-26 (3241 legacy → 2924 import).
       AddressOfResidence-preview.calik-energi.xlsx re-exported 2026-06-27 after lodging/hotel split (3971 → 3968 import, 3 skipped).
+      Application-preview.calik-energi.xlsx exported 2026-06-29 (12,237 legacy → 12,129 import, 108 skipped).
       ReadOnlyUser + VISA2014_SQL_PASSWORD; legacy DB named VISA2015 on SQLEXPRESS.
       Çalik Person-preview.calik-energi.xlsx reviewed; importConfirmed 2026-06-26.
 
@@ -101,6 +106,9 @@ workstreams:
       Lodging/hotel split 2026-06-27: Lojman+myhmanhan -> Hotel catalog (IsHotelAddressLine); lodging 67 + hotel 33 tenant rows deployed.
       AddressOfResidence re-export 2026-06-27: 3971 legacy, 3968 import, 3 skipped; Type Lodging 2378 / PrivateHouse 1148 / Hotel 442; unmapped 3 (Region/City on skipped Patent rows).
       AddressOfResidence OData 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 pilot resume-skipped; OData count 3786.
+      Application OData importer 2026-06-29: Visa2014ApplicationODataImporter + resolver extensions; IsManualEntry + FullApplicationNumber-only POST (omit ApplicationNumber/AppNumberPrefix).
+      Application OData pilot 2026-06-29: 9 posted, 0 failed, 1 skipped (TOP 10 legacy SQL); id-map id-maps/calik-energi/Application.json (9 entries).
+      Application OData full 2026-06-29: 12120 posted + 9 resume-skipped, 0 failed; 108 transform-skipped (E:44/E:55 etc); id-map 12129 entries; ~7 min.
 
 issues:
   - id: ISS-001
@@ -264,15 +272,17 @@ issues:
 
   - id: ISS-008
     title: Application discovery not started
-    status: open
+    status: resolved
     severity: medium
     category: discovery
     relatedTo: [Application]
     openedAt: 2026-06-20
+    resolvedAt: 2026-06-29
     owner: null
     notes: |
-      Blocked on applicationWaveComplete in lookup-review-queue.yaml for importConfirmed.
-      Discovery may start in parallel after Person person-wave gate progresses.
+      Discovery complete 2026-06-29: 12,237 active headers; field-map + layer 3 drafted.
+      ApplicationType E:44/E:55 resolved 2026-06-29 — approved skip_row (105 headers / 204 items); no longer a blocker.
+      importConfirmed still pending applicationWaveComplete gate in lookup-review-queue.yaml.
 
   - id: ISS-009
     title: Open strategic decisions (service account, staging DB, cutover, files)

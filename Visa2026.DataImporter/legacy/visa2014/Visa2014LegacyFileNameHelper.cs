@@ -16,6 +16,9 @@ internal static class Visa2014LegacyFileNameHelper
     public static string BuildDiplomaCopyFileName(string? personFullName, byte[] content, int copyIndex = 1) =>
         BuildCopyFileName("diploma", SanitizeToken(personFullName, "unknown"), content, copyIndex);
 
+    public static string BuildMedicalCopyFileName(string? personFullName, byte[] content, int copyIndex = 1) =>
+        BuildCopyFileName("medical", SanitizeToken(personFullName, "unknown"), content, copyIndex);
+
     private static string BuildCopyFileName(string prefix, string token, byte[] content, int copyIndex)
     {
         var ext = GuessExtension(content);

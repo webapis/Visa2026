@@ -30,6 +30,7 @@ Side-by-side review of **legacy lookup values actually used in production** vs *
 | ProjectContract | [ProjectContract.md](./ProjectContract.md) · [ProjectContract.yaml](./ProjectContract.yaml) (**approved** 2026-06-21 — GT-15 pilot) |
 | Country (Person) | Done in `lookup-translations.yaml` audit (64 identity codes) |
 | Gender | Done in `lookup-translations.yaml` (2 values) |
+| **MigrationService** | [MigrationService.md](./MigrationService.md) · [MigrationService.yaml](./MigrationService.yaml) (**approved** 2026-06-30) |
 
 Add one `{Catalog}.md` + `{Catalog}.yaml` per catalog audit.
 
@@ -49,6 +50,7 @@ Add one `{Catalog}.md` + `{Catalog}.yaml` per catalog audit.
 
 | Date | Change |
 |------|--------|
+| 2026-06-30 | MigrationService draft — DepartmentForRegistration 9 codes on 6,840 apps; TDMG başlygyna + Kerki gaps |
 | 2026-06-21 | ProjectContract approved — all legacy codes → GT-15 (Gap Insaat / Calik Energi pilot) |
 | 2026-06-21 | Relationship comparison (147/159 proposed; ejesi + giyewisi gaps) |
 | 2026-06-21 | Added lookup-review-queue.yaml; MaritalStatus approved |

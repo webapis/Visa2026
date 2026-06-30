@@ -3317,6 +3317,36 @@
     "tk-TM": "Faýl jikme-jikliklerini görkez",
     "ru-RU": "Показать сведения о файлах"
   },
+  "PersonDocumentCopies.Action.ShowMore": {
+    "en": "Show {0} more in {1}",
+    "tr-TR": "{1} bölümünde {0} tane daha göster",
+    "tk-TM": "{1} bölüminde ýene {0} görkez",
+    "ru-RU": "Показать ещё {0} в разделе «{1}»"
+  },
+  "PersonDocumentCopies.Action.ShowLess": {
+    "en": "Show less",
+    "tr-TR": "Daha az göster",
+    "tk-TM": "Az görkez",
+    "ru-RU": "Свернуть"
+  },
+  "PersonDocumentCopies.Action.ShowAll": {
+    "en": "Show all documents",
+    "tr-TR": "Tüm belgeleri göster",
+    "tk-TM": "Hemme resminamalary görkez",
+    "ru-RU": "Показать все документы"
+  },
+  "PersonDocumentCopies.Action.ShowCurrentOnly": {
+    "en": "Show current only",
+    "tr-TR": "Yalnızca güncel olanları göster",
+    "tk-TM": "Diňe häzirki görkez",
+    "ru-RU": "Только текущие"
+  },
+  "PersonDocumentCopies.Hint.NoCurrentShowingRecent": {
+    "en": "No current record in this section; showing the most recent.",
+    "tr-TR": "Bu bölümde güncel kayıt yok; en son kayıt gösteriliyor.",
+    "tk-TM": "Bu bölümdä häzirki ýazgy ýok; iň soňky ýazgy görkezilýär.",
+    "ru-RU": "В этом разделе нет текущей записи; показана последняя."
+  },
   "PersonDocumentCopies.Preview.Title": {
     "en": "Document preview",
     "tr-TR": "Belge önizleme",

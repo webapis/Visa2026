@@ -1,6 +1,6 @@
 ﻿# VISA2014 â†’ Visa2026 â€” migration status
 
-**Last updated:** 2026-06-26  
+**Last updated:** 2026-06-29  
 **Machine-readable:** [`migration-status.yaml`](migration-status.yaml) â€” **update this file first**, then refresh this dashboard if summaries drift.
 
 **Quick links:** [Migration plan](../VISA2014_MIGRATION.md) Â· [Multi-company sources](MULTI_COMPANY_LEGACY_SOURCES.md) Â· [Order](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) Â· [Import strategy](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) Â· [Lookup strategy](LOOKUP_RESOLUTION_STRATEGY.md)
@@ -9,10 +9,9 @@
 
 ## Current focus
 
-1. **Person pilot OData import (live)** — start Blazor :5001, then `--import-visa2014 --entity Person --legacy-source calik-energi --max-rows 10`
-2. **Full Person import** (~2924 rows) after spot-check
-3. **ApplicationType** lookup comparison → Application discovery
-4. **Passport** in `order.yaml` (ISS-005)
+1. **ApplicationItem** preview review → `importConfirmed` (Excel exported 2026-06-29)
+2. **ApplicationItem OData** importer (after preview approval)
+3. **ApplicationProgress OData** (resolve initializer vs synthetic history)
 
 **Person `importConfirmed: true`** â€” 2026-06-26 (Ã‡alik `Person-preview.calik-energi.xlsx`).
 
@@ -42,8 +41,9 @@ Canonical flags: [`order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/orde
 | Entity | Discovery | Import confirmed | Import run | Notes |
 |--------|-----------|------------------|------------|-------|
 | **Person** | **Complete** | **Yes** (2026-06-26, Ã‡alik) | Pending | `legacySource: calik-energi`; pilot OData next |
-| **Application** | Not started | No | Pending | Blocked on Person review; needs ApplicationType lookup audit |
-| **ApplicationItem** | Not started | No | Pending | Depends on Person + Application |
+| **Application** | **Complete** | **Yes** (2026-06-29, Çalik) | **Done** (2026-06-29) | 12,129 id-map; 108 skipped at transform |
+| **ApplicationItem** | **Complete** | No | Pending | Preview exported 2026-06-29 — 21,588 import / 206 skipped |
+| **ApplicationProgress** | **Complete** | **Yes** (2026-06-29, Çalik) | Pending | Preview reviewed; OData after Application id-map |
 
 **Not in order yet:** Passport (child of Person â€” likely needed before ApplicationItem).
 
@@ -60,7 +60,7 @@ Do **not** import legacy lookup tables. Track translation coverage here; detail 
 | MaritalStatus | Person | **Approved** | 6 | allow_null |
 | Relationship | Person | **Approved** | 8 | allow_null |
 | ProjectContract | Person, Application | **Complete** (Çalik) | 73 identity pass-through | allow_null |
-| ApplicationType | Application, ApplicationItem | Not started | â€” | â€” |
+| ApplicationType | Application, ApplicationItem | **Approved (skip)** | 31 mapped; 2 skipped | skip_row (E:44, E:55) |
 
 ---
 
@@ -70,7 +70,7 @@ Do **not** import legacy lookup tables. Track translation coverage here; detail 
 |----|----------|-------|--------|
 | [ISS-004](migration-status.yaml) | Medium | 5 PersonalNumber duplicate pairs | Open |
 | [ISS-005](migration-status.yaml) | Medium | Passport not in order.yaml | Open |
-| [ISS-008](migration-status.yaml) | Medium | Application discovery not started | Open |
+| [ISS-008](migration-status.yaml) | Medium | Application discovery not started | **Resolved** |
 | [ISS-009](migration-status.yaml) | Medium | Open strategic decisions | Open |
 | [ISS-010](migration-status.yaml) | Low | Legacy lookup duplicates / unused rows | In progress |
 | [ISS-011](migration-status.yaml) | Medium | Binary fields separate from Excel preview | In progress |

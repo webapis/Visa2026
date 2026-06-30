@@ -1,0 +1,162 @@
+# Discovery dossier — ApplicationProgress (synthetic progress history from legacy Application scalars)
+# dependsOn: Application — Application id-map required before OData POST (header import may still be pending).
+
+targetODataEntity: ApplicationProgress
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-29
+  importConfirmedBy: developer
+  reviewNotes: |
+    ApplicationProgress-preview.calik-energi.xlsx reviewed 2026-06-29 — simple/long synthesis approved (32,177 rows / 108 parent skips).
+    OData import blocked until Application id-map exists. MinistryLetterFile deferred to attachments wave.
+
+legacy:
+  boClass: IApplication
+  boPath: VISA2014.Module/DC/IApplication.cs
+  tables:
+    - dbo.Application
+    - dbo.IRegistration_Data
+    - dbo.SimpleProcessApplication
+    - dbo.LongProcessApplication
+  rowCount: null
+  primaryKey: null
+  softDeleteColumn: GCRecord
+  notes: |
+    Not 1:1 legacy rows. One Application → 1–5 synthesized ApplicationProgress rows.
+    Legacy ApplicationState is computed (Helper.Get_ApplicationState*) from header dates — not persisted.
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/ApplicationProgress.cs
+  docPath: docs/APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationProgress.yaml
+  tableMappingId: application-progress-synthetic
+  cardinality: many_progress_rows_per_application
+  upsertKeys:
+    - _syntheticStepKey
+  lookupDependencies:
+    - ApplicationState
+    - ApplicationLocation
+  lookupAuditStatus:
+    ApplicationState: target_catalog_by_code_2026-06-29
+    ApplicationLocation: target_catalog_by_code_2026-06-29
+  duplicateGroups: 0
+  legacyOnlyCount: 8
+  targetOnlyCount: 1
+  mismatchCount: 3
+  blockedReason: null
+  notes: |
+    **Simple process (8,392 apps):** no DateForwardedToMonistery on Çalik — office → migration service from ProcessDate only.
+    **Long process (3,845 apps):** ministry route — 3,822 with DateForwardedToMonistery; Contract FK on all long-process rows.
+    **Synthesis tiers (active Application, GCRecord IS NULL):**
+      office-only (no ministry fwd): 8,415 | at ministry: 88 | returned from ministry: 47 | process date set: 12,047
+      MinConstruction leg: 273 | Cancelled: 306 | Rejected: 0 (header flag)
+  synthesisStrategy:
+    approved: true
+    approvedAt: 2026-06-29
+    approvedBy: developer
+    maxMinistryLegsFromLegacy: 2
+    simpleProcessSteps:
+      - step: prepare
+        when: always
+        state: IS_BEING_PREPARED
+        location: AT_OFFICE
+        dateSource: IRegistration_Data.ManualApplicationDate
+      - step: issued
+        when: ProcessDate >= 2000-01-01 OR ProcessNumber non-empty
+        state: PROCESS_ISSUED
+        location: AT_MIGRATION_SERVICE
+        dateSource: ProcessDate
+        descriptionFields: [ProcessNumber]
+    longProcessSteps:
+      - step: prepare
+        when: always
+        state: IS_BEING_PREPARED
+        location: AT_OFFICE
+        dateSource: IRegistration_Data.ManualApplicationDate
+      - step: ministry_forward
+        when: DateForwardedToMonistery >= 2000-01-01
+        state: 1_REVIEW_STARTED
+        location: AT_THE_MINISTERY_1
+        dateSource: DateForwardedToMonistery
+      - step: ministry_return
+        when: MinisteriesDocumentDate >= 2000-01-01 OR MinisteriesDocumentNumber non-empty
+        state: 1_REVIEW_APPROVED
+        location: AT_THE_MINISTERY_1
+        dateSource: MinisteriesDocumentDate
+        descriptionFields: [MinisteriesDocumentNumber]
+        openDecision: location after approval — AT_OFFICE vs stay AT_THE_MINISTERY_1
+      - step: ministry_2_forward
+        when: DateForwardedToMinConstruction >= 2000-01-01 AND ProjectContract.MinistryLegs >= 2
+        state: 2_REVIEW_STARTED
+        location: AT_THE_MINISTERY_2
+        dateSource: DateForwardedToMinConstruction
+        descriptionFields: [DocNumberForwardedToMinConstruction]
+      - step: migration_process
+        when: ProcessDate >= 2000-01-01 OR ProcessNumber non-empty
+        state: PROCESS_ISSUED
+        location: AT_MIGRATION_SERVICE
+        dateSource: ProcessDate
+        descriptionFields: [ProcessNumber]
+    terminalOverrides:
+      - when: Cancelled = 1
+        state: PROCESS_CANCELLED
+        location: AT_OFFICE
+        dateSource: last_non_null_progress_date_or_ApplicationDate
+        priority: after_synthesis
+      - when: Rejected = 1
+        state: PROCESS_REJECTED
+        location: AT_MIGRATION_SERVICE
+        dateSource: ProcessDate
+        priority: after_synthesis
+        notes: Header Rejected rare on Çalik; item-level rejection may override in permits wave
+    skipParentApplication:
+      - parent ApplicationType E:44/E:55 skipped at header import — no progress rows
+    initializerConflict: |
+      ApplicationProgressInitializer seeds IS_BEING_PREPARED on Application create unless SuppressInitialProgress=true (OData migration).
+      Bulk import: Visa2014ApplicationODataImporter sets SuppressInitialProgress; cleanup CLI removes legacy seeds; ApplicationProgress OData removes seeds before POST.
+    validationConflict: |
+      ApplicationProgressCommitValidationController enforces transition graph on save.
+      Historical import may need ordered POST, migration bypass flag, or server-side import endpoint — TBD at implementation.
+    ministryLetterFile: defer_file_wave
+    estimatedRows:
+      simpleMin: 8392
+      simpleMax: 16784
+      longMin: 3845
+      longMax: 15380
+      note: 1–2 rows typical simple; up to 5 long-process with construction leg
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-29
+completedBy: developer — ApplicationProgress preview reviewed (Çalik VISA2015)
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  parentApplicationActiveRows: 12237
+  parentApplicationImportEstimate: 12129
+  parentApplicationSkippedEstimate: 108
+  simpleProcessRows: 8392
+  longProcessRows: 3845
+  withDateForwardedToMonistery: 3822
+  withMinisteriesDocument: 3734
+  withProcessDate: 11989
+  withMinConstructionForward: 273
+  cancelledHeaders: 306
+  rejectedHeaders: 0

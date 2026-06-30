@@ -117,6 +117,17 @@ namespace Visa2026.Module.BusinessObjects
         {
         }
 
+        /// <summary>
+        /// When true, changing <see cref="Person"/> does not run
+        /// <see cref="ApplyCurrentFieldsFromSelectedPerson"/> or person-triggered sync rules.
+        /// VISA2014 OData import sets this so legacy-mapped FKs (passport, visa, position, …) are kept.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool SuppressPersonCurrentFieldSync { get; set; }
+
         private Application application;
 
         [RuleRequiredField]
@@ -129,7 +140,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (application != value)
                 {
                     application = value;
-                    if (application?.ApplicationType != null)
+                    if (application?.ApplicationType != null && !SuppressPersonCurrentFieldSync)
                         ApplyRegistrationMovementDefaults(application.ApplicationType.Name);
                     ApplyVisibilityGatedReferenceFields();
                     UpdateApplicationItemName();
@@ -148,7 +159,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         // Must not rely only on SyncRule + CrossObjectSyncHelper: non-admin users cannot read
                         // SyncRule, so GetObjectsQuery<SyncRule>() is empty and rules never run in production.

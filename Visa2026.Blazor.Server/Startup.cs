@@ -299,6 +299,7 @@ namespace Visa2026.Blazor.Server
             app.UseRouting();
             app.UseSentryTracing();
             app.UseMiddleware<CorrelationIdMiddleware>();
+            app.UseMiddleware<MigrationImportContextMiddleware>();
 
             // ── Web API middleware (Swagger UI + /api/challenge fix) ───────
             app.UseVisaWebApi(env);

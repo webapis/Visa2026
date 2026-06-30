@@ -53,7 +53,7 @@ flowchart LR
 | `dbo.PassportCopy` | ~4,317 active (Education FK) | `Göçürme` | `Education` FK | `EducationDocument` + `FileData` (after Education BO import) |
 | `dbo.FileData` | 107 | `Content` + `FileName` | XAF aggregate | Various `FileData` / `DocumentBase` targets |
 | `dbo.FamilyProofDocument` | ~994 | `CopyOfDocument` | Person / family | `PersonDocument` or related |
-| `dbo.Copy` | 2 | — (junction / FK refs) | Passport, Visa, WorkPermit, … | Resolve via FK graph in dossier — not raw blob store |
+| `dbo.Copy` | ~104 active | `CopyOfDocument` → `FileData` | `IPersonn_SpidKepilnama`, Passport, Visa, … | `MedicalRecordDocument` + synthetic `MedicalRecord` parent (Spid kepilnama — see discovery/MedicalRecord.yaml) |
 
 **Schema snapshot** also flags attachment deferrals: `FileData`, `PassportCopy`, `Copy` ([`schema-snapshot.md`](schema-snapshot.md)).
 

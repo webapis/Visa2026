@@ -61,6 +61,16 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         public virtual bool IsManualEntry { get; set; }
 
+        /// <summary>
+        /// When true, <see cref="ApplicationProgressInitializer"/> does not seed the first progress row.
+        /// Used by VISA2014 OData import — synthetic <see cref="ApplicationProgress"/> is imported separately.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool SuppressInitialProgress { get; set; }
+
         [MaxLength(50)]
         [VisibleInListView(false)]
         [Appearance("ApplicationNumberReadOnly", Context = "DetailView", Criteria = "!IsManualEntry", Enabled = false)]
@@ -667,7 +677,8 @@ namespace Visa2026.Module.BusinessObjects
                 VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
                 VisaPeriod = objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
                 ProjectContract = objectSpace.GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
-                ApplicationProgressInitializer.EnsureInitialProgress(this, objectSpace);
+                if (!SuppressInitialProgress)
+                    ApplicationProgressInitializer.EnsureInitialProgress(this, objectSpace);
             }
         }
 

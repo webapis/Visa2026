@@ -692,3 +692,382 @@ catalogs:
         target: Türkmenbaşy etraby
     unmappedPolicy: block_row
     notes: Fallback when ŞeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.
+
+  - targetCatalog: Urgency
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Urgency
+      column: ApplicationUrgencyL
+      valueKind: composite
+      compositeColumns: [ApplicationUrgency, mgCode]
+      compositeKeyFormat: "{0}:{1}"
+      sampleQuery: |
+        SELECT u.ApplicationUrgency, ISNULL(CAST(u.mgCode AS varchar(10)), '') AS mgCode,
+               u.ApplicationUrgencyL, COUNT(*) AS cnt
+        FROM dbo.Application a
+        INNER JOIN dbo.Urgency u ON a.Urgency = u.Oid
+        WHERE a.GCRecord IS NULL
+        GROUP BY u.ApplicationUrgency, u.mgCode, u.ApplicationUrgencyL
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: Application
+      distinctLegacyValuesUsed: 3
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Urgency.md
+    values:
+      - legacy: "0:1"
+        target: NORM
+        notes: Adaty — 9,787 rows; Visa2026 default
+      - legacy: "1:2"
+        target: URG
+        notes: Gyssagly — 2,316 rows
+      - legacy: "2:3"
+        target: TOP
+        notes: Örän gyssagly — 134 rows
+    unmappedPolicy: use_default
+    unmappedDefault: NORM
+    notes: Resolve by LocalizationKey (urgency.json). All active Application rows have Urgency FK.
+
+  - targetCatalog: VisaPeriod
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.VisaPeriod
+      column: PeriodOfVisaL
+      valueKind: composite
+      compositeColumns: [PeriodOfVisaL, mgCode, CountMonth]
+      compositeKeyFormat: "{0}:{1}:{2}"
+      sampleQuery: |
+        SELECT vp.PeriodOfVisaL, ISNULL(CAST(vp.mgCode AS varchar(10)), '') AS mgCode,
+               vp.CountMonth, COUNT(*) AS cnt
+        FROM dbo.Application a
+        INNER JOIN dbo.VisaPeriod vp ON a.VisaPeriod = vp.Oid
+        WHERE a.GCRecord IS NULL
+        GROUP BY vp.PeriodOfVisaL, vp.mgCode, vp.CountMonth
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: Application
+      distinctLegacyValuesUsed: 12
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaPeriod.md
+    values:
+      - legacy: "6 (alty) ay:AY:182"
+        target: Month6
+      - legacy: "1 (bir) ay:AY:31"
+        target: Month1
+      - legacy: "12 (on iki) ay:AY:365"
+        target: Month12
+      - legacy: "3 (üç) ay:AY:92"
+        target: Month3
+      - legacy: "10 (on) gün:GUN:0"
+        target: Day10
+      - legacy: "15 (on bäş) gün:GUN:15"
+        target: Day15
+      - legacy: "20 ( yigrimi )gün:GUN:20"
+        target: Day20
+      - legacy: "1 (bir) yyl:YYL:365"
+        target: Year1
+      - legacy: "2 (iki) ay:AY:61"
+        target: Month2
+      - legacy: "5 (bäş) gün:GUN:5"
+        target: Day7
+        notes: No Day5 in catalog — nearest Day7; 4 rows only
+      - legacy: "7 (yedi) gün:GUN:0"
+        target: Day7
+      - legacy: "4 ay:AY:0"
+        target: Month4
+        notes: 1 row — CountMonth 0 in legacy
+    unmappedPolicy: use_default
+    unmappedDefault: Month6
+    nullFkPolicy: allow_null
+    notes: |
+      Extends Visa-wave VisaPeriod audit to Application FK path (4,213 populated rows).
+      Rows without VisaPeriod FK are valid when ApplicationType.ShowVisaPeriod=false.
+
+  - targetCatalog: ApplicationType
+    targetMatchProperty: Name
+    legacy:
+      storage: composite_derived
+      table: dbo.Application
+      valueKind: composite
+      compositeColumns:
+        - ForEmployee
+        - ForFamilyMember
+        - ApplicationTypeForEmployee.TypeOfApplicationForEmployeeID
+        - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMemberID
+        - IsInvitationWithWorkPermit.InvitationAndWorkPermitRequired
+        - IsWizaWithWorkPermit.WizaAndWorkPermitRequired
+        - ChangeInformation
+      compositeKeyFormat: "{category}:{subtypeId}:{invWp}:{wizaWp}:{changeInfo}"
+      categoryRule: "ForEmployee=1 → E; ForFamilyMember=1 → F"
+      sampleQuery: |
+        SELECT CASE WHEN a.ForEmployee=1 THEN 'E' WHEN a.ForFamilyMember=1 THEN 'F' END AS category,
+               COALESCE(ate.TypeOfApplicationForEmployeeID, atfm.TypeOfApplicationForFamilyMemberID) AS subtype_id,
+               iwp.InvitationAndWorkPermitRequired, wwp.WizaAndWorkPermitRequired,
+               a.ChangeInformation, COUNT(*) AS cnt
+        FROM dbo.Application a
+        LEFT JOIN dbo.ApplicationTypeForEmployee ate ON ate.Oid = a.ApplicationTypeForEmployee
+        LEFT JOIN dbo.ApplicationTypeForFamilyMember atfm ON atfm.Oid = a.ApplicationTypeForFamilyMember
+        LEFT JOIN dbo.IsInvitationWithWorkPermit iwp ON iwp.Oid = a.IsInvitationWithWorkPermit
+        LEFT JOIN dbo.IsWizaWithWorkPermit wwp ON wwp.Oid = a.IsWizaWithWorkPermit
+        WHERE a.GCRecord IS NULL
+        GROUP BY CASE WHEN a.ForEmployee=1 THEN 'E' WHEN a.ForFamilyMember=1 THEN 'F' END,
+                 COALESCE(ate.TypeOfApplicationForEmployeeID, atfm.TypeOfApplicationForFamilyMemberID),
+                 iwp.InvitationAndWorkPermitRequired, wwp.WizaAndWorkPermitRequired, a.ChangeInformation
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: Application
+      distinctLegacyValuesUsed: 31
+      allMappedToTarget: false
+      unmapped:
+        - "E:44:na:na:na"
+        - "E:55:na:na:na"
+      skipPolicy: skip_row
+      skippedApplicationHeaders: 105
+      skippedApplicationItemRows: 204
+      approvedDecision: "Approved 2026-06-29 — skip E:44 (92 apps) + E:55 (13 apps); no Visa2026 ApplicationType.Name mapping"
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
+    values:
+      - legacy: "E:7:na:na:na"
+        target: App_Visa_Ext
+        notes: 1,896 rows — default when WizaAndWorkPermit not set
+      - legacy: "E:0:0:na:na"
+        target: App_Inv
+      - legacy: "E:0:1:na:na"
+        target: App_Inv_And_WP
+      - legacy: "E:3:na:na:na"
+        target: App_Reg_ext
+      - legacy: "E:4:na:na:na"
+        target: App_Reg_Check_In_Internal
+      - legacy: "E:8:na:1:na"
+        target: App_Change_Visa_Category
+        notes: 744 rows — wizaWp flag ignored for subtype 8
+      - legacy: "E:6:na:na:na"
+        target: App_Reg_Check_Out
+      - legacy: "E:13:na:na:na"
+        target: App_Business_Trip_Departure
+      - legacy: "E:5:na:na:na"
+        target: App_Reg_Info_Change_Address
+        notes: Default when ChangeInformation null — 449 rows; refine by changeInfo when set
+      - legacy: "E:5:na:na:1"
+        target: App_Reg_Info_Change_Passport
+      - legacy: "E:5:na:na:2"
+        target: App_Reg_Info_Change_Visa
+      - legacy: "E:11:na:na:na"
+        target: App_Border_Zone_Permission
+      - legacy: "E:15:na:na:na"
+        target: App_Additional_WP_location
+      - legacy: "E:12:na:na:na"
+        target: App_Cancel_Visa_and_WP
+      - legacy: "E:10:na:na:na"
+        target: App_Sevice_Passport
+      - legacy: "E:31:na:na:na"
+        target: App_Cancell_WP
+      - legacy: "E:20:na:na:na"
+        target: App_Inv_According_to_WP
+      - legacy: "E:2:na:na:na"
+        target: App_Reg_Check_In
+      - legacy: "E:1:na:na:na"
+        target: App_Change_Inv
+      - legacy: "E:45:na:na:na"
+        target: App_Cancel_Visa
+      - legacy: "E:7:na:0:na"
+        target: App_Visa_Ext
+      - legacy: "E:7:na:1:na"
+        target: App_Visa_and_WP_Ext
+      - legacy: "E:8:na:0:na"
+        target: App_Change_Visa_Category
+      - legacy: "E:9:na:na:na"
+        target: App_Change_Passport
+      - legacy: "E:14:na:na:na"
+        target: App_Business_Trip_Arrival
+      - legacy: "F:8:na:na:na"
+        target: App_Change_Visa_Category
+      - legacy: "F:4:na:na:na"
+        target: App_Reg_Check_In_Internal
+      - legacy: "F:0:na:na:na"
+        target: App_Inv_FM
+      - legacy: "F:7:na:na:na"
+        target: App_Visa_Ext_FM
+      - legacy: "F:3:na:na:na"
+        target: App_Reg_ext
+      - legacy: "F:6:na:na:na"
+        target: App_Reg_Check_Out
+      - legacy: "F:45:na:na:na"
+        target: App_Cancel_Visa
+      - legacy: "F:5:na:na:na"
+        target: App_Reg_Info_Change_Address
+      - legacy: "F:10:na:na:na"
+        target: App_Sevice_Passport
+      - legacy: "F:2:na:na:na"
+        target: App_Reg_Check_In
+    unmappedPolicy: skip_row
+    notes: |
+      Drafted 2026-06-29. Subtype IDs map to legacy SubType enum (IApplication.cs).
+      Approved 2026-06-29: skip unmapped E:44 (92 apps, 187 items) and E:55 (13 apps, 17 items) — 105 headers / 204 items.
+      2 composite keys remain without Visa2026 ApplicationType.Name; rows skipped at import (not blocked).
+      importConfirmed still pending broader applicationWaveComplete gate in lookup-review-queue.yaml.
+
+  - targetCatalog: PurposeOfTravel
+    targetMatchProperty: NameTm
+    legacy:
+      storage: fk
+      table: dbo.PersonInApplication
+      column: PurposeOfTrave
+      labelTable: dbo.PurposeOfTravel
+      labelColumn: PurposeOfTravelL
+      sampleQuery: |
+        SELECT pot.PurposeOfTravelL, COUNT(*) cnt
+        FROM dbo.PersonInApplication pia
+        JOIN dbo.PurposeOfTravel pot ON pot.Oid = pia.PurposeOfTrave
+        WHERE pia.GCRecord IS NULL
+        GROUP BY pot.PurposeOfTravelL ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: ApplicationItem
+      distinctLegacyValuesUsed: 5
+      allMappedToTarget: true
+    values:
+      - legacy: Işlemek üçin
+        target: Işlemek üçin
+      - legacy: Masgala agzasy
+        target: Maşgala agzasy
+      - legacy: Is saparyna
+        target: Iş saparyna
+      - legacy: Dynç almak üçin
+        target: Dynç almak üçin
+      - legacy: Myhmançylyga
+        target: Myhmançylyga
+    unmappedPolicy: use_default
+    unmappedDefault: Işlemek üçin
+    nullFkPolicy: allow_null
+    notes: |
+      ApplicationItem registration lines only (3,534 rows with FK). Legacy typo column PurposeOfTrave.
+      Encoding variants (Islemek/Is sapary) normalized to seed purpose-of-travel.json NameTm.
+
+  - targetCatalog: CheckPoint
+    targetMatchProperty: NameTm
+    legacy:
+      storage: fk
+      table: dbo.PersonInApplication
+      column: CheckPoint
+      labelTable: dbo.CheckPoint
+      labelColumns:
+        - TitleOfCheckPoint
+        - TitleOfCheckPointL
+      sampleQuery: |
+        SELECT cp.TitleOfCheckPoint, cp.TitleOfCheckPointL, COUNT(*) cnt
+        FROM dbo.PersonInApplication pia
+        JOIN dbo.CheckPoint cp ON cp.Oid = pia.CheckPoint
+        WHERE pia.GCRecord IS NULL
+        GROUP BY cp.TitleOfCheckPoint, cp.TitleOfCheckPointL ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: ApplicationItem
+      distinctLegacyValuesUsed: 8
+      allMappedToTarget: true
+    values:
+      - legacy: "0"
+        target: Aşgabat şäher howa menzilindäki MGP
+        notes: TitleOfCheckPoint mgCode 0 — 3,201 rows
+      - legacy: "2"
+        target: Daşoguz ş. MGP
+      - legacy: "12"
+        target: Türkmenbaşy deňiz menzilindäki MGP
+      - legacy: "4"
+        target: Farap MGP
+      - legacy: "1"
+        target: Howdan MGP
+      - legacy: "7"
+        target: Serhetabat ş. MGP
+      - legacy: "11"
+        target: Garabogaz MGP
+      - legacy: "3"
+        target: Köneürgenç ş. MGP
+    unmappedPolicy: block_row
+    notes: |
+      Match by TitleOfCheckPoint mgCode string or TitleOfCheckPointL label → checkpoint.json NameTm.
+      Reuse global checkpoint.json seed (14 rows) — all 8 DISTINCT values on ApplicationItem data map 1:1.
+
+  - targetCatalog: WorkPermittedLocationName
+    targetMatchProperty: NameTm
+    legacy:
+      storage: bit_matrix
+      table: dbo.WorkPermitLocation
+      via: PersonInApplication.WorkPermit → WorkPermit.WorkPermitLocation
+      transformRef: field-maps/ApplicationItem.yaml WorkPermittedLocations
+    audit:
+      completedAt: null
+      scope: ApplicationItem
+      distinctLegacyValuesUsed: null
+      allMappedToTarget: false
+    unmappedPolicy: block_row
+    notes: |
+      PENDING — full bit-matrix audit with WorkPermitItem discovery (73 legacy flags vs 8-row tenant seed).
+      ApplicationItem imports WorkPermittedLocations from linked WorkPermit row when ShowWorkPermittedLocations.
+      Reuse WorkPermitItem layer-3 when that dossier closes; until then Excel preview may list _UnmappedLookups.
+
+  - targetCatalog: MigrationService
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.DepartmentForRegistration
+      column: TitleOfDepartmentForRegistration
+      labelColumn: DepartmentForRegistrationL
+      valueKind: string
+      join: dbo.Application.DepartmentForRegistration
+      sampleQuery: |
+        SELECT d.TitleOfDepartmentForRegistration AS legacy_code,
+               d.DepartmentForRegistrationL AS legacy_name_tm,
+               COUNT(*) AS app_count
+        FROM dbo.Application a
+        INNER JOIN dbo.DepartmentForRegistration d ON d.Oid = a.DepartmentForRegistration
+        WHERE a.GCRecord IS NULL AND d.GCRecord IS NULL
+        GROUP BY d.TitleOfDepartmentForRegistration, d.DepartmentForRegistrationL
+        ORDER BY app_count DESC;
+    audit:
+      completedAt: 2026-06-30
+      scope: Application
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MigrationService.md
+      distinctLegacyValuesUsed: 9
+      applicationWithFk: 6840
+      allMappedToTarget: true
+      approvedAt: 2026-06-30
+      catalogRowsAdded:
+        - "TDMGKR — Lebap Kerki şäher bölümi"
+    values:
+      - legacy: TDMGMR
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine"
+      - legacy: TDMGAH
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine"
+      - legacy: TDMGAS
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+      - legacy: TDMGBN
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine"
+        notes: Legacy müdirligine → target müdirine
+      - legacy: TDMGSERH
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine"
+      - legacy: TDMGYL
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine"
+      - legacy: TDMGLB
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine"
+      - legacy: TDMG
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+        notes: Approved 2026-06-30 — legacy başlygyna → TDMGAS
+      - legacy: TDMGLBA
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+        notes: Approved 2026-06-30 — new TDMGKR seed row; use TDMGLBA:Kerki when label disambiguates
+      - legacy: "TDMGLBA:Kerki"
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+      - legacy: "TDMGLBA:Atamyrat"
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Atamyrat şäher bölüminiň müdirine"
+        notes: Legacy TDMGLBA + Atamyrat şäher bölümi label (~167 apps); soft-deleted lookup row in VISA2015
+    unmappedPolicy: allow_null
+    notes: |
+      Only set Application.MigrationService when ApplicationType.ShowMigrationService.
+      Null DepartmentForRegistration FK on non-registration types is expected (5397 apps).
+      PATCH imported Applications via id-map after approval — see MigrationService.md.

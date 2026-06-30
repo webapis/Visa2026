@@ -32,7 +32,6 @@
                 <LayoutItem Id="Lodging" RelativeSize="17.647058823529413" />
                 <LayoutItem Id="Region" ViewItem="Region" Index="2" RelativeSize="17.647058823529413" IsNewNode="True" />
                 <LayoutItem Id="City" ViewItem="City" Index="3" RelativeSize="17.647058823529413" IsNewNode="True" />
-                <LayoutItem Id="FullAddress" RelativeSize="17.647058823529413" Index="4" />
                 <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="5" RelativeSize="17.647058823529413" IsNewNode="True" />
                 <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="6" RelativeSize="23.529411764705884" IsNewNode="True" />
               </LayoutGroup>
@@ -358,8 +357,8 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="51.224489795918366">
             <LayoutGroup Id="BorderZone" RelativeSize="100">
               <LayoutGroup Id="BorderZone_col1" Direction="Vertical" RelativeSize="100" Caption="BorderZone_col1">
-                <LayoutItem Id="BorderZoneNumber" ViewItem="BorderZoneNumber" Index="0" RelativeSize="22.797927461139896" IsNewNode="True" />
-                <LayoutItem Id="StartDate" ViewItem="StartDate" Index="1" RelativeSize="16.580310880829014" IsNewNode="True" />
+                <LayoutItem Id="BorderZoneNumber" Index="0" RelativeSize="22.797927461139896" ViewItem="BorderZoneNumber" IsNewNode="True" />
+                <LayoutItem Id="StartDate" Index="1" RelativeSize="16.580310880829014" ViewItem="StartDate" IsNewNode="True" />
                 <LayoutItem Id="ValidityDuration" ViewItem="ValidityDuration" Index="2" RelativeSize="16.580310880829014" IsNewNode="True" />
                 <LayoutGroup Id="AutoBorderZoneExpirationRow" ShowCaption="False" Caption="AutoBorderZoneExpirationRow" Direction="Horizontal" Index="3" RelativeSize="44.04145077720207" IsNewNode="True">
                   <LayoutGroup Id="AutoBorderZoneExpirationCol" ShowCaption="False" Caption="" Index="0" RelativeSize="45.172413793103445" IsNewNode="True">
@@ -382,6 +381,15 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="BorderZoneItem_ListView">
+      <Columns>
+        <ColumnInfo Id="IsCancelled" Index="-1" />
+        <ColumnInfo Id="Person" Index="0" Width="140" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="Passport" Index="2" Width="100" />
+        <ColumnInfo Id="BorderZone" Index="3" Width="140" />
+      </Columns>
+    </ListView>
     <DetailView Id="BorderZoneLocation_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -516,16 +524,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="Invitation_ListView">
-      <Columns>
-        <ColumnInfo Id="InvitationNumber" Index="0" Width="110" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="StartDate" Index="2" Width="100" />
-        <ColumnInfo Id="ExpirationDate" Index="3" Width="100" />
-        <ColumnInfo Id="DaysRemaining" Index="4" Width="72" />
-        <ColumnInfo Id="ValidityDuration" Index="5" Width="120" />
-      </Columns>
-    </ListView>
     <DetailView Id="Invitation_DetailView">
       <Items>
         <PropertyEditor Id="Application" PropertyName="Application" IsNewNode="True" />
@@ -570,6 +568,16 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="Invitation_ListView">
+      <Columns>
+        <ColumnInfo Id="InvitationNumber" Index="0" Width="110" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="StartDate" Index="2" Width="100" />
+        <ColumnInfo Id="ExpirationDate" Index="3" Width="100" />
+        <ColumnInfo Id="DaysRemaining" Index="4" Width="72" />
+        <ColumnInfo Id="ValidityDuration" Index="5" Width="120" />
+      </Columns>
+    </ListView>
     <DetailView Id="InvitationItem_DetailView">
       <Items>
         <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
@@ -598,32 +606,15 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="RejectionItem_DetailView">
-      <Items>
-        <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
-      </Items>
-      <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="RejectionItem" RelativeSize="100">
-              <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="7.085346215780999" IsNewNode="True" />
-              <LayoutItem Id="Passport" Index="1" RelativeSize="5.152979066022544" ViewItem="Passport" IsNewNode="True" />
-              <LayoutItem Id="RejectionItemName" Index="2" RelativeSize="5.152979066022544" />
-              <LayoutItem Id="Reason" ViewItem="Reason" Index="3" RelativeSize="82.60867471819646" />
-              <LayoutItem Id="Rejection" Removed="True" />
-            </LayoutGroup>
-          </LayoutGroup>
-        </LayoutGroup>
-      </Layout>
-    </DetailView>
-    <ListView Id="Rejection_ListView">
+    <ListView Id="InvitationItem_ListView">
       <Columns>
-        <ColumnInfo Id="RejectionTitle" Index="0" Width="200" />
+        <ColumnInfo Id="Invitation" Index="-1" />
+        <ColumnInfo Id="IsCancelled" Index="-1" />
+        <ColumnInfo Id="IsChanged" Index="-1" />
+        <ColumnInfo Id="InvitationItemName" Index="0" Width="180" />
         <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="Date" Index="2" Width="100" />
-        <ColumnInfo Id="RejectedDocNumber" Index="3" Width="120" />
-        <ColumnInfo Id="Application" Index="4" Width="140" />
-        <ColumnInfo Id="Reason" Index="5" Width="240" />
+        <ColumnInfo Id="Person" Index="2" Width="120" />
+        <ColumnInfo Id="Passport" Index="3" Width="100" />
       </Columns>
     </ListView>
     <DetailView Id="Lodging_DetailView">
@@ -845,68 +836,87 @@
       </Layout>
     </DetailView>
     <DetailView Id="Person_DetailView_FamilyMember" Caption="Family member">
+      <Items>
+        <PropertyEditor Id="SponsoringEmployee" PropertyName="SponsoringEmployee" IsNewNode="True" />
+      </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="75.20564042303172">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="41.5014164305949">
             <TabbedGroup Id="Item1" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Person" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" Caption="Family member" IsNewNode="True">
-                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="64.65028355387524" IsNewNode="True">
-                  <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="7.638888888888889" IsNewNode="True" />
-                  <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutGroup Id="Autodbbe6d56-77b7-4439-a868-9c8401cecd77" ShowCaption="False" Caption="Autodbbe6d56-77b7-4439-a868-9c8401cecd77(9)" Direction="Horizontal" Index="2" RelativeSize="8.680555555555555" IsNewNode="True">
-                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="50.58479532163743" IsNewNode="True" />
-                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="49.41520467836257" IsNewNode="True" />
+                <LayoutGroup Id="Person_col1" ShowCaption="False" Index="0" RelativeSize="64.41756842775303" IsNewNode="True">
+                  <LayoutItem Id="FirstName" ViewItem="FirstName" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" />
+                  <LayoutItem Id="LastName" ViewItem="LastName" Index="1" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutGroup Id="Autodbbe6d56-77b7-4439-a868-9c8401cecd77" ShowCaption="False" Caption="Autodbbe6d56-77b7-4439-a868-9c8401cecd77(9)" Direction="Horizontal" Index="2" RelativeSize="9.578544061302683" IsNewNode="True">
+                    <LayoutItem Id="DateOfBirth" ViewItem="DateOfBirth" Index="0" RelativeSize="50.29644268774704" IsNewNode="True" />
+                    <LayoutItem Id="Age" ViewItem="Age" Index="1" RelativeSize="49.70355731225296" IsNewNode="True" />
                   </LayoutGroup>
-                  <LayoutItem Id="BirthPlace" ViewItem="BirthPlace" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="4" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Gender" ViewItem="Gender" Index="5" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="MaritalStatus" ViewItem="MaritalStatus" Index="6" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Nationality" ViewItem="Nationality" Index="8" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="PersonalNumber" ViewItem="PersonalNumber" Index="9" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="ForeignAddress" ViewItem="ForeignAddress" Index="10" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="ForeignAddressCountry" ViewItem="ForeignAddressCountry" Index="11" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="12" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Subcontractor" ViewItem="Subcontractor" Index="13" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="7.638888888888889" IsNewNode="True" />
+                  <LayoutItem Id="BirthPlace" ViewItem="BirthPlace" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="CountryOfBirth" ViewItem="CountryOfBirth" Index="4" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="Gender" ViewItem="Gender" Index="5" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="MaritalStatus" ViewItem="MaritalStatus" Index="6" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="Nationality" ViewItem="Nationality" Index="7" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="PersonalNumber" ViewItem="PersonalNumber" Index="8" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="ForeignAddress" ViewItem="ForeignAddress" Index="9" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="ForeignAddressCountry" ViewItem="ForeignAddressCountry" Index="10" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="ProjectContract" ViewItem="ProjectContract" Index="11" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="Subcontractor" ViewItem="Subcontractor" Index="12" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="SponsoringEmployee" ViewItem="SponsoringEmployee" Index="13" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="Relationship" ViewItem="Relationship" Index="14" RelativeSize="8.42911877394636" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="35.349716446124766" Caption="Person_col2" IsNewNode="True">
-                  <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="8.365019011406844" IsNewNode="True" />
-                  <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="30.854166666666664" CaptionLocation="Top" IsNewNode="True" />
-                  <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.034722222222222" IsNewNode="True" />
-                  <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
-                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="50.55555555555556" IsNewNode="True" />
+                <LayoutGroup Id="Person_col2" ShowCaption="False" Index="1" RelativeSize="35.582431572246975" Caption="Person_col2" IsNewNode="True">
+                  <LayoutItem Id="ShowOptionalFields" ViewItem="ShowOptionalFields" Index="0" RelativeSize="8.42911877394636" IsNewNode="True" />
+                  <LayoutItem Id="Photo" ViewItem="Photo" Index="1" RelativeSize="35.05747126436781" CaptionLocation="Top" IsNewNode="True" />
+                  <LayoutItem Id="IsArchived" ViewItem="IsArchived" Index="2" RelativeSize="5.555555555555555" IsNewNode="True" />
+                  <LayoutItem Id="Email" ViewItem="Email" Index="3" RelativeSize="6.130268199233717" IsNewNode="True" />
+                  <LayoutItem Id="HireDate" ViewItem="HireDate" Index="4" RelativeSize="44.827586206896555" IsNewNode="True" />
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="24.794359576968272" Index="1">
-            <LayoutGroup Id="Passports" RelativeSize="100">
+          <TabbedGroup Id="Tabs" RelativeSize="58.4985835694051" Index="1">
+            <LayoutGroup Id="Passports" RelativeSize="100" Index="0">
               <LayoutItem Id="Passports" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="PositionHistory" RelativeSize="100" Index="2">
+            <LayoutGroup Id="PositionHistory" RelativeSize="100" Index="1">
               <LayoutItem Id="PositionHistory" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="3">
+            <LayoutGroup Id="MedicalRecords" RelativeSize="100" Index="2">
               <LayoutItem Id="MedicalRecords" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="4">
+            <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="3">
               <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
+            <LayoutGroup Id="Documents" ShowCaption="True" Index="4" RelativeSize="100" IsNewNode="True">
               <LayoutItem Id="Documents" Index="0" RelativeSize="100" ViewItem="Documents" IsNewNode="True" />
             </LayoutGroup>
-            <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="6" RelativeSize="100" IsNewNode="True">
+            <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
               <LayoutItem Id="FamilyRelationDocuments" Index="0" RelativeSize="100" ViewItem="FamilyRelationDocuments" IsNewNode="True" />
             </LayoutGroup>
-            <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="7">
+            <LayoutGroup Id="WorkPermitItems" RelativeSize="100">
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="FamilyMembers" RelativeSize="100">
+              <LayoutItem Id="FamilyMembers" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="TravelHistories" RelativeSize="100" Index="8">
               <LayoutItem Id="TravelHistories" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="WorkDuties" Index="7" RelativeSize="100">
+            <LayoutGroup Id="WorkDuties" Index="9" RelativeSize="100">
               <LayoutItem Id="WorkDuties" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Salaries" Index="8" RelativeSize="100">
+            <LayoutGroup Id="Salaries" Index="10" RelativeSize="100">
               <LayoutItem Id="Salaries" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="InvitationItems" RelativeSize="100">
+              <LayoutItem Id="InvitationItems" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="RejectionItems" RelativeSize="100">
+              <LayoutItem Id="RejectionItems" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="ApplicationItems" Index="13" RelativeSize="100">
+              <LayoutItem Id="ApplicationItems" RelativeSize="100" />
             </LayoutGroup>
             <LayoutGroup Id="Educations" RelativeSize="100" Removed="True">
               <LayoutItem Id="Educations" RelativeSize="100" />
@@ -1027,6 +1037,7 @@
         <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
         <ColumnInfo Id="Subcontractor" Index="9" Width="158" />
         <ColumnInfo Id="CurrentPositionHistory" Index="10" Removed="True" />
+        <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
         <ColumnInfo Id="IsArchived" Index="18" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
@@ -1059,6 +1070,7 @@
         <ColumnInfo Id="IsArchived" Index="11" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
+        <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
         <ColumnInfo Id="FirstName" Removed="True" />
         <ColumnInfo Id="ForeignAddress" Removed="True" />
@@ -1085,6 +1097,7 @@
         <ColumnInfo Id="IsArchived" Index="9" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
+        <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
         <ColumnInfo Id="Email" Removed="True" />
         <ColumnInfo Id="FirstName" Removed="True" />
         <ColumnInfo Id="ForeignAddress" Removed="True" />
@@ -1124,6 +1137,43 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="Rejection_ListView">
+      <Columns>
+        <ColumnInfo Id="RejectionTitle" Index="0" Width="200" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="Date" Index="2" Width="100" />
+        <ColumnInfo Id="RejectedDocNumber" Index="3" Width="120" />
+        <ColumnInfo Id="Application" Index="4" Width="140" />
+        <ColumnInfo Id="Reason" Index="5" Width="240" />
+      </Columns>
+    </ListView>
+    <DetailView Id="RejectionItem_DetailView">
+      <Items>
+        <PropertyEditor Id="Person" PropertyName="Person" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="RejectionItem" RelativeSize="100">
+              <LayoutItem Id="Person" ViewItem="Person" Index="0" RelativeSize="7.085346215780999" IsNewNode="True" />
+              <LayoutItem Id="Passport" Index="1" RelativeSize="5.152979066022544" ViewItem="Passport" IsNewNode="True" />
+              <LayoutItem Id="RejectionItemName" Index="2" RelativeSize="5.152979066022544" />
+              <LayoutItem Id="Reason" Index="3" RelativeSize="82.60867471819645" ViewItem="Reason" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="RejectionItem_ListView">
+      <Columns>
+        <ColumnInfo Id="Rejection" Index="-1" />
+        <ColumnInfo Id="RejectionItemName" Index="0" Width="200" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="Person" Index="2" Width="120" />
+        <ColumnInfo Id="Passport" Index="3" Width="100" />
+        <ColumnInfo Id="Reason" Index="4" Width="200" />
+      </Columns>
+    </ListView>
     <DetailView Id="Specialty_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -1194,13 +1244,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermit_ListView">
-      <Columns>
-        <ColumnInfo Id="WorkPermitNumber" Index="0" Width="120" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="IssuedDate" Index="2" Width="100" />
-      </Columns>
-    </ListView>
     <DetailView Id="WorkPermit_DetailView">
       <Items>
         <PropertyEditor Id="Application" PropertyName="Application" IsNewNode="True" />
@@ -1236,6 +1279,13 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="WorkPermit_ListView">
+      <Columns>
+        <ColumnInfo Id="WorkPermitNumber" Index="0" Width="120" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
+        <ColumnInfo Id="IssuedDate" Index="2" Width="100" />
+      </Columns>
+    </ListView>
     <ListView Id="WorkPermit_WorkPermitItems_ListView">
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
@@ -1305,37 +1355,6 @@
         <ColumnInfo Id="DaysRemaining" Index="6" Width="72" />
         <ColumnInfo Id="WorkPermittedLocations" Index="7" Width="240" />
         <ColumnInfo Id="ASNumber" Index="8" Width="90" />
-      </Columns>
-    </ListView>
-    <ListView Id="InvitationItem_ListView">
-      <Columns>
-        <ColumnInfo Id="InvitationItemName" Index="0" Width="180" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="Person" Index="2" Width="120" />
-        <ColumnInfo Id="Passport" Index="3" Width="100" />
-        <ColumnInfo Id="Invitation" Index="-1" />
-        <ColumnInfo Id="IsCancelled" Index="-1" />
-        <ColumnInfo Id="IsChanged" Index="-1" />
-        <ColumnInfo Id="Description" Index="-1" />
-      </Columns>
-    </ListView>
-    <ListView Id="RejectionItem_ListView">
-      <Columns>
-        <ColumnInfo Id="RejectionItemName" Index="0" Width="200" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="Person" Index="2" Width="120" />
-        <ColumnInfo Id="Passport" Index="3" Width="100" />
-        <ColumnInfo Id="Reason" Index="4" Width="200" />
-        <ColumnInfo Id="Rejection" Index="-1" />
-      </Columns>
-    </ListView>
-    <ListView Id="BorderZoneItem_ListView">
-      <Columns>
-        <ColumnInfo Id="Person" Index="0" Width="140" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="Passport" Index="2" Width="100" />
-        <ColumnInfo Id="BorderZone" Index="3" Width="140" />
-        <ColumnInfo Id="IsCancelled" Index="-1" />
       </Columns>
     </ListView>
   </Views>

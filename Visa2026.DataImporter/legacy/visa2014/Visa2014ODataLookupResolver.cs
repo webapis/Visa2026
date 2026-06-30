@@ -27,6 +27,14 @@ internal sealed class Visa2014ODataLookupResolver
     private List<Hotel> _hotels = [];
     private List<Hospital> _hospitals = [];
     private List<OtherSite> _otherSites = [];
+    private List<ApplicationType> _applicationTypes = [];
+    private List<Urgency> _urgencies = [];
+    private List<VisaPeriod> _visaPeriods = [];
+    private List<MovementPermitLocation> _movementPermitLocations = [];
+    private List<BorderZoneLocation> _borderZoneLocations = [];
+    private List<ApplicationState> _applicationStates = [];
+    private List<ApplicationLocation> _applicationLocations = [];
+    private List<CheckPoint> _checkPoints = [];
 
     public async Task LoadAsync(ApiClient api, string? tenantCatalogDirectory = null)
     {
@@ -52,6 +60,14 @@ internal sealed class Visa2014ODataLookupResolver
         _hotels = await api.GetAllAsync<Hotel>("Hotel");
         _hospitals = await api.GetAllAsync<Hospital>("Hospital");
         _otherSites = await api.GetAllAsync<OtherSite>("OtherSite");
+        _applicationTypes = await api.GetAllAsync<ApplicationType>("ApplicationType");
+        _urgencies = await api.GetAllAsync<Urgency>("Urgency");
+        _visaPeriods = await api.GetAllAsync<VisaPeriod>("VisaPeriod");
+        _movementPermitLocations = await api.GetAllAsync<MovementPermitLocation>("MovementPermitLocation");
+        _borderZoneLocations = await api.GetAllAsync<BorderZoneLocation>("BorderZoneLocation");
+        _applicationStates = await api.GetAllAsync<ApplicationState>("ApplicationState");
+        _applicationLocations = await api.GetAllAsync<ApplicationLocation>("ApplicationLocation");
+        _checkPoints = await api.GetAllAsync<CheckPoint>("CheckPoint");
 
         var lookupCatalogDir = string.IsNullOrWhiteSpace(tenantCatalogDirectory)
             ? null
@@ -234,6 +250,65 @@ internal sealed class Visa2014ODataLookupResolver
     {
         if (row.Id != Guid.Empty)
             _actualPositions.Add(row);
+    }
+
+    public Guid? ResolveApplicationType(string? name) =>
+        ResolveByName(_applicationTypes, name, t => t.Name);
+
+    public Guid? ResolveApplicationState(string? code) =>
+        ResolveByCode(_applicationStates, code, s => s.Code);
+
+    public Guid? ResolveApplicationLocation(string? code) =>
+        ResolveByCode(_applicationLocations, code, l => l.Code);
+
+    public Guid? ResolveUrgency(string? code) =>
+        ResolveByCode(_urgencies, code, u => u.Code);
+
+    public Guid? ResolveVisaPeriod(string? localizationKeyOrCode)
+    {
+        if (string.IsNullOrWhiteSpace(localizationKeyOrCode))
+            return null;
+
+        foreach (var row in _visaPeriods)
+        {
+            if (VisaPeriodKeyMatches(row, localizationKeyOrCode))
+                return row.Id;
+        }
+
+        return null;
+    }
+
+    public Guid? ResolveMovementPermitLocation(string? nameTm) =>
+        ResolveByNameTm(_movementPermitLocations, nameTm, m => m.NameTm);
+
+    public Guid? ResolveCheckPoint(string? nameTmOrCode)
+    {
+        if (string.IsNullOrWhiteSpace(nameTmOrCode))
+            return null;
+
+        var byNameTm = ResolveByNameTm(_checkPoints, nameTmOrCode, c => c.NameTm);
+        if (byNameTm.HasValue)
+            return byNameTm;
+
+        return ResolveByCode(_checkPoints, nameTmOrCode, c => c.Code);
+    }
+
+    public Guid? ResolveBorderZoneLocation(string? commaSeparatedLabels)
+    {
+        if (string.IsNullOrWhiteSpace(commaSeparatedLabels))
+            return null;
+
+        foreach (var part in commaSeparatedLabels.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (IsBorderZoneNoneLabel(part))
+                continue;
+
+            var id = ResolveByNameTm(_borderZoneLocations, part, b => b.NameTm);
+            if (id.HasValue)
+                return id;
+        }
+
+        return null;
     }
 
     public Guid? ResolveGender(string? translatedCode) =>
@@ -660,6 +735,20 @@ internal sealed class Visa2014ODataLookupResolver
         return preferred?.Id ?? (_educationLevels.Count > 0 ? _educationLevels[0].Id : null);
     }
 
+    private static bool VisaPeriodKeyMatches(VisaPeriod row, string key)
+    {
+        if (Visa2014CatalogMatchHelper.KeysEqual(row.LocalizationKey, key))
+            return true;
+        if (Visa2014CatalogMatchHelper.KeysEqual(row.Code, key))
+            return true;
+        return string.Equals(row.LocalizationKey, key, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(row.Code, key, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsBorderZoneNoneLabel(string label) =>
+        Visa2014CatalogMatchHelper.KeysEqual(label, "Ýok")
+        || string.Equals(label.Trim(), "Ýok", StringComparison.Ordinal);
+
     private static bool EducationLevelKeyMatches(EducationLevel row, string key)
     {
         if (Visa2014CatalogMatchHelper.KeysEqual(row.LocalizationKey, key))
@@ -762,6 +851,14 @@ internal sealed class Visa2014ODataLookupResolver
         Hotel h => h.Id,
         Hospital hs => hs.Id,
         OtherSite os => os.Id,
+        ApplicationType at => at.Id,
+        Urgency u => u.Id,
+        VisaPeriod vp => vp.Id,
+        MovementPermitLocation mpl => mpl.Id,
+        BorderZoneLocation bzl => bzl.Id,
+        ApplicationState ast => ast.Id,
+        ApplicationLocation al => al.Id,
+        CheckPoint cp => cp.Id,
         _ => throw new InvalidOperationException($"Unsupported lookup type {typeof(T).Name}"),
     };
 }

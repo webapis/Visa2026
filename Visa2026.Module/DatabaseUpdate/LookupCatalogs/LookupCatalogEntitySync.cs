@@ -715,8 +715,9 @@ internal static class LookupCatalogEntitySync
         if (string.IsNullOrWhiteSpace(key))
             key = GetString(row, "Code");
 
-        // ProjectContract variants share Code but differ by NameTm — do not reuse one LocalizationKey for all.
-        if (target is ProjectContract && string.IsNullOrWhiteSpace(GetString(row, "LocalizationKey")))
+        // ProjectContract / MigrationService variants share Code but differ by NameTm — unique LocalizationKey per row.
+        if ((target is ProjectContract or MigrationService)
+            && string.IsNullOrWhiteSpace(GetString(row, "LocalizationKey")))
         {
             var title = GetString(row, "NameTm") ?? lookup.NameTm;
             if (!string.IsNullOrWhiteSpace(title))

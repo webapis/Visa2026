@@ -1,0 +1,103 @@
+# Discovery dossier — MedicalRecord (Spid kepilnama file chain)
+# Legacy: Person.SpidKepilnama → ICopy (dbo.Copy) → FileData — not scalar MedicalRecord fields.
+# dependsOn: Person — Person id-map required before OData POST / file wave.
+
+targetODataEntity: MedicalRecord
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-29
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    SQL discovery 2026-06-29 (VISA2015, calik-energi).
+    Legacy medical scans: IPersonn_SpidKepilnama → Copy → FileData (VISA2014 IPerson.SpidKepilnama).
+    Çalik data: 2 active link rows, 0 resolvable Copy rows, 0 importable blobs — file wave is no-op on this backup.
+    Scalar defaults signed off 2026-06-29 (developer):
+      DocumentNumber = "0"; IssueDate = MIN audit ModifiedOn at upload (ObjectCreated on Copy/FileData);
+      ValidityDuration = Month3 (90 days); ExpirationDate derived on save.
+    importConfirmed 2026-06-29 — file importer shipped; Çalik run 2026-06-29 posted 0 (orphan links).
+
+legacy:
+  boClass: IPerson
+  boPath: VISA2014.Module/DC/IPerson.cs
+  tables:
+    - dbo.IPersonn_SpidKepilnama
+    - dbo.Copy
+    - dbo.FileData
+    - dbo.AuditDataItemPersistent
+    - dbo.AuditedObjectWeakReference
+  rowCount: 2
+  primaryKey: IPersonn_SpidKepilnama.OID
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/MedicalRecord.cs
+  docPath: docs/PERSON_DOCUMENT_COPIES.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/MedicalRecord.yaml
+  tableMappingId: medical-record-spid-kepilnama
+  cardinality: one_medical_record_per_spid_copy_link
+  upsertKeys:
+    - Person
+    - legacyCopyOid
+  lookupDependencies:
+    - ValidityDuration
+  lookupAuditStatus:
+    ValidityDuration: approved_global_catalog_Month3
+  duplicateGroups: 0
+  legacyOnlyCount: 3
+  targetOnlyCount: 1
+  mismatchCount: 4
+  blockedReason: null
+  notes: |
+    Extract (file wave only — no legacy scalar medical fields):
+      Person ← IPersonn_SpidKepilnama.IPersonn_SpidKepilnama_Link
+      Copy ← ICopy_Implicit_IPersonn_SpidKepilnama_List_Link
+      FileData ← Copy.CopyOfDocument (Content + FileName)
+    Skip link when Copy row missing (orphan FK), CopyOfDocument null, or FileData.Content null.
+    Skip when Person not in id-map.
+    Per importable link: POST MedicalRecord (synthetic scalars) then MedicalRecordDocument + FileData bytes.
+    DocumentNumber: fixed "0" (no legacy number).
+    IssueDate: MIN(AuditDataItemPersistent.ModifiedOn) for ObjectCreated on Copy.Oid and FileData.Oid
+      via AuditedObjectWeakReference.GuidId join (verified on sample Copy 2014-01-25).
+      Fallback if no audit: skip row (_issueDateSource: no_audit).
+    ValidityDuration: resolve LocalizationKey Month3 (validity-duration.json, 90 days, IsDefault).
+    ExpirationDate: computed by MedicalRecord.UpdateExpirationDate (IssueDate + 90 days).
+    Employee AIDS boolean flags (AIDsKepilnamasy*, etc.) are workflow text only — not mapped.
+    CLI (planned): --import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument
+    id-map key: legacy Copy.Oid (or link OID if Copy orphan — only stub in preview).
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: false
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-29
+completedBy: developer
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  spidLinkRowsActive: 2
+  spidLinksWithCopyRow: 0
+  spidLinksWithFileBlob: 0
+  copyRowsActive: 104
+  copyRowsWithFileData: 44
+  auditPatternVerified: true
+  sampleAuditIssueDate: 2014-01-25
+  previewImportRowsExpected: 0
+  odataPosted: 0
+  odataOrphanLinks: 2
+  fileImportCompletedAt: 2026-06-29

@@ -99,6 +99,9 @@ Waves match [`importPhases`](../../Visa2026.DataImporter/legacy/visa2014/order.y
 | **Local dev** | `VISA2015` + `Visa2026DbDev` | Discovery, mapping, first pilot |
 | **Staging** | Fresh or restored Visa2026 staging DB | Full-wave UAT, officer spot-check |
 | **Production** | `Visa2026DbProd` | Cutover only after staging sign-off |
+| **On-prem IIS** | `10.100.128.25` (:80 / :8080 / :8081) | See [ON_PREM_IIS_MIGRATION_RUNBOOK.md](./ON_PREM_IIS_MIGRATION_RUNBOOK.md) — legacy SQL `10.100.128.15` |
+
+**Parallel period (on-prem):** officers **view/search only** in Visa2026; legacy `VISA2015` remains system of record; planned **nightly one-way sync** legacy → Visa2026 until cutover (`import-strategy.yaml` → `onPremDeployment.parallelPeriod`).
 
 **Rules:**
 

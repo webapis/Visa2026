@@ -89,22 +89,55 @@ entities:
     blockReason: null
     notes: "OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 63 transform skipped."
 
+  - targetODataEntity: MedicalRecord
+    discoveryDossier: discovery/MedicalRecord.yaml
+    tableMappingId: medical-record-spid-kepilnama
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: IPersonn_SpidKepilnama
+    legacyBo: IPerson.SpidKepilnama
+    blockReason: null
+    notes: |
+      Spid kepilnama file chain. File import 2026-06-29: 0 posted (2 orphan links, 0 blobs on Çalik).
+
   - targetODataEntity: Application
     discoveryDossier: discovery/Application.yaml
-    discoveryStatus: not_started
-    importConfirmed: false
+    discoveryStatus: complete
+    importConfirmed: true
     importStatus: pending
-    legacyTable: null
-    legacyBo: null
+    legacyTable: dbo.Application + dbo.IRegistration_Data
+    legacyBo: IApplication
     blockReason: null
-    notes: "dependsOn Person — discover only after Person dossier complete (Person discovery complete 2026-06-20)."
+    notes: |
+      importConfirmed 2026-06-29 after Application-preview.calik-energi.xlsx review (12,129 import / 108 skipped).
+      862 duplicate ManualApplicationNumber groups — upsert on Oid. ApplicationItem discovery complete.
+      OData: Visa2014ApplicationODataImporter wired in Visa2014ImportCommand; id-map id-maps/calik-energi/Application.json; pilot pending.
 
   - targetODataEntity: ApplicationItem
     discoveryDossier: discovery/ApplicationItem.yaml
-    discoveryStatus: not_started
+    tableMappingId: application-item-main
+    discoveryStatus: complete
     importConfirmed: false
     importStatus: pending
-    legacyTable: null
-    legacyBo: null
+    legacyTable: PersonInApplication
+    legacyBo: IPersonInApplication
     blockReason: null
-    notes: "dependsOn Person + Application — see order.yaml."
+    notes: |
+      Discovery 2026-06-29: 21,794 active rows; dedupe 925 groups.
+      Layer 3 PurposeOfTravel + CheckPoint drafted; WorkPermittedLocations pending WorkPermitItem audit.
+      204 rows on parent apps with skipped ApplicationType E:44/E:55 (inherit parent skip_row).
+
+  - targetODataEntity: ApplicationProgress
+    discoveryDossier: discovery/ApplicationProgress.yaml
+    tableMappingId: application-progress-synthetic
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: pending
+    legacyTable: dbo.Application (synthetic)
+    legacyBo: IApplication
+    blockReason: null
+    notes: |
+      importConfirmed 2026-06-29 — preview 32,177 progress rows from 12,129 parents (108 E:44/E:55 skips).
+      Requires Application id-map before OData POST.
+

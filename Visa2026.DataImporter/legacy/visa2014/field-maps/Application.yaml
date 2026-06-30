@@ -1,0 +1,386 @@
+# Application field map — layer 2
+# Layer 1: table-mappings.yaml (id: application-main)
+# Layer 3: lookup-translations.yaml (+ calik-energi overlay for ProjectContract)
+
+tableMappingId: application-main
+
+source:
+  table: Application
+  schema: dbo
+
+target:
+  odataEntity: Application
+
+deduplication:
+  enabled: true
+  keys:
+    - Oid
+  manualNumberDedupe:
+    enabled: true
+    when: duplicate ManualApplicationNumber among active rows
+    keys:
+      - ManualApplicationNumber
+    canonicalRule: keep_all_import_with_oid_upsert
+    notes: |
+      862 duplicate number groups (e.g. multiple 1/-2). Visa2026 uniqueness is prefix+year+month+number.
+      Import all rows; upsert/id-map on legacy Oid. Set IsManualEntry=true; preserve FullApplicationNumber as-is.
+  action: import_one_per_legacy_oid
+  discoveryQuery: |
+    SELECT r.ManualApplicationNumber, COUNT(*) cnt
+    FROM dbo.Application a
+    JOIN dbo.IRegistration_Data r ON r.Oid = a.IRegistration_Data
+    WHERE a.GCRecord IS NULL AND r.ManualApplicationNumber IS NOT NULL
+    GROUP BY r.ManualApplicationNumber
+    HAVING COUNT(*) > 1
+    ORDER BY cnt DESC;
+
+propertyGaps:
+  legacyOnly:
+    - column: ForEmployee
+      disposition: derive
+      notes: Input to ApplicationType composite transform — not persisted on Visa2026 Application
+    - column: ForFamilyMember
+      disposition: derive
+      notes: Input to ApplicationType composite transform
+    - column: BaseApplicationType
+      disposition: drop
+    - column: ApplicationTypeForEmployee
+      disposition: derive
+      notes: Join SubType ID for ApplicationType layer 3
+    - column: ApplicationTypeForFamilyMember
+      disposition: derive
+    - column: IsInvitationWithWorkPermit
+      disposition: derive
+      notes: InvitationAndWorkPermitRequired enum → App_Inv vs App_Inv_And_WP
+    - column: IsWizaWithWorkPermit
+      disposition: derive
+      notes: WizaAndWorkPermitRequired enum → App_Visa_Ext vs App_Visa_and_WP_Ext
+    - column: StrikeOffType
+      disposition: defer
+      notes: May inform App_Reg_Check_Out vs App_Reg_Check_Out_Internal — confirm at ApplicationItem
+    - column: NewRegistrationLocation
+      disposition: defer
+      notes: Registration cities on ApplicationItem in Visa2026 — header FK dropped
+    - column: PreviousRegistrationLocation
+      disposition: defer
+    - column: ChangeInformation
+      disposition: derive
+      notes: SubType 5 branches → App_Reg_Info_Change_Passport / _Visa / _Address
+    - column: DepartmentForRegistration
+      disposition: lookup_translate
+      notes: TitleOfDepartmentForRegistration → MigrationService NameTm (approved lookup-comparisons/MigrationService.md)
+    - column: AppliedMinistery
+      disposition: defer
+      notes: Ministry metadata on ProjectContract legs — not Application FK in Visa2026
+    - column: ProcessDate
+      disposition: defer
+      notes: ApplicationProgress wave
+    - column: ProcessNumber
+      disposition: defer
+    - column: DateForwardedToMonistery
+      disposition: defer
+    - column: MinisteriesDocumentDate
+      disposition: defer
+    - column: MinisteriesDocumentNumber
+      disposition: defer
+    - column: DateForwardedToMinConstruction
+      disposition: defer
+    - column: DocNumberForwardedToMinConstruction
+      disposition: defer
+    - column: SigningPerson
+      disposition: drop
+      notes: Company singleton in Visa2026 (OrganizationReportHelper)
+    - column: InvitationToBeChanged
+      disposition: defer
+      notes: ApplicationItem / Invitation linkage — ApplicationItem discovery
+    - column: PrefferedVisaCategory
+      disposition: defer
+      notes: Preferred category change target — may map on ApplicationItem for change-category apps
+    - column: Plural
+      disposition: drop
+      notes: Report pluralization table — computed in Visa2026
+    - column: Bellik
+      disposition: drop
+    - column: NumberOfPages
+      disposition: drop
+    - column: NumberOfPerson
+      disposition: drop
+      notes: Computed from ApplicationItems count
+    - column: PersonInApplication
+      disposition: child_bo
+      notes: ApplicationItem import — separate field-map
+    - column: ApplicationResult
+      disposition: defer
+      notes: Invitation/Rejection results — child BO waves
+    - column: WorkPermit
+      disposition: child_bo
+      notes: WorkPermit header synthesis — see WorkPermit.yaml
+    - column: ChooseBorderZoneType
+      disposition: derive
+      notes: BorderZoneForApplication when BorderZone FK set
+    - column: BorderZonePeriod
+      disposition: drop
+      notes: VisaPeriod FK on border-zone apps — Visa2026 uses header VisaPeriod when ShowVisaPeriod
+    - column: Cancelled
+      disposition: defer
+      notes: May map to ApplicationProgress terminal state
+    - column: Rejected
+      disposition: defer
+    - column: VisaExtended
+      disposition: drop
+    - column: SahsyKagyz
+      disposition: file_wave
+    - column: AnketaMaksat
+      disposition: drop
+    - column: AppConf
+      disposition: drop
+    - column: ObjectType
+      disposition: derive
+      notes: SimpleProcess vs LongProcess discriminator — informs progress route
+    - column: OptimisticLockField
+      disposition: drop
+    - column: Counter
+      disposition: drop
+    - column: CreatePDF_SK
+      disposition: drop
+    - column: IsComplete
+      disposition: drop
+    - column: CurrentYear
+      disposition: derive
+      notes: Used with ManualApplicationNumber generation — map to Year from ApplicationDate
+  targetOnly:
+    - property: ApplicationTypeQuickCode
+      disposition: computed
+      missingBehavior: omit
+      notes: Set from ApplicationType.SelectionCode on load
+    - property: VisaType
+      default: from_application_type_defaults
+      missingBehavior: use_default
+      notes: No legacy header FK — ApplyDefaultsForApplicationType on type set
+    - property: MigrationService
+      default: null
+      missingBehavior: allow_null
+      notes: ShowMigrationService types — map from DepartmentForRegistration via lookup-translations.yaml (approved 2026-06-30)
+    - property: BusinessTripPurpose
+      default: null
+      missingBehavior: allow_null
+    - property: FromCity
+      default: null
+      missingBehavior: allow_null
+      notes: Legacy business trip uses destination only (ToCity)
+    - property: MovementPermitLocation
+      default: null
+      missingBehavior: allow_null
+      notes: Legacy GoşmaçaIşlemägeRugsatÝeri FK when populated
+    - property: ApplicationItems
+      disposition: child_bo
+    - property: Invitations
+      disposition: child_bo
+    - property: Rejections
+      disposition: child_bo
+    - property: WorkPermits
+      disposition: child_bo
+    - property: ProgressHistory
+      disposition: defer
+      notes: ApplicationProgressInitializer seeds IS_BEING_PREPARED; legacy state history separate wave
+    - property: ApprovalLegSnapshots
+      disposition: defer
+    - property: CurrentState
+      disposition: computed
+    - property: PrimaryStateCode
+      disposition: computed
+    - property: WorkingDaysInCurrentStep
+      disposition: computed
+    - property: ProgressSlaStatement
+      disposition: computed
+    - property: MigrationSlaStatement
+      disposition: computed
+    - property: CreationProgressRoute
+      disposition: omit
+    - property: AvailableProgressStates
+      disposition: omit
+    - property: AvailableProgressLocations
+      disposition: omit
+  mismatches:
+    - property: IsManualEntry
+      legacyColumn: AutoRegistration
+      notes: Always true on import — legacy AutoRegistration not mirrored; prevents OnSaving auto-numbering
+    - property: FullApplicationNumber
+      legacyColumn: IRegistration_Data.ManualApplicationNumber
+      notes: Preserve legacy display number; parse ApplicationNumber segment after /
+    - property: ApplicationDate
+      legacyColumn: IRegistration_Data.ManualApplicationDate
+    - property: BusinessTripEndDate
+      legacyColumn: DateOfDeparture + DurationOfStay
+      notes: EndOfBusinessTrip = DateOfDeparture + (DurationOfStay - 1) days
+    - property: BorderZoneLocation
+      legacyColumn: BorderZoneForVisa
+      notes: Bit matrix on dbo.BorderZoneForVisa — same transform as Visa.BorderZone
+    - property: ToCity
+      legacyColumn: BusinessTripDestination
+      notes: ŞeherEtrap FK — reuse City/CityByName layer 3 from AddressOfResidence wave
+    - property: ProjectContract
+      legacyColumn: Contract
+      notes: Long-process rows only; resolve NumberOfContract via calik-energi ProjectContract overlay
+    - property: ApplicationType
+      legacyColumn: ApplicationTypeForEmployee / ApplicationTypeForFamilyMember
+      notes: Composite transform — see lookup-translations ApplicationType catalog
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: Id-map key only
+
+  - source: IRegistration_Data.ManualApplicationNumber
+    target: FullApplicationNumber
+    transform: string_trim
+    missingBehavior: skip_row
+
+  - source: IRegistration_Data.ManualApplicationNumber
+    target: ApplicationNumber
+    transform: parse_app_number_suffix
+    notes: Segment after /- or trailing numeric part per AppNumberFormat
+
+  - source: IRegistration_Data.ManualApplicationNumber
+    target: AppNumberPrefix
+    transform: parse_app_number_prefix
+    notes: From OrganizationReportHelper / numbering profile default when empty
+
+  - source: IRegistration_Data.ManualApplicationDate
+    target: ApplicationDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: IRegistration_Data.ManualApplicationDate
+    target: Year
+    transform: year_from_date
+
+  - source: IRegistration_Data.ManualApplicationDate
+    target: Month
+    transform: month_from_date
+
+  - source: AutoRegistration
+    target: IsManualEntry
+    transform: constant_true
+    notes: |
+      Always true for VISA2014 import — preserve legacy FullApplicationNumber; do not run auto-sequence.
+      Legacy AutoRegistration flag is not mirrored (most legacy rows were auto-registered but numbers already exist).
+
+  - source: composite_application_type
+    target: ApplicationType
+    transform: lookup_composite
+    lookupCatalog: ApplicationType
+    lookupMatch: Name
+    lookupLegacyColumns:
+      - ForEmployee
+      - ForFamilyMember
+      - ApplicationTypeForEmployee.TypeOfApplicationForEmployeeID
+      - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMemberID
+      - IsInvitationWithWorkPermit.InvitationAndWorkPermitRequired
+      - IsWizaWithWorkPermit.WizaAndWorkPermitRequired
+      - ChangeInformation
+    lookupLegacyKeyFormat: "{category}:{subtypeId}:{invWp}:{wizaWp}:{changeInfo}"
+    missingBehavior: skip_row
+
+  - source: Urgency
+    target: Urgency
+    transform: lookup_composite
+    lookupCatalog: Urgency
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - Urgency.ApplicationUrgency
+      - Urgency.mgCode
+    lookupLegacyKeyFormat: "{ApplicationUrgency}:{mgCode}"
+    missingBehavior: use_default
+    default: NORM
+
+  - source: VisaPeriod
+    target: VisaPeriod
+    transform: lookup_composite
+    lookupCatalog: VisaPeriod
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - VisaPeriod.PeriodOfVisaL
+      - VisaPeriod.mgCode
+      - VisaPeriod.CountMonth
+    lookupLegacyKeyFormat: "{PeriodOfVisaL}:{mgCode}:{CountMonth}"
+    missingBehavior: allow_null
+
+  - source: VisaCategory
+    target: VisaCategory
+    transform: lookup_composite
+    lookupCatalog: VisaCategory
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - VisaCategory.CategoryOfVisaL
+      - VisaCategory.mgCode
+    lookupLegacyKeyFormat: "{CategoryOfVisaL}:{mgCode}"
+    missingBehavior: allow_null
+
+  - source: Contract
+    target: ProjectContract
+    transform: lookup_identity_passthrough
+    lookupCatalog: ProjectContract
+    lookupMatch: Code
+    lookupLegacyColumn: Contract.NumberOfContract
+    lookupOverlay: lookup-translations.calik-energi.yaml
+    missingBehavior: allow_null
+    notes: Required when ApplicationType.ShowProjectContract; 3,845 long-process rows have FK
+
+  - source: BorderZoneForVisa
+    target: BorderZoneLocation
+    transform: border_zone_bit_matrix
+    lookupCatalog: BorderZoneName
+    missingBehavior: allow_null
+
+  - source: GosmaçaIşlemägeRugsatÝeri
+    target: MovementPermitLocation
+    transform: lookup_nametm
+    lookupCatalog: MovementPermitLocation
+    missingBehavior: allow_null
+
+  - source: BusinessTripDestination
+    target: ToCity
+    transform: lookup_composite
+    lookupCatalog: City
+    lookupMatch: PdfForm_Code
+    lookupLegacyColumns:
+      - ŞeherEtrap.mgCode
+      - ŞeherEtrap.ŞeherEtrapL
+    fallbackCatalog: CityByName
+    missingBehavior: allow_null
+
+  - source: DateOfDeparture
+    target: BusinessTripStartDate
+    transform: date
+    missingBehavior: allow_null
+
+  - source: DateOfDeparture
+    target: BusinessTripEndDate
+    transform: business_trip_end_date
+    transformArgs:
+      durationColumn: DurationOfStay
+    missingBehavior: allow_null
+
+import:
+  rowFilter: a.GCRecord IS NULL
+  rowFilterNote: Active applications only; soft-deleted legacy headers skipped
+
+export:
+  sheetName: Application
+  includeAuditColumns: true
+  auditColumns:
+    - _legacyRowId
+    - _legacyTable
+    - _dedupeGroupId
+    - _importAction
+    - _legacyManualNumber
+    - _legacySubtypeId
+  lastExportedAt: 2026-06-29T16:13:27Z
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/Application-preview.calik-energi.xlsx
+
+notes: |
+  Header-only scope. PersonInApplication → ApplicationItem (next discovery).
+  Ministry/process scalars → ApplicationProgress deferred entity.
+  VisaType header default from ApplicationType OnCreated logic when ShowVisaType.

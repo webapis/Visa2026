@@ -1,0 +1,129 @@
+# ApplicationProgress field map — layer 2 (synthetic / multi-row per legacy Application)
+# Layer 1: table-mappings.yaml (id: application-progress-synthetic)
+# Layer 3: ApplicationState + ApplicationLocation resolved by Code (target catalogs — no legacy lookup import)
+
+tableMappingId: application-progress-synthetic
+
+source:
+  table: Application
+  schema: dbo
+  mode: synthetic_progress_from_application_scalars
+
+target:
+  odataEntity: ApplicationProgress
+
+deduplication:
+  enabled: true
+  keys:
+    - _syntheticStepKey
+  action: import_one_per_synthetic_step
+  notes: |
+    _syntheticStepKey = {legacyApplicationOid}:{stepCode} e.g. {guid}:prepare | {guid}:ministry_forward
+    Re-import idempotent on synthetic step key + Application id-map.
+
+propertyGaps:
+  legacyOnly:
+    - column: DateForwardedToMonistery
+      disposition: synthesize
+      notes: Long-process → 1_REVIEW_STARTED @ AT_THE_MINISTERY_1
+    - column: MinisteriesDocumentDate
+      disposition: synthesize
+    - column: MinisteriesDocumentNumber
+      disposition: synthesize
+      notes: Appended to Description on ministry_return step
+    - column: DateForwardedToMinConstruction
+      disposition: synthesize
+      notes: Leg 2 when contract has ≥2 MinistryLegs (273 Çalik rows)
+    - column: DocNumberForwardedToMinConstruction
+      disposition: synthesize
+    - column: ProcessDate
+      disposition: synthesize
+    - column: ProcessNumber
+      disposition: synthesize
+    - column: Cancelled
+      disposition: synthesize
+      notes: Terminal PROCESS_CANCELLED override
+    - column: Rejected
+      disposition: synthesize
+  targetOnly:
+    - property: MinistryLetterFile
+      disposition: defer
+      notes: FILE_AND_IMAGE_IMPORT wave — no legacy header blob mapped yet
+    - property: MinistryStepLabel
+      disposition: computed
+    - property: LocationWithMinistryLabel
+      disposition: computed
+    - property: StatusListLabel
+      disposition: computed
+  mismatches:
+    - property: State
+      legacyColumn: ApplicationState (computed enum)
+      notes: Do not map enum 1:1 — synthesize from date ladder per discovery/ApplicationProgress.yaml
+    - property: Location
+      legacyColumn: null
+      notes: Derived from step template + ProjectContract leg count
+    - property: Date
+      legacyColumn: multiple
+      notes: One legacy date column per synthesis step
+
+fields:
+  - source: _syntheticStepKey
+    target: null
+    transform: legacy_id
+    notes: Dedupe / id-map key only — not OData property
+
+  - source: Application.Oid
+    target: Application
+    transform: fk_from_id_map
+    lookupEntity: Application
+    missingBehavior: skip_row
+    notes: Requires Application id-map; skip when parent header skipped (E:44/E:55)
+
+  - source: synthesis.stateCode
+    target: State
+    transform: lookup_by_code
+    lookupCatalog: ApplicationState
+    lookupMatch: Code
+    missingBehavior: block_row
+
+  - source: synthesis.locationCode
+    target: Location
+    transform: lookup_by_code
+    lookupCatalog: ApplicationLocation
+    lookupMatch: Code
+    missingBehavior: block_row
+
+  - source: synthesis.date
+    target: Date
+    transform: date
+    missingBehavior: skip_row
+
+  - source: synthesis.description
+    target: Description
+    transform: string_trim
+    missingBehavior: allow_null
+
+import:
+  rowFilter: a.GCRecord IS NULL
+  processKindFilter: |
+    Discriminate SimpleProcessApplication vs LongProcessApplication for step template selection.
+  skipWhenParentSkipped: true
+
+export:
+  sheetName: ApplicationProgress
+  includeAuditColumns: true
+  auditColumns:
+    - _legacyRowId
+    - _legacyApplicationOid
+    - _syntheticStepKey
+    - _importAction
+    - _processKind
+    - _legacy_ProcessNumber
+    - _legacy_MinisteriesDocumentNumber
+  lastExportedAt: 2026-06-29T16:45:53Z
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/ApplicationProgress-preview.calik-energi.xlsx
+
+notes: |
+  Wave 5 progress-and-history. See discovery/ApplicationProgress.yaml synthesisStrategy.
+  Excel preview emits flattened rows (one sheet row per synthesized progress step).
+  OData POST after Application id-map exists. Transition validation TBD for historical rows.

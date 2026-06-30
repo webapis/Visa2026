@@ -61,3 +61,65 @@ entities:
     notes: |
       Legacy Employee FK → Person id-map. EndDate derived from next StartDate per Person.
       ActualPosition mirrors Position title (Visa2026-only). Position + Department tenant catalog seeds pending.
+
+  - targetODataEntity: MedicalRecord
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/MedicalRecord.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - legacyCopyOid
+    duplicateGroups: 0
+    legacyOnlyCount: 3
+    targetOnlyCount: 1
+    mismatchCount: 4
+    importBlocked: false
+    notes: |
+      File-only legacy path (SpidKepilnama → Copy → FileData). Synthesize scalars at import:
+      DocumentNumber "0", IssueDate from audit ObjectCreated, ValidityDuration Month3.
+      Çalik backup: 0 importable blobs. importConfirmed 2026-06-29 — file importer not implemented.
+
+  - targetODataEntity: Application
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Application.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - Oid
+    duplicateGroups: 862
+    legacyOnlyCount: 38
+    targetOnlyCount: 22
+    mismatchCount: 8
+    importBlocked: false
+    notes: |
+      Header dbo.Application + IRegistration_Data numbering. IsManualEntry=true for all legacy rows.
+      ApplicationType composite layer 3 — E:44/E:55 approved skip_row 2026-06-29 (105 headers / 204 items).
+      ProjectContract via calik-energi overlay. Progress/ministry scalars deferred to ApplicationProgress.
+
+  - targetODataEntity: ApplicationItem
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationItem.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - Application
+      - Person
+    duplicateGroups: 925
+    legacyOnlyCount: 28
+    targetOnlyCount: 18
+    mismatchCount: 12
+    importBlocked: false
+    notes: |
+      Legacy PersonInApplication → ApplicationItem. Upsert on Oid; dedupe (Application+Person) before POST.
+      Person column rule: Employee vs FamilyMember by parent Application category.
+      CurrentWorkPermitItem uses WorkPermitItem id-map (legacy WorkPermit.Oid). PurposeOfTravel + CheckPoint layer 3 drafted.
+      204 item rows on parent ApplicationType E:44/E:55 skip with parent (approved skip_row 2026-06-29).
+
+  - targetODataEntity: ApplicationProgress
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationProgress.yaml
+    deduplicationEnabled: true
+    dedupeKeys:
+      - _syntheticStepKey
+    duplicateGroups: 0
+    legacyOnlyCount: 8
+    targetOnlyCount: 1
+    mismatchCount: 3
+    importBlocked: false
+    notes: |
+      Synthetic child of Application — synthesize State/Location/Date from legacy ministry/process columns.
+      MinistryLetterFile deferred. Initializer + transition validation conflicts documented in discovery dossier.
+

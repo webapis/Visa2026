@@ -50,6 +50,16 @@ deduplication:
 
 propertyGaps:
   legacyOnly:
+    - column: MiddleName
+      disposition: relocate
+      relocateTo: EmployeePositionHistory.ActualPosition
+      notes: |
+        Legacy Person.MiddleName is NOT a real middle name — VISA2014 had no dedicated field for the
+        employee's actual/company position, so the free-text position title was stored here
+        (e.g. "PROJECT MANAGER"). Do NOT map to Visa2026 Person.MiddleName (it pollutes FullName).
+        Migrated to EmployeePositionHistory.ActualPosition on the current/latest position-history row
+        (see EmployeePositionHistory.yaml ActualPosition + Visa2014EmployeePositionHistoryTransform).
+        Kept as _legacy_MiddleName audit column in the Person preview only.
     - column: IDNumber
       disposition: drop
       notes: Often employer/subcontractor text, not civil ID — do not map to PersonalNumber
@@ -117,10 +127,8 @@ fields:
     transform: identity
     missingBehavior: skip_row
 
-  - source: MiddleName
-    target: MiddleName
-    transform: identity
-    missingBehavior: allow_null
+  # MiddleName: legacy column holds the free-text work-position title, not a real middle name.
+  # Relocated to EmployeePositionHistory.ActualPosition (see propertyGaps.legacyOnly above) — not a Person target.
 
   - source: BirthDate
     target: DateOfBirth
@@ -215,6 +223,9 @@ fields:
     lookupLegacyColumn: NumberOfContract
     missingBehavior: allow_null
     notes: |
+      Employee: dbo.Person.Contract → Contract.NumberOfContract.
+      Family member: legacy Person.Contract is null on Çalik — derive from sponsoring employee
+      (COALESCE in extract SQL + OData fallback from employee batch).
       Company-specific via --legacy-source:
       Çalik (calik-energi): identityPassThrough — legacy NumberOfContract → same Visa2026 Code.
       Gap (gap-insaat): experimental remap → GT-15. See lookup-translations.*.yaml.

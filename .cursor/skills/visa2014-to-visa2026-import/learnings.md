@@ -511,3 +511,169 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Pilot**: 400 on POST — **restart Blazor** after `EmployeeSalary` OData registration (running host has old Web API model).
 - **Fix**: OData `Currency` must be string `"USD"` not int `1` (400 Incorrect body).
 - **Full import** 2026-06-29: **2740** posted, **0** failed, **145** no Person map, **2** pilot resume-skipped, **63** transform skipped. Id-map: `id-maps/calik-energi/EmployeeSalary.json`.
+
+### 2026-06-29 — MedicalRecord discovery (SpidKepilnama file chain, calik-energi)
+
+- **Phase**: discovery
+- **Legacy path**: `IPersonn_SpidKepilnama` → `Copy` → `FileData` (`IPerson.SpidKepilnama` in VISA2014 repo) — **not** scalar medical fields on Person/Employee.
+- **Çalik counts**: **2** active link rows, **0** resolvable `Copy` rows (orphan FKs), **0** importable blobs.
+- **Scalar sign-off**: `DocumentNumber` = `"0"`; `IssueDate` = `MIN(AuditDataItemPersistent.ModifiedOn)` on `ObjectCreated` for `Copy` + `FileData` OIDs via `AuditedObjectWeakReference.GuidId` (sample verified 2014-01-25); `ValidityDuration` = **Month3** (90 days) → `ExpirationDate` derived on save.
+- **Skip**: orphan Copy link, null `FileData.Content`, no audit row (`_issueDateSource: no_audit`), Person not in id-map.
+- **Artifacts**: `discovery/MedicalRecord.yaml`, `field-maps/MedicalRecord.yaml`, `table-mappings.yaml` `medical-record-spid-kepilnama`, `order.yaml` attachments entry.
+- **importConfirmed**: `true` 2026-06-29 (developer). Çalik file wave still expected 0 rows; Application wave can proceed.
+- **Next**: implement file importer (`--import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument`).
+
+### 2026-06-29 — MedicalRecord file importer (calik-energi)
+
+- **Phase**: implementation | file-import
+- **Code**: `Visa2014MedicalRecordDocumentImporter.cs`, `Visa2014LegacyAuditIssueDateHelper.cs`; `MedicalRecordDocument` OData registration; CLI in `Visa2014FilesImportCommand`.
+- **Flow**: Spid link → resolve Person id-map → audit `ObjectCreated` → POST `MedicalRecord` (Doc# `0`, Month3) → `FileData` → `MedicalRecordDocument`.
+- **Dry-run + full run** 2026-06-29: **0** posted, **2** orphan copy links, **0** failed. Çalik has no importable blobs.
+- **Note**: restart Blazor after `MedicalRecordDocument` OData registration before first POST on a host with blobs.
+
+### 2026-06-29 — Application — Phase 1 discovery complete
+
+- **Phase**: discovery
+- **Dossier**: docs/VISA2014_MIGRATION/discovery/Application.yaml
+- **Legacy table(s)**: dbo.Application (12,237 active / 18,118 total) + dbo.IRegistration_Data (numbering); SimpleProcess 8,392 / LongProcess 3,845 via XPObjectType
+- **Symptom / surprise**:
+  - Legacy type is **not** a single FK — composite ForEmployee/ForFamilyMember + ApplicationTypeForEmployee/FamilyMember SubType ID + invitation/visa WP flags
+  - **862** duplicate `ManualApplicationNumber` groups (e.g. `1/-2` × 8) — upsert on Oid, not FullApplicationNumber
+  - Contract FK only on long-process rows (3,845) — matches ministry workflow; ProjectContract calik overlay already approved
+  - SubType IDs **44** (92 rows) and **55** (13 rows) have no Visa2026 ApplicationType mapping yet
+- **SQL / MCP that helped**: sqlcmd `localhost\SQLEXPRESS` / VISA2015 — INFORMATION_SCHEMA + DISTINCT composite type query
+- **Fix / mapping change**: `application-main` table map, `field-maps/Application.yaml`, layer 3 Urgency + VisaPeriod (Application scope) + ApplicationType composite in `lookup-translations.yaml`
+- **Prevent**: Discover ApplicationItem before Excel preview (34,161 PersonInApplication rows); resolve E:44/E:55 before importConfirmed
+- **Artifacts**: discovery/Application.yaml, field-maps/Application.yaml, table-mappings.yaml, lookup-translations.yaml, entity-inventory.yaml, property-gap-registry.yaml
+
+### 2026-06-29 — ApplicationItem — Phase 1 discovery complete
+
+- **Phase**: discovery
+- **Dossier**: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
+- **Legacy table(s)**: dbo.PersonInApplication (21,794 active / 40,414 total), TravelInformation, AddressOnBusinessTrip, WorkPermit/WorkPermitLocation
+- **Symptom / surprise**:
+  - schema-snapshot ~34,161 is partition total — **21,794** active after `GCRecord IS NULL` (reconcile imports on active count)
+  - FM lines set **both** Employee + FamilyMember (2,759 rows) — Person FK must use Application.ForFamilyMember flag, not COALESCE
+  - Legacy **WorkPermit** FK → Visa2026 **CurrentWorkPermitItem** (WorkPermitItem id-map, same Oid) — ApplicationItem ordered before WorkPermitItem in order.yaml
+  - **NextVisa** not a column — 5,744 Visa rows link `ProcessNumber = PersonInApplication.Oid`
+  - Parent ApplicationType **E:44** (187 item rows) / **E:55** (17 item rows) inherit header block
+- **SQL / MCP that helped**: sqlcmd VISA2015 — INFORMATION_SCHEMA PersonInApplication; DISTINCT PurposeOfTravelL + CheckPoint mgCode
+- **Fix / mapping change**: application-item-main table map, field-maps/ApplicationItem.yaml, layer 3 PurposeOfTravel + CheckPoint in lookup-translations.yaml
+- **Prevent**: Dedupe 925 (Application+Person) groups before POST; omit ShowOptionalFields; gate FKs by ApplicationType Show* flags
+- **Artifacts**: discovery/ApplicationItem.yaml, field-maps/ApplicationItem.yaml, table-mappings.yaml, entity-inventory.yaml, property-gap-registry.yaml
+
+### 2026-06-29 — ApplicationType — E:44/E:55 approved skip_row
+
+- **Phase**: mapping
+- **Decision**: User approved skipping legacy composite keys `E:44:na:na:na` (92 apps, 187 items) and `E:55:na:na:na` (13 apps, 17 items) instead of blocking import.
+- **Policy change**: `unmappedPolicy: skip_row` on ApplicationType catalog; `missingBehavior: skip_row` on Application field-map composite transform.
+- **Counts**: 105 Application headers + 204 ApplicationItem rows skipped (items cascade with parent).
+- **Not done**: `importConfirmed` left false — skip decision only; broader applicationWaveComplete gate still applies.
+- **Artifacts**: lookup-translations.yaml#ApplicationType, field-maps/Application.yaml, lookup-comparisons/ApplicationType.md, lookup-review-queue.yaml, migration-status.yaml ISS-008
+
+### 2026-06-29 — Application Excel preview export (calik-energi)
+
+- **Phase**: excel-preview
+- **Code**: `Visa2014ApplicationTransform.cs`, `Visa2014ApplicationPreviewExporter.cs`; wired in `Visa2014PreviewExportCommand` + `legacy-sources.yaml`.
+- **SQL**: `dbo.Application` + `IRegistration_Data` + type/WP/urgency/visa/contract/border-zone/business-trip joins; `ŞäherEtrap` unicode table name; `GoşmaçaIşlemägeRugsatÝeri` movement-permit FK.
+- **Transform**: ManualApplicationNumber → prefix/number; ApplicationType composite `{E|F}:{subtype}:{invWp}:{wizaWp}:{changeInfo}`; dedupe groups in `_DedupeSummary` with `keep_all_import_with_oid_upsert` (no duplicate_merged).
+- **Export**: `Application-preview.calik-energi.xlsx` — **12237** legacy, **12129** import, **108** skipped (105 E:44/E:55 + 3 required-null), **862** dedupe groups, **0** duplicate_merged.
+- **Next**: human review skipped sheet; then ApplicationItem preview export.
+
+### 2026-06-29 — ApplicationProgress preview reviewed; importConfirmed
+
+- **Phase**: excel-preview sign-off
+- **Decision**: Developer approved simple/long synthesis in `ApplicationProgress-preview.calik-energi.xlsx` (32,177 rows / 108 parent skips).
+- **Gate**: `importConfirmed: true` on discovery + order.yaml; OData implementation still after Application id-map.
+
+### 2026-06-29 — ApplicationProgress synthesis approved + Excel preview
+
+- **Decision**: Developer approved synthesis matrix (simple vs long process steps).
+- **Export**: `ApplicationProgress-preview.calik-energi.xlsx` — **12,237** legacy apps → **32,177** progress rows, **108** parent skips (E:44/E:55).
+- **Code**: `Visa2014ApplicationProgressTransform.cs`, `Visa2014ApplicationProgressPreviewExporter.cs`.
+- **Next**: preview review → importConfirmed; OData after Application id-map; transition validation TBD.
+
+### 2026-06-29 — Application preview reviewed; importConfirmed
+
+- **Phase**: excel-preview sign-off
+- **Decision**: Developer approved `Application-preview.calik-energi.xlsx` (12,129 import / 108 skipped).
+- **Mapping lock**: `IsManualEntry=true` for all import rows (not `!AutoRegistration`) — preserves legacy numbers on OData POST.
+- **Gate**: `importConfirmed: true` on discovery/Application.yaml + order.yaml.
+- **OData (2026-06-29)**: `Visa2014ApplicationODataImporter` — POST `IsManualEntry=true` + `FullApplicationNumber` only (omit `ApplicationNumber`/`AppNumberPrefix`) so `Application.OnSaving` copies legacy full number without company-format rebuild. Resolver: ApplicationType by Name, Urgency by Code, VisaPeriod by LocalizationKey, BorderZoneLocation first non-Ýok label from comma list.
+- **OData full (2026-06-29)**: 12,120 posted + 9 resume-skipped, 0 failed, 108 transform-skipped; ~7 min; id-map 12,129 entries. Unblocks ApplicationProgress + ApplicationItem OData.
+
+
+- **Phase**: mapping + data fix
+- **Symptom / surprise**: Visa2026 Person.FullName (`FirstName MiddleName LastName`) showed job titles in the middle
+  (e.g. "Abdullah PROJECT MANAGER BAYSAL"). Root cause: legacy `dbo.Person.MiddleName` was used to store the
+  employee's free-text **actual/company position** — VISA2014 had no dedicated field. Person.yaml mapped it 1:1 to
+  Visa2026 Person.MiddleName.
+- **User decisions**: (1) target = **current/latest** position-history row only (EndDate null / max StartDate);
+  (2) scope = **employees only** (IsEmployee=true) — leave family members' MiddleName untouched;
+  (3) employee with MiddleName but **no** EmployeePositionHistory row → **keep** MiddleName, report (nothing to attach).
+- **Fix / mapping change**:
+  - `Visa2014PersonTransform`: stop exporting MiddleName → Person.MiddleName; keep `_legacy_MiddleName` audit column.
+  - `Visa2014PersonODataImporter`: removed MiddleName from POST payload.
+  - `Visa2014EmployeePositionHistoryTransform`: extract `p.MiddleName`; on the current/latest row per person set
+    ActualPosition = trim(MiddleName) when non-empty; else fall back to trim(Position.Code) or "-".
+  - field-maps: Person.yaml MiddleName → propertyGaps.legacyOnly `relocate` → EmployeePositionHistory.ActualPosition;
+    EmployeePositionHistory.yaml ActualPosition source updated.
+- **Existing-data cleanup (already imported)**: new CLI `--cleanup-visa2014-person-middlename`
+  (`Visa2014PersonMiddleNameToActualPositionCleanup`) — OData only. For each employee with MiddleName: find current
+  EmployeePositionHistory, resolve/create ActualPosition by Name, PATCH it, then PATCH Person MiddleName="".
+  `--dry-run` supported. PATCH clears MiddleName with **""** (JsonOptions ignores nulls → null would be omitted).
+- **Prevent**: legacy "MiddleName"/name-ish columns may be repurposed free-text — verify sample values before 1:1 name mapping.
+- **Artifacts**: field-maps/Person.yaml, field-maps/EmployeePositionHistory.yaml, Visa2014PersonTransform.cs,
+  Visa2014PersonODataImporter.cs, Visa2014EmployeePositionHistoryTransform.cs,
+  Visa2014PersonMiddleNameToActualPositionCleanup.cs, Program.cs
+
+### 2026-06-29 — ApplicationItem Excel preview export
+
+- **Phase**: excel-preview export
+- **Export**: `ApplicationItem-preview.calik-energi.xlsx` — **21,794** legacy → **21,588** import / **206** skipped (204 parent E:44/E:55, 2 dedupe_duplicate); 925 dedupe groups from discovery dossier — only **2** groups on current VISA2015 attach.
+- **SQL fixes**: bracket `dbo.[CheckPoint]` (reserved keyword); `OUTER APPLY TOP 1` for NextVisa (`Visa.ProcessNumber` has duplicate groups — naive JOIN inflated row count to 24,392).
+- **Transform**: parent ApplicationType composite skip via `IsSkippedApplicationTypeComposite`; Person by ForEmployee/ForFamilyMember; (Application+Person) dedupe canonical lowest Oid → `_Skipped` `dedupe_duplicate`; WorkPermittedLocations null + `_audit_WorkPermittedLocations=pending_work_permit_location_audit`.
+- **Code**: `Visa2014ApplicationItemTransform.cs`, `Visa2014ApplicationItemPreviewExporter.cs`, `Visa2014PreviewExportCommand.cs`, `Program.cs` help.
+- **Next**: preview review → `importConfirmed`; OData after Application + Person + Passport + Visa id-maps.
+
+### 2026-06-29 — ApplicationProgress seed suppression
+
+- **Symptom**: Application OData POST auto-created `IS_BEING_PREPARED` @ `AT_OFFICE` progress rows via `OnCreated` → duplicate with synthetic ApplicationProgress import.
+- **Fix**: `Application.SuppressInitialProgress` (hidden); `Visa2014ApplicationODataImporter` POST `SuppressInitialProgress=true`; `--cleanup-visa2014-application-progress-seeds` DELETEs initializer rows on Application id-map apps; `Visa2014ApplicationProgressODataImporter` removes seeds before POST + posts synthesized history.
+- **Artifacts**: Application.cs, ApplicationProgressInitializer.cs, Visa2014ApplicationProgressSeedHelper.cs, Visa2014ApplicationProgressSeedCleanup.cs, Visa2014ApplicationProgressODataImporter.cs, Visa2014ODataLookupResolver (ApplicationState/Location by Code).
+
+### 2026-06-30 — ApplicationMigrationServiceInference — excel preview
+
+- **Phase**: excel-preview
+- **Export path**: `preview-export/ApplicationMigrationServiceInference-preview.calik-energi.xlsx`
+- **Scope**: `App_Reg_Check_In` (`E:2` / `F:2`) with null `DepartmentForRegistration` only — **58** legacy apps
+- **Counts**: **58** total — confidence **high 7**, **medium 44**, **low 0**, **none 7** (no address / null region / DZ gap)
+- **Artifacts**: `migration-service-inference.yaml`, `MigrationService-inference.md`, `Visa2014ApplicationMigrationServiceInferencePreview.cs`, `Visa2014MigrationServiceInferenceRules.cs`
+- **Ready for PATCH**: **no** — `approvedForPatch: false`; review Excel first
+
+### 2026-06-30 — ApplicationItem — OData importer
+
+- **Phase**: import
+- **Environment**: Visa2026DbDev (local OData https://localhost:5001)
+- **Code**: `Visa2014ApplicationItemODataImporter.cs`, `Visa2014ODataLookupResolver.ResolveCheckPoint`, `Visa2014ImportCommand` ApplicationItem wave.
+- **Transform**: reuses `Visa2014ApplicationItemTransform.PrepareImportBatch` (21,588 prepared / 206 skipped from preview).
+- **POST rules**: required Application+Person+CurrentPassport id-maps; optional FKs allow_null on miss; PurposeOfTravel omitted; BorderZoneLocation string; nested BusinessTripAddress when city+address; CheckPoint OData NameTm.
+- **order.yaml**: `importConfirmed: true` (developer, 2026-06-30).
+
+### 2026-06-30 — ApplicationProgress — OData live import (calik-energi)
+
+- **Phase**: import (live, not dry-run)
+- **Environment**: https://localhost:5001 (HTTP 302), VISA2015 read-only via `VISA2014_SQL_PASSWORD` (User env; must set from User scope in Agent shells).
+- **Built-in seed cleanup**: 8135 initializer rows removed before progress POST phase (do not run standalone seed cleanup CLI separately).
+- **Counts**: prepared 32177; parent-skipped 108; posted **0**; failed **0**; skipped (already imported) **32177**; legacy applications 12237.
+- **Id-map**: `Visa2026.DataImporter/legacy/visa2014/id-maps/calik-energi/ApplicationProgress.json` — **32177** entries.
+- **Note**: Idempotent re-run — all rows already present from prior load; seed cleanup still ran on this pass.
+- **order.yaml**: `importStatus: complete` with counts in notes.
+
+### 2026-06-21 — On-prem IIS migration runbook + parallel period
+
+- **Decision**: Officers **view/search only** in Visa2026 until cutover; legacy `VISA2015` on `10.100.128.15` remains system of record.
+- **Hosts**: Visa2026 IIS `10.100.128.25` (Prod :80, Staging :8080, Demo :8081); legacy SQL `10.100.128.15`.
+- **Sync**: One-way legacy → Visa2026 planned (nightly off-peak); safe because no officer writes in Visa2026 during parallel period. Full delta upsert (`--sync-visa2014`) not implemented yet — v1 catch-up is new-row id-map skip on some entities only.
+- **Artifacts**: `docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md`, `import-strategy.yaml` `onPremDeployment`, `legacy-sources.yaml` profiles `calik-energi-onprem-{staging,prod,demo}`.
+

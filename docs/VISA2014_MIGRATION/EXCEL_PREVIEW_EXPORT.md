@@ -6,7 +6,7 @@ This is **not** a raw SQL dump. The export uses the **same transform pipeline** 
 
 **Binary exclusion:** Excel preview is **scalar / tabular review only**. Photo bytes, scan attachments, PDFs, and other blobs are **not** exported to cells — use **audit stub columns** (e.g. `_hasPhoto`, `_photoByteLength`, `_photoSha256`) and import files in a **separate wave** after the owning BO id-map exists. Canonical detail: [FILE_AND_IMAGE_IMPORT.md](./FILE_AND_IMAGE_IMPORT.md).
 
-**Status:** **Person**, **Passport**, and **Visa** implemented — `--export-visa2014-preview --entity Person|Passport|Visa` (2026-06-21). Other entities TBD.
+**Status:** **Person**, **Passport**, **Visa**, **Education**, **EmployeePositionHistory**, **EmployeeSalary**, **AddressOfResidence** (+ lodging/hotel/hospital/other-site/private-house splits), **Application**, **ApplicationItem**, and **ApplicationProgress** implemented via `--export-visa2014-preview --entity <Name>`. Later waves TBD.
 
 **Related:** [IMPORT_PLAN_AND_STRATEGY.md](./IMPORT_PLAN_AND_STRATEGY.md) · [FILE_AND_IMAGE_IMPORT.md](./FILE_AND_IMAGE_IMPORT.md) · [field-maps/](../../Visa2026.DataImporter/legacy/visa2014/field-maps/) · [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md)
 

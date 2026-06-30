@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.DataImporter;
 
@@ -52,6 +53,9 @@ public class ApiClient
         _http = new HttpClient(handler);
         _http.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
+        _http.DefaultRequestHeaders.TryAddWithoutValidation(
+            MigrationImportContext.DataImportHeaderName,
+            "true");
     }
 
     // ------------------------------------------------------------------
@@ -128,7 +132,9 @@ public class ApiClient
     {
         var all = new List<T>();
         var url = $"{_baseUrl}/api/odata/{entityName}";
-        if (!string.IsNullOrWhiteSpace(odataQuery))
+        if (string.IsNullOrWhiteSpace(odataQuery))
+            url += "?$top=10000";
+        else
             url += odataQuery.StartsWith('?') ? odataQuery : "?" + odataQuery;
 
         while (!string.IsNullOrEmpty(url))
@@ -140,7 +146,7 @@ public class ApiClient
                 var body = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException(
                     $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
-                    $"Body: {body}");
+                    $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -148,10 +154,24 @@ public class ApiClient
             if (result?.Value is { Count: > 0 })
                 all.AddRange(result.Value);
 
-            url = result?.NextLink;
+            url = ResolveNextLink(result?.NextLink);
         }
 
         return all;
+    }
+
+    private string? ResolveNextLink(string? nextLink)
+    {
+        if (string.IsNullOrWhiteSpace(nextLink))
+            return null;
+
+        if (Uri.TryCreate(nextLink, UriKind.Absolute, out _))
+            return nextLink;
+
+        if (nextLink.StartsWith('/'))
+            return _baseUrl + nextLink;
+
+        return $"{_baseUrl}/{nextLink.TrimStart('/')}";
     }
 
     /// <summary>GET a single record by its GUID key.</summary>

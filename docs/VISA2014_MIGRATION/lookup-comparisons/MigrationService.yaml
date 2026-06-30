@@ -1,0 +1,123 @@
+# Lookup comparison — MigrationService (machine-readable)
+# Human table: MigrationService.md
+
+version: 1
+catalog: MigrationService
+comparedAt: 2026-06-30
+legacyDatabase: VISA2015
+legacySource: calik-energi
+legacyTable: dbo.DepartmentForRegistration
+legacyColumns:
+  - TitleOfDepartmentForRegistration   # short code (layer 3 key)
+  - DepartmentForRegistrationL         # full Turkmen addressee line
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/migration-service.json
+targetMatchProperty: NameTm
+legacyFkColumn: dbo.Application.DepartmentForRegistration
+applicationScope: dbo.Application WHERE GCRecord IS NULL
+
+summary:
+  verdict: approved_2026-06-30
+  layer3Key: TitleOfDepartmentForRegistration
+  approvedAt: 2026-06-30
+  approvedDecisions:
+    - "TDMG başlygyna → TDMGAS müdirine"
+    - "TDMGLBA Kerki → new TDMGKR catalog row"
+  applicationWithFkCount: 6840
+  applicationNullFkCount: 5397
+  legacyCatalogActiveRows: 9
+  legacyDistinctUsedOnData: 9
+  targetCatalogRows: 9
+  recommendedNextStep: approve TDMG_baslygyna and TDMGLBA_Kerki decisions; then Application preview + PATCH
+
+targetCatalog:
+  - code: TDMGAS
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+  - code: TDMGAH
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine"
+  - code: TDMGMR
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine"
+  - code: TDMG
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine"
+  - code: TDMG
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine"
+  - code: TDMG
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine"
+  - code: TDMG
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine"
+  - code: TDMG
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine"
+  - code: TDMG
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine"
+  - code: TDMGKR
+    nameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+    addedAt: 2026-06-30
+
+comparisons:
+  - legacyCode: TDMGMR
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine"
+    targetCode: TDMGMR
+    applicationCount: 1961
+    match: exact
+    importNote: Map by legacy code
+
+  - legacyCode: TDMGAH
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine"
+    targetCode: TDMGAH
+    applicationCount: 1353
+    match: exact
+    importNote: Map by legacy code
+
+  - legacyCode: TDMGAS
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+    targetCode: TDMGAS
+    applicationCount: 472
+    match: exact
+    importNote: Map by legacy code
+
+  - legacyCode: TDMGBN
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirligine"
+    targetCode: TDMG
+    targetNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine"
+    applicationCount: 1235
+    match: proposed
+    importNote: Normalize müdirligine → müdirine; match NameTm
+
+  - legacyCode: TDMGSERH
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat etrap bölümi"
+    targetCode: TDMG
+    targetNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine"
+    applicationCount: 42
+    match: proposed
+    importNote: Match by normalized NameTm
+
+  - legacyCode: TDMGYL
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölümine"
+    targetCode: TDMG
+    targetNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine"
+    applicationCount: 23
+    match: proposed
+    importNote: Match by normalized NameTm
+
+  - legacyCode: TDMGLB
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirligine"
+    targetCode: TDMG
+    targetNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine"
+    applicationCount: 95
+    match: proposed
+    importNote: Regional Lebap office
+
+  - legacyCode: TDMG
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň başlygyna"
+    targetCode: TDMGAS
+    targetNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+    applicationCount: 1433
+    match: approved
+    importNote: Officer decision — başlygyna maps to TDMGAS müdirine
+
+  - legacyCode: TDMGLBA
+    legacyNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölümine"
+    targetCode: TDMGKR
+    targetNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+    applicationCount: 98
+    match: approved
+    importNote: New migration-service.json row 2026-06-30

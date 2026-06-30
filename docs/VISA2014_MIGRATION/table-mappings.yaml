@@ -180,6 +180,41 @@ mappings:
       2,950 active employees (Employee ⋈ Person); one salary per employee via Salary.Detail lookup text.
       No legacy history or currency column — import as open EmployeeSalary row (EndDate null).
 
+  - id: medical-record-spid-kepilnama
+    legacy:
+      schema: dbo
+      table: IPersonn_SpidKepilnama
+      boClass: IPerson
+      boPath: VISA2014.Module/DC/IPerson.cs
+    target:
+      odataEntity: MedicalRecord
+      boPath: Visa2026.Module/BusinessObjects/MedicalRecord.cs
+    relationship: junction_to_file
+    legacyTablesExtra:
+      - schema: dbo
+        table: Copy
+        join: Copy.Oid = IPersonn_SpidKepilnama.ICopy_Implicit_IPersonn_SpidKepilnama_List_Link
+        role: file_carrier
+      - schema: dbo
+        table: FileData
+        join: FileData.Oid = Copy.CopyOfDocument
+        role: blob_store
+      - schema: dbo
+        table: AuditedObjectWeakReference
+        join: AuditedObjectWeakReference.GuidId IN (Copy.Oid, FileData.Oid)
+        role: derive_issue_date
+      - schema: dbo
+        table: AuditDataItemPersistent
+        join: AuditDataItemPersistent.AuditedObject = AuditedObjectWeakReference.Oid
+        role: derive_issue_date
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/MedicalRecord.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/MedicalRecord.yaml
+    status: mapped
+    notes: |
+      Spid kepilnama scans only — Person.SpidKepilnama → Copy → FileData.
+      No legacy scalar medical fields; synthesize MedicalRecord per link (DocumentNumber "0",
+      IssueDate from audit ObjectCreated, ValidityDuration Month3). Çalik: 2 links, 0 blobs.
+
   - id: address-of-residence-main
     legacy:
       schema: dbo
@@ -212,3 +247,135 @@ mappings:
     notes: |
       4,083 active rows; Address detail holds Region, ŞeherEtrap, AddressLine, expiration.
       Type from DocumentOfAddress. Person id-map required. Lodging tenant catalog prerequisite.
+
+  - id: application-main
+    legacy:
+      schema: dbo
+      table: Application
+      boClass: IApplication
+      boPath: VISA2014.Module/DC/IApplication.cs
+    target:
+      odataEntity: Application
+      boPath: Visa2026.Module/BusinessObjects/Application.cs
+    relationship: primary_with_registration_extension
+    legacyTablesExtra:
+      - schema: dbo
+        table: IRegistration_Data
+        join: IRegistration_Data.Oid = Application.IRegistration_Data
+        role: numbering_and_date_extension
+      - schema: dbo
+        table: SimpleProcessApplication
+        join: SimpleProcessApplication.Oid = Application.Oid
+        role: inheritance_discriminator
+      - schema: dbo
+        table: LongProcessApplication
+        join: LongProcessApplication.Oid = Application.Oid
+        role: inheritance_discriminator
+      - schema: dbo
+        table: ApplicationTypeForEmployee
+        join: ApplicationTypeForEmployee.Oid = Application.ApplicationTypeForEmployee
+        role: lookup_fk_derive_type
+      - schema: dbo
+        table: ApplicationTypeForFamilyMember
+        join: ApplicationTypeForFamilyMember.Oid = Application.ApplicationTypeForFamilyMember
+        role: lookup_fk_derive_type
+      - schema: dbo
+        table: Contract
+        join: Contract.Oid = Application.Contract
+        role: lookup_fk_project_contract
+      - schema: dbo
+        table: BorderZoneForVisa
+        join: BorderZoneForVisa.Oid = Application.BorderZoneForVisa
+        role: lookup_fk_bit_matrix
+      - schema: dbo
+        table: PersonInApplication
+        join: PersonInApplication.Application = Application.Oid
+        role: child_collection
+        notes: ApplicationItem discovery — out of header import scope
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Application.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Application.yaml
+    status: mapped
+    notes: |
+      12,237 active Application rows on Çalik VISA2015 (8,392 simple + 3,845 long process).
+      Numbering on IRegistration_Data; 862 duplicate ManualApplicationNumber groups.
+      Contract FK on all long-process rows; ProjectContract via calik-energi identityPassThrough.
+      PersonInApplication: 21,794 active rows (40,414 total) → ApplicationItem after Application id-map.
+
+  - id: application-item-main
+    legacy:
+      schema: dbo
+      table: PersonInApplication
+      boClass: IPersonInApplication
+      boPath: VISA2014.Module/DC/IPersonInApplication.cs
+    target:
+      odataEntity: ApplicationItem
+      boPath: Visa2026.Module/BusinessObjects/ApplicationItem.cs
+    relationship: child_of_application
+    legacyTablesExtra:
+      - schema: dbo
+        table: TravelInformation
+        join: TravelInformation.Oid IN (PersonInApplication.EmployeeEntryDate, PersonInApplication.FamilyMemberEntryDate)
+        role: registration_travel_flattened
+      - schema: dbo
+        table: AddressOnBusinessTrip
+        join: AddressOnBusinessTrip.Oid = PersonInApplication.AddressOnBusinessTrip
+        role: business_trip_line_address
+      - schema: dbo
+        table: WorkPermit
+        join: WorkPermit.Oid = PersonInApplication.WorkPermit
+        role: fk_current_work_permit
+      - schema: dbo
+        table: WorkPermitLocation
+        join: WorkPermitLocation.Oid = WorkPermit.WorkPermitLocation
+        role: bit_matrix_work_permitted_locations
+      - schema: dbo
+        table: Application
+        join: Application.Oid = PersonInApplication.Application
+        role: parent_header
+      - schema: dbo
+        table: BorderZoneForVisa
+        join: BorderZoneForVisa.Oid = Application.BorderZoneForVisa
+        role: header_bit_matrix_border_zone_on_line
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationItem.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
+    status: mapped
+    notes: |
+      21,794 active PersonInApplication rows on Çalik VISA2015 (12,210 parent applications).
+      Person = Employee (employee apps) or FamilyMember (family apps); 2,759 FM lines also store Employee FK.
+      Upsert/id-map on legacy Oid. Dedupe 925 (Application+Person) groups before POST.
+      Requires Application + Person + Passport + Visa id-maps; WorkPermitItem id-map for CurrentWorkPermitItem (legacy WorkPermit.Oid).
+
+  - id: application-progress-synthetic
+    legacy:
+      schema: dbo
+      table: Application
+      boClass: IApplication
+      boPath: VISA2014.Module/DC/IApplication.cs
+    target:
+      odataEntity: ApplicationProgress
+      boPath: Visa2026.Module/BusinessObjects/ApplicationProgress.cs
+    relationship: synthetic_child_of_application
+    legacyTablesExtra:
+      - schema: dbo
+        table: IRegistration_Data
+        join: IRegistration_Data.Oid = Application.IRegistration_Data
+        role: application_date_for_prepare_step
+      - schema: dbo
+        table: SimpleProcessApplication
+        join: SimpleProcessApplication.Oid = Application.Oid
+        role: direct_route_template
+      - schema: dbo
+        table: LongProcessApplication
+        join: LongProcessApplication.Oid = Application.Oid
+        role: ministry_route_template
+      - schema: dbo
+        table: Contract
+        join: Contract.Oid = Application.Contract
+        role: ministry_leg_count_hint
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationProgress.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationProgress.yaml
+    status: mapped
+    notes: |
+      No legacy progress table — synthesize 1–N ApplicationProgress rows per Application from header scalars.
+      Simple process (8,392): office → migration service. Long process (3,845): up to 5 steps incl. ministry + optional construction leg.
+      Requires Application id-map. Skip parents blocked/skipped at header import (E:44/E:55).

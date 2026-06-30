@@ -2434,12 +2434,40 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Täzele",
             ["ru-RU"] = "Обновить",
         },
+        ["PersonDocumentCopies.Action.ShowAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show all documents",
+            ["tr-TR"] = "Tüm belgeleri göster",
+            ["tk-TM"] = "Hemme resminamalary görkez",
+            ["ru-RU"] = "Показать все документы",
+        },
+        ["PersonDocumentCopies.Action.ShowCurrentOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show current only",
+            ["tr-TR"] = "Yalnızca güncel olanları göster",
+            ["tk-TM"] = "Diňe häzirki görkez",
+            ["ru-RU"] = "Только текущие",
+        },
         ["PersonDocumentCopies.Action.ShowDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Show file details",
             ["tr-TR"] = "Dosya ayrıntılarını göster",
             ["tk-TM"] = "Faýl jikme-jikliklerini görkez",
             ["ru-RU"] = "Показать сведения о файлах",
+        },
+        ["PersonDocumentCopies.Action.ShowLess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show less",
+            ["tr-TR"] = "Daha az göster",
+            ["tk-TM"] = "Az görkez",
+            ["ru-RU"] = "Свернуть",
+        },
+        ["PersonDocumentCopies.Action.ShowMore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show {0} more in {1}",
+            ["tr-TR"] = "{1} bölümünde {0} tane daha göster",
+            ["tk-TM"] = "{1} bölüminde ýene {0} görkez",
+            ["ru-RU"] = "Показать ещё {0} в разделе «{1}»",
         },
         ["PersonDocumentCopies.Badge.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2461,6 +2489,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu kişi için belge kaydı bulunamadı.",
             ["tk-TM"] = "Bu adam üçin resminama ýazgysy tapylmady.",
             ["ru-RU"] = "Записи документов для этого лица не найдены.",
+        },
+        ["PersonDocumentCopies.Hint.NoCurrentShowingRecent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No current record in this section; showing the most recent.",
+            ["tr-TR"] = "Bu bölümde güncel kayıt yok; en son kayıt gösteriliyor.",
+            ["tk-TM"] = "Bu bölümdä häzirki ýazgy ýok; iň soňky ýazgy görkezilýär.",
+            ["ru-RU"] = "В этом разделе нет текущей записи; показана последняя.",
         },
         ["PersonDocumentCopies.Hint.NoFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

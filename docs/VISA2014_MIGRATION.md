@@ -796,6 +796,7 @@ Mapping stays in **YAML**; code implements extract/transform/load only.
 | [EXCEL_PREVIEW_EXPORT.md](VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md) | **Consolidated legacy → Excel** before import (scalar only; binary stubs) |
 | [FILE_AND_IMAGE_IMPORT.md](VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md) | **Binary files / images** — separate wave from Excel preview |
 | [IMPORT_PLAN_AND_STRATEGY.md](VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) | **Import plan — approve before implementation** |
+| [ON_PREM_IIS_MIGRATION_RUNBOOK.md](VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md) | **On-prem IIS** (`10.100.128.25`) — staging/prod/demo import from legacy `10.100.128.15` |
 | [visa2014-to-visa2026-import](../.cursor/skills/visa2014-to-visa2026-import/SKILL.md) | MCP preflight, discovery, mapping, pilot import; [MATURITY.md](../.cursor/skills/visa2014-to-visa2026-import/MATURITY.md) experience loop |
 | [import-practices.md](../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) | **OData ETL, upsert, reconciliation, cutover** (Phase 3+) |
 | [visa2026-dataimporter](../.cursor/skills/visa2026-dataimporter/SKILL.md) | Target OData import, seed scenarios, Web API exposure fixes |

@@ -27,6 +27,11 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
 
     public ListViewTotalCountController()
     {
+        // Root list views only: the toolbar's RecordsNavigation container is not rendered on nested
+        // (in-DetailView) list views, so nested counts are shown in the tab caption instead
+        // (see NestedListViewTabCountController).
+        TargetViewNesting = Nesting.Root;
+
         totalCountAction = new SimpleAction(this, TotalCountActionId, PredefinedCategory.RecordsNavigation)
         {
             Caption = FormatCaption(0),

@@ -126,13 +126,20 @@ waves:
       - catalog: ApplicationType
         legacyTable: dbo.ApplicationType
         usedBy: [Application, ApplicationItem]
-        auditStatus: not_started
-        comparisonDoc: null
-        lookupTranslations: null
-        blocksImportUntilApproved: true
+        auditStatus: approved_with_skip
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
+        lookupTranslations: lookup-translations.yaml#ApplicationType
+        blocksImportUntilApproved: false
         legacyStats:
           tableRowsAll: 231
-        notes: Layer 3 required; also see ApplicationTypeForEmployee, ApplicationTypeForFamilyMember, BaseApplicationType
+          distinctCompositeKeysMapped: 31
+          skippedCompositeKeys: 2
+          skippedApplicationHeaders: 105
+          skippedApplicationItemRows: 204
+        notes: |
+          Approved 2026-06-29 with skip_row for E:44 (92 apps) + E:55 (13 apps).
+          31 composite keys mapped; 2 keys in audit.unmapped — rows skipped, not blocked.
+          Layer 3 composite — see ApplicationTypeForEmployee, ApplicationTypeForFamilyMember, BaseApplicationType.
 
       - catalog: VisaType
         legacyTable: dbo.VisaType
@@ -319,12 +326,21 @@ waves:
           6 catalog rows added to border-zone-name.json. Application wave deferred.
 
       - catalog: MigrationService
-        legacyTable: null
+        legacyTable: dbo.DepartmentForRegistration
         usedBy: [Application]
-        auditStatus: not_started
-        comparisonDoc: null
-        lookupTranslations: null
+        auditStatus: approved_2026-06-30
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MigrationService.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml#MigrationService
         blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 9
+          distinctUsedOnApplication: 9
+          applicationWithFk: 6840
+          applicationNullFk: 5397
+        notes: |
+          Layer-3 key TitleOfDepartmentForRegistration → target NameTm (Code TDMG ambiguous).
+          7/9 codes mapped at draft; approved 2026-06-30: TDMG→TDMGAS, TDMGLBA→TDMGKR Kerki seed.
+          PATCH existing Applications after approval — not full re-import.
 
       - catalog: ApplicationLocation
         legacyTable: null

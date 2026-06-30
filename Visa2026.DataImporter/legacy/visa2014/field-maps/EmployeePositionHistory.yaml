@@ -44,8 +44,11 @@ propertyGaps:
     - property: ActualPosition
       disposition: derive
       notes: |
-        Legacy Position.Code on same FK (no separate ActualPosition BO). Import rule:
-        ActualPosition.Name = trim(Code) when non-empty; else "-" (required field; 2289 Çalik rows have empty Code).
+        Actual/company position title. Primary source: legacy Person.MiddleName (free-text title the
+        company actually used — VISA2014 had no dedicated field) applied to the CURRENT/latest position
+        history row per person. Older rows and persons without a MiddleName fall back to:
+        ActualPosition.Name = trim(Position.Code) when non-empty; else "-" (required field).
+        OData resolve-or-create ActualPosition by Name. See Visa2014EmployeePositionHistoryTransform.
     - property: Title
       disposition: computed
       notes: Computed from Position.NameTm — not posted
@@ -79,17 +82,20 @@ fields:
     missingBehavior: skip_row
     notes: Tenant position catalog seed required (~1579 distinct labels on Çalik data)
 
-  - source: Position
+  - source: Person.MiddleName
     target: ActualPosition
-    transform: position_code_or_default
+    transform: middlename_current_row_or_position_code
     lookupLegacyColumns:
+      - Person.MiddleName
       - Position.Code
     lookupMatch: Name
     default: "-"
     missingBehavior: use_default
     notes: |
-      ActualPosition.Name = trim(Code) when non-empty; else "-".
+      Current/latest row per person: ActualPosition.Name = trim(Person.MiddleName) when non-empty.
+      Otherwise (older rows, or empty MiddleName): trim(Position.Code) when non-empty; else "-".
       OData resolve or create ActualPosition by Name (ensure "-" row exists once in target DB).
+      "Current/latest" = last row by StartDateOnThisPosition asc per Employee (EndDate null).
 
   - source: Department
     target: Department

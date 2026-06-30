@@ -1,0 +1,126 @@
+# MedicalRecord field map — Spid kepilnama file chain (attachments wave)
+# Layer 1: table-mappings.yaml (id: medical-record-spid-kepilnama)
+# No legacy scalar medical fields — parent BO is synthesized per Copy link for file import.
+
+tableMappingId: medical-record-spid-kepilnama
+
+source:
+  table: IPersonn_SpidKepilnama
+  schema: dbo
+
+target:
+  odataEntity: MedicalRecord
+
+deduplication:
+  enabled: true
+  keys:
+    - legacyCopyOid
+  action: import_one_per_legacy_copy
+  notes: |
+    One MedicalRecord + one MedicalRecordDocument per SpidKepilnama → Copy link when blob exists.
+    Multiple links per Person are valid (separate MedicalRecord rows).
+
+propertyGaps:
+  legacyOnly:
+    - column: ICopy_Implicit_IPersonn_SpidKepilnama_List_Link
+      disposition: map
+      notes: FK to dbo.Copy — blob carrier
+    - column: IPersonn_SpidKepilnama_Link
+      disposition: map
+      notes: FK to dbo.Person
+    - column: OptimisticLockField
+      disposition: drop
+  targetOnly:
+    - property: Documents
+      disposition: file_wave
+      notes: |
+        Legacy scan bytes on Copy.CopyOfDocument → FileData.Content.
+        POST MedicalRecordDocument after parent MedicalRecord OData row exists.
+        CLI: --import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument
+    - property: Images
+      disposition: defer
+      notes: No legacy MedicalRecordImage source on SpidKepilnama chain
+    - property: ExpirationDate
+      disposition: derive
+      notes: Set by MedicalRecord.UpdateExpirationDate from IssueDate + ValidityDuration
+  mismatches:
+    - property: DocumentNumber
+      legacyColumn: null
+      notes: Fixed import value "0" — sign-off 2026-06-29
+    - property: IssueDate
+      legacyColumn: null
+      notes: MIN audit ModifiedOn (ObjectCreated) on Copy + FileData via AuditedObjectWeakReference.GuidId
+    - property: ValidityDuration
+      legacyColumn: null
+      notes: Fixed Month3 (90 days) — sign-off 2026-06-29
+    - property: Person
+      legacyColumn: IPersonn_SpidKepilnama_Link
+      notes: Person id-map required
+
+fields:
+  - source: ICopy_Implicit_IPersonn_SpidKepilnama_List_Link
+    target: null
+    transform: legacy_id
+    notes: id-map key — legacy Copy.Oid
+
+  - source: IPersonn_SpidKepilnama_Link
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+
+  - source: null
+    target: DocumentNumber
+    transform: constant
+    constant: "0"
+    notes: Sign-off 2026-06-29 — no legacy document number
+
+  - source: audit_upload_date
+    target: IssueDate
+    transform: audit_min_modified_on
+    auditTables:
+      - dbo.AuditDataItemPersistent
+      - dbo.AuditedObjectWeakReference
+    auditGuidColumns:
+      - Copy.Oid
+      - FileData.Oid
+    auditFilter:
+      operationType: ObjectCreated
+    missingBehavior: skip_row
+    notes: |
+      SELECT MIN(a.ModifiedOn) FROM AuditedObjectWeakReference w
+      JOIN AuditDataItemPersistent a ON a.AuditedObject = w.Oid
+      WHERE w.GuidId IN (@copyOid, @fileDataOid) AND a.OperationType = 'ObjectCreated'
+
+  - source: null
+    target: ValidityDuration
+    transform: lookup_by_key
+    lookupCatalog: ValidityDuration
+    lookupMatch: LocalizationKey
+    lookupKey: Month3
+    missingBehavior: use_default
+    notes: 90 days — matches three-month validity sign-off
+
+fileAttachments:
+  - property: MedicalRecordDocument
+    legacyTable: Copy
+    legacyJoin: |
+      IPersonn_SpidKepilnama.ICopy_Implicit_* = Copy.Oid
+      Copy.CopyOfDocument = FileData.Oid
+    blobSource: FileData.Content
+    fileNameSource: FileData.FileName
+    parentODataEntity: MedicalRecord
+    idMapEntity: MedicalRecord
+    notes: Two-step OData — POST MedicalRecord scalars first, then MedicalRecordDocument with nested FileData
+
+excelExport:
+  includeAuditColumns: true
+  stubColumns:
+    - _hasSpidCopy
+    - _copyOid
+    - _fileDataOid
+    - _fileByteLength
+    - _fileSha256
+    - _auditIssueDate
+    - _issueDateSource
+    - _orphanCopy

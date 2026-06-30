@@ -1,0 +1,158 @@
+# Discovery dossier — ApplicationItem (application-domain line BO)
+# dependsOn: Person, Application — both id-maps required before OData POST.
+
+targetODataEntity: ApplicationItem
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |
+    Layer 3 PurposeOfTravel + CheckPoint drafted — human review before importConfirmed.
+    WorkPermittedLocations reuses WorkPermitLocation bit matrix (full audit with WorkPermitItem wave).
+    Parent ApplicationType E:44/E:55 — approved skip_row 2026-06-29; 204 ApplicationItem rows skip with parent.
+    CurrentWorkPermitItem needs WorkPermitItem id-map (legacy WorkPermit.Oid 1:1) — import after WorkPermitItem or allow_null + backfill.
+
+legacy:
+  boClass: IPersonInApplication
+  boPath: VISA2014.Module/DC/IPersonInApplication.cs
+  tables:
+    - dbo.PersonInApplication
+    - dbo.TravelInformation
+    - dbo.AddressOnBusinessTrip
+    - dbo.WorkPermit
+    - dbo.WorkPermitLocation
+    - dbo.PurposeOfTravel
+    - dbo.CheckPoint
+    - dbo.VisaIssuedPlace
+  rowCount: 21794
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/ApplicationItem.cs
+  docPath: Visa2026.Module/BusinessObjects/ApplicationItem.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/ApplicationItem.yaml
+  tableMappingId: application-item-main
+  cardinality: one_legacy_row_per_application_item
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - PurposeOfTravel
+    - CheckPoint
+    - BorderZoneName
+    - WorkPermittedLocationName
+    - City
+  lookupAuditStatus:
+    PurposeOfTravel: drafted_2026-06-29
+    CheckPoint: drafted_2026-06-29
+    BorderZoneName: reuse_border_zone_matrix_2026-06-29
+    WorkPermittedLocationName: pending_work_permit_item_wave
+    City: reuse_address_wave_2026-06-21
+  duplicateGroups: 925
+  legacyOnlyCount: 28
+  targetOnlyCount: 18
+  mismatchCount: 12
+  blockedReason: null
+  notes: |
+    Authoritative: dbo.PersonInApplication — 21,794 active (GCRecord IS NULL); 40,414 total incl. soft-deleted.
+    schema-snapshot ~34,161 = partition estimate before GCRecord filter — use active count for reconciliation.
+    All 21,794 active rows join active Application (0 orphan Application FK).
+    Person derivation: Application.ForEmployee → Employee; ForFamilyMember → FamilyMember (2,759 FM lines also set Employee = sponsor).
+    Required always: Application, Person, CurrentPassport (Passport FK non-null on all active rows).
+    Registration flattening: TravelInformation via EmployeeEntryDate / FamilyMemberEntryDate → TravelDate + CheckPoint + PurposeOfTravel;
+    RegistrationDate/RegistrationNumber on 3,514 rows when app type shows registration number/date.
+    NextVisa: 5,744 legacy Visa rows link Visa.ProcessNumber = PersonInApplication.Oid (not a column on line).
+    BorderZoneLocation on line: derive from parent Application.BorderZoneForVisa bit matrix when ApplicationType.ShowBorderZoneLocation.
+    WorkPermittedLocations: dbo.WorkPermit.WorkPermitLocation bit matrix when WorkPermit FK set (3,802 rows with location FK).
+    BusinessTripAddress: AddressOnBusinessTrip.AddressOnTrip + parent Application.BusinessTripDestination → City.
+    Person-scoped children without legacy FK (Education, MedicalRecord, Salary, WorkDuty, InvitationItem): resolve from Person id-map current-items at import.
+    Workflow flags (VisaIssued, InvitationItemIsIssued, …): partial map from Cancelled/Rejected/IsComplete — full PersonState enum deferred.
+    Dedupe: 925 groups same (Application, Person) — canonical lowest Oid; skip_row duplicates (1,221 extra rows).
+  parentBlocker:
+    applicationTypeSkipped:
+      - legacy: E:44
+        applicationHeaders: 92
+        applicationItemRows: 187
+      - legacy: E:55
+        applicationHeaders: 13
+        applicationItemRows: 17
+      notes: Inherited from Application layer 3 skip_row — skip ApplicationItem when parent Application row skipped (not blocked).
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/ApplicationItem-preview.calik-energi.xlsx
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-29
+completedBy: agent session — ApplicationItem discovery (Çalik VISA2015)
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 21794
+  totalRowsInclSoftDeleted: 40414
+  softDeletedRows: 18620
+  deleteddFlagRows: 0
+  parentApplications: 12210
+  employeeLines: 19035
+  familyLines: 2759
+  bothEmployeeAndFamilyMemberSet: 2759
+  avgItemsPerApplication: 1.79
+  maxItemsPerApplication: 53
+  duplicatePersonPerApplicationGroups: 925
+  duplicateExtraRows: 1221
+  orphanPassportFk: 96
+  orphanVisaFk: 115
+  orphanWorkPermitFk: 77
+  orphanPositionFk: 189
+  orphanAddressOfResidenceFk: 76
+  withVisaFk: 15562
+  withWorkPermitFk: 3802
+  withRegistrationEntryFk: 3534
+  withCheckPointFk: 3534
+  withPurposeOfTravelFk: 3534
+  withRegistrationNumber: 3516
+  withRegistrationDate: 3514
+  withBusinessTripAddress: 739
+  withAddressFk: 5849
+  withPreviousPassportFk: 141
+  nextVisaViaProcessNumber: 5744
+  cancelledFlag: 774
+  rejectedFlag: 9
+  isCompleteFlag: 3182
+  itemsOnUnmappedApplicationTypeE44: 187
+  itemsOnUnmappedApplicationTypeE55: 17
+  purposeOfTravelBreakdown:
+    - legacy: Işlemek üçin
+      rows: 2934
+    - legacy: Maşgala agzasy
+      rows: 368
+    - legacy: Iş saparyna
+      rows: 225
+    - legacy: Dynç almak üçin
+      rows: 5
+    - legacy: Myhmançylyga
+      rows: 2
+  checkPointBreakdown:
+    - legacy: "0 — Aşgabat şäher howa menzilindäki MGP"
+      rows: 3201
+    - legacy: "2 — Daşoguz ş. MGP"
+      rows: 127
+    - legacy: "12 — Türkmenbaşy deňiz menzilindäki MGP"
+      rows: 113
+    - legacy: "4 — Farap MGP"
+      rows: 63

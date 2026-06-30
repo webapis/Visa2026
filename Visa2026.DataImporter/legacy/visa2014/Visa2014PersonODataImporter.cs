@@ -48,6 +48,13 @@ internal static class Visa2014PersonODataImporter
         var resolver = new Visa2014ODataLookupResolver();
         await resolver.LoadAsync(api);
 
+        var employeeProjectContractByLegacyOid = batch.ImportRows
+            .Where(IsEmployeeRow)
+            .Where(r => r["_legacyRowId"] is Guid)
+            .ToDictionary(
+                r => (Guid)r["_legacyRowId"]!,
+                r => r.GetValueOrDefault("ProjectContract") as string);
+
         var idMap = new Dictionary<Guid, Guid>();
         var errors = new List<string>();
         int posted = 0;
@@ -61,7 +68,7 @@ internal static class Visa2014PersonODataImporter
             var legacyOid = (Guid)row["_legacyRowId"]!;
             try
             {
-                var payload = BuildPayload(row, resolver, idMap);
+                var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid);
                 var created = await api.CreateAsync<Person>("Person", payload);
                 if (created == null)
                 {
@@ -115,7 +122,8 @@ internal static class Visa2014PersonODataImporter
     private static Dictionary<string, object?> BuildPayload(
         Dictionary<string, object?> row,
         Visa2014ODataLookupResolver resolver,
-        IReadOnlyDictionary<Guid, Guid> idMap)
+        IReadOnlyDictionary<Guid, Guid> idMap,
+        IReadOnlyDictionary<Guid, string?> employeeProjectContractByLegacyOid)
     {
         var isEmployee = IsEmployeeRow(row);
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -130,8 +138,7 @@ internal static class Visa2014PersonODataImporter
         if (row.GetValueOrDefault("Email") is string email && !string.IsNullOrWhiteSpace(email))
             payload["Email"] = email;
 
-        if (row.GetValueOrDefault("MiddleName") is string middle && !string.IsNullOrWhiteSpace(middle))
-            payload["MiddleName"] = middle.Length > 100 ? middle[..100] : middle;
+        // MiddleName intentionally not posted: legacy value is work-position text → EmployeePositionHistory.ActualPosition.
         if (row.GetValueOrDefault("BirthPlace") is string bp && !string.IsNullOrWhiteSpace(bp))
             payload["BirthPlace"] = bp;
         if (row.GetValueOrDefault("ForeignAddress") is string fa && !string.IsNullOrWhiteSpace(fa))
@@ -143,12 +150,22 @@ internal static class Visa2014PersonODataImporter
         TrySetLookup(payload, "Nationality", resolver.ResolveCountry(row.GetValueOrDefault("Nationality") as string));
         TrySetLookup(payload, "MaritalStatus", resolver.ResolveMaritalStatus(row.GetValueOrDefault("MaritalStatus") as string));
         TrySetLookup(payload, "Relationship", resolver.ResolveRelationship(row.GetValueOrDefault("Relationship") as string));
-        TrySetLookup(payload, "ProjectContract", resolver.ResolveProjectContract(row.GetValueOrDefault("ProjectContract") as string));
+
+        var projectContractCode = row.GetValueOrDefault("ProjectContract") as string;
+        if (!isEmployee
+            && string.IsNullOrWhiteSpace(projectContractCode)
+            && row.GetValueOrDefault("SponsoringEmployee") is string sponsorOidText
+            && Guid.TryParse(sponsorOidText, out var legacySponsorOid))
+        {
+            employeeProjectContractByLegacyOid.TryGetValue(legacySponsorOid, out projectContractCode);
+        }
+
+        TrySetLookup(payload, "ProjectContract", resolver.ResolveProjectContract(projectContractCode));
         TrySetLookup(payload, "Subcontractor", resolver.ResolveDefaultSubcontractor());
 
         if (row.GetValueOrDefault("SponsoringEmployee") is string sponsorText &&
-            Guid.TryParse(sponsorText, out var legacySponsorOid) &&
-            idMap.TryGetValue(legacySponsorOid, out var sponsorId))
+            Guid.TryParse(sponsorText, out var legacySponsorOidForFk) &&
+            idMap.TryGetValue(legacySponsorOidForFk, out var sponsorId))
         {
             payload["SponsoringEmployee"] = new { ID = sponsorId };
         }

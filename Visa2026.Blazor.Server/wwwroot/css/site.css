@@ -157,6 +157,7 @@ dxd-license,
 /* Banner is position:fixed — do not add body padding-top (height:100% + padding overflows viewport). */
 
 .force-xaf-db-update-banner {
+    --visa-force-xaf-banner-height: 3.25rem;
     position: fixed;
     left: 0;
     right: 0;
@@ -2642,6 +2643,17 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     --visa-preview-slot-default: max(320px, 50vw);
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--visa-preview-slot-width, var(--visa-preview-slot-default));
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+body:has(#force-xaf-db-update-banner) #visa-app-shell {
+    height: calc(100% - var(--visa-force-xaf-banner-height, 3.25rem));
+    max-height: calc(100% - var(--visa-force-xaf-banner-height, 3.25rem));
 }
 
 #visa-app-shell.visa-app-shell--slot-resizing {
@@ -2668,9 +2680,23 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 }
 
 #visa-app-shell.visa-app-shell--preview-open > app {
+    grid-column: 1;
+    grid-row: 1;
     flex: none;
     width: 100%;
     min-width: 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+#visa-app-shell.visa-app-shell--preview-open #visa-preview-slot {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
     overflow: hidden;
 }
 
@@ -2706,8 +2732,13 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     flex: none;
     width: 100%;
     min-width: 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
     max-width: none;
-    overflow: visible;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     border-left: 1px solid var(--dxbl-border-color, color-mix(in srgb, currentColor 14%, transparent));
     box-shadow: -4px 0 20px color-mix(in srgb, #000 9%, transparent);
     color: var(--dxbl-text-color, inherit);
@@ -2783,6 +2814,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     display: flex;
     flex-direction: column;
     height: 100%;
+    max-height: 100%;
     width: 100%;
     min-height: 0;
     color: inherit;
@@ -2843,7 +2875,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     justify-content: flex-start;
     padding: 1.25rem var(--resminamalar-slot-inset-x, 1rem) 1rem;
     box-sizing: border-box;
@@ -2855,9 +2887,11 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     max-width: var(--resminamalar-slot-content-max, 100%);
     margin-inline: auto;
     margin-block: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
+    align-self: stretch;
     min-height: 0;
     max-height: 100%;
+    height: 100%;
 }
 
 .resminamalar-slot-panel__catalog > .app-item-doc-copies__empty {
@@ -2893,7 +2927,7 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 /* Inline slot catalog — elevated card (Resminamalar + Document copies; not document preview) */
 .resminamalar-slot-panel .app-report-package--inline-slot,
 .resminamalar-slot-panel .app-item-doc-copies--inline-slot {
-    height: auto;
+    height: 100%;
     max-height: 100%;
     min-height: 0;
     width: 100%;
@@ -2932,7 +2966,10 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 .resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__body {
     flex: 1 1 auto;
     min-height: 0;
+    overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     padding: 0.25rem 0.75rem;
 }
 
@@ -3181,6 +3218,11 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
     padding: 0.75rem 1rem;
 }
 
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot.app-item-doc-copies,
+.resminamalar-slot-panel .app-report-package--inline-slot.app-item-doc-copies {
+    min-height: 0;
+}
+
 .resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__empty {
     margin: 0.75rem 0.65rem;
     padding: 1rem;
@@ -3190,6 +3232,21 @@ body.user-feedback-capturing .user-feedback-dialog-backdrop {
 
 .app-person-doc-copies__subtitle {
     margin: 0 0.65rem 0.5rem;
+}
+
+.app-person-doc-copies__section-hint {
+    margin: 0 0.65rem 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-person-doc-copies__section:not(:last-child) {
+    border-bottom: 1px solid var(--resminamalar-slot-border);
+}
+
+.app-person-doc-copies__section-more {
+    display: flex;
+    justify-content: flex-start;
+    padding: 0.35rem 0.65rem 0.75rem;
 }
 
 .app-person-doc-copies__section-title {

@@ -78,16 +78,53 @@ waves:
     importPhase: attachments
     status: not_started
 
+onPremDeployment:
+  doc: docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md
+  legacySqlHost: 10.100.128.15
+  legacyDatabase: VISA2015
+  visa2026Host: 10.100.128.25
+  slots:
+    production:
+      port: 80
+      database: Visa2026DbProd
+      idMapDir: id-maps/calik-energi-onprem-prod
+      legacySourceId: calik-energi-onprem-prod
+    staging:
+      port: 8080
+      database: Visa2026DbStaging
+      idMapDir: id-maps/calik-energi-onprem-staging
+      legacySourceId: calik-energi-onprem-staging
+    demo:
+      port: 8081
+      database: Visa2026DbDemo
+      idMapDir: id-maps/calik-energi-onprem-demo
+      legacySourceId: calik-energi-onprem-demo
+  parallelPeriod:
+    legacySystemOfRecord: true
+    visa2026OfficerWrites: false          # view/search only until cutover
+    syncDirection: legacy_to_visa2026_only
+    conflictPolicy: legacy_wins
+    scheduledSyncStatus: planned          # requires --sync-visa2014 / delta upsert (not v1)
+    recommendedSchedule:
+      staging: nightly_off_peak
+      production: nightly_off_peak_until_cutover
+      demo: manual_or_clone_from_staging
+
 openDecisions:
   - id: odata-service-account
     question: Service account for OData import
     decision: null
   - id: staging-database
     question: Staging DB for full-wave UAT
-    decision: null
+    decision: Visa2026DbStaging on 10.100.128.25:8080 (IIS slot)
+    decidedAt: 2026-06-21
   - id: cutover-mode
     question: Big-bang vs domain waves on prod
     decision: null
+  - id: parallel-period-officer-writes
+    question: Officers write in Visa2026 before cutover?
+    decision: false — read-only preview; legacy on 10.100.128.15 is system of record
+    decidedAt: 2026-06-21
   - id: unmapped-lookup-policy
     question: Default unmappedPolicy for required lookups
     decision: null

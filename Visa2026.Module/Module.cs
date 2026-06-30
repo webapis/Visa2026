@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Model.DomainLogics;
 using Visa2026.Module.Controllers;
 using Visa2026.Module.Model;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services.MigrationImport;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.ExpressApp.Updating;
@@ -180,7 +181,10 @@ namespace Visa2026.Module
             application.ObjectSpaceCreated += Application_ObjectSpaceCreated;
         }
 
-        private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e) =>
+        private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e)
+        {
             ProjectContractMinistryLegObjectSpaceHooks.Subscribe(e.ObjectSpace);
+            MigrationImportAuditTrailObjectSpaceHooks.ApplyIfNeeded(e.ObjectSpace);
+        }
     }
 }

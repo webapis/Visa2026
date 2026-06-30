@@ -17,6 +17,11 @@ namespace Visa2026.Module.BusinessObjects
                 return;
             }
 
+            if (application.SuppressInitialProgress)
+            {
+                return;
+            }
+
             if (HasInitialProgress(application, objectSpace))
             {
                 return;
