@@ -20,7 +20,8 @@ internal sealed class Visa2014ApplicationItemImportResult
 internal static class Visa2014ApplicationItemODataImporter
 {
     public static async Task<Visa2014ApplicationItemImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string applicationIdMapPath,
@@ -60,30 +61,39 @@ internal static class Visa2014ApplicationItemODataImporter
             maxRows,
             verbose);
 
+        var applicationItemIdMap = LoadOptionalIdMap(applicationItemIdMapOutputPath);
+
         if (dryRun)
         {
-            int missingRequired = CountMissingRequiredIdMap(
+            var gap = AnalyzeImportGap(
                 batch.ImportRows,
                 applicationIdMap,
                 personIdMap,
-                passportIdMap);
+                passportIdMap,
+                applicationItemIdMap);
             Console.WriteLine(
-                $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
-                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged, {missingRequired} missing required id-map).");
+                $"DRY RUN: {batch.ImportRows.Count} prepared row(s) " +
+                $"({batch.Skipped.Count} transform-skipped, {batch.DedupeMergedCount} dedupe merged).");
+            Console.WriteLine($"INF Already imported (id-map): {gap.AlreadyImported}");
+            Console.WriteLine($"INF Missing parent id-map: {gap.MissingRequiredIdMap}");
+            if (gap.MissingRequiredIdMap > 0)
+            {
+                Console.WriteLine($"INF   Application not in id-map: {gap.MissingApplication}");
+                Console.WriteLine($"INF   Person not in id-map: {gap.MissingPerson}");
+                Console.WriteLine($"INF   Passport not in id-map: {gap.MissingPassport}");
+                Console.WriteLine($"INF   Missing legacy FK on row: {gap.MissingLegacyField}");
+            }
+            Console.WriteLine($"INF Ready to POST (remainder): {gap.ReadyToPost}");
             return new Visa2014ApplicationItemImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
                 PreparedCount = batch.ImportRows.Count,
                 SkippedCount = batch.Skipped.Count,
                 DedupeMergedCount = batch.DedupeMergedCount,
-                SkippedMissingRequiredIdMap = missingRequired,
+                SkippedMissingRequiredIdMap = gap.MissingRequiredIdMap,
+                SkippedAlreadyImported = gap.AlreadyImported,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
-
-        var applicationItemIdMap = LoadOptionalIdMap(applicationItemIdMapOutputPath);
         if (verbose && applicationItemIdMap.Count > 0)
             Console.WriteLine($"INF Existing ApplicationItem id-map entries: {applicationItemIdMap.Count}");
 
@@ -140,15 +150,15 @@ internal static class Visa2014ApplicationItemODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<ApplicationItem>("ApplicationItem", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationItem), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                applicationItemIdMap[legacyOid] = created.Id;
+                applicationItemIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                 {
@@ -158,7 +168,7 @@ internal static class Visa2014ApplicationItemODataImporter
                         await Visa2014IdMapHelper.SaveAsync(applicationItemIdMapOutputPath, applicationItemIdMap);
                 }
                 if (verbose)
-                    Console.WriteLine($"  POST ApplicationItem {created.Id} <- legacy {legacyOid}");
+                    Console.WriteLine($"  SAVE ApplicationItem {createdId.Value} <- legacy {legacyOid}");
             }
             catch (Exception ex)
             {
@@ -167,6 +177,8 @@ internal static class Visa2014ApplicationItemODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (applicationItemIdMap.Count > 0 && !string.IsNullOrWhiteSpace(applicationItemIdMapOutputPath))
@@ -190,20 +202,63 @@ internal static class Visa2014ApplicationItemODataImporter
         };
     }
 
-    private static int CountMissingRequiredIdMap(
+    private sealed record ApplicationItemImportGap(
+        int AlreadyImported,
+        int MissingRequiredIdMap,
+        int MissingApplication,
+        int MissingPerson,
+        int MissingPassport,
+        int MissingLegacyField,
+        int ReadyToPost);
+
+    private static ApplicationItemImportGap AnalyzeImportGap(
         IReadOnlyList<Dictionary<string, object?>> importRows,
         IReadOnlyDictionary<Guid, Guid> applicationIdMap,
         IReadOnlyDictionary<Guid, Guid> personIdMap,
-        IReadOnlyDictionary<Guid, Guid> passportIdMap)
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        IReadOnlyDictionary<Guid, Guid> applicationItemIdMap)
     {
-        int missing = 0;
+        int alreadyImported = 0;
+        int missingApplication = 0;
+        int missingPerson = 0;
+        int missingPassport = 0;
+        int missingLegacyField = 0;
+        int readyToPost = 0;
+
         foreach (var row in importRows)
         {
-            if (!TryResolveRequiredIds(row, applicationIdMap, personIdMap, passportIdMap, out _, out _, out _, out _))
-                missing++;
+            var legacyOid = (Guid)row["_legacyRowId"]!;
+            if (applicationItemIdMap.ContainsKey(legacyOid))
+            {
+                alreadyImported++;
+                continue;
+            }
+
+            if (!TryResolveRequiredIds(row, applicationIdMap, personIdMap, passportIdMap, out _, out _, out _, out var missingReason))
+            {
+                if (missingReason.StartsWith("Application ", StringComparison.Ordinal))
+                    missingApplication++;
+                else if (missingReason.StartsWith("Person ", StringComparison.Ordinal))
+                    missingPerson++;
+                else if (missingReason.StartsWith("Passport ", StringComparison.Ordinal))
+                    missingPassport++;
+                else
+                    missingLegacyField++;
+                continue;
+            }
+
+            readyToPost++;
         }
 
-        return missing;
+        var missingRequired = missingApplication + missingPerson + missingPassport + missingLegacyField;
+        return new ApplicationItemImportGap(
+            alreadyImported,
+            missingRequired,
+            missingApplication,
+            missingPerson,
+            missingPassport,
+            missingLegacyField,
+            readyToPost);
     }
 
     private static bool TryResolveRequiredIds(

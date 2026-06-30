@@ -19,7 +19,7 @@
 | **Visa2026 Staging** | `10.100.128.25:8080` | `Visa2026DbStaging` — full-volume UAT before prod |
 | **Visa2026 Demo** | `10.100.128.25:8081` | `Visa2026DbDemo` — training / familiarization |
 
-**Write path:** `Visa2026.DataImporter --import-visa2014` → **OData only** (never direct SQL into Visa2026, never write to `VISA2015`).
+**Write path:** `Visa2026.DataImporter --import-visa2014` → **OData** (default) or **`--inprocess`** headless XAF for **Application** / **ApplicationItem** bulk loads. Never direct SQL into Visa2026; never write to `VISA2015`.
 
 **Do not** ship migration by copying LocalDB `.mdf` files from a developer machine.
 
@@ -144,6 +144,22 @@ dotnet run --project Visa2026.DataImporter -c Debug -- @common --entity Person `
 
 # Continue per order.yaml — pass parent id-map flags for child entities, e.g. ApplicationItem:
 dotnet run --project Visa2026.DataImporter -c Debug -- @common --entity ApplicationItem `
+  --id-map-output "$mapRoot\ApplicationItem.json" `
+  --person-id-map "$mapRoot\Person.json" `
+  --application-id-map "$mapRoot\Application.json" `
+  --passport-id-map "$mapRoot\Passport.json"
+```
+
+**Faster bulk (Application / ApplicationItem):** omit `--api-base-url` and use in-process XAF — no IIS slot required during import:
+
+```powershell
+$targetCs = "Server=10.100.128.25;Database=Visa2026DbStaging;User Id=...;TrustServerCertificate=True;MultipleActiveResultSets=true"
+
+dotnet run --project Visa2026.DataImporter -c Release -- `
+  --import-visa2014 --inprocess --entity ApplicationItem `
+  --legacy-source calik-energi-onprem-staging `
+  --target-connection $targetCs `
+  --batch-size 50 --no-wait `
   --id-map-output "$mapRoot\ApplicationItem.json" `
   --person-id-map "$mapRoot\Person.json" `
   --application-id-map "$mapRoot\Application.json" `

@@ -63,11 +63,33 @@ internal static class Visa2014ImportCommand
 
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
+        bool inProcess = HasArg(args, "--inprocess");
 
-        Console.WriteLine($"=== VISA2014 OData import — {entity}");
+        if (inProcess && !IsInProcessEntitySupported(entity))
+        {
+            Console.Error.WriteLine("ERR --inprocess is only supported for Application and ApplicationItem today.");
+            return 1;
+        }
+
+        Console.WriteLine($"=== VISA2014 import — {entity}" + (inProcess ? " (headless XAF)" : " (OData)"));
         Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
         Console.WriteLine($"INF Legacy (read-only): {Visa2014LegacySqlGuard.DescribeLegacyConnection(source.ConnectionString, source.LegacyDatabase)}");
-        Console.WriteLine($"INF Target (write): Visa2026 via OData at {apiBaseUrl}");
+        if (inProcess)
+        {
+            var targetConnection = GetTargetConnection(args);
+            if (string.IsNullOrWhiteSpace(targetConnection))
+            {
+                Console.Error.WriteLine("ERR --inprocess requires --target-connection or ConnectionStrings__DefaultConnection.");
+                return 1;
+            }
+
+            Console.WriteLine($"INF Target (write): Visa2026 in-process ObjectSpace");
+            Console.WriteLine($"INF Target SQL: {MaskConnectionForLog(targetConnection)}");
+        }
+        else
+        {
+            Console.WriteLine($"INF Target (write): Visa2026 via OData at {apiBaseUrl}");
+        }
         Console.WriteLine($"INF Lookup translations:");
         foreach (var path in source.LookupTranslationPaths)
             Console.WriteLine($"INF   - {path}");
@@ -86,6 +108,41 @@ internal static class Visa2014ImportCommand
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"ERR {ex.Message}");
+                return 1;
+            }
+        }
+
+        if (inProcess)
+        {
+            if (dryRun)
+            {
+                var dryResolver = new Visa2014ODataLookupResolver();
+                var dryTarget = new Visa2014DryRunImportTarget();
+                if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
+                    return await RunApplicationImportAsync(dryTarget, dryResolver, source, args, idMapPath, maxRows, true, verbose);
+
+                if (string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase))
+                    return await RunApplicationItemImportAsync(dryTarget, dryResolver, source, dataImporterRoot, args, idMapPath, maxRows, true, verbose);
+            }
+
+            var targetConnection = GetTargetConnection(args);
+            var batchSize = ResolveBatchSize(args);
+            await using var session = await Visa2014HeadlessImportSession.OpenAsync(targetConnection, batchSize);
+            try
+            {
+                if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
+                    return await RunApplicationImportAsync(session.Target, session.Resolver, source, args, idMapPath, maxRows, dryRun, verbose);
+
+                if (string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase))
+                    return await RunApplicationItemImportAsync(session.Target, session.Resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"ERR Import failed: {ex.Message}");
+                if (verbose)
+                    Console.Error.WriteLine(ex);
                 return 1;
             }
         }
@@ -114,7 +171,20 @@ internal static class Visa2014ImportCommand
                 return await RunEducationImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
 
             if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
-                return await RunApplicationImportAsync(api, source, args, idMapPath, maxRows, dryRun, verbose);
+            {
+                var resolver = new Visa2014ODataLookupResolver();
+                if (!dryRun)
+                    await resolver.LoadAsync(api);
+                return await RunApplicationImportAsync(
+                    new Visa2014ODataImportTarget(api),
+                    resolver,
+                    source,
+                    args,
+                    idMapPath,
+                    maxRows,
+                    dryRun,
+                    verbose);
+            }
 
             if (string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase))
                 return await RunApplicationProgressImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
@@ -126,7 +196,21 @@ internal static class Visa2014ImportCommand
                 return await RunEmployeeSalaryImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
 
             if (string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase))
-                return await RunApplicationItemImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+            {
+                var resolver = new Visa2014ODataLookupResolver();
+                if (!dryRun)
+                    await resolver.LoadAsync(api);
+                return await RunApplicationItemImportAsync(
+                    new Visa2014ODataImportTarget(api),
+                    resolver,
+                    source,
+                    dataImporterRoot,
+                    args,
+                    idMapPath,
+                    maxRows,
+                    dryRun,
+                    verbose);
+            }
 
             return await RunEmployeePositionHistoryImportAsync(api, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
         }
@@ -315,7 +399,8 @@ internal static class Visa2014ImportCommand
     }
 
     private static async Task<int> RunApplicationImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         Visa2014LegacySourceProfile source,
         IReadOnlyList<string> args,
         string applicationIdMapPath,
@@ -324,7 +409,8 @@ internal static class Visa2014ImportCommand
         bool verbose)
     {
         var result = await Visa2014ApplicationODataImporter.RunAsync(
-            api,
+            target,
+            resolver,
             source.ConnectionString,
             source.LookupTranslationPaths,
             dryRun ? null : applicationIdMapPath,
@@ -454,7 +540,8 @@ internal static class Visa2014ImportCommand
     }
 
     private static async Task<int> RunApplicationItemImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         Visa2014LegacySourceProfile source,
         string dataImporterRoot,
         IReadOnlyList<string> args,
@@ -487,7 +574,8 @@ internal static class Visa2014ImportCommand
         Console.WriteLine($"INF WorkPermitItem id-map: {workPermitItemIdMapPath}");
 
         var result = await Visa2014ApplicationItemODataImporter.RunAsync(
-            api,
+            target,
+            resolver,
             source.ConnectionString,
             source.LookupTranslationPaths,
             applicationIdMapPath,
@@ -497,7 +585,7 @@ internal static class Visa2014ImportCommand
             positionHistoryIdMapPath,
             addressIdMapPath,
             workPermitItemIdMapPath,
-            dryRun ? null : applicationItemIdMapPath,
+            applicationItemIdMapPath,
             maxRows,
             dryRun,
             verbose);
@@ -510,10 +598,6 @@ internal static class Visa2014ImportCommand
                 $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (missing required id-map): {result.SkippedMissingRequiredIdMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
-        }
-        else if (result.SkippedMissingRequiredIdMap > 0)
-        {
-            Console.WriteLine($"INF Would skip (missing required id-map): {result.SkippedMissingRequiredIdMap}");
         }
 
         if (result.FailedCount > 0)
@@ -629,8 +713,20 @@ internal static class Visa2014ImportCommand
 
     private static string GetTargetConnection(IReadOnlyList<string> args) =>
         GetOptionValue(args, "--target-connection")
+        ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
         ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
         ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
+
+    private static bool IsInProcessEntitySupported(string entity) =>
+        string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase);
+
+    private static int ResolveBatchSize(IReadOnlyList<string> args)
+    {
+        if (int.TryParse(GetOptionValue(args, "--batch-size"), out var size) && size > 0)
+            return size;
+        return 50;
+    }
 
     private static bool HasArg(IReadOnlyList<string> args, string flag) =>
         args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));

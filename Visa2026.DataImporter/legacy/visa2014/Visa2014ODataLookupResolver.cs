@@ -3,7 +3,7 @@ using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed class Visa2014ODataLookupResolver
+internal sealed partial class Visa2014ODataLookupResolver
 {
     private List<Gender> _genders = [];
     private List<Country> _countries = [];

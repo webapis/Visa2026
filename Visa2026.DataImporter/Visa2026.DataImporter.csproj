@@ -32,6 +32,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Visa2026.Blazor.Server\Visa2026.Blazor.Server.csproj" />
     <ProjectReference Include="..\Visa2026.Module\Visa2026.Module.csproj" />
   </ItemGroup>
   <ItemGroup>

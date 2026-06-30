@@ -18,7 +18,7 @@ Discovery/mapping rules live in [SKILL.md](./SKILL.md) and [VISA2014_MIGRATION.m
 |---|----------|-----|
 | 0 | **Strategy approved** | `import-strategy.yaml` before any import **implementation** |
 | 0b | **Confirm before implement** | Excel preview reviewed; `importConfirmed: true` per BO; read/append **learnings.md** each session |
-| 1 | **OData only** into Visa2026 | XAF validation, security, audit — same as seed import |
+| 1 | **OData or in-process XAF** into Visa2026 | Same validation/rules as UI — never direct SQL into Visa2026 |
 | 2 | **Never write** to `VISA2015` | Legacy is read-only source |
 | 3 | **Dependency order** from `order.yaml` | FKs and id-map must exist before children |
 | 4 | **Three-layer mapping** at transform time | Table → column → lookup value before POST |
@@ -35,8 +35,8 @@ Run in order:
 0. **`import-strategy.yaml`** → `status: approved` ([IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md)).
 1. **`importConfirmed: true`** — dossier + `order.yaml` for every entity in this batch ([SKILL.md § Phase 1b](./SKILL.md)); **Excel preview** reviewed ([EXCEL_PREVIEW_EXPORT.md](../../../docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)).
 2. **Target DB** — `Visa2026DbDev` or empty disposable DB; **not** production on first pass.
-3. **Start `Visa2026.Blazor.Server`** once so Module updaters seed lookups, ApplicationType, org singletons ([LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)).
-4. **Wait for server** — importer polls until `https://localhost:5001` responds (see `ApiClient.WaitForServerAsync`).
+3. **Target DB ready** — Module updaters must have run once (start Blazor host **or** use `--inprocess` which boots the same XAF stack headlessly). Lookups, ApplicationType, org singletons ([LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)).
+4. **OData path only:** start `Visa2026.Blazor.Server` and wait for server (`ApiClient.WaitForServerAsync`). **In-process path:** no Kestrel — pass `--target-connection` (or `ConnectionStrings__DefaultConnection`).
 5. **Verify prerequisite lookups** — Country, Department, Position, ApplicationType, etc. exist via OData GET (DataImporter Phase 2 pattern). **Abort** if critical catalogs empty.
 6. **Org singletons** — `CompanyProfile`, default `ProjectContract` if BO validation requires them (IMPORTING.md Phase 3).
 7. **OData exposure** — every imported BO registered in `WebApiServiceExtensions.cs`.
@@ -147,28 +147,57 @@ Mirror [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md) scenario idem
 
 ---
 
-## Commands (current + planned)
+## Headless in-process import (`--inprocess`)
 
-**Today (target seed import — same OData stack):**
+For **Application** and **ApplicationItem** (largest OData batches), use the headless XAF host — same business rules as OData POST, **no HTTP per row**.
 
-```powershell
-# Start host (lookups + updaters)
-dotnet run --project Visa2026.Blazor.Server
-
-# Reference importer (scenarios — not VISA2014 yet)
-dotnet run --project Visa2026.DataImporter
-# or
-.\scripts\local\Run-DataImporter.ps1
-```
-
-**Planned (VISA2014 legacy):**
+| Flag | Purpose |
+|------|---------|
+| `--inprocess` | Boot `HeadlessMigrationHost` (Blazor.Server XAF stack without Kestrel) |
+| `--target-connection` | Visa2026 SQL connection string (or env `ConnectionStrings__DefaultConnection`) |
+| `--batch-size` | ObjectSpace commits per batch (default **50**) |
+| `--dry-run` | Transform + count only; no legacy SQL required for in-process dry-run |
 
 ```powershell
-dotnet run --project Visa2026.DataImporter -- --import-visa2014 --entity Person --verbose
-dotnet run --project Visa2026.DataImporter -- --import-visa2014 --dry-run --entity Person
+# Dry-run transform (no target DB writes)
+dotnet run --project Visa2026.DataImporter -- `
+  --import-visa2014 --inprocess --dry-run --entity ApplicationItem `
+  --legacy-source calik-energi --max-rows 100 --no-wait
+
+# Live import (no Blazor host required)
+dotnet run --project Visa2026.DataImporter -- `
+  --import-visa2014 --inprocess --entity ApplicationItem `
+  --legacy-source calik-energi-onprem-staging `
+  --target-connection "Server=10.100.128.25;Database=Visa2026DbStaging;..." `
+  --person-id-map "legacy/visa2014/id-maps/calik-energi-onprem-staging/Person.json" `
+  --application-id-map ".../Application.json" `
+  --passport-id-map ".../Passport.json" `
+  --batch-size 50 --no-wait
 ```
 
-Until `--import-visa2014` exists, pilot via documented manual OData POST following sections above.
+**When to use:** bulk Application / ApplicationItem on staging or prod LAN where OData round-trips dominate runtime. **Other entities** still use OData today.
+
+Implementation: `Visa2026.Blazor.Server/Services/Migration/HeadlessMigrationHost.cs`, `Visa2026.DataImporter/Migration/ObjectSpaceImportSink.cs`, `Visa2014ObjectSpaceImportTarget`.
+
+---
+
+## Commands
+
+**OData (all entities):**
+
+```powershell
+dotnet run --project Visa2026.Blazor.Server   # lookups + updaters (first time)
+dotnet run --project Visa2026.DataImporter -- `
+  --import-visa2014 --entity Person `
+  --api-base-url https://localhost:5001 --no-wait
+```
+
+**VISA2014 legacy (representative):**
+
+```powershell
+dotnet run --project Visa2026.DataImporter -- --import-visa2014 --dry-run --entity Person --legacy-source calik-energi
+dotnet run --project Visa2026.DataImporter -- --import-visa2014 --entity Application --legacy-source calik-energi --no-wait
+```
 
 ---
 

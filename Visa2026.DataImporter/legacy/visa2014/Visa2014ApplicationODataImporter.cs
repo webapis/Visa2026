@@ -21,7 +21,8 @@ internal static class Visa2014ApplicationODataImporter
     private const string BorderZoneNoneLabel = "Ýok";
 
     public static async Task<Visa2014ApplicationImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string? applicationIdMapOutputPath,
@@ -48,9 +49,6 @@ internal static class Visa2014ApplicationODataImporter
                 DedupeMergedCount = batch.DedupeMergedCount,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
 
         var applicationIdMap = LoadOptionalApplicationIdMap(applicationIdMapOutputPath);
         if (verbose && applicationIdMap.Count > 0)
@@ -83,20 +81,20 @@ internal static class Visa2014ApplicationODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<Application>("Application", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Application), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                applicationIdMap[legacyOid] = created.Id;
+                applicationIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported...");
                 if (verbose)
-                    Console.WriteLine($"  POST Application {created.Id} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
+                    Console.WriteLine($"  SAVE Application {createdId.Value} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
             }
             catch (Exception ex)
             {
@@ -105,6 +103,8 @@ internal static class Visa2014ApplicationODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (applicationIdMap.Count > 0 && !string.IsNullOrWhiteSpace(applicationIdMapOutputPath))

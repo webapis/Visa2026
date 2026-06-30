@@ -677,3 +677,13 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Sync**: One-way legacy → Visa2026 planned (nightly off-peak); safe because no officer writes in Visa2026 during parallel period. Full delta upsert (`--sync-visa2014`) not implemented yet — v1 catch-up is new-row id-map skip on some entities only.
 - **Artifacts**: `docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md`, `import-strategy.yaml` `onPremDeployment`, `legacy-sources.yaml` profiles `calik-energi-onprem-{staging,prod,demo}`.
 
+### 2026-06-30 — Headless XAF import (`--inprocess`)
+
+- **Phase**: import implementation
+- **Goal**: Speed Application / ApplicationItem loads by skipping OData HTTP per row while keeping XAF validation (`MigrationImportContext`, same rules as UI).
+- **Architecture**: `HeadlessMigrationHost` in `Visa2026.Blazor.Server` boots `Program.CreateHostBuilder` without Kestrel; `Visa2014ObjectSpaceImportTarget` + `ObjectSpaceImportSink` apply payload dicts via `INonSecuredObjectSpaceFactory`; batch commit default 50.
+- **CLI**: `--import-visa2014 --inprocess --entity Application|ApplicationItem --target-connection ...` optional `--batch-size`. Other entities remain OData-only for now.
+- **Verified**: Debug build OK; dry-run Application 5 rows; live in-process 1 row on LocalDB `Visa2026` — headless host started, lookup catalogs loaded from ObjectSpace, idempotent skip (already imported).
+- **Docs**: `import-practices.md` § Headless in-process; `ON_PREM_IIS_MIGRATION_RUNBOOK.md` staging example.
+- **Next**: Benchmark full ApplicationItem (~21k) vs OData; extend `--inprocess` to remaining entities if needed.
+
