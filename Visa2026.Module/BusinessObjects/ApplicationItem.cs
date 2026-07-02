@@ -104,7 +104,8 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentMedicalRecord";
 
         private const string ShowCurrentEducationRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentEducation And Not ("
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentEducation And "
+            + EmployeeApplicationItemLineCriteria + " And Not ("
             + RegistrationApplicationItemContextCriteria + ")";
 
         private const string ShowBorderZoneLocationRequiredCriteria =
@@ -399,13 +400,13 @@ namespace Visa2026.Module.BusinessObjects
 
             CurrentAddressOfResidence = PersonCurrentItems.GetCurrentAddressOfResidence(p);
             CurrentMedicalRecord = PersonCurrentItems.GetCurrentMedicalRecord(p);
-            CurrentEducation = PersonCurrentItems.GetCurrentEducation(p);
             CurrentInvitationItem = PersonCurrentItems.GetCurrentInvitationItem(p);
             PreviousInvitationItem = null;
             PreviousWorkPermitItem = null;
 
             if (p.IsEmployee)
             {
+                CurrentEducation = PersonCurrentItems.GetCurrentEducation(p);
                 CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
                 CurrentSalary = PersonCurrentItems.GetCurrentSalary(p);
                 CurrentWorkDuty = PersonCurrentItems.GetCurrentWorkDuty(p);
@@ -415,6 +416,7 @@ namespace Visa2026.Module.BusinessObjects
             }
             else
             {
+                CurrentEducation = null;
                 CurrentPositionHistory = null;
                 CurrentSalary = null;
                 CurrentWorkDuty = null;
@@ -1740,6 +1742,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("CurrentEducationHiddenOnRegistration", Visibility = ViewItemVisibility.Hide,
             Criteria = RegistrationApplicationItemContextCriteria, Context = "DetailView,ListView")]
+        [Appearance("CurrentEducationEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
         [Appearance("EducationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEducation", Context = "DetailView,ListView")]
         [RuleRequiredField(TargetCriteria = ShowCurrentEducationRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableEducations))]
