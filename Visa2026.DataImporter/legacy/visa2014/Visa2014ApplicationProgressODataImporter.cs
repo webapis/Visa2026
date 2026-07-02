@@ -1,3 +1,5 @@
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Core;
 using System.Text.Json;
 using Visa2026.DataImporter;
 
@@ -31,17 +33,23 @@ internal static class Visa2014ApplicationProgressODataImporter
         string? progressIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
+        string? targetConnectionForLegCounts = null)
     {
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         if (verbose)
             Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
 
+        var ministryLegCountByLegacyApplicationOid = await ResolveMinistryLegCountMapAsync(
+            applicationIdMap, objectSpaceFactory, targetConnectionForLegCounts, verbose);
+
         var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
             legacyConnectionString,
             lookupTranslationPaths,
             maxRows,
-            verbose);
+            verbose,
+            ministryLegCountByLegacyApplicationOid);
 
         if (dryRun)
         {
@@ -185,6 +193,7 @@ internal static class Visa2014ApplicationProgressODataImporter
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         IReadOnlyDictionary<Guid, Guid> legacyApplicationIdToTargetId,
+        IReadOnlyDictionary<Guid, int> ministryLegCountByLegacyApplicationOid,
         bool dryRun,
         bool verbose)
     {
@@ -193,7 +202,8 @@ internal static class Visa2014ApplicationProgressODataImporter
             legacyConnectionString,
             lookupTranslationPaths,
             maxRows: null,
-            verbose);
+            verbose,
+            ministryLegCountByLegacyApplicationOid);
 
         var errors = new List<string>();
         var progressIdMap = new Dictionary<string, Guid>(StringComparer.Ordinal);
@@ -355,6 +365,32 @@ internal static class Visa2014ApplicationProgressODataImporter
                 map[prop.Name] = targetId;
         }
 
+        return map;
+    }
+
+    private static async Task<IReadOnlyDictionary<Guid, int>?> ResolveMinistryLegCountMapAsync(
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory,
+        string? targetConnectionForLegCounts,
+        bool verbose)
+    {
+        IReadOnlyDictionary<Guid, int> targetLegCounts;
+        if (objectSpaceFactory != null)
+        {
+            targetLegCounts = Visa2014ApplicationMinistryLegCountResolver.LoadFromObjectSpace(objectSpaceFactory);
+        }
+        else if (!string.IsNullOrWhiteSpace(targetConnectionForLegCounts))
+        {
+            targetLegCounts = await Visa2014ApplicationMinistryLegCountResolver.LoadFromSqlAsync(targetConnectionForLegCounts);
+        }
+        else
+        {
+            return null;
+        }
+
+        var map = Visa2014ApplicationMinistryLegCountResolver.MapLegacyLegCounts(applicationIdMap, targetLegCounts);
+        if (verbose)
+            Console.WriteLine($"INF Ministry-leg counts resolved for {map.Count} legacy application(s) from snapshots.");
         return map;
     }
 }

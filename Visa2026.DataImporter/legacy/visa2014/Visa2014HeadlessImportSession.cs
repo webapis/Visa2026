@@ -1,3 +1,4 @@
+using DevExpress.ExpressApp;
 using Visa2026.Blazor.Server.Services.Migration;
 using Visa2026.Module.Services.MigrationImport;
 
@@ -14,6 +15,8 @@ internal sealed class Visa2014HeadlessImportSession : IAsyncDisposable
     public Visa2014ODataLookupResolver Resolver { get; }
 
     public IVisa2014ImportTarget Target => _target;
+
+    public INonSecuredObjectSpaceFactory ObjectSpaceFactory => _host.ObjectSpaceFactory;
 
     private Visa2014HeadlessImportSession(
         HeadlessMigrationHost host,

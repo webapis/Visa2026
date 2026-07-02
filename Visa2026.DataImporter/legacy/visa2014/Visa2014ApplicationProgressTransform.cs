@@ -74,7 +74,8 @@ internal static class Visa2014ApplicationProgressTransform
         string connectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
-        bool verbose)
+        bool verbose,
+        IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid = null)
     {
         _ = lookupTranslationPaths;
         var sql = maxRows is > 0
@@ -95,7 +96,7 @@ internal static class Visa2014ApplicationProgressTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        return TransformRows(rawRows, out var skipped, out var dedupeSummary);
+        return TransformRows(rawRows, ministryLegCountByLegacyApplicationOid, out var skipped, out var dedupeSummary);
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationProgressRawRow parsed)
@@ -133,6 +134,7 @@ internal static class Visa2014ApplicationProgressTransform
 
     private static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014ApplicationProgressRawRow> rawRows,
+        IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> dedupeSummary)
     {
@@ -165,7 +167,8 @@ internal static class Visa2014ApplicationProgressTransform
                 continue;
             }
 
-            var steps = SynthesizeSteps(raw);
+            var ministryLegCount = ResolveMinistryLegCount(raw, ministryLegCountByLegacyApplicationOid);
+            var steps = SynthesizeSteps(raw, ministryLegCount);
             if (steps.Count == 0)
             {
                 skipped.Add(BuildParentSkippedRow(raw, composite, "no_synthesized_steps"));
@@ -177,6 +180,7 @@ internal static class Visa2014ApplicationProgressTransform
                 ["_legacyApplicationOid"] = raw.LegacyApplicationOid,
                 ["_processKind"] = raw.IsLongProcess ? "long" : "simple",
                 ["stepCount"] = steps.Count,
+                ["ministryLegCount"] = ministryLegCount,
                 ["_legacy_ApplicationTypeComposite"] = composite,
                 ["_legacy_ManualApplicationNumber"] = raw.ManualApplicationNumber,
             });
@@ -216,7 +220,7 @@ internal static class Visa2014ApplicationProgressTransform
 
     private sealed record SynthesisStep(string StepCode, string StateCode, string LocationCode, DateTime Date, string? Description);
 
-    private static List<SynthesisStep> SynthesizeSteps(Visa2014ApplicationProgressRawRow raw)
+    private static List<SynthesisStep> SynthesizeSteps(Visa2014ApplicationProgressRawRow raw, int ministryLegCount)
     {
         var steps = new List<SynthesisStep>();
         var appDate = raw.ManualApplicationDate!.Value;
@@ -228,41 +232,40 @@ internal static class Visa2014ApplicationProgressTransform
             appDate,
             null));
 
-        if (raw.IsLongProcess)
+        ministryLegCount = Math.Clamp(ministryLegCount, 0, 5);
+        if (ministryLegCount > 0)
         {
-            if (IsLegacyDateSet(raw.DateForwardedToMonistery))
+            var endDate = ResolveTimelineEndDate(raw, appDate);
+            var slotDates = BuildMinistrySlotDates(raw, appDate, endDate, ministryLegCount);
+            for (var leg = 1; leg <= ministryLegCount; leg++)
             {
+                var startedSlot = (leg - 1) * 2;
+                var approvedSlot = startedSlot + 1;
+                var startedDate = slotDates[startedSlot];
+                var approvedDate = slotDates[approvedSlot];
+                if (approvedDate < startedDate)
+                    approvedDate = startedDate;
+
                 steps.Add(new SynthesisStep(
-                    "ministry_forward",
-                    "1_REVIEW_STARTED",
-                    "AT_THE_MINISTERY_1",
-                    raw.DateForwardedToMonistery!.Value,
+                    $"leg_{leg}_started",
+                    $"{leg}_REVIEW_STARTED",
+                    $"AT_THE_MINISTERY_{leg}",
+                    startedDate,
                     null));
-            }
 
-            if (IsLegacyDateSet(raw.MinisteriesDocumentDate) || !string.IsNullOrWhiteSpace(raw.MinisteriesDocumentNumber))
-            {
-                var date = raw.MinisteriesDocumentDate ?? raw.DateForwardedToMonistery ?? appDate;
                 steps.Add(new SynthesisStep(
-                    "ministry_return",
-                    "1_REVIEW_APPROVED",
-                    "AT_THE_MINISTERY_1",
-                    date,
-                    FormatLegacyRef("MinisteriesDocumentNumber", raw.MinisteriesDocumentNumber)));
-            }
-
-            if (IsLegacyDateSet(raw.DateForwardedToMinConstruction))
-            {
-                steps.Add(new SynthesisStep(
-                    "ministry_2_forward",
-                    "2_REVIEW_STARTED",
-                    "AT_THE_MINISTERY_2",
-                    raw.DateForwardedToMinConstruction!.Value,
-                    FormatLegacyRef("DocNumberForwardedToMinConstruction", raw.DocNumberForwardedToMinConstruction)));
+                    $"leg_{leg}_approved",
+                    $"{leg}_REVIEW_APPROVED",
+                    $"AT_THE_MINISTERY_{leg}",
+                    approvedDate,
+                    BuildLegApprovedDescription(raw, leg)));
             }
         }
 
-        if (IsLegacyDateSet(raw.ProcessDate) || !string.IsNullOrWhiteSpace(raw.ProcessNumber))
+        var shouldAddIssued = IsLegacyDateSet(raw.ProcessDate)
+            || !string.IsNullOrWhiteSpace(raw.ProcessNumber)
+            || (ministryLegCount > 0 && !raw.Cancelled && !raw.Rejected);
+        if (shouldAddIssued)
         {
             var date = raw.ProcessDate ?? steps[^1].Date;
             steps.Add(new SynthesisStep(
@@ -301,17 +304,149 @@ internal static class Visa2014ApplicationProgressTransform
             .ToList();
     }
 
-    private static int StepOrder(string stepCode) => stepCode switch
+    private static int ResolveMinistryLegCount(
+        Visa2014ApplicationProgressRawRow raw,
+        IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid)
     {
-        "prepare" => 0,
-        "ministry_forward" => 1,
-        "ministry_return" => 2,
-        "ministry_2_forward" => 3,
-        "migration_process" => 4,
-        "cancelled" => 5,
-        "rejected" => 6,
-        _ => 99,
-    };
+        if (ministryLegCountByLegacyApplicationOid != null
+            && ministryLegCountByLegacyApplicationOid.TryGetValue(raw.LegacyApplicationOid, out var resolved))
+            return resolved;
+
+        return raw.IsLongProcess ? 2 : 0;
+    }
+
+    private static DateTime ResolveTimelineEndDate(Visa2014ApplicationProgressRawRow raw, DateTime appDate)
+    {
+        if (IsLegacyDateSet(raw.ProcessDate))
+            return raw.ProcessDate!.Value;
+        if (IsLegacyDateSet(raw.DateForwardedToMinConstruction))
+            return raw.DateForwardedToMinConstruction!.Value;
+        if (IsLegacyDateSet(raw.MinisteriesDocumentDate))
+            return raw.MinisteriesDocumentDate!.Value;
+        if (IsLegacyDateSet(raw.DateForwardedToMonistery))
+            return raw.DateForwardedToMonistery!.Value;
+        return appDate.AddDays(Math.Max(30, raw.IsLongProcess ? 60 : 30));
+    }
+
+    private static DateTime[] BuildMinistrySlotDates(
+        Visa2014ApplicationProgressRawRow raw,
+        DateTime appDate,
+        DateTime endDate,
+        int ministryLegCount)
+    {
+        var slotCount = ministryLegCount * 2;
+        var slots = new DateTime?[slotCount];
+        AssignKnownLegDates(raw, slots);
+        FillInterpolatedSlotDates(appDate, endDate, slots);
+        return slots.Select(s => s ?? appDate).ToArray();
+    }
+
+    private static void AssignKnownLegDates(Visa2014ApplicationProgressRawRow raw, DateTime?[] slots)
+    {
+        if (slots.Length == 0)
+            return;
+
+        if (IsLegacyDateSet(raw.DateForwardedToMonistery))
+            slots[0] = raw.DateForwardedToMonistery;
+
+        if (slots.Length > 1
+            && (IsLegacyDateSet(raw.MinisteriesDocumentDate) || !string.IsNullOrWhiteSpace(raw.MinisteriesDocumentNumber)))
+        {
+            slots[1] = raw.MinisteriesDocumentDate ?? raw.DateForwardedToMonistery;
+        }
+
+        if (slots.Length > 2 && IsLegacyDateSet(raw.DateForwardedToMinConstruction))
+            slots[2] = raw.DateForwardedToMinConstruction;
+    }
+
+    private static void FillInterpolatedSlotDates(DateTime appDate, DateTime endDate, DateTime?[] slots)
+    {
+        if (slots.Length == 0)
+            return;
+
+        if (endDate < appDate)
+            endDate = appDate.AddDays(1);
+
+        for (var i = 0; i < slots.Length; i++)
+        {
+            if (slots[i].HasValue)
+                continue;
+
+            var prev = i - 1;
+            while (prev >= 0 && !slots[prev].HasValue)
+                prev--;
+
+            var next = i + 1;
+            while (next < slots.Length && !slots[next].HasValue)
+                next++;
+
+            var from = prev >= 0 ? slots[prev]!.Value : appDate;
+            var to = next < slots.Length ? slots[next]!.Value : endDate;
+            var gapCount = next - prev;
+            var position = i - prev;
+            slots[i] = InterpolateDate(from, to, position, gapCount);
+        }
+    }
+
+    private static DateTime InterpolateDate(DateTime from, DateTime to, int position, int gapCount)
+    {
+        if (gapCount <= 0 || position <= 0)
+            return from;
+        if (to <= from)
+            return from.AddDays(position);
+
+        var fraction = (double)position / gapCount;
+        var ticks = from.Ticks + (long)((to.Ticks - from.Ticks) * fraction);
+        return new DateTime(ticks);
+    }
+
+    private static string? BuildLegApprovedDescription(Visa2014ApplicationProgressRawRow raw, int leg) =>
+        leg switch
+        {
+            1 => FormatLegacyRef("MinisteriesDocumentNumber", raw.MinisteriesDocumentNumber),
+            2 => FormatLegacyRef("DocNumberForwardedToMinConstruction", raw.DocNumberForwardedToMinConstruction),
+            _ => null,
+        };
+
+    private static int StepOrder(string stepCode)
+    {
+        if (stepCode == "prepare")
+            return 0;
+        if (stepCode.StartsWith("leg_", StringComparison.Ordinal) && stepCode.EndsWith("_started", StringComparison.Ordinal))
+        {
+            if (TryParseLegStepCode(stepCode, out var leg))
+                return 10 + leg * 2;
+        }
+        if (stepCode.StartsWith("leg_", StringComparison.Ordinal) && stepCode.EndsWith("_approved", StringComparison.Ordinal))
+        {
+            if (TryParseLegStepCode(stepCode, out var leg))
+                return 11 + leg * 2;
+        }
+
+        return stepCode switch
+        {
+            "ministry_forward" => 12,
+            "ministry_return" => 13,
+            "ministry_2_forward" => 14,
+            "migration_process" => 1000,
+            "cancelled" => 1001,
+            "rejected" => 1002,
+            _ => 99,
+        };
+    }
+
+    private static bool TryParseLegStepCode(string stepCode, out int leg)
+    {
+        leg = 0;
+        if (!stepCode.StartsWith("leg_", StringComparison.Ordinal))
+            return false;
+
+        var underscore = stepCode.IndexOf('_', 4);
+        if (underscore <= 4)
+            return false;
+
+        return int.TryParse(stepCode.AsSpan(4, underscore - 4), out leg) && leg is >= 1 and <= 5;
+    }
 
     private static Dictionary<string, object?> BuildParentSkippedRow(
         Visa2014ApplicationProgressRawRow raw,

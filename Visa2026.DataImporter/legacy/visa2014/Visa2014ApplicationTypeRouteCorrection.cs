@@ -198,8 +198,10 @@ internal static class Visa2014ApplicationTypeRouteCorrection
         {
             var legacyToTarget = applicationIdMap.Where(kv => familyAppIds.Contains(kv.Value))
                 .ToDictionary(kv => kv.Key, kv => kv.Value);
+            var targetLegCounts = Visa2014ApplicationMinistryLegCountResolver.LoadFromObjectSpace(objectSpaceFactory);
+            var familyLegCounts = Visa2014ApplicationMinistryLegCountResolver.MapLegacyLegCounts(legacyToTarget, targetLegCounts);
             var regen = await Visa2014ApplicationProgressODataImporter.RegenerateForLegacyApplicationsAsync(
-                target, resolver, legacyConnectionString, lookupTranslationPaths, legacyToTarget, dryRun, verbose);
+                target, resolver, legacyConnectionString, lookupTranslationPaths, legacyToTarget, familyLegCounts, dryRun, verbose);
             progressPosted = regen.PostedCount;
             progressFailed = regen.FailedCount;
             errors.AddRange(regen.Errors);

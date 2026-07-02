@@ -176,7 +176,8 @@ internal static class Visa2014ImportCommand
             else if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunApplicationImportAsync(target, resolver, source, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase))
-                exitCode = await RunApplicationProgressImportAsync(target, resolver, seedCleanupApi, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+                exitCode = await RunApplicationProgressImportAsync(
+                    target, resolver, seedCleanupApi, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session);
             else if (string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunAddressOfResidenceImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase))
@@ -445,7 +446,8 @@ internal static class Visa2014ImportCommand
         string progressIdMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        Visa2014HeadlessImportSession? headlessSession = null)
     {
         var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
             ?? source.IdMapPath(dataImporterRoot, "Application");
@@ -462,7 +464,9 @@ internal static class Visa2014ImportCommand
             dryRun ? null : progressIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            headlessSession?.ObjectSpaceFactory,
+            GetTargetConnection(args));
 
         Console.WriteLine($"INF Legacy applications: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Parent-skipped: {result.SkippedCount}");
