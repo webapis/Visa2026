@@ -474,6 +474,12 @@ internal sealed partial class Visa2014ODataLookupResolver
             || string.Equals(row.PdfFormCode, key, StringComparison.OrdinalIgnoreCase);
     }
 
+    public Guid? ResolveSubcontractor(string? nameTm)
+    {
+        var resolved = ResolveByNameTm(_subcontractors, nameTm, s => s.NameTm);
+        return resolved ?? ResolveDefaultSubcontractor();
+    }
+
     public Guid? ResolveDefaultSubcontractor()
     {
         var preferred = _subcontractors.FirstOrDefault(s => s.IsDefault);

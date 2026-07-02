@@ -164,6 +164,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--patch-visa2014-application-project-contract",
         "--correct-visa-application-types",
         "--correct-application-progress-ministry-legs",
+        "--correct-person-subcontractor",
+        "--correct-person-relationship",
         "--export-visa2014-actual-positions",
         "--apply-visa2014-actual-positions",
         "--auto-no-letters",
@@ -290,6 +292,8 @@ static void PrintHelp()
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");
     Console.WriteLine("  --correct-visa-application-types  Retype App_Visa_Ext→708, FM via-ministry + progress regen (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress from ApprovalLegProfile snapshots (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");
@@ -549,6 +553,26 @@ if (HasArg(args, "--correct-application-progress-ministry-legs"))
     Log.Phase("VISA2014 ApplicationProgress ministry-leg correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationProgressMinistryLegCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-person-subcontractor"))
+{
+    Log.Phase("VISA2014 Person Subcontractor correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014PersonSubcontractorCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-person-relationship"))
+{
+    Log.Phase("VISA2014 Person Relationship correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014PersonRelationshipCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

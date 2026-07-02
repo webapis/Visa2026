@@ -21,6 +21,11 @@
                      "ReverseNameTm":  "giýewisi"
                  },
                  {
+                     "NameTm":  "(gaýny) aýalynyň kakasy",
+                     "LocalizationKey":  "FatherInLaw",
+                     "ReverseNameTm":  "jyren"
+                 },
+                 {
                      "NameTm":  "gyzy",
                      "LocalizationKey":  "Daughter",
                      "ReverseNameTm":  "kakasy"

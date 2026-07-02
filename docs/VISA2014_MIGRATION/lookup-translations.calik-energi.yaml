@@ -190,3 +190,29 @@ catalogs:
     notes: |
       Seed department.calik-energi.json from DISTINCT TitleOfDepartment on active WorkHistoryOfEmployee.
       Demo tenant seed has 3 rows — Çalik production needs full department set.
+
+  - targetCatalog: Subcontractor
+    targetMatchProperty: NameTm
+    identityPassThrough: true
+    legacy:
+      storage: legacy_column
+      table: dbo.Person
+      column: IDNumber
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(p.IDNumber)) AS label, COUNT(*) AS cnt
+        FROM dbo.Person p
+        WHERE p.GCRecord IS NULL AND NULLIF(LTRIM(RTRIM(p.IDNumber)), '') IS NOT NULL
+        GROUP BY LTRIM(RTRIM(p.IDNumber))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-07-02
+      scope: Person
+      distinctIdNumberLabels: 130
+      notes: Person.IDNumber holds employer/subcontractor text on Çalik; Employee.Tasaron FK when Tasaron table present
+    values: []
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Seed subcontractor.calik-energi.json from UNION Tasaron.NameOfTasaron + Person.IDNumber.
+      Family members inherit sponsoring employee subcontractor at OData import / correction.

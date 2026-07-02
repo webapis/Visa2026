@@ -53,6 +53,13 @@ internal static class Visa2014PersonODataImporter
                 r => (Guid)r["_legacyRowId"]!,
                 r => r.GetValueOrDefault("ProjectContract") as string);
 
+        var employeeSubcontractorByLegacyOid = batch.ImportRows
+            .Where(IsEmployeeRow)
+            .Where(r => r["_legacyRowId"] is Guid)
+            .ToDictionary(
+                r => (Guid)r["_legacyRowId"]!,
+                r => r.GetValueOrDefault("Subcontractor") as string);
+
         var idMap = new Dictionary<Guid, Guid>();
         var errors = new List<string>();
         int posted = 0;
@@ -66,7 +73,7 @@ internal static class Visa2014PersonODataImporter
             var legacyOid = (Guid)row["_legacyRowId"]!;
             try
             {
-                var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid);
+                var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid, employeeSubcontractorByLegacyOid);
                 var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Person), payload);
                 if (!createdId.HasValue)
                 {
@@ -123,7 +130,8 @@ internal static class Visa2014PersonODataImporter
         Dictionary<string, object?> row,
         Visa2014ODataLookupResolver resolver,
         IReadOnlyDictionary<Guid, Guid> idMap,
-        IReadOnlyDictionary<Guid, string?> employeeProjectContractByLegacyOid)
+        IReadOnlyDictionary<Guid, string?> employeeProjectContractByLegacyOid,
+        IReadOnlyDictionary<Guid, string?> employeeSubcontractorByLegacyOid)
     {
         var isEmployee = IsEmployeeRow(row);
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -152,16 +160,19 @@ internal static class Visa2014PersonODataImporter
         TrySetLookup(payload, "Relationship", resolver.ResolveRelationship(row.GetValueOrDefault("Relationship") as string));
 
         var projectContractCode = row.GetValueOrDefault("ProjectContract") as string;
+        var subcontractorName = row.GetValueOrDefault("Subcontractor") as string;
         if (!isEmployee
-            && string.IsNullOrWhiteSpace(projectContractCode)
             && row.GetValueOrDefault("SponsoringEmployee") is string sponsorOidText
             && Guid.TryParse(sponsorOidText, out var legacySponsorOid))
         {
-            employeeProjectContractByLegacyOid.TryGetValue(legacySponsorOid, out projectContractCode);
+            if (string.IsNullOrWhiteSpace(projectContractCode))
+                employeeProjectContractByLegacyOid.TryGetValue(legacySponsorOid, out projectContractCode);
+            if (string.IsNullOrWhiteSpace(subcontractorName))
+                employeeSubcontractorByLegacyOid.TryGetValue(legacySponsorOid, out subcontractorName);
         }
 
         TrySetLookup(payload, "ProjectContract", resolver.ResolveProjectContract(projectContractCode));
-        TrySetLookup(payload, "Subcontractor", resolver.ResolveDefaultSubcontractor());
+        TrySetLookup(payload, "Subcontractor", resolver.ResolveSubcontractor(subcontractorName));
 
         if (row.GetValueOrDefault("SponsoringEmployee") is string sponsorText &&
             Guid.TryParse(sponsorText, out var legacySponsorOidForFk) &&

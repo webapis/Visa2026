@@ -280,7 +280,8 @@ catalogs:
       unmapped: []
       personWithFkCount: 159
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Relationship.md
-      catalogRowsAdded: [Mother, BrotherInLaw]
+      catalogRowsAdded: [Mother, BrotherInLaw, FatherInLaw]
+      extendedMappings20260702: [(gayny) ayalynyn ejesi, (gayny) ayalynyn kakasy, Inisi, adamsy, baldyzy]
     values:
       - legacy: ayaly
         target: aýaly
@@ -301,6 +302,21 @@ catalogs:
       - legacy: Ayal doganynyn adamsy (giyewisi)
         target: aýal doganyň adamsy (giýewisi)
         notes: Brother-in-law — added to Visa2026 relationship.json 2026-06-21
+      - legacy: (gayny) ayalynyn ejesi
+        target: (gaýny) aýalynyň ejesi
+        notes: Mother-in-law — catalog existed; mapping added 2026-07-02 (4 Person rows on Çalik)
+      - legacy: (gayny) ayalynyn kakasy
+        target: (gaýny) aýalynyň kakasy
+        notes: Father-in-law — catalog row added 2026-07-02 (3 Person rows on Çalik)
+      - legacy: Inisi
+        target: İnisi
+        notes: Case/spelling variant of YoungerSister
+      - legacy: adamsy
+        target: adamsy
+        notes: Husband — catalog existed; explicit mapping for import layer
+      - legacy: baldyzy
+        target: baldyzy
+        notes: Grandchild — catalog existed; explicit mapping for import layer
     unmappedPolicy: allow_null
     unmappedDefault: null
     notes: |

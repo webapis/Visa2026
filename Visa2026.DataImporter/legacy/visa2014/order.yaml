@@ -45,6 +45,11 @@ tenantCatalogGeneration:
         - project-contract-calik-energi
       outputs:
         - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/approval-leg-profile.json
+    - id: subcontractor-calik-energi
+      script: scripts/local/Generate-SubcontractorCalikEnergiCatalog.ps1
+      dependsOn: []
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/subcontractor.calik-energi.json
 
 entities:
   # --- person-domain (no upstream transactional deps) ---

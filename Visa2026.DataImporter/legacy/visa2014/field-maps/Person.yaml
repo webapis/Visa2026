@@ -61,8 +61,9 @@ propertyGaps:
         (see EmployeePositionHistory.yaml ActualPosition + Visa2014EmployeePositionHistoryTransform).
         Kept as _legacy_MiddleName audit column in the Person preview only.
     - column: IDNumber
-      disposition: drop
-      notes: Often employer/subcontractor text, not civil ID — do not map to PersonalNumber
+      disposition: mapped
+      relocateTo: Person.Subcontractor
+      notes: Employer/subcontractor text on Çalik — not civil ID; maps to Subcontractor.NameTm (see fields)
     - column: IMessage_Data
       disposition: drop
     - column: CountPerson
@@ -101,7 +102,7 @@ propertyGaps:
       missingBehavior: allow_null
     - property: Subcontractor
       missingBehavior: allow_null
-      notes: Candidate source Employee.Tasaron — map in follow-up
+      notes: Legacy Person.IDNumber (+ Employee.Tasaron when available); family inherits sponsor
     - property: VisaApplicationFamilyMembersText
       missingBehavior: allow_null
       notes: Optional source MaritalStatus.StatusL (legacy family narrative) — not catalog
@@ -234,6 +235,14 @@ fields:
     target: IsArchived
     transform: bool_invert
     notes: ActivePerson=1 → IsArchived=false
+
+  - source: IDNumber
+    target: Subcontractor
+    transform: lookup
+    lookupCatalog: Subcontractor
+    lookupMatch: NameTm
+    missingBehavior: allow_null
+    notes: Legacy employer/subcontractor text; family members inherit sponsor at OData import
 
   - source: Photo
     target: Photo

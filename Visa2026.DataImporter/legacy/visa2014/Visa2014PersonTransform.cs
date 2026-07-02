@@ -23,7 +23,8 @@ internal sealed record Visa2014PersonRawRow(
     int PhotoByteLength,
     string? PhotoSha256,
     string? RawPersonalNumber,
-    string? LegacyNationality);
+    string? LegacyNationality,
+    string? LegacySubcontractorName);
 
 internal sealed class Visa2014PersonImportBatch
 {
@@ -62,7 +63,8 @@ internal static class Visa2014PersonTransform
             CASE WHEN p.Photo IS NULL OR DATALENGTH(p.Photo) = 0 THEN NULL
                  ELSE LOWER(CONVERT(varchar(64), HASHBYTES('SHA2_256', p.Photo), 2)) END AS PhotoSha256,
             Passport.PersonalNumber AS RawPersonalNumber,
-            nc.NameOfCountryL AS LegacyNationality
+            nc.NameOfCountryL AS LegacyNationality,
+            NULLIF(LTRIM(RTRIM(p.IDNumber)), '') AS LegacySubcontractorName
         FROM dbo.Person p
         OUTER APPLY (
             SELECT TOP 1 pp.*
@@ -91,9 +93,9 @@ internal static class Visa2014PersonTransform
         "FirstName", "LastName", "DateOfBirth", "BirthPlace",
         "CountryOfBirth", "ForeignAddress", "ForeignAddressCountry", "Gender",
         "PersonalNumber", "Nationality", "Email", "IsEmployee", "PersonRole",
-        "IsArchived", "SponsoringEmployee", "Relationship", "ProjectContract",
+        "IsArchived", "SponsoringEmployee", "Relationship", "ProjectContract", "Subcontractor",
         "MaritalStatus", "VisaApplicationFamilyMembersText",
-        "_legacy_MiddleName", "_legacy_Relationship", "_legacy_ProjectContract",
+        "_legacy_MiddleName", "_legacy_Relationship", "_legacy_ProjectContract", "_legacy_SubcontractorName",
         "_legacy_MaritalStatusStatus", "_legacy_MaritalStatusText",
     ];
 
@@ -164,7 +166,8 @@ internal static class Visa2014PersonTransform
             PhotoByteLength: int.TryParse(row.GetValueOrDefault("PhotoByteLength"), out var len) ? len : 0,
             PhotoSha256: row.GetValueOrDefault("PhotoSha256"),
             RawPersonalNumber: row.GetValueOrDefault("RawPersonalNumber"),
-            LegacyNationality: row.GetValueOrDefault("LegacyNationality"));
+            LegacyNationality: row.GetValueOrDefault("LegacyNationality"),
+            LegacySubcontractorName: row.GetValueOrDefault("LegacySubcontractorName"));
         return true;
     }
 
@@ -378,9 +381,11 @@ internal static class Visa2014PersonTransform
         TrySetLookup(row, catalogs, "MaritalStatus", raw.LegacyMaritalStatusStatus, "MaritalStatus", unmapped, ref skipReason);
         TrySetLookup(row, catalogs, "Relationship", raw.LegacyRelationship, "Relationship", unmapped, ref skipReason);
         TrySetLookup(row, catalogs, "ProjectContract", raw.LegacyProjectContract, "ProjectContract", unmapped, ref skipReason);
+        TrySetLookup(row, catalogs, "Subcontractor", raw.LegacySubcontractorName, "Subcontractor", unmapped, ref skipReason);
 
         row["_legacy_Relationship"] = raw.LegacyRelationship;
         row["_legacy_ProjectContract"] = raw.LegacyProjectContract;
+        row["_legacy_SubcontractorName"] = raw.LegacySubcontractorName;
         row["_legacy_MaritalStatusStatus"] = raw.LegacyMaritalStatusStatus;
         row["_legacy_MaritalStatusText"] = raw.LegacyMaritalStatusText;
 
