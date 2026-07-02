@@ -61,6 +61,8 @@ internal sealed class Visa2014HeadlessImportSession : IAsyncDisposable
             "tenant");
     }
 
+    internal static string? ResolveTenantCatalogDirStatic() => ResolveTenantCatalogDir();
+
     public ValueTask DisposeAsync()
     {
         _target.Dispose();

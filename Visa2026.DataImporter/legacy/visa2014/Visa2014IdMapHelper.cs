@@ -6,6 +6,20 @@ internal static class Visa2014IdMapHelper
 {
     public static Dictionary<Guid, Guid> Load(string path)
     {
+        var raw = LoadStringKeyMap(path);
+        var map = new Dictionary<Guid, Guid>();
+        foreach (var (legacyText, targetId) in raw)
+        {
+            if (!Guid.TryParse(legacyText, out var legacyOid))
+                continue;
+            map[legacyOid] = targetId;
+        }
+
+        return map;
+    }
+
+    public static Dictionary<string, Guid> LoadStringKeyMap(string path)
+    {
         if (!File.Exists(path))
             throw new FileNotFoundException($"Id-map not found: {path}", path);
 
@@ -13,14 +27,11 @@ internal static class Visa2014IdMapHelper
         var raw = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
             ?? throw new InvalidOperationException($"Id-map is empty or invalid: {path}");
 
-        var map = new Dictionary<Guid, Guid>();
-        foreach (var (legacyText, targetText) in raw)
+        var map = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        foreach (var (key, targetText) in raw)
         {
-            if (!Guid.TryParse(legacyText, out var legacyOid))
-                continue;
-            if (!Guid.TryParse(targetText, out var targetId))
-                continue;
-            map[legacyOid] = targetId;
+            if (Guid.TryParse(targetText, out var targetId))
+                map[key] = targetId;
         }
 
         return map;

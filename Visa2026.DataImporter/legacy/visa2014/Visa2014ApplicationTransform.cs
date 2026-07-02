@@ -81,9 +81,10 @@ internal static class Visa2014ApplicationTransform
         "App_Inv_According_to_WP",
         "App_Inv_And_WP",
         "App_Visa_Ext_According_to_WP",
-        "App_Visa_Ext",
-        "App_Exit_Visa",
         "App_Visa_and_WP_Ext",
+        "App_Visa_Ext_FM",
+        "App_Visa_For_New_Born_FM",
+        "App_Exit_Visa",
         "App_WP_Ext",
         "App_Additional_WP_location",
     };

@@ -833,8 +833,8 @@ catalogs:
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
     values:
       - legacy: "E:7:na:na:na"
-        target: App_Visa_Ext
-        notes: 1,896 rows — default when WizaAndWorkPermit not set
+        target: App_Visa_and_WP_Ext
+        notes: All employee subtype-7 extensions map to visa + work permit (App_Visa_Ext deprecated)
       - legacy: "E:0:0:na:na"
         target: App_Inv
       - legacy: "E:0:1:na:na"
@@ -876,7 +876,7 @@ catalogs:
       - legacy: "E:45:na:na:na"
         target: App_Cancel_Visa
       - legacy: "E:7:na:0:na"
-        target: App_Visa_Ext
+        target: App_Visa_and_WP_Ext
       - legacy: "E:7:na:1:na"
         target: App_Visa_and_WP_Ext
       - legacy: "E:8:na:0:na"

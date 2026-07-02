@@ -162,6 +162,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--patch-visa2014-application-migration-service",
         "--patch-visa2014-application-migration-service-inference",
         "--patch-visa2014-application-project-contract",
+        "--correct-visa-application-types",
         "--export-visa2014-actual-positions",
         "--apply-visa2014-actual-positions",
         "--auto-no-letters",
@@ -286,6 +287,7 @@ static void PrintHelp()
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--inference-rules path.yaml] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--force] [--api-base-url url] [--no-wait] [--verbose]");
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");
+    Console.WriteLine("  --correct-visa-application-types  Retype App_Visa_Ext→708, FM via-ministry + progress regen (--legacy-source, --dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");
@@ -525,6 +527,16 @@ if (HasArg(args, "--patch-visa2014-application-project-contract"))
     Log.Phase("VISA2014 Application.ProjectContract PATCH");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationProjectContractPatch.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-visa-application-types"))
+{
+    Log.Phase("VISA2014 Application type route correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationTypeRouteCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
