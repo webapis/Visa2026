@@ -35,8 +35,8 @@ Run in order:
 0. **`import-strategy.yaml`** → `status: approved` ([IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md)).
 1. **`importConfirmed: true`** — dossier + `order.yaml` for every entity in this batch ([SKILL.md § Phase 1b](./SKILL.md)); **Excel preview** reviewed ([EXCEL_PREVIEW_EXPORT.md](../../../docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md)).
 2. **Target DB** — `Visa2026DbDev` or empty disposable DB; **not** production on first pass.
-3. **Target DB ready** — Module updaters must have run once (start Blazor host **or** use `--inprocess` which boots the same XAF stack headlessly). Lookups, ApplicationType, org singletons ([LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)).
-4. **OData path only:** start `Visa2026.Blazor.Server` and wait for server (`ApiClient.WaitForServerAsync`). **In-process path:** no Kestrel — pass `--target-connection` (or `ConnectionStrings__DefaultConnection`).
+3. **Target DB ready** — Module updaters must have run once (start Blazor host **or** use `--inprocess` which boots the same XAF stack headlessly). Lookups, ApplicationType, org singletons ([LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)). Before **Application** import: `order.yaml` **tenantCatalogGeneration** runs automatically (`--generate-visa2014-tenant-catalogs` or `Import-Visa2014OnPremStaging.ps1`); then DB update seeds `ApprovalLegProfile` from generated JSON.
+4. **OData path only:** start `Visa2026.Blazor.Server` and wait for server (`ApiClient.WaitForServerAsync`). Use **`:5002`** (`Visa2026 - Migration import` launch profile) while F5 uses `:5001`. **In-process path:** no HTTP traffic for writes — Kestrel still binds **`:5002`** by default so it does not take `:5001`; pass `--target-connection` (or `ConnectionStrings__DefaultConnection`).
 5. **Verify prerequisite lookups** — Country, Department, Position, ApplicationType, etc. exist via OData GET (DataImporter Phase 2 pattern). **Abort** if critical catalogs empty.
 6. **Org singletons** — `CompanyProfile`, default `ProjectContract` if BO validation requires them (IMPORTING.md Phase 3).
 7. **OData exposure** — every imported BO registered in `WebApiServiceExtensions.cs`.
@@ -109,6 +109,8 @@ Mirror [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md) scenario idem
 | **OData 400** | Stop batch; fix mapping or Web API exposure — do not blindly continue |
 | **Partial failure** | Record last successful legacy key; document in `learnings.md` |
 | **No silent catch** | Every `skip_row` and `block_row` increments a counter in import summary |
+| **Audit trail off** | All import writes (OData + `--inprocess`) run under `MigrationImportContext` — `AuditTrailService.Enabled = false` on every Object Space; `X-Visa2014-DataImport: true` on DataImporter HTTP |
+| **Tracking log cleanup** | After a successful entity run (`exit 0`, not `--dry-run`), clears `legacy/visa2014/import-logs/*.log`, `import_*.log` in output dir, and (when `--target-connection` / env SQL is set) `AuditDataItemPersistent` + `ApplicationRuntimeLog` rows since run start. Id-maps are kept. Use `--skip-import-log-cleanup` to retain logs |
 
 ---
 
@@ -153,7 +155,7 @@ For **Application** and **ApplicationItem** (largest OData batches), use the hea
 
 | Flag | Purpose |
 |------|---------|
-| `--inprocess` | Boot `HeadlessMigrationHost` (Blazor.Server XAF stack without Kestrel) |
+| `--inprocess` | Boot `HeadlessMigrationHost` (Blazor.Server XAF stack; Kestrel on **:5002** by default, not :5001) |
 | `--target-connection` | Visa2026 SQL connection string (or env `ConnectionStrings__DefaultConnection`) |
 | `--batch-size` | ObjectSpace commits per batch (default **50**) |
 | `--dry-run` | Transform + count only; no legacy SQL required for in-process dry-run |
@@ -178,6 +180,10 @@ dotnet run --project Visa2026.DataImporter -- `
 **When to use:** bulk Application / ApplicationItem on staging or prod LAN where OData round-trips dominate runtime. **Other entities** still use OData today.
 
 Implementation: `Visa2026.Blazor.Server/Services/Migration/HeadlessMigrationHost.cs`, `Visa2026.DataImporter/Migration/ObjectSpaceImportSink.cs`, `Visa2014ObjectSpaceImportTarget`.
+
+**Audit trail:** disabled for every BO during import (`MigrationImportContext` + `X-Visa2014-DataImport` on OData). Hooks apply on all Object Spaces (batch, lookup resolver, `ObjectSpaceCreated`).
+
+**Tracking log cleanup:** after a successful entity run (`FailedCount == 0`, not `--dry-run`), `Visa2014ImportTrackingLogCleanup` removes `legacy/visa2014/import-logs/*.log`, `import_*.log` under the output dir, and session-scoped rows in `AuditDataItemPersistent`, `ApplicationRuntimeLog`, and orphan `AuditEFCoreWeakReference`. **Id-map JSON is kept.** Pass `--target-connection` when using OData to a remote DB so DB cleanup targets the correct catalog.
 
 ---
 

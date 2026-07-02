@@ -368,9 +368,13 @@ namespace Visa2026.Module.BusinessObjects
 
 
 
+            if (ApplicationProgressProfileResolver.RequiresApprovalLegProfile(application)
+                && (application?.ApprovalLegProfile == null
+                    || !ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile)))
+                return null;
+
             if (ApplicationProgressProfileResolver.RequiresProjectContract(application)
-                && (application?.ProjectContract == null
-                    || !ProjectContractMinistryHelper.HasConfiguredLegs(application.ProjectContract)))
+                && application?.ProjectContract == null)
                 return null;
 
             return route.Value == ApplicationProgressRouteKind.DirectToMigrationService

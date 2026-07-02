@@ -3,6 +3,7 @@ using DevExpress.ExpressApp.Core;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Blazor.Server.Services.Migration;
 using Visa2026.DataImporter.Migration;
+using Visa2026.Module.Services.MigrationImport;
 using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -30,7 +31,15 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
         {
             nameof(Application) => (await _api.CreateAsync<Application>(entityName, payload))?.Id,
             nameof(ApplicationItem) => (await _api.CreateAsync<ApplicationItem>(entityName, payload))?.Id,
+            nameof(ApplicationProgress) => (await _api.CreateAsync<ApplicationProgress>(entityName, payload))?.Id,
             nameof(Person) => (await _api.CreateAsync<Person>(entityName, payload))?.Id,
+            nameof(Passport) => (await _api.CreateAsync<Passport>(entityName, payload))?.Id,
+            nameof(Visa) => (await _api.CreateAsync<Visa>(entityName, payload))?.Id,
+            nameof(Education) => (await _api.CreateAsync<Education>(entityName, payload))?.Id,
+            nameof(EmployeePositionHistory) => (await _api.CreateAsync<EmployeePositionHistory>(entityName, payload))?.Id,
+            nameof(EmployeeSalary) => (await _api.CreateAsync<EmployeeSalary>(entityName, payload))?.Id,
+            nameof(AddressOfResidence) => (await _api.CreateAsync<AddressOfResidence>(entityName, payload))?.Id,
+            nameof(ActualPosition) => (await _api.CreateAsync<ActualPosition>(entityName, payload))?.Id,
             _ => throw new NotSupportedException($"OData import target does not support {entityName}."),
         };
     }
@@ -63,7 +72,9 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
         var key = entityType.FullName ?? entityType.Name;
         if (!_batches.TryGetValue(key, out var batch))
         {
-            batch = new BatchState(_factory.CreateNonSecuredObjectSpace(entityType));
+            var objectSpace = _factory.CreateNonSecuredObjectSpace(entityType);
+            MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+            batch = new BatchState(objectSpace);
             _batches[key] = batch;
         }
 

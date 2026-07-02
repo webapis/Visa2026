@@ -18,6 +18,8 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Seed-DataYaml.ps1` | Run **`db-updater`** (imports bundled **`data.yaml`** by default, or **`-HostYamlPath`** to bind-mount another file). Requires **app + SQL** up; fresh DB: start **app** once so lookup catalogs sync first. |
 | `Run-DataImporter.ps1` | Interactive launcher for local `dotnet run --project Visa2026.DataImporter` (import / clear / sync / validate / prune) so you don’t need to remember flags. |
 | `Update-LocalDatabase.ps1` | **XAF `--updateDatabase`** on your PC (LocalDB, Docker dev, or custom connection) — **no login**, no browser. |
+| `Import-Visa2014OnPremStaging.ps1` | **VISA2015 → on-prem staging** (`10.100.128.15` → `10.100.128.25:8080`): ordered `--import-visa2014` waves; runs `order.yaml` **tenantCatalogGeneration** before application-domain; see [ON_PREM_IIS_MIGRATION_RUNBOOK.md](../docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md). |
+| `Invoke-Visa2014TenantCatalogGeneration.ps1` | **order.yaml** steps: `Generate-ProjectContractCalikEnergiCatalog.ps1` → `Generate-ApprovalLegProfileCatalog.ps1` (also `--generate-visa2014-tenant-catalogs`). |
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. See [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md). |
 
 **Typical env files here:** `.env.dev` (paths passed into scripts or compose).

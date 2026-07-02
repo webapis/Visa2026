@@ -8,18 +8,18 @@ using DevExpress.Persistent.Validation;
 
 namespace Visa2026.Module.BusinessObjects;
 
-/// <summary>One ordered ministry leg on a <see cref="ProjectContract"/> approval process.</summary>
+/// <summary>One ordered ministry leg on an <see cref="ApprovalLegProfile"/>.</summary>
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(Sequence))]
-public class ProjectContractMinistryLeg : BaseObject
+public class ApprovalLegProfileMinistryLeg : BaseObject
 {
     [Browsable(false)]
-    public virtual Guid ProjectContractId { get; set; }
+    public virtual Guid ApprovalLegProfileId { get; set; }
 
     [RuleRequiredField]
-    [ForeignKey(nameof(ProjectContractId))]
-    public virtual ProjectContract ProjectContract { get; set; } = null!;
+    [ForeignKey(nameof(ApprovalLegProfileId))]
+    public virtual ApprovalLegProfile ApprovalLegProfile { get; set; } = null!;
 
     [RuleRequiredField]
     public virtual int? Sequence { get; set; }
@@ -30,7 +30,7 @@ public class ProjectContractMinistryLeg : BaseObject
     [Browsable(false)]
     public virtual Guid ApprovingMinistryId { get; set; }
 
-    /// <summary>Max working days allowed in <c>{n}_REVIEW_STARTED</c> for this leg (required before contract is active).</summary>
+    /// <summary>Max working days allowed in <c>{n}_REVIEW_STARTED</c> for this leg.</summary>
     [XafDisplayName("Maks. iş günleri")]
     public virtual int? MaxDaysInReview { get; set; }
 
@@ -44,25 +44,21 @@ public class ProjectContractMinistryLeg : BaseObject
         base.OnSaving();
     }
 
-    /// <summary>
-    /// EF persists explicit FK scalars. Do not set <see cref="ProjectContractId"/> while the parent
-    /// contract is still unsaved in the same session — EF may insert the leg before the parent.
-    /// </summary>
     internal void SyncForeignKeys()
     {
         if (ApprovingMinistry != null)
             ApprovingMinistryId = ApprovingMinistry.ID;
 
-        if (ProjectContract == null)
+        if (ApprovalLegProfile == null)
             return;
 
-        var objectSpace = ObjectSpaceHelper.Get(ProjectContract) ?? ObjectSpaceHelper.Get(this);
-        if (objectSpace == null || objectSpace.IsNewObject(ProjectContract))
+        var objectSpace = ObjectSpaceHelper.Get(ApprovalLegProfile) ?? ObjectSpaceHelper.Get(this);
+        if (objectSpace == null || objectSpace.IsNewObject(ApprovalLegProfile))
         {
-            ProjectContractId = Guid.Empty;
+            ApprovalLegProfileId = Guid.Empty;
             return;
         }
 
-        ProjectContractId = ProjectContract.ID;
+        ApprovalLegProfileId = ApprovalLegProfile.ID;
     }
 }

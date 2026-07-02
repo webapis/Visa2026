@@ -8,10 +8,10 @@ namespace Visa2026.Module.Controllers;
 
 /// <summary>
 /// Ministry leg popup Save must not commit the leg alone when the parent
-/// <see cref="ProjectContract"/> is still new — commit the parent session instead.
+/// <see cref="ApprovalLegProfile"/> is still new — commit the parent session instead.
 /// </summary>
-public sealed class ProjectContractMinistryLegSaveGuardController
-    : ObjectViewController<DetailView, ProjectContractMinistryLeg>
+public sealed class ApprovalLegProfileMinistryLegSaveGuardController
+    : ObjectViewController<DetailView, ApprovalLegProfileMinistryLeg>
 {
     private SimpleAction? _saveAction;
     private SimpleAction? _saveAndCloseAction;
@@ -51,7 +51,7 @@ public sealed class ProjectContractMinistryLegSaveGuardController
         WireParentFromFrame(leg);
     }
 
-    private void WireParentFromFrame(ProjectContractMinistryLeg leg)
+    private void WireParentFromFrame(ApprovalLegProfileMinistryLeg leg)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(ObjectSpace) ?? ObjectSpace;
 
@@ -61,7 +61,7 @@ public sealed class ProjectContractMinistryLegSaveGuardController
         if (TryResolveAndAttach(ObjectSpace, leg, Application.MainWindow))
             return;
 
-        if (ProjectContractMinistryLegCreationContext.TryGetProjectContractFromMainWindow(
+        if (ApprovalLegProfileMinistryLegCreationContext.TryGetApprovalLegProfileFromMainWindow(
                 Application,
                 rootObjectSpace,
                 out var mainContract)
@@ -71,13 +71,13 @@ public sealed class ProjectContractMinistryLegSaveGuardController
         }
     }
 
-    private bool TryResolveAndAttach(IObjectSpace legObjectSpace, ProjectContractMinistryLeg leg, Frame? frame)
+    private bool TryResolveAndAttach(IObjectSpace legObjectSpace, ApprovalLegProfileMinistryLeg leg, Frame? frame)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(legObjectSpace) ?? legObjectSpace;
-        if (!ProjectContractMinistryLegCreationContext.TryGetProjectContract(frame, rootObjectSpace, out var contract)
+        if (!ApprovalLegProfileMinistryLegCreationContext.TryGetApprovalLegProfile(frame, rootObjectSpace, out var contract)
             || contract == null)
         {
-            if (!ProjectContractMinistryLegCreationContext.TryGetProjectContract(frame, legObjectSpace, out contract)
+            if (!ApprovalLegProfileMinistryLegCreationContext.TryGetApprovalLegProfile(frame, legObjectSpace, out contract)
                 || contract == null)
             {
                 return false;
@@ -90,14 +90,14 @@ public sealed class ProjectContractMinistryLegSaveGuardController
 
     private static void AttachLegInSpace(
         IObjectSpace legObjectSpace,
-        ProjectContractMinistryLeg leg,
-        ProjectContract contract)
+        ApprovalLegProfileMinistryLeg leg,
+        ApprovalLegProfile contract)
     {
         var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(legObjectSpace, contract);
-        var contractInTarget = parentSpace.GetObject(contract) as ProjectContract
+        var contractInTarget = parentSpace.GetObject(contract) as ApprovalLegProfile
             ?? (parentSpace.IsNewObject(contract) ? contract : null)
-            ?? (contract.ID != Guid.Empty ? parentSpace.GetObjectByKey<ProjectContract>(contract.ID) : null)
+            ?? (contract.ID != Guid.Empty ? parentSpace.GetObjectByKey<ApprovalLegProfile>(contract.ID) : null)
             ?? contract;
-        ProjectContractMinistryHelper.EnsureLegInObjectSpace(parentSpace, contractInTarget, leg);
+        ApprovalLegProfileMinistryHelper.EnsureLegInObjectSpace(parentSpace, contractInTarget, leg);
     }
 }

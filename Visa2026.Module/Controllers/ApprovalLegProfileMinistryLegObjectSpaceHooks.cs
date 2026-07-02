@@ -4,8 +4,8 @@ using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Controllers;
 
-/// <summary>App-wide object-space hooks for <see cref="ProjectContractMinistryLeg"/> parent FK wiring.</summary>
-internal static class ProjectContractMinistryLegObjectSpaceHooks
+/// <summary>App-wide object-space hooks for <see cref="ApprovalLegProfileMinistryLeg"/> parent FK wiring.</summary>
+internal static class ApprovalLegProfileMinistryLegObjectSpaceHooks
 {
     internal static void Subscribe(IObjectSpace objectSpace)
     {
@@ -31,17 +31,17 @@ internal static class ProjectContractMinistryLegObjectSpaceHooks
     {
         switch (e.Object)
         {
-            case ProjectContract contract:
-                ProjectContractMinistryHelper.WireMinistryLegs(contract);
+            case ApprovalLegProfile contract:
+                ApprovalLegProfileMinistryHelper.WireMinistryLegs(contract);
                 break;
-            case ProjectContractMinistryLeg leg when sender is IObjectSpace objectSpace:
+            case ApprovalLegProfileMinistryLeg leg when sender is IObjectSpace objectSpace:
             {
-                if (!ProjectContractMinistryHelper.ShouldPrepareLegsOnCommit(objectSpace))
+                if (!ApprovalLegProfileMinistryHelper.ShouldPrepareLegsOnCommit(objectSpace))
                     break;
 
                 var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
-                ProjectContractMinistryHelper.TryAttachLegToParent(objectSpace, leg);
-                ProjectContractMinistryHelper.PrepareLegForSave(objectSpace, rootObjectSpace, leg);
+                ApprovalLegProfileMinistryHelper.TryAttachLegToParent(objectSpace, leg);
+                ApprovalLegProfileMinistryHelper.PrepareLegForSave(objectSpace, rootObjectSpace, leg);
                 break;
             }
         }
@@ -50,9 +50,9 @@ internal static class ProjectContractMinistryLegObjectSpaceHooks
     private static void OnCommitting(object? sender, CancelEventArgs e)
     {
         if (sender is IObjectSpace objectSpace
-            && ProjectContractMinistryHelper.ShouldPrepareLegsOnCommit(objectSpace))
+            && ApprovalLegProfileMinistryHelper.ShouldPrepareLegsOnCommit(objectSpace))
         {
-            ProjectContractMinistryHelper.PrepareLegsForCommit(objectSpace);
+            ApprovalLegProfileMinistryHelper.PrepareLegsForCommit(objectSpace);
         }
     }
 }

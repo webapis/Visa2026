@@ -1,4 +1,4 @@
-﻿# VISA2014 → Visa2026 — canonical dependency order
+# VISA2014 → Visa2026 — canonical dependency order
 #
 # Single source of truth for:
 #   - Phase 1 discovery (walk `entities` top-to-bottom, respect dependsOn)
@@ -23,6 +23,28 @@ bootstrapOnce:
     artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
     status: complete
     completedAt: 2026-06-20
+
+# VISA2015 → tenant JSON for ApprovalLegProfile seed (before application-domain import).
+# Executed automatically by --generate-visa2014-tenant-catalogs and Import-Visa2014OnPremStaging.ps1.
+tenantCatalogGeneration:
+  runBeforeImportPhase: application-domain
+  legacySources:
+    - calik-energi
+    - calik-energi-onprem-staging
+    - calik-energi-onprem-prod
+    - calik-energi-onprem-demo
+  steps:
+    - id: project-contract-calik-energi
+      script: scripts/local/Generate-ProjectContractCalikEnergiCatalog.ps1
+      dependsOn: []
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.calik-energi.json
+    - id: approval-leg-profile-catalog
+      script: scripts/local/Generate-ApprovalLegProfileCatalog.ps1
+      dependsOn:
+        - project-contract-calik-energi
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/approval-leg-profile.json
 
 entities:
   # --- person-domain (no upstream transactional deps) ---
@@ -254,7 +276,7 @@ entities:
 
 importPhases:
   - id: prerequisites
-    description: Target lookups seeded by Module updaters; lookup-translations.yaml validated; lookup-review-queue personWaveComplete for Person
+    description: Target lookups seeded by Module updaters; tenantCatalogGeneration (project-contract + approval-leg-profile JSON from VISA2015); lookup-translations.yaml validated; lookup-review-queue personWaveComplete for Person
   - id: person-domain
     description: Person and person-scoped children
   - id: application-domain

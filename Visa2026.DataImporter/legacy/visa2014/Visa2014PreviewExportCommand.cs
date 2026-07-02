@@ -13,7 +13,7 @@ internal static class Visa2014PreviewExportCommand
 
         if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, Application, ApplicationItem, ApplicationProgress, ApplicationMigrationServiceInference.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, Application, ApplicationItem, ApplicationProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
             return 1;
         }
 
@@ -60,6 +60,14 @@ internal static class Visa2014PreviewExportCommand
                 ? Visa2014ApplicationMigrationServiceInferencePreview.Export(
                     source.ConnectionString,
                     Visa2014MigrationServiceInferenceRules.ResolveRulesPath(solutionRoot),
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "ProjectContractMinistryLeg", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014ProjectContractMinistryLegPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
                     output,
                     maxRows,
                     verbose,
@@ -217,6 +225,7 @@ internal static class Visa2014PreviewExportCommand
         || string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "ProjectContractMinistryLeg", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "ApplicationMigrationServiceInference", StringComparison.OrdinalIgnoreCase);
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)

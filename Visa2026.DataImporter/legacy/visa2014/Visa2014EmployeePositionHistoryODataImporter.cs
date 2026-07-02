@@ -21,7 +21,8 @@ internal sealed class Visa2014EmployeePositionHistoryImportResult
 internal static class Visa2014EmployeePositionHistoryODataImporter
 {
     public static async Task<Visa2014EmployeePositionHistoryImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
@@ -55,9 +56,6 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                 SkippedNoPersonMap = missingPerson,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
 
         var historyIdMap = LoadOptionalIdMap(historyIdMapOutputPath);
         if (verbose && historyIdMap.Count > 0)
@@ -101,7 +99,7 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
             {
                 var actualPositionName = row.GetValueOrDefault("ActualPosition") as string ?? "-";
                 var (actualPositionId, createdActual) = await ResolveOrCreateActualPositionAsync(
-                    api, resolver, actualPositionCache, actualPositionName, verbose);
+                    target, resolver, actualPositionCache, actualPositionName, verbose);
                 if (!actualPositionId.HasValue)
                 {
                     failed++;
@@ -120,20 +118,20 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<EmployeePositionHistory>("EmployeePositionHistory", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.EmployeePositionHistory), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                historyIdMap[legacyOid] = created.Id;
+                historyIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
                 if (verbose)
-                    Console.WriteLine($"  POST EmployeePositionHistory {created.Id} <- legacy {legacyOid}");
+                    Console.WriteLine($"  SAVE EmployeePositionHistory {createdId.Value} <- legacy {legacyOid}");
             }
             catch (Exception ex)
             {
@@ -142,6 +140,8 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (historyIdMap.Count > 0 && !string.IsNullOrWhiteSpace(historyIdMapOutputPath))
@@ -173,7 +173,7 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
     }
 
     private static async Task<(Guid? Id, bool Created)> ResolveOrCreateActualPositionAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         Visa2014ODataLookupResolver resolver,
         Dictionary<string, Guid> cache,
         string? name,
@@ -190,18 +190,21 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
             return (existing.Value, false);
         }
 
-        var created = await api.CreateAsync<ActualPosition>("ActualPosition", new Dictionary<string, object?>
-        {
-            ["Name"] = key,
-        });
-        if (created == null)
+        var createdId = await target.CreateAsync(
+            typeof(Visa2026.Module.BusinessObjects.ActualPosition),
+            new Dictionary<string, object?> { ["Name"] = key });
+        if (!createdId.HasValue)
             return (null, false);
 
-        resolver.RegisterActualPosition(created);
-        cache[key] = created.Id;
+        // Persist the new lookup row now so the EmployeePositionHistory FK ({ ID }) resolves
+        // against a committed ActualPosition (in-process target keys ObjectSpaces by type).
+        await target.FlushAsync();
+
+        resolver.RegisterActualPosition(new ActualPosition { Id = createdId.Value, Name = key });
+        cache[key] = createdId.Value;
         if (verbose)
-            Console.WriteLine($"  POST ActualPosition '{key}' -> {created.Id}");
-        return (created.Id, true);
+            Console.WriteLine($"  SAVE ActualPosition '{key}' -> {createdId.Value}");
+        return (createdId.Value, true);
     }
 
     private static int CountMissingPersonMap(

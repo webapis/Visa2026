@@ -120,7 +120,19 @@ Do **not** run continuous scheduled sync into Demo from live legacy unless you a
 
 ### 2.2 Initial full import
 
-Run **one entity at a time** in `order.yaml` order from the import workstation:
+**Script (recommended):** from repo root on the import workstation:
+
+```powershell
+$env:VISA2014_SQL_PASSWORD = [Environment]::GetEnvironmentVariable('VISA2014_SQL_PASSWORD','User')
+$env:VISA2026_STAGING_IMPORT_PASSWORD = '<staging-import-user-password>'
+$env:VISA2026_STAGING_SQL_CONNECTION = "Server=10.100.128.25;Database=Visa2026DbStaging;User Id=...;Password=...;TrustServerCertificate=True;MultipleActiveResultSets=true"
+
+.\scripts\local\Import-Visa2014OnPremStaging.ps1
+```
+
+Resume after a failed wave: `-StartAt Application`. Single entity: `-Entity ApplicationItem`. Transform-only: `-DryRun`.
+
+Run **one entity at a time** in `order.yaml` order from the import workstation (manual equivalent):
 
 ```powershell
 $repo = "C:\path\to\Visa2026"

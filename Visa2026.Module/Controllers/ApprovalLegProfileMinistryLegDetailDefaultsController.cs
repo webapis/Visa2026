@@ -5,11 +5,11 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Wires a <see cref="ProjectContractMinistryLeg"/> to its parent contract when opened or saved
+/// Wires a <see cref="ApprovalLegProfileMinistryLeg"/> to its parent contract when opened or saved
 /// from the nested ministry-legs list (Blazor NestedFrame or legacy Link).
 /// </summary>
-public sealed class ProjectContractMinistryLegDetailDefaultsController
-    : ObjectViewController<DetailView, ProjectContractMinistryLeg>
+public sealed class ApprovalLegProfileMinistryLegDetailDefaultsController
+    : ObjectViewController<DetailView, ApprovalLegProfileMinistryLeg>
 {
     protected override void OnActivated()
     {
@@ -40,16 +40,16 @@ public sealed class ProjectContractMinistryLegDetailDefaultsController
 
         WireParentIfNeeded();
 
-        if (ProjectContractMinistryHelper.IsLegCommitRedirectInProgress
-            || !ProjectContractMinistryHelper.ShouldPrepareLegsOnCommit(ObjectSpace))
+        if (ApprovalLegProfileMinistryHelper.IsLegCommitRedirectInProgress
+            || !ApprovalLegProfileMinistryHelper.ShouldPrepareLegsOnCommit(ObjectSpace))
         {
             return;
         }
 
-        if (ProjectContractMinistryHelper.TryCommitParentWithLeg(ObjectSpace, leg, e))
+        if (ApprovalLegProfileMinistryHelper.TryCommitParentWithLeg(ObjectSpace, leg, e))
             return;
 
-        ProjectContractMinistryHelper.TryFinalizeLegCommit(ObjectSpace, e);
+        ApprovalLegProfileMinistryHelper.TryFinalizeLegCommit(ObjectSpace, e);
     }
 
     private void WireParentIfNeeded()
@@ -58,36 +58,36 @@ public sealed class ProjectContractMinistryLegDetailDefaultsController
         if (leg == null)
             return;
 
-        if (ProjectContractMinistryHelper.TryAttachLegToParent(ObjectSpace, leg))
+        if (ApprovalLegProfileMinistryHelper.TryAttachLegToParent(ObjectSpace, leg))
             return;
 
         if (TryResolveParentContract(out var contract) && contract != null)
         {
             var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(ObjectSpace, contract);
-            var contractInTarget = parentSpace.GetObject(contract) as ProjectContract
+            var contractInTarget = parentSpace.GetObject(contract) as ApprovalLegProfile
                 ?? (parentSpace.IsNewObject(contract) ? contract : null)
-                ?? (contract.ID != Guid.Empty ? parentSpace.GetObjectByKey<ProjectContract>(contract.ID) : null)
+                ?? (contract.ID != Guid.Empty ? parentSpace.GetObjectByKey<ApprovalLegProfile>(contract.ID) : null)
                 ?? contract;
-            ProjectContractMinistryHelper.EnsureLegInObjectSpace(parentSpace, contractInTarget, leg);
+            ApprovalLegProfileMinistryHelper.EnsureLegInObjectSpace(parentSpace, contractInTarget, leg);
         }
     }
 
-    private bool TryResolveParentContract(out ProjectContract? contract)
+    private bool TryResolveParentContract(out ApprovalLegProfile? contract)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(ObjectSpace) ?? ObjectSpace;
-        if (ProjectContractMinistryLegCreationContext.TryGetProjectContract(Frame, rootObjectSpace, out contract)
+        if (ApprovalLegProfileMinistryLegCreationContext.TryGetApprovalLegProfile(Frame, rootObjectSpace, out contract)
             && contract != null)
         {
             return true;
         }
 
-        if (ProjectContractMinistryLegCreationContext.TryGetProjectContract(Frame, ObjectSpace, out contract)
+        if (ApprovalLegProfileMinistryLegCreationContext.TryGetApprovalLegProfile(Frame, ObjectSpace, out contract)
             && contract != null)
         {
             return true;
         }
 
-        return ProjectContractMinistryLegCreationContext.TryGetProjectContractFromMainWindow(
+        return ApprovalLegProfileMinistryLegCreationContext.TryGetApprovalLegProfileFromMainWindow(
             Application,
             rootObjectSpace,
             out contract);

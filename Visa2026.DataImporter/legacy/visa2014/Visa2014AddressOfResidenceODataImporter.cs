@@ -20,7 +20,8 @@ internal sealed class Visa2014AddressOfResidenceImportResult
 internal static class Visa2014AddressOfResidenceODataImporter
 {
     public static async Task<Visa2014AddressOfResidenceImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
@@ -54,15 +55,6 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 SkippedNoPersonMap = missingPerson,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        var tenantCatalogDir = Path.Combine(
-            Visa2014ContentRoot.FindSolutionRoot() ?? Directory.GetCurrentDirectory(),
-            "Visa2026.Module",
-            "DatabaseUpdate",
-            "LookupCatalogs",
-            "tenant");
-        await resolver.LoadAsync(api, tenantCatalogDir);
 
         var addressIdMap = LoadOptionalIdMap(addressIdMapOutputPath);
         if (verbose && addressIdMap.Count > 0)
@@ -117,20 +109,20 @@ internal static class Visa2014AddressOfResidenceODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<AddressOfResidence>("AddressOfResidence", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.AddressOfResidence), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                addressIdMap[legacyOid] = created.Id;
+                addressIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
                 if (verbose)
-                    Console.WriteLine($"  POST AddressOfResidence {created.Id} <- legacy {legacyOid}");
+                    Console.WriteLine($"  SAVE AddressOfResidence {createdId.Value} <- legacy {legacyOid}");
             }
             catch (Exception ex)
             {
@@ -139,6 +131,8 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (addressIdMap.Count > 0 && !string.IsNullOrWhiteSpace(addressIdMapOutputPath))

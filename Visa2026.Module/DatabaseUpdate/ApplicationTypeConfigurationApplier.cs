@@ -30,6 +30,7 @@ internal static class ApplicationTypeConfigurationApplier
     public static void ApplyShowFlags(ApplicationType target, ApplicationTypeConfigurationRow source)
     {
         target.ShowProjectContract = source.ShowProjectContract;
+        target.ShowApprovalLegProfile = source.ShowApprovalLegProfile;
         target.ShowVisaPeriod = source.ShowVisaPeriod;
         target.ShowVisaCategory = source.ShowVisaCategory;
         target.ShowVisaType = source.ShowVisaType;

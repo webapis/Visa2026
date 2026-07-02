@@ -151,6 +151,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--export-seed",
         "--export-visa2014-preview",
         "--import-visa2014",
+        "--generate-visa2014-tenant-catalogs",
         "--expand-visa2014-id-map",
         "--import-visa2014-files",
         "--cleanup-visa2014-education-documents",
@@ -252,9 +253,11 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
-    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite|Application|ApplicationItem|ApplicationProgress).");
-    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|Application|ApplicationItem|ApplicationProgress [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
+    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg).");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
     Console.WriteLine("                [--connection conn] [--max-rows N]");
+    Console.WriteLine("  --generate-visa2014-tenant-catalogs  VISA2015 → tenant project-contract + approval-leg-profile JSON (order.yaml steps).");
+    Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 OData (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence).");
     Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence [--legacy-source calik-energi|gap-insaat] [--connection conn]");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--api-base-url url] [--user Admin] [--password pwd]");
@@ -405,12 +408,34 @@ if (HasArg(args, "--expand-visa2014-id-map"))
     return;
 }
 
+if (HasArg(args, "--generate-visa2014-tenant-catalogs"))
+{
+    Log.Phase("VISA2014 tenant catalog generation");
+    var dataImporterRoot = Visa2014ContentRoot.FindDataImporterRoot();
+    if (dataImporterRoot == null)
+    {
+        Log.Error("Could not locate Visa2026.DataImporter content root.");
+        Log.Close();
+        Environment.ExitCode = 1;
+        return;
+    }
+
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014TenantCatalogGenerationCommand.Run(dataImporterRoot, args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--import-visa2014"))
 {
     Log.Phase("VISA2014 OData import");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    bool isDryRun = HasArg(args, "--dry-run");
     int exitCode = await Visa2014ImportCommand.RunAsync(args, isVerbose);
     Log.Close();
+    if (exitCode == 0 && !isDryRun && !HasArg(args, "--skip-import-log-cleanup"))
+        Visa2014ImportTrackingLogCleanup.ClearDataImporterSessionLogs(AppContext.BaseDirectory);
     Environment.ExitCode = exitCode;
     return;
 }
@@ -500,6 +525,16 @@ if (HasArg(args, "--patch-visa2014-application-project-contract"))
     Log.Phase("VISA2014 Application.ProjectContract PATCH");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationProjectContractPatch.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--patch-visa2014-application-approval-leg-profile"))
+{
+    Log.Phase("VISA2014 Application.ApprovalLegProfile PATCH");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationApprovalLegProfilePatch.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

@@ -37,7 +37,15 @@ internal sealed record Visa2014ApplicationRawRow(
     bool BzSarahs,
     bool BzEtrek,
     string? DepartmentForRegistrationCode,
-    string? DepartmentForRegistrationName);
+    string? DepartmentForRegistrationName,
+    string? AppliedMinistryTitle,
+    string? AppliedMinistryTitleL,
+    DateTime? DateForwardedToMinistry,
+    DateTime? DateForwardedToMinConstruction,
+    string? DocNumberForwardedToMinConstruction,
+    string? ContractMinistryTitle,
+    string? ContractMinistryTitleL,
+    Guid? LegacyPersonOid);
 
 internal static class Visa2014ApplicationTransform
 {
@@ -112,7 +120,7 @@ internal static class Visa2014ApplicationTransform
         "_legacyManualNumber", "_legacySubtypeId",
         "FullApplicationNumber", "ApplicationNumber", "AppNumberPrefix",
         "ApplicationDate", "Year", "Month", "IsManualEntry", "ApplicationType",
-        "MigrationService", "Urgency", "VisaPeriod", "VisaCategory", "ProjectContract",
+        "MigrationService", "Urgency", "VisaPeriod", "VisaCategory", "ProjectContract", "ApprovalLegProfile",
         "BorderZoneLocation", "MovementPermitLocation",
         "ToCity", "BusinessTripStartDate", "BusinessTripEndDate",
         "_legacy_DepartmentForRegistration", "_legacy_DepartmentForRegistrationName",
@@ -159,7 +167,15 @@ internal static class Visa2014ApplicationTransform
             CASE WHEN ISNULL(bz.Sarahs, 0) = 1 THEN '1' ELSE '0' END AS BzSarahs,
             CASE WHEN ISNULL(bz.Etrek, 0) = 1 THEN '1' ELSE '0' END AS BzEtrek,
             d.TitleOfDepartmentForRegistration AS DepartmentForRegistrationCode,
-            d.DepartmentForRegistrationL AS DepartmentForRegistrationName
+            d.DepartmentForRegistrationL AS DepartmentForRegistrationName,
+            LTRIM(RTRIM(ISNULL(am.TitleOfMinistery, ''))) AS AppliedMinistryTitle,
+            LTRIM(RTRIM(ISNULL(am.TitleOfMinisteryL, ''))) AS AppliedMinistryTitleL,
+            CONVERT(varchar(10), a.DateForwardedToMonistery, 23) AS DateForwardedToMinistry,
+            CONVERT(varchar(10), a.DateForwardedToMinConstruction, 23) AS DateForwardedToMinConstruction,
+            LTRIM(RTRIM(ISNULL(a.DocNumberForwardedToMinConstruction, ''))) AS DocNumberForwardedToMinConstruction,
+            LTRIM(RTRIM(ISNULL(cam.TitleOfMinistery, ''))) AS ContractMinistryTitle,
+            LTRIM(RTRIM(ISNULL(cam.TitleOfMinisteryL, ''))) AS ContractMinistryTitleL,
+            piaFirst.LegacyPersonOid
         FROM dbo.Application a
         INNER JOIN dbo.IRegistration_Data r ON r.Oid = a.IRegistration_Data
         LEFT JOIN dbo.ApplicationTypeForEmployee ate ON ate.Oid = a.ApplicationTypeForEmployee
@@ -170,6 +186,8 @@ internal static class Visa2014ApplicationTransform
         LEFT JOIN dbo.VisaPeriod vp ON vp.Oid = a.VisaPeriod
         LEFT JOIN dbo.VisaCategory vc ON vc.Oid = a.VisaCategory
         LEFT JOIN dbo.Contract c_app ON c_app.Oid = a.Contract
+        LEFT JOIN dbo.AppliedMinistery am ON am.Oid = a.AppliedMinistery
+        LEFT JOIN dbo.AppliedMinistery cam ON cam.Oid = c_app.AppliedMinistery
         OUTER APPLY (
             SELECT TOP 1 COALESCE(c_per.NumberOfContract, c_sponsor.NumberOfContract) AS NumberOfContract
             FROM dbo.PersonInApplication pia
@@ -185,6 +203,16 @@ internal static class Visa2014ApplicationTransform
         LEFT JOIN dbo.[{GosmacaIslemageRugsatYeri}] mp ON mp.Oid = a.[{GosmacaIslemageRugsatYeri}]
         LEFT JOIN dbo.BorderZoneForVisa bz ON bz.Oid = a.BorderZoneForVisa AND bz.GCRecord IS NULL
         LEFT JOIN dbo.DepartmentForRegistration d ON d.Oid = a.DepartmentForRegistration
+        OUTER APPLY (
+            SELECT TOP 1
+                CASE
+                    WHEN ISNULL(a.ForEmployee, 0) = 1 THEN CAST(pia.Employee AS varchar(36))
+                    ELSE CAST(pia.FamilyMember AS varchar(36))
+                END AS LegacyPersonOid
+            FROM dbo.PersonInApplication pia
+            WHERE pia.Application = a.Oid AND pia.GCRecord IS NULL
+            ORDER BY pia.Oid
+        ) piaFirst
         WHERE a.GCRecord IS NULL
         """;
 
@@ -213,7 +241,9 @@ internal static class Visa2014ApplicationTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        return TransformRows(rawRows, catalogs, out var skipped, out var unmappedDistinct, out var dedupeSummary);
+        var batch = TransformRows(rawRows, catalogs, out _, out _, out _);
+        EnrichMigrationServiceInference(connectionString, batch.ImportRows, verbose);
+        return batch;
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationRawRow parsed)
@@ -264,7 +294,17 @@ internal static class Visa2014ApplicationTransform
             BzSarahs: row.GetValueOrDefault("BzSarahs") == "1",
             BzEtrek: row.GetValueOrDefault("BzEtrek") == "1",
             DepartmentForRegistrationCode: NullIfEmpty(row.GetValueOrDefault("DepartmentForRegistrationCode")),
-            DepartmentForRegistrationName: NullIfEmpty(row.GetValueOrDefault("DepartmentForRegistrationName")));
+            DepartmentForRegistrationName: NullIfEmpty(row.GetValueOrDefault("DepartmentForRegistrationName")),
+            AppliedMinistryTitle: NullIfEmpty(row.GetValueOrDefault("AppliedMinistryTitle")),
+            AppliedMinistryTitleL: NullIfEmpty(row.GetValueOrDefault("AppliedMinistryTitleL")),
+            DateForwardedToMinistry: TryParseOptionalDate(row.GetValueOrDefault("DateForwardedToMinistry")),
+            DateForwardedToMinConstruction: TryParseOptionalDate(row.GetValueOrDefault("DateForwardedToMinConstruction")),
+            DocNumberForwardedToMinConstruction: NullIfEmpty(row.GetValueOrDefault("DocNumberForwardedToMinConstruction")),
+            ContractMinistryTitle: NullIfEmpty(row.GetValueOrDefault("ContractMinistryTitle")),
+            ContractMinistryTitleL: NullIfEmpty(row.GetValueOrDefault("ContractMinistryTitleL")),
+            LegacyPersonOid: Guid.TryParse(row.GetValueOrDefault("LegacyPersonOid"), out var legacyPersonOid)
+                ? legacyPersonOid
+                : null);
         return true;
     }
 
@@ -405,6 +445,8 @@ internal static class Visa2014ApplicationTransform
             return row;
 
         TrySetMigrationService(row, catalogs, raw, unmapped);
+        if (raw.LegacyPersonOid is { } personOid && personOid != Guid.Empty)
+            row["_legacyPersonOid"] = personOid;
 
         var urgencyComposite = BuildComposite(
             raw.ApplicationUrgency?.ToString() ?? "",
@@ -437,6 +479,7 @@ internal static class Visa2014ApplicationTransform
         }
 
         TrySetProjectContract(row, catalogs, raw.NumberOfContract, unmapped);
+        TrySetApprovalLegProfile(row, raw);
         row["BorderZoneLocation"] = BuildBorderZoneLocation(catalogs, raw);
         TrySetMovementPermitLocation(row, raw.MovementPermitNameTm, unmapped);
 
@@ -465,28 +508,9 @@ internal static class Visa2014ApplicationTransform
         string? manual,
         out string fullNumber,
         out string? prefix,
-        out string? applicationNumber)
-    {
-        fullNumber = string.IsNullOrWhiteSpace(manual) ? "" : manual.Trim();
-        prefix = null;
-        applicationNumber = null;
-
-        if (string.IsNullOrWhiteSpace(fullNumber))
-            return;
-
-        var slash = fullNumber.IndexOf('/');
-        if (slash < 0)
-        {
-            applicationNumber = fullNumber;
-            return;
-        }
-
-        prefix = fullNumber[..slash].Trim();
-        var suffix = fullNumber[(slash + 1)..].Trim();
-        if (suffix.StartsWith('-'))
-            suffix = suffix[1..];
-        applicationNumber = suffix;
-    }
+        out string? applicationNumber) =>
+        Visa2026.Module.Services.ApplicationManualNumberParser.Parse(
+            manual, out fullNumber, out prefix, out applicationNumber);
 
     internal static string BuildApplicationTypeComposite(Visa2014ApplicationRawRow raw) =>
         BuildApplicationTypeComposite(
@@ -712,6 +736,23 @@ internal static class Visa2014ApplicationTransform
         row["ProjectContract"] = legacyCode.Trim();
     }
 
+    private static void TrySetApprovalLegProfile(Dictionary<string, object?> row, Visa2014ApplicationRawRow raw)
+    {
+        row["ApprovalLegProfile"] = null;
+
+        var applicationType = row.GetValueOrDefault("ApplicationType") as string;
+        if (string.IsNullOrWhiteSpace(applicationType)
+            || !ShowProjectContractApplicationTypes.Contains(applicationType))
+            return;
+
+        var code = Visa2014ApplicationApprovalLegProfileInference.ResolveProfileCode(raw);
+        if (!string.IsNullOrWhiteSpace(code))
+            row["ApprovalLegProfile"] = code;
+    }
+
+    private static DateTime? TryParseOptionalDate(string? value) =>
+        DateTime.TryParse(value, out var parsed) ? parsed : null;
+
     private static void TrySetMovementPermitLocation(
         Dictionary<string, object?> row,
         string? legacyNameTm,
@@ -863,4 +904,79 @@ internal static class Visa2014ApplicationTransform
     };
 
     private const string CommaSeparatedNoneValue = "Ýok";
+
+    /// <summary>
+    /// Address-based MigrationService for <c>App_Reg_Check_In</c> rows with null legacy department (approved inference rules).
+    /// </summary>
+    private static void EnrichMigrationServiceInference(
+        string connectionString,
+        IReadOnlyList<Dictionary<string, object?>> importRows,
+        bool verbose)
+    {
+        var rulesPath = Visa2014MigrationServiceInferenceRules.ResolveRulesPath(Visa2014ContentRoot.FindSolutionRoot());
+        if (!File.Exists(rulesPath))
+            return;
+
+        var rules = Visa2014MigrationServiceInferenceRules.Load(rulesPath);
+        if (!rules.ApprovedForPatch)
+            return;
+
+        var candidates = importRows
+            .Where(row => row.GetValueOrDefault("MigrationService") is not string ms || string.IsNullOrWhiteSpace(ms))
+            .Where(row =>
+                row.GetValueOrDefault("ApplicationType") is string appType
+                && string.Equals(appType, "App_Reg_Check_In", StringComparison.Ordinal))
+            .Where(row => string.IsNullOrWhiteSpace(row.GetValueOrDefault("_legacy_DepartmentForRegistration") as string))
+            .ToList();
+
+        if (candidates.Count == 0)
+            return;
+
+        var personOids = candidates
+            .Select(row => row.GetValueOrDefault("_legacyPersonOid"))
+            .OfType<Guid>()
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+
+        var addressesByPerson = Visa2014ApplicationMigrationServiceInferencePreview.LoadAddressesByPerson(
+            connectionString,
+            personOids,
+            verbose);
+
+        int enriched = 0;
+        foreach (var row in candidates)
+        {
+            if (row.GetValueOrDefault("_legacyPersonOid") is not Guid personOid || personOid == Guid.Empty)
+                continue;
+
+            DateTime? appDate = DateTime.TryParse(row.GetValueOrDefault("ApplicationDate") as string, out var parsed)
+                ? parsed
+                : null;
+
+            if (!Visa2014ApplicationMigrationServiceInferencePreview.TryInferMigrationService(
+                    personOid,
+                    appDate,
+                    addressesByPerson,
+                    rules,
+                    out var migrationServiceName,
+                    out var confidence,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _))
+                continue;
+
+            row["MigrationService"] = migrationServiceName;
+            row["_migrationServiceInferred"] = true;
+            row["_migrationServiceInferenceConfidence"] = confidence;
+            enriched++;
+        }
+
+        if (verbose && enriched > 0)
+            Console.WriteLine($"INF MigrationService address inference: {enriched} row(s) enriched.");
+    }
 }

@@ -253,6 +253,9 @@ public class Application
     [JsonPropertyName("ProjectContract")]
     public ProjectContract? ProjectContract { get; set; }
 
+    [JsonPropertyName("ApprovalLegProfile")]
+    public ApprovalLegProfile? ApprovalLegProfile { get; set; }
+
     [JsonPropertyName("FromCity")]
     public City? FromCity { get; set; }
 
@@ -1211,6 +1214,21 @@ public class ProjectContract
 
     [JsonPropertyName("Code")]
     public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+}
+
+public class ApprovalLegProfile
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
 
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }

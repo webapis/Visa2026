@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -92,7 +91,11 @@ internal static class Visa2014ApplicationODataImporter
                 applicationIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
+                {
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported...");
+                    if (!string.IsNullOrWhiteSpace(applicationIdMapOutputPath))
+                        await Visa2014IdMapHelper.SaveAsync(applicationIdMapOutputPath, applicationIdMap);
+                }
                 if (verbose)
                     Console.WriteLine($"  SAVE Application {createdId.Value} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
             }
@@ -109,14 +112,8 @@ internal static class Visa2014ApplicationODataImporter
         string? idMapPath = null;
         if (applicationIdMap.Count > 0 && !string.IsNullOrWhiteSpace(applicationIdMapOutputPath))
         {
+            await Visa2014IdMapHelper.SaveAsync(applicationIdMapOutputPath, applicationIdMap);
             idMapPath = Path.GetFullPath(applicationIdMapOutputPath);
-            Directory.CreateDirectory(Path.GetDirectoryName(idMapPath)!);
-            var serializable = applicationIdMap.ToDictionary(
-                kvp => kvp.Key.ToString(),
-                kvp => kvp.Value.ToString());
-            await File.WriteAllTextAsync(
-                idMapPath,
-                JsonSerializer.Serialize(serializable, new JsonSerializerOptions { WriteIndented = true }));
         }
 
         return new Visa2014ApplicationImportResult
@@ -162,10 +159,20 @@ internal static class Visa2014ApplicationODataImporter
             ["ApplicationType"] = new { ID = applicationTypeId.Value },
         };
 
+        var applicationNumber = row.GetValueOrDefault("ApplicationNumber") as string;
+        if (!string.IsNullOrWhiteSpace(applicationNumber))
+            payload["ApplicationNumber"] = applicationNumber.Trim();
+
+        var appNumberPrefix = row.GetValueOrDefault("AppNumberPrefix") as string;
+        if (!string.IsNullOrWhiteSpace(appNumberPrefix))
+            payload["AppNumberPrefix"] = appNumberPrefix.Trim();
+
+        TryAddOptionalFk(payload, row, "MigrationService", resolver.ResolveMigrationService);
         TryAddOptionalFk(payload, row, "Urgency", resolver.ResolveUrgency);
         TryAddOptionalFk(payload, row, "VisaPeriod", resolver.ResolveVisaPeriod);
         TryAddOptionalFk(payload, row, "VisaCategory", value => resolver.ResolveVisaCategory(value));
         TryAddOptionalFk(payload, row, "ProjectContract", resolver.ResolveProjectContract);
+        TryAddOptionalFk(payload, row, "ApprovalLegProfile", resolver.ResolveApprovalLegProfile);
         TryAddOptionalFk(payload, row, "ToCity", value => resolver.ResolveCity(value));
         TryAddOptionalFk(payload, row, "MovementPermitLocation", resolver.ResolveMovementPermitLocation);
 

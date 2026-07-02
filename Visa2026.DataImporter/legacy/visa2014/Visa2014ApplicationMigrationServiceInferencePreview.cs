@@ -177,44 +177,22 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
         bool usedExpiredFallback = false;
         int addressCount = 0;
 
-        if (app.LegacyPersonOid == Guid.Empty)
-        {
-            reason = "No PersonInApplication person OID";
-        }
-        else if (!addressesByPerson.TryGetValue(app.LegacyPersonOid, out var addresses) || addresses.Count == 0)
-        {
-            reason = "No AddressOfResidence for person";
-        }
-        else
-        {
-            addressCount = addresses.Count;
-            var current = Visa2014MigrationServiceAddressPicker.PickCurrent(
-                addresses,
+        if (!TryInferMigrationService(
+                app.LegacyPersonOid,
                 app.ApplicationDate,
-                out usedExpiredFallback);
-
-            if (current == null)
-            {
-                reason = "Address picker returned null";
-            }
-            else
-            {
-                regionMgCode = NullIfEmpty(current.RegionMgCode);
-                regionName = current.RegionName;
-                cityMgCode = NullIfEmpty(current.CityMgCode);
-                cityName = current.CityName;
-
-                var inference = rules.Infer(
-                    regionMgCode,
-                    regionName,
-                    cityMgCode,
-                    cityName,
-                    usedExpiredFallback);
-
-                proposed = inference.MigrationServiceNameTm;
-                confidence = inference.Confidence;
-                reason = inference.Reason;
-            }
+                addressesByPerson,
+                rules,
+                out proposed,
+                out confidence,
+                out reason,
+                out regionMgCode,
+                out regionName,
+                out cityMgCode,
+                out cityName,
+                out usedExpiredFallback,
+                out addressCount))
+        {
+            // reason already set by TryInferMigrationService
         }
 
         return new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -235,7 +213,76 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
         };
     }
 
-    private static Dictionary<Guid, List<Visa2014AddressForInference>> LoadAddressesByPerson(
+    internal static bool TryInferMigrationService(
+        Guid legacyPersonOid,
+        DateTime? applicationDate,
+        IReadOnlyDictionary<Guid, List<Visa2014AddressForInference>> addressesByPerson,
+        Visa2014MigrationServiceInferenceRules rules,
+        out string? migrationServiceNameTm,
+        out string confidence,
+        out string reason,
+        out string? regionMgCode,
+        out string? regionName,
+        out string? cityMgCode,
+        out string? cityName,
+        out bool usedExpiredFallback,
+        out int addressCount)
+    {
+        regionMgCode = null;
+        regionName = null;
+        cityMgCode = null;
+        cityName = null;
+        migrationServiceNameTm = null;
+        confidence = "none";
+        reason = "";
+        usedExpiredFallback = false;
+        addressCount = 0;
+
+        if (legacyPersonOid == Guid.Empty)
+        {
+            reason = "No PersonInApplication person OID";
+            return false;
+        }
+
+        if (!addressesByPerson.TryGetValue(legacyPersonOid, out var addresses) || addresses.Count == 0)
+        {
+            reason = "No AddressOfResidence for person";
+            return false;
+        }
+
+        addressCount = addresses.Count;
+        var current = Visa2014MigrationServiceAddressPicker.PickCurrent(
+            addresses,
+            applicationDate,
+            out usedExpiredFallback);
+
+        if (current == null)
+        {
+            reason = "Address picker returned null";
+            return false;
+        }
+
+        regionMgCode = NullIfEmpty(current.RegionMgCode);
+        regionName = current.RegionName;
+        cityMgCode = NullIfEmpty(current.CityMgCode);
+        cityName = current.CityName;
+
+        var inference = rules.Infer(
+            regionMgCode,
+            regionName,
+            cityMgCode,
+            cityName,
+            usedExpiredFallback);
+
+        migrationServiceNameTm = inference.MigrationServiceNameTm;
+        confidence = inference.Confidence;
+        reason = inference.Reason;
+
+        return !string.IsNullOrWhiteSpace(migrationServiceNameTm)
+            && !string.Equals(confidence, "none", StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal static Dictionary<Guid, List<Visa2014AddressForInference>> LoadAddressesByPerson(
         string connectionString,
         IReadOnlyList<Guid> personOids,
         bool verbose)

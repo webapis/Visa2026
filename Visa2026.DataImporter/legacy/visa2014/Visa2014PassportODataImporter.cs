@@ -19,7 +19,8 @@ internal sealed class Visa2014PassportImportResult
 internal static class Visa2014PassportODataImporter
 {
     public static async Task<Visa2014PassportImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
@@ -53,9 +54,6 @@ internal static class Visa2014PassportODataImporter
                 SkippedNoPersonMap = missingPerson,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
 
         var passportIdMap = new Dictionary<Guid, Guid>();
         var errors = new List<string>();
@@ -91,18 +89,18 @@ internal static class Visa2014PassportODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<Passport>("Passport", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Passport), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                passportIdMap[legacyOid] = created.Id;
+                passportIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (verbose)
-                    Console.WriteLine($"  POST Passport {created.Id} ← legacy {legacyOid} ({row["PassportNumber"]})");
+                    Console.WriteLine($"  SAVE Passport {createdId.Value} <- legacy {legacyOid} ({row["PassportNumber"]})");
             }
             catch (Exception ex)
             {
@@ -111,6 +109,8 @@ internal static class Visa2014PassportODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (passportIdMap.Count > 0 && !string.IsNullOrWhiteSpace(passportIdMapOutputPath))

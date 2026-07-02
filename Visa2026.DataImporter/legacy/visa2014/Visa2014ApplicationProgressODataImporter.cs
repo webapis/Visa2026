@@ -20,7 +20,9 @@ internal sealed class Visa2014ApplicationProgressImportResult
 internal static class Visa2014ApplicationProgressODataImporter
 {
     public static async Task<Visa2014ApplicationProgressImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        ApiClient? seedCleanupApi,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string applicationIdMapPath,
@@ -54,16 +56,22 @@ internal static class Visa2014ApplicationProgressODataImporter
             };
         }
 
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
-
-        var seedCleanup = await Visa2014ApplicationProgressSeedCleanup.RunAsync(
-            api,
-            applicationIdMap.Values.ToHashSet(),
-            dryRun: false,
-            verbose);
-        if (seedCleanup.Deleted > 0)
-            Console.WriteLine($"INF Removed {seedCleanup.Deleted} initializer seed row(s) before progress import.");
+        int seedsRemoved = 0;
+        if (seedCleanupApi != null)
+        {
+            var seedCleanup = await Visa2014ApplicationProgressSeedCleanup.RunAsync(
+                seedCleanupApi,
+                applicationIdMap.Values.ToHashSet(),
+                dryRun: false,
+                verbose);
+            seedsRemoved = seedCleanup.Deleted;
+            if (seedsRemoved > 0)
+                Console.WriteLine($"INF Removed {seedsRemoved} initializer seed row(s) before progress import.");
+        }
+        else if (verbose)
+        {
+            Console.WriteLine("INF Headless import: skipping initializer seed cleanup (Applications imported with SuppressInitialProgress).");
+        }
 
         var progressIdMap = LoadOptionalProgressIdMap(progressIdMapOutputPath);
         if (verbose && progressIdMap.Count > 0)
@@ -117,20 +125,20 @@ internal static class Visa2014ApplicationProgressODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<ApplicationProgress>("ApplicationProgress", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{syntheticKey}: POST returned null");
+                    errors.Add($"{syntheticKey}: create returned null");
                     continue;
                 }
 
-                progressIdMap[syntheticKey] = created.Id;
+                progressIdMap[syntheticKey] = createdId.Value;
                 posted++;
                 if (posted % 500 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoApp} no app map...");
                 if (verbose)
-                    Console.WriteLine($"  POST ApplicationProgress {created.Id} <- {syntheticKey}");
+                    Console.WriteLine($"  SAVE ApplicationProgress {createdId.Value} <- {syntheticKey}");
             }
             catch (Exception ex)
             {
@@ -139,6 +147,8 @@ internal static class Visa2014ApplicationProgressODataImporter
                 Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (progressIdMap.Count > 0 && !string.IsNullOrWhiteSpace(progressIdMapOutputPath))
@@ -157,7 +167,7 @@ internal static class Visa2014ApplicationProgressODataImporter
             SkippedCount = batch.Skipped.Count,
             SkippedNoApplicationMap = skippedNoApp,
             SkippedAlreadyImported = skippedAlready,
-            SeedsRemovedBeforeImport = seedCleanup.Deleted,
+            SeedsRemovedBeforeImport = seedsRemoved,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,

@@ -44,6 +44,7 @@ sources:
       Application: preview-export/Application-preview.calik-energi.xlsx
       ApplicationItem: preview-export/ApplicationItem-preview.calik-energi.xlsx
       ApplicationProgress: preview-export/ApplicationProgress-preview.calik-energi.xlsx
+      ProjectContractMinistryLeg: preview-export/ProjectContractMinistryLeg-preview.calik-energi.xlsx
       ApplicationMigrationServiceInference: preview-export/ApplicationMigrationServiceInference-preview.calik-energi.xlsx
     idMapDir: id-maps/calik-energi
 

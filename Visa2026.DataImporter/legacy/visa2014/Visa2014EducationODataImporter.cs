@@ -20,7 +20,8 @@ internal sealed class Visa2014EducationImportResult
 internal static class Visa2014EducationODataImporter
 {
     public static async Task<Visa2014EducationImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
@@ -54,9 +55,6 @@ internal static class Visa2014EducationODataImporter
                 SkippedNoPersonMap = missingPerson,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
 
         var educationIdMap = LoadOptionalEducationIdMap(educationIdMapOutputPath);
         if (verbose && educationIdMap.Count > 0)
@@ -105,20 +103,20 @@ internal static class Visa2014EducationODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<Education>("Education", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Education), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                educationIdMap[legacyOid] = created.Id;
+                educationIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
                 if (verbose)
-                    Console.WriteLine($"  POST Education {created.Id} <- legacy {legacyOid}");
+                    Console.WriteLine($"  SAVE Education {createdId.Value} <- legacy {legacyOid}");
             }
             catch (Exception ex)
             {
@@ -127,6 +125,8 @@ internal static class Visa2014EducationODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (educationIdMap.Count > 0 && !string.IsNullOrWhiteSpace(educationIdMapOutputPath))

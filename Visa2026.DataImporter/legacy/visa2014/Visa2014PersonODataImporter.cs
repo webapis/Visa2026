@@ -19,7 +19,8 @@ internal sealed class Visa2014PersonImportResult
 internal static class Visa2014PersonODataImporter
 {
     public static async Task<Visa2014PersonImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string? idMapOutputPath,
@@ -45,9 +46,6 @@ internal static class Visa2014PersonODataImporter
             };
         }
 
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
-
         var employeeProjectContractByLegacyOid = batch.ImportRows
             .Where(IsEmployeeRow)
             .Where(r => r["_legacyRowId"] is Guid)
@@ -69,18 +67,18 @@ internal static class Visa2014PersonODataImporter
             try
             {
                 var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid);
-                var created = await api.CreateAsync<Person>("Person", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Person), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                idMap[legacyOid] = created.Id;
+                idMap[legacyOid] = createdId.Value;
                 posted++;
                 if (verbose)
-                    Console.WriteLine($"  POST Person {created.Id} ← legacy {legacyOid}");
+                    Console.WriteLine($"  SAVE Person {createdId.Value} <- legacy {legacyOid}");
             }
             catch (Exception ex)
             {
@@ -89,6 +87,8 @@ internal static class Visa2014PersonODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (idMap.Count > 0 && !string.IsNullOrWhiteSpace(idMapOutputPath))

@@ -30,6 +30,12 @@
     <Content Include="legacy\visa2014\field-maps\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="legacy\visa2014\order.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="legacy\visa2014\legacy-sources.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Visa2026.Blazor.Server\Visa2026.Blazor.Server.csproj" />

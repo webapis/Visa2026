@@ -36,6 +36,9 @@ internal static class Visa2014ContentRoot
     public static string LegacyRoot(string dataImporterRoot) =>
         Path.Combine(dataImporterRoot, "legacy", "visa2014");
 
+    public static string ImportLogsDirectory(string dataImporterRoot) =>
+        Path.Combine(LegacyRoot(dataImporterRoot), "import-logs");
+
     public static string FieldMapPath(string dataImporterRoot, string entity) =>
         Path.Combine(LegacyRoot(dataImporterRoot), "field-maps", $"{entity}.yaml");
 

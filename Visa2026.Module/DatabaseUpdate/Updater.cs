@@ -310,7 +310,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<WorkPermittedLocationName>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovingMinistry>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<ProjectContractMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ProjectContractApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         // Application number generation reads prefix/format/seed on save; officers must not create or edit org settings.
         userRole.AddTypePermissionsRecursively<ApplicationNumberingProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -727,6 +729,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteOnlyPermission<ApplicationNumberingProfile>(role);
             EnsureReadWriteCreatePermission<ProjectContract>(role);
             EnsureReadWriteCreatePermission<ApprovingMinistry>(role);
+            EnsureReadWriteCreatePermission<ApprovalLegProfile>(role);
             EnsureReadOnlyPermission<OrganizationType>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -755,6 +758,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/SystemSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ProjectContract", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApprovingMinistry", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApprovalLegProfile", SecurityPermissionState.Allow);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Education", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Housing", SecurityPermissionState.Deny);

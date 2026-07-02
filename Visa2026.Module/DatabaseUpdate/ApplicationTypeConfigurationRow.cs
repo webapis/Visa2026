@@ -20,6 +20,7 @@ internal sealed class ApplicationTypeConfigurationRow
     public string MigrationSlaProfileCode { get; init; } = "";
 
     public bool ShowProjectContract { get; init; }
+    public bool ShowApprovalLegProfile { get; init; }
     public bool ShowVisaPeriod { get; init; }
     public bool ShowVisaCategory { get; init; }
     public bool ShowVisaType { get; init; }

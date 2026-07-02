@@ -1,4 +1,5 @@
 using Visa2026.Blazor.Server.Services.Migration;
+using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -34,12 +35,30 @@ internal sealed class Visa2014HeadlessImportSession : IAsyncDisposable
 
         var host = HeadlessMigrationHost.Start(targetConnectionString);
 
+        var tenantCatalogDir = ResolveTenantCatalogDir();
         var resolver = new Visa2014ODataLookupResolver();
         using (var lookupSpace = host.ObjectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Visa2026.Module.BusinessObjects.Person)))
-            resolver.LoadFromObjectSpace(lookupSpace);
+        {
+            MigrationImportContext.ApplyImportObjectSpaceHooks(lookupSpace);
+            resolver.LoadFromObjectSpace(lookupSpace, tenantCatalogDir);
+        }
 
         var target = new Visa2014ObjectSpaceImportTarget(host.ObjectSpaceFactory, batchSize);
         return Task.FromResult(new Visa2014HeadlessImportSession(host, resolver, target));
+    }
+
+    private static string? ResolveTenantCatalogDir()
+    {
+        var solutionRoot = Visa2014ContentRoot.FindSolutionRoot();
+        if (string.IsNullOrWhiteSpace(solutionRoot))
+            return null;
+
+        return Path.Combine(
+            solutionRoot,
+            "Visa2026.Module",
+            "DatabaseUpdate",
+            "LookupCatalogs",
+            "tenant");
     }
 
     public ValueTask DisposeAsync()

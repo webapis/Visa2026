@@ -8,7 +8,7 @@ using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.BusinessObjects;
 
-public static class ProjectContractMinistryHelper
+public static class ApprovalLegProfileMinistryHelper
 {
     /// <summary>True while a leg popup commit is being redirected to a parent object-space commit.</summary>
     internal static bool IsLegCommitRedirectInProgress => LegCommitRedirectScope.IsActive;
@@ -18,19 +18,19 @@ public static class ProjectContractMinistryHelper
         !(IsLegCommitRedirectInProgress && ObjectSpaceHelper.IsNestedObjectSpace(objectSpace));
 
     /// <summary>
-    /// True when a new parent contract would not be inserted in the same commit batch as its leg.
+    /// True when a new parent profile would not be inserted in the same commit batch as its leg.
     /// </summary>
     internal static bool WouldOrphanLegForeignKey(
         bool isParentNewObject,
         Guid parentId,
-        IEnumerable<Guid> contractIdsInCommitBatch) =>
+        IEnumerable<Guid> profileIdsInCommitBatch) =>
         isParentNewObject
         && parentId != Guid.Empty
-        && !contractIdsInCommitBatch.Contains(parentId);
+        && !profileIdsInCommitBatch.Contains(parentId);
 
     /// <summary>
-    /// Ensures aggregated legs reference the parent contract before EF commit.
-    /// Nested Blazor list rows often populate <see cref="ProjectContract.MinistryLegs"/> without back-references.
+    /// Ensures aggregated legs reference the parent profile before EF commit.
+    /// Nested Blazor list rows often populate <see cref="ApprovalLegProfile.MinistryLegs"/> without back-references.
     /// </summary>
     public static void PrepareLegsForCommit(IObjectSpace objectSpace)
     {
@@ -42,19 +42,19 @@ public static class ProjectContractMinistryHelper
             return;
 
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
-        var contractsToSave = CollectContractsInCommitBatch(objectSpace, rootObjectSpace);
-        var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, contractsToSave);
+        var profilesToSave = CollectProfilesInCommitBatch(objectSpace, rootObjectSpace);
+        var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, profilesToSave);
 
         if (!ReferenceEquals(objectSpace, rootObjectSpace))
             WireOrphanLegsInRoot(objectSpace, rootObjectSpace, legsToSave);
 
-        foreach (var contract in contractsToSave)
+        foreach (var profile in profilesToSave)
         {
-            var targetSpace = ResolveObjectSpaceFor(contract, objectSpace, rootObjectSpace);
-            var contractInTarget = ResolveContractInObjectSpace(targetSpace, contract) ?? contract;
-            RehomeContractLegsInObjectSpace(targetSpace, contractInTarget);
-            WireMinistryLegs(contractInTarget);
-            targetSpace.SetModified(contractInTarget);
+            var targetSpace = ResolveObjectSpaceFor(profile, objectSpace, rootObjectSpace);
+            var profileInTarget = ResolveProfileInObjectSpace(targetSpace, profile) ?? profile;
+            RehomeProfileLegsInObjectSpace(targetSpace, profileInTarget);
+            WireMinistryLegs(profileInTarget);
+            targetSpace.SetModified(profileInTarget);
         }
 
         foreach (var leg in legsToSave)
@@ -63,12 +63,12 @@ public static class ProjectContractMinistryHelper
             EnsureLegHasParentNavigation(objectSpace, rootObjectSpace, leg);
         }
 
-        foreach (var contract in CollectParentContracts(objectSpace, rootObjectSpace, legsToSave))
-            ResolveObjectSpaceFor(contract, objectSpace, rootObjectSpace).SetModified(contract);
+        foreach (var profile in CollectParentProfiles(objectSpace, rootObjectSpace, legsToSave))
+            ResolveObjectSpaceFor(profile, objectSpace, rootObjectSpace).SetModified(profile);
     }
 
     /// <summary>
-    /// When a leg popup commits, ensure the unsaved parent contract is in the same batch.
+    /// When a leg popup commits, ensure the unsaved parent profile is in the same batch.
     /// Redirects to the parent session when the popup uses a different object space.
     /// </summary>
     public static bool TryFinalizeLegCommit(IObjectSpace objectSpace, CancelEventArgs e)
@@ -79,8 +79,8 @@ public static class ProjectContractMinistryHelper
         PrepareLegsForCommit(objectSpace);
 
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
-        var contractsToSave = CollectContractsInCommitBatch(objectSpace, rootObjectSpace);
-        var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, contractsToSave);
+        var profilesToSave = CollectProfilesInCommitBatch(objectSpace, rootObjectSpace);
+        var legsToSave = CollectLegsInCommitBatch(objectSpace, rootObjectSpace, profilesToSave);
         if (legsToSave.Count == 0)
             return true;
 
@@ -88,10 +88,10 @@ public static class ProjectContractMinistryHelper
             EnsureLegParentInCommitBatch(objectSpace, leg);
 
         if (legsToSave.Any(leg => IsLegForeignKeyOrphaned(objectSpace, leg))
-            || legsToSave.Any(leg => leg.ProjectContract == null))
+            || legsToSave.Any(leg => leg.ApprovalLegProfile == null))
         {
             e.Cancel = true;
-            throw new UserFriendlyException(VisaUiMessages.Get("ProjectContract.SaveBeforeMinistryLeg"));
+            throw new UserFriendlyException(VisaUiMessages.Get("ApprovalLegProfile.SaveBeforeMinistryLeg"));
         }
 
         return true;
@@ -102,20 +102,20 @@ public static class ProjectContractMinistryHelper
     /// </summary>
     public static bool TryCommitParentWithLeg(
         IObjectSpace legObjectSpace,
-        ProjectContractMinistryLeg leg,
+        ApprovalLegProfileMinistryLeg leg,
         CancelEventArgs e)
     {
         PrepareLegsForCommit(legObjectSpace);
         TryAttachLegToParent(legObjectSpace, leg);
 
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(legObjectSpace) ?? legObjectSpace;
-        var parent = leg.ProjectContract
-            ?? FindParentContract(legObjectSpace, rootObjectSpace, leg);
+        var parent = leg.ApprovalLegProfile
+            ?? FindParentProfile(legObjectSpace, rootObjectSpace, leg);
         if (parent == null)
             return false;
 
         var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(legObjectSpace, parent);
-        var parentInSpace = ResolveContractInObjectSpace(parentSpace, parent);
+        var parentInSpace = ResolveProfileInObjectSpace(parentSpace, parent);
         if (parentInSpace == null || !parentSpace.IsNewObject(parentInSpace))
             return false;
 
@@ -126,20 +126,20 @@ public static class ProjectContractMinistryHelper
         if (TryRedirectCommitToParentSpace(parentSpace, legObjectSpace, e))
             return true;
 
-        return legInSpace.ProjectContract != null && !IsLegForeignKeyOrphaned(parentSpace, legInSpace);
+        return legInSpace.ApprovalLegProfile != null && !IsLegForeignKeyOrphaned(parentSpace, legInSpace);
     }
 
     /// <summary>After frame-based parent resolution, verify the leg can commit without FK orphan.</summary>
-    public static bool CanCommitLeg(IObjectSpace committingObjectSpace, ProjectContractMinistryLeg leg)
+    public static bool CanCommitLeg(IObjectSpace committingObjectSpace, ApprovalLegProfileMinistryLeg leg)
     {
         PrepareLegsForCommit(committingObjectSpace);
         EnsureLegParentInCommitBatch(committingObjectSpace, leg);
-        return leg.ProjectContract != null && !IsLegForeignKeyOrphaned(committingObjectSpace, leg);
+        return leg.ApprovalLegProfile != null && !IsLegForeignKeyOrphaned(committingObjectSpace, leg);
     }
 
     private static void EnsureLegParentInCommitBatch(
         IObjectSpace committingObjectSpace,
-        ProjectContractMinistryLeg leg)
+        ApprovalLegProfileMinistryLeg leg)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(committingObjectSpace) ?? committingObjectSpace;
         TryAttachLegToParent(committingObjectSpace, leg);
@@ -151,7 +151,7 @@ public static class ProjectContractMinistryHelper
         }
     }
 
-    private static bool IsLegForeignKeyOrphaned(IObjectSpace committingObjectSpace, ProjectContractMinistryLeg leg)
+    private static bool IsLegForeignKeyOrphaned(IObjectSpace committingObjectSpace, ApprovalLegProfileMinistryLeg leg)
     {
         if (NeedsParentInCommitBatch(committingObjectSpace, leg, out _))
             return true;
@@ -194,14 +194,16 @@ public static class ProjectContractMinistryHelper
         return true;
     }
 
-    public static void WireMinistryLegs(ProjectContract contract)
+    public static void WireMinistryLegs(ApprovalLegProfile profile)
     {
-        if (contract.MinistryLegs == null)
+        if (profile.MinistryLegs == null)
             return;
 
-        foreach (var leg in contract.MinistryLegs)
+        // Snapshot: assigning ApprovalLegProfile / SyncForeignKeys mutates the same
+        // InverseProperty collection, which throws if we enumerate the live list.
+        foreach (var leg in profile.MinistryLegs.ToList())
         {
-            leg.ProjectContract = contract;
+            leg.ApprovalLegProfile = profile;
             leg.SyncForeignKeys();
         }
     }
@@ -209,35 +211,35 @@ public static class ProjectContractMinistryHelper
     public static void PrepareLegForSave(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace,
-        ProjectContractMinistryLeg leg)
+        ApprovalLegProfileMinistryLeg leg)
     {
-        if (leg.ProjectContract == null)
+        if (leg.ApprovalLegProfile == null)
         {
-            EnsureLegParentContract(
+            EnsureLegParentProfile(
                 objectSpace,
                 rootObjectSpace,
                 leg,
-                objectSpace.GetObjectsToSave(false).OfType<ProjectContract>().ToList());
+                objectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>().ToList());
         }
 
         leg.SyncForeignKeys();
     }
 
-    /// <summary>Links a leg to its parent contract in the given object space (popup save / nested list).</summary>
-    public static bool TryAttachLegToParent(IObjectSpace objectSpace, ProjectContractMinistryLeg leg)
+    /// <summary>Links a leg to its parent profile in the given object space (popup save / nested list).</summary>
+    public static bool TryAttachLegToParent(IObjectSpace objectSpace, ApprovalLegProfileMinistryLeg leg)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
 
-        if (leg.ProjectContract != null)
+        if (leg.ApprovalLegProfile != null)
         {
-            var parentSpace = ResolveObjectSpaceFor(leg.ProjectContract, objectSpace, rootObjectSpace);
-            var parentInSpace = ResolveContractInObjectSpace(parentSpace, leg.ProjectContract) ?? leg.ProjectContract;
+            var parentSpace = ResolveObjectSpaceFor(leg.ApprovalLegProfile, objectSpace, rootObjectSpace);
+            var parentInSpace = ResolveProfileInObjectSpace(parentSpace, leg.ApprovalLegProfile) ?? leg.ApprovalLegProfile;
             EnsureLegInObjectSpace(parentSpace, parentInSpace, leg);
             parentSpace.SetModified(parentInSpace);
             return true;
         }
 
-        var parent = FindParentContract(objectSpace, rootObjectSpace, leg);
+        var parent = FindParentProfile(objectSpace, rootObjectSpace, leg);
         if (parent == null)
             return false;
 
@@ -246,75 +248,75 @@ public static class ProjectContractMinistryHelper
         return true;
     }
 
-    public static void AttachLegToContract(
-        ProjectContract contract,
-        ProjectContractMinistryLeg leg,
+    public static void AttachLegToProfile(
+        ApprovalLegProfile profile,
+        ApprovalLegProfileMinistryLeg leg,
         IObjectSpace objectSpace)
     {
-        leg.ProjectContract = contract;
-        if (contract.MinistryLegs != null && !contract.MinistryLegs.Contains(leg))
-            contract.MinistryLegs.Add(leg);
+        leg.ApprovalLegProfile = profile;
+        if (profile.MinistryLegs != null && !profile.MinistryLegs.Contains(leg))
+            profile.MinistryLegs.Add(leg);
 
         leg.SyncForeignKeys();
-        objectSpace.SetModified(contract);
+        objectSpace.SetModified(profile);
     }
 
     internal static bool NeedsParentInCommitBatch(
         IObjectSpace objectSpace,
-        ProjectContractMinistryLeg leg,
-        out ProjectContract? parent)
+        ApprovalLegProfileMinistryLeg leg,
+        out ApprovalLegProfile? parent)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
-        parent = leg.ProjectContract ?? FindParentContract(objectSpace, rootObjectSpace, leg);
+        parent = leg.ApprovalLegProfile ?? FindParentProfile(objectSpace, rootObjectSpace, leg);
 
         if (parent == null)
             return false;
 
         var parentSpace = ObjectSpaceHelper.ResolveObjectSpace(objectSpace, parent);
-        var parentInSpace = ResolveContractInObjectSpace(parentSpace, parent) ?? parent;
-        var contractIds = CollectContractIdsInCommitBatch(parentSpace);
+        var parentInSpace = ResolveProfileInObjectSpace(parentSpace, parent) ?? parent;
+        var profileIds = CollectProfileIdsInCommitBatch(parentSpace);
         return WouldOrphanLegForeignKey(
             parentSpace.IsNewObject(parentInSpace),
             parentInSpace.ID,
-            contractIds);
+            profileIds);
     }
 
-    private static List<ProjectContract> CollectContractsInCommitBatch(
+    private static List<ApprovalLegProfile> CollectProfilesInCommitBatch(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace)
     {
-        var contracts = objectSpace.GetObjectsToSave(false).OfType<ProjectContract>()
-            .Concat(objectSpace.GetObjectsToSave(true).OfType<ProjectContract>())
-            .Concat(objectSpace.ModifiedObjects.OfType<ProjectContract>())
+        var contracts = objectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>()
+            .Concat(objectSpace.GetObjectsToSave(true).OfType<ApprovalLegProfile>())
+            .Concat(objectSpace.ModifiedObjects.OfType<ApprovalLegProfile>())
             .ToList();
 
         if (!ReferenceEquals(objectSpace, rootObjectSpace))
         {
             contracts = contracts
-                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ProjectContract>())
-                .Concat(rootObjectSpace.GetObjectsToSave(true).OfType<ProjectContract>())
-                .Concat(rootObjectSpace.ModifiedObjects.OfType<ProjectContract>())
+                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>())
+                .Concat(rootObjectSpace.GetObjectsToSave(true).OfType<ApprovalLegProfile>())
+                .Concat(rootObjectSpace.ModifiedObjects.OfType<ApprovalLegProfile>())
                 .ToList();
         }
 
         return contracts.Distinct().ToList();
     }
 
-    private static List<ProjectContractMinistryLeg> CollectLegsInCommitBatch(
+    private static List<ApprovalLegProfileMinistryLeg> CollectLegsInCommitBatch(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace,
-        IReadOnlyList<ProjectContract> contractsToSave)
+        IReadOnlyList<ApprovalLegProfile> profilesToSave)
     {
-        var legs = objectSpace.GetObjectsToSave(false).OfType<ProjectContractMinistryLeg>()
-            .Concat(objectSpace.GetObjectsToSave(true).OfType<ProjectContractMinistryLeg>())
+        var legs = objectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfileMinistryLeg>()
+            .Concat(objectSpace.GetObjectsToSave(true).OfType<ApprovalLegProfileMinistryLeg>())
             .ToList();
 
-        foreach (var contract in contractsToSave)
+        foreach (var profile in profilesToSave)
         {
-            if (contract.MinistryLegs == null)
+            if (profile.MinistryLegs == null)
                 continue;
 
-            foreach (var leg in contract.MinistryLegs)
+            foreach (var leg in profile.MinistryLegs)
             {
                 if (!legs.Contains(leg))
                     legs.Add(leg);
@@ -324,59 +326,59 @@ public static class ProjectContractMinistryHelper
         if (!ReferenceEquals(objectSpace, rootObjectSpace))
         {
             legs = legs
-                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ProjectContractMinistryLeg>())
-                .Concat(rootObjectSpace.GetObjectsToSave(true).OfType<ProjectContractMinistryLeg>())
+                .Concat(rootObjectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfileMinistryLeg>())
+                .Concat(rootObjectSpace.GetObjectsToSave(true).OfType<ApprovalLegProfileMinistryLeg>())
                 .ToList();
         }
 
         return legs.Distinct().ToList();
     }
 
-    private static IEnumerable<Guid> CollectContractIdsInCommitBatch(IObjectSpace objectSpace)
+    private static IEnumerable<Guid> CollectProfileIdsInCommitBatch(IObjectSpace objectSpace)
     {
         var rootObjectSpace = ObjectSpaceHelper.GetRootObjectSpace(objectSpace) ?? objectSpace;
-        return CollectContractsInCommitBatch(objectSpace, rootObjectSpace).Select(c => c.ID).Distinct();
+        return CollectProfilesInCommitBatch(objectSpace, rootObjectSpace).Select(c => c.ID).Distinct();
     }
 
-    private static void RehomeContractLegsInObjectSpace(IObjectSpace targetSpace, ProjectContract contract)
+    private static void RehomeProfileLegsInObjectSpace(IObjectSpace targetSpace, ApprovalLegProfile profile)
     {
-        if (contract.MinistryLegs == null)
+        if (profile.MinistryLegs == null)
             return;
 
-        foreach (var leg in contract.MinistryLegs.ToList())
-            EnsureLegInObjectSpace(targetSpace, contract, leg);
+        foreach (var leg in profile.MinistryLegs.ToList())
+            EnsureLegInObjectSpace(targetSpace, profile, leg);
     }
 
     /// <summary>
     /// Ensures the leg instance tracked for commit lives in <paramref name="targetSpace"/>
     /// and is linked to <paramref name="contractInTarget"/>.
     /// </summary>
-    internal static ProjectContractMinistryLeg EnsureLegInObjectSpace(
+    internal static ApprovalLegProfileMinistryLeg EnsureLegInObjectSpace(
         IObjectSpace targetSpace,
-        ProjectContract contractInTarget,
-        ProjectContractMinistryLeg sourceLeg)
+        ApprovalLegProfile contractInTarget,
+        ApprovalLegProfileMinistryLeg sourceLeg)
     {
         var resolved = ResolveLegInObjectSpace(targetSpace, sourceLeg, contractInTarget);
         if (resolved != null)
         {
-            AttachLegToContract(contractInTarget, resolved, targetSpace);
+            AttachLegToProfile(contractInTarget, resolved, targetSpace);
             return resolved;
         }
 
         var sourceSpace = ObjectSpaceHelper.Get(sourceLeg);
         if (sourceSpace != null && ReferenceEquals(sourceSpace, targetSpace))
         {
-            AttachLegToContract(contractInTarget, sourceLeg, targetSpace);
+            AttachLegToProfile(contractInTarget, sourceLeg, targetSpace);
             return sourceLeg;
         }
 
-        var copy = targetSpace.CreateObject<ProjectContractMinistryLeg>();
+        var copy = targetSpace.CreateObject<ApprovalLegProfileMinistryLeg>();
         copy.Sequence = sourceLeg.Sequence;
         copy.MaxDaysInReview = sourceLeg.MaxDaysInReview;
         copy.WarningDaysBeforeMax = sourceLeg.WarningDaysBeforeMax;
         if (sourceLeg.ApprovingMinistry != null)
             copy.ApprovingMinistry = targetSpace.GetObject(sourceLeg.ApprovingMinistry);
-        AttachLegToContract(contractInTarget, copy, targetSpace);
+        AttachLegToProfile(contractInTarget, copy, targetSpace);
 
         if (sourceSpace != null
             && !ReferenceEquals(sourceSpace, targetSpace)
@@ -392,41 +394,41 @@ public static class ProjectContractMinistryHelper
     private static void EnsureLegHasParentNavigation(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace,
-        ProjectContractMinistryLeg leg)
+        ApprovalLegProfileMinistryLeg leg)
     {
-        if (leg.ProjectContract != null)
+        if (leg.ApprovalLegProfile != null)
         {
             leg.SyncForeignKeys();
             return;
         }
 
         TryAttachLegToParent(objectSpace, leg);
-        if (leg.ProjectContract != null)
+        if (leg.ApprovalLegProfile != null)
         {
             leg.SyncForeignKeys();
             return;
         }
 
-        var parent = FindParentContract(objectSpace, rootObjectSpace, leg);
+        var parent = FindParentProfile(objectSpace, rootObjectSpace, leg);
         if (parent == null)
             return;
 
         var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
-        var parentInTarget = ResolveContractInObjectSpace(targetSpace, parent) ?? parent;
+        var parentInTarget = ResolveProfileInObjectSpace(targetSpace, parent) ?? parent;
         EnsureLegInObjectSpace(targetSpace, parentInTarget, leg);
     }
 
     private static void WireOrphanLegsInRoot(
         IObjectSpace committingObjectSpace,
         IObjectSpace rootObjectSpace,
-        IReadOnlyList<ProjectContractMinistryLeg> legsToSave)
+        IReadOnlyList<ApprovalLegProfileMinistryLeg> legsToSave)
     {
         foreach (var leg in legsToSave)
         {
             if (!NeedsParentInCommitBatch(committingObjectSpace, leg, out var parent) || parent == null)
                 continue;
 
-            var rootParent = ResolveContractInObjectSpace(rootObjectSpace, parent);
+            var rootParent = ResolveProfileInObjectSpace(rootObjectSpace, parent);
             if (rootParent == null)
                 continue;
 
@@ -434,29 +436,29 @@ public static class ProjectContractMinistryHelper
         }
     }
 
-    private static IEnumerable<ProjectContract> CollectParentContracts(
+    private static IEnumerable<ApprovalLegProfile> CollectParentProfiles(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace,
-        IReadOnlyList<ProjectContractMinistryLeg> legsToSave)
+        IReadOnlyList<ApprovalLegProfileMinistryLeg> legsToSave)
     {
-        var parents = new HashSet<ProjectContract>();
+        var parents = new HashSet<ApprovalLegProfile>();
         foreach (var leg in legsToSave)
         {
-            if (leg.ProjectContract != null)
-                parents.Add(leg.ProjectContract);
+            if (leg.ApprovalLegProfile != null)
+                parents.Add(leg.ApprovalLegProfile);
         }
 
         foreach (var leg in legsToSave)
         {
-            if (leg.ProjectContract != null)
+            if (leg.ApprovalLegProfile != null)
                 continue;
 
-            var parent = FindParentContract(objectSpace, rootObjectSpace, leg);
+            var parent = FindParentProfile(objectSpace, rootObjectSpace, leg);
             if (parent == null)
                 continue;
 
             var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
-            var parentInTarget = ResolveContractInObjectSpace(targetSpace, parent) ?? parent;
+            var parentInTarget = ResolveProfileInObjectSpace(targetSpace, parent) ?? parent;
             EnsureLegInObjectSpace(targetSpace, parentInTarget, leg);
             parents.Add(parentInTarget);
         }
@@ -464,86 +466,86 @@ public static class ProjectContractMinistryHelper
         return parents;
     }
 
-    private static void EnsureLegParentContract(
+    private static void EnsureLegParentProfile(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace,
-        ProjectContractMinistryLeg leg,
-        IReadOnlyList<ProjectContract> contractsToSave)
+        ApprovalLegProfileMinistryLeg leg,
+        IReadOnlyList<ApprovalLegProfile> profilesToSave)
     {
-        var parent = FindParentContract(objectSpace, rootObjectSpace, leg, contractsToSave);
+        var parent = FindParentProfile(objectSpace, rootObjectSpace, leg, profilesToSave);
         if (parent == null)
             return;
 
         var targetSpace = ResolveObjectSpaceFor(parent, objectSpace, rootObjectSpace);
-        var parentInTarget = ResolveContractInObjectSpace(targetSpace, parent) ?? parent;
+        var parentInTarget = ResolveProfileInObjectSpace(targetSpace, parent) ?? parent;
         EnsureLegInObjectSpace(targetSpace, parentInTarget, leg);
     }
 
-    private static ProjectContract? FindParentContract(
+    private static ApprovalLegProfile? FindParentProfile(
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace,
-        ProjectContractMinistryLeg leg,
-        IReadOnlyList<ProjectContract>? contractsToSave = null)
+        ApprovalLegProfileMinistryLeg leg,
+        IReadOnlyList<ApprovalLegProfile>? profilesToSave = null)
     {
-        var parent = FindParentContractInObjectSpace(objectSpace, leg, contractsToSave);
+        var parent = FindParentProfileInObjectSpace(objectSpace, leg, profilesToSave);
         if (parent != null)
             return parent;
 
         if (!ReferenceEquals(objectSpace, rootObjectSpace))
         {
-            parent = FindParentContractInObjectSpace(
+            parent = FindParentProfileInObjectSpace(
                 rootObjectSpace,
                 leg,
-                CollectContractsInCommitBatch(rootObjectSpace, rootObjectSpace));
+                CollectProfilesInCommitBatch(rootObjectSpace, rootObjectSpace));
         }
 
         return parent;
     }
 
-    private static ProjectContract? FindParentContractInObjectSpace(
+    private static ApprovalLegProfile? FindParentProfileInObjectSpace(
         IObjectSpace objectSpace,
-        ProjectContractMinistryLeg leg,
-        IReadOnlyList<ProjectContract>? contractsToSave = null)
+        ApprovalLegProfileMinistryLeg leg,
+        IReadOnlyList<ApprovalLegProfile>? profilesToSave = null)
     {
-        contractsToSave ??= objectSpace.GetObjectsToSave(false).OfType<ProjectContract>().ToList();
+        profilesToSave ??= objectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>().ToList();
 
-        var parent = contractsToSave.FirstOrDefault(c => c.MinistryLegs?.Contains(leg) == true);
+        var parent = profilesToSave.FirstOrDefault(c => c.MinistryLegs?.Contains(leg) == true);
         if (parent != null)
             return parent;
 
-        foreach (var contract in objectSpace.ModifiedObjects.OfType<ProjectContract>())
+        foreach (var profile in objectSpace.ModifiedObjects.OfType<ApprovalLegProfile>())
         {
-            if (contract.MinistryLegs?.Contains(leg) == true)
-                return contract;
+            if (profile.MinistryLegs?.Contains(leg) == true)
+                return profile;
         }
 
-        var modifiedContracts = objectSpace.ModifiedObjects.OfType<ProjectContract>().ToList();
+        var modifiedContracts = objectSpace.ModifiedObjects.OfType<ApprovalLegProfile>().ToList();
         if (modifiedContracts.Count == 1)
             return modifiedContracts[0];
 
-        var contractsBeingEdited = objectSpace.GetObjectsToSave(false).OfType<ProjectContract>().ToList();
+        var contractsBeingEdited = objectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>().ToList();
         if (contractsBeingEdited.Count == 1)
             return contractsBeingEdited[0];
 
         return null;
     }
 
-    private static ProjectContract? ResolveContractInObjectSpace(
+    private static ApprovalLegProfile? ResolveProfileInObjectSpace(
         IObjectSpace targetObjectSpace,
-        ProjectContract source)
+        ApprovalLegProfile source)
     {
         if (targetObjectSpace.IsNewObject(source))
-            return targetObjectSpace.GetObject(source) as ProjectContract ?? source;
+            return targetObjectSpace.GetObject(source) as ApprovalLegProfile ?? source;
 
-        return targetObjectSpace.GetObjectByKey<ProjectContract>(source.ID);
+        return targetObjectSpace.GetObjectByKey<ApprovalLegProfile>(source.ID);
     }
 
-    private static ProjectContractMinistryLeg? ResolveLegInObjectSpace(
+    private static ApprovalLegProfileMinistryLeg? ResolveLegInObjectSpace(
         IObjectSpace targetObjectSpace,
-        ProjectContractMinistryLeg source,
-        ProjectContract? parent)
+        ApprovalLegProfileMinistryLeg source,
+        ApprovalLegProfile? parent)
     {
-        var leg = targetObjectSpace.GetObject(source) as ProjectContractMinistryLeg;
+        var leg = targetObjectSpace.GetObject(source) as ApprovalLegProfileMinistryLeg;
         if (leg != null)
             return leg;
 
@@ -551,24 +553,24 @@ public static class ProjectContractMinistryHelper
     }
 
     private static IObjectSpace ResolveObjectSpaceFor(
-        ProjectContract contract,
+        ApprovalLegProfile profile,
         IObjectSpace objectSpace,
         IObjectSpace rootObjectSpace) =>
-        ObjectSpaceHelper.Get(contract) ?? rootObjectSpace ?? objectSpace;
+        ObjectSpaceHelper.Get(profile) ?? rootObjectSpace ?? objectSpace;
 
-    public static int GetLegCount(ProjectContract? contract) =>
-        contract?.MinistryLegs?.Count(l => l.ApprovingMinistry != null) ?? 0;
+    public static int GetLegCount(ApprovalLegProfile? profile) =>
+        profile?.MinistryLegs?.Count(l => l.ApprovingMinistry != null) ?? 0;
 
-    public static bool HasConfiguredLegs(ProjectContract? contract) =>
-        GetLegCount(contract) > 0;
+    public static bool HasConfiguredLegs(ApprovalLegProfile? profile) =>
+        GetLegCount(profile) > 0;
 
-    public static bool TryValidateLegSla(ProjectContract? contract, out string? errorMessage)
+    public static bool TryValidateLegSla(ApprovalLegProfile? profile, out string? errorMessage)
     {
         errorMessage = null;
-        if (contract == null || !contract.IsActive)
+        if (profile == null || !profile.IsActive)
             return true;
 
-        var legs = contract.MinistryLegs?
+        var legs = profile.MinistryLegs?
             .Where(l => l.ApprovingMinistry != null)
             .OrderBy(l => l.Sequence)
             .ToList() ?? [];
@@ -581,7 +583,7 @@ public static class ProjectContractMinistryHelper
             if (leg.MaxDaysInReview is not > 0)
             {
                 errorMessage = VisaUiMessages.Format(
-                    "ProjectContract.MinistryLegMaxDaysRequired",
+                    "ApprovalLegProfile.MinistryLegMaxDaysRequired",
                     leg.Sequence ?? 0);
                 return false;
             }
@@ -589,7 +591,7 @@ public static class ProjectContractMinistryHelper
             if (leg.WarningDaysBeforeMax is > 0 && leg.WarningDaysBeforeMax >= leg.MaxDaysInReview)
             {
                 errorMessage = VisaUiMessages.Format(
-                    "ProjectContract.MinistryLegWarningDaysInvalid",
+                    "ApprovalLegProfile.MinistryLegWarningDaysInvalid",
                     leg.Sequence ?? 0);
                 return false;
             }
@@ -598,19 +600,19 @@ public static class ProjectContractMinistryHelper
         return true;
     }
 
-    public static void ApplySnapshot(IObjectSpace objectSpace, Application application, ProjectContract? contract)
+
+    public static void ApplySnapshot(IObjectSpace objectSpace, Application application, ApprovalLegProfile? profile)
     {
         if (application.ApprovalLegSnapshots == null)
             return;
 
-        // Do not call ObservableCollection.Clear() — EF Core change tracking rejects the Reset notification.
         foreach (var existing in application.ApprovalLegSnapshots.ToList())
             objectSpace.Delete(existing);
 
-        if (contract?.MinistryLegs == null)
+        if (profile?.MinistryLegs == null)
             return;
 
-        foreach (var leg in contract.MinistryLegs
+        foreach (var leg in profile.MinistryLegs
                      .Where(l => l.ApprovingMinistry != null)
                      .OrderBy(l => l.Sequence))
         {
@@ -625,10 +627,9 @@ public static class ProjectContractMinistryHelper
             application.ApprovalLegSnapshots.Add(snapshot);
         }
     }
-
-    public static bool IsContractReferencedByApplications(ProjectContract contract, IObjectSpace objectSpace) =>
+    public static bool IsProfileReferencedByApplications(ApprovalLegProfile profile, IObjectSpace objectSpace) =>
         objectSpace.GetObjectsQuery<Application>()
-            .Any(a => a.ProjectContract != null && a.ProjectContract.ID == contract.ID);
+            .Any(a => a.ApprovalLegProfile != null && a.ApprovalLegProfile.ID == profile.ID);
 
     public static string? GetMinistryShortNameForLeg(Application? application, int leg)
     {

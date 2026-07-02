@@ -687,3 +687,16 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Docs**: `import-practices.md` § Headless in-process; `ON_PREM_IIS_MIGRATION_RUNBOOK.md` staging example.
 - **Next**: Benchmark full ApplicationItem (~21k) vs OData; extend `--inprocess` to remaining entities if needed.
 
+### 2026-07-02 — Full clean re-migration via headless XAF host (all entities in-process)
+
+- **Phase**: import (live, LocalDB `Visa2026`, `--inprocess` for the whole chain).
+- **Goal**: User asked "all data should be imported using headless xaf host" — a full clean re-migration, not just Application/ApplicationItem.
+- **Refactor**: All 8 person-domain + progress importers now write through `IVisa2014ImportTarget` (OData or ObjectSpace) + `Visa2014ODataLookupResolver`; command dispatch unified (no more per-entity in-process allow-list). `EmployeePositionHistory` calls `target.FlushAsync()` right after creating a new `ActualPosition` so the dependent row can reference it.
+- **GCRecord gotcha**: Active rows in this schema are `GCRecord = 0`, **not** `NULL`. Verifying seed with `WHERE GCRecord IS NULL` falsely reports "0 active / all soft-deleted". Use `GCRecord = 0`.
+- **Bug 1 — resolver subset**: `LoadFromObjectSpace` (in-process) only loaded the Application/ApplicationItem lookups. Passport failed 3585/3585 (`BuildPayload` null: no PassportType/Country) and Person silently dropped Gender/Country/Nationality/MaritalStatus FKs. Fix: mirror `LoadAsync` fully — load every lookup (Gender, Country, MaritalStatus, Relationship, PassportType, VisaType, VisaIssuedPlace, Subcontractor, Education*, Specialty, Position, Department, Region, ApplicationState/Location) plus custom maps for `BaseObject` types (`ActualPosition`, `Lodging`, `Hotel`, `Hospital`, `OtherSite` — City nav → CityId).
+- **Bug 2 — GetId missing case**: `Visa2014ODataLookupResolver.GetId<T>` switch had no `ApprovalLegProfile` arm → `ResolveApprovalLegProfile` threw "Unsupported lookup type ApprovalLegProfile" for every application with an approval-leg code (5757 failed, both paths affected). Fix: add `ApprovalLegProfile alp => alp.Id`.
+- **Re-run safety**: Person and Passport importers do **not** skip already-imported rows (re-running duplicates) → delete `dbo.People` + clear id-maps for a true clean start. All downstream importers (Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, Application, ApplicationItem, ApplicationProgress) skip via their id-map, so a failed Application run can be re-run to retry only the failed rows.
+- **sqlcmd**: `DELETE` against tables with filtered indexes needs `-I` (QUOTED_IDENTIFIER ON) or it errors 1934.
+- **Final verified counts (calik-energi)**: People 2967 (Gender+Nationality 2967/2967), Passports 3573, Visas 5965, Educations 3101, EmployeePositionHistories 2993 (+1368 ActualPositions), EmployeeSalaries 2887, AddressesOfResidence 3968, Applications 12129 (ApprovalLegProfile 5757, ProjectContract 5750), ApplicationItems 21345, ApplicationProgresses 32177. 0 hard failures on final runs (only benign per-row data skips).
+- **Orchestration**: `scripts/local/_run-headless-chain.ps1` runs the dependency-ordered chain in-process; tolerates minority row failures, hard-fails only on 0-posted/non-empty batches; `-StartAt <Entity>` to resume.
+

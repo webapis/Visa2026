@@ -61,6 +61,7 @@ internal static class ApplicationTypeConfigurationSeed
                 MigrationSlaProfileCode = r.MigrationSlaProfileCode ?? "",
 
                 ShowProjectContract = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract)),
+                ShowApprovalLegProfile = ResolveShowApprovalLegProfile(r, flags),
                 ShowVisaPeriod = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowVisaPeriod)),
                 ShowVisaCategory = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowVisaCategory)),
                 ShowVisaType = GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowVisaType)),
@@ -127,6 +128,21 @@ internal static class ApplicationTypeConfigurationSeed
 
     private static bool GetFlag(IReadOnlyDictionary<string, bool> flags, string propertyName)
         => flags.TryGetValue(propertyName, out var v) && v;
+
+    /// <summary>
+    /// Explicit JSON wins; otherwise enabled for via-ministries types that show project contract.
+    /// </summary>
+    private static bool ResolveShowApprovalLegProfile(
+        ApplicationTypeConfigurationRowDto row,
+        IReadOnlyDictionary<string, bool> flags)
+    {
+        if (flags.TryGetValue(nameof(ApplicationTypeConfigurationRow.ShowApprovalLegProfile), out var explicitValue))
+            return explicitValue;
+
+        var route = ResolveApplicationProgressRoute(row, flags);
+        return GetFlag(flags, nameof(ApplicationTypeConfigurationRow.ShowProjectContract))
+            && route == ApplicationProgressRouteKind.ViaMinistries;
+    }
 
     /// <summary>
     /// Explicit JSON wins; otherwise infer from legacy <c>ShowProjectContract</c> (UI flag used only as seed hint).

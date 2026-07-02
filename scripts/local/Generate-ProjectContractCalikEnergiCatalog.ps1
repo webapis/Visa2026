@@ -1,16 +1,37 @@
 # Generates tenant project-contract.calik-energi.json from VISA2015 (Çalik Energi).
-# Requires VISA2014_SQL_PASSWORD env and ReadOnlyUser on localhost\SQLEXPRESS / VISA2015.
+# Requires VISA2014_SQL_PASSWORD env and ReadOnlyUser on VISA2015.
+# SQL endpoint: param -SqlServer/-Database, or parse VISA2014_SQL_CONNECTION (set by --generate-visa2014-tenant-catalogs).
 #Requires -Version 5.1
+param(
+    [string]$SqlServer,
+    [string]$Database = 'VISA2015'
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+function Resolve-LegacySqlEndpoint {
+    param([string]$Server, [string]$Db)
+    $conn = $env:VISA2014_SQL_CONNECTION
+    if ($conn -match '(?i)Server\s*=\s*([^;]+)') { $Server = $matches[1].Trim() }
+    if ($conn -match '(?i)(?:Database|Initial Catalog)\s*=\s*([^;]+)') { $Db = $matches[1].Trim() }
+    if ([string]::IsNullOrWhiteSpace($Server)) { $Server = 'localhost\SQLEXPRESS' }
+    return @{ Server = $Server; Database = $Db }
+}
 
 $password = $env:VISA2014_SQL_PASSWORD
 if ([string]::IsNullOrWhiteSpace($password)) {
     throw 'Set VISA2014_SQL_PASSWORD before running this script.'
 }
 
+$resolved = Resolve-LegacySqlEndpoint -Server $SqlServer -Db $Database
+$SqlServer = $resolved.Server
+$Database = $resolved.Database
+
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $outFile = Join-Path $repoRoot 'Visa2026.Module\DatabaseUpdate\LookupCatalogs\tenant\project-contract.calik-energi.json'
+
+Write-Host "INF Legacy SQL: $SqlServer / $Database" -ForegroundColor DarkGray
 
 $query = @'
 WITH person_codes AS (
@@ -57,7 +78,7 @@ ORDER BY u.person_cnt + u.app_cnt DESC, u.code;
 
 $tempCsv = [System.IO.Path]::GetTempFileName()
 try {
-    & sqlcmd -S 'localhost\SQLEXPRESS' -U ReadOnlyUser -P $password -d VISA2015 -C `
+    & sqlcmd -S $SqlServer -U ReadOnlyUser -P $password -d $Database -C `
         -y 0 -s "`t" -Q $query -o $tempCsv -f o:65001 | Out-Null
 
     $lines = Get-Content -LiteralPath $tempCsv -Encoding UTF8 |
@@ -74,6 +95,11 @@ try {
     $MinistryEn = 'Energetika'
     $MinistryGu = 'Gurlu' + [char]0x015F + 'yk'
     $MinistryTg = 'T' + [char]0x00FC + 'rkmengaz'
+    # Leg-1 ministries surfaced by Application.AppliedMinistery (see Visa2014ProjectContractMinistryLegPreviewExporter).
+    $MinistryAsh = 'A' + [char]0x015F + 'gabat h' + [char]0x00E4 + 'kimlik'   # Aşgabat häkimlik
+    $MinistryTngiz = 'TNGIZ'
+    $MinistryThim = 'T' + [char]0x00FC + 'rkmenhimi' + [char]0x00FD + 'a'      # Türkmenhimiýa
+    $MinistryTnebit = 'T' + [char]0x00FC + 'rkmennebit'                         # Türkmennebit
 
     function Fold-Turkmen([string]$s) {
         if ([string]::IsNullOrWhiteSpace($s)) { return '' }
@@ -120,40 +146,18 @@ try {
         return (Fold-Turkmen $s).ToLowerInvariant()
     }
 
-    function Map-MinistryLegs([string]$title, [string]$titleL) {
-        $combined = Normalize-MatchText "$title $titleL"
-
-        if ($combined -match 'turkmengaz' -and $combined -notmatch 'energetika') {
-            return @{ Legs = @(@{ Sequence = 1; ApprovingMinistryShortNameTm = $MinistryTg; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }); Fallback = $false }
-        }
-        if ($combined -match 'gurlusyk') {
-            return @{ Legs = @(@{ Sequence = 1; ApprovingMinistryShortNameTm = $MinistryGu; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }); Fallback = $false }
-        }
-        if ($combined -match 'energetika' -and $combined -match 'turkmenenergo') {
-            return @{
-                Legs = @(
-                    @{ Sequence = 1; ApprovingMinistryShortNameTm = $MinistryTe; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }
-                    @{ Sequence = 2; ApprovingMinistryShortNameTm = $MinistryEn; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }
-                )
-                Fallback = $false
-            }
-        }
-        if ($combined -match 'energetika') {
-            return @{ Legs = @(@{ Sequence = 1; ApprovingMinistryShortNameTm = $MinistryEn; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }); Fallback = $false }
-        }
-        if ($combined -match 'turkmenenergo') {
-            return @{ Legs = @(@{ Sequence = 1; ApprovingMinistryShortNameTm = $MinistryTe; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }); Fallback = $false }
-        }
-
-        return @{
-            Legs = @(@{
-                Sequence = 1
-                ApprovingMinistryShortNameTm = $MinistryEn
-                MaxDaysInReview = 10
-                WarningDaysBeforeMax = 8
-            })
-            Fallback = $true
-        }
+    # Maps a legacy AppliedMinistery.TitleOfMinistery to a canonical ApprovingMinistry.ShortNameTm.
+    # Keep in sync with Visa2014ProjectContractMinistryLegPreviewExporter.MapMinistryShortName.
+    function Map-MinistryShortName([string]$title) {
+        $n = Normalize-MatchText $title
+        if ([string]::IsNullOrWhiteSpace($n)) { return '' }
+        if ($n -match 'energetika') { return $MinistryEn }
+        if ($n -match 'gaz') { return $MinistryTg }
+        if ($n -match 'gabat' -or $n -match 'hakim') { return $MinistryAsh }
+        if ($n -match 'ngiz' -or $n -match 'nebiti gaytadan' -or $n -match 'turkmenbasydaky') { return $MinistryTngiz }
+        if ($n -match 'himi') { return $MinistryThim }
+        if ($n -match 'nebit') { return $MinistryTnebit }
+        return ''
     }
 
     function Leg-Suffix([array]$legs) {
@@ -164,16 +168,85 @@ try {
                 'energetika' { 'EN' }
                 'gurlusyk' { 'GU' }
                 'turkmengaz' { 'TG' }
+                'asgabat hakimlik' { 'AH' }
+                'tngiz' { 'NG' }
+                'turkmenhimiya' { 'TH' }
+                'turkmennebit' { 'TN' }
                 default { 'DF' }
             }
         }
         return "YL$($legs.Count)-$($parts -join '-')"
     }
 
+    # Application-level ministry legs: leg 1 = majority Application.AppliedMinistery per contract,
+    # trailing "construction" leg (Gurluşyk) when any application was forwarded to the construction ministry.
+    # Türkmenenergo flow: the Energetika ministry row whose signatory line names the "Türkmenenergo"
+    # corporation (TitleOfMinisteryL LIKE '%energo%') is a two-step chain Türkmenenergo -> Energetika
+    # (+ Gurluşyk when construction). The plain Energetika row (person signatory) stays a single leg.
+    # contract.AppliedMinistery is only a fallback for codes with no application forwarding evidence.
+    $legQuery = @'
+WITH app_leg AS (
+  SELECT LTRIM(RTRIM(c.NumberOfContract)) AS code,
+         LTRIM(RTRIM(ISNULL(m.TitleOfMinistery, ''))) AS title,
+         CASE WHEN m.TitleOfMinisteryL LIKE '%energo%' THEN 1 ELSE 0 END AS is_energo,
+         SUM(CASE WHEN a.DateForwardedToMonistery >= '2000-01-01' THEN 1 ELSE 0 END) AS leg1fwd,
+         SUM(CASE WHEN a.DateForwardedToMinConstruction >= '2000-01-01'
+                    OR NULLIF(LTRIM(RTRIM(a.DocNumberForwardedToMinConstruction)), '') IS NOT NULL
+                  THEN 1 ELSE 0 END) AS leg2
+  FROM dbo.Application a
+  INNER JOIN dbo.Contract c ON a.Contract = c.Oid
+  LEFT JOIN dbo.AppliedMinistery m ON a.AppliedMinistery = m.Oid
+  WHERE a.GCRecord IS NULL AND c.GCRecord IS NULL
+  GROUP BY LTRIM(RTRIM(c.NumberOfContract)), LTRIM(RTRIM(ISNULL(m.TitleOfMinistery, ''))),
+           CASE WHEN m.TitleOfMinisteryL LIKE '%energo%' THEN 1 ELSE 0 END
+),
+code_agg AS (
+  SELECT code, SUM(leg1fwd) AS leg1_total, SUM(leg2) AS leg2_total
+  FROM app_leg GROUP BY code
+),
+majority AS (
+  SELECT code, title, is_energo, leg1fwd,
+         ROW_NUMBER() OVER (PARTITION BY code ORDER BY leg1fwd DESC, title) AS rn
+  FROM app_leg WHERE leg1fwd > 0 AND title <> ''
+)
+SELECT ca.code, ca.leg1_total, ca.leg2_total, ISNULL(mj.is_energo, 0) AS is_energo, ISNULL(mj.title, '') AS majority_title
+FROM code_agg ca
+LEFT JOIN majority mj ON mj.code = ca.code AND mj.rn = 1
+ORDER BY ca.code;
+'@
+
+    $appLegs = @{}
+    $tempCsv2 = [System.IO.Path]::GetTempFileName()
+    try {
+        & sqlcmd -S $SqlServer -U ReadOnlyUser -P $password -d $Database -C `
+            -h -1 -y 1000 -s "`t" -Q $legQuery -o $tempCsv2 -f o:65001 | Out-Null
+
+        $legLines = Get-Content -LiteralPath $tempCsv2 -Encoding UTF8 |
+            Where-Object { $_ -and $_ -notmatch '^\(\d+ rows affected\)$' -and $_ -notmatch '^\s*$' }
+
+        foreach ($legLine in $legLines) {
+            $lp = $legLine -split "`t", 5
+            if ($lp.Count -lt 5) { continue }
+            $lc = $lp[0].Trim()
+            if ($lc.Length -gt 56) { $lc = $lc.Substring(0, 56) }
+            $l2 = 0; [void][int]::TryParse($lp[2].Trim(), [ref]$l2)
+            $isEnergo = ($lp[3].Trim() -eq '1')
+            $mt = $lp[4].Trim()
+            if ($mt -eq 'NULL') { $mt = '' }
+            $short = Map-MinistryShortName $mt
+            $appLegs[$lc] = @{ Leg1Short = $short; HasLeg2 = ($l2 -gt 0); Leg1Title = $mt; IsTurkmenenergo = $isEnergo }
+        }
+    }
+    finally {
+        if (Test-Path $tempCsv2) { Remove-Item -LiteralPath $tempCsv2 -Force }
+    }
+
     $rows = New-Object System.Collections.Generic.List[object]
     $usedKeys = @{}
     $fallbackCount = 0
+    $appEvidenceCount = 0
     $gapMinistries = [System.Collections.Generic.HashSet[string]]::new()
+    $unmappedAppTitles = [System.Collections.Generic.HashSet[string]]::new()
 
     foreach ($line in $lines) {
         $parts = Split-SqlRow $line
@@ -189,11 +262,60 @@ try {
         if ($title -eq 'NULL') { $title = $null }
         if ($titleL -eq 'NULL') { $titleL = $null }
 
-        $mapped = Map-MinistryLegs $title $titleL
-        $legs = $mapped.Legs
-        if ($mapped.Fallback) {
-            $fallbackCount++
-            if ($title) { [void]$gapMinistries.Add($title.Trim()) }
+        $appLeg = if ($appLegs.ContainsKey($code)) { $appLegs[$code] } else { $null }
+
+        $isEnergoFlow = $false
+        $hasLeg2 = $false
+        $leg1Short = ''
+
+        if ($appLeg -and ($appLeg.IsTurkmenenergo -or -not [string]::IsNullOrWhiteSpace($appLeg.Leg1Short))) {
+            # Authoritative: derived from the applications' own AppliedMinistery.
+            $isEnergoFlow = [bool]$appLeg.IsTurkmenenergo
+            $hasLeg2 = [bool]$appLeg.HasLeg2
+            $leg1Short = $appLeg.Leg1Short
+            $appEvidenceCount++
+        }
+        else {
+            if ($appLeg -and $appLeg.Leg1Title) { [void]$unmappedAppTitles.Add($appLeg.Leg1Title) }
+            # No application forwarding evidence (person-only / simple-process contract):
+            # fall back to contract.AppliedMinistery. "Türkmenenergo" in the contract ministry text
+            # means the contract is with Türkmenenergo -> Energetika chain.
+            $combinedFold = Normalize-MatchText "$title $titleL"
+            if ($combinedFold -match 'energo') {
+                $isEnergoFlow = $true
+            }
+            else {
+                $short = Map-MinistryShortName $title
+                if ([string]::IsNullOrWhiteSpace($short)) { $short = Map-MinistryShortName $titleL }
+                if ([string]::IsNullOrWhiteSpace($short)) {
+                    $short = $MinistryEn
+                    $fallbackCount++
+                    if ($title) { [void]$gapMinistries.Add($title.Trim()) }
+                }
+                $leg1Short = $short
+            }
+        }
+
+        # No leg-1 evidence at all defaults to Energetika (energy sector is the dominant flow).
+        if ([string]::IsNullOrWhiteSpace($leg1Short)) { $leg1Short = $MinistryEn }
+
+        if ($isEnergoFlow -or $leg1Short -eq $MinistryEn) {
+            # Every Energetika approval is preceded by Türkmenenergo: all energy-sector contracts
+            # require approval by "Türkmenenergo" (corporation) then "Energetika" (ministry),
+            # then "Gurluşyk" (construction) when the application was forwarded to construction.
+            $legs = @(
+                @{ Sequence = 1; ApprovingMinistryShortNameTm = $MinistryTe; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }
+                @{ Sequence = 2; ApprovingMinistryShortNameTm = $MinistryEn; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }
+            )
+            if ($hasLeg2) {
+                $legs += @{ Sequence = 3; ApprovingMinistryShortNameTm = $MinistryGu; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }
+            }
+        }
+        else {
+            $legs = @(@{ Sequence = 1; ApprovingMinistryShortNameTm = $leg1Short; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 })
+            if ($hasLeg2) {
+                $legs += @{ Sequence = 2; ApprovingMinistryShortNameTm = $MinistryGu; MaxDaysInReview = 10; WarningDaysBeforeMax = 8 }
+            }
         }
         $cleanLegs = $legs
 
@@ -237,9 +359,16 @@ try {
     [System.IO.File]::WriteAllText($outFile, $json, (New-Object System.Text.UTF8Encoding $false))
 
     Write-Host "Wrote $($rows.Count) rows to $outFile"
-    Write-Host "Fallback ministry (Energetika) rows: $fallbackCount"
+    Write-Host "Application-derived leg rows (leg 1 = AppliedMinistery): $appEvidenceCount"
+    Write-Host "Contract-fallback rows (no application forwarding evidence): $($rows.Count - $appEvidenceCount)"
+    Write-Host "  of which Energetika default fallback: $fallbackCount"
+    Write-Host 'Next: scripts/local/Generate-ApprovalLegProfileCatalog.ps1 (dedupe MinistryLegs into approval-leg-profile.json).'
+    if ($unmappedAppTitles.Count -gt 0) {
+        Write-Host 'Unmapped Application.AppliedMinistery titles (fell back to contract mapping):'
+        $unmappedAppTitles | Sort-Object | ForEach-Object { Write-Host "  - $_" }
+    }
     if ($gapMinistries.Count -gt 0) {
-        Write-Host 'Unmapped legacy ministry titles (used Energetika fallback):'
+        Write-Host 'Unmapped legacy contract ministry titles (used Energetika fallback):'
         $gapMinistries | Sort-Object | ForEach-Object { Write-Host "  - $_" }
     }
 }

@@ -20,7 +20,8 @@ internal sealed class Visa2014VisaImportResult
 internal static class Visa2014VisaODataImporter
 {
     public static async Task<Visa2014VisaImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string passportIdMapPath,
@@ -54,9 +55,6 @@ internal static class Visa2014VisaODataImporter
                 SkippedNoPassportMap = missingPassport,
             };
         }
-
-        var resolver = new Visa2014ODataLookupResolver();
-        await resolver.LoadAsync(api);
 
         var visaIdMap = LoadOptionalVisaIdMap(visaIdMapOutputPath);
         if (verbose && visaIdMap.Count > 0)
@@ -104,20 +102,20 @@ internal static class Visa2014VisaODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<Visa>("Visa", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Visa), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                visaIdMap[legacyOid] = created.Id;
+                visaIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPassport} no passport map...");
                 if (verbose)
-                    Console.WriteLine($"  POST Visa {created.Id} <- legacy {legacyOid} ({row["VisaNumber"]})");
+                    Console.WriteLine($"  SAVE Visa {createdId.Value} <- legacy {legacyOid} ({row["VisaNumber"]})");
             }
             catch (Exception ex)
             {
@@ -126,6 +124,8 @@ internal static class Visa2014VisaODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (visaIdMap.Count > 0 && !string.IsNullOrWhiteSpace(visaIdMapOutputPath))

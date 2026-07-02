@@ -63,7 +63,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [NotMapped]
         public string MinistryStepLabel =>
-            ProjectContractMinistryHelper.GetMinistryShortNameForProgressStep(
+            ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep(
                 Application,
                 State?.Code,
                 Location?.Code) ?? string.Empty;

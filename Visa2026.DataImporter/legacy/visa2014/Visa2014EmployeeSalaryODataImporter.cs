@@ -20,7 +20,7 @@ internal sealed class Visa2014EmployeeSalaryImportResult
 internal static class Visa2014EmployeeSalaryODataImporter
 {
     public static async Task<Visa2014EmployeeSalaryImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string legacyConnectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
@@ -101,20 +101,20 @@ internal static class Visa2014EmployeeSalaryODataImporter
                     continue;
                 }
 
-                var created = await api.CreateAsync<EmployeeSalary>("EmployeeSalary", payload);
-                if (created == null)
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.EmployeeSalary), payload);
+                if (!createdId.HasValue)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: POST returned null");
+                    errors.Add($"{legacyOid}: create returned null");
                     continue;
                 }
 
-                salaryIdMap[legacyOid] = created.Id;
+                salaryIdMap[legacyOid] = createdId.Value;
                 posted++;
                 if (posted % 250 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoPerson} no person map...");
                 if (verbose)
-                    Console.WriteLine($"  POST EmployeeSalary {created.Id} <- legacy Employee {legacyOid}");
+                    Console.WriteLine($"  SAVE EmployeeSalary {createdId.Value} <- legacy Employee {legacyOid}");
             }
             catch (Exception ex)
             {
@@ -123,6 +123,8 @@ internal static class Visa2014EmployeeSalaryODataImporter
                 Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
             }
         }
+
+        await target.FlushAsync();
 
         string? idMapPath = null;
         if (salaryIdMap.Count > 0 && !string.IsNullOrWhiteSpace(salaryIdMapOutputPath))

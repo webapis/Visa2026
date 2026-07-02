@@ -8,9 +8,9 @@ using Visa2026.Module.Localization;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Validates <see cref="ProjectContract"/> ministry legs and blocks structural edits once referenced by applications.
+/// Validates <see cref="ApprovalLegProfile"/> ministry legs and blocks structural edits once referenced by applications.
 /// </summary>
-public sealed class ProjectContractMinistryController : ObjectViewController<DetailView, ProjectContract>
+public sealed class ApprovalLegProfileMinistryController : ObjectViewController<DetailView, ApprovalLegProfile>
 {
     protected override void OnActivated()
     {
@@ -26,16 +26,16 @@ public sealed class ProjectContractMinistryController : ObjectViewController<Det
 
     private void ObjectSpace_Committing(object sender, CancelEventArgs e)
     {
-        ProjectContractMinistryHelper.PrepareLegsForCommit(ObjectSpace);
+        ApprovalLegProfileMinistryHelper.PrepareLegsForCommit(ObjectSpace);
 
-        foreach (var contract in ObjectSpace.GetObjectsToSave(false).OfType<ProjectContract>())
+        foreach (var contract in ObjectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>())
         {
             if (contract.IsActive
-                && !ProjectContractMinistryHelper.TryValidateLegSla(contract, out var slaError))
+                && !ApprovalLegProfileMinistryHelper.TryValidateLegSla(contract, out var slaError))
             {
                 e.Cancel = true;
                 Application.ShowViewStrategy.ShowMessage(
-                    slaError ?? VisaUiMessages.Get("ProjectContract.MinistryLegMaxDaysRequiredGeneric"),
+                    slaError ?? VisaUiMessages.Get("ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric"),
                     InformationType.Error,
                     6000,
                     InformationPosition.Top);
@@ -45,10 +45,10 @@ public sealed class ProjectContractMinistryController : ObjectViewController<Det
             if (ObjectSpace.IsNewObject(contract))
                 continue;
 
-            if (!ProjectContractMinistryHelper.IsContractReferencedByApplications(contract, ObjectSpace))
+            if (!ApprovalLegProfileMinistryHelper.IsProfileReferencedByApplications(contract, ObjectSpace))
                 continue;
 
-            var original = ObjectSpace.GetObjectByKey<ProjectContract>(contract.ID);
+            var original = ObjectSpace.GetObjectByKey<ApprovalLegProfile>(contract.ID);
             if (original == null)
                 continue;
 
@@ -57,7 +57,7 @@ public sealed class ProjectContractMinistryController : ObjectViewController<Det
 
             e.Cancel = true;
             Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("ProjectContract.MinistryLegsStructuralEditBlocked"),
+                VisaUiMessages.Get("ApprovalLegProfile.MinistryLegsStructuralEditBlocked"),
                 InformationType.Error,
                 6000,
                 InformationPosition.Top);
@@ -65,7 +65,7 @@ public sealed class ProjectContractMinistryController : ObjectViewController<Det
         }
     }
 
-    private static bool HasStructuralLegChanges(ProjectContract original, ProjectContract current)
+    private static bool HasStructuralLegChanges(ApprovalLegProfile original, ApprovalLegProfile current)
     {
         var originalLegs = original.MinistryLegs?
             .Where(l => l.ApprovingMinistry != null)

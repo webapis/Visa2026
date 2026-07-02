@@ -9,8 +9,9 @@ using DevExpress.Persistent.Validation;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Immutable ministry-leg snapshot copied from <see cref="ProjectContract.MinistryLegs"/>
-/// when an <see cref="Application"/> selects an approval process.
+/// Immutable ministry-leg snapshot copied from <see cref="ApprovalLegProfile.MinistryLegs"/>
+/// (or legacy <see cref="ProjectContract.MinistryLegs"/> until Phase 5) when an
+/// <see cref="Application"/> selects an approval profile.
 /// </summary>
 [DefaultClassOptions]
 [NavigationItem(false)]

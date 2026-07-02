@@ -10,6 +10,7 @@ internal sealed partial class Visa2014ODataLookupResolver
     private List<MaritalStatus> _maritalStatuses = [];
     private List<Relationship> _relationships = [];
     private List<ProjectContract> _projectContracts = [];
+    private List<ApprovalLegProfile> _approvalLegProfiles = [];
     private List<PassportType> _passportTypes = [];
     private List<VisaType> _visaTypes = [];
     private List<VisaCategory> _visaCategories = [];
@@ -35,6 +36,7 @@ internal sealed partial class Visa2014ODataLookupResolver
     private List<ApplicationState> _applicationStates = [];
     private List<ApplicationLocation> _applicationLocations = [];
     private List<CheckPoint> _checkPoints = [];
+    private List<MigrationService> _migrationServices = [];
 
     public async Task LoadAsync(ApiClient api, string? tenantCatalogDirectory = null)
     {
@@ -43,6 +45,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         _maritalStatuses = await api.GetAllAsync<MaritalStatus>("MaritalStatus");
         _relationships = await api.GetAllAsync<Relationship>("Relationship");
         _projectContracts = await api.GetAllAsync<ProjectContract>("ProjectContract");
+        _approvalLegProfiles = await api.GetAllAsync<ApprovalLegProfile>("ApprovalLegProfile");
         _passportTypes = await api.GetAllAsync<PassportType>("PassportType");
         _visaTypes = await api.GetAllAsync<VisaType>("VisaType");
         _visaCategories = await api.GetAllAsync<VisaCategory>("VisaCategory");
@@ -68,6 +71,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         _applicationStates = await api.GetAllAsync<ApplicationState>("ApplicationState");
         _applicationLocations = await api.GetAllAsync<ApplicationLocation>("ApplicationLocation");
         _checkPoints = await api.GetAllAsync<CheckPoint>("CheckPoint");
+        _migrationServices = await api.GetAllAsync<MigrationService>("MigrationService");
 
         var lookupCatalogDir = string.IsNullOrWhiteSpace(tenantCatalogDirectory)
             ? null
@@ -281,6 +285,9 @@ internal sealed partial class Visa2014ODataLookupResolver
     public Guid? ResolveMovementPermitLocation(string? nameTm) =>
         ResolveByNameTm(_movementPermitLocations, nameTm, m => m.NameTm);
 
+    public Guid? ResolveMigrationService(string? nameTm) =>
+        ResolveByNameTm(_migrationServices, nameTm, m => m.NameTm);
+
     public Guid? ResolveCheckPoint(string? nameTmOrCode)
     {
         if (string.IsNullOrWhiteSpace(nameTmOrCode))
@@ -434,6 +441,9 @@ internal sealed partial class Visa2014ODataLookupResolver
 
         return (preferred ?? matches[0]).Id;
     }
+
+    public Guid? ResolveApprovalLegProfile(string? code) =>
+        ResolveByCode(_approvalLegProfiles, code, p => p.Code);
 
     private Guid? ResolveDefaultPassportType()
     {
@@ -835,6 +845,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         MaritalStatus m => m.Id,
         Relationship r => r.Id,
         ProjectContract p => p.Id,
+        ApprovalLegProfile alp => alp.Id,
         PassportType pt => pt.Id,
         VisaType vt => vt.Id,
         VisaCategory vc => vc.Id,
@@ -859,6 +870,7 @@ internal sealed partial class Visa2014ODataLookupResolver
         ApplicationState ast => ast.Id,
         ApplicationLocation al => al.Id,
         CheckPoint cp => cp.Id,
+        MigrationService ms => ms.Id,
         _ => throw new InvalidOperationException($"Unsupported lookup type {typeof(T).Name}"),
     };
 }

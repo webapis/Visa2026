@@ -7,17 +7,17 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Resolves the parent <see cref="ProjectContract"/> when a ministry leg is created or saved
+/// Resolves the parent <see cref="ApprovalLegProfile"/> when a ministry leg is created or saved
 /// from a nested list or popup. Blazor uses <see cref="NestedFrame"/>, not only <see cref="Link"/>.
 /// </summary>
-internal static class ProjectContractMinistryLegCreationContext
+internal static class ApprovalLegProfileMinistryLegCreationContext
 {
-    internal static bool TryGetProjectContract(
+    internal static bool TryGetApprovalLegProfile(
         Frame? frame,
         IObjectSpace objectSpace,
-        out ProjectContract? projectContract)
+        out ApprovalLegProfile? approvalLegProfile)
     {
-        projectContract = null;
+        approvalLegProfile = null;
 
         var visitedFrames = new HashSet<Frame>();
         for (var current = frame; current != null; current = GetParentFrame(current))
@@ -25,28 +25,28 @@ internal static class ProjectContractMinistryLegCreationContext
             if (!visitedFrames.Add(current))
                 break;
             if (current is NestedFrame nestedFrame
-                && TryResolveFromNestedFrame(nestedFrame, objectSpace, out projectContract))
+                && TryResolveFromNestedFrame(nestedFrame, objectSpace, out approvalLegProfile))
             {
                 return true;
             }
 
-            if (current.View is DetailView { CurrentObject: ProjectContract viewContract }
-                && TryBringIntoObjectSpace(objectSpace, viewContract, out projectContract))
+            if (current.View is DetailView { CurrentObject: ApprovalLegProfile viewContract }
+                && TryBringIntoObjectSpace(objectSpace, viewContract, out approvalLegProfile))
             {
                 return true;
             }
 
             if (current.View is ListView { CollectionSource: PropertyCollectionSource framePcs }
-                && framePcs.MasterObject is ProjectContract frameMaster
-                && TryBringIntoObjectSpace(objectSpace, frameMaster, out projectContract))
+                && framePcs.MasterObject is ApprovalLegProfile frameMaster
+                && TryBringIntoObjectSpace(objectSpace, frameMaster, out approvalLegProfile))
             {
                 return true;
             }
         }
 
         if (objectSpace.Owner is Link { ListView.CollectionSource: PropertyCollectionSource linkPcs }
-            && linkPcs.MasterObject is ProjectContract linkMaster
-            && TryBringIntoObjectSpace(objectSpace, linkMaster, out projectContract))
+            && linkPcs.MasterObject is ApprovalLegProfile linkMaster
+            && TryBringIntoObjectSpace(objectSpace, linkMaster, out approvalLegProfile))
         {
             return true;
         }
@@ -58,32 +58,32 @@ internal static class ProjectContractMinistryLegCreationContext
     /// Blazor leg popup keeps the parent contract on <see cref="Window.View"/> while the nested frame hosts the leg.
     /// Falls back to searching MDI child windows if MainWindow.View is null.
     /// </summary>
-    internal static bool TryGetProjectContractFromMainWindow(
+    internal static bool TryGetApprovalLegProfileFromMainWindow(
         XafApplication application,
         IObjectSpace objectSpace,
-        out ProjectContract? projectContract)
+        out ApprovalLegProfile? approvalLegProfile)
     {
-        projectContract = null;
+        approvalLegProfile = null;
         if (application.MainWindow?.View is DetailView mainDetail
-            && mainDetail.CurrentObject is ProjectContract mainContract)
+            && mainDetail.CurrentObject is ApprovalLegProfile mainContract)
         {
-            return TryBringIntoObjectSpace(objectSpace, mainContract, out projectContract);
+            return TryBringIntoObjectSpace(objectSpace, mainContract, out approvalLegProfile);
         }
 
-        // Fallback: search MDI child windows for an open ProjectContract detail view
-        return TryGetProjectContractFromMdiWindows(application, objectSpace, out projectContract);
+        // Fallback: search MDI child windows for an open ApprovalLegProfile detail view
+        return TryGetApprovalLegProfileFromMdiWindows(application, objectSpace, out approvalLegProfile);
     }
 
     /// <summary>
-    /// Searches MDI child windows to find an open ProjectContract detail view.
+    /// Searches MDI child windows to find an open ApprovalLegProfile detail view.
     /// This handles the scenario where a leg is edited from a separate window/tab.
     /// </summary>
-    private static bool TryGetProjectContractFromMdiWindows(
+    private static bool TryGetApprovalLegProfileFromMdiWindows(
         XafApplication application,
         IObjectSpace objectSpace,
-        out ProjectContract? projectContract)
+        out ApprovalLegProfile? approvalLegProfile)
     {
-        projectContract = null;
+        approvalLegProfile = null;
 
         if (application.MainWindow == null)
             return false;
@@ -98,8 +98,8 @@ internal static class ProjectContractMinistryLegCreationContext
                     continue;
 
                 var viewProperty = childWindow.GetType().GetProperty("View");
-                if (viewProperty?.GetValue(childWindow) is DetailView { CurrentObject: ProjectContract contract }
-                    && TryBringIntoObjectSpace(objectSpace, contract, out projectContract))
+                if (viewProperty?.GetValue(childWindow) is DetailView { CurrentObject: ApprovalLegProfile contract }
+                    && TryBringIntoObjectSpace(objectSpace, contract, out approvalLegProfile))
                 {
                     return true;
                 }
@@ -112,25 +112,25 @@ internal static class ProjectContractMinistryLegCreationContext
     private static bool TryResolveFromNestedFrame(
         NestedFrame nestedFrame,
         IObjectSpace objectSpace,
-        out ProjectContract? projectContract)
+        out ApprovalLegProfile? approvalLegProfile)
     {
-        projectContract = null;
+        approvalLegProfile = null;
 
-        if (nestedFrame.ViewItem?.CurrentObject is ProjectContract itemContract
-            && TryBringIntoObjectSpace(objectSpace, itemContract, out projectContract))
+        if (nestedFrame.ViewItem?.CurrentObject is ApprovalLegProfile itemContract
+            && TryBringIntoObjectSpace(objectSpace, itemContract, out approvalLegProfile))
         {
             return true;
         }
 
-        if (nestedFrame.ViewItem?.View is DetailView { CurrentObject: ProjectContract detailContract }
-            && TryBringIntoObjectSpace(objectSpace, detailContract, out projectContract))
+        if (nestedFrame.ViewItem?.View is DetailView { CurrentObject: ApprovalLegProfile detailContract }
+            && TryBringIntoObjectSpace(objectSpace, detailContract, out approvalLegProfile))
         {
             return true;
         }
 
         if (nestedFrame.ViewItem?.View is ListView { CollectionSource: PropertyCollectionSource pcs }
-            && pcs.MasterObject is ProjectContract listMaster
-            && TryBringIntoObjectSpace(objectSpace, listMaster, out projectContract))
+            && pcs.MasterObject is ApprovalLegProfile listMaster
+            && TryBringIntoObjectSpace(objectSpace, listMaster, out approvalLegProfile))
         {
             return true;
         }
@@ -153,17 +153,17 @@ internal static class ProjectContractMinistryLegCreationContext
 
     private static bool TryBringIntoObjectSpace(
         IObjectSpace objectSpace,
-        ProjectContract source,
-        out ProjectContract? projectContract)
+        ApprovalLegProfile source,
+        out ApprovalLegProfile? approvalLegProfile)
     {
-        projectContract = objectSpace.GetObject(source) as ProjectContract;
-        if (projectContract != null)
+        approvalLegProfile = objectSpace.GetObject(source) as ApprovalLegProfile;
+        if (approvalLegProfile != null)
             return true;
 
         if (source.ID != Guid.Empty)
         {
-            projectContract = objectSpace.GetObjectByKey<ProjectContract>(source.ID);
-            if (projectContract != null)
+            approvalLegProfile = objectSpace.GetObjectByKey<ApprovalLegProfile>(source.ID);
+            if (approvalLegProfile != null)
                 return true;
         }
 
@@ -173,25 +173,25 @@ internal static class ProjectContractMinistryLegCreationContext
             if (sourceSpace.IsNewObject(source))
             {
                 // Unsaved parent in another session — return source; callers resolve the owning space.
-                projectContract = source;
+                approvalLegProfile = source;
                 return true;
             }
 
             var rootSpace = ObjectSpaceHelper.GetRootObjectSpace(sourceSpace) ?? sourceSpace;
-            projectContract = objectSpace.GetObject(source) as ProjectContract
-                ?? rootSpace.GetObject(source) as ProjectContract
-                ?? sourceSpace.GetObject(source) as ProjectContract;
-            if (projectContract != null)
+            approvalLegProfile = objectSpace.GetObject(source) as ApprovalLegProfile
+                ?? rootSpace.GetObject(source) as ApprovalLegProfile
+                ?? sourceSpace.GetObject(source) as ApprovalLegProfile;
+            if (approvalLegProfile != null)
                 return true;
         }
 
         if (objectSpace.IsNewObject(source))
         {
-            projectContract = source;
+            approvalLegProfile = source;
             return true;
         }
 
-        projectContract = null;
+        approvalLegProfile = null;
         return false;
     }
 }

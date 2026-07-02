@@ -8,7 +8,7 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class ApplicationProgressTransitionHelperThreeLegTests
 {
     [Fact]
-    public void ThreeLegContract_AllowsFullMinistryChain()
+    public void ThreeLegProfile_AllowsFullMinistryChain()
     {
         var app = BuildThreeLegApplication();
 
@@ -63,22 +63,23 @@ public class ApplicationProgressTransitionHelperThreeLegTests
         var type = new ApplicationType
         {
             ApplicationProgressRoute = ApplicationProgressRouteKind.ViaMinistries,
-            ShowProjectContract = true
+            ShowApprovalLegProfile = true,
+            MigrationSlaProfile = new ApplicationMigrationSlaProfile { MaxDaysInReview = 10 }
         };
-        var contract = new ProjectContract
+        var profile = new ApprovalLegProfile
         {
             MinistryLegs =
             [
-                new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() },
-                new ProjectContractMinistryLeg { Sequence = 2, ApprovingMinistry = new ApprovingMinistry() },
-                new ProjectContractMinistryLeg { Sequence = 3, ApprovingMinistry = new ApprovingMinistry() }
+                new ApprovalLegProfileMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() },
+                new ApprovalLegProfileMinistryLeg { Sequence = 2, ApprovingMinistry = new ApprovingMinistry() },
+                new ApprovalLegProfileMinistryLeg { Sequence = 3, ApprovingMinistry = new ApprovingMinistry() }
             ]
         };
 
         return new Application
         {
             ApplicationType = type,
-            ProjectContract = contract,
+            ApprovalLegProfile = profile,
             ProgressHistory = new ObservableCollection<ApplicationProgress>()
         };
     }

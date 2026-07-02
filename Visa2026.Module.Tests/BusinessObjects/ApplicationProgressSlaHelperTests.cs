@@ -66,18 +66,18 @@ public class ApplicationProgressSlaHelperTests
     }
 
     [Fact]
-    public void TryValidateLegSla_BlocksActiveContract_WhenLegMissingMaxDays()
+    public void TryValidateLegSla_BlocksActiveProfile_WhenLegMissingMaxDays()
     {
-        var contract = new ProjectContract
+        var profile = new ApprovalLegProfile
         {
             IsActive = true,
             MinistryLegs =
             [
-                new ProjectContractMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() }
+                new ApprovalLegProfileMinistryLeg { Sequence = 1, ApprovingMinistry = new ApprovingMinistry() }
             ]
         };
 
-        Assert.False(ProjectContractMinistryHelper.TryValidateLegSla(contract, out var error));
+        Assert.False(ApprovalLegProfileMinistryHelper.TryValidateLegSla(profile, out var error));
         Assert.False(string.IsNullOrWhiteSpace(error));
     }
 
