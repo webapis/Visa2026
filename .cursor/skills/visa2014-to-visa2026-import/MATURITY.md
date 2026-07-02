@@ -1,95 +1,55 @@
-# VISA2014 → Visa2026 import — continuous improvement
+# VISA2014 import skill — maturity loop
 
-**Skill:** [SKILL.md](./SKILL.md) · **Log:** [learnings.md](./learnings.md) (append-only) · **Commands:** [reference.md](./reference.md)
+This skill **accumulates experience** from every migration session — especially **import runs** (success, failure, or partial success). Same pattern as [on-prem-deploy/MATURITY.md](../on-prem-deploy/MATURITY.md).
 
-**Canonical docs:**
+## Loop (every session)
 
-| Doc | Role |
-|-----|------|
-| [docs/VISA2014_MIGRATION.md](../../../docs/VISA2014_MIGRATION.md) | Migration overview, gates, data quality |
-| [docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) | **Import plan — approve before implementation** |
-| [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) | Strategy approval status |
+1. **READ** [learnings.md](./learnings.md) (`## Entries`) — newest first; search for the BO, script, or error you are about to hit.
+2. **READ** [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md) — **reuse** an existing script or CLI before creating a new `.ps1`.
+3. **READ** [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) — `currentFocus`, `issues`, entity `importStatus`.
+4. **READ** [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) — `status` must be `approved` before `--import-visa2014` implementation.
+5. **WORK** — discovery, strategy, Excel preview, OData import, partial reimport, correction CLI, or file wave.
+6. **VERIFY** — SQL reconciliation, spot-checks, id-map counts, log tail (when applicable).
+7. **UPDATE** [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) when a workstream advances or a **blocking** issue appears.
+8. **APPEND** [learnings.md](./learnings.md) — **required after every import attempt** (see below). Also append when a dossier closes, strategy locks, or a mapping fix is verified without a full import.
+9. **PROMOTE** — repeated issue → Troubleshooting in [SKILL.md](./SKILL.md); stable procedure → [reference.md](./reference.md) or [import-practices.md](./import-practices.md).
 
-**Related skills:**
+## When to append learnings (import runs)
 
-| Topic | Skill / log |
-|-------|-------------|
-| Target OData / seed patterns | [visa2026-dataimporter](../visa2026-dataimporter/SKILL.md) |
-| Lookup catalogs | [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) |
-| Docker / DB / schema | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
+| Situation | Append? | Notes |
+|-----------|---------|--------|
+| End-to-end or single-entity import **succeeds** | **Yes** | Counts, reconciliation, log path, script/CLI used |
+| Import **fails** (non-zero exit, OData error, validation) | **Yes** | Exit code, error snippet, root cause or hypothesis, next step |
+| Import **partial** (some rows skipped/failed) | **Yes** | Success/failed/skipped counts; sample failures |
+| Partial reimport (dev `reimport/` script) | **Yes** | Cleanup + id-map rebuild + import; target DB |
+| Correction CLI only (`--correct-*`) | **Yes** | Rows updated; before/after spot-check |
+| File/image wave | **Yes** | Bytes loaded, missing id-map keys |
+| Discovery / Excel preview only (no import) | Optional | Append if non-obvious SQL or mapping insight |
+| Build failed before import ran | **Yes** | Compiler error; blocks repeat attempts |
 
-Shared promotion rules: [docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](../../../docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md)
+**Do not skip failure entries.** They are often more valuable than success entries.
 
----
+## What to log (import entries)
 
-## Maturity goal
+Use the templates in [learnings.md](./learnings.md). Minimum fields:
 
-| As usage increases | Effect |
-|--------------------|--------|
-| More sessions in **learnings.md** | Next discovery/import skips repeated MCP, mapping, OData mistakes |
-| Same root cause **2+** times | Scenario row in **SKILL.md** or triage table |
-| Stable SQL / CLI pattern **3+** times | Snippet in **reference.md** |
-| Strategy or wave decision locked | Update **IMPORT_PLAN_AND_STRATEGY.md** + **import-strategy.yaml** |
+- **Date**, **environment** (local / staging / prod pilot), **tenant** if applicable
+- **Mode**: end-to-end | single-entity | partial-reimport | correction | file-wave
+- **Entity / BO** and **script or CLI** (e.g. `scripts/visa2014-migration/reimport/ApplicationItems.ps1`)
+- **Outcome**: success | failed | partial
+- **Counts**: legacy source, imported, failed, skipped (as available)
+- **Reconciliation** (one line) or **error** (snippet + exit code)
+- **Log path** (e.g. `import-logs/…`) when the run produced one
+- **Follow-up** — fix applied, next run, or `migration-status.yaml` issue id
 
-**Developer review:** promoted **SKILL.md** text stays short; long SQL, stack traces, and session notes stay in **learnings.md**.
-
----
-
-## The loop (every migration task)
-
-Agents **must** follow this order:
-
-```text
-1. READ    → learnings.md (## Entries) + import-strategy.yaml status + Scenarios in SKILL.md
-2. CLASSIFY → discovery vs strategy vs confirmation vs import implementation vs pilot run
-3. GATE    → strategy approved? importConfirmed? (stop if not)
-4. TRY     → smallest unit: one BO, one SQL probe, one OData POST
-5. TEST    → reconcile counts; dotnet build if code changed
-6. FIX     → minimal diff; mapping YAML before code when possible
-7. RECORD  → append learnings.md (verified outcome only)
-8. PROMOTE → 2+ hits → SKILL.md scenario; 3+ → reference.md
-```
-
-**Record when:** discovery dossier closed, strategy decision made, confirmation review, pilot/batch reconciled, or verified fix — not speculative notes.
-
-**Do not:** delete or rewrite old learnings entries; **append only**.
-
-**Agents must not** set `import-strategy.yaml` `status: approved` or `importConfirmed: true` unless the user explicitly approves in session.
-
----
-
-## What to log (minimum)
-
-| Session type | Required learnings fields |
-|--------------|---------------------------|
-| Discovery BO closed | Entity, legacy table, surprise gaps, SQL that helped |
-| Strategy / plan | Decision id, chosen option, link to IMPORT_PLAN |
-| Pilot import | Entity, counts (legacy vs target), skips, OData errors |
-| Mapping fix | Layer 1/2/3 file, before/after, reconciliation delta |
-
-Use the template in [learnings.md](./learnings.md).
-
----
-
-## Promotion ladder
+## Promotion rules
 
 | Hits | Action |
 |------|--------|
-| **1** verified outcome | Append **learnings.md** only |
-| **2** same root cause | Add/update **Troubleshooting** or scenario in **SKILL.md** |
-| **3+** same pattern | Command/SQL block in **reference.md** |
-| Strategy or wave change | **IMPORT_PLAN_AND_STRATEGY.md** + **import-strategy.yaml** |
-| Cross-cutting OData exposure | Note in **visa2026-dataimporter/learnings.md** if that skill owns the fix |
+| Same failure or workaround **2×** | Add row to Troubleshooting in [SKILL.md](./SKILL.md) |
+| Same procedure **3×** verified | Move steps to [reference.md](./reference.md) or [import-practices.md](./import-practices.md) |
+| Strategy / wave decision locked | Update [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) or import-strategy notes |
 
----
+## Agent obligation
 
-## Which log owns the entry?
-
-| Symptom / work | Log to |
-|----------------|--------|
-| Legacy table/column mapping, VISA2015 SQL, dedupe, id-map | **visa2014-to-visa2026-import** |
-| Visa2026 seed scenarios, `--import-scenario` | **visa2026-dataimporter** |
-| ApplicationType / catalog seed drift | **visa2026-lookup-data** |
-| Target DB schema / Docker / FORCE_XAF_DB_UPDATE | **visa2026-lifecycle-docker** |
-
-When unsure: log where you **changed artifacts or code**; cross-link the other skill in **Prevent**.
+When the user or agent **runs** any import-related script or DataImporter CLI for VISA2014 migration, the session is not complete until step 7 (append learnings) is done — **including failed runs the user pastes logs for**.

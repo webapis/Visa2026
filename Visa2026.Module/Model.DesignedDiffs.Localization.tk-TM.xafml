@@ -272,7 +272,7 @@
         <Member Name="CurrentPassport" Caption="Pasport" />
         <Member Name="CurrentPositionHistory" Caption="Wezipesi" />
         <Member Name="CurrentVisa" Caption="Wiza" />
-        <Member Name="CurrentWorkDuty" Caption="Gelmeginiň maksady" />
+        <Member Name="CurrentWorkDuty" Caption="Iş jogapkärçiligi" />
         <Member Name="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />

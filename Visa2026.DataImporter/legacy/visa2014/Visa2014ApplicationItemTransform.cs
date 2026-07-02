@@ -12,6 +12,7 @@ internal sealed record Visa2014ApplicationItemRawRow(
     Guid? LegacyWorkPermitOid,
     Guid? LegacyPositionOid,
     Guid? LegacyAddressOfResidenceOid,
+    Guid? LegacyDirectAddressOid,
     DateTime? RegistrationDate,
     string? RegistrationNumber,
     DateTime? TravelDate,
@@ -69,6 +70,7 @@ internal static class Visa2014ApplicationItemTransform
         "Application", "ApplicationType", "Person",
         "CurrentPassport", "PreviousPassport", "CurrentVisa", "NextVisa",
         "CurrentWorkPermitItem", "CurrentPositionHistory", "CurrentAddressOfResidence",
+        "CurrentEducation", "CurrentSalary",
         "RegistrationDate", "TravelDate", "TravelType", "MovementType",
         "CheckPoint", "PurposeOfTravel",
         "BusinessTripAddress", "BusinessTripCity",
@@ -92,6 +94,7 @@ internal static class Visa2014ApplicationItemTransform
             CAST(pia.WorkPermit AS varchar(36)) AS WorkPermitOid,
             CAST(pia.Position AS varchar(36)) AS PositionOid,
             CAST(pia.AddressOfResidence AS varchar(36)) AS AddressOfResidenceOid,
+            CAST(pia.Address AS varchar(36)) AS DirectAddressOid,
             CONVERT(varchar(10), pia.RegistrationDate, 23) AS RegistrationDate,
             pia.RegistrationNumber,
             CONVERT(varchar(10), ti.TravelDate, 23) AS TravelDate,
@@ -174,8 +177,18 @@ internal static class Visa2014ApplicationItemTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        return TransformRows(rawRows, catalogs, out var skipped, out var unmappedDistinct, out var dedupeSummary);
+        var visibility = ApplicationTypeVisibilityCatalog.Load();
+        var currentEducationByPerson = Visa2014PersonCurrentFieldInference.BuildCurrentEducationByPerson(
+            connectionString,
+            verbose);
+        var context = new ApplicationItemTransformContext(visibility, currentEducationByPerson);
+
+        return TransformRows(rawRows, catalogs, context, out var skipped, out var unmappedDistinct, out var dedupeSummary);
     }
+
+    private sealed record ApplicationItemTransformContext(
+        ApplicationTypeVisibilityCatalog Visibility,
+        IReadOnlyDictionary<Guid, Guid> CurrentEducationByPerson);
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationItemRawRow parsed)
     {
@@ -200,6 +213,7 @@ internal static class Visa2014ApplicationItemTransform
             LegacyWorkPermitOid: TryParseNullableGuid(row.GetValueOrDefault("WorkPermitOid")),
             LegacyPositionOid: TryParseNullableGuid(row.GetValueOrDefault("PositionOid")),
             LegacyAddressOfResidenceOid: TryParseNullableGuid(row.GetValueOrDefault("AddressOfResidenceOid")),
+            LegacyDirectAddressOid: TryParseNullableGuid(row.GetValueOrDefault("DirectAddressOid")),
             RegistrationDate: TryParseDate(row.GetValueOrDefault("RegistrationDate")),
             RegistrationNumber: row.GetValueOrDefault("RegistrationNumber"),
             TravelDate: TryParseDate(row.GetValueOrDefault("TravelDate")),
@@ -237,6 +251,7 @@ internal static class Visa2014ApplicationItemTransform
     private static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014ApplicationItemRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        ApplicationItemTransformContext context,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct,
         out List<Dictionary<string, object?>> dedupeSummary)
@@ -250,7 +265,7 @@ internal static class Visa2014ApplicationItemTransform
         var importRows = new List<Dictionary<string, object?>>();
         foreach (var row in working)
         {
-            var export = BuildExportRow(row, catalogs, out var skipReason, out var rowUnmapped);
+            var export = BuildExportRow(row, catalogs, context, out var skipReason, out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -340,6 +355,7 @@ internal static class Visa2014ApplicationItemTransform
     private static Dictionary<string, object?> BuildExportRow(
         WorkingRow working,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        ApplicationItemTransformContext context,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -429,7 +445,8 @@ internal static class Visa2014ApplicationItemTransform
         row["NextVisa"] = raw.LegacyNextVisaOid?.ToString("D");
         row["CurrentWorkPermitItem"] = raw.LegacyWorkPermitOid?.ToString("D");
         row["CurrentPositionHistory"] = raw.LegacyPositionOid?.ToString("D");
-        row["CurrentAddressOfResidence"] = raw.LegacyAddressOfResidenceOid?.ToString("D");
+        row["CurrentAddressOfResidence"] =
+            Visa2014PiaAddressInference.ResolveApplicationItemCurrentAddressLegacyKey(raw)?.ToString("D");
 
         row["RegistrationDate"] = raw.RegistrationDate?.ToString("yyyy-MM-dd");
         row["TravelDate"] = raw.TravelDate?.ToString("yyyy-MM-dd");
@@ -452,6 +469,13 @@ internal static class Visa2014ApplicationItemTransform
         row["IsCancelled"] = raw.Cancelled;
         row["RejectionIssued"] = raw.Rejected;
         row["VisaIssued"] = raw.IsComplete;
+
+        Visa2014PersonCurrentFieldInference.TrySetApplicationItemPersonCurrentFields(
+            raw,
+            applicationTypeName,
+            context.Visibility,
+            context.CurrentEducationByPerson,
+            row);
 
         return row;
     }

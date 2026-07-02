@@ -1,8 +1,9 @@
 ---
 name: visa2014-to-visa2026-import
 description: >-
-  VISA2014 → Visa2026 migration: Excel preview of consolidated import data; approve strategy before
-  code; read learnings each session; VISA2015 source of truth; confirm each BO; OData import.
+  VISA2014 → Visa2026 migration: Excel preview; approve strategy before code; read learnings each
+  session; append learnings after every import attempt (success or failure); VISA2015 source of truth;
+  confirm each BO; OData / in-process import; partial reimport (dev only); reuse existing migration scripts before creating new ones.
 disable-model-invocation: false
 ---
 
@@ -30,22 +31,44 @@ disable-model-invocation: false
 
 **Import best practices:** [import-practices.md](./import-practices.md) — **read before Phase 3+**
 
-**Commands and SQL templates:** [reference.md](./reference.md)
+**Commands and SQL templates:** [reference.md](./reference.md) · **Migration scripts (reuse first):** [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md)
 
-**Experience loop:** [MATURITY.md](./MATURITY.md) — **read before every task** · [learnings.md](./learnings.md) — **append after verified work**
+---
+
+## Migration scripts — reuse first
+
+**Do not reinvent the wheel.** Before writing a new `.ps1`, search [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md) and [reference.md § Orchestration](./reference.md).
+
+| Need | Use (in order) |
+|------|----------------|
+| Import one BO | `dotnet run … --import-visa2014 --entity <BO>` |
+| Resume / full local chain | `import/Run-HeadlessChain.ps1` (`-StartAt`) |
+| Staging / on-prem waves | `import/OnPrem-Staging.ps1` |
+| Tenant JSON before Application | `import/Invoke-TenantCatalogGeneration.ps1` |
+| Dev: fix one BO after delete | `reimport/<Entity>.ps1` + `cleanup/*.sql` |
+| Same script, different scope | Add **parameters** (`-MaxRows`, `-DryRun`, `-TargetConnection`) — not a new file |
+
+**New script only** when no CLI flag, orchestrator, or existing helper covers the workflow — then add one README row and append [learnings.md](./learnings.md). Prefer C# in `Visa2026.DataImporter` over duplicate PowerShell wrappers.
+
+**Experience loop:** [MATURITY.md](./MATURITY.md) — **read before every task** · [learnings.md](./learnings.md) — **append after every import attempt** (success **or** failure)
 
 ---
 
 ## Experience loop (mandatory)
 
-Follow [MATURITY.md](./MATURITY.md) on **every** migration session:
+Follow [MATURITY.md](./MATURITY.md) on **every** migration session. The skill **accumulates experience** from each importing action — not only when things go well.
 
-1. **READ** [learnings.md](./learnings.md) (`## Entries`), [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) (`currentFocus`, open `issues`), and [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) `status`.
+1. **READ** [learnings.md](./learnings.md) (`## Entries`), [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) (`currentFocus`, open `issues`), and [import-strategy.yaml](../../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) `status`. Skim recent import entries for the BO you are about to run.
 2. **WORK** — discovery, strategy draft, or import (respect gates below).
-3. **RECORD** — update [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) (workstreams, issues, lookup audit); append [learnings.md](./learnings.md) when a dossier closes, a strategy decision is locked, a pilot reconciles, or a fix is verified.
+3. **RECORD** (required after **every** import run):
+   - **Success** — append [learnings.md](./learnings.md) with counts, reconciliation, log path, what worked.
+   - **Failure / partial success** — append with exit code, error snippet, root cause (or hypothesis), next fix, log path. Update [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml) `issues` when the run blocks progress.
+   - Also record when a dossier closes, strategy locks, or a mapping fix is verified (without a full import).
 4. **PROMOTE** — same issue **2+** times → update Troubleshooting or a scenario here; **3+** → [reference.md](./reference.md).
 
-Do not skip step 1 or 3. Optional learnings defeats the purpose of this skill.
+Do not skip step 1 or 3. Skipping failure entries guarantees the next session repeats the same mistake.
+
+**Import modes that must be logged:** end-to-end chain, single-entity first load, partial reimport, correction CLI, file wave — each attempt counts.
 
 ---
 
@@ -110,6 +133,17 @@ Full transactional import?
 Import run / upsert / reconciliation?
   → § Import best practices (import-practices.md)
 
+Need to run import / reimport / catalog step?
+  → scripts/visa2014-migration/README.md (reuse existing script or CLI first — § Reuse scripts first)
+  → reference.md orchestration table · only create new .ps1 if nothing fits
+
+Partial reimport one BO during migration implementation (local dev)?
+  → import-practices.md § Partial reimport · scripts/visa2014-migration/reimport/
+  → Respect order.yaml dependsOn — parents before children; re-run downstream if parent changed
+
+End-to-end migration (staging / prod cutover)?
+  → import/OnPrem-Staging.ps1 or import/Run-HeadlessChain.ps1 · order.yaml sequence — not reimport/
+
 End of session with verified outcome?
   → Append learnings.md (MATURITY.md loop)
 ```
@@ -152,9 +186,9 @@ If **`VISA2015`** already exists on your SQL instance (e.g. `localhost\SQLEXPRES
 **Docker dev SQL** (alternative): restore from `.bak`:
 
 ```powershell
-.\scripts\local\Restore-Visa2014Db.ps1
+.\scripts\visa2014-migration\setup\Restore-LegacyDatabase.ps1
 # or
-.\scripts\local\Restore-Visa2014Db.ps1 -BackupFile D:\backups\visa2015-prod.bak
+.\scripts\visa2014-migration\setup\Restore-LegacyDatabase.ps1 -BackupFile D:\backups\visa2015-prod.bak
 ```
 
 Verify via **`visa2014-sql-local`**: `SELECT DB_NAME()` (see [reference.md](./reference.md)).
@@ -480,7 +514,7 @@ Requires **`import-strategy.yaml`** `approved`, **Person** `discoveryStatus: com
 3. **Person** in `WebApiServiceExtensions.cs`.
 4. Import with **verbose** logging; upsert on `PassportNumber`.
 5. **Reconcile** — legacy distinct passports vs OData count; spot-check 5 records.
-6. Set `importStatus: pilot`; **append [learnings.md](./learnings.md)** (required).
+6. Set `importStatus: pilot`; **append [learnings.md](./learnings.md)** (required — success or failure).
 
 ---
 
@@ -494,6 +528,7 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 4. Log summary: success / failed / skipped / dedupeMerged.
 5. **`id-map/`** updated continuously; attachments **last**.
 6. Prod cutover only after staging UAT + DB rollback plan ([import-practices.md](./import-practices.md) § Safety).
+7. **After each entity batch** (and after each failed attempt): append [learnings.md](./learnings.md) per [MATURITY.md](./MATURITY.md) — do not wait until the full chain finishes.
 
 ---
 
@@ -502,7 +537,8 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 | Symptom | Likely fix |
 |---------|------------|
 | Started import code without plan | Complete [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md); get `import-strategy.yaml` `approved` |
-| Repeated mistake across sessions | Read **learnings.md** first; append after fix ([MATURITY.md](./MATURITY.md)) |
+| Repeated mistake across sessions | Read **learnings.md** first; append after **every** import attempt, including failures ([MATURITY.md](./MATURITY.md)) |
+| New `.ps1` for every import task | Search [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md); use CLI or `-StartAt` / `-MaxRows` on existing scripts first |
 | Import run without user sign-off | Set **`importConfirmed: true`** only after human review (Phase 1b) |
 | Agent wrote importer before mapping done | Complete Phase 1 + confirmation gate first |
 | Wrong BO discovered first | Use **`order.yaml`** pick algorithm — do not choose by convenience |

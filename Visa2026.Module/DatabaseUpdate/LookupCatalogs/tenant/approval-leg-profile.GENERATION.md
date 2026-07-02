@@ -6,9 +6,9 @@
 
 ```text
 VISA2015 (read-only SQL)
-  └─ scripts/local/Generate-ProjectContractCalikEnergiCatalog.ps1
+  └─ scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1
        → project-contract.calik-energi.json  (per-contract ministry chains; input only)
-  └─ scripts/local/Generate-ApprovalLegProfileCatalog.ps1
+  └─ scripts/visa2014-migration/catalogs/generate/ApprovalLegProfile.ps1
        → approval-leg-profile.json           (~10 deduped shared profiles)
   └─ App deploy / Update-LocalDatabase.ps1
        → ApprovalLegProfileSeedUpdater

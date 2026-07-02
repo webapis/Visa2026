@@ -21,10 +21,45 @@
 | `Visa2026.DataImporter/legacy/visa2014/field-maps/` | Per-BO mapping (drafted in discovery) |
 | `Visa2026.DataImporter/legacy/visa2014/id-map/` | Runtime GUID map (gitignored) |
 | `C:\Users\webap\Documents\GitHub\VISA2014` | Legacy repo — **supplementary** (MCP filesystem only) |
-| `.cursor/skills/visa2014-to-visa2026-import/MATURITY.md` | **Experience loop** — read learnings before, append after |
+| `.cursor/skills/visa2014-to-visa2026-import/MATURITY.md` | **Experience loop** — read learnings before; append after **every import attempt** (success or failure) |
 | `.cursor/skills/visa2014-to-visa2026-import/learnings.md` | Append-only session log |
 | `.cursor/skills/visa2014-to-visa2026-import/import-practices.md` | **Import best practices** (Phase 3+; strategy + `importConfirmed`) |
 | `docs/VISA2014_MIGRATION.md` | Canonical migration overview |
+| `scripts/visa2014-migration/README.md` | **Migration scripts index** — **search before creating new scripts** |
+
+## Migration scripts — reuse first
+
+**Do not add a new `.ps1` until you confirm nothing existing covers the task.**
+
+| Priority | Mechanism | When |
+|----------|-----------|------|
+| 1 | `dotnet run … --import-visa2014 --entity <BO>` | Single entity; no cleanup/rebuild |
+| 2 | `import/Run-HeadlessChain.ps1` | Full chain or `-StartAt` resume |
+| 3 | `import/OnPrem-Staging.ps1` | Staging / on-prem ordered waves |
+| 4 | `import/Invoke-TenantCatalogGeneration.ps1` | Tenant catalog JSON before Application |
+| 5 | `import/<Entity>.ps1` or `reimport/<Entity>.ps1` | Documented entity workflow (import-only vs partial reimport) |
+| 6 | Extend existing script (`-MaxRows`, `-DryRun`, `-TargetConnection`) | Same workflow, different scope |
+| 7 | **New script** | Only if 1–6 cannot express the workflow — update README + learnings |
+
+Shared repo root: `_lib/Get-RepoRoot.ps1`. Dot-source **after** `param()`, not inside it.
+
+## Orchestration scripts (`scripts/visa2014-migration/`)
+
+**Order rule:** Full and partial reimport both follow [`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml) `dependsOn`. Orchestration scripts run entities in that order; partial reimport is one BO at a time but only when parents are already valid — re-run downstream BOs in order after a parent partial reimport.
+
+| When | Script | Notes |
+|------|--------|-------|
+| Restore **VISA2015** on dev PC | `setup/Restore-LegacyDatabase.ps1` | Wraps `migration-scripts/Restore-BackupToLocalSql.ps1` |
+| Tenant JSON before **Application** | `import/Invoke-TenantCatalogGeneration.ps1` | Same as `--generate-visa2014-tenant-catalogs`; steps in `order.yaml` |
+| Full on-prem staging waves | `import/OnPrem-Staging.ps1` | Ordered `--import-visa2014` per `order.yaml`; in-process for Application/ApplicationItem |
+| Local dev full chain | `import/Run-HeadlessChain.ps1` | In-process all entities; `-StartAt` to resume |
+| ApplicationItem only | `import/ApplicationItems.ps1` | In-process; needs parent id-maps |
+| Partial reimport Applications (dev only) | `reimport/Applications.ps1` | SQL cleanup + import — **not** end-to-end migration |
+| Partial reimport ApplicationItems (dev only) | `reimport/ApplicationItems.ps1` | SQL cleanup → rebuild parent id-maps → in-process import → corrections. **Procedure:** [import-practices.md § Partial reimport](./import-practices.md#partial-reimport-dev-implementation-only) |
+| Çalik tenant catalogs | `catalogs/generate/*.ps1`, `catalogs/deploy/*.ps1` | See README in that folder |
+| Patch ApprovalLegProfile | `patch/Application-ApprovalLegProfile.ps1` | After Application import |
+
+Per-entity import without a dedicated script: `dotnet run --project Visa2026.DataImporter -- --import-visa2014 --entity <BO> …`
 
 ## Import confirmation gate
 
@@ -71,7 +106,7 @@ Skip if **`VISA2015`** already exists on your SQL instance (SSMS). **Docker** al
 ```powershell
 docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up -d
 
-.\scripts\local\Restore-Visa2014Db.ps1
+.\scripts\visa2014-migration\setup\Restore-LegacyDatabase.ps1
 # or
 .\migration-scripts\Restore-BackupToLocalSql.ps1 -BackupFile .\visa2015-prod.bak -DatabaseName VISA2015
 ```

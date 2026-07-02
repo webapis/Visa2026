@@ -278,6 +278,9 @@ fields:
     idMapEntity: AddressOfResidence
     missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentAddressOfResidence
+    notes: |
+      Legacy PersonInApplication.AddressOfResidence FK when set; else PersonInApplication.Address via id-map
+      (PIA inference on AddressOfResidence wave + sponsor canonical for family lines).
 
   - source: EmployeeEntryDate
     target: TravelDate
@@ -392,6 +395,9 @@ fields:
     idMapEntity: Education
     missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentEducation
+    notes: |
+      Transform sets legacy Education Oid (latest GraduationYear per Person). OData maps via --education-id-map.
+      Employee lines only; omitted when ShowRegistrations (registration workflow).
 
   - source: null
     target: CurrentMedicalRecord
@@ -406,6 +412,8 @@ fields:
     idMapEntity: EmployeeSalary
     missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentSalary
+    notes: |
+      Transform sets legacy Employee Oid (= Person Oid). OData maps via --employee-salary-id-map. Employee lines only.
 
   - source: null
     target: CurrentWorkDuty

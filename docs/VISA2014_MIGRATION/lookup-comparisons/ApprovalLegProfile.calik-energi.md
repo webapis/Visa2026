@@ -18,7 +18,7 @@ Runtime DB update seeds **only** from committed JSON. It does **not** scan `dbo.
 
 ### Stage 1 — Legacy contract ministry chains
 
-`scripts/local/Generate-ProjectContractCalikEnergiCatalog.ps1` reads **VISA2015** (`dbo.Application`, `dbo.Contract`, `dbo.AppliedMinistery`) and writes `tenant/project-contract.calik-energi.json` with optional nested `MinistryLegs` per contract code.
+`scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1` reads **VISA2015** (`dbo.Application`, `dbo.Contract`, `dbo.AppliedMinistery`) and writes `tenant/project-contract.calik-energi.json` with optional nested `MinistryLegs` per contract code.
 
 Inference rules (same family as `Visa2014ApplicationApprovalLegProfileInference`):
 
@@ -29,7 +29,7 @@ Inference rules (same family as `Visa2014ApplicationApprovalLegProfileInference`
 
 ### Stage 2 — Deduplicate to shared profiles
 
-`scripts/local/Generate-ApprovalLegProfileCatalog.ps1` (tool: `tools/GenerateApprovalLegProfileCatalog/`) collapses distinct leg chains from the contract catalog into `approval-leg-profile.json`.
+`scripts/visa2014-migration/catalogs/generate/ApprovalLegProfile.ps1` (tool: `tools/GenerateApprovalLegProfileCatalog/`) collapses distinct leg chains from the contract catalog into `approval-leg-profile.json`.
 
 Use `-StripContractLegs` after review to remove nested `MinistryLegs` from contract JSON (contracts become identity-only on target).
 
@@ -39,7 +39,7 @@ Use `-StripContractLegs` after review to remove nested `MinistryLegs` from contr
 
 ### Stage 4 — Application FK (import wave)
 
-`scripts/local/Patch-Visa2014ApplicationApprovalLegProfile.ps1` (or Application reimport with `ApprovalLegProfile` column) sets `Application.ApprovalLegProfile` from per-app legacy inference.
+`scripts/visa2014-migration/patch/Application-ApprovalLegProfile.ps1` (or Application reimport with `ApprovalLegProfile` column) sets `Application.ApprovalLegProfile` from per-app legacy inference.
 
 ## Regenerate checklist
 

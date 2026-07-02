@@ -8,12 +8,12 @@ alwaysApply: true
 - **VISA2014 is not in this workspace.** Sibling repo: `C:\Users\webap\Documents\GitHub\VISA2014` — do not add as a workspace root for routine work.
 - **Legacy source of truth:** SQL database **`VISA2015`** via **`visa2014-sql-local`**. **VISA2014** is the app/repo name only — there is **no** database named `VISA2014`. The VISA2014 **repo** (`visa2014-readonly-files`) is supplementary context only — if repo ≠ DB, trust **`VISA2015`**.
 - **Legacy discovery:** use MCP **`visa2014-sql-local`** first; **`visa2014-readonly-files`** for BO/EF hints only. Never create or edit files under the VISA2014 folder.
-- **Target work:** all migration code and mapping artifacts live in **Visa2026** (`docs/VISA2014_MIGRATION/`, `Visa2026.DataImporter/legacy/visa2014/`).
+- **Target work:** all migration code and mapping artifacts live in **Visa2026** (`docs/VISA2014_MIGRATION/`, `Visa2026.DataImporter/legacy/visa2014/`). **Reuse** existing scripts under `scripts/visa2014-migration/` before creating new ones — see that folder's README.
 - **Target DB / validation:** **`visa2026-sql-local`** → Visa2026 database only.
 - **Writes:** import production data via **Visa2026 OData** only — not direct SQL into Visa2026, never write to `VISA2015`.
 - **Import strategy first:** approve [IMPORT_PLAN_AND_STRATEGY.md](docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) (`import-strategy.yaml` → `approved`) before any `--import-visa2014` implementation.
 - **Document before implement:** each BO needs discovery **`complete`** + human **`importConfirmed: true`** before OData load.
-- **Experience loop:** read [learnings.md](.cursor/skills/visa2014-to-visa2026-import/learnings.md) before work; append after verified sessions ([MATURITY.md](.cursor/skills/visa2014-to-visa2026-import/MATURITY.md)).
+- **Experience loop:** read [learnings.md](.cursor/skills/visa2014-to-visa2026-import/learnings.md) before work; append after **every import attempt** (success or failure) and verified discovery ([MATURITY.md](.cursor/skills/visa2014-to-visa2026-import/MATURITY.md)).
 - **Canonical plan:** `docs/VISA2014_MIGRATION.md` · **Skill:** `.cursor/skills/visa2014-to-visa2026-import/SKILL.md`
 
 Before any SQL MCP call, confirm server name: `visa2014-*` = legacy, `visa2026-*` = new.

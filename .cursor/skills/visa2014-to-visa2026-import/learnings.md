@@ -2,7 +2,7 @@
 
 **Purpose:** Record verified discovery, strategy decisions, mapping corrections, and OData import outcomes so **each session builds on the last**.
 
-**Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after verified work** (not optional).
+**Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
 **Canonical plan:** [docs/VISA2014_MIGRATION.md](../../../docs/VISA2014_MIGRATION.md) · [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md)
 
@@ -14,13 +14,20 @@
 
 | Event | Append? |
 |-------|---------|
+| **Import run succeeds** (pilot, batch, e2e wave, partial reimport) | **Yes** |
+| **Import run fails** (exit code, OData 400, build blocked import) | **Yes** |
+| **Import partial** (some rows failed/skipped) | **Yes** |
+| Correction CLI (`--correct-*`) | **Yes** |
+| File/image wave | **Yes** |
 | Discovery dossier closed (`complete` / `blocked` / `skip`) | **Yes** |
 | Excel preview exported or reviewed | **Yes** (note path + row counts) |
 | Strategy decision locked or plan approved | **Yes** |
-| Pilot or batch reconciled | **Yes** |
-| Verified mapping or OData fix | **Yes** |
+| Verified mapping fix (no import yet) | **Yes** |
+| New migration script created (last resort) | **Yes** | Why existing scripts/CLI were insufficient; README row added |
 | Exploratory SQL with no conclusion | No |
 | User asked read-only question | No |
+
+**Failure entries are mandatory.** They prevent the next session from repeating the same mistake.
 
 Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences ([MATURITY.md](./MATURITY.md)).
 
@@ -69,23 +76,80 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Ready for importConfirmed**: yes | no
 ```
 
-### Pilot / import run
+### Pilot / import run (success)
 
 ```markdown
-### YYYY-MM-DD — <TargetODataEntity> — pilot | batch
+### YYYY-MM-DD — <TargetODataEntity> — pilot | batch | e2e-wave
 
 - **Phase**: import
-- **Environment**: Visa2026DbDev | staging | prod
-- **Counts**: legacy SQL __ → target __
-- **Skipped / dedupeMerged**:
-- **OData errors**:
-- **Fix**:
-- **Reconciliation pass**: yes | no
+- **Mode**: end-to-end | single-entity | partial-reimport | correction | file-wave
+- **Outcome**: success
+- **Environment**: local | staging | prod
+- **Script / CLI**: e.g. scripts/visa2014-migration/import/OnPrem-Staging.ps1 or dotnet … --import-visa2014 --entity Person
+- **Legacy source**: calik-energi | …
+- **Counts**: legacy SQL __ → imported __ → target __
+- **Skipped / dedupeMerged / failed**:
+- **Reconciliation**: pass | partial (note)
+- **Log**: legacy/visa2014/import-logs/…
+- **Follow-up**:
+```
+
+### Import run (failed or partial)
+
+```markdown
+### YYYY-MM-DD — <TargetODataEntity> — import failed | partial
+
+- **Phase**: import
+- **Mode**: end-to-end | single-entity | partial-reimport | correction | file-wave
+- **Outcome**: failed | partial
+- **Environment**: local | staging | prod
+- **Script / CLI**:
+- **Exit code**:
+- **Error** (snippet or OData message):
+- **Counts** (if any): success __ / failed __ / skipped __
+- **Root cause** (or hypothesis):
+- **Fix / next step**:
+- **Log**: …
+- **migration-status issue** (if blocking): …
+```
+
+### Partial reimport (dev)
+
+```markdown
+### YYYY-MM-DD — <TargetODataEntity> — partial reimport
+
+- **Phase**: import
+- **Outcome**: success | failed | partial
+- **Script**: scripts/visa2014-migration/reimport/<Entity>.ps1
+- **Target DB**: (connection summary)
+- **Steps run**: cleanup SQL | id-map rebuild | import | correction CLI
+- **Counts / reconciliation**:
+- **Mapping fix verified**: yes | no
+- **Log**: legacy/visa2014/import-logs/reimport-…
+- **Follow-up** (downstream BOs to re-run per order.yaml):
 ```
 
 ---
 
 ## Entries
+
+> **Script paths (2026-07):** VISA2014 migration PowerShell/SQL moved from `scripts/local/` to **`scripts/visa2014-migration/`** — see [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md). Older entries below may still cite `scripts/local/…`; use the README index for current names.
+
+### 2026-07-02 — ApplicationItem — partial reimport (success)
+
+- **Phase**: import
+- **Mode**: partial-reimport
+- **Outcome**: success (with known skips)
+- **Environment**: local — `(localdb)\mssqllocaldb` / `Visa2026`
+- **Script**: `scripts/visa2014-migration/reimport/ApplicationItems.ps1` (`-Configuration Release`)
+- **Legacy source**: calik-energi
+- **Steps run**: cleanup SQL (21,345 deleted) → id-map rebuild → in-process import → PIA correction (started) → person-current correction (manual rerun)
+- **Counts**: Prepared 21,588 / skipped 206 → **Posted 21,345** / failed 0 / id-map skip 243
+- **Reconciliation**: `ApplicationItems` = 21,345; `CurrentEducation` populated 12,206; `CurrentSalary` populated 5,662 on manual-entry apps
+- **Person-current correction**: 11,360 in scope; 0 updated (already set at import)
+- **Log**: `legacy/visa2014/import-logs/reimport-ApplicationItem-20260702-172516.log`
+- **Fixes this session**: `Get-RepoRoot.ps1` UTF-16 → UTF-8 (broke all `reimport/` scripts); `Visa2014TargetIdMapRebuild` `IdMapDirectory` + `AddressOfResidence` `_legacyRowId` string parse; `ApplicationItemPersonCurrentCorrection` `using DevExpress.ExpressApp`; cleanup SQL path `..\cleanup\ImportedApplicationItems.sql`
+- **Follow-up**: PIA warnings for rows missing address id-map keys (3,290 address rows skipped at rebuild) — expected gap; ApplicationProgress unchanged (downstream BO not partial-reimported)
 
 ### 2026-06-20 — Person — bootstrap + discovery complete
 
@@ -698,5 +762,5 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Re-run safety**: Person and Passport importers do **not** skip already-imported rows (re-running duplicates) → delete `dbo.People` + clear id-maps for a true clean start. All downstream importers (Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, Application, ApplicationItem, ApplicationProgress) skip via their id-map, so a failed Application run can be re-run to retry only the failed rows.
 - **sqlcmd**: `DELETE` against tables with filtered indexes needs `-I` (QUOTED_IDENTIFIER ON) or it errors 1934.
 - **Final verified counts (calik-energi)**: People 2967 (Gender+Nationality 2967/2967), Passports 3573, Visas 5965, Educations 3101, EmployeePositionHistories 2993 (+1368 ActualPositions), EmployeeSalaries 2887, AddressesOfResidence 3968, Applications 12129 (ApprovalLegProfile 5757, ProjectContract 5750), ApplicationItems 21345, ApplicationProgresses 32177. 0 hard failures on final runs (only benign per-row data skips).
-- **Orchestration**: `scripts/local/_run-headless-chain.ps1` runs the dependency-ordered chain in-process; tolerates minority row failures, hard-fails only on 0-posted/non-empty batches; `-StartAt <Entity>` to resume.
+- **Orchestration**: `scripts/visa2014-migration/import/Run-HeadlessChain.ps1` runs the dependency-ordered chain in-process; tolerates minority row failures, hard-fails only on 0-posted/non-empty batches; `-StartAt <Entity>` to resume.
 

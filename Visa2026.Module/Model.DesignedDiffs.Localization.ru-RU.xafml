@@ -272,7 +272,7 @@
         <Member Name="CurrentPassport" Caption="Паспорт" />
         <Member Name="CurrentPositionHistory" Caption="Должность" />
         <Member Name="CurrentVisa" Caption="Виза" />
-        <Member Name="CurrentWorkDuty" Caption="Цель визита" />
+        <Member Name="CurrentWorkDuty" Caption="Обязанности" />
         <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />

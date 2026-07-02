@@ -30,6 +30,8 @@ internal static class Visa2014ApplicationItemODataImporter
         string visaIdMapPath,
         string employeePositionHistoryIdMapPath,
         string addressOfResidenceIdMapPath,
+        string educationIdMapPath,
+        string employeeSalaryIdMapPath,
         string? workPermitItemIdMapPath,
         string? applicationItemIdMapOutputPath,
         int? maxRows,
@@ -42,6 +44,8 @@ internal static class Visa2014ApplicationItemODataImporter
         var visaIdMap = LoadOptionalIdMap(visaIdMapPath);
         var positionHistoryIdMap = LoadOptionalIdMap(employeePositionHistoryIdMapPath);
         var addressIdMap = LoadOptionalIdMap(addressOfResidenceIdMapPath);
+        var educationIdMap = LoadOptionalIdMap(educationIdMapPath);
+        var employeeSalaryIdMap = LoadOptionalIdMap(employeeSalaryIdMapPath);
         var workPermitItemIdMap = LoadOptionalIdMap(workPermitItemIdMapPath);
 
         if (verbose)
@@ -52,6 +56,8 @@ internal static class Visa2014ApplicationItemODataImporter
             Console.WriteLine($"INF Visa id-map entries: {visaIdMap.Count}");
             Console.WriteLine($"INF EmployeePositionHistory id-map entries: {positionHistoryIdMap.Count}");
             Console.WriteLine($"INF AddressOfResidence id-map entries: {addressIdMap.Count}");
+            Console.WriteLine($"INF Education id-map entries: {educationIdMap.Count}");
+            Console.WriteLine($"INF EmployeeSalary id-map entries: {employeeSalaryIdMap.Count}");
             Console.WriteLine($"INF WorkPermitItem id-map entries: {workPermitItemIdMap.Count}");
         }
 
@@ -142,6 +148,8 @@ internal static class Visa2014ApplicationItemODataImporter
                     visaIdMap,
                     positionHistoryIdMap,
                     addressIdMap,
+                    educationIdMap,
+                    employeeSalaryIdMap,
                     workPermitItemIdMap);
                 if (payload == null)
                 {
@@ -332,6 +340,8 @@ internal static class Visa2014ApplicationItemODataImporter
         IReadOnlyDictionary<Guid, Guid> visaIdMap,
         IReadOnlyDictionary<Guid, Guid> positionHistoryIdMap,
         IReadOnlyDictionary<Guid, Guid> addressIdMap,
+        IReadOnlyDictionary<Guid, Guid> educationIdMap,
+        IReadOnlyDictionary<Guid, Guid> employeeSalaryIdMap,
         IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap)
     {
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -347,6 +357,8 @@ internal static class Visa2014ApplicationItemODataImporter
         TryAddOptionalFkFromMap(payload, row, "NextVisa", "NextVisa", visaIdMap);
         TryAddOptionalFkFromMap(payload, row, "CurrentPositionHistory", "CurrentPositionHistory", positionHistoryIdMap);
         TryAddOptionalFkFromMap(payload, row, "CurrentAddressOfResidence", "CurrentAddressOfResidence", addressIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentEducation", "CurrentEducation", educationIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentSalary", "CurrentSalary", employeeSalaryIdMap);
         TryAddOptionalFkFromMap(payload, row, "CurrentWorkPermitItem", "CurrentWorkPermitItem", workPermitItemIdMap);
 
         if (TryParseDate(row.GetValueOrDefault("RegistrationDate") as string, out var registrationDate))

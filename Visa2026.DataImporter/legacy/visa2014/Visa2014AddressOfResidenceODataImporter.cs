@@ -101,7 +101,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
 
             try
             {
-                var payload = BuildPayload(row, resolver, personId);
+                var payload = Visa2014AddressOfResidenceImportApplier.BuildODataPayload(row, resolver, personId);
                 if (payload == null)
                 {
                     failed++;
@@ -134,6 +134,24 @@ internal static class Visa2014AddressOfResidenceODataImporter
 
         await target.FlushAsync();
 
+        int inferredPosted = 0;
+        int inferredFailed = 0;
+        int inferredSkipped = 0;
+        if (!dryRun)
+        {
+            (inferredPosted, inferredFailed, inferredSkipped) = await ImportInferredFromPiaAsync(
+                target,
+                resolver,
+                legacyConnectionString,
+                lookupTranslationPaths,
+                personIdMap,
+                addressIdMap,
+                verbose);
+            if (inferredPosted > 0 || inferredSkipped > 0)
+                Console.WriteLine(
+                    $"INF PIA-inferred AddressOfResidence: posted {inferredPosted}, skipped {inferredSkipped}, failed {inferredFailed}");
+        }
+
         string? idMapPath = null;
         if (addressIdMap.Count > 0 && !string.IsNullOrWhiteSpace(addressIdMapOutputPath))
         {
@@ -155,8 +173,8 @@ internal static class Visa2014AddressOfResidenceODataImporter
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedNoPersonMap = skippedNoPerson,
             SkippedAlreadyImported = skippedAlreadyImported,
-            PostedCount = posted,
-            FailedCount = failed,
+            PostedCount = posted + inferredPosted,
+            FailedCount = failed + inferredFailed,
             IdMapPath = idMapPath,
             Errors = errors,
         };
@@ -188,76 +206,6 @@ internal static class Visa2014AddressOfResidenceODataImporter
         var text = row.GetValueOrDefault("Person") as string
             ?? row.GetValueOrDefault("_legacy_PersonOid") as string;
         return !string.IsNullOrWhiteSpace(text) && Guid.TryParse(text, out legacyPersonOid);
-    }
-
-    private static Dictionary<string, object?>? BuildPayload(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver,
-        Guid personId)
-    {
-        var typeText = row.GetValueOrDefault("Type") as string;
-        if (!Enum.TryParse<ResidenceType>(typeText, ignoreCase: true, out var residenceType))
-            return null;
-
-        var regionName = row.GetValueOrDefault("Region") as string;
-        var cityName = row.GetValueOrDefault("City") as string;
-        var regionId = resolver.ResolveRegion(regionName);
-        var cityId = resolver.ResolveCity(cityName, regionName);
-        if (!regionId.HasValue || !cityId.HasValue)
-            return null;
-
-        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
-        {
-            ["Person"] = new { ID = personId },
-            ["Type"] = residenceType.ToString(),
-            ["Region"] = new { ID = regionId.Value },
-            ["City"] = new { ID = cityId.Value },
-        };
-
-        switch (residenceType)
-        {
-            case ResidenceType.PrivateHouse:
-                var fullAddress = row.GetValueOrDefault("FullAddress") as string;
-                if (string.IsNullOrWhiteSpace(fullAddress))
-                    return null;
-                payload["FullAddress"] = fullAddress.Trim();
-                if (TryParseDate(row.GetValueOrDefault("ExpirationDate") as string, out var expirationDate))
-                    payload["ExpirationDate"] = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc);
-                break;
-
-            case ResidenceType.Lodging:
-                var lodgingId = resolver.ResolveLodging(cityName, regionName, row.GetValueOrDefault("Lodging") as string);
-                if (!lodgingId.HasValue)
-                    return null;
-                payload["Lodging"] = new { ID = lodgingId.Value };
-                break;
-
-            case ResidenceType.Hotel:
-                var hotelId = resolver.ResolveHotel(cityName, regionName, row.GetValueOrDefault("Hotel") as string);
-                if (!hotelId.HasValue)
-                    return null;
-                payload["Hotel"] = new { ID = hotelId.Value };
-                break;
-
-            case ResidenceType.Hospital:
-                var hospitalId = resolver.ResolveHospital(cityName, regionName, row.GetValueOrDefault("Hospital") as string);
-                if (!hospitalId.HasValue)
-                    return null;
-                payload["Hospital"] = new { ID = hospitalId.Value };
-                break;
-
-            case ResidenceType.Other:
-                var otherSiteId = resolver.ResolveOtherSite(cityName, regionName, row.GetValueOrDefault("OtherSite") as string);
-                if (!otherSiteId.HasValue)
-                    return null;
-                payload["OtherSite"] = new { ID = otherSiteId.Value };
-                break;
-
-            default:
-                return null;
-        }
-
-        return payload;
     }
 
     private static bool TryParseDate(string? text, out DateTime date) =>
@@ -306,6 +254,134 @@ internal static class Visa2014AddressOfResidenceODataImporter
         }
 
         return gaps.Count > 0 ? string.Join("; ", gaps) : "lookup or required field";
+    }
+
+    private static async Task<(int Posted, int Failed, int Skipped)> ImportInferredFromPiaAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        IReadOnlyDictionary<Guid, Guid> personIdMap,
+        Dictionary<Guid, Guid> addressIdMap,
+        bool verbose)
+    {
+        RegisterSponsorCanonicalFromExistingLegacyAor(
+            legacyConnectionString, personIdMap, addressIdMap, verbose);
+
+        var batch = Visa2014PiaAddressInference.PrepareEmployeeInferredAddresses(
+            legacyConnectionString, lookupTranslationPaths, verbose);
+
+        int posted = 0;
+        int failed = 0;
+        int skipped = 0;
+
+        foreach (var plan in batch.Plans)
+        {
+            if (addressIdMap.ContainsKey(plan.SyntheticLegacyOid))
+            {
+                skipped++;
+                continue;
+            }
+
+            if (!personIdMap.TryGetValue(plan.LegacyPersonOid, out var personId))
+            {
+                skipped++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP inferred {plan.SyntheticLegacyOid}: Person {plan.LegacyPersonOid} not in id-map");
+                continue;
+            }
+
+            try
+            {
+                var payload = Visa2014AddressOfResidenceImportApplier.BuildODataPayload(plan.ImportRow, resolver, personId);
+                if (payload == null)
+                {
+                    failed++;
+                    continue;
+                }
+
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.AddressOfResidence), payload);
+                if (!createdId.HasValue)
+                {
+                    failed++;
+                    continue;
+                }
+
+                Visa2014PiaAddressInference.RegisterPlanAliases(plan, createdId.Value, addressIdMap);
+                posted++;
+                if (verbose)
+                    Console.WriteLine($"  SAVE inferred AddressOfResidence {createdId.Value} <- person {plan.LegacyPersonOid}");
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                Console.Error.WriteLine($"ERR inferred {plan.SyntheticLegacyOid}: {ex.Message}");
+            }
+        }
+
+        await target.FlushAsync();
+        return (posted, failed, skipped);
+    }
+
+    private static void RegisterSponsorCanonicalFromExistingLegacyAor(
+        string legacyConnectionString,
+        IReadOnlyDictionary<Guid, Guid> personIdMap,
+        IDictionary<Guid, Guid> addressIdMap,
+        bool verbose)
+    {
+        const string sql = """
+            SELECT
+                CAST(aor.Person AS varchar(36)) AS PersonOid,
+                CAST(aor.Oid AS varchar(36)) AS AorOid,
+                CONVERT(varchar(10), addr.ExpiringDateOfAddressDocument, 23) AS ExpirationDate
+            FROM dbo.AddressOfResidence aor
+            INNER JOIN dbo.Address addr ON addr.Oid = aor.Address AND addr.GCRecord IS NULL
+            WHERE aor.GCRecord IS NULL
+            """;
+
+        var rows = Visa2014SqlCmdReader.Query(legacyConnectionString, sql, verbose: false);
+        var bestPerPerson = new Dictionary<Guid, (Guid AorOid, DateTime? Expiration)>();
+        foreach (var row in rows)
+        {
+            if (!Guid.TryParse(row.GetValueOrDefault("PersonOid"), out var personOid))
+                continue;
+            if (!Guid.TryParse(row.GetValueOrDefault("AorOid"), out var aorOid))
+                continue;
+            if (!personIdMap.ContainsKey(personOid))
+                continue;
+
+            DateTime? expiration = DateTime.TryParse(row.GetValueOrDefault("ExpirationDate"), out var exp) ? exp : null;
+            if (!bestPerPerson.TryGetValue(personOid, out var current) ||
+                CompareAddressRecency(expiration, aorOid, current.Expiration, current.AorOid) > 0)
+            {
+                bestPerPerson[personOid] = (aorOid, expiration);
+            }
+        }
+
+        int registered = 0;
+        foreach (var (personOid, best) in bestPerPerson)
+        {
+            if (!addressIdMap.TryGetValue(best.AorOid, out var targetId))
+                continue;
+
+            var synthetic = Visa2014PiaAddressInference.PersonCanonicalSyntheticLegacyOid(personOid);
+            if (addressIdMap.ContainsKey(synthetic))
+                continue;
+
+            addressIdMap[synthetic] = targetId;
+            registered++;
+        }
+
+        if (verbose && registered > 0)
+            Console.WriteLine($"INF Registered {registered} sponsor canonical AddressOfResidence alias(es) from existing legacy rows.");
+    }
+
+    private static int CompareAddressRecency(DateTime? expA, Guid oidA, DateTime? expB, Guid oidB)
+    {
+        var rankA = expA?.Date ?? DateTime.MaxValue;
+        var rankB = expB?.Date ?? DateTime.MaxValue;
+        var cmp = rankA.CompareTo(rankB);
+        return cmp != 0 ? cmp : oidA.CompareTo(oidB);
     }
 
     private static Dictionary<Guid, Guid> LoadOptionalIdMap(string? path)

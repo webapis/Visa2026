@@ -127,7 +127,7 @@ $env:VISA2014_SQL_PASSWORD = [Environment]::GetEnvironmentVariable('VISA2014_SQL
 $env:VISA2026_STAGING_IMPORT_PASSWORD = '<staging-import-user-password>'
 $env:VISA2026_STAGING_SQL_CONNECTION = "Server=10.100.128.25;Database=Visa2026DbStaging;User Id=...;Password=...;TrustServerCertificate=True;MultipleActiveResultSets=true"
 
-.\scripts\local\Import-Visa2014OnPremStaging.ps1
+.\scripts\visa2014-migration\import\OnPrem-Staging.ps1
 ```
 
 Resume after a failed wave: `-StartAt Application`. Single entity: `-Entity ApplicationItem`. Transform-only: `-DryRun`.

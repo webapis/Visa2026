@@ -128,7 +128,7 @@ if ($GenerateTenantCatalogs) {
     Write-Warning 'GenerateTenantCatalogs skipped: VISA2014_SQL_PASSWORD is not set.'
   } else {
     Write-Host '==> tenantCatalogGeneration (order.yaml)' -ForegroundColor Cyan
-    & (Join-Path $PSScriptRoot 'Invoke-Visa2014TenantCatalogGeneration.ps1') -Configuration $Configuration
+    & (Join-Path (Split-Path $PSScriptRoot -Parent) 'visa2014-migration\import\Invoke-TenantCatalogGeneration.ps1') -Configuration $Configuration
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   }
 }

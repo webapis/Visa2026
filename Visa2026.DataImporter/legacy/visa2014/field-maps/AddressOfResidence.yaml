@@ -116,3 +116,12 @@ fields:
     target: ExpirationDate
     transform: date
     when: Type=PrivateHouse
+
+postImport:
+  - wave: person-domain-inference
+    cli: --import-visa2014 --entity AddressOfResidence
+    subPass: pia-address-inference
+    notes: |
+      Automatic at end of AddressOfResidence OData import (not a separate order.yaml entity).
+      Synthesizes rows from PersonInApplication.Address when Person has no legacy AddressOfResidence children.
+      Backfill only: --correct-person-address-of-residence (order.yaml postImportCorrections).

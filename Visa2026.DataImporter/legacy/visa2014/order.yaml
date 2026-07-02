@@ -25,7 +25,7 @@ bootstrapOnce:
     completedAt: 2026-06-20
 
 # VISA2015 → tenant JSON for ApprovalLegProfile seed (before application-domain import).
-# Executed automatically by --generate-visa2014-tenant-catalogs and Import-Visa2014OnPremStaging.ps1.
+# Executed automatically by --generate-visa2014-tenant-catalogs and scripts/visa2014-migration/import/OnPrem-Staging.ps1.
 tenantCatalogGeneration:
   runBeforeImportPhase: application-domain
   legacySources:
@@ -35,18 +35,18 @@ tenantCatalogGeneration:
     - calik-energi-onprem-demo
   steps:
     - id: project-contract-calik-energi
-      script: scripts/local/Generate-ProjectContractCalikEnergiCatalog.ps1
+      script: scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1
       dependsOn: []
       outputs:
         - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.calik-energi.json
     - id: approval-leg-profile-catalog
-      script: scripts/local/Generate-ApprovalLegProfileCatalog.ps1
+      script: scripts/visa2014-migration/catalogs/generate/ApprovalLegProfile.ps1
       dependsOn:
         - project-contract-calik-energi
       outputs:
         - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/approval-leg-profile.json
     - id: subcontractor-calik-energi
-      script: scripts/local/Generate-SubcontractorCalikEnergiCatalog.ps1
+      script: scripts/visa2014-migration/catalogs/generate/Subcontractor-CalikEnergi.ps1
       dependsOn: []
       outputs:
         - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/subcontractor.calik-energi.json
@@ -155,6 +155,9 @@ entities:
       Region+City lookup approved; site catalogs manifest v31 deployed 2026-06-21 (lodging 37, hotel 34, hospital 4, other-site 24).
       Lodging-preview.calik-energi.xlsx reviewed 2026-06-21; lodging dedupe fingerprint + OData resolver aligned.
       OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 resume-skipped (pilot); OData total 3786.
+      PIA inference sub-pass (automatic, end of AddressOfResidence import): when Person has zero legacy
+      AddressOfResidence children but PersonInApplication has dbo.Address, synthesize one canonical row per employee
+      (latest application date). Id-map aliases include synthetic person key + legacy Address Oids. No separate entity wave.
 
   - targetODataEntity: EmployeeSalary
     dependsOn:
@@ -224,6 +227,8 @@ entities:
       Preview 21,588 import / 206 skipped (204 parent E:44/E:55, 2 dedupe_duplicate). OData importer shipped 2026-06-30.
       CheckPoint via OData NameTm; BorderZoneLocation comma-separated string; PurposeOfTravel omitted (dropped from BO).
       CurrentWorkPermitItem allow_null until WorkPermitItem id-map wave; WorkPermittedLocations null pending audit.
+      CurrentAddressOfResidence: legacy pia.AddressOfResidence FK, else pia.Address via AddressOfResidence id-map
+      (PIA inference + sponsor canonical key for family lines). See postImportCorrections for DB backfill only.
 
   # --- permits-and-visas (after application-domain) ---
   - targetODataEntity: WorkPermit
@@ -292,3 +297,39 @@ importPhases:
     description: ApplicationProgress and legacy state history
   - id: attachments
     description: File blobs and scan links
+
+# Headless SQL corrections after application-domain waves (staging / full chain).
+# Idempotent on greenfield imports. Required when re-importing into a DB that was loaded before a fix shipped.
+postImportCorrections:
+  runAfterImportPhase: application-domain
+  requiresInProcessTarget: true
+  skipWhenDryRun: true
+  orchestration:
+    - scripts/visa2014-migration/import/OnPrem-Staging.ps1
+    - scripts/visa2014-migration/import/Run-HeadlessChain.ps1
+  steps:
+    - id: person-subcontractor
+      cliFlag: --correct-person-subcontractor
+      dependsOn:
+        - Person
+    - id: person-relationship
+      cliFlag: --correct-person-relationship
+      dependsOn:
+        - Person
+    - id: person-address-of-residence-pia
+      cliFlag: --correct-person-address-of-residence
+      dependsOn:
+        - AddressOfResidence
+        - ApplicationItem
+      notes: |
+        Greenfield: PIA inference runs inside --import-visa2014 --entity AddressOfResidence (no extra step).
+        This correction backfills Person rows + ApplicationItem.CurrentAddressOfResidence on DBs imported earlier.
+    - id: application-item-person-current
+      cliFlag: --correct-application-item-person-current
+      dependsOn:
+        - Education
+        - EmployeeSalary
+        - ApplicationItem
+      notes: |
+        Greenfield: CurrentEducation/CurrentSalary resolve at ApplicationItem OData import when Show* gates pass.
+        This correction backfills null FKs on DBs imported before that wiring shipped.

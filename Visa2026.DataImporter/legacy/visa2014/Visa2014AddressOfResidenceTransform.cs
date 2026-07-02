@@ -120,65 +120,19 @@ internal static class Visa2014AddressOfResidenceTransform
 
         foreach (var row in rawRows)
         {
-            var unmapped = new List<string>();
-
-            if (!TryResolveRegion(row, catalogs, out var regionNameTm, out var regionReason))
-                unmapped.Add(regionReason ?? "Region");
-
-            if (!TryResolveCity(row, catalogs, regionNameTm, out var cityNameTm, out var cityReason))
-                unmapped.Add(cityReason ?? "City");
-
-            if (unmapped.Count > 0)
+            if (!TryBuildImportRow(row, catalogs, row.LegacyOid, out var importRow, out var skipReason))
             {
-                skipped.Add(BuildSkippedRow(row, string.Join("; ", unmapped)));
-                foreach (var u in unmapped)
-                    unmappedSet.Add(u);
+                skipped.Add(BuildSkippedRow(row, skipReason ?? "transform failed"));
+                foreach (var token in (skipReason ?? string.Empty).Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (token.Contains(':'))
+                        unmappedSet.Add(token);
+                }
+
                 continue;
             }
 
-            var type = MapResidenceType(row.DocumentType, row.AddressLine);
-            var stripped = Visa2014AddressLineNormalizer.StripRegionAndCityPrefixes(
-                row.AddressLine, regionNameTm, cityNameTm);
-            if (string.IsNullOrWhiteSpace(stripped))
-                stripped = row.AddressLine?.Trim() ?? string.Empty;
-
-            string? lodgingName = null;
-            string? hotelName = null;
-            string? hospitalName = null;
-            string? otherSiteName = null;
-            if (type == "Lodging")
-                lodgingName = Visa2014AddressLineNormalizer.NormalizeLodgingCatalogAddress(
-                    row.AddressLine, regionNameTm, cityNameTm);
-            else if (type == "Hotel")
-                hotelName = Visa2014AddressLineNormalizer.NormalizeHotelCatalogName(
-                    row.AddressLine, regionNameTm, cityNameTm);
-            else if (type == "Hospital")
-                hospitalName = Visa2014AddressLineNormalizer.NormalizeHospitalCatalogName(
-                    row.AddressLine, regionNameTm, cityNameTm);
-            else if (type == "Other")
-                otherSiteName = Visa2014AddressLineNormalizer.NormalizeLodgingCatalogAddress(
-                    row.AddressLine, regionNameTm, cityNameTm);
-
-            importRows.Add(new Dictionary<string, object?>(StringComparer.Ordinal)
-            {
-                ["_legacyRowId"] = row.LegacyOid.ToString(),
-                ["_legacyTable"] = "AddressOfResidence",
-                ["_importAction"] = "import",
-                ["Person"] = row.LegacyPersonOid.ToString(),
-                ["Type"] = type,
-                ["Region"] = regionNameTm,
-                ["City"] = cityNameTm,
-                ["FullAddress"] = type == "PrivateHouse" ? stripped : null,
-                ["Lodging"] = lodgingName,
-                ["Hotel"] = hotelName,
-                ["Hospital"] = hospitalName,
-                ["OtherSite"] = otherSiteName,
-                ["ExpirationDate"] = type == "PrivateHouse" ? row.ExpirationDate?.ToString("yyyy-MM-dd") : null,
-                ["_legacy_AddressLine"] = row.AddressLine,
-                ["_legacy_RegionMgCode"] = row.RegionMgCode,
-                ["_legacy_CityMgCode"] = row.CityMgCode,
-                ["_legacy_PersonOid"] = row.LegacyPersonOid.ToString(),
-            });
+            importRows.Add(importRow!);
         }
 
         unmappedDistinct = unmappedSet
@@ -201,6 +155,75 @@ internal static class Visa2014AddressOfResidenceTransform
             DedupeMergedCount = 0,
             DedupeSummary = dedupeSummary,
         };
+    }
+
+    internal static bool TryBuildImportRow(
+        Visa2014AddressOfResidenceRawRow row,
+        IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        Guid legacyRowId,
+        out Dictionary<string, object?>? importRow,
+        out string? skipReason)
+    {
+        importRow = null;
+        skipReason = null;
+        var unmapped = new List<string>();
+
+        if (!TryResolveRegion(row, catalogs, out var regionNameTm, out var regionReason))
+            unmapped.Add(regionReason ?? "Region");
+
+        if (!TryResolveCity(row, catalogs, regionNameTm, out var cityNameTm, out var cityReason))
+            unmapped.Add(cityReason ?? "City");
+
+        if (unmapped.Count > 0)
+        {
+            skipReason = string.Join("; ", unmapped);
+            return false;
+        }
+
+        var type = MapResidenceType(row.DocumentType, row.AddressLine);
+        var stripped = Visa2014AddressLineNormalizer.StripRegionAndCityPrefixes(
+            row.AddressLine, regionNameTm, cityNameTm);
+        if (string.IsNullOrWhiteSpace(stripped))
+            stripped = row.AddressLine?.Trim() ?? string.Empty;
+
+        string? lodgingName = null;
+        string? hotelName = null;
+        string? hospitalName = null;
+        string? otherSiteName = null;
+        if (type == "Lodging")
+            lodgingName = Visa2014AddressLineNormalizer.NormalizeLodgingCatalogAddress(
+                row.AddressLine, regionNameTm, cityNameTm);
+        else if (type == "Hotel")
+            hotelName = Visa2014AddressLineNormalizer.NormalizeHotelCatalogName(
+                row.AddressLine, regionNameTm, cityNameTm);
+        else if (type == "Hospital")
+            hospitalName = Visa2014AddressLineNormalizer.NormalizeHospitalCatalogName(
+                row.AddressLine, regionNameTm, cityNameTm);
+        else if (type == "Other")
+            otherSiteName = Visa2014AddressLineNormalizer.NormalizeLodgingCatalogAddress(
+                row.AddressLine, regionNameTm, cityNameTm);
+
+        importRow = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["_legacyRowId"] = legacyRowId.ToString(),
+            ["_legacyTable"] = "AddressOfResidence",
+            ["_importAction"] = "import",
+            ["Person"] = row.LegacyPersonOid.ToString(),
+            ["Type"] = type,
+            ["Region"] = regionNameTm,
+            ["City"] = cityNameTm,
+            ["FullAddress"] = type == "PrivateHouse" ? stripped : null,
+            ["Lodging"] = lodgingName,
+            ["Hotel"] = hotelName,
+            ["Hospital"] = hospitalName,
+            ["OtherSite"] = otherSiteName,
+            ["ExpirationDate"] = type == "PrivateHouse" ? row.ExpirationDate?.ToString("yyyy-MM-dd") : null,
+            ["_legacy_AddressLine"] = row.AddressLine,
+            ["_legacy_RegionMgCode"] = row.RegionMgCode,
+            ["_legacy_CityMgCode"] = row.CityMgCode,
+            ["_legacy_PersonOid"] = row.LegacyPersonOid.ToString(),
+        };
+        return true;
     }
 
     private static bool TryResolveRegion(

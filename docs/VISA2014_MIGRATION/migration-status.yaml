@@ -268,7 +268,7 @@ issues:
       Energetika fallback for unmapped ministries and contracts without AppliedMinistery FK (46 rows).
       Deploy: copy calik file to {AppBase}/LookupCatalogs/tenant/project-contract.json overlay (or replace embedded file);
       bump tenant manifest version + FORCE_XAF_DB_UPDATE once. Demo project-contract.json (3 rows) kept for greenfield.
-      Regenerate: scripts/local/Generate-ProjectContractCalikEnergiCatalog.ps1. See ProjectContract.calik-energi.md.
+      Regenerate: scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1. See ProjectContract.calik-energi.md.
 
   - id: ISS-008
     title: Application discovery not started

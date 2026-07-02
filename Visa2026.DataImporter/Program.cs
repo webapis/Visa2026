@@ -153,6 +153,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--import-visa2014",
         "--generate-visa2014-tenant-catalogs",
         "--expand-visa2014-id-map",
+        "--rebuild-visa2014-id-maps",
         "--import-visa2014-files",
         "--cleanup-visa2014-education-documents",
         "--purge-visa2014-education-documents",
@@ -166,6 +167,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--correct-application-progress-ministry-legs",
         "--correct-person-subcontractor",
         "--correct-person-relationship",
+        "--correct-person-address-of-residence",
+        "--correct-application-item-person-current",
         "--export-visa2014-actual-positions",
         "--apply-visa2014-actual-positions",
         "--auto-no-letters",
@@ -294,6 +297,8 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress from ApprovalLegProfile snapshots (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-person-address-of-residence  Backfill Person AddressOfResidence from PIA + patch ApplicationItem (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-application-item-person-current  Backfill ApplicationItem CurrentEducation/CurrentSalary from Person (--dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");
@@ -411,6 +416,16 @@ if (HasArg(args, "--expand-visa2014-id-map"))
     Log.Phase("VISA2014 id-map expand");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ImportCommand.RunExpandIdMapAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--rebuild-visa2014-id-maps"))
+{
+    Log.Phase("VISA2014 id-map rebuild from target");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014TargetIdMapRebuild.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -573,6 +588,26 @@ if (HasArg(args, "--correct-person-relationship"))
     Log.Phase("VISA2014 Person Relationship correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014PersonRelationshipCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-person-address-of-residence"))
+{
+    Log.Phase("VISA2014 Person/ApplicationItem AddressOfResidence (PIA) correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014PersonAddressOfResidenceFromPiaCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-application-item-person-current"))
+{
+    Log.Phase("VISA2014 ApplicationItem person-current correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationItemPersonCurrentCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

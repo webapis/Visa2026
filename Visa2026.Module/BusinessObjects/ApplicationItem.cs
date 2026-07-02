@@ -100,19 +100,10 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentSalary And "
             + EmployeeApplicationItemLineCriteria;
 
-        private const string ShowCurrentMedicalRecordRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentMedicalRecord";
-
         private const string ShowCurrentEducationRequiredCriteria =
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentEducation And "
             + EmployeeApplicationItemLineCriteria + " And Not ("
             + RegistrationApplicationItemContextCriteria + ")";
-
-        private const string ShowBorderZoneLocationRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowBorderZoneLocation";
-
-        private const string ShowWorkPermittedLocationsRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowWorkPermittedLocations";
 
         public ApplicationItem()
         {
@@ -301,7 +292,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("ApplicationItem_BorderZoneLocationVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = ApplicationItemBorderZoneLocationHiddenCriteria, Context = "DetailView,ListView")]
-        [RuleRequiredField(TargetCriteria = ShowBorderZoneLocationRequiredCriteria)]
         [VisibleInListView(false)]
         [MaxLength(500)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.BorderZone)]
@@ -322,7 +312,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("WorkPermittedLocationsVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermittedLocations",
             Context = "DetailView,ListView")]
-        [RuleRequiredField(TargetCriteria = ShowWorkPermittedLocationsRequiredCriteria)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [Editors.CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(WorkPermittedLocationName),
@@ -1736,7 +1725,6 @@ namespace Visa2026.Module.BusinessObjects
         public virtual EmployeeSalary CurrentSalary { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
-        [RuleRequiredField(TargetCriteria = ShowCurrentMedicalRecordRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableMedicalRecords))]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 

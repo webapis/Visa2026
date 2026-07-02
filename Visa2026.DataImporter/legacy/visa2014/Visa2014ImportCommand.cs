@@ -568,6 +568,10 @@ internal static class Visa2014ImportCommand
             ?? source.IdMapPath(dataImporterRoot, "EmployeePositionHistory");
         var addressIdMapPath = GetOptionValue(args, "--address-id-map")
             ?? source.IdMapPath(dataImporterRoot, "AddressOfResidence");
+        var educationIdMapPath = GetOptionValue(args, "--education-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Education");
+        var employeeSalaryIdMapPath = GetOptionValue(args, "--employee-salary-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "EmployeeSalary");
         var workPermitItemIdMapPath = GetOptionValue(args, "--work-permit-item-id-map")
             ?? source.IdMapPath(dataImporterRoot, "WorkPermitItem");
 
@@ -577,6 +581,8 @@ internal static class Visa2014ImportCommand
         Console.WriteLine($"INF Visa id-map: {visaIdMapPath}");
         Console.WriteLine($"INF EmployeePositionHistory id-map: {positionHistoryIdMapPath}");
         Console.WriteLine($"INF AddressOfResidence id-map: {addressIdMapPath}");
+        Console.WriteLine($"INF Education id-map: {educationIdMapPath}");
+        Console.WriteLine($"INF EmployeeSalary id-map: {employeeSalaryIdMapPath}");
         Console.WriteLine($"INF WorkPermitItem id-map: {workPermitItemIdMapPath}");
 
         var result = await Visa2014ApplicationItemODataImporter.RunAsync(
@@ -590,6 +596,8 @@ internal static class Visa2014ImportCommand
             visaIdMapPath,
             positionHistoryIdMapPath,
             addressIdMapPath,
+            educationIdMapPath,
+            employeeSalaryIdMapPath,
             workPermitItemIdMapPath,
             applicationItemIdMapPath,
             maxRows,
