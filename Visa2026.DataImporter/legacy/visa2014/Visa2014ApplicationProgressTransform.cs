@@ -218,9 +218,9 @@ internal static class Visa2014ApplicationProgressTransform
         };
     }
 
-    private sealed record SynthesisStep(string StepCode, string StateCode, string LocationCode, DateTime Date, string? Description);
+    internal sealed record SynthesisStep(string StepCode, string StateCode, string LocationCode, DateTime Date, string? Description);
 
-    private static List<SynthesisStep> SynthesizeSteps(Visa2014ApplicationProgressRawRow raw, int ministryLegCount)
+    internal static List<SynthesisStep> SynthesizeSteps(Visa2014ApplicationProgressRawRow raw, int ministryLegCount)
     {
         var steps = new List<SynthesisStep>();
         var appDate = raw.ManualApplicationDate!.Value;
@@ -262,18 +262,34 @@ internal static class Visa2014ApplicationProgressTransform
             }
         }
 
-        var shouldAddIssued = IsLegacyDateSet(raw.ProcessDate)
-            || !string.IsNullOrWhiteSpace(raw.ProcessNumber)
-            || (ministryLegCount > 0 && !raw.Cancelled && !raw.Rejected);
-        if (shouldAddIssued)
+        var hasProcessCompletion = IsLegacyDateSet(raw.ProcessDate)
+            || !string.IsNullOrWhiteSpace(raw.ProcessNumber);
+        var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !raw.Rejected;
+        var shouldAddMigrationStarted = hasProcessCompletion || ministryRouteComplete;
+        var shouldAddMigrationIssued = hasProcessCompletion;
+        if (shouldAddMigrationStarted)
         {
-            var date = raw.ProcessDate ?? steps[^1].Date;
+            var priorDate = steps[^1].Date;
+            var issuedDate = raw.ProcessDate ?? priorDate;
+            var startedDate = shouldAddMigrationIssued
+                ? ResolveMigrationStartedDate(issuedDate, priorDate)
+                : ResolveMigrationInProgressDate(priorDate);
             steps.Add(new SynthesisStep(
-                "migration_process",
-                "PROCESS_ISSUED",
+                "migration_started",
+                "PROCESS_STARTED",
                 "AT_MIGRATION_SERVICE",
-                date,
-                FormatLegacyRef("ProcessNumber", raw.ProcessNumber)));
+                startedDate,
+                null));
+
+            if (shouldAddMigrationIssued)
+            {
+                steps.Add(new SynthesisStep(
+                    "migration_issued",
+                    "PROCESS_ISSUED",
+                    "AT_MIGRATION_SERVICE",
+                    issuedDate,
+                    FormatLegacyRef("ProcessNumber", raw.ProcessNumber)));
+            }
         }
 
         if (raw.Cancelled)
@@ -428,6 +444,8 @@ internal static class Visa2014ApplicationProgressTransform
             "ministry_forward" => 12,
             "ministry_return" => 13,
             "ministry_2_forward" => 14,
+            "migration_started" => 999,
+            "migration_issued" => 1000,
             "migration_process" => 1000,
             "cancelled" => 1001,
             "rejected" => 1002,
@@ -460,6 +478,12 @@ internal static class Visa2014ApplicationProgressTransform
             ["_reason"] = reason,
             ["_processKind"] = raw.IsLongProcess ? "long" : "simple",
         };
+
+    private static DateTime ResolveMigrationStartedDate(DateTime issuedDate, DateTime priorDate) =>
+        issuedDate > priorDate ? priorDate.AddDays(1) : priorDate;
+
+    private static DateTime ResolveMigrationInProgressDate(DateTime priorDate) =>
+        priorDate.AddDays(1);
 
     private static bool IsLegacyDateSet(DateTime? date) =>
         date.HasValue && date.Value >= LegacyDateThreshold;

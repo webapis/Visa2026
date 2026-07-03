@@ -10,6 +10,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 internal sealed class Visa2014ApplicationProgressMinistryLegCorrectionResult
 {
     public int ApplicationsInScope { get; init; }
+    public int SnapshotsBackfilled { get; init; }
     public int ProgressDeleted { get; init; }
     public int ProgressPosted { get; init; }
     public int ProgressFailed { get; init; }
@@ -73,6 +74,7 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
                 verbose);
 
             Console.WriteLine($"INF Applications in scope: {result.ApplicationsInScope}");
+            Console.WriteLine($"INF Snapshots backfilled: {result.SnapshotsBackfilled}");
             Console.WriteLine($"INF Progress deleted: {result.ProgressDeleted}");
             Console.WriteLine($"INF Progress posted: {result.ProgressPosted}");
             Console.WriteLine($"INF Progress failed: {result.ProgressFailed}");
@@ -102,16 +104,19 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
     {
         var errors = new List<string>();
         var targetLegCounts = Visa2014ApplicationMinistryLegCountResolver.LoadFromObjectSpace(objectSpaceFactory);
+        var targetAppIds = Visa2014ApplicationMinistryLegCountResolver.ResolveTargetApplicationIdsMissingMinistryProgress(
+            objectSpaceFactory, targetLegCounts);
         var legacyLegCounts = Visa2014ApplicationMinistryLegCountResolver.MapLegacyLegCounts(applicationIdMap, targetLegCounts);
-        var targetAppIds = Visa2014ApplicationMinistryLegCountResolver.ResolveTargetApplicationIdsInScope(
-            applicationIdMap, targetLegCounts);
 
         if (verbose)
-            Console.WriteLine($"INF Via-ministry applications with snapshots: {targetAppIds.Count}");
+            Console.WriteLine($"INF Via-ministry apps missing ministry progress rows: {targetAppIds.Count}");
 
         var legacyToTarget = applicationIdMap
             .Where(kv => targetAppIds.Contains(kv.Value))
             .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+        var snapshotsBackfilled = BackfillApprovalLegSnapshots(
+            objectSpaceFactory, targetAppIds, dryRun, verbose);
 
         int progressDeleted = 0;
         if (targetAppIds.Count > 0)
@@ -130,6 +135,9 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
             }
         }
 
+        if (!dryRun && !string.IsNullOrWhiteSpace(progressIdMapPath))
+            PruneProgressIdMapForLegacyApplications(progressIdMapPath, legacyToTarget.Keys);
+
         var regen = await Visa2014ApplicationProgressODataImporter.RegenerateForLegacyApplicationsAsync(
             target,
             resolver,
@@ -147,11 +155,74 @@ internal static class Visa2014ApplicationProgressMinistryLegCorrection
         return new Visa2014ApplicationProgressMinistryLegCorrectionResult
         {
             ApplicationsInScope = targetAppIds.Count,
+            SnapshotsBackfilled = snapshotsBackfilled,
             ProgressDeleted = progressDeleted,
             ProgressPosted = regen.PostedCount,
             ProgressFailed = regen.FailedCount,
             Errors = errors,
         };
+    }
+
+    private static int BackfillApprovalLegSnapshots(
+        INonSecuredObjectSpaceFactory objectSpaceFactory,
+        HashSet<Guid> targetAppIds,
+        bool dryRun,
+        bool verbose)
+    {
+        if (targetAppIds.Count == 0)
+            return 0;
+
+        using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Application));
+        MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+        var profileLegCounts = objectSpace.GetObjectsQuery<Bo.ApprovalLegProfileMinistryLeg>()
+            .Where(l => l.ApprovingMinistry != null && l.ApprovalLegProfile != null)
+            .AsEnumerable()
+            .GroupBy(l => l.ApprovalLegProfile!.ID)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var applications = objectSpace.GetObjectsQuery<Bo.Application>()
+            .Where(a => targetAppIds.Contains(a.ID) && a.ApprovalLegProfile != null)
+            .ToList();
+
+        var backfilled = 0;
+        foreach (var application in applications)
+        {
+            var expectedLegs = Visa2014ApplicationMinistryLegCountResolver.ResolveLegCount(application, profileLegCounts);
+            if (expectedLegs <= 0)
+                continue;
+
+            var snapshotLegs = application.ApprovalLegSnapshots?
+                .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+            if (snapshotLegs == expectedLegs)
+                continue;
+
+            if (!dryRun)
+                Bo.ApprovalLegProfileMinistryHelper.ApplySnapshot(objectSpace, application, application.ApprovalLegProfile);
+            backfilled++;
+            if (verbose)
+                Console.WriteLine($"  SNAPSHOT {application.FullApplicationNumber ?? application.ID.ToString()} legs {snapshotLegs} -> {expectedLegs}");
+        }
+
+        if (!dryRun && backfilled > 0)
+            objectSpace.CommitChanges();
+
+        return backfilled;
+    }
+
+    private static void PruneProgressIdMapForLegacyApplications(string path, IEnumerable<Guid> legacyApplicationOids)
+    {
+        if (!File.Exists(path))
+            return;
+
+        var existing = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path))
+            ?? new Dictionary<string, string>(StringComparer.Ordinal);
+        var prefixes = legacyApplicationOids
+            .Select(id => $"{id:D}:")
+            .ToHashSet(StringComparer.Ordinal);
+        var pruned = existing
+            .Where(kv => !prefixes.Any(p => kv.Key.StartsWith(p, StringComparison.Ordinal)))
+            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+        File.WriteAllText(path, JsonSerializer.Serialize(pruned, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static void MergeProgressIdMap(string path, IReadOnlyDictionary<string, Guid> updates)

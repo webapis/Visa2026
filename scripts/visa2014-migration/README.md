@@ -28,7 +28,7 @@ All PowerShell/SQL helpers for **legacy prod migration** live here (not under `s
 |-----------|---------|
 | No existing script or CLI covers the workflow | First partial-reimport for a BO (cleanup SQL + id-map rebuild + import) |
 | Extending the existing script would mix unrelated concerns | `reimport/ApplicationItems.ps1` adds SQL delete + rebuild; `import/ApplicationItems.ps1` is import-only |
-| The task is a stable, repeated procedure worth documenting by name | `catalogs/generate/EducationLookup-CalikEnergi.ps1` |
+| The task is a stable, repeated procedure worth documenting by name | `catalogs/generate/EducationLookup-CalikEnergi.ps1`, `Compare-LegacyMigratedCounts.ps1` |
 
 When you **must** add a script: place it in the correct folder below, dot-source `_lib/Get-RepoRoot.ps1` **after** `param()`, add a one-line entry to this README, and append [learnings.md](../../.cursor/skills/visa2014-to-visa2026-import/learnings.md).
 
@@ -103,6 +103,15 @@ Do **not** use `reimport/` for staging or production cutover.
 |------|--------|-------------|
 | Application headers + items | `reimport/Applications.ps1` | `cleanup/ImportedApplications.sql` |
 | ApplicationItem lines | `reimport/ApplicationItems.ps1` | `cleanup/ImportedApplicationItems.sql` |
+| ApplicationProgress (synthetic steps) | `reimport/ApplicationProgress.ps1` | `cleanup/ImportedApplicationProgress.sql` |
+| Ministry legs missing on via-ministry apps | `patch/ApplicationProgress-MinistryLegs.ps1` | (in-place delete/regen per app) |
+| Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
+
+### Reconcile
+
+| Task | Script |
+|------|--------|
+| Legacy VISA2015 vs Visa2026 BO row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
 
 Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md).
 
@@ -133,6 +142,7 @@ Preview row helper: `catalogs/Import-PreviewCatalogRows.ps1`.
 
 ```powershell
 .\scripts\visa2014-migration\setup\Restore-LegacyDatabase.ps1
+.\scripts\visa2014-migration\Compare-LegacyMigratedCounts.ps1 -ShowIdMap
 .\scripts\visa2014-migration\import\Invoke-TenantCatalogGeneration.ps1
 .\scripts\visa2014-migration\import\OnPrem-Staging.ps1 -TargetConnection "Server=...;Database=...;"
 .\scripts\visa2014-migration\import\Run-HeadlessChain.ps1 -StartAt ApplicationItem

@@ -798,3 +798,55 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Log**: `artifacts/headless-import/Person-reimport.log`, `downstream-reimport.log`
 - **Follow-up**: restart Blazor for new Person validation rule; monitor downstream chain completion
 
+### 2026-07-03 — Visa — resume import after Passport reimport (calik-energi)
+
+- **Phase**: import (resume — no Visa cleanup; id-map skip for 5965 existing)
+- **Outcome**: success — **10 posted**, **0 failed**; Visas **5975** total (was 5965); id-map **5975**
+- **CLI**: `--import-visa2014 --entity Visa --legacy-source calik-energi --inprocess --no-build --target-connection (localdb)/Visa2026`
+- **Dry-run**: 6016 prepared, 19 transform skip, 6 dedupe merged, **41** missing Passport id-map
+- **Live**: skipped already-imported **5965**, skipped no Passport map **41**, posted **10**
+- **Reconciliation**: legacy active **6041** → **66** still unmigrated (**41** passport id-map gap + **25** transform/dedupe skips)
+- **Log**: `Visa2026.DataImporter/bin/Debug/net8.0/import_20260703_101659.log`
+- **Next**: fix remaining **41** Passport id-map gaps (legacy passports not imported or dedupe aliases); optional `--import-visa2014-files` VisaDocument wave for new rows
+
+### 2026-07-03 — Person-domain downstream partial reimport (calik-energi)
+
+- **Phase**: partial-reimport (children only after Person reimport; keeps People + Person.json)
+- **Outcome**: success — all 6 entities **0 failed**
+- **Script**: `scripts/visa2014-migration/reimport/PersonDomainDownstream.ps1` + `cleanup/ImportedPersonDomainChildren.sql`
+- **Cleanup**: cleared ApplicationItem person-current FKs (CurrentVisa/Passport/Education/Salary/PositionHistory/Address) before delete; did **not** delete Applications
+- **Posted**: Passport **3585**, Visa **5975** (41 no Passport map), Education **3108**, EmployeePositionHistory **2993** (+1368 ActualPositions), EmployeeSalary **2887**, AddressOfResidence **5054** (includes **1086** PIA-inferred)
+- **People unchanged**: **3241**
+- **Follow-up**: re-run `--correct-application-item-person-current` and/or `reimport/ApplicationItems.ps1` to repopulate ApplicationItem person-current fields; optional file waves (PassportCopy, VisaDocument, EducationDocument)
+
+### 2026-07-03 — ApplicationProgress synthesis: PROCESS_STARTED before PROCESS_ISSUED
+
+- **Phase**: mapping fix (transform only; DB reimport pending)
+- **Symptom**: Long-process apps (e.g. manual **3717**) jumped from ministry approval straight to **Issued - Migration service** — missing **In processing - Migration service**.
+- **Root cause**: `Visa2014ApplicationProgressTransform.SynthesizeSteps` emitted single `migration_process` row (`PROCESS_ISSUED` @ `AT_MIGRATION_SERVICE`) with no preceding `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`.
+- **Fix**: Split migration leg into `migration_started` (`PROCESS_STARTED`) + `migration_issued` (`PROCESS_ISSUED`); issued only when `ProcessDate`/`ProcessNumber` set; started also when ministry route complete without process date (no bogus issued row).
+- **Tests**: `Visa2014ApplicationProgressTransformTests.cs` (xunit in DataImporter project).
+- **Next**: dev partial reimport — delete imported `ApplicationProgress` rows + `--import-visa2014 --entity ApplicationProgress --inprocess` (~+12k rows for apps with process date).
+
+### 2026-07-03 — ApplicationProgress dev reimport (calik-energi)
+
+- **Phase**: partial-reimport (`reimport/ApplicationProgress.ps1` + `cleanup/ImportedApplicationProgress.sql`)
+- **Cleanup**: deleted **39,742** progress rows; cleared `ApplicationProgress.json` id-map
+- **Import**: **51,681** posted, **0** failed (~**+11,939** vs pre-fix); **11,979** `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`
+- **Build note**: stop `Visa2026.Blazor.Server` if MSB3027 file-lock on `dotnet build`
+- **Log**: `import_20260703_112131.log`
+- **Edge case**: when legacy `ProcessDate` is before interpolated last ministry date, date sort can persist **Issued** before **In processing** — rare; follow-up clamp in transform if seen in UI
+
+### 2026-07-03 — ApplicationProgress ministry-leg correction (profile-based leg count)
+
+- **Phase**: patch (`patch/ApplicationProgress-MinistryLegs.ps1` + `--correct-application-progress-ministry-legs`)
+- **Root cause**: `Visa2014ApplicationMinistryLegCountResolver` counted only empty snapshots; fallback `IsLongProcess` missed ~5.9k ViaMinistries apps with `ApprovalLegProfile` (legacy simple process).
+- **Fix**: Resolver falls back to `ApprovalLegProfile.MinistryLegs` count; correction scopes apps missing `*_REVIEW_*` progress, backfills snapshots, prunes id-map prefixes, regenerates progress.
+- **Outcome**: **3019** apps in scope; **0** ViaMinistries 2-leg profile apps still missing review steps; **6038** approval-leg snapshots on manual-entry apps.
+- **Verify**: `7/-8308` now has `1_REVIEW_*` / `2_REVIEW_*` rows.
+- **Follow-up**: step date ordering when `ProcessDate` precedes interpolated ministry slots.
+
+
+- **Artifact**: `scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1` — legacy `VISA2015` vs LocalDB `Visa2026` BO row counts (`Legacy`, `Migrated`, `Gap`; `-ShowIdMap` optional)
+- **Verified**: Person 3241/3241; Passport 3666/3585; Visa 6041/5975; Education 3133/3108; EPH 2993/2993; Salary 2950/2887; Address 4083/5054; Application 12237/12129; ApplicationItem 21794/21345; ApplicationProgress legacy apps 12237 vs 39742 progress rows
+

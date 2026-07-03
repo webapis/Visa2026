@@ -293,7 +293,7 @@ static void PrintHelp()
     Console.WriteLine("                [--dry-run] [--force] [--api-base-url url] [--no-wait] [--verbose]");
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");
     Console.WriteLine("  --correct-visa-application-types  Retype App_Visa_Ext→708, FM via-ministry + progress regen (--legacy-source, --dry-run)");
-    Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress from ApprovalLegProfile snapshots (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress for via-ministry apps missing ministry legs (profile/snapshot leg count; --legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-address-of-residence  Backfill Person AddressOfResidence from PIA + patch ApplicationItem (--legacy-source, --dry-run)");
