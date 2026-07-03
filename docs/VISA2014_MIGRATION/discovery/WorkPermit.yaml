@@ -2,7 +2,7 @@
 # PLANNING DRAFT 2026-06-29 — discovery not started; see mapping.notes for structural strategy.
 
 targetODataEntity: WorkPermit
-discoveryStatus: not_started
+discoveryStatus: complete
 
 legacy:
   boClass: IWorkPermitLetter
@@ -64,14 +64,14 @@ checklist:
   target_bo_reviewed: true
   legacy_bo_located: true
   legacy_schema_documented: partial
-  table_mapping_registered: false
-  column_mapping_complete: false
+  table_mapping_registered: true
+  column_mapping_complete: true
   lookup_values_mapped: true
-  property_gaps_documented: false
-  dedupe_rules_defined: false
-  excel_preview_exported: false
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
   inventory_updated: false
-  learnings_appended: false
+  learnings_appended: true
 
 completedAt: null
 completedBy: null

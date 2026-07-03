@@ -10,6 +10,7 @@ internal sealed record Visa2014ApplicationItemRawRow(
     Guid? LegacyVisaOid,
     Guid? LegacyNextVisaOid,
     Guid? LegacyWorkPermitOid,
+    Guid? LegacyInvitationItemOid,
     Guid? LegacyPositionOid,
     Guid? LegacyAddressOfResidenceOid,
     Guid? LegacyDirectAddressOid,
@@ -69,7 +70,7 @@ internal static class Visa2014ApplicationItemTransform
         "_parentApplicationType", "_personLegacyOid",
         "Application", "ApplicationType", "Person",
         "CurrentPassport", "PreviousPassport", "CurrentVisa", "NextVisa",
-        "CurrentWorkPermitItem", "CurrentPositionHistory", "CurrentAddressOfResidence",
+        "CurrentWorkPermitItem", "CurrentInvitationItem", "CurrentPositionHistory", "CurrentAddressOfResidence",
         "CurrentEducation", "CurrentSalary",
         "RegistrationDate", "TravelDate", "TravelType", "MovementType",
         "CheckPoint", "PurposeOfTravel",
@@ -92,6 +93,7 @@ internal static class Visa2014ApplicationItemTransform
             CAST(pia.Visa AS varchar(36)) AS VisaOid,
             CAST(nextVisa.NextVisaOid AS varchar(36)) AS NextVisaOid,
             CAST(pia.WorkPermit AS varchar(36)) AS WorkPermitOid,
+            invMatch.InvitationItemOid,
             CAST(pia.Position AS varchar(36)) AS PositionOid,
             CAST(pia.AddressOfResidence AS varchar(36)) AS AddressOfResidenceOid,
             CAST(pia.Address AS varchar(36)) AS DirectAddressOid,
@@ -110,8 +112,8 @@ internal static class Visa2014ApplicationItemTransform
             CASE WHEN ISNULL(pia.IsComplete, 0) = 1 THEN '1' ELSE '0' END AS IsComplete,
             CASE WHEN ISNULL(a.ForEmployee, 0) = 1 THEN '1' ELSE '0' END AS ForEmployee,
             CASE WHEN ISNULL(a.ForFamilyMember, 0) = 1 THEN '1' ELSE '0' END AS ForFamilyMember,
-            ate.TypeOfApplicationForEmployeeID AS EmployeeSubtypeId,
-            atfm.TypeOfApplicationForFamilyMemberID AS FamilySubtypeId,
+            ate.TypeOfApplicationForEmployee AS EmployeeSubtypeId,
+            atfm.TypeOfApplicationForFamilyMember AS FamilySubtypeId,
             CASE WHEN a.IsInvitationWithWorkPermit IS NULL THEN '0' ELSE '1' END AS HasInvitationWpFk,
             iwp.InvitationAndWorkPermitRequired,
             CASE WHEN a.IsWizaWithWorkPermit IS NULL THEN '0' ELSE '1' END AS HasWizaWpFk,
@@ -149,6 +151,17 @@ internal static class Visa2014ApplicationItemTransform
         ) nextVisa
         LEFT JOIN dbo.[{SeherEtrap}] se ON se.Oid = a.BusinessTripDestination
         LEFT JOIN dbo.BorderZoneForVisa bz ON bz.Oid = a.BorderZoneForVisa AND bz.GCRecord IS NULL
+        OUTER APPLY (
+            SELECT TOP 1 CAST(pii.Oid AS varchar(36)) AS InvitationItemOid
+            FROM dbo.PersonInInvitation pii
+            INNER JOIN dbo.ApplicationResult ar ON ar.Oid = pii.Invitation AND ar.GCRecord IS NULL
+            WHERE pii.GCRecord IS NULL
+              AND ar.Application = pia.Application
+              AND (
+                  (pia.Employee IS NOT NULL AND pii.Employee = pia.Employee)
+                  OR (pia.FamilyMember IS NOT NULL AND pii.FamilyMember = pia.FamilyMember))
+            ORDER BY ar.IssuedDate DESC, pii.Oid
+        ) invMatch
         WHERE pia.GCRecord IS NULL
         """;
 
@@ -181,14 +194,21 @@ internal static class Visa2014ApplicationItemTransform
         var currentEducationByPerson = Visa2014PersonCurrentFieldInference.BuildCurrentEducationByPerson(
             connectionString,
             verbose);
-        var context = new ApplicationItemTransformContext(visibility, currentEducationByPerson);
+        var currentWorkPermitByPerson = Visa2014PersonCurrentFieldInference.BuildCurrentWorkPermitByPerson(
+            connectionString,
+            verbose);
+        var context = new ApplicationItemTransformContext(
+            visibility,
+            currentEducationByPerson,
+            currentWorkPermitByPerson);
 
         return TransformRows(rawRows, catalogs, context, out var skipped, out var unmappedDistinct, out var dedupeSummary);
     }
 
     private sealed record ApplicationItemTransformContext(
         ApplicationTypeVisibilityCatalog Visibility,
-        IReadOnlyDictionary<Guid, Guid> CurrentEducationByPerson);
+        IReadOnlyDictionary<Guid, Guid> CurrentEducationByPerson,
+        IReadOnlyDictionary<Guid, Guid> CurrentWorkPermitByPerson);
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationItemRawRow parsed)
     {
@@ -211,6 +231,7 @@ internal static class Visa2014ApplicationItemTransform
             LegacyVisaOid: TryParseNullableGuid(row.GetValueOrDefault("VisaOid")),
             LegacyNextVisaOid: TryParseNullableGuid(row.GetValueOrDefault("NextVisaOid")),
             LegacyWorkPermitOid: TryParseNullableGuid(row.GetValueOrDefault("WorkPermitOid")),
+            LegacyInvitationItemOid: TryParseNullableGuid(row.GetValueOrDefault("InvitationItemOid")),
             LegacyPositionOid: TryParseNullableGuid(row.GetValueOrDefault("PositionOid")),
             LegacyAddressOfResidenceOid: TryParseNullableGuid(row.GetValueOrDefault("AddressOfResidenceOid")),
             LegacyDirectAddressOid: TryParseNullableGuid(row.GetValueOrDefault("DirectAddressOid")),
@@ -444,6 +465,7 @@ internal static class Visa2014ApplicationItemTransform
         row["CurrentVisa"] = raw.LegacyVisaOid?.ToString("D");
         row["NextVisa"] = raw.LegacyNextVisaOid?.ToString("D");
         row["CurrentWorkPermitItem"] = raw.LegacyWorkPermitOid?.ToString("D");
+        row["CurrentInvitationItem"] = raw.LegacyInvitationItemOid?.ToString("D");
         row["CurrentPositionHistory"] = raw.LegacyPositionOid?.ToString("D");
         row["CurrentAddressOfResidence"] =
             Visa2014PiaAddressInference.ResolveApplicationItemCurrentAddressLegacyKey(raw)?.ToString("D");
@@ -475,6 +497,7 @@ internal static class Visa2014ApplicationItemTransform
             applicationTypeName,
             context.Visibility,
             context.CurrentEducationByPerson,
+            context.CurrentWorkPermitByPerson,
             row);
 
         return row;

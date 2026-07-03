@@ -135,6 +135,18 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 
 > **Script paths (2026-07):** VISA2014 migration PowerShell/SQL moved from `scripts/local/` to **`scripts/visa2014-migration/`** — see [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md). Older entries below may still cite `scripts/local/…`; use the README index for current names.
 
+### 2026-07-03 — ApplicationItem — reimport after PersonDomainDownstream FK wipe (success)
+
+- **Phase**: partial-reimport (follow-up to Person-domain downstream cleanup that NULLed ApplicationItem FK columns)
+- **Outcome**: success
+- **Environment**: local — `(localdb)\mssqllocaldb` / `Visa2026`
+- **Script**: `scripts/visa2014-migration/reimport/ApplicationItems.ps1` (`-Configuration Debug`)
+- **Symptom before**: 21,345 ApplicationItems with `Person` only — all `CurrentPassport` / `CurrentVisa` / `CurrentPositionHistory` / `CurrentEducation` / `CurrentSalary` / `CurrentAddressOfResidence` NULL (caused by `ImportedPersonDomainChildren.sql` after Person-child reimport)
+- **Import**: Prepared 21,588 / skipped 206 → **Posted 21,394** / failed **0** / id-map skip **194** (missing parent passport map)
+- **Reconciliation (SQL)**: Total 21,394 — WithPassport **21,394**, WithVisa **15,294**, WithPosition **21,031**, WithEducation **12,495**, WithSalary **5,883**, WithAddress **9,142**
+- **Log**: `legacy/visa2014/import-logs/reimport-ApplicationItem-20260703-121015.log`
+- **Prevent**: After `reimport/PersonDomainDownstream.ps1`, always run `reimport/ApplicationItems.ps1` (or future FK repair command) — `--correct-application-item-person-current` alone does not restore Passport/Visa/Position/Address
+
 ### 2026-07-02 — ApplicationItem — partial reimport (success)
 
 - **Phase**: import
@@ -849,4 +861,111 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 
 - **Artifact**: `scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1` — legacy `VISA2015` vs LocalDB `Visa2026` BO row counts (`Legacy`, `Migrated`, `Gap`; `-ShowIdMap` optional)
 - **Verified**: Person 3241/3241; Passport 3666/3585; Visa 6041/5975; Education 3133/3108; EPH 2993/2993; Salary 2950/2887; Address 4083/5054; Application 12237/12129; ApplicationItem 21794/21345; ApplicationProgress legacy apps 12237 vs 39742 progress rows
+
+### 2026-07-03 — ApplicationItem CurrentAddressOfResidence correction (calik-energi)
+
+- **Phase**: mapping fix + id-map rebuild + `--correct-person-address-of-residence` (live)
+- **Symptom**: **12,252** imported ApplicationItems had Person/Passport/Visa/Position filled but **CurrentAddressOfResidence** empty; e.g. app **909** Milos Krcevinac (lodging) and Tanveer Alam (hotel).
+- **Root cause**: `AddressOfResidence.json` id-map rebuild matched **PrivateHouse** only (`FullAddress` + `ExpirationDate`); legacy PIA lines mostly reference **Lodging/Hotel** via `pia.AddressOfResidence` FK — **3,290** legacy AOR OIDs skipped on rebuild. Importer omits FK when id-map miss (`TryAddOptionalFkFromMap`).
+- **Fix**: `Visa2014AddressOfResidenceTargetMatcher` (all `ResidenceType` + site joins; `Type` stored as **int** enum in SQL); `Visa2014AddressOfResidenceIdMapAliasAppender` (PIA synthetic keys, direct `Address` OID aliases, sponsor canonical); `Visa2014ApplicationItemLegacyAddressResolver` creates missing `AddressOfResidence` on correct Person when legacy AOR exists but target row/id-map miss.
+- **Id-map rebuild**: **3361** matched (+**1812** aliases appended); **607** skipped.
+- **Correction live**: ApplicationItems in scope **21,394**; updated **12,248**; unchanged **9,142**; unresolved **4** (lookup gaps / unmappable legacy rows: apps **8424**, **3327**, **8780**, **7531**).
+- **Verify SQL**: `CurrentAddressOfResidenceID` populated **21,390 / 21,394**; app **909** Milos + Tanveer both have lodging/hotel address.
+- **Code**: `Visa2014TargetIdMapRebuild.cs`, new `Visa2014AddressOfResidence*.cs` helpers under `Visa2026.DataImporter/legacy/visa2014/`.
+- **Next**: triage remaining **4** rows manually if UI-visible; consider dedupe-key lodging match in rebuild for near-miss catalog strings.
+
+
+### 2026-07-03 — WorkPermit + WorkPermitItem — Çalik pilot (calik-energi)
+
+- **Phase**: excel-preview + pilot import (LocalDB Visa2026)
+- **Excel preview**: WorkPermit **401** import rows (399 letters + 2 orphan headers); WorkPermitItem **6363** rows, **0** skipped, **0** unmapped lookups
+- **Catalog**: `work-permitted-location-name.json` expanded **8 → 30** distinct `NameTm` from preview (bit-matrix heuristic; fixed Şäheri suffix handling)
+- **Pilot import**: WorkPermit **401/401** posted; WorkPermitItem **3750/6363** posted, **2613** skipped (EmployeePositionHistory not in id-map — legacy `WorkPermit.Position` = `WorkHistoryOfEmployee.Oid` but EPH import gap), **0** failed
+- **Id-maps**: `id-maps/calik-energi/WorkPermit.json`, `WorkPermitItem.json`
+- **Script**: `scripts/visa2014-migration/import/WorkPermits.ps1` (headers then items; builds DataImporter only — avoid Blazor F5 lock)
+- **Order**: `order.yaml` — Application → WorkPermit → WorkPermitItem → ApplicationItem
+- **Ready for importConfirmed**: no (human review Excel + 2613 EPH gap triage)
+- **Next**: Invitation/InvitationItem discovery; ApplicationItem reimport with `--work-permit-item-id-map`; triage 2613 rows (reimport EPH subset or accept gap)
+### 2026-07-03 — ApplicationItem reimport after WorkPermitItem wave (calik-energi)
+
+- **Phase**: partial-reimport (`reimport/ApplicationItems.ps1` + `--work-permit-item-id-map`)
+- **Script**: added `--work-permit-item-id-map` to `reimport/ApplicationItems.ps1` (was only on `import/ApplicationItems.ps1`)
+- **Id-map rebuild**: WorkPermitItem **3750** matched, **2613** skipped (stale Position / no EPH)
+- **Import**: **21,394** ApplicationItem posted, **0** failed
+- **Verify (Visa2026)**: `CurrentWorkPermitItemID` populated **3,446** rows; legacy PIA with `WorkPermit` FK **3,802** → **356** gap (permit row not in WorkPermitItem id-map)
+- **WorkPermittedLocations** on ApplicationItem: **34** (gated by `ApplicationType.ShowWorkPermittedLocations`; most types use item-level copy only when flag true)
+- **Corrections**: PIA address + person-current ran after import (same script chain)
+- **Next**: Invitation wave; optional WorkPermit.Application backfill; triage 2613 permit items / 356 application-line gaps
+
+### 2026-07-03 — WorkPermitItem position FK fix (supplement EPH + fallback)
+
+- **Root cause (2613 skips)**: legacy `WorkPermit.Position` → `WorkHistoryOfEmployee.Oid`; **2582** point at soft-deleted WH; **2523** also have soft-deleted employee (not recoverable). **~59** active employee + soft-deleted WH — fixable.
+- **Fix shipped**:
+  - `Visa2014EmployeePositionHistoryTransform.SupplementPermitReferencedExtractSql` + `--supplement-permit-positions` on EmployeePositionHistory import (appends soft-deleted WH referenced by active WorkPermit; active person only; `EndDate` null snapshot).
+  - `Visa2014WorkPermitItemPositionResolver` — when position OID missing from id-map, pick nearest active WH for employee at permit `StartDate` (legacy GetLastPosition-style).
+  - Patch script: `scripts/visa2014-migration/patch/WorkPermitItem-SupplementPositions.ps1` (supplement EPH then WorkPermitItem re-import; skips already in id-map).
+- **Tests**: `Visa2014WorkPermitItemPositionResolverTests` (fallback date pick).
+- **Next**: run patch on calik-energi pilot; re-run `reimport/ApplicationItems.ps1` if new WorkPermitItem rows posted; expect ~59–90 recovered items not full 2613.
+
+### 2026-07-03 — WorkPermitItem supplement patch run (calik-energi pilot)
+
+- **Patch**: `WorkPermitItem-SupplementPositions.ps1` on LocalDB Visa2026 + SQLEXPRESS VISA2015
+- **Supplement EPH** (`--supplement-permit-positions`): **0** legacy rows (no soft-deleted WH with active person on this legacy DB for calik-energi)
+- **WorkPermitItem re-import**: **47** posted via **position fallback**; **3750** already imported; **2566** still skipped (missing id-map); **0** failed
+- **WorkPermitItem total**: **3797** in target + id-map rebuild match
+- **ApplicationItem reimport**: **21,394** posted; id-map rebuild WorkPermitItem **3797** matched, **2566** skipped
+- **Verify (Visa2026)**: `CurrentWorkPermitItemID` **3496** (was **3446**, +**50**); legacy PIA with `WorkPermit` FK **3725** on this SQL instance
+- **Next**: triage remaining **2566** permit rows (mostly soft-deleted employee); Invitation wave
+
+### 2026-07-03 — Invitation + InvitationItem wave (calik-energi pilot)
+
+- **Legacy mapping**: header `ApplicationResult` (via `PersonInInvitation.Invitation` FK); item `PersonInInvitation` 1:1
+- **Preview**: Invitation **2776** import / **185** skipped (missing dates/number); InvitationItem **5239** / **0** skipped
+- **Pilot import** (LocalDB Visa2026): Invitation **2776/2776** posted; InvitationItem **4955/5239** posted, **284** skipped (missing Person/Passport/Invitation id-map), **0** failed
+- **Target counts**: Invitations **2776**, InvitationItems **4955**
+- **Code**: transforms/importers/preview + `scripts/visa2014-migration/import/Invitations.ps1`; `order.yaml` updated
+- **Next**: triage 284 item skips; wire `CurrentInvitationItem` on ApplicationItem reimport; human `importConfirmed` after Excel review
+
+### 2026-07-03 — ApplicationItem CurrentInvitationItem wiring (calik-energi)
+
+- **Resolver**: SQL `OUTER APPLY` joins `PersonInApplication` → `PersonInInvitation` via `ApplicationResult.Application` + same Employee/FamilyMember; tie-break `ApplicationResult.IssuedDate DESC` (18 multi-match rows).
+- **CLI**: `--invitation-item-id-map` on ApplicationItem import + `import/` / `reimport/ApplicationItems.ps1`.
+- **Reimport**: **21,394** posted; `CurrentInvitationItemID` **4929** (was **0**); `CurrentWorkPermitItemID` **3496** (unchanged).
+- **Gap**: legacy PIA with invitation match **5213** → **284** not in InvitationItem id-map (same skip set as invitation import).
+
+### 2026-07-03 — Application id-map: FullApplicationNumber + ApplicationDate (no merge)
+
+- **Root cause (`6/-909`)**: legacy has **two** active `Application` rows with same `ManualApplicationNumber` but different dates (2025-07-26 Tanveer, 2026-06-26 Milos). `--rebuild-visa2014-id-maps` matched **FullApplicationNumber only** → both legacy Oids mapped to one Visa2026 `Application` → ApplicationItems from both headers collapsed onto one parent.
+- **Rule**: business identity = **FullApplicationNumber + ApplicationDate**; id-map upsert key = **legacy Application.Oid (GUID)**; ApplicationItem parent = legacy **Application** Oid via id-map (never number alone).
+- **Fix shipped**: `Visa2014ApplicationTransform` identity helpers + rebuild SQL `FullApplicationNumber` AND `CAST(ApplicationDate AS date)`; collision guard on rebuild + ApplicationItem import abort; dedupe metadata keyed by number+date; tests in `Visa2014WorkPermitItemPositionResolverTests`.
+- **Pilot repair**: rebuild `Application.json` id-map; reparent mis-linked ApplicationItems (e.g. Tanveer `AC7D8DDA…` → 2025-07-26 app `34AFE059…`).
+
+### 2026-07-03 — Application id-map rebuild + ApplicationItem reparent (calik-energi pilot)
+
+- **Backup**: `id-maps/calik-energi/Application.json.bak-collapsed` (pre-rebuild, number-only collapse).
+- **Rebuild** (`--rebuild-visa2014-id-maps`, LocalDB Visa2026): Application **12129** matched, **0** skipped; cross-date collisions **0** after fix. Example `6/-909`: `f5616776…` → `C022D8D4…` (2026-06-26 Milos), `f538cb62…` → `34AFE059…` (2025-07-26 Tanveer).
+- **Reparent** (`--correct-application-item-application-parent`): **21394** in scope, **1594** reparented, **19800** already correct, **0** errors.
+- **Verify `6/-909`**: Tanveer item on `34AFE059…` (2025-07-26); Milos item on `C022D8D4…` (2026-06-26) — no longer merged.
+- **CLI shipped**: `Visa2014ApplicationItemApplicationParentCorrection.cs` + `--correct-application-item-application-parent` in `Program.cs`; aborts if Application id-map still has cross-date collisions.
+
+### 2026-07-03 — ApplicationItem CurrentWorkPermitItem person fallback
+
+- **Rule**: when legacy `PersonInApplication.WorkPermit` is null but type has `ShowCurrentWorkPermitItem`, use latest `dbo.WorkPermit` per employee (`StartDateOfWorkPermit DESC`, `Oid DESC`) — same as `PersonCurrentItems.GetCurrentWorkPermitItem`.
+- **Transform**: `Visa2014PersonCurrentFieldInference.BuildCurrentWorkPermitByPerson` + `TrySetApplicationItemPersonCurrentFields` (does not override explicit PIA FK).
+- **Pilot correction** (`--correct-application-item-person-current`, LocalDB): **2057** `CurrentWorkPermitItem` backfilled (+ `WorkPermittedLocations` from item); **3496 → 5553** with permit FK (post-run count).
+- **Note**: `6/-909` Milos/Tanveer still empty — no legacy `WorkPermit` rows for either person in VISA2015 (correct).
+
+### 2026-07-03 — ApplicationType composite: SubType enum vs TypeOfApplication*ID
+
+- **Root cause (`2/-291` Ismet Danış)**: importer used `TypeOfApplicationForEmployeeID` (internal seed ID) but legacy UI displays `TypeOfApplicationForEmployee` (`SubType` enum). Example: enum **9** = “Wizany täze pasporta geçirmek” (`App_Change_Passport`) but ID **10** was mapped to `App_Sevice_Passport`. ~6990 employee apps have enum ≠ ID.
+- **Fix**: transforms (`Application`, `ApplicationItem`, `ApplicationProgress`) now read enum columns; skip composites `E:33` / `E:55`; added `E:21`/`E:22`/`F:21` mappings for cancel visa/WP enum values.
+- **Pilot correction** (`--correct-application-type-composite`): **7933** retyped, **4136** already correct, **60** skipped. `2/-291` → `App_Change_Passport` (705).
+
+### 2026-07-03 — Application id-map identity: number+date+ApplicationType (twin legacy apps)
+
+- **Residual 129 type mismatches** after composite retype were **not** enum/ID bugs — **144 id-map entries** pointed multiple legacy `Application.Oid` values at one Visa2026 row (employee+family twins share `ManualApplicationNumber`+date; also same-type twins).
+- **Identity key** extended to `FullApplicationNumber+ApplicationDate+ApplicationType` (`Visa2014ApplicationTransform.ApplicationImportIdentity`, target SQL joins `ApplicationTypes`).
+- **Rebuild** (`Visa2014ApplicationIdMapRebuild`): greedy one-to-one target assignment + `ApplicationItem` parent overlap disambiguation; merge preserved prior id-map entries only when target slot still free (`MergePreservedApplicationIdMapEntries`).
+- **Pilot** (calik-energi, LocalDB): id-map **11993** entries, **0** duplicate targets; `--correct-application-type-composite --dry-run` → **0** retypes, **11934** already correct, **59** skipped (unmapped composites).
+- **Gap**: **~136** legacy apps dropped from id-map (`no target` / twin slot taken) — no matching `Applications` row for resolved type in Visa2026 (e.g. family `9/-3876` `App_Visa_Ext_FM` never imported). Needs missing Application OData import, not retype alone.
 

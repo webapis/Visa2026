@@ -20,10 +20,14 @@ internal static class Visa2014ImportCommand
             || string.Equals(entity, "EmployeePositionHistory", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "WorkPermit", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "WorkPermitItem", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(entity, "InvitationItem", StringComparison.OrdinalIgnoreCase)
             || string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase);
         if (!supported)
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, Application, ApplicationProgress, ApplicationItem, EmployeePositionHistory, EmployeeSalary, AddressOfResidence.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, Application, ApplicationProgress, ApplicationItem, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem.");
             return 1;
         }
 
@@ -66,6 +70,7 @@ internal static class Visa2014ImportCommand
         bool dryRun = HasArg(args, "--dry-run");
         bool noWait = HasArg(args, "--no-wait");
         bool inProcess = HasArg(args, "--inprocess");
+        bool supplementPermitPositions = HasArg(args, "--supplement-permit-positions");
 
         if (!dryRun
             && string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
@@ -183,10 +188,19 @@ internal static class Visa2014ImportCommand
                 exitCode = await RunAddressOfResidenceImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "EmployeeSalary", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunEmployeeSalaryImportAsync(target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+            else if (string.Equals(entity, "WorkPermit", StringComparison.OrdinalIgnoreCase))
+                exitCode = await RunWorkPermitImportAsync(target, source, args, idMapPath, maxRows, dryRun, verbose);
+            else if (string.Equals(entity, "WorkPermitItem", StringComparison.OrdinalIgnoreCase))
+                exitCode = await RunWorkPermitItemImportAsync(target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+            else if (string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase))
+                exitCode = await RunInvitationImportAsync(target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, session?.ObjectSpaceFactory);
+            else if (string.Equals(entity, "InvitationItem", StringComparison.OrdinalIgnoreCase))
+                exitCode = await RunInvitationItemImportAsync(target, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "ApplicationItem", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunApplicationItemImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else
-                exitCode = await RunEmployeePositionHistoryImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+                exitCode = await RunEmployeePositionHistoryImportAsync(
+                    target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, supplementPermitPositions);
 
             return await CompleteSuccessfulImportAsync(
                 exitCode, dryRun, dataImporterRoot, args, importSessionStartedUtc, verbose);
@@ -582,6 +596,8 @@ internal static class Visa2014ImportCommand
             ?? source.IdMapPath(dataImporterRoot, "EmployeeSalary");
         var workPermitItemIdMapPath = GetOptionValue(args, "--work-permit-item-id-map")
             ?? source.IdMapPath(dataImporterRoot, "WorkPermitItem");
+        var invitationItemIdMapPath = GetOptionValue(args, "--invitation-item-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "InvitationItem");
 
         Console.WriteLine($"INF Application id-map: {applicationIdMapPath}");
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
@@ -592,6 +608,7 @@ internal static class Visa2014ImportCommand
         Console.WriteLine($"INF Education id-map: {educationIdMapPath}");
         Console.WriteLine($"INF EmployeeSalary id-map: {employeeSalaryIdMapPath}");
         Console.WriteLine($"INF WorkPermitItem id-map: {workPermitItemIdMapPath}");
+        Console.WriteLine($"INF InvitationItem id-map: {invitationItemIdMapPath}");
 
         var result = await Visa2014ApplicationItemODataImporter.RunAsync(
             target,
@@ -607,6 +624,7 @@ internal static class Visa2014ImportCommand
             educationIdMapPath,
             employeeSalaryIdMapPath,
             workPermitItemIdMapPath,
+            invitationItemIdMapPath,
             applicationItemIdMapPath,
             maxRows,
             dryRun,
@@ -642,12 +660,15 @@ internal static class Visa2014ImportCommand
         string historyIdMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool supplementPermitPositions)
     {
         var personIdMapPath = GetOptionValue(args, "--person-id-map")
             ?? source.IdMapPath(dataImporterRoot, "Person");
 
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+        if (supplementPermitPositions)
+            Console.WriteLine("INF Mode: --supplement-permit-positions (soft-deleted WH referenced by active WorkPermit).");
 
         var result = await Visa2014EmployeePositionHistoryODataImporter.RunAsync(
             target,
@@ -658,7 +679,8 @@ internal static class Visa2014ImportCommand
             dryRun ? null : historyIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            supplementPermitPositions);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
@@ -722,6 +744,218 @@ internal static class Visa2014ImportCommand
         else if (result.SkippedNoPersonMap > 0)
         {
             Console.WriteLine($"INF Would skip (no Person map): {result.SkippedNoPersonMap}");
+        }
+
+        if (result.FailedCount > 0)
+        {
+            foreach (var error in result.Errors.Take(10))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 10)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunWorkPermitImportAsync(
+        IVisa2014ImportTarget target,
+        Visa2014LegacySourceProfile source,
+        IReadOnlyList<string> args,
+        string workPermitIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var result = await Visa2014WorkPermitODataImporter.RunAsync(
+            target,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            dryRun ? null : workPermitIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+
+        if (result.FailedCount > 0)
+        {
+            foreach (var error in result.Errors.Take(10))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 10)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunWorkPermitItemImportAsync(
+        IVisa2014ImportTarget target,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string workPermitItemIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+        var passportIdMapPath = GetOptionValue(args, "--passport-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Passport");
+        var positionHistoryIdMapPath = GetOptionValue(args, "--position-history-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "EmployeePositionHistory");
+        var workPermitIdMapPath = GetOptionValue(args, "--work-permit-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "WorkPermit");
+
+        Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+        Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
+        Console.WriteLine($"INF EmployeePositionHistory id-map: {positionHistoryIdMapPath}");
+        Console.WriteLine($"INF WorkPermit id-map: {workPermitIdMapPath}");
+
+        var result = await Visa2014WorkPermitItemODataImporter.RunAsync(
+            target,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            personIdMapPath,
+            passportIdMapPath,
+            positionHistoryIdMapPath,
+            workPermitIdMapPath,
+            dryRun ? null : workPermitItemIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (missing required id-map): {result.SkippedMissingRequiredIdMap}  Skipped (already imported): {result.SkippedAlreadyImported}  Position fallback: {result.PositionResolvedViaFallback}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+        else if (result.SkippedMissingRequiredIdMap > 0)
+        {
+            Console.WriteLine($"INF Would skip (missing required id-map): {result.SkippedMissingRequiredIdMap}");
+            if (result.PositionResolvedViaFallback > 0)
+                Console.WriteLine($"INF Would use position fallback: {result.PositionResolvedViaFallback}");
+        }
+
+        if (result.FailedCount > 0)
+        {
+            foreach (var error in result.Errors.Take(10))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 10)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunInvitationImportAsync(
+        IVisa2014ImportTarget target,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string invitationIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose,
+        DevExpress.ExpressApp.INonSecuredObjectSpaceFactory? objectSpaceFactory = null)
+    {
+        var applicationIdMapPath = GetOptionValue(args, "--application-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Application");
+        var applicationIdMap = File.Exists(applicationIdMapPath)
+            ? Visa2014IdMapHelper.Load(applicationIdMapPath)
+            : new Dictionary<Guid, Guid>();
+
+        Console.WriteLine($"INF Application id-map: {applicationIdMapPath} ({applicationIdMap.Count} entries)");
+
+        var result = await Visa2014InvitationODataImporter.RunAsync(
+            target,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            applicationIdMap,
+            objectSpaceFactory,
+            dryRun ? null : invitationIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}  Application not in id-map (header still posted): {result.SkippedMissingApplicationIdMap}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+
+        if (result.FailedCount > 0)
+        {
+            foreach (var error in result.Errors.Take(10))
+                Console.Error.WriteLine($"ERR {error}");
+            if (result.Errors.Count > 10)
+                Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+        }
+
+        return result.FailedCount > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunInvitationItemImportAsync(
+        IVisa2014ImportTarget target,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string invitationItemIdMapPath,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var personIdMapPath = GetOptionValue(args, "--person-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Person");
+        var passportIdMapPath = GetOptionValue(args, "--passport-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Passport");
+        var invitationIdMapPath = GetOptionValue(args, "--invitation-id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Invitation");
+
+        Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+        Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
+        Console.WriteLine($"INF Invitation id-map: {invitationIdMapPath}");
+
+        var result = await Visa2014InvitationItemODataImporter.RunAsync(
+            target,
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            personIdMapPath,
+            passportIdMapPath,
+            invitationIdMapPath,
+            dryRun ? null : invitationItemIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
+        Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}");
+        if (!dryRun)
+        {
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (missing required id-map): {result.SkippedMissingRequiredIdMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
+            if (result.IdMapPath != null)
+                Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+        }
+        else if (result.SkippedMissingRequiredIdMap > 0)
+        {
+            Console.WriteLine($"INF Would skip (missing required id-map): {result.SkippedMissingRequiredIdMap}");
         }
 
         if (result.FailedCount > 0)

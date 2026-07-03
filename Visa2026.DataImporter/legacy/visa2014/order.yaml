@@ -210,10 +210,81 @@ entities:
       Layer 3 ApplicationType approved with skip_row — E:44 (92) + E:55 (13) skipped; 105 headers / 204 items.
       ApplicationItem discovery complete — see ApplicationItem row.
 
+      ApplicationItem discovery complete — see ApplicationItem row (import after WorkPermitItem wave).
+
+  - targetODataEntity: WorkPermit
+    dependsOn:
+      - Application
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermit.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: Reordered before ApplicationItem. Legacy header synthesized from dbo.WorkPermitLetter (~398)
+      + 2 orphan dbo.WorkPermit rows without letter. Application FK optional on pilot.
+      Transform + preview exporter in progress; Excel review before importConfirmed.
+
+  - targetODataEntity: WorkPermitItem
+    dependsOn:
+      - WorkPermit
+      - Person
+      - Passport
+      - EmployeePositionHistory
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermitItem.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: 1:1 dbo.WorkPermit → item (~6363 rows). WorkPermitLocation bit matrix → WorkPermittedLocations.
+      WorkPermittedLocationName catalog expansion + layer-3 audit in progress.
+
+  - targetODataEntity: Invitation
+    dependsOn:
+      - Application
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Invitation.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: Header synthesized from dbo.ApplicationResult rows referenced by PersonInInvitation.Invitation (~2961).
+      ApplicationResult.Number → InvitationNumber; IssuedDate → StartDate; DateOfExpire → closest ValidityDuration (90/180/365).
+      13 duplicate InvitationNumber groups suffix with legacy oid tail; ~254 headers skipped (missing Number/IssuedDate/DateOfExpire).
+      Application FK optional via Application id-map.
+
+  - targetODataEntity: InvitationItem
+    dependsOn:
+      - Invitation
+      - Person
+      - Passport
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/InvitationItem.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: 1:1 dbo.PersonInInvitation (~5239 active). Person ← COALESCE(Employee, FamilyMember).
+      ApplicationResult.Result == 1 → IsCancelled heuristic. id-map: PersonInInvitation.Oid.
+
   - targetODataEntity: ApplicationItem
     dependsOn:
       - Person
       - Application
+      - WorkPermitItem
     importPhase: application-domain
     discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
     discoveryStatus: complete
@@ -226,44 +297,12 @@ entities:
       Discovery 2026-06-29: dbo.PersonInApplication — 21,794 active rows (40,414 total incl. soft-deleted).
       Preview 21,588 import / 206 skipped (204 parent E:44/E:55, 2 dedupe_duplicate). OData importer shipped 2026-06-30.
       CheckPoint via OData NameTm; BorderZoneLocation comma-separated string; PurposeOfTravel omitted (dropped from BO).
-      CurrentWorkPermitItem allow_null until WorkPermitItem id-map wave; WorkPermittedLocations null pending audit.
+      CurrentWorkPermitItem + WorkPermittedLocations require WorkPermitItem id-map (legacy WorkPermit.Oid 1:1).
+      Reimport ApplicationItems.ps1 after WorkPermitItem wave for full FK fidelity.
       CurrentAddressOfResidence: legacy pia.AddressOfResidence FK, else pia.Address via AddressOfResidence id-map
       (PIA inference + sponsor canonical key for family lines). See postImportCorrections for DB backfill only.
 
   # --- permits-and-visas (after application-domain) ---
-  - targetODataEntity: WorkPermit
-    dependsOn:
-      - Application
-    importPhase: permits-and-visas
-    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermit.yaml
-    discoveryStatus: not_started
-    importConfirmed: false
-    importConfirmedAt: null
-    importConfirmedBy: null
-    importStatus: pending
-    notes: |
-      PLAN 2026-06-29: Legacy has no header — synthesize from dbo.WorkPermitLetter (~398).
-      Application FK optional on pilot (ProcessNumber → PersonInApplication.Application).
-      See discovery/WorkPermit.yaml.
-
-  - targetODataEntity: WorkPermitItem
-    dependsOn:
-      - WorkPermit
-      - Person
-      - Passport
-      - EmployeePositionHistory
-    importPhase: permits-and-visas
-    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermitItem.yaml
-    discoveryStatus: not_started
-    importConfirmed: false
-    importConfirmedAt: null
-    importConfirmedBy: null
-    importStatus: pending
-    notes: |
-      PLAN 2026-06-29: 1:1 dbo.WorkPermit row → item. WorkPermitLocation bit matrix → WorkPermittedLocations.
-      Expand WorkPermittedLocationName catalog before layer-3 sign-off. See discovery/WorkPermitItem.yaml.
-
-  # --- permits-and-visas (commented templates) ---
 
   # --- progress-and-history ---
   - targetODataEntity: ApplicationProgress

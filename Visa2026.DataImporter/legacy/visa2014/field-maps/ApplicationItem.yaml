@@ -36,7 +36,8 @@ deduplication:
     HAVING COUNT(*) > 1;
   notes: |
     925 duplicate groups (1,221 extra rows); max duplicate count 2 per group on Çalik data.
-    Upsert/id-map still keyed on legacy PersonInApplication.Oid — dedupe only affects which row POSTs.
+    Parent link uses legacy Application.Oid (GUID) via Application id-map — never FullApplicationNumber alone.
+    Upsert/id-map keyed on legacy PersonInApplication.Oid; dedupe only skips duplicate PIAs on the same legacy Application+Person.
 
 propertyGaps:
   legacyOnly:
@@ -135,8 +136,11 @@ propertyGaps:
       missingBehavior: allow_null
       notes: No EmployeeContract FK on legacy line
     - property: CurrentInvitationItem
-      disposition: defer
-      notes: Legacy Invitation computed from ApplicationResult — InvitationItem wave
+      disposition: resolve_from_person_in_invitation
+      missingBehavior: allow_null
+      notes: |
+        Legacy PersonInInvitation row for same Application (via ApplicationResult) + Person.
+        InvitationItem id-map key = PersonInInvitation.Oid. Tie-break: latest ApplicationResult.IssuedDate.
     - property: PreviousInvitationItem
       disposition: defer
     - property: PreviousWorkPermitItem
@@ -261,8 +265,20 @@ fields:
     missingBehavior: allow_null
     gatedBy: Application.ApplicationType.ShowCurrentWorkPermitItem
     notes: |
-      WorkPermitItem import uses same legacy Oid as dbo.WorkPermit.
-      ApplicationItem is ordered before WorkPermitItem in order.yaml — allow_null until id-map backfill or reorder import.
+      Primary: legacy PersonInApplication.WorkPermit FK → WorkPermitItem id-map (legacy Oid = dbo.WorkPermit.Oid).
+      Fallback when FK null: latest dbo.WorkPermit per employee (StartDate DESC, Oid DESC) — same rule as PersonCurrentItems.GetCurrentWorkPermitItem.
+      Employee lines only; gated by ShowCurrentWorkPermitItem.
+
+  - source: PersonInInvitation
+    target: CurrentInvitationItem
+    transform: fk_id_map
+    idMapEntity: InvitationItem
+    join: |
+      PersonInInvitation + ApplicationResult on same Application as PersonInApplication;
+      match Employee or FamilyMember; latest ApplicationResult.IssuedDate when multiple.
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentInvitationItem
+    notes: Legacy key PersonInInvitation.Oid — not ApplicationResult.Oid.
 
   - source: Position
     target: CurrentPositionHistory

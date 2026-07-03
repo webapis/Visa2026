@@ -812,8 +812,8 @@ catalogs:
       compositeColumns:
         - ForEmployee
         - ForFamilyMember
-        - ApplicationTypeForEmployee.TypeOfApplicationForEmployeeID
-        - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMemberID
+        - ApplicationTypeForEmployee.TypeOfApplicationForEmployee
+        - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMember
         - IsInvitationWithWorkPermit.InvitationAndWorkPermitRequired
         - IsWizaWithWorkPermit.WizaAndWorkPermitRequired
         - ChangeInformation
@@ -821,7 +821,7 @@ catalogs:
       categoryRule: "ForEmployee=1 → E; ForFamilyMember=1 → F"
       sampleQuery: |
         SELECT CASE WHEN a.ForEmployee=1 THEN 'E' WHEN a.ForFamilyMember=1 THEN 'F' END AS category,
-               COALESCE(ate.TypeOfApplicationForEmployeeID, atfm.TypeOfApplicationForFamilyMemberID) AS subtype_id,
+               COALESCE(ate.TypeOfApplicationForEmployee, atfm.TypeOfApplicationForFamilyMember) AS subtype_id,
                iwp.InvitationAndWorkPermitRequired, wwp.WizaAndWorkPermitRequired,
                a.ChangeInformation, COUNT(*) AS cnt
         FROM dbo.Application a
@@ -831,7 +831,7 @@ catalogs:
         LEFT JOIN dbo.IsWizaWithWorkPermit wwp ON wwp.Oid = a.IsWizaWithWorkPermit
         WHERE a.GCRecord IS NULL
         GROUP BY CASE WHEN a.ForEmployee=1 THEN 'E' WHEN a.ForFamilyMember=1 THEN 'F' END,
-                 COALESCE(ate.TypeOfApplicationForEmployeeID, atfm.TypeOfApplicationForFamilyMemberID),
+                 COALESCE(ate.TypeOfApplicationForEmployee, atfm.TypeOfApplicationForFamilyMember),
                  iwp.InvitationAndWorkPermitRequired, wwp.WizaAndWorkPermitRequired, a.ChangeInformation
         ORDER BY cnt DESC;
     audit:
@@ -840,12 +840,12 @@ catalogs:
       distinctLegacyValuesUsed: 31
       allMappedToTarget: false
       unmapped:
-        - "E:44:na:na:na"
+        - "E:33:na:na:na"
         - "E:55:na:na:na"
       skipPolicy: skip_row
       skippedApplicationHeaders: 105
       skippedApplicationItemRows: 204
-      approvedDecision: "Approved 2026-06-29 — skip E:44 (92 apps) + E:55 (13 apps); no Visa2026 ApplicationType.Name mapping"
+      approvedDecision: "Approved 2026-06-29 — skip E:33 (92 apps) + E:55 (13 apps); composite uses SubType enum not TypeOfApplication*ID"
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
     values:
       - legacy: "E:7:na:na:na"
@@ -891,6 +891,12 @@ catalogs:
         target: App_Change_Inv
       - legacy: "E:45:na:na:na"
         target: App_Cancel_Visa
+      - legacy: "E:21:na:na:na"
+        target: App_Cancel_Visa
+        notes: SubType enum ApplicationForCancellingVisa (legacy TypeOfApplicationForEmployeeID was 45)
+      - legacy: "E:22:na:na:na"
+        target: App_Cancell_WP
+        notes: SubType enum ApplicationForCancellingWorkPermit (legacy TypeOfApplicationForEmployeeID was 31)
       - legacy: "E:7:na:0:na"
         target: App_Visa_and_WP_Ext
       - legacy: "E:7:na:1:na"
@@ -915,6 +921,9 @@ catalogs:
         target: App_Reg_Check_Out
       - legacy: "F:45:na:na:na"
         target: App_Cancel_Visa
+      - legacy: "F:21:na:na:na"
+        target: App_Cancel_Visa
+        notes: SubType enum ApplicationForCancellingVisa (legacy TypeOfApplicationForFamilyMemberID was 45)
       - legacy: "F:5:na:na:na"
         target: App_Reg_Info_Change_Address
       - legacy: "F:10:na:na:na"
@@ -1014,18 +1023,19 @@ catalogs:
     legacy:
       storage: bit_matrix
       table: dbo.WorkPermitLocation
-      via: PersonInApplication.WorkPermit → WorkPermit.WorkPermitLocation
-      transformRef: field-maps/ApplicationItem.yaml WorkPermittedLocations
+      via: dbo.WorkPermit.WorkPermitLocation
+      transformRef: field-maps/WorkPermitItem.yaml WorkPermittedLocations
     audit:
-      completedAt: null
-      scope: ApplicationItem
-      distinctLegacyValuesUsed: null
-      allMappedToTarget: false
+      completedAt: 2026-07-03
+      scope: WorkPermitItem
+      distinctLegacyValuesUsed: 30
+      allMappedToTarget: true
+      catalogRowsAdded: work-permitted-location-name.json expanded 8 → 30 (heuristic from bit columns)
     unmappedPolicy: block_row
     notes: |
-      PENDING — full bit-matrix audit with WorkPermitItem discovery (73 legacy flags vs 8-row tenant seed).
-      ApplicationItem imports WorkPermittedLocations from linked WorkPermit row when ShowWorkPermittedLocations.
-      Reuse WorkPermitItem layer-3 when that dossier closes; until then Excel preview may list _UnmappedLookups.
+      Çalik pilot 2026-07-03: Excel preview 6363 rows, _UnmappedLookups empty after Visa2014WorkPermitLocationLabelHeuristic
+      (Seheri/Şäheri/Etraby suffix + prefix normalize). Tenant seed expanded from preview column L distinct labels.
+      ApplicationItem WorkPermittedLocations can reuse same catalog after WorkPermitItem id-map exists.
 
   - targetCatalog: MigrationService
     targetMatchProperty: NameTm

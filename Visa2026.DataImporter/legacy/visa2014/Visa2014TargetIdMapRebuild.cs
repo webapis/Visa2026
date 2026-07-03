@@ -28,7 +28,7 @@ internal static class Visa2014TargetIdMapRebuild
 
         var entities = ParseEntities(args);
         if (entities.Count == 0)
-            entities = ["Person", "Application", "Passport", "Visa", "Education", "EmployeePositionHistory", "EmployeeSalary", "AddressOfResidence"];
+            entities = ["Person", "Application", "Passport", "Visa", "Education", "EmployeePositionHistory", "EmployeeSalary", "AddressOfResidence", "WorkPermit", "WorkPermitItem", "Invitation", "InvitationItem"];
 
         Console.WriteLine("=== VISA2014 id-map rebuild from target");
         Console.WriteLine($"INF Legacy source: {source.Id}");
@@ -82,42 +82,52 @@ internal static class Visa2014TargetIdMapRebuild
 
         if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
         {
+            var previousMap = File.Exists(mapPath) ? Visa2014IdMapHelper.Load(mapPath) : null;
+            var applicationItemIdMapPath = Path.Combine(mapDir, "ApplicationItem.json");
+            var rebuild = await Visa2014ApplicationIdMapRebuild.RebuildAsync(
+                conn,
+                source.ConnectionString,
+                source.LookupTranslationPaths,
+                File.Exists(applicationItemIdMapPath) ? applicationItemIdMapPath : null,
+                verbose);
+
+            map = rebuild.Map;
+            matched = rebuild.Matched;
+            skipped = rebuild.Skipped;
+
+            if (previousMap is { Count: > 0 })
+            {
+                var preserved = MergePreservedApplicationIdMapEntries(map, previousMap, verbose);
+                matched += preserved;
+            }
+
+            var legacyIdentities = new Dictionary<Guid, Visa2014ApplicationTransform.ApplicationImportIdentity>();
             var batch = Visa2014ApplicationTransform.PrepareImportBatch(
                 source.ConnectionString, source.LookupTranslationPaths, maxRows: null, verbose: false);
             foreach (var row in batch.ImportRows)
             {
                 if (row.GetValueOrDefault("_importAction") as string == "skip")
-                {
-                    skipped++;
                     continue;
-                }
 
                 var legacyOid = (Guid)row["_legacyRowId"]!;
-                var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string;
-                if (string.IsNullOrWhiteSpace(fullNumber))
-                {
-                    skipped++;
-                    continue;
-                }
+                var identity = Visa2014ApplicationTransform.ApplicationImportIdentity.FromExportRow(row);
+                if (identity != null)
+                    legacyIdentities[legacyOid] = identity.Value;
+            }
 
-                var targetId = await ScalarGuidAsync(conn,
-                    """
-                    SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM Applications
-                    WHERE (GCRecord IS NULL OR GCRecord = 0)
-                      AND IsManualEntry = 1
-                      AND FullApplicationNumber = @key
-                    ORDER BY ID
-                    """,
-                    ("@key", fullNumber.Trim()));
-                if (!targetId.HasValue)
-                {
-                    skipped++;
-                    continue;
-                }
-
-                map[legacyOid] = targetId.Value;
-                matched++;
+            var collisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateTargetCollisions(
+                map,
+                legacyIdentities);
+            if (collisions.Count > 0)
+            {
+                Console.Error.WriteLine(
+                    $"ERR Application id-map rebuild: {collisions.Count} target collision(s) — " +
+                    "multiple legacy Application Oids mapped to the same target.");
+                foreach (var collision in collisions.Take(20))
+                    Console.Error.WriteLine($"ERR   {collision}");
+                if (collisions.Count > 20)
+                    Console.Error.WriteLine($"ERR   ... and {collisions.Count - 20} more");
+                return 1;
             }
         }
         else if (string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase))
@@ -334,6 +344,7 @@ internal static class Visa2014TargetIdMapRebuild
         else if (string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase))
         {
             var personMap = LoadMap(Path.Combine(mapDir, "Person.json"));
+            var applicationItemMap = LoadMap(Path.Combine(mapDir, "ApplicationItem.json"));
             var batch = Visa2014AddressOfResidenceTransform.PrepareImportBatch(
                 source.ConnectionString, source.LookupTranslationPaths, maxRows: null, verbose: false);
             foreach (var row in batch.ImportRows)
@@ -350,33 +361,203 @@ internal static class Visa2014TargetIdMapRebuild
                     continue;
                 }
 
-                var fullAddress = row.GetValueOrDefault("FullAddress") as string;
-                var expirationText = row.GetValueOrDefault("ExpirationDate") as string;
                 if (!TryParseLegacyGuid(row, "Person", out var legacyPersonOid) ||
-                    !personMap.TryGetValue(legacyPersonOid, out var personId) ||
-                    string.IsNullOrWhiteSpace(fullAddress))
+                    !personMap.TryGetValue(legacyPersonOid, out var personId))
                 {
                     skipped++;
                     continue;
                 }
 
-                DateTime? expiration = DateTime.TryParse(expirationText, out var exp) ? exp.Date : null;
+                var targetId = await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(conn, personId, row);
+                if (!targetId.HasValue)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                map[legacyOid] = targetId.Value;
+                matched++;
+            }
+
+            var aliasAdded = await Visa2014AddressOfResidenceIdMapAliasAppender.AppendAsync(
+                source.ConnectionString,
+                source.LookupTranslationPaths,
+                personMap,
+                applicationItemMap,
+                map,
+                verbose);
+            if (verbose && aliasAdded > 0)
+                Console.WriteLine($"INF AddressOfResidence id-map aliases appended: {aliasAdded}");
+        }
+        else if (string.Equals(entity, "WorkPermit", StringComparison.OrdinalIgnoreCase))
+        {
+            var batch = Visa2014WorkPermitTransform.PrepareImportBatch(
+                source.ConnectionString, source.LookupTranslationPaths, maxRows: null, verbose: false);
+            foreach (var row in batch.ImportRows)
+            {
+                if (row.GetValueOrDefault("_importAction") as string == "skip")
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var legacyOid = (Guid)row["_legacyRowId"]!;
+                var workPermitNumber = row.GetValueOrDefault("WorkPermitNumber") as string;
+                var issuedDateText = row.GetValueOrDefault("IssuedDate") as string;
+                if (string.IsNullOrWhiteSpace(workPermitNumber) ||
+                    !DateTime.TryParse(issuedDateText, out var issuedDate))
+                {
+                    skipped++;
+                    continue;
+                }
+
                 var targetId = await ScalarGuidAsync(conn,
                     """
                     SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM AddressesOfResidence
+                    FROM WorkPermits
+                    WHERE (GCRecord IS NULL OR GCRecord = 0)
+                      AND WorkPermitNumber = @workPermitNumber
+                      AND CAST(StartDate AS date) = @issuedDate
+                    ORDER BY ID
+                    """,
+                    ("@workPermitNumber", workPermitNumber.Trim()),
+                    ("@issuedDate", issuedDate.Date));
+                if (!targetId.HasValue)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                map[legacyOid] = targetId.Value;
+                matched++;
+            }
+        }
+        else if (string.Equals(entity, "WorkPermitItem", StringComparison.OrdinalIgnoreCase))
+        {
+            var personMap = LoadMap(Path.Combine(mapDir, "Person.json"));
+            var batch = Visa2014WorkPermitItemTransform.PrepareImportBatch(
+                source.ConnectionString, source.LookupTranslationPaths, maxRows: null, verbose: false);
+            foreach (var row in batch.ImportRows)
+            {
+                if (row.GetValueOrDefault("_importAction") as string == "skip")
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var legacyOid = (Guid)row["_legacyRowId"]!;
+                var workPermitNumber = row.GetValueOrDefault("WorkPermitNumber") as string;
+                var startDateText = row.GetValueOrDefault("StartDate") as string;
+                if (!TryParseLegacyGuid(row, "Person", out var legacyPersonOid) ||
+                    string.IsNullOrWhiteSpace(workPermitNumber) ||
+                    !personMap.TryGetValue(legacyPersonOid, out var personId) ||
+                    !DateTime.TryParse(startDateText, out var startDate))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var targetId = await ScalarGuidAsync(conn,
+                    """
+                    SELECT TOP 1 CAST(ID AS varchar(36))
+                    FROM WorkPermitItems
                     WHERE (GCRecord IS NULL OR GCRecord = 0)
                       AND PersonID = @personId
-                      AND FullAddress = @fullAddress
-                      AND (
-                            (@expiration IS NULL AND ExpirationDate IS NULL)
-                         OR (ExpirationDate IS NOT NULL AND CAST(ExpirationDate AS date) = @expiration)
-                      )
+                      AND WorkPermitNumber = @workPermitNumber
+                      AND CAST(StartDate AS date) = @startDate
                     ORDER BY ID
                     """,
                     ("@personId", personId),
-                    ("@fullAddress", fullAddress.Trim()),
-                    ("@expiration", expiration.HasValue ? expiration.Value : DBNull.Value));
+                    ("@workPermitNumber", workPermitNumber.Trim()),
+                    ("@startDate", startDate.Date));
+                if (!targetId.HasValue)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                map[legacyOid] = targetId.Value;
+                matched++;
+            }
+        }
+        else if (string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase))
+        {
+            var batch = Visa2014InvitationTransform.PrepareImportBatch(
+                source.ConnectionString, source.LookupTranslationPaths, maxRows: null, verbose: false);
+            foreach (var row in batch.ImportRows)
+            {
+                if (row.GetValueOrDefault("_importAction") as string == "skip")
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var legacyOid = (Guid)row["_legacyRowId"]!;
+                var invitationNumber = row.GetValueOrDefault("InvitationNumber") as string;
+                var startDateText = row.GetValueOrDefault("StartDate") as string;
+                if (string.IsNullOrWhiteSpace(invitationNumber) ||
+                    !DateTime.TryParse(startDateText, out var startDate))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var targetId = await ScalarGuidAsync(conn,
+                    """
+                    SELECT TOP 1 CAST(ID AS varchar(36))
+                    FROM Invitations
+                    WHERE (GCRecord IS NULL OR GCRecord = 0)
+                      AND InvitationNumber = @invitationNumber
+                      AND CAST(StartDate AS date) = @startDate
+                    ORDER BY ID
+                    """,
+                    ("@invitationNumber", invitationNumber.Trim()),
+                    ("@startDate", startDate.Date));
+                if (!targetId.HasValue)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                map[legacyOid] = targetId.Value;
+                matched++;
+            }
+        }
+        else if (string.Equals(entity, "InvitationItem", StringComparison.OrdinalIgnoreCase))
+        {
+            var personMap = LoadMap(Path.Combine(mapDir, "Person.json"));
+            var invitationMap = LoadMap(Path.Combine(mapDir, "Invitation.json"));
+            var batch = Visa2014InvitationItemTransform.PrepareImportBatch(
+                source.ConnectionString, source.LookupTranslationPaths, maxRows: null, verbose: false);
+            foreach (var row in batch.ImportRows)
+            {
+                if (row.GetValueOrDefault("_importAction") as string == "skip")
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var legacyOid = (Guid)row["_legacyRowId"]!;
+                if (!TryParseLegacyGuid(row, "Person", out var legacyPersonOid) ||
+                    !TryParseLegacyGuid(row, "Invitation", out var legacyInvitationOid) ||
+                    !personMap.TryGetValue(legacyPersonOid, out var personId) ||
+                    !invitationMap.TryGetValue(legacyInvitationOid, out var invitationId))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var targetId = await ScalarGuidAsync(conn,
+                    """
+                    SELECT TOP 1 CAST(ID AS varchar(36))
+                    FROM InvitationItems
+                    WHERE (GCRecord IS NULL OR GCRecord = 0)
+                      AND PersonID = @personId
+                      AND InvitationID = @invitationId
+                    ORDER BY ID
+                    """,
+                    ("@personId", personId),
+                    ("@invitationId", invitationId));
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -396,6 +577,32 @@ internal static class Visa2014TargetIdMapRebuild
         await Visa2014IdMapHelper.SaveAsync(mapPath, map);
         Console.WriteLine($"INF {entity} id-map: {matched} matched, {skipped} skipped -> {mapPath}");
         return 0;
+    }
+
+    private static int MergePreservedApplicationIdMapEntries(
+        Dictionary<Guid, Guid> map,
+        IReadOnlyDictionary<Guid, Guid> previousMap,
+        bool verbose)
+    {
+        var usedTargets = map.Values.ToHashSet();
+        int merged = 0;
+
+        foreach (var (legacyOid, targetId) in previousMap)
+        {
+            if (map.ContainsKey(legacyOid))
+                continue;
+
+            if (usedTargets.Contains(targetId))
+                continue;
+
+            map[legacyOid] = targetId;
+            usedTargets.Add(targetId);
+            merged++;
+            if (verbose)
+                Console.WriteLine($"  MERGE preserved {legacyOid:D} -> {targetId:D}");
+        }
+
+        return merged;
     }
 
     private static Dictionary<Guid, Guid> LoadMap(string path)

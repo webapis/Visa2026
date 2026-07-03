@@ -34,7 +34,7 @@ namespace Visa2026.Module.BusinessObjects
 
     [DefaultClassOptions]
 
-    [DefaultProperty(nameof(FullAddress))]
+    [DefaultProperty(nameof(DisplayAddress))]
 
     [NavigationItem("Lookup/General/Geography")]
 
@@ -402,7 +402,26 @@ namespace Visa2026.Module.BusinessObjects
 
         }
 
-
+        /// <summary>Region, city, and address combined for lookups and list display.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DisplayAddress
+        {
+            get
+            {
+                var parts = new List<string>();
+                if (Region != null)
+                    parts.Add(LookupLocalization.GetDisplayName(Region));
+                if (City != null)
+                    parts.Add(LookupLocalization.GetDisplayName(City));
+                var address = FullAddress?.Trim();
+                if (!string.IsNullOrEmpty(address))
+                    parts.Add(address);
+                return string.Join(", ", parts);
+            }
+        }
 
         private Region region;
 

@@ -29,8 +29,8 @@ internal static class Visa2014ApplicationMigrationServiceInferencePreview
         WHERE a.GCRecord IS NULL
           AND a.DepartmentForRegistration IS NULL
           AND (
-              (ISNULL(a.ForEmployee, 0) = 1 AND ate.TypeOfApplicationForEmployeeID = 2)
-              OR (ISNULL(a.ForFamilyMember, 0) = 1 AND atfm.TypeOfApplicationForFamilyMemberID = 2)
+              (ISNULL(a.ForEmployee, 0) = 1 AND ate.TypeOfApplicationForEmployee = 2)
+              OR (ISNULL(a.ForFamilyMember, 0) = 1 AND atfm.TypeOfApplicationForFamilyMember = 2)
           )
         """;
 

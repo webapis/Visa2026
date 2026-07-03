@@ -1,0 +1,69 @@
+# Discovery dossier — Invitation (permits-and-visas header BO)
+
+targetODataEntity: Invitation
+discoveryStatus: complete
+
+legacy:
+  boClass: IApplicationResult
+  tables:
+    - dbo.ApplicationResult
+    - dbo.PersonInInvitation
+  rowCount: 2961
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Invitation.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Invitation.yaml
+  tableMappingId: invitation-header
+  cardinality: distinct_application_result_referenced_by_person_in_invitation
+  upsertKeys:
+    - InvitationNumber
+    - StartDate
+  lookupDependencies:
+    - ValidityDuration
+  duplicateGroups: 13
+  legacyOnlyCount: null
+  targetOnlyCount: null
+  mismatchCount: null
+  blockedReason: null
+  notes: |
+    HEADER SOURCE:
+      dbo.ApplicationResult rows referenced by PersonInInvitation.Invitation (~2961 distinct Oids on Çalik).
+      ~254 headers skipped when Number, IssuedDate, or DateOfExpire is null.
+
+    COLUMN MAP:
+      Number → InvitationNumber
+      IssuedDate → StartDate
+      DateOfExpire → ValidityDuration (closest of 90/180/365 days at import)
+      Application → optional Application FK via id-map
+
+    DEDUPE:
+      13 duplicate InvitationNumber groups — suffix all with legacy oid tail (same pattern as WorkPermit).
+
+    id-map: ApplicationResult.Oid → Invitation.ID
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: partial
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: false
+  inventory_updated: false
+  learnings_appended: false
+
+completedAt: null
+completedBy: null
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |

@@ -95,6 +95,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | On-prem staging waves | `import/OnPrem-Staging.ps1` | Ordered per `order.yaml` |
 | Tenant catalog generation | `import/Invoke-TenantCatalogGeneration.ps1` | Wraps `--generate-visa2014-tenant-catalogs` |
 | ApplicationItem import only | `import/ApplicationItems.ps1` | Parents + id-maps must exist |
+| WorkPermit + WorkPermitItem import | `import/WorkPermits.ps1` | After Person/Passport/EPH id-maps |
 | Single entity (any BO) | *(no script)* | `dotnet run … --import-visa2014 --entity <BO>` |
 
 ### Partial reimport (dev only)

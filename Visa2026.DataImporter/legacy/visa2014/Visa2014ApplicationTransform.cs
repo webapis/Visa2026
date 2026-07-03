@@ -68,7 +68,7 @@ internal static class Visa2014ApplicationTransform
 
     private static readonly HashSet<string> ApplicationTypeSkipComposites = new(StringComparer.Ordinal)
     {
-        "E:44:na:na:na",
+        "E:33:na:na:na",
         "E:55:na:na:na",
     };
 
@@ -138,8 +138,8 @@ internal static class Visa2014ApplicationTransform
             CASE WHEN ISNULL(a.AutoRegistration, 0) = 1 THEN '1' ELSE '0' END AS AutoRegistration,
             CASE WHEN ISNULL(a.ForEmployee, 0) = 1 THEN '1' ELSE '0' END AS ForEmployee,
             CASE WHEN ISNULL(a.ForFamilyMember, 0) = 1 THEN '1' ELSE '0' END AS ForFamilyMember,
-            ate.TypeOfApplicationForEmployeeID AS EmployeeSubtypeId,
-            atfm.TypeOfApplicationForFamilyMemberID AS FamilySubtypeId,
+            ate.TypeOfApplicationForEmployee AS EmployeeSubtypeId,
+            atfm.TypeOfApplicationForFamilyMember AS FamilySubtypeId,
             CASE WHEN a.IsInvitationWithWorkPermit IS NULL THEN '0' ELSE '1' END AS HasInvitationWpFk,
             iwp.InvitationAndWorkPermitRequired,
             CASE WHEN a.IsWizaWithWorkPermit IS NULL THEN '0' ELSE '1' END AS HasWizaWpFk,
@@ -373,25 +373,32 @@ internal static class Visa2014ApplicationTransform
     private static void ApplyManualNumberDedupe(List<WorkingRow> rows, List<Dictionary<string, object?>> dedupeSummary)
     {
         var groups = rows
-            .Select(r => new { Row = r, Norm = NormalizeManualNumber(r.Raw.ManualApplicationNumber) })
-            .Where(x => !string.IsNullOrWhiteSpace(x.Norm))
-            .GroupBy(x => x.Norm, StringComparer.OrdinalIgnoreCase)
+            .Select(r => new
+            {
+                Row = r,
+                IdentityKey = Visa2014ApplicationTransform.BuildApplicationIdentityGroupKey(
+                    r.Raw.ManualApplicationNumber,
+                    r.Raw.ManualApplicationDate,
+                    BuildApplicationTypeComposite(r.Raw)),
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.IdentityKey))
+            .GroupBy(x => x.IdentityKey!, StringComparer.OrdinalIgnoreCase)
             .Where(g => g.Count() > 1);
 
         foreach (var group in groups)
         {
             var members = group.ToList();
-            var groupId = $"MAN:{group.Key}";
+            var groupId = $"MAN_DATE:{group.Key}";
             foreach (var member in members)
                 member.Row.DedupeGroupId = groupId;
 
             dedupeSummary.Add(new Dictionary<string, object?>(StringComparer.Ordinal)
             {
                 ["_dedupeGroupId"] = groupId,
-                ["key"] = "ManualApplicationNumber",
+                ["key"] = Visa2014ApplicationTransform.ApplicationIdentityDedupeKeyName,
                 ["normalizedValue"] = group.Key,
                 ["memberCount"] = members.Count,
-                ["canonicalRule"] = "keep_all_import_with_oid_upsert",
+                ["canonicalRule"] = "keep_all_import_with_legacy_oid_upsert",
             });
         }
     }
@@ -979,5 +986,138 @@ internal static class Visa2014ApplicationTransform
 
         if (verbose && enriched > 0)
             Console.WriteLine($"INF MigrationService address inference: {enriched} row(s) enriched.");
+    }
+
+    internal const string ApplicationIdentityDedupeKeyName = "FullApplicationNumber+ApplicationDate+ApplicationType";
+
+    internal const string ApplicationTargetLookupSql =
+        """
+        SELECT TOP 1 CAST(a.ID AS varchar(36))
+        FROM Applications a
+        INNER JOIN ApplicationTypes t ON t.ID = a.ApplicationTypeID
+        WHERE (a.GCRecord IS NULL OR a.GCRecord = 0)
+          AND a.IsManualEntry = 1
+          AND a.FullApplicationNumber = @fullNumber
+          AND CAST(a.ApplicationDate AS date) = @applicationDate
+          AND t.Name = @applicationTypeName
+        ORDER BY a.ID
+        """;
+
+    internal const string ApplicationTargetCandidatesSql =
+        """
+        SELECT CAST(a.ID AS varchar(36))
+        FROM Applications a
+        INNER JOIN ApplicationTypes t ON t.ID = a.ApplicationTypeID
+        WHERE (a.GCRecord IS NULL OR a.GCRecord = 0)
+          AND a.IsManualEntry = 1
+          AND a.FullApplicationNumber = @fullNumber
+          AND CAST(a.ApplicationDate AS date) = @applicationDate
+          AND t.Name = @applicationTypeName
+        ORDER BY a.ID
+        """;
+
+    internal readonly record struct ApplicationImportIdentity(
+        string FullApplicationNumber,
+        DateTime ApplicationDate,
+        string ApplicationTypeName)
+    {
+        public string GroupKey => BuildApplicationIdentityGroupKey(
+            FullApplicationNumber,
+            ApplicationDate,
+            ApplicationTypeName)!;
+
+        public static ApplicationImportIdentity? FromExportRow(IReadOnlyDictionary<string, object?> row)
+        {
+            var fullNumber = row.GetValueOrDefault("FullApplicationNumber") as string;
+            if (string.IsNullOrWhiteSpace(fullNumber))
+                return null;
+
+            if (!TryParseExportApplicationDate(row.GetValueOrDefault("ApplicationDate"), out var applicationDate))
+                return null;
+
+            var applicationTypeName = row.GetValueOrDefault("ApplicationType") as string;
+            if (string.IsNullOrWhiteSpace(applicationTypeName))
+                return null;
+
+            return new ApplicationImportIdentity(
+                fullNumber.Trim(),
+                applicationDate.Date,
+                applicationTypeName.Trim());
+        }
+    }
+
+    internal static string? BuildApplicationIdentityGroupKey(
+        string? fullApplicationNumber,
+        DateTime? applicationDate,
+        string? applicationTypeName = null)
+    {
+        if (string.IsNullOrWhiteSpace(fullApplicationNumber) || !applicationDate.HasValue)
+            return null;
+
+        var key = $"{fullApplicationNumber.Trim()}|{applicationDate.Value:yyyy-MM-dd}";
+        if (!string.IsNullOrWhiteSpace(applicationTypeName))
+            key += $"|{applicationTypeName.Trim()}";
+
+        return key;
+    }
+
+    internal static bool TryParseExportApplicationDate(object? value, out DateTime applicationDate)
+    {
+        applicationDate = default;
+        if (value is DateTime dt)
+        {
+            applicationDate = dt.Date;
+            return true;
+        }
+
+        var text = value as string;
+        return !string.IsNullOrWhiteSpace(text) && DateTime.TryParse(text, out applicationDate);
+    }
+
+    internal static IReadOnlyList<string> FindApplicationIdMapCrossDateCollisions(
+        IReadOnlyDictionary<Guid, Guid> idMap,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths)
+    {
+        var batch = PrepareImportBatch(legacyConnectionString, lookupTranslationPaths, maxRows: null, verbose: false);
+        var legacyIdentities = new Dictionary<Guid, ApplicationImportIdentity>();
+        foreach (var row in batch.ImportRows)
+        {
+            if (row.GetValueOrDefault("_importAction") as string == "skip")
+                continue;
+
+            var legacyOid = (Guid)row["_legacyRowId"]!;
+            var identity = ApplicationImportIdentity.FromExportRow(row);
+            if (identity != null)
+                legacyIdentities[legacyOid] = identity.Value;
+        }
+
+        return FindApplicationIdMapCrossDateTargetCollisions(idMap, legacyIdentities);
+    }
+
+    internal static IReadOnlyList<string> FindApplicationIdMapCrossDateTargetCollisions(
+        IReadOnlyDictionary<Guid, Guid> idMap,
+        IReadOnlyDictionary<Guid, ApplicationImportIdentity> legacyIdentities)
+    {
+        var collisions = new List<string>();
+        foreach (var targetGroup in idMap.GroupBy(kvp => kvp.Value))
+        {
+            var members = targetGroup.ToList();
+            if (members.Count < 2)
+                continue;
+
+            var identityKeys = members
+                .Select(m => legacyIdentities.TryGetValue(m.Key, out var identity)
+                    ? identity.GroupKey
+                    : m.Key.ToString("D"))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var legacyList = string.Join(", ", members.Select(m => m.Key.ToString("D")));
+            collisions.Add(
+                $"target {targetGroup.Key:D} <= legacy [{legacyList}] identities [{string.Join("; ", identityKeys)}]");
+        }
+
+        return collisions;
     }
 }

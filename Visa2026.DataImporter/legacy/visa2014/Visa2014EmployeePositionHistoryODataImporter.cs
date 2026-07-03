@@ -29,17 +29,27 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
         string? historyIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool supplementPermitReferencedOnly = false)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         if (verbose)
             Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
 
-        var batch = Visa2014EmployeePositionHistoryTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose);
+        var batch = supplementPermitReferencedOnly
+            ? Visa2014EmployeePositionHistoryTransform.PrepareSupplementPermitReferencedImportBatch(
+                legacyConnectionString,
+                lookupTranslationPaths,
+                maxRows,
+                verbose)
+            : Visa2014EmployeePositionHistoryTransform.PrepareImportBatch(
+                legacyConnectionString,
+                lookupTranslationPaths,
+                maxRows,
+                verbose);
+
+        if (supplementPermitReferencedOnly && verbose)
+            Console.WriteLine("INF Mode: supplement permit-referenced soft-deleted WorkHistoryOfEmployee rows.");
 
         if (dryRun)
         {

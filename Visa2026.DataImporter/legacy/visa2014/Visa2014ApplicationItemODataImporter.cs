@@ -33,6 +33,7 @@ internal static class Visa2014ApplicationItemODataImporter
         string educationIdMapPath,
         string employeeSalaryIdMapPath,
         string? workPermitItemIdMapPath,
+        string? invitationItemIdMapPath,
         string? applicationItemIdMapOutputPath,
         int? maxRows,
         bool dryRun,
@@ -47,6 +48,28 @@ internal static class Visa2014ApplicationItemODataImporter
         var educationIdMap = LoadOptionalIdMap(educationIdMapPath);
         var employeeSalaryIdMap = LoadOptionalIdMap(employeeSalaryIdMapPath);
         var workPermitItemIdMap = LoadOptionalIdMap(workPermitItemIdMapPath);
+        var invitationItemIdMap = LoadOptionalIdMap(invitationItemIdMapPath);
+
+        var applicationIdMapCollisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateCollisions(
+            applicationIdMap,
+            legacyConnectionString,
+            lookupTranslationPaths);
+        if (applicationIdMapCollisions.Count > 0)
+        {
+            Console.Error.WriteLine(
+                $"ERR Application id-map has {applicationIdMapCollisions.Count} cross-date collision(s). " +
+                "Rebuild with --rebuild-visa2014-id-maps --entity Application (matches FullApplicationNumber + ApplicationDate per legacy Oid).");
+            foreach (var collision in applicationIdMapCollisions.Take(20))
+                Console.Error.WriteLine($"ERR   {collision}");
+            if (applicationIdMapCollisions.Count > 20)
+                Console.Error.WriteLine($"ERR   ... and {applicationIdMapCollisions.Count - 20} more");
+            return new Visa2014ApplicationItemImportResult
+            {
+                LegacyRowCount = 0,
+                FailedCount = applicationIdMapCollisions.Count,
+                Errors = applicationIdMapCollisions,
+            };
+        }
 
         if (verbose)
         {
@@ -59,6 +82,7 @@ internal static class Visa2014ApplicationItemODataImporter
             Console.WriteLine($"INF Education id-map entries: {educationIdMap.Count}");
             Console.WriteLine($"INF EmployeeSalary id-map entries: {employeeSalaryIdMap.Count}");
             Console.WriteLine($"INF WorkPermitItem id-map entries: {workPermitItemIdMap.Count}");
+            Console.WriteLine($"INF InvitationItem id-map entries: {invitationItemIdMap.Count}");
         }
 
         var batch = Visa2014ApplicationItemTransform.PrepareImportBatch(
@@ -150,7 +174,8 @@ internal static class Visa2014ApplicationItemODataImporter
                     addressIdMap,
                     educationIdMap,
                     employeeSalaryIdMap,
-                    workPermitItemIdMap);
+                    workPermitItemIdMap,
+                    invitationItemIdMap);
                 if (payload == null)
                 {
                     failed++;
@@ -342,7 +367,8 @@ internal static class Visa2014ApplicationItemODataImporter
         IReadOnlyDictionary<Guid, Guid> addressIdMap,
         IReadOnlyDictionary<Guid, Guid> educationIdMap,
         IReadOnlyDictionary<Guid, Guid> employeeSalaryIdMap,
-        IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap)
+        IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap,
+        IReadOnlyDictionary<Guid, Guid> invitationItemIdMap)
     {
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
@@ -360,6 +386,7 @@ internal static class Visa2014ApplicationItemODataImporter
         TryAddOptionalFkFromMap(payload, row, "CurrentEducation", "CurrentEducation", educationIdMap);
         TryAddOptionalFkFromMap(payload, row, "CurrentSalary", "CurrentSalary", employeeSalaryIdMap);
         TryAddOptionalFkFromMap(payload, row, "CurrentWorkPermitItem", "CurrentWorkPermitItem", workPermitItemIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentInvitationItem", "CurrentInvitationItem", invitationItemIdMap);
 
         if (TryParseDate(row.GetValueOrDefault("RegistrationDate") as string, out var registrationDate))
             payload["RegistrationDate"] = DateTime.SpecifyKind(registrationDate, DateTimeKind.Utc);

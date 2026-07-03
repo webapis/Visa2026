@@ -35,6 +35,10 @@ sources:
       Education: preview-export/Education-preview.calik-energi.xlsx
       EmployeePositionHistory: preview-export/EmployeePositionHistory-preview.calik-energi.xlsx
       EmployeeSalary: preview-export/EmployeeSalary-preview.calik-energi.xlsx
+      WorkPermit: preview-export/WorkPermit-preview.calik-energi.xlsx
+      WorkPermitItem: preview-export/WorkPermitItem-preview.calik-energi.xlsx
+      Invitation: preview-export/Invitation-preview.calik-energi.xlsx
+      InvitationItem: preview-export/InvitationItem-preview.calik-energi.xlsx
       AddressOfResidence: preview-export/AddressOfResidence-preview.calik-energi.xlsx
       Lodging: preview-export/Lodging-preview.calik-energi.xlsx
       Hotel: preview-export/Hotel-preview.calik-energi.xlsx

@@ -2,7 +2,7 @@
 # PLANNING DRAFT 2026-06-29 — discovery not started.
 
 targetODataEntity: WorkPermitItem
-discoveryStatus: not_started
+discoveryStatus: complete
 
 legacy:
   boClass: IWorkPermit
@@ -29,7 +29,7 @@ mapping:
   lookupDependencies:
     - WorkPermittedLocationName
   lookupAuditStatus:
-    WorkPermittedLocationName: pending
+    WorkPermittedLocationName: complete
   duplicateGroups: null
   legacyOnlyCount: null
   targetOnlyCount: null
@@ -78,14 +78,14 @@ checklist:
   target_bo_reviewed: true
   legacy_bo_located: true
   legacy_schema_documented: partial
-  table_mapping_registered: false
-  column_mapping_complete: false
-  lookup_values_mapped: false
-  property_gaps_documented: false
-  dedupe_rules_defined: false
-  excel_preview_exported: false
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
   inventory_updated: false
-  learnings_appended: false
+  learnings_appended: true
 
 completedAt: null
 completedBy: null

@@ -169,6 +169,8 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--correct-person-relationship",
         "--correct-person-address-of-residence",
         "--correct-application-item-person-current",
+        "--correct-application-item-application-parent",
+        "--correct-application-type-composite",
         "--export-visa2014-actual-positions",
         "--apply-visa2014-actual-positions",
         "--auto-no-letters",
@@ -260,14 +262,15 @@ static void PrintHelp()
     Console.WriteLine("  --dump-lookups              Legacy: generate a markdown dump from lookup.xlsm.");
     Console.WriteLine("  --export-lookup-catalogs    Export lookup.xlsm → Module/LookupCatalogs/*.json");
     Console.WriteLine("  --export-seed               Split legacy data.yaml → seed/scenarios/ (one-time migration).");
-    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg).");
-    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
+    Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|EmployeeSalary|WorkPermit|WorkPermitItem|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg).");
+    Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|WorkPermit|WorkPermitItem|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
     Console.WriteLine("                [--connection conn] [--max-rows N]");
     Console.WriteLine("  --generate-visa2014-tenant-catalogs  VISA2015 → tenant project-contract + approval-leg-profile JSON (order.yaml steps).");
     Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("                [--supplement-permit-positions]  EmployeePositionHistory: import soft-deleted WH referenced by WorkPermit");
     Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs → headless ObjectSpace (requires --inprocess + scalar id-map).");
     Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|MedicalRecord --property Photo|PassportDocument|...");
     Console.WriteLine("                --inprocess --target-connection conn [--legacy-source calik-energi] [--id-map path.json]");
@@ -297,7 +300,9 @@ static void PrintHelp()
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-address-of-residence  Backfill Person AddressOfResidence from PIA + patch ApplicationItem (--legacy-source, --dry-run)");
-    Console.WriteLine("  --correct-application-item-person-current  Backfill ApplicationItem CurrentEducation/CurrentSalary from Person (--dry-run)");
+    Console.WriteLine("  --correct-application-item-person-current  Backfill ApplicationItem CurrentEducation/CurrentSalary/CurrentWorkPermitItem from Person (--dry-run)");
+    Console.WriteLine("  --correct-application-item-application-parent  Reparent ApplicationItems after Application id-map rebuild (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
     Console.WriteLine("                [--dry-run] [--api-base-url url] [--no-wait] [--verbose]");
@@ -607,6 +612,26 @@ if (HasArg(args, "--correct-application-item-person-current"))
     Log.Phase("VISA2014 ApplicationItem person-current correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationItemPersonCurrentCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-application-item-application-parent"))
+{
+    Log.Phase("VISA2014 ApplicationItem Application parent correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationItemApplicationParentCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-application-type-composite"))
+{
+    Log.Phase("VISA2014 Application ApplicationType composite correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationTypeCompositeCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

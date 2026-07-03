@@ -43,6 +43,8 @@ $importArgs = @(
     "--address-id-map", (Join-Path $mapRoot "AddressOfResidence.json"),
     "--education-id-map", (Join-Path $mapRoot "Education.json"),
     "--employee-salary-id-map", (Join-Path $mapRoot "EmployeeSalary.json"),
+    "--work-permit-item-id-map", (Join-Path $mapRoot "WorkPermitItem.json"),
+    "--invitation-item-id-map", (Join-Path $mapRoot "InvitationItem.json"),
     "--no-wait"
 )
 if ($MaxRows -gt 0) { $importArgs += @("--max-rows", $MaxRows) }

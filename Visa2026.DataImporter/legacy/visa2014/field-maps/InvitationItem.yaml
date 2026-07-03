@@ -1,0 +1,47 @@
+# InvitationItem field map — layer 2
+# Layer 1: table-mappings.yaml (id: invitation-item)
+
+tableMappingId: invitation-item
+
+source:
+  table: PersonInInvitation
+  schema: dbo
+
+target:
+  odataEntity: InvitationItem
+
+deduplication:
+  enabled: false
+  notes: 1:1 legacy PersonInInvitation row per item
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map legacy PersonInInvitation.Oid → InvitationItem.ID
+
+  - source: COALESCE(Employee, FamilyMember)
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+
+  - source: Passport
+    target: Passport
+    transform: fk_id_map
+    idMapEntity: Passport
+    missingBehavior: skip_row
+
+  - source: Invitation
+    target: Invitation
+    transform: fk_id_map
+    idMapEntity: Invitation
+    idMapLegacyTable: ApplicationResult
+    missingBehavior: skip_row
+
+  - source: ApplicationResult.Result
+    target: IsCancelled
+    transform: equals_one
+    join: PersonInInvitation.Invitation = ApplicationResult.Oid
+    missingBehavior: default_false
+    notes: Heuristic — Result == 1 maps to cancelled item

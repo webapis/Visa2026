@@ -1,0 +1,81 @@
+# WorkPermitItem field map — layer 2
+# Layer 1: table-mappings.yaml (id: work-permit-item)
+# Layer 3: lookup-translations.yaml (WorkPermittedLocationName bit columns)
+
+tableMappingId: work-permit-item
+
+source:
+  table: WorkPermit
+  schema: dbo
+
+target:
+  odataEntity: WorkPermitItem
+
+deduplication:
+  enabled: false
+  notes: 1:1 legacy dbo.WorkPermit row per item; employees may have multiple historical rows
+
+lookupDependencies:
+  - WorkPermittedLocationName
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map legacy WorkPermit.Oid → WorkPermitItem.ID
+
+  - source: Employee
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+
+  - source: Passport
+    target: Passport
+    transform: fk_id_map
+    idMapEntity: Passport
+    missingBehavior: skip_row
+
+  - source: Position
+    target: CurrentPositionHistory
+    transform: fk_id_map
+    idMapEntity: EmployeePositionHistory
+    missingBehavior: skip_row
+    notes: |
+      Legacy FK is WorkHistoryOfEmployee.Oid (not Position catalog). Main EPH import skips GCRecord rows.
+      Use --supplement-permit-positions for soft-deleted WH still referenced by active WorkPermit.
+      Importer fallback: nearest active WH for employee at permit StartDate when id-map miss persists.
+
+  - source: WorkPermitLetter
+    target: WorkPermit
+    transform: fk_id_map
+    idMapEntity: WorkPermit
+    missingBehavior: skip_row
+    notes: Orphan rows use wp.Oid as header id-map key
+
+  - source: AppruvalNumber
+    target: WorkPermitNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+
+  - source: ASNumber
+    target: ASNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+
+  - source: StartDateOfWorkPermit
+    target: StartDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: ExpiringDateOfWorkPermit
+    target: ExpirationDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: WorkPermitLocation
+    target: WorkPermittedLocations
+    transform: bit_matrix_to_comma_string
+    lookupCatalog: WorkPermittedLocationName
+    missingBehavior: allow_empty
+    notes: 1 legacy row has null WorkPermitLocation — empty string allowed

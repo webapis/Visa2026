@@ -27,6 +27,30 @@ internal static class Visa2014EmployeePositionHistoryTransform
         WHERE w.GCRecord IS NULL
         """;
 
+    /// <summary>
+    /// Soft-deleted <c>WorkHistoryOfEmployee</c> rows still referenced by active <c>WorkPermit.Position</c>
+    /// (active person only). Appended to the EPH id-map so WorkPermitItem can resolve permit FKs.
+    /// </summary>
+    internal const string SupplementPermitReferencedExtractSql = """
+        SELECT
+            CAST(w.Oid AS varchar(36)) AS Oid,
+            CAST(w.Employee AS varchar(36)) AS LegacyPersonOid,
+            pos.TitleOfPosition,
+            ISNULL(CAST(pos.Code AS varchar(100)), '') AS PositionCode,
+            dep.TitleOfDepartment,
+            CONVERT(varchar(10), w.StartDateOnThisPosition, 23) AS StartDateOnThisPosition,
+            p.MiddleName AS PersonMiddleName
+        FROM dbo.WorkHistoryOfEmployee w
+        INNER JOIN dbo.Person p ON w.Employee = p.Oid AND p.GCRecord IS NULL
+        INNER JOIN dbo.Position pos ON w.Position = pos.Oid
+        INNER JOIN dbo.Department dep ON w.Department = dep.Oid
+        WHERE w.GCRecord IS NOT NULL
+          AND EXISTS (
+              SELECT 1
+              FROM dbo.WorkPermit wp
+              WHERE wp.GCRecord IS NULL AND wp.Position = w.Oid)
+        """;
+
     internal static readonly string[] EmployeePositionHistoryMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_importAction",
@@ -60,7 +84,35 @@ internal static class Visa2014EmployeePositionHistoryTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        return TransformRows(rawRows, catalogs, out var skipped, out var unmappedDistinct, out _);
+        return TransformRows(rawRows, catalogs, forPermitSupplement: false, out var skipped, out var unmappedDistinct, out _);
+    }
+
+    public static Visa2014PersonImportBatch PrepareSupplementPermitReferencedImportBatch(
+        string connectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        int? maxRows,
+        bool verbose)
+    {
+        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
+        var sql = maxRows is > 0
+            ? $"SELECT TOP ({maxRows}) * FROM ({SupplementPermitReferencedExtractSql}) AS q"
+            : SupplementPermitReferencedExtractSql;
+
+        var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
+        var rawRows = new List<Visa2014EmployeePositionHistoryRawRow>();
+        int parseSkipped = 0;
+        foreach (var dict in dictRows)
+        {
+            if (TryParseRawRow(dict, out var parsed))
+                rawRows.Add(parsed);
+            else
+                parseSkipped++;
+        }
+
+        if (verbose)
+            Console.WriteLine($"  Supplement permit-referenced WorkHistoryOfEmployee rows: {rawRows.Count} ({parseSkipped} parse skipped).");
+
+        return TransformRows(rawRows, catalogs, forPermitSupplement: true, out var skipped, out var unmappedDistinct, out _);
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014EmployeePositionHistoryRawRow parsed)
@@ -92,6 +144,7 @@ internal static class Visa2014EmployeePositionHistoryTransform
     private static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014EmployeePositionHistoryRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        bool forPermitSupplement,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct,
         out List<Dictionary<string, object?>> dedupeSummary)
@@ -100,13 +153,20 @@ internal static class Visa2014EmployeePositionHistoryTransform
         unmappedDistinct = [];
         dedupeSummary = [];
         var unmappedSet = new HashSet<string>(StringComparer.Ordinal);
-        var endDates = DeriveEndDates(rawRows);
-        var currentRowOids = DeriveCurrentRowOids(rawRows);
+        var endDates = forPermitSupplement ? new Dictionary<Guid, DateTime?>() : DeriveEndDates(rawRows);
+        var currentRowOids = forPermitSupplement ? new HashSet<Guid>() : DeriveCurrentRowOids(rawRows);
         var importRows = new List<Dictionary<string, object?>>();
 
         foreach (var raw in rawRows)
         {
-            var row = BuildExportRow(raw, catalogs, endDates, currentRowOids, out var skipReason, out var rowUnmapped);
+            var row = BuildExportRow(
+                raw,
+                catalogs,
+                endDates,
+                currentRowOids,
+                forPermitSupplement,
+                out var skipReason,
+                out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -189,6 +249,7 @@ internal static class Visa2014EmployeePositionHistoryTransform
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         IReadOnlyDictionary<Guid, DateTime?> endDates,
         IReadOnlySet<Guid> currentRowOids,
+        bool forPermitSupplement,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -197,7 +258,7 @@ internal static class Visa2014EmployeePositionHistoryTransform
         var row = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["_legacyRowId"] = raw.LegacyOid,
-            ["_legacyTable"] = "WorkHistoryOfEmployee",
+            ["_legacyTable"] = forPermitSupplement ? "WorkHistoryOfEmployee(permit-supplement)" : "WorkHistoryOfEmployee",
             ["_importAction"] = "import",
             ["_legacy_PositionTitle"] = raw.TitleOfPosition,
             ["_legacy_DepartmentTitle"] = raw.TitleOfDepartment,
@@ -211,8 +272,11 @@ internal static class Visa2014EmployeePositionHistoryTransform
 
         // Actual (company) position: legacy Person.MiddleName held the free-text title (no dedicated field in
         // VISA2014). Apply it to the current/latest row only; older periods fall back to Position.Code or "-".
+        // Permit-supplement rows are historical snapshots — never treat as "current".
         var middleName = raw.PersonMiddleName?.Trim();
-        row["ActualPosition"] = currentRowOids.Contains(raw.LegacyOid) && !string.IsNullOrEmpty(middleName)
+        row["ActualPosition"] = !forPermitSupplement
+                                && currentRowOids.Contains(raw.LegacyOid)
+                                && !string.IsNullOrEmpty(middleName)
             ? middleName
             : ResolveActualPosition(raw.PositionCode);
 
@@ -224,9 +288,11 @@ internal static class Visa2014EmployeePositionHistoryTransform
         else
         {
             row["StartDate"] = raw.StartDateOnThisPosition.Value.ToString("yyyy-MM-dd");
-            row["EndDate"] = endDates.TryGetValue(raw.LegacyOid, out var end) && end.HasValue
-                ? end.Value.ToString("yyyy-MM-dd")
-                : null;
+            row["EndDate"] = forPermitSupplement
+                ? null
+                : endDates.TryGetValue(raw.LegacyOid, out var end) && end.HasValue
+                    ? end.Value.ToString("yyyy-MM-dd")
+                    : null;
         }
 
         row["Person"] = raw.LegacyPersonOid.ToString("D");

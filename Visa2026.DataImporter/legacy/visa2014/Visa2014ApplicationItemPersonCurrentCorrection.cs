@@ -11,13 +11,15 @@ internal sealed class Visa2014ApplicationItemPersonCurrentCorrectionResult
     public int ItemsInScope { get; init; }
     public int EducationUpdated { get; init; }
     public int SalaryUpdated { get; init; }
+    public int WorkPermitUpdated { get; init; }
     public int Unchanged { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
 }
 
 /// <summary>
-/// Backfills <see cref="Bo.ApplicationItem.CurrentEducation"/> and <see cref="Bo.ApplicationItem.CurrentSalary"/>
-/// from imported person child rows using the same rules as <see cref="Bo.PersonCurrentItems"/>.
+/// Backfills <see cref="Bo.ApplicationItem.CurrentEducation"/>, <see cref="Bo.ApplicationItem.CurrentSalary"/>,
+/// and <see cref="Bo.ApplicationItem.CurrentWorkPermitItem"/> from imported person child rows using the same rules
+/// as <see cref="Bo.PersonCurrentItems"/>.
 /// </summary>
 internal static class Visa2014ApplicationItemPersonCurrentCorrection
 {
@@ -51,6 +53,7 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
             Console.WriteLine($"INF Items in scope: {result.ItemsInScope}");
             Console.WriteLine($"INF CurrentEducation updated: {result.EducationUpdated}");
             Console.WriteLine($"INF CurrentSalary updated: {result.SalaryUpdated}");
+            Console.WriteLine($"INF CurrentWorkPermitItem updated: {result.WorkPermitUpdated}");
             Console.WriteLine($"INF Unchanged: {result.Unchanged}");
             foreach (var error in result.Errors.Take(20))
                 Console.Error.WriteLine($"ERR {error}");
@@ -73,6 +76,7 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
         int inScope = 0;
         int educationUpdated = 0;
         int salaryUpdated = 0;
+        int workPermitUpdated = 0;
         int unchanged = 0;
 
         using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.ApplicationItem));
@@ -91,7 +95,8 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
             var appType = item.Application!.ApplicationType!;
             var showEducation = appType.ShowCurrentEducation && !appType.ShowRegistrations;
             var showSalary = appType.ShowCurrentSalary;
-            if (!showEducation && !showSalary)
+            var showWorkPermit = appType.ShowCurrentWorkPermitItem;
+            if (!showEducation && !showSalary && !showWorkPermit)
                 continue;
 
             inScope++;
@@ -121,6 +126,18 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
                         changed = true;
                     }
                 }
+
+                if (showWorkPermit && item.CurrentWorkPermitItem == null)
+                {
+                    var workPermitItem = Bo.PersonCurrentItems.GetCurrentWorkPermitItem(personInSpace);
+                    if (workPermitItem != null)
+                    {
+                        item.CurrentWorkPermitItem = objectSpace.GetObject(workPermitItem);
+                        item.WorkPermittedLocations = workPermitItem.WorkPermittedLocations ?? string.Empty;
+                        workPermitUpdated++;
+                        changed = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -134,7 +151,7 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
                 Console.WriteLine($"  PATCH ApplicationItem {item.ID}");
         }
 
-        if (!dryRun && (educationUpdated > 0 || salaryUpdated > 0))
+        if (!dryRun && (educationUpdated > 0 || salaryUpdated > 0 || workPermitUpdated > 0))
             objectSpace.CommitChanges();
 
         return new Visa2014ApplicationItemPersonCurrentCorrectionResult
@@ -142,6 +159,7 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
             ItemsInScope = inScope,
             EducationUpdated = educationUpdated,
             SalaryUpdated = salaryUpdated,
+            WorkPermitUpdated = workPermitUpdated,
             Unchanged = unchanged,
             Errors = errors,
         };

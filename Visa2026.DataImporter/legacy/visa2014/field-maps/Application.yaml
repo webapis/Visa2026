@@ -17,20 +17,24 @@ deduplication:
     - Oid
   manualNumberDedupe:
     enabled: true
-    when: duplicate ManualApplicationNumber among active rows
+    when: duplicate ManualApplicationNumber + ManualApplicationDate among active rows
     keys:
       - ManualApplicationNumber
-    canonicalRule: keep_all_import_with_oid_upsert
+      - ManualApplicationDate
+    canonicalRule: keep_all_import_with_legacy_oid_upsert
     notes: |
-      862 duplicate number groups (e.g. multiple 1/-2). Visa2026 uniqueness is prefix+year+month+number.
-      Import all rows; upsert/id-map on legacy Oid. Set IsManualEntry=true; preserve FullApplicationNumber as-is.
+      862+ legacy groups share a manual number across different dates (e.g. multiple 6/-909).
+      Business identity is FullApplicationNumber + ApplicationDate; id-map upsert key remains legacy Application.Oid (GUID).
+      Import every legacy row; never merge headers or items across dates.
   action: import_one_per_legacy_oid
   discoveryQuery: |
-    SELECT r.ManualApplicationNumber, COUNT(*) cnt
+    SELECT r.ManualApplicationNumber,
+           CONVERT(varchar(10), r.ManualApplicationDate, 23) AS ApplicationDate,
+           COUNT(*) cnt
     FROM dbo.Application a
     JOIN dbo.IRegistration_Data r ON r.Oid = a.IRegistration_Data
     WHERE a.GCRecord IS NULL AND r.ManualApplicationNumber IS NOT NULL
-    GROUP BY r.ManualApplicationNumber
+    GROUP BY r.ManualApplicationNumber, r.ManualApplicationDate
     HAVING COUNT(*) > 1
     ORDER BY cnt DESC;
 
@@ -275,8 +279,8 @@ fields:
     lookupLegacyColumns:
       - ForEmployee
       - ForFamilyMember
-      - ApplicationTypeForEmployee.TypeOfApplicationForEmployeeID
-      - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMemberID
+      - ApplicationTypeForEmployee.TypeOfApplicationForEmployee
+      - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMember
       - IsInvitationWithWorkPermit.InvitationAndWorkPermitRequired
       - IsWizaWithWorkPermit.WizaAndWorkPermitRequired
       - ChangeInformation

@@ -128,7 +128,7 @@ internal static class Visa2014PersonAddressOfResidenceFromPiaCorrection
             });
         }
 
-        RegisterSponsorCanonicalFromExistingLegacyAorForCorrection(
+        Visa2014AddressOfResidenceSponsorCanonicalRegistration.RegisterFromExistingLegacyAor(
             legacyConnectionString, personIdMap, addressIdMap, verbose);
 
         var batch = Visa2014PiaAddressInference.PrepareEmployeeInferredAddresses(
@@ -209,14 +209,6 @@ internal static class Visa2014PersonAddressOfResidenceFromPiaCorrection
 
                 itemsInScope++;
 
-                if (!addressIdMap.TryGetValue(legacyAddressKey.Value, out var targetAddressId))
-                {
-                    itemsUnresolved++;
-                    if (verbose)
-                        Console.WriteLine($"WRN PIA {legacyPiaOid}: no id-map for address key {legacyAddressKey.Value}");
-                    continue;
-                }
-
                 var item = itemSpace.GetObjectByKey<Bo.ApplicationItem>(targetItemId);
                 if (item == null)
                 {
@@ -224,16 +216,50 @@ internal static class Visa2014PersonAddressOfResidenceFromPiaCorrection
                     continue;
                 }
 
-                if (item.CurrentAddressOfResidence?.ID == targetAddressId)
+                if (item.Person == null)
                 {
-                    itemsUnchanged++;
+                    itemsUnresolved++;
+                    errors.Add($"PIA {legacyPiaOid}: ApplicationItem has no Person");
                     continue;
                 }
 
-                var address = itemSpace.GetObjectByKey<Bo.AddressOfResidence>(targetAddressId);
-                if (address == null)
+                Bo.AddressOfResidence? address;
+                if (!addressIdMap.TryGetValue(legacyAddressKey.Value, out var targetAddressId)
+                    || itemSpace.GetObjectByKey<Bo.AddressOfResidence>(targetAddressId) == null)
                 {
-                    errors.Add($"PIA {legacyPiaOid}: AddressOfResidence {targetAddressId} not found");
+                    if (!Visa2014ApplicationItemLegacyAddressResolver.TryEnsureLegacyAddressMapped(
+                            itemSpace,
+                            resolver,
+                            legacyConnectionString,
+                            lookupTranslationPaths,
+                            personIdMap,
+                            addressIdMap,
+                            legacyAddressKey.Value,
+                            raw,
+                            item.Person,
+                            dryRun,
+                            out address)
+                        || address == null)
+                    {
+                        itemsUnresolved++;
+                        if (verbose)
+                            Console.WriteLine($"WRN PIA {legacyPiaOid}: no id-map for address key {legacyAddressKey.Value}");
+                        continue;
+                    }
+                }
+                else
+                {
+                    address = itemSpace.GetObjectByKey<Bo.AddressOfResidence>(targetAddressId);
+                    if (address == null)
+                    {
+                        errors.Add($"PIA {legacyPiaOid}: AddressOfResidence {targetAddressId} not found");
+                        continue;
+                    }
+                }
+
+                if (item.CurrentAddressOfResidence?.ID == address.ID)
+                {
+                    itemsUnchanged++;
                     continue;
                 }
 
@@ -242,7 +268,7 @@ internal static class Visa2014PersonAddressOfResidenceFromPiaCorrection
                 itemsUpdated++;
             }
 
-            if (!dryRun && itemsUpdated > 0)
+            if (!dryRun && (itemsUpdated > 0 || addressIdMap.Count > 0))
                 itemSpace.CommitChanges();
         }
 
@@ -257,67 +283,6 @@ internal static class Visa2014PersonAddressOfResidenceFromPiaCorrection
             ApplicationItemsUnresolved = itemsUnresolved,
             Errors = errors,
         });
-    }
-
-    private static void RegisterSponsorCanonicalFromExistingLegacyAorForCorrection(
-        string legacyConnectionString,
-        IReadOnlyDictionary<Guid, Guid> personIdMap,
-        IDictionary<Guid, Guid> addressIdMap,
-        bool verbose)
-    {
-        const string sql = """
-            SELECT
-                CAST(aor.Person AS varchar(36)) AS PersonOid,
-                CAST(aor.Oid AS varchar(36)) AS AorOid,
-                CONVERT(varchar(10), addr.ExpiringDateOfAddressDocument, 23) AS ExpirationDate
-            FROM dbo.AddressOfResidence aor
-            INNER JOIN dbo.Address addr ON addr.Oid = aor.Address AND addr.GCRecord IS NULL
-            WHERE aor.GCRecord IS NULL
-            """;
-
-        var rows = Visa2014SqlCmdReader.Query(legacyConnectionString, sql, verbose: false);
-        var bestPerPerson = new Dictionary<Guid, (Guid AorOid, DateTime? Expiration)>();
-        foreach (var row in rows)
-        {
-            if (!Guid.TryParse(row.GetValueOrDefault("PersonOid"), out var personOid))
-                continue;
-            if (!Guid.TryParse(row.GetValueOrDefault("AorOid"), out var aorOid))
-                continue;
-            if (!personIdMap.ContainsKey(personOid))
-                continue;
-
-            DateTime? expiration = DateTime.TryParse(row.GetValueOrDefault("ExpirationDate"), out var exp) ? exp : null;
-            if (!bestPerPerson.TryGetValue(personOid, out var current) ||
-                CompareAddressRecency(expiration, aorOid, current.Expiration, current.AorOid) > 0)
-            {
-                bestPerPerson[personOid] = (aorOid, expiration);
-            }
-        }
-
-        int registered = 0;
-        foreach (var (personOid, best) in bestPerPerson)
-        {
-            if (!addressIdMap.TryGetValue(best.AorOid, out var targetId))
-                continue;
-
-            var synthetic = Visa2014PiaAddressInference.PersonCanonicalSyntheticLegacyOid(personOid);
-            if (addressIdMap.ContainsKey(synthetic))
-                continue;
-
-            addressIdMap[synthetic] = targetId;
-            registered++;
-        }
-
-        if (verbose && registered > 0)
-            Console.WriteLine($"INF Registered {registered} sponsor canonical alias(es) in id-map.");
-    }
-
-    private static int CompareAddressRecency(DateTime? expA, Guid oidA, DateTime? expB, Guid oidB)
-    {
-        var rankA = expA?.Date ?? DateTime.MaxValue;
-        var rankB = expB?.Date ?? DateTime.MaxValue;
-        var cmp = rankA.CompareTo(rankB);
-        return cmp != 0 ? cmp : oidA.CompareTo(oidB);
     }
 
     private static Dictionary<Guid, Visa2014ApplicationItemRawRow> LoadLegacyApplicationItemRows(
