@@ -18,6 +18,12 @@ internal static class Visa2014FilesImportCommand
             return 1;
         }
 
+        if (!HasArg(args, "--inprocess"))
+        {
+            Console.Error.WriteLine("ERR --import-visa2014-files requires --inprocess (headless XAF ObjectSpace). OData file writes are not supported.");
+            return 1;
+        }
+
         var dataImporterRoot = Visa2014ContentRoot.FindDataImporterRoot();
         if (dataImporterRoot == null)
         {
@@ -37,39 +43,38 @@ internal static class Visa2014FilesImportCommand
             return 1;
         }
 
-        var apiBaseUrl = GetOptionValue(args, "--api-base-url")
-            ?? Environment.GetEnvironmentVariable("ApiOptions__BaseUrl")
-            ?? Environment.GetEnvironmentVariable("API_BASE_URL")
-            ?? "https://localhost:5001";
-        var userName = GetOptionValue(args, "--user") ?? "Admin";
-        var password = GetOptionValue(args, "--password") ?? "";
-
         int? maxRows = null;
         var maxRowsText = GetOptionValue(args, "--max-rows");
         if (int.TryParse(maxRowsText, out var parsedMax) && parsedMax > 0)
             maxRows = parsedMax;
 
         bool dryRun = HasArg(args, "--dry-run");
-        bool noWait = HasArg(args, "--no-wait");
-        bool isODataOnlyFamilyProjectContract = string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase)
+        bool isFamilyProjectContract = string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase)
             && string.Equals(property, "FamilyMemberProjectContract", StringComparison.OrdinalIgnoreCase);
 
-        Console.WriteLine($"=== VISA2014 file import — {entity}.{property}");
+        Console.WriteLine($"=== VISA2014 file import — {entity}.{property} (headless XAF)");
         Console.WriteLine($"INF Legacy source: {source.Id} ({source.Label})");
-        if (isODataOnlyFamilyProjectContract)
+
+        var targetConnection = GetTargetConnection(args);
+        if (string.IsNullOrWhiteSpace(targetConnection) && !dryRun)
         {
-            var targetCs = GetTargetConnection(args);
-            Console.WriteLine($"INF Target SQL (read-only): {MaskConnectionForLog(targetCs)}");
+            Console.Error.WriteLine("ERR --inprocess requires --target-connection or ConnectionStrings__DefaultConnection.");
+            return 1;
         }
-        else
+
+        Console.WriteLine($"INF Target (write): Visa2026 in-process ObjectSpace");
+        if (!string.IsNullOrWhiteSpace(targetConnection))
+            Console.WriteLine($"INF Target SQL: {MaskConnectionForLog(targetConnection)}");
+
+        if (!isFamilyProjectContract)
             Console.WriteLine($"INF Legacy (read-only): {Visa2014LegacySqlGuard.DescribeLegacyConnection(source.ConnectionString, source.LegacyDatabase)}");
-        Console.WriteLine($"INF Target (write): Visa2026 via OData at {apiBaseUrl}");
+
         if (maxRows.HasValue)
             Console.WriteLine($"INF Max rows: {maxRows.Value}");
         if (dryRun)
-            Console.WriteLine("INF Mode: dry-run (no POST)");
+            Console.WriteLine("INF Mode: dry-run (no writes)");
 
-        if (!dryRun && !isODataOnlyFamilyProjectContract)
+        if (!dryRun && !isFamilyProjectContract)
         {
             try
             {
@@ -83,31 +88,45 @@ internal static class Visa2014FilesImportCommand
             }
         }
 
-        var api = new Visa2026.DataImporter.ApiClient(apiBaseUrl, userName, password) { Verbose = verbose };
-
-        if (!dryRun || isODataOnlyFamilyProjectContract)
-        {
-            if (!noWait)
-                await api.WaitForServerAsync();
-            await api.LoginAsync();
-        }
+        IVisa2014ImportTarget target;
+        Visa2014HeadlessImportSession? session = null;
 
         try
         {
+            if (dryRun)
+            {
+                target = new Visa2014DryRunImportTarget();
+            }
+            else
+            {
+                var batchSize = ResolveBatchSize(args);
+                session = await Visa2014HeadlessImportSession.OpenAsync(targetConnection!, batchSize);
+                target = session.Target;
+            }
+
             if (string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
-                return await RunPersonFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+                return await RunPersonFileImportAsync(target, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
             if (string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase))
-                return await RunPassportFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+                return await RunPassportFileImportAsync(target, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
             if (string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase))
-                return await RunVisaFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+                return await RunVisaFileImportAsync(target, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
             if (string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase))
-                return await RunEducationFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+                return await RunEducationFileImportAsync(target, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
 
             if (string.Equals(entity, "MedicalRecord", StringComparison.OrdinalIgnoreCase))
-                return await RunMedicalRecordFileImportAsync(api, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+            {
+                if (session == null)
+                {
+                    Console.Error.WriteLine("ERR MedicalRecord file import requires a live headless session (not dry-run).");
+                    return 1;
+                }
+
+                return await RunMedicalRecordFileImportAsync(
+                    target, session.ObjectSpaceFactory, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+            }
 
             Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, MedicalRecord.");
             return 1;
@@ -119,10 +138,15 @@ internal static class Visa2014FilesImportCommand
                 Console.Error.WriteLine(ex);
             return 1;
         }
+        finally
+        {
+            if (session != null)
+                await session.DisposeAsync();
+        }
     }
 
     private static async Task<int> RunPersonFileImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
         Visa2014LegacySourceProfile source,
         string dataImporterRoot,
         IReadOnlyList<string> args,
@@ -144,7 +168,7 @@ internal static class Visa2014FilesImportCommand
         {
             var targetCs = GetTargetConnection(args);
             var result = await Visa2014FamilyMemberProjectContractSync.RunAsync(
-                api,
+                target,
                 targetCs,
                 maxRows,
                 dryRun,
@@ -173,7 +197,7 @@ internal static class Visa2014FilesImportCommand
         if (isPhoto)
         {
             var result = await Visa2014PersonPhotoImporter.RunAsync(
-                api,
+                target,
                 source.ConnectionString,
                 idMapPath,
                 maxRows,
@@ -192,7 +216,7 @@ internal static class Visa2014FilesImportCommand
         }
 
         var familyResult = await Visa2014PersonVisaFamilyTextImporter.RunAsync(
-            api,
+            target,
             source.ConnectionString,
             idMapPath,
             maxRows,
@@ -214,7 +238,7 @@ internal static class Visa2014FilesImportCommand
     }
 
     private static async Task<int> RunPassportFileImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
         Visa2014LegacySourceProfile source,
         string dataImporterRoot,
         IReadOnlyList<string> args,
@@ -241,7 +265,7 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Copy id-map: {copyIdMapPath}");
 
         var result = await Visa2014PassportCopyImporter.RunAsync(
-            api,
+            target,
             source.ConnectionString,
             passportIdMapPath,
             dryRun ? null : copyIdMapPath,
@@ -268,7 +292,7 @@ internal static class Visa2014FilesImportCommand
     }
 
     private static async Task<int> RunVisaFileImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
         Visa2014LegacySourceProfile source,
         string dataImporterRoot,
         IReadOnlyList<string> args,
@@ -295,7 +319,7 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
 
         var result = await Visa2014VisaDocumentImporter.RunAsync(
-            api,
+            target,
             source.ConnectionString,
             visaIdMapPath,
             dryRun ? null : documentIdMapPath,
@@ -321,7 +345,7 @@ internal static class Visa2014FilesImportCommand
     }
 
     private static async Task<int> RunEducationFileImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
         Visa2014LegacySourceProfile source,
         string dataImporterRoot,
         IReadOnlyList<string> args,
@@ -349,7 +373,7 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
 
         var result = await Visa2014EducationDocumentImporter.RunAsync(
-            api,
+            target,
             source.ConnectionString,
             educationIdMapPath,
             dryRun ? null : documentIdMapPath,
@@ -376,7 +400,8 @@ internal static class Visa2014FilesImportCommand
     }
 
     private static async Task<int> RunMedicalRecordFileImportAsync(
-        Visa2026.DataImporter.ApiClient api,
+        IVisa2014ImportTarget target,
+        DevExpress.ExpressApp.INonSecuredObjectSpaceFactory objectSpaceFactory,
         Visa2014LegacySourceProfile source,
         string dataImporterRoot,
         IReadOnlyList<string> args,
@@ -407,7 +432,8 @@ internal static class Visa2014FilesImportCommand
         Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
 
         var result = await Visa2014MedicalRecordDocumentImporter.RunAsync(
-            api,
+            target,
+            objectSpaceFactory,
             source.ConnectionString,
             personIdMapPath,
             dryRun ? null : medicalRecordIdMapPath,
@@ -437,6 +463,12 @@ internal static class Visa2014FilesImportCommand
         return result.Failed > 0 ? 1 : 0;
     }
 
+    private static int ResolveBatchSize(IReadOnlyList<string> args)
+    {
+        var text = GetOptionValue(args, "--batch-size");
+        return int.TryParse(text, out var size) && size > 0 ? size : 50;
+    }
+
     private static bool HasArg(IReadOnlyList<string> args, string flag) =>
         args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
 
@@ -457,6 +489,7 @@ internal static class Visa2014FilesImportCommand
 
     private static string GetTargetConnection(IReadOnlyList<string> args) =>
         GetOptionValue(args, "--target-connection")
+        ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
         ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
         ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
 

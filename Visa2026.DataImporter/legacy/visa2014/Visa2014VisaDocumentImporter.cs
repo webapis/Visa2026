@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.SqlClient;
-using Visa2026.DataImporter;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -34,7 +34,7 @@ internal static class Visa2014VisaDocumentImporter
         """;
 
     public static async Task<Visa2014VisaDocumentImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string legacyConnectionString,
         string visaIdMapPath,
         string? documentIdMapOutputPath,
@@ -116,38 +116,24 @@ internal static class Visa2014VisaDocumentImporter
 
             try
             {
-                var fileCreated = await api.CreateAsync<FileDataImportRow>("FileData", new Dictionary<string, object?>
-                {
-                    ["FileName"] = fileName,
-                    ["Content"] = blob,
-                });
-                if (fileCreated == null)
+                var payload = Visa2014DocumentImportPayload.WithNestedFile(
+                    "Visa", targetVisaId, fileName, blob);
+
+                var createdId = await target.CreateAsync(typeof(Bo.VisaDocument), payload);
+                if (createdId == null)
                 {
                     failed++;
-                    errors.Add($"{legacyVisaOid}: FileData POST returned null");
+                    errors.Add($"{legacyVisaOid}: VisaDocument create returned null");
                     continue;
                 }
 
-                var payload = new Dictionary<string, object?>
-                {
-                    ["Visa"] = new { ID = targetVisaId },
-                    ["File"] = new { ID = fileCreated.Id },
-                };
-
-                var created = await api.CreateAsync<VisaDocumentImportRow>("VisaDocument", payload);
-                if (created == null)
-                {
-                    failed++;
-                    errors.Add($"{legacyVisaOid}: VisaDocument POST returned null");
-                    continue;
-                }
-
-                newDocMap[legacyVisaOid] = created.Id;
+                await target.FlushAsync();
+                newDocMap[legacyVisaOid] = createdId.Value;
                 posted++;
                 if (posted % 100 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoVisaMap} no visa map...");
                 if (verbose)
-                    Console.WriteLine($"  POST VisaDocument {created.Id} ← visa {legacyVisaOid}");
+                    Console.WriteLine($"  POST VisaDocument {createdId} ← visa {legacyVisaOid}");
             }
             catch (Exception ex)
             {

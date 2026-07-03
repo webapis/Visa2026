@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
+using DevExpress.ExpressApp;
 using Microsoft.Data.SqlClient;
-using Visa2026.DataImporter;
+using Visa2026.Module.Services.MigrationImport;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -62,7 +64,8 @@ internal static class Visa2014MedicalRecordDocumentImporter
         """;
 
     public static async Task<Visa2014MedicalRecordDocumentImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
+        INonSecuredObjectSpaceFactory objectSpaceFactory,
         string legacyConnectionString,
         string personIdMapPath,
         string? medicalRecordIdMapOutputPath,
@@ -79,7 +82,7 @@ internal static class Visa2014MedicalRecordDocumentImporter
 
         Guid validityDurationId = Guid.Empty;
         if (!dryRun)
-            validityDurationId = await ResolveMonth3ValidityDurationIdAsync(api);
+            validityDurationId = ResolveMonth3ValidityDurationId(objectSpaceFactory);
 
         await using var connection = new SqlConnection(legacyConnectionString);
         await connection.OpenAsync();
@@ -193,51 +196,38 @@ internal static class Visa2014MedicalRecordDocumentImporter
                 {
                     var medicalPayload = new Dictionary<string, object?>
                     {
-                        ["Person"] = new { ID = targetPersonId },
+                        ["Person"] = new Dictionary<string, object?> { ["ID"] = targetPersonId },
                         ["DocumentNumber"] = DocumentNumber,
                         ["IssueDate"] = DateTime.SpecifyKind(issueDate.Value, DateTimeKind.Utc),
-                        ["ValidityDuration"] = new { ID = validityDurationId },
+                        ["ValidityDuration"] = new Dictionary<string, object?> { ["ID"] = validityDurationId },
                     };
 
-                    var medicalCreated = await api.CreateAsync<MedicalRecordImportRow>("MedicalRecord", medicalPayload);
-                    if (medicalCreated == null)
+                    var medicalCreatedId = await target.CreateAsync(typeof(Bo.MedicalRecord), medicalPayload);
+                    if (medicalCreatedId == null)
                     {
                         failed++;
-                        errors.Add($"{row.LegacyCopyOid}: MedicalRecord POST returned null");
+                        errors.Add($"{row.LegacyCopyOid}: MedicalRecord create returned null");
                         continue;
                     }
 
-                    medicalRecordId = medicalCreated.Id;
+                    await target.FlushAsync();
+                    medicalRecordId = medicalCreatedId.Value;
                     medicalRecordMap[row.LegacyCopyOid] = medicalRecordId;
                 }
 
-                var fileCreated = await api.CreateAsync<FileDataImportRow>("FileData", new Dictionary<string, object?>
-                {
-                    ["FileName"] = fileName,
-                    ["Content"] = blob,
-                });
-                if (fileCreated == null)
+                var docPayload = Visa2014DocumentImportPayload.WithNestedFile(
+                    "MedicalRecord", medicalRecordId, fileName, blob);
+
+                var docCreatedId = await target.CreateAsync(typeof(Bo.MedicalRecordDocument), docPayload);
+                if (docCreatedId == null)
                 {
                     failed++;
-                    errors.Add($"{row.LegacyCopyOid}: FileData POST returned null");
+                    errors.Add($"{row.LegacyCopyOid}: MedicalRecordDocument create returned null");
                     continue;
                 }
 
-                var docPayload = new Dictionary<string, object?>
-                {
-                    ["MedicalRecord"] = new { ID = medicalRecordId },
-                    ["File"] = new { ID = fileCreated.Id },
-                };
-
-                var docCreated = await api.CreateAsync<MedicalRecordDocumentImportRow>("MedicalRecordDocument", docPayload);
-                if (docCreated == null)
-                {
-                    failed++;
-                    errors.Add($"{row.LegacyCopyOid}: MedicalRecordDocument POST returned null");
-                    continue;
-                }
-
-                documentMap[row.LegacyCopyOid] = docCreated.Id;
+                await target.FlushAsync();
+                documentMap[row.LegacyCopyOid] = docCreatedId.Value;
                 posted++;
                 postedSinceLastSave++;
                 if (posted % 50 == 0)
@@ -245,7 +235,7 @@ internal static class Visa2014MedicalRecordDocumentImporter
                         $"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported, " +
                         $"{skippedNoPersonMap} no person map...");
                 if (verbose)
-                    Console.WriteLine($"  POST MedicalRecordDocument {docCreated.Id} ← copy {row.LegacyCopyOid}");
+                    Console.WriteLine($"  POST MedicalRecordDocument {docCreatedId} ← copy {row.LegacyCopyOid}");
 
                 if (postedSinceLastSave >= 50)
                 {
@@ -298,21 +288,23 @@ internal static class Visa2014MedicalRecordDocumentImporter
         };
     }
 
-    private static async Task<Guid> ResolveMonth3ValidityDurationIdAsync(ApiClient api)
+    private static Guid ResolveMonth3ValidityDurationId(INonSecuredObjectSpaceFactory factory)
     {
-        var durations = await api.GetAllAsync<ValidityDuration>("ValidityDuration");
+        using var objectSpace = factory.CreateNonSecuredObjectSpace(typeof(Bo.ValidityDuration));
+        MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+        var durations = objectSpace.GetObjectsQuery<Bo.ValidityDuration>().ToList();
         var month3 = durations.FirstOrDefault(d =>
             string.Equals(d.LocalizationKey, "Month3", StringComparison.OrdinalIgnoreCase)
             || d.NumberOfDays == 90);
         if (month3 != null)
-            return month3.Id;
+            return month3.ID;
 
         var defaultDuration = durations.FirstOrDefault(d => d.IsDefault);
         if (defaultDuration != null)
-            return defaultDuration.Id;
+            return defaultDuration.ID;
 
         throw new InvalidOperationException(
-            "Could not resolve ValidityDuration Month3 (90 days) from OData — ensure lookup catalogs are seeded.");
+            "Could not resolve ValidityDuration Month3 (90 days) — ensure lookup catalogs are seeded.");
     }
 
     private static string ResolveFileName(LegacySpidRow row, byte[] blob, int copyIndex)

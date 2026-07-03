@@ -13,7 +13,7 @@
 | Track | Sink | When | Contents |
 |-------|------|------|----------|
 | **Scalar + lookup** | Excel preview → OData POST/PATCH | Per BO wave (`person-domain`, `application-domain`, …) | Strings, numbers, dates, bools, lookup FKs resolved via `lookup-translations.yaml` |
-| **Files / images** | OData file properties or staged blob + reference | **After** owning BO exists in Visa2026 + `id-map/` | `byte[]` inline fields, `FileData` aggregates, `*Document` child rows |
+| **Files / images** | Headless ObjectSpace (`--import-visa2014-files --inprocess`) | **After** owning BO exists in Visa2026 + `id-map/` | `byte[]` inline fields, `FileData` aggregates, `*Document` child rows |
 
 ```mermaid
 flowchart LR
@@ -24,7 +24,7 @@ flowchart LR
   end
   subgraph files [File track]
     SQL2[VISA2015 blobs] --> M[Manifest + validate]
-    M --> F[Upload / PATCH bytes]
+    M --> F[ObjectSpace create / PATCH]
     F --> R[Reconcile counts + checksums]
   end
   O --> idmap[id-map populated]
@@ -52,7 +52,7 @@ flowchart LR
 | `dbo.PassportCopy` | ~9,157 active | `Göçürme` (`varbinary`) | `Passport` FK | `PassportDocument` + `FileData` (after Passport BO import) |
 | `dbo.PassportCopy` | ~4,317 active (Education FK) | `Göçürme` | `Education` FK | `EducationDocument` + `FileData` (after Education BO import) |
 | `dbo.FileData` | 107 | `Content` + `FileName` | XAF aggregate | Various `FileData` / `DocumentBase` targets |
-| `dbo.FamilyProofDocument` | ~994 | `CopyOfDocument` | Person / family | `PersonDocument` or related |
+| `dbo.FamilyProofDocument` | ~994 | `CopyOfDocument` | Person / family | `PersonDocument` or `PersonFamilyRelationDocument` (headless file wave — planned) |
 | `dbo.Copy` | ~104 active | `CopyOfDocument` → `FileData` | `IPersonn_SpidKepilnama`, Passport, Visa, … | `MedicalRecordDocument` + synthetic `MedicalRecord` parent (Spid kepilnama — see discovery/MedicalRecord.yaml) |
 
 **Schema snapshot** also flags attachment deferrals: `FileData`, `PassportCopy`, `Copy` ([`schema-snapshot.md`](schema-snapshot.md)).
@@ -152,7 +152,7 @@ Open decision: [`import-strategy.yaml`](../../Visa2026.DataImporter/legacy/visa2
 - **`PassportCopy` / `*Document`:** Option **D** — create child document row, upload `FileData.Content` + `FileName`, link to parent from id-map.
 - **Volume / prod cutover:** Option **C** as optional accelerator only if validated on staging (same audit trail as OData).
 
-**Target write path remains OData** (or OData-documented file endpoints exposed by Visa2026 Web API) — **never** direct SQL `INSERT` into Visa2026 `FileData` tables.
+**Target write path:** headless XAF ObjectSpace (`--import-visa2014` / `--import-visa2014-files` with `--inprocess`) — **never** direct SQL `INSERT` into Visa2026 `FileData` tables and **not** OData for migration loads.
 
 ---
 
@@ -179,20 +179,23 @@ Columns: `_legacyRowId`, `_targetEntity`, `_targetProperty`, `_byteLength`, `_sh
 
 ---
 
-## CLI (planned — after strategy approved)
+## CLI
 
 ```powershell
 # Scalar only (default) — Photo omitted or null in POST
 dotnet run --project Visa2026.DataImporter -- `
-  --import-visa2014 --entity Person --skip-file-properties
+  --import-visa2014 --inprocess --entity Person --skip-file-properties `
+  --target-connection "Server=...;Database=Visa2026;..."
 
-# File follow-up pass
+# File follow-up pass (requires --inprocess)
 dotnet run --project Visa2026.DataImporter -- `
-  --import-visa2014-files --entity Person --property Photo
+  --import-visa2014-files --inprocess --entity Person --property Photo `
+  --target-connection "Server=...;Database=Visa2026;..."
 
-# Attachments wave
+# Attachments wave (each property run separately today)
 dotnet run --project Visa2026.DataImporter -- `
-  --import-visa2014-files --wave attachments
+  --import-visa2014-files --inprocess --entity Passport --property PassportDocument `
+  --target-connection "..."
 ```
 
 Exact flags TBD in implementation; **must** share id-map and manifest with scalar importer.

@@ -1,6 +1,6 @@
 using Microsoft.Data.SqlClient;
-using Visa2026.DataImporter;
 using Visa2026.Module.Services;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -29,7 +29,7 @@ internal static class Visa2014PersonVisaFamilyTextImporter
         """;
 
     public static async Task<Visa2014PersonVisaFamilyTextImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string legacyConnectionString,
         string idMapPath,
         int? maxRows,
@@ -101,7 +101,7 @@ internal static class Visa2014PersonVisaFamilyTextImporter
 
             try
             {
-                await api.UpdateAsync("Person", targetId, new Dictionary<string, object?>
+                await target.UpdateAsync(typeof(Bo.Person), targetId, new Dictionary<string, object?>
                 {
                     ["VisaApplicationFamilyMembersText"] = familyText,
                 });

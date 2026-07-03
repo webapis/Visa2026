@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.SqlClient;
-using Visa2026.DataImporter;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -38,7 +38,7 @@ internal static class Visa2014PassportCopyImporter
         """;
 
     public static async Task<Visa2014PassportCopyImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string legacyConnectionString,
         string passportIdMapPath,
         string? copyIdMapOutputPath,
@@ -131,36 +131,22 @@ internal static class Visa2014PassportCopyImporter
 
             try
             {
-                var fileCreated = await api.CreateAsync<FileDataImportRow>("FileData", new Dictionary<string, object?>
-                {
-                    ["FileName"] = fileName,
-                    ["Content"] = blob,
-                });
-                if (fileCreated == null)
+                var payload = Visa2014DocumentImportPayload.WithNestedFile(
+                    "Passport", targetPassportId, fileName, blob);
+
+                var createdId = await target.CreateAsync(typeof(Bo.PassportDocument), payload);
+                if (createdId == null)
                 {
                     failed++;
-                    errors.Add($"{legacyCopyOid}: FileData POST returned null");
+                    errors.Add($"{legacyCopyOid}: PassportDocument create returned null");
                     continue;
                 }
 
-                var payload = new Dictionary<string, object?>
-                {
-                    ["Passport"] = new { ID = targetPassportId },
-                    ["File"] = new { ID = fileCreated.Id },
-                };
-
-                var created = await api.CreateAsync<PassportDocumentImportRow>("PassportDocument", payload);
-                if (created == null)
-                {
-                    failed++;
-                    errors.Add($"{legacyCopyOid}: POST returned null");
-                    continue;
-                }
-
-                newCopyMap[legacyCopyOid] = created.Id;
+                await target.FlushAsync();
+                newCopyMap[legacyCopyOid] = createdId.Value;
                 posted++;
                 if (verbose)
-                    Console.WriteLine($"  POST PassportDocument {created.Id} ← copy {legacyCopyOid}");
+                    Console.WriteLine($"  POST PassportDocument {createdId} ← copy {legacyCopyOid}");
             }
             catch (Exception ex)
             {
@@ -246,16 +232,4 @@ internal static class Visa2014PassportCopyImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
-}
-
-internal sealed class PassportDocumentImportRow
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
-}
-
-internal sealed class FileDataImportRow
-{
-    [JsonPropertyName("ID")]
-    public Guid Id { get; set; }
 }

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Data.SqlClient;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -42,7 +43,7 @@ internal static class Visa2014EducationDocumentImporter
         """;
 
     public static async Task<Visa2014EducationDocumentImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string legacyConnectionString,
         string educationIdMapPath,
         string? documentIdMapOutputPath,
@@ -136,39 +137,25 @@ internal static class Visa2014EducationDocumentImporter
 
             try
             {
-                var fileCreated = await api.CreateAsync<FileDataImportRow>("FileData", new Dictionary<string, object?>
-                {
-                    ["FileName"] = fileName,
-                    ["Content"] = blob,
-                });
-                if (fileCreated == null)
+                var payload = Visa2014DocumentImportPayload.WithNestedFile(
+                    "Education", targetEducationId, fileName, blob);
+
+                var createdId = await target.CreateAsync(typeof(Bo.EducationDocument), payload);
+                if (createdId == null)
                 {
                     failed++;
-                    errors.Add($"{legacyCopyOid}: FileData POST returned null");
+                    errors.Add($"{legacyCopyOid}: EducationDocument create returned null");
                     continue;
                 }
 
-                var payload = new Dictionary<string, object?>
-                {
-                    ["Education"] = new { ID = targetEducationId },
-                    ["File"] = new { ID = fileCreated.Id },
-                };
-
-                var created = await api.CreateAsync<EducationDocumentImportRow>("EducationDocument", payload);
-                if (created == null)
-                {
-                    failed++;
-                    errors.Add($"{legacyCopyOid}: EducationDocument POST returned null");
-                    continue;
-                }
-
-                docMap[legacyCopyOid] = created.Id;
+                await target.FlushAsync();
+                docMap[legacyCopyOid] = createdId.Value;
                 posted++;
                 postedSinceLastSave++;
                 if (posted % 100 == 0)
                     Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported, {skippedNoEducationMap} no education map...");
                 if (verbose)
-                    Console.WriteLine($"  POST EducationDocument {created.Id} ← copy {legacyCopyOid}");
+                    Console.WriteLine($"  POST EducationDocument {createdId} ← copy {legacyCopyOid}");
 
                 if (postedSinceLastSave >= 100 &&
                     !string.IsNullOrWhiteSpace(documentIdMapOutputPath))

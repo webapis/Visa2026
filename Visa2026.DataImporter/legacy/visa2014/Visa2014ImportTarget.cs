@@ -15,6 +15,8 @@ internal interface IVisa2014ImportTarget
 {
     Task<Guid?> CreateAsync(Type entityType, IReadOnlyDictionary<string, object?> payload);
 
+    Task UpdateAsync(Type entityType, Guid id, IReadOnlyDictionary<string, object?> payload);
+
     Task FlushAsync();
 }
 
@@ -44,6 +46,12 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
         };
     }
 
+    public async Task UpdateAsync(Type entityType, Guid id, IReadOnlyDictionary<string, object?> payload)
+    {
+        var entityName = entityType.Name;
+        await _api.UpdateAsync(entityName, id, payload);
+    }
+
     public Task FlushAsync() => Task.CompletedTask;
 }
 
@@ -51,6 +59,9 @@ internal sealed class Visa2014DryRunImportTarget : IVisa2014ImportTarget
 {
     public Task<Guid?> CreateAsync(Type entityType, IReadOnlyDictionary<string, object?> payload) =>
         Task.FromResult<Guid?>(Guid.NewGuid());
+
+    public Task UpdateAsync(Type entityType, Guid id, IReadOnlyDictionary<string, object?> payload) =>
+        Task.CompletedTask;
 
     public Task FlushAsync() => Task.CompletedTask;
 }
@@ -86,6 +97,26 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
             CommitBatch(batch);
 
         return Task.FromResult<Guid?>(((BaseObject)entity).ID);
+    }
+
+    public Task UpdateAsync(Type entityType, Guid id, IReadOnlyDictionary<string, object?> payload)
+    {
+        var key = entityType.FullName ?? entityType.Name;
+        if (!_batches.TryGetValue(key, out var batch))
+        {
+            var objectSpace = _factory.CreateNonSecuredObjectSpace(entityType);
+            MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+            batch = new BatchState(objectSpace);
+            _batches[key] = batch;
+        }
+
+        var entity = batch.ObjectSpace.GetObjectByKey(entityType, id);
+        if (entity == null)
+            throw new InvalidOperationException($"Update target {entityType.Name}({id}) not found.");
+
+        Migration.ObjectSpaceImportSink.ApplyPayload(batch.ObjectSpace, entity, payload);
+        CommitBatch(batch);
+        return Task.CompletedTask;
     }
 
     public Task FlushAsync()

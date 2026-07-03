@@ -356,7 +356,8 @@ After owning BO scalar import reconciled and `id-map/` populated. **Person.Photo
 ### Rules
 
 - Excel preview never embeds bytes — `_hasPhoto`, `_photoByteLength`, `_photoSha256` stubs only.
-- Planned CLI: `--import-visa2014-files` (after strategy approved).
+- CLI: `--import-visa2014-files --inprocess` (required). Writes via headless ObjectSpace — not OData PATCH/POST.
+- Planned: `FamilyProofDocument` → `PersonDocument` / `PersonFamilyRelationDocument` on same headless path.
 - Idempotency via hash + byte length; quarantine corrupt/oversize files.
 - Resolve `openDecisions.file-blob-strategy` before prod cutover.
 

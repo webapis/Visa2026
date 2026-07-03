@@ -93,6 +93,7 @@ internal static class Visa2014ImportCommand
         }
         else
         {
+            Console.WriteLine("WRN OData write path is deprecated for migration — prefer --inprocess.");
             Console.WriteLine($"INF Target (write): Visa2026 via OData at {apiBaseUrl}");
         }
         Console.WriteLine($"INF Lookup translations:");

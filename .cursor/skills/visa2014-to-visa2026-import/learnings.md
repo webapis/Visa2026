@@ -764,3 +764,13 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Final verified counts (calik-energi)**: People 2967 (Gender+Nationality 2967/2967), Passports 3573, Visas 5965, Educations 3101, EmployeePositionHistories 2993 (+1368 ActualPositions), EmployeeSalaries 2887, AddressesOfResidence 3968, Applications 12129 (ApprovalLegProfile 5757, ProjectContract 5750), ApplicationItems 21345, ApplicationProgresses 32177. 0 hard failures on final runs (only benign per-row data skips).
 - **Orchestration**: `scripts/visa2014-migration/import/Run-HeadlessChain.ps1` runs the dependency-ordered chain in-process; tolerates minority row failures, hard-fails only on 0-posted/non-empty batches; `-StartAt <Entity>` to resume.
 
+### 2026-07-02 — File/image waves on headless XAF (no OData)
+
+- **Phase**: import implementation + docs
+- **Goal**: User policy — all migration writes (scalar + file copies: photo, passport/visa/diploma scans, spid kepilnama) via headless ObjectSpace, not OData.
+- **Code**: `IVisa2014ImportTarget.UpdateAsync`; file importers refactored to `Visa2014DocumentImportPayload.WithNestedFile` (aggregated `FileData` on `*Document`); `--import-visa2014-files` **requires** `--inprocess` (errors without it).
+- **CLI examples**: `--import-visa2014-files --inprocess --entity Person --property Photo --target-connection ...`
+- **Orchestration**: `Run-HeadlessChain.ps1` extended with file steps after each parent scalar BO; `OnPrem-Staging.ps1` headless-only for all entities.
+- **Planned**: `FamilyProofDocument` → `PersonDocument` / `PersonFamilyRelationDocument` on same headless path (not implemented yet).
+- **OData**: deprecated for migration writes; scalar `--import-visa2014` without `--inprocess` prints `WRN OData write path is deprecated`.
+

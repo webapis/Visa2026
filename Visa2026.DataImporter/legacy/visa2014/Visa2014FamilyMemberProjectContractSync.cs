@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -16,7 +17,7 @@ internal sealed class Visa2014FamilyMemberProjectContractSyncResult
 
 /// <summary>
 /// Backfill: set each family member's <see cref="ProjectContract"/> from their sponsoring employee.
-/// Reads FK links from Visa2026 SQL (<c>People</c>); writes via OData only.
+/// Reads FK links from Visa2026 SQL (<c>People</c>); writes via headless ObjectSpace.
 /// </summary>
 internal static class Visa2014FamilyMemberProjectContractSync
 {
@@ -35,7 +36,7 @@ internal static class Visa2014FamilyMemberProjectContractSync
         """;
 
     public static async Task<Visa2014FamilyMemberProjectContractSyncResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string targetConnectionString,
         int? maxRows,
         bool dryRun,
@@ -58,9 +59,9 @@ internal static class Visa2014FamilyMemberProjectContractSync
 
             try
             {
-                await api.UpdateAsync("Person", familyId, new Dictionary<string, object?>
+                await target.UpdateAsync(typeof(Bo.Person), familyId, new Dictionary<string, object?>
                 {
-                    ["ProjectContract"] = new { ID = sponsorContractId },
+                    ["ProjectContract"] = new Dictionary<string, object?> { ["ID"] = sponsorContractId },
                 });
                 patched++;
                 if (verbose)

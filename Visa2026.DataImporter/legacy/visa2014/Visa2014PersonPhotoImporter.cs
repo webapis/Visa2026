@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Visa2026.DataImporter;
+using Bo = Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -15,10 +15,10 @@ internal sealed class Visa2014PersonPhotoImportResult
 
 internal static class Visa2014PersonPhotoImporter
 {
-    private const int MaxODataPhotoBytes = 12 * 1024 * 1024;
+    private const int MaxPhotoBytes = 16 * 1024 * 1024;
 
     public static async Task<Visa2014PersonPhotoImportResult> RunAsync(
-        ApiClient api,
+        IVisa2014ImportTarget target,
         string legacyConnectionString,
         string idMapPath,
         int? maxRows,
@@ -60,10 +60,10 @@ internal static class Visa2014PersonPhotoImporter
                 continue;
             }
 
-            if (photo.Length > MaxODataPhotoBytes)
+            if (photo.Length > MaxPhotoBytes)
             {
                 failed++;
-                errors.Add($"{legacyOid}: Photo {photo.Length} bytes exceeds OData limit ({MaxODataPhotoBytes}).");
+                errors.Add($"{legacyOid}: Photo {photo.Length} bytes exceeds limit ({MaxPhotoBytes}).");
                 continue;
             }
 
@@ -76,7 +76,7 @@ internal static class Visa2014PersonPhotoImporter
 
             try
             {
-                await api.UpdateAsync("Person", targetId, new Dictionary<string, object?>
+                await target.UpdateAsync(typeof(Bo.Person), targetId, new Dictionary<string, object?>
                 {
                     ["Photo"] = photo,
                 });

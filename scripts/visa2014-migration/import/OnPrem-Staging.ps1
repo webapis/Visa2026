@@ -5,12 +5,12 @@
 
 .DESCRIPTION
   Runs Visa2026.DataImporter --import-visa2014 entity-by-entity per order.yaml.
-  Uses OData for most entities; --inprocess (headless XAF) for Application and ApplicationItem.
+  All writes use --inprocess (headless XAF ObjectSpace) — no OData migration loads.
 
   Prerequisites:
-    - Repo checkout on a machine that can reach 10.100.128.15:1433 and 10.100.128.25:8080
+    - Repo checkout on a machine that can reach 10.100.128.15:1433 (legacy SQL)
     - Visa2026DbStaging empty or pre-migration backup; Module updaters ran once on staging
-    - User env: VISA2014_SQL_PASSWORD, VISA2026_STAGING_IMPORT_PASSWORD
+    - User env: VISA2014_SQL_PASSWORD
     - Param or env: Target SQL connection string for Visa2026DbStaging
 
   Id-maps: Visa2026.DataImporter/legacy/visa2014/id-maps/calik-energi-onprem-staging/
@@ -79,8 +79,8 @@ if (-not $env:VISA2026_STAGING_IMPORT_PASSWORD) {
 }
 
 $importPassword = $env:VISA2026_STAGING_IMPORT_PASSWORD
-if ([string]::IsNullOrWhiteSpace($importPassword) -and -not $DryRun) {
-    throw "Set VISA2026_STAGING_IMPORT_PASSWORD (user env) for OData import user '$ImportUser'."
+if ([string]::IsNullOrWhiteSpace($TargetConnection) -and -not $DryRun) {
+    throw "TargetConnection (or VISA2026_STAGING_SQL_CONNECTION) required for headless in-process import."
 }
 if ([string]::IsNullOrWhiteSpace($env:VISA2014_SQL_PASSWORD) -and -not $DryRun) {
     throw "Set VISA2014_SQL_PASSWORD (user env) for legacy ReadOnlyUser on 10.100.128.15."
@@ -92,8 +92,12 @@ function Get-MapPath([string]$name) {
     Join-Path $mapRoot "$name.json"
 }
 
-# In-process entities need target SQL; OData entities need API URL.
-$inProcessEntities = @{ Application = $true; ApplicationItem = $true }
+# All migration writes use headless XAF ObjectSpace.
+$inProcessEntities = @{
+    Person = $true; Passport = $true; Visa = $true; Education = $true
+    EmployeePositionHistory = $true; EmployeeSalary = $true; AddressOfResidence = $true
+    Application = $true; ApplicationItem = $true; ApplicationProgress = $true
+}
 
 # order.yaml tenantCatalogGeneration.runBeforeImportPhase: application-domain
 $applicationDomainEntities = @{ Application = $true; ApplicationItem = $true; ApplicationProgress = $true }
@@ -281,16 +285,12 @@ foreach ($wave in $waves) {
 
     if ($inProcessEntities.ContainsKey($wave.Name)) {
         if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
-            throw "TargetConnection (or VISA2026_STAGING_SQL_CONNECTION) required for in-process entity $($wave.Name)."
+            throw "TargetConnection required for in-process entity $($wave.Name)."
         }
         $args += @("--inprocess", "--target-connection", $TargetConnection, "--batch-size", $BatchSize)
     }
     else {
-        $args += @(
-            "--api-base-url", $ApiBaseUrl,
-            "--user", $ImportUser,
-            "--password", $importPassword
-        )
+        throw "Entity $($wave.Name) is not configured for headless import."
     }
 
     if ($DryRun) { $args += "--dry-run" }
