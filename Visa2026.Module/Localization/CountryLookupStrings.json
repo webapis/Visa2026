@@ -438,6 +438,12 @@
                                 "tk-TM":  "Ermenistan",
                                 "ru-RU":  "Армения"
                             },
+                    "ALB":  {
+                                "en-US":  "Albania",
+                                "tr-TR":  "Arnavutluk",
+                                "tk-TM":  "Albaniya",
+                                "ru-RU":  "Албания"
+                            },
                     "EGY":  {
                                 "en-US":  "Egypt",
                                 "tr-TR":  "Mısır",
@@ -589,6 +595,12 @@
                                 "ru-RU":  "Того"
                             },
                     "UAE":  {
+                                "en-US":  "United Arab Emirates",
+                                "tr-TR":  "Birleşik Arap Emirlikleri",
+                                "tk-TM":  "Birleşen Arap Emirlikleri",
+                                "ru-RU":  "ОАЭ"
+                            },
+                    "ARE":  {
                                 "en-US":  "United Arab Emirates",
                                 "tr-TR":  "Birleşik Arap Emirlikleri",
                                 "tk-TM":  "Birleşen Arap Emirlikleri",
@@ -905,6 +917,12 @@
                                 "tr-TR":  "Polonya",
                                 "tk-TM":  "Polşa",
                                 "ru-RU":  "Польша"
+                            },
+                    "PRT":  {
+                                "en-US":  "Portugal",
+                                "tr-TR":  "Portekiz",
+                                "tk-TM":  "Portugaliýa",
+                                "ru-RU":  "Португалия"
                             },
                     "DJI":  {
                                 "en-US":  "Djibouti",

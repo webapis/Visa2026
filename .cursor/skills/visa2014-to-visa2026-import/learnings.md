@@ -774,3 +774,27 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Planned**: `FamilyProofDocument` → `PersonDocument` / `PersonFamilyRelationDocument` on same headless path (not implemented yet).
 - **OData**: deprecated for migration writes; scalar `--import-visa2014` without `--inprocess` prints `WRN OData write path is deprecated`.
 
+### 2026-07-03 — Person — PersonalNumber placeholder dedupe fix + partial reimport (calik-energi)
+
+- **Phase**: import
+- **Mode**: partial-reimport (person-domain wipe + full chain from Person)
+- **Outcome**: Person success; downstream chain running
+- **Environment**: local — `(localdb)\mssqllocaldb` / `Visa2026`
+- **Mapping fix**: `---`, `...`, `----`, etc. normalize to `0`; sentinel dedupe on FirstName+LastName+DateOfBirth; `Person_IdentityUniqueWhenPersonalNumberIsSentinel` save rule
+- **Cleanup**: `scripts/visa2014-migration/cleanup/ImportedPersonDomain.sql` (People + person-domain + manual Applications)
+- **Script**: `scripts/visa2014-migration/reimport/Person.ps1` (new); `Run-HeadlessChain.ps1` fails on PS 5.1 (`??`) — ran Person via `dotnet exec` + downstream loop
+- **Dry-run**: legacy 3241 → prepared **3222**, skipped 0, dedupe merged **19** (was 274)
+- **Person import**: posted **3222**, failed **0**; id-map 3241 entries (+19 dedupe aliases)
+
+### 2026-07-03 — Passport — PRT/ARE country gap + 12-row reimport (calik-energi)
+
+- **Phase**: import (partial Passport resume)
+- **Outcome**: success — **12 posted**, **0 failed**; Passports **3585** total (was 3573)
+- **Root cause**: legacy `IssuedCountry` **PRT** (10) and **ARE** (2) missing from Visa2026 `Country` catalog (`UAE` exists; ISO **ARE** did not)
+- **Fix**: `country.json` + `CountryLookupStrings.json` — added **PRT** (Portugaliýa) and **ARE** (same label as UAE); `manifest.json` version **8**
+- **Importer**: `Visa2014PassportODataImporter` now skips rows already in Passport id-map and merges id-map on resume (like Visa)
+- **DB note**: headless import did not run `LookupCatalogSyncUpdater` (stored `LookupCatalogManifestVersion` 37 ≫ manifest 8) — inserted PRT/ARE via SQL on LocalDB before reimport; greenfield/deploy should get rows from JSON sync after manifest bump or app restart
+- **Reconciliation**: People **3222** (employees **2935**, family **287**); legacy employees 2950 → gap **15** (real-PN duplicate pairs only; was 2686)
+- **Log**: `artifacts/headless-import/Person-reimport.log`, `downstream-reimport.log`
+- **Follow-up**: restart Blazor for new Person validation rule; monitor downstream chain completion
+

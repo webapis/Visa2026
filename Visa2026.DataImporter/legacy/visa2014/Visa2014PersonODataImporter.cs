@@ -36,7 +36,7 @@ internal static class Visa2014PersonODataImporter
 
         if (dryRun)
         {
-            Console.WriteLine($"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST ({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} dedupe merged).");
+            Console.WriteLine($"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST ({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} duplicate suffixed).");
             return new Visa2014PersonImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,

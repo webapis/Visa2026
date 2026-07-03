@@ -601,6 +601,12 @@
                      "LocalizationKey":  "UAE"
                  },
                  {
+                     "NameTm":  "Birleşen Arap Emirlikleri",
+                     "Code":  "ARE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ARE"
+                 },
+                 {
                      "NameTm":  "Butan",
                      "Code":  "BTN",
                      "IsDefault":  false,
@@ -911,6 +917,12 @@
                      "Code":  "POL",
                      "IsDefault":  false,
                      "LocalizationKey":  "POL"
+                 },
+                 {
+                     "NameTm":  "Portugaliýa",
+                     "Code":  "PRT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PRT"
                  },
                  {
                      "NameTm":  "Jibuti",

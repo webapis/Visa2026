@@ -288,9 +288,16 @@ internal static class Visa2014ImportCommand
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
             if (result.IdMapPath != null)
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+            if (result.FailedCount > 0)
+            {
+                foreach (var error in result.Errors.Take(10))
+                    Console.Error.WriteLine($"ERR {error}");
+                if (result.Errors.Count > 10)
+                    Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 10} more");
+            }
         }
         else if (result.SkippedNoPersonMap > 0)
         {

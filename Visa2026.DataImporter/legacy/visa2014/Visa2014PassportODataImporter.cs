@@ -10,6 +10,7 @@ internal sealed class Visa2014PassportImportResult
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
     public int SkippedNoPersonMap { get; init; }
+    public int SkippedAlreadyImported { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -55,15 +56,27 @@ internal static class Visa2014PassportODataImporter
             };
         }
 
-        var passportIdMap = new Dictionary<Guid, Guid>();
+        var passportIdMap = LoadOptionalPassportIdMap(passportIdMapOutputPath);
+        if (verbose && passportIdMap.Count > 0)
+            Console.WriteLine($"INF Existing Passport id-map entries: {passportIdMap.Count}");
+
         var errors = new List<string>();
         int posted = 0;
         int failed = 0;
         int skippedNoPerson = 0;
+        int skippedAlreadyImported = 0;
 
         foreach (var row in batch.ImportRows)
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
+            if (passportIdMap.ContainsKey(legacyOid))
+            {
+                skippedAlreadyImported++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: already in Passport id-map");
+                continue;
+            }
+
             if (!TryResolveLegacyPersonOid(row, out var legacyPersonOid))
             {
                 failed++;
@@ -132,6 +145,7 @@ internal static class Visa2014PassportODataImporter
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedNoPersonMap = skippedNoPerson,
+            SkippedAlreadyImported = skippedAlreadyImported,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
@@ -195,5 +209,13 @@ internal static class Visa2014PassportODataImporter
             ["PassportType"] = new { ID = passportTypeId.Value },
             ["IssuedCountry"] = new { ID = issuedCountryId.Value },
         };
+    }
+
+    private static Dictionary<Guid, Guid> LoadOptionalPassportIdMap(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return new Dictionary<Guid, Guid>();
+
+        return Visa2014IdMapHelper.Load(path);
     }
 }

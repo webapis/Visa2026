@@ -17,17 +17,29 @@ deduplication:
     - Oid
   personalNumberDedupe:
     enabled: true
-    when: normalized PersonalNumber NOT IN ('0', '-', '.', '')
+    when: normalized PersonalNumber NOT sentinel (not 0; dash/dot-only placeholders normalize to 0)
     keys:
       - PersonalNumber
     canonicalRule: most_complete
     tieBreakColumn: Oid
-    mergeBeforeImport: coalesce_non_null
-    action: import_one
+    duplicatePolicy: suffix_not_merge
+    suffixPattern: "{PersonalNumber}_dub{N}"
     notes: |
-      Visa2026: filtered unique index IX_People_PersonalNumber + Person_PersonalNumberUniqueAmongActive.
-      Sentinel "0" may repeat; all other values must be unique among active Person rows.
-      Legacy has 5 real-PN pairs (10 Person Oids → 5 humans) — merge before OData POST.
+      True duplicates (same real PersonalNumber) all import; 2nd+ rows get _dub1, _dub2 suffix on PersonalNumber.
+      Visa2026 IX_People_PersonalNumber unique except bare "0".
+  sentinelIdentityDedupe:
+    enabled: true
+    when: normalized PersonalNumber IS sentinel 0 AND same FirstName+LastName+DateOfBirth
+    keys:
+      - FirstName
+      - LastName
+      - DateOfBirth
+    canonicalRule: most_complete
+    tieBreakColumn: Oid
+    duplicatePolicy: suffix_not_merge
+    suffixPattern: "0_dub{N}"
+    notes: |
+      Different names with PN 0 stay separate (no suffix). Same identity duplicates get 0_dub1, 0_dub2, etc.
   canonicalRule: most_recent
   tieBreakColumn: Passport.PassportIssuedDate
   mergeBeforeImport: coalesce_non_null
@@ -270,14 +282,24 @@ fields:
       - "-"
       - "."
       - ""
+      - "---"
+      - "..."
+      - "----"
+    sentinelIdentityKeys:
+      - FirstName
+      - LastName
+      - DateOfBirth
     visa2026Uniqueness:
       rule: Person_PersonalNumberUniqueAmongActive
+      sentinelIdentityRule: Person_IdentityUniqueWhenPersonalNumberIsSentinel
       index: IX_People_PersonalNumber
       sentinelAllowed: "0"
       duplicatePolicy: dedupe_before_post
     notes: |
       Source: dbo.Passport.PersonalNumber only (not Person.IDNumber).
-      Canonical passport: non-sentinel first, then latest PassportIssuedDate.
+      Dash/dot-only placeholders (---, ..., ----, -, .) normalize to sentinel 0.
+      Canonical passport: real PN first, then dash/dot-only, then latest PassportIssuedDate.
+      When PN is 0, dedupe on FirstName + LastName + DateOfBirth; otherwise dedupe on PersonalNumber.
       Sentinels (- . empty) → "0" (multiple persons allowed in Visa2026).
       Real PN must be unique — 5 legacy duplicate pairs merged to one Person each.
       OData upsert uses legacy Oid/id-map, not PersonalNumber filter alone.

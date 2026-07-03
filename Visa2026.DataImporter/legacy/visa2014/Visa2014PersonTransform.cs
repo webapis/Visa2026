@@ -71,7 +71,11 @@ internal static class Visa2014PersonTransform
             FROM dbo.Passport pp
             WHERE pp.Person = p.Oid AND pp.GCRecord IS NULL
             ORDER BY
-                CASE WHEN NULLIF(LTRIM(RTRIM(pp.PersonalNumber)), '') IN ('-', '.') THEN 1 ELSE 0 END,
+                CASE
+                    WHEN pp.PersonalNumber IS NULL OR LTRIM(RTRIM(pp.PersonalNumber)) = N'' THEN 2
+                    WHEN LTRIM(RTRIM(pp.PersonalNumber)) NOT LIKE N'%[^-.]%' ESCAPE N'\' THEN 1
+                    ELSE 0
+                END,
                 pp.PassportIssuedDate DESC,
                 pp.Oid
         ) Passport
@@ -184,18 +188,16 @@ internal static class Visa2014PersonTransform
         var unmappedSet = new HashSet<string>(StringComparer.Ordinal);
 
         var working = rawRows.Select(r => new WorkingRow(r)).ToList();
-        ApplyPersonalNumberDedupe(working, dedupeSummary);
+        ApplyPersonalNumberDuplicateSuffixes(working, dedupeSummary);
+        ApplySentinelIdentityDuplicateSuffixes(working, dedupeSummary);
 
         var importRows = new List<Dictionary<string, object?>>();
-        var dedupeMergedCount = 0;
+        var duplicateSuffixCount = 0;
 
         foreach (var row in working)
         {
-            if (row.ImportAction == "duplicate_merged")
-            {
-                dedupeMergedCount++;
-                continue;
-            }
+            if (row.PersonalNumberOverride != null)
+                duplicateSuffixCount++;
 
             var export = BuildExportRow(row, catalogs, out var skipReason, out var rowUnmapped);
             foreach (var key in rowUnmapped)
@@ -225,48 +227,19 @@ internal static class Visa2014PersonTransform
             })
             .ToList();
 
-        return new TransformBatchResult(importRows, dedupeMergedCount);
+        return new TransformBatchResult(importRows, duplicateSuffixCount);
     }
 
     /// <summary>
-    /// Legacy Person Oids marked duplicate_merged → canonical legacy Oid (for id-map alias expansion).
+    /// Legacy Person Oids that shared a dedupe group no longer alias — each legacy row imports separately
+    /// with <c>_dubN</c> suffixes on <c>PersonalNumber</c> when needed.
     /// </summary>
     internal static IReadOnlyDictionary<Guid, Guid> BuildDedupeLegacyAliases(
         string connectionString,
         IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
-        bool verbose)
-    {
-        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
-        var sql = maxRows is > 0
-            ? $"SELECT TOP ({maxRows}) * FROM ({ExtractSql}) AS q"
-            : ExtractSql;
-
-        var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
-        var rawRows = new List<Visa2014PersonRawRow>();
-        foreach (var dict in dictRows)
-        {
-            if (TryParseRawRow(dict, out var parsed))
-                rawRows.Add(parsed);
-        }
-
-        var working = rawRows.Select(r => new WorkingRow(r)).ToList();
-        var dedupeSummary = new List<Dictionary<string, object?>>();
-        ApplyPersonalNumberDedupe(working, dedupeSummary);
-
-        var aliases = new Dictionary<Guid, Guid>();
-        foreach (var group in working
-                     .Where(r => r.ImportAction == "duplicate_merged")
-                     .GroupBy(r => r.DedupeGroupId, StringComparer.Ordinal))
-        {
-            var canonical = working.First(r =>
-                r.DedupeGroupId == group.Key && r.ImportAction == "import");
-            foreach (var merged in group)
-                aliases[merged.Raw.LegacyOid] = canonical.Raw.LegacyOid;
-        }
-
-        return aliases;
-    }
+        bool verbose) =>
+        new Dictionary<Guid, Guid>();
 
     internal sealed record TransformBatchResult(List<Dictionary<string, object?>> ImportRows, int DedupeMergedCount);
 
@@ -275,9 +248,16 @@ internal static class Visa2014PersonTransform
         public Visa2014PersonRawRow Raw { get; } = Raw;
         public string ImportAction { get; set; } = "import";
         public string? DedupeGroupId { get; set; }
+        /// <summary>When set, overrides normalized passport PersonalNumber (e.g. <c>0_dub1</c>, <c>56872306030_dub2</c>).</summary>
+        public string? PersonalNumberOverride { get; set; }
     }
 
-    private static void ApplyPersonalNumberDedupe(List<WorkingRow> rows, List<Dictionary<string, object?>> dedupeSummary)
+    internal const string DuplicatePersonalNumberSuffixPrefix = "_dub";
+
+    internal static string BuildDuplicatePersonalNumber(string basePersonalNumber, int duplicateIndex) =>
+        $"{basePersonalNumber}{DuplicatePersonalNumberSuffixPrefix}{duplicateIndex}";
+
+    private static void ApplyPersonalNumberDuplicateSuffixes(List<WorkingRow> rows, List<Dictionary<string, object?>> dedupeSummary)
     {
         var groups = rows
             .Select(r => new { Row = r, Norm = NormalizePersonalNumber(r.Raw.RawPersonalNumber) })
@@ -287,30 +267,89 @@ internal static class Visa2014PersonTransform
 
         foreach (var group in groups)
         {
-            var members = group.ToList();
-            var canonical = members
-                .OrderByDescending(x => CompletenessScore(x.Row.Raw))
-                .ThenBy(x => x.Row.Raw.LegacyOid)
-                .First();
-
-            var groupId = $"PN:{group.Key}";
-            foreach (var member in members)
-            {
-                member.Row.DedupeGroupId = groupId;
-                if (!ReferenceEquals(member.Row, canonical.Row))
-                    member.Row.ImportAction = "duplicate_merged";
-            }
-
-            dedupeSummary.Add(new Dictionary<string, object?>
-            {
-                ["_dedupeGroupId"] = groupId,
-                ["key"] = "PersonalNumber",
-                ["normalizedValue"] = group.Key,
-                ["memberCount"] = members.Count,
-                ["canonical_legacyRowId"] = canonical.Row.Raw.LegacyOid,
-                ["canonicalRule"] = "most_complete; tieBreak Oid",
-            });
+            AssignDuplicatePersonalNumberSuffixes(
+                group.Select(x => x.Row).ToList(),
+                $"PN:{group.Key}",
+                "PersonalNumber",
+                group.Key,
+                dedupeSummary);
         }
+    }
+
+    /// <summary>
+    /// When PersonalNumber normalizes to sentinel <c>0</c>, suffix duplicates that share the same
+    /// FirstName + LastName + DateOfBirth (<c>0_dub1</c>, <c>0_dub2</c>, …).
+    /// </summary>
+    private static void ApplySentinelIdentityDuplicateSuffixes(List<WorkingRow> rows, List<Dictionary<string, object?>> dedupeSummary)
+    {
+        var groups = rows
+            .Select(r => new
+            {
+                Row = r,
+                IdentityKey = BuildIdentityDedupeKey(r.Raw),
+                Norm = NormalizePersonalNumber(r.Raw.RawPersonalNumber),
+            })
+            .Where(x => IsSentinelPersonalNumber(x.Norm) && !string.IsNullOrEmpty(x.IdentityKey))
+            .GroupBy(x => x.IdentityKey, StringComparer.Ordinal)
+            .Where(g => g.Count() > 1);
+
+        foreach (var group in groups)
+        {
+            AssignDuplicatePersonalNumberSuffixes(
+                group.Select(x => x.Row).ToList(),
+                $"ID:{group.Key}",
+                "FirstName|LastName|DateOfBirth",
+                "0",
+                dedupeSummary,
+                "most_complete; tieBreak Oid; PersonalNumber sentinel 0");
+        }
+    }
+
+    private static void AssignDuplicatePersonalNumberSuffixes(
+        List<WorkingRow> members,
+        string groupId,
+        string keyName,
+        string basePersonalNumber,
+        List<Dictionary<string, object?>> dedupeSummary,
+        string canonicalRule = "most_complete; tieBreak Oid")
+    {
+        var ordered = members
+            .OrderByDescending(x => CompletenessScore(x.Raw))
+            .ThenBy(x => x.Raw.LegacyOid)
+            .ToList();
+
+        for (var i = 0; i < ordered.Count; i++)
+        {
+            var member = ordered[i];
+            member.DedupeGroupId = groupId;
+            if (i == 0)
+                continue;
+
+            member.PersonalNumberOverride = BuildDuplicatePersonalNumber(basePersonalNumber, i);
+            member.ImportAction = "duplicate_suffix";
+        }
+
+        dedupeSummary.Add(new Dictionary<string, object?>
+        {
+            ["_dedupeGroupId"] = groupId,
+            ["key"] = keyName,
+            ["normalizedValue"] = basePersonalNumber,
+            ["memberCount"] = ordered.Count,
+            ["suffixCount"] = ordered.Count - 1,
+            ["canonical_legacyRowId"] = ordered[0].Raw.LegacyOid,
+            ["canonicalRule"] = canonicalRule,
+            ["suffixPattern"] = $"{basePersonalNumber}{DuplicatePersonalNumberSuffixPrefix}N",
+        });
+    }
+
+    internal static string BuildIdentityDedupeKey(Visa2014PersonRawRow raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw.FirstName) ||
+            string.IsNullOrWhiteSpace(raw.LastName) ||
+            !raw.BirthDate.HasValue)
+            return "";
+
+        return $"{raw.FirstName.Trim().ToUpperInvariant()}|{raw.LastName.Trim().ToUpperInvariant()}|{raw.BirthDate.Value:yyyy-MM-dd}";
     }
 
     private static int CompletenessScore(Visa2014PersonRawRow row)
@@ -367,7 +406,10 @@ internal static class Visa2014PersonTransform
         row["DateOfBirth"] = raw.BirthDate;
         row["BirthPlace"] = string.IsNullOrWhiteSpace(raw.BirthPlace) ? null : raw.BirthPlace.Trim();
         row["ForeignAddress"] = string.IsNullOrWhiteSpace(raw.ForeignAddress) ? null : raw.ForeignAddress.Trim();
-        row["PersonalNumber"] = NormalizePersonalNumber(raw.RawPersonalNumber);
+        row["PersonalNumber"] = working.PersonalNumberOverride
+            ?? NormalizePersonalNumber(raw.RawPersonalNumber);
+        if (working.PersonalNumberOverride != null)
+            row["_duplicatePersonalNumberSuffix"] = working.PersonalNumberOverride;
         row["Email"] = "";
         row["IsEmployee"] = raw.IsEmployee;
         row["PersonRole"] = raw.IsEmployee ? "Employee" : "FamilyMember";
@@ -428,15 +470,22 @@ internal static class Visa2014PersonTransform
         row[targetProperty] = null;
     }
 
-    internal static string NormalizePersonalNumber(string? raw)
+    /// <summary>Legacy passport placeholders made only of dashes/dots (e.g. ---, ..., ----).</summary>
+    internal static bool IsDashDotPlaceholderPersonalNumber(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw))
-            return "0";
-        var trimmed = raw.Trim();
-        return trimmed is "-" or "." ? "0" : trimmed;
+            return true;
+        return raw.Trim().All(c => c is '-' or '.');
     }
 
-    private static bool IsSentinelPersonalNumber(string normalized) =>
+    internal static string NormalizePersonalNumber(string? raw)
+    {
+        if (IsDashDotPlaceholderPersonalNumber(raw))
+            return "0";
+        return raw!.Trim();
+    }
+
+    internal static bool IsSentinelPersonalNumber(string normalized) =>
         string.IsNullOrWhiteSpace(normalized) ||
         string.Equals(normalized, "0", StringComparison.Ordinal);
 

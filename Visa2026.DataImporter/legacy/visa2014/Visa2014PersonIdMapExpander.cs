@@ -64,13 +64,37 @@ internal static class Visa2014PersonIdMapExpander
                     continue;
 
                 await using var cmd = conn.CreateCommand();
-                cmd.CommandText = """
-                    SELECT TOP 1 CAST(ID AS varchar(36))
-                    FROM People
-                    WHERE GCRecord = 0 AND PersonalNumber = @pn
-                    ORDER BY ID
-                    """;
-                cmd.Parameters.AddWithValue("@pn", pn);
+                if (Visa2014PersonTransform.IsSentinelPersonalNumber(pn))
+                {
+                    if (row.GetValueOrDefault("FirstName") is not string firstName ||
+                        row.GetValueOrDefault("LastName") is not string lastName ||
+                        row.GetValueOrDefault("DateOfBirth") is not DateTime dateOfBirth)
+                        continue;
+
+                    cmd.CommandText = """
+                        SELECT TOP 1 CAST(ID AS varchar(36))
+                        FROM People
+                        WHERE GCRecord = 0
+                          AND PersonalNumber = N'0'
+                          AND UPPER(LTRIM(RTRIM(FirstName))) = @fn
+                          AND UPPER(LTRIM(RTRIM(LastName))) = @ln
+                          AND CAST(DateOfBirth AS date) = CAST(@dob AS date)
+                        ORDER BY ID
+                        """;
+                    cmd.Parameters.AddWithValue("@fn", firstName.Trim().ToUpperInvariant());
+                    cmd.Parameters.AddWithValue("@ln", lastName.Trim().ToUpperInvariant());
+                    cmd.Parameters.AddWithValue("@dob", dateOfBirth.Date);
+                }
+                else
+                {
+                    cmd.CommandText = """
+                        SELECT TOP 1 CAST(ID AS varchar(36))
+                        FROM People
+                        WHERE GCRecord = 0 AND PersonalNumber = @pn
+                        ORDER BY ID
+                        """;
+                    cmd.Parameters.AddWithValue("@pn", pn);
+                }
                 var existing = await cmd.ExecuteScalarAsync() as string;
                 if (string.IsNullOrWhiteSpace(existing))
                     continue;
