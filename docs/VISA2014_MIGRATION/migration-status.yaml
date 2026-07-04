@@ -1,0 +1,333 @@
+# VISA2014 Ã¢â€ â€™ Visa2026 Ã¢â‚¬â€ migration status tracker
+#
+# Human dashboard: STATUS.md (same folder)
+#
+# Update rules:
+#   - Set lastUpdated + updatedBy on every edit.
+#   - Entity discovery/import flags: canonical in order.yaml Ã¢â‚¬â€ mirror summary only in entity-inventory.yaml.
+#   - Add/close issues here; do not bury blockers only in dossier notes.
+#   - When an issue is resolved, set status: resolved + resolvedAt; keep the row for history.
+#   - When a workstream completes, set status: done + completedAt.
+#
+# Status values:
+#   workstreams: not_started | in_progress | blocked | done
+#   issues: open | in_progress | resolved | deferred | wont_fix
+
+version: 1
+lastUpdated: 2026-06-29
+updatedBy: agent - ApplicationItem Excel preview export
+
+entityStatusSource: Visa2026.DataImporter/legacy/visa2014/order.yaml
+entitySummarySource: docs/VISA2014_MIGRATION/entity-inventory.yaml
+
+currentFocus:
+  - ApplicationItem Excel preview review → importConfirmed
+  - Application OData pilot (--max-rows then full ~12,129; Blazor on :5001 + legacy ReadOnlyUser)
+  - ApplicationProgress OData (after Application id-map)
+
+workstreams:
+  - id: bootstrap
+    label: VISA2015 schema bootstrap (table index + row counts)
+    status: done
+    artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
+    completedAt: 2026-06-20
+    notes: 94 tables indexed in schema-snapshot.md
+
+  - id: lookup-strategy
+    label: Lookup resolution strategy (translate only Ã¢â‚¬â€ no legacy lookup import)
+    status: done
+    artifact: docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md
+    completedAt: 2026-06-20
+
+  - id: import-strategy
+    label: Import plan and strategy approved
+    status: done
+    artifact: Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml
+    completedAt: 2026-06-21
+    notes: |
+      Approved 2026-06-21. Multi-company: legacy-sources.yaml (calik-energi / gap-insaat).
+      Ãƒâ€¡alik pilot: VISA2015 on SQLEXPRESS Ã¢â€ â€™ LocalDB Visa2026. See MULTI_COMPANY_LEGACY_SOURCES.md.
+
+  - id: multi-company-legacy
+    label: Multi-company legacy source profiles
+    status: done
+    artifact: docs/VISA2014_MIGRATION/MULTI_COMPANY_LEGACY_SOURCES.md
+    completedAt: 2026-06-21
+    notes: |
+      legacy-sources.yaml + --legacy-source CLI. Shared lookup-translations.yaml;
+      company overrides: lookup-translations.calik-energi.yaml, lookup-translations.gap-insaat.yaml.
+
+  - id: lookup-audit
+    label: Layer 3 lookup value audit (lookup-translations.yaml)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/lookup-translations.yaml
+    notes: |
+      Shared (all companies): Gender, Country, MaritalStatus, Relationship Ã¢â‚¬â€ done/approved.
+      ProjectContract Gap (VISA2015): GT-15 remap in lookup-translations.gap-insaat.yaml.
+      ProjectContract Çalik (VISA2015): audit complete 2026-06-26 — 73 union codes; identity pass-through; tenant catalog seeded (project-contract.calik-energi.json).
+      ApplicationType + other catalogs: not started (application-wave gate).
+
+  - id: phase1-discovery
+    label: Phase 1 per-BO discovery (dossiers + layers 1Ã¢â‚¬â€œ3)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/discovery/
+    notes: |
+      Phase1-discovery: Person through MedicalRecord + Application + ApplicationItem complete on Çalik VISA2015.
+      ApplicationItem 2026-06-29: 21,794 active PersonInApplication rows mapped.
+
+  - id: excel-preview
+    label: Excel preview export (--export-visa2014-preview)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/EXCEL_PREVIEW_EXPORT.md
+    notes: |
+      Çalik Person-preview.calik-energi.xlsx exported 2026-06-26 (3241 legacy → 2924 import).
+      AddressOfResidence-preview.calik-energi.xlsx re-exported 2026-06-27 after lodging/hotel split (3971 → 3968 import, 3 skipped).
+      Application-preview.calik-energi.xlsx exported 2026-06-29 (12,237 legacy → 12,129 import, 108 skipped).
+      ReadOnlyUser + VISA2014_SQL_PASSWORD; legacy DB named VISA2015 on SQLEXPRESS.
+      Çalik Person-preview.calik-energi.xlsx reviewed; importConfirmed 2026-06-26.
+
+  - id: file-image-import
+    label: File and image import (binary wave Ã¢â‚¬â€ separate from Excel)
+    status: in_progress
+    artifact: docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md
+    blockedBy: [import-implementation, pilot-import]
+    notes: |
+      Planning complete 2026-06-21. Person.Photo follow-up after scalar Person;
+      PassportCopy / FileData in attachments wave. openDecisions.file-blob-strategy TBD.
+
+  - id: import-implementation
+    label: OData import implementation (--import-visa2014)
+    status: in_progress
+    artifact: Visa2026.DataImporter/
+    notes: |
+      Person importer implemented; --legacy-source wired. OData load requires importConfirmed + running Blazor.Server.
+      Visa scalar 2026-06-26: 5760 posted, 0 failed, 251 skipped (Passport map), 5 resume-skipped; id-map 5765.
+      AddressOfResidence inference pass 2026-06-27: excel preview 3971 -> 3968 import, 3 skipped (was 1209).
+      Lodging/hotel split 2026-06-27: Lojman+myhmanhan -> Hotel catalog (IsHotelAddressLine); lodging 67 + hotel 33 tenant rows deployed.
+      AddressOfResidence re-export 2026-06-27: 3971 legacy, 3968 import, 3 skipped; Type Lodging 2378 / PrivateHouse 1148 / Hotel 442; unmapped 3 (Region/City on skipped Patent rows).
+      AddressOfResidence OData 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 pilot resume-skipped; OData count 3786.
+      Application OData importer 2026-06-29: Visa2014ApplicationODataImporter + resolver extensions; IsManualEntry + FullApplicationNumber-only POST (omit ApplicationNumber/AppNumberPrefix).
+      Application OData pilot 2026-06-29: 9 posted, 0 failed, 1 skipped (TOP 10 legacy SQL); id-map id-maps/calik-energi/Application.json (9 entries).
+      Application OData full 2026-06-29: 12120 posted + 9 resume-skipped, 0 failed; 108 transform-skipped (E:44/E:55 etc); id-map 12129 entries; ~7 min.
+
+issues:
+  - id: ISS-001
+    title: Import strategy not approved
+    status: resolved
+    severity: blocker
+    category: strategy
+    relatedTo: [import-strategy]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: Approved 2026-06-21; import-strategy.yaml status approved, implementationBlocked false.
+
+  - id: ISS-002
+    title: Country lookup values[] empty while unmappedPolicy is block_row
+    status: resolved
+    severity: high
+    category: lookup
+    relatedTo: [Person, Country]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-20
+    owner: null
+    notes: |
+      Person-scope audit complete: 64 DISTINCT NameOfCountryL Ã¢â€ â€™ identity Country.Code in lookup-translations.yaml.
+      Legacy dbo.Country has duplicate Oids per code Ã¢â‚¬â€ importer resolves by translated Code string.
+
+  - id: ISS-003
+    title: MaritalStatus legacy shape is not Visa2026 catalog
+    status: resolved
+    severity: medium
+    category: lookup
+    relatedTo: [Person, MaritalStatus]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Approved 2026-06-21: Status int 0Ã¢â‚¬â€œ5 Ã¢â€ â€™ Visa2026 Code in lookup-translations.yaml.
+      Status=0 Ã¢â€ â€™ Ãƒâ€“ÃƒÂ½lenen (Married); StatusL Ã¢â€ â€™ VisaApplicationFamilyMembersText.
+      Comparison: lookup-comparisons/MaritalStatus.md
+
+  - id: ISS-012
+    title: Person importConfirmed blocked Ã¢â‚¬â€ person-wave lookup review incomplete
+    status: resolved
+    severity: medium
+    category: lookup
+    relatedTo: [Person, Relationship, ProjectContract, lookup-audit]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Resolved 2026-06-21: person-wave complete in lookup-review-queue.yaml.
+      Gender, Country, MaritalStatus, Relationship, ProjectContract all approved.
+      ProjectContract uses GT-15 experimental remap (Gap Insaat Ã¢â€ â€™ Calik Energi tenant).
+      Person importConfirmed true 2026-06-21 (ISS-007 resolved).
+
+  - id: ISS-013
+    title: Relationship lookup gaps Ã¢â‚¬â€ ejesi and giyewisi not in Visa2026 catalog
+    status: resolved
+    severity: medium
+    category: lookup
+    relatedTo: [Person, Relationship]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Resolved 2026-06-21: Mother (ejesi) + BrotherInLaw added to relationship.json;
+      lookup-translations.yaml values[] complete; preview exporter wired.
+
+  - id: ISS-014
+    title: ProjectContract Ã¢â‚¬â€ 15 legacy codes missing from tenant catalog (E1 seed)
+    status: resolved
+    severity: high
+    category: lookup
+    relatedTo: [Person, Application, ProjectContract]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Resolved 2026-06-21: waived E1 for pilot Ã¢â‚¬â€ all legacy NumberOfContract Ã¢â€ â€™ GT-15.
+      Gap Insaat legacy data on Calik Enerji tenant seed; lookup-translations.yaml complete.
+
+  - id: ISS-004
+    title: Five real PersonalNumber duplicate person pairs (10 legacy Oids)
+    status: open
+    severity: medium
+    category: data-quality
+    relatedTo: [Person]
+    openedAt: 2026-06-20
+    owner: null
+    notes: Merge before POST; upsert on legacy Oid; ~2,564 persons after dedupe.
+
+  - id: ISS-005
+    title: Passport BO not in order.yaml
+    status: resolved
+    severity: medium
+    category: discovery
+    relatedTo: [Person, Passport, ApplicationItem]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-26
+    owner: null
+    notes: |
+      Passport added to order.yaml after Person; discovery dossier + field-map + PassportType audit complete.
+      3684 Çalik rows; importConfirmed false until preview review + full Person id-map.
+
+  - id: ISS-006
+    title: Excel preview CLI not implemented
+    status: resolved
+    severity: high
+    category: tooling
+    relatedTo: [excel-preview, Person]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-21
+    owner: null
+    notes: |
+      Person --export-visa2014-preview implemented and reviewed 2026-06-21.
+      Output: Visa2026.DataImporter/legacy/visa2014/preview-export/Person-preview.xlsx
+
+  - id: ISS-007
+    title: Person importConfirmed Ã¢â‚¬â€ Ãƒâ€¡alik VISA2015 preview reviewed
+    status: resolved
+    severity: medium
+    category: discovery
+    relatedTo: [Person, calik-energi]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-26
+    owner: null
+    notes: |
+      importConfirmed true 2026-06-26 after Person-preview.calik-energi.xlsx review.
+      3241 legacy Ã¢â€ â€™ 2924 import; Unicode SqlClient fix; ProjectContract catalog gap documented.
+
+  - id: ISS-015
+    title: Wrong legacy database name VISA2025 assumed Ã¢â‚¬â€ actual catalog is VISA2015
+    status: resolved
+    severity: high
+    category: environment
+    relatedTo: [calik-energi, excel-preview]
+    openedAt: 2026-06-21
+    resolvedAt: 2026-06-26
+    owner: null
+    notes: |
+      Ãƒâ€¡alik legacy data attached as VISA2015 on SQLEXPRESS (3241 persons, 60 contract codes).
+      ReadOnlyUser SQL login; password via VISA2014_SQL_PASSWORD env (not in repo).
+      Person-preview.calik-energi.xlsx exported 2026-06-26.
+
+  - id: ISS-016
+    title: ProjectContract — Çalik 73 union codes missing from tenant catalog
+    status: resolved
+    severity: high
+    category: lookup
+    relatedTo: [Person, Application, ProjectContract, calik-energi]
+    openedAt: 2026-06-26
+    resolvedAt: 2026-06-26
+    owner: null
+    notes: |
+      Generated tenant/project-contract.calik-energi.json (73 rows, Code = trimmed NumberOfContract).
+      Ministry legs: TE+EN from legacy AppliedMinistery where Energetika/Türkmenenergo; Türkmengaz where applicable;
+      Energetika fallback for unmapped ministries and contracts without AppliedMinistery FK (46 rows).
+      Deploy: copy calik file to {AppBase}/LookupCatalogs/tenant/project-contract.json overlay (or replace embedded file);
+      bump tenant manifest version + FORCE_XAF_DB_UPDATE once. Demo project-contract.json (3 rows) kept for greenfield.
+      Regenerate: scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1. See ProjectContract.calik-energi.md.
+
+  - id: ISS-008
+    title: Application discovery not started
+    status: resolved
+    severity: medium
+    category: discovery
+    relatedTo: [Application]
+    openedAt: 2026-06-20
+    resolvedAt: 2026-06-29
+    owner: null
+    notes: |
+      Discovery complete 2026-06-29: 12,237 active headers; field-map + layer 3 drafted.
+      ApplicationType E:44/E:55 resolved 2026-06-29 — approved skip_row (105 headers / 204 items); no longer a blocker.
+      importConfirmed still pending applicationWaveComplete gate in lookup-review-queue.yaml.
+
+  - id: ISS-009
+    title: Open strategic decisions (service account, staging DB, cutover, files)
+    status: open
+    severity: medium
+    category: strategy
+    relatedTo: [import-strategy]
+    openedAt: 2026-06-20
+    owner: null
+    notes: See import-strategy.yaml openDecisions[] and IMPORT_PLAN_AND_STRATEGY.md Ã‚Â§2.
+
+  - id: ISS-010
+    title: Legacy lookup tables may contain duplicate/unused rows
+    status: in_progress
+    severity: low
+    category: lookup
+    relatedTo: [lookup-audit, Country]
+    openedAt: 2026-06-20
+    owner: null
+    notes: |
+      Process defined in LOOKUP_RESOLUTION_STRATEGY.md Ã¢â‚¬â€ inventory DISTINCT from transactional FKs only;
+      consolidate aliases in lookup-translations.yaml; investigate gaps (E1Ã¢â‚¬â€œE5).
+      Country Person-scope: duplicate Oids documented; resolve by NameOfCountryL not Oid.
+
+  - id: ISS-011
+    title: Binary fields must not go to Excel preview Ã¢â‚¬â€ separate file import wave
+    status: in_progress
+    severity: medium
+    category: strategy
+    relatedTo: [file-image-import, excel-preview, Person]
+    openedAt: 2026-06-21
+    owner: null
+    notes: |
+      FILE_AND_IMAGE_IMPORT.md specifies stub columns (_hasPhoto, length, hash) and ordering:
+      scalar OData Ã¢â€ â€™ Person Photo Ã¢â€ â€™ application scans Ã¢â€ â€™ attachments wave last.
+      openDecisions.file-blob-strategy still TBD at strategy approval.
+
+resolvedIssues:
+  - ISS-001
+  - ISS-002
+  - ISS-003
+  - ISS-006
+  - ISS-007
+  - ISS-012
+  - ISS-013
+  - ISS-014
+  - ISS-015
+  - ISS-016

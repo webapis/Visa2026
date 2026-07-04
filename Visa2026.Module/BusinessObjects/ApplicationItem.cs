@@ -100,22 +100,25 @@ namespace Visa2026.Module.BusinessObjects
             ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentSalary And "
             + EmployeeApplicationItemLineCriteria;
 
-        private const string ShowCurrentMedicalRecordRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentMedicalRecord";
-
         private const string ShowCurrentEducationRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentEducation And Not ("
+            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowCurrentEducation And "
+            + EmployeeApplicationItemLineCriteria + " And Not ("
             + RegistrationApplicationItemContextCriteria + ")";
-
-        private const string ShowBorderZoneLocationRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowBorderZoneLocation";
-
-        private const string ShowWorkPermittedLocationsRequiredCriteria =
-            ApplicationTypePresentCriteria + " And Application.ApplicationType.ShowWorkPermittedLocations";
 
         public ApplicationItem()
         {
         }
+
+        /// <summary>
+        /// When true, changing <see cref="Person"/> does not run
+        /// <see cref="ApplyCurrentFieldsFromSelectedPerson"/> or person-triggered sync rules.
+        /// VISA2014 OData import sets this so legacy-mapped FKs (passport, visa, position, …) are kept.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool SuppressPersonCurrentFieldSync { get; set; }
 
         private Application application;
 
@@ -129,7 +132,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (application != value)
                 {
                     application = value;
-                    if (application?.ApplicationType != null)
+                    if (application?.ApplicationType != null && !SuppressPersonCurrentFieldSync)
                         ApplyRegistrationMovementDefaults(application.ApplicationType.Name);
                     ApplyVisibilityGatedReferenceFields();
                     UpdateApplicationItemName();
@@ -148,7 +151,7 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         // Must not rely only on SyncRule + CrossObjectSyncHelper: non-admin users cannot read
                         // SyncRule, so GetObjectsQuery<SyncRule>() is empty and rules never run in production.
@@ -289,7 +292,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("ApplicationItem_BorderZoneLocationVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = ApplicationItemBorderZoneLocationHiddenCriteria, Context = "DetailView,ListView")]
-        [RuleRequiredField(TargetCriteria = ShowBorderZoneLocationRequiredCriteria)]
         [VisibleInListView(false)]
         [MaxLength(500)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.BorderZone)]
@@ -310,7 +312,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("WorkPermittedLocationsVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowWorkPermittedLocations",
             Context = "DetailView,ListView")]
-        [RuleRequiredField(TargetCriteria = ShowWorkPermittedLocationsRequiredCriteria)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.WorkPermittedLocation)]
         [Editors.CommaSeparatedMultiSelect(
             CatalogEntityType = typeof(WorkPermittedLocationName),
@@ -388,13 +389,13 @@ namespace Visa2026.Module.BusinessObjects
 
             CurrentAddressOfResidence = PersonCurrentItems.GetCurrentAddressOfResidence(p);
             CurrentMedicalRecord = PersonCurrentItems.GetCurrentMedicalRecord(p);
-            CurrentEducation = PersonCurrentItems.GetCurrentEducation(p);
             CurrentInvitationItem = PersonCurrentItems.GetCurrentInvitationItem(p);
             PreviousInvitationItem = null;
             PreviousWorkPermitItem = null;
 
             if (p.IsEmployee)
             {
+                CurrentEducation = PersonCurrentItems.GetCurrentEducation(p);
                 CurrentPositionHistory = PersonCurrentItems.GetCurrentPositionHistory(p);
                 CurrentSalary = PersonCurrentItems.GetCurrentSalary(p);
                 CurrentWorkDuty = PersonCurrentItems.GetCurrentWorkDuty(p);
@@ -404,6 +405,7 @@ namespace Visa2026.Module.BusinessObjects
             }
             else
             {
+                CurrentEducation = null;
                 CurrentPositionHistory = null;
                 CurrentSalary = null;
                 CurrentWorkDuty = null;
@@ -811,10 +813,10 @@ namespace Visa2026.Module.BusinessObjects
         public string Address_ExpirationDateText => $"{CurrentAddressOfResidence?.ExpirationDate:dd.MM.yyyy}";
 
         [XafDisplayName("Address Region (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_RegionTm => null;
+        public string Address_RegionTm => CurrentAddressOfResidence?.Region?.NameTm;
 
         [XafDisplayName("Address City (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Address_CityTm => null;
+        public string Address_CityTm => CurrentAddressOfResidence?.City?.NameTm;
         #endregion
 
         #region Travel
@@ -1723,12 +1725,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual EmployeeSalary CurrentSalary { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
-        [RuleRequiredField(TargetCriteria = ShowCurrentMedicalRecordRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableMedicalRecords))]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
         [Appearance("CurrentEducationHiddenOnRegistration", Visibility = ViewItemVisibility.Hide,
             Criteria = RegistrationApplicationItemContextCriteria, Context = "DetailView,ListView")]
+        [Appearance("CurrentEducationEmployeeOnly", Visibility = ViewItemVisibility.Hide,
+            Criteria = PersonIsFamilyMemberCriteria, Context = "DetailView,ListView")]
         [Appearance("EducationVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentEducation", Context = "DetailView,ListView")]
         [RuleRequiredField(TargetCriteria = ShowCurrentEducationRequiredCriteria)]
         [DataSourceProperty(nameof(AvailableEducations))]

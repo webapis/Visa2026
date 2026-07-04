@@ -1,0 +1,114 @@
+# EmployeeSalary field map — layer 2
+# Layer 1: table-mappings.yaml (id: employee-salary-main)
+# Layer 3: none — Currency fixed USD (legacy has no currency column; dtm in text ignored per sign-off)
+
+tableMappingId: employee-salary-main
+
+source:
+  table: Employee
+  schema: dbo
+
+target:
+  odataEntity: EmployeeSalary
+
+deduplication:
+  enabled: true
+  keys:
+    - LegacyPersonOid
+  action: import_one_per_employee
+  notes: |
+    Legacy stores one current salary per employee (Employee.Salary FK → dbo.Salary lookup).
+    Import one EmployeeSalary row per employee; id-map keyed on Employee.Oid (= Person.Oid).
+
+propertyGaps:
+  legacyOnly:
+    - column: Tasaron
+      disposition: drop
+      notes: Subcontractor FK on Employee — mapped on Person, not salary row
+    - column: Diplomy?ok
+      disposition: drop
+    - column: DiplomyTerjimede
+      disposition: drop
+    - column: AIDsKepilnamasy?ok
+      disposition: drop
+    - column: AIDsKepilnamaTerjimede
+      disposition: drop
+    - column: Da?ary?urtSalgysy?ok
+      disposition: drop
+    - column: Bellik
+      disposition: drop
+    - column: DiplomyYok
+      disposition: drop
+    - column: AIDsKepilnamasyYok
+      disposition: drop
+    - column: DasaryYurtSalgysyYok
+      disposition: drop
+    - column: Salary
+      disposition: map
+      notes: FK to dbo.Salary — join for Detail text; not posted as lookup on target
+  targetOnly:
+    - property: ShowOptionalFields
+      default: false
+      missingBehavior: omit_from_post
+      notes: "[NotMapped] — omit on OData POST"
+    - property: Title
+      disposition: computed
+      notes: Computed from Amount + Currency — not posted
+  mismatches:
+    - property: Amount
+      legacyColumn: Salary.Detail
+      notes: |
+        Free-text lookup value; normalize via Visa2014SalaryAmountNormalizer
+        (extract numeric from labor-contract sentences; unify 1.667,00 → 1.667.00).
+    - property: Currency
+      legacyColumn: null
+      notes: Fixed USD for all Çalik import rows (legacy Detail may say dtm; no structured currency field)
+    - property: StartDate
+      legacyColumn: null
+      notes: MAX(WorkHistoryOfEmployee.StartDateOnThisPosition) per employee (current position)
+    - property: EndDate
+      legacyColumn: null
+      notes: null — open period (current salary snapshot)
+    - property: Person
+      legacyColumn: Employee.Oid
+      notes: Employee.Oid = Person.Oid for employees
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: Employee.Oid — id-map only (same as Person.Oid)
+
+  - source: Oid
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+    notes: Requires Person id-map from Person OData import
+
+  - source: Salary.Detail
+    target: Amount
+    transform: normalize_salary_amount
+    missingBehavior: skip_row
+    notes: Max 32 chars; skip when empty or unparseable (e.g. "Alesta")
+
+  - source: null
+    target: Currency
+    transform: constant
+    default: USD
+    missingBehavior: use_default
+
+  - source: null
+    target: StartDate
+    transform: current_position_start
+    missingBehavior: skip_row
+    notes: MAX StartDateOnThisPosition from WorkHistoryOfEmployee per employee
+
+  - source: null
+    target: EndDate
+    transform: constant_null
+    missingBehavior: allow_null
+
+export:
+  lastExportedAt: 2026-06-29
+  lastExportPath: preview-export/EmployeeSalary-preview.calik-energi.xlsx

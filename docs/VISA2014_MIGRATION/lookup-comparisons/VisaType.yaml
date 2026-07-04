@@ -1,0 +1,91 @@
+# Lookup comparison — VisaType (machine-readable)
+# Human table: VisaType.md
+
+version: 1
+catalog: VisaType
+comparedAt: 2026-06-26
+legacyDatabase: VISA2015
+legacyTable: dbo.VisaType
+legacyExtensionTable: dbo.IVisaType_Data
+legacyJoin: VisaType.IVisaType_Data = IVisaType_Data.Oid
+legacyColumns:
+  - TypeOfVisaL
+  - mgCode
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/visa-type.json
+targetMatchProperty: LocalizationKey
+visaScope: dbo.Visa WHERE GCRecord IS NULL
+visaWithFkCount: 6041
+visaWithoutFkCount: 0
+
+summary:
+  verdict: approved
+  layer3KeyFormat: "{TypeOfVisaL}:{mgCode}"
+  approvedAt: 2026-06-26
+  distinctLegacyBucketsOnVisa: 5
+  recommendedNextStep: VisaCategory comparison
+
+comparisons:
+  - legacyKey: "WP:11"
+    legacyTypeOfVisaL: WP
+    legacyMgCode: "11"
+    targetLocalizationKey: WP
+    targetNameTm: WP-Işçi Wiza
+    visaCount: 3993
+    match: approved
+    importNote: Default visa type; mgCode matches PdfForm_Code 11
+
+  - legacyKey: "BS:14"
+    legacyTypeOfVisaL: BS
+    legacyMgCode: "14"
+    targetLocalizationKey: BS1
+    targetNameTm: BS1-İşerwürlik
+    visaCount: 1652
+    match: approved
+    importNote: mgCode 14 → BS1 (not TR2 — same PdfForm_Code, different TypeOfVisaL)
+
+  - legacyKey: "FM:"
+    legacyTypeOfVisaL: FM
+    legacyMgCode: null
+    targetLocalizationKey: FM
+    targetNameTm: FM-Maşgala
+    visaCount: 317
+    match: approved
+    importNote: Family visa
+
+  - legacyKey: "GL:"
+    legacyTypeOfVisaL: GL
+    legacyMgCode: null
+    targetLocalizationKey: OF
+    targetNameTm: OF-Gulluk
+    visaCount: 58
+    match: approved
+    importNote: Official/Gulluk visa — NOT PassportType GL→PG
+
+  - legacyKey: "EX:10"
+    legacyTypeOfVisaL: EX
+    legacyMgCode: "10"
+    targetLocalizationKey: EX
+    targetNameTm: EX-Çykyş
+    visaCount: 21
+    match: approved
+    importNote: Exit visa
+
+unmappedPolicy:
+  policy: use_default
+  defaultLocalizationKey: WP
+
+targetCatalogUnusedOnVisa:
+  - TR1
+  - TR2
+  - HM
+  - DP
+  - PR1
+  - PR2
+  - HL
+  - DR
+  - IN
+  - ST
+  - SP1
+  - SP2
+  - BS2
+  - TU

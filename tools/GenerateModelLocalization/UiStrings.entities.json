@@ -190,6 +190,35 @@
         "ApprovingMinistry": { "en-US": "Ministry", "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" }
       }
     },
+    "ApprovalLegProfile": {
+      "caption": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Tassyklama ministrlik profili", "ru-RU": "Профиль этапов министерств" },
+      "listCaption": { "en-US": "Approval leg profiles", "tr-TR": "Onay bakanlık profilleri", "tk-TM": "Tassyklama ministrlik profilleri", "ru-RU": "Профили этапов министерств" },
+      "lookup": true,
+      "members": {
+        "Code": { "en-US": "Code", "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "MinistriesLabel": {
+          "en-US": "Ministries",
+          "tr-TR": "Bakanlıklar",
+          "tk-TM": "Ministrlikler",
+          "ru-RU": "Министерства"
+        },
+        "MinistryLegs": {
+          "en-US": "Ministry steps",
+          "tr-TR": "Bakanlık adımları",
+          "tk-TM": "Ministrlik ädimleri",
+          "ru-RU": "Этапы министерств"
+        }
+      }
+    },
+    "ApprovalLegProfileMinistryLeg": {
+      "caption": { "en-US": "Ministry step", "tr-TR": "Bakanlık adımı", "tk-TM": "Ministrlik ädimi", "ru-RU": "Этап министерства" },
+      "listCaption": { "en-US": "Ministry steps", "tr-TR": "Bakanlık adımları", "tk-TM": "Ministrlik ädimleri", "ru-RU": "Этапы министерств" },
+      "members": {
+        "Sequence": { "en-US": "Order", "tr-TR": "Sıra", "tk-TM": "Tertip", "ru-RU": "Порядок" },
+        "ApprovingMinistry": { "en-US": "Ministry", "tr-TR": "Bakanlık", "tk-TM": "Ministrlik", "ru-RU": "Министерство" }
+      }
+    },
     "ApprovingMinistry": {
       "caption": { "en-US": "Approving ministry", "tr-TR": "Onaylayan Bakanlık", "tk-TM": "Tassyklýan ministrlik", "ru-RU": "Согласующее министерство" },
       "listCaption": { "en-US": "Approving ministries", "tr-TR": "Onaylayan Bakanlıklar", "tk-TM": "Tassyklýan ministrlikler", "ru-RU": "Согласующие министерства" },

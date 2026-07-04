@@ -1,0 +1,1099 @@
+# Lookup value translation — same meaning, different representation in VISA2014 vs Visa2026
+#
+# STRATEGY: Do NOT import legacy lookup tables. Target Visa2026 catalogs are authoritative.
+#           See LOOKUP_RESOLUTION_STRATEGY.md for workflow, gaps, duplicates, normalization.
+#
+# Person discovery (2026-06-20): Gender + Country samples below.
+# MaritalStatus: approved 2026-06-21 — Status int 0–5 → Visa2026 Code (not StatusL narrative).
+# Relationship: approved 2026-06-21 — RelativeAsL → NameTm; Mother + BrotherInLaw added to target catalog.
+# ProjectContract: company-specific — see lookup-translations.calik-energi.yaml / lookup-translations.gap-insaat.yaml
+# Lookup review gate: person-wave in lookup-comparisons/lookup-review-queue.yaml (per legacy source).
+
+version: 1
+
+catalogs:
+  - targetCatalog: Gender
+    targetMatchProperty: Code
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Gender
+      column: TypeOfGenderL
+      valueKind: string
+      sampleQuery: |
+        SELECT DISTINCT g.TypeOfGenderL, g.TypeOfGender, COUNT(*) AS cnt
+        FROM dbo.Person p
+        INNER JOIN dbo.Gender g ON p.Gender = g.Oid
+        WHERE p.GCRecord IS NULL
+        GROUP BY g.TypeOfGenderL, g.TypeOfGender;
+    values:
+      - legacy: Erkek
+        target: Erkek
+        notes: Legacy TypeOfGender=0
+      - legacy: Ayal
+        target: Aýal
+        notes: Legacy TypeOfGender=1; Visa2026 Code uses Turkmen Aýal (LookupCatalogMatchHelper folds ASCII)
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+
+  - targetCatalog: Country
+    targetMatchProperty: Code
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Country
+      column: NameOfCountryL
+      valueKind: string
+      sampleQuery: |
+        -- DISTINCT codes used on active Person (BirthCountry, ForeignAddressCountry, Passport.Citizenship)
+        WITH hits AS (
+          SELECT LTRIM(RTRIM(c.NameOfCountryL)) AS legacy_code
+          FROM dbo.Person p
+          INNER JOIN dbo.Country c ON p.BirthCountry = c.Oid
+          WHERE p.GCRecord IS NULL
+          UNION
+          SELECT LTRIM(RTRIM(c.NameOfCountryL))
+          FROM dbo.Person p
+          INNER JOIN dbo.Country c ON p.ForeignAddressCountry = c.Oid
+          WHERE p.GCRecord IS NULL
+          UNION
+          SELECT LTRIM(RTRIM(c.NameOfCountryL))
+          FROM dbo.Person p
+          INNER JOIN dbo.Passport pp ON pp.Person = p.Oid AND pp.GCRecord IS NULL
+          INNER JOIN dbo.Country c ON pp.Citizenship = c.Oid
+          WHERE p.GCRecord IS NULL
+        )
+        SELECT legacy_code, COUNT(*) AS cnt FROM hits GROUP BY legacy_code ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-20
+      scope: Person
+      distinctLegacyValuesUsed: 64
+      allMappedToTarget: true
+      unmapped: []
+      legacyCountryTableActiveRows: 1037
+      legacyDuplicateOidsPerCode: "7-8 Oids per code common — resolve by NameOfCountryL string, not legacy Oid"
+      topCodesByHits: "TUR 4349, JPN 1318, IND 370, DEU 345, ITA 283"
+    values:
+      - legacy: AUT
+        target: AUT
+      - legacy: AZE
+        target: AZE
+      - legacy: BEL
+        target: BEL
+      - legacy: BGD
+        target: BGD
+      - legacy: BGR
+        target: BGR
+      - legacy: BIH
+        target: BIH
+      - legacy: BLR
+        target: BLR
+      - legacy: BRA
+        target: BRA
+      - legacy: CAN
+        target: CAN
+      - legacy: CHE
+        target: CHE
+      - legacy: CHN
+        target: CHN
+      - legacy: COL
+        target: COL
+      - legacy: CYP
+        target: CYP
+      - legacy: CZE
+        target: CZE
+      - legacy: DEU
+        target: DEU
+      - legacy: DNK
+        target: DNK
+      - legacy: EGY
+        target: EGY
+      - legacy: ESP
+        target: ESP
+      - legacy: ETH
+        target: ETH
+      - legacy: FIN
+        target: FIN
+      - legacy: FRA
+        target: FRA
+      - legacy: GBR
+        target: GBR
+      - legacy: GEO
+        target: GEO
+      - legacy: GRC
+        target: GRC
+      - legacy: HUN
+        target: HUN
+      - legacy: IDN
+        target: IDN
+      - legacy: IND
+        target: IND
+      - legacy: IRL
+        target: IRL
+      - legacy: IRN
+        target: IRN
+      - legacy: IRQ
+        target: IRQ
+      - legacy: ITA
+        target: ITA
+      - legacy: JOR
+        target: JOR
+      - legacy: JPN
+        target: JPN
+      - legacy: KAZ
+        target: KAZ
+      - legacy: KEN
+        target: KEN
+      - legacy: KGZ
+        target: KGZ
+      - legacy: KHM
+        target: KHM
+      - legacy: KOR
+        target: KOR
+      - legacy: LBN
+        target: LBN
+      - legacy: LKA
+        target: LKA
+      - legacy: LVA
+        target: LVA
+      - legacy: MAR
+        target: MAR
+      - legacy: MDA
+        target: MDA
+      - legacy: MEX
+        target: MEX
+      - legacy: MYS
+        target: MYS
+      - legacy: NLD
+        target: NLD
+      - legacy: NOR
+        target: NOR
+      - legacy: PAK
+        target: PAK
+      - legacy: PHL
+        target: PHL
+      - legacy: POL
+        target: POL
+      - legacy: ROU
+        target: ROU
+      - legacy: RUS
+        target: RUS
+      - legacy: SAU
+        target: SAU
+      - legacy: SGP
+        target: SGP
+      - legacy: SRB
+        target: SRB
+      - legacy: SWE
+        target: SWE
+      - legacy: THA
+        target: THA
+      - legacy: TJK
+        target: TJK
+      - legacy: TKM
+        target: TKM
+      - legacy: TUR
+        target: TUR
+      - legacy: UAE
+        target: UAE
+      - legacy: UKR
+        target: UKR
+      - legacy: USA
+        target: USA
+      - legacy: UZB
+        target: UZB
+    unmappedPolicy: block_row
+    unmappedDefault: null
+    notes: |
+      Legacy NameOfCountryL is ISO 3166 alpha-3; 1:1 with Visa2026 Country.Code for all 64 values used on Person (2026-06-20).
+      Re-audit DISTINCT from transactional FKs when Application / other BOs add Country lookups.
+      Legacy dbo.Country has many duplicate Oids per code — importer resolves by translated Code, not legacy Oid.
+
+  - targetCatalog: MaritalStatus
+    targetMatchProperty: Code
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.MaritalStatus
+      column: Status
+      valueKind: int_as_string
+      sampleQuery: |
+        SELECT ms.Status, COUNT(*) AS cnt
+        FROM dbo.Person p
+        INNER JOIN dbo.MaritalStatus ms ON p.MaritalStatus = ms.Oid
+        WHERE p.GCRecord IS NULL
+        GROUP BY ms.Status
+        ORDER BY ms.Status;
+    audit:
+      completedAt: 2026-06-21
+      scope: Person
+      distinctLegacyValuesUsed: 6
+      allMappedToTarget: true
+      unmapped: []
+      approvedDecision: "Status=0 → Öýlenen (Married); StatusL narrative not imported as catalog"
+      personWithFkCount: 2569
+      legacyLookupTableActiveRows: 1965
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MaritalStatus.md
+    values:
+      - legacy: "0"
+        target: Öýlenen
+        notes: Status=0 family narrative rows (1543+ Person rows) — map to Married; StatusL → VisaApplicationFamilyMembersText
+      - legacy: "1"
+        target: Sallah
+        notes: Legacy Status=1 — Single
+      - legacy: "2"
+        target: Öýlenen
+        notes: Legacy Status=2 — Married (husband line)
+      - legacy: "3"
+        target: Öýlenen
+        notes: Legacy Status=3 — Married (spouse/child lines)
+      - legacy: "4"
+        target: Aýrylşan
+        notes: Legacy Status=4 — Divorced
+      - legacy: "5"
+        target: Çaga
+        notes: Legacy Status=5 — Minor
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Legacy is NOT a simple string catalog. Person FK → MaritalStatus row with Status int (0–5) + StatusL narrative.
+      Approved 2026-06-21: map Status int (as string key) → Visa2026 MaritalStatus.Code.
+      Do NOT import 1,965 narrative lookup rows — StatusL copied to VisaApplicationFamilyMembersText in preview/import.
+      See lookup-comparisons/MaritalStatus.md and lookup-review-queue.yaml.
+
+  - targetCatalog: Relationship
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Relation
+      column: RelativeAsL
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(r.RelativeAsL)) AS RelativeAsL, COUNT(*) AS cnt
+        FROM dbo.Person p
+        INNER JOIN dbo.Relation r ON p.FamilyMemberRelation = r.Oid
+        WHERE p.GCRecord IS NULL AND r.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(r.RelativeAsL))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-21
+      scope: Person
+      distinctLegacyValuesUsed: 7
+      allMappedToTarget: true
+      unmapped: []
+      personWithFkCount: 159
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Relationship.md
+      catalogRowsAdded: [Mother, BrotherInLaw, FatherInLaw]
+      extendedMappings20260702: [(gayny) ayalynyn ejesi, (gayny) ayalynyn kakasy, Inisi, adamsy, baldyzy]
+    values:
+      - legacy: ayaly
+        target: aýaly
+      - legacy: ogly
+        target: ogly
+      - legacy: Ogly
+        target: ogly
+        notes: Case variant of Son
+      - legacy: gyzy
+        target: gyzy
+      - legacy: kakasy
+        target: kakasy
+      - legacy: ayal dogany
+        target: aýal dogany
+      - legacy: ejesi
+        target: ejesi
+        notes: Mother — added to Visa2026 relationship.json 2026-06-21
+      - legacy: Ayal doganynyn adamsy (giyewisi)
+        target: aýal doganyň adamsy (giýewisi)
+        notes: Brother-in-law — added to Visa2026 relationship.json 2026-06-21
+      - legacy: (gayny) ayalynyn ejesi
+        target: (gaýny) aýalynyň ejesi
+        notes: Mother-in-law — catalog existed; mapping added 2026-07-02 (4 Person rows on Çalik)
+      - legacy: (gayny) ayalynyn kakasy
+        target: (gaýny) aýalynyň kakasy
+        notes: Father-in-law — catalog row added 2026-07-02 (3 Person rows on Çalik)
+      - legacy: Inisi
+        target: İnisi
+        notes: Case/spelling variant of YoungerSister
+      - legacy: adamsy
+        target: adamsy
+        notes: Husband — catalog existed; explicit mapping for import layer
+      - legacy: baldyzy
+        target: baldyzy
+        notes: Grandchild — catalog existed; explicit mapping for import layer
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Match RelativeAsL via LookupCatalogMatchHelper normalization (ASCII Turkmen fold).
+      Do NOT use RelativeAs int alone (codes 3 and 6 are ambiguous in legacy table).
+      Only 159/2569 Person rows have FamilyMemberRelation FK (family members).
+
+  - targetCatalog: PassportType
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.PassportType
+      column: TypeOfPassportL
+      valueKind: composite
+      compositeColumns: [TypeOfPassportL, mgCode]
+      compositeKeyFormat: "{0}:{1}"
+      sampleQuery: |
+        SELECT pt.TypeOfPassportL, ISNULL(pt.mgCode, '') AS mgCode, COUNT(*) AS cnt
+        FROM dbo.Passport pp
+        INNER JOIN dbo.PassportType pt ON pp.PassportType = pt.Oid
+        WHERE pp.GCRecord IS NULL
+        GROUP BY pt.TypeOfPassportL, pt.mgCode
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Passport
+      distinctLegacyValuesUsed: 5
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/PassportType.md
+    values:
+      - legacy: "AD:P"
+        target: P
+        notes: National passport — 3383 rows
+      - legacy: "AD:"
+        target: P
+        notes: Deleted legacy type row — 228 rows
+      - legacy: "GL:PG"
+        target: PG
+        notes: Service passport — 70 rows
+      - legacy: "GL:"
+        target: PG
+        notes: Deleted legacy type row — 2 rows
+      - legacy: "DP:PD"
+        target: PD
+      - legacy: "DP:"
+        target: PD
+        notes: Diplomatic — 1 row (deleted type)
+    unmappedPolicy: use_default
+    unmappedDefault: P
+    notes: |
+      Approved 2026-06-26 for Passport import. mgCode null → empty suffix in composite key.
+      See lookup-comparisons/PassportType.md. ApplicationItem FK audit deferred to Application wave.
+
+  - targetCatalog: EducationLevel
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.EducationLevel
+      column: TitleOfEducationLevel
+      valueKind: composite
+      compositeColumns: [TitleOfEducationLevel, mgCode]
+      compositeKeyFormat: "{0}:{1}"
+      sampleQuery: |
+        SELECT el.TitleOfEducationLevel, el.mgCode, COUNT(*) AS cnt
+        FROM dbo.Education e
+        INNER JOIN dbo.EducationLevel el ON e.EducationLevel = el.Oid
+        WHERE e.GCRecord IS NULL
+        GROUP BY el.TitleOfEducationLevel, el.mgCode
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Education
+      distinctLegacyValuesUsed: 3
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/EducationLevel.md
+    values:
+      - legacy: "Yokary:2"
+        target: Higher
+      - legacy: "Ýörite Orta:1"
+        target: SpecialSecondary
+      - legacy: "Orta:5"
+        target: Secondary
+    unmappedPolicy: use_default
+    unmappedDefault: SpecialSecondary
+    notes: |
+      Approved 2026-06-26 for Education import. mgCode matches Visa2026 PdfForm_Code.
+      Alternate resolve: match by mgCode alone when TitleOfEducationLevel encoding differs.
+
+  - targetCatalog: VisaType
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_extension
+      table: dbo.VisaType
+      extensionTable: dbo.IVisaType_Data
+      join: VisaType.IVisaType_Data = IVisaType_Data.Oid
+      column: TypeOfVisaL
+      valueKind: composite
+      compositeColumns: [TypeOfVisaL, mgCode]
+      compositeKeyFormat: "{0}:{1}"
+      sampleQuery: |
+        SELECT d.TypeOfVisaL, ISNULL(CAST(d.mgCode AS varchar(10)), '') AS mgCode, COUNT(*) AS cnt
+        FROM dbo.Visa v
+        INNER JOIN dbo.VisaType vt ON v.VisaType = vt.Oid
+        INNER JOIN dbo.IVisaType_Data d ON vt.IVisaType_Data = d.Oid
+        WHERE v.GCRecord IS NULL
+        GROUP BY d.TypeOfVisaL, d.mgCode
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Visa
+      distinctLegacyValuesUsed: 5
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaType.md
+    values:
+      - legacy: "WP:11"
+        target: WP
+        notes: Worker visa — 3993 rows
+      - legacy: "BS:14"
+        target: BS1
+        notes: Business / entrepreneurship — mgCode 14
+      - legacy: "FM:"
+        target: FM
+        notes: Family visa — 317 rows
+      - legacy: "GL:"
+        target: OF
+        notes: Official/Gulluk visa — 58 rows; not PassportType GL→PG
+      - legacy: "EX:10"
+        target: EX
+        notes: Exit visa — 21 rows
+    unmappedPolicy: use_default
+    unmappedDefault: WP
+    notes: |
+      Approved 2026-06-26 for Visa import (permits-and-visas). Resolve by LocalizationKey, not PdfForm_Code alone (TR2/BS1 share 14).
+      Application/ApplicationItem FK audit deferred to Application wave.
+
+  - targetCatalog: VisaCategory
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.VisaCategory
+      column: CategoryOfVisaL
+      valueKind: composite
+      compositeColumns: [CategoryOfVisaL, mgCode]
+      compositeKeyFormat: "{0}:{1}"
+      sampleQuery: |
+        SELECT vc.CategoryOfVisaL, ISNULL(CAST(vc.mgCode AS varchar(10)), '') AS mgCode, COUNT(*) AS cnt
+        FROM dbo.Visa v
+        INNER JOIN dbo.VisaCategory vc ON v.VisaCategory = vc.Oid
+        WHERE v.GCRecord IS NULL
+        GROUP BY vc.CategoryOfVisaL, vc.mgCode
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Visa
+      distinctLegacyValuesUsed: 3
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaCategory.md
+    values:
+      - legacy: "köp gezeklik:4"
+        target: Multiple
+        notes: 4301 rows — default catalog row
+      - legacy: "iki gezeklik:2"
+        target: Double
+        notes: 1431 rows
+      - legacy: "bir gezeklik:1"
+        target: Single
+        notes: 308 rows
+    unmappedPolicy: use_default
+    unmappedDefault: Multiple
+    nullFkPolicy: skip_row
+    notes: |
+      Approved 2026-06-26 for Visa import. 1 visa with null VisaCategory → skip row.
+      PrefferedVisaCategory / Application FK audit deferred to Application wave.
+
+  - targetCatalog: VisaIssuedPlace
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.VisaIssuedPlace
+      column: IssuedPlaceOfVisaL
+      valueKind: string
+      sampleQuery: |
+        SELECT vip.IssuedPlaceOfVisaL, COUNT(v.Oid) AS visa_rows
+        FROM dbo.VisaIssuedPlace vip
+        INNER JOIN dbo.Visa v ON v.VisaIssuedPlace = vip.Oid AND v.GCRecord IS NULL
+        GROUP BY vip.IssuedPlaceOfVisaL
+        ORDER BY visa_rows DESC;
+    audit:
+      completedAt: 2026-06-21
+      scope: Visa
+      distinctLegacyValuesUsed: 22
+      allMappedToTarget: false
+      unmapped:
+        - DELİ
+        - Pekin
+        - Serhetabat
+        - London
+        - Kazan
+        - Taşkent
+        - Mary H.M.
+        - BAKU
+      mappedVisaRows: 6023
+      unmappedVisaRows: 18
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaIssuedPlace.md
+    values:
+      - legacy: Türkmenbaşy H.M.
+        target: Türkmenbaşy howa menzilindäki MGP
+        notes: 65 rows — legacy abbrev H.M.
+      - legacy: T-abat H.M.
+        target: Türkmenabat Howa Menzili
+        notes: 18 rows
+      - legacy: Farap G.Y.
+        target: Farap MGP
+        notes: 17 rows — border G.Y. label
+      - legacy: BERLİN
+        target: Berlin
+        notes: 4 rows — case / İ normalization
+      - legacy: Garabogaz
+        target: Garabogaz GY
+        notes: 4 rows — short legacy label
+    unmappedPolicy: skip_row
+    nullFkPolicy: skip_row
+    notes: |
+      Approved 2026-06-21 for Visa import. Identity labels (Aşgabat şäheri, Ankara, …) resolve via NameTm fold.
+      18 visas with embassy labels not in seed catalog → skip row (do not default to Aşgabat MGP).
+      Application.VisaIssuedPlace re-validation deferred to Application wave.
+
+  - targetCatalog: BorderZoneName
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_bit_matrix
+      table: dbo.BorderZoneForVisa
+      join: Visa.BorderZone = BorderZoneForVisa.Oid
+      valueKind: bit_matrix
+      bitColumns:
+        - Daşoguz
+        - Tagtabazar
+        - Serhetabat
+        - Ýolöten
+        - Farap
+        - Sarahs
+        - Garabogaz
+        - Etrek
+      legacyHelperSource: VISA2014.Module/BusinessObjects/Helper.cs Get_BZ_*
+      sampleQuery: |
+        SELECT
+          SUM(CASE WHEN ISNULL(bz.[Daşoguz],0)=1 THEN 1 ELSE 0 END) AS Dasoguz,
+          SUM(CASE WHEN ISNULL(bz.Tagtabazar,0)=1 THEN 1 ELSE 0 END) AS Tagtabazar,
+          SUM(CASE WHEN ISNULL(bz.Serhetabat,0)=1 THEN 1 ELSE 0 END) AS Serhetabat,
+          SUM(CASE WHEN ISNULL(bz.[Ýolöten],0)=1 THEN 1 ELSE 0 END) AS Yoloten,
+          SUM(CASE WHEN ISNULL(bz.Farap,0)=1 THEN 1 ELSE 0 END) AS Farap,
+          SUM(CASE WHEN ISNULL(bz.Garabogaz,0)=1 THEN 1 ELSE 0 END) AS Garabogaz,
+          SUM(CASE WHEN ISNULL(bz.Sarahs,0)=1 THEN 1 ELSE 0 END) AS Sarahs,
+          SUM(CASE WHEN ISNULL(bz.Etrek,0)=1 THEN 1 ELSE 0 END) AS Etrek,
+          COUNT(*) AS visa_rows
+        FROM dbo.Visa v
+        INNER JOIN dbo.BorderZoneForVisa bz ON v.BorderZone = bz.Oid
+        WHERE v.GCRecord IS NULL AND bz.GCRecord IS NULL;
+    audit:
+      completedAt: 2026-06-21
+      scope: Visa
+      distinctBitPatternsOnVisa: 18
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/BorderZoneName.md
+      catalogRowsAdded:
+        - Daşoguz şäher
+        - Tagtabazar etrap
+        - Serhetabat etrap
+        - Ýolöten etrap
+        - Farap etrap
+        - Etrek etrap
+    values:
+      - legacy: Daşoguz
+        target: Daşoguz şäher
+      - legacy: Tagtabazar
+        target: Tagtabazar etrap
+      - legacy: Serhetabat
+        target: Serhetabat etrap
+      - legacy: Ýolöten
+        target: Ýolöten etrap
+      - legacy: Farap
+        target: Farap etrap
+      - legacy: Sarahs
+        target: Sarahs etraby
+        notes: Legacy Helper typo Sarags etrap; 0 Çalik visa rows
+      - legacy: Garabogaz
+        target: Garabogaz şäheri
+        notes: Legacy Helper Garabogaz şäher → catalog şäheri
+      - legacy: Etrek
+        target: Etrek etrap
+    outputFormat: comma_separated
+    bitOrder:
+      - Daşoguz
+      - Tagtabazar
+      - Serhetabat
+      - Ýolöten
+      - Farap
+      - Sarahs
+      - Garabogaz
+      - Etrek
+    unmappedPolicy: use_default
+    unmappedDefault: Ýok
+    nullFkPolicy: use_default
+    nullFkDefault: Ýok
+    allBitsFalsePolicy: use_default
+    allBitsFalseDefault: Ýok
+    notes: |
+      Approved 2026-06-21 for Visa import. 5452 null FK + 2 all-bits-false → Ýok.
+      Tenant border-zone-name.json expanded (6 rows). Application BorderZone re-validation deferred.
+
+  - targetCatalog: Region
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Region
+      column: mgCode
+      valueKind: scalar
+      sampleQuery: |
+        SELECT r.mgCode, r.NameOfRegion, COUNT(*) AS cnt
+        FROM dbo.AddressOfResidence aor
+        INNER JOIN dbo.Address a ON aor.Address = a.Oid AND a.GCRecord IS NULL
+        INNER JOIN dbo.Region r ON a.Region = r.Oid
+        WHERE aor.GCRecord IS NULL
+        GROUP BY r.mgCode, r.NameOfRegion
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      distinctLegacyValuesUsed: 6
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Region.md
+    values:
+      - legacy: BN
+        target: BN
+      - legacy: MR
+        target: MR
+      - legacy: AH
+        target: AH
+      - legacy: AS
+        target: AS
+      - legacy: LB
+        target: LB
+      - legacy: DZ
+        target: DZ
+    identityPassThrough: true
+    unmappedPolicy: block_row
+    notes: |
+      Approved 2026-06-27 for AddressOfResidence. mgCode equals Visa2026 LocalizationKey/PdfForm_Code.
+      Rows without Region FK use AddressLine prefix inference in transform.
+
+  - targetCatalog: City
+    targetMatchProperty: PdfForm_Code
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.ŞeherEtrap
+      column: mgCode
+      valueKind: scalar
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+    identityPassThrough: true
+    unmappedPolicy: block_row
+    notes: Primary City resolve on AddressOfResidence rows with ŞeherEtrap.mgCode.
+
+  - targetCatalog: CityByName
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.ŞeherEtrap
+      column: ŞeherEtrapL
+      valueKind: scalar
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+    values:
+      - legacy: Asgabat şäheri
+        target: Aşgabat şäheri
+      - legacy: Akbugday etraby
+        target: Akbugdaý etraby
+      - legacy: Dasoguz şäheri
+        target: Daşoguz şäheri
+      - legacy: Serdar etraby
+        target: Serdar etraby
+      - legacy: Yolöten etraby
+        target: Ýolöten etraby
+      - legacy: Türkmenbaşy etraby
+        target: Türkmenbaşy etraby
+    unmappedPolicy: block_row
+    notes: Fallback when ŞeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.
+
+  - targetCatalog: Urgency
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Urgency
+      column: ApplicationUrgencyL
+      valueKind: composite
+      compositeColumns: [ApplicationUrgency, mgCode]
+      compositeKeyFormat: "{0}:{1}"
+      sampleQuery: |
+        SELECT u.ApplicationUrgency, ISNULL(CAST(u.mgCode AS varchar(10)), '') AS mgCode,
+               u.ApplicationUrgencyL, COUNT(*) AS cnt
+        FROM dbo.Application a
+        INNER JOIN dbo.Urgency u ON a.Urgency = u.Oid
+        WHERE a.GCRecord IS NULL
+        GROUP BY u.ApplicationUrgency, u.mgCode, u.ApplicationUrgencyL
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: Application
+      distinctLegacyValuesUsed: 3
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Urgency.md
+    values:
+      - legacy: "0:1"
+        target: NORM
+        notes: Adaty — 9,787 rows; Visa2026 default
+      - legacy: "1:2"
+        target: URG
+        notes: Gyssagly — 2,316 rows
+      - legacy: "2:3"
+        target: TOP
+        notes: Örän gyssagly — 134 rows
+    unmappedPolicy: use_default
+    unmappedDefault: NORM
+    notes: Resolve by LocalizationKey (urgency.json). All active Application rows have Urgency FK.
+
+  - targetCatalog: VisaPeriod
+    targetMatchProperty: LocalizationKey
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.VisaPeriod
+      column: PeriodOfVisaL
+      valueKind: composite
+      compositeColumns: [PeriodOfVisaL, mgCode, CountMonth]
+      compositeKeyFormat: "{0}:{1}:{2}"
+      sampleQuery: |
+        SELECT vp.PeriodOfVisaL, ISNULL(CAST(vp.mgCode AS varchar(10)), '') AS mgCode,
+               vp.CountMonth, COUNT(*) AS cnt
+        FROM dbo.Application a
+        INNER JOIN dbo.VisaPeriod vp ON a.VisaPeriod = vp.Oid
+        WHERE a.GCRecord IS NULL
+        GROUP BY vp.PeriodOfVisaL, vp.mgCode, vp.CountMonth
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: Application
+      distinctLegacyValuesUsed: 12
+      allMappedToTarget: true
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaPeriod.md
+    values:
+      - legacy: "6 (alty) ay:AY:182"
+        target: Month6
+      - legacy: "1 (bir) ay:AY:31"
+        target: Month1
+      - legacy: "12 (on iki) ay:AY:365"
+        target: Month12
+      - legacy: "3 (üç) ay:AY:92"
+        target: Month3
+      - legacy: "10 (on) gün:GUN:0"
+        target: Day10
+      - legacy: "15 (on bäş) gün:GUN:15"
+        target: Day15
+      - legacy: "20 ( yigrimi )gün:GUN:20"
+        target: Day20
+      - legacy: "1 (bir) yyl:YYL:365"
+        target: Year1
+      - legacy: "2 (iki) ay:AY:61"
+        target: Month2
+      - legacy: "5 (bäş) gün:GUN:5"
+        target: Day7
+        notes: No Day5 in catalog — nearest Day7; 4 rows only
+      - legacy: "7 (yedi) gün:GUN:0"
+        target: Day7
+      - legacy: "4 ay:AY:0"
+        target: Month4
+        notes: 1 row — CountMonth 0 in legacy
+    unmappedPolicy: use_default
+    unmappedDefault: Month6
+    nullFkPolicy: allow_null
+    notes: |
+      Extends Visa-wave VisaPeriod audit to Application FK path (4,213 populated rows).
+      Rows without VisaPeriod FK are valid when ApplicationType.ShowVisaPeriod=false.
+
+  - targetCatalog: ApplicationType
+    targetMatchProperty: Name
+    legacy:
+      storage: composite_derived
+      table: dbo.Application
+      valueKind: composite
+      compositeColumns:
+        - ForEmployee
+        - ForFamilyMember
+        - ApplicationTypeForEmployee.TypeOfApplicationForEmployee
+        - ApplicationTypeForFamilyMember.TypeOfApplicationForFamilyMember
+        - IsInvitationWithWorkPermit.InvitationAndWorkPermitRequired
+        - IsWizaWithWorkPermit.WizaAndWorkPermitRequired
+        - ChangeInformation
+      compositeKeyFormat: "{category}:{subtypeId}:{invWp}:{wizaWp}:{changeInfo}"
+      categoryRule: "ForEmployee=1 → E; ForFamilyMember=1 → F"
+      sampleQuery: |
+        SELECT CASE WHEN a.ForEmployee=1 THEN 'E' WHEN a.ForFamilyMember=1 THEN 'F' END AS category,
+               COALESCE(ate.TypeOfApplicationForEmployee, atfm.TypeOfApplicationForFamilyMember) AS subtype_id,
+               iwp.InvitationAndWorkPermitRequired, wwp.WizaAndWorkPermitRequired,
+               a.ChangeInformation, COUNT(*) AS cnt
+        FROM dbo.Application a
+        LEFT JOIN dbo.ApplicationTypeForEmployee ate ON ate.Oid = a.ApplicationTypeForEmployee
+        LEFT JOIN dbo.ApplicationTypeForFamilyMember atfm ON atfm.Oid = a.ApplicationTypeForFamilyMember
+        LEFT JOIN dbo.IsInvitationWithWorkPermit iwp ON iwp.Oid = a.IsInvitationWithWorkPermit
+        LEFT JOIN dbo.IsWizaWithWorkPermit wwp ON wwp.Oid = a.IsWizaWithWorkPermit
+        WHERE a.GCRecord IS NULL
+        GROUP BY CASE WHEN a.ForEmployee=1 THEN 'E' WHEN a.ForFamilyMember=1 THEN 'F' END,
+                 COALESCE(ate.TypeOfApplicationForEmployee, atfm.TypeOfApplicationForFamilyMember),
+                 iwp.InvitationAndWorkPermitRequired, wwp.WizaAndWorkPermitRequired, a.ChangeInformation
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: Application
+      distinctLegacyValuesUsed: 31
+      allMappedToTarget: false
+      unmapped:
+        - "E:33:na:na:na"
+        - "E:55:na:na:na"
+      skipPolicy: skip_row
+      skippedApplicationHeaders: 105
+      skippedApplicationItemRows: 204
+      approvedDecision: "Approved 2026-06-29 — skip E:33 (92 apps) + E:55 (13 apps); composite uses SubType enum not TypeOfApplication*ID"
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
+    values:
+      - legacy: "E:7:na:na:na"
+        target: App_Visa_and_WP_Ext
+        notes: All employee subtype-7 extensions map to visa + work permit (App_Visa_Ext deprecated)
+      - legacy: "E:0:0:na:na"
+        target: App_Inv
+      - legacy: "E:0:1:na:na"
+        target: App_Inv_And_WP
+      - legacy: "E:3:na:na:na"
+        target: App_Reg_ext
+      - legacy: "E:4:na:na:na"
+        target: App_Reg_Check_In_Internal
+      - legacy: "E:8:na:1:na"
+        target: App_Change_Visa_Category
+        notes: 744 rows — wizaWp flag ignored for subtype 8
+      - legacy: "E:6:na:na:na"
+        target: App_Reg_Check_Out
+      - legacy: "E:13:na:na:na"
+        target: App_Business_Trip_Departure
+      - legacy: "E:5:na:na:na"
+        target: App_Reg_Info_Change_Address
+        notes: Default when ChangeInformation null — 449 rows; refine by changeInfo when set
+      - legacy: "E:5:na:na:1"
+        target: App_Reg_Info_Change_Passport
+      - legacy: "E:5:na:na:2"
+        target: App_Reg_Info_Change_Visa
+      - legacy: "E:11:na:na:na"
+        target: App_Border_Zone_Permission
+      - legacy: "E:15:na:na:na"
+        target: App_Additional_WP_location
+      - legacy: "E:12:na:na:na"
+        target: App_Cancel_Visa_and_WP
+      - legacy: "E:10:na:na:na"
+        target: App_Sevice_Passport
+      - legacy: "E:31:na:na:na"
+        target: App_Cancell_WP
+      - legacy: "E:20:na:na:na"
+        target: App_Inv_According_to_WP
+      - legacy: "E:2:na:na:na"
+        target: App_Reg_Check_In
+      - legacy: "E:1:na:na:na"
+        target: App_Change_Inv
+      - legacy: "E:45:na:na:na"
+        target: App_Cancel_Visa
+      - legacy: "E:21:na:na:na"
+        target: App_Cancel_Visa
+        notes: SubType enum ApplicationForCancellingVisa (legacy TypeOfApplicationForEmployeeID was 45)
+      - legacy: "E:22:na:na:na"
+        target: App_Cancell_WP
+        notes: SubType enum ApplicationForCancellingWorkPermit (legacy TypeOfApplicationForEmployeeID was 31)
+      - legacy: "E:7:na:0:na"
+        target: App_Visa_and_WP_Ext
+      - legacy: "E:7:na:1:na"
+        target: App_Visa_and_WP_Ext
+      - legacy: "E:8:na:0:na"
+        target: App_Change_Visa_Category
+      - legacy: "E:9:na:na:na"
+        target: App_Change_Passport
+      - legacy: "E:14:na:na:na"
+        target: App_Business_Trip_Arrival
+      - legacy: "F:8:na:na:na"
+        target: App_Change_Visa_Category
+      - legacy: "F:4:na:na:na"
+        target: App_Reg_Check_In_Internal
+      - legacy: "F:0:na:na:na"
+        target: App_Inv_FM
+      - legacy: "F:7:na:na:na"
+        target: App_Visa_Ext_FM
+      - legacy: "F:3:na:na:na"
+        target: App_Reg_ext
+      - legacy: "F:6:na:na:na"
+        target: App_Reg_Check_Out
+      - legacy: "F:45:na:na:na"
+        target: App_Cancel_Visa
+      - legacy: "F:21:na:na:na"
+        target: App_Cancel_Visa
+        notes: SubType enum ApplicationForCancellingVisa (legacy TypeOfApplicationForFamilyMemberID was 45)
+      - legacy: "F:5:na:na:na"
+        target: App_Reg_Info_Change_Address
+      - legacy: "F:10:na:na:na"
+        target: App_Sevice_Passport
+      - legacy: "F:2:na:na:na"
+        target: App_Reg_Check_In
+    unmappedPolicy: skip_row
+    notes: |
+      Drafted 2026-06-29. Subtype IDs map to legacy SubType enum (IApplication.cs).
+      Approved 2026-06-29: skip unmapped E:44 (92 apps, 187 items) and E:55 (13 apps, 17 items) — 105 headers / 204 items.
+      2 composite keys remain without Visa2026 ApplicationType.Name; rows skipped at import (not blocked).
+      importConfirmed still pending broader applicationWaveComplete gate in lookup-review-queue.yaml.
+
+  - targetCatalog: PurposeOfTravel
+    targetMatchProperty: NameTm
+    legacy:
+      storage: fk
+      table: dbo.PersonInApplication
+      column: PurposeOfTrave
+      labelTable: dbo.PurposeOfTravel
+      labelColumn: PurposeOfTravelL
+      sampleQuery: |
+        SELECT pot.PurposeOfTravelL, COUNT(*) cnt
+        FROM dbo.PersonInApplication pia
+        JOIN dbo.PurposeOfTravel pot ON pot.Oid = pia.PurposeOfTrave
+        WHERE pia.GCRecord IS NULL
+        GROUP BY pot.PurposeOfTravelL ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: ApplicationItem
+      distinctLegacyValuesUsed: 5
+      allMappedToTarget: true
+    values:
+      - legacy: Işlemek üçin
+        target: Işlemek üçin
+      - legacy: Masgala agzasy
+        target: Maşgala agzasy
+      - legacy: Is saparyna
+        target: Iş saparyna
+      - legacy: Dynç almak üçin
+        target: Dynç almak üçin
+      - legacy: Myhmançylyga
+        target: Myhmançylyga
+    unmappedPolicy: use_default
+    unmappedDefault: Işlemek üçin
+    nullFkPolicy: allow_null
+    notes: |
+      ApplicationItem registration lines only (3,534 rows with FK). Legacy typo column PurposeOfTrave.
+      Encoding variants (Islemek/Is sapary) normalized to seed purpose-of-travel.json NameTm.
+
+  - targetCatalog: CheckPoint
+    targetMatchProperty: NameTm
+    legacy:
+      storage: fk
+      table: dbo.PersonInApplication
+      column: CheckPoint
+      labelTable: dbo.CheckPoint
+      labelColumns:
+        - TitleOfCheckPoint
+        - TitleOfCheckPointL
+      sampleQuery: |
+        SELECT cp.TitleOfCheckPoint, cp.TitleOfCheckPointL, COUNT(*) cnt
+        FROM dbo.PersonInApplication pia
+        JOIN dbo.CheckPoint cp ON cp.Oid = pia.CheckPoint
+        WHERE pia.GCRecord IS NULL
+        GROUP BY cp.TitleOfCheckPoint, cp.TitleOfCheckPointL ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-29
+      scope: ApplicationItem
+      distinctLegacyValuesUsed: 8
+      allMappedToTarget: true
+    values:
+      - legacy: "0"
+        target: Aşgabat şäher howa menzilindäki MGP
+        notes: TitleOfCheckPoint mgCode 0 — 3,201 rows
+      - legacy: "2"
+        target: Daşoguz ş. MGP
+      - legacy: "12"
+        target: Türkmenbaşy deňiz menzilindäki MGP
+      - legacy: "4"
+        target: Farap MGP
+      - legacy: "1"
+        target: Howdan MGP
+      - legacy: "7"
+        target: Serhetabat ş. MGP
+      - legacy: "11"
+        target: Garabogaz MGP
+      - legacy: "3"
+        target: Köneürgenç ş. MGP
+    unmappedPolicy: block_row
+    notes: |
+      Match by TitleOfCheckPoint mgCode string or TitleOfCheckPointL label → checkpoint.json NameTm.
+      Reuse global checkpoint.json seed (14 rows) — all 8 DISTINCT values on ApplicationItem data map 1:1.
+
+  - targetCatalog: WorkPermittedLocationName
+    targetMatchProperty: NameTm
+    legacy:
+      storage: bit_matrix
+      table: dbo.WorkPermitLocation
+      via: dbo.WorkPermit.WorkPermitLocation
+      transformRef: field-maps/WorkPermitItem.yaml WorkPermittedLocations
+    audit:
+      completedAt: 2026-07-03
+      scope: WorkPermitItem
+      distinctLegacyValuesUsed: 30
+      allMappedToTarget: true
+      catalogRowsAdded: work-permitted-location-name.json expanded 8 → 30 (heuristic from bit columns)
+    unmappedPolicy: block_row
+    notes: |
+      Çalik pilot 2026-07-03: Excel preview 6363 rows, _UnmappedLookups empty after Visa2014WorkPermitLocationLabelHeuristic
+      (Seheri/Şäheri/Etraby suffix + prefix normalize). Tenant seed expanded from preview column L distinct labels.
+      ApplicationItem WorkPermittedLocations can reuse same catalog after WorkPermitItem id-map exists.
+
+  - targetCatalog: MigrationService
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.DepartmentForRegistration
+      column: TitleOfDepartmentForRegistration
+      labelColumn: DepartmentForRegistrationL
+      valueKind: string
+      join: dbo.Application.DepartmentForRegistration
+      sampleQuery: |
+        SELECT d.TitleOfDepartmentForRegistration AS legacy_code,
+               d.DepartmentForRegistrationL AS legacy_name_tm,
+               COUNT(*) AS app_count
+        FROM dbo.Application a
+        INNER JOIN dbo.DepartmentForRegistration d ON d.Oid = a.DepartmentForRegistration
+        WHERE a.GCRecord IS NULL AND d.GCRecord IS NULL
+        GROUP BY d.TitleOfDepartmentForRegistration, d.DepartmentForRegistrationL
+        ORDER BY app_count DESC;
+    audit:
+      completedAt: 2026-06-30
+      scope: Application
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MigrationService.md
+      distinctLegacyValuesUsed: 9
+      applicationWithFk: 6840
+      allMappedToTarget: true
+      approvedAt: 2026-06-30
+      catalogRowsAdded:
+        - "TDMGKR — Lebap Kerki şäher bölümi"
+    values:
+      - legacy: TDMGMR
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine"
+      - legacy: TDMGAH
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine"
+      - legacy: TDMGAS
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+      - legacy: TDMGBN
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine"
+        notes: Legacy müdirligine → target müdirine
+      - legacy: TDMGSERH
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine"
+      - legacy: TDMGYL
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine"
+      - legacy: TDMGLB
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine"
+      - legacy: TDMG
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+        notes: Approved 2026-06-30 — legacy başlygyna → TDMGAS
+      - legacy: TDMGLBA
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+        notes: Approved 2026-06-30 — new TDMGKR seed row; use TDMGLBA:Kerki when label disambiguates
+      - legacy: "TDMGLBA:Kerki"
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+      - legacy: "TDMGLBA:Atamyrat"
+        target: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Atamyrat şäher bölüminiň müdirine"
+        notes: Legacy TDMGLBA + Atamyrat şäher bölümi label (~167 apps); soft-deleted lookup row in VISA2015
+    unmappedPolicy: allow_null
+    notes: |
+      Only set Application.MigrationService when ApplicationType.ShowMigrationService.
+      Null DepartmentForRegistration FK on non-registration types is expected (5397 apps).
+      PATCH imported Applications via id-map after approval — see MigrationService.md.

@@ -19,8 +19,9 @@ using Visa2026.Module.Services.StateEvaluation.Evaluators;
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
+    [NavigationItem("Lookup/Passport/Config")]
     [DefaultProperty(nameof(PassportNumber))]
-    [NavigationItem(false)]
+   // [NavigationItem(false)]
     [RuleCriteria("Passport_DateRange", DefaultContexts.Save, "ExpirationDate > IssueDate", "Expiration Date must be later than Issue Date.")]
     [Appearance("PassportStateWarning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]

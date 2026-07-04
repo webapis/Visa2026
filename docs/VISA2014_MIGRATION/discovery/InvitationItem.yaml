@@ -1,0 +1,66 @@
+# Discovery dossier — InvitationItem (permits-and-visas line BO)
+
+targetODataEntity: InvitationItem
+discoveryStatus: complete
+
+legacy:
+  boClass: IPersonInInvitation
+  tables:
+    - dbo.PersonInInvitation
+    - dbo.ApplicationResult
+  rowCount: 5239
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/InvitationItem.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/InvitationItem.yaml
+  tableMappingId: invitation-item
+  cardinality: one_legacy_person_in_invitation_row_per_item
+  upsertKeys:
+    - Oid
+  lookupDependencies: []
+  duplicateGroups: null
+  legacyOnlyCount: null
+  targetOnlyCount: null
+  mismatchCount: null
+  blockedReason: null
+  notes: |
+    LEGACY ROW → ITEM (1:1):
+      Each active dbo.PersonInInvitation row becomes one InvitationItem (~5239 on Çalik).
+
+    COLUMN MAP:
+      COALESCE(Employee, FamilyMember) → Person
+      Passport → Passport
+      Invitation → Invitation header (ApplicationResult.Oid via id-map)
+      ApplicationResult.Result == 1 → IsCancelled (heuristic)
+
+    IMPORT ORDER:
+      1) Invitation headers (ApplicationResult)
+      2) InvitationItem rows (PersonInInvitation)
+      id-map: PersonInInvitation.Oid → InvitationItem.ID
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: partial
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: false
+  inventory_updated: false
+  learnings_appended: false
+
+completedAt: null
+completedBy: null
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |

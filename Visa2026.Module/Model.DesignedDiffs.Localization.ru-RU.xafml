@@ -271,8 +271,9 @@
         <Member Name="CurrentMedicalRecord" Caption="Текущая мед. запись" />
         <Member Name="CurrentPassport" Caption="Паспорт" />
         <Member Name="CurrentPositionHistory" Caption="Должность" />
+        <Member Name="CurrentSalary" Caption="Зарплата" />
         <Member Name="CurrentVisa" Caption="Виза" />
-        <Member Name="CurrentWorkDuty" Caption="Цель визита" />
+        <Member Name="CurrentWorkDuty" Caption="Обязанности" />
         <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -554,6 +555,57 @@
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Roles" Caption="Роли" />
         <Member Name="UserName" Caption="Имя пользователя" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfile" Caption="Профиль этапов министерств">
+      <OwnMembers>
+        <Member Name="Application" Caption="Заявка" />
+        <Member Name="Code" Caption="Код" />
+        <Member Name="Company" Caption="Компания" />
+        <Member Name="CurrentState" Caption="Состояние" />
+        <Member Name="Date" Caption="Дата" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DaysRemaining" Caption="Осталось дней" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Department" Caption="Отдел" />
+        <Member Name="Description" Caption="Описание" />
+        <Member Name="EndDate" Caption="Дата окончания" />
+        <Member Name="ExpirationDate" Caption="Срок действия" />
+        <Member Name="ExpirationState" Caption="Статус срока" />
+        <Member Name="ExtensionRequired" Caption="Требуется продление" />
+        <Member Name="File" Caption="Файл" />
+        <Member Name="FullAddress" Caption="Полный адрес" />
+        <Member Name="HasInvitation" Caption="Есть приглашение" />
+        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
+        <Member Name="InvitationItem" Caption="Позиция приглашения" />
+        <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsChanged" Caption="Изменено" />
+        <Member Name="IsDefault" Caption="По умолчанию" />
+        <Member Name="IsExtended" Caption="Продлено" />
+        <Member Name="IssueDate" Caption="Дата выдачи" />
+        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
+        <Member Name="Location" Caption="Место" />
+        <Member Name="MinistriesLabel" Caption="Министерства" />
+        <Member Name="MinistryLegs" Caption="Этапы министерств" />
+        <Member Name="Name" Caption="Имя" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="Notes" Caption="Примечания" />
+        <Member Name="Passport" Caption="Паспорт" />
+        <Member Name="Person" Caption="Лицо" />
+        <Member Name="Position" Caption="Должность" />
+        <Member Name="RegistrationState" Caption="Статус регистрации" />
+        <Member Name="StartDate" Caption="Дата начала" />
+        <Member Name="State" Caption="Состояние" />
+        <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfileMinistryLeg" Caption="Этап министерства">
+      <OwnMembers>
+        <Member Name="ApprovingMinistry" Caption="Министерство" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Sequence" Caption="Порядок" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApprovingMinistry" Caption="Согласующее министерство">
@@ -2429,6 +2481,10 @@
         <ColumnInfo Id="Name" Caption="Имя" />
       </Columns>
     </ListView>
+    <DetailView Id="ApprovalLegProfile_DetailView" Caption="Профиль этапов министерств" />
+    <ListView Id="ApprovalLegProfile_ListView" Caption="Профили этапов министерств" />
+    <DetailView Id="ApprovalLegProfileMinistryLeg_DetailView" Caption="Этап министерства" />
+    <ListView Id="ApprovalLegProfileMinistryLeg_ListView" Caption="Этапы министерств" />
     <DetailView Id="ApprovingMinistry_DetailView" Caption="Согласующее министерство" />
     <ListView Id="ApprovingMinistry_ListView" Caption="Согласующие министерства" />
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Вход">

@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using System.Linq;
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.MigrationImport;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -60,6 +62,16 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [ImmediatePostData]
         public virtual bool IsManualEntry { get; set; }
+
+        /// <summary>
+        /// When true, <see cref="ApplicationProgressInitializer"/> does not seed the first progress row.
+        /// Used by VISA2014 OData import — synthetic <see cref="ApplicationProgress"/> is imported separately.
+        /// </summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual bool SuppressInitialProgress { get; set; }
 
         [MaxLength(50)]
         [VisibleInListView(false)]
@@ -313,10 +325,25 @@ namespace Visa2026.Module.BusinessObjects
         public bool IsProjectContractLocked =>
             ApplicationType?.ShowProjectContract == true && IsLockedAfterOfficePreparation;
 
+        [Appearance("ApprovalLegProfileVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApprovalLegProfile", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [DataSourceProperty(nameof(AvailableApprovalLegProfiles))]
+        public virtual ApprovalLegProfile ApprovalLegProfile { get; set; }
+
+        [Browsable(false)]
+        [NotMapped]
+        public IList<ApprovalLegProfile> AvailableApprovalLegProfiles => LoadAvailableApprovalLegProfiles();
+
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
         [VisibleInListView(false)]
-        [DataSourceCriteria("IsActive = true")]
+        [ImmediatePostData]
+        [DataSourceProperty(nameof(AvailableProjectContracts))]
         public virtual ProjectContract ProjectContract { get; set; }
+
+        [Browsable(false)]
+        [NotMapped]
+        public IList<ProjectContract> AvailableProjectContracts => LoadAvailableProjectContracts();
 
         [Browsable(false)]
         [Aggregated]
@@ -667,7 +694,8 @@ namespace Visa2026.Module.BusinessObjects
                 VisaCategory = objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(vc => vc.IsDefault);
                 VisaPeriod = objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(vp => vp.IsDefault);
                 ProjectContract = objectSpace.GetObjectsQuery<ProjectContract>().FirstOrDefault(pc => pc.IsDefault);
-                ApplicationProgressInitializer.EnsureInitialProgress(this, objectSpace);
+                if (!SuppressInitialProgress && !MigrationImportContext.IsDataImport)
+                    ApplicationProgressInitializer.EnsureInitialProgress(this, objectSpace);
             }
         }
 
@@ -685,14 +713,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 if (IsManualEntry)
                 {
-                    if (!string.IsNullOrEmpty(ApplicationNumber))
-                        FullApplicationNumber = BuildFullNumber(
-                            numbering.Format,
-                            AppNumberPrefix,
-                            Year, Month,
-                            ApplicationNumber);
-                    else if (!string.IsNullOrEmpty(FullApplicationNumber))
-                        ApplicationNumber = FullApplicationNumber;
+                    ApplyManualEntryNumbering(numbering);
                     return;
                 }
 
@@ -738,21 +759,103 @@ namespace Visa2026.Module.BusinessObjects
             }
             else if (IsManualEntry)
             {
-                Year = ApplicationDate.Year;
-                Month = ApplicationDate.Month;
-                var numbering = GetNumberingConfiguration();
-                if (string.IsNullOrEmpty(AppNumberPrefix))
-                    AppNumberPrefix = numbering.Prefix;
-                if (!string.IsNullOrEmpty(ApplicationNumber))
-                    FullApplicationNumber = BuildFullNumber(
-                        numbering.Format,
-                        AppNumberPrefix,
-                        Year, Month,
-                        ApplicationNumber);
-                else if (!string.IsNullOrEmpty(FullApplicationNumber))
-                    ApplicationNumber = FullApplicationNumber;
+                ApplyManualEntryNumbering(GetNumberingConfiguration());
             }
 
+            SyncApprovalLegSnapshotsForDataImport();
+        }
+
+        private void SyncApprovalLegSnapshotsForDataImport()
+        {
+            if (!MigrationImportContext.IsDataImport)
+                return;
+
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null || ApprovalLegProfile == null)
+                return;
+
+            if (!ApplicationProgressProfileResolver.RequiresApprovalLegProfile(this))
+                return;
+
+            var expectedLegs = ApprovalLegProfileMinistryHelper.GetLegCount(ApprovalLegProfile);
+            if (expectedLegs <= 0)
+                return;
+
+            var snapshotLegs = ApprovalLegSnapshots?
+                .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+            if (snapshotLegs == expectedLegs)
+                return;
+
+            ApprovalLegProfileMinistryHelper.ApplySnapshot(objectSpace, this, ApprovalLegProfile);
+        }
+
+        /// <summary>
+        /// Manual entry / VISA2014 import: preserve <see cref="FullApplicationNumber"/> when already set;
+        /// parse sequence into <see cref="ApplicationNumber"/> instead of re-applying <c>AppNumberFormat</c>.
+        /// </summary>
+        private void ApplyManualEntryNumbering((string Prefix, string Format, int Seed, int Padding) numbering)
+        {
+            Year = ApplicationDate.Year;
+            Month = ApplicationDate.Month;
+
+            if (MigrationImportContext.IsDataImport)
+            {
+                ApplyImportedManualNumbering();
+                return;
+            }
+
+            if (string.IsNullOrEmpty(AppNumberPrefix))
+                AppNumberPrefix = numbering.Prefix;
+
+            if (!string.IsNullOrWhiteSpace(FullApplicationNumber))
+            {
+                ApplicationManualNumberParser.Parse(
+                    FullApplicationNumber,
+                    out var parsedFull,
+                    out var parsedPrefix,
+                    out var parsedNumber);
+                FullApplicationNumber = parsedFull;
+                if (!string.IsNullOrEmpty(parsedPrefix))
+                    AppNumberPrefix = parsedPrefix;
+                if (!string.IsNullOrEmpty(parsedNumber))
+                    ApplicationNumber = parsedNumber;
+                else if (string.IsNullOrEmpty(ApplicationNumber))
+                    ApplicationNumber = FullApplicationNumber;
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(ApplicationNumber))
+            {
+                FullApplicationNumber = BuildFullNumber(
+                    numbering.Format,
+                    AppNumberPrefix,
+                    Year, Month,
+                    ApplicationNumber);
+            }
+        }
+
+        /// <summary>
+        /// VISA2014 import: keep legacy <see cref="FullApplicationNumber"/> verbatim; never apply <c>AppNumberFormat</c>.
+        /// </summary>
+        private void ApplyImportedManualNumbering()
+        {
+            if (!string.IsNullOrWhiteSpace(FullApplicationNumber))
+            {
+                ApplicationManualNumberParser.Parse(
+                    FullApplicationNumber,
+                    out var parsedFull,
+                    out var parsedPrefix,
+                    out var parsedNumber);
+                FullApplicationNumber = parsedFull;
+                if (!string.IsNullOrEmpty(parsedPrefix))
+                    AppNumberPrefix = parsedPrefix;
+                if (!string.IsNullOrEmpty(parsedNumber))
+                    ApplicationNumber = parsedNumber;
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(ApplicationNumber))
+                FullApplicationNumber = ApplicationNumber;
         }
 
         public virtual void OnDeleting()
@@ -824,6 +927,38 @@ namespace Visa2026.Module.BusinessObjects
             return objectSpace.GetObjectsQuery<ApplicationLocation>()
                 .Where(l => l.Code != null && allowedCodes.Contains(l.Code))
                 .OrderBy(s => s.Code)
+                .ToList();
+        }
+
+        private IList<ApprovalLegProfile> LoadAvailableApprovalLegProfiles()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null)
+                return Array.Empty<ApprovalLegProfile>();
+
+            return objectSpace.GetObjectsQuery<ApprovalLegProfile>()
+                .Where(profile => profile.IsActive)
+                .OrderBy(profile => profile.Code)
+                .ToList();
+        }
+
+        private IList<ProjectContract> LoadAvailableProjectContracts()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null)
+                return Array.Empty<ProjectContract>();
+
+            var query = objectSpace.GetObjectsQuery<ProjectContract>()
+                .Where(contract => contract.IsActive);
+
+            if (ApplicationType?.ShowApprovalLegProfile == true && ApprovalLegProfile != null)
+            {
+                var profileId = ApprovalLegProfile.ID;
+                query = query.Where(contract => contract.ApprovalLegProfileId == profileId);
+            }
+
+            return query
+                .OrderBy(contract => contract.NameTm)
                 .ToList();
         }
 

@@ -90,7 +90,7 @@ Importer and child sheets should reference **`FullApplicationNumber`**, not lega
 
 ### Initial progress
 
-[`ApplicationProgressInitializer`](ApplicationProgressInitializer.cs) adds the first `ApplicationProgress` row (`IS_BEING_PREPARED` @ `AT_OFFICE`, date = `ApplicationDate`) when the application is created, unless history already exists.
+[`ApplicationProgressInitializer`](ApplicationProgressInitializer.cs) adds the first `ApplicationProgress` row (`IS_BEING_PREPARED` @ `AT_OFFICE`, date = `ApplicationDate`) when the application is created, unless history already exists or `SuppressInitialProgress` is true (VISA2014 OData import).
 
 ### Progress / “current state”
 

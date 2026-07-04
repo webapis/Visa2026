@@ -1,0 +1,234 @@
+{
+    "rows":  [
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "10 ýyl Abadançylyk köçesi Olimpiýa Şäherçesi Sport myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Ak-Altyn myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Arçabil myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Aşgabat ,Aşgabat myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Aşgabat Grand Türkmen oteli"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Aşkabat .Mizan Myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "DIWAN myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Grand Otel"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "GRAND Türkmen myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Köpetdag Myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Laçyn myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Nusaý myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Oguzkent myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "ş Aşgabat myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Ýyldyz myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Balkanabat şäheri",
+                     "Name":  "Balkanabat ş, Nebitçi myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Balkanabat şäheri",
+                     "Name":  "Balkanabat ş, Nebitçi myhmanhanasy,Türkmenbaşy ş. Çarlak myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Serdar şäheri",
+                     "Name":  "Serdar, Türkmenbaşy garaýoly, Çynar myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Ýüpek ýol myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy etraby",
+                     "Name":  "“Gämi” myhmanhanasy “Awaza” milli syýahatçylyk zolagy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy etraby",
+                     "Name":  "Beýik Ýüpek Ýoly myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy etraby",
+                     "Name":  "Çarlak myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy etraby",
+                     "Name":  "Milli syýahatçylyk zolagy Awaza Berkakar myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy etraby",
+                     "Name":  "Ýelken Ýahta kuluby HJ. myhmanhanasy “Awaza” milli syýahatçylyk zolagy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
+                     "Name":  "Kuwwat myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
+                     "Name":  "ş Deňiz myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Balkan welaýaty",
+                     "City":  "Türkmenbaşy şäheri",
+                     "Name":  "Ýelken myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Daşoguz welaýaty",
+                     "City":  "Daşoguz şäheri",
+                     "Name":  "Daşoguz myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Atamyrat ş, Baýram myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Jeýhun myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Lebap myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "ş; Jeýhun myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Türkmenabat halkara howa menziliniň myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Türkmenabat myhmanhansy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Ýüpek ýoly myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Lebap welaýaty",
+                     "City":  "Türkmenabat şäheri",
+                     "Name":  "Ýüpekýol myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary etraby",
+                     "Name":  "Mary myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "Marguş myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "Mary myhmanhana"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "Mary myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "Mary myhymanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "ş; Marguş myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "Yrysgal myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Serhetabat etraby",
+                     "Name":  "Owganystan Hyrat we Kabul şäheri"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Tagtabazar etraby",
+                     "Name":  "Guşgy myhmanhanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Ýolöten etraby",
+                     "Name":  "Galkynyş gaz käniniň 2-nji işçiler şäherçesiň myhmanhanasy"
+                 }
+             ]
+}

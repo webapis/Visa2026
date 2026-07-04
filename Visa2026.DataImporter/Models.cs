@@ -26,6 +26,9 @@ public class VisaType
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
 
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
+
     public override string ToString() =>
         $"[{Id}] Name={Name}, Code={Code}, IsDefault={IsDefault}";
 }
@@ -250,6 +253,9 @@ public class Application
     [JsonPropertyName("ProjectContract")]
     public ProjectContract? ProjectContract { get; set; }
 
+    [JsonPropertyName("ApprovalLegProfile")]
+    public ApprovalLegProfile? ApprovalLegProfile { get; set; }
+
     [JsonPropertyName("FromCity")]
     public City? FromCity { get; set; }
 
@@ -435,11 +441,20 @@ public class ApplicationProgress
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
+public enum EmployeeCurrency
+{
+    TMT,
+    USD,
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ResidenceType
 {
     Lodging,
     Hotel,
-    PrivateHouse
+    PrivateHouse,
+    Hospital,
+    Other,
 }
 
 public class AddressOfResidence
@@ -453,8 +468,23 @@ public class AddressOfResidence
     [JsonPropertyName("Lodging")]
     public Lodging? Lodging { get; set; }
 
+    [JsonPropertyName("Hotel")]
+    public Hotel? Hotel { get; set; }
+
+    [JsonPropertyName("Hospital")]
+    public Hospital? Hospital { get; set; }
+
+    [JsonPropertyName("OtherSite")]
+    public OtherSite? OtherSite { get; set; }
+
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
+
+    [JsonPropertyName("Region")]
+    public Region? Region { get; set; }
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
 
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
@@ -646,6 +676,15 @@ public class Country
     public bool IsDefault { get; set; }
 }
 
+public class ActualPosition
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+}
+
 public class Department
 {
     [JsonPropertyName("ID")]
@@ -738,8 +777,32 @@ public class EmployeePositionHistory
     [JsonPropertyName("Position")]
     public Position? Position { get; set; }
 
+    [JsonPropertyName("ActualPosition")]
+    public ActualPosition? ActualPosition { get; set; }
+
     [JsonPropertyName("Department")]
     public Department? Department { get; set; }
+
+    [JsonPropertyName("Person")]
+    public Person? Person { get; set; }
+}
+
+public class EmployeeSalary
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Amount")]
+    public string Amount { get; set; } = "";
+
+    [JsonPropertyName("Currency")]
+    public EmployeeCurrency Currency { get; set; }
+
+    [JsonPropertyName("StartDate")]
+    public DateTime StartDate { get; set; }
+
+    [JsonPropertyName("EndDate")]
+    public DateTime? EndDate { get; set; }
 
     [JsonPropertyName("Person")]
     public Person? Person { get; set; }
@@ -785,6 +848,9 @@ public class EducationLevel
 
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class Gender
@@ -902,6 +968,9 @@ public class PassportType
 
     [JsonPropertyName("PdfForm_Code")]
     public string PdfFormCode { get; set; } = "";
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class Position
@@ -1037,6 +1106,9 @@ public class Urgency
 
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class ValidityDuration
@@ -1055,6 +1127,9 @@ public class ValidityDuration
 
     [JsonPropertyName("IsDefault")]
     public bool IsDefault { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 
     [JsonPropertyName("NumberOfDays")]
     public int NumberOfDays { get; set; }
@@ -1100,6 +1175,9 @@ public class VisaPeriod
 
     [JsonPropertyName("PdfForm_Count")]
     public int PdfFormCount { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class VisaCategory
@@ -1121,12 +1199,33 @@ public class VisaCategory
 
     [JsonPropertyName("PdfForm_Code")]
     public int PdfFormCode { get; set; }
+
+    [JsonPropertyName("LocalizationKey")]
+    public string LocalizationKey { get; set; } = "";
 }
 
 public class ProjectContract
 {
     [JsonPropertyName("ID")]
     public Guid Id { get; set; }
+
+    [JsonPropertyName("NameTm")]
+    public string NameTm { get; set; } = "";
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
+
+    [JsonPropertyName("IsDefault")]
+    public bool IsDefault { get; set; }
+}
+
+public class ApprovalLegProfile
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Code")]
+    public string Code { get; set; } = "";
 
     [JsonPropertyName("NameTm")]
     public string NameTm { get; set; } = "";
@@ -1591,6 +1690,66 @@ public class Lodging
 
     [JsonPropertyName("FullAddress")]
     public string FullAddress { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
+public class Hotel
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
+public class Hospital
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("Name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
+
+    [JsonPropertyName("Notes")]
+    public string Notes { get; set; } = "";
+}
+
+public class OtherSite
+{
+    [JsonPropertyName("ID")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("FullAddress")]
+    public string FullAddress { get; set; } = "";
+
+    [JsonPropertyName("City")]
+    public City? City { get; set; }
+
+    [JsonPropertyName("CityID")]
+    public Guid? CityId { get; set; }
 
     [JsonPropertyName("Notes")]
     public string Notes { get; set; } = "";

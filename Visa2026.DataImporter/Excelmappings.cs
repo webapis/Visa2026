@@ -679,6 +679,20 @@ public static class ExcelMappings
                 new() { Header = "Notes",        PayloadProperty = "Notes",       Kind = ColumnKind.StringValue },
             }
         },
+        new SheetMap { SheetName = "Hotel",         EntityName = "Hotel",          DisplayName = "Hotel",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "Name", Header = "Name" } },
+            Columns = new() {
+                new() { Header = "Name",  PayloadProperty = "Name",  Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Notes", PayloadProperty = "Notes", Kind = ColumnKind.StringValue },
+            }
+        },
+        new SheetMap { SheetName = "Hospital",      EntityName = "Hospital",       DisplayName = "Hospital",
+            UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "Name", Header = "Name" } },
+            Columns = new() {
+                new() { Header = "Name",  PayloadProperty = "Name",  Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Notes", PayloadProperty = "Notes", Kind = ColumnKind.StringValue },
+            }
+        },
         new SheetMap { SheetName = "AddressOfResidence",      EntityName = "AddressOfResidence", DisplayName = "Address of Residence",
             UpsertKeys = new[]
             {
@@ -687,9 +701,13 @@ public static class ExcelMappings
             },
             Columns = new() {
                 new() { Header = "Person",           PayloadProperty = "Person",           Kind = ColumnKind.PersonLookupByName, Required = true },
-                new() { Header = "Type",             PayloadProperty = "Type",             Kind = ColumnKind.Scalar, ValueMap = new() { {"0","Lodging"}, {"1","Hotel"}, {"2","PrivateHouse"} } },
+                new() { Header = "Type",             PayloadProperty = "Type",             Kind = ColumnKind.Scalar, ValueMap = new() { {"0","Lodging"}, {"1","Hotel"}, {"2","PrivateHouse"}, {"3","Hospital"} } },
                 new() { Header = "Full Address",     PayloadProperty = "FullAddress",      Kind = ColumnKind.StringValue, Required = true },
+                new() { Header = "Region",           PayloadProperty = "Region",           Kind = ColumnKind.LookupByName, LookupEntity = "Region", Required = true },
+                new() { Header = "City",             PayloadProperty = "City",             Kind = ColumnKind.LookupByName, LookupEntity = "City", Required = true },
                 new() { Header = "Lodging",          PayloadProperty = "Lodging",          Kind = ColumnKind.LookupByName, LookupEntity = "Lodging" },
+                new() { Header = "Hotel",            PayloadProperty = "Hotel",            Kind = ColumnKind.LookupByName, LookupEntity = "Hotel" },
+                new() { Header = "Hospital",         PayloadProperty = "Hospital",         Kind = ColumnKind.LookupByName, LookupEntity = "Hospital" },
                 new() { Header = "Expiration Date",  PayloadProperty = "ExpirationDate",   Kind = ColumnKind.Scalar },
             }
         },

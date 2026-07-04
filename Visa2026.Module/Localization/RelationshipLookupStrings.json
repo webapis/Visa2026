@@ -24,6 +24,12 @@
       "tk-TM": "(gaýny) aýalynyň ejesi",
       "ru-RU": "Свекровь"
     },
+    "FatherInLaw": {
+      "en-US": "Father-in-law (wife's father)",
+      "tr-TR": "Kayınpeder",
+      "tk-TM": "(gaýny) aýalynyň kakasy",
+      "ru-RU": "Свёкор"
+    },
     "Daughter": {
       "en-US": "Daughter",
       "tr-TR": "Kız",
@@ -53,6 +59,18 @@
       "tr-TR": "Oğul",
       "tk-TM": "ogly",
       "ru-RU": "Сын"
+    },
+    "Mother": {
+      "en-US": "Mother",
+      "tr-TR": "Anne",
+      "tk-TM": "ejesi",
+      "ru-RU": "Мать"
+    },
+    "BrotherInLaw": {
+      "en-US": "Brother-in-law (sister's husband)",
+      "tr-TR": "Enişte",
+      "tk-TM": "aýal doganyň adamsy (giýewisi)",
+      "ru-RU": "Шурин (муж сестры)"
     }
   }
 }

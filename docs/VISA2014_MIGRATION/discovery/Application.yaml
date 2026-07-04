@@ -1,0 +1,134 @@
+# Discovery dossier — Application (application-domain header BO)
+# dependsOn: Person — Person id-map not required on header (no Person FK on dbo.Application).
+
+targetODataEntity: Application
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-29
+  importConfirmedBy: developer
+  reviewNotes: |
+    Application-preview.calik-energi.xlsx reviewed 2026-06-29 — approved (12,129 import / 108 skipped).
+    IsManualEntry=true for all rows; E:44/E:55 skip_row (105 headers). OData import not started.
+    ApplicationProgress / ministry dates deferred to ApplicationProgress wave.
+
+legacy:
+  boClass: IApplication
+  boPath: VISA2014.Module/DC/IApplication.cs
+  tables:
+    - dbo.Application
+    - dbo.IRegistration_Data
+    - dbo.SimpleProcessApplication
+    - dbo.LongProcessApplication
+  rowCount: 12237
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Application.cs
+  docPath: Visa2026.Module/BusinessObjects/APPLICATION.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Application.yaml
+  tableMappingId: application-main
+  cardinality: one_legacy_row_per_application
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - ApplicationType
+    - Urgency
+    - VisaPeriod
+    - VisaCategory
+    - VisaType
+    - ProjectContract
+    - BorderZoneLocation
+    - MovementPermitLocation
+    - City
+    - BusinessTripPurpose
+    - MigrationService
+  lookupAuditStatus:
+    ApplicationType: approved_with_skip_2026-06-29
+    Urgency: drafted_2026-06-29
+    VisaPeriod: reuse_visa_wave_extend_application_2026-06-29
+    VisaCategory: approved_2026-06-26
+    VisaType: approved_2026-06-26
+    ProjectContract: approved_2026-06-26_calik_overlay
+    BorderZoneLocation: reuse_border_zone_matrix_2026-06-29
+    City: approved_address_wave_2026-06-21
+    BusinessTripPurpose: not_started
+    MigrationService: approved_2026-06-30
+  duplicateGroups: 862
+  legacyOnlyCount: 38
+  targetOnlyCount: 22
+  mismatchCount: 8
+  blockedReason: null
+  notes: |
+    Authoritative header: dbo.Application (12,237 active; 18,118 total incl. soft-deleted).
+    Numbering: IRegistration_Data.ManualApplicationNumber (e.g. 4/-001) + ManualApplicationDate.
+    AutoRegistration=1 on 12,024 rows; manual numbering on 213 — set IsManualEntry=true for all imports.
+    862 duplicate ManualApplicationNumber groups — upsert on legacy Oid, not FullApplicationNumber.
+    Process subtype: XPObjectType — SimpleProcessApplication 8,392 / LongProcessApplication 3,845.
+    Ministry scalar fields (ProcessDate, ProcessNumber, DateForwardedToMonistery, …) → ApplicationProgress wave.
+    ApplicationType: legacy ForEmployee/ForFamilyMember + ApplicationTypeForEmployee/FamilyMember SubType ID
+    + IsInvitationWithWorkPermit / IsWizaWithWorkPermit → Visa2026 ApplicationType.Name (layer 3).
+    Contract FK on 3,845 long-process rows only — ProjectContract via calik identityPassThrough on NumberOfContract.
+    PersonInApplication (21,794 active) → ApplicationItem discovery complete 2026-06-29.
+    BorderZoneForVisa on 383 headers — same bit matrix as Visa → BorderZoneLocation catalog.
+    BusinessTripDestination on 600 rows — ŞeherEtrap → ToCity; DateOfDeparture + DurationOfStay → trip dates.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-29
+completedBy: agent session — Application discovery (Çalik VISA2015)
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 12237
+  softDeletedRows: 5881
+  simpleProcessRows: 8392
+  longProcessRows: 3845
+  autoRegistrationRows: 12024
+  manualRegistrationRows: 213
+  duplicateManualNumberGroups: 862
+  withContractFk: 3845
+  distinctContractCodes: 34
+  withUrgencyFk: 12237
+  withVisaPeriodFk: 4213
+  withVisaCategoryFk: 4231
+  withBorderZoneFk: 383
+  withBusinessTripDestination: 600
+  personInApplicationChildRows: 21794
+  personInApplicationTotalRows: 40414
+  subtypeBreakdownTop:
+    - legacy: "Employee:7 (visa extension)"
+      rows: 1896
+      target: App_Visa_Ext / App_Visa_and_WP_Ext
+    - legacy: "Employee:0 inv only"
+      rows: 1686
+      target: App_Inv
+    - legacy: "Employee:0 inv+wp"
+      rows: 1177
+      target: App_Inv_And_WP
+    - legacy: "Employee:3 (reg extension)"
+      rows: 1532
+      target: App_Reg_ext
+    - legacy: "Employee:4 (reg new location)"
+      rows: 942
+      target: App_Reg_Check_In_Internal
+    - legacy: "Family:0"
+      rows: 224
+      target: App_Inv_FM

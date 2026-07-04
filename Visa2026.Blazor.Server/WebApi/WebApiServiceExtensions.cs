@@ -158,13 +158,22 @@ public static class WebApiServiceExtensions
             options.BusinessObject<Visa2026.Module.BusinessObjects.AuthorizedRepresentative>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.SystemSettings>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Education>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.EducationDocument>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.EmployeePositionHistory>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.EmployeeSalary>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ActualPosition>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Invitation>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.InvitationItem>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Passport>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.PassportDocument>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.VisaDocument>();
+            options.BusinessObject<DevExpress.Persistent.BaseImpl.EF.FileData>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Lodging>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Hotel>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.Hospital>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.OtherSite>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.MedicalRecord>();
+            options.BusinessObject<Visa2026.Module.BusinessObjects.MedicalRecordDocument>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.Person>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.WorkDuty>();
             options.BusinessObject<Visa2026.Module.BusinessObjects.ProjectContract>();
@@ -189,6 +198,7 @@ public static class WebApiServiceExtensions
                 .Select()    // enables $select
                 .Filter()    // enables $filter
                 .OrderBy()   // enables $orderby
+                .Expand()    // enables $expand (importer reads nav refs e.g. ProjectContract)
                 .SetMaxTop(10000) // removes the MaxTop=0 restriction — allows any $top value
                 .Count();    // enables $count
         });

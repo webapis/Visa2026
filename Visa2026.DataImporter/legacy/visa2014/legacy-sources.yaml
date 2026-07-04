@@ -1,0 +1,103 @@
+# VISA legacy SQL sources — one profile per company deployment
+#
+# NAMING (do not confuse):
+#   VISA2014 = legacy application / git repo name (folder legacy/visa2014/, CLI --import-visa2014)
+#   VISA2015 = legacy SQL Server DATABASE name (Initial Catalog in connection strings)
+#   There is no database named VISA2014 or VISA2025 in this migration.
+#
+# Each company: one legacy VISA2015 database (or separate attach) → one Visa2026 deployment.
+# Default CLI: --legacy-source calik-energi
+#
+# Override connection: --connection "..." or env VISA2014_SQL_CONNECTION
+# SQL auth password: env VISA2014_SQL_PASSWORD (never commit passwords to this file)
+# Canonical doc: docs/VISA2014_MIGRATION/MULTI_COMPANY_LEGACY_SOURCES.md
+#
+# Company is selected by --legacy-source (calik-energi | gap-insaat), not by SQL database name alone.
+# Both companies use database name VISA2015 when attached on SQLEXPRESS (swap .mdf between imports).
+
+version: 1
+defaultSource: calik-energi
+
+sources:
+  - id: calik-energi
+    label: Çalik Enerji
+    companyProfile: Çalyk Enerji Sanaýi we Tijaret A.Ş.
+    legacyDatabase: VISA2015
+    connectionString: "Server=localhost\\SQLEXPRESS;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: local-calik
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    previewOutput:
+      Person: preview-export/Person-preview.calik-energi.xlsx
+      Passport: preview-export/Passport-preview.calik-energi.xlsx
+      Visa: preview-export/Visa-preview.calik-energi.xlsx
+      Education: preview-export/Education-preview.calik-energi.xlsx
+      EmployeePositionHistory: preview-export/EmployeePositionHistory-preview.calik-energi.xlsx
+      EmployeeSalary: preview-export/EmployeeSalary-preview.calik-energi.xlsx
+      WorkPermit: preview-export/WorkPermit-preview.calik-energi.xlsx
+      WorkPermitItem: preview-export/WorkPermitItem-preview.calik-energi.xlsx
+      Invitation: preview-export/Invitation-preview.calik-energi.xlsx
+      InvitationItem: preview-export/InvitationItem-preview.calik-energi.xlsx
+      AddressOfResidence: preview-export/AddressOfResidence-preview.calik-energi.xlsx
+      Lodging: preview-export/Lodging-preview.calik-energi.xlsx
+      Hotel: preview-export/Hotel-preview.calik-energi.xlsx
+      Hospital: preview-export/Hospital-preview.calik-energi.xlsx
+      OtherSite: preview-export/OtherSite-preview.calik-energi.xlsx
+      PrivateHouse: preview-export/PrivateHouse-preview.calik-energi.xlsx
+      Application: preview-export/Application-preview.calik-energi.xlsx
+      ApplicationItem: preview-export/ApplicationItem-preview.calik-energi.xlsx
+      ApplicationProgress: preview-export/ApplicationProgress-preview.calik-energi.xlsx
+      ProjectContractMinistryLeg: preview-export/ProjectContractMinistryLeg-preview.calik-energi.xlsx
+      ApplicationMigrationServiceInference: preview-export/ApplicationMigrationServiceInference-preview.calik-energi.xlsx
+    idMapDir: id-maps/calik-energi
+
+  # On-prem IIS targets (10.100.128.25) — legacy SQL on 10.100.128.15 via env override.
+  # Password: VISA2014_SQL_PASSWORD only (never in this file).
+  # Runbook: docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md
+
+  - id: calik-energi-onprem-staging
+    label: Çalik Enerji — on-prem staging (10.100.128.25:8080)
+    companyProfile: Çalyk Enerji Sanaýi we Tijaret A.Ş.
+    legacyDatabase: VISA2015
+    connectionString: "Server=10.100.128.15;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: onprem-staging
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    idMapDir: id-maps/calik-energi-onprem-staging
+
+  - id: calik-energi-onprem-prod
+    label: Çalik Enerji — on-prem production (10.100.128.25:80)
+    companyProfile: Çalyk Enerji Sanaýi we Tijaret A.Ş.
+    legacyDatabase: VISA2015
+    connectionString: "Server=10.100.128.15;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: onprem-prod
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    idMapDir: id-maps/calik-energi-onprem-prod
+
+  - id: calik-energi-onprem-demo
+    label: Çalik Enerji — on-prem demo (10.100.128.25:8081)
+    companyProfile: Çalyk Enerji Sanaýi we Tijaret A.Ş.
+    legacyDatabase: VISA2015
+    connectionString: "Server=10.100.128.15;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: onprem-demo
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    idMapDir: id-maps/calik-energi-onprem-demo
+
+  - id: gap-insaat
+    label: Gap İnşaat
+    companyProfile: Gap İnşaat (legacy VISA2015 snapshot)
+    legacyDatabase: VISA2015
+    connectionString: "Server=localhost\\SQLEXPRESS;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: gap-on-prem
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.gap-insaat.yaml
+    previewOutput:
+      Person: preview-export/Person-preview.gap-insaat.xlsx
+    idMapDir: id-maps/gap-insaat

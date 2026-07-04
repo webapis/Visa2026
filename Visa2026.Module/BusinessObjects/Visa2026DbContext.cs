@@ -68,6 +68,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<Lodging> Lodgings { get; set; }
         public DbSet<LodgingDocument> LodgingDocuments { get; set; }
         public DbSet<LodgingImage> LodgingImages { get; set; }
+        public DbSet<Hotel> Hotels { get; set; }
+        public DbSet<Hospital> Hospitals { get; set; }
+        public DbSet<OtherSite> OtherSites { get; set; }
         public DbSet<EducationImage> EducationImages { get; set; }
         public DbSet<InvitationImage> InvitationImages { get; set; }
         public DbSet<InvitationDocument> InvitationDocuments { get; set; }
@@ -78,7 +81,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ProjectContractDocument> ProjectContractDocuments { get; set; }
         public DbSet<ApprovingMinistry> ApprovingMinistries { get; set; }
         public DbSet<ApplicationMigrationSlaProfile> ApplicationMigrationSlaProfiles { get; set; }
-        public DbSet<ProjectContractMinistryLeg> ProjectContractMinistryLegs { get; set; }
+        public DbSet<ApprovalLegProfile> ApprovalLegProfiles { get; set; }
+        public DbSet<ApprovalLegProfileMinistryLeg> ApprovalLegProfileMinistryLegs { get; set; }
+        public DbSet<ProjectContractApprovalLegProfile> ProjectContractApprovalLegProfiles { get; set; }
         public DbSet<ApplicationApprovalLegSnapshot> ApplicationApprovalLegSnapshots { get; set; }
         public DbSet<VisaPeriod> VisaPeriods { get; set; }
         public DbSet<VisaCategory> VisaCategories { get; set; }
@@ -153,6 +158,13 @@ namespace Visa2026.Module.BusinessObjects
             // Match XAF template (DX 404292): notification strategy + UseChangeTrackingProxies() in Startup so BaseImpl entities
             // (e.g. FileData) get notification interfaces via proxies. Snapshot breaks Model Editor; notifications without proxies fail at runtime.
             modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotificationsWithOriginalValues);
+
+            modelBuilder.Entity<ProjectContractApprovalLegProfile>(b =>
+            {
+                b.HasIndex(e => new { e.ProjectContractId, e.ApprovalLegProfileId })
+                    .IsUnique()
+                    .HasFilter("[GCRecord] IS NULL");
+            });
 
             modelBuilder.Entity<TravelHistory>(b =>
             {
@@ -278,18 +290,11 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.Ignore(c => c.Name);
                 b.Ignore(c => c.Code);
-            });
-
-            modelBuilder.Entity<ProjectContractMinistryLeg>(b =>
-            {
-                b.HasOne(l => l.ProjectContract)
-                    .WithMany(c => c.MinistryLegs)
-                    .HasForeignKey(l => l.ProjectContractId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                b.HasOne(l => l.ApprovingMinistry)
-                    .WithMany()
-                    .HasForeignKey(l => l.ApprovingMinistryId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasOne(c => c.ApprovalLegProfile)
+                    .WithMany(p => p.ProjectContracts)
+                    .HasForeignKey(c => c.ApprovalLegProfileId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<SystemSettings>()

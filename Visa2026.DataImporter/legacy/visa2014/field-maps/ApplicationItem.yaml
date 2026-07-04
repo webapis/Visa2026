@@ -1,0 +1,467 @@
+# ApplicationItem field map — layer 2
+# Layer 1: table-mappings.yaml (id: application-item-main)
+# Layer 3: lookup-translations.yaml (PurposeOfTravel, CheckPoint, BorderZoneName, WorkPermittedLocationName)
+
+tableMappingId: application-item-main
+
+source:
+  table: PersonInApplication
+  schema: dbo
+
+target:
+  odataEntity: ApplicationItem
+
+deduplication:
+  enabled: true
+  keys:
+    - Application
+    - Person
+  personKeyRule: |
+    Person legacy Oid = Employee when parent Application.ForEmployee=1;
+    FamilyMember when parent Application.ForFamilyMember=1.
+    Do not use COALESCE(FamilyMember, Employee) — wrong on FM lines where both are set.
+  canonicalRule: lowest_legacy_oid
+  tieBreakColumn: Oid
+  mergeBeforeImport: none
+  action: import_one_skip_duplicates
+  discoveryQuery: |
+    SELECT Application,
+           CASE WHEN a.ForEmployee=1 THEN pia.Employee ELSE pia.FamilyMember END AS person_oid,
+           COUNT(*) cnt
+    FROM dbo.PersonInApplication pia
+    JOIN dbo.Application a ON a.Oid = pia.Application AND a.GCRecord IS NULL
+    WHERE pia.GCRecord IS NULL
+    GROUP BY Application,
+             CASE WHEN a.ForEmployee=1 THEN pia.Employee ELSE pia.FamilyMember END
+    HAVING COUNT(*) > 1;
+  notes: |
+    925 duplicate groups (1,221 extra rows); max duplicate count 2 per group on Çalik data.
+    Parent link uses legacy Application.Oid (GUID) via Application id-map — never FullApplicationNumber alone.
+    Upsert/id-map keyed on legacy PersonInApplication.Oid; dedupe only skips duplicate PIAs on the same legacy Application+Person.
+
+propertyGaps:
+  legacyOnly:
+    - column: FamilyMember
+      disposition: derive
+      notes: Source for Person when Application.ForFamilyMember — not persisted separately on Visa2026
+    - column: Employee
+      disposition: derive
+      notes: Source for Person when Application.ForEmployee; also sponsor FK on FM lines (not a Visa2026 property)
+    - column: EmployeeEntryDate
+      disposition: derive
+      notes: FK to TravelInformation — flatten to TravelDate, CheckPoint, PurposeOfTravel, TravelType/MovementType
+    - column: FamilyMemberEntryDate
+      disposition: derive
+      notes: Same flattening path for family registration lines
+    - column: VisaIssuedPlace
+      disposition: drop
+      notes: Registration-era field on legacy line; Visa2026 uses CurrentVisa.VisaIssuedPlace — not duplicated on ApplicationItem
+    - column: Address
+      disposition: drop
+      notes: Legacy IAddresses FK — superseded by AddressOfResidence on Visa2026 line
+    - column: ApplicationForChangingInvitation
+      disposition: defer
+      notes: Invitation change workflow — may inform PreviousInvitationItem in later wave
+    - column: InvitationToBeCancelled
+      disposition: defer
+      notes: ApplicationResult FK — invitation cancel workflow
+    - column: Deletedd
+      disposition: drop
+      notes: Legacy UI flag; 0 rows on active data — GCRecord is authoritative soft delete
+    - column: ImpIDNumber
+      disposition: drop
+    - column: ImpPosition
+      disposition: drop
+    - column: ImpPassport
+      disposition: drop
+    - column: ImpVisa
+      disposition: drop
+    - column: ImpVisaIssuedPlace
+      disposition: drop
+    - column: ImpAddressOfResidence
+      disposition: drop
+    - column: ImpEmpEntryDate
+      disposition: drop
+    - column: ImpCheckPoint
+      disposition: drop
+    - column: ImpPurposeOfTravel
+      disposition: drop
+    - column: OptimisticLockField
+      disposition: drop
+    - column: GCRecord
+      disposition: filter
+      notes: Active rows only — GCRecord IS NULL
+    - column: Cancelled
+      disposition: derive
+      notes: Partial input to workflow flags — see fields InvitationItemIsCancelled, VisaIsCancelled, IsCancelled
+    - column: Rejected
+      disposition: derive
+      notes: Maps to RejectionIssued when true
+    - column: IsComplete
+      disposition: derive
+      notes: Legacy processed state — correlate with issued flags at transform time
+  targetOnly:
+    - property: ShowOptionalFields
+      default: false
+      missingBehavior: omit_from_post
+      notes: "[NotMapped] UI toggle — never POST"
+    - property: ApplicationItemName
+      disposition: computed
+      notes: Person.FullName + Application.FullApplicationNumber — set on save in Visa2026
+    - property: RowNumber
+      default: 0
+      missingBehavior: use_default
+      notes: Optional list ordering — derive ROW_NUMBER per Application ordered by Oid if needed
+    - property: NextVisa
+      disposition: derive
+      notes: From Visa.ProcessNumber = PersonInApplication.Oid (5,744 links) — not a legacy column
+    - property: NextVisaId
+      disposition: derive
+      notes: Shadow FK for NextVisa
+    - property: CurrentEducation
+      disposition: resolve_from_person
+      missingBehavior: allow_null
+      notes: No legacy FK — PersonCurrentItems.GetCurrentEducation when ShowCurrentEducation
+    - property: CurrentMedicalRecord
+      disposition: resolve_from_person
+      missingBehavior: allow_null
+    - property: CurrentSalary
+      disposition: resolve_from_person
+      missingBehavior: allow_null
+    - property: CurrentWorkDuty
+      disposition: resolve_from_person
+      missingBehavior: allow_null
+    - property: CurrentEmployeeContract
+      disposition: resolve_from_person
+      missingBehavior: allow_null
+      notes: No EmployeeContract FK on legacy line
+    - property: CurrentInvitationItem
+      disposition: resolve_from_person_in_invitation
+      missingBehavior: allow_null
+      notes: |
+        Legacy PersonInInvitation row for same Application (via ApplicationResult) + Person.
+        InvitationItem id-map key = PersonInInvitation.Oid. Tie-break: latest ApplicationResult.IssuedDate.
+    - property: PreviousInvitationItem
+      disposition: defer
+    - property: PreviousWorkPermitItem
+      disposition: allow_null
+      notes: No legacy FK except implicit history — allow null at import
+    - property: IsDeleted
+      disposition: omit
+      notes: Documented in ApplicationItem.md; not on EF entity in current codebase — use GCRecord skip only
+    - property: DateDeleted
+      disposition: omit
+    - property: DeletedBy
+      disposition: omit
+    - property: TravelType
+      disposition: derive
+      notes: From ApplicationType App_Reg_* defaults + legacy TravelInformation.TravelType int
+    - property: MovementType
+      disposition: derive
+      notes: Entry/Exit paired with TravelType from parent ApplicationType
+    - property: TravelNotes
+      default: null
+      missingBehavior: allow_null
+  mismatches:
+    - property: Person
+      legacyColumn: Employee | FamilyMember
+      notes: Single Person FK — pick column by parent Application.ForEmployee / ForFamilyMember
+    - property: CurrentPassport
+      legacyColumn: Passport
+      notes: Renamed; id-map entity Passport
+    - property: CurrentVisa
+      legacyColumn: Visa
+      notes: Renamed; id-map entity Visa
+    - property: CurrentWorkPermitItem
+      legacyColumn: WorkPermit
+      notes: Legacy dbo.WorkPermit row → Visa2026 WorkPermitItem (1:1 Oid). WorkPermitItem id-map required.
+    - property: CurrentPositionHistory
+      legacyColumn: Position
+      notes: Legacy WorkHistoryOfEmployee FK
+    - property: CurrentAddressOfResidence
+      legacyColumn: AddressOfResidence
+      notes: Renamed
+    - property: BorderZoneLocation
+      legacyColumn: null
+      notes: Comma-separated NameTm — derive from parent Application.BorderZoneForVisa bit matrix (not stored on line in legacy)
+    - property: WorkPermittedLocations
+      legacyColumn: WorkPermit.WorkPermitLocation
+      notes: Bit matrix on linked WorkPermit row — same transform family as WorkPermitItem wave
+    - property: BusinessTripAddress
+      legacyColumn: AddressOnBusinessTrip
+      notes: Legacy scalar AddressOnTrip text → aggregated BusinessTripAddress { City, FullAddress }
+    - property: CheckPoint
+      legacyColumn: CheckPoint
+      notes: Direct FK; also copied from TravelInformation.CheckPoint when registration entry FK set
+    - property: Registration_GelmeginMaksadyTm
+      legacyColumn: PurposeOfTrave
+      notes: Legacy typo column name; maps to PurposeOfTravel lookup NameTm for reports
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    upsertKey: true
+    notes: id-map only — OData ID assigned on POST
+
+  - source: Application
+    target: Application
+    transform: fk_id_map
+    idMapEntity: Application
+    missingBehavior: skip_row
+    notes: Parent header — Application id-map required
+
+  - source: Employee
+    target: Person
+    transform: person_fk_by_app_category
+    idMapEntity: Person
+    when: Application.ForEmployee = 1
+    missingBehavior: skip_row
+
+  - source: FamilyMember
+    target: Person
+    transform: person_fk_by_app_category
+    idMapEntity: Person
+    when: Application.ForFamilyMember = 1
+    missingBehavior: skip_row
+
+  - source: Passport
+    target: CurrentPassport
+    transform: fk_id_map
+    idMapEntity: Passport
+    missingBehavior: skip_row
+    notes: 96 orphan Passport FK on active rows — skip_row
+
+  - source: PreviousPassport
+    target: PreviousPassport
+    transform: fk_id_map
+    idMapEntity: Passport
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowPreviousPassport
+    notes: Required only when ShowPreviousPassport — RuleRequiredField TargetCriteria
+
+  - source: Visa
+    target: CurrentVisa
+    transform: fk_id_map
+    idMapEntity: Visa
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentVisa
+    notes: 115 orphan Visa FK — skip FK resolve, allow_null
+
+  - source: null
+    target: NextVisa
+    transform: visa_by_process_number
+    join: Visa.ProcessNumber = PersonInApplication.Oid
+    idMapEntity: Visa
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowNextVisa
+    notes: 5,744 legacy visas link via ProcessNumber — not a PersonInApplication column
+
+  - source: WorkPermit
+    target: CurrentWorkPermitItem
+    transform: fk_id_map
+    idMapEntity: WorkPermitItem
+    legacyOidSameAs: WorkPermit
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentWorkPermitItem
+    notes: |
+      Primary: legacy PersonInApplication.WorkPermit FK → WorkPermitItem id-map (legacy Oid = dbo.WorkPermit.Oid).
+      Fallback when FK null: latest dbo.WorkPermit per employee (StartDate DESC, Oid DESC) — same rule as PersonCurrentItems.GetCurrentWorkPermitItem.
+      Employee lines only; gated by ShowCurrentWorkPermitItem.
+
+  - source: PersonInInvitation
+    target: CurrentInvitationItem
+    transform: fk_id_map
+    idMapEntity: InvitationItem
+    join: |
+      PersonInInvitation + ApplicationResult on same Application as PersonInApplication;
+      match Employee or FamilyMember; latest ApplicationResult.IssuedDate when multiple.
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentInvitationItem
+    notes: Legacy key PersonInInvitation.Oid — not ApplicationResult.Oid.
+
+  - source: Position
+    target: CurrentPositionHistory
+    transform: fk_id_map
+    idMapEntity: EmployeePositionHistory
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentPositionHistory
+    notes: 189 orphan Position FK — skip resolve
+
+  - source: AddressOfResidence
+    target: CurrentAddressOfResidence
+    transform: fk_id_map
+    idMapEntity: AddressOfResidence
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentAddressOfResidence
+    notes: |
+      Legacy PersonInApplication.AddressOfResidence FK when set; else PersonInApplication.Address via id-map
+      (PIA inference on AddressOfResidence wave + sponsor canonical for family lines).
+
+  - source: EmployeeEntryDate
+    target: TravelDate
+    transform: travel_information_scalar
+    joinTable: TravelInformation
+    joinColumn: TravelDate
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowRegistrations
+
+  - source: FamilyMemberEntryDate
+    target: TravelDate
+    transform: travel_information_scalar
+    joinTable: TravelInformation
+    joinColumn: TravelDate
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowRegistrations
+
+  - source: CheckPoint
+    target: CheckPoint
+    transform: lookup
+    lookupCatalog: CheckPoint
+    lookupLegacyColumn: CheckPoint.TitleOfCheckPointL
+    lookupMatch: NameTm
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowRegistrations
+    notes: Prefer line FK; fallback TravelInformation.CheckPoint when EmployeeEntryDate/FamilyMemberEntryDate set
+
+  - source: PurposeOfTrave
+    target: null
+    transform: lookup
+    lookupCatalog: PurposeOfTravel
+    lookupLegacyColumn: PurposeOfTravel.PurposeOfTravelL
+    lookupMatch: NameTm
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowRegistrations
+    notes: Drives registration purpose; Registration_GelmeginMaksadyTm is computed in Visa2026 for FM reports
+
+  - source: null
+    target: TravelType
+    transform: registration_travel_type
+    missingBehavior: derive_from_application_type
+    notes: Legacy TravelInformation.TravelType int 0→Entry context; pair with ApplicationType App_Reg_* for Internal/External
+
+  - source: null
+    target: MovementType
+    transform: registration_movement_type
+    missingBehavior: derive_from_application_type
+
+  - source: RegistrationDate
+    target: RegistrationDate
+    transform: scalar_datetime
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowRegistrations
+
+  - source: RegistrationNumber
+    target: null
+    disposition: drop
+    notes: No Visa2026 property — registration number not on flattened ApplicationItem (deferred / report-only in legacy)
+
+  - source: AddressOnBusinessTrip
+    target: BusinessTripAddress
+    transform: business_trip_address_aggregate
+    joinTable: AddressOnBusinessTrip
+    joinColumn: AddressOnTrip
+    cityFrom: Application.BusinessTripDestination
+    lookupCatalog: City
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowBusinessTrips
+
+  - source: null
+    target: BorderZoneLocation
+    transform: border_zone_bit_matrix
+    sourceTable: Application.BorderZoneForVisa
+    lookupCatalog: BorderZoneName
+    missingBehavior: use_default
+    default: Ýok
+    gatedBy: Application.ApplicationType.ShowBorderZoneLocation
+    notes: Reuse Visa/Application BorderZoneName layer 3 — header matrix copied to line
+
+  - source: WorkPermit
+    target: WorkPermittedLocations
+    transform: work_permit_location_bit_matrix
+    joinTable: WorkPermitLocation
+    lookupCatalog: WorkPermittedLocationName
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowWorkPermittedLocations
+    notes: Full layer-3 audit pending WorkPermitItem discovery — 3,725 rows with WorkPermitLocation FK
+
+  - source: Cancelled
+    target: IsCancelled
+    transform: bool
+    missingBehavior: use_default
+    default: false
+    notes: Work-permit-item cancel flag — also map InvitationItemIsCancelled / VisaIsCancelled per app type at transform
+
+  - source: Rejected
+    target: RejectionIssued
+    transform: bool
+    missingBehavior: use_default
+    default: false
+
+  - source: IsComplete
+    target: VisaIssued
+    transform: derive_processed_flags
+    missingBehavior: use_default
+    default: false
+    notes: Legacy PersonState enum richer than bool flags — approximate at import; refine in ApplicationProgress wave
+
+  - source: null
+    target: CurrentEducation
+    transform: resolve_person_current
+    idMapEntity: Education
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentEducation
+    notes: |
+      Transform sets legacy Education Oid (latest GraduationYear per Person). OData maps via --education-id-map.
+      Employee lines only; omitted when ShowRegistrations (registration workflow).
+
+  - source: null
+    target: CurrentMedicalRecord
+    transform: resolve_person_current
+    idMapEntity: MedicalRecord
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentMedicalRecord
+
+  - source: null
+    target: CurrentSalary
+    transform: resolve_person_current
+    idMapEntity: EmployeeSalary
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentSalary
+    notes: |
+      Transform sets legacy Employee Oid (= Person Oid). OData maps via --employee-salary-id-map. Employee lines only.
+
+  - source: null
+    target: CurrentWorkDuty
+    transform: resolve_person_current
+    idMapEntity: WorkDuty
+    missingBehavior: allow_null
+    gatedBy: Application.ApplicationType.ShowCurrentWorkDuty
+
+import:
+  rowFilter: GCRecord IS NULL
+  rowFilterNote: Import active PersonInApplication rows only; parent Application must resolve via id-map.
+  parentBlockerFilter: |
+    Skip row when parent Application composite ApplicationType is unmapped (E:44, E:55) —
+    same gate as Application header transform.
+
+export:
+  sheetName: ApplicationItem
+  includeAuditColumns: true
+  auditColumns:
+    - _legacyRowId
+    - _legacyTable
+    - _dedupeGroupId
+    - _importAction
+    - _parentApplicationType
+    - _personLegacyOid
+  lastExportedAt: 2026-06-29T17:56:33Z
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/ApplicationItem-preview.calik-energi.xlsx
+
+notes: |
+  ApplicationType Show* flags gate which fields are required on POST (RuleRequiredField TargetCriteria).
+  Importer must read parent Application.ApplicationType after header import — do not POST gated FKs when Show* is false.
+  Omit ShowOptionalFields from OData payload ([NotMapped]).
+  Person uniqueness per Application enforced in Visa2026 — dedupe legacy duplicates before POST.
+  RegistrationNumber legacy column has no target — 3,516 populated rows; preserve in audit column only unless product adds field.
+  Order.yaml places ApplicationItem before WorkPermitItem — document allow_null CurrentWorkPermitItem or run WorkPermitItem import first for full fidelity.

@@ -31,6 +31,8 @@ public static class ApplicationTypeDevelopmentReadiness
         "App_Reg_Check_In",
         "App_Inv_And_WP",
         "App_Visa_and_WP_Ext",
+        "App_Visa_Ext_FM",
+        "App_Visa_For_New_Born_FM",
         "App_Cancel_Visa",
     };
 
@@ -40,12 +42,30 @@ public static class ApplicationTypeDevelopmentReadiness
         "102",
         "105",
         "301",
+        "706",
+        "707",
         "708",
         "807",
     };
 
+    /// <summary>Deprecated types — omitted from the type-code picker entirely (row kept in DB for FK integrity).</summary>
+    public static readonly HashSet<string> HiddenFromTypeCodePickerByName = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "App_Visa_Ext",
+    };
+
+    public static readonly HashSet<string> HiddenFromTypeCodePickerBySelectionCode = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "702",
+    };
+
+    public static bool IsHiddenFromTypeCodePicker(string? name, string? selectionCode) =>
+        Matches(HiddenFromTypeCodePickerByName, HiddenFromTypeCodePickerBySelectionCode, name, selectionCode);
+
     public static ApplicationTypeReadinessStatus GetStatus(string? name, string? selectionCode)
     {
+        if (IsHiddenFromTypeCodePicker(name, selectionCode))
+            return ApplicationTypeReadinessStatus.NotReady;
         if (Matches(ReadyByName, ReadyBySelectionCode, name, selectionCode))
             return ApplicationTypeReadinessStatus.Ready;
         if (Matches(PendingByName, PendingBySelectionCode, name, selectionCode))

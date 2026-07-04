@@ -1,0 +1,62 @@
+# WorkPermit field map — layer 2
+# Layer 1: table-mappings.yaml (id: work-permit-header)
+
+tableMappingId: work-permit-header
+
+source:
+  tables:
+    - dbo.WorkPermitLetter
+    - dbo.WorkPermit
+  schema: dbo
+
+target:
+  odataEntity: WorkPermit
+
+deduplication:
+  enabled: true
+  keys:
+    - WorkPermitNumber
+  workPermitNumberSuffix:
+    when: duplicate Number across letter headers
+    transform: append_legacy_oid_tail
+    notes: 25 letter groups share Number on Çalik — suffix last 8 hex chars of legacy Oid
+
+propertyGaps:
+  targetOnly:
+    - property: Application
+      disposition: omit_from_post
+      notes: Optional link — pilot imports with Application=null
+    - property: ShowOptionalFields
+      disposition: omit_from_post
+
+fields:
+  - source: WorkPermitLetter.Oid
+    target: null
+    transform: legacy_id
+    notes: id-map key for letter-sourced headers
+
+  - source: WorkPermit.Oid
+    target: null
+    transform: legacy_id
+    notes: id-map key for 2 orphan rows without WorkPermitLetter FK
+
+  - source: WorkPermitLetter.Number
+    target: WorkPermitNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+
+  - source: WorkPermitLetter.Date
+    target: IssuedDate
+    transform: date
+    missingBehavior: skip_row
+    notes: EF column StartDate
+
+  - source: WorkPermit.AppruvalNumber
+    target: WorkPermitNumber
+    transform: identity_trim
+    when: orphan header only (WorkPermitLetter IS NULL)
+
+  - source: WorkPermit.StartDateOfWorkPermit
+    target: IssuedDate
+    transform: date
+    when: orphan header only

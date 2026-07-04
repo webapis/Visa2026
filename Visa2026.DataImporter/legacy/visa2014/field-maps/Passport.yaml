@@ -1,0 +1,140 @@
+# Passport field map — layer 2
+# Layer 1: table-mappings.yaml (id: passport-main)
+# Layer 3: lookup-translations.yaml (PassportType, Country)
+
+tableMappingId: passport-main
+
+source:
+  table: Passport
+  schema: dbo
+
+target:
+  odataEntity: Passport
+
+deduplication:
+  enabled: true
+  keys:
+    - Oid
+  passportNumberDedupe:
+    enabled: true
+    when: normalized PassportNumber shared by multiple active legacy Oids
+    keys:
+      - PassportNumber
+    canonicalRule: most_recent_issue_date
+    tieBreakColumn: Oid
+    sentinelNumbers:
+      - AF000000000
+      - JL000000000
+    sentinelAction: import_all_with_oid_suffix
+    sentinelSuffixTransform: append_legacy_oid_tail
+    notes: |
+      Visa2026: Passport_PassportNumberUniqueAmongActive (trimmed, case-insensitive).
+      4 legacy groups: 2 placeholder families (8 rows each) + 2 real pairs.
+      Placeholders: suffix passport number with last 8 chars of legacy Oid for OData uniqueness.
+      Real pairs (21FV15263, AA0094304): keep row with latest PassportIssuedDate; log skipped Oid.
+  action: import_one_per_legacy_oid
+  notes: Do NOT collapse to one passport per Person — 353 persons have multiple documents.
+
+propertyGaps:
+  legacyOnly:
+    - column: IRemainingDays_Data
+      disposition: drop
+    - column: IMessage_Data
+      disposition: drop
+    - column: VisaIsNotRequired
+      disposition: drop
+      notes: Application/visa wave — not on Visa2026 Passport BO
+    - column: Citizenship
+      disposition: drop
+      notes: Nationality on Person; Passport BO has IssuedCountry only
+    - column: PersonalNumber
+      disposition: drop
+      notes: Copied to Person.PersonalNumber in Person wave; hidden on Visa2026 Passport
+    - column: AppConf
+      disposition: drop
+    - column: ImpPassportType
+      disposition: drop
+    - column: ImpPassportIssuedCountry
+      disposition: drop
+    - column: ImpCitizenship
+      disposition: drop
+    - column: ImpPersonID
+      disposition: drop
+    - column: OptimisticLockField
+      disposition: drop
+  targetOnly:
+    - property: IsCancelled
+      default: false
+      missingBehavior: use_default
+    - property: ShowOptionalFields
+      default: false
+      missingBehavior: use_default
+  mismatches:
+    - property: Authority
+      legacyColumn: PassportIssuedPlace
+      notes: Legacy issuing place text → Visa2026 Authority (required string)
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map only — not OData ID
+
+  - source: PassportNumber
+    target: PassportNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+    notes: MaxLength 20 on Visa2026; Çalik data max len ≤ 20
+
+  - source: PassportType
+    target: PassportType
+    transform: lookup_composite
+    lookupCatalog: PassportType
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - PassportType.TypeOfPassportL
+      - PassportType.mgCode
+    lookupLegacyKeyFormat: "{TypeOfPassportL}:{mgCode}"
+    missingBehavior: use_default
+    default: P
+    notes: See lookup-translations.yaml + PassportType.md; mgCode null → empty suffix
+
+  - source: PassportIssuedDate
+    target: IssueDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: PassportExpiringDate
+    target: ExpirationDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: PassportIssuedPlace
+    target: Authority
+    transform: identity_trim
+    missingBehavior: skip_row
+
+  - source: PassportIssuedCountry
+    target: IssuedCountry
+    transform: lookup
+    lookupCatalog: Country
+    lookupMatch: Code
+    lookupLegacyColumn: Country.NameOfCountryL
+    missingBehavior: skip_row
+
+  - source: Person
+    target: Person
+    transform: fk_id_map
+    fkEntity: Person
+    missingBehavior: skip_row
+    notes: Requires Person id-map; skip orphan FK (18 rows on Çalik)
+
+importFilters:
+  - sql: pp.GCRecord IS NULL
+  - sql: EXISTS (SELECT 1 FROM dbo.Person p WHERE p.Oid = pp.Person AND p.GCRecord IS NULL)
+
+postImport:
+  - wave: attachments
+    property: PassportDocument
+    legacyColumn: PassportCopy
+    notes: Separate --import-visa2014-files wave after scalar Passport POST

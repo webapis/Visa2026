@@ -1,0 +1,143 @@
+# VISA2014 → Visa2026 entity inventory
+# Summary index — sync when each dossier closes.
+# Discovery/import order: Visa2026.DataImporter/legacy/visa2014/order.yaml
+
+version: 1
+legacy:
+  product: VISA2014
+  database: VISA2015               # source of truth for legacy schema and data
+  repo: VISA2014                   # supplementary — BO/EF hints only
+target:
+  product: Visa2026
+  importTransport: OData
+
+entities:
+  - targetODataEntity: Person
+    discoveryDossier: discovery/Person.yaml
+    tableMappingId: person-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Person
+    legacyBo: Person
+    blockReason: null
+    notes: "Full import 2026-06-26: 2915 posted, 9 PN collisions; id-map 3087; 2925 People in LocalDB."
+
+  - targetODataEntity: Passport
+    discoveryDossier: discovery/Passport.yaml
+    tableMappingId: passport-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Passport
+    legacyBo: Passport
+    blockReason: null
+    notes: "Scalar + PassportCopy done 2026-06-26: 3410 passports, 3392 scans."
+
+  - targetODataEntity: Visa
+    discoveryDossier: discovery/Visa.yaml
+    tableMappingId: visa-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Visa
+    legacyBo: Visa
+    blockReason: null
+    notes: "Scalar + VisaDocument done 2026-06-26: 5760 visas, 5571 scans posted; id-maps Visa.json + VisaDocument.json."
+
+  - targetODataEntity: Education
+    discoveryDossier: discovery/Education.yaml
+    tableMappingId: education-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Education
+    legacyBo: Education
+    blockReason: null
+    notes: "OData import 2026-06-26: 2958 posted, 150 no Person map, 6 skipped."
+
+  - targetODataEntity: EmployeePositionHistory
+    discoveryDossier: discovery/EmployeePositionHistory.yaml
+    tableMappingId: employee-position-history-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: WorkHistoryOfEmployee
+    legacyBo: WorkHistoryOfEmployee
+    blockReason: null
+    notes: "OData import 2026-06-26: 2838 posted, 151 no Person map, 194 ActualPositions created."
+
+  - targetODataEntity: AddressOfResidence
+    discoveryDossier: discovery/AddressOfResidence.yaml
+    tableMappingId: address-of-residence-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: AddressOfResidence
+    legacyBo: AddressOfResidence
+    blockReason: null
+    notes: "OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 pilot resume-skipped; OData total 3786."
+
+  - targetODataEntity: EmployeeSalary
+    discoveryDossier: discovery/EmployeeSalary.yaml
+    tableMappingId: employee-salary-main
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: Employee
+    legacyBo: Employee
+    blockReason: null
+    notes: "OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 63 transform skipped."
+
+  - targetODataEntity: MedicalRecord
+    discoveryDossier: discovery/MedicalRecord.yaml
+    tableMappingId: medical-record-spid-kepilnama
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: IPersonn_SpidKepilnama
+    legacyBo: IPerson.SpidKepilnama
+    blockReason: null
+    notes: |
+      Spid kepilnama file chain. File import 2026-06-29: 0 posted (2 orphan links, 0 blobs on Çalik).
+
+  - targetODataEntity: Application
+    discoveryDossier: discovery/Application.yaml
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: pending
+    legacyTable: dbo.Application + dbo.IRegistration_Data
+    legacyBo: IApplication
+    blockReason: null
+    notes: |
+      importConfirmed 2026-06-29 after Application-preview.calik-energi.xlsx review (12,129 import / 108 skipped).
+      862 duplicate ManualApplicationNumber groups — upsert on Oid. ApplicationItem discovery complete.
+      OData: Visa2014ApplicationODataImporter wired in Visa2014ImportCommand; id-map id-maps/calik-energi/Application.json; pilot pending.
+
+  - targetODataEntity: ApplicationItem
+    discoveryDossier: discovery/ApplicationItem.yaml
+    tableMappingId: application-item-main
+    discoveryStatus: complete
+    importConfirmed: false
+    importStatus: pending
+    legacyTable: PersonInApplication
+    legacyBo: IPersonInApplication
+    blockReason: null
+    notes: |
+      Discovery 2026-06-29: 21,794 active rows; dedupe 925 groups.
+      Layer 3 PurposeOfTravel + CheckPoint drafted; WorkPermittedLocations pending WorkPermitItem audit.
+      204 rows on parent apps with skipped ApplicationType E:44/E:55 (inherit parent skip_row).
+
+  - targetODataEntity: ApplicationProgress
+    discoveryDossier: discovery/ApplicationProgress.yaml
+    tableMappingId: application-progress-synthetic
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: pending
+    legacyTable: dbo.Application (synthetic)
+    legacyBo: IApplication
+    blockReason: null
+    notes: |
+      importConfirmed 2026-06-29 — preview 32,177 progress rows from 12,129 parents (108 E:44/E:55 skips).
+      Requires Application id-map before OData POST.
+

@@ -1,0 +1,59 @@
+# Invitation field map — layer 2
+# Layer 1: table-mappings.yaml (id: invitation-header)
+
+tableMappingId: invitation-header
+
+source:
+  table: ApplicationResult
+  schema: dbo
+  filter: referenced by PersonInInvitation.Invitation FK
+
+target:
+  odataEntity: Invitation
+
+deduplication:
+  enabled: true
+  keys:
+    - InvitationNumber
+  invitationNumberSuffix:
+    when: duplicate Number across headers
+    transform: append_legacy_oid_tail
+    notes: 13 groups on Çalik — suffix last 8 hex chars of legacy ApplicationResult Oid
+
+propertyGaps:
+  targetOnly:
+    - property: ShowOptionalFields
+      disposition: omit_from_post
+    - property: ExpirationDate
+      disposition: derived_on_save
+      notes: Computed from StartDate + ValidityDuration.NumberOfDays
+
+fields:
+  - source: ApplicationResult.Oid
+    target: null
+    transform: legacy_id
+    notes: id-map key
+
+  - source: ApplicationResult.Number
+    target: InvitationNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+
+  - source: ApplicationResult.IssuedDate
+    target: StartDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: ApplicationResult.DateOfExpire
+    target: ValidityDuration
+    transform: closest_day_span
+    candidates: [90, 180, 365]
+    lookupCatalog: ValidityDuration
+    missingBehavior: skip_row
+    notes: Resolved at import via INonSecuredObjectSpaceFactory (Month3/Month6/Year1)
+
+  - source: ApplicationResult.Application
+    target: Application
+    transform: fk_id_map
+    idMapEntity: Application
+    missingBehavior: allow_null

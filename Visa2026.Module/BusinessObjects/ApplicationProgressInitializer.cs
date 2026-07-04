@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -13,6 +14,11 @@ namespace Visa2026.Module.BusinessObjects
         public static void EnsureInitialProgress(Application application, IObjectSpace objectSpace)
         {
             if (application == null || objectSpace == null)
+            {
+                return;
+            }
+
+            if (application.SuppressInitialProgress || MigrationImportContext.IsDataImport)
             {
                 return;
             }

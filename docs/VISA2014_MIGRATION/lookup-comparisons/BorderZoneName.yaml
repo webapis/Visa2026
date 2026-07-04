@@ -1,0 +1,124 @@
+# Lookup comparison — BorderZoneName (machine-readable)
+# Human table: BorderZoneName.md
+
+version: 1
+catalog: BorderZoneName
+comparedAt: 2026-06-21
+legacyDatabase: VISA2015
+legacyStorage: bit_matrix
+legacyTable: dbo.BorderZoneForVisa
+legacyJoin: Visa.BorderZone = BorderZoneForVisa.Oid
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/border-zone-name.json
+targetMatchProperty: NameTm
+visaScope: dbo.Visa WHERE GCRecord IS NULL
+visaTotal: 6041
+visaWithBorderZoneFk: 589
+visaWithoutBorderZoneFk: 5452
+visaAllBitsFalse: 2
+visaWithAtLeastOneBit: 587
+
+summary:
+  verdict: approved
+  approvedAt: 2026-06-21
+  layer3Transform: border_zone_bit_matrix
+  outputFormat: comma_separated
+  bitOrder:
+    - Daşoguz
+    - Tagtabazar
+    - Serhetabat
+    - Ýolöten
+    - Farap
+    - Sarahs
+    - Garabogaz
+    - Etrek
+  defaultWhenEmpty: Ýok
+  recommendedNextStep: Visa Excel preview export
+
+bitMappings:
+  - legacyBit: Daşoguz
+    legacyHelperLabelTm: Daşoguz şäher
+    targetNameTm: Daşoguz şäher
+    visaCount: 82
+    catalogAction: add
+    match: approved
+
+  - legacyBit: Tagtabazar
+    legacyHelperLabelTm: Tagtabazar etrap
+    targetNameTm: Tagtabazar etrap
+    visaCount: 150
+    catalogAction: add
+    match: approved
+
+  - legacyBit: Serhetabat
+    legacyHelperLabelTm: Serhetabat etrap
+    targetNameTm: Serhetabat etrap
+    visaCount: 179
+    catalogAction: add
+    match: approved
+
+  - legacyBit: Ýolöten
+    legacyHelperLabelTm: Ýolöten etrap
+    targetNameTm: Ýolöten etrap
+    visaCount: 1
+    catalogAction: add
+    match: approved
+
+  - legacyBit: Farap
+    legacyHelperLabelTm: Farap etrap
+    targetNameTm: Farap etrap
+    visaCount: 227
+    catalogAction: add
+    match: approved
+
+  - legacyBit: Sarahs
+    legacyHelperLabelTm: Sarags etrap
+    targetNameTm: Sarahs etraby
+    visaCount: 0
+    catalogAction: existing
+    match: approved
+    notes: Legacy Helper typo Sarags; bit unused on Çalik visas
+
+  - legacyBit: Garabogaz
+    legacyHelperLabelTm: Garabogaz şäher
+    targetNameTm: Garabogaz şäheri
+    visaCount: 189
+    catalogAction: alias
+    match: approved
+
+  - legacyBit: Etrek
+    legacyHelperLabelTm: Etrek etrap
+    targetNameTm: Etrek etrap
+    visaCount: 4
+    catalogAction: add
+    match: approved
+
+catalogRowsAdded:
+  - Daşoguz şäher
+  - Tagtabazar etrap
+  - Serhetabat etrap
+  - Ýolöten etrap
+  - Farap etrap
+  - Etrek etrap
+
+catalogPreservedNotFromVisaBits:
+  - Serhetabat etr
+  - Serhetabat şäheri
+  - Sarahs etrabyna
+
+nullFkPolicy:
+  policy: use_default
+  defaultValue: Ýok
+  visaCount: 5452
+
+allBitsFalsePolicy:
+  policy: use_default
+  defaultValue: Ýok
+  visaCount: 2
+
+topBitPatterns:
+  - bits: { Farap: 1 }
+    visaCount: 217
+  - bits: { Garabogaz: 1 }
+    visaCount: 143
+  - bits: { Tagtabazar: 1, Serhetabat: 1 }
+    visaCount: 110

@@ -1,0 +1,83 @@
+# Discovery dossier — WorkPermit (permits-and-visas header BO)
+# PLANNING DRAFT 2026-06-29 — discovery not started; see mapping.notes for structural strategy.
+
+targetODataEntity: WorkPermit
+discoveryStatus: complete
+
+legacy:
+  boClass: IWorkPermitLetter
+  boPath: VISA2014.Module/DC/IWorkPermit.cs
+  tables:
+    - dbo.WorkPermitLetter
+    - dbo.WorkPermit
+  rowCount: 398
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/WorkPermit.cs
+  docPath: Visa2026.Module/BusinessObjects/WorkPermit.md
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/WorkPermit.yaml
+  tableMappingId: work-permit-header
+  cardinality: one_legacy_letter_per_header
+  upsertKeys:
+    - WorkPermitNumber
+  lookupDependencies: []
+  duplicateGroups: null
+  legacyOnlyCount: null
+  targetOnlyCount: null
+  mismatchCount: null
+  blockedReason: null
+  notes: |
+    STRUCTURAL SPLIT (critical):
+      Legacy VISA2014 has NO WorkPermit header — dbo.WorkPermit is a flat per-employee row (IWorkPermit).
+      Visa2026 splits into WorkPermit (letter/header) + WorkPermitItem (per employee line).
+      Import must SYNTHESIZE headers from dbo.WorkPermitLetter, then attach items (see WorkPermitItem.yaml).
+
+    VISA2015 stats (full backup, GCRecord IS NULL):
+      WorkPermit rows: 6363 (schema-snapshot listed 5317 — recount on calik attach).
+      Distinct WorkPermitLetter: 398 (~16 items/letter avg, max 129).
+      WorkPermitLetter columns: Number, Date, Company.
+      Only 2 WorkPermit rows lack WorkPermitLetter FK.
+
+  HEADER SYNTHESIS (proposed):
+      Source: DISTINCT dbo.WorkPermitLetter (join WorkPermit for company filter if needed).
+      WorkPermit.WorkPermitNumber ← WorkPermitLetter.Number
+      WorkPermit.IssuedDate ← WorkPermitLetter.Date (maps to column StartDate in EF)
+      WorkPermit.Application ← optional; resolve after Application import:
+        Mode A: from items on same letter — PersonInApplication.Application via WorkPermit.ProcessNumber
+        Mode B: leave null for standalone permits (535 legacy rows have no ProcessNumber)
+      id-map: legacy WorkPermitLetter.Oid → Visa2026 WorkPermit.ID
+
+    DEFER / FILE WAVE:
+      WorkPermitDocument / WorkPermitImage — no dbo scan table found; letter scans TBD (audit / FileData).
+      WorkPermitStateEnum on legacy row → no header equivalent; map Cancelled to WorkPermitItem.IsCancelled.
+
+    PREREQUISITES:
+      Application + ApplicationItem discovery/import recommended before linking WorkPermit.Application.
+      Pilot may import headers + items with Application = null, backfill Application FK later.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: partial
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: false
+  learnings_appended: true
+
+completedAt: null
+completedBy: null
+
+importConfirmation:
+  importConfirmed: false
+  importConfirmedAt: null
+  importConfirmedBy: null
+  reviewNotes: |

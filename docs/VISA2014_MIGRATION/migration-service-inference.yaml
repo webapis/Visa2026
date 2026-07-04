@@ -1,0 +1,84 @@
+# Address-based MigrationService inference — App_Reg_Check_In with null DepartmentForRegistration
+# Machine-readable rules for preview export and (after human approval) second-pass PATCH.
+# Catalog target: Visa2026.Module/DatabaseUpdate/LookupCatalogs/migration-service.json
+
+version: 1
+approvedForPatch: true
+
+scope:
+  legacySource: calik-energi
+  applicationType: App_Reg_Check_In
+  applicationTypeComposites:
+    - E:2:na:na:na
+    - F:2:na:na:na
+  legacyDepartmentForRegistration: null
+  notes: |
+    Only imported Check_In applications where legacy DepartmentForRegistration FK was null.
+    Does not apply to other application types or rows that already had a department code.
+
+addressSelection:
+  path: Application → PersonInApplication → Person → AddressOfResidence → Region/City
+  asOf: Application.ApplicationDate
+  algorithm: PersonCurrentItems.GetCurrentAddressOfResidence
+  notes: |
+    Prefer address still valid on ApplicationDate (no expiration or expiration on/after that date);
+    among valid rows, latest expiration then newest ID. If none valid, fall back to latest expired address (confidence downgrade).
+
+confidence:
+  high: Branch city override matched by cityMgCode (or cityNameContains when mgCode null).
+  medium: Regional office from regionMgCode only, or regional mapping with non-branch city present.
+  low: Regional mapping using expired-only address fallback, or cityNameContains without mgCode.
+  none: No person, no address, null/empty region, or unknown region.
+
+regionRules:
+  - regionMgCode: AS
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine"
+    localizationKey: tdmgas
+    confidence: medium
+  - regionMgCode: AH
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine"
+    localizationKey: tdmgah
+    confidence: medium
+  - regionMgCode: MR
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine"
+    localizationKey: tdmgmr
+    confidence: medium
+  - regionMgCode: BN
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine"
+    localizationKey: tdmgbn
+    confidence: medium
+  - regionMgCode: LB
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine"
+    localizationKey: tdmg-lb
+    confidence: medium
+  - regionMgCode: DZ
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Daşoguz welaýaty boýunça müdirligine"
+    localizationKey: tdmg-dz
+    confidence: medium
+
+cityOverrides:
+  - cityMgCodes: [MR23]
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine"
+    localizationKey: tdmg-serh
+    confidence: high
+  - cityMgCodes: [MR11]
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine"
+    localizationKey: tdmg-yl
+    confidence: high
+  - cityMgCodes: [BN15, BN5]
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine"
+    localizationKey: tdmg-tb
+    confidence: high
+  - cityMgCodes: [BN9]
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine"
+    localizationKey: tdmg-gyz
+    confidence: high
+  - cityMgCodes: [LB67, LB68]
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Atamyrat şäher bölüminiň müdirine"
+    localizationKey: tdmg-atyr
+    confidence: high
+  - cityNameContains: kerki
+    migrationServiceNameTm: "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine"
+    localizationKey: tdmgkr
+    confidence: high
+    notes: Fallback when ŞeherEtrap.mgCode null; fold/normalize city name (CatalogMatchHelper).

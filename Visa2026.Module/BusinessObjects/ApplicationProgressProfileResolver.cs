@@ -1,272 +1,713 @@
 using System;
+
 using System.Linq;
+
 using DevExpress.ExpressApp;
+
 using Visa2026.Module.Localization;
+
+
 
 namespace Visa2026.Module.BusinessObjects;
 
+
+
 /// <summary>
+
 /// Resolves effective progress route settings for an <see cref="Application"/>
-/// (type defaults, <see cref="ProjectContract"/> ministry legs, snapshots).
+
+/// (type defaults, <see cref="ApprovalLegProfile"/> legs, snapshots).
+
 /// </summary>
+
 public static class ApplicationProgressProfileResolver
+
 {
+
     /// <summary>
+
     /// Header members locked after approval leaves office preparation. Workflow fields (visa, travel,
+
     /// locations, child collections) and optional detail fields remain editable for later process steps.
+
     /// </summary>
+
     public const string LockedApplicationHeaderTargetItems =
-        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ProjectContract";
+
+        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApprovalLegProfile;ProjectContract";
+
+
 
     public static bool RequiresProjectContract(Application? application)
+
     {
+
         if (application?.ApplicationType?.ShowProjectContract != true)
+
             return false;
 
+
+
         var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+
         return route == ApplicationProgressRouteKind.ViaMinistries;
+
     }
+
+
+
+    public static bool RequiresApprovalLegProfile(Application? application)
+
+    {
+
+        if (application?.ApplicationType?.ShowApprovalLegProfile != true)
+
+            return false;
+
+
+
+        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+
+        return route == ApplicationProgressRouteKind.ViaMinistries;
+
+    }
+
+
 
     public static int GetMinistryLegCount(Application? application)
+
     {
+
         if (application == null)
+
             return 1;
 
+
+
         var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+
         if (!route.HasValue || route.Value == ApplicationProgressRouteKind.DirectToMigrationService)
+
             return 0;
 
+
+
         var snapshotCount = application.ApprovalLegSnapshots?
+
             .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+
         if (snapshotCount > 0)
+
             return snapshotCount;
 
-        if (application.ApplicationType?.ShowProjectContract == true && application.ProjectContract != null)
-            return ProjectContractMinistryHelper.GetLegCount(application.ProjectContract);
+
+
+        if (application.ApplicationType?.ShowApprovalLegProfile == true
+
+            && application.ApprovalLegProfile != null)
+
+        {
+
+            return ApprovalLegProfileMinistryHelper.GetLegCount(application.ApprovalLegProfile);
+
+        }
+
+
 
         return MapLegacyDepthToLegCount(
+
             application.ApplicationType?.MinistryReviewDepth ?? MinistryReviewDepth.FirstMinistryOnly);
+
     }
+
+
 
     public static MinistryReviewDepth GetMinistryReviewDepth(Application? application)
+
     {
+
         var legCount = GetMinistryLegCount(application);
+
         return MapLegCountToLegacyDepth(legCount);
+
     }
+
+
 
     public static MinistryReviewDepth GetMinistryReviewDepth(ApplicationType? applicationType) =>
+
         applicationType == null
+
             ? MinistryReviewDepth.FirstMinistryOnly
+
             : ApplicationProgressRouteHelper.NormalizeMinistryReviewDepth(
+
                 applicationType.ApplicationProgressRoute,
+
                 applicationType.MinistryReviewDepth);
 
+
+
     public static bool HasAnyProgressHistory(Application? application, IObjectSpace? objectSpace = null) =>
+
         ApplicationProgressHelper.GetLatest(application?.ProgressHistory, objectSpace) != null;
 
+
+
     public static bool HasProgressBeyondOfficePreparation(Application? application, IObjectSpace? objectSpace = null)
+
     {
+
         if (application?.ProgressHistory == null)
+
             return false;
+
+
 
         return application.ProgressHistory.Any(p =>
+
             (objectSpace == null || !objectSpace.IsObjectToDelete(p))
+
             && !IsOfficePreparationStep(p));
+
     }
 
-    /// <summary>
-    /// True when header fields and child collections on <see cref="Application"/> must not be edited
-    /// (ministry or migration progress recorded after office preparation).
-    /// </summary>
+
+
     public static bool IsApplicationLockedAfterOfficePreparation(
+
         Application? application,
+
         IObjectSpace? objectSpace = null) =>
+
         HasProgressBeyondOfficePreparation(application, objectSpace);
 
-    /// <summary>
-    /// True when <see cref="Application.ProjectContract"/> must not be edited
-    /// (ministry or migration progress recorded after office preparation).
-    /// </summary>
+
+
     public static bool IsProjectContractLocked(Application? application, IObjectSpace? objectSpace = null)
+
     {
+
         if (application?.ApplicationType?.ShowProjectContract != true)
+
             return false;
+
+
 
         return IsApplicationLockedAfterOfficePreparation(application, objectSpace);
+
     }
 
-    /// <summary>Blocks locked header edits once approval has left office preparation.</summary>
-    public static bool TryValidateApplicationUnchangedAfterProgress(
-        Application? application,
-        IObjectSpace objectSpace,
-        out string? errorMessage)
+
+
+    public static bool IsApprovalLegProfileLocked(Application? application, IObjectSpace? objectSpace = null)
+
     {
+
+        if (application?.ApplicationType?.ShowApprovalLegProfile != true)
+
+            return false;
+
+
+
+        return IsApplicationLockedAfterOfficePreparation(application, objectSpace);
+
+    }
+
+
+
+    public static bool TryValidateApplicationUnchangedAfterProgress(
+
+        Application? application,
+
+        IObjectSpace objectSpace,
+
+        out string? errorMessage)
+
+    {
+
         errorMessage = null;
+
         if (application == null || objectSpace.IsNewObject(application))
+
             return true;
 
+
+
         if (!HasProgressBeyondOfficePreparation(application, objectSpace))
+
             return true;
+
+
 
         var original = objectSpace.GetObjectByKey<Application>(application.ID);
+
         if (original == null)
+
             return true;
+
+
 
         if (ApplicationLockedHeaderScalarsDiffer(original, application))
+
         {
+
             errorMessage = VisaUiMessages.Get("Application.FieldsLockedAfterProgress");
+
             return false;
+
         }
+
+
 
         return true;
+
     }
 
-    /// <inheritdoc cref="TryValidateApplicationUnchangedAfterProgress"/>
+
+
     public static bool TryValidateProjectContractUnchangedAfterProgress(
+
         Application? application,
+
         IObjectSpace objectSpace,
+
         out string? errorMessage) =>
+
         TryValidateApplicationUnchangedAfterProgress(application, objectSpace, out errorMessage);
 
+
+
     public static bool TryValidateProjectContractOnApplication(
+
         Application? application,
+
         IObjectSpace? objectSpace,
+
         out string? errorMessage)
+
     {
+
         errorMessage = null;
-        if (application == null || !RequiresProjectContract(application))
+
+        if (application == null)
+
             return true;
 
-        if (application.ProjectContract != null)
-        {
-            if (ProjectContractMinistryHelper.HasConfiguredLegs(application.ProjectContract))
-                return true;
 
-            if (!HasProgressBeyondOfficePreparation(application, objectSpace))
-                return true;
 
-            errorMessage = VisaUiMessages.Get("Application.ProjectContractLegsRequired");
+        if (!TryValidateApprovalLegProfileOnApplication(application, objectSpace, out errorMessage))
+
             return false;
-        }
+
+
+
+        if (!RequiresProjectContract(application))
+
+            return true;
+
+
+
+        if (application.ProjectContract != null)
+
+            return true;
+
+
 
         if (!HasProgressBeyondOfficePreparation(application, objectSpace))
+
             return true;
 
+
+
         errorMessage = VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired");
+
         return false;
+
     }
 
-    public static bool TryValidateProjectContractForProgress(
-        ApplicationProgress progress,
+
+
+    public static bool TryValidateApprovalLegProfileOnApplication(
+
+        Application? application,
+
         IObjectSpace? objectSpace,
+
         out string? errorMessage)
+
     {
+
         errorMessage = null;
-        var application = progress.Application;
-        if (application == null || !RequiresProjectContract(application))
+
+        if (application == null || !RequiresApprovalLegProfile(application))
+
             return true;
 
-        if (application.ProjectContract != null
-            && TryValidateProjectContractOnApplication(application, objectSpace, out errorMessage))
-            return errorMessage == null;
 
-        if (application.ProjectContract != null)
-            return false;
 
-        if (IsPermittedWithoutProjectContract(progress, objectSpace))
-            return true;
+        if (application.ApprovalLegProfile != null)
 
-        errorMessage = VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired");
-        return false;
-    }
-
-    public static bool WouldMinistryDepthChange(
-        Application application,
-        ProjectContract? previousContract,
-        ProjectContract? newContract)
-    {
-        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
-        if (route != ApplicationProgressRouteKind.ViaMinistries)
-            return false;
-
-        if (application.ApplicationType?.ShowProjectContract != true)
-            return false;
-
-        return ResolveLegCountForContract(application, previousContract)
-            != ResolveLegCountForContract(application, newContract);
-    }
-
-    public static string FormatMinistryReviewDepthLabel(MinistryReviewDepth depth) =>
-        depth == MinistryReviewDepth.FirstAndSecondMinistry
-            ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two")
-            : depth == MinistryReviewDepth.FirstMinistryOnly
-                ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One")
-                : VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None");
-
-    public static string FormatMinistryLegCountLabel(int legCount) =>
-        legCount switch
         {
-            0 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None"),
-            1 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One"),
-            2 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two"),
-            _ => VisaUiMessages.Format("ApplicationProgressProfile.MinistryDepth.Many", legCount)
-        };
 
-    private static int ResolveLegCountForContract(Application application, ProjectContract? contract)
-    {
-        if (contract == null)
-            return GetMinistryLegCount(application);
+            if (ApprovalLegProfileMinistryHelper.HasConfiguredLegs(application.ApprovalLegProfile))
 
-        if (ReferenceEquals(application.ProjectContract, contract))
-        {
-            var snapshotCount = application.ApprovalLegSnapshots?
-                .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
-            if (snapshotCount > 0)
-                return snapshotCount;
+                return true;
+
+
+
+            if (!HasProgressBeyondOfficePreparation(application, objectSpace))
+
+                return true;
+
+
+
+            errorMessage = VisaUiMessages.Get("Application.ApprovalLegProfileLegsRequired");
+
+            return false;
+
         }
 
-        return ProjectContractMinistryHelper.GetLegCount(contract);
-    }
 
-    private static int MapLegacyDepthToLegCount(MinistryReviewDepth depth) =>
-        depth == MinistryReviewDepth.FirstAndSecondMinistry ? 2 : 1;
 
-    private static MinistryReviewDepth MapLegCountToLegacyDepth(int legCount) =>
-        legCount switch
-        {
-            <= 0 => MinistryReviewDepth.None,
-            1 => MinistryReviewDepth.FirstMinistryOnly,
-            _ => MinistryReviewDepth.FirstAndSecondMinistry
-        };
+        if (!HasProgressBeyondOfficePreparation(application, objectSpace))
 
-    private static bool IsPermittedWithoutProjectContract(ApplicationProgress progress, IObjectSpace? objectSpace)
-    {
-        if (!IsOfficePreparationStep(progress))
-            return false;
-
-        var application = progress.Application;
-        if (application?.ProgressHistory == null)
             return true;
 
-        var otherRows = application.ProgressHistory
-            .Where(p => p != progress && (objectSpace == null || !objectSpace.IsObjectToDelete(p)))
-            .ToList();
 
-        return otherRows.Count == 0;
+
+        errorMessage = VisaUiMessages.Get("ApplicationProgress.ApprovalLegProfileRequired");
+
+        return false;
+
     }
 
+
+
+    public static bool TryValidateProjectContractForProgress(
+
+        ApplicationProgress progress,
+
+        IObjectSpace? objectSpace,
+
+        out string? errorMessage)
+
+    {
+
+        errorMessage = null;
+
+        var application = progress.Application;
+
+        if (application == null)
+
+            return true;
+
+
+
+        if (!TryValidateApprovalLegProfileForProgress(progress, objectSpace, out errorMessage))
+
+            return false;
+
+
+
+        if (!RequiresProjectContract(application))
+
+            return true;
+
+
+
+        if (application.ProjectContract != null)
+
+            return true;
+
+
+
+        if (IsPermittedWithoutProjectContract(progress, objectSpace))
+
+            return true;
+
+
+
+        errorMessage = VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired");
+
+        return false;
+
+    }
+
+
+
+    public static bool TryValidateApprovalLegProfileForProgress(
+
+        ApplicationProgress progress,
+
+        IObjectSpace? objectSpace,
+
+        out string? errorMessage)
+
+    {
+
+        errorMessage = null;
+
+        var application = progress.Application;
+
+        if (application == null || !RequiresApprovalLegProfile(application))
+
+            return true;
+
+
+
+        if (application.ApprovalLegProfile != null
+
+            && TryValidateApprovalLegProfileOnApplication(application, objectSpace, out errorMessage))
+
+            return errorMessage == null;
+
+
+
+        if (application.ApprovalLegProfile != null)
+
+            return false;
+
+
+
+        if (IsPermittedWithoutApprovalLegProfile(progress, objectSpace))
+
+            return true;
+
+
+
+        errorMessage = VisaUiMessages.Get("ApplicationProgress.ApprovalLegProfileRequired");
+
+        return false;
+
+    }
+
+
+
+    public static bool WouldMinistryDepthChange(
+
+        Application application,
+
+        ProjectContract? previousContract,
+
+        ProjectContract? newContract) =>
+
+        false;
+
+
+
+    public static bool WouldMinistryDepthChange(
+
+        Application application,
+
+        ApprovalLegProfile? previousProfile,
+
+        ApprovalLegProfile? newProfile)
+
+    {
+
+        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+
+        if (route != ApplicationProgressRouteKind.ViaMinistries)
+
+            return false;
+
+
+
+        if (application.ApplicationType?.ShowApprovalLegProfile != true)
+
+            return false;
+
+
+
+        return ResolveLegCountForProfile(application, previousProfile)
+
+            != ResolveLegCountForProfile(application, newProfile);
+
+    }
+
+
+
+    public static string FormatMinistryReviewDepthLabel(MinistryReviewDepth depth) =>
+
+        depth == MinistryReviewDepth.FirstAndSecondMinistry
+
+            ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two")
+
+            : depth == MinistryReviewDepth.FirstMinistryOnly
+
+                ? VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One")
+
+                : VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None");
+
+
+
+    public static string FormatMinistryLegCountLabel(int legCount) =>
+
+        legCount switch
+
+        {
+
+            0 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.None"),
+
+            1 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.One"),
+
+            2 => VisaUiMessages.Get("ApplicationProgressProfile.MinistryDepth.Two"),
+
+            _ => VisaUiMessages.Format("ApplicationProgressProfile.MinistryDepth.Many", legCount)
+
+        };
+
+
+
+    private static int ResolveLegCountForProfile(Application application, ApprovalLegProfile? profile)
+
+    {
+
+        if (profile == null)
+
+            return GetMinistryLegCount(application);
+
+
+
+        if (ReferenceEquals(application.ApprovalLegProfile, profile))
+
+        {
+
+            var snapshotCount = application.ApprovalLegSnapshots?
+
+                .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+
+            if (snapshotCount > 0)
+
+                return snapshotCount;
+
+        }
+
+
+
+        return ApprovalLegProfileMinistryHelper.GetLegCount(profile);
+
+    }
+
+
+
+    private static int MapLegacyDepthToLegCount(MinistryReviewDepth depth) =>
+
+        depth == MinistryReviewDepth.FirstAndSecondMinistry ? 2 : 1;
+
+
+
+    private static MinistryReviewDepth MapLegCountToLegacyDepth(int legCount) =>
+
+        legCount switch
+
+        {
+
+            <= 0 => MinistryReviewDepth.None,
+
+            1 => MinistryReviewDepth.FirstMinistryOnly,
+
+            _ => MinistryReviewDepth.FirstAndSecondMinistry
+
+        };
+
+
+
+    private static bool IsPermittedWithoutProjectContract(ApplicationProgress progress, IObjectSpace? objectSpace)
+
+    {
+
+        if (!IsOfficePreparationStep(progress))
+
+            return false;
+
+
+
+        var application = progress.Application;
+
+        if (application?.ProgressHistory == null)
+
+            return true;
+
+
+
+        var otherRows = application.ProgressHistory
+
+            .Where(p => p != progress && (objectSpace == null || !objectSpace.IsObjectToDelete(p)))
+
+            .ToList();
+
+
+
+        return otherRows.Count == 0;
+
+    }
+
+
+
+    private static bool IsPermittedWithoutApprovalLegProfile(ApplicationProgress progress, IObjectSpace? objectSpace)
+
+    {
+
+        if (!IsOfficePreparationStep(progress))
+
+            return false;
+
+
+
+        var application = progress.Application;
+
+        if (application?.ProgressHistory == null)
+
+            return true;
+
+
+
+        var otherRows = application.ProgressHistory
+
+            .Where(p => p != progress && (objectSpace == null || !objectSpace.IsObjectToDelete(p)))
+
+            .ToList();
+
+
+
+        return otherRows.Count == 0;
+
+    }
+
+
+
     private static bool IsOfficePreparationStep(ApplicationProgress progress) =>
+
         progress.State != null
+
         && progress.Location != null
+
         && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)
+
         && string.Equals(progress.Location.Code, ApplicationProgressLocationCodes.AtOffice, StringComparison.OrdinalIgnoreCase);
 
+
+
     private static bool ApplicationLockedHeaderScalarsDiffer(Application original, Application current) =>
+
         original.IsManualEntry != current.IsManualEntry
+
         || !string.Equals(original.ApplicationNumber, current.ApplicationNumber, StringComparison.Ordinal)
+
         || !string.Equals(original.AppNumberPrefix, current.AppNumberPrefix, StringComparison.Ordinal)
+
         || !string.Equals(original.FullApplicationNumber, current.FullApplicationNumber, StringComparison.Ordinal)
+
         || original.ApplicationDate != current.ApplicationDate
+
         || original.ApplicationType?.ID != current.ApplicationType?.ID
+
+        || original.ApprovalLegProfile?.ID != current.ApprovalLegProfile?.ID
+
         || original.ProjectContract?.ID != current.ProjectContract?.ID;
+
 }
+
+

@@ -271,8 +271,9 @@
         <Member Name="CurrentMedicalRecord" Caption="Häzirki saglyk ýazgysy" />
         <Member Name="CurrentPassport" Caption="Pasport" />
         <Member Name="CurrentPositionHistory" Caption="Wezipesi" />
+        <Member Name="CurrentSalary" Caption="Aýlyk" />
         <Member Name="CurrentVisa" Caption="Wiza" />
-        <Member Name="CurrentWorkDuty" Caption="Gelmeginiň maksady" />
+        <Member Name="CurrentWorkDuty" Caption="Iş jogapkärçiligi" />
         <Member Name="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -554,6 +555,57 @@
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="Roles" Caption="Rollar" />
         <Member Name="UserName" Caption="Ulanyjy ady" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfile" Caption="Tassyklama ministrlik profili">
+      <OwnMembers>
+        <Member Name="Application" Caption="Arza" />
+        <Member Name="Code" Caption="Kod" />
+        <Member Name="Company" Caption="Kompaniýa" />
+        <Member Name="CurrentState" Caption="Ýagdaýy" />
+        <Member Name="Date" Caption="Sene" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DaysRemaining" Caption="Galan gün" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Department" Caption="Bölüm" />
+        <Member Name="Description" Caption="Düşündiriş" />
+        <Member Name="EndDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
+        <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
+        <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
+        <Member Name="File" Caption="Faýl" />
+        <Member Name="FullAddress" Caption="Doly salgy" />
+        <Member Name="HasInvitation" Caption="Çakylyk bar" />
+        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
+        <Member Name="InvitationItem" Caption="Çakylyk elementi" />
+        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsCancelled" Caption="Ýatyryldy" />
+        <Member Name="IsChanged" Caption="Üýtgedildi" />
+        <Member Name="IsDefault" Caption="Bellenen" />
+        <Member Name="IsExtended" Caption="Uzaldy" />
+        <Member Name="IssueDate" Caption="Berlen senesi" />
+        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
+        <Member Name="Location" Caption="Ýer" />
+        <Member Name="MinistriesLabel" Caption="Ministrlikler" />
+        <Member Name="MinistryLegs" Caption="Ministrlik ädimleri" />
+        <Member Name="Name" Caption="Ady" />
+        <Member Name="NameTm" Caption="Ady (Tm)" />
+        <Member Name="Notes" Caption="Bellikler" />
+        <Member Name="Passport" Caption="Pasport" />
+        <Member Name="Person" Caption="Adam" />
+        <Member Name="Position" Caption="Wezipesi" />
+        <Member Name="RegistrationState" Caption="Hasaba alnyş ýagdaýy" />
+        <Member Name="StartDate" Caption="Başlanýan senesi" />
+        <Member Name="State" Caption="Ýagdaý" />
+        <Member Name="ValidityDuration" Caption="Möhleti" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfileMinistryLeg" Caption="Ministrlik ädimi">
+      <OwnMembers>
+        <Member Name="ApprovingMinistry" Caption="Ministrlik" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Sequence" Caption="Tertip" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApprovingMinistry" Caption="Tassyklýan ministrlik">
@@ -2429,6 +2481,10 @@
         <ColumnInfo Id="Name" Caption="Ady" />
       </Columns>
     </ListView>
+    <DetailView Id="ApprovalLegProfile_DetailView" Caption="Tassyklama ministrlik profili" />
+    <ListView Id="ApprovalLegProfile_ListView" Caption="Tassyklama ministrlik profilleri" />
+    <DetailView Id="ApprovalLegProfileMinistryLeg_DetailView" Caption="Ministrlik ädimi" />
+    <ListView Id="ApprovalLegProfileMinistryLeg_ListView" Caption="Ministrlik ädimleri" />
     <DetailView Id="ApprovingMinistry_DetailView" Caption="Tassyklýan ministrlik" />
     <ListView Id="ApprovingMinistry_ListView" Caption="Tassyklýan ministrlikler" />
     <DetailView Id="AuthenticationStandardLogonParameters_Blazor_DetailView" Caption="Girmek">

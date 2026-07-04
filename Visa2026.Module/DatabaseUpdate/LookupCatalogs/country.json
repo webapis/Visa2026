@@ -439,6 +439,12 @@
                      "LocalizationKey":  "ARM"
                  },
                  {
+                     "NameTm":  "Albaniya",
+                     "Code":  "ALB",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ALB"
+                 },
+                 {
                      "NameTm":  "Müsür",
                      "Code":  "EGY",
                      "IsDefault":  false,
@@ -593,6 +599,12 @@
                      "Code":  "UAE",
                      "IsDefault":  false,
                      "LocalizationKey":  "UAE"
+                 },
+                 {
+                     "NameTm":  "Birleşen Arap Emirlikleri",
+                     "Code":  "ARE",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "ARE"
                  },
                  {
                      "NameTm":  "Butan",
@@ -905,6 +917,12 @@
                      "Code":  "POL",
                      "IsDefault":  false,
                      "LocalizationKey":  "POL"
+                 },
+                 {
+                     "NameTm":  "Portugaliýa",
+                     "Code":  "PRT",
+                     "IsDefault":  false,
+                     "LocalizationKey":  "PRT"
                  },
                  {
                      "NameTm":  "Jibuti",

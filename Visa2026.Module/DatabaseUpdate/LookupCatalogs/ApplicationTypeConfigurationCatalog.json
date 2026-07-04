@@ -1495,7 +1495,7 @@
             "Category": "FamilyMember",
             "DurationInDays": 10,
             "Flags": {
-                "ShowProjectContract": false,
+                "ShowProjectContract": true,
                 "ShowVisaPeriod": false,
                 "ShowVisaCategory": false,
                 "ShowUrgency": true,
@@ -1546,7 +1546,7 @@
             "Category": "FamilyMember",
             "DurationInDays": 10,
             "Flags": {
-                "ShowProjectContract": false,
+                "ShowProjectContract": true,
                 "ShowVisaPeriod": false,
                 "ShowVisaCategory": false,
                 "ShowUrgency": true,

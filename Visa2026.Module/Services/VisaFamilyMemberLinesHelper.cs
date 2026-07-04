@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
@@ -30,10 +31,46 @@ public static class VisaFamilyMemberLinesHelper
             return;
         }
 
+        if (IsSingleMaritalStatus(person.MaritalStatus))
+        {
+            person.VisaApplicationFamilyMembersText = NoneValue;
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(person.VisaApplicationFamilyMembersText))
         {
             person.VisaApplicationFamilyMembersText = NoneValue;
         }
+    }
+
+    /// <summary>Legacy VISA2015 <c>MaritalStatus.Status</c> int as string; <c>1</c> = single.</summary>
+    public static bool IsLegacySingleMaritalStatus(string? legacyStatusInt) =>
+        string.Equals(legacyStatusInt?.Trim(), "1", StringComparison.Ordinal);
+
+    public static bool IsSingleMaritalStatus(MaritalStatus? maritalStatus)
+    {
+        if (maritalStatus == null)
+        {
+            return false;
+        }
+
+        return string.Equals(maritalStatus.Code, "Sallah", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(maritalStatus.LocalizationKey, "Single", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(maritalStatus.NameTm, "Sallah", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Removes legacy punctuation noise (e.g. trailing "(" before dates) from imported names.</summary>
+    public static string SanitizeFamilyMemberFullName(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return string.Empty;
+        }
+
+        var s = raw.Trim();
+        s = Regex.Replace(s, @"[\(\)\[\]\{\}]", string.Empty);
+        s = s.Trim().Trim(',', '-', '–', ':', ';', '.');
+        return Regex.Replace(s, @"\s{2,}", " ").Trim();
     }
 
     public static IReadOnlyList<VisaFamilyMemberLineDto> Parse(string? text)
@@ -46,6 +83,11 @@ public static class VisaFamilyMemberLinesHelper
         if (string.IsNullOrWhiteSpace(text))
         {
             return Array.Empty<VisaFamilyMemberLineDto>();
+        }
+
+        if (LegacyMaritalStatusLParser.LooksLikeLegacyStatusL(text))
+        {
+            return LegacyMaritalStatusLParser.Parse(text);
         }
 
         var lines = text.Split(NewLineSeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -419,7 +461,7 @@ public static class VisaFamilyMemberLinesHelper
             return dto;
         }
 
-        dto.FullName = parts[0].Trim();
+        dto.FullName = VisaFamilyMemberLinesHelper.SanitizeFamilyMemberFullName(parts[0]);
 
         if (parts.Length == 1)
         {

@@ -135,6 +135,8 @@ namespace Visa2026.Blazor.Server
                     {
                         ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
                         ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProgressOrderSchemaSql.ApplyIfMissing(connectionString);
+                        ProjectContractApprovalLegProfileSchemaSql.ApplyIfMissing(connectionString);
                     }
                 });
                 builder.ObjectSpaceProviders
@@ -299,6 +301,7 @@ namespace Visa2026.Blazor.Server
             app.UseRouting();
             app.UseSentryTracing();
             app.UseMiddleware<CorrelationIdMiddleware>();
+            app.UseMiddleware<MigrationImportContextMiddleware>();
 
             // ── Web API middleware (Swagger UI + /api/challenge fix) ───────
             app.UseVisaWebApi(env);

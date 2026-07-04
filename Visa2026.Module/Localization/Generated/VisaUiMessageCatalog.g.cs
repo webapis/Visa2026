@@ -47,6 +47,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["Application.ApprovalLegProfileChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Progress history already exists. Changing the approval leg profile may change which ministry steps apply to new progress rows. Review existing steps.",
+            ["tr-TR"] = "İlerleme geçmişi mevcut. Onay bakanlık profilini değiştirmek yeni adımlar için bakanlık sürecini etkileyebilir. Mevcut adımları kontrol edin.",
+            ["tk-TM"] = "Ösüş taryhy bar. Tassyklama ministrlik profilini üýtgetmek täze ädimler üçin ministrlik tapgyrlaryny üýtgedip biler. Bar bolan ädimleri barlaň.",
+            ["ru-RU"] = "История прогресса уже есть. Смена профиля этапов может изменить министерские шаги для новых записей. Проверьте существующие шаги.",
+        },
+        ["Application.ApprovalLegProfileLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The selected approval leg profile has no ministry legs configured.",
+            ["tr-TR"] = "Seçilen onay bakanlık profilinde bakanlık adımı tanımlı değil.",
+            ["tk-TM"] = "Saýlanan tassyklama ministrlik profilinde ministrlik ädimi ýok.",
+            ["ru-RU"] = "У выбранного профиля этапов министерств не настроены шаги.",
+        },
+        ["Application.ApprovalLegProfileMinistryDepthChanged"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ministry approval depth changes from {0} to {1} for this application.",
+            ["tr-TR"] = "Bu başvuru için bakanlık onay derinliği {0} → {1} olur.",
+            ["tk-TM"] = "Bu arza üçin ministrlik tassyklama çuňlugy {0} → {1} bolýar.",
+            ["ru-RU"] = "Глубина министерского согласования для заявки меняется: {0} → {1}.",
+        },
         ["Application.FieldsLockedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application fields cannot be changed after ministry or migration progress was recorded.",
@@ -782,6 +803,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "PDF şablon ýoly sazlanmady. appsettings.json-daky 'PdfSettings:TemplatePath' barlaň.",
             ["ru-RU"] = "Путь к шаблону PDF не настроен. Проверьте PdfSettings:TemplatePath в appsettings.json.",
         },
+        ["ApplicationProgress.ApprovalLegProfileRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select an approval leg profile before advancing beyond office preparation.",
+            ["tr-TR"] = "Ofis hazırlığından sonraki adıma geçmeden önce onay bakanlık profilini seçin.",
+            ["tk-TM"] = "Ofis taýýarlygyndan soňky ädime geçmezden ozal tassyklama ministrlik profilini saýlaň.",
+            ["ru-RU"] = "Выберите профиль этапов министерств перед переходом после подготовки в офисе.",
+        },
         ["ApplicationProgress.CannotAdvanceFromTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Cannot add progress after a terminal state (issued, rejected, or cancelled).",
@@ -886,6 +914,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bakanlık yazısı kopyaları",
             ["tk-TM"] = "Ministrlik hatlarynyň nusgalary",
             ["ru-RU"] = "Копии писем министерства",
+        },
+        ["ApplicationProgress.OnlyLastStepDeletable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Only the last progress step can be deleted. Remove later steps first.",
+            ["tr-TR"] = "Yalnızca son ilerleme adımı silinebilir. Önce sonraki adımları silin.",
+            ["tk-TM"] = "Diňe soňky ösüş ädimini pozup bolýar. Ilki soňky ädimleri aýyryň.",
+            ["ru-RU"] = "Удалить можно только последний шаг прогресса. Сначала удалите более поздние шаги.",
         },
         ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1607,6 +1642,48 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} kodu ({1}) {3} sürecine aittir. Bu başvuruyu Başvurular ({2}) menüsünden açın veya başka kod seçin.",
             ["tk-TM"] = "{0} kody ({1}) {3} iş prosesine degişlidir. Arzany ({2}) menýusyndan açyň ýa-da başga kod saýlaň.",
             ["ru-RU"] = "Код {0} ({1}) относится к маршруту «{3}». Откройте заявку из списка «{2}» или выберите другой код.",
+        },
+        ["ApprovalLegProfile.MinistryLegMaxDaysRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Leg {0}: enter the maximum working days in review before this profile can be active.",
+            ["tr-TR"] = "Adım {0}: profil aktif olmadan önce incelemedeki azami iş günlerini girin.",
+            ["tk-TM"] = "Ädim {0}: profil işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini girižiň.",
+            ["ru-RU"] = "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать профиль.",
+        },
+        ["ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Every ministry leg needs maximum working days in review before this profile can be active.",
+            ["tr-TR"] = "Profil aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
+            ["tk-TM"] = "Profil işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
+            ["ru-RU"] = "Перед активацией профиля для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении.",
+        },
+        ["ApprovalLegProfile.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Add at least one ministry leg to this approval leg profile.",
+            ["tr-TR"] = "Bu onay bakanlık profiline en az bir bakanlık adımı ekleyin.",
+            ["tk-TM"] = "Bu tassyklama ministrlik profiline azyndan bir ministrlik ädimi goşuň.",
+            ["ru-RU"] = "Добавьте хотя бы один этап министерства в этот профиль.",
+        },
+        ["ApprovalLegProfile.MinistryLegsStructuralEditBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This approval leg profile is already used by applications. Duplicate it to change ministry legs.",
+            ["tr-TR"] = "Bu onay bakanlık profili başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
+            ["tk-TM"] = "Bu tassyklama ministrlik profili arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
+            ["ru-RU"] = "Этот профиль этапов уже используется заявками. Скопируйте его, чтобы изменить этапы министерств.",
+        },
+        ["ApprovalLegProfile.MinistryLegWarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Leg {0}: warning days must be less than the maximum review days.",
+            ["tr-TR"] = "Adım {0}: uyarı günleri azami inceleme günlerinden küçük olmalıdır.",
+            ["tk-TM"] = "Ädim {0}: duýduryş günleri iň ýokary barlag günlerinden az bolmaly.",
+            ["ru-RU"] = "Этап {0}: порог предупреждения должен быть меньше максимального числа дней на рассмотрении.",
+        },
+        ["ApprovalLegProfile.SaveBeforeMinistryLeg"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Save the approval leg profile before saving this ministry leg.",
+            ["tr-TR"] = "Bu bakanlık adımını kaydetmeden önce onay bakanlık profilini kaydedin.",
+            ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal tassyklama ministrlik profilini ýazdyryň.",
+            ["ru-RU"] = "Сохраните профиль этапов перед сохранением этого этапа министерства.",
         },
         ["BorderZoneDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2434,12 +2511,40 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Täzele",
             ["ru-RU"] = "Обновить",
         },
+        ["PersonDocumentCopies.Action.ShowAll"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show all documents",
+            ["tr-TR"] = "Tüm belgeleri göster",
+            ["tk-TM"] = "Hemme resminamalary görkez",
+            ["ru-RU"] = "Показать все документы",
+        },
+        ["PersonDocumentCopies.Action.ShowCurrentOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show current only",
+            ["tr-TR"] = "Yalnızca güncel olanları göster",
+            ["tk-TM"] = "Diňe häzirki görkez",
+            ["ru-RU"] = "Только текущие",
+        },
         ["PersonDocumentCopies.Action.ShowDetails"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Show file details",
             ["tr-TR"] = "Dosya ayrıntılarını göster",
             ["tk-TM"] = "Faýl jikme-jikliklerini görkez",
             ["ru-RU"] = "Показать сведения о файлах",
+        },
+        ["PersonDocumentCopies.Action.ShowLess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show less",
+            ["tr-TR"] = "Daha az göster",
+            ["tk-TM"] = "Az görkez",
+            ["ru-RU"] = "Свернуть",
+        },
+        ["PersonDocumentCopies.Action.ShowMore"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show {0} more in {1}",
+            ["tr-TR"] = "{1} bölümünde {0} tane daha göster",
+            ["tk-TM"] = "{1} bölüminde ýene {0} görkez",
+            ["ru-RU"] = "Показать ещё {0} в разделе «{1}»",
         },
         ["PersonDocumentCopies.Badge.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2461,6 +2566,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu kişi için belge kaydı bulunamadı.",
             ["tk-TM"] = "Bu adam üçin resminama ýazgysy tapylmady.",
             ["ru-RU"] = "Записи документов для этого лица не найдены.",
+        },
+        ["PersonDocumentCopies.Hint.NoCurrentShowingRecent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No current record in this section; showing the most recent.",
+            ["tr-TR"] = "Bu bölümde güncel kayıt yok; en son kayıt gösteriliyor.",
+            ["tk-TM"] = "Bu bölümdä häzirki ýazgy ýok; iň soňky ýazgy görkezilýär.",
+            ["ru-RU"] = "В этом разделе нет текущей записи; показана последняя.",
         },
         ["PersonDocumentCopies.Hint.NoFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

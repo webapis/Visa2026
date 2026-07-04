@@ -160,13 +160,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual ApplicationProgressRouteKind ApplicationProgressRoute { get; set; }
 
         /// <summary>
-        /// Default ministry legs when route is via ministries and <see cref="ShowProjectContract"/> is false.
-        /// Hidden when contract-based approval profiles apply (<see cref="ShowProjectContract"/>).
+        /// Default ministry legs when route is via ministries and neither contract nor approval-leg profile applies.
+        /// Hidden when contract-based or profile-based approval applies.
         /// </summary>
         [DevExpress.ExpressApp.ConditionalAppearance.Appearance(
             "HideMinistryReviewDepthWhenProjectContract",
             Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
-            Criteria = "ShowProjectContract = true",
+            Criteria = "ShowProjectContract = true OR ShowApprovalLegProfile = true",
             Context = "DetailView")]
         public virtual MinistryReviewDepth MinistryReviewDepth { get; set; }
 
@@ -183,6 +183,7 @@ namespace Visa2026.Module.BusinessObjects
 
         // --- These flags control the visibility of fields in the main Application Detail View ---
         public virtual bool ShowProjectContract { get; set; }
+        public virtual bool ShowApprovalLegProfile { get; set; }
         public virtual bool ShowVisaPeriod { get; set; }
         public virtual bool ShowVisaCategory { get; set; }
         public virtual bool ShowVisaType { get; set; }

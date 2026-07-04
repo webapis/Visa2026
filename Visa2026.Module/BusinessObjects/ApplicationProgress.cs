@@ -51,6 +51,12 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public IList<ApplicationLocation> AvailableLocationsForSelectedState => LoadAvailableLocationsForSelectedState();
 
+        /// <summary>1-based step sequence within the parent application's progress history.</summary>
+        [Column("ProgressOrder")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(true)]
+        public virtual int Order { get; set; }
+
         [RuleRequiredField]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
@@ -63,7 +69,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [NotMapped]
         public string MinistryStepLabel =>
-            ProjectContractMinistryHelper.GetMinistryShortNameForProgressStep(
+            ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep(
                 Application,
                 State?.Code,
                 Location?.Code) ?? string.Empty;
@@ -139,6 +145,25 @@ namespace Visa2026.Module.BusinessObjects
             base.OnCreated();
             Date = DateTime.Now;
             ApplicationProgressTransitionHelper.TryApplySuggestedNextStep(this);
+            TryAssignOrder();
+        }
+
+        public override void OnSaving()
+        {
+            TryAssignOrder();
+            base.OnSaving();
+        }
+
+        private void TryAssignOrder()
+        {
+            if (Order > 0 || Application == null)
+                return;
+
+            var objectSpace = ObjectSpaceHelper.Get(this) ?? ObjectSpaceHelper.Get(Application);
+            if (objectSpace == null)
+                return;
+
+            Order = ApplicationProgressOrderHelper.ResolveNextOrder(this, objectSpace);
         }
 
         private IList<ApplicationState> LoadAvailableStatesForNextStep()

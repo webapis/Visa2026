@@ -120,6 +120,49 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// When <see cref="PersonalNumber"/> is the sentinel <c>0</c>, identity is FirstName + LastName + DateOfBirth.
+        /// </summary>
+        [RuleFromBoolProperty(
+            "Person_IdentityUniqueWhenPersonalNumberIsSentinel",
+            DefaultContexts.Save,
+            "Another active person with personal number 0 already has this first name, last name, and date of birth.")]
+        [Browsable(false)]
+        public bool IsIdentityUniqueWhenPersonalNumberIsSentinel
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(PersonalNumber) ||
+                    PersonalNumber.Trim().ToUpperInvariant() != "0" ||
+                    string.IsNullOrWhiteSpace(FirstName) ||
+                    string.IsNullOrWhiteSpace(LastName))
+                {
+                    return true;
+                }
+
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                {
+                    return true;
+                }
+
+                var firstName = FirstName.Trim().ToUpperInvariant();
+                var lastName = LastName.Trim().ToUpperInvariant();
+                var birthDate = DateOfBirth.Date;
+                var currentId = ID;
+
+                return !objectSpace.GetObjectsQuery<Person>()
+                    .Where(p => p.ID != currentId &&
+                                p.PersonalNumber != null &&
+                                p.FirstName != null &&
+                                p.LastName != null &&
+                                p.PersonalNumber.Trim().ToUpper() == "0")
+                    .Any(p => p.FirstName.Trim().ToUpper() == firstName &&
+                              p.LastName.Trim().ToUpper() == lastName &&
+                              p.DateOfBirth.Date == birthDate);
+            }
+        }
+
         public string FullName => string.Join(" ", new[] { FirstName, MiddleName, LastName }.Where(s => !string.IsNullOrEmpty(s)));
 
         private DateTime dateOfBirth;
@@ -171,6 +214,7 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>Latest rejection line for this person (replaces removed <c>CurrentRejectionItemID</c> FK).</summary>
         [NotMapped]
+        [VisibleInListView(false)]
         [ModelDefault("AllowEdit", "False")]
         public RejectionItem CurrentRejectionItem => PersonCurrentItems.GetCurrentRejectionItem(this);
 
@@ -265,6 +309,10 @@ namespace Visa2026.Module.BusinessObjects
         // --- Properties from FamilyMember ---
         [DataSourceCriteria(PersonRoleHelper.EmployeeCriteria)]
         [InverseProperty(nameof(FamilyMembers))]
+        [ExcludeFromOptionalDetailFields]
+        [ImmediatePostData]
+        [RuleRequiredField("Person_SponsoringEmployee_RequiredForFamilyMember", DefaultContexts.Save, TargetCriteria = FamilyMemberRoleCriteria)]
+        [ModelDefault("CustomCSSClassName", "e2e-person-sponsoring-employee")]
         public virtual Person SponsoringEmployee { get; set; }
 
         [RuleRequiredField("Person_Relationship_RequiredForFamilyMember", DefaultContexts.Save, TargetCriteria = RelationshipRequiredCriteria)]
@@ -446,6 +494,17 @@ namespace Visa2026.Module.BusinessObjects
             return age < 0 ? 0 : age;
         }
 
+        /// <summary>Family members inherit project contract from the sponsoring employee (legacy + UI).</summary>
+        public void SyncProjectContractFromSponsoringEmployee()
+        {
+            if (PersonRole != PersonRecordRole.FamilyMember)
+                return;
+
+            var sponsorContract = SponsoringEmployee?.ProjectContract;
+            if (sponsorContract != null)
+                ProjectContract = sponsorContract;
+        }
+
         public override void OnSaving()
         {
             base.OnSaving();
@@ -457,6 +516,8 @@ namespace Visa2026.Module.BusinessObjects
             PersonRoleHelper.SyncIsEmployee(this);
             if (PersonRole == PersonRecordRole.TemporaryVisitor)
                 PersonRoleHelper.ClearFamilyMemberLinks(this);
+
+            SyncProjectContractFromSponsoringEmployee();
 
             if (PersonRole == PersonRecordRole.Employee)
                 VisaFamilyMemberLinesHelper.ApplyEmployeeDefaultIfEmpty(this);

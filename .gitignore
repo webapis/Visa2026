@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 # DevExpress license files — do not commit
-
+DevExpress.Key/
 # Microsoft Core Fonts (.ttf) for Docker — keep local only; see docker/fonts/msttcore/README.txt
 docker/fonts/msttcore/*.ttf
 docker/fonts/msttcore/*.TTF
@@ -412,26 +412,41 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-# JetBrains Rider
+# JetBrains Rider / IntelliJ IDEA (per-developer)
+.idea/
 *.sln.iml
 
 # Local Docker / diagnostic exports (may contain sensitive log lines; not for commit)
 agent-local/
 
 # Local-only env (secrets); use .env.*.example files in repo
+.env
+.env.*
+!.env*.example
+!.env.example
+*.bak
 
 # Resminamalar desktop template edit staging (dev); keep README + .gitkeep
 Visa2026.Blazor.Server/TemplateEdit/*
 !Visa2026.Blazor.Server/TemplateEdit/README.md
 !Visa2026.Blazor.Server/TemplateEdit/.gitkeep
-.env.prod
-*.bak
-.env.dev
 
 # User-report template scratch (unzip/repack while authoring; seeds are .docx / Excel only)
 Visa2026.Module/Resources/Templates/_c/
 Visa2026.Module/Resources/Templates/*.zip
 visa2026-prod.bak.20260525-1713
+
+# VISA2014 → Visa2026 legacy migration (local PII — do not commit)
+Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
+Visa2026.DataImporter/legacy/visa2014/preview-export/*.xlsx
+Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsm
+Visa2026.DataImporter/legacy/visa2014/preview-export/_*.txt
+Visa2026.DataImporter/legacy/visa2014/id-maps/**/*.json
+Visa2026.DataImporter/legacy/visa2014/id-maps/*.json
+Visa2026.DataImporter/legacy/visa2014/id-map/
+Visa2026.DataImporter/legacy/visa2014/file-import/
+# VISA2014 import CLI tee logs (large; never commit)
+Visa2026.DataImporter/legacy/visa2014/import-logs/
 dist/
 
 # E2E — Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)

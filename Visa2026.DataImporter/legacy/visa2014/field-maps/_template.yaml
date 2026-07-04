@@ -1,0 +1,57 @@
+# Field map template — layer 2 column mapping
+# Layer 1 table: docs/VISA2014_MIGRATION/table-mappings.yaml
+# Layer 3 lookup values: docs/VISA2014_MIGRATION/lookup-translations.yaml
+
+tableMappingId: null               # id from table-mappings.yaml
+
+source:
+  table: null                    # legacy SQL table — must match table-mappings
+  schema: dbo
+
+target:
+  odataEntity: null              # Visa2026 OData entity
+
+deduplication:
+  enabled: false
+  keys: []
+  canonicalRule: most_complete
+  tieBreakColumn: null
+  mergeBeforeImport: coalesce_non_null
+  action: import_one
+  discoveryQuery: null
+
+propertyGaps:
+  legacyOnly: []
+  targetOnly: []
+  mismatches: []
+
+fields:
+  - source: null                 # legacy COLUMN name
+    target: null                 # Visa2026 PROPERTY name
+    upsertKey: false
+    transform: identity          # identity | lookup | date | enum | ...
+    lookupCatalog: null          # required when transform=lookup → lookup-translations.yaml targetCatalog
+    lookupMatch: Name             # target catalog property after translation (Name | Code)
+    missingBehavior: skip_row
+    default: null
+    defaultValue: null
+    mismatchNotes: null
+    # Binary / file fields — see FILE_AND_IMAGE_IMPORT.md:
+    # importWave: file-follow-up | excelExport.mode: stub | stubColumns: [_hasPhoto, ...]
+
+import:
+  rowFilter: null
+  rowFilterNote: null
+
+export:
+  sheetName: null                  # main sheet name (usually target odataEntity)
+  includeAuditColumns: true
+  auditColumns:
+    - _legacyRowId
+    - _legacyTable
+    - _dedupeGroupId
+    - _importAction
+  lastExportedAt: null
+  lastExportPath: null             # under legacy/visa2014/preview-export/
+
+notes: |

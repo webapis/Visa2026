@@ -7,6 +7,7 @@ using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 
@@ -83,6 +84,14 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.NameTm => HasNonEmpty(row, "NameTm"),
             LookupCatalogMatchKey.NameTmTitle => HasNonEmpty(row, "NameTm"),
             LookupCatalogMatchKey.ShortNameTm => HasNonEmpty(row, "ShortNameTm"),
+            LookupCatalogMatchKey.CityAndFullAddress =>
+                HasNonEmpty(row, "FullAddress")
+                && (HasNonEmpty(row, "City") || HasNonEmpty(row, "NameTm"))
+                && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
+            LookupCatalogMatchKey.CityAndName =>
+                HasNonEmpty(row, "Name")
+                && (HasNonEmpty(row, "City") || HasNonEmpty(row, "NameTm"))
+                && (HasNonEmpty(row, "Region") || HasNonEmpty(row, "RegionName")),
             _ => HasNonEmpty(row, "Name"),
         };
 
@@ -113,6 +122,8 @@ internal static class LookupCatalogEntitySync
             LookupCatalogMatchKey.NameTmTitle => FindByNameTmTitle(objectSpace, entityType, row),
             LookupCatalogMatchKey.ShortNameTm =>
                 FindByProperty(objectSpace, entityType, "ShortNameTm", GetString(row, "ShortNameTm")),
+            LookupCatalogMatchKey.CityAndFullAddress => FindByCityAndProperty(objectSpace, entityType, row, "FullAddress"),
+            LookupCatalogMatchKey.CityAndName => FindByCityAndProperty(objectSpace, entityType, row, "Name"),
             _ => FindByName(objectSpace, entityType, GetString(row, "Name")),
         };
     }
@@ -290,6 +301,13 @@ internal static class LookupCatalogEntitySync
     {
         if (definition.MatchKey == LookupCatalogMatchKey.NameTmTitle)
         {
+            if (row is ProjectContract contract && !string.IsNullOrWhiteSpace(contract.LocalizationKey))
+                return "L:" + LookupCatalogMatchHelper.NormalizeKey(contract.LocalizationKey);
+
+            var titleLocKey = GetPropertyString(row, "LocalizationKey");
+            if (!string.IsNullOrWhiteSpace(titleLocKey))
+                return "L:" + LookupCatalogMatchHelper.NormalizeKey(titleLocKey);
+
             var titleNameTm = row is LookupBase lookupTitle
                 ? lookupTitle.NameTm
                 : GetPropertyString(row, "NameTm");
@@ -334,6 +352,12 @@ internal static class LookupCatalogEntitySync
             var fullAddress = GetPropertyString(row, "FullAddress");
             return fullAddress == null ? string.Empty : "A:" + LookupCatalogMatchHelper.NormalizeKey(fullAddress);
         }
+
+        if (definition.MatchKey == LookupCatalogMatchKey.CityAndFullAddress)
+            return BuildCityAndScalarSyncKey(row, "FullAddress");
+
+        if (definition.MatchKey == LookupCatalogMatchKey.CityAndName)
+            return BuildCityAndScalarSyncKey(row, "Name");
 
         if (definition.MatchKey == LookupCatalogMatchKey.NameAndRegion && row is City city)
         {
@@ -461,11 +485,104 @@ internal static class LookupCatalogEntitySync
     /// </summary>
     private static object? FindByNameTmTitle(IObjectSpace objectSpace, Type entityType, Dictionary<string, JsonElement> row)
     {
+        if (entityType == typeof(ProjectContract))
+        {
+            var byProjectContract = FindProjectContractForCatalogRow(objectSpace, row);
+            if (byProjectContract != null)
+                return byProjectContract;
+        }
+
         var nameTm = GetString(row, "NameTm");
         if (string.IsNullOrWhiteSpace(nameTm))
             return null;
 
         return FindByProperty(objectSpace, entityType, "NameTm", nameTm);
+    }
+
+    private static object? FindProjectContractForCatalogRow(
+        IObjectSpace objectSpace,
+        Dictionary<string, JsonElement> row)
+    {
+        var localizationKey = GetString(row, "LocalizationKey");
+        if (!string.IsNullOrWhiteSpace(localizationKey))
+        {
+            var byKey = FindProjectContractsByProperty(objectSpace, nameof(LookupBase.LocalizationKey), localizationKey);
+            if (byKey.Count > 0)
+                return SelectProjectContractKeeper(objectSpace, byKey);
+        }
+
+        var nameTm = GetString(row, "NameTm");
+        var code = GetString(row, "Code") ?? nameTm;
+        if (!string.IsNullOrWhiteSpace(nameTm))
+        {
+            var byNameTm = FindByProperty(objectSpace, typeof(ProjectContract), "NameTm", nameTm);
+            if (byNameTm != null)
+                return byNameTm;
+        }
+
+        if (string.IsNullOrWhiteSpace(code))
+            return null;
+
+        var legacyMatches = objectSpace.GetObjects(typeof(ProjectContract))
+            .Cast<ProjectContract>()
+            .Where(c =>
+                LegacyProjectContractTitleStartsWithCode(c.NameTm, code)
+                || (!string.IsNullOrWhiteSpace(nameTm) && TitleMatches(c, nameTm)))
+            .ToList();
+
+        if (legacyMatches.Count == 0)
+            return null;
+
+        return SelectProjectContractKeeper(objectSpace, legacyMatches);
+    }
+
+    private static List<ProjectContract> FindProjectContractsByProperty(
+        IObjectSpace objectSpace,
+        string propertyName,
+        string value) =>
+        objectSpace.GetObjects(typeof(ProjectContract))
+            .Cast<ProjectContract>()
+            .Where(c => CatalogFieldEquals(c, propertyName, value))
+            .ToList();
+
+    private static ProjectContract SelectProjectContractKeeper(
+        IObjectSpace objectSpace,
+        IReadOnlyList<ProjectContract> matches) =>
+        matches
+            .OrderByDescending(c => CountProjectContractReferences(objectSpace, c))
+            .ThenByDescending(c => c.Description?.Length ?? 0)
+            .ThenBy(c => c.NameTm?.Length ?? int.MaxValue)
+            .ThenBy(c => c.ID)
+            .First();
+
+    private static int CountProjectContractReferences(IObjectSpace objectSpace, ProjectContract contract)
+    {
+        var id = contract.ID;
+        int count = objectSpace.GetObjects(typeof(Person)).Cast<Person>()
+            .Count(p => p.ProjectContract?.ID == id);
+        count += objectSpace.GetObjects(typeof(Application)).Cast<Application>()
+            .Count(a => a.ProjectContract?.ID == id);
+        count += objectSpace.GetObjects(typeof(UserReportTemplateProjectContract))
+            .Cast<UserReportTemplateProjectContract>()
+            .Count(l => l.ProjectContractId == id);
+        return count;
+    }
+
+    private static bool LegacyProjectContractTitleStartsWithCode(string? nameTm, string? code)
+    {
+        if (string.IsNullOrWhiteSpace(nameTm) || string.IsNullOrWhiteSpace(code))
+            return false;
+
+        var title = nameTm.Trim();
+        var shortCode = code.Trim();
+        if (!title.StartsWith(shortCode, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (title.Length == shortCode.Length)
+            return true;
+
+        var separator = title[shortCode.Length];
+        return separator is ' ' or '-' or '—';
     }
 
     private static object? FindByProperty(IObjectSpace objectSpace, Type entityType, string propertyName, string? value)
@@ -558,6 +675,12 @@ internal static class LookupCatalogEntitySync
                 continue;
             }
 
+            if (key == "City")
+            {
+                ApplyCityNavigation(objectSpace, target, row);
+                continue;
+            }
+
             if (SkipPropertyNames.Contains(key))
                 continue;
 
@@ -582,6 +705,9 @@ internal static class LookupCatalogEntitySync
         }
 
         ApplyLocalizationKey(target, row);
+
+        if (target is ProjectContract contract)
+            ProjectContractApprovalLegProfileLinker.TryLinkContractFromCatalogRow(objectSpace, contract, row);
     }
 
     private static void ApplyLocalizationKey(object target, Dictionary<string, JsonElement> row)
@@ -593,8 +719,9 @@ internal static class LookupCatalogEntitySync
         if (string.IsNullOrWhiteSpace(key))
             key = GetString(row, "Code");
 
-        // ProjectContract variants share Code but differ by NameTm — do not reuse one LocalizationKey for all.
-        if (target is ProjectContract && string.IsNullOrWhiteSpace(GetString(row, "LocalizationKey")))
+        // ProjectContract / MigrationService variants share Code but differ by NameTm — unique LocalizationKey per row.
+        if ((target is ProjectContract or MigrationService)
+            && string.IsNullOrWhiteSpace(GetString(row, "LocalizationKey")))
         {
             var title = GetString(row, "NameTm") ?? lookup.NameTm;
             if (!string.IsNullOrWhiteSpace(title))
@@ -608,6 +735,83 @@ internal static class LookupCatalogEntitySync
             return;
 
         lookup.LocalizationKey = LookupCatalogMatchHelper.ToLocalizationKey(key.Trim());
+    }
+
+    private static City? FindCityReference(IObjectSpace objectSpace, Dictionary<string, JsonElement> row)
+    {
+        var cityTitle = GetString(row, "City") ?? GetString(row, "NameTm");
+        var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
+        if (string.IsNullOrWhiteSpace(cityTitle) || string.IsNullOrWhiteSpace(regionName))
+            return null;
+
+        return objectSpace.GetObjects(typeof(City))
+            .Cast<City>()
+            .FirstOrDefault(c =>
+                TitleMatches(c, cityTitle)
+                && c.Region != null
+                && TitleMatches(c.Region, regionName));
+    }
+
+    private static object? FindByCityAndProperty(
+        IObjectSpace objectSpace,
+        Type entityType,
+        Dictionary<string, JsonElement> row,
+        string scalarProperty)
+    {
+        var city = FindCityReference(objectSpace, row);
+        var scalar = GetString(row, scalarProperty);
+        if (city == null || string.IsNullOrWhiteSpace(scalar))
+            return null;
+
+        return objectSpace.GetObjects(entityType)
+            .Cast<object>()
+            .FirstOrDefault(item =>
+            {
+                var itemCity = item.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public)?.GetValue(item) as City;
+                if (itemCity == null || itemCity.ID != city.ID)
+                    return false;
+
+                var itemScalar = GetPropertyString(item, scalarProperty);
+                return LookupCatalogMatchHelper.KeysEqual(itemScalar, scalar)
+                    || string.Equals(itemScalar?.Trim(), scalar.Trim(), StringComparison.Ordinal);
+            });
+    }
+
+    private static string BuildCityAndScalarSyncKey(Dictionary<string, JsonElement> row, string scalarProperty)
+    {
+        var regionName = GetString(row, "Region") ?? GetString(row, "RegionName");
+        var cityName = GetString(row, "City") ?? GetString(row, "NameTm");
+        var scalar = GetString(row, scalarProperty);
+        return BuildCityAndScalarSyncKeyFromParts(regionName, cityName, scalar);
+    }
+
+    private static string BuildCityAndScalarSyncKey(object row, string scalarProperty) =>
+        BuildCityAndScalarSyncKeyFromParts(
+            GetPropertyString(row, "Region") ?? GetPropertyString(row, "RegionName"),
+            GetPropertyString(row, "City") ?? GetPropertyString(row, "NameTm"),
+            GetPropertyString(row, scalarProperty));
+
+    private static string BuildCityAndScalarSyncKeyFromParts(string? regionName, string? cityName, string? scalar)
+    {
+        if (string.IsNullOrWhiteSpace(regionName) || string.IsNullOrWhiteSpace(cityName) || string.IsNullOrWhiteSpace(scalar))
+            return string.Empty;
+
+        return "R:" + LookupCatalogMatchHelper.NormalizeKey(regionName)
+            + "|C:" + LookupCatalogMatchHelper.NormalizeKey(cityName)
+            + "|S:" + LookupCatalogMatchHelper.NormalizeKey(scalar);
+    }
+
+    private static void ApplyCityNavigation(IObjectSpace objectSpace, object target, Dictionary<string, JsonElement> row)
+    {
+        var city = FindCityReference(objectSpace, row);
+        if (city == null)
+            return;
+
+        var prop = target.GetType().GetProperty("City", BindingFlags.Instance | BindingFlags.Public);
+        if (prop == null || !prop.CanWrite)
+            return;
+
+        prop.SetValue(target, city);
     }
 
     private static void ApplyNavigation(IObjectSpace objectSpace, object target, string key, JsonElement value)

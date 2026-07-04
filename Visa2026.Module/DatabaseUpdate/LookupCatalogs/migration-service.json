@@ -2,39 +2,63 @@
     "rows":  [
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Aşgabat şäheri boýunça müdirliginiň müdirine",
-                     "Code":  "TDMGAS"
+                     "Code":  "TDMGAS",
+                     "LocalizationKey":  "tdmgas"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Ahal welaýaty boýunça müdirliginiň müdirine",
-                     "Code":  "TDMGAH"
+                     "Code":  "TDMGAH",
+                     "LocalizationKey":  "tdmgah"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň müdirine",
-                     "Code":  "TDMGMR"
+                     "Code":  "TDMGMR",
+                     "LocalizationKey":  "tdmgmr"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Serhetabat şäher bölüminiň müdirine",
-                     "Code":  "TDMG"
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-serh"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Mary welaýaty boýunça müdirliginiň Ýolöten etrap bölüminiň müdirine",
-                     "Code":  "TDMG"
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-yl"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Gyzylarbat etrap bölüminiň müdirine",
-                     "Code":  "TDMG"
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-gyz"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň Türkmenbaşy şäher bölüminiň müdirine",
-                     "Code":  "TDMG"
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-tb"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Balkan welaýaty boýunça müdirliginiň müdirine",
-                     "Code":  "TDMG"
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmgbn"
                  },
                  {
                      "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň müdirine",
-                     "Code":  "TDMG"
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-lb"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Kerki şäher bölüminiň müdirine",
+                     "Code":  "TDMGKR",
+                     "LocalizationKey":  "tdmgkr"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Lebap welaýaty boýunça müdirliginiň Atamyrat şäher bölüminiň müdirine",
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-atyr"
+                 },
+                 {
+                     "NameTm":  "Türkmenistanyň Döwlet migrasiýa gullugynyň Daşoguz welaýaty boýunça müdirligine",
+                     "Code":  "TDMG",
+                     "LocalizationKey":  "tdmg-dz"
                  }
              ]
 }

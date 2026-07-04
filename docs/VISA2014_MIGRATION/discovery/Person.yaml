@@ -1,0 +1,72 @@
+# Discovery dossier — Person (pilot BO)
+# dependsOn: [] — first in order.yaml. Finish before Application.
+
+targetODataEntity: Person
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-26
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    Person-preview.calik-energi.xlsx reviewed 2026-06-26 (VISA2015 on SQLEXPRESS, ReadOnlyUser).
+    3241 legacy rows → 2924 import + 274 dedupe merged + 43 skipped; 25 unmapped lookups.
+    Unicode fix: SqlClient replaces sqlcmd for Turkish/Turkmen text.
+    ProjectContract: identity pass-through; tenant seed still needs expansion for 60 legacy codes.
+    Pilot OData import (--import-visa2014 --entity Person) may proceed.
+
+legacy:
+  boClass: Person
+  boPath: VISA2014.Module/DC/IPerson.cs
+  tables:
+    - dbo.Person
+    - dbo.Employee
+  rowCount: 2569
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Person.cs
+  docPath: Visa2026.Module/BusinessObjects/Person.md
+  odataExposed: unknown
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Person.yaml
+  tableMappingId: person-main
+  cardinality: one_legacy_row_per_person
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - Gender
+    - Country
+    - MaritalStatus
+    - Relationship
+    - ProjectContract
+  duplicateGroups: 5
+  legacyOnlyCount: 12
+  targetOnlyCount: 4
+  mismatchCount: 0
+  blockedReason: null
+  notes: |
+    Primary extract: dbo.Person WHERE GCRecord IS NULL (2,569 rows → ~2,564 after PN dedupe).
+    Person.PersonalNumber ← dbo.Passport.PersonalNumber (canonical passport row).
+    Visa2026 uniqueness: IX_People_PersonalNumber (unique except NULL/''/'0') + save rule Person_PersonalNumberUniqueAmongActive.
+    ~1,024 persons → sentinel "0" (allowed duplicates). 5 real-PN duplicate pairs (same human, 2 legacy Oids) — merge before POST.
+    Upsert/id-map keyed on legacy Person.Oid — not PersonalNumber alone.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-20
+completedBy: agent session — Phase 1 bootstrap + Person discovery

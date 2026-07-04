@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Visa2026.Module.Services.MigrationImport;
 
 namespace Visa2026.DataImporter;
 
@@ -52,6 +53,9 @@ public class ApiClient
         _http = new HttpClient(handler);
         _http.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
+        _http.DefaultRequestHeaders.TryAddWithoutValidation(
+            MigrationImportContext.DataImportHeaderName,
+            "true");
     }
 
     // ------------------------------------------------------------------
@@ -124,22 +128,50 @@ public class ApiClient
     // ------------------------------------------------------------------
 
     /// <summary>GET all records from an OData entity set.</summary>
-    public async Task<List<T>> GetAllAsync<T>(string entityName)
+    public async Task<List<T>> GetAllAsync<T>(string entityName, string? odataQuery = null)
     {
+        var all = new List<T>();
         var url = $"{_baseUrl}/api/odata/{entityName}";
-        var response = await _http.GetAsync(url);
+        if (string.IsNullOrWhiteSpace(odataQuery))
+            url += "?$top=10000";
+        else
+            url += odataQuery.StartsWith('?') ? odataQuery : "?" + odataQuery;
 
-        if (!response.IsSuccessStatusCode)
+        while (!string.IsNullOrEmpty(url))
         {
-            var body = await response.Content.ReadAsStringAsync();
-      throw new HttpRequestException(
-          $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
-          $"Body: {body}");
+            var response = await _http.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException(
+                    $"GET {url} -> {(int)response.StatusCode} {response.ReasonPhrase}. " +
+                    $"Body: {(body.Length > 600 ? body[..600] + "..." : body)}");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<ODataListResponse<T>>(json, JsonOptions);
+            if (result?.Value is { Count: > 0 })
+                all.AddRange(result.Value);
+
+            url = ResolveNextLink(result?.NextLink);
         }
 
-        var json = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<ODataListResponse<T>>(json, JsonOptions);
-        return result?.Value ?? new List<T>();
+        return all;
+    }
+
+    private string? ResolveNextLink(string? nextLink)
+    {
+        if (string.IsNullOrWhiteSpace(nextLink))
+            return null;
+
+        if (Uri.TryCreate(nextLink, UriKind.Absolute, out _))
+            return nextLink;
+
+        if (nextLink.StartsWith('/'))
+            return _baseUrl + nextLink;
+
+        return $"{_baseUrl}/{nextLink.TrimStart('/')}";
     }
 
     /// <summary>GET a single record by its GUID key.</summary>
@@ -247,4 +279,7 @@ public class ODataListResponse<T>
 {
     [JsonPropertyName("value")]
     public List<T> Value { get; set; } = new();
+
+    [JsonPropertyName("@odata.nextLink")]
+    public string? NextLink { get; set; }
 }

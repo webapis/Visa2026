@@ -1,0 +1,24 @@
+{
+    "rows":  [
+                 {
+                     "Region":  "Ahal welaýaty",
+                     "City":  "Gökdepe etraby",
+                     "Name":  "Yzgant obasyndaky ýokanç keseller hassahanasy"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Ýokanç keselleri bejeriş we öňüni alyş merkezi"
+                 },
+                 {
+                     "Region":  "Aşgabat şäheri",
+                     "City":  "Aşgabat şäheri",
+                     "Name":  "Ýokanç keselleri bejeriş we öňüni alyş merkezi hassahanasy"
+                 },
+                 {
+                     "Region":  "Mary welaýaty",
+                     "City":  "Mary şäheri",
+                     "Name":  "içki kesel hassahanasy"
+                 }
+             ]
+}

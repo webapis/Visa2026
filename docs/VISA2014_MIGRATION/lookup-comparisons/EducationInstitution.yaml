@@ -1,0 +1,33 @@
+# Lookup comparison — EducationInstitution (machine-readable)
+
+version: 1
+catalog: EducationInstitution
+comparedAt: 2026-06-26
+legacyDatabase: VISA2015
+legacyStorage: legacy_lookup_table
+legacyTable: dbo.EducationInstitution
+legacyLabelColumn: TitleOfIEducationInstitution
+legacyJoin: Education.EducationInstitution = EducationInstitution.Oid
+educationScope: dbo.Education WHERE GCRecord IS NULL
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/education-institution.json
+recommendedSeedFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/education-institution.calik-energi.json
+targetMatchProperty: NameTm
+
+summary:
+  verdict: approved_with_catalog_seed
+  approvedAt: 2026-06-26
+  educationRowsTotal: 3133
+  legacyDistinctLabels: 1471
+  catalogRowsBeforeSeed: 953
+  mappedEducationRows: 1037
+  unmappedEducationRows: 2096
+  unmappedDistinct: 1334
+  aliasLabels: 31
+  unmappedPolicy: skip_row_after_seed_only
+  recommendedNextStep: generate_calik_energi_tenant_catalog_then_excel_preview
+
+strategy:
+  identityPassThrough: true
+  seedFromLegacyDistinctOnEducation: true
+  distinctLabelCountToSeed: 1471
+  rejectSkipRowWithoutSeed: true

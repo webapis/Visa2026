@@ -1,0 +1,188 @@
+# Visa field map — layer 2
+# Layer 1: table-mappings.yaml (id: visa-main)
+# Layer 3: lookup-translations.yaml (VisaType, VisaCategory, VisaIssuedPlace, BorderZoneName) — approved 2026-06-21
+
+tableMappingId: visa-main
+
+source:
+  table: Visa
+  schema: dbo
+
+target:
+  odataEntity: Visa
+
+deduplication:
+  enabled: true
+  keys:
+    - Oid
+  visaNumberDedupe:
+    enabled: true
+    when: normalized VisaNumber shared by multiple active legacy Oids
+    keys:
+      - VisaNumber
+    canonicalRule: most_recent_end_date
+    tieBreakColumn: Oid
+    sentinelNumbers:
+      - AFV0000000
+      - JLV0000000
+    sentinelAction: import_all_with_oid_suffix
+    sentinelSuffixTransform: append_legacy_oid_tail
+    notes: |
+      Visa2026: Visa_VisaNumberUniqueAmongActive (trimmed, case-insensitive).
+      7 legacy groups: 2 placeholder families (8 rows each) + 5 real pairs.
+      Placeholders: suffix visa number with last 8 chars of legacy Oid for OData uniqueness.
+      Real pairs: keep row with latest VisaEndDate; log skipped Oid.
+  action: import_one_per_legacy_oid
+  notes: Do NOT collapse to one visa per Passport — 1,460 passports have multiple visas.
+
+propertyGaps:
+  legacyOnly:
+    - column: IRemainingDays_Data
+      disposition: drop
+    - column: IMessage_Data
+      disposition: drop
+    - column: HasBorderZonePermit
+      disposition: derive
+      notes: Inform BorderZoneLocation transform when BorderZone FK null
+    - column: ProcessNumber
+      disposition: drop
+    - column: ASNumber
+      disposition: drop
+    - column: AppConf
+      disposition: drop
+    - column: ImpVisaType
+      disposition: drop
+    - column: ImpVisaCategory
+      disposition: drop
+    - column: ImpVisaIssuedPlace
+      disposition: drop
+    - column: ImpPassport
+      disposition: drop
+    - column: GöçürmeNusga
+      disposition: file_wave
+      notes: Inline varbinary — VisaDocument via --import-visa2014-files after scalar POST
+    - column: HasabaAlynmayar
+      disposition: drop
+      notes: 8 rows; registration semantics — no direct Visa2026 scalar (RegistrationState is computed)
+    - column: OptimisticLockField
+      disposition: drop
+  targetOnly:
+    - property: InvitationItem
+      default: null
+      missingBehavior: allow_null
+      notes: Defer until ApplicationItem import + id-map
+    - property: IssuingApplicationItem
+      default: null
+      missingBehavior: allow_null
+      notes: Defer until ApplicationItem import
+    - property: Notes
+      default: null
+      missingBehavior: allow_null
+    - property: RegistrationState
+      disposition: computed
+      missingBehavior: omit
+    - property: ExtensionRequired
+      default: true
+      missingBehavior: use_default
+    - property: IsCancelled
+      default: false
+      missingBehavior: use_default
+    - property: IsChanged
+      default: false
+      missingBehavior: use_default
+    - property: IsExtended
+      default: false
+      missingBehavior: use_default
+    - property: ShowOptionalFields
+      default: false
+      missingBehavior: use_default
+  mismatches:
+    - property: BorderZoneLocation
+      legacyColumn: BorderZone
+      notes: |
+        Legacy FK → dbo.BorderZoneForVisa bit matrix (Dasoguz, Tagtabazar, …).
+        Target: comma-separated BorderZoneName catalog; default Ýok when no flags.
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: Id-map key only
+
+  - source: VisaNumber
+    target: VisaNumber
+    transform: string_trim
+    missingBehavior: skip_row
+
+  - source: VisaType
+    target: VisaType
+    transform: lookup_composite
+    lookupCatalog: VisaType
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - IVisaType_Data.TypeOfVisaL
+      - IVisaType_Data.mgCode
+    missingBehavior: skip_row
+
+  - source: VisaCategory
+    target: VisaCategory
+    transform: lookup_composite
+    lookupCatalog: VisaCategory
+    lookupMatch: LocalizationKey
+    lookupLegacyColumns:
+      - VisaCategory.CategoryOfVisaL
+      - VisaCategory.mgCode
+    missingBehavior: skip_row
+
+  - source: VisaIssuedPlace
+    target: VisaIssuedPlace
+    transform: lookup
+    lookupCatalog: VisaIssuedPlace
+    lookupMatch: NameTm
+    lookupLegacyColumn: VisaIssuedPlace.IssuedPlaceOfVisaL
+    missingBehavior: skip_row
+
+  - source: VisaIssuedDate
+    target: IssueDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: VisaStartDate
+    target: StartDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: VisaEndDate
+    target: ExpirationDate
+    transform: date
+    missingBehavior: skip_row
+
+  - source: Passport
+    target: Passport
+    transform: fk_id_map
+    fkEntity: Passport
+    missingBehavior: skip_row
+    notes: Requires Passport id-map from scalar Passport import
+
+  - source: BorderZone
+    target: BorderZoneLocation
+    transform: border_zone_bit_matrix
+    lookupCatalog: BorderZoneName
+    missingBehavior: use_default
+    defaultValue: Ýok
+
+export:
+  sheetName: Visa
+  includeAuditColumns: true
+  lastExportedAt: 2026-06-21
+  lastExportPath: preview-export/Visa-preview.calik-energi.xlsx
+
+importFilters:
+  - sql: v.GCRecord IS NULL
+  - sql: EXISTS (SELECT 1 FROM dbo.Passport p WHERE p.Oid = v.Passport AND p.GCRecord IS NULL)
+
+postImport:
+  - wave: attachments
+    property: VisaDocument
+    legacyColumn: GöçürmeNusga
+    notes: Separate --import-visa2014-files wave after scalar Visa POST + id-map

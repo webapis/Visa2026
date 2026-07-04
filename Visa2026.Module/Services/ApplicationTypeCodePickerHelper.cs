@@ -37,6 +37,7 @@ namespace Visa2026.Module.Services
 
             return query.OrderBy(t => t.SelectionCode)
                 .AsEnumerable()
+                .Where(t => !ApplicationTypeDevelopmentReadiness.IsHiddenFromTypeCodePicker(t.Name, t.SelectionCode))
                 .Select(t => new ApplicationTypeCodePickerRow
                 {
                     Id = t.ID,

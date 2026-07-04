@@ -21,6 +21,10 @@
 .PARAMETER ForceUpdate
   Pass --forceUpdate so all ModuleUpdaters run even when the DB version matches the app.
 
+.PARAMETER GenerateTenantCatalogs
+  Run order.yaml tenantCatalogGeneration (VISA2015 SQL → approval-leg-profile JSON) before DB update.
+  Requires VISA2014_SQL_PASSWORD.
+
 .PARAMETER Silent
   Pass --silent (no interactive backup prompt). Default: on.
 
@@ -49,6 +53,8 @@ param(
     [string]$EnvFile = '.env.dev',
 
     [switch]$ForceUpdate,
+
+    [switch]$GenerateTenantCatalogs,
 
     [switch]$Silent = $true,
 
@@ -113,6 +119,19 @@ function Get-ProfileConnectionString {
 
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $RepoRoot
+
+if ($GenerateTenantCatalogs) {
+  if (-not $env:VISA2014_SQL_PASSWORD) {
+    $env:VISA2014_SQL_PASSWORD = [Environment]::GetEnvironmentVariable('VISA2014_SQL_PASSWORD', 'User')
+  }
+  if ([string]::IsNullOrWhiteSpace($env:VISA2014_SQL_PASSWORD)) {
+    Write-Warning 'GenerateTenantCatalogs skipped: VISA2014_SQL_PASSWORD is not set.'
+  } else {
+    Write-Host '==> tenantCatalogGeneration (order.yaml)' -ForegroundColor Cyan
+    & (Join-Path (Split-Path $PSScriptRoot -Parent) 'visa2014-migration\import\Invoke-TenantCatalogGeneration.ps1') -Configuration $Configuration
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  }
+}
 
 if ($ConnectionString -eq '') {
     $ConnectionString = Get-ProfileConnectionString -ProfileName $Profile -RepoRoot $RepoRoot -EnvFilePath $EnvFile

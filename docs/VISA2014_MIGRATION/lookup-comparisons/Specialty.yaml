@@ -1,0 +1,35 @@
+# Lookup comparison — Specialty (machine-readable)
+
+version: 1
+catalog: Specialty
+comparedAt: 2026-06-26
+legacyDatabase: VISA2015
+legacyStorage: legacy_lookup_table
+legacyTable: dbo.Speciality
+legacyLabelColumn: TitleOfSpeciality
+legacyFkColumn: Education.Spcialty
+legacyJoin: Education.Spcialty = Speciality.Oid
+educationScope: dbo.Education WHERE GCRecord IS NULL
+targetCatalogFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/specialty.json
+recommendedSeedFile: Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/specialty.calik-energi.json
+targetMatchProperty: NameTm
+
+summary:
+  verdict: approved_with_catalog_seed
+  approvedAt: 2026-06-26
+  educationRowsTotal: 3133
+  legacyDistinctLabels: 1063
+  catalogRowsBeforeSeed: 680
+  mappedEducationRows: 956
+  unmappedEducationRows: 2177
+  unmappedDistinct: 903
+  aliasLabels: 21
+  unmappedPolicy: skip_row_after_seed_only
+  recommendedNextStep: generate_calik_energi_tenant_catalog_then_excel_preview
+
+strategy:
+  identityPassThrough: true
+  seedFromLegacyDistinctOnEducation: true
+  distinctLabelCountToSeed: 1063
+  rejectSkipRowWithoutSeed: true
+  notes: Legacy table dbo.Speciality; Visa2026 entity Specialty

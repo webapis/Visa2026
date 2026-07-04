@@ -1,0 +1,395 @@
+# Lookup review queue — gate before main BO importConfirmed
+#
+# Human dashboard: lookup-comparisons/README.md
+# Layer 3 output: lookup-translations.yaml
+#
+# Gate rules:
+#   personWaveComplete   → required before Person importConfirmed (order.yaml)
+#   applicationWaveComplete → required before Application importConfirmed / discovery close
+#
+# Do NOT import legacy lookup tables. Translate DISTINCT values used on transactional FKs only.
+
+version: 1
+lastUpdated: 2026-06-26
+updatedBy: developer — Passport discovery + PassportType audit
+
+gateRules:
+  personWaveComplete:
+    requiredBefore: Person.importConfirmed
+    blocksUntil: all personWave entries have auditStatus approved | done
+    currentStatus: in_progress
+    remaining: [ProjectContract.calik-energi]
+    notes: |
+      Shared catalogs done. Legacy SQL database is VISA2015 (not VISA2014).
+      ProjectContract: Gap GT-15 remap vs Çalik identity pass-through (60 codes on VISA2015).
+      Person importConfirmed true 2026-06-26. Pilot OData import unblocked.
+
+  applicationWaveComplete:
+    requiredBefore: Application.importConfirmed
+    blocksUntil: all applicationWave entries have auditStatus approved | done
+    currentStatus: not_started
+    notes: Application discovery may start in parallel; importConfirmed blocked until wave complete
+
+waves:
+  personWave:
+    label: Person-domain lookup catalogs
+    entries:
+      - catalog: Gender
+        legacyTable: dbo.Gender
+        legacyColumn: TypeOfGenderL
+        usedBy: [Person]
+        auditStatus: done
+        comparisonDoc: null
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        notes: 2 values mapped (Ayal→Aýal, Erkek→Erkek)
+
+      - catalog: Country
+        legacyTable: dbo.Country
+        legacyColumn: NameOfCountryL
+        usedBy: [Person]
+        auditStatus: done
+        comparisonDoc: null
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        notes: Person-scope 64 identity Code mappings (2026-06-20)
+
+      - catalog: MaritalStatus
+        legacyTable: dbo.MaritalStatus
+        legacyColumn: Status
+        usedBy: [Person]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MaritalStatus.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-21
+        notes: |
+          Status int 0–5 → Visa2026 Code; Status=0 → Öýlenen approved.
+          StatusL narrative → VisaApplicationFamilyMembersText (not catalog).
+          Legacy table: 2369 total / 1965 active rows; 2569 Person rows with FK.
+
+      - catalog: Relationship
+        legacyTable: dbo.Relation
+        legacyColumn: RelativeAsL
+        usedBy: [Person]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Relationship.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-21
+        legacyStats:
+          tableRowsAll: 54
+          tableRowsActive: 12
+          personFkHits: 159
+          valuesMapped: 8
+        notes: |
+          Approved 2026-06-21: all 159 Person FK rows map via RelativeAsL → NameTm.
+          Mother (ejesi) + BrotherInLaw added to Visa2026 relationship.json.
+
+      - catalog: ProjectContract
+        legacyTable: dbo.Contract
+        legacyColumn: NumberOfContract
+        usedBy: [Person, Application]
+        auditStatus: in_progress
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.calik-energi.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+        blocksImportUntilApproved: true
+        legacyStats:
+          legacyDatabase: VISA2015
+          legacySourceCalik: calik-energi
+          legacySourceGap: gap-insaat
+        notes: |
+          Çalik: identityPassThrough on NumberOfContract → Visa2026 Code (VISA2015 DB; 60 distinct codes).
+          Gap: GT-15 blanket remap in lookup-translations.gap-insaat.yaml (separate --legacy-source).
+
+      - catalog: PassportType
+        legacyTable: dbo.PassportType
+        legacyColumn: TypeOfPassportL
+        usedBy: [Passport]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/PassportType.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-26
+        legacyStats:
+          tableRowsAll: 24
+          tableRowsActive: 3
+          passportFkHits: 3684
+          valuesMapped: 5
+        notes: |
+          Çalik VISA2015: AD/GL/DP + mgCode P/PG/PD → Visa2026 LocalizationKey.
+          Passport importConfirmed still requires dossier sign-off (preview pending).
+
+  applicationWave:
+    label: Application-domain lookup catalogs
+    entries:
+      - catalog: ApplicationType
+        legacyTable: dbo.ApplicationType
+        usedBy: [Application, ApplicationItem]
+        auditStatus: approved_with_skip
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
+        lookupTranslations: lookup-translations.yaml#ApplicationType
+        blocksImportUntilApproved: false
+        legacyStats:
+          tableRowsAll: 231
+          distinctCompositeKeysMapped: 31
+          skippedCompositeKeys: 2
+          skippedApplicationHeaders: 105
+          skippedApplicationItemRows: 204
+        notes: |
+          Approved 2026-06-29 with skip_row for E:44 (92 apps) + E:55 (13 apps).
+          31 composite keys mapped; 2 keys in audit.unmapped — rows skipped, not blocked.
+          Layer 3 composite — see ApplicationTypeForEmployee, ApplicationTypeForFamilyMember, BaseApplicationType.
+
+      - catalog: VisaType
+        legacyTable: dbo.VisaType
+        usedBy: [Application, ApplicationItem, Visa]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaType.md
+        lookupTranslations: lookup-translations.yaml#VisaType
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 6
+          distinctOnVisa: 5
+          visaRowsCovered: 6041
+        notes: |
+          Approved 2026-06-26 (Visa scope). Composite TypeOfVisaL+mgCode via IVisaType_Data.
+          GL→OF (official visa); BS:14→BS1. Application wave re-validation deferred.
+
+      - catalog: VisaCategory
+        legacyTable: dbo.VisaCategory
+        usedBy: [Application, ApplicationItem, Visa]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaCategory.md
+        lookupTranslations: lookup-translations.yaml#VisaCategory
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 4
+          distinctOnVisa: 3
+          visaRowsCovered: 6040
+          nullFkVisaRows: 1
+        notes: |
+          Approved 2026-06-26 (Visa scope). köp/iki/bir gezeklik + mgCode 4/2/1 → Multiple/Double/Single.
+          PrefferedVisaCategory deferred to Application wave.
+
+      - catalog: Region
+        legacyTable: dbo.Region
+        usedBy: [Application, AddressOfResidence]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Region.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-27
+        legacyStats:
+          tableRowsAll: 50
+          distinctOnAddressOfResidenceData: 6
+        notes: mgCode identity map for AddressOfResidence; Application wave still validates separately.
+
+      - catalog: EducationLevel
+        legacyTable: dbo.EducationLevel
+        usedBy: [Education, Application, Person]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/EducationLevel.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-26
+        legacyStats:
+          tableRowsAll: 24
+          bucketsOnEducationData: 3
+        notes: |
+          Education-scope audit approved 2026-06-26. mgCode → PdfForm_Code / LocalizationKey.
+
+      - catalog: EducationInstitution
+        legacyTable: dbo.EducationInstitution
+        usedBy: [Education]
+        auditStatus: approved_with_catalog_seed
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/EducationInstitution.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+        blocksImportUntilApproved: true
+        approvedAt: 2026-06-26
+        legacyStats:
+          tableRowsAll: 2022
+          distinctOnEducationData: 1471
+          mappedEducationRows: 1037
+          unmappedEducationRows: 2096
+        notes: |
+          Identity pass-through seed required (education-institution.calik-energi.json).
+          Current 953-row tenant seed covers 33% of education rows.
+
+      - catalog: Specialty
+        legacyTable: dbo.Speciality
+        usedBy: [Education]
+        auditStatus: approved_with_catalog_seed
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Specialty.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+        blocksImportUntilApproved: true
+        approvedAt: 2026-06-26
+        legacyStats:
+          tableRowsAll: 1683
+          distinctOnEducationData: 1063
+          mappedEducationRows: 956
+          unmappedEducationRows: 2177
+        notes: |
+          Legacy FK column Education.Spcialty. Seed specialty.calik-energi.json from DISTINCT TitleOfSpeciality.
+
+      - catalog: PassportType
+        legacyTable: dbo.PassportType
+        usedBy: [Passport, ApplicationItem]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/PassportType.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-26
+        legacyStats:
+          tableRowsAll: 24
+        notes: |
+          Passport-scope audit approved 2026-06-26 (personWave). Re-validate ApplicationItem FK at Application discovery.
+
+      - catalog: Department
+        legacyTable: dbo.Department
+        usedBy: [Application, Employee]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 49
+        notes: DepartmentForRegistration (44 rows) may overlap
+
+      - catalog: Position
+        legacyTable: dbo.Position
+        usedBy: [Application, Employee]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 689
+
+      - catalog: Urgency
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+        notes: Confirm legacy table name during Application discovery
+
+      - catalog: PurposeOfTravel
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: CheckPoint
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: VisaIssuedPlace
+        legacyTable: dbo.VisaIssuedPlace
+        usedBy: [Application, Visa]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaIssuedPlace.md
+        lookupTranslations: lookup-translations.yaml#VisaIssuedPlace
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 37
+          distinctOnVisa: 22
+          visaRowsCovered: 6023
+          unmappedVisaRows: 18
+          nullFkVisaRows: 0
+        notes: |
+          Approved 2026-06-21 (Visa scope). IssuedPlaceOfVisaL → NameTm; 5 explicit aliases.
+          8 rare embassy labels (18 visas) → skip_row. Application wave re-validation deferred.
+
+      - catalog: BorderZoneName
+        legacyTable: dbo.BorderZoneForVisa
+        usedBy: [Application, ApplicationItem, Visa]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/BorderZoneName.md
+        lookupTranslations: lookup-translations.yaml#BorderZoneName
+        blocksImportUntilApproved: true
+        legacyStats:
+          matrixRowsAll: 3421
+          visaWithFk: 589
+          visaWithoutFk: 5452
+          visaAllBitsFalse: 2
+          distinctBitPatterns: 18
+        notes: |
+          Approved 2026-06-21 (Visa scope). Bit matrix → comma-separated NameTm; default Ýok.
+          6 catalog rows added to border-zone-name.json. Application wave deferred.
+
+      - catalog: MigrationService
+        legacyTable: dbo.DepartmentForRegistration
+        usedBy: [Application]
+        auditStatus: approved_2026-06-30
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/MigrationService.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml#MigrationService
+        blocksImportUntilApproved: true
+        legacyStats:
+          tableRowsAll: 9
+          distinctUsedOnApplication: 9
+          applicationWithFk: 6840
+          applicationNullFk: 5397
+        notes: |
+          Layer-3 key TitleOfDepartmentForRegistration → target NameTm (Code TDMG ambiguous).
+          7/9 codes mapped at draft; approved 2026-06-30: TDMG→TDMGAS, TDMGLBA→TDMGKR Kerki seed.
+          PATCH existing Applications after approval — not full re-import.
+
+      - catalog: ApplicationLocation
+        legacyTable: null
+        usedBy: [ApplicationProgress]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: ApplicationState
+        legacyTable: null
+        usedBy: [ApplicationProgress]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: ValidityDuration
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: VisaPeriod
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: BusinessTripPurpose
+        legacyTable: null
+        usedBy: [Application]
+        auditStatus: not_started
+        comparisonDoc: null
+        lookupTranslations: null
+        blocksImportUntilApproved: true
+
+      - catalog: City
+        legacyTable: dbo.ŞeherEtrap
+        usedBy: [Application, AddressOfResidence]
+        auditStatus: approved
+        comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+        lookupTranslations: docs/VISA2014_MIGRATION/lookup-translations.yaml
+        blocksImportUntilApproved: false
+        approvedAt: 2026-06-27
+        notes: mgCode → PdfForm_Code; CityByName fallback for legacy spelling variants.
+
+nextComparisons: []

@@ -1,0 +1,218 @@
+# Çalik Energi — company-specific lookup overrides (legacy DB: VISA2015)
+
+# Merged after lookup-translations.yaml (shared catalogs).
+# ProjectContract: legacy NumberOfContract → same Visa2026 Code (tenant catalog identity).
+
+version: 1
+
+catalogs:
+  - targetCatalog: ProjectContract
+    targetMatchProperty: Code
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Contract
+      column: NumberOfContract
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(c.NumberOfContract)) AS NumberOfContract, COUNT(*) AS cnt
+        FROM dbo.Person p
+        INNER JOIN dbo.Contract c ON p.Contract = c.Oid
+        WHERE p.GCRecord IS NULL AND c.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(c.NumberOfContract))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Person, Application
+      legacyDatabase: VISA2015
+      company: calik-energi
+      status: complete
+      activeContractRows: 95
+      distinctNumberOfContractInTable: 83
+      maxNumberOfContractLength: 56
+      distinctLegacyContractCodesOnPerson: 60
+      distinctLegacyContractCodesOnApplication: 34
+      distinctLegacyContractCodesUnion: 73
+      orphanContractCodesNotOnPersonOrApplication: 10
+      personRowsWithContract: 2950
+      applicationRowsWithContract: 3845
+      contractsWithAppliedMinistery: 42
+      ministryTable: dbo.AppliedMinistery
+      tenantSeedOverlapExactCode: 0
+      gt15InLegacyData: false
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.calik-energi.md
+    values: []
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Legacy SQL database name is VISA2015 (not VISA2014). Çalik production data on SQLEXPRESS.
+      identityPassThrough maps NumberOfContract → same Visa2026 ProjectContract.Code for OData resolve.
+      Seed tenant project-contract.calik-energi.json (73 rows) before import; deploy via disk overlay as project-contract.json.
+      Add explicit values[] rows only for aliases (e.g. Satlyk-1 → Şatlyk-1) if product requires.
+      Do NOT use Gap İnşaat GT-15 blanket remap (see lookup-translations.gap-insaat.yaml).
+
+  - targetCatalog: Country
+    targetMatchProperty: Code
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Country
+      column: mgCode
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(c.mgCode)) AS mgCode, COUNT(*) AS cnt
+        FROM dbo.Education e
+        INNER JOIN dbo.Country c ON e.EducationCountry = c.Oid
+        WHERE e.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(c.mgCode))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Education
+      notes: Education uses Country.mgCode (field-map); Person wave audited NameOfCountryL — 38 rows had mgCode outside Person-scope values[] before pass-through.
+    values: []
+    unmappedPolicy: skip_row
+    unmappedDefault: null
+    notes: |
+      identityPassThrough maps legacy mgCode → Visa2026 Country.Code (ISO alpha-3 in seed).
+      Person-wave explicit values[] remain in base lookup-translations.yaml when codes match.
+
+  - targetCatalog: EducationInstitution
+    targetMatchProperty: NameTm
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.EducationInstitution
+      column: TitleOfIEducationInstitution
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(ei.TitleOfIEducationInstitution)) AS label, COUNT(*) AS cnt
+        FROM dbo.Education e
+        INNER JOIN dbo.EducationInstitution ei ON e.EducationInstitution = ei.Oid
+        WHERE e.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(ei.TitleOfIEducationInstitution))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Education
+      distinctLabelsOnEducation: 1471
+      mappedEducationRowsBeforeSeed: 1037
+      unmappedEducationRowsBeforeSeed: 2096
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/EducationInstitution.md
+    values: []
+    unmappedPolicy: skip_row
+    unmappedDefault: null
+    notes: |
+      Seed education-institution.calik-energi.json from DISTINCT labels on active Education (1471 rows).
+      Deploy via tenant manifest before Education OData import. Optional values[] for Istanbul/İstanbul aliases if not seeding verbatim legacy strings.
+
+  - targetCatalog: Specialty
+    targetMatchProperty: NameTm
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Speciality
+      column: TitleOfSpeciality
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(s.TitleOfSpeciality)) AS label, COUNT(*) AS cnt
+        FROM dbo.Education e
+        INNER JOIN dbo.Speciality s ON e.Spcialty = s.Oid
+        WHERE e.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(s.TitleOfSpeciality))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: Education
+      distinctLabelsOnEducation: 1063
+      mappedEducationRowsBeforeSeed: 956
+      unmappedEducationRowsBeforeSeed: 2177
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Specialty.md
+    values: []
+    unmappedPolicy: skip_row
+    unmappedDefault: null
+    notes: |
+      Legacy FK column Education.Spcialty. Seed specialty.calik-energi.json from DISTINCT TitleOfSpeciality on active Education.
+      Top gap Tehniki howpsuzlyk we zähmeti goramak (401 rows) absent from current tenant seed.
+
+  - targetCatalog: Position
+    targetMatchProperty: NameTm
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Position
+      column: TitleOfPosition
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(pos.TitleOfPosition)) AS label, COUNT(*) AS cnt
+        FROM dbo.WorkHistoryOfEmployee w
+        INNER JOIN dbo.Position pos ON w.Position = pos.Oid
+        WHERE w.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(pos.TitleOfPosition))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: EmployeePositionHistory
+      distinctLabelsOnWorkHistory: 1579
+      tenantSeedRows: 259
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Position.md
+    values: []
+    unmappedPolicy: skip_row
+    unmappedDefault: null
+    notes: |
+      Seed position.calik-energi.json from DISTINCT TitleOfPosition on active WorkHistoryOfEmployee.
+      Deploy via tenant manifest before EmployeePositionHistory OData import.
+
+  - targetCatalog: Department
+    targetMatchProperty: NameTm
+    identityPassThrough: true
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.Department
+      column: TitleOfDepartment
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(dep.TitleOfDepartment)) AS label, COUNT(*) AS cnt
+        FROM dbo.WorkHistoryOfEmployee w
+        INNER JOIN dbo.Department dep ON w.Department = dep.Oid
+        WHERE w.GCRecord IS NULL
+        GROUP BY LTRIM(RTRIM(dep.TitleOfDepartment))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-26
+      scope: EmployeePositionHistory
+      distinctLabelsOnWorkHistory: 74
+      tenantSeedRows: 3
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/Department.md
+    values: []
+    unmappedPolicy: skip_row
+    unmappedDefault: null
+    notes: |
+      Seed department.calik-energi.json from DISTINCT TitleOfDepartment on active WorkHistoryOfEmployee.
+      Demo tenant seed has 3 rows — Çalik production needs full department set.
+
+  - targetCatalog: Subcontractor
+    targetMatchProperty: NameTm
+    identityPassThrough: true
+    legacy:
+      storage: legacy_column
+      table: dbo.Person
+      column: IDNumber
+      valueKind: string
+      sampleQuery: |
+        SELECT LTRIM(RTRIM(p.IDNumber)) AS label, COUNT(*) AS cnt
+        FROM dbo.Person p
+        WHERE p.GCRecord IS NULL AND NULLIF(LTRIM(RTRIM(p.IDNumber)), '') IS NOT NULL
+        GROUP BY LTRIM(RTRIM(p.IDNumber))
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-07-02
+      scope: Person
+      distinctIdNumberLabels: 130
+      notes: Person.IDNumber holds employer/subcontractor text on Çalik; Employee.Tasaron FK when Tasaron table present
+    values: []
+    unmappedPolicy: allow_null
+    unmappedDefault: null
+    notes: |
+      Seed subcontractor.calik-energi.json from UNION Tasaron.NameOfTasaron + Person.IDNumber.
+      Family members inherit sponsoring employee subcontractor at OData import / correction.

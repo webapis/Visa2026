@@ -1,70 +1,515 @@
 {
   "rows": [
     {
-      "NameTm": "GT-15 — (2 ylalaşyk: türkmenenergo > energetika)",
-      "LocalizationKey": "GT-15-YL2-TE-EN",
-      "Code": "GT-15",
-      "IsActive": true,
-      "MinistryLegs": [
-        {
-          "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Türkmenenergo",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        },
-        {
-          "Sequence": 2,
-          "ApprovingMinistryShortNameTm": "Energetika",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        }
-      ]
+      "NameTm": "14306 Mary",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2015-nji \u00FDyly\u0148 24-njy i\u00FDunynda 14306 belgili kararyna la\u00FDyklykda \u003C\u003CT\u00FCrkmenenergo\u003E\u003E d\u00F6wlet elektroenergetika korporasi\u00FDasyna Mary wela\u00FDatyny\u0148 Mary d\u00F6wlet elektrik stansi\u00FDasyny\u0148 \u00E7\u00E4klerinde kuwwatlylygy 1574 MWt bolan utga\u015Fykly dolan\u015Fykda i\u015Fle\u00FD\u00E4n elektrik stansi\u00FDasyny\u0148 we o\u0148a bar\u00FDan da\u015Farky eltiji gaz we suw \u00FCpjin\u00E7ilik ulgamlaryny\u0148 hem-de desgalaryny\u0148, taslamalaryny d\u00FCzmek we olary \u00FDana\u015Fyk \u00FDerleri abadanla\u015Fdyryp gurmak barada \u003C\u003C\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u003E\u003E t\u00FCrk kompani\u00FDasy bilen \u015Fertnamany bagla\u015Fmaga ygty\u00FDar berildi.",
+      "LocalizationKey": "14306-mary-yl3-te-en-gu",
+      "Code": "14306 Mary",
+      "IsActive": true
     },
     {
-      "NameTm": "GT-15 — (4 ylalaşyk: türkmenenergo > energetika > gurluşyk > energetika)",
-      "LocalizationKey": "GT-15-YL4-TE-EN-GU-EN",
-      "Code": "GT-15",
-      "IsActive": true,
-      "MinistryLegs": [
-        {
-          "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Türkmenenergo",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        },
-        {
-          "Sequence": 2,
-          "ApprovingMinistryShortNameTm": "Energetika",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        },
-        {
-          "Sequence": 3,
-          "ApprovingMinistryShortNameTm": "Gurluşyk",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        },
-        {
-          "Sequence": 4,
-          "ApprovingMinistryShortNameTm": "Energetika",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        }
-      ]
+      "NameTm": "1574 -KIYANLI",
+      "Description": "Balkan wela\u00FDatyny\u0148 T\u00FCrkmenba\u015Fy etrabynda kuwwatlylygy 1574 megawatt bolan utga\u015Fykly dolany\u015Fykda i\u015Fle\u00FD\u00E4n elektrik stansi\u00FDasyny we ony energoulgama birikdirmek \u00FC\u00E7in gerek bolan elektrik ge\u00E7iriji ulgamlary gurmak hem-de bar bolan d\u00F6wlet elektrik stansi\u00FDalary \u00FC\u00E7in zerur bolan \u00E4ti\u00FDa\u00E7lyk \u015Fa\u00FDlaryny satyn almak",
+      "LocalizationKey": "1574-kiyanli-yl3-te-en-gu",
+      "Code": "1574 -KIYANLI",
+      "IsActive": true
     },
     {
-      "NameTm": "Şatlyk‑1 — (1 ylalaşyk: türkmengaz)",
-      "LocalizationKey": "SATLYK-1-YL1-TG",
-      "Code": "Şatlyk-1",
-      "IsActive": true,
-      "MinistryLegs": [
-        {
-          "Sequence": 1,
-          "ApprovingMinistryShortNameTm": "Türkmengaz",
-          "MaxDaysInReview": 10,
-          "WarningDaysBeforeMax": 8
-        }
-      ]
+      "NameTm": "KYC (Kiyanl\u0131 Kobmine Elektrik Santrali projesi)",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "kyc-kiyanl-kobmine-elektrik-santrali-projesi-yl2-te-en",
+      "Code": "KYC (Kiyanl\u0131 Kobmine Elektrik Santrali projesi)",
+      "IsActive": true
+    },
+    {
+      "NameTm": "12552 AST1",
+      "Description": "A\u015Fgabat \u015F\u00E4her h\u00E4kimligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2012-nji \u00FDyly\u0148 17-nji Sent\u00FDabrynda 12552 belgili kararyna la\u00FDyklykda Berkarar d\u00F6wletimizi\u0148 Bagty\u00FDarlyk d\u00F6wr\u00FCnde A\u015Fgabat \u015F\u00E4herini\u0148 ya\u015Fa\u00FDjylaryny elektrik energiyasy bilen b\u00F6kden\u00E7siz \u00FCpj\u00FCn etmek hem-de energiya \u00FCpj\u00FCn\u00E7iligini\u0148 ygtybarlylygyny yokarlandyrmak maksady bilen \u2018\u00C7al\u0131k Enerji sana\u00FDi we tijaret A.\u015E.\u2019\u2019 kompan\u00FDasy bilen 2012-\u00FDyly\u0148 16-njy no\u00FDabrynda AST-1-001 belgili \u015Fertnama bagla\u015Fyldy.",
+      "LocalizationKey": "12552-ast1-yl1-ah",
+      "Code": "12552 AST1",
+      "IsActive": true
+    },
+    {
+      "NameTm": "14080 Watan",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2015-nji \u00FDyly\u0148 22-njy \u00FDanwarynda 14080 belgili kararyna la\u00FDyklykda \u003C\u003CT\u00FCrkmenenergo\u003E\u003E d\u00F6wlet elektroenergetika korporasi\u00FDasyna Lebap wela\u00FDatyny\u0148 Be\u00FDik Saparmyrat T\u00FCrkmenba\u015Fy adyndaky etrabynda kuwwatlylygy 254 MWt bolan gaz turbinaly elektrik stansi\u00FDasyny\u0148 we o\u0148a bar\u00FDan da\u015Farky eltiji gaz, suw \u00FCpjin\u00E7ilik ulgamlaryny\u0148 hem-de desgalaryny\u0148, taslamalaryny d\u00FCzmek we olary \u00FDana\u015Fyk \u00FDerleri abadanla\u015Fdyryp gurmak barada \u003C\u003C\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u003E\u003E t\u00FCrk kompani\u00FDasy bilen \u015Fertnamany bagla\u015Fmaga ygty\u00FDar berildi.",
+      "LocalizationKey": "14080-watan-yl2-te-en",
+      "Code": "14080 Watan",
+      "IsActive": true
+    },
+    {
+      "NameTm": "13111 Derweze",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2013-nji \u00FDyly\u0148 12-njy i\u00FDulynda 13111 belgili kararyna la\u00FDyklykda \u003C\u003CT\u00FCrkmenenergo\u003E\u003E d\u00F6wlet elektroenergetika korporasi\u00FDasyna Ahal wela\u00FDatyny\u0148 Derweze etrabynda kuwwatlylygy 504,4 MWt bolan gaz turbinaly elektrik stansi\u00FDasyny\u0148 we o\u0148a bar\u00FDan da\u015Farky eltiji aragatna\u015Fyk, elektrik, gaz, suw \u00FCpjin\u00E7ilik ulgamlaryny\u0148 hem-de desgalaryny\u0148, demir \u00FDolu\u0148, gara \u00FDolu\u0148 taslamasyny d\u00FCzmek we olary \u00FDana\u015Fyk \u00FDerleri abadanla\u015Fdyryp gurmak barada \u003C\u003C\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u003E\u003E t\u00FCrk kompani\u00FDasy bilen \u015Fertnamany bagla\u015Fmaga ygty\u00FDar berildi.",
+      "LocalizationKey": "13111-derweze-yl2-te-en",
+      "Code": "13111 Derweze",
+      "IsActive": true
+    },
+    {
+      "NameTm": "13542 AST2",
+      "Description": "A\u015Fgabat \u015F\u00E4her h\u00E4kimligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2014-nji \u00FDyly\u0148 14-nji martynda 13542 belgili kararyna la\u00FDyklykda Berkarar d\u00F6wletimizi\u0148 Bagty\u00FDarlyk d\u00F6wr\u00FCnde A\u015Fgabat \u015F\u00E4herini\u0148 ya\u015Fa\u00FDjylaryny elektrik energiyasy bilen b\u00F6kden\u00E7siz \u00FCpj\u00FCn etmek hem-de energiya \u00FCpj\u00FCn\u00E7iligini\u0148 ygtybarlylygyny yokarlandyrmak maksady bilen \u2018\u00C7al\u0131k Enerji sana\u00FDi we tijaret A.\u015E.\u2019\u2019 kompan\u00FDasy bilen 2014-\u00FDyly\u0148 14-njy Awgustynda AST-2-001 belgili \u015Fertnama bagla\u015Fyldy.",
+      "LocalizationKey": "13542-ast2-yl1-ah",
+      "Code": "13542 AST2",
+      "IsActive": true
+    },
+    {
+      "NameTm": "12985 LM6000",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2013-nji \u00FDyly\u0148 29-njy aprelinde 12985 belgili kararyna la\u00FDyklykda \u003C\u003C T\u00FCrkmenenergo\u003E\u003E d\u00F6wlet elektroenergetika korporasi\u00FDasyna Ahal wela\u00FDatyny\u0148 Ak bugda\u00FD etrabynda kuwwatlylygy 141,7 MWt, Lebap wela\u00FDatyny\u0148 Serdarabat etrabynda kuwwatlylygy149,9 MWt, we Mary wela\u00FDatyny\u0148 Saparmyrat T\u00FCrkmenba\u015Fy \u015F\u00E4her\u00E7esinde kuwwatlylygy 146,7 MWt bolan gaz turbinaly ki\u00E7i elektrik stansi\u00FDalaryny gurmak barada \u003C\u003C\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u003E\u003E t\u00FCrk kompani\u00FDasy bilen \u015Fertnamany bagla\u015Fmaga ygty\u00FDar berildi.",
+      "LocalizationKey": "12985-lm6000-yl2-te-en",
+      "Code": "12985 LM6000",
+      "IsActive": true
+    },
+    {
+      "NameTm": "KYM (Kiyanl\u0131 yedek par\u00E7a-servis ve bak\u0131m projesi)",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "kym-kiyanl-yedek-parca-servis-ve-bak-m-projesi-yl2-te-en",
+      "Code": "KYM (Kiyanl\u0131 yedek par\u00E7a-servis ve bak\u0131m projesi)",
+      "IsActive": true
+    },
+    {
+      "NameTm": "13110 Akbugday",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2013-nji \u00FDyly\u0148 12-njy i\u00FDulynda 13110 belgili kararyna la\u00FDyklykda \u003C\u003CT\u00FCrkmenenergo\u003E\u003E d\u00F6wlet elektroenergetika korporasi\u00FDasyna Ahal wela\u00FDatyny\u0148 Ak bugda\u00FD etrabynda kuwwatlylygy 252,2 MWt bolan gaz turbinaly elektrik stansi\u00FDasyny\u0148 we o\u0148a bar\u00FDan da\u015Farky eltiji aragatna\u015Fyk, elektrik, gaz, suw \u00FCpjin\u00E7ilik ulgamlaryny\u0148 hem-de desgalaryny\u0148 taslamasyny d\u00FCzmek we olary \u00FDana\u015Fyk \u00FDerleri abadanla\u015Fdyryp gurmak barada \u003C\u003C\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u003E\u003E t\u00FCrk kompani\u00FDasy bilen \u015Fertnamany bagla\u015Fmaga ygty\u00FDar berildi.",
+      "LocalizationKey": "13110-akbugday-yl2-te-en",
+      "Code": "13110 Akbugday",
+      "IsActive": true
+    },
+    {
+      "NameTm": "1235-SERVIS MERKEZI",
+      "Description": "Berkarar d\u00F6wletimizi\u0148 bagty\u00FDarlyk d\u00F6wr\u00FCnde \u00FDurdumyzy\u0148 elektrik energetikasy pudagyny\u0148 maddy-enjamla\u00FDyn bin\u00FDadyny pugtalandyrmak, \u015Fe\u00FDle hem sarp edijileri\u0148 elektrik \u00FCpj\u00FCn\u00E7iligini\u0148 ygtybarlylygyny \u00FDokarlandyrmak maksady bilen, T\u00FCrkmenistany\u0148 Prezdenti 24.05.2019 senesinde \u201CEnergetika enjamlaryny abatla\u00FDy\u015F we hyzmat edi\u015F merkezini gurmak hem-de gaz turbina desgalary \u00FC\u00E7in \u00E4ti\u00FDa\u00E7lyk \u015Fa\u00FDlaryny satyn almak hakynda\u201D 1235 belgili kararyna gol \u00E7ekdi. T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 25.05.2019\u00FD. seneli, \u2116 HG-0919, \u2116 HE-0119 belgili \u015Fertnamalar d\u00FCz\u00FCldi we bagla\u015Fyldy. \u015Eertnama esasynda hatymyzy\u0148 go\u015Fundysynda g\u00F6rkezilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyna degi\u015Fli bolan sanawdaky",
+      "LocalizationKey": "1235-servis-merkezi-yl3-te-en-gu",
+      "Code": "1235-SERVIS MERKEZI",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TAP",
+      "Description": "T\u00FCrkmenistany\u0148 Prezdentini\u0148 2018-nji \u00FDyly\u0148 24-nji \u00FDanwaryndaky PB-404 belgili Bu\u00FDrugyna la\u00FDyklykda \u00ABT\u00FCrkmenistany\u0148, Owganystan Yslam Respublikasyny\u0148 we P\u00E4kistan Yslam Respublikasyny\u0148 arasyndaky \u00F6zara d\u00FC\u015F\u00FCni\u015Fmek hakyndaky \u00C4htnamany\u0148\u00BB \u015Fertlerini \u00FDerine \u00FDetirmek maksady bilen: 2018-nji \u00FDyly\u0148 31-nji \u00FDanwarynda \u201CT\u00FCrkmenistan \u2013 Owganystan \u2013P\u00E4kistan\u201D elektrik ge\u00E7irijisi taslamasyny durmu\u015Fa ge\u00E7irmekde hyzmatda\u015Flyk etmek bo\u00FDun\u00E7a T\u00FCrkmenistany\u0148 Energetika ministrligi bilen \u201C\u00C7alyk Holding A.\u015E.\u201D kompani\u00FDasyny\u0148 arasynda \u00F6zara d\u00FC\u015F\u00FCni\u015Fmek hakyndaky \u00C4htnama gol \u00E7ekildi.",
+      "LocalizationKey": "tap-yl2-te-en",
+      "Code": "TAP",
+      "IsActive": true
+    },
+    {
+      "NameTm": "KYC (Kiyanl\u0131 Kombine Elektrik Santrali projesi)",
+      "Description": "KYC (Kiyanl\u0131 Kombine Elektrik Santrali projesi)",
+      "LocalizationKey": "kyc-kiyanl-kombine-elektrik-santrali-projesi-yl2-te-en",
+      "Code": "KYC (Kiyanl\u0131 Kombine Elektrik Santrali projesi)",
+      "IsActive": true
+    },
+    {
+      "NameTm": "G\u00DD2022/L1-Serdar etr",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 01.07.2022\u00FD. seneli \u201CBalkan wela\u00FDatyny\u0148 Serdar etrabynda k\u00F6pugurly elektrik stansi\u00FDasyny gurmak hem-de elektrik ge\u00E7irijisi \u00FC\u00E7in enjamlary we materiallary satyn almak hakynda\u201D 153 belgili kararyna la\u00FDyklykda, T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 01.10.2022\u00FD. seneli, G\u00DD2022/L1 belgili \u015Fertnama bagla\u015Fyldy.",
+      "LocalizationKey": "gy2022-l1-serdar-etr-yl3-te-en-gu",
+      "Code": "G\u00DD2022/L1-Serdar etr",
+      "IsActive": true
+    },
+    {
+      "NameTm": "1862",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 \u00FDurdumyzy\u0148 2019-2025-nji \u00FDyllarda durmu\u015F \u2013 ykdysady ta\u00FDdan \u00F6sd\u00FCrmegi\u0148 Maksatnamasyna la\u00FDyklykda, 27.08.2020\u00FD. seneli \u201CT\u00FCrkmenba\u015Fydaky nebiti ga\u00FDtadan i\u015Fle\u00FD\u00E4n zawodlar toplumynda t\u00E4ze gaz turbinalary gurmak we elektrik bekedini\u0148 durkuny t\u00E4zelemek hakynda\u201D 1862 belgili kararyna la\u00FDyklykda T\u00FCrkmenba\u015Fyndaky Nebiti Ga\u00FDtadan \u0130\u015Fle\u00FD\u00E4n Zawodlar Toplumy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 25.11.2020\u00FD. seneli, \u2116 15/592 belgili \u015Fertnama d\u00FCz\u00FCldi we bagla\u015Fyldy.",
+      "LocalizationKey": "1862-yl2-ng-gu",
+      "Code": "1862",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TFM",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidenti 24.05.2019 senesinde \u201CEnergetika enjamlaryny abatla\u00FDy\u015F we hyzmat edi\u015F merkezini gurmak hem-de gaz turbina desgalary \u00FC\u00E7in \u00E4ti\u00FDa\u00E7lyk \u015Fa\u00FDlaryny satyn almak hakynda\u201D 1235 belgili kararyna gol \u00E7ekdi. T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7alik Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 25.05.2019\u00FD. seneli, \u2116 HG-0919, \u2116 HE-0119 belgili \u015Fertnamalar d\u00FCz\u00FCldi we bagla\u015Fyldy.",
+      "LocalizationKey": "tfm-yl2-te-en",
+      "Code": "TFM",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TRS proje",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "trs-proje-yl2-te-en",
+      "Code": "TRS proje",
+      "IsActive": true
+    },
+    {
+      "NameTm": "CS-1 \u015Eatl\u0131k",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "cs-1-atl-k-yl2-te-en",
+      "Code": "CS-1 \u015Eatl\u0131k",
+      "IsActive": true
+    },
+    {
+      "NameTm": "GKT-28.10/2024",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 30.08.2024\u00FD. seneli, 1099 belgili kararyna la\u00FDyklykda, \u201CT\u00FCrkmengaz\u201D D\u00F6wlet konserni bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda Mary wela\u00FDatynda \u201C\u015Eatlyk -1\u201D gaz gysyjy desgasyny\u0148 taslamasyny d\u00FCzmek, ony gurmak, zerur enjamlar bilen \u00FCpj\u00FCn etmek we go\u00FDberi\u015F-sazla\u00FDy\u015F i\u015Flerini \u00FDerine \u00FDetirmek\u201D,",
+      "LocalizationKey": "gkt-28-10-2024-yl2-tg-gu",
+      "Code": "GKT-28.10/2024",
+      "IsActive": true
+    },
+    {
+      "NameTm": "HE-2024 -Da\u015Foguz",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligi bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 01.04.2024\u00FD. senesinde \u201CT\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 Da\u015Foguz d\u00F6wlet elektrik stansi\u00FDasyny\u0148 gaz turbinalaryny abatlamak \u00FC\u00E7in zerur bolan \u00E4ti\u00FDa\u00E7lyk \u015Fa\u00FDlaryny satyn almak, enjamlary abatlamak we olarda sazla\u00FDy\u015F i\u015Flerini ge\u00E7irmek barada taslama generatory\u0148 d\u00FC\u00FDpli abatla\u00FDy\u0148 i\u015Fleri, kysymy BRUSH 154625 KVA 15 kw 3000RPM \u201D atly HE-2024 belgili \u015Fertnama bagla\u015Fyldy.",
+      "LocalizationKey": "he-2024-dasoguz-yl2-te-en",
+      "Code": "HE-2024 -Da\u015Foguz",
+      "IsActive": true
+    },
+    {
+      "NameTm": "\u0130stanbul Merkez Ofis",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "\u0130stanbul-merkez-ofis-yl2-te-en",
+      "Code": "\u0130stanbul Merkez Ofis",
+      "IsActive": true
+    },
+    {
+      "NameTm": "1604-TOP",
+      "Description": "T\u00FCrkmenistany\u0148 Prezdenti \u201CT\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 T\u00FCrkmen b\u00F6legini gurmak hakynda\u201D 2020-nji \u00FDyly\u0148 24-nji \u00FDanwarynda 1604 belgili karara gol \u00E7ekdi. Berkarar d\u00F6wletimizi\u0148 bagty\u00FDarlyk d\u00F6wr\u00FCnde t\u00FCrkmen elektrik energi\u00FDasyny\u0148 da\u015Fary \u00FDurtlara iberil\u00FD\u00E4n m\u00F6\u00E7berlerini artdyrmak, \u015Fe\u00FDle hem T\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 taslamasyny \u00FCst\u00FCnlikli durmu\u015Fa ge\u00E7irmek maksady bilen, T\u00FCrkmenistany\u0148 Energetika ministrligi, T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen \u00AB\u00C7alyk Holding A.\u015E.\u00BB kompani\u00FDasyny\u0148 gol\u00E7ur k\u00E4rhanasy bolan \u00ABTAPP-500 Power Transmission Line FZE\u00BB we T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda T\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 birinji tapgyrynda Mary d\u00F6wlet elektrik stansi\u00FDasyndan Owganystan Yslam Respublikasyny\u0148 Hyrat \u015F\u00E4heri ugry bo\u00FDun\u00E7a t\u00FCrkmen-owgan serhedine \u00E7enli g\u00FC\u00FDjenmesi 220 kW bolan elektrik ge\u00E7irijisini gurmak barada ylala\u015Fyk 2020-nji \u00FDyly\u0148 \u00FDanwarynda gol \u00E7ekildi.",
+      "LocalizationKey": "1604-top-yl3-te-en-gu",
+      "Code": "1604-TOP",
+      "IsActive": true
+    },
+    {
+      "NameTm": "HG-0819 -MARY1",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 01.03.2019\u00FD. seneli \u201CMary d\u00F6wlet elektrik stansi\u00FDasy \u00FC\u00E7in zerur bolan \u00E4ti\u00FDa\u00E7lyk \u015Fa\u00FDlaryny, enjamlary, materiallary we himiki seri\u015Fdeleri satyn almak hakynda\u201D 1157 belgili kararyna la\u00FDyklykda, T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 14.03.2019\u00FD. seneli, \u2116 HG-0819 belgili \u015Fertnama d\u00FCz\u00FCldi we bagla\u015Fyldy.Agzalan \u015Fertnamany\u0148 esasynda hatymyzy\u0148 go\u015Fundysynda g\u00F6rkezilen",
+      "LocalizationKey": "hg-0819-mary1-yl2-te-en",
+      "Code": "HG-0819 -MARY1",
+      "IsActive": true
+    },
+    {
+      "NameTm": "GFM",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "gfm-yl2-te-en",
+      "Code": "GFM",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TAP-serhet\u00FDaka",
+      "Description": "Mary wela\u00FDatyny\u0148 Serhetabat etrabynda \u00ABT\u00FCrkmenistan-Owganystan-Pakistan\u00BB elektrik ge\u00E7irijisini\u0148 dabarasyna ta\u00FD\u00FDarlyk g\u00F6rmek maksady bilen haty\u0148 go\u015Fundysynda g\u00F6rkezilen sanawdaky 1(bir) da\u015Fary \u00FDurt ra\u00FDatyna wiza m\u00F6hletlerine \u00E7enli serhet\u00FDaka Mary wela\u00FDatyny\u0148 Serhetabat we Tagtabazar etraplaryna barmaga ejaza berilmegine \u00FDardam etmegi\u0148izi Sizden ha\u00FDy\u015F ed\u00FD\u00E4r. Resminamalary\u0148 \u00F6z wagtynda resmile\u015Fdirilmegine, T\u00FCrkmenistany\u0148 \u00E7\u00E4klerinde da\u015Fary \u00FDurt ra\u00FDatlaryny\u0148 hereket etmegi baradaky d\u00FCzg\u00FCnleri\u0148 berja\u00FD edilmegine ,,\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u201D (T\u00FCrki\u00FDe) kompani\u00FDasy we T\u00FCrkmenistany\u0148 Energetika ministrligi doly jogapk\u00E4r\u00E7ilik \u00E7ek\u00FD\u00E4rler.",
+      "LocalizationKey": "tap-serhetyaka-yl3-te-en-gu",
+      "Code": "TAP-serhet\u00FDaka",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Hibrit",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "hibrit-yl2-te-en",
+      "Code": "Hibrit",
+      "IsActive": true
+    },
+    {
+      "NameTm": "KYT (Kiyanl\u0131 iletim hatlar\u0131 ve \u015Falt sahalar\u0131 projesi)",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "kyt-kiyanl-iletim-hatlar-ve-salt-sahalar-projesi-yl2-te-en",
+      "Code": "KYT (Kiyanl\u0131 iletim hatlar\u0131 ve \u015Falt sahalar\u0131 projesi)",
+      "IsActive": true
+    },
+    {
+      "NameTm": "HE-1820/L7",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 2020-nji \u00FDyly\u0148 \u00FDanwar a\u00FDyny\u0148 31-d\u00E4ki 1619 belgili karary esasynda \u201CAhal-Balkan\u201D we Balkan-Da\u015Foguz\u201D \u00FDokary woltly asma elektrik ge\u00E7iriji ulgamyny\u0148 we beketlerini\u0148 taslamasy \u00FC\u00E7in telemehanika, aragatna\u015Fyk we Scada ulgamlaryny\u0148 taslamasyny d\u00FCzmek, \u00FCpj\u00FCn etmek we gurnamak barada baglany\u015Fylan \u015Fertnamany\u0148 esasynda \u00F6z\u00FCne degi\u015Fli i\u015Fleri \u00FDerine \u00FDetirmek.",
+      "LocalizationKey": "he-1820-l7-yl2-te-en",
+      "Code": "HE-1820/L7",
+      "IsActive": true
+    },
+    {
+      "NameTm": "\u211612/24",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 20.112024\u00FD. seneli 1188 belgili kararyna la\u00FDyklykda, \u201CT\u00FCrkmenhimi\u00FDa\u201D d\u00F6wlet konserni bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda \u201CGarabogazkarbamid\u201D zawodyny b\u00F6kden\u00E7siz i\u015Fletmek we \u00F6n\u00FCm\u00E7iligini\u0148 ygtybarlylygyny gazanmak maksady bilen, tehnologik enjamlarynda tehniki kadalara la\u00FDyklykda g\u00F6zden ge\u00E7iri\u015F we abatla\u00FDy\u015F i\u015Flerini \u00FDerine \u00FDetirmek \u00FC\u00E7in T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyna degi\u015Fli bolan sanawdaky",
+      "LocalizationKey": "12-24-yl2-th-gu",
+      "Code": "\u211612/24",
+      "IsActive": true
+    },
+    {
+      "NameTm": "SERGI",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "sergi-yl2-te-en",
+      "Code": "SERGI",
+      "IsActive": true
+    },
+    {
+      "NameTm": "CSK-1 Shatl\u0131k",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 30.08.2024\u00FD. senede \u00E7ykaran \u201CT\u00FCrkmengaz d\u00F6wlet konsernine Mary wela\u00FDatynda \u201C\u015Eatlyk -1\u201D gaz gysyjy desgasyny\u0148 taslamasyny d\u00FCzmek, ony gurmak, zerur enjamlar bilen \u00FCpj\u00FCn etmek we go\u00FDberi\u015F sazla\u00FDy\u015F i\u015Flerini \u00FDerine \u00FDetirmek\u201D hakyndaky 1099 belgili kararyna la\u00FDyklykda, \u201CT\u00FCrkmengaz\u201D d\u00F6wlet konserni bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda \u015Fertnama",
+      "LocalizationKey": "csk-1-shatl-k-yl1-tg",
+      "Code": "CSK-1 Shatl\u0131k",
+      "IsActive": true
+    },
+    {
+      "NameTm": "T\u00FCrkmen himi\u00FDa",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "turkmen-himiya-yl2-te-en",
+      "Code": "T\u00FCrkmen himi\u00FDa",
+      "IsActive": true
+    },
+    {
+      "NameTm": "15/592",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 \u201CT\u00FCrkmenba\u015Fydaky nebiti ga\u00FDtadan i\u015Fle\u00FD\u00E4n zawodlar toplumynda t\u00E4ze gaz turbinalary gurmak we elektrik bekedini\u0148 durkuny t\u00E4zelemek hakyndaky\u201D 27.08.2020\u00FD. seneli, 1862 belgili kararyna la\u00FDyklykda T\u00FCrkmenba\u015Fyndaky Nebiti Ga\u00FDtadan \u0130\u015Fle\u00FD\u00E4n Zawodlar Toplumy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 25.11.2020\u00FD. seneli, \u2116 15/592 belgili \u015Fertnama d\u00FCz\u00FCldi we bagla\u015Fyldy",
+      "LocalizationKey": "15-592-yl1-ng",
+      "Code": "15/592",
+      "IsActive": true
+    },
+    {
+      "NameTm": "A\u015Fgabat merkez ofis",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "asgabat-merkez-ofis-yl2-te-en",
+      "Code": "A\u015Fgabat merkez ofis",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Garabogaz",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "garabogaz-yl2-te-en",
+      "Code": "Garabogaz",
+      "IsActive": true
+    },
+    {
+      "NameTm": "9915",
+      "Description": "\u0022\u00C7alyk Enerji\u0022 T\u00FCrk kompani\u00FDasy T\u00FCrkmenistany\u0148 Prezidentini\u0148 2008-nji \u00FDyly\u0148 21-nji Awgustynda 9915 beligili kararyna la\u00FDyklykda GT-8 \u015Fertnamasy bo\u00FDun\u00E7a Balkan wela\u00FDatyny\u0148 Balkanabat \u015F\u00E4herinde Gazturbinaly Elektrostansi\u00FDanysy gurdy. Elektrostansi\u00FDanyp go\u015Fma\u00E7a dizel \u00FDangyjy bilen i\u015Fle\u00FD\u00E4n sistemasyny gurnap ulanylmagyna tab\u015Fyryldy \u00FD\u00FCze \u00E7ykan b\u00F6kden\u00E7likleri aradan a\u00FDyrmak maksady bilen",
+      "LocalizationKey": "9915-yl2-te-en",
+      "Code": "9915",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Merkez ofis",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "merkez-ofis-yl2-te-en",
+      "Code": "Merkez ofis",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TRM-1574 MW K\u0131yanl\u0131",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "trm-1574-mw-k-yanl-yl2-te-en",
+      "Code": "TRM-1574 MW K\u0131yanl\u0131",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TRS",
+      "Description": "(1 ylala\u015Fyk: tngiz)",
+      "LocalizationKey": "trs-yl1-ng",
+      "Code": "TRS",
+      "IsActive": true
+    },
+    {
+      "NameTm": "CS-1 Shatl\u0131k",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "cs-1-shatl-k-yl2-te-en",
+      "Code": "CS-1 Shatl\u0131k",
+      "IsActive": true
+    },
+    {
+      "NameTm": "KYM(Kiyanl\u0131 yedek par\u00E7a-servis ve bak\u0131m projesi)",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "kym-kiyanl-yedek-parca-servis-ve-bak-m-projesi-yl2-te-en-2",
+      "Code": "KYM(Kiyanl\u0131 yedek par\u00E7a-servis ve bak\u0131m projesi)",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Serdar etr",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "serdar-etr-yl2-te-en",
+      "Code": "Serdar etr",
+      "IsActive": true
+    },
+    {
+      "NameTm": "tmgaz",
+      "Description": "\u201C\u00C7al\u0131k Enerji Sanayi Tijaret A.\u015E.\u201D kompani\u00FDasyny\u00F1 \u015Faham\u00E7asy 26.10.2001-nji senesinde d\u00F6redildi. 2001-nji Bitarapl\u0131k a\u00FDyny\u0148 4-de T\u00FCrkmenistany\u0148 Prezidentini\u0148 da\u015Fary \u1EF3urt ma\u1EF3a go\u1EF3umlary hasaba aly\u015F d\u00F6wlet gullugy tarapyndan re\u1EF3estoryny\u0148 belgisi \u211615413246 bilen alynan. 02.10.2009-nji \u1EF3ylda, 26340709 sanaw belgili, T\u00FCrkmenistany\u0148 ykdysad\u1EF3 we \u00F6s\u00FC\u015F ministirligi tarapyndan berilen 08.07.2012-nji \u1EF3\u1EF3ldan 27.11.2014 \u1EF3yla \u00E7enli m\u00F6hletli, T\u00FCrkmenistany\u0148 edara g\u00F6rn\u00FC\u015Fli tarapyndan \u1EF3eke-t\u00E4k d\u00F6wlet sanawyndan g\u00F6\u00E7\u00FCrme. 19.03.2002-nji \u1EF3ylda, D\u00DDK-126500000/9238 hasaba al\u1EF3\u015F belgili, T\u00FCrkmenistan\u1EF3\u0148 ykdysad\u1EF3 we \u00F6s\u00FC\u015F ministirligi tarapyndan berilen, 10.01.2012-nji \u1EF3yldan 10.01.2015 \u1EF3yla \u00E7enli, T\u00FCrkmenistany\u0148 Da\u015Fary ykdysady aragatna\u015Fyklara gatna\u015Fyjysyny\u0148 \u015Fahadatnamasy. H\u00E4zirki wagtda \u201C\u00C7al\u0131k Enerji Sanayi Tijaret A.\u015E.\u201D kompani\u00FDasyny\u00F1.\u201D \u015Eaham\u00E7asy \u00AB\u00C7alyk Enerji Sana\u00FDi we Tijaret Anonim \u015Eirketi \u00BB \u015Faham\u00E7asy Gazturbinaly Elektrostansi\u00FDalary\u0148 gurlu\u015Fyk i\u015Fleri bilen me\u015Fgullan\u00FDar we a\u015Fakda g\u00F6rkezilen \u015Fertnamalar bo\u00FDun\u00E7a i\u015F alyp bar\u00FDar: T\u00FCrkmenistany\u0148 Energetika ministrligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2015-nji \u00FDyly\u0148 24-njy i\u00FDunynda 14306 belgili kararyna la\u00FDyklykda \u003C\u003CT\u00FCrkmenenergo\u003E\u003E d\u00F6wlet elektroenergetika korporasi\u00FDasyna Mary wela\u00FDatyny\u0148 Mary d\u00F6wlet elektrik stansi\u00FDasyny\u0148 \u00E7\u00E4klerinde kuwwatlylygy 1574 MWt bolan utga\u015Fykly dolan\u015Fykda i\u015Fle\u00FD\u00E4n elektrik stansi\u00FDasyny\u0148 we o\u0148a bar\u00FDan da\u015Farky eltiji gaz we suw \u00FCpjin\u00E7ilik ulgamlaryny\u0148 hem-de desgalaryny\u0148, taslamalaryny d\u00FCzmek we olary \u00FDana\u015Fyk \u00FDerleri abadanla\u015Fdyryp gurmak barada \u003C\u003C\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u003E\u003E t\u00FCrk kompani\u00FDasy bilen \u015Fertnamany bagla\u015Fmaga ygty\u00FDar berildi. Bahasy 1.195.000.000 USD Amerikan dollary bolan taslamany 2015-nji \u00FDyly\u0148 I\u00FDun a\u00FDynda ba\u015Flap 2018-nji \u00FDyly\u0148 Dekabr a\u00FDyna \u00E7enli \u00DDylda umumy 16,5 mlrd. m3 (15 C-da) harytlyk gaz \u00F6nd\u00FCr\u00FD\u00E4n \u201CGalkyny\u015F\u201D k\u00E4nini\u0148 tebigy gazyny ga\u00FDtadan i\u015Fle\u00FD\u00E4n desgasyny doly taa\u00FD\u00FDar edip tab\u015Fyrmak \u015Ferti bilen taslamasyny d\u00FCzmek we gurmak \u00FCcin deslapky tehniki \u015Fertler",
+      "LocalizationKey": "tmgaz-yl1-tg",
+      "Code": "tmgaz",
+      "IsActive": true
+    },
+    {
+      "NameTm": "25.04.2012",
+      "Description": "\u0022\u00C7alyk Enerji\u0022 kompani\u00FDasy bilen d\u00FCn\u00FD\u00E4ni\u0148 \u00F6\u0148debaryjy tilsimatyny ulanmak arkaly \u00FDataklary \u00F6zle\u015Fdirmek hem-de nebiti\u0148 we gazy\u0148 \u00E7ykaryly\u015Fyny \u00FDokarlandyrmak bo\u00FDun\u00E7a uzak m\u00F6hletle\u00FDin hyzmatda\u015Flyk etmeklik me\u00FDille\u015Fdiril\u00FD\u00E4r. \u00DDokarda agzalanlar bilen baglan\u015Fykda \u0022T\u00FCrkmennebit\u0022 D\u00F6wlet konserni bilen \u0022\u00C7alyk Enerji\u0022 kompani\u00FDasy arasynda 25.04.2012 senesinde \u0022Syr Saklama\u0022 Ylala\u015Fygy bagla\u015Fyldy.",
+      "LocalizationKey": "25-04-2012-yl1-tn",
+      "Code": "25.04.2012",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Ahal \u0026 Da\u015Fo\u011Fuz Ziyaret",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "ahal-daso-uz-ziyaret-yl2-te-en",
+      "Code": "Ahal \u0026 Da\u015Fo\u011Fuz Ziyaret",
+      "IsActive": true
+    },
+    {
+      "NameTm": "ASB-350",
+      "Description": "T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u2018\u2018T\u00FCrkmenenergo\u2019\u2019 d\u00F6wlet elektroenergetika korporasi\u00FDasy \u2018\u2018\u00C7alik Enerji Sana\u00FDi we Ticaret A.\u015E.\u2019\u2019 t\u00FCrk kompani\u00FDasy bilen 2019-njy \u00FDyly\u0148 01-nji i\u00FDunynda ASB-350 belgili \u015Fertnamany bagla\u015Fdylar we bu \u015Fertnamany\u0148 esasynda \u00FDel \u00F6l\u00E7emek we \u00FDeli\u0148 ugruny we tizligini \u00F6l\u00E7emek i\u015Flerini \u00FDerine \u00FDetirmek maksady bilen, hatymyzy\u0148 go\u015Fundysynda g\u00F6rkezilen 1 (bir) sany da\u015Fary \u00FDurt ra\u00FDatyna 1 (bir) a\u00FD m\u00F6hlet bilen iki gezeklik \u00E7akylyk resmile\u015Fdirilmegine \u00FDardam etmegi\u0148izi Sizden ha\u00FDy\u015F ed\u00FD\u00E4ris. Da\u015Fary \u00FDurt ra\u00FDatyny\u0148 T\u00FCrkmenistana gelmegini\u0148, onda bolmagyny\u0148 we ondan gitmegini\u0148 d\u00FCzg\u00FCnlerini berja\u00FD etmegine jogapk\u00E4r\u00E7iligi kompani\u00FDamyz \u00F6z \u00FCst\u00FCne al\u00FDar. Go\u015Fundy: 1. pasport nusgasy, 2.Go\u015Fundy 1(da\u015Fary \u00FDurt ra\u00FDatyny\u0148 maglumaty), 3.ASB -350 \u015Fertnamany\u0148 nusgasy.",
+      "LocalizationKey": "asb-350-yl2-te-en",
+      "Code": "ASB-350",
+      "IsActive": true
+    },
+    {
+      "NameTm": "AWAZA",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "awaza-yl2-te-en",
+      "Code": "AWAZA",
+      "IsActive": true
+    },
+    {
+      "NameTm": "KIYANLY 1574 MW CCPP LOJ\u0130ST\u0130K",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "kiyanly-1574-mw-ccpp-loj\u0130st\u0130k-yl2-te-en",
+      "Code": "KIYANLY 1574 MW CCPP LOJ\u0130ST\u0130K",
+      "IsActive": true
+    },
+    {
+      "NameTm": "MB-01/22",
+      "Description": "02.11.2022\u00FD. senesinde \u201CMaslahat beriji hyzmatlary h\u00F6d\u00FCrlemek hakynda\u201D \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D t\u00FCrk kompani\u00FDasy bilen MB-01/22 belgili bagla\u015Fylan \u015Fertnamany \u00FDerine \u00FDetirmek maksady bilen,",
+      "LocalizationKey": "mb-01-22-yl1-th",
+      "Code": "MB-01/22",
+      "IsActive": true
+    },
+    {
+      "NameTm": "1604-TOP gulluk pasport",
+      "Description": "T\u00FCrkmenistany\u0148 Prezdenti \u201CT\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 T\u00FCrkmen b\u00F6legini gurmak hakynda\u201D 2020-nji \u00FDyly\u0148 24-nji \u00FDanwarynda 1604 belgili karara gol \u00E7ekdi. Berkarar d\u00F6wletimizi\u0148 bagty\u00FDarlyk d\u00F6wr\u00FCnde t\u00FCrkmen elektrik energi\u00FDasyny\u0148 da\u015Fary \u00FDurtlara iberil\u00FD\u00E4n m\u00F6\u00E7berlerini artdyrmak maksady bilen, T\u00FCrkmenistany\u0148 Energetika ministrligi, T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen \u00AB\u00C7alyk Holding A.\u015E.\u00BB kompani\u00FDasyny\u0148 gol\u00E7ur k\u00E4rhanasy bolan \u00ABTAPP-500 Power Transmission Line FZE\u00BB we T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda T\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 birinji tapgyrynda Mary d\u00F6wlet elektrik stansi\u00FDasyndan Owganystan Yslam Respublikasyny\u0148 Hyrat \u015F\u00E4heri ugry bo\u00FDun\u00E7a t\u00FCrkmen-owgan serhedine \u00E7enli g\u00FC\u00FDjenmesi 220 kW bolan elektrik ge\u00E7irijisini gurmak barada ylala\u015Fyk 2020-nji \u00FDyly\u0148 \u00FDanwarynda gol \u00E7ekildi.TOP elektrik ge\u00E7iriji ulgamyny \u00E7ekmegi\u0148 taslamasyny \u00FCst\u00FCnlikli amala a\u015Fyrmak maksady bilen hatymyzy\u0148 go\u015Fundysynda maglumaty g\u00F6rkezilen 1 (bir) sany da\u015Fary \u00FDurt ra\u00FDatyna gulluk pasportly 1 (bir) a\u00FD m\u00F6hlet bilen bir gezeklik T\u00FCrkmenistana gelip gitmegine \u00FDardam etmegi\u0148izi Sizden ha\u00FDy\u015F ed\u00FD\u00E4ris.",
+      "LocalizationKey": "1604-top-gulluk-pasport-yl2-te-en",
+      "Code": "1604-TOP gulluk pasport",
+      "IsActive": true
+    },
+    {
+      "NameTm": "1862-NGIZ",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 \u00FDurdumyzy\u0148 2019-2025-nji \u00FDyllarda durmu\u015F \u2013 ykdysady ya\u00FDdan \u00F6sd\u00FCrmegi\u0148 Maksatnamasyna la\u00FDyklykda, 27.08.2020\u00FD. seneli \u201CT\u00FCrkmenba\u015Fydaky nebiti ga\u00FDtadan i\u015Fle\u00FD\u00E4n zawodlar toplumynda t\u00E4ze gaz turbinalary gurmak we elektrik bekedini\u0148 durkuny t\u00E4zelemek hakynda\u201D 1862 belgili kararyna la\u00FDyklykda T\u00FCrkmenba\u015Fyndaky Nebiti Ga\u00FDtadan \u0130\u015Fle\u00FD\u00E4n Zawodlar Toplumy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 25.11.2020\u00FD. seneli, \u2116 15/592 belgili \u015Fertnama d\u00FCz\u00FCldi we bagla\u015Fyldy. T\u00FCrkmenba\u015Fydaky nebiti ga\u00FDtadan i\u015Fle\u00FD\u00E4n zawodlar toplumynda t\u00E4ze gaz turbinalary gurmak we elektrik bekedini\u0148 durkuny t\u00E4zelemek taslamasyny \u00FCst\u00FCnlikli durmu\u015Fa ge\u00E7irmek maksady bilen, hatymyzy\u0148 go\u015Fundysynda maglumaty g\u00F6rkezilen 4 (d\u00F6rt) sany da\u015Fary \u00FDurt ra\u00FDatlaryny\u0148 wizalaryny\u0148, i\u015F rugsatnamalaryny\u0148 6 (alty) a\u00FD k\u00F6p gezeklik m\u00F6hleti bilen uzaldylmagyna \u00FDardam bermegi\u0148izi Sizden ha\u00FDy\u015F ed\u00FD\u00E4ris.",
+      "LocalizationKey": "1862-ngiz-yl1-ng",
+      "Code": "1862-NGIZ",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Halka LOT 7",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "halka-lot-7-yl2-te-en",
+      "Code": "Halka LOT 7",
+      "IsActive": true
+    },
+    {
+      "NameTm": "HE-1820/7",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 31.01.2020\u00FD senesinde \u201CAhal-Balkan\u0022 we \u0022Balkan-Da\u015Foguz\u201D \u00FDokary woltly asma elektrik ge\u00E7irijisini\u0148 we beketlerini\u0148 gurlu\u015Fygy \u00FC\u00E7in enjamlary, materiallary we awtotehnikalary satyn almak hem-de telemehanika ulgamyny gurnamak barada \u0022 1619 belgili kararyna la\u00FDyklykda, T\u00FCrkmenistany\u0148 energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen \u201C\u00C7al\u0131k Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda \u0022Elektrik ge\u00E7iriji ulgamyny\u0148 we elektrik beketlerini\u0148 taslamasy \u00FC\u00E7in telemehanika, aragatna\u015Fyk we SCADA ulgamlaryny\u0148 taslamasyny d\u00FCzmek, \u00FCpj\u00FCn etmek we gurnamak barada 10.02.2020\u00FD. seneli, HE-1820/L7 belgili \u015Fertnama bagla\u015Fyldy.",
+      "LocalizationKey": "he-1820-7-yl2-te-en",
+      "Code": "HE-1820/7",
+      "IsActive": true
+    },
+    {
+      "NameTm": "KYM",
+      "Description": "(Kiyanl\u0131 yedek par\u00E7a-servis ve bak\u0131m projesi)",
+      "LocalizationKey": "kym-yl2-te-en",
+      "Code": "KYM",
+      "IsActive": true
+    },
+    {
+      "NameTm": "LM6000 Bak\u0131m",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "lm6000-bak-m-yl2-te-en",
+      "Code": "LM6000 Bak\u0131m",
+      "IsActive": true
+    },
+    {
+      "NameTm": "\u015Eatlyk-1",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 30.08.2024\u00FD. senede \u00E7ykaran \u201CT\u00FCrkmengaz d\u00F6wlet konsernine Mary wela\u00FDatynda \u201C\u015Eatlyk -1\u201D gaz gysyjy desgasyny\u0148 taslamasyny d\u00FCzmek, ony gurmak, zerur enjamlar bilen \u00FCpj\u00FCn etmek we go\u00FDberi\u015F sazla\u00FDy\u015F i\u015Flerini \u00FDerine \u00FDetirmek\u201D hakyndaky 1099 belgili karary esasynda taslamany\u0148 gurlu\u015Fygyna ba\u015Flamak",
+      "LocalizationKey": "atlyk-1-yl2-te-en",
+      "Code": "\u015Eatlyk-1",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Teklip grubu",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "teklip-grubu-yl2-te-en",
+      "Code": "Teklip grubu",
+      "IsActive": true
+    },
+    {
+      "NameTm": "...",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "yl2-te-en",
+      "Code": "...",
+      "IsActive": true
+    },
+    {
+      "NameTm": "1188-\u201CT\u00FCrkmenhimi\u00FDa\u201D",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 20.112024\u00FD. seneli 1188 belgili kararyna la\u00FDyklykda, \u201CT\u00FCrkmenhimi\u00FDa\u201D d\u00F6wlet konserni bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda \u201CGarabogazkarbamid\u201D zawody \u00FC\u00E7in i\u015Fg\u00E4rleri \u00FCpj\u00FCn etmek hakynda 20.11.2024\u00FD seneli \u211612/24 belgili \u015Fertnama bagla\u015Fyldy. \u015Eunu\u0148 bilen baglylykda, \u201CGarabogazkarbamid\u201D zawodyny\u0148 b\u00F6kden\u00E7siz i\u015Fletmek we \u00F6n\u00FCm\u00E7iligini\u0148 ygtybarlylygyny gazanmak maksady bilen, tehnologik enjamlarynda tehniki kadalara la\u00FDyklykda g\u00F6zden ge\u00E7iri\u015F we abatla\u00FDy\u015F i\u015Flerini \u00FDerine \u00FDetirmek \u00FC\u00E7in T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u201D kompani\u00FDasyna degi\u015Fli bolan sanawdaky",
+      "LocalizationKey": "1188-turkmenhimiya-yl1-th",
+      "Code": "1188-\u201CT\u00FCrkmenhimi\u00FDa\u201D",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Da\u015Foguz zi\u00FDaraty",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "dasoguz-ziyaraty-yl2-te-en",
+      "Code": "Da\u015Foguz zi\u00FDaraty",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Suw rezerwuarlar",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "suw-rezerwuarlar-yl2-te-en",
+      "Code": "Suw rezerwuarlar",
+      "IsActive": true
+    },
+    {
+      "NameTm": "T\u00FCrkmenenergo DEK",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "turkmenenergo-dek-yl2-te-en",
+      "Code": "T\u00FCrkmenenergo DEK",
+      "IsActive": true
+    },
+    {
+      "NameTm": "10 MWt bolan g\u00FCn we \u00FDel utga\u015Fdyrylan elektrik stansi\u00FDasy",
+      "Description": "T\u00FCrkmenistany\u0148 Hormatly Prezidentini\u0148 12.04.2019 seneli we 1207 belgili Karary bilen tassyklanan \u201CAltyn Asyr T\u00FCrkmen k\u00F6l\u00FCni\u0148 sebitini 2019-2025-nji y\u0131llarda \u00F6zle\u015Fdirmegi\u0148 konsepsiyasyna\u201D la\u00FDyklykda gurulmagy me\u00FDille\u015Fdiril\u00FD\u00E4n 10 MWt kuwwatlylygyndaky g\u00FCne\u015F we \u00FDel utga\u015Fykly elektrik stansy\u00FDasy",
+      "LocalizationKey": "10-mwt-bolan-gun-we-yel-utgasdyrylan-elektrik-stansiyas_85347b44",
+      "Code": "10 MWt bolan g\u00FCn we \u00FDel utga\u015Fdyrylan elektrik stansi\u00FDasy",
+      "IsActive": true
+    },
+    {
+      "NameTm": "12\u00A0476",
+      "Description": "T\u00FCrkmenistany\u0148 Dokma toplumy ministrligi, T\u00FCrkmenistany\u0148 Prezidentini\u0148 2012-nji \u00FDyly\u0148 6-njy \u00FDanwarynda \u00E7ykaran 11995 belgili \u0022Ahal wela\u00FDatyny\u0148 senagat pudagyny \u00F6sd\u00FCrmegi\u0148 esasy ugurlary hakynda\u0022 kararyna hem-de 2012-nji \u00FDyly\u0148 3-nji awgustynda \u00E7ykaran 12476 belgili karary bilen tassyklanan, \u0022T\u00FCrkmenistany\u0148 Dokma senagaty we s\u00F6wda toplumyny\u0148 pudaklaryny \u00F6sd\u00FCrmegi\u0148 2012-2016-njy \u00FDyllar \u00FC\u00E7in Maksatnamasyna\u0022 la\u00FDyklykda Ahal wela\u00FDatyny\u0148 Kaka etrabyndaky \u0022Serdar\u0022 pagta egiriji fabrigini ygtybarly elektrik togy bilen \u00FCpj\u00FCn etmek maksady bilen, transformator bekedini\u0148 taslamasyny ta\u00FD\u00FDarlamak we gurlu\u015Fyk i\u015Flerini \u00FDerine \u00FDetirmek barada T\u00FCrkmenistany\u0148 Dokma senagaty ministrligi bilen T\u00FCrki\u00FD\u00E4ni\u0148 \u0022\u00C7alyk Enerji Sana\u00FDi we Tijaret A.\u015E\u0022 kompani\u00FDasy arasynda \u015Fertnamany\u0148 esasynda",
+      "LocalizationKey": "12-476-yl2-te-en",
+      "Code": "12\u00A0476",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Awaza DES ve Newruz \u015Falt sahalar\u0131",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "awaza-des-ve-newruz-salt-sahalar-yl2-te-en",
+      "Code": "Awaza DES ve Newruz \u015Falt sahalar\u0131",
+      "IsActive": true
+    },
+    {
+      "NameTm": "\u00C7O\u011EANLI MERKEZ DEPO",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "co-anli-merkez-depo-yl2-te-en",
+      "Code": "\u00C7O\u011EANLI MERKEZ DEPO",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Dolandyryjylar ge\u0148e\u015Fini\u0148 ba\u015Flygyny\u0148 orunbasary",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "dolandyryjylar-genesinin-baslygynyn-orunbasary-yl2-te-en",
+      "Code": "Dolandyryjylar ge\u0148e\u015Fini\u0148 ba\u015Flygyny\u0148 orunbasary",
+      "IsActive": true
+    },
+    {
+      "NameTm": "G\u00DD2022/L1",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 01.07.2022\u00FD. seneli \u201CBalkan wela\u00FDatyny\u0148 Serdar etrabynda k\u00F6pugurly elektrik stansi\u00FDasyny gurmak hem-de elektrik ge\u00E7irijisi \u00FC\u00E7in enjamlary we materiallary satyn almak hakynda\u201D 153 belgili kararyna la\u00FDyklykda, T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 01.10.2022\u00FD. seneli, G\u00DD2022/L1 belgili \u015Fertnama bagla\u015Fyldy",
+      "LocalizationKey": "gy2022-l1-yl2-te-en",
+      "Code": "G\u00DD2022/L1",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Halka LOT 7 projesi",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "halka-lot-7-projesi-yl2-te-en",
+      "Code": "Halka LOT 7 projesi",
+      "IsActive": true
+    },
+    {
+      "NameTm": "Mary Galk\u0131nsh Petrofac",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "mary-galk-nsh-petrofac-yl2-te-en",
+      "Code": "Mary Galk\u0131nsh Petrofac",
+      "IsActive": true
+    },
+    {
+      "NameTm": "\u00D6zbeg\u0131stan",
+      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
+      "LocalizationKey": "ozbeg-stan-yl2-te-en",
+      "Code": "\u00D6zbeg\u0131stan",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TOP-24.01.2020.,1604",
+      "Description": "T\u00FCrkmenistany\u0148 Prezdenti \u201CT\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 T\u00FCrkmen b\u00F6legini gurmak hakynda\u201D 2020-nji \u00FDyly\u0148 24-nji \u00FDanwarynda 1604 belgili karara gol \u00E7ekdi. Berkarar d\u00F6wletimizi\u0148 bagty\u00FDarlyk d\u00F6wr\u00FCnde t\u00FCrkmen elektrik energi\u00FDasyny\u0148 da\u015Fary \u00FDurtlara iberil\u00FD\u00E4n m\u00F6\u00E7berlerini artdyrmak, \u015Fe\u00FDle hem T\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 taslamasyny \u00FCst\u00FCnlikli durmu\u015Fa ge\u00E7irmek maksady bilen, T\u00FCrkmenistany\u0148 Energetika ministrligi, T\u00FCrkmenistany\u0148 Energetika ministrligini\u0148 \u201CT\u00FCrkmenenergo\u201D d\u00F6wlet elektroenergetika korporasi\u00FDasy bilen \u00AB\u00C7alyk Holding A.\u015E.\u00BB kompani\u00FDasyny\u0148 gol\u00E7ur k\u00E4rhanasy bolan \u00ABTAPP-500 Power Transmission Line FZE\u00BB we T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda T\u00FCrkmenistan-Owganystan-Pakistan elektrik ge\u00E7irijisini\u0148 birinji tapgyrynda Mary d\u00F6wlet elektrik stansi\u00FDasyndan Owganystan Yslam Respublikasyny\u0148 Hyrat \u015F\u00E4heri ugry bo\u00FDun\u00E7a t\u00FCrkmen-owgan serhedine \u00E7enli g\u00FC\u00FDjenmesi 220 kW bolan elektrik ge\u00E7irijisini gurmak barada ylala\u015Fyk 2020-nji \u00FDyly\u0148 \u00FDanwarynda gol \u00E7ekildi. Ylala\u015Fyga la\u00FDyklykda hatymyzy\u0148 go\u015Fundysynda maglumaty g\u00F6rkezilen 1 (bir) sany da\u015Fary \u00FDurt ra\u00FDatyny\u0148 wizasyny\u0148, i\u015F rugsatnamasyny\u0148 we hasaba aly\u015F m\u00F6hletini\u0148 12 (on iki) a\u00FD k\u00F6p gezeklik m\u00F6hleti bilen uzaldylmagyna \u00FDardam etmegi\u0148izi Sizden ha\u00FDy\u015F ed\u00FD\u00E4ris.",
+      "LocalizationKey": "top-24-01-2020-1604-yl3-te-en-gu",
+      "Code": "TOP-24.01.2020.,1604",
+      "IsActive": true
+    },
+    {
+      "NameTm": "TRS-319",
+      "Description": "T\u00FCrkmenistany\u0148 Prezidentini\u0148 \u201CT\u00FCrkmenba\u015Fydaky nebiti ga\u00FDtadan i\u015Fle\u00FD\u00E4n zawodlar toplumynda t\u00E4ze gaz turbinalary gurmak we elektrik bekedini\u0148 durkuny t\u00E4zelemek hakyndaky\u201D 27.08.2020\u00FD. seneli, 1862 belgili kararyna la\u00FDyklykda T\u00FCrkmenba\u015Fyndaky Nebiti Ga\u00FDtadan \u0130\u015Fle\u00FD\u00E4n Zawodlar Toplumy bilen T\u00FCrki\u00FDe Respublikasyny\u0148 \u201C\u00C7al\u0131k Enerji Sana\u00FDi ve Ticaret A.\u015E\u201D kompani\u00FDasyny\u0148 arasynda 25.11.2020\u00FD. seneli,15/592 belgili \u015Fertnamany \u00FCst\u00FCnlikli durmu\u015Fa ge\u00E7irmek maksady bilen, \u00ABDesga H\u0131ll Taslama\u00BB hojalyk jemgy\u00FDeti we \u201C\u00C7alyk Enerji Sanayi we T\u0131jaret Anonim \u015Eirketi\u201D T\u00FCrk Kompani\u00FDalaryny\u0148 arasynda 01.06.2022\u00FD. seneli TRS-319 belgili d\u00FCz\u00FClen we bagla\u015Fylan \u201CK\u00F6mek\u00E7i potrat\u00E7y\u201D \u015Fertnamasynda g\u00F6z \u00F6\u0148\u00FCnde tutulan i\u015Fleri\u0148 \u00F6z wagtynda \u00FDerine \u00FDetirilmegi \u00FC\u00E7in hatymyzy\u0148 go\u015Fundysynda sanawy berilen \u00ABDesga H\u0131ll Taslama\u00BB hojalyk jemgy\u00FDetine degi\u015Fli 1 (bir) sany da\u015Fary \u00FDurt ra\u00FDatyna 1 (bir) a\u00FD m\u00F6hlet bilen iki gezeklik \u00E7akylyk resmile\u015Fdirilmegine \u00FDardam bermegi\u0148izi Sizden ha\u00FDy\u015F ed\u00FD\u00E4ris.",
+      "LocalizationKey": "trs-319-yl2-te-en",
+      "Code": "TRS-319",
+      "IsActive": true
     }
   ]
 }

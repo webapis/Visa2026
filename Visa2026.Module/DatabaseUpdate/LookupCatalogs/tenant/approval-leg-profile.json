@@ -1,0 +1,180 @@
+{
+  "rows": [
+    {
+      "Code": "AH",
+      "NameTm": "A\u015Fgabat h\u00E4kimlik",
+      "LocalizationKey": "ah",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "A\u015Fgabat h\u00E4kimlik",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "NG",
+      "NameTm": "TNGIZ",
+      "LocalizationKey": "ng",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "TNGIZ",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "NG-GU",
+      "NameTm": "TNGIZ-Gurlu\u015Fyk",
+      "LocalizationKey": "ng-gu",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "TNGIZ",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 2,
+          "ApprovingMinistryShortNameTm": "Gurlu\u015Fyk",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TE-EN",
+      "NameTm": "T\u00FCrkmenenergo-Energetika",
+      "LocalizationKey": "te-en",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmenenergo",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 2,
+          "ApprovingMinistryShortNameTm": "Energetika",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TE-EN-GU",
+      "NameTm": "T\u00FCrkmenenergo-Energetika-Gurlu\u015Fyk",
+      "LocalizationKey": "te-en-gu",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmenenergo",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 2,
+          "ApprovingMinistryShortNameTm": "Energetika",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 3,
+          "ApprovingMinistryShortNameTm": "Gurlu\u015Fyk",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TG",
+      "NameTm": "T\u00FCrkmengaz",
+      "LocalizationKey": "tg",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmengaz",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TG-GU",
+      "NameTm": "T\u00FCrkmengaz-Gurlu\u015Fyk",
+      "LocalizationKey": "tg-gu",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmengaz",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 2,
+          "ApprovingMinistryShortNameTm": "Gurlu\u015Fyk",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TH",
+      "NameTm": "T\u00FCrkmenhimi\u00FDa",
+      "LocalizationKey": "th",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmenhimi\u00FDa",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TH-GU",
+      "NameTm": "T\u00FCrkmenhimi\u00FDa-Gurlu\u015Fyk",
+      "LocalizationKey": "th-gu",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmenhimi\u00FDa",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        },
+        {
+          "Sequence": 2,
+          "ApprovingMinistryShortNameTm": "Gurlu\u015Fyk",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    },
+    {
+      "Code": "TN",
+      "NameTm": "T\u00FCrkmennebit",
+      "LocalizationKey": "tn",
+      "IsActive": true,
+      "MinistryLegs": [
+        {
+          "Sequence": 1,
+          "ApprovingMinistryShortNameTm": "T\u00FCrkmennebit",
+          "MaxDaysInReview": 10,
+          "WarningDaysBeforeMax": 8
+        }
+      ]
+    }
+  ]
+}

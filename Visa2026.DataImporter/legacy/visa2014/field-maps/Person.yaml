@@ -1,0 +1,368 @@
+# Person field map — layer 2
+# Layer 1: table-mappings.yaml (id: person-main)
+# Layer 3: lookup-translations.yaml (Gender, Country)
+
+tableMappingId: person-main
+
+source:
+  table: Person
+  schema: dbo
+
+target:
+  odataEntity: Person
+
+deduplication:
+  enabled: true
+  keys:
+    - Oid
+  personalNumberDedupe:
+    enabled: true
+    when: normalized PersonalNumber NOT sentinel (not 0; dash/dot-only placeholders normalize to 0)
+    keys:
+      - PersonalNumber
+    canonicalRule: most_complete
+    tieBreakColumn: Oid
+    duplicatePolicy: suffix_not_merge
+    suffixPattern: "{PersonalNumber}_dub{N}"
+    notes: |
+      True duplicates (same real PersonalNumber) all import; 2nd+ rows get _dub1, _dub2 suffix on PersonalNumber.
+      Visa2026 IX_People_PersonalNumber unique except bare "0".
+  sentinelIdentityDedupe:
+    enabled: true
+    when: normalized PersonalNumber IS sentinel 0 AND same FirstName+LastName+DateOfBirth
+    keys:
+      - FirstName
+      - LastName
+      - DateOfBirth
+    canonicalRule: most_complete
+    tieBreakColumn: Oid
+    duplicatePolicy: suffix_not_merge
+    suffixPattern: "0_dub{N}"
+    notes: |
+      Different names with PN 0 stay separate (no suffix). Same identity duplicates get 0_dub1, 0_dub2, etc.
+  canonicalRule: most_recent
+  tieBreakColumn: Passport.PassportIssuedDate
+  mergeBeforeImport: coalesce_non_null
+  action: import_one
+  discoveryQuery: |
+    -- Real PersonalNumber shared by different Person Oids (after canonical passport pick)
+    WITH canon AS (
+      SELECT p.Oid,
+        LTRIM(RTRIM((SELECT TOP 1 pp.PersonalNumber FROM dbo.Passport pp
+          WHERE pp.Person = p.Oid AND pp.GCRecord IS NULL
+          ORDER BY CASE WHEN NULLIF(LTRIM(RTRIM(pp.PersonalNumber)), '') IN ('-', '.') THEN 1 ELSE 0 END,
+                   pp.PassportIssuedDate DESC))) AS raw_pn
+      FROM dbo.Person p WHERE p.GCRecord IS NULL
+    )
+    SELECT UPPER(LTRIM(RTRIM(raw_pn))) AS norm_pn, COUNT(*) AS person_cnt
+    FROM canon
+    WHERE UPPER(LTRIM(RTRIM(raw_pn))) NOT IN ('-', '.', '0', '') AND raw_pn IS NOT NULL
+    GROUP BY UPPER(LTRIM(RTRIM(raw_pn)))
+    HAVING COUNT(*) > 1;
+
+propertyGaps:
+  legacyOnly:
+    - column: MiddleName
+      disposition: relocate
+      relocateTo: EmployeePositionHistory.ActualPosition
+      notes: |
+        Legacy Person.MiddleName is NOT a real middle name — VISA2014 had no dedicated field for the
+        employee's actual/company position, so the free-text position title was stored here
+        (e.g. "PROJECT MANAGER"). Do NOT map to Visa2026 Person.MiddleName (it pollutes FullName).
+        Migrated to EmployeePositionHistory.ActualPosition on the current/latest position-history row
+        (see EmployeePositionHistory.yaml ActualPosition + Visa2014EmployeePositionHistoryTransform).
+        Kept as _legacy_MiddleName audit column in the Person preview only.
+    - column: IDNumber
+      disposition: mapped
+      relocateTo: Person.Subcontractor
+      notes: Employer/subcontractor text on Çalik — not civil ID; maps to Subcontractor.NameTm (see fields)
+    - column: IMessage_Data
+      disposition: drop
+    - column: CountPerson
+      disposition: drop
+    - column: ImpBirthCountry
+      disposition: drop
+      notes: Denormalized import snapshot text
+    - column: ImpForeignAddressCountry
+      disposition: drop
+    - column: ImpGender
+      disposition: drop
+    - column: ImpContract
+      disposition: drop
+    - column: ImpMaritalStatus
+      disposition: drop
+    - column: OptimisticLockField
+      disposition: drop
+    - column: ObjectType
+      disposition: drop
+    - column: AppConf
+      disposition: drop
+    - column: AnketaCV
+      disposition: drop
+    - column: GosmacaMaglumat
+      disposition: drop
+    - column: RegistratinDescription
+      disposition: drop
+    - column: Berkan
+      disposition: drop
+      notes: Legacy date field — confirm meaning before future mapping
+  targetOnly:
+    - property: Email
+      default: ""
+      missingBehavior: use_default
+    - property: HireDate
+      missingBehavior: allow_null
+    - property: Subcontractor
+      missingBehavior: allow_null
+      notes: Legacy Person.IDNumber (+ Employee.Tasaron when available); family inherits sponsor
+    - property: VisaApplicationFamilyMembersText
+      missingBehavior: allow_null
+      notes: Optional source MaritalStatus.StatusL (legacy family narrative) — not catalog
+  mismatches:
+    - property: PersonalNumber
+      legacyColumn: IDNumber
+      notes: Use Passport.PersonalNumber via extractJoin, not Person.IDNumber
+      transform: custom_canonical_passport
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map only — not OData ID
+
+  - source: FirstName
+    target: FirstName
+    transform: identity
+    missingBehavior: skip_row
+
+  - source: LastName
+    target: LastName
+    transform: identity
+    missingBehavior: skip_row
+
+  # MiddleName: legacy column holds the free-text work-position title, not a real middle name.
+  # Relocated to EmployeePositionHistory.ActualPosition (see propertyGaps.legacyOnly above) — not a Person target.
+
+  - source: BirthDate
+    target: DateOfBirth
+    transform: date
+    missingBehavior: skip_row
+
+  - source: BirthPlace
+    target: BirthPlace
+    transform: identity
+    missingBehavior: allow_null
+
+  - source: BirthCountry
+    target: CountryOfBirth
+    transform: lookup
+    lookupCatalog: Country
+    lookupMatch: Code
+    lookupLegacyColumn: Country.NameOfCountryL
+    missingBehavior: allow_null
+
+  - source: ForeignAddress
+    target: ForeignAddress
+    transform: identity
+    missingBehavior: allow_null
+
+  - source: ForeignAddressCountry
+    target: ForeignAddressCountry
+    transform: lookup
+    lookupCatalog: Country
+    lookupMatch: Code
+    lookupLegacyColumn: Country.NameOfCountryL
+    missingBehavior: allow_null
+
+  - source: Gender
+    target: Gender
+    transform: lookup
+    lookupCatalog: Gender
+    lookupMatch: Code
+    lookupLegacyColumn: Gender.TypeOfGenderL
+    missingBehavior: allow_null
+
+  - source: MaritalStatus.Status
+    target: MaritalStatus
+    transform: lookup
+    lookupCatalog: MaritalStatus
+    lookupMatch: Code
+    lookupLegacyColumn: MaritalStatus.Status
+    missingBehavior: allow_null
+    notes: Join dbo.MaritalStatus; map Status int (0–5) → Visa2026 Code via lookup-translations.yaml
+
+  - source: MaritalStatus.StatusL
+    target: VisaApplicationFamilyMembersText
+    transform: identity
+    missingBehavior: allow_null
+    notes: Legacy family narrative — optional; not a catalog row
+
+  - source: IsEmployee
+    target: IsEmployee
+    transform: bool
+    missingBehavior: use_default
+    default: false
+
+  - source: IsFamilyMember
+    target: PersonRole
+    transform: enum_from_flags
+    enumMap:
+      employee: Employee
+      familyMember: FamilyMember
+    missingBehavior: use_default
+    default: FamilyMember
+    notes: Derived with IsEmployee — Employee when IsEmployee=1 else FamilyMember
+
+  - source: Employee
+    target: SponsoringEmployee
+    transform: fk_id_map
+    fkEntity: Person
+    missingBehavior: allow_null
+    notes: Resolve after parent Person id-map populated
+
+  - source: FamilyMemberRelation
+    target: Relationship
+    transform: lookup
+    lookupCatalog: Relationship
+    lookupMatch: Name
+    lookupLegacyTable: Relation
+    missingBehavior: allow_null
+
+  - source: Contract
+    target: ProjectContract
+    transform: lookup
+    lookupCatalog: ProjectContract
+    lookupMatch: Code
+    lookupLegacyColumn: NumberOfContract
+    missingBehavior: allow_null
+    notes: |
+      Employee: dbo.Person.Contract → Contract.NumberOfContract.
+      Family member: legacy Person.Contract is null on Çalik — derive from sponsoring employee
+      (COALESCE in extract SQL + OData fallback from employee batch).
+      Company-specific via --legacy-source:
+      Çalik (calik-energi): identityPassThrough — legacy NumberOfContract → same Visa2026 Code.
+      Gap (gap-insaat): experimental remap → GT-15. See lookup-translations.*.yaml.
+
+  - source: ActivePerson
+    target: IsArchived
+    transform: bool_invert
+    notes: ActivePerson=1 → IsArchived=false
+
+  - source: IDNumber
+    target: Subcontractor
+    transform: lookup
+    lookupCatalog: Subcontractor
+    lookupMatch: NameTm
+    missingBehavior: allow_null
+    notes: Legacy employer/subcontractor text; family members inherit sponsor at OData import
+
+  - source: Photo
+    target: Photo
+    transform: bytes
+    importWave: file-follow-up
+    excelExport:
+      mode: stub
+      stubColumns:
+        - _hasPhoto
+        - _photoByteLength
+        - _photoSha256
+    missingBehavior: allow_null
+    notes: |
+      VISA2015: dbo.Person.Photo varbinary(max); 2,567/2,569 active rows with data (avg ~473 KB, max ~15 MB).
+      Visa2026: Person.Photo byte[] — not FileData. Excel preview uses stubs only; bytes via --import-visa2014-files after scalar Person + id-map.
+      See docs/VISA2014_MIGRATION/FILE_AND_IMAGE_IMPORT.md
+
+  - source: Passport.PersonalNumber
+    target: PersonalNumber
+    upsertKey: false
+    transform: custom_canonical_passport
+    missingBehavior: use_default
+    default: "0"
+    normalizeSentinels:
+      - "-"
+      - "."
+      - ""
+      - "---"
+      - "..."
+      - "----"
+    sentinelIdentityKeys:
+      - FirstName
+      - LastName
+      - DateOfBirth
+    visa2026Uniqueness:
+      rule: Person_PersonalNumberUniqueAmongActive
+      sentinelIdentityRule: Person_IdentityUniqueWhenPersonalNumberIsSentinel
+      index: IX_People_PersonalNumber
+      sentinelAllowed: "0"
+      duplicatePolicy: dedupe_before_post
+    notes: |
+      Source: dbo.Passport.PersonalNumber only (not Person.IDNumber).
+      Dash/dot-only placeholders (---, ..., ----, -, .) normalize to sentinel 0.
+      Canonical passport: real PN first, then dash/dot-only, then latest PassportIssuedDate.
+      When PN is 0, dedupe on FirstName + LastName + DateOfBirth; otherwise dedupe on PersonalNumber.
+      Sentinels (- . empty) → "0" (multiple persons allowed in Visa2026).
+      Real PN must be unique — 5 legacy duplicate pairs merged to one Person each.
+      OData upsert uses legacy Oid/id-map, not PersonalNumber filter alone.
+
+  - source: Passport.Citizenship
+    target: Nationality
+    transform: lookup
+    lookupCatalog: Country
+    lookupMatch: Code
+    lookupLegacyColumn: Country.NameOfCountryL
+    missingBehavior: allow_null
+    notes: From same canonical passport join
+
+import:
+  rowFilter: "p.GCRecord IS NULL"
+  rowFilterNote: XPO soft delete — active persons only
+  extractJoin: |
+    FROM dbo.Person p
+    OUTER APPLY (
+      SELECT TOP 1 pp.*
+      FROM dbo.Passport pp
+      WHERE pp.Person = p.Oid AND pp.GCRecord IS NULL
+      ORDER BY
+        CASE WHEN NULLIF(LTRIM(RTRIM(pp.PersonalNumber)), '') IN ('-', '.') THEN 1 ELSE 0 END,
+        pp.PassportIssuedDate DESC,
+        pp.Oid
+    ) Passport
+    LEFT JOIN dbo.Country bc ON p.BirthCountry = bc.Oid
+    LEFT JOIN dbo.Country fac ON p.ForeignAddressCountry = fac.Oid
+    LEFT JOIN dbo.Gender g ON p.Gender = g.Oid
+    LEFT JOIN dbo.MaritalStatus ms ON p.MaritalStatus = ms.Oid
+    LEFT JOIN dbo.Country nc ON Passport.Citizenship = nc.Oid
+
+export:
+  sheetName: Person
+  includeAuditColumns: true
+  auditColumns:
+    - _legacyRowId
+    - _legacyTable
+    - _dedupeGroupId
+    - _importAction
+  binaryStubColumns:          # from fields[].excelExport.stubColumns — never write bytes to cells
+    Photo:
+      - _hasPhoto
+      - _photoByteLength
+      - _photoSha256
+  lastExportedAt: null
+  lastExportPath: null
+
+notes: |
+  Upsert/id-map on legacy Person.Oid — not PersonalNumber (Visa2026 unique index on PN except "0").
+  Passport child records imported in separate Passport entity pass after Person id-map exists.
+
+targetConstraints:
+  PersonalNumber:
+    source: Passport.PersonalNumber
+    visa2026Rule: Person_PersonalNumberUniqueAmongActive
+    visa2026Index: IX_People_PersonalNumber
+    uniqueExcept:
+      - "0"
+    importNormalize:
+      "-": "0"
+      ".": "0"
+      "": "0"
+    legacyDuplicateRealPnGroups: 5
+    legacyRowsAfterPnDedupe: 2564

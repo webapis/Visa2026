@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.Model.DomainLogics;
 using Visa2026.Module.Controllers;
 using Visa2026.Module.Model;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services.MigrationImport;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.ExpressApp.Updating;
@@ -90,6 +91,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.EmployeeContractSchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemCurrentSalarySchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressMinistryLetterFileSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProgressOrderSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonIsActiveColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PassportCurrentVisaColumnCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),
@@ -126,6 +128,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.SoftDeleteColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupBaseNameTmBackfillUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractTitleDescriptionMergeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupBaseNameTmPdfFormMappingUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
@@ -133,7 +136,10 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractMinistrySeedUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractApprovalLegProfileSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractMinistryLegsSchemaCleanupUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
@@ -179,7 +185,10 @@ namespace Visa2026.Module
             application.ObjectSpaceCreated += Application_ObjectSpaceCreated;
         }
 
-        private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e) =>
-            ProjectContractMinistryLegObjectSpaceHooks.Subscribe(e.ObjectSpace);
+        private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e)
+        {
+            ApprovalLegProfileMinistryLegObjectSpaceHooks.Subscribe(e.ObjectSpace);
+            MigrationImportAuditTrailObjectSpaceHooks.ApplyIfNeeded(e.ObjectSpace);
+        }
     }
 }

@@ -1,0 +1,374 @@
+# VISA2014 → Visa2026 — canonical dependency order
+#
+# Single source of truth for:
+#   - Phase 1 discovery (walk `entities` top-to-bottom, respect dependsOn)
+#   - Phase 4+ OData import (same sequence)
+#
+# Rules:
+#   - Array order MUST be a topological sort: every dependsOn target appears earlier in the list.
+#   - Discover/import one BO atomically; only one discoveryStatus: in_progress at a time.
+#   - Do not discover a BO until all dependsOn are complete | blocked | skip.
+#   - Do not implement import code or run OData load until importConfirmed: true (Phase 1b sign-off).
+#   - Lookup review gate: personWaveComplete in lookup-comparisons/lookup-review-queue.yaml before Person importConfirmed.
+#   - Application importConfirmed requires applicationWaveComplete in the same queue.
+#   - If a dependency is blocked, downstream BOs stay not_started unless waived in mapping.notes.
+#
+# When adding a BO: insert at the correct dependency position (not at the end unless it is a leaf).
+
+version: 1
+
+bootstrapOnce:
+  - id: global-schema-index
+    description: Table list + row counts; identify XAF/system tables to skip
+    artifact: docs/VISA2014_MIGRATION/schema-snapshot.md
+    status: complete
+    completedAt: 2026-06-20
+
+# VISA2015 → tenant JSON for ApprovalLegProfile seed (before application-domain import).
+# Executed automatically by --generate-visa2014-tenant-catalogs and scripts/visa2014-migration/import/OnPrem-Staging.ps1.
+tenantCatalogGeneration:
+  runBeforeImportPhase: application-domain
+  legacySources:
+    - calik-energi
+    - calik-energi-onprem-staging
+    - calik-energi-onprem-prod
+    - calik-energi-onprem-demo
+  steps:
+    - id: project-contract-calik-energi
+      script: scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1
+      dependsOn: []
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/project-contract.calik-energi.json
+    - id: approval-leg-profile-catalog
+      script: scripts/visa2014-migration/catalogs/generate/ApprovalLegProfile.ps1
+      dependsOn:
+        - project-contract-calik-energi
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/approval-leg-profile.json
+    - id: subcontractor-calik-energi
+      script: scripts/visa2014-migration/catalogs/generate/Subcontractor-CalikEnergi.ps1
+      dependsOn: []
+      outputs:
+        - Visa2026.Module/DatabaseUpdate/LookupCatalogs/tenant/subcontractor.calik-energi.json
+
+entities:
+  # --- person-domain (no upstream transactional deps) ---
+  - targetODataEntity: Person
+    dependsOn: []
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Person.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-26
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Full OData import 2026-06-26: 2915/2924 posted, 9 failed (duplicate PersonalNumber collisions).
+      Id-map 3087 entries after alias expand. Target People: 2925 rows (GCRecord=0).
+
+  - targetODataEntity: Passport
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Passport.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-26
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      importConfirmed 2026-06-26 after Passport-preview.calik-energi.xlsx review.
+      Full OData import 2026-06-26: 3410/3534 posted, 0 failed, 124 skipped (Person not in id-map).
+      Legacy 3666 rows; 130 transform skipped, 2 dedupe merged. Id-map in id-maps/calik-energi/Passport.json.
+      PassportCopy files 2026-06-26: 3392/3615 posted (3 pilot + 3389 full), 190 no passport map, 32 oversize, 1 no blob.
+      Copy id-map: id-maps/calik-energi/PassportCopy.json.
+
+  - targetODataEntity: Visa
+    dependsOn:
+      - Passport
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Visa.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-21
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Preview export 2026-06-21: 6016 import rows, 19 skipped, 6 dedupe merged (Visa-preview.calik-energi.xlsx).
+      Full OData scalar import 2026-06-26: 5760 posted, 0 failed, 251 skipped (no Passport id-map), 5 skipped (already in id-map from pilot).
+      Legacy 6041 rows; transform skipped 19, dedupe merged 6. Id-map 5765 entries: id-maps/calik-energi/Visa.json.
+      VisaDocument file wave 2026-06-26: 5571 posted, 0 failed, 276 no visa map, 45 no blob, 149 oversize (>5MB).
+      Document id-map: id-maps/calik-energi/VisaDocument.json.
+
+  - targetODataEntity: Education
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Education.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-26
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-26: 3133 active rows; Person id-map required.
+      Institution/Specialty calik-energi catalogs (1471 + 1063). No file wave.
+      OData import 2026-06-26: 2958 posted, 0 failed, 150 no Person id-map, 6 transform skipped.
+      Id-map: id-maps/calik-energi/Education.json. Country mgCode prefix normalize; ALB in country.json v3.
+      Diploma file wave: PassportCopy.Education FK → EducationDocument (--import-visa2014-files --property EducationDocument).
+
+  - targetODataEntity: EmployeePositionHistory
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/EmployeePositionHistory.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-26
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-26: legacy dbo.WorkHistoryOfEmployee — 2993 active rows; Employee FK → Person.
+      Position (1579) + Department (74) calik-energi catalogs deployed manifest v25.
+      ActualPosition = trim(Position.Code) or "-"; EndDate derived from next StartDate per Person.
+      OData import 2026-06-26: 2838 posted, 0 failed, 151 no Person id-map, 194 ActualPositions created.
+      Id-map: id-maps/calik-energi/EmployeePositionHistory.json. No legacy file blobs.
+
+  - targetODataEntity: AddressOfResidence
+    dependsOn:
+      - Person
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/AddressOfResidence.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-21
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-27: 4083 active rows; Address FK holds Region/City/AddressLine.
+      Region+City lookup approved; site catalogs manifest v31 deployed 2026-06-21 (lodging 37, hotel 34, hospital 4, other-site 24).
+      Lodging-preview.calik-energi.xlsx reviewed 2026-06-21; lodging dedupe fingerprint + OData resolver aligned.
+      OData import 2026-06-29: 3737 posted, 0 failed, 182 no Person map, 49 resume-skipped (pilot); OData total 3786.
+      PIA inference sub-pass (automatic, end of AddressOfResidence import): when Person has zero legacy
+      AddressOfResidence children but PersonInApplication has dbo.Address, synthesize one canonical row per employee
+      (latest application date). Id-map aliases include synthetic person key + legacy Address Oids. No separate entity wave.
+
+  - targetODataEntity: EmployeeSalary
+    dependsOn:
+      - Person
+      - EmployeePositionHistory
+    importPhase: person-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/EmployeeSalary.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-29: legacy Employee.Salary FK → dbo.Salary.Detail.
+      importConfirmed 2026-06-29.       OData import 2026-06-29: 2740 posted, 0 failed, 145 no Person map, 2 pilot resume-skipped, 63 transform skipped.
+
+  - targetODataEntity: MedicalRecord
+    dependsOn:
+      - Person
+    importPhase: attachments
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/MedicalRecord.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: done
+    notes: |
+      Discovery 2026-06-29: SpidKepilnama → Copy → FileData (not legacy scalar medical fields).
+      importConfirmed 2026-06-29. File import 2026-06-29: 0 posted (2 orphan Spid links, 0 blobs on Çalik).
+      Scalars: DocumentNumber "0"; IssueDate from audit ObjectCreated; ValidityDuration Month3 (90d).
+      CLI: --import-visa2014-files --entity MedicalRecord --property MedicalRecordDocument.
+
+  # --- application-domain ---
+  - targetODataEntity: Application
+    dependsOn:
+      - Person
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Application.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: pending
+    notes: |
+      Discovery 2026-06-29: 12,237 active dbo.Application rows; IRegistration_Data numbering.
+      Excel preview reviewed 2026-06-29: 12,129 import / 108 skipped; IsManualEntry=true all rows.
+      Layer 3 ApplicationType approved with skip_row — E:44 (92) + E:55 (13) skipped; 105 headers / 204 items.
+      ApplicationItem discovery complete — see ApplicationItem row.
+
+      ApplicationItem discovery complete — see ApplicationItem row (import after WorkPermitItem wave).
+
+  - targetODataEntity: WorkPermit
+    dependsOn:
+      - Application
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermit.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: Reordered before ApplicationItem. Legacy header synthesized from dbo.WorkPermitLetter (~398)
+      + 2 orphan dbo.WorkPermit rows without letter. Application FK optional on pilot.
+      Transform + preview exporter in progress; Excel review before importConfirmed.
+
+  - targetODataEntity: WorkPermitItem
+    dependsOn:
+      - WorkPermit
+      - Person
+      - Passport
+      - EmployeePositionHistory
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/WorkPermitItem.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: 1:1 dbo.WorkPermit → item (~6363 rows). WorkPermitLocation bit matrix → WorkPermittedLocations.
+      WorkPermittedLocationName catalog expansion + layer-3 audit in progress.
+
+  - targetODataEntity: Invitation
+    dependsOn:
+      - Application
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Invitation.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: Header synthesized from dbo.ApplicationResult rows referenced by PersonInInvitation.Invitation (~2961).
+      ApplicationResult.Number → InvitationNumber; IssuedDate → StartDate; DateOfExpire → closest ValidityDuration (90/180/365).
+      13 duplicate InvitationNumber groups suffix with legacy oid tail; ~254 headers skipped (missing Number/IssuedDate/DateOfExpire).
+      Application FK optional via Application id-map.
+
+  - targetODataEntity: InvitationItem
+    dependsOn:
+      - Invitation
+      - Person
+      - Passport
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/InvitationItem.yaml
+    discoveryStatus: in_progress
+    legacySource: calik-energi
+    importConfirmed: false
+    importConfirmedAt: null
+    importConfirmedBy: null
+    importStatus: pending
+    notes: |
+      2026-07-03: 1:1 dbo.PersonInInvitation (~5239 active). Person ← COALESCE(Employee, FamilyMember).
+      ApplicationResult.Result == 1 → IsCancelled heuristic. id-map: PersonInInvitation.Oid.
+
+  - targetODataEntity: ApplicationItem
+    dependsOn:
+      - Person
+      - Application
+      - WorkPermitItem
+    importPhase: application-domain
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationItem.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-30
+    importConfirmedBy: developer
+    importStatus: in_progress
+    notes: |
+      Discovery 2026-06-29: dbo.PersonInApplication — 21,794 active rows (40,414 total incl. soft-deleted).
+      Preview 21,588 import / 206 skipped (204 parent E:44/E:55, 2 dedupe_duplicate). OData importer shipped 2026-06-30.
+      CheckPoint via OData NameTm; BorderZoneLocation comma-separated string; PurposeOfTravel omitted (dropped from BO).
+      CurrentWorkPermitItem + WorkPermittedLocations require WorkPermitItem id-map (legacy WorkPermit.Oid 1:1).
+      Reimport ApplicationItems.ps1 after WorkPermitItem wave for full FK fidelity.
+      CurrentAddressOfResidence: legacy pia.AddressOfResidence FK, else pia.Address via AddressOfResidence id-map
+      (PIA inference + sponsor canonical key for family lines). See postImportCorrections for DB backfill only.
+
+  # --- permits-and-visas (after application-domain) ---
+
+  # --- progress-and-history ---
+  - targetODataEntity: ApplicationProgress
+    dependsOn:
+      - Application
+    importPhase: progress-and-history
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/ApplicationProgress.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-06-29
+    importConfirmedBy: developer
+    importStatus: complete
+    notes: |
+      importConfirmed 2026-06-29 after preview review (32,177 synthesized rows / 108 parent skips).
+      Live OData 2026-06-30 calik-energi: seeds removed 8135; posted 0; failed 0; skipped (already imported) 32177; parent-skipped 108; prepared 32177; id-map 32177 at legacy/visa2014/id-maps/calik-energi/ApplicationProgress.json (idempotent re-run).
+
+  # --- attachments (last) ---
+  # File blobs / scan links — often separate pipeline; discover after owning BOs.
+
+importPhases:
+  - id: prerequisites
+    description: Target lookups seeded by Module updaters; tenantCatalogGeneration (project-contract + approval-leg-profile JSON from VISA2015); lookup-translations.yaml validated; lookup-review-queue personWaveComplete for Person
+  - id: person-domain
+    description: Person and person-scoped children
+  - id: application-domain
+    description: Application header and items
+  - id: permits-and-visas
+    description: Invitation, WorkPermit, Visa, BorderZone, Rejection
+  - id: progress-and-history
+    description: ApplicationProgress and legacy state history
+  - id: attachments
+    description: File blobs and scan links
+
+# Headless SQL corrections after application-domain waves (staging / full chain).
+# Idempotent on greenfield imports. Required when re-importing into a DB that was loaded before a fix shipped.
+postImportCorrections:
+  runAfterImportPhase: application-domain
+  requiresInProcessTarget: true
+  skipWhenDryRun: true
+  orchestration:
+    - scripts/visa2014-migration/import/OnPrem-Staging.ps1
+    - scripts/visa2014-migration/import/Run-HeadlessChain.ps1
+  steps:
+    - id: person-subcontractor
+      cliFlag: --correct-person-subcontractor
+      dependsOn:
+        - Person
+    - id: person-relationship
+      cliFlag: --correct-person-relationship
+      dependsOn:
+        - Person
+    - id: person-address-of-residence-pia
+      cliFlag: --correct-person-address-of-residence
+      dependsOn:
+        - AddressOfResidence
+        - ApplicationItem
+      notes: |
+        Greenfield: PIA inference runs inside --import-visa2014 --entity AddressOfResidence (no extra step).
+        This correction backfills Person rows + ApplicationItem.CurrentAddressOfResidence on DBs imported earlier.
+    - id: application-item-person-current
+      cliFlag: --correct-application-item-person-current
+      dependsOn:
+        - Education
+        - EmployeeSalary
+        - ApplicationItem
+      notes: |
+        Greenfield: CurrentEducation/CurrentSalary resolve at ApplicationItem OData import when Show* gates pass.
+        This correction backfills null FKs on DBs imported before that wiring shipped.

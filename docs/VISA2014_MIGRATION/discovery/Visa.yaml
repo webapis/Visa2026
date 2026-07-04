@@ -1,0 +1,130 @@
+# Discovery dossier — Visa (permits-and-visas child BO)
+# dependsOn: Passport — Passport id-map required before OData POST.
+
+targetODataEntity: Visa
+discoveryStatus: complete
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-06-21
+  importConfirmedBy: developer
+  legacySource: calik-energi
+  reviewNotes: |
+    Excel preview 2026-06-21: preview-export/Visa-preview.calik-energi.xlsx — 6016 import, 19 skipped, 6 dedupe_merged.
+    Layer-3 lookups approved. OData scalar + VisaDocument importers implemented; run when Blazor :5001 is up.
+
+legacy:
+  boClass: Visa
+  boPath: VISA2014.Module/DC/IVisa.cs
+  tables:
+    - dbo.Visa
+    - dbo.VisaType
+    - dbo.IVisaType_Data
+    - dbo.VisaCategory
+    - dbo.VisaIssuedPlace
+    - dbo.BorderZoneForVisa
+  rowCount: 6041
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Visa.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Visa.yaml
+  tableMappingId: visa-main
+  cardinality: one_legacy_row_per_visa
+  upsertKeys:
+    - Oid
+  lookupDependencies:
+    - VisaType
+    - VisaCategory
+    - VisaIssuedPlace
+    - BorderZoneName
+  lookupAuditStatus:
+    VisaType: approved_2026-06-26
+    VisaCategory: approved_2026-06-26
+    VisaIssuedPlace: approved_2026-06-21
+    BorderZoneName: approved_2026-06-21
+  duplicateGroups: 7
+  legacyOnlyCount: 11
+  targetOnlyCount: 8
+  mismatchCount: 2
+  blockedReason: null
+  notes: |
+    Import ALL active visa rows (1,460 passports have >1 visa — expected).
+    Passport FK via Passport id-map (legacy Visa.Passport → Visa2026 Passport.ID).
+    All 6,041 rows have active Passport FK; 0 orphan.
+    VisaType: join VisaType → IVisaType_Data; map TypeOfVisaL + mgCode → Visa2026 LocalizationKey (see legacyStats).
+    VisaCategory: CategoryOfVisaL + mgCode (1/2/4) → Single/Double/Multiple.
+    VisaIssuedPlace: IssuedPlaceOfVisaL → NameTm; 5 aliases; 18 visas (DELİ, Pekin, London, …) skip_row — see VisaIssuedPlace.md.
+    BorderZoneLocation: bit matrix → comma-separated NameTm; 5452+2 → Ýok; catalog expanded — see BorderZoneName.md.
+    7 duplicate VisaNumber groups (2 sentinel × 8 + 5 real pairs) — see field-map dedupe rules.
+    Scan blob: inline GöçürmeNusga varbinary (~5,976 rows) → VisaDocument file wave after scalar POST.
+    Defer InvitationItem + IssuingApplicationItem until ApplicationItem import.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-06-26
+completedBy: agent session — Visa discovery (Çalik VISA2015)
+
+legacyStats:
+  database: VISA2015
+  legacySource: calik-energi
+  activeRows: 6041
+  distinctPassportFk: 4581
+  multiVisaPassports: 1460
+  orphanPassportFk: 0
+  distinctVisaNumbers: 6022
+  duplicateVisaNumberGroups: 7
+  nullRequiredScalars: 0
+  invalidDateRanges: 0
+  withInlineScanBlob: 5976
+  withBorderZoneRow: 589
+  hasBorderZonePermitFlag: 585
+  notRegisteredFlag: 8
+  visaTypeBreakdown:
+    - legacy: "WP + mgCode 11"
+      rows: 3993
+      target: "WP (Işçi Wiza)"
+    - legacy: "BS + mgCode 14"
+      rows: 1652
+      target: "BS1 (mgCode 14) — confirm BS1 vs BS2"
+    - legacy: "FM + mgCode null"
+      rows: 317
+      target: "FM"
+    - legacy: "GL + mgCode null"
+      rows: 58
+      target: "OF (Gulluk/official visa — approved 2026-06-26)"
+    - legacy: "EX + mgCode 10"
+      rows: 21
+      target: "EX"
+  visaCategoryBreakdown:
+    - legacy: "köp gezeklik + mgCode 4"
+      rows: 4301
+      target: "Multiple"
+    - legacy: "iki gezeklik + mgCode 2"
+      rows: 1431
+      target: "Double"
+    - legacy: "bir gezeklik + mgCode 1"
+      rows: 308
+      target: "Single"
+  topIssuedPlaces:
+    - legacy: "Asgabat şäheri"
+      rows: 2853
+    - legacy: "Asgabat şäher howa menzilindäki MGP"
+      rows: 2799
+    - legacy: "Dasoguz G.Y"
+      rows: 121
