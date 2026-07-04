@@ -102,9 +102,12 @@ Do **not** use `reimport/` for staging or production cutover.
 
 | Task | Script | Cleanup SQL |
 |------|--------|-------------|
-| Application headers + items | `reimport/Applications.ps1` | `cleanup/ImportedApplications.sql` |
+| **Full application domain reload** (ordered chain) | See [import-practices § Full application domain](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) — `Applications.ps1` → `WorkPermits.ps1` → `Invitations.ps1` → `ApplicationItems.ps1` → `ApplicationProgress.ps1` | `ImportedApplications.sql` (+ purge stale WorkPermit/Invitation rows/id-maps if needed) |
+| Application headers only | `reimport/Applications.ps1` | `cleanup/ImportedApplications.sql` |
 | ApplicationItem lines | `reimport/ApplicationItems.ps1` | `cleanup/ImportedApplicationItems.sql` |
 | ApplicationProgress (synthetic steps) | `reimport/ApplicationProgress.ps1` | `cleanup/ImportedApplicationProgress.sql` |
+| WorkPermit + WorkPermitItem | `import/WorkPermits.ps1` | *(manual purge if Application scope was wiped)* |
+| Invitation + InvitationItem | `import/Invitations.ps1` | *(manual purge if Application scope was wiped)* |
 | Ministry legs missing on via-ministry apps | `patch/ApplicationProgress-MinistryLegs.ps1` | (in-place delete/regen per app) |
 | Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
 

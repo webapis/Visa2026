@@ -217,7 +217,7 @@ Implementation: `Visa2026.Blazor.Server/Services/Migration/HeadlessMigrationHost
 
 **Not for end-to-end migration.** Staging cutover and production use the full `order.yaml` sequence (`import/OnPrem-Staging.ps1`, `import/Run-HeadlessChain.ps1`, or entity-by-entity first load with reconcile) — never ad-hoc partial deletes on a DB you intend to keep.
 
-**Dependency order (both modes):** Whether end-to-end or partial, always respect `order.yaml` — walk `entities[]` top-to-bottom and satisfy every `dependsOn` before importing or partial-reimporting a BO. Partial reimport touches **one BO at a time**, but only when its parents are already correct in the target DB (and id-maps match). If you partial-reimport a **parent** (e.g. Application), you must partial-reimport or re-run **downstream** entities in dependency order (e.g. ApplicationItem → ApplicationProgress) before trusting child data.
+**Dependency order (both modes):** Whether end-to-end or partial, always respect `order.yaml` — walk `entities[]` top-to-bottom and satisfy every `dependsOn` before importing or partial-reimporting a BO. Partial reimport touches **one BO at a time**, but only when its parents are already correct in the target DB (and id-maps match). If you partial-reimport **Application**, re-run the full downstream chain: WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress (see § Full application domain below).
 
 | Mode | When | Entry |
 |------|------|--------|
@@ -227,14 +227,57 @@ Implementation: `Visa2026.Blazor.Server/Services/Migration/HeadlessMigrationHost
 
 Scripts live under `reimport/` for historical path reasons; treat them as **partial reimport** helpers, not the production migration path.
 
-### Partial reimport — ApplicationItem
+### Partial reimport — full application domain (dev)
+
+Use when **Application headers** or application-domain transforms changed and you need a **clean reload** of the whole application wave — not just one BO.
+
+**Canonical order** ([`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml)):
+
+```text
+Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress
+```
+
+`reimport/Applications.ps1` alone is **not** enough: it deletes all manual-entry application scope (headers, items, progress, permits, invitations) but only **re-imports Application**. You must re-run downstream BOs in order.
+
+```powershell
+# 1. Application headers (~12k rows; deletes full application scope first)
+.\scripts\visa2014-migration\reimport\Applications.ps1
+
+# 2. Work permits (headers then items)
+.\scripts\visa2014-migration\import\WorkPermits.ps1
+
+# 3. Invitations (headers then items)
+.\scripts\visa2014-migration\import\Invitations.ps1
+
+# 4. Application lines + post corrections (~21k rows; ~20 min)
+.\scripts\visa2014-migration\reimport\ApplicationItems.ps1
+
+# 5. Synthetic progress (~54k rows)
+.\scripts\visa2014-migration\reimport\ApplicationProgress.ps1
+```
+
+**Gotchas (calik-energi 2026-07-04):**
+
+| Issue | Fix |
+|-------|-----|
+| `ImportedApplications.sql` deleted **0** rows | Active rows use `GCRecord = 0`, not `NULL` — fixed in cleanup SQL |
+| SQL cleanup fails on `CurrentInvitationItemID` FK | Cleanup NULLs ApplicationItem permit/invitation FKs before deleting permit/invitation rows |
+| WorkPermit/Invitation import posts **0** (“already imported”) | Application wipe left orphan permit/invitation rows + stale id-maps — delete those BO tables and remove `WorkPermit.json`, `WorkPermitItem.json`, `Invitation.json`, `InvitationItem.json` before re-import |
+| Direct-migration apps show ministry progress steps | Reimport ApplicationProgress only — **do not** run `--correct-application-progress-ministry-legs` afterward (that patch is for via-ministry apps missing legs) |
+| WorkPermit `Application` FK null | Expected on current pilot — headers from `WorkPermitLetter`; Application link is a later backfill |
+
+**Pilot verify:** app **8/-967** — `App_Reg_Check_Out`, 1 progress step (`IS_BEING_PREPARED` @ `AT_OFFICE`), 2 items, 0 direct-ministry review rows.
+
+**Note:** `import/Run-HeadlessChain.ps1` still skips WorkPermit and Invitation — use the recipe above or individual import scripts; `order.yaml` is authoritative.
+
+### Partial reimport — ApplicationItem only
 
 Use when **Application headers** and parent BO rows are already in the **dev** target DB, but you changed ApplicationItem transform/mapping/correction code and need a **clean item reload** (not a full chain re-run).
 
 | Situation | Use |
 |-----------|-----|
 | Mapping/transform fix on ApplicationItem only (dev) | `reimport/ApplicationItems.ps1` |
-| Application header fields wrong (dev) | `reimport/Applications.ps1` (deletes headers + items) |
+| Application header fields wrong (dev) | Full application-domain recipe above — start with `reimport/Applications.ps1` |
 | Small backfill on existing rows (no delete) | Correction CLIs only — see `order.yaml` → `postImportCorrections` |
 | Greenfield or end-to-end | `import/ApplicationItems.ps1` or full chain — **not** partial reimport |
 

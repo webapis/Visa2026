@@ -969,3 +969,31 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Pilot** (calik-energi, LocalDB): id-map **11993** entries, **0** duplicate targets; `--correct-application-type-composite --dry-run` → **0** retypes, **11934** already correct, **59** skipped (unmapped composites).
 - **Gap**: **~136** legacy apps dropped from id-map (`no target` / twin slot taken) — no matching `Applications` row for resolved type in Visa2026 (e.g. family `9/-3876` `App_Visa_Ext_FM` never imported). Needs missing Application OData import, not retype alone.
 
+### 2026-07-04 — Full application-domain partial reimport (calik-energi)
+
+- **Phase**: partial-reimport (dev chain after ApplicationType / id-map / progress fixes)
+- **Environment**: LocalDB `Visa2026` + SQLEXPRESS `VISA2015`
+- **Scripts** (in order): `reimport/Applications.ps1` → `import/WorkPermits.ps1` → `import/Invitations.ps1` → `reimport/ApplicationItems.ps1` → `reimport/ApplicationProgress.ps1`
+- **Outcome**: success
+- **Counts (target)**:
+
+  | BO | Posted / in DB |
+  |----|----------------|
+  | Application | 12,069 |
+  | ApplicationItem | 21,306 |
+  | WorkPermit | 401 |
+  | WorkPermitItem | 3,797 |
+  | Invitation | 2,776 |
+  | InvitationItem | 4,955 |
+  | ApplicationProgress | 54,267 |
+
+- **Verify `8/-967`**: `App_Reg_Check_Out` (direct migration) — **1** progress step (`IS_BEING_PREPARED` @ `AT_OFFICE`), **2** items, **0** direct-ministry review rows
+- **Gotchas**:
+  - `ImportedApplications.sql` matched `GCRecord IS NULL` only → deleted **0** rows while **36k** manual apps remained (`GCRecord = 0`) — fixed cleanup to `(GCRecord IS NULL OR GCRecord = 0)` + NULL ApplicationItem permit/invitation FKs before child delete
+  - `Applications.ps1` pointed at wrong cleanup path (`reimport/ImportedApplications.sql`) — fixed to `../cleanup/ImportedApplications.sql`
+  - After Application wipe, WorkPermit/Invitation imports posted **0** (“already imported”) until orphan BO rows + id-maps purged
+  - WorkPermit `ApplicationID` still **null** on all headers — expected pilot (letter-synthesized headers; Application FK backfill deferred)
+- **Officer sign-off**: legacy subtypes **E:33** (92) and **E:55** (13) confirmed **no migration** — remain `skip_row` in `lookup-translations.yaml`
+- **Prevent**: After `Applications.ps1`, always run WorkPermit → Invitation → ApplicationItem → ApplicationProgress; document in [import-practices.md § Full application domain](./import-practices.md). Do **not** run `--correct-application-progress-ministry-legs` after direct-migration progress reimport.
+- **Artifacts**: `cleanup/ImportedApplications.sql`, `reimport/Applications.ps1`, import-practices + scripts README + SKILL troubleshooting
+

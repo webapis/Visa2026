@@ -139,6 +139,7 @@ Need to run import / reimport / catalog step?
 
 Partial reimport one BO during migration implementation (local dev)?
   → import-practices.md § Partial reimport · scripts/visa2014-migration/reimport/
+  → Application header fix: § Full application domain (not Applications.ps1 alone)
   → Respect order.yaml dependsOn — parents before children; re-run downstream if parent changed
 
 End-to-end migration (staging / prod cutover)?
@@ -555,5 +556,9 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 | Import duplicates on re-run | Upsert on natural keys; maintain id-map |
 | Silent missing rows | Check import summary counters; enforce `skip_row` logging |
 | Prod import first try | Use Visa2026DbDev pilot + import-practices.md |
+| Application cleanup deleted 0 rows | `ImportedApplications.sql` must match `GCRecord = 0` (not `NULL` only) — see [import-practices § Full application domain](./import-practices.md) |
+| Reimport skipped all rows (“already imported”) | Stale downstream id-maps / orphan WorkPermit or Invitation rows after Application wipe — purge BO tables + id-maps before re-import |
+| Direct-migration apps have ministry progress | `reimport/ApplicationProgress.ps1` only — do **not** run `--correct-application-progress-ministry-legs` after that fix |
+| `Applications.ps1` only — items/progress empty | Run full application-domain chain (WorkPermit → Invitation → ApplicationItem → ApplicationProgress) — [import-practices](./import-practices.md) |
 
 Longer fixes → [learnings.md](./learnings.md) · [import-practices.md](./import-practices.md).

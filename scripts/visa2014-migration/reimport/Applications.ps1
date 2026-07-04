@@ -24,7 +24,7 @@ Set-Location $repoRoot
 $dataImporterRoot = Join-Path $repoRoot "Visa2026.DataImporter"
 $mapPath = Join-Path $dataImporterRoot "legacy/visa2014/id-maps/$LegacySource/Application.json"
 $logDir = Join-Path $dataImporterRoot "legacy/visa2014/import-logs"
-$sqlScript = Join-Path $PSScriptRoot "ImportedApplications.sql"
+$sqlScript = Join-Path $PSScriptRoot "..\cleanup\ImportedApplications.sql"
 
 Write-Host "=== Stop running importers ===" -ForegroundColor Cyan
 Get-Process -Name "Visa2026.DataImporter" -ErrorAction SilentlyContinue | Stop-Process -Force
