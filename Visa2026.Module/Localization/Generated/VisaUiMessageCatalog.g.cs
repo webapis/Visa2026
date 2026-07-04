@@ -915,6 +915,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ministrlik hatlarynyň nusgalary",
             ["ru-RU"] = "Копии писем министерства",
         },
+        ["ApplicationProgress.OnlyLastStepDeletable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Only the last progress step can be deleted. Remove later steps first.",
+            ["tr-TR"] = "Yalnızca son ilerleme adımı silinebilir. Önce sonraki adımları silin.",
+            ["tk-TM"] = "Diňe soňky ösüş ädimini pozup bolýar. Ilki soňky ädimleri aýyryň.",
+            ["ru-RU"] = "Удалить можно только последний шаг прогресса. Сначала удалите более поздние шаги.",
+        },
         ["ApplicationProgress.ProjectContractRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select a project contract before advancing beyond office preparation.",

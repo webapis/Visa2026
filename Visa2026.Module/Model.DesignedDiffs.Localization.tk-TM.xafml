@@ -271,6 +271,7 @@
         <Member Name="CurrentMedicalRecord" Caption="Häzirki saglyk ýazgysy" />
         <Member Name="CurrentPassport" Caption="Pasport" />
         <Member Name="CurrentPositionHistory" Caption="Wezipesi" />
+        <Member Name="CurrentSalary" Caption="Aýlyk" />
         <Member Name="CurrentVisa" Caption="Wiza" />
         <Member Name="CurrentWorkDuty" Caption="Iş jogapkärçiligi" />
         <Member Name="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
@@ -2417,7 +2418,6 @@
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="Ösüş taryhy">
       <Columns>
-        <ColumnInfo Id="Order" Caption="Tertip" />
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Faýl ady" />
@@ -2446,7 +2446,6 @@
     <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
     <ListView Id="ApplicationProgress_ListView" Caption="Arza ösüşleri">
       <Columns>
-        <ColumnInfo Id="Order" Caption="Tertip" />
         <ColumnInfo Id="Date" Caption="Sene" />
         <ColumnInfo Id="Description" Caption="Düşündiriş" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Faýl ady" />

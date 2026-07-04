@@ -6,7 +6,7 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Resolves the latest <see cref="ApplicationProgress"/> row from history (date, then ID).
+/// Resolves the latest <see cref="ApplicationProgress"/> row from history (order, then date/ID).
 /// </summary>
 public static class ApplicationProgressHelper
 {
@@ -20,8 +20,7 @@ public static class ApplicationProgressHelper
             query = query.Where(p => !objectSpace.IsObjectToDelete(p));
 
         return query
-            .OrderByDescending(p => p.Date)
-            .ThenByDescending(p => p.ID)
+            .OrderByDescending(p => p, Comparer<ApplicationProgress>.Create(ApplicationProgressOrderHelper.CompareSiblingOrder))
             .FirstOrDefault();
     }
 

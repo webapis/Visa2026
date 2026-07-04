@@ -120,4 +120,84 @@ public static class ApplicationProgressOrderHelper
 
         return maxOrder + 1;
     }
+    /// <summary>Compares sibling rows: <see cref="ApplicationProgress.Order"/> first, then workflow/date/ID.</summary>
+    public static int CompareSiblingOrder(ApplicationProgress a, ApplicationProgress b)
+    {
+        if (ReferenceEquals(a, b))
+            return 0;
+
+        var orderA = a?.Order ?? 0;
+        var orderB = b?.Order ?? 0;
+
+        if (orderA > 0 && orderB > 0)
+        {
+            var orderCompare = orderA.CompareTo(orderB);
+            if (orderCompare != 0)
+                return orderCompare;
+        }
+        else if (orderA > 0)
+            return 1;
+        else if (orderB > 0)
+            return -1;
+
+        return CompareTimelineOrder(a!, b!);
+    }
+
+    public static ApplicationProgress? GetLastTimelineStep(Application application, IObjectSpace objectSpace)
+    {
+        if (application == null || objectSpace == null)
+            return null;
+
+        ApplicationProgress? last = null;
+        foreach (var sibling in GetTimelineSiblings(application, objectSpace))
+        {
+            if (last == null || CompareSiblingOrder(sibling, last) > 0)
+                last = sibling;
+        }
+
+        return last;
+    }
+
+    public static bool IsLastTimelineStep(ApplicationProgress progress, IObjectSpace objectSpace)
+    {
+        if (progress?.Application == null || objectSpace == null)
+            return false;
+
+        var last = GetLastTimelineStep(progress.Application, objectSpace);
+        return last != null && ReferenceEquals(last, progress);
+    }
+
+    private static IEnumerable<ApplicationProgress> GetTimelineSiblings(Application application, IObjectSpace objectSpace)
+    {
+        var seen = new HashSet<Guid>();
+
+        if (application.ProgressHistory != null)
+        {
+            foreach (var progress in application.ProgressHistory)
+            {
+                if (objectSpace.IsObjectToDelete(progress))
+                    continue;
+
+                if (progress.ID != Guid.Empty && !seen.Add(progress.ID))
+                    continue;
+
+                yield return progress;
+            }
+        }
+
+        if (objectSpace.IsNewObject(application) || application.ID == Guid.Empty)
+            yield break;
+
+        foreach (var progress in objectSpace.GetObjectsQuery<ApplicationProgress>()
+                     .Where(p => p.Application != null && p.Application.ID == application.ID))
+        {
+            if (objectSpace.IsObjectToDelete(progress))
+                continue;
+
+            if (progress.ID != Guid.Empty && !seen.Add(progress.ID))
+                continue;
+
+            yield return progress;
+        }
+    }
 }

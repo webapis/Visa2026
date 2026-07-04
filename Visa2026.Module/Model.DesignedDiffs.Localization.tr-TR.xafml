@@ -271,6 +271,7 @@
         <Member Name="CurrentMedicalRecord" Caption="Güncel Sağlık Kaydı" />
         <Member Name="CurrentPassport" Caption="Pasaport" />
         <Member Name="CurrentPositionHistory" Caption="Pozisyon" />
+        <Member Name="CurrentSalary" Caption="Maaş" />
         <Member Name="CurrentVisa" Caption="Vize" />
         <Member Name="CurrentWorkDuty" Caption="İş sorumluluğu" />
         <Member Name="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
@@ -2417,7 +2418,6 @@
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="İlerleme Geçmişi">
       <Columns>
-        <ColumnInfo Id="Order" Caption="Sıra" />
         <ColumnInfo Id="Date" Caption="Tarih" />
         <ColumnInfo Id="Description" Caption="Açıklama" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Dosya adı" />
@@ -2446,7 +2446,6 @@
     <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
     <ListView Id="ApplicationProgress_ListView" Caption="Başvuru İlerlemeleri">
       <Columns>
-        <ColumnInfo Id="Order" Caption="Sıra" />
         <ColumnInfo Id="Date" Caption="Tarih" />
         <ColumnInfo Id="Description" Caption="Açıklama" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Dosya adı" />

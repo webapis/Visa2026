@@ -1295,6 +1295,12 @@
     "tk-TM": "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (taýýarlykda @ ofisde).",
     "ru-RU": "Первый шаг прогресса — подготовка в офисе."
   },
+  "ApplicationProgress.OnlyLastStepDeletable": {
+    "en": "Only the last progress step can be deleted. Remove later steps first.",
+    "tr-TR": "Yalnızca son ilerleme adımı silinebilir. Önce sonraki adımları silin.",
+    "tk-TM": "Diňe soňky ösüş ädimini pozup bolýar. Ilki soňky ädimleri aýyryň.",
+    "ru-RU": "Удалить можно только последний шаг прогресса. Сначала удалите более поздние шаги."
+  },
   "ApplicationProgress.ListLabel.Office": {
     "en": "Office",
     "tr-TR": "Ofis",

@@ -271,6 +271,7 @@
         <Member Name="CurrentMedicalRecord" Caption="Текущая мед. запись" />
         <Member Name="CurrentPassport" Caption="Паспорт" />
         <Member Name="CurrentPositionHistory" Caption="Должность" />
+        <Member Name="CurrentSalary" Caption="Зарплата" />
         <Member Name="CurrentVisa" Caption="Виза" />
         <Member Name="CurrentWorkDuty" Caption="Обязанности" />
         <Member Name="CurrentWorkPermitItem" Caption="Позиция РНТ" />
@@ -2417,7 +2418,6 @@
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="История прогресса">
       <Columns>
-        <ColumnInfo Id="Order" Caption="№" />
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />
@@ -2446,7 +2446,6 @@
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
     <ListView Id="ApplicationProgress_ListView" Caption="Прогресс заявок">
       <Columns>
-        <ColumnInfo Id="Order" Caption="№" />
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />
