@@ -1,0 +1,5 @@
+﻿FirstName|MiddleName
+---------|----------
+Gökhan|EMEK ELEKTRIK ENDUSTRISI A.S.-Genel müdür yardymjysy 
+
+(1 rows affected)
