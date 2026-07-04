@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using DevExpress.Data;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
+using DevExpress.Xpo.DB;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Model;
@@ -17,6 +19,7 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
 
     private static readonly string[] ColumnOrder =
     [
+        nameof(ApplicationProgress.Order),
         nameof(ApplicationProgress.StatusListLabel),
         nameof(ApplicationProgress.Date),
         nameof(ApplicationProgress.Description),
@@ -27,10 +30,42 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
     {
         var views = (IModelViews)node;
         if (views[NestedListViewId] is IModelListView nestedListView)
-            ConfigureColumns(nestedListView, ColumnOrder);
+            ConfigureListView(nestedListView, ColumnOrder);
 
         if (views[StandaloneListViewId] is IModelListView standaloneListView)
-            ConfigureColumns(standaloneListView, ColumnOrder);
+            ConfigureListView(standaloneListView, ColumnOrder);
+    }
+
+    private static void ConfigureListView(IModelListView listView, string[] visiblePropertyNames)
+    {
+        ConfigureColumns(listView, visiblePropertyNames);
+        DisableInteractiveColumnSort(listView);
+        EnsureTimelineSortOrder(listView);
+    }
+
+    private static void DisableInteractiveColumnSort(IModelListView listView)
+    {
+        foreach (var column in listView.Columns)
+        {
+            column.SortIndex = -1;
+            column.SortOrder = ColumnSortOrder.None;
+        }
+    }
+
+    private static void EnsureTimelineSortOrder(IModelListView listView)
+    {
+        EnsureSortProperty(listView, nameof(ApplicationProgress.Order), SortingDirection.Ascending);
+    }
+
+    private static void EnsureSortProperty(
+        IModelListView listView,
+        string propertyName,
+        SortingDirection direction)
+    {
+        var sortNode = listView.Sorting[propertyName]
+            ?? listView.Sorting.AddNode<IModelSortProperty>(propertyName);
+        sortNode.PropertyName = propertyName;
+        sortNode.Direction = direction;
     }
 
     private static void ConfigureColumns(IModelListView listView, string[] visiblePropertyNames)
@@ -53,6 +88,12 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
             var column = listView.Columns[name] ?? listView.Columns.AddNode<IModelColumn>(name);
             column.PropertyName = name;
             column.Index = i;
+            if (string.Equals(name, nameof(ApplicationProgress.Order), StringComparison.Ordinal))
+            {
+                column.Width = 60;
+                column.SortIndex = -1;
+                column.SortOrder = ColumnSortOrder.None;
+            }
         }
     }
 }

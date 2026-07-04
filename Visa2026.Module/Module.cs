@@ -91,6 +91,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.EmployeeContractSchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemCurrentSalarySchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressMinistryLetterFileSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProgressOrderSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonIsActiveColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PassportCurrentVisaColumnCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),
@@ -136,6 +137,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractApprovalLegProfileSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractMinistryLegsSchemaCleanupUpdater(objectSpace, versionFromDB)
             };
         }

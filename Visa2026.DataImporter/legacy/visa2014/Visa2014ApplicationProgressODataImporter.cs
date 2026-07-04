@@ -329,6 +329,9 @@ internal static class Visa2014ApplicationProgressODataImporter
             ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
         };
 
+        if (TryParseOrder(row.GetValueOrDefault("Order"), out var order))
+            payload["Order"] = order;
+
         var description = row.GetValueOrDefault("Description") as string;
         if (!string.IsNullOrWhiteSpace(description))
             payload["Description"] = description.Trim();
@@ -350,6 +353,24 @@ internal static class Visa2014ApplicationProgressODataImporter
 
     private static bool TryParseDate(string? text, out DateTime date) =>
         DateTime.TryParse(text, out date);
+
+    private static bool TryParseOrder(object? value, out int order)
+    {
+        order = 0;
+        return value switch
+        {
+            int i when i > 0 => Assign(i, out order),
+            long l when l > 0 && l <= int.MaxValue => Assign((int)l, out order),
+            string s when int.TryParse(s, out var parsed) && parsed > 0 => Assign(parsed, out order),
+            _ => false,
+        };
+
+        static bool Assign(int parsed, out int result)
+        {
+            result = parsed;
+            return true;
+        }
+    }
 
     private static Dictionary<string, Guid> LoadOptionalProgressIdMap(string? path)
     {

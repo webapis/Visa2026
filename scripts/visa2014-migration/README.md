@@ -109,6 +109,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | WorkPermit + WorkPermitItem | `import/WorkPermits.ps1` | *(manual purge if Application scope was wiped)* |
 | Invitation + InvitationItem | `import/Invitations.ps1` | *(manual purge if Application scope was wiped)* |
 | Ministry legs missing on via-ministry apps | `patch/ApplicationProgress-MinistryLegs.ps1` | (in-place delete/regen per app) |
+| Progress steps out of workflow order (date vs leg sequence) | `patch/ApplicationProgress-Order.ps1` | (in-place `ProgressOrder` recompute) |
 | Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
 
 ### Reconcile

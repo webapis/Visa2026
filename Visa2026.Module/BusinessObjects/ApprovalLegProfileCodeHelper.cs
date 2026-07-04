@@ -1,28 +1,41 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Visa2026.Module.BusinessObjects;
 
-/// <summary>Stable profile <see cref="ApprovalLegProfile.Code"/> from ordered ministry short names.</summary>
+/// <summary>
+/// Builds <see cref="ApprovalLegProfile"/> <see cref="LookupBase.Code"/> values from ordered ministry short names.
+/// Matches <c>tools/GenerateApprovalLegProfileCatalog</c> token rules.
+/// </summary>
 public static class ApprovalLegProfileCodeHelper
 {
-    public static string? ResolveCodeFromLegShortNames(IEnumerable<string?> shortNames)
+    public static string? BuildProfileCode(IReadOnlyList<string> orderedMinistryShortNamesTm)
     {
-        var legs = shortNames?
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s!.Trim())
-            .ToList();
-
-        if (legs is not { Count: > 0 })
+        if (orderedMinistryShortNamesTm == null || orderedMinistryShortNamesTm.Count == 0)
             return null;
 
-        return string.Join("-", legs.Select(ToProfileToken));
+        var tokens = orderedMinistryShortNamesTm
+            .Select(s => s?.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(ToProfileToken)
+            .ToList();
+
+        return tokens.Count == 0 ? null : string.Join('-', tokens);
     }
+
+    public static string? ResolveCodeFromLegShortNames(IReadOnlyList<string> orderedMinistryShortNamesTm) =>
+        BuildProfileCode(orderedMinistryShortNamesTm);
+
+    public static string BuildProfileNameTm(IReadOnlyList<string> orderedMinistryShortNamesTm) =>
+        string.Join('-', orderedMinistryShortNamesTm
+            .Select(s => s?.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s)!));
 
     public static string ToProfileToken(string shortNameTm)
     {
-        var folded = FoldTurkmen(shortNameTm).ToLowerInvariant();
+        var folded = FoldTurkmen(shortNameTm).ToLowerInvariant().Trim();
         return folded switch
         {
             "turkmenenergo" => "TE",
@@ -33,13 +46,13 @@ public static class ApprovalLegProfileCodeHelper
             "tngiz" => "NG",
             "turkmenhimiya" => "TH",
             "turkmennebit" => "TN",
-            _ => new string(folded.Where(char.IsLetterOrDigit).Take(4).ToArray()).ToUpperInvariant() is { Length: > 0 } s
-                ? s
+            _ => new string(folded.Where(char.IsLetterOrDigit).Take(4).ToArray()).ToUpperInvariant() is { Length: > 0 } token
+                ? token
                 : "DF",
         };
     }
 
-    internal static string FoldTurkmen(string value)
+    private static string FoldTurkmen(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return string.Empty;

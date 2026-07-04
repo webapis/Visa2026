@@ -1,3 +1,5 @@
+using Visa2026.Module.BusinessObjects;
+
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 internal sealed record Visa2014ApplicationProgressRawRow(
@@ -31,7 +33,7 @@ internal static class Visa2014ApplicationProgressTransform
     internal static readonly string[] ApplicationProgressMainColumnOrder =
     [
         "_legacyRowId", "_legacyApplicationOid", "_syntheticStepKey", "_importAction", "_processKind",
-        "Application", "State", "Location", "Date", "Description",
+        "Application", "State", "Location", "Order", "Date", "Description",
         "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite",
         "_legacy_ProcessNumber", "_legacy_MinisteriesDocumentNumber",
     ];
@@ -185,8 +187,9 @@ internal static class Visa2014ApplicationProgressTransform
                 ["_legacy_ManualApplicationNumber"] = raw.ManualApplicationNumber,
             });
 
-            foreach (var step in steps)
+            for (var stepIndex = 0; stepIndex < steps.Count; stepIndex++)
             {
+                var step = steps[stepIndex];
                 importRows.Add(new Dictionary<string, object?>(StringComparer.Ordinal)
                 {
                     ["_legacyRowId"] = $"{raw.LegacyApplicationOid:D}:{step.StepCode}",
@@ -197,6 +200,7 @@ internal static class Visa2014ApplicationProgressTransform
                     ["Application"] = raw.LegacyApplicationOid.ToString("D"),
                     ["State"] = step.StateCode,
                     ["Location"] = step.LocationCode,
+                    ["Order"] = stepIndex + 1,
                     ["Date"] = step.Date.ToString("yyyy-MM-dd"),
                     ["Description"] = step.Description,
                     ["_legacy_ManualApplicationNumber"] = raw.ManualApplicationNumber,
@@ -315,7 +319,8 @@ internal static class Visa2014ApplicationProgressTransform
         }
 
         return steps
-            .OrderBy(s => s.Date)
+            .OrderBy(s => ApplicationProgressOrderHelper.GetWorkflowSortKey(s.StateCode))
+            .ThenBy(s => s.Date)
             .ThenBy(s => StepOrder(s.StepCode))
             .ToList();
     }

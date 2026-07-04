@@ -28,7 +28,7 @@ namespace Visa2026.Module.BusinessObjects
 
     /// <summary>
 
-    /// Tenant lookup: project/contract identity (no ministry legs — see <see cref="ApprovalLegProfile"/>).
+    /// Tenant lookup: project/contract identity. Belongs to one <see cref="ApprovalLegProfile"/> (ministry route).
 
     /// Selected on <see cref="Application"/> and <see cref="Person"/> when <see cref="ApplicationType.ShowProjectContract"/> applies.
 
@@ -98,7 +98,12 @@ namespace Visa2026.Module.BusinessObjects
 
         public virtual bool IsActive { get; set; } = true;
 
+        [Browsable(false)]
+        public virtual Guid? ApprovalLegProfileId { get; set; }
 
+        /// <summary>Parent approval route — filters contract choices on <see cref="Application"/> DetailView.</summary>
+        [VisibleInListView(false)]
+        public virtual ApprovalLegProfile ApprovalLegProfile { get; set; }
 
         [Browsable(false)]
 
@@ -136,14 +141,11 @@ namespace Visa2026.Module.BusinessObjects
 
 
 
-        /// <summary>Allowed <see cref="ApprovalLegProfile"/> options for applications on this contract.</summary>
-
+        /// <summary>Legacy many-to-many join — use <see cref="ApprovalLegProfile"/> FK instead.</summary>
+        [Obsolete("Use ApprovalLegProfile FK (one profile, many contracts). Retained for migration backfill only.")]
         [Browsable(false)]
-
         [Aggregated]
-
         [InverseProperty(nameof(ProjectContractApprovalLegProfile.ProjectContract))]
-
         public virtual IList<ProjectContractApprovalLegProfile> AllowedApprovalLegProfiles { get; set; }
 
     }

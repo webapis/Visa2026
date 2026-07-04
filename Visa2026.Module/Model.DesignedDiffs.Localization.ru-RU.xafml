@@ -2417,6 +2417,7 @@
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" Caption="История прогресса">
       <Columns>
+        <ColumnInfo Id="Order" Caption="№" />
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />
@@ -2445,6 +2446,7 @@
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
     <ListView Id="ApplicationProgress_ListView" Caption="Прогресс заявок">
       <Columns>
+        <ColumnInfo Id="Order" Caption="№" />
         <ColumnInfo Id="Date" Caption="Дата" />
         <ColumnInfo Id="Description" Caption="Описание" />
         <ColumnInfo Id="MinistryLetterFileName" Caption="Имя файла" />

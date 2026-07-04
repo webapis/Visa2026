@@ -7,6 +7,7 @@ using System.Text.Json;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.Module.DatabaseUpdate.LookupCatalogs;
 
@@ -704,6 +705,9 @@ internal static class LookupCatalogEntitySync
         }
 
         ApplyLocalizationKey(target, row);
+
+        if (target is ProjectContract contract)
+            ProjectContractApprovalLegProfileLinker.TryLinkContractFromCatalogRow(objectSpace, contract, row);
     }
 
     private static void ApplyLocalizationKey(object target, Dictionary<string, JsonElement> row)

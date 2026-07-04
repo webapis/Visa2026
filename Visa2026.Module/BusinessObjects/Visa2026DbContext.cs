@@ -290,6 +290,11 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.Ignore(c => c.Name);
                 b.Ignore(c => c.Code);
+                b.HasOne(c => c.ApprovalLegProfile)
+                    .WithMany(p => p.ProjectContracts)
+                    .HasForeignKey(c => c.ApprovalLegProfileId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<SystemSettings>()

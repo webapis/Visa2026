@@ -337,8 +337,13 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
         [VisibleInListView(false)]
-        [DataSourceCriteria("IsActive = true")]
+        [ImmediatePostData]
+        [DataSourceProperty(nameof(AvailableProjectContracts))]
         public virtual ProjectContract ProjectContract { get; set; }
+
+        [Browsable(false)]
+        [NotMapped]
+        public IList<ProjectContract> AvailableProjectContracts => LoadAvailableProjectContracts();
 
         [Browsable(false)]
         [Aggregated]
@@ -934,6 +939,26 @@ namespace Visa2026.Module.BusinessObjects
             return objectSpace.GetObjectsQuery<ApprovalLegProfile>()
                 .Where(profile => profile.IsActive)
                 .OrderBy(profile => profile.Code)
+                .ToList();
+        }
+
+        private IList<ProjectContract> LoadAvailableProjectContracts()
+        {
+            var objectSpace = ObjectSpaceHelper.Get(this);
+            if (objectSpace == null)
+                return Array.Empty<ProjectContract>();
+
+            var query = objectSpace.GetObjectsQuery<ProjectContract>()
+                .Where(contract => contract.IsActive);
+
+            if (ApplicationType?.ShowApprovalLegProfile == true && ApprovalLegProfile != null)
+            {
+                var profileId = ApprovalLegProfile.ID;
+                query = query.Where(contract => contract.ApprovalLegProfileId == profileId);
+            }
+
+            return query
+                .OrderBy(contract => contract.NameTm)
                 .ToList();
         }
 

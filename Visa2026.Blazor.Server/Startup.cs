@@ -135,6 +135,8 @@ namespace Visa2026.Blazor.Server
                     {
                         ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
                         ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProgressOrderSchemaSql.ApplyIfMissing(connectionString);
+                        ProjectContractApprovalLegProfileSchemaSql.ApplyIfMissing(connectionString);
                     }
                 });
                 builder.ObjectSpaceProviders
