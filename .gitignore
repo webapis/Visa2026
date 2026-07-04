@@ -441,8 +441,10 @@ Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
 Visa2026.DataImporter/legacy/visa2014/preview-export/*.xlsx
 Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsm
 Visa2026.DataImporter/legacy/visa2014/preview-export/_*.txt
+Visa2026.DataImporter/legacy/visa2014/preview-export/_*/
 Visa2026.DataImporter/legacy/visa2014/id-maps/**/*.json
 Visa2026.DataImporter/legacy/visa2014/id-maps/*.json
+Visa2026.DataImporter/legacy/visa2014/id-maps/**/*.bak*
 Visa2026.DataImporter/legacy/visa2014/id-map/
 Visa2026.DataImporter/legacy/visa2014/file-import/
 # VISA2014 import CLI tee logs (large; never commit)
