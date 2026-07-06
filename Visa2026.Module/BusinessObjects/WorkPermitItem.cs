@@ -184,13 +184,7 @@ namespace Visa2026.Module.BusinessObjects
 
         DateTime? IExpirationLogic.ExpirationDate => ExpirationDate;
 
-        public int DaysRemaining
-        {
-            get
-            {
-                return (ExpirationDate.Date - DateTime.Today).Days;
-            }
-        }
+        public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate, IsCancelled);
 
         public string WorkPermitItemName => $"{Person?.FullName} - {WorkPermitNumber}";
 

@@ -14,12 +14,12 @@
 
 | Temporal type | Officer question | Anchor date | Metric (computed) | Typical action |
 |---------------|------------------|-------------|-------------------|----------------|
-| **`DaysRemaining`** | How many days **until** something must happen? | A **future** (or today) deadline, usually `ExpirationDate` | `(AnchorDate.Date − Today).Days` — positive while still valid | **Preventive:** extend, renew, register **before** the date |
+| **`DaysRemaining`** | How many days **until** something must happen? | A **future** (or today) deadline, usually `ExpirationDate` | `(AnchorDate.Date − Today).Days`, clamped to **0** when expired or cancelled | **Preventive:** extend, renew, register **before** the date |
 | **`DaysElapsed`** | How many days **since** something happened? | A **past** event date (progress step, arrival, submission) | `(Today − AnchorDate.Date).Days` — zero on the event day, grows each day after | **Follow-up:** chase ministry, complete registration, escalate stuck case |
 
 **Important distinctions**
 
-- **`DaysRemaining < 0`** on a validity BO means **expired** (deadline passed). That is still the **DaysRemaining** axis, not DaysElapsed — the primary metric remains “distance to `ExpirationDate`”.
+- **Expired** validity is detected from `ExpirationDate < Today` (`ExpirationLogicHelper.IsExpired`). **`DaysRemaining`** displays **0** when expired or when `IsCancelled` is true (no negative values in the UI).
 - **`DaysElapsed`** alerts often need a **precondition** (e.g. only while `ApplicationProgress.State` is non-terminal).
 - Many BOs also have **non-temporal** states (flags, process codes) that do not use either metric — see §4.
 
@@ -54,7 +54,7 @@ All eight document BOs implement [`IExpirationLogic`](../Visa2026.Module/Busines
 
 ```csharp
 DateTime? ExpirationDate { get; }
-int DaysRemaining { get; }  // (ExpirationDate.Date - Today).Days
+int DaysRemaining { get; }  // 0 when expired/cancelled; otherwise calendar days until ExpirationDate
 ```
 
 Shared helper: [`ExpirationLogicHelper`](../Visa2026.Module/BusinessObjects/IExpirationLogic.cs), evaluators under [`Services/StateEvaluation/Evaluators/`](../Visa2026.Module/Services/StateEvaluation/Evaluators/).
@@ -79,7 +79,7 @@ Shared helper: [`ExpirationLogicHelper`](../Visa2026.Module/BusinessObjects/IExp
 | `Active` | `DaysRemaining` above alert window | Document still comfortably valid |
 | `ExtensionApplicationRequired` | Within extension band (Visa, WorkPermitItem only) | Start extension application |
 | `ExpiringSoon` / `Expiring` | `DaysRemaining ≤ ExpiringSoonDays` (per `ExpirationAlertRule`) | Urgent renewal window |
-| `Expired` | `DaysRemaining < 0` | Document no longer valid |
+| `Expired` | `ExpirationDate < Today` | Document no longer valid |
 | `Archived` | Not the person’s current item | Historical row — no validity action |
 
 Thresholds: **System → Expiration alert rules** (`ExpiringSoonDays`, optional `ExtensionApplicationRequiredDays`). Fallback: `SystemSettings.DefaultExpiringSoonDays`.

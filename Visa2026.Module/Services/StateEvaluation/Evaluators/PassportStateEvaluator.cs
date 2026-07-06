@@ -17,8 +17,8 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (passport.Person != null && PersonCurrentItems.GetCurrentPassport(passport.Person) != passport)
                 return Make("Archived", StateSeverity.None, days, id, "Passport: Archived");
 
-            if (days < 0)
-                return Make("Expired", StateSeverity.Critical, days, id, $"Passport: Expired ({Math.Abs(days)} days ago)");
+            if (ExpirationLogicHelper.IsExpired(passport))
+                return Make("Expired", StateSeverity.Critical, days, id, $"Passport: Expired ({ExpirationLogicHelper.DaysOverdue(passport.ExpirationDate)} days ago)");
 
             if (ExpirationEvaluationHelper.IsExpiringSoon(passport, ExpirationAlertBusinessObjectKeys.Passport, settings))
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Passport: Expiring Soon ({days} days remaining)");

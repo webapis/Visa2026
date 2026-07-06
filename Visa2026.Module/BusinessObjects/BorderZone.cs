@@ -62,17 +62,7 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(BorderZoneDocument.BorderZone))]
         public virtual IList<BorderZoneDocument> Documents { get; set; }
 
-        public int DaysRemaining
-        {
-            get
-            {
-                if (!ExpirationDate.HasValue)
-                {
-                    return 0;
-                }
-                return (ExpirationDate.Value.Date - DateTime.Today).Days;
-            }
-        }
+        public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate, IsCancelled);
 
 		public ExpirationState ExpirationState
         {

@@ -21,8 +21,8 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (wp.Person != null && PersonCurrentItems.GetCurrentWorkPermitItem(wp.Person) != wp)
                 return Make("Archived", StateSeverity.None, days, id, "Work Permit: Archived");
 
-            if (days < 0)
-                return Make("Expired", StateSeverity.Critical, days, id, $"Work Permit: Expired ({Math.Abs(days)} days ago)");
+            if (ExpirationLogicHelper.IsExpired(wp))
+                return Make("Expired", StateSeverity.Critical, days, id, $"Work Permit: Expired ({ExpirationLogicHelper.DaysOverdue(wp.ExpirationDate)} days ago)");
 
             if (ExpirationEvaluationHelper.IsExpiringSoon(wp, ExpirationAlertBusinessObjectKeys.WorkPermitItem, settings))
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Work Permit: Expiring Soon ({days} days remaining)");

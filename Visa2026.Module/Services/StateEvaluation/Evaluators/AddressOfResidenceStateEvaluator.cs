@@ -21,8 +21,8 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (!address.ExpirationDate.HasValue)
                 return Make("Active", StateSeverity.None, days, id, "Address: Active (no expiry)");
 
-            if (days < 0)
-                return Make("Expired", StateSeverity.Critical, days, id, $"Address: Expired ({Math.Abs(days)} days ago)");
+            if (ExpirationLogicHelper.IsExpired(address))
+                return Make("Expired", StateSeverity.Critical, days, id, $"Address: Expired ({ExpirationLogicHelper.DaysOverdue(address.ExpirationDate)} days ago)");
 
             if (ExpirationEvaluationHelper.IsExpiringSoon(address, ExpirationAlertBusinessObjectKeys.AddressOfResidence, settings))
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Address: Expiring Soon ({days} days remaining)");

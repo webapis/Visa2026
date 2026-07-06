@@ -93,17 +93,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<InvitationDocument> Documents { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
-        public int DaysRemaining
-        {
-            get
-            {
-                if (!ExpirationDate.HasValue)
-                {
-                    return 0;
-                }
-                return (ExpirationDate.Value.Date - DateTime.Today).Days;
-            }
-        }
+        public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate);
 
         [Browsable(false)]
 		public ExpirationState ExpirationState

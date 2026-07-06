@@ -21,8 +21,8 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (!record.ExpirationDate.HasValue)
                 return Make("Active", StateSeverity.None, days, id, "Medical: Active (no expiry)");
 
-            if (days < 0)
-                return Make("Expired", StateSeverity.Critical, days, id, $"Medical: Expired ({Math.Abs(days)} days ago)");
+            if (ExpirationLogicHelper.IsExpired(record))
+                return Make("Expired", StateSeverity.Critical, days, id, $"Medical: Expired ({ExpirationLogicHelper.DaysOverdue(record.ExpirationDate)} days ago)");
 
             if (ExpirationEvaluationHelper.IsExpiringSoon(record, ExpirationAlertBusinessObjectKeys.MedicalRecord, settings))
                 return Make("ExpiringSoon", StateSeverity.Warning, days, id, $"Medical: Expiring Soon ({days} days remaining)");

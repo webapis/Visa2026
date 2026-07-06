@@ -277,17 +277,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual string RegistrationState { get; set; }
 
-        public int DaysRemaining
-        {
-            get
-            {
-                if (!ExpirationDate.HasValue)
-                {
-                    return 0;
-                }
-                return (ExpirationDate.Value.Date - DateTime.Today).Days;
-            }
-        }
+        public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate, IsCancelled);
 
         /// <summary>
         /// Validity state from flags and expiration (see <see cref="VisaValidityStateHelper"/>).

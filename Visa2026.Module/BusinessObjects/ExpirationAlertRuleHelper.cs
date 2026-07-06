@@ -38,7 +38,7 @@ namespace Visa2026.Module.BusinessObjects
 
         public static bool IsExpiringSoon(IExpirationLogic item, string businessObjectKey, IObjectSpace? objectSpace)
         {
-            if (item == null || !item.ExpirationDate.HasValue || item.DaysRemaining < 0)
+            if (item == null || !item.ExpirationDate.HasValue || ExpirationLogicHelper.IsExpired(item))
             {
                 return false;
             }

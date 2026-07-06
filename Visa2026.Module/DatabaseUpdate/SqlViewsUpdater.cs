@@ -53,7 +53,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     ap.StateID AS CurrentStateID, -- The state for this specific history row
                     ap.Date AS StatusDate,
                     ap.Description AS StatusDescription,
-                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa
+                    CASE
+                        WHEN v.IsCancelled = 1 THEN 0
+                        WHEN v.ExpirationDate IS NULL THEN 0
+                        WHEN DATEDIFF(day, GETDATE(), v.ExpirationDate) < 0 THEN 0
+                        ELSE DATEDIFF(day, GETDATE(), v.ExpirationDate)
+                    END AS DaysRemainingOnVisa
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN Visas v ON ai.CurrentVisaID = v.ID
@@ -76,7 +81,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.StateID       AS CurrentStateID,
                     latest_ap.[Date]        AS StatusDate,
                     latest_ap.Description   AS StatusDescription,
-                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa,
+                    CASE
+                        WHEN v.IsCancelled = 1 THEN 0
+                        WHEN v.ExpirationDate IS NULL THEN 0
+                        WHEN DATEDIFF(day, GETDATE(), v.ExpirationDate) < 0 THEN 0
+                        ELSE DATEDIFF(day, GETDATE(), v.ExpirationDate)
+                    END AS DaysRemainingOnVisa,
                     (SELECT TOP 1 iv.ID FROM Visas iv
                      WHERE iv.IssuingApplicationItemId = ai.ID) AS IssuedVisaID,
                     (SELECT TOP 1 ri.ID
@@ -126,7 +136,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     ap.StateID AS CurrentStateID,
                     ap.Date AS StatusDate,
                     ap.Description AS StatusDescription,
-                    DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
+                    CASE
+                        WHEN wpi.IsCancelled = 1 THEN 0
+                        WHEN wpi.ExpirationDate IS NULL THEN 0
+                        WHEN DATEDIFF(day, GETDATE(), wpi.ExpirationDate) < 0 THEN 0
+                        ELSE DATEDIFF(day, GETDATE(), wpi.ExpirationDate)
+                    END AS DaysRemaining
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
@@ -151,7 +166,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.StateID AS CurrentStateID,
                     latest_ap.[Date] AS StatusDate,
                     latest_ap.Description AS StatusDescription,
-                    DATEDIFF(day, GETDATE(), wpi.ExpirationDate) AS DaysRemaining
+                    CASE
+                        WHEN wpi.IsCancelled = 1 THEN 0
+                        WHEN wpi.ExpirationDate IS NULL THEN 0
+                        WHEN DATEDIFF(day, GETDATE(), wpi.ExpirationDate) < 0 THEN 0
+                        ELSE DATEDIFF(day, GETDATE(), wpi.ExpirationDate)
+                    END AS DaysRemaining
                 FROM ApplicationItems ai
                 JOIN Applications a ON ai.ApplicationID = a.ID
                 JOIN ApplicationTypes at ON a.ApplicationTypeID = at.ID
@@ -212,7 +232,12 @@ namespace Visa2026.Module.DatabaseUpdate
                     latest_ap.StateID       AS CurrentStateID,
                     latest_ap.[Date]        AS StatusDate,
                     latest_ap.Description   AS StatusDescription,
-                    DATEDIFF(day, GETDATE(), v.ExpirationDate) AS DaysRemainingOnVisa,
+                    CASE
+                        WHEN v.IsCancelled = 1 THEN 0
+                        WHEN v.ExpirationDate IS NULL THEN 0
+                        WHEN DATEDIFF(day, GETDATE(), v.ExpirationDate) < 0 THEN 0
+                        ELSE DATEDIFF(day, GETDATE(), v.ExpirationDate)
+                    END AS DaysRemainingOnVisa,
                     -- Extension application for the same visa (if any)
                     (SELECT TOP 1 ext_a.ApplicationNumber
                      FROM ApplicationItems ext_ai
@@ -304,7 +329,9 @@ namespace Visa2026.Module.DatabaseUpdate
                 AS
                 BEGIN
                     IF @ExpirationDate IS NULL RETURN 0;
-                    RETURN DATEDIFF(day, GETDATE(), @ExpirationDate);
+                    DECLARE @Days INT = DATEDIFF(day, GETDATE(), @ExpirationDate);
+                    IF @Days < 0 RETURN 0;
+                    RETURN @Days;
                 END
             ", true);
         }

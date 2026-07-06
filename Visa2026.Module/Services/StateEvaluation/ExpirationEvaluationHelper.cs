@@ -6,7 +6,7 @@ namespace Visa2026.Module.Services.StateEvaluation
     {
         public static bool IsExpiringSoon(IExpirationLogic item, string businessObjectKey, StateEvaluationSettings settings)
         {
-            if (item == null || !item.ExpirationDate.HasValue || item.DaysRemaining < 0)
+            if (item == null || !item.ExpirationDate.HasValue || ExpirationLogicHelper.IsExpired(item))
             {
                 return false;
             }
@@ -19,7 +19,7 @@ namespace Visa2026.Module.Services.StateEvaluation
             string businessObjectKey,
             StateEvaluationSettings settings)
         {
-            if (item == null || !item.ExpirationDate.HasValue || item.DaysRemaining < 0)
+            if (item == null || !item.ExpirationDate.HasValue || ExpirationLogicHelper.IsExpired(item))
             {
                 return false;
             }

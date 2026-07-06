@@ -22,8 +22,8 @@ namespace Visa2026.Module.Services.StateEvaluation.Evaluators
             if (person != null && PersonCurrentItems.GetCurrentVisa(person) != visa)
                 return Make("Archived", StateSeverity.None, days, id, "Visa: Archived");
 
-            if (days < 0)
-                return Make("Expired", StateSeverity.Critical, days, id, $"Visa: Expired ({Math.Abs(days)} days ago)");
+            if (ExpirationLogicHelper.IsExpired(visa))
+                return Make("Expired", StateSeverity.Critical, days, id, $"Visa: Expired ({ExpirationLogicHelper.DaysOverdue(visa.ExpirationDate)} days ago)");
 
             if (ExpirationEvaluationHelper.IsExpiringSoon(visa, ExpirationAlertBusinessObjectKeys.Visa, settings))
             {

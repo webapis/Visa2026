@@ -130,17 +130,7 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<Visa> Visas { get; set; }
 
-        public int DaysRemaining
-        {
-            get
-            {
-                if (!ExpirationDate.HasValue)
-                {
-                    return 0;
-                }
-                return (ExpirationDate.Value.Date - DateTime.Today).Days;
-            }
-        }
+        public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate, IsCancelled);
 
         /// <summary>Optional; hidden behind detail-view gear when not expanded.</summary>
         [VisibleInListView(false)]

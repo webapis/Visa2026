@@ -84,19 +84,7 @@ namespace Visa2026.Module.BusinessObjects
 
         #region IExpirationLogic
         [NotMapped]
-        public int DaysRemaining
-        {
-            get
-            {
-                if (!ExpirationDate.HasValue)
-                {
-                    // If there is no expiration date, for display purposes, it's better to show 0
-                    // than a confusing large number like int.MaxValue.
-                    return 0;
-                }
-                return (ExpirationDate.Value.Date - DateTime.Today).Days;
-            }
-        }
+        public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate);
 
         #endregion
 
