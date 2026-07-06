@@ -29,6 +29,13 @@ namespace Visa2026.Module.BusinessObjects
         Criteria = "IsLockedAfterOfficePreparation",
         Enabled = false,
         Context = "DetailView")]
+    [Appearance(
+        "ApplicationReadOnlyWhenWorkflowTerminal",
+        AppearanceItemType = "ViewItem",
+        TargetItems = ApplicationProgressProfileResolver.TerminalLockedApplicationDetailTargetItems,
+        Criteria = "IsWorkflowTerminal",
+        Enabled = false,
+        Context = "DetailView")]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject, IBoListRowState
     {
@@ -46,6 +53,10 @@ namespace Visa2026.Module.BusinessObjects
         private const string AppInvAndWpDefaultVisaCategoryLocalizationKey = "Multiple";
         /// <summary>Default visa type for <see cref="AppInvAndWpApplicationTypeName"/> (see visa-type.json <c>WP</c> / WP-Işçi Wiza).</summary>
         private const string AppInvAndWpDefaultVisaTypeLocalizationKey = "WP";
+
+        /// <summary>Registration and business-trip application types target a migration-service office.</summary>
+        private const string MigrationServiceVisibleCriteria =
+            "ApplicationType is null or !(ApplicationType.ShowRegistrations or ApplicationType.ShowBusinessTrips)";
 
         public Application()
         {
@@ -170,22 +181,53 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [XafDisplayName("Current status")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(false)]
+        [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
         public string CurrentState =>
             ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName(this) ?? string.Empty;
 
+        /// <summary>Latest progress is <c>PROCESS_CANCELLED</c> (legacy <c>Application.Cancelled</c>).</summary>
+        [XafDisplayName("Cancelled")]
+        [ToolTip("Derived from the latest workflow progress step. Add a PROCESS_CANCELLED progress row to cancel.")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public bool IsCancelled =>
+            string.Equals(PrimaryStateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Latest progress is <c>PROCESS_REJECTED</c> (legacy <c>Application.Rejected</c>).</summary>
+        [XafDisplayName("Rejected")]
+        [ToolTip("Derived from the latest workflow progress step. Add a PROCESS_REJECTED progress row to reject.")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public bool IsRejected =>
+            string.Equals(PrimaryStateCode, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Latest progress is <c>PROCESS_ISSUED</c>.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public bool IsIssued =>
+            string.Equals(PrimaryStateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Closed workflow: issued, rejected, or cancelled at migration service.</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public bool IsWorkflowTerminal => IsCancelled || IsRejected || IsIssued;
+
         [XafDisplayName("Iş günleri")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(false)]
+        [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
         public int? WorkingDaysInCurrentStep => ApplicationProgressSlaHelper.Resolve(this).WorkingDaysInCurrentStep;
 
         [XafDisplayName("Tassyklama möhleti")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(false)]
+        [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
         public string ProgressSlaStatement => ApplicationProgressSlaHelper.FormatStatement(
@@ -366,7 +408,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         public virtual VisaType VisaType { get; set; }
 
-        [Appearance("MigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMigrationService", Context = "DetailView")]
+        [Appearance("MigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = MigrationServiceVisibleCriteria, Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual MigrationService MigrationService { get; set; }
 

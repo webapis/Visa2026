@@ -91,11 +91,6 @@ internal static class Visa2014ApplicationTransform
 
     private static readonly HashSet<string> ShowMigrationServiceApplicationTypes = new(StringComparer.Ordinal)
     {
-        "App_Cancel_BZ",
-        "App_Cancel_App",
-        "App_Change_Inv",
-        "App_Cancel_Inv",
-        "App_Cancel_Inv_WP",
         "App_Reg_Check_In",
         "App_Reg_Check_In_Internal",
         "App_Reg_Info_Change_Passport",
@@ -106,13 +101,6 @@ internal static class Visa2014ApplicationTransform
         "App_Reg_Check_Out_Internal",
         "App_Business_Trip_Departure",
         "App_Business_Trip_Arrival",
-        "App_Visa_Ext_According_to_WP",
-        "App_Change_Visa_Category",
-        "App_Change_Passport",
-        "App_Visa_Ext_FM",
-        "App_Visa_For_New_Born_FM",
-        "App_Cancel_Visa_and_WP",
-        "App_Cancell_WP",
     };
 
     internal static readonly string[] ApplicationMainColumnOrder =
