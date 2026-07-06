@@ -13,6 +13,12 @@
 .PARAMETER InstanceName
   Default SQLEXPRESS.
 
+.PARAMETER OverrideDataPath
+  Optional data file folder (default: SQL instance default path on C:).
+
+.PARAMETER OverrideLogPath
+  Optional log file folder (default: same as data path).
+
 .PARAMETER StopAppPool
   Stop IIS app pool Visa2026 during restore (default: true).
 
@@ -29,6 +35,8 @@ param(
     [string]$EnvFile = "",
     [string]$InstanceName = "SQLEXPRESS",
     [string]$AppPoolName = "",
+    [string]$OverrideDataPath = "",
+    [string]$OverrideLogPath = "",
     [switch]$StopAppPool = $true
 )
 
@@ -140,6 +148,8 @@ $logPath = [string]$reader.GetValue(1)
 $reader.Close()
 $conn.Close()
 
+if (-not [string]::IsNullOrWhiteSpace($OverrideDataPath)) { $dataPath = $OverrideDataPath }
+if (-not [string]::IsNullOrWhiteSpace($OverrideLogPath)) { $logPath = $OverrideLogPath }
 if ([string]::IsNullOrWhiteSpace($dataPath)) { $dataPath = "C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\" }
 if ([string]::IsNullOrWhiteSpace($logPath)) { $logPath = $dataPath }
 if (-not $dataPath.EndsWith('\')) { $dataPath += '\' }
@@ -170,6 +180,8 @@ $($moveClauses -join ",`n");
 "@
 
 Write-Host "==> Restore (may take several minutes)..." -ForegroundColor Cyan
+Write-Host "    Data: ${dataPath}${dbName}.mdf" -ForegroundColor DarkGray
+Write-Host "    Log:  ${logPath}${dbName}_log.ldf" -ForegroundColor DarkGray
 Invoke-SqlNonQuery $saConn $restoreSql
 Write-Host "Restore completed: $dbName" -ForegroundColor Green
 

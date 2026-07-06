@@ -6,12 +6,12 @@ namespace Visa2026.Module.BusinessObjects;
 
 public static class ApplicationProgressSlaHelper
 {
-    public static ApplicationProgressSlaResult Resolve(Application? application)
+    public static ApplicationProgressSlaResult Resolve(Application? application, ApplicationProgress? latest = null)
     {
         if (application?.ProgressHistory == null)
             return default;
 
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        latest ??= ApplicationProgressHelper.GetLatest(application.ProgressHistory);
         if (latest?.State?.Code == null || latest.Date == default)
             return default;
 

@@ -79,3 +79,13 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Certs:** Self-signed via `Enable-Visa2026IisHttps.ps1 -IpAddress <LAN-IP>` or enterprise CA; officers import to Trusted Root or use GPO. Run **`Set-Visa2026TemplateEditOfficeTrust.ps1`** on officer PCs.
 - **Smoke:** `https://<server>/LoginPage`, `https://<server>:8080/LoginPage`, `https://<server>:8081/LoginPage` (use `-SkipCertificateCheck` / `curl -k` only for ops smoke on self-signed).
 - **Firewall:** TCP **443** inbound for production; `Enable-Visa2026IisSlotFirewall.ps1` for 8080/8081 (same ports, HTTPS binding).
+
+### 2026-07-06 — LocalDB → staging restore (33 GB, E: drive) (10.100.128.25)
+
+- **Goal:** Copy dev `(localdb)\mssqllocaldb` / `Visa2026` to `Visa2026DbStaging` on IIS host.
+- **Local backup:** `BACKUP DATABASE [Visa2026] TO DISK = ...` (no `COMPRESSION` on LocalDB/Express). ~33 GB for ~35 GB allocated DB.
+- **Disk:** Server **C:** ~24 GB free — too small for .bak + MDF on C:. **E:** had ~170 GB free — store `.bak` under `E:\visa2026\backups\staging\` and MDF/LDF under `E:\visa2026\sql-data\` via `Restore-Visa2026SqlBackup.ps1 -OverrideDataPath` / `-OverrideLogPath`.
+- **Bug:** Param names `-DataPath` collided with `$dataPath` from `SERVERPROPERTY` (PowerShell case-insensitive) — override was wiped before apply. Fixed with `-OverrideDataPath` / `-OverrideLogPath`.
+- **SSH:** Pass `-OverrideDataPath E:\visa2026\sql-data` in **single-quoted** outer `ssh '...'` so `E:` is not parsed as a separate argument.
+- **After restore:** `Run-Visa2026DbUpdateOnServer.ps1 -Profile Staging -ForceUpdate` (app on slot may be newer than backup schema); smoke `http://10.100.128.25:8080/LoginPage` HTTP 200.
+- **Helper:** `Restore-StagingLocalDbBackup.ps1` (run on server) wraps restore with E: paths.

@@ -1,7 +1,6 @@
 using DevExpress.Blazor;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Editors;
-using Visa2026.Module.Appearance;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Blazor.Server.Controllers;
@@ -13,44 +12,23 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
 {
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
-    private CancellationTokenSource? deferredAppearanceCts;
+    private ApplicationListViewPreloadController? preloadController;
 
     public ApplicationProgressRowAppearanceController()
     {
         TargetObjectType = typeof(Application);
     }
 
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        preloadController = Frame.GetController<ApplicationListViewPreloadController>();
+    }
+
     protected override void OnViewControlsCreated()
     {
         base.OnViewControlsCreated();
         ApplyRowAppearance();
-        ScheduleDeferredAppearance();
-    }
-
-    private void ScheduleDeferredAppearance()
-    {
-        deferredAppearanceCts?.Cancel();
-        deferredAppearanceCts?.Dispose();
-        deferredAppearanceCts = new CancellationTokenSource();
-        CancellationToken token = deferredAppearanceCts.Token;
-        _ = ApplyRowAppearanceDeferredAsync(token);
-    }
-
-    private async Task ApplyRowAppearanceDeferredAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Task.Delay(150, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
-
-        if (View is { IsDisposed: false })
-        {
-            ApplyRowAppearance();
-        }
     }
 
     private void ApplyRowAppearance()
@@ -70,37 +48,34 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
         previousCustomizeElement = gridModel.CustomizeElement;
         customizeElementHandler = e =>
         {
-            previousCustomizeElement?.Invoke(e);
+            if (e.ElementType != GridElementType.DataRow)
+                previousCustomizeElement?.Invoke(e);
             ApplyProgressRowStyle(e);
         };
         gridModel.CustomizeElement = customizeElementHandler;
     }
 
-    private static void ApplyProgressRowStyle(GridCustomizeElementEventArgs e)
+    private void ApplyProgressRowStyle(GridCustomizeElementEventArgs e)
     {
         if (e.ElementType != GridElementType.DataRow || e.VisibleIndex < 0)
             return;
 
+        preloadController?.EnsureScrollAheadIfNeeded(e.Grid, e.VisibleIndex);
+
         if (e.Grid.GetDataItem(e.VisibleIndex) is not Application application)
             return;
 
-        var stateCode = application.ProgressSlaAppearanceCode;
-        if (string.IsNullOrEmpty(stateCode))
-            stateCode = application.PrimaryStateCode;
-        if (string.IsNullOrEmpty(stateCode)
-            || !BoStateAppearanceColors.TryGet(stateCode, out var appearance))
+        var rowCssClass = application.ListRowCssClass;
+        if (string.IsNullOrEmpty(rowCssClass))
             return;
 
-        var rowClass = $"{appearance.RowCssClass} visa-progress-row";
-        e.CssClass = string.IsNullOrEmpty(e.CssClass) ? rowClass : $"{e.CssClass} {rowClass}";
+        e.CssClass = string.IsNullOrEmpty(e.CssClass)
+            ? rowCssClass
+            : $"{e.CssClass} {rowCssClass}";
     }
 
     protected override void OnDeactivated()
     {
-        deferredAppearanceCts?.Cancel();
-        deferredAppearanceCts?.Dispose();
-        deferredAppearanceCts = null;
-
         if (customizeElementHandler != null
             && View?.Editor is DxGridListEditor { GridModel: { } gridModel })
         {
@@ -109,6 +84,7 @@ public sealed class ApplicationProgressRowAppearanceController : ViewController<
 
         customizeElementHandler = null;
         previousCustomizeElement = null;
+        preloadController = null;
         base.OnDeactivated();
     }
 }

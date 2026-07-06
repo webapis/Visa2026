@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using Visa2026.Module.BusinessObjects;
@@ -28,12 +29,9 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
 
     private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
     {
-        if (e.Object is ApplicationProgress progress
-            && (e.PropertyName is nameof(ApplicationProgress.State)
-                or nameof(ApplicationProgress.Location)
-                or nameof(ApplicationProgress.Date)
-                or nameof(ApplicationProgress.Application)))
+        if (e.Object is ApplicationProgress progress)
         {
+            progress.Application?.InvalidateListViewDisplayCache();
             RefreshAppearance();
             return;
         }
@@ -44,6 +42,13 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
 
     private void RefreshAppearance()
     {
+        if (Frame.View is ListView { ObjectTypeInfo.Type: var type } listView
+            && type == typeof(Application))
+        {
+            foreach (var application in listView.CollectionSource.List.OfType<Application>())
+                application.InvalidateListViewDisplayCache();
+        }
+
         Frame.GetController<AppearanceController>()?.Refresh();
 
         if (Frame.View is DetailView detailView

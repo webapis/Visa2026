@@ -13,7 +13,11 @@ public static class ApplicationProgressPrimaryStateCodeResolver
         if (application == null)
             return null;
 
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        return ResolveFromLatest(ApplicationProgressHelper.GetLatest(application.ProgressHistory));
+    }
+
+    public static string? ResolveFromLatest(ApplicationProgress? latest)
+    {
         if (latest == null)
             return null;
 
@@ -51,7 +55,11 @@ public static class ApplicationProgressPrimaryStateCodeResolver
         if (application == null)
             return null;
 
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        return ResolveDisplayNameFromLatest(ApplicationProgressHelper.GetLatest(application.ProgressHistory));
+    }
+
+    public static string? ResolveDisplayNameFromLatest(ApplicationProgress? latest)
+    {
         if (latest == null)
             return null;
 

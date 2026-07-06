@@ -168,13 +168,48 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public IList<ApplicationLocation> AvailableProgressLocations => LoadAvailableProgressLocations();
 
+        private ApplicationListViewDisplayState? listViewDisplayState;
+        private string? listRowCssClass;
+
+        /// <summary>Clears cached ListView computed fields (progress display, SLA, row color).</summary>
+        public void InvalidateListViewDisplayCache()
+        {
+            listViewDisplayState = null;
+            listRowCssClass = null;
+        }
+
+        /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
+        public void WarmListViewDisplayCache()
+        {
+            if (listViewDisplayState != null)
+                return;
+
+            var state = ApplicationListViewDisplayState.Resolve(this);
+            listViewDisplayState = state;
+            listRowCssClass = state.ListRowCssClass;
+        }
+
+        private ApplicationListViewDisplayState ListViewDisplay =>
+            listViewDisplayState ??= ApplicationListViewDisplayState.Resolve(this);
+
+        /// <summary>
+        /// Row background key for Application ListViews (SLA warning/overdue overrides primary progress state).
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string ListRowAppearanceStateCode => ListViewDisplay.ListRowAppearanceStateCode;
+
+        /// <summary>Precomputed row CSS classes for Application ListView virtual scroll (see <see cref="ApplicationProgressRowAppearanceController"/>).</summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string ListRowCssClass => listRowCssClass ?? ListViewDisplay.ListRowCssClass;
+
         /// <summary>
         /// Latest <see cref="ApplicationProgress"/> state/location code for ListView row color (<see cref="IBoListRowState"/>).
         /// </summary>
         [Browsable(false)]
         [NotMapped]
-        public string PrimaryStateCode =>
-            ApplicationProgressPrimaryStateCodeResolver.Resolve(this) ?? string.Empty;
+        public string PrimaryStateCode => ListViewDisplay.PrimaryStateCode;
 
         /// <summary>
         /// Latest progress state and location (localized) for ListView — <see cref="ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName"/>.
@@ -184,8 +219,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public string CurrentState =>
-            ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName(this) ?? string.Empty;
+        public string CurrentState => ListViewDisplay.CurrentState;
 
         /// <summary>Latest progress is <c>PROCESS_CANCELLED</c> (legacy <c>Application.Cancelled</c>).</summary>
         [XafDisplayName("Cancelled")]
@@ -194,8 +228,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public bool IsCancelled =>
-            string.Equals(PrimaryStateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase);
+        public bool IsCancelled => ListViewDisplay.IsCancelled;
 
         /// <summary>Latest progress is <c>PROCESS_REJECTED</c> (legacy <c>Application.Rejected</c>).</summary>
         [XafDisplayName("Rejected")]
@@ -204,14 +237,13 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public bool IsRejected =>
-            string.Equals(PrimaryStateCode, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase);
+        public bool IsRejected => ListViewDisplay.IsRejected;
 
         /// <summary>Latest progress is <c>PROCESS_ISSUED</c>.</summary>
         [Browsable(false)]
         [NotMapped]
         public bool IsIssued =>
-            string.Equals(PrimaryStateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
+            string.Equals(ListViewDisplay.PrimaryStateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>Closed workflow: issued, rejected, or cancelled at migration service.</summary>
         [Browsable(false)]
@@ -223,45 +255,32 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public int? WorkingDaysInCurrentStep => ApplicationProgressSlaHelper.Resolve(this).WorkingDaysInCurrentStep;
+        public int? WorkingDaysInCurrentStep => ListViewDisplay.WorkingDaysInCurrentStep;
 
         [XafDisplayName("Tassyklama möhleti")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public string ProgressSlaStatement => ApplicationProgressSlaHelper.FormatStatement(
-            ApplicationProgressSlaHelper.Resolve(this));
+        public string ProgressSlaStatement => ListViewDisplay.ProgressSlaStatement;
 
         [Browsable(false)]
         [NotMapped]
-        public string ProgressSlaAppearanceCode
-        {
-            get
-            {
-                var ministry = ApplicationProgressSlaHelper.Resolve(this).AppearanceStateCode;
-                if (!string.IsNullOrEmpty(ministry))
-                    return ministry;
-
-                return ApplicationMigrationSlaHelper.Resolve(this).AppearanceStateCode ?? string.Empty;
-            }
-        }
+        public string ProgressSlaAppearanceCode => ListViewDisplay.ProgressSlaAppearanceCode;
 
         [XafDisplayName("Migrasiýa iş günleri")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
-        public int? WorkingDaysInMigrationStep =>
-            ApplicationMigrationSlaHelper.Resolve(this).WorkingDaysInCurrentStep;
+        public int? WorkingDaysInMigrationStep => ListViewDisplay.WorkingDaysInMigrationStep;
 
         [XafDisplayName("Migrasiýa möhleti")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
-        public string MigrationSlaStatement => ApplicationMigrationSlaHelper.FormatStatement(
-            ApplicationMigrationSlaHelper.Resolve(this));
+        public string MigrationSlaStatement => ListViewDisplay.MigrationSlaStatement;
 
         private ApplicationType applicationType;
         [ImmediatePostData, RuleRequiredField]

@@ -1,0 +1,173 @@
+using DevExpress.Blazor;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor.Components.Models;
+using DevExpress.ExpressApp.Blazor.Editors;
+using Microsoft.EntityFrameworkCore;
+using Visa2026.Module.BusinessObjects;
+
+namespace Visa2026.Blazor.Server.Controllers;
+
+/// <summary>
+/// EF Include + display-cache warmup for large <see cref="Application"/> ListViews.
+/// Sync preloads the first viewport; background + scroll-ahead cover the rest.
+/// </summary>
+public sealed class ApplicationListViewPreloadController : ViewController<ListView>
+{
+    private const int BatchSize = 200;
+    private const int InitialSyncBatchCount = 4;
+    private const int ScrollAheadRows = 160;
+    private const int ScrollBehindRows = 40;
+    private const int BackgroundYieldEveryBatches = 3;
+
+    private readonly HashSet<Guid> preloadedIds = new();
+    private EventHandler? collectionReloadedHandler;
+    private EventHandler<ComponentInstanceCapturedEventArgs<IGrid>>? gridCapturedHandler;
+    private CancellationTokenSource? preloadCts;
+    private int lastScrollAheadVisibleIndex = -1;
+
+    public ApplicationListViewPreloadController()
+    {
+        TargetObjectType = typeof(Application);
+    }
+
+    protected override void OnActivated()
+    {
+        base.OnActivated();
+        collectionReloadedHandler ??= (_, _) => StartPreload();
+        View.CollectionSource.CollectionReloaded += collectionReloadedHandler;
+    }
+
+    protected override void OnViewControlsCreated()
+    {
+        base.OnViewControlsCreated();
+        if (View.Editor is DxGridListEditor gridListEditor)
+        {
+            gridListEditor.GridModel.TextWrapEnabled = false;
+            gridCapturedHandler ??= (_, _) => StartPreload();
+            gridListEditor.GridModel.ComponentInstanceCaptured += gridCapturedHandler;
+        }
+
+        StartPreload(syncBatches: InitialSyncBatchCount);
+    }
+
+    protected override void OnDeactivated()
+    {
+        preloadCts?.Cancel();
+        preloadCts?.Dispose();
+        preloadCts = null;
+        preloadedIds.Clear();
+        lastScrollAheadVisibleIndex = -1;
+
+        if (gridCapturedHandler != null && View.Editor is DxGridListEditor gridListEditor)
+            gridListEditor.GridModel.ComponentInstanceCaptured -= gridCapturedHandler;
+
+        if (collectionReloadedHandler != null)
+            View.CollectionSource.CollectionReloaded -= collectionReloadedHandler;
+
+        base.OnDeactivated();
+    }
+
+    internal void EnsureScrollAheadIfNeeded(IGrid grid, int visibleIndex)
+    {
+        if (visibleIndex < 0)
+            return;
+
+        if (lastScrollAheadVisibleIndex >= 0
+            && visibleIndex >= lastScrollAheadVisibleIndex
+            && visibleIndex < lastScrollAheadVisibleIndex + 40)
+            return;
+
+        EnsureScrollAhead(grid, visibleIndex);
+    }
+
+    private void EnsureScrollAhead(IGrid grid, int visibleIndex)
+    {
+        var pendingIds = new List<Guid>();
+        for (var rowIndex = Math.Max(0, visibleIndex - ScrollBehindRows); rowIndex < visibleIndex + ScrollAheadRows; rowIndex++)
+        {
+            if (grid.GetDataItem(rowIndex) is not Application application)
+                break;
+
+            if (!preloadedIds.Contains(application.ID))
+                pendingIds.Add(application.ID);
+        }
+
+        if (pendingIds.Count == 0)
+            return;
+
+        lastScrollAheadVisibleIndex = visibleIndex;
+        PreloadByIds(pendingIds);
+    }
+
+    private void StartPreload(int syncBatches = 0)
+    {
+        preloadCts?.Cancel();
+        preloadCts?.Dispose();
+        preloadCts = new CancellationTokenSource();
+        preloadedIds.Clear();
+        lastScrollAheadVisibleIndex = -1;
+        _ = PreloadListApplicationsAsync(preloadCts.Token, syncBatches);
+    }
+
+    private async Task PreloadListApplicationsAsync(CancellationToken cancellationToken, int syncBatches)
+    {
+        if (View?.CollectionSource.List == null || View.CollectionSource.List.Count == 0)
+            return;
+
+        var ids = View.CollectionSource.List.OfType<Application>().Select(a => a.ID).Distinct().ToList();
+        var syncRowCount = Math.Min(syncBatches * BatchSize, ids.Count);
+        for (var offset = 0; offset < syncRowCount; offset += BatchSize)
+            PreloadByIds(ids.Skip(offset).Take(BatchSize).ToList());
+
+        if (syncRowCount >= ids.Count)
+            return;
+
+        await Task.Yield();
+        var batchesSinceYield = 0;
+        for (var offset = syncRowCount; offset < ids.Count; offset += BatchSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            PreloadByIds(ids.Skip(offset).Take(BatchSize).ToList());
+            if (++batchesSinceYield < BackgroundYieldEveryBatches)
+                continue;
+
+            batchesSinceYield = 0;
+            await Task.Yield();
+        }
+    }
+
+    private void PreloadByIds(IReadOnlyList<Guid> ids)
+    {
+        if (ids.Count == 0)
+            return;
+
+        var pendingIds = ids.Where(id => !preloadedIds.Contains(id)).Distinct().ToList();
+        if (pendingIds.Count == 0)
+            return;
+
+        for (var offset = 0; offset < pendingIds.Count; offset += BatchSize)
+            PreloadBatch(pendingIds.Skip(offset).Take(BatchSize).ToList());
+    }
+
+    private void PreloadBatch(List<Guid> batchIds)
+    {
+        if (batchIds.Count == 0)
+            return;
+
+        var applications = ObjectSpace.GetObjectsQuery<Application>()
+            .Where(application => batchIds.Contains(application.ID))
+            .Include(application => application.ProgressHistory).ThenInclude(progress => progress.State)
+            .Include(application => application.ProgressHistory).ThenInclude(progress => progress.Location)
+            .Include(application => application.ApplicationType).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
+            .Include(application => application.ApprovalLegSnapshots)
+            .AsSplitQuery()
+            .ToList();
+
+        foreach (var application in applications)
+        {
+            _ = application.ProgressHistory.Count;
+            application.WarmListViewDisplayCache();
+            preloadedIds.Add(application.ID);
+        }
+    }
+}
