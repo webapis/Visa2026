@@ -21,6 +21,8 @@ namespace Visa2026.Module.BusinessObjects
     [RuleCriteria("InvitationItem_StatusFlagsExclusive", DefaultContexts.Save,
         "Not (IsCancelled And IsChanged) And Not (IsCancelled And IsUsed) And Not (IsChanged And IsUsed)",
         "Only one of Cancelled, Changed, or Used can be set on an invitation item.")]
+    [Appearance("InvitationItem_CancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
     [SupportsOptionalDetailFields]
     public class InvitationItem : PersonLinkedItemBase<InvitationItem, Invitation>, IOptionalDetailFields
     {

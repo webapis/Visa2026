@@ -41,7 +41,10 @@ fields:
 
   - source: ApplicationResult.Result
     target: IsCancelled
-    transform: equals_one
+    transform: legacy_invitation_cancellation_index
     join: PersonInInvitation.Invitation = ApplicationResult.Oid
     missingBehavior: default_false
-    notes: Heuristic — Result == 1 maps to cancelled item
+    notes: |
+      Visa2014LegacyInvitationItemCancellationIndex — ApplicationResult.Result == 1
+      plus PersonInApplication.Cancelled on cancel-invitation apps matched to PersonInInvitation
+      (same resolver as ApplicationItem.InvitationItemIsCancelled document path).

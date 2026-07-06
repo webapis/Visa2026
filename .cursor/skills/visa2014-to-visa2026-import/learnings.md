@@ -1085,3 +1085,33 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Outcome**: **partial success** — all three OData imports completed; script exit **1** on post-import corrections (`ApplicationItems.ps1` → `--correct-person-address-of-residence`) with `hostpolicy.dll` / missing `Visa2026.DataImporter.runtimeconfig.json` after ~37 min run (likely file lock / stale `--no-build` output). Cancellation backfill itself is done; re-run corrections when build is clean: `ApplicationItems.ps1 -SkipCorrections` not needed — run correction flags only via DataImporter after `dotnet build`.
 - **Before reimport (stale)**: 863 visa + 195 WP item cancelled (pre-index logic / partial state).
 
+### 2026-07-06 — P0.5 invitation document `IsCancelled` backfill (InvitationItem)
+
+- **What**: `Visa2014LegacyInvitationItemCancellationIndex` — `ApplicationResult.Result == 1` **plus** `PersonInApplication.Cancelled` on cancel-invitation apps matched to `PersonInInvitation` (same OUTER APPLY as ApplicationItem `CurrentInvitationItem` resolver).
+- **Files**: `Visa2014LegacyInvitationItemCancellationIndex.cs`, `Visa2014InvitationItemTransform`, `field-maps/InvitationItem.yaml`, tests in `Visa2014LegacyInvitationItemCancellationResolverTests.cs`.
+- **Reimport**: `scripts/visa2014-migration/reimport/InvitationCancellation.ps1` + `cleanup/ImportedInvitationItemCancellationBackfill.sql` (InvitationItems delete + ApplicationItem FK relink via `ApplicationItems.ps1`).
+- **Before fix (dev)**: `InvitationItems.IsCancelled` **0** vs `ApplicationItems.InvitationItemIsCancelled` **16**.
+
+### 2026-07-06 — Dev reimport InvitationItem cancellation (`InvitationCancellation.ps1`)
+
+- **Script**: `scripts/visa2014-migration/reimport/InvitationCancellation.ps1 -Configuration Debug` — exit **0** (~20 min).
+- **Import waves** (all **0 failed**):
+
+  | Entity | Posted | Skipped (id-map) |
+  |--------|-------:|-----------------:|
+  | InvitationItem | 4955 | 284 |
+  | ApplicationItem | 21306 | 194 |
+
+- **Cancellation counts (target `Visa2026` after import)**:
+
+  | Layer | Count | Notes |
+  |-------|------:|-------|
+  | `InvitationItems.IsCancelled` | **6** | was **0** |
+  | `ApplicationItems.InvitationItemIsCancelled` | **16** | unchanged (workflow mirror) |
+  | App items with flag **and** `CurrentInvitationItemID` | **6** | all linked docs `IsCancelled=1` |
+  | App items with flag **without** `CurrentInvitationItemID` | **10** | cancel-invitation lines with no resolvable `PersonInInvitation` match |
+
+- **Index (dry-run verbose)**: `Legacy invitation-item cancellation index: 260` PersonInInvitation OIDs — but **all 254** legacy rows with `ApplicationResult.Result = 1` are **absent** from `InvitationItem.json` (not imported; invitation header id-map gap). Verified cancelled sample `0328c30b-…` has **Result = 0** and `PersonInApplication.Cancelled = 1` — the **6** dev rows come from the **PIA cancel path**, not `Result == 1`.
+- **Follow-up**: revalidate `ApplicationResult.Result == 1 → IsCancelled` heuristic (likely not cancellation); consider dropping or replacing that path in `Visa2014LegacyInvitationItemCancellationIndex` so index count matches importable rows. `InvitationItem` status distribution: 4897 none / 52 `IsChanged` / 6 `IsCancelled`.
+- **UTF-8**: rewrite `.ps1` / `.sql` with `[System.IO.File]::WriteAllText(..., UTF8Encoding(false))` if Cursor `Write` corrupts encoding (parse error on first run).
+

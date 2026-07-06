@@ -113,6 +113,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | Progress steps out of workflow order (date vs leg sequence) | `patch/ApplicationProgress-Order.ps1` | (in-place `ProgressOrder` recompute) |
 | Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
 | Visa + WorkPermitItem `IsCancelled` backfill | `reimport/VisaWorkPermitCancellation.ps1` | `cleanup/ImportedVisaWorkPermitCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
+| InvitationItem `IsCancelled` backfill | `reimport/InvitationCancellation.ps1` | `cleanup/ImportedInvitationItemCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
 
 ### Reconcile
 

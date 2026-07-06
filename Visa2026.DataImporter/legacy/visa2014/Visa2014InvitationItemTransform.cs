@@ -55,7 +55,12 @@ internal static class Visa2014InvitationItemTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        return TransformRows(rawRows, out var skipped);
+        var cancellationIndex = Visa2014LegacyInvitationItemCancellationIndex.Load(
+            connectionString,
+            lookupTranslationPaths,
+            verbose);
+
+        return TransformRows(rawRows, cancellationIndex, out var skipped);
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014InvitationItemRawRow parsed)
@@ -83,6 +88,7 @@ internal static class Visa2014InvitationItemTransform
 
     private static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014InvitationItemRawRow> rawRows,
+        Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
         out List<Dictionary<string, object?>> skipped)
     {
         skipped = [];
@@ -90,7 +96,7 @@ internal static class Visa2014InvitationItemTransform
 
         foreach (var raw in rawRows)
         {
-            var export = BuildExportRow(raw, out var skipReason);
+            var export = BuildExportRow(raw, cancellationIndex, out var skipReason);
             if (skipReason != null)
             {
                 export["_skipReason"] = skipReason;
@@ -114,6 +120,7 @@ internal static class Visa2014InvitationItemTransform
 
     private static Dictionary<string, object?> BuildExportRow(
         Visa2014InvitationItemRawRow raw,
+        Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
         out string? skipReason)
     {
         skipReason = null;
@@ -139,7 +146,10 @@ internal static class Visa2014InvitationItemTransform
         row["Person"] = raw.LegacyPersonOid?.ToString("D");
         row["Passport"] = raw.LegacyPassportOid?.ToString("D");
         row["Invitation"] = raw.LegacyInvitationOid?.ToString("D");
-        row["IsCancelled"] = raw.ApplicationResultResult == 1;
+        row["IsCancelled"] = Visa2014LegacyInvitationItemCancellationIndex.ResolveIsCancelled(
+            raw.ApplicationResultResult,
+            raw.LegacyOid,
+            cancellationIndex);
         return row;
     }
 }
