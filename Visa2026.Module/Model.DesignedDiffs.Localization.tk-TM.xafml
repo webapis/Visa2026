@@ -258,6 +258,16 @@
         <Member Name="Year" Caption="Ýyl" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationApprovalLegSnapshot" Caption="Tassyklama ministrlik suraty">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="MaxDaysInReview" Caption="Maks. iş günleri" />
+        <Member Name="MinistryShortName" Caption="Gysga ady" />
+        <Member Name="Sequence" Caption="Tertip" />
+        <Member Name="WarningDaysBeforeMax" Caption="Duýduryş (iş günleri)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Arza elementi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
@@ -337,6 +347,15 @@
         <Member Name="StartDate" Caption="Başlanýan senesi" />
         <Member Name="State" Caption="Ýagdaý" />
         <Member Name="ValidityDuration" Caption="Möhleti" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Migrasiýa SLA profili">
+      <OwnMembers>
+        <Member Name="ApplicationTypes" Caption="Arza görnüşleri" />
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="MaxDaysInReview" Caption="Maks. iş günleri" />
+        <Member Name="WarningDaysBeforeMax" Caption="Duýduryş (iş günleri)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Arza belgileme">
@@ -1269,6 +1288,14 @@
         <Member Name="FirstAndSecondMinistry" Caption="Birinji we ikinji ministrlik" />
         <Member Name="FirstMinistryOnly" Caption="Diňe birinji ministrlik" />
         <Member Name="None" Caption="Ýok" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewSlaSettings" Caption="Ministrlik barlagy SLA">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="MaxDaysInReview" Caption="Maks. iş günleri" />
+        <Member Name="WarningDaysBeforeMax" Caption="Duýduryş (iş günleri)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hereket rugsady ýeri">
@@ -2424,6 +2451,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Ýagdaý" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Tassyklama ministrlik suraty" />
+    <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Tassyklama ministrlik suratlary" />
     <DetailView Id="ApplicationItem_DetailView" Caption="Arza elementi" />
     <ListView Id="ApplicationItem_ListView" Caption="Arza elementleri">
       <Columns>
@@ -2441,6 +2470,8 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Resminamalar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Arza ýerleri" />
+    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Migrasiýa SLA profili" />
+    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Migrasiýa SLA profilleri" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Arza belgileme" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Arza belgileme" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Arza ösüşi" />
@@ -2668,6 +2699,8 @@
     </ListView>
     <DetailView Id="MigrationService_DetailView" Caption="Migrasiýa gullugy" />
     <ListView Id="MigrationService_ListView" Caption="Migrasiýa gullugylary" />
+    <DetailView Id="MinistryReviewSlaSettings_DetailView" Caption="Ministrlik barlagy SLA" />
+    <ListView Id="MinistryReviewSlaSettings_ListView" Caption="Ministrlik barlagy SLA" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Hereket rugsady ýeri" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Hereket rugsady ýerleri" />
     <DetailView Id="OrganizationType_DetailView" Caption="Gurama görnüşi" />

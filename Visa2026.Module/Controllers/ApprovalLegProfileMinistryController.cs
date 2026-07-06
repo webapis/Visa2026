@@ -31,11 +31,11 @@ public sealed class ApprovalLegProfileMinistryController : ObjectViewController<
         foreach (var contract in ObjectSpace.GetObjectsToSave(false).OfType<ApprovalLegProfile>())
         {
             if (contract.IsActive
-                && !ApprovalLegProfileMinistryHelper.TryValidateLegSla(contract, out var slaError))
+                && !ApprovalLegProfileMinistryHelper.TryValidateLegSla(ObjectSpace, contract, out var slaError))
             {
                 e.Cancel = true;
                 Application.ShowViewStrategy.ShowMessage(
-                    slaError ?? VisaUiMessages.Get("ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric"),
+                    slaError ?? VisaUiMessages.Get("MinistryReviewSlaSettings.NotConfigured"),
                     InformationType.Error,
                     6000,
                     InformationPosition.Top);

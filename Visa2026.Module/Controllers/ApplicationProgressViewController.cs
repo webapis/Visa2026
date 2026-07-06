@@ -27,6 +27,18 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
 
     private void ObjectSpace_Committing(object sender, CancelEventArgs e)
     {
+        if (!ApplicationProgressProfileResolver.TryValidateApplicationEditableWhenWorkflowTerminal(
+                ObjectSpace, out var terminalLockError))
+        {
+            e.Cancel = true;
+            Application.ShowViewStrategy.ShowMessage(
+                terminalLockError ?? VisaUiMessages.Get("Application.FieldsLockedWhenWorkflowTerminal"),
+                InformationType.Error,
+                5000,
+                InformationPosition.Top);
+            return;
+        }
+
         foreach (var application in ObjectSpace.GetObjectsToSave(false).OfType<BusinessObjects.Application>())
         {
             if (!ApplicationProgressProfileResolver.TryValidateApplicationUnchangedAfterProgress(

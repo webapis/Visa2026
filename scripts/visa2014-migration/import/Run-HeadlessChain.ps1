@@ -44,6 +44,11 @@ $steps = @(
     @{ Key = 'AddressOfResidence';      Kind = 'scalar'; Name = 'AddressOfResidence';      Extra = @() },
     @{ Key = 'MedicalRecordDocument';   Kind = 'files';  Name = 'MedicalRecord.MedicalRecordDocument'; Extra = @('--import-visa2014-files','--entity','MedicalRecord','--property','MedicalRecordDocument') },
     @{ Key = 'Application';             Kind = 'scalar'; Name = 'Application';             Extra = @('--skip-tenant-catalog-generation') },
+    @{ Key = 'WorkPermit';              Kind = 'scalar'; Name = 'WorkPermit';              Extra = @() },
+    @{ Key = 'WorkPermitDocument';      Kind = 'files';  Name = 'WorkPermit.WorkPermitDocument'; Extra = @('--import-visa2014-files','--entity','WorkPermit','--property','WorkPermitDocument') },
+    @{ Key = 'Invitation';              Kind = 'scalar'; Name = 'Invitation';              Extra = @() },
+    @{ Key = 'InvitationDocument';      Kind = 'files';  Name = 'Invitation.InvitationDocument'; Extra = @('--import-visa2014-files','--entity','Invitation','--property','InvitationDocument') },
+    @{ Key = 'FamilyProofDocument';     Kind = 'files';  Name = 'Person.FamilyProofDocument'; Extra = @('--import-visa2014-files','--entity','Person','--property','FamilyProofDocument') },
     @{ Key = 'ApplicationItem';         Kind = 'scalar'; Name = 'ApplicationItem';         Extra = @() },
     @{ Key = 'ApplicationProgress';     Kind = 'scalar'; Name = 'ApplicationProgress';     Extra = @() }
 )

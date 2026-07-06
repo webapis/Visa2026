@@ -25,7 +25,7 @@ public class ApplicationApprovalLegSnapshot : BaseObject
     public virtual Application Application { get; set; } = null!;
 
     [RuleRequiredField]
-    [XafDisplayName("Tertip")]
+    [XafDisplayName("Sequence")]
     public virtual int? Sequence { get; set; }
 
     [Browsable(false)]
@@ -33,16 +33,16 @@ public class ApplicationApprovalLegSnapshot : BaseObject
 
     [RuleRequiredField]
     [MaxLength(40)]
-    [XafDisplayName("Gysga ady")]
+    [XafDisplayName("Short name")]
     public virtual string MinistryShortName { get; set; } = string.Empty;
 
     [MaxLength(200)]
     [Browsable(false)]
     public virtual string MinistryNameTm { get; set; }
 
-    [XafDisplayName("Maks. iş günleri")]
+    [XafDisplayName("Max working days")]
     public virtual int? MaxDaysInReview { get; set; }
 
-    [XafDisplayName("Duýduryş (iş günleri)")]
+    [XafDisplayName("Warning (working days)")]
     public virtual int? WarningDaysBeforeMax { get; set; }
 }

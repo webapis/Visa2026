@@ -1,6 +1,8 @@
 @using DevExpress.Blazor
+@using Microsoft.AspNetCore.Components
 @using Visa2026.Module.Services
 @using Readiness = Visa2026.Module.Services.ApplicationTypeReadinessStatus
+@inject NavigationManager NavigationManager
 
 <div class="app-type-quick-code-inline">
     <DxTextBox Text="@Value"
@@ -87,18 +89,12 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (canPick)
-                                        {
-                                            <button type="button"
-                                                    class="app-type-code-picker__link app-type-code-picker__link--name"
-                                                    @onclick="() => PickRowAsync(row)">
-                                                @row.DisplayName
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span class="app-type-code-picker__text-muted app-type-code-picker__text-muted--name">@row.DisplayName</span>
-                                        }
+                                        <button type="button"
+                                                class="app-type-code-picker__link app-type-code-picker__link--name"
+                                                title="@row.DisplayName"
+                                                @onclick="() => OnApplicationTypeLinkClickAsync(row)">
+                                            @row.DisplayName
+                                        </button>
                                     </td>
                                     <td class="app-type-code-picker__group">@row.CategoryName</td>
                                 </tr>
@@ -140,6 +136,8 @@
     [Parameter] public string ReadinessLegend { get; set; } = string.Empty;
     [Parameter] public string ReadinessBlockedMessage { get; set; } = string.Empty;
 
+    private const string ApplicationTypeDetailViewId = "ApplicationType_DetailView";
+
     private bool IsApplying => _isApplying;
     private bool _isApplying;
     private string? _applyingCode;
@@ -164,6 +162,33 @@
 
         if (PopupVisibleChanged.HasDelegate)
             await PopupVisibleChanged.InvokeAsync(visible);
+    }
+
+    private async Task OnApplicationTypeLinkClickAsync(ApplicationTypeCodePickerRow row)
+    {
+        if (_isApplying || row == null)
+            return;
+
+        if (row.CanSelect && !ReadOnly && !string.IsNullOrEmpty(row.SelectionCode))
+        {
+            await PickRowAsync(row);
+            return;
+        }
+
+        await OpenApplicationTypeDetailAsync(row);
+    }
+
+    private async Task OpenApplicationTypeDetailAsync(ApplicationTypeCodePickerRow row)
+    {
+        if (row.Id == Guid.Empty)
+            return;
+
+        var key = row.Id.ToString();
+        if (string.IsNullOrEmpty(key))
+            return;
+
+        await ClosePopupAsync();
+        NavigationManager.NavigateTo($"/{ApplicationTypeDetailViewId}/{key}");
     }
 
     private async Task PickRowAsync(ApplicationTypeCodePickerRow row)

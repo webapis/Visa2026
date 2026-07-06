@@ -425,6 +425,9 @@ internal static class Visa2014ApplicationItemODataImporter
             payload["WorkPermittedLocations"] = workPermittedLocations.Trim();
 
         payload["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled;
+        payload["InvitationItemIsCancelled"] =
+            row.GetValueOrDefault("InvitationItemIsCancelled") is bool invitationCancelled && invitationCancelled;
+        payload["VisaIsCancelled"] = row.GetValueOrDefault("VisaIsCancelled") is bool visaCancelled && visaCancelled;
         payload["RejectionIssued"] = row.GetValueOrDefault("RejectionIssued") is bool rejected && rejected;
         payload["VisaIssued"] = row.GetValueOrDefault("VisaIssued") is bool visaIssued && visaIssued;
 

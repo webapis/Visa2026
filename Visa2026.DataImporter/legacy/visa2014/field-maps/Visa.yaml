@@ -87,6 +87,7 @@ propertyGaps:
     - property: IsCancelled
       default: false
       missingBehavior: use_default
+      notes: Visa2014LegacyDocumentCancellationIndex — PersonInApplication.Cancelled + completed cancel subtypes (12/21/22)
     - property: IsChanged
       default: false
       missingBehavior: use_default

@@ -86,6 +86,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.MinistrySchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.MinistryReviewSlaSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonCurrentColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.EmployeeContractSchemaCleanupUpdater(objectSpace, versionFromDB),
@@ -152,6 +153,7 @@ namespace Visa2026.Module
             updaters.Add(new LookupLocalizationLookupListViewUpdater());
             updaters.Add(new LookupBaseDetailViewModelUpdater());
             updaters.Add(new ApplicationMigrationSlaProfileViewsUpdater());
+            updaters.Add(new ApprovalLegProfileMinistryLegViewsUpdater());
             updaters.Add(new ApplicationProgressHistoryViewsUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());

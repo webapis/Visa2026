@@ -997,3 +997,91 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Prevent**: After `Applications.ps1`, always run WorkPermit → Invitation → ApplicationItem → ApplicationProgress; document in [import-practices.md § Full application domain](./import-practices.md). Do **not** run `--correct-application-progress-ministry-legs` after direct-migration progress reimport.
 - **Artifacts**: `cleanup/ImportedApplications.sql`, `reimport/Applications.ps1`, import-practices + scripts README + SKILL troubleshooting
 
+### 2026-07-04 — Document copies wave (calik-energi, LocalDB)
+
+- **Phase**: file-import
+- **Environment**: LocalDB `Visa2026` + SQLEXPRESS `VISA2015` (`ReadOnlyUser` + `VISA2014_SQL_PASSWORD`)
+- **Script**: `scripts/visa2014-migration/import/DocumentCopies.ps1` (also wired in `Run-HeadlessChain.ps1`)
+- **Outcome**: success (FamilyProof required one fix — see below)
+- **Counts (target after wave)**:
+
+  | Wave | Posted / in DB | Skips (run log) |
+  |------|----------------|-----------------|
+  | Person.Photo | 3,170 | 71 no blob |
+  | PassportDocument | 3,567 | 35 oversize, 12 no passport map, 1 no blob |
+  | VisaDocument | 5,775 | 154 oversize, 66 no visa map, 46 no blob |
+  | EducationDocument | 4,222 | 40 oversize, 16 duplicate blob, 10 no education map, 29 no blob |
+  | WorkPermitDocument | 1,000 | 2 no blob, 5 already imported (pilot) |
+  | InvitationDocument | 2,875 | 203 no parent map, 4 no blob |
+  | FamilyProofDocument | 9 `PersonDocument` + 437 `PersonFamilyRelationDocument` | 1 oversize (>5MB), 3 duplicate blob |
+
+- **Legacy mapping**:
+  - Passport / Education / WorkPermit / Invitation scans → `dbo.PassportCopy` (implicit FK columns for WorkPermit letter + ApplicationResult)
+  - Visa scan → inline `Visa.GöçürmeNusga`
+  - Photo → `Person.Photo` varbinary
+  - Family proof → `FamilyProofDocument.CopyOfDocument` **inline varbinary(max)** (not `FileData` FK)
+- **FamilyProof fix**: initial SQL `CAST(CopyOfDocument AS varchar(36))` + `FileData` join caused SQL error 8152 — read blob per row from `CopyOfDocument` instead (`Visa2014FamilyProofDocumentImporter`)
+- **New importers**: `Visa2014WorkPermitDocumentImporter`, `Visa2014InvitationDocumentImporter`, `Visa2014PassportCopyLinkedDocumentImporter`, `Visa2014FamilyProofDocumentImporter`, `Visa2014LegacyTableColumnResolver`
+- **Gotcha**: Passport/Visa/Education re-run posted with `Already imported: 0` when id-map files were empty — target counts may exceed prior pilot if those maps were not saved earlier; id-maps now under `id-maps/calik-energi/*Document.json`
+- **Gotcha**: `StrReplace` on `.cs` under DataImporter can save UTF-16 — convert to UTF-8 before `dotnet build` (bytes should start `117,115,105,110` = `using`)
+- **Prevent**: Use `DocumentCopies.ps1 -StartAt FamilyProofDocument` only after fix; keep 5MB cap consistent with `DocumentBase` rules
+- **Artifacts**: `DocumentCopies.ps1`, `Visa2014LegacyFileNameHelper` (work-permit / invitation / family-proof names)
+
+## 2026-07-06 — ApplicationItem cancel flags fan-out + reimport (calik-energi)
+
+- **Phase**: partial-reimport (`reimport/ApplicationItems.ps1` after `Visa2014ApplicationItemCancelledFlagsMapper` + `IsLineCancelled` on BO)
+- **Script**: `scripts/visa2014-migration/reimport/ApplicationItems.ps1` (`-Configuration Debug`)
+- **Outcome**: success
+- **Import**: deleted 21,306 items; posted **21,306**; failed **0**; skipped missing id-map **194** (legacy 21,794 rows)
+- **Cancel flags (target DB)**:
+
+  | Column | Count |
+  |--------|------:|
+  | `IsCancelled` (WP) | 750 |
+  | `InvitationItemIsCancelled` | 16 |
+  | `VisaIsCancelled` | 3 |
+  | Any line flag (OR) | **769** |
+  | `RejectionIssued` | 9 |
+
+- **Before fix**: all 769 cancelled lines landed on `IsCancelled` only; invitation/visa flags were 0
+- **Mapper**: `Visa2014ApplicationItemCancelledFlagsMapper` — `App_Cancel_*` name heuristics + `Show*IsCancelled` catalog + fallback `IsCancelled`
+- **UI**: computed `ApplicationItem.IsLineCancelled` (OR of type flags + `Application.IsCancelled`); column on nested + standalone ListViews
+- **Gap vs legacy**: ~774 `PersonInApplication.Cancelled=1` in VISA2015 — 5-row delta expected from 194 skipped items / apps not in id-map
+- **Post-corrections**: PersonAddressPia + ApplicationItemPersonCurrent ran; CurrentWorkPermitItem updated 71 on person-current pass
+- **Prevent**: new UTF-16 on DataImporter `.cs` — write via PowerShell UTF-8 or verify bytes before build
+
+### 2026-07-06 — P0 document `IsCancelled` backfill (Visa + WorkPermitItem transforms)
+
+- **What**: `Visa2014LegacyDocumentCancellationIndex` loads `PersonInApplication` cancellation evidence and sets `IsCancelled` on **Visa** and **WorkPermitItem** import rows (not only `ApplicationItem` workflow flags).
+- **Evidence**: `Cancelled=1` → `Visa2014ApplicationItemCancelledFlagsMapper.ResolveDocumentCancellation`; completed cancel subtypes **12 / 21 / 22** → direct visa/WP mapping; merged per linked `Visa` / `WorkPermit` OID.
+- **Files**: `Visa2014LegacyDocumentCancellationIndex.cs`, refactored mapper, `Visa2014VisaTransform`, `Visa2014WorkPermitItemTransform`, OData payload for WP item; field-map notes in `Visa.yaml` / `WorkPermitItem.yaml`.
+- **Tests**: 12 passed (`Visa2014LegacyDocumentCancellationResolverTests` + mapper tests).
+- **Not done**: idempotent OData PATCH backfill for already-imported rows; `InvitationItem` already had `ApplicationResult.Result==1`.
+- **Reimport**: run `WorkPermitItem` + `Visa` waves (or targeted reimport scripts) after deploy; `ApplicationItem` workflow flags unchanged.
+
+### 2026-07-06 — Dev reimport Visa + WorkPermitItem cancellation (`VisaWorkPermitCancellation.ps1`)
+
+- **Script**: `scripts/visa2014-migration/reimport/VisaWorkPermitCancellation.ps1 -Configuration Debug`
+- **Cleanup**: `cleanup/ImportedVisaWorkPermitCancellationBackfill.sql` — null `ApplicationItems` visa/WP FKs; delete all `Visas` (+ docs) and `WorkPermitItems`; keep `WorkPermit` headers
+- **Import waves** (all **0 failed**):
+
+  | Entity | Posted | Skipped (id-map) | Notes |
+  |--------|-------:|-----------------:|-------|
+  | Visa | 5975 | 41 (no Passport map) | log: `import-logs/reimport-Visa-cancellation-*.log` |
+  | WorkPermitItem | 3797 | 2566 | 47 position fallback |
+  | ApplicationItem | 21306 | 194 | relink `CurrentVisa` / `CurrentWorkPermitItem` |
+
+- **Cancellation counts (target `Visa2026` after import)**:
+
+  | Layer | Count |
+  |-------|------:|
+  | `Visas.IsCancelled` | **685** |
+  | `WorkPermitItems.IsCancelled` | **634** |
+  | `ApplicationItems.IsCancelled` (WP line) | **750** (unchanged — workflow flags) |
+  | `ApplicationItems.VisaIsCancelled` | **3** |
+  | `ApplicationItems` with `CurrentVisaId` | 15208 |
+  | `ApplicationItems` with `CurrentWorkPermitItemID` | 3580 |
+
+- **Outcome**: **partial success** — all three OData imports completed; script exit **1** on post-import corrections (`ApplicationItems.ps1` → `--correct-person-address-of-residence`) with `hostpolicy.dll` / missing `Visa2026.DataImporter.runtimeconfig.json` after ~37 min run (likely file lock / stale `--no-build` output). Cancellation backfill itself is done; re-run corrections when build is clean: `ApplicationItems.ps1 -SkipCorrections` not needed — run correction flags only via DataImporter after `dotnet build`.
+- **Before reimport (stale)**: 863 visa + 195 WP item cancelled (pre-index logic / partial state).
+

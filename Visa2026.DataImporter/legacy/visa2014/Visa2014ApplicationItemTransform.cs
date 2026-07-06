@@ -488,7 +488,11 @@ internal static class Visa2014ApplicationItemTransform
             ? WorkPermitLocationAuditNote
             : null;
 
-        row["IsCancelled"] = raw.Cancelled;
+        Visa2014ApplicationItemCancelledFlagsMapper.ApplyLegacyCancelledFlags(
+            row,
+            applicationTypeName,
+            context.Visibility,
+            raw.Cancelled);
         row["RejectionIssued"] = raw.Rejected;
         row["VisaIssued"] = raw.IsComplete;
 

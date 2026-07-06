@@ -120,7 +120,12 @@ internal static class Visa2014VisaTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        var transformed = TransformRows(rawRows, catalogs, out var skipped, out var unmappedDistinct, out var dedupeSummary);
+        var cancellationIndex = Visa2014LegacyDocumentCancellationIndex.Load(
+            connectionString,
+            lookupTranslationPaths,
+            verbose);
+
+        var transformed = TransformRows(rawRows, catalogs, cancellationIndex, out var skipped, out var unmappedDistinct, out var dedupeSummary);
         return new Visa2014PersonImportBatch
         {
             ImportRows = transformed.ImportRows,
@@ -172,6 +177,7 @@ internal static class Visa2014VisaTransform
     internal static Visa2014PersonTransform.TransformBatchResult TransformRows(
         IReadOnlyList<Visa2014VisaRawRow> rawRows,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        Visa2014LegacyDocumentCancellationIndex cancellationIndex,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct,
         out List<Dictionary<string, object?>> dedupeSummary)
@@ -195,7 +201,7 @@ internal static class Visa2014VisaTransform
                 continue;
             }
 
-            var export = BuildExportRow(row, catalogs, out var skipReason, out var rowUnmapped);
+            var export = BuildExportRow(row, catalogs, cancellationIndex, out var skipReason, out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -272,6 +278,7 @@ internal static class Visa2014VisaTransform
     private static Dictionary<string, object?> BuildExportRow(
         WorkingRow working,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        Visa2014LegacyDocumentCancellationIndex cancellationIndex,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -328,7 +335,7 @@ internal static class Visa2014VisaTransform
         row["ExpirationDate"] = raw.ExpirationDate;
         row["Passport"] = raw.LegacyPassportOid.ToString("D");
         row["ExtensionRequired"] = true;
-        row["IsCancelled"] = false;
+        row["IsCancelled"] = cancellationIndex.IsVisaCancelled(raw.LegacyOid);
         row["IsChanged"] = false;
         row["IsExtended"] = false;
         row["ShowOptionalFields"] = false;

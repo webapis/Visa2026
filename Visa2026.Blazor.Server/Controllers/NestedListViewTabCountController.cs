@@ -39,11 +39,11 @@ public sealed class DetailViewTabCountController : ViewController<DetailView>
         if (e.ModelLayoutElement.Parent is not IModelTabbedGroup)
             return;
 
-        foreach (var item in (IModelLayoutGroup)e.ModelLayoutElement)
+        foreach (var layoutViewItem in EnumerateLayoutViewItems((IModelLayoutGroup)e.ModelLayoutElement))
         {
-            if (item is not IModelLayoutViewItem layoutViewItem)
+            if (layoutViewItem.ViewItem?.Id is not { } viewItemId)
                 continue;
-            if (View.FindItem(layoutViewItem.ViewItem.Id) is not ListPropertyEditor propertyEditor)
+            if (View.FindItem(viewItemId) is not ListPropertyEditor propertyEditor)
                 continue;
 
             var controller = propertyEditor.Frame?.GetController<NestedListViewTabCountController>();
@@ -52,6 +52,24 @@ public sealed class DetailViewTabCountController : ViewController<DetailView>
 
             controller.Initialize(layoutGroup);
             propertyEditor.ValueRead += (_, _) => controller.SubscribeToListChanged();
+            break;
+        }
+    }
+
+    private static IEnumerable<IModelLayoutViewItem> EnumerateLayoutViewItems(IModelLayoutGroup? group)
+    {
+        if (group == null)
+            yield break;
+
+        foreach (var node in group)
+        {
+            if (node is IModelLayoutViewItem viewItem && viewItem.ViewItem != null)
+                yield return viewItem;
+            else if (node is IModelLayoutGroup nestedGroup)
+            {
+                foreach (var nested in EnumerateLayoutViewItems(nestedGroup))
+                    yield return nested;
+            }
         }
     }
 }

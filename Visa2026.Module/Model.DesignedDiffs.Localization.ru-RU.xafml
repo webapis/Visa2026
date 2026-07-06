@@ -258,6 +258,16 @@
         <Member Name="Year" Caption="Год" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationApprovalLegSnapshot" Caption="Снимок этапа министерства">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="MaxDaysInReview" Caption="Макс. рабочих дней" />
+        <Member Name="MinistryShortName" Caption="Краткое название" />
+        <Member Name="Sequence" Caption="Порядок" />
+        <Member Name="WarningDaysBeforeMax" Caption="Предупреждение (рабочие дни)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Позиция заявки">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
@@ -337,6 +347,15 @@
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Профиль SLA миграции">
+      <OwnMembers>
+        <Member Name="ApplicationTypes" Caption="Типы заявок" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="MaxDaysInReview" Caption="Макс. рабочих дней" />
+        <Member Name="WarningDaysBeforeMax" Caption="Предупреждение (рабочие дни)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Нумерация заявок">
@@ -1269,6 +1288,14 @@
         <Member Name="FirstAndSecondMinistry" Caption="Первое и второе министерство" />
         <Member Name="FirstMinistryOnly" Caption="Только первое министерство" />
         <Member Name="None" Caption="Нет" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewSlaSettings" Caption="SLA министерской проверки">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="MaxDaysInReview" Caption="Макс. рабочих дней" />
+        <Member Name="WarningDaysBeforeMax" Caption="Предупреждение (рабочие дни)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Место разрешения на перемещение">
@@ -2424,6 +2451,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Состояние" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Снимок этапа министерства" />
+    <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Снимки этапов министерств" />
     <DetailView Id="ApplicationItem_DetailView" Caption="Позиция" />
     <ListView Id="ApplicationItem_ListView" Caption="Позиции заявки">
       <Columns>
@@ -2441,6 +2470,8 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Документы" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
+    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Профиль SLA миграции" />
+    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Профили SLA миграции" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Нумерация заявок" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Нумерация заявок" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Прогресс заявки" />
@@ -2668,6 +2699,8 @@
     </ListView>
     <DetailView Id="MigrationService_DetailView" Caption="Миграционная служба" />
     <ListView Id="MigrationService_ListView" Caption="Миграционные службы" />
+    <DetailView Id="MinistryReviewSlaSettings_DetailView" Caption="SLA министерской проверки" />
+    <ListView Id="MinistryReviewSlaSettings_ListView" Caption="SLA министерской проверки" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Место разрешения на перемещение" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Места разрешения" />
     <DetailView Id="OrganizationType_DetailView" Caption="Тип организации" />

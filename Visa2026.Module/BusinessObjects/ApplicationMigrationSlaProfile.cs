@@ -37,15 +37,15 @@ public class ApplicationMigrationSlaProfile : LookupBase
     }
 
     /// <summary>Max working days allowed at migration service for types using this profile.</summary>
-    [XafDisplayName("Maks. iş günleri")]
+    [XafDisplayName("Max working days")]
     public virtual int? MaxDaysInReview { get; set; }
 
     /// <summary>Optional early warning when working days exceed this value (must be &lt; <see cref="MaxDaysInReview"/>).</summary>
-    [XafDisplayName("Duýduryş (iş günleri)")]
+    [XafDisplayName("Warning (working days)")]
     public virtual int? WarningDaysBeforeMax { get; set; }
 
     /// <summary>Application types that use this migration SLA tier (maintained via Link / Unlink).</summary>
-    [XafDisplayName("Arza görnüşleri")]
+    [XafDisplayName("Application types")]
     [InverseProperty(nameof(ApplicationType.MigrationSlaProfile))]
     [VisibleInListView(false)]
     [ModelDefault("AllowNew", "False")]

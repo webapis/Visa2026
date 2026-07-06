@@ -79,3 +79,10 @@ fields:
     lookupCatalog: WorkPermittedLocationName
     missingBehavior: allow_empty
     notes: 1 legacy row has null WorkPermitLocation — empty string allowed
+
+  - source: PersonInApplication.Cancelled
+    target: IsCancelled
+    transform: legacy_document_cancellation_index
+    notes: |
+      Visa2014LegacyDocumentCancellationIndex — PersonInApplication.Cancelled + completed cancel subtypes (12/21/22).
+      Legacy dbo.WorkPermit.Oid maps 1:1 to WorkPermitItem. Not rejected-only lines.

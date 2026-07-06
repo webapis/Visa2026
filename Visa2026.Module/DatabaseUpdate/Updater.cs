@@ -737,6 +737,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<PdfFormMapping>(role);
             EnsureFullAccessRecursivePermission<ApplicationMigrationSlaProfile>(role);
             EnsureFullAccessRecursivePermission<SystemSettings>(role);
+            EnsureFullAccessRecursivePermission<MinistryReviewSlaSettings>(role);
             EnsureReadWriteOnlyPermission<ExpirationAlertRule>(role);
             // Link / Unlink application types on migration SLA profile detail.
             EnsureTypePermission<ApplicationType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -754,6 +755,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/AuthorizedRepresentative", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationNumberingProfile", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ApplicationMigrationSlaProfile", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/MinistryReviewSlaSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ExpirationAlertRule", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/SystemSettings", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration/Items/ProjectContract", SecurityPermissionState.Allow);

@@ -374,8 +374,6 @@ public static class ApprovalLegProfileMinistryHelper
 
         var copy = targetSpace.CreateObject<ApprovalLegProfileMinistryLeg>();
         copy.Sequence = sourceLeg.Sequence;
-        copy.MaxDaysInReview = sourceLeg.MaxDaysInReview;
-        copy.WarningDaysBeforeMax = sourceLeg.WarningDaysBeforeMax;
         if (sourceLeg.ApprovingMinistry != null)
             copy.ApprovingMinistry = targetSpace.GetObject(sourceLeg.ApprovingMinistry);
         AttachLegToProfile(contractInTarget, copy, targetSpace);
@@ -564,40 +562,19 @@ public static class ApprovalLegProfileMinistryHelper
     public static bool HasConfiguredLegs(ApprovalLegProfile? profile) =>
         GetLegCount(profile) > 0;
 
-    public static bool TryValidateLegSla(ApprovalLegProfile? profile, out string? errorMessage)
+    public static bool TryValidateLegSla(
+        IObjectSpace objectSpace,
+        ApprovalLegProfile? profile,
+        out string? errorMessage)
     {
         errorMessage = null;
         if (profile == null || !profile.IsActive)
             return true;
 
-        var legs = profile.MinistryLegs?
-            .Where(l => l.ApprovingMinistry != null)
-            .OrderBy(l => l.Sequence)
-            .ToList() ?? [];
-
-        if (legs.Count == 0)
+        if (!HasConfiguredLegs(profile))
             return true;
 
-        foreach (var leg in legs)
-        {
-            if (leg.MaxDaysInReview is not > 0)
-            {
-                errorMessage = VisaUiMessages.Format(
-                    "ApprovalLegProfile.MinistryLegMaxDaysRequired",
-                    leg.Sequence ?? 0);
-                return false;
-            }
-
-            if (leg.WarningDaysBeforeMax is > 0 && leg.WarningDaysBeforeMax >= leg.MaxDaysInReview)
-            {
-                errorMessage = VisaUiMessages.Format(
-                    "ApprovalLegProfile.MinistryLegWarningDaysInvalid",
-                    leg.Sequence ?? 0);
-                return false;
-            }
-        }
-
-        return true;
+        return MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out errorMessage);
     }
 
 
@@ -622,8 +599,12 @@ public static class ApprovalLegProfileMinistryHelper
             snapshot.ApprovingMinistryId = leg.ApprovingMinistry.ID;
             snapshot.MinistryShortName = leg.ApprovingMinistry.ShortNameTm ?? leg.ApprovingMinistry.NameTm ?? string.Empty;
             snapshot.MinistryNameTm = leg.ApprovingMinistry.NameTm ?? string.Empty;
-            snapshot.MaxDaysInReview = leg.MaxDaysInReview;
-            snapshot.WarningDaysBeforeMax = leg.WarningDaysBeforeMax;
+            if (MinistryReviewSlaHelper.TryGetEffectiveSla(objectSpace, out var maxDays, out var warningDays))
+            {
+                snapshot.MaxDaysInReview = maxDays;
+                snapshot.WarningDaysBeforeMax = warningDays;
+            }
+
             application.ApprovalLegSnapshots.Add(snapshot);
         }
     }

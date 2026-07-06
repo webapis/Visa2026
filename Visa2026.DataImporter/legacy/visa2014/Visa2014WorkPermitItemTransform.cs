@@ -34,7 +34,7 @@ internal static class Visa2014WorkPermitItemTransform
     [
         "_legacyRowId", "_legacyTable", "_importAction",
         "Person", "Passport", "CurrentPositionHistory", "WorkPermit",
-        "WorkPermitNumber", "ASNumber", "StartDate", "ExpirationDate", "WorkPermittedLocations",
+        "WorkPermitNumber", "ASNumber", "StartDate", "ExpirationDate", "WorkPermittedLocations", "IsCancelled",
         "_legacy_EmployeeOid", "_legacy_PassportOid", "_legacy_PositionOid",
         "_legacy_WorkPermitLetterOid", "_legacy_WorkPermitLocationOid",
     ];
@@ -73,7 +73,12 @@ internal static class Visa2014WorkPermitItemTransform
         var locationRows = Visa2014WorkPermitLocationBitMatrix.LoadLocationRows(
             connectionString, locationOids, verbose);
 
-        return TransformRows(rawRows, catalogs, bitColumnNames, locationRows, out var skipped, out var unmappedDistinct);
+        var cancellationIndex = Visa2014LegacyDocumentCancellationIndex.Load(
+            connectionString,
+            lookupTranslationPaths,
+            verbose);
+
+        return TransformRows(rawRows, catalogs, bitColumnNames, locationRows, cancellationIndex, out var skipped, out var unmappedDistinct);
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014WorkPermitItemRawRow parsed)
@@ -105,6 +110,7 @@ internal static class Visa2014WorkPermitItemTransform
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         IReadOnlyList<string> bitColumnNames,
         IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string?>> locationRows,
+        Visa2014LegacyDocumentCancellationIndex cancellationIndex,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct)
     {
@@ -114,7 +120,7 @@ internal static class Visa2014WorkPermitItemTransform
 
         foreach (var raw in rawRows)
         {
-            var export = BuildExportRow(raw, catalogs, bitColumnNames, locationRows, out var skipReason, out var rowUnmapped);
+            var export = BuildExportRow(raw, catalogs, bitColumnNames, locationRows, cancellationIndex, out var skipReason, out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -158,6 +164,7 @@ internal static class Visa2014WorkPermitItemTransform
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         IReadOnlyList<string> bitColumnNames,
         IReadOnlyDictionary<Guid, IReadOnlyDictionary<string, string?>> locationRows,
+        Visa2014LegacyDocumentCancellationIndex cancellationIndex,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -243,6 +250,7 @@ internal static class Visa2014WorkPermitItemTransform
             catalogs,
             unmapped);
         row["WorkPermittedLocations"] = workPermittedLocations;
+        row["IsCancelled"] = cancellationIndex.IsWorkPermitCancelled(raw.LegacyOid);
 
         return row;
     }

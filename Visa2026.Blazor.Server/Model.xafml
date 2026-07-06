@@ -54,15 +54,17 @@
       <Columns>
         <ColumnInfo Id="ApplicationItemName" Index="0" />
         <ColumnInfo Id="Person" Index="1" />
-        <ColumnInfo Id="RegistrationDate" Index="2" />
-        <ColumnInfo Id="TravelDate" Index="3" />
-        <ColumnInfo Id="CheckPoint" Index="4" />
-        <ColumnInfo Id="CurrentPassport" Index="5" />
+        <ColumnInfo Id="IsLineCancelled" Index="2" />
+        <ColumnInfo Id="RegistrationDate" Index="3" />
+        <ColumnInfo Id="TravelDate" Index="4" />
+        <ColumnInfo Id="CheckPoint" Index="5" />
+        <ColumnInfo Id="CurrentPassport" Index="6" />
         <ColumnInfo Id="CurrentVisa" Index="7" />
         <ColumnInfo Id="CurrentPositionHistory" Index="8" />
         <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
       </Columns>
     </ListView>
+    <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />
     <DetailView Id="Application_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100" Direction="Vertical">
@@ -97,9 +99,16 @@
                     <LayoutItem Id="Urgency" ViewItem="Urgency" Index="3" RelativeSize="78.57142857142857" IsNewNode="True" />
                   </LayoutGroup>
                 </LayoutGroup>
-                <LayoutGroup Id="Item2" ShowCaption="True" Caption="Progress" CaptionLocation="Top" Index="1" RelativeSize="100" IsNewNode="True">
-                  <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="0" RelativeSize="100" IsNewNode="True">
-                    <LayoutItem Id="ProgressHistory" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
+                <LayoutGroup Id="Item2" ShowCaption="True" Caption="Progress" CaptionLocation="Top" Index="1" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows-tabbed" IsNewNode="True">
+                  <LayoutGroup Id="ProgressCurrentStatus" ShowCaption="False" CustomCSSClassName="visa-progress-current-status" Direction="Horizontal" Index="0" RelativeSize="8" IsNewNode="True">
+                    <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="40" IsNewNode="True" />
+                    <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="1" RelativeSize="10" IsNewNode="True" />
+                    <LayoutItem Id="IsRejected" ViewItem="IsRejected" Index="2" RelativeSize="10" IsNewNode="True" />
+                    <LayoutItem Id="WorkingDaysInCurrentStep" ViewItem="WorkingDaysInCurrentStep" Index="3" RelativeSize="15" IsNewNode="True" />
+                    <LayoutItem Id="ProgressSlaStatement" ViewItem="ProgressSlaStatement" Index="4" RelativeSize="25" IsNewNode="True" />
+                  </LayoutGroup>
+                  <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="1" RelativeSize="92" IsNewNode="True">
+                    <LayoutItem Id="ProgressHistory" CustomCSSClassName="xaf-show-all-rows" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
                   </LayoutGroup>
                 </LayoutGroup>
               </TabbedGroup>
@@ -226,6 +235,8 @@
         <ColumnInfo Id="Month" Width="56" />
         <ColumnInfo Id="ApplicationDate" Width="108" />
         <ColumnInfo Id="CurrentState" Width="89" />
+        <ColumnInfo Id="IsCancelled" Width="70" />
+        <ColumnInfo Id="IsRejected" Width="70" />
         <ColumnInfo Id="ApplicationType" Width="109" />
       </Columns>
     </ListView>
@@ -236,6 +247,8 @@
         <ColumnInfo Id="Month" Width="56" />
         <ColumnInfo Id="ApplicationDate" Width="108" />
         <ColumnInfo Id="CurrentState" Width="89" />
+        <ColumnInfo Id="IsCancelled" Width="70" />
+        <ColumnInfo Id="IsRejected" Width="70" />
         <ColumnInfo Id="ApplicationType" Width="109" />
       </Columns>
     </ListView>
@@ -246,6 +259,8 @@
         <ColumnInfo Id="Month" Width="56" />
         <ColumnInfo Id="ApplicationDate" Width="108" />
         <ColumnInfo Id="CurrentState" Width="89" />
+        <ColumnInfo Id="IsCancelled" Width="70" />
+        <ColumnInfo Id="IsRejected" Width="70" />
         <ColumnInfo Id="ApplicationType" Width="109" />
       </Columns>
     </ListView>
@@ -312,11 +327,12 @@
         <ColumnInfo Id="ApplicationItemName" Index="0" Width="156" />
         <ColumnInfo Id="Application" Width="81" />
         <ColumnInfo Id="Person" Index="1" Width="56" />
-        <ColumnInfo Id="RegistrationDate" Index="2" Width="110" />
-        <ColumnInfo Id="TravelDate" Index="3" Width="78" />
-        <ColumnInfo Id="CheckPoint" Index="4" Width="84" />
+        <ColumnInfo Id="IsLineCancelled" Index="2" Width="80" />
+        <ColumnInfo Id="RegistrationDate" Index="3" Width="110" />
+        <ColumnInfo Id="TravelDate" Index="4" Width="78" />
+        <ColumnInfo Id="CheckPoint" Index="5" Width="84" />
         <ColumnInfo Id="TravelType" Width="79" />
-        <ColumnInfo Id="CurrentPassport" Index="5" Width="108" />
+        <ColumnInfo Id="CurrentPassport" Index="6" Width="108" />
         <ColumnInfo Id="MovementType" Width="106" />
         <ColumnInfo Id="CurrentVisa" Index="7" Width="84" />
         <ColumnInfo Id="TravelNotes" Width="85" />

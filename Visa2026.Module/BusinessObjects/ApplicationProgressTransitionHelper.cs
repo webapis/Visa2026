@@ -335,6 +335,15 @@ public static class ApplicationProgressTransitionHelper
 
         if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep))
         {
+            if (ApplicationProgressLegCodes.IsMinistryReviewStartedStateCode(progress.State?.Code)
+                && objectSpace != null
+                && route.Value == ApplicationProgressRouteKind.ViaMinistries
+                && !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _))
+            {
+                errorMessage = VisaUiMessages.Get("ApplicationProgress.MinistryReviewSlaRequired");
+                return false;
+            }
+
             if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(
                     progress.State?.Code,
                     progress.Location?.Code)

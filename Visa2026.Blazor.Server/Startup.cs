@@ -264,7 +264,10 @@ namespace Visa2026.Blazor.Server
             var connectionString = Configuration.GetConnectionString("DefaultConnection")
                 ?? Configuration.GetConnectionString("ConnectionString");
             if (!string.IsNullOrWhiteSpace(connectionString))
+            {
                 ApplicationRuntimeLogSchemaSql.ApplyIfMissing(connectionString);
+                MinistryReviewSlaSettingsSchemaSql.ApplyIfMissing(connectionString);
+            }
 
             BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
                 app.ApplicationServices,

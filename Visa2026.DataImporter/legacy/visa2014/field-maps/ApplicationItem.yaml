@@ -386,11 +386,14 @@ fields:
     notes: Full layer-3 audit pending WorkPermitItem discovery — 3,725 rows with WorkPermitLocation FK
 
   - source: Cancelled
-    target: IsCancelled
+    target:
+      - InvitationItemIsCancelled
+      - IsCancelled
+      - VisaIsCancelled
     transform: bool
     missingBehavior: use_default
     default: false
-    notes: Work-permit-item cancel flag — also map InvitationItemIsCancelled / VisaIsCancelled per app type at transform
+    notes: Legacy PersonInApplication.Cancelled fans out per ApplicationType Show*IsCancelled flags and App_Cancel_* name heuristics (Visa2014ApplicationItemCancelledFlagsMapper). Aggregate UI flag IsLineCancelled on ApplicationItem.
 
   - source: Rejected
     target: RejectionIssued

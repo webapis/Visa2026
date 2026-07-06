@@ -289,23 +289,8 @@ internal static class ApprovalLegProfileMinistryLegCatalogSync
         ApprovalLegProfileMinistryLegCatalogRow jsonLeg,
         bool onlyIfMissing)
     {
-        var changed = false;
-
-        if (jsonLeg.MaxDaysInReview is > 0
-            && (!onlyIfMissing || leg.MaxDaysInReview is not > 0))
-        {
-            leg.MaxDaysInReview = jsonLeg.MaxDaysInReview;
-            changed = true;
-        }
-
-        if (jsonLeg.WarningDaysBeforeMax is > 0
-            && (!onlyIfMissing || leg.WarningDaysBeforeMax is not > 0))
-        {
-            leg.WarningDaysBeforeMax = jsonLeg.WarningDaysBeforeMax;
-            changed = true;
-        }
-
-        return changed;
+        // Ministry review SLA is tenant-wide (MinistryReviewSlaSettings). Per-leg JSON values are ignored.
+        return false;
     }
 
     private static ApprovingMinistry? FindMinistry(IObjectSpace objectSpace, string shortNameTm)

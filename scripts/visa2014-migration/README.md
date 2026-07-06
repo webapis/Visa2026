@@ -92,6 +92,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | Task | Script | Notes |
 |------|--------|-------|
 | Full local chain (in-process) | `import/Run-HeadlessChain.ps1` | `-StartAt <Entity>` to resume |
+| Document copies only (photos + scans) | `import/DocumentCopies.ps1` | `-StartAt WorkPermitDocument` to resume mid-wave |
 | On-prem staging waves | `import/OnPrem-Staging.ps1` | Ordered per `order.yaml` |
 | Tenant catalog generation | `import/Invoke-TenantCatalogGeneration.ps1` | Wraps `--generate-visa2014-tenant-catalogs` |
 | ApplicationItem import only | `import/ApplicationItems.ps1` | Parents + id-maps must exist |
@@ -111,6 +112,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | Ministry legs missing on via-ministry apps | `patch/ApplicationProgress-MinistryLegs.ps1` | (in-place delete/regen per app) |
 | Progress steps out of workflow order (date vs leg sequence) | `patch/ApplicationProgress-Order.ps1` | (in-place `ProgressOrder` recompute) |
 | Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
+| Visa + WorkPermitItem `IsCancelled` backfill | `reimport/VisaWorkPermitCancellation.ps1` | `cleanup/ImportedVisaWorkPermitCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
 
 ### Reconcile
 

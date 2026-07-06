@@ -324,6 +324,7 @@ internal static class Visa2014WorkPermitItemODataImporter
             ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
             ["ExpirationDate"] = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc),
             ["WorkPermittedLocations"] = workPermittedLocations.Trim(),
+            ["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled,
         };
     }
 

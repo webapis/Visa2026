@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
@@ -12,6 +14,12 @@ namespace Visa2026.Module.BusinessObjects;
 [DefaultClassOptions]
 [NavigationItem(false)]
 [DefaultProperty(nameof(Sequence))]
+[Appearance(
+    "ApprovalLegProfileMinistryLeg_HideLegSlaColumns",
+    AppearanceItemType = "ViewItem",
+    TargetItems = nameof(MaxDaysInReview) + ";" + nameof(WarningDaysBeforeMax),
+    Visibility = ViewItemVisibility.Hide,
+    Context = "DetailView,ListView")]
 public class ApprovalLegProfileMinistryLeg : BaseObject
 {
     [Browsable(false)]
@@ -30,12 +38,14 @@ public class ApprovalLegProfileMinistryLeg : BaseObject
     [Browsable(false)]
     public virtual Guid ApprovingMinistryId { get; set; }
 
-    /// <summary>Max working days allowed in <c>{n}_REVIEW_STARTED</c> for this leg.</summary>
-    [XafDisplayName("Maks. iş günleri")]
+    /// <summary>Legacy per-leg SLA — use <see cref="MinistryReviewSlaSettings"/> (Configuration).</summary>
+    [Obsolete("Ministry review SLA is configured globally on MinistryReviewSlaSettings. Retained for DB/import compatibility.")]
+    [Browsable(false)]
     public virtual int? MaxDaysInReview { get; set; }
 
-    /// <summary>Optional early warning when working days in review exceed this value (must be &lt; <see cref="MaxDaysInReview"/>).</summary>
-    [XafDisplayName("Duýduryş (iş günleri)")]
+    /// <summary>Legacy per-leg SLA — use <see cref="MinistryReviewSlaSettings"/> (Configuration).</summary>
+    [Obsolete("Ministry review SLA is configured globally on MinistryReviewSlaSettings. Retained for DB/import compatibility.")]
+    [Browsable(false)]
     public virtual int? WarningDaysBeforeMax { get; set; }
 
     public override void OnSaving()

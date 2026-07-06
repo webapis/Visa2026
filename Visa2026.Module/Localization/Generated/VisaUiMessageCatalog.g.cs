@@ -75,6 +75,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
             ["ru-RU"] = "Поля заявки нельзя изменить после записи прогресса министерства или миграции.",
         },
+        ["Application.FieldsLockedWhenWorkflowTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This application is closed (issued, rejected, or cancelled). Edit the last progress step to reopen it.",
+            ["tr-TR"] = "Bu arza kapatıldı (verildi, reddedildi veya iptal edildi). Yeniden açmak için son ilerleme adımını düzenleyin.",
+            ["tk-TM"] = "Bu arza ýapyldy (berildi, ret edildi ýa-da ýatyryldy). Täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
+            ["ru-RU"] = "Заявка закрыта (выдана, отклонена или отменена). Измените последний шаг прогресса, чтобы открыть снова.",
+        },
         ["Application.ProjectContractChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Progress history already exists. Changing the project contract may change which ministry steps apply to new progress rows. Review existing steps.",
@@ -915,6 +922,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ministrlik hatlarynyň nusgalary",
             ["ru-RU"] = "Копии писем министерства",
         },
+        ["ApplicationProgress.MinistryReviewSlaRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA before starting ministry review.",
+            ["tr-TR"] = "Bakanlık incelemesine başlamadan önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
+            ["tk-TM"] = "Ministrlik barlagyna başlamazdan ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["ru-RU"] = "Перед началом министерской проверки настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
+        },
         ["ApplicationProgress.OnlyLastStepDeletable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Only the last progress step can be deleted. Remove later steps first.",
@@ -1652,10 +1666,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Every ministry leg needs maximum working days in review before this profile can be active.",
-            ["tr-TR"] = "Profil aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
-            ["tk-TM"] = "Profil işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
-            ["ru-RU"] = "Перед активацией профиля для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении.",
+            ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA before activating this profile.",
+            ["tr-TR"] = "Profili etkinleştirmeden önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
+            ["tk-TM"] = "Profili işjeňleşdirmezden ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["ru-RU"] = "Перед активацией профиля настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
         },
         ["ApprovalLegProfile.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2062,6 +2076,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Davet belge kopyaları",
             ["tk-TM"] = "Çakylyk resminama nusgalary",
             ["ru-RU"] = "Копии документов приглашения",
+        },
+        ["MinistryReviewSlaSettings.NotConfigured"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA.",
+            ["tr-TR"] = "Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
+            ["tk-TM"] = "Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["ru-RU"] = "Настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
+        },
+        ["MinistryReviewSlaSettings.WarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Warning (working days) must be less than max working days.",
+            ["tr-TR"] = "Uyarı (iş günleri), azami iş günlerinden küçük olmalıdır.",
+            ["tk-TM"] = "Duýduryş (iş günleri) iň ýokary iş günlerinden az bolmaly.",
+            ["ru-RU"] = "Порог предупреждения (рабочие дни) должен быть меньше максимального числа рабочих дней.",
         },
         ["Pdf.Packaging.ApplicationId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

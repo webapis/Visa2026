@@ -128,7 +128,14 @@ internal static class Visa2014FilesImportCommand
                     target, session.ObjectSpaceFactory, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
             }
 
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, MedicalRecord.");
+            if (string.Equals(entity, "WorkPermit", StringComparison.OrdinalIgnoreCase))
+                return await RunWorkPermitFileImportAsync(target, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+
+            if (string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase))
+                return await RunInvitationFileImportAsync(target, source, dataImporterRoot, args, property, maxRows, dryRun, verbose);
+
+            Console.Error.WriteLine(
+                $"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, MedicalRecord, WorkPermit, Invitation.");
             return 1;
         }
         catch (Exception ex)
@@ -158,10 +165,52 @@ internal static class Visa2014FilesImportCommand
         var isPhoto = string.Equals(property, "Photo", StringComparison.OrdinalIgnoreCase);
         var isFamilyText = string.Equals(property, "VisaApplicationFamilyMembersText", StringComparison.OrdinalIgnoreCase);
         var isFamilyProjectContract = string.Equals(property, "FamilyMemberProjectContract", StringComparison.OrdinalIgnoreCase);
-        if (!isPhoto && !isFamilyText && !isFamilyProjectContract)
+        var isFamilyProof = string.Equals(property, "FamilyProofDocument", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "FamilyProof", StringComparison.OrdinalIgnoreCase);
+        if (!isPhoto && !isFamilyText && !isFamilyProjectContract && !isFamilyProof)
         {
-            Console.Error.WriteLine($"ERR Property '{property}' is not supported for Person. Supported: Photo, VisaApplicationFamilyMembersText, FamilyMemberProjectContract.");
+            Console.Error.WriteLine(
+                $"ERR Property '{property}' is not supported for Person. Supported: Photo, FamilyProofDocument, VisaApplicationFamilyMembersText, FamilyMemberProjectContract.");
             return 1;
+        }
+
+        if (isFamilyProof)
+        {
+            var personIdMapPath = GetOptionValue(args, "--person-id-map")
+                ?? GetOptionValue(args, "--id-map")
+                ?? source.IdMapPath(dataImporterRoot, "Person");
+            var documentIdMapPath = GetOptionValue(args, "--document-id-map-output")
+                ?? source.IdMapPath(dataImporterRoot, "FamilyProofDocument");
+
+            Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+            Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
+
+            var familyProofResult = await Visa2014FamilyProofDocumentImporter.RunAsync(
+                target,
+                source.ConnectionString,
+                personIdMapPath,
+                dryRun ? null : documentIdMapPath,
+                maxRows,
+                dryRun,
+                verbose);
+
+            Console.WriteLine($"INF Person id-map entries: {familyProofResult.PersonIdMapEntries}");
+            Console.WriteLine($"INF Legacy family-proof rows: {familyProofResult.LegacyRows}");
+            Console.WriteLine(
+                $"INF Posted PersonDocument: {familyProofResult.PostedPersonDocument}  " +
+                $"PersonFamilyRelationDocument: {familyProofResult.PostedFamilyRelationDocument}  Failed: {familyProofResult.Failed}  " +
+                $"No person map: {familyProofResult.SkippedNoPersonMap}  No blob: {familyProofResult.SkippedNoBlob}  " +
+                $"Oversize (>5MB): {familyProofResult.SkippedOversize}  Already imported: {familyProofResult.SkippedAlreadyImported}  " +
+                $"Duplicate blob: {familyProofResult.SkippedDuplicateBlob}");
+            if (familyProofResult.DocumentIdMapPath != null)
+                Console.WriteLine($"INF Document id-map: {familyProofResult.DocumentIdMapPath}");
+
+            foreach (var error in familyProofResult.Errors.Take(20))
+                Console.Error.WriteLine($"ERR {error}");
+            if (familyProofResult.Errors.Count > 20)
+                Console.Error.WriteLine($"ERR ... and {familyProofResult.Errors.Count - 20} more");
+
+            return familyProofResult.Failed > 0 ? 1 : 0;
         }
 
         if (isFamilyProjectContract)
@@ -461,6 +510,104 @@ internal static class Visa2014FilesImportCommand
             Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
 
         return result.Failed > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunWorkPermitFileImportAsync(
+        IVisa2014ImportTarget target,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string property,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var isWorkPermitDocument = string.Equals(property, "WorkPermitDocument", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "WorkPermitCopy", StringComparison.OrdinalIgnoreCase);
+        if (!isWorkPermitDocument)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported for WorkPermit. Supported: WorkPermitDocument (WorkPermitCopy).");
+            return 1;
+        }
+
+        var workPermitIdMapPath = GetOptionValue(args, "--work-permit-id-map")
+            ?? GetOptionValue(args, "--id-map")
+            ?? source.IdMapPath(dataImporterRoot, "WorkPermit");
+        var documentIdMapPath = GetOptionValue(args, "--document-id-map-output")
+            ?? source.IdMapPath(dataImporterRoot, "WorkPermitDocument");
+
+        Console.WriteLine($"INF WorkPermit id-map: {workPermitIdMapPath}");
+        Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
+
+        var result = await Visa2014WorkPermitDocumentImporter.RunAsync(
+            target,
+            source.ConnectionString,
+            workPermitIdMapPath,
+            dryRun ? null : documentIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        PrintPassportCopyLinkedResult("WorkPermit", result);
+        return result.Failed > 0 ? 1 : 0;
+    }
+
+    private static async Task<int> RunInvitationFileImportAsync(
+        IVisa2014ImportTarget target,
+        Visa2014LegacySourceProfile source,
+        string dataImporterRoot,
+        IReadOnlyList<string> args,
+        string property,
+        int? maxRows,
+        bool dryRun,
+        bool verbose)
+    {
+        var isInvitationDocument = string.Equals(property, "InvitationDocument", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(property, "InvitationCopy", StringComparison.OrdinalIgnoreCase);
+        if (!isInvitationDocument)
+        {
+            Console.Error.WriteLine($"ERR Property '{property}' is not supported for Invitation. Supported: InvitationDocument (InvitationCopy).");
+            return 1;
+        }
+
+        var invitationIdMapPath = GetOptionValue(args, "--invitation-id-map")
+            ?? GetOptionValue(args, "--id-map")
+            ?? source.IdMapPath(dataImporterRoot, "Invitation");
+        var documentIdMapPath = GetOptionValue(args, "--document-id-map-output")
+            ?? source.IdMapPath(dataImporterRoot, "InvitationDocument");
+
+        Console.WriteLine($"INF Invitation id-map: {invitationIdMapPath}");
+        Console.WriteLine($"INF Document id-map: {documentIdMapPath}");
+
+        var result = await Visa2014InvitationDocumentImporter.RunAsync(
+            target,
+            source.ConnectionString,
+            invitationIdMapPath,
+            dryRun ? null : documentIdMapPath,
+            maxRows,
+            dryRun,
+            verbose);
+
+        PrintPassportCopyLinkedResult("Invitation", result);
+        return result.Failed > 0 ? 1 : 0;
+    }
+
+    private static void PrintPassportCopyLinkedResult(string label, Visa2014PassportCopyLinkedDocumentImportResult result)
+    {
+        Console.WriteLine($"INF {label} id-map entries: {result.ParentIdMapEntries}");
+        Console.WriteLine($"INF Legacy copy rows: {result.LegacyCopyRows}");
+        Console.WriteLine(
+            $"INF Posted: {result.Posted}  Failed: {result.Failed}  " +
+            $"No parent map: {result.SkippedNoParentMap}  No blob: {result.SkippedNoBlob}  " +
+            $"Oversize (>5MB): {result.SkippedOversize}  Already imported: {result.SkippedAlreadyImported}  " +
+            $"Duplicate blob: {result.SkippedDuplicateBlob}");
+        if (result.DocumentIdMapPath != null)
+            Console.WriteLine($"INF Document id-map: {result.DocumentIdMapPath}");
+
+        foreach (var error in result.Errors.Take(20))
+            Console.Error.WriteLine($"ERR {error}");
+        if (result.Errors.Count > 20)
+            Console.Error.WriteLine($"ERR ... and {result.Errors.Count - 20} more");
     }
 
     private static int ResolveBatchSize(IReadOnlyList<string> args)

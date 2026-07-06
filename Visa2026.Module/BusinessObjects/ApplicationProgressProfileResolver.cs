@@ -36,6 +36,13 @@ public static class ApplicationProgressProfileResolver
 
         "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApprovalLegProfile;ProjectContract";
 
+    /// <summary>
+    /// Detail members read-only when <see cref="Application.IsWorkflowTerminal"/> is true.
+    /// Excludes <see cref="Application.ProgressHistory"/> so officers may delete the last step.
+    /// </summary>
+    public const string TerminalLockedApplicationDetailTargetItems =
+        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApplicationType;ApplicationReason;ApprovalLegProfile;ProjectContract;MigrationService;FromCity;ToCity;BusinessTripStartDate;BusinessTripEndDate;BusinessTripPurpose;VisaPeriod;VisaType;VisaCategory;MovementPermitLocation;BorderZoneLocation;Urgency;IsForFamily;OrganizationType;ApplicationItems;Invitations;Rejections;WorkPermits";
+
 
 
     public static bool RequiresProjectContract(Application? application)
@@ -182,6 +189,20 @@ public static class ApplicationProgressProfileResolver
 
         HasProgressBeyondOfficePreparation(application, objectSpace);
 
+    public static bool IsWorkflowTerminal(Application? application) =>
+        IsProcessTerminalStateCode(ApplicationProgressPrimaryStateCodeResolver.Resolve(application));
+
+    public static bool IsProcessTerminalStateCode(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        var trimmed = stateCode.Trim();
+        return string.Equals(trimmed, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(trimmed, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
+    }
+
 
 
     public static bool IsProjectContractLocked(Application? application, IObjectSpace? objectSpace = null)
@@ -263,6 +284,84 @@ public static class ApplicationProgressProfileResolver
         return true;
 
     }
+
+    public static bool TryValidateApplicationEditableWhenWorkflowTerminal(
+
+        IObjectSpace objectSpace,
+
+        out string? errorMessage)
+
+    {
+
+        errorMessage = null;
+
+        foreach (var application in objectSpace.GetObjectsToSave(false).OfType<Application>())
+
+        {
+
+            if (objectSpace.IsNewObject(application))
+
+                continue;
+
+            var original = objectSpace.GetObjectByKey<Application>(application.ID);
+
+            if (original == null || !IsWorkflowTerminal(original))
+
+                continue;
+
+            errorMessage = VisaUiMessages.Get("Application.FieldsLockedWhenWorkflowTerminal");
+
+            return false;
+
+        }
+
+        foreach (var child in objectSpace.GetObjectsToSave(false))
+
+        {
+
+            if (child is Application or ApplicationProgress)
+
+                continue;
+
+            var parent = TryGetParentApplication(child);
+
+            if (parent == null || objectSpace.IsNewObject(parent))
+
+                continue;
+
+            var originalParent = objectSpace.GetObjectByKey<Application>(parent.ID);
+
+            if (originalParent == null || !IsWorkflowTerminal(originalParent))
+
+                continue;
+
+            errorMessage = VisaUiMessages.Get("Application.FieldsLockedWhenWorkflowTerminal");
+
+            return false;
+
+        }
+
+        return true;
+
+    }
+
+    private static Application? TryGetParentApplication(object entity) =>
+
+        entity switch
+
+        {
+
+            ApplicationItem item => item.Application,
+
+            Invitation invitation => invitation.Application,
+
+            Rejection rejection => rejection.Application,
+
+            WorkPermit workPermit => workPermit.Application,
+
+            _ => null
+
+        };
 
 
 

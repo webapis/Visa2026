@@ -258,6 +258,16 @@
         <Member Name="Year" Caption="Yıl" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationApprovalLegSnapshot" Caption="Onay bakanlık anlık görüntüsü">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="MaxDaysInReview" Caption="Azami iş günleri" />
+        <Member Name="MinistryShortName" Caption="Kısa ad" />
+        <Member Name="Sequence" Caption="Sıra" />
+        <Member Name="WarningDaysBeforeMax" Caption="Uyarı (iş günleri)" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationItem" Caption="Başvuru Kalemi">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
@@ -337,6 +347,15 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile" Caption="Göç SLA profili">
+      <OwnMembers>
+        <Member Name="ApplicationTypes" Caption="Başvuru türleri" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="MaxDaysInReview" Caption="Azami iş günleri" />
+        <Member Name="WarningDaysBeforeMax" Caption="Uyarı (iş günleri)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationNumberingProfile" Caption="Başvuru Numaralandırma">
@@ -1269,6 +1288,14 @@
         <Member Name="FirstAndSecondMinistry" Caption="Birinci ve ikinci bakanlık" />
         <Member Name="FirstMinistryOnly" Caption="Yalnızca birinci bakanlık" />
         <Member Name="None" Caption="Yok" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.MinistryReviewSlaSettings" Caption="Bakanlık inceleme SLA">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="MaxDaysInReview" Caption="Azami iş günleri" />
+        <Member Name="WarningDaysBeforeMax" Caption="Uyarı (iş günleri)" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MovementPermitLocation" Caption="Hareket İzni Yeri">
@@ -2424,6 +2451,8 @@
         <ColumnInfo Id="StatusListLabel" Caption="Durum" />
       </Columns>
     </ListView>
+    <DetailView Id="ApplicationApprovalLegSnapshot_DetailView" Caption="Onay bakanlık anlık görüntüsü" />
+    <ListView Id="ApplicationApprovalLegSnapshot_ListView" Caption="Onay bakanlık anlık görüntüleri" />
     <DetailView Id="ApplicationItem_DetailView" Caption="Başvuru Kalemi" />
     <ListView Id="ApplicationItem_ListView" Caption="Başvuru Kalemleri">
       <Columns>
@@ -2441,6 +2470,8 @@
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Belgeler" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
+    <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Göç SLA profili" />
+    <ListView Id="ApplicationMigrationSlaProfile_ListView" Caption="Göç SLA profilleri" />
     <DetailView Id="ApplicationNumberingProfile_DetailView" Caption="Başvuru Numaralandırma" />
     <ListView Id="ApplicationNumberingProfile_ListView" Caption="Başvuru Numaralandırma" />
     <DetailView Id="ApplicationProgress_DetailView" Caption="Başvuru İlerlemesi" />
@@ -2668,6 +2699,8 @@
     </ListView>
     <DetailView Id="MigrationService_DetailView" Caption="Göç Dairesi" />
     <ListView Id="MigrationService_ListView" Caption="Göç Daireleri" />
+    <DetailView Id="MinistryReviewSlaSettings_DetailView" Caption="Bakanlık inceleme SLA" />
+    <ListView Id="MinistryReviewSlaSettings_ListView" Caption="Bakanlık inceleme SLA" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Hareket İzni Yeri" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Hareket İzni Yerleri" />
     <DetailView Id="OrganizationType_DetailView" Caption="Organizasyon Türü" />

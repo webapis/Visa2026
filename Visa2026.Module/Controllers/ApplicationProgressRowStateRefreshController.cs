@@ -42,6 +42,14 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
             RefreshAppearance();
     }
 
-    private void RefreshAppearance() =>
+    private void RefreshAppearance()
+    {
         Frame.GetController<AppearanceController>()?.Refresh();
+
+        if (Frame.View is DetailView detailView
+            && detailView.CurrentObject is BusinessObjects.Application)
+        {
+            detailView.Refresh();
+        }
+    }
 }

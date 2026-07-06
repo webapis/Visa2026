@@ -1379,6 +1379,12 @@
     "tk-TM": "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
     "ru-RU": "Поля заявки нельзя изменить после записи прогресса министерства или миграции."
   },
+  "Application.FieldsLockedWhenWorkflowTerminal": {
+    "en": "This application is closed (issued, rejected, or cancelled). Edit the last progress step to reopen it.",
+    "tr-TR": "Bu arza kapatıldı (verildi, reddedildi veya iptal edildi). Yeniden açmak için son ilerleme adımını düzenleyin.",
+    "tk-TM": "Bu arza ýapyldy (berildi, ret edildi ýa-da ýatyryldy). Täzeden açmak üçin soňky ösüş ädimini üýtgediň.",
+    "ru-RU": "Заявка закрыта (выдана, отклонена или отменена). Измените последний шаг прогресса, чтобы открыть снова."
+  },
   "Application.ProjectContractLockedAfterProgress": {
     "en": "Project contract cannot change after ministry or migration steps were recorded.",
     "tr-TR": "Bakanlık veya göç adımları kaydedildikten sonra proje sözleşmesi değiştirilemez.",
@@ -1500,10 +1506,28 @@
     "ru-RU": "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать профиль."
   },
   "ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric": {
-    "en": "Every ministry leg needs maximum working days in review before this profile can be active.",
-    "tr-TR": "Profil aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
-    "tk-TM": "Profil işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
-    "ru-RU": "Перед активацией профиля для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении."
+    "en": "Configure maximum working days under Configuration → Ministry review SLA before activating this profile.",
+    "tr-TR": "Profili etkinleştirmeden önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
+    "tk-TM": "Profili işjeňleşdirmezden ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+    "ru-RU": "Перед активацией профиля настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки."
+  },
+  "MinistryReviewSlaSettings.NotConfigured": {
+    "en": "Configure maximum working days under Configuration → Ministry review SLA.",
+    "tr-TR": "Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
+    "tk-TM": "Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+    "ru-RU": "Настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки."
+  },
+  "MinistryReviewSlaSettings.WarningDaysInvalid": {
+    "en": "Warning (working days) must be less than max working days.",
+    "tr-TR": "Uyarı (iş günleri), azami iş günlerinden küçük olmalıdır.",
+    "tk-TM": "Duýduryş (iş günleri) iň ýokary iş günlerinden az bolmaly.",
+    "ru-RU": "Порог предупреждения (рабочие дни) должен быть меньше максимального числа рабочих дней."
+  },
+  "ApplicationProgress.MinistryReviewSlaRequired": {
+    "en": "Configure maximum working days under Configuration → Ministry review SLA before starting ministry review.",
+    "tr-TR": "Bakanlık incelemesine başlamadan önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
+    "tk-TM": "Ministrlik barlagyna başlamazdan ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+    "ru-RU": "Перед началом министерской проверки настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки."
   },
   "ApprovalLegProfile.MinistryLegWarningDaysInvalid": {
     "en": "Leg {0}: warning days must be less than the maximum review days.",

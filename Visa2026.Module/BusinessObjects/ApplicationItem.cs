@@ -30,6 +30,8 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("ApplicationItem_HideApplicationBorderZone", Visibility = ViewItemVisibility.Hide,
         TargetItems = "Application.BorderZoneLocation",
         Context = "DetailView")]
+    [Appearance("ApplicationItem_LineCancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
+        Criteria = "IsLineCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
     public class ApplicationItem : BaseObject, IOptionalDetailFields
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
@@ -1756,6 +1758,21 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssued", Context = "DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIssued { get; set; }
+
+        /// <summary>
+        /// Line or parent application is cancelled — type-specific flags or latest application <c>PROCESS_CANCELLED</c> progress.
+        /// </summary>
+        [XafDisplayName("Cancelled")]
+        [ToolTip("Work-permit, invitation, or visa line cancel flags, or parent application PROCESS_CANCELLED progress.")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public bool IsLineCancelled =>
+            InvitationItemIsCancelled
+            || VisaIsCancelled
+            || IsCancelled
+            || (Application?.IsCancelled ?? false);
 
 		[ExcludeFromOptionalDetailFields]
 		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView,ListView")]
