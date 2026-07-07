@@ -272,4 +272,32 @@ internal static class Visa2014ApplicationODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        var batch = Visa2014ApplicationTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.Application),
+            "Application",
+            batch.ImportRows,
+            sync,
+            row => BuildPayload(row, resolver),
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
 }

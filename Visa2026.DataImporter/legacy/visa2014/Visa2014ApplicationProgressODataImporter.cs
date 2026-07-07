@@ -389,6 +389,232 @@ internal static class Visa2014ApplicationProgressODataImporter
         return map;
     }
 
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string applicationIdMapPath,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
+        string? targetConnectionForLegCounts = null)
+    {
+        var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
+        if (verbose)
+            Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
+
+        var ministryLegCountByLegacyApplicationOid = await ResolveMinistryLegCountMapAsync(
+            applicationIdMap, objectSpaceFactory, targetConnectionForLegCounts, verbose);
+
+        var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose,
+            ministryLegCountByLegacyApplicationOid);
+
+        var progressIdMap = LoadOptionalProgressIdMap(sync.IdMapOutputPath);
+        var errors = new List<string>();
+        int inserted = 0;
+        int updated = 0;
+        int skippedUnchanged = 0;
+        int failed = 0;
+        int skippedNoApp = 0;
+
+        foreach (var row in batch.ImportRows)
+        {
+            var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
+                ?? row.GetValueOrDefault("_legacyRowId") as string;
+            if (string.IsNullOrWhiteSpace(syntheticKey))
+            {
+                failed++;
+                errors.Add("row: missing _syntheticStepKey");
+                continue;
+            }
+
+            Dictionary<string, object?>? payload;
+            bool missingApplication;
+            try
+            {
+                payload = BuildSyncPayload(row, resolver, applicationIdMap, progressIdMap, out missingApplication);
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                errors.Add($"{syntheticKey}: payload build failed: {ex.Message}");
+                continue;
+            }
+
+            if (payload == null)
+            {
+                if (missingApplication)
+                {
+                    skippedNoApp++;
+                    if (verbose)
+                        Console.WriteLine($"  SKIP {syntheticKey}: Application not in id-map");
+                    continue;
+                }
+
+                failed++;
+                errors.Add($"{syntheticKey}: incomplete payload");
+                continue;
+            }
+
+            if (progressIdMap.TryGetValue(syntheticKey, out var targetId))
+            {
+                if (!ShouldUpdateProgressRow(row, sync.RowFilter))
+                {
+                    skippedUnchanged++;
+                    continue;
+                }
+
+                try
+                {
+                    await target.UpdateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), targetId, payload);
+                    updated++;
+                    if (verbose)
+                        Console.WriteLine($"  UPDATE ApplicationProgress {targetId} <- {syntheticKey}");
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    errors.Add($"{syntheticKey}: update failed: {ex.Message}");
+                    Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
+                }
+
+                continue;
+            }
+
+            try
+            {
+                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
+                if (!createdId.HasValue)
+                {
+                    failed++;
+                    errors.Add($"{syntheticKey}: create returned null");
+                    continue;
+                }
+
+                progressIdMap[syntheticKey] = createdId.Value;
+                inserted++;
+                if (inserted % 500 == 0 && !string.IsNullOrWhiteSpace(sync.IdMapOutputPath))
+                    await SaveProgressIdMapAsync(sync.IdMapOutputPath, progressIdMap);
+
+                if (verbose)
+                    Console.WriteLine($"  INSERT ApplicationProgress {createdId.Value} <- {syntheticKey}");
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                errors.Add($"{syntheticKey}: create failed: {ex.Message}");
+                Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
+            }
+        }
+
+        await target.FlushAsync();
+
+        string? idMapPath = null;
+        if (progressIdMap.Count > 0 && !string.IsNullOrWhiteSpace(sync.IdMapOutputPath))
+        {
+            await SaveProgressIdMapAsync(sync.IdMapOutputPath, progressIdMap);
+            idMapPath = Path.GetFullPath(sync.IdMapOutputPath);
+        }
+
+        return new Visa2014SyncEntityResult
+        {
+            LegacyRowCount = batch.LegacyRowCount,
+            PreparedCount = batch.ImportRows.Count,
+            InsertedCount = inserted,
+            UpdatedCount = updated,
+            SkippedUnchangedCount = skippedUnchanged,
+            FailedCount = failed,
+            SkippedCount = batch.Skipped.Count,
+            IdMapPath = idMapPath,
+            Errors = errors,
+        };
+    }
+
+    private static Dictionary<string, object?>? BuildSyncPayload(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        IReadOnlyDictionary<string, Guid> progressIdMap,
+        out bool missingApplication)
+    {
+        missingApplication = false;
+        var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
+            ?? row.GetValueOrDefault("_legacyRowId") as string
+            ?? "";
+        var isUpdate = !string.IsNullOrWhiteSpace(syntheticKey) && progressIdMap.ContainsKey(syntheticKey);
+
+        if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid))
+            return isUpdate ? BuildPayloadWithoutApplication(row, resolver) : null;
+
+        if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+        {
+            if (isUpdate)
+                return BuildPayloadWithoutApplication(row, resolver);
+
+            missingApplication = true;
+            return null;
+        }
+
+        return BuildPayload(row, resolver, applicationId);
+    }
+
+    private static Dictionary<string, object?>? BuildPayloadWithoutApplication(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver)
+    {
+        var stateCode = row.GetValueOrDefault("State") as string;
+        var locationCode = row.GetValueOrDefault("Location") as string;
+        if (!TryParseDate(row.GetValueOrDefault("Date") as string, out var date))
+            return null;
+
+        var stateId = resolver.ResolveApplicationState(stateCode);
+        var locationId = resolver.ResolveApplicationLocation(locationCode);
+        if (!stateId.HasValue || !locationId.HasValue)
+            return null;
+
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["State"] = new { ID = stateId.Value },
+            ["Location"] = new { ID = locationId.Value },
+            ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
+        };
+
+        if (TryParseOrder(row.GetValueOrDefault("Order"), out var order))
+            payload["Order"] = order;
+
+        var description = row.GetValueOrDefault("Description") as string;
+        if (!string.IsNullOrWhiteSpace(description))
+            payload["Description"] = description.Trim();
+
+        return payload;
+    }
+
+    private static bool ShouldUpdateProgressRow(Dictionary<string, object?> row, Visa2014SyncRowFilter rowFilter)
+    {
+        if (rowFilter.ProcessAllMappedRows)
+            return true;
+
+        if (rowFilter.ChangedLegacyOids == null)
+            return false;
+
+        return TryResolveLegacyApplicationOid(row, out var legacyApplicationOid)
+            && rowFilter.ChangedLegacyOids.Contains(legacyApplicationOid);
+    }
+
+    private static async Task SaveProgressIdMapAsync(string path, Dictionary<string, Guid> progressIdMap)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        await File.WriteAllTextAsync(
+            path,
+            JsonSerializer.Serialize(progressIdMap, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
     private static async Task<IReadOnlyDictionary<Guid, int>?> ResolveMinistryLegCountMapAsync(
         IReadOnlyDictionary<Guid, Guid> applicationIdMap,
         INonSecuredObjectSpaceFactory? objectSpaceFactory,

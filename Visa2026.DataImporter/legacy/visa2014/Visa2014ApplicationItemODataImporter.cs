@@ -492,4 +492,268 @@ internal static class Visa2014ApplicationItemODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string applicationIdMapPath,
+        string personIdMapPath,
+        string passportIdMapPath,
+        string visaIdMapPath,
+        string employeePositionHistoryIdMapPath,
+        string addressOfResidenceIdMapPath,
+        string educationIdMapPath,
+        string employeeSalaryIdMapPath,
+        string? workPermitItemIdMapPath,
+        string? invitationItemIdMapPath,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
+        var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
+        var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
+        var visaIdMap = LoadOptionalIdMap(visaIdMapPath);
+        var positionHistoryIdMap = LoadOptionalIdMap(employeePositionHistoryIdMapPath);
+        var addressIdMap = LoadOptionalIdMap(addressOfResidenceIdMapPath);
+        var educationIdMap = LoadOptionalIdMap(educationIdMapPath);
+        var employeeSalaryIdMap = LoadOptionalIdMap(employeeSalaryIdMapPath);
+        var workPermitItemIdMap = LoadOptionalIdMap(workPermitItemIdMapPath);
+        var invitationItemIdMap = LoadOptionalIdMap(invitationItemIdMapPath);
+
+        var applicationIdMapCollisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateCollisions(
+            applicationIdMap,
+            legacyConnectionString,
+            lookupTranslationPaths);
+        if (applicationIdMapCollisions.Count > 0)
+        {
+            return new Visa2014SyncEntityResult
+            {
+                LegacyRowCount = 0,
+                FailedCount = applicationIdMapCollisions.Count,
+                Errors = applicationIdMapCollisions,
+            };
+        }
+
+        if (verbose)
+        {
+            Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
+            Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
+            Console.WriteLine($"INF Passport id-map entries: {passportIdMap.Count}");
+            Console.WriteLine($"INF Visa id-map entries: {visaIdMap.Count}");
+            Console.WriteLine($"INF EmployeePositionHistory id-map entries: {positionHistoryIdMap.Count}");
+            Console.WriteLine($"INF AddressOfResidence id-map entries: {addressIdMap.Count}");
+            Console.WriteLine($"INF Education id-map entries: {educationIdMap.Count}");
+            Console.WriteLine($"INF EmployeeSalary id-map entries: {employeeSalaryIdMap.Count}");
+            Console.WriteLine($"INF WorkPermitItem id-map entries: {workPermitItemIdMap.Count}");
+            Console.WriteLine($"INF InvitationItem id-map entries: {invitationItemIdMap.Count}");
+        }
+
+        var batch = Visa2014ApplicationItemTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.ApplicationItem),
+            "ApplicationItem",
+            batch.ImportRows,
+            sync,
+            row => BuildSyncPayload(
+                row,
+                resolver,
+                applicationIdMap,
+                personIdMap,
+                passportIdMap,
+                visaIdMap,
+                positionHistoryIdMap,
+                addressIdMap,
+                educationIdMap,
+                employeeSalaryIdMap,
+                workPermitItemIdMap,
+                invitationItemIdMap,
+                sync.IdMap),
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
+
+    private static Dictionary<string, object?>? BuildSyncPayload(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        IReadOnlyDictionary<Guid, Guid> personIdMap,
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        IReadOnlyDictionary<Guid, Guid> visaIdMap,
+        IReadOnlyDictionary<Guid, Guid> positionHistoryIdMap,
+        IReadOnlyDictionary<Guid, Guid> addressIdMap,
+        IReadOnlyDictionary<Guid, Guid> educationIdMap,
+        IReadOnlyDictionary<Guid, Guid> employeeSalaryIdMap,
+        IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap,
+        IReadOnlyDictionary<Guid, Guid> invitationItemIdMap,
+        IReadOnlyDictionary<Guid, Guid> applicationItemIdMap)
+    {
+        var legacyOid = (Guid)row["_legacyRowId"]!;
+        var isUpdate = applicationItemIdMap.ContainsKey(legacyOid);
+
+        if (!isUpdate)
+        {
+            if (!TryResolveRequiredIds(
+                    row,
+                    applicationIdMap,
+                    personIdMap,
+                    passportIdMap,
+                    out var applicationId,
+                    out var personId,
+                    out var passportId,
+                    out _))
+                return null;
+
+            return BuildPayload(
+                row,
+                resolver,
+                applicationId,
+                personId,
+                passportId,
+                passportIdMap,
+                visaIdMap,
+                positionHistoryIdMap,
+                addressIdMap,
+                educationIdMap,
+                employeeSalaryIdMap,
+                workPermitItemIdMap,
+                invitationItemIdMap);
+        }
+
+        if (TryResolveRequiredIds(
+                row,
+                applicationIdMap,
+                personIdMap,
+                passportIdMap,
+                out var updateApplicationId,
+                out var updatePersonId,
+                out var updatePassportId,
+                out _))
+        {
+            return BuildPayload(
+                row,
+                resolver,
+                updateApplicationId,
+                updatePersonId,
+                updatePassportId,
+                passportIdMap,
+                visaIdMap,
+                positionHistoryIdMap,
+                addressIdMap,
+                educationIdMap,
+                employeeSalaryIdMap,
+                workPermitItemIdMap,
+                invitationItemIdMap);
+        }
+
+        return BuildPayloadWithoutRequiredParents(
+            row,
+            resolver,
+            passportIdMap,
+            visaIdMap,
+            positionHistoryIdMap,
+            addressIdMap,
+            educationIdMap,
+            employeeSalaryIdMap,
+            workPermitItemIdMap,
+            invitationItemIdMap);
+    }
+
+    private static Dictionary<string, object?>? BuildPayloadWithoutRequiredParents(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver,
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        IReadOnlyDictionary<Guid, Guid> visaIdMap,
+        IReadOnlyDictionary<Guid, Guid> positionHistoryIdMap,
+        IReadOnlyDictionary<Guid, Guid> addressIdMap,
+        IReadOnlyDictionary<Guid, Guid> educationIdMap,
+        IReadOnlyDictionary<Guid, Guid> employeeSalaryIdMap,
+        IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap,
+        IReadOnlyDictionary<Guid, Guid> invitationItemIdMap)
+    {
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["SuppressPersonCurrentFieldSync"] = true,
+        };
+
+        TryAddOptionalFkFromMap(payload, row, "PreviousPassport", "PreviousPassport", passportIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentVisa", "CurrentVisa", visaIdMap);
+        TryAddOptionalFkFromMap(payload, row, "NextVisa", "NextVisa", visaIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentPositionHistory", "CurrentPositionHistory", positionHistoryIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentAddressOfResidence", "CurrentAddressOfResidence", addressIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentEducation", "CurrentEducation", educationIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentSalary", "CurrentSalary", employeeSalaryIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentWorkPermitItem", "CurrentWorkPermitItem", workPermitItemIdMap);
+        TryAddOptionalFkFromMap(payload, row, "CurrentInvitationItem", "CurrentInvitationItem", invitationItemIdMap);
+
+        if (TryParseDate(row.GetValueOrDefault("RegistrationDate") as string, out var registrationDate))
+            payload["RegistrationDate"] = DateTime.SpecifyKind(registrationDate, DateTimeKind.Utc);
+
+        if (TryParseDate(row.GetValueOrDefault("TravelDate") as string, out var travelDate))
+            payload["TravelDate"] = DateTime.SpecifyKind(travelDate, DateTimeKind.Utc);
+
+        if (row.GetValueOrDefault("TravelType") is string travelType &&
+            Enum.TryParse<TravelType>(travelType, ignoreCase: true, out var parsedTravelType))
+        {
+            payload["TravelType"] = parsedTravelType.ToString();
+        }
+
+        if (row.GetValueOrDefault("MovementType") is string movementType &&
+            Enum.TryParse<MovementType>(movementType, ignoreCase: true, out var parsedMovementType))
+        {
+            payload["MovementType"] = parsedMovementType.ToString();
+        }
+
+        var checkPointLabel = row.GetValueOrDefault("CheckPoint") as string;
+        if (!string.IsNullOrWhiteSpace(checkPointLabel))
+        {
+            var checkPointId = resolver.ResolveCheckPoint(checkPointLabel.Trim());
+            if (!checkPointId.HasValue)
+                return null;
+
+            payload["CheckPoint"] = new { ID = checkPointId.Value };
+        }
+
+        var borderZoneLocation = row.GetValueOrDefault("BorderZoneLocation") as string;
+        if (!string.IsNullOrWhiteSpace(borderZoneLocation))
+            payload["BorderZoneLocation"] = borderZoneLocation.Trim();
+
+        var workPermittedLocations = row.GetValueOrDefault("WorkPermittedLocations") as string;
+        if (!string.IsNullOrWhiteSpace(workPermittedLocations))
+            payload["WorkPermittedLocations"] = workPermittedLocations.Trim();
+
+        payload["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled;
+        payload["InvitationItemIsCancelled"] =
+            row.GetValueOrDefault("InvitationItemIsCancelled") is bool invitationCancelled && invitationCancelled;
+        payload["VisaIsCancelled"] = row.GetValueOrDefault("VisaIsCancelled") is bool visaCancelled && visaCancelled;
+        payload["RejectionIssued"] = row.GetValueOrDefault("RejectionIssued") is bool rejected && rejected;
+        payload["VisaIssued"] = row.GetValueOrDefault("VisaIssued") is bool visaIssued && visaIssued;
+
+        var businessTripAddress = row.GetValueOrDefault("BusinessTripAddress") as string;
+        var businessTripCity = row.GetValueOrDefault("BusinessTripCity") as string;
+        if (!string.IsNullOrWhiteSpace(businessTripAddress) && !string.IsNullOrWhiteSpace(businessTripCity))
+        {
+            var cityId = resolver.ResolveCity(businessTripCity.Trim());
+            if (!cityId.HasValue)
+                return null;
+
+            payload["BusinessTripAddress"] = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                ["City"] = new { ID = cityId.Value },
+                ["FullAddress"] = businessTripAddress.Trim(),
+            };
+        }
+
+        return payload;
+    }
 }

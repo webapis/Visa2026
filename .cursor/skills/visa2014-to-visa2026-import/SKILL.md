@@ -43,7 +43,7 @@ disable-model-invocation: false
 |------|----------------|
 | Import one BO | `dotnet run … --import-visa2014 --entity <BO>` |
 | Resume / full local chain | `import/Run-HeadlessChain.ps1` (`-StartAt`) |
-| Staging / on-prem waves | `import/OnPrem-Staging.ps1` |
+| Staging / on-prem waves | `import/OnPrem-Sync.ps1` (`-Profile Staging|Production`) · see [visa2026-onprem-legacy-sync](../visa2026-onprem-legacy-sync/SKILL.md) |
 | Tenant JSON before Application | `import/Invoke-TenantCatalogGeneration.ps1` |
 | Dev: fix one BO after delete | `reimport/<Entity>.ps1` + `cleanup/*.sql` |
 | Same script, different scope | Add **parameters** (`-MaxRows`, `-DryRun`, `-TargetConnection`) — not a new file |
@@ -143,7 +143,7 @@ Partial reimport one BO during migration implementation (local dev)?
   → Respect order.yaml dependsOn — parents before children; re-run downstream if parent changed
 
 End-to-end migration (staging / prod cutover)?
-  → import/OnPrem-Staging.ps1 or import/Run-HeadlessChain.ps1 · order.yaml sequence — not reimport/
+  → import/OnPrem-Sync.ps1 or import/Run-HeadlessChain.ps1 · order.yaml sequence — not reimport/ · on-prem LAN: [visa2026-onprem-legacy-sync](../visa2026-onprem-legacy-sync/SKILL.md)
 
 End of session with verified outcome?
   → Append learnings.md (MATURITY.md loop)

@@ -9,16 +9,17 @@ Reference for adjusting XAF security permissions in `Visa2026.Module/DatabaseUpd
 ## How Permissions Work
 
 The app uses **"Deny all by default"** policy. Every permission must be explicitly granted.  
-Roles are managed in `Updater.cs` → `CreateAdminRole()`, `CreateUserRole()`, `CreateVisaOfficeRole()`, `CreateDefaultRole()`.
+Roles are managed in `Updater.cs` → `CreateAdminRole()`, `CreateUserRole()`, `CreateUsersReadOnlyRole()`, `CreateVisaOfficeRole()`, `CreateDefaultRole()`.
 
 | Role | Purpose |
 |------|---------|
 | **Administrators** | Super administrator (`IsAdministrative = true`) — full bypass |
 | **Users** | Case officers — applications, people, operational workflows |
+| **UsersReadOnly** | Parallel-period case officers — view/search only (legacy sync window) |
 | **VisaOffice** | Organization / tenant configuration + Resminamalar templates |
 | **Default** | Self-service profile, password, culture |
 
-**Tenant users:** `LookupCatalogs/tenant/tenant-users.json` — per-deployment officer accounts (`Updater` + `TenantUserSeedUpdater`). Adds missing users and missing roles; does not remove roles or change passwords on existing accounts. If users do not appear after deploy, run a DB update (`scripts/local/Update-LocalDatabase.ps1 -ForceUpdate`) or restart with debugger attached / `FORCE_XAF_DB_UPDATE=true` once — see `docs/ENVIRONMENTS.md`.
+**Tenant users:** `LookupCatalogs/tenant/tenant-users.json` — per-deployment officer accounts (`Updater` + `TenantUserSeedUpdater`). Syncs the **exact** role list on every DB update (adds missing roles, **removes** roles not listed); does not change passwords on existing accounts. During legacy parallel period use **`UsersReadOnly`** instead of `Users` + `VisaOffice`; restore full roles on cutover.
 
 There are two places to set permissions:
 

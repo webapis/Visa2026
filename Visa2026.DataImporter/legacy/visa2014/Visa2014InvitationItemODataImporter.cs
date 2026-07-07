@@ -256,4 +256,96 @@ internal static class Visa2014InvitationItemODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string personIdMapPath,
+        string passportIdMapPath,
+        string invitationIdMapPath,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
+        var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
+        var invitationIdMap = Visa2014IdMapHelper.Load(invitationIdMapPath);
+
+        if (verbose)
+        {
+            Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
+            Console.WriteLine($"INF Passport id-map entries: {passportIdMap.Count}");
+            Console.WriteLine($"INF Invitation id-map entries: {invitationIdMap.Count}");
+        }
+
+        var batch = Visa2014InvitationItemTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.InvitationItem),
+            "InvitationItem",
+            batch.ImportRows,
+            sync,
+            row => BuildSyncPayload(row, personIdMap, passportIdMap, invitationIdMap, sync.IdMap),
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
+
+    private static Dictionary<string, object?>? BuildSyncPayload(
+        Dictionary<string, object?> row,
+        IReadOnlyDictionary<Guid, Guid> personIdMap,
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        IReadOnlyDictionary<Guid, Guid> invitationIdMap,
+        IReadOnlyDictionary<Guid, Guid> invitationItemIdMap)
+    {
+        var legacyOid = (Guid)row["_legacyRowId"]!;
+        var isUpdate = invitationItemIdMap.ContainsKey(legacyOid);
+
+        if (!isUpdate)
+        {
+            if (!TryResolveRequiredIds(
+                    row,
+                    personIdMap,
+                    passportIdMap,
+                    invitationIdMap,
+                    out var personId,
+                    out var passportId,
+                    out var invitationId,
+                    out _))
+                return null;
+
+            return BuildPayload(row, personId, passportId, invitationId);
+        }
+
+        if (TryResolveRequiredIds(
+                row,
+                personIdMap,
+                passportIdMap,
+                invitationIdMap,
+                out var updatePersonId,
+                out var updatePassportId,
+                out var updateInvitationId,
+                out _))
+        {
+            return BuildPayload(row, updatePersonId, updatePassportId, updateInvitationId);
+        }
+
+        return BuildPayloadWithoutParents(row);
+    }
+
+    private static Dictionary<string, object?>? BuildPayloadWithoutParents(Dictionary<string, object?> row)
+    {
+        var isCancelled = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled;
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["IsCancelled"] = isCancelled,
+        };
+    }
 }

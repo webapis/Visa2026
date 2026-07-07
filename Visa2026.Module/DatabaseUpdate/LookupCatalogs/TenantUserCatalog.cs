@@ -88,18 +88,32 @@ internal static class TenantUserCatalogSync
         if (roleNames == null || roleNames.Count == 0)
             return;
 
-        foreach (var roleName in roleNames)
+        var desired = roleNames
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Select(n => n.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        foreach (var assigned in user.Roles.ToList())
         {
-            if (string.IsNullOrWhiteSpace(roleName))
+            if (!desired.Contains(assigned.Name, StringComparer.Ordinal))
+            {
+                user.Roles.Remove(assigned);
+                Tracing.Tracer.LogText($"TenantUserCatalogSync: removed role '{assigned.Name}' from '{user.UserName}'.");
+            }
+        }
+
+        foreach (var roleName in desired)
+        {
+            if (user.Roles.Any(r => string.Equals(r.Name, roleName, StringComparison.Ordinal)))
                 continue;
 
-            var normalized = roleName.Trim();
-            if (user.Roles.Any(r => string.Equals(r.Name, normalized, StringComparison.Ordinal)))
-                continue;
-
-            var role = objectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == normalized);
+            var role = objectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == roleName);
             if (role != null)
+            {
                 user.Roles.Add(role);
+                Tracing.Tracer.LogText($"TenantUserCatalogSync: added role '{roleName}' to '{user.UserName}'.");
+            }
         }
     }
 }

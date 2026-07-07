@@ -72,7 +72,7 @@ Both **end-to-end** and **partial reimport** follow `order.yaml` `dependsOn`:
 
 | Mode | When | Scripts |
 |------|------|---------|
-| **End-to-end migration** | Staging UAT, prod cutover, fresh DB | `import/OnPrem-Staging.ps1`, `import/Run-HeadlessChain.ps1`, or first load per `order.yaml` |
+| **End-to-end migration** | Staging UAT, prod cutover, fresh DB | `import/OnPrem-Sync.ps1`, `import/OnPrem-Staging.ps1`, `import/Run-HeadlessChain.ps1`, or first load per `order.yaml` |
 | **Partial reimport** | Local dev: mapping/transform fix on one BO | `reimport/*.ps1` + `cleanup/*.sql` |
 
 Do **not** use `reimport/` for staging or production cutover.
@@ -93,7 +93,8 @@ Do **not** use `reimport/` for staging or production cutover.
 |------|--------|-------|
 | Full local chain (in-process) | `import/Run-HeadlessChain.ps1` | `-StartAt <Entity>` to resume |
 | Document copies only (photos + scans) | `import/DocumentCopies.ps1` | `-StartAt WorkPermitDocument` to resume mid-wave |
-| On-prem staging waves | `import/OnPrem-Staging.ps1` | Ordered per `order.yaml` |
+| On-prem sync (staging or prod) | `import/OnPrem-Sync.ps1` | `-Profile Staging|Production`; `-IncludeFileWaves` for scans |
+| On-prem staging (wrapper) | `import/OnPrem-Staging.ps1` | Delegates to `OnPrem-Sync.ps1 -Profile Staging` |
 | Tenant catalog generation | `import/Invoke-TenantCatalogGeneration.ps1` | Wraps `--generate-visa2014-tenant-catalogs` |
 | ApplicationItem import only | `import/ApplicationItems.ps1` | Parents + id-maps must exist |
 | WorkPermit + WorkPermitItem import | `import/WorkPermits.ps1` | After Person/Passport/EPH id-maps |
@@ -152,7 +153,8 @@ Preview row helper: `catalogs/Import-PreviewCatalogRows.ps1`.
 .\scripts\visa2014-migration\setup\Restore-LegacyDatabase.ps1
 .\scripts\visa2014-migration\Compare-LegacyMigratedCounts.ps1 -ShowIdMap
 .\scripts\visa2014-migration\import\Invoke-TenantCatalogGeneration.ps1
-.\scripts\visa2014-migration\import\OnPrem-Staging.ps1 -TargetConnection "Server=...;Database=...;"
+.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Staging -TargetConnection "Server=...;Database=...;"
+.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -IncludeFileWaves
 .\scripts\visa2014-migration\import\Run-HeadlessChain.ps1 -StartAt ApplicationItem
 .\scripts\visa2014-migration\reimport\ApplicationItems.ps1 -MaxRows 50
 ```

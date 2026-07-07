@@ -17,6 +17,8 @@ internal interface IVisa2014ImportTarget
 
     Task UpdateAsync(Type entityType, Guid id, IReadOnlyDictionary<string, object?> payload);
 
+    Task SoftDeleteAsync(Type entityType, Guid id);
+
     Task FlushAsync();
 }
 
@@ -52,6 +54,9 @@ internal sealed class Visa2014ODataImportTarget : IVisa2014ImportTarget
         await _api.UpdateAsync(entityName, id, payload);
     }
 
+    public Task SoftDeleteAsync(Type entityType, Guid id) =>
+        throw new NotSupportedException("Soft-delete sync requires --inprocess.");
+
     public Task FlushAsync() => Task.CompletedTask;
 }
 
@@ -61,6 +66,9 @@ internal sealed class Visa2014DryRunImportTarget : IVisa2014ImportTarget
         Task.FromResult<Guid?>(Guid.NewGuid());
 
     public Task UpdateAsync(Type entityType, Guid id, IReadOnlyDictionary<string, object?> payload) =>
+        Task.CompletedTask;
+
+    public Task SoftDeleteAsync(Type entityType, Guid id) =>
         Task.CompletedTask;
 
     public Task FlushAsync() => Task.CompletedTask;
@@ -115,6 +123,26 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
             throw new InvalidOperationException($"Update target {entityType.Name}({id}) not found.");
 
         Migration.ObjectSpaceImportSink.ApplyPayload(batch.ObjectSpace, entity, payload);
+        CommitBatch(batch);
+        return Task.CompletedTask;
+    }
+
+    public Task SoftDeleteAsync(Type entityType, Guid id)
+    {
+        var key = entityType.FullName ?? entityType.Name;
+        if (!_batches.TryGetValue(key, out var batch))
+        {
+            var objectSpace = _factory.CreateNonSecuredObjectSpace(entityType);
+            MigrationImportContext.ApplyImportObjectSpaceHooks(objectSpace);
+            batch = new BatchState(objectSpace);
+            _batches[key] = batch;
+        }
+
+        var entity = batch.ObjectSpace.GetObjectByKey(entityType, id);
+        if (entity == null)
+            throw new InvalidOperationException($"Soft-delete target {entityType.Name}({id}) not found.");
+
+        batch.ObjectSpace.Delete(entity);
         CommitBatch(batch);
         return Task.CompletedTask;
     }

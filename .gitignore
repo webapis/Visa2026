@@ -449,6 +449,7 @@ Visa2026.DataImporter/legacy/visa2014/id-map/
 Visa2026.DataImporter/legacy/visa2014/file-import/
 # VISA2014 import CLI tee logs (large; never commit)
 Visa2026.DataImporter/legacy/visa2014/import-logs/
+Visa2026.DataImporter/legacy/visa2014/sync-state/
 dist/
 
 # E2E — Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)

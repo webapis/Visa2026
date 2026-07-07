@@ -229,4 +229,79 @@ internal static class Visa2014EmployeeSalaryODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string personIdMapPath,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
+        if (verbose)
+            Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
+
+        var batch = Visa2014EmployeeSalaryTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.EmployeeSalary),
+            "EmployeeSalary",
+            batch.ImportRows,
+            sync,
+            row => BuildSyncPayload(row, personIdMap, sync.IdMap),
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
+
+    private static Dictionary<string, object?>? BuildSyncPayload(
+        Dictionary<string, object?> row,
+        IReadOnlyDictionary<Guid, Guid> personIdMap,
+        IReadOnlyDictionary<Guid, Guid> salaryIdMap)
+    {
+        var legacyOid = (Guid)row["_legacyRowId"]!;
+        var isUpdate = salaryIdMap.ContainsKey(legacyOid);
+
+        if (!TryResolveLegacyPersonOid(row, out var legacyPersonOid))
+            return isUpdate ? BuildPayloadWithoutPerson(row) : null;
+
+        if (!personIdMap.TryGetValue(legacyPersonOid, out var personId))
+            return isUpdate ? BuildPayloadWithoutPerson(row) : null;
+
+        return BuildPayload(row, personId);
+    }
+
+    private static Dictionary<string, object?>? BuildPayloadWithoutPerson(Dictionary<string, object?> row)
+    {
+        var amount = row.GetValueOrDefault("Amount") as string;
+        if (string.IsNullOrWhiteSpace(amount))
+            return null;
+
+        if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out var startDate))
+            return null;
+
+        var currencyText = row.GetValueOrDefault("Currency") as string ?? "USD";
+        if (!Enum.TryParse<EmployeeCurrency>(currencyText, ignoreCase: true, out var currency))
+            currency = EmployeeCurrency.USD;
+
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["Amount"] = amount.Trim(),
+            ["Currency"] = currency.ToString(),
+            ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
+        };
+
+        if (TryParseDate(row.GetValueOrDefault("EndDate") as string, out var endDate))
+            payload["EndDate"] = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+
+        return payload;
+    }
 }

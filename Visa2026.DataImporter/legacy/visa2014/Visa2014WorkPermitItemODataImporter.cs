@@ -354,4 +354,131 @@ internal static class Visa2014WorkPermitItemODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string personIdMapPath,
+        string passportIdMapPath,
+        string employeePositionHistoryIdMapPath,
+        string workPermitIdMapPath,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
+        var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
+        var positionHistoryIdMap = Visa2014IdMapHelper.Load(employeePositionHistoryIdMapPath);
+        var workPermitIdMap = Visa2014IdMapHelper.Load(workPermitIdMapPath);
+        var positionResolver = new Visa2014WorkPermitItemPositionResolver(
+            legacyConnectionString,
+            positionHistoryIdMap,
+            verbose);
+
+        if (verbose)
+        {
+            Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
+            Console.WriteLine($"INF Passport id-map entries: {passportIdMap.Count}");
+            Console.WriteLine($"INF EmployeePositionHistory id-map entries: {positionHistoryIdMap.Count}");
+            Console.WriteLine($"INF WorkPermit id-map entries: {workPermitIdMap.Count}");
+        }
+
+        var batch = Visa2014WorkPermitItemTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.WorkPermitItem),
+            "WorkPermitItem",
+            batch.ImportRows,
+            sync,
+            row => BuildSyncPayload(
+                row,
+                personIdMap,
+                passportIdMap,
+                positionResolver,
+                workPermitIdMap,
+                sync.IdMap),
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
+
+    private static Dictionary<string, object?>? BuildSyncPayload(
+        Dictionary<string, object?> row,
+        IReadOnlyDictionary<Guid, Guid> personIdMap,
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        Visa2014WorkPermitItemPositionResolver positionResolver,
+        IReadOnlyDictionary<Guid, Guid> workPermitIdMap,
+        IReadOnlyDictionary<Guid, Guid> workPermitItemIdMap)
+    {
+        var legacyOid = (Guid)row["_legacyRowId"]!;
+        var isUpdate = workPermitItemIdMap.ContainsKey(legacyOid);
+
+        if (!isUpdate)
+        {
+            if (!TryResolveRequiredIds(
+                    row,
+                    personIdMap,
+                    passportIdMap,
+                    positionResolver,
+                    workPermitIdMap,
+                    out var personId,
+                    out var passportId,
+                    out var positionHistoryId,
+                    out var workPermitId,
+                    out _,
+                    out _))
+                return null;
+
+            return BuildPayload(row, personId, passportId, positionHistoryId, workPermitId);
+        }
+
+        if (TryResolveRequiredIds(
+                row,
+                personIdMap,
+                passportIdMap,
+                positionResolver,
+                workPermitIdMap,
+                out var updatePersonId,
+                out var updatePassportId,
+                out var updatePositionHistoryId,
+                out var updateWorkPermitId,
+                out _,
+                out _))
+        {
+            return BuildPayload(row, updatePersonId, updatePassportId, updatePositionHistoryId, updateWorkPermitId);
+        }
+
+        return BuildPayloadWithoutParents(row);
+    }
+
+    private static Dictionary<string, object?>? BuildPayloadWithoutParents(Dictionary<string, object?> row)
+    {
+        if (row["WorkPermitNumber"] is not string workPermitNumber || string.IsNullOrWhiteSpace(workPermitNumber))
+            return null;
+        if (row["ASNumber"] is not string asNumber || string.IsNullOrWhiteSpace(asNumber))
+            return null;
+        if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out var startDate))
+            return null;
+        if (!TryParseDate(row.GetValueOrDefault("ExpirationDate") as string, out var expirationDate))
+            return null;
+
+        var workPermittedLocations = row.GetValueOrDefault("WorkPermittedLocations") as string ?? "";
+
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["WorkPermitNumber"] = workPermitNumber.Trim(),
+            ["ASNumber"] = asNumber.Trim(),
+            ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
+            ["ExpirationDate"] = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc),
+            ["WorkPermittedLocations"] = workPermittedLocations.Trim(),
+            ["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled,
+        };
+    }
 }

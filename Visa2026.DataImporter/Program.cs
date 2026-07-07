@@ -151,6 +151,11 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--export-seed",
         "--export-visa2014-preview",
         "--import-visa2014",
+        "--sync-visa2014",
+        "--sync-since",
+        "--sync-state-dir",
+        "--sync-full",
+        "--no-soft-delete-sync",
         "--generate-visa2014-tenant-catalogs",
         "--expand-visa2014-id-map",
         "--rebuild-visa2014-id-maps",
@@ -223,7 +228,12 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
                       string.Equals(token, "--user", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--password", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--file", StringComparison.OrdinalIgnoreCase) ||
-                      string.Equals(token, "--id-map-output", StringComparison.OrdinalIgnoreCase)) &&
+                      string.Equals(token, "--id-map-output", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--sync-since", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--sync-state-dir", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--target-connection", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--legacy-source", StringComparison.OrdinalIgnoreCase) ||
+                      string.Equals(token, "--batch-size", StringComparison.OrdinalIgnoreCase)) &&
                      i + 1 < args.Count &&
                      !args[i + 1].StartsWith('-'))
             {
@@ -268,6 +278,10 @@ static void PrintHelp()
     Console.WriteLine("                [--connection conn] [--max-rows N]");
     Console.WriteLine("  --generate-visa2014-tenant-catalogs  VISA2015 → tenant project-contract + approval-leg-profile JSON (order.yaml steps).");
     Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
+    Console.WriteLine("  --sync-visa2014           Legacy SQL → Visa2026 delta sync (requires --inprocess).");
+    Console.WriteLine("      Options: [--entity Person|Passport|...] [--legacy-source calik-energi-onprem-prod]");
+    Console.WriteLine("                --inprocess --target-connection conn [--sync-full] [--sync-since <utc>]");
+    Console.WriteLine("                [--sync-state-dir path] [--no-soft-delete-sync] [--dry-run] [--batch-size N]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--id-map-output path.json] [--no-wait]");
@@ -451,6 +465,16 @@ if (HasArg(args, "--generate-visa2014-tenant-catalogs"))
 
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = Visa2014TenantCatalogGenerationCommand.Run(dataImporterRoot, args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--sync-visa2014"))
+{
+    Log.Phase("VISA2014 delta sync");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014SyncCommand.RunAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

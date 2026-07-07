@@ -45,6 +45,7 @@ namespace Visa2026.Module.DatabaseUpdate
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
             var userRole = CreateUserRole();
+            _ = CreateUsersReadOnlyRole();
             var visaOfficeRole = CreateVisaOfficeRole();
             EnsurePreferredCultureSelfWritePermission(defaultRole);
             ApplicationUserThemePreferencePermissions.EnsureSelfWrite(defaultRole);
@@ -431,11 +432,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     // PDF filling relies on database-driven mappings (PdfFormMapping). Users must be able to read them.
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);
 
-    // Keep People navigation available even for existing "Users" roles created before this rule.
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+    EnsureUsersOfficerNavigationPermissions(userRole);
 
     // Users: EducationInstitution, Specialty, Position & Lodging — read/write/create only (no delete), including existing roles.
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
@@ -472,55 +469,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureFullAccessRecursivePermission<MedicalRecordDocument>(userRole);
     EnsureFullAccessRecursivePermission<MedicalRecordImage>(userRole);
 
-    // Users: explicitly deny Lookup group (admin-only), including existing roles.
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
-
-    // Users: explicitly deny Employee group navigation items, including existing roles.
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeePositionHistory", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
-
-    // Users: Application list split by progress route (ministry vs direct migration).
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(
-        userRole,
-        @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries/Items/ApplicationItem_ViaMinistries",
-        SecurityPermissionState.Allow);
-    EnsureNavigationPermission(
-        userRole,
-        @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration/Items/ApplicationItem_DirectMigration",
-        SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Deny);
-
-    // Users: explicitly deny Application sub-items that should not be visible.
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
-
-    // Users: WorkPermit group (separate from Lookup)
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
-
-    // Users: Rejection group (separate from Application)
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
-
-    // Users: Invitation group (separate from Lookup)
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
-
-    // Users: BorderZone group (separate from Invitation)
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Allow);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Allow);
-
     // Users: lookup types — read only (explicit deny on Write/Create/Delete), including existing roles.
     EnsureReadOnlyPermission<EducationLevel>(userRole);
     EnsureReadOnlyPermission<Country>(userRole);
@@ -536,13 +484,221 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<Urgency>(userRole);
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
     EnsureReadOnlyPermission<ExpirationAlertRule>(userRole);
-    EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Deny);
 
     EnsureUserFeedbackOfficerPermissions(userRole);
     EnsureAdminOnlyOperationsDeny(userRole);
 
     return userRole;
 }
+
+        /// <summary>
+        /// Parallel-period officers: same navigation as <see cref="CreateUserRole"/> but read-only on business data.
+        /// Used while legacy VISA2015 remains system of record (see ON_PREM_IIS_MIGRATION_RUNBOOK).
+        /// </summary>
+        PermissionPolicyRole CreateUsersReadOnlyRole()
+        {
+            PermissionPolicyRole role = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "UsersReadOnly");
+            if (role == null)
+            {
+                role = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                role.Name = "UsersReadOnly";
+            }
+
+            EnsureUsersOfficerNavigationPermissions(role);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Deny);
+            EnsureUsersReadOnlyTypePermissions(role);
+            EnsureAdminOnlyOperationsDeny(role);
+
+            return role;
+        }
+
+        /// <summary>Shared case-officer navigation for <c>Users</c> and <c>UsersReadOnly</c> roles.</summary>
+        static void EnsureUsersOfficerNavigationPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries/Items/ApplicationItem_ViaMinistries",
+                SecurityPermissionState.Allow);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration/Items/ApplicationItem_DirectMigration",
+                SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationItem", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/ApplicationProgress", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/RejectionItem", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation/Items/Invitation", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Invitation/Items/InvitationItem", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone/Items/BorderZone", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/BorderZone/Items/BorderZoneItem", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
+
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/AddressOfResidenceDocument", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/BorderZoneItem", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/BusinessTripAddress", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/BusinessTripPlan", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/AuthorizedSignatory", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/ContractTemplate", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/Role", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Default/Items/AuthorizedRepresentative", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Documents", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee/Items/EmployeePositionHistory", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee/Items/EmployeeSalary", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee/Items/LocalEmployee", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Images", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Application/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Education/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/General/Geography", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Organization/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Passport/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Person/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Visa/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/WorkPermit/Config", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Auth", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/System/Items/ExpirationAlertRule", SecurityPermissionState.Deny);
+        }
+
+        static void EnsureUsersReadOnlyTypePermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureReadOnlyPermission<Person>(role);
+            EnsureReadOnlyPermission<Application>(role);
+            EnsureReadOnlyPermission<ApplicationItem>(role);
+            EnsureReadOnlyPermission<ApplicationProgress>(role);
+            EnsureReadOnlyPermission<Passport>(role);
+            EnsureReadOnlyPermission<Visa>(role);
+            EnsureReadOnlyPermission<Education>(role);
+            EnsureReadOnlyPermission<MedicalRecord>(role);
+            EnsureReadOnlyPermission<MedicalRecordDocument>(role);
+            EnsureReadOnlyPermission<MedicalRecordImage>(role);
+            EnsureReadOnlyPermission<Invitation>(role);
+            EnsureReadOnlyPermission<InvitationItem>(role);
+            EnsureReadOnlyPermission<BorderZone>(role);
+            EnsureReadOnlyPermission<BorderZoneItem>(role);
+            EnsureReadOnlyPermission<EducationInstitution>(role);
+            EnsureReadOnlyPermission<Specialty>(role);
+            EnsureReadOnlyPermission<Lodging>(role);
+            EnsureReadOnlyPermission<Hotel>(role);
+            EnsureReadOnlyPermission<Hospital>(role);
+            EnsureReadOnlyPermission<OtherSite>(role);
+            EnsureReadOnlyPermission<Rejection>(role);
+            EnsureReadOnlyPermission<RejectionItem>(role);
+            EnsureReadOnlyPermission<WorkPermit>(role);
+            EnsureReadOnlyPermission<WorkPermitItem>(role);
+            EnsureReadOnlyPermission<FileData>(role);
+            EnsureReadOnlyPermission<Position>(role);
+            EnsureReadOnlyPermission<ActualPosition>(role);
+            EnsureReadOnlyPermission<Subcontractor>(role);
+            EnsureReadOnlyPermission<AddressOfResidence>(role);
+            EnsureReadOnlyPermission<AddressOfResidenceDocument>(role);
+            EnsureReadOnlyPermission<BorderZoneName>(role);
+            EnsureReadOnlyPermission<WorkPermittedLocationName>(role);
+            EnsureReadOnlyPermission<ApplicationApprovalLegSnapshot>(role);
+            EnsureReadOnlyPermission<UserReportTemplate>(role);
+            EnsureReadOnlyPermission<UserReportPlaceholder>(role);
+            EnsureReadOnlyPermission<UserReportTemplateApplicationType>(role);
+            EnsureReadOnlyPermission<UserReportTemplateProjectContract>(role);
+            EnsureReadOnlyPermission<PdfGenerationBatch>(role);
+            EnsureReadOnlyPermission<WordReportGenerationBatch>(role);
+
+            EnsureReadOnlyPermission<ApplicationTypeFilter>(role);
+            EnsureReadOnlyPermission<ApplicationType>(role);
+            EnsureReadOnlyPermission<ApplicationState>(role);
+            EnsureReadOnlyPermission<ApplicationLocation>(role);
+            EnsureReadOnlyPermission<CheckPoint>(role);
+            EnsureReadOnlyPermission<Country>(role);
+            EnsureReadOnlyPermission<Department>(role);
+            EnsureReadOnlyPermission<EducationLevel>(role);
+            EnsureReadOnlyPermission<Gender>(role);
+            EnsureReadOnlyPermission<MaritalStatus>(role);
+            EnsureReadOnlyPermission<MigrationService>(role);
+            EnsureReadOnlyPermission<OrganizationType>(role);
+            EnsureReadOnlyPermission<PassportType>(role);
+            EnsureReadOnlyPermission<PurposeOfTravel>(role);
+            EnsureReadOnlyPermission<Region>(role);
+            EnsureReadOnlyPermission<Relationship>(role);
+            EnsureReadOnlyPermission<Urgency>(role);
+            EnsureReadOnlyPermission<ValidityDuration>(role);
+            EnsureReadOnlyPermission<VisaCategory>(role);
+            EnsureReadOnlyPermission<VisaIssuedPlace>(role);
+            EnsureReadOnlyPermission<VisaPeriod>(role);
+            EnsureReadOnlyPermission<VisaType>(role);
+            EnsureReadOnlyPermission<WorkPermitLocation>(role);
+            EnsureReadOnlyPermission<MovementPermitLocation>(role);
+            EnsureReadOnlyPermission<BorderZoneLocation>(role);
+            EnsureReadOnlyPermission<ProjectContract>(role);
+            EnsureReadOnlyPermission<ApprovingMinistry>(role);
+            EnsureReadOnlyPermission<ApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
+            EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ApplicationNumberingProfile>(role);
+            EnsureReadOnlyPermission<ExpirationAlertRule>(role);
+            EnsureReadOnlyPermission<PdfFormMapping>(role);
+
+            EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<BusinessObjects.ApplicationItemDocumentCopiesListHost>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<BusinessObjects.ApplicationReportPackageListHost>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<BusinessObjects.ApplicationItemReportPackageListHost>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            EnsureDenyTypeAccess<UserFeedback>(role);
+        }
+
+        static void EnsureDenyTypeAccess<T>(PermissionPolicyRole role) where T : class
+        {
+            if (role == null)
+                return;
+
+            var targetType = typeof(T);
+            var existing = role.TypePermissions.FirstOrDefault(p => p.TargetType == targetType);
+            if (existing != null)
+            {
+                existing.ReadState = SecurityPermissionState.Deny;
+                existing.WriteState = SecurityPermissionState.Deny;
+                existing.CreateState = SecurityPermissionState.Deny;
+                existing.DeleteState = SecurityPermissionState.Deny;
+            }
+            else
+            {
+                role.AddTypePermissionsRecursively<T>(SecurityOperations.Read, SecurityPermissionState.Deny);
+            }
+        }
 
         private static void EnsureNavigationPermission(PermissionPolicyRole role, string itemPath, SecurityPermissionState state)
         {

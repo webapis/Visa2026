@@ -6,7 +6,9 @@
 
 **IIS slot layout:** [ON_PREM_WINDOWS_IIS.md](../ON_PREM_WINDOWS_IIS.md) · [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md)
 
-**Import commands:** [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) · [order.yaml](../../Visa2026.DataImporter/legacy/visa2014/order.yaml)
+**Import commands:** [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) · [order.yaml](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) · **Agent skill:** [visa2026-onprem-legacy-sync](../../.cursor/skills/visa2026-onprem-legacy-sync/SKILL.md)
+
+**Legacy SQL (read-only discovery):** Cursor MCP **`visa2014-sql-remote`** → `10.100.128.15` / `VISA2015` / `ReadOnlyUser` (see [`.cursor/mcp.json`](../../.cursor/mcp.json)).
 
 ---
 
@@ -55,7 +57,8 @@ Import workstation (or scheduled-task host) must reach:
 
 | Secret | Storage |
 |--------|---------|
-| `ReadOnlyUser` password | Windows **user** env `VISA2014_SQL_PASSWORD` on import machine |
+| `ReadOnlyUser` password (DataImporter) | Windows **user** env `VISA2014_SQL_PASSWORD` on import machine |
+| `ReadOnlyUser` password (Cursor MCP) | Windows **user** env `SQL_SERVER_10.100.128.15` — MCP **`visa2014-sql-remote`** in [`.cursor/mcp.json`](../../.cursor/mcp.json) |
 | OData import user password | Windows user env or secure vault per slot |
 | JWT / SQL on `.25` | `C:\visa2026\env\prod.env`, `staging.env`, `demo.env` on server |
 
@@ -109,102 +112,55 @@ Do **not** run continuous scheduled sync into Demo from live legacy unless you a
 
 ---
 
-## Phase 2 — Staging (`:8080`) — required before prod
+## Phase 2 — Staging (`:8080`) — UAT mirror of prod
 
-### 2.1 Pre-flight
+**Staging does not receive legacy sync.** Refresh from **production backup** after prod import/sync.
 
-- [ ] Per-entity `importConfirmed: true` in [`order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/order.yaml)
-- [ ] Excel preview reviewed for critical entities
-- [ ] Staging backup taken
-- [ ] `VISA2014_SQL_CONNECTION` points at `10.100.128.15`
+### 2.1 Refresh from prod
 
-### 2.2 Initial full import
+1. Backup `Visa2026DbProd` on `.25`.
+2. Restore to `Visa2026DbStaging` ([Restore-Visa2026SqlBackup.ps1](../../scripts/windows-iis/Restore-Visa2026SqlBackup.ps1)); use `E:\visa2026\` paths if `C:` is tight (see [visa2026-windows-iis-deploy/learnings.md](../../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)).
+3. `Run-Visa2026DbUpdateOnServer.ps1 -Profile Staging` if published app is newer than backup.
+4. Officer read-only UAT on `https://10.100.128.25:8080`.
 
-**Script (recommended):** from repo root on the import workstation:
+**Do not** run `OnPrem-Sync.ps1 -Profile Staging` for legacy `.15` data.
 
-```powershell
-$env:VISA2014_SQL_PASSWORD = [Environment]::GetEnvironmentVariable('VISA2014_SQL_PASSWORD','User')
-$env:VISA2026_STAGING_IMPORT_PASSWORD = '<staging-import-user-password>'
-$env:VISA2026_STAGING_SQL_CONNECTION = "Server=10.100.128.25;Database=Visa2026DbStaging;User Id=...;Password=...;TrustServerCertificate=True;MultipleActiveResultSets=true"
+### 2.2 Sign-off gate
 
-.\scripts\visa2014-migration\import\OnPrem-Staging.ps1
-```
-
-Resume after a failed wave: `-StartAt Application`. Single entity: `-Entity ApplicationItem`. Transform-only: `-DryRun`.
-
-Run **one entity at a time** in `order.yaml` order from the import workstation (manual equivalent):
-
-```powershell
-$repo = "C:\path\to\Visa2026"
-$mapRoot = "$repo\Visa2026.DataImporter\legacy\visa2014\id-maps\calik-energi-onprem-staging"
-$base = "http://10.100.128.25:8080"
-$user = "<staging-import-user>"
-$pass = [Environment]::GetEnvironmentVariable('VISA2026_STAGING_IMPORT_PASSWORD','User')
-
-$common = @(
-  "--import-visa2014",
-  "--legacy-source", "calik-energi-onprem-staging",
-  "--api-base-url", $base,
-  "--user", $user,
-  "--password", $pass,
-  "--no-wait"
-)
-
-Set-Location $repo
-dotnet run --project Visa2026.DataImporter -c Debug -- @common --entity Person `
-  --id-map-output "$mapRoot\Person.json"
-
-# Continue per order.yaml — pass parent id-map flags for child entities, e.g. ApplicationItem:
-dotnet run --project Visa2026.DataImporter -c Debug -- @common --entity ApplicationItem `
-  --id-map-output "$mapRoot\ApplicationItem.json" `
-  --person-id-map "$mapRoot\Person.json" `
-  --application-id-map "$mapRoot\Application.json" `
-  --passport-id-map "$mapRoot\Passport.json"
-```
-
-**Faster bulk (Application / ApplicationItem):** omit `--api-base-url` and use in-process XAF — no IIS slot required during import:
-
-```powershell
-$targetCs = "Server=10.100.128.25;Database=Visa2026DbStaging;User Id=...;TrustServerCertificate=True;MultipleActiveResultSets=true"
-
-dotnet run --project Visa2026.DataImporter -c Release -- `
-  --import-visa2014 --inprocess --entity ApplicationItem `
-  --legacy-source calik-energi-onprem-staging `
-  --target-connection $targetCs `
-  --batch-size 50 --no-wait `
-  --id-map-output "$mapRoot\ApplicationItem.json" `
-  --person-id-map "$mapRoot\Person.json" `
-  --application-id-map "$mapRoot\Application.json" `
-  --passport-id-map "$mapRoot\Passport.json"
-```
-
-Log to `import-logs/staging-<Entity>-<date>.log` (create directory first).
-
-### 2.3 Reconciliation
-
-After each wave ([IMPORT_PLAN_AND_STRATEGY.md](./IMPORT_PLAN_AND_STRATEGY.md) §7):
-
-- Legacy row counts vs OData `$count`
-- Spot-check 5–10 records via id-map
-- Officer **read-only** UAT: search, lists, document preview
-
-### 2.4 Sign-off gate
-
-- [ ] Reconciliation signed
-- [ ] Rollback `.bak` retained until prod cutover completes
+- [ ] Staging reflects prod after restore
+- [ ] Rollback `.bak` retained until cutover completes
 
 ---
 
-## Phase 3 — Production (`:80`)
+## Phase 3 — Production (`:80`) — legacy sync target
 
-**Only after staging sign-off.**
+**All legacy import/sync runs on `.25` against prod only** (`calik-energi-onprem-prod` id-maps).
 
-Same procedure as staging with:
+### 3.1 Pre-flight
 
-- `--api-base-url http://10.100.128.25` (port 80)
-- `--legacy-source calik-energi-onprem-prod`
-- `id-maps/calik-energi-onprem-prod/`
-- Officers remain **read-only** until cutover day
+- [ ] Per-entity `importConfirmed: true` in [`order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/order.yaml)
+- [ ] Prod backup taken
+- [ ] `VISA2014_SQL_PASSWORD` and `VISA2026_PROD_SQL_CONNECTION` set on `.25`
+- [ ] Id-map bootstrap: copy `id-maps/calik-energi/*` → `id-maps/calik-energi-onprem-prod/` **or** `--rebuild-visa2014-id-maps` after first load
+
+### 3.2 Initial full import / manual catch-up
+
+```powershell
+$env:VISA2014_SQL_PASSWORD = [Environment]::GetEnvironmentVariable('VISA2014_SQL_PASSWORD','User')
+$env:VISA2026_PROD_SQL_CONNECTION = "Server=localhost\SQLEXPRESS;Database=Visa2026DbProd;..."
+
+.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -IncludeFileWaves
+```
+
+**First ~1 week:** run manually; check logs. **No** Task Scheduler until ops sign off.
+
+Resume: `-StartAt Application`. Single entity: `-Entity ApplicationItem`. Transform-only: `-DryRun`.
+
+### 3.3 Reconciliation
+
+- Legacy row counts vs prod ([Compare-LegacyMigratedCounts.ps1](../../scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1))
+- Spot-check 5–10 records via id-map
+- Officer read-only smoke on prod
 
 ### Cutover day
 
@@ -224,46 +180,43 @@ Same procedure as staging with:
 
 ## Scheduled one-way sync (parallel period)
 
-**Status:** **Planned** — tooling today supports **initial load** and **new-row catch-up** (id-map skip) on some entities; **full delta sync** (PATCH updated legacy rows) requires a future `--sync-visa2014` / `--sync-since` implementation.
+**Status:** **`--sync-visa2014` v1 shipped** — insert + update + soft-delete for scalar entities via `--inprocess`. File bytes remain a separate weekly wave.
 
-Because officers **do not write** in Visa2026 during parallel period, **legacy-wins** scheduled sync is **safe** and **feasible** once delta upsert is implemented.
+Because officers **do not write** in Visa2026 during parallel period, **legacy-wins** scheduled sync is **safe**.
 
-### Recommended schedule
+### Recommended schedule (after manual trial week)
 
-| Slot | Schedule | Notes |
-|------|----------|-------|
-| **Staging** | Nightly (e.g. 02:00) | Keeps UAT data fresh for read-only officer preview |
-| **Production** | Nightly off-peak | After initial prod load; before cutover only |
-| **Demo** | Manual / weekly clone from staging | Avoid live sync |
+| Slot | Schedule | Command |
+|------|----------|---------|
+| **Production** | Nightly off-peak on **`.25`** | `OnPrem-Sync.ps1 -Profile Production -Mode Sync` |
+| **Staging** | After prod sync | Prod `.bak` restore — not legacy |
+| **Demo** | Manual clone from staging | |
 
-### Planned sync job shape
+### First manual run (prod)
 
 ```powershell
-# Future — not implemented yet
-# dotnet run --project Visa2026.DataImporter -- `
-#   --sync-visa2014 --legacy-source calik-energi-onprem-prod `
-#   --api-base-url http://10.100.128.25 `
-#   --sync-state-dir C:\visa2026-import\sync-state\prod `
-#   --user ... --password ...
+# After id-map bootstrap (copy calik-energi → calik-energi-onprem-prod)
+.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -Mode Sync -SyncFull
 ```
 
-Until `--sync-visa2014` exists, **interim catch-up:**
+### Nightly incremental (prod on `.25`)
 
-- Re-run entity imports in `order.yaml` order — entities with id-map skip import **new** legacy rows only (`Application`, `ApplicationProgress`, `ApplicationItem`).
-- **Does not** update changed fields on rows already imported.
-- **Person** re-run may duplicate without upsert — avoid repeating full Person import on prod.
+```powershell
+.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -Mode Sync
+```
 
-Use Windows **Task Scheduler** on the import workstation; alert on non-zero exit.
+Or direct CLI:
 
-### Sync implementation backlog
+```powershell
+dotnet run --project Visa2026.DataImporter -c Release -- `
+  --sync-visa2014 --inprocess --legacy-source calik-energi-onprem-prod `
+  --target-connection $env:VISA2026_PROD_SQL_CONNECTION `
+  --sync-state-dir C:\path\to\Visa2026\Visa2026.DataImporter\legacy\visa2014\sync-state
+```
 
-| Feature | Purpose |
-|---------|---------|
-| `--sync-since <timestamp>` | Legacy rows changed after last successful run |
-| Upsert (PATCH if in id-map) | Propagate edits made in legacy |
-| Per-slot watermark file | `sync-state/<slot>.json` |
-| Legacy soft-delete | `GCRecord` → target archive policy |
-| Attachments wave | Less frequent schedule (nightly scalars, weekly files) |
+**Flags:** `--sync-full` (all mapped rows) · `--sync-since <utc>` · `--no-soft-delete-sync` · `--entity Application` (single BO)
+
+Until operators enable Task Scheduler, run manually and check `import-logs/`.
 
 ---
 

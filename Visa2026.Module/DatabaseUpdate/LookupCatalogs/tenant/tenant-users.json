@@ -2,15 +2,15 @@
   "rows": [
     {
       "UserName": "tumar",
-      "Roles": ["Default", "Users", "VisaOffice"]
+      "Roles": ["Default", "UsersReadOnly"]
     },
     {
       "UserName": "gulshat",
-      "Roles": ["Default", "Users", "VisaOffice"]
+      "Roles": ["Default", "UsersReadOnly"]
     },
     {
       "UserName": "arzygul",
-      "Roles": ["Default", "Users", "VisaOffice"]
+      "Roles": ["Default", "UsersReadOnly"]
     }
   ]
 }

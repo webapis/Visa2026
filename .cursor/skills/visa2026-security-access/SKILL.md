@@ -48,6 +48,7 @@ disable-model-invocation: false
 |------|-------------------|-------------|
 | **Administrators** | `true` | Super administrator — full bypass; do **not** verify officer access as Admin only |
 | **Users** | `false` | Immigration officers — main permission matrix in `CreateUserRole()` |
+| **UsersReadOnly** | `false` | Parallel-period officers — view/search only while legacy `VISA2015` is system of record |
 | **VisaOffice** | `false` | Tenant **Configuration** nav, project contracts, ministries, Resminamalar templates (`CreateVisaOfficeRole()`) |
 | **Default** | `false` | Self-service profile / password / culture only |
 
@@ -58,7 +59,9 @@ Seeded accounts (`Updater.UpdateDatabaseAfterUpdateSchema`):
 | `Admin` | Administrators | empty |
 | `User`, `StandardUser` | Default + Users | empty |
 | `VisaOffice` | Default + VisaOffice | empty |
-| `tumar`, `gulshat`, `arzygul` | Default + Users + VisaOffice | empty (from `tenant/tenant-users.json`) |
+| `tumar`, `gulshat`, `arzygul` | Default + **UsersReadOnly** (parallel period) | empty (from `tenant/tenant-users.json`) |
+
+**Parallel period:** tenant officers use **`UsersReadOnly`** until legacy cutover; restore `["Default", "Users", "VisaOffice"]` in `tenant-users.json` on cutover day. `TenantUserCatalogSync` replaces roles to match JSON (removes `Users` / `VisaOffice` when dropped from the file).
 
 **Verify officer fixes** by logging in as `User` or `StandardUser`, not `Admin`. Tenant officers: edit `LookupCatalogs/tenant/tenant-users.json` (see `TenantUserSeedUpdater`).
 

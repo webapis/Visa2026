@@ -210,4 +210,49 @@ internal static class Visa2014InvitationODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        if (objectSpaceFactory == null)
+        {
+            throw new InvalidOperationException(
+                "Invitation sync requires a live headless session (INonSecuredObjectSpaceFactory) for ValidityDuration resolution — use --inprocess.");
+        }
+
+        var batch = Visa2014InvitationTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.Invitation),
+            "Invitation",
+            batch.ImportRows,
+            sync,
+            row =>
+            {
+                var legacyOid = (Guid)row["_legacyRowId"]!;
+                var isUpdate = sync.IdMap.ContainsKey(legacyOid);
+                var payload = BuildPayload(row, applicationIdMap, objectSpaceFactory, out var missingApplication);
+                if (payload == null)
+                    return null;
+                if (!isUpdate && missingApplication)
+                    return null;
+                return payload;
+            },
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
 }

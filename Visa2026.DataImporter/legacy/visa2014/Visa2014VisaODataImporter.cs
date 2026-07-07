@@ -231,4 +231,93 @@ internal static class Visa2014VisaODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
+
+    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        string legacyConnectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string passportIdMapPath,
+        Visa2014SyncContext sync,
+        int? maxRows,
+        bool verbose)
+    {
+        var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
+        if (verbose)
+            Console.WriteLine($"INF Passport id-map entries: {passportIdMap.Count}");
+
+        var batch = Visa2014VisaTransform.PrepareImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows,
+            verbose);
+
+        return await Visa2014SyncUpsertHelper.RunAsync(
+            target,
+            typeof(Visa2026.Module.BusinessObjects.Visa),
+            "Visa",
+            batch.ImportRows,
+            sync,
+            row => BuildSyncPayload(row, resolver, passportIdMap, sync.IdMap),
+            batch.LegacyRowCount,
+            batch.Skipped.Count,
+            batch.DedupeMergedCount,
+            verbose);
+    }
+
+    private static Dictionary<string, object?>? BuildSyncPayload(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver,
+        IReadOnlyDictionary<Guid, Guid> passportIdMap,
+        IReadOnlyDictionary<Guid, Guid> visaIdMap)
+    {
+        var legacyOid = (Guid)row["_legacyRowId"]!;
+        var isUpdate = visaIdMap.ContainsKey(legacyOid);
+
+        if (!TryResolveLegacyPassportOid(row, out var legacyPassportOid))
+            return isUpdate ? BuildPayloadWithoutPassport(row, resolver) : null;
+
+        if (!passportIdMap.TryGetValue(legacyPassportOid, out var passportId))
+            return isUpdate ? BuildPayloadWithoutPassport(row, resolver) : null;
+
+        return BuildPayload(row, resolver, passportId);
+    }
+
+    private static Dictionary<string, object?>? BuildPayloadWithoutPassport(
+        Dictionary<string, object?> row,
+        Visa2014ODataLookupResolver resolver)
+    {
+        if (row["VisaNumber"] is not string visaNumber || string.IsNullOrWhiteSpace(visaNumber))
+            return null;
+        if (row["IssueDate"] is not DateTime issueDate ||
+            row["StartDate"] is not DateTime startDate ||
+            row["ExpirationDate"] is not DateTime expirationDate)
+            return null;
+
+        var visaTypeId = resolver.ResolveVisaType(row.GetValueOrDefault("VisaType") as string);
+        var visaCategoryId = resolver.ResolveVisaCategory(row.GetValueOrDefault("VisaCategory") as string);
+        var visaIssuedPlaceId = resolver.ResolveVisaIssuedPlace(row.GetValueOrDefault("VisaIssuedPlace") as string);
+        if (!visaTypeId.HasValue || !visaCategoryId.HasValue || !visaIssuedPlaceId.HasValue)
+            return null;
+
+        var borderZone = row.GetValueOrDefault("BorderZoneLocation") as string;
+        if (string.IsNullOrWhiteSpace(borderZone))
+            borderZone = "Ýok";
+
+        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        {
+            ["VisaNumber"] = visaNumber,
+            ["IssueDate"] = DateTime.SpecifyKind(issueDate, DateTimeKind.Utc),
+            ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
+            ["ExpirationDate"] = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc),
+            ["BorderZoneLocation"] = borderZone.Trim(),
+            ["ExtensionRequired"] = row.GetValueOrDefault("ExtensionRequired") is bool ext && ext,
+            ["IsCancelled"] = row.GetValueOrDefault("IsCancelled") is bool cancelled && cancelled,
+            ["IsChanged"] = row.GetValueOrDefault("IsChanged") is bool changed && changed,
+            ["IsExtended"] = row.GetValueOrDefault("IsExtended") is bool extended && extended,
+            ["VisaType"] = new { ID = visaTypeId.Value },
+            ["VisaCategory"] = new { ID = visaCategoryId.Value },
+            ["VisaIssuedPlace"] = new { ID = visaIssuedPlaceId.Value },
+        };
+    }
 }
