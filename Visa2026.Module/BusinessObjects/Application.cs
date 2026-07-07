@@ -209,7 +209,10 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [Browsable(false)]
         [NotMapped]
-        public string PrimaryStateCode => ListViewDisplay.PrimaryStateCode;
+        public string PrimaryStateCode =>
+            !string.IsNullOrEmpty(LatestPrimaryStateCode)
+                ? LatestPrimaryStateCode
+                : ListViewDisplay.PrimaryStateCode;
 
         /// <summary>
         /// Latest progress state and location (localized) for ListView — <see cref="ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayName"/>.
@@ -219,7 +222,10 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public string CurrentState => ListViewDisplay.CurrentState;
+        public string CurrentState =>
+            LatestProgressId != null
+                ? (LatestProgressDisplay ?? string.Empty)
+                : ListViewDisplay.CurrentState;
 
         /// <summary>Latest progress is <c>PROCESS_CANCELLED</c> (legacy <c>Application.Cancelled</c>).</summary>
         [XafDisplayName("Cancelled")]
@@ -228,7 +234,8 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public bool IsCancelled => ListViewDisplay.IsCancelled;
+        public bool IsCancelled =>
+            LatestProgressId != null ? LatestIsCancelled : ListViewDisplay.IsCancelled;
 
         /// <summary>Latest progress is <c>PROCESS_REJECTED</c> (legacy <c>Application.Rejected</c>).</summary>
         [XafDisplayName("Rejected")]
@@ -237,7 +244,8 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public bool IsRejected => ListViewDisplay.IsRejected;
+        public bool IsRejected =>
+            LatestProgressId != null ? LatestIsRejected : ListViewDisplay.IsRejected;
 
         /// <summary>Latest progress is <c>PROCESS_ISSUED</c>.</summary>
         [Browsable(false)]
@@ -742,6 +750,41 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(ApplicationProgress.Application))]
         [VisibleInListView(false)]
         public virtual IList<ApplicationProgress> ProgressHistory { get; set; }
+
+        /// <summary>Denormalized pointer to the latest <see cref="ApplicationProgress"/> row (list/query performance).</summary>
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual Guid? LatestProgressId { get; set; }
+
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public virtual ApplicationProgress? LatestProgress { get; set; }
+
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [MaxLength(64)]
+        public virtual string? LatestPrimaryStateCode { get; set; }
+
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [MaxLength(255)]
+        public virtual string? LatestProgressDisplay { get; set; }
+
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public virtual bool LatestIsCancelled { get; set; }
+
+        [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        public virtual bool LatestIsRejected { get; set; }
 
         public override void OnCreated()
         {

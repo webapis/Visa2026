@@ -25,7 +25,24 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
         base.OnDeactivated();
     }
 
-    private void ObjectSpace_Committed(object sender, EventArgs e) => RefreshAppearance();
+    private void ObjectSpace_Committed(object sender, EventArgs e)
+    {
+        SyncLatestProgressFields();
+        RefreshAppearance();
+    }
+
+    private void SyncLatestProgressFields()
+    {
+        var applications = ObjectSpace.ModifiedObjects.OfType<ApplicationProgress>()
+            .Select(progress => progress.Application)
+            .Concat(ObjectSpace.ModifiedObjects.OfType<Application>())
+            .Where(application => application != null)
+            .Distinct()
+            .ToList();
+
+        foreach (var application in applications)
+            ApplicationLatestProgressSyncHelper.Sync(application, ObjectSpace);
+    }
 
     private void ObjectSpace_ObjectChanged(object sender, ObjectChangedEventArgs e)
     {

@@ -152,6 +152,15 @@ namespace Visa2026.Module.BusinessObjects
         {
             TryAssignOrder();
             base.OnSaving();
+            if (Application != null)
+                ApplicationLatestProgressSyncHelper.Sync(Application, ObjectSpaceHelper.Get(this));
+        }
+
+        public virtual void OnDeleting()
+        {
+            var parent = Application;
+            if (parent != null)
+                ApplicationLatestProgressSyncHelper.Sync(parent, ObjectSpaceHelper.Get(this));
         }
 
         private void TryAssignOrder()

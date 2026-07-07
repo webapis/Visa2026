@@ -94,7 +94,8 @@ $scriptFiles = @(
     "Invoke-Visa2026IisSlotConfigure.ps1",
     "Invoke-Visa2026IisSlotSmokeTest.ps1",
     "Ensure-Visa2026SlotHttpsEnv.ps1",
-    "Get-Visa2026RuntimeErrorsForPull.ps1"
+    "Get-Visa2026RuntimeErrorsForPull.ps1",
+    "Get-Visa2026ApplicationListPerformanceDiagnostics.ps1"
 )
 Write-Host "==> Copy scripts to server" -ForegroundColor Cyan
 foreach ($f in $scriptFiles) {

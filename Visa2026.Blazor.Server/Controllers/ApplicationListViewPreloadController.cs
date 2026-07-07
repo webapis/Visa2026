@@ -156,16 +156,15 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
 
         var applications = ObjectSpace.GetObjectsQuery<Application>()
             .Where(application => batchIds.Contains(application.ID))
-            .Include(application => application.ProgressHistory).ThenInclude(progress => progress.State)
-            .Include(application => application.ProgressHistory).ThenInclude(progress => progress.Location)
-            .Include(application => application.ApplicationType).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
+            .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
+            .Include(application => application.LatestProgress!).ThenInclude(progress => progress.Location)
+            .Include(application => application.ApplicationType!).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
             .Include(application => application.ApprovalLegSnapshots)
             .AsSplitQuery()
             .ToList();
 
         foreach (var application in applications)
         {
-            _ = application.ProgressHistory.Count;
             application.WarmListViewDisplayCache();
             preloadedIds.Add(application.ID);
         }

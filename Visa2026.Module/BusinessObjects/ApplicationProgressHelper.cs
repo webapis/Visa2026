@@ -19,9 +19,14 @@ public static class ApplicationProgressHelper
         if (objectSpace != null)
             query = query.Where(p => !objectSpace.IsObjectToDelete(p));
 
-        return query
-            .OrderByDescending(p => p, Comparer<ApplicationProgress>.Create(ApplicationProgressOrderHelper.CompareSiblingOrder))
-            .FirstOrDefault();
+        ApplicationProgress? latest = null;
+        foreach (var progress in query)
+        {
+            if (latest == null || ApplicationProgressOrderHelper.CompareSiblingOrder(progress, latest) > 0)
+                latest = progress;
+        }
+
+        return latest;
     }
 
     /// <summary>

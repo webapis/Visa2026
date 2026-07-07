@@ -271,9 +271,25 @@ namespace Visa2026.Module.BusinessObjects
             });
 
             modelBuilder.Entity<Application>(b => {
+                b.HasOne(a => a.LatestProgress)
+                    .WithMany()
+                    .HasForeignKey(a => a.LatestProgressId)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
                  .HasFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL");
+                b.HasIndex("ApplicationTypeID")
+                 .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
+            });
+
+            modelBuilder.Entity<ApplicationProgress>(b => {
+                b.HasIndex("ApplicationID", nameof(ApplicationProgress.Order))
+                 .HasDatabaseName("IX_ApplicationProgresses_ApplicationID_ProgressOrder");
+            });
+
+            modelBuilder.Entity<ApplicationApprovalLegSnapshot>(b => {
+                b.HasIndex(s => s.ApplicationId)
+                 .HasDatabaseName("IX_ApplicationApprovalLegSnapshots_ApplicationId");
             });
 
             modelBuilder.Entity<ApplicationType>(b => {

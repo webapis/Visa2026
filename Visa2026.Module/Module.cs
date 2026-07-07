@@ -93,6 +93,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationItemCurrentSalarySchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressMinistryLetterFileSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressOrderSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationListQueryPerformanceSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationLatestProgressSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonIsActiveColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PassportCurrentVisaColumnCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),

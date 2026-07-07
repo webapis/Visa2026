@@ -19,7 +19,7 @@ internal readonly struct ApplicationListViewDisplayState
 
     public static ApplicationListViewDisplayState Resolve(Application application)
     {
-        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+        var latest = ApplicationLatestProgressSyncHelper.ResolveLatestForDisplay(application);
         var progressSla = ApplicationProgressSlaHelper.Resolve(application, latest);
         var migrationSla = ApplicationMigrationSlaHelper.Resolve(application, latest);
 
