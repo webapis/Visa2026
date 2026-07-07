@@ -33,10 +33,7 @@ public sealed class EfApplicationRuntimeLogRemotePull
         if (limit <= 0)
             limit = 50;
 
-        var optionsBuilder = new DbContextOptionsBuilder<Visa2026EFCoreDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        await using var dbContext = new Visa2026EFCoreDbContext(optionsBuilder.Options);
+        await using var dbContext = ApplicationRuntimeLogDbContextFactory.Create(connectionString);
         var rows = await dbContext.ApplicationRuntimeLogs
             .AsNoTracking()
             .Where(x => x.GCRecord == 0)

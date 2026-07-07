@@ -94,3 +94,9 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Task** `Visa2026-OnPrem-LegacySync` daily **02:30** (SYSTEM) → `Run-OnPremSyncOnServer.ps1 -Mode Sync -SkipTenantCatalogGeneration -ContinueOnError`.
 - **Logs** `C:\visa2026-sync\logs\sync-run-*.log`.
 - **Fix** `Register-OnPremLegacySyncTask.ps1`: `New-ScheduledTaskAction -Argument` must be a single string, not an array.
+
+### 2026-07-07 — ApplicationItem sync: FileData EF + optional FK
+
+- **FileData / INotifyPropertyChanged** in headless import logs was **not** ApplicationItem sync — `ApplicationRuntimeLogRetentionBackgroundService` opened `Visa2026EFCoreDbContext` without `UseChangeTrackingProxies()`. Fixed via `ApplicationRuntimeLogDbContextFactory` (all runtime-log EF helpers).
+- **ApplicationItem wave exit 1**: `FK CurrentAddressOfResidence ... not found` when id-map points at AddressOfResidence rows missing in prod (stale/partial PIA map). **Fix**: optional FK payloads use `_optionalFk` in `ObjectSpaceImportSink`; `TryAddOptionalFkFromMap` skips missing targets instead of failing the row.
+- **Redeploy** after fix: dev `Install-OnPremSyncHost.ps1` → `.25` `C:\visa2026-sync\tools\DataImporter\` so nightly `02:30` task picks up the build.

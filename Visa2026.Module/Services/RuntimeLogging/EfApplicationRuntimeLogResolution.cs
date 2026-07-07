@@ -23,10 +23,7 @@ public sealed class EfApplicationRuntimeLogResolution : IApplicationRuntimeLogRe
         if (string.IsNullOrWhiteSpace(connectionString))
             return false;
 
-        var optionsBuilder = new DbContextOptionsBuilder<Visa2026EFCoreDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        await using var dbContext = new Visa2026EFCoreDbContext(optionsBuilder.Options);
+        await using var dbContext = ApplicationRuntimeLogDbContextFactory.Create(connectionString);
         var row = await dbContext.ApplicationRuntimeLogs
             .FirstOrDefaultAsync(x => x.ID == update.Id, cancellationToken)
             .ConfigureAwait(false);
@@ -57,10 +54,7 @@ public sealed class EfApplicationRuntimeLogResolution : IApplicationRuntimeLogRe
         if (limit <= 0)
             limit = 20;
 
-        var optionsBuilder = new DbContextOptionsBuilder<Visa2026EFCoreDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        await using var dbContext = new Visa2026EFCoreDbContext(optionsBuilder.Options);
+        await using var dbContext = ApplicationRuntimeLogDbContextFactory.Create(connectionString);
         var rows = await dbContext.ApplicationRuntimeLogs
             .AsNoTracking()
             .Where(x => x.ResolutionStatus == ApplicationRuntimeLogResolutionStatus.Open
@@ -82,10 +76,7 @@ public sealed class EfApplicationRuntimeLogResolution : IApplicationRuntimeLogRe
         if (string.IsNullOrWhiteSpace(connectionString))
             return null;
 
-        var optionsBuilder = new DbContextOptionsBuilder<Visa2026EFCoreDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        await using var dbContext = new Visa2026EFCoreDbContext(optionsBuilder.Options);
+        await using var dbContext = ApplicationRuntimeLogDbContextFactory.Create(connectionString);
         var row = await dbContext.ApplicationRuntimeLogs
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.ID == id, cancellationToken)

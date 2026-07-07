@@ -38,10 +38,7 @@ public sealed class EfApplicationRuntimeLogRetention : IApplicationRuntimeLogRet
             ? ApplicationRuntimeLogRetentionHelper.DefaultBatchSize
             : options.RetentionBatchSize;
 
-        var optionsBuilder = new DbContextOptionsBuilder<Visa2026EFCoreDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        await using var dbContext = new Visa2026EFCoreDbContext(optionsBuilder.Options);
+        await using var dbContext = ApplicationRuntimeLogDbContextFactory.Create(connectionString);
 
         int totalDeleted = 0;
         while (!cancellationToken.IsCancellationRequested)

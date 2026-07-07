@@ -25,7 +25,8 @@ internal static class ObjectSpaceImportSink
             {
                 if (TryReadFkId(nestedDict, out var fkId))
                 {
-                    SetReference(objectSpace, entity, propertyName, member.MemberType, fkId);
+                    var optionalFk = IsOptionalFkMarker(nestedDict);
+                    SetReference(objectSpace, entity, propertyName, member.MemberType, fkId, optionalFk);
                     continue;
                 }
 
@@ -62,16 +63,27 @@ internal static class ObjectSpaceImportSink
         object entity,
         string propertyName,
         Type memberType,
-        Guid id)
+        Guid id,
+        bool optional = false)
     {
         var targetType = Nullable.GetUnderlyingType(memberType) ?? memberType;
         var referenced = objectSpace.GetObjectByKey(targetType, id);
         if (referenced == null)
+        {
+            if (optional)
+                return;
+
             throw new InvalidOperationException($"FK {propertyName} target {targetType.Name}({id}) not found.");
+        }
 
         var member = objectSpace.TypesInfo.FindTypeInfo(entity.GetType())?.FindMember(propertyName);
         member?.SetValue(entity, referenced);
     }
+
+    private static bool IsOptionalFkMarker(IReadOnlyDictionary<string, object?> dict) =>
+        dict.TryGetValue("_optionalFk", out var raw)
+        && raw is bool optional
+        && optional;
 
     private static bool TryReadFkId(IReadOnlyDictionary<string, object?> dict, out Guid id)
     {

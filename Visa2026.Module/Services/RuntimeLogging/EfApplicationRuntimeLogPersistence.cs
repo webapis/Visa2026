@@ -20,10 +20,7 @@ public sealed class EfApplicationRuntimeLogPersistence : IApplicationRuntimeLogP
         if (string.IsNullOrWhiteSpace(connectionString))
             return null;
 
-        var optionsBuilder = new DbContextOptionsBuilder<Visa2026EFCoreDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
-
-        await using var dbContext = new Visa2026EFCoreDbContext(optionsBuilder.Options);
+        await using var dbContext = ApplicationRuntimeLogDbContextFactory.Create(connectionString);
         var row = MapRow(entry);
         dbContext.ApplicationRuntimeLogs.Add(row);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

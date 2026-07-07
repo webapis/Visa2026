@@ -460,7 +460,11 @@ internal static class Visa2014ApplicationItemODataImporter
             return;
 
         if (idMap.TryGetValue(legacyOid, out var targetId))
-            payload[payloadField] = new { ID = targetId };
+            payload[payloadField] = new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                ["ID"] = targetId,
+                ["_optionalFk"] = true,
+            };
     }
 
     private static bool TryParseDate(string? text, out DateTime date) =>
