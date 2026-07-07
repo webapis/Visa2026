@@ -35,11 +35,11 @@ public static class ApplicationLatestProgressSyncHelper
             return;
 
         var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
-        Apply(application, latest);
+        Apply(application, latest, objectSpace);
         application.InvalidateListViewDisplayCache();
     }
 
-    public static void Apply(Application application, ApplicationProgress? latest)
+    public static void Apply(Application application, ApplicationProgress? latest, IObjectSpace? objectSpace = null)
     {
         if (latest == null)
         {
@@ -53,8 +53,6 @@ public static class ApplicationLatestProgressSyncHelper
         }
 
         var primaryCode = ApplicationProgressPrimaryStateCodeResolver.ResolveFromLatest(latest) ?? string.Empty;
-        application.LatestProgressId = latest.ID;
-        application.LatestProgress = latest;
         application.LatestPrimaryStateCode = primaryCode;
         application.LatestProgressDisplay =
             ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty;
@@ -66,5 +64,28 @@ public static class ApplicationLatestProgressSyncHelper
             primaryCode,
             ApplicationProgressStateCodes.ProcessRejected,
             StringComparison.OrdinalIgnoreCase);
+
+        if (CanLinkLatestProgress(latest, objectSpace))
+        {
+            application.LatestProgressId = latest.ID;
+            application.LatestProgress = latest;
+            return;
+        }
+
+        application.LatestProgressId = null;
+        application.LatestProgress = null;
+    }
+
+    /// <summary>
+    /// EF cannot insert Application and ApplicationProgress in one batch when both are new and
+    /// <see cref="Application.LatestProgressId"/> points at the child row (circular FK graph).
+    /// Scalars are still updated; the pointer is linked after the first commit.
+    /// </summary>
+    private static bool CanLinkLatestProgress(ApplicationProgress latest, IObjectSpace? objectSpace)
+    {
+        if (latest.ID == Guid.Empty)
+            return false;
+
+        return objectSpace == null || !objectSpace.IsNewObject(latest);
     }
 }

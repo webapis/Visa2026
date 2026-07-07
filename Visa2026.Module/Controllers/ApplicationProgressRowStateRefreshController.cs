@@ -28,6 +28,8 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
     private void ObjectSpace_Committed(object sender, EventArgs e)
     {
         SyncLatestProgressFields();
+        if (ObjectSpace.ModifiedObjects.Count > 0)
+            ObjectSpace.CommitChanges();
         RefreshAppearance();
     }
 
