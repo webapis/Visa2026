@@ -11,16 +11,16 @@ internal static class Visa2014LegacySoftDeleteQuery
             ["Passport"] = "Passport",
             ["Visa"] = "Visa",
             ["Education"] = "Education",
-            ["EmployeePositionHistory"] = "EmployeePositionHistory",
-            ["EmployeeSalary"] = "EmployeeSalary",
+            ["EmployeePositionHistory"] = "WorkHistoryOfEmployee",
+            ["EmployeeSalary"] = "Employee",
             ["AddressOfResidence"] = "AddressOfResidence",
             ["Application"] = "Application",
-            ["ApplicationItem"] = "ApplicationItem",
-            ["ApplicationProgress"] = "ApplicationProgress",
+            ["ApplicationItem"] = "PersonInApplication",
+            ["ApplicationProgress"] = "Application",
             ["WorkPermit"] = "WorkPermit",
-            ["WorkPermitItem"] = "WorkPermitItem",
-            ["Invitation"] = "Invitation",
-            ["InvitationItem"] = "InvitationItem",
+            ["WorkPermitItem"] = "WorkPermit",
+            ["Invitation"] = "ApplicationResult",
+            ["InvitationItem"] = "PersonInInvitation",
         };
 
     public static bool TryGetLegacyTable(string entityName, out string tableName) =>
@@ -42,12 +42,7 @@ internal static class Visa2014LegacySoftDeleteQuery
         foreach (var chunk in candidateLegacyOids.Chunk(500))
         {
             var paramNames = chunk.Select((_, i) => $"@p{i}").ToArray();
-            var sql = $"""
-                SELECT CAST(Oid AS uniqueidentifier) AS LegacyOid
-                FROM dbo.[{legacyTable}]
-                WHERE (GCRecord IS NOT NULL AND GCRecord <> 0)
-                  AND Oid IN ({string.Join(", ", paramNames)})
-                """;
+            var sql = BuildSoftDeletedQuery(legacyTable, paramNames);
 
             await using var command = new SqlCommand(sql, connection);
             for (int i = 0; i < chunk.Length; i++)
@@ -62,5 +57,28 @@ internal static class Visa2014LegacySoftDeleteQuery
         }
 
         return deleted;
+    }
+
+    private static string BuildSoftDeletedQuery(string legacyTable, IReadOnlyList<string> paramNames)
+    {
+        var inClause = string.Join(", ", paramNames);
+
+        if (string.Equals(legacyTable, "Employee", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"""
+                SELECT CAST(e.Oid AS uniqueidentifier) AS LegacyOid
+                FROM dbo.Employee e
+                INNER JOIN dbo.Person p ON p.Oid = e.Oid
+                WHERE (p.GCRecord IS NOT NULL AND p.GCRecord <> 0)
+                  AND e.Oid IN ({inClause})
+                """;
+        }
+
+        return $"""
+            SELECT CAST(Oid AS uniqueidentifier) AS LegacyOid
+            FROM dbo.[{legacyTable}]
+            WHERE (GCRecord IS NOT NULL AND GCRecord <> 0)
+              AND Oid IN ({inClause})
+            """;
     }
 }

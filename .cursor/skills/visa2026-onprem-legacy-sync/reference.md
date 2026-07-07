@@ -108,7 +108,55 @@ Matches [order.yaml](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml) 
 
 ---
 
-## Future `--sync-visa2014` (shipped v1)
+## Reconcile — sync state dashboard
+
+**On-prem prod** (legacy `.15` + target `.25`):
+
+```powershell
+$env:VISA2026_PROD_SQL_CONNECTION = "Server=10.100.128.25\SQLEXPRESS;Database=Visa2026DbProd;User Id=sa;Password=...;TrustServerCertificate=True"
+.\scripts\visa2014-migration\Compare-OnPremSyncState.ps1 -LegacySource calik-energi-onprem-prod -ShowNotes
+```
+
+| Output section | Meaning |
+|----------------|---------|
+| Scalar BOs | Legacy total, migrated (prod), NotCompleted, id-map count, ScalarSync status |
+| FileData waves | Document/photo rows; bootstrap from calik-energi `.bak` vs `-IncludeFileWaves` |
+| Sync watermark | `sync-state/calik-energi-onprem-prod.json` → `LastSuccessfulRunUtc` |
+
+**From dev PC** (same LAN hosts; legacy password `SQL_SERVER_10.100.128.15`):
+
+```powershell
+.\scripts\visa2014-migration\Compare-OnPremSyncState.ps1 `
+  -TargetConnection $env:VISA2026_PROD_SQL_CONNECTION `
+  -LegacySource calik-energi-onprem-prod
+```
+
+**Local dev** (localhost SQL): `Compare-LegacyMigratedCounts.ps1 -ShowIdMap`.
+
+**Real-time** (second terminal while `OnPrem-Sync.ps1` runs):
+
+```powershell
+.\scripts\visa2014-migration\Watch-OnPremSyncState.ps1 -IntervalSeconds 30 -ClearScreen
+# CSV log: Visa2026.DataImporter/legacy/visa2014/import-logs/sync-state-watch-*.csv
+# DeltaMigrated column = prod count change since previous sample
+```
+
+---
+
+## Sync host on `.25` (`C:\visa2026-sync`)
+
+| Step | Command |
+|------|---------|
+| Deploy from dev | `Install-OnPremSyncHost.ps1 -SyncHostRoot '\\10.100.128.25\c$\visa2026-sync' -PublishFromRepo -CopyIdMapsFromRepo` |
+| Configure | `C:\visa2026-sync\config\sync.env` → `VISA2014_SQL_PASSWORD` |
+| Manual on server | `Run-OnPremSyncOnServer.ps1 -Mode Sync -SkipTenantCatalogGeneration` |
+| Nightly task | `Register-OnPremLegacySyncTask.ps1 -ScheduledTime 02:30` (Admin; after manual trial week) |
+
+Prod SQL on the server defaults to **`localhost\SQLEXPRESS`** from `C:\inetpub\visa2026-prod\appsettings.Production.json`.
+
+---
+
+## `--sync-visa2014` (shipped v1)
 
 CLI: `--sync-visa2014` (requires `--inprocess`). Options: `--sync-full`, `--sync-since <utc>`, `--sync-state-dir`, `--no-soft-delete-sync`.
 

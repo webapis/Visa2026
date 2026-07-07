@@ -234,6 +234,8 @@
         <Member Name="Company" Caption="Компания" />
         <Member Name="CompanyHead" Caption="Руководитель" />
         <Member Name="CurrentState" Caption="Текущее состояние" />
+        <Member Name="IsCancelled" Caption="Отменено" />
+        <Member Name="IsRejected" Caption="Отказ" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -2413,6 +2415,8 @@
         <ColumnInfo Id="Category" Caption="Категория" />
         <ColumnInfo Id="Company" Caption="Компания" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
+        <ColumnInfo Id="IsCancelled" Caption="Отменено" />
+        <ColumnInfo Id="IsRejected" Caption="Отказ" />
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
         <ColumnInfo Id="ExpirationDate" Caption="Дата окончания" />
         <ColumnInfo Id="ExpirationState" Caption="Статус срока" />
@@ -2428,6 +2432,8 @@
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
+        <ColumnInfo Id="IsCancelled" Caption="Отменено" />
+        <ColumnInfo Id="IsRejected" Caption="Отказ" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="Year" Caption="Год" />
@@ -2438,6 +2444,8 @@
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
+        <ColumnInfo Id="IsCancelled" Caption="Отменено" />
+        <ColumnInfo Id="IsRejected" Caption="Отказ" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="Year" Caption="Год" />

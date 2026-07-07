@@ -234,6 +234,8 @@
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CompanyHead" Caption="Kompaniýa müdiri" />
         <Member Name="CurrentState" Caption="Häzirki ýagdaý" />
+        <Member Name="IsCancelled" Caption="Ýatyryldy" />
+        <Member Name="IsRejected" Caption="Ret edildi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -2413,6 +2415,8 @@
         <ColumnInfo Id="Category" Caption="Kategoriýa" />
         <ColumnInfo Id="Company" Caption="Kompaniýa" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
+        <ColumnInfo Id="IsCancelled" Caption="Ýatyryldy" />
+        <ColumnInfo Id="IsRejected" Caption="Ret edildi" />
         <ColumnInfo Id="DaysRemaining" Caption="Galan gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
         <ColumnInfo Id="ExpirationState" Caption="Möhlet ýagdaýy" />
@@ -2428,6 +2432,8 @@
         <ColumnInfo Id="ApplicationDate" Caption="Sene" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
+        <ColumnInfo Id="IsCancelled" Caption="Ýatyryldy" />
+        <ColumnInfo Id="IsRejected" Caption="Ret edildi" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="Year" Caption="Ýyl" />
@@ -2438,6 +2444,8 @@
         <ColumnInfo Id="ApplicationDate" Caption="Sene" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
+        <ColumnInfo Id="IsCancelled" Caption="Ýatyryldy" />
+        <ColumnInfo Id="IsRejected" Caption="Ret edildi" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
         <ColumnInfo Id="Month" Caption="Aý" />
         <ColumnInfo Id="Year" Caption="Ýyl" />

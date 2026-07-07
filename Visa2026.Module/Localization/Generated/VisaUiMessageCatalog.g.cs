@@ -138,6 +138,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Dikelt",
             ["ru-RU"] = "Восстановить",
         },
+        ["ApplicationItem.ArchivedPersonWarning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Warning: {0} is archived. Confirm this person should be on the application line.",
+            ["tr-TR"] = "Uyarı: {0} arşivlenmiş. Bu kişinin başvuru satırında olması gerektiğini onaylayın.",
+            ["tk-TM"] = "Duýduryş: {0} arhiwlenen. Bu adamyň arza setirinde bolmagy gerekdigini tassyklaň.",
+            ["ru-RU"] = "Внимание: {0} в архиве. Подтвердите, что эта персона должна быть в строке заявки.",
+        },
         ["ApplicationItemDocumentCopies.Action.BatchSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Batch summary",

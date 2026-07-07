@@ -62,15 +62,21 @@ internal static class Visa2014SyncUpsertHelper
                     updated++;
                     if (verbose)
                         Console.WriteLine($"  UPDATE {entityName} {targetId} <- legacy {legacyOid}");
+                    continue;
+                }
+                catch (Exception ex) when (IsStaleIdMapTarget(ex))
+                {
+                    idMap.Remove(legacyOid);
+                    if (verbose)
+                        Console.WriteLine($"  REMAP stale id-map {entityName} legacy {legacyOid} (target {targetId} missing) - insert");
                 }
                 catch (Exception ex)
                 {
                     failed++;
                     errors.Add($"{legacyOid}: update failed: {ex.Message}");
                     Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
+                    continue;
                 }
-
-                continue;
             }
 
             try
@@ -203,6 +209,12 @@ internal static class Visa2014SyncUpsertHelper
                 if (verbose)
                     Console.WriteLine($"  SOFT-DELETE {entityName} {targetId} <- legacy {legacyOid}");
             }
+            catch (Exception ex) when (IsStaleIdMapTarget(ex, "Soft-delete target"))
+            {
+                idMap.Remove(legacyOid);
+                if (verbose)
+                    Console.WriteLine($"  REMAP stale id-map {entityName} legacy {legacyOid} (soft-delete target {targetId} missing)");
+            }
             catch (Exception ex)
             {
                 errors.Add($"{legacyOid}: soft-delete failed: {ex.Message}");
@@ -215,4 +227,10 @@ internal static class Visa2014SyncUpsertHelper
 
         return softDeleted;
     }
+
+
+    private static bool IsStaleIdMapTarget(Exception ex, string targetPrefix = "Update target") =>
+        ex is InvalidOperationException ioe
+        && ioe.Message.Contains("not found.", StringComparison.OrdinalIgnoreCase)
+        && ioe.Message.Contains(targetPrefix, StringComparison.OrdinalIgnoreCase);
 }

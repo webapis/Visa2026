@@ -222,10 +222,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
-        public string CurrentState =>
-            LatestProgressId != null
-                ? (LatestProgressDisplay ?? string.Empty)
-                : ListViewDisplay.CurrentState;
+        public string CurrentState => ListViewDisplay.CurrentState;
 
         /// <summary>Latest progress is <c>PROCESS_CANCELLED</c> (legacy <c>Application.Cancelled</c>).</summary>
         [XafDisplayName("Cancelled")]

@@ -428,12 +428,6 @@ namespace Visa2026.Module.BusinessObjects
                 if (Application == null) return new List<Person>();
 
                 var query = objectSpace.GetObjectsQuery<Person>();
-                var contract = Application.ProjectContract;
-                if (contract != null)
-                {
-                    var contractId = contract.ID;
-                    query = query.Where(p => p.ProjectContract != null && p.ProjectContract.ID == contractId);
-                }
 
                 var excludedPersonIds = ApplicationItemAvailablePeopleFilter.GetExcludedPersonIds(
                     Application, ID, objectSpace);

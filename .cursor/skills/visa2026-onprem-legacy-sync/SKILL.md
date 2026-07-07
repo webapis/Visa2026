@@ -19,7 +19,7 @@ disable-model-invocation: false
 | **Production** | `https://10.100.128.25` | `Visa2026DbProd` | **Yes** — `calik-energi-onprem-prod` id-maps |
 | **Staging** | `https://10.100.128.25:8080` | `Visa2026DbStaging` | **No** — restore from **prod `.bak`** ([visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md)) |
 
-**Run from:** **`10.100.128.25`** (Task Scheduler when enabled). Needs `.15:1433` + local SQL.
+**Run from:** **`10.100.128.25`** via `C:\visa2026-sync` + Task Scheduler (see [Install-OnPremSyncHost.ps1](../../../scripts/visa2014-migration/import/Install-OnPremSyncHost.ps1)). Dev PC is fine for manual catch-up until host is installed.
 
 **Canonical runbook:** [ON_PREM_IIS_MIGRATION_RUNBOOK.md](../../../docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md)
 
@@ -96,7 +96,7 @@ For **read-only SQL** against production legacy on the LAN, use Cursor MCP **`vi
 2. **Id-map bootstrap** (once): copy dev `id-maps/calik-energi/*` → `id-maps/calik-energi-onprem-prod/` (expect **19** JSON files).
 3. Manual catch-up: `OnPrem-Sync.ps1 -Profile Production` with application-domain entities (see [reference.md](./reference.md) W3).
 4. Weekly: `-IncludeFileWaves` for photos/scans.
-5. Reconcile: [Compare-LegacyMigratedCounts.ps1](../../../scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1).
+5. Reconcile: [Compare-OnPremSyncState.ps1](../../../scripts/visa2014-migration/Compare-OnPremSyncState.ps1) (scalar + FileData + id-map + sync watermark). Local dev: [Compare-LegacyMigratedCounts.ps1](../../../scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1).
 6. Refresh staging via W2.
 
 ### W2 — Refresh staging from prod (not legacy)
@@ -146,7 +146,7 @@ Restore target slot `.bak` on `.25`. **Never** write to `.15`.
 | S2 | MCP legacy queries fail | Enable **`visa2014-sql-remote`**; reload Cursor MCP; test `SELECT DB_NAME()` |
 | S3 | `TargetConnection required` | Set `VISA2026_*_SQL_CONNECTION` or `-TargetConnection` |
 | S4 | Wave fails mid-chain | `-StartAt <Entity>` on [OnPrem-Sync.ps1](../../../scripts/visa2014-migration/import/OnPrem-Sync.ps1) |
-| S5 | Counts ≠ legacy | [Compare-LegacyMigratedCounts.ps1](../../../scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1); MCP `visa2014-sql-remote` row counts |
+| S5 | Counts ≠ legacy | [Compare-OnPremSyncState.ps1](../../../scripts/visa2014-migration/Compare-OnPremSyncState.ps1) (`-ShowNotes`); MCP `visa2014-sql-remote` row counts; gap BOs may need `-Mode Import` not sync |
 | S6 | Officers can edit during parallel | Tighten read-only role |
 | S7 | Post-import corrections fail (`hostpolicy.dll`) | `dotnet build` DataImporter; re-run `--correct-*` flags only |
 | S8 | Id-map missing on `.25` | Copy `calik-energi` → `calik-energi-onprem-prod` or `--rebuild-visa2014-id-maps` on prod |

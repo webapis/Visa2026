@@ -15,7 +15,8 @@ Use `@visa2026-onprem-legacy-sync` when your Cursor UI supports skill mentions.
 | Preflight MCP | `@visa2026-onprem-legacy-sync Preflight: visa2014-sql-remote to VISA2015 on 10.100.128.15 — SELECT DB_NAME() and Application count.` |
 | Id-map bootstrap | `@visa2026-onprem-legacy-sync Prod on .25 restored from calik-energi LocalDB — copy id-maps to calik-energi-onprem-prod and verify 19 files.` |
 | Manual catch-up | `@visa2026-onprem-legacy-sync Run manual prod catch-up on .25 (application-domain entities only). Ask before running.` |
-| Reconcile | `@visa2026-onprem-legacy-sync Compare legacy .15 counts vs Visa2026DbProd after catch-up.` |
+| Sync state report | `@visa2026-onprem-legacy-sync Run Compare-OnPremSyncState.ps1 for calik-energi-onprem-prod — scalar + FileData tables, id-map counts, sync watermark. Summarize gaps and next wave.` |
+| Reconcile | `@visa2026-onprem-legacy-sync Compare legacy .15 vs Visa2026DbProd with Compare-OnPremSyncState.ps1 (-ShowNotes). List BOs with NotCompleted > 0 and whether sync vs import is needed.` |
 | File waves | `@visa2026-onprem-legacy-sync Weekly prod file wave: OnPrem-Sync.ps1 -Profile Production -IncludeFileWaves.` |
 
 ## Staging (from prod backup)

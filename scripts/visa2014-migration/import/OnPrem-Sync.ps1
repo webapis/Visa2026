@@ -38,6 +38,10 @@
 .PARAMETER SyncStateDir
   Optional directory for per-slot sync watermark JSON (default: Visa2026.DataImporter/legacy/visa2014/sync-state/).
 
+.PARAMETER SyncHostRoot
+  Server layout root (e.g. C:\visa2026-sync on 10.100.128.25). Uses published Visa2026.DataImporter.exe
+  instead of dotnet run. See Install-OnPremSyncHost.ps1.
+
 .EXAMPLE
   .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -Mode Sync -SyncFull
 
@@ -64,14 +68,30 @@ param(
     [ValidateSet("Import", "Sync")]
     [string]$Mode = "Import",
     [switch]$SyncFull,
-    [string]$SyncStateDir = ""
+    [string]$SyncStateDir = "",
+    [string]$SyncHostRoot = ""
 )
 
 $ErrorActionPreference = "Stop"
 
-. (Join-Path $PSScriptRoot '..\_lib\Get-RepoRoot.ps1')
-$repoRoot = Get-Visa2026RepoRoot
-Set-Location $repoRoot
+$script:DataImporterExe = $null
+if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
+    . (Join-Path $PSScriptRoot '..\_lib\Get-RepoRoot.ps1')
+    $repoRoot = Get-Visa2026RepoRoot
+    Set-Location $repoRoot
+}
+else {
+    if (-not (Test-Path -LiteralPath $SyncHostRoot)) {
+        throw "SyncHostRoot not found: $SyncHostRoot"
+    }
+    $SyncHostRoot = (Resolve-Path -LiteralPath $SyncHostRoot).Path
+    $repoRoot = $SyncHostRoot
+    $dataImporterRoot = Join-Path $SyncHostRoot 'tools\DataImporter'
+    $script:DataImporterExe = Join-Path $dataImporterRoot 'Visa2026.DataImporter.exe'
+    if (-not (Test-Path -LiteralPath $script:DataImporterExe)) {
+        throw "Published DataImporter not found: $($script:DataImporterExe). Run Install-OnPremSyncHost.ps1 on .25 or deploy from dev."
+    }
+}
 
 $profileConfig = @{
     Staging = @{
@@ -100,9 +120,17 @@ if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
     }
 }
 
-$dataImporterRoot = Join-Path $repoRoot "Visa2026.DataImporter"
-$mapRoot = Join-Path $dataImporterRoot "legacy/visa2014/id-maps/$($cfg.IdMapSubDir)"
-$logRoot = Join-Path $dataImporterRoot "legacy/visa2014/import-logs"
+if (-not $script:DataImporterExe) {
+    $dataImporterRoot = Join-Path $repoRoot "Visa2026.DataImporter"
+}
+if ($SyncHostRoot) {
+    $mapRoot = Join-Path $SyncHostRoot "data\id-maps\$($cfg.IdMapSubDir)"
+    $logRoot = Join-Path $SyncHostRoot 'data\import-logs'
+}
+else {
+    $mapRoot = Join-Path $dataImporterRoot "legacy/visa2014/id-maps/$($cfg.IdMapSubDir)"
+    $logRoot = Join-Path $dataImporterRoot "legacy/visa2014/import-logs"
+}
 $logPrefix = $cfg.LogPrefix
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 
@@ -118,7 +146,11 @@ if ([string]::IsNullOrWhiteSpace($env:VISA2014_SQL_PASSWORD) -and -not $DryRun) 
 }
 
 $syncStateDirResolved = if ([string]::IsNullOrWhiteSpace($SyncStateDir)) {
-    Join-Path $dataImporterRoot "legacy/visa2014/sync-state"
+    if ($SyncHostRoot) {
+        Join-Path $SyncHostRoot 'data\sync-state'
+    } else {
+        Join-Path $dataImporterRoot "legacy/visa2014/sync-state"
+    }
 } else { $SyncStateDir }
 
 if ($Mode -eq "Sync" -and $Profile -ne "Production") {
@@ -129,6 +161,35 @@ New-Item -ItemType Directory -Force -Path $mapRoot, $logRoot, $syncStateDirResol
 
 function Get-MapPath([string]$name) {
     Join-Path $mapRoot "$name.json"
+}
+
+function Invoke-DataImporterCli {
+    param(
+        [string[]]$CliArgs,
+        [string]$LogFile = ''
+    )
+
+    if ($script:DataImporterExe) {
+        if ($LogFile) {
+            & $script:DataImporterExe @CliArgs 2>&1 | Tee-Object -FilePath $LogFile
+        }
+        else {
+            & $script:DataImporterExe @CliArgs
+        }
+        return $LASTEXITCODE
+    }
+
+    $dotnetArgs = @(
+        'run', '--project', (Join-Path $repoRoot 'Visa2026.DataImporter\Visa2026.DataImporter.csproj'),
+        '-c', $Configuration, '--'
+    ) + $CliArgs
+    if ($LogFile) {
+        & dotnet @dotnetArgs 2>&1 | Tee-Object -FilePath $LogFile
+    }
+    else {
+        & dotnet @dotnetArgs
+    }
+    return $LASTEXITCODE
 }
 
 $scalarEntities = @{
@@ -166,16 +227,15 @@ function Invoke-PostImportCorrections {
         $logFile = Join-Path $logRoot "$logPrefix-post-$($corr.Name)-$stamp.log"
         Write-Host ">>> $($corr.Name)  ->  $logFile" -ForegroundColor Green
         $corrArgs = @(
-            "run", "--project", "Visa2026.DataImporter", "-c", $Configuration, "--",
             $corr.Flag,
             "--legacy-source", $LegacySource,
             "--target-connection", $Conn,
             "--verbose"
         )
-        & dotnet @corrArgs 2>&1 | Tee-Object -FilePath $logFile
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERR postImportCorrection $($corr.Name) failed (exit $LASTEXITCODE). Log: $logFile" -ForegroundColor Red
-            if (-not $ContinueOnError) { exit $LASTEXITCODE }
+        $exit = Invoke-DataImporterCli -CliArgs $corrArgs -LogFile $logFile
+        if ($exit -ne 0) {
+            Write-Host "ERR postImportCorrection $($corr.Name) failed (exit $exit). Log: $logFile" -ForegroundColor Red
+            if (-not $ContinueOnError) { exit $exit }
         }
     }
 }
@@ -188,13 +248,12 @@ function Invoke-TenantCatalogGenerationIfNeeded {
     Write-Host ""
     Write-Host ">>> tenantCatalogGeneration (order.yaml) before $WaveName" -ForegroundColor Green
     $genArgs = @(
-        'run', '--project', 'Visa2026.DataImporter', '-c', $Configuration, '--',
         '--generate-visa2014-tenant-catalogs',
         '--legacy-source', $LegacySource
     )
-    & dotnet @genArgs
-    if ($LASTEXITCODE -ne 0) {
-        throw "tenantCatalogGeneration failed (exit $LASTEXITCODE). Fix VISA2014_SQL_PASSWORD / legacy SQL reachability."
+    $exit = Invoke-DataImporterCli -CliArgs $genArgs
+    if ($exit -ne 0) {
+        throw "tenantCatalogGeneration failed (exit $exit). Fix VISA2014_SQL_PASSWORD / legacy SQL reachability."
     }
     $script:tenantCatalogGenerationDone = $true
     Write-Host "INF Re-run target DB update (Module updaters) if approval-leg-profile.json changed." -ForegroundColor Yellow
@@ -216,16 +275,15 @@ function Invoke-ImportWave {
 
     if ($Kind -eq "Scalar") {
         $cliVerb = if ($Mode -eq "Sync") { "--sync-visa2014" } else { "--import-visa2014" }
-        $waveArgs = @(
-            "run", "--project", "Visa2026.DataImporter", "-c", $Configuration, "--",
+        $waveCli = @(
             $cliVerb,
             "--legacy-source", $LegacySource,
             "--no-wait"
         ) + $ExtraArgs
 
         if ($Mode -eq "Sync") {
-            $waveArgs += @("--sync-state-dir", $syncStateDirResolved)
-            if ($SyncFull) { $waveArgs += "--sync-full" }
+            $waveCli += @("--sync-state-dir", $syncStateDirResolved)
+            if ($SyncFull) { $waveCli += "--sync-full" }
         }
 
         if (-not $scalarEntities.ContainsKey($WaveName)) {
@@ -234,23 +292,22 @@ function Invoke-ImportWave {
         if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
             throw "TargetConnection required for in-process entity $WaveName."
         }
-        $waveArgs += @("--inprocess", "--target-connection", $TargetConnection, "--batch-size", $BatchSize)
+        $waveCli += @("--inprocess", "--target-connection", $TargetConnection, "--batch-size", $BatchSize)
     }
     else {
-        $waveArgs = @(
-            "run", "--project", "Visa2026.DataImporter", "-c", $Configuration, "--",
+        $waveCli = @(
             "--legacy-source", $LegacySource,
             "--inprocess", "--target-connection", $TargetConnection,
             "--no-wait"
         ) + $ExtraArgs
     }
 
-    if ($DryRun) { $waveArgs += "--dry-run" }
+    if ($DryRun) { $waveCli += "--dry-run" }
+    if ($SkipTenantCatalogGeneration) { $waveCli += "--skip-tenant-catalog-generation" }
 
     $exit = 0
     try {
-        & dotnet @waveArgs 2>&1 | Tee-Object -FilePath $logFile
-        $exit = $LASTEXITCODE
+        $exit = Invoke-DataImporterCli -CliArgs $waveCli -LogFile $logFile
     }
     catch {
         Write-Host "ERR ${WaveName}: $_" -ForegroundColor Red
@@ -413,6 +470,7 @@ if (-not $started) {
 }
 
 Write-Host "=== VISA2014 on-prem sync ($Profile) ===" -ForegroundColor Cyan
+if ($SyncHostRoot) { Write-Host "INF Sync host: $SyncHostRoot (published exe)" -ForegroundColor DarkGray }
 Write-Host "INF Legacy source: $LegacySource (SQL 10.100.128.15 / VISA2015)"
 Write-Host "INF Target API:    $ApiBaseUrl"
 Write-Host "INF Id-map dir:    $mapRoot"
@@ -458,5 +516,5 @@ if ($IncludeFileWaves -and -not $DryRun) {
 }
 
 Write-Host "=== On-prem $Profile import waves finished ===" -ForegroundColor Cyan
-Write-Host "INF Reconcile: scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1"
+Write-Host "INF Reconcile: scripts/visa2014-migration/Compare-OnPremSyncState.ps1 (-LegacySource calik-energi-onprem-prod)"
 Write-Host "INF Officer read-only UAT: $ApiBaseUrl/LoginPage"

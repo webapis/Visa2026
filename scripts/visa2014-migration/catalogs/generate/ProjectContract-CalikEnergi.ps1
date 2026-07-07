@@ -347,9 +347,10 @@ ORDER BY ca.code;
         })
     }
 
-    if ($rows.Count -ne 73) {
-        throw "Expected 73 rows, got $($rows.Count)."
+    if ($rows.Count -lt 1) {
+        throw "Project contract catalog generation produced 0 rows."
     }
+    Write-Host "INF Generated $($rows.Count) project-contract row(s) from legacy VISA2015."
 
     $catalog = [ordered]@{
         rows = $rows

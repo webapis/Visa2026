@@ -13,7 +13,7 @@ There is **no** separate `Registration` business object and **no** `Employee` / 
 | Property | Type | Notes |
 |----------|------|--------|
 | `Application` | `Application` | Required parent. Changing it runs registration defaults and visibility cleanup. |
-| `Person` | `Person` | Required. `ImmediatePostData`. Data source: `AvailablePeople` (contract + type category). |
+| `Person` | `Person` | Required. `ImmediatePostData`. Data source: `AvailablePeople` (type category; duplicate persons on the same application excluded). Archived persons remain selectable; UI warns when an archived person is chosen. |
 | `ApplicationItemName` | `string` | Read-only display key (`Person` + `Application.FullApplicationNumber`). |
 | `CurrentPassport` | `Passport` | Required. Data source: person's passports. |
 | `CurrentPositionHistory` | `EmployeePositionHistory` | Employee lines only (hidden for family members); populated from person when applicable. |
@@ -98,8 +98,9 @@ Catalog flags are defined on [`ApplicationType`](LookupBusinessObjects.cs) and s
 
 ### `AvailablePeople`
 
-- Filtered by parent `Application.ProjectContract` when set.
 - Filtered by `Application.ApplicationType.Category`: `Employee` → employees only; `FamilyMember` → family members only; `Both` / null → all persons.
+- Does **not** filter by `Application.ProjectContract` — contract context lives on the application header (progress, reports, ministry route); `Person.ProjectContract` is master data only.
+- Does **not** exclude archived persons (`IsArchived`); selecting an archived person shows a UI warning (`ApplicationItemArchivedPersonWarningController`).
 - Excludes persons already linked on **other** `ApplicationItem` rows on the same `Application` (current line keeps its own `Person` when editing). Mirrors save rule `IsPersonUniqueInApplication` (`ApplicationItemAvailablePeopleFilter`).
 
 ### `ApplyCurrentFieldsFromSelectedPerson`

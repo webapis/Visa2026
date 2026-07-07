@@ -509,6 +509,12 @@
     "tk-TM": "Saýlanan setirler bir arzanyň içinde bolmaly.",
     "ru-RU": "Выбранные строки должны относиться к одной заявке."
   },
+  "ApplicationItem.ArchivedPersonWarning": {
+    "en": "Warning: {0} is archived. Confirm this person should be on the application line.",
+    "tr-TR": "Uyarı: {0} arşivlenmiş. Bu kişinin başvuru satırında olması gerektiğini onaylayın.",
+    "tk-TM": "Duýduryş: {0} arhiwlenen. Bu adamyň arza setirinde bolmagy gerekdigini tassyklaň.",
+    "ru-RU": "Внимание: {0} в архиве. Подтвердите, что эта персона должна быть в строке заявки."
+  },
   "ApplicationReportPackage.Empty": {
     "en": "No applicable reports for this application.",
     "tr-TR": "Bu başvuru için uygun rapor yok.",
