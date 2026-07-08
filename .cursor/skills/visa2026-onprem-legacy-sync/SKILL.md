@@ -16,8 +16,8 @@ disable-model-invocation: false
 
 | Slot | URL | Database | Legacy sync? |
 |------|-----|----------|--------------|
-| **Production** | `https://10.100.128.25` | `Visa2026DbProd` | **Yes** — `calik-energi-onprem-prod` id-maps |
-| **Staging** | `https://10.100.128.25:8080` | `Visa2026DbStaging` | **No** — restore from **prod `.bak`** ([visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md)) |
+| **Production** | `http://10.100.128.25` (`:80`; HTTPS off by design) | `Visa2026DbProd` | **Yes** — `calik-energi-onprem-prod` id-maps |
+| **Staging** | `http://10.100.128.25:8080` | `Visa2026DbStaging` | **No** — restore from **prod `.bak`** ([visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md)) |
 
 **Run from:** **`10.100.128.25`** via `C:\visa2026-sync` + Task Scheduler (see [Install-OnPremSyncHost.ps1](../../../scripts/visa2014-migration/import/Install-OnPremSyncHost.ps1)). Dev PC is fine for manual catch-up until host is installed.
 
@@ -95,8 +95,8 @@ For **read-only SQL** against production legacy on the LAN, use Cursor MCP **`vi
 1. Backup `Visa2026DbProd`.
 2. **Id-map bootstrap** (once): copy dev `id-maps/calik-energi/*` → `id-maps/calik-energi-onprem-prod/` (expect **19** JSON files).
 3. Manual catch-up: `OnPrem-Sync.ps1 -Profile Production` with application-domain entities (see [reference.md](./reference.md) W3).
-4. Weekly: `-IncludeFileWaves` for photos/scans.
-5. Reconcile: [Compare-OnPremSyncState.ps1](../../../scripts/visa2014-migration/Compare-OnPremSyncState.ps1) (scalar + FileData + id-map + sync watermark). Local dev: [Compare-LegacyMigratedCounts.ps1](../../../scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1).
+4. Weekly: `-IncludeFileWaves` for photos/scans. FileData Partial leftovers are often **hard skips** (S11) — do not expect 100% Complete.
+5. Reconcile: [Compare-OnPremSyncState.ps1](../../../scripts/visa2014-migration/Compare-OnPremSyncState.ps1) / [Export-OnPremSyncDashboard.ps1](../../../scripts/visa2014-migration/Export-OnPremSyncDashboard.ps1) (scalar + **FileData** always + id-map + sync watermark). Prefer export from **dev PC** + scp to `C:\visa2026-sync\` if remote `Export-*.ps1` is UTF-16-corrupt.
 6. Refresh staging via W2.
 
 ### W2 — Refresh staging from prod (not legacy)
@@ -151,6 +151,9 @@ Restore target slot `.bak` on `.25`. **Never** write to `.15`.
 | S7 | Post-import corrections fail (`hostpolicy.dll`) | `dotnet build` DataImporter; re-run `--correct-*` flags only |
 | S8 | Id-map missing on `.25` | Copy `calik-energi` → `calik-energi-onprem-prod` or `--rebuild-visa2014-id-maps` on prod |
 | S9 | Staging drift vs legacy | Expected — staging mirrors **prod**, not `.15`; refresh from prod `.bak` |
+| S10 | File-wave / in-process import: missing assembly or type load | DataImporter DLL **version skew** vs `Visa2026.Module` / `Blazor.Server` on `.25`. Publish matching Release set together; stop sync task + unlock DLLs before copy. Side folder OK (e.g. `tools\DataImporter-VisaDoc\`) until main folder republished |
+| S11 | FileData dashboard still Partial after re-run | Remediable posts are small; residual = **oversize >5MB**, missing parent id-map, empty legacy blob, duplicate-blob skip. Dry-run **Posted** ignores **Already imported** — use live counts. MedicalRecordDocument stays N/A until MedicalRecord scalar id-map exists |
+| S12 | `Person id-map not found` on Person.Photo | Photo path uses **`--id-map`** (Person.json), not `--person-id-map` (that flag is for FamilyProofDocument) |
 
 ## Experience loop
 

@@ -180,4 +180,5 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
   - **FamilyProofDocument**: Posted 0, Already 446, Oversize 1, Dup blob 3 → **NotCompleted 19** (hard residual).
 - **Cannot auto-complete without product change**: Oversize >5MB, missing parent id-maps, empty legacy blobs, duplicate-blob skips; **VisaDocument** residual ~205; **MedicalRecordDocument** N/A (no MedicalRecord scalar id-map).
 - **Dashboard**: re-exported from workstation; `sync-dashboard.json|.html` copied to `C:\visa2026-sync\`. Remote `tools\scripts\Export-*.ps1` UTF-16 corrupted — prefer local export + scp until scripts redeployed as UTF-8.
+- **Promoted**: SKILL S10 (DLL skew), S11 (Partial hard residual), S12 (Photo `--id-map`); HTTP `:80`/`:8080` URLs; reference + user-prompts for FileData / dashboard export.
 

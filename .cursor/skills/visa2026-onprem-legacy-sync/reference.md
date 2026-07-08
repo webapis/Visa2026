@@ -74,6 +74,19 @@ Copy-Item "$src\*" $dst -Force
 
 File waves (weekly, manual for now): add `-IncludeFileWaves`.
 
+**Ad-hoc file wave on `.25`** (matching publish package; see SKILL S10–S12):
+
+```powershell
+# Person.Photo — --id-map (not --person-id-map)
+Visa2026.DataImporter.exe --import-visa2014-files --inprocess `
+  --legacy-source calik-energi-onprem-prod --target-connection $conn --no-wait `
+  --entity Person --property Photo --id-map "$mapRoot\Person.json"
+
+# Passport / Education / Visa / FamilyProof — see DocumentCopies.ps1 or learnings; parent *-id-map + *Document.json output
+```
+
+Hard residual after Partial close-out: oversize **>5MB**, no parent map, empty blob, dup-blob — not fixed by re-running the same wave.
+
 ---
 
 ## W2 — Refresh staging from prod (not legacy)
@@ -120,8 +133,18 @@ $env:VISA2026_PROD_SQL_CONNECTION = "Server=10.100.128.25\SQLEXPRESS;Database=Vi
 | Output section | Meaning |
 |----------------|---------|
 | Scalar BOs | Legacy total, migrated (prod), NotCompleted, id-map count, ScalarSync status |
-| FileData waves | Document/photo rows; bootstrap from calik-energi `.bak` vs `-IncludeFileWaves` |
+| FileData waves | Always included: Person.Photo, Passport/Education/Visa/WorkPermit/Invitation/FamilyProof/Medical docs + FileData(all) |
 | Sync watermark | `sync-state/calik-energi-onprem-prod.json` → `LastSuccessfulRunUtc` |
+
+**Dashboard JSON/HTML for Blazor Operations → Legacy sync:**
+
+```powershell
+# Prefer from repo on workstation (then scp to C:\visa2026-sync\); remote tools\scripts can be UTF-16-corrupt
+.\scripts\visa2014-migration\Export-OnPremSyncDashboard.ps1 `
+  -LoadProdConnectionFromSsh -IncludeHtml -LegacySource calik-energi-onprem-prod `
+  -SyncHostRoot $env:TEMP\visa-dash-export
+# scp sync-dashboard.json|.html → visa2026-onprem:C:/visa2026-sync/
+```
 
 **From dev PC** (same LAN hosts; legacy password `SQL_SERVER_10.100.128.15`):
 

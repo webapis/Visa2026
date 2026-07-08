@@ -18,13 +18,15 @@ Use `@visa2026-onprem-legacy-sync` when your Cursor UI supports skill mentions.
 | Sync state report | `@visa2026-onprem-legacy-sync Run Compare-OnPremSyncState.ps1 for calik-energi-onprem-prod — scalar + FileData tables, id-map counts, sync watermark. Summarize gaps and next wave.` |
 | Reconcile | `@visa2026-onprem-legacy-sync Compare legacy .15 vs Visa2026DbProd with Compare-OnPremSyncState.ps1 (-ShowNotes). List BOs with NotCompleted > 0 and whether sync vs import is needed.` |
 | File waves | `@visa2026-onprem-legacy-sync Weekly prod file wave: OnPrem-Sync.ps1 -Profile Production -IncludeFileWaves.` |
+| Close FileData Partials | `@visa2026-onprem-legacy-sync Re-run remediable FileData waves on prod (Photo/Passport/Education/FamilyProof). Expect hard residual per S11; Person.Photo uses --id-map.` |
+| Export dashboard | `@visa2026-onprem-legacy-sync Export-OnPremSyncDashboard from workstation to Temp, scp JSON+HTML to C:\visa2026-sync on .25.` |
 
 ## Staging (from prod backup)
 
 | Intent | Prompt |
 |--------|--------|
 | Refresh staging | `@visa2026-onprem-legacy-sync Refresh Visa2026DbStaging from prod backup on .25 — not legacy sync.` |
-| UAT smoke | `@visa2026-onprem-legacy-sync Staging read-only UAT on https://10.100.128.25:8080 after prod restore.` |
+| UAT smoke | `@visa2026-onprem-legacy-sync Staging read-only UAT on http://10.100.128.25:8080 after prod restore.` |
 
 ## Cross-skill
 
