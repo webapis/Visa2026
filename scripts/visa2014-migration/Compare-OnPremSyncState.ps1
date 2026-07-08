@@ -70,6 +70,8 @@ $scalar = Get-OnPremScalarSyncSnapshot -Config $config | ForEach-Object {
         Migrated      = $_.Migrated
         NotCompleted  = $_.NotCompleted
         IdMap         = $_.IdMap
+        DupGrp        = $_.DuplicateGroups
+        DupExtra      = $_.DuplicateExtraRows
         ScalarSync    = $_.SyncState
     }
     if ($ShowNotes -and $_.Note) { $obj.Note = $_.Note }

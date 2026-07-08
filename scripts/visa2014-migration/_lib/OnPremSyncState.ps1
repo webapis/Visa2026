@@ -21,6 +21,31 @@ function Get-OnPremScalarRowDefinitions {
     )
 }
 
+function Get-OnPremDuplicateRowDefinitions {
+    @(
+        @{ BO = 'ApplicationItem'; G = "SELECT COUNT(*) FROM (SELECT ApplicationID, PersonID FROM ApplicationItems WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL AND ApplicationID IS NOT NULL GROUP BY ApplicationID, PersonID HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM ApplicationItems WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL AND ApplicationID IS NOT NULL GROUP BY ApplicationID, PersonID HAVING COUNT(*) > 1) x" }
+        @{ BO = 'AddressOfResidence'; G = "SELECT COUNT(*) FROM (SELECT PersonID, Type, CityID, FullAddress FROM AddressesOfResidence WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL GROUP BY PersonID, Type, CityID, FullAddress HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM AddressesOfResidence WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL GROUP BY PersonID, Type, CityID, FullAddress HAVING COUNT(*) > 1) x" }
+        @{ BO = 'Passport'; G = "SELECT COUNT(*) FROM (SELECT PersonID, PassportNumber FROM Passports WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL AND NULLIF(LTRIM(RTRIM(PassportNumber)), '') IS NOT NULL GROUP BY PersonID, PassportNumber HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Passports WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL AND NULLIF(LTRIM(RTRIM(PassportNumber)), '') IS NOT NULL GROUP BY PersonID, PassportNumber HAVING COUNT(*) > 1) x" }
+        @{ BO = 'WorkPermitItem'; G = "SELECT COUNT(*) FROM (SELECT WorkPermitID, PersonID FROM WorkPermitItems WHERE (GCRecord IS NULL OR GCRecord = 0) AND WorkPermitID IS NOT NULL AND PersonID IS NOT NULL GROUP BY WorkPermitID, PersonID HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM WorkPermitItems WHERE (GCRecord IS NULL OR GCRecord = 0) AND WorkPermitID IS NOT NULL AND PersonID IS NOT NULL GROUP BY WorkPermitID, PersonID HAVING COUNT(*) > 1) x" }
+        @{ BO = 'Person'; G = "SELECT COUNT(*) FROM (SELECT PersonalNumber FROM People WHERE (GCRecord IS NULL OR GCRecord = 0) AND NULLIF(LTRIM(RTRIM(PersonalNumber)), '') IS NOT NULL AND PersonalNumber <> '0' GROUP BY PersonalNumber HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM People WHERE (GCRecord IS NULL OR GCRecord = 0) AND NULLIF(LTRIM(RTRIM(PersonalNumber)), '') IS NOT NULL AND PersonalNumber <> '0' GROUP BY PersonalNumber HAVING COUNT(*) > 1) x" }
+        @{ BO = 'Visa'; G = "SELECT COUNT(*) FROM (SELECT PassportID, VisaNumber FROM Visas WHERE (GCRecord IS NULL OR GCRecord = 0) AND PassportID IS NOT NULL AND NULLIF(LTRIM(RTRIM(VisaNumber)), '') IS NOT NULL GROUP BY PassportID, VisaNumber HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Visas WHERE (GCRecord IS NULL OR GCRecord = 0) AND PassportID IS NOT NULL AND NULLIF(LTRIM(RTRIM(VisaNumber)), '') IS NOT NULL GROUP BY PassportID, VisaNumber HAVING COUNT(*) > 1) x" }
+        @{ BO = 'EmployeePositionHistory'; G = "SELECT COUNT(*) FROM (SELECT PersonID, StartDate, PositionID FROM EmployeePositionHistories WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL GROUP BY PersonID, StartDate, PositionID HAVING COUNT(*) > 1) d"; E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM EmployeePositionHistories WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonID IS NOT NULL GROUP BY PersonID, StartDate, PositionID HAVING COUNT(*) > 1) x" }
+    )
+}
+
+function Get-OnPremDuplicateCounts {
+    param($Config, [string]$Bo)
+
+    $def = Get-OnPremDuplicateRowDefinitions | Where-Object { $_.BO -eq $Bo } | Select-Object -First 1
+    if (-not $def) {
+        return @{ DuplicateGroups = $null; DuplicateExtraRows = $null }
+    }
+
+    $groups = Invoke-OnPremTargetCount -Config $Config -Query $def.G
+    $extra = Invoke-OnPremTargetCount -Config $Config -Query $def.E
+    return @{ DuplicateGroups = $groups; DuplicateExtraRows = $extra }
+}
+
 function Get-OnPremFileRowDefinitions {
     @(
         @{ BO = 'Person.Photo'; L = 'SELECT COUNT(*) FROM dbo.Person WHERE GCRecord IS NULL AND Photo IS NOT NULL AND DATALENGTH(Photo) > 0'; T = 'SELECT COUNT(*) FROM People WHERE Photo IS NOT NULL AND DATALENGTH(Photo) > 0'; Map = $null }
@@ -260,6 +285,7 @@ function Get-OnPremScalarSyncSnapshot {
         $migrated = Invoke-OnPremTargetCount -Config $Config -Query $row.T
         $notCompleted = if ($null -ne $legacy -and $null -ne $migrated) { [Math]::Max(0, $legacy - $migrated) } else { $null }
         $idMap = Get-OnPremIdMapCount -Config $Config -Entity $row.BO
+        $dup = Get-OnPremDuplicateCounts -Config $Config -Bo $row.BO
         $state = if ($null -ne $legacy -and $null -ne $migrated) {
             Get-OnPremScalarSyncState -Bo $row.BO -Legacy $legacy -Migrated $migrated -NotCompleted $notCompleted
         } else { 'Unknown' }
@@ -271,6 +297,8 @@ function Get-OnPremScalarSyncSnapshot {
             Migrated     = $migrated
             NotCompleted = $notCompleted
             IdMap        = $idMap
+            DuplicateGroups    = $dup.DuplicateGroups
+            DuplicateExtraRows = $dup.DuplicateExtraRows
             SyncState    = $state
             Note         = $row.Note
         }

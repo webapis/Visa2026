@@ -364,6 +364,7 @@ internal static class Visa2014WorkPermitItemODataImporter
         string employeePositionHistoryIdMapPath,
         string workPermitIdMapPath,
         Visa2014SyncContext sync,
+        string? targetConnectionString,
         int? maxRows,
         bool verbose)
     {
@@ -390,6 +391,10 @@ internal static class Visa2014WorkPermitItemODataImporter
             maxRows,
             verbose);
 
+        var duplicateGuard = await Visa2014WorkPermitItemPersonDuplicateGuard.LoadFromSqlAsync(
+            targetConnectionString ?? "",
+            verbose);
+
         return await Visa2014SyncUpsertHelper.RunAsync(
             target,
             typeof(Visa2026.Module.BusinessObjects.WorkPermitItem),
@@ -406,7 +411,9 @@ internal static class Visa2014WorkPermitItemODataImporter
             batch.LegacyRowCount,
             batch.Skipped.Count,
             batch.DedupeMergedCount,
-            verbose);
+            verbose,
+            payload => duplicateGuard.TryResolveFromPayload(payload),
+            (payload, createdId) => duplicateGuard.RegisterFromPayload(payload, createdId));
     }
 
     private static Dictionary<string, object?>? BuildSyncPayload(

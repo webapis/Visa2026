@@ -38,6 +38,8 @@ function Export-OnPremSyncDashboard {
             Migrated     = $_.Migrated
             NotCompleted = $_.NotCompleted
             IdMap        = $_.IdMap
+            DuplicateGroups    = $_.DuplicateGroups
+            DuplicateExtraRows = $_.DuplicateExtraRows
             SyncState    = $_.SyncState
             Note         = $_.Note
         }
@@ -131,12 +133,12 @@ function Build-OnPremSyncDashboardHtml {
   </div>
   <div class="card" style="margin-top:1rem;">
     <table>
-      <thead><tr><th>BO</th><th>Legacy</th><th>Migrated</th><th>Gap</th><th>Id-map</th><th>Status</th></tr></thead>
+      <thead><tr><th>BO</th><th>Legacy</th><th>Migrated</th><th>Gap</th><th>Id-map</th><th>Dup grp</th><th>Dup +</th><th>Status</th></tr></thead>
       <tbody>
 $(($scalarRows | ForEach-Object {
     $gap = if ($null -ne $_.NotCompleted) { $_.NotCompleted } else { '' }
     $gapClass = if ($gap -gt 0) { 'gap-warn' } else { 'gap-ok' }
-    "        <tr><td>$($_.BO)</td><td>$($_.Legacy)</td><td>$($_.Migrated)</td><td class='$gapClass'>$gap</td><td>$($_.IdMap)</td><td>$($_.SyncState)</td></tr>"
+    "        <tr><td>$($_.BO)</td><td>$($_.Legacy)</td><td>$($_.Migrated)</td><td class='$gapClass'>$gap</td><td>$($_.IdMap)</td><td>$($_.DuplicateGroups)</td><td>$($_.DuplicateExtraRows)</td><td>$($_.SyncState)</td></tr>"
 }) -join "`n")
       </tbody>
     </table>

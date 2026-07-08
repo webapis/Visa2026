@@ -274,6 +274,7 @@ internal static class Visa2014PassportODataImporter
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
         Visa2014SyncContext sync,
+        string? targetConnectionString,
         int? maxRows,
         bool verbose)
     {
@@ -287,6 +288,10 @@ internal static class Visa2014PassportODataImporter
             maxRows,
             verbose);
 
+        var duplicateGuard = await Visa2014PassportPersonNumberDuplicateGuard.LoadFromSqlAsync(
+            targetConnectionString ?? "",
+            verbose);
+
         return await Visa2014SyncUpsertHelper.RunAsync(
             target,
             typeof(Visa2026.Module.BusinessObjects.Passport),
@@ -297,7 +302,9 @@ internal static class Visa2014PassportODataImporter
             batch.LegacyRowCount,
             batch.Skipped.Count,
             batch.DedupeMergedCount,
-            verbose);
+            verbose,
+            payload => duplicateGuard.TryResolveFromPayload(payload),
+            (payload, createdId) => duplicateGuard.RegisterFromPayload(payload, createdId));
     }
 
     private static Dictionary<string, object?>? BuildSyncPayload(

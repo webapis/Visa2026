@@ -65,6 +65,13 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
                     ? Math.Max(0, legacy.Value - migrated.Value)
                     : (int?)null;
                 var idMap = GetIdMapCount(mapRoot, row.BO);
+                var dupDef = LegacySyncDashboardDuplicateDefinitions.TryGet(row.BO);
+                int? duplicateGroups = null;
+                int? duplicateExtraRows = null;
+                if (dupDef?.GroupsQuery is { Length: > 0 } groupsQuery)
+                    duplicateGroups = ExecuteScalarCount(targetBuilder.ConnectionString, groupsQuery);
+                if (dupDef?.ExtraRowsQuery is { Length: > 0 } extraRowsQuery)
+                    duplicateExtraRows = ExecuteScalarCount(targetBuilder.ConnectionString, extraRowsQuery);
                 var syncState = legacy.HasValue && migrated.HasValue
                     ? GetScalarSyncState(row.BO, legacy.Value, migrated.Value, notCompleted ?? 0)
                     : "Unknown";
@@ -77,6 +84,8 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
                     Migrated = migrated,
                     NotCompleted = notCompleted,
                     IdMap = idMap,
+                    DuplicateGroups = duplicateGroups,
+                    DuplicateExtraRows = duplicateExtraRows,
                     SyncState = syncState,
                     Note = row.Note,
                 });
@@ -104,6 +113,8 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
                     ["Migrated"] = e.Migrated,
                     ["NotCompleted"] = e.NotCompleted,
                     ["IdMap"] = e.IdMap,
+                    ["DuplicateGroups"] = e.DuplicateGroups,
+                    ["DuplicateExtraRows"] = e.DuplicateExtraRows,
                     ["SyncState"] = e.SyncState,
                     ["Note"] = e.Note,
                 }).ToList(),

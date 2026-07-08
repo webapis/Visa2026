@@ -213,7 +213,7 @@ internal static class Visa2014SyncCommand
                 ?? source.IdMapPath(dataImporterRoot, "Person");
             result = await Visa2014PassportODataImporter.RunSyncAsync(
                 target, resolver, source.ConnectionString, source.LookupTranslationPaths,
-                personIdMapPath, sync, maxRows, verbose);
+                personIdMapPath, sync, GetTargetConnection(args), maxRows, verbose);
         }
         else if (string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase))
         {
@@ -283,7 +283,7 @@ internal static class Visa2014SyncCommand
                 GetOptionValue(args, "--passport-id-map") ?? source.IdMapPath(dataImporterRoot, "Passport"),
                 GetOptionValue(args, "--position-history-id-map") ?? source.IdMapPath(dataImporterRoot, "EmployeePositionHistory"),
                 GetOptionValue(args, "--work-permit-id-map") ?? source.IdMapPath(dataImporterRoot, "WorkPermit"),
-                sync, maxRows, verbose);
+                sync, GetTargetConnection(args), maxRows, verbose);
         }
         else if (string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase))
         {
@@ -317,7 +317,7 @@ internal static class Visa2014SyncCommand
                 GetOptionValue(args, "--employee-salary-id-map") ?? source.IdMapPath(dataImporterRoot, "EmployeeSalary"),
                 GetOptionValue(args, "--work-permit-item-id-map") ?? source.IdMapPath(dataImporterRoot, "WorkPermitItem"),
                 GetOptionValue(args, "--invitation-item-id-map") ?? source.IdMapPath(dataImporterRoot, "InvitationItem"),
-                sync, maxRows, verbose);
+                sync, GetTargetConnection(args), maxRows, verbose);
         }
         else if (string.Equals(entity, "ApplicationProgress", StringComparison.OrdinalIgnoreCase))
         {
@@ -359,6 +359,7 @@ internal static class Visa2014SyncCommand
         Console.WriteLine($"INF {entity} legacy rows: {result.LegacyRowCount}");
         Console.WriteLine(
             $"INF Inserted: {result.InsertedCount}  Updated: {result.UpdatedCount}  " +
+            $"Relinked: {result.RelinkedCount}  " +
             $"Skipped unchanged: {result.SkippedUnchangedCount}  Soft-deleted: {result.SoftDeletedCount}  " +
             $"Failed: {result.FailedCount}");
         if (result.IdMapPath != null)

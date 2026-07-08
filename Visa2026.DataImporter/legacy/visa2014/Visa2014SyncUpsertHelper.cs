@@ -13,12 +13,15 @@ internal static class Visa2014SyncUpsertHelper
         int skippedTransformCount,
         int dedupeMergedCount,
         bool verbose,
+        Func<Dictionary<string, object?>, Guid?>? resolveExistingOnInsert = null,
+        Action<IReadOnlyDictionary<string, object?>, Guid>? onInserted = null,
         CancellationToken cancellationToken = default)
     {
         var idMap = sync.IdMap;
         var errors = new List<string>();
         int inserted = 0;
         int updated = 0;
+        int relinked = 0;
         int skippedUnchanged = 0;
         int failed = 0;
 
@@ -79,6 +82,27 @@ internal static class Visa2014SyncUpsertHelper
                 }
             }
 
+            if (resolveExistingOnInsert?.Invoke(payload) is Guid existingId)
+            {
+                try
+                {
+                    await target.UpdateAsync(entityType, existingId, payload);
+                    idMap[legacyOid] = existingId;
+                    updated++;
+                    relinked++;
+                    if (verbose)
+                        Console.WriteLine($"  RELINK {entityName} {existingId} <- legacy {legacyOid} (existing Application+Person)");
+                    continue;
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    errors.Add($"{legacyOid}: relink update failed: {ex.Message}");
+                    Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
+                    continue;
+                }
+            }
+
             try
             {
                 var createdId = await target.CreateAsync(entityType, payload);
@@ -90,6 +114,7 @@ internal static class Visa2014SyncUpsertHelper
                 }
 
                 idMap[legacyOid] = createdId.Value;
+                onInserted?.Invoke(payload, createdId.Value);
                 inserted++;
                 if (inserted % 250 == 0 && !string.IsNullOrWhiteSpace(sync.IdMapOutputPath))
                     await Visa2014IdMapHelper.SaveAsync(sync.IdMapOutputPath, idMap);
@@ -125,6 +150,7 @@ internal static class Visa2014SyncUpsertHelper
             FailedCount = failed,
             SkippedCount = skippedTransformCount,
             DedupeMergedCount = dedupeMergedCount,
+            RelinkedCount = relinked,
             IdMapPath = idMapPath,
             Errors = errors,
         };
@@ -142,6 +168,7 @@ internal static class Visa2014SyncUpsertHelper
             FailedCount = result.FailedCount,
             SkippedCount = result.SkippedCount,
             DedupeMergedCount = result.DedupeMergedCount,
+            RelinkedCount = result.RelinkedCount,
             IdMapPath = result.IdMapPath,
             Errors = result.Errors,
         };

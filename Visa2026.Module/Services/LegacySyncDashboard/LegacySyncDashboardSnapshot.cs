@@ -56,6 +56,10 @@ public sealed class LegacySyncEntityRowDto
 
     public int? IdMap { get; init; }
 
+    public int? DuplicateGroups { get; init; }
+
+    public int? DuplicateExtraRows { get; init; }
+
     public string SyncState { get; init; } = "";
 
     public string Note { get; init; } = "";

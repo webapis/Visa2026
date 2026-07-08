@@ -171,6 +171,8 @@ public sealed class LegacySyncDashboardService : ILegacySyncDashboardService
             Migrated = row.Migrated,
             NotCompleted = row.NotCompleted,
             IdMap = row.IdMap,
+            DuplicateGroups = row.DuplicateGroups,
+            DuplicateExtraRows = row.DuplicateExtraRows,
             SyncState = row.SyncState ?? "",
             Note = row.Note ?? "",
         };
@@ -251,6 +253,10 @@ public sealed class LegacySyncDashboardService : ILegacySyncDashboardService
         public int? NotCompleted { get; set; }
 
         public int? IdMap { get; set; }
+
+        public int? DuplicateGroups { get; set; }
+
+        public int? DuplicateExtraRows { get; set; }
 
         public string? SyncState { get; set; }
 

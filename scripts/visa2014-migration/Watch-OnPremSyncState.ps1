@@ -160,7 +160,7 @@ try {
             Write-SyncWatchBanner -SampleTime $sampleTime -Index $sampleIndex -Watermark $watermark
             Write-Host ''
             $rows | Where-Object { $_.Kind -eq 'Scalar' } |
-                Select-Object BO, Legacy, Migrated, NotCompleted, IdMap, DeltaMigrated, SyncState |
+                Select-Object BO, Legacy, Migrated, NotCompleted, IdMap, DuplicateGroups, DuplicateExtraRows, DeltaMigrated, SyncState |
                 Format-Table -AutoSize
             if ($IncludeFileData) {
                 Write-Host ''

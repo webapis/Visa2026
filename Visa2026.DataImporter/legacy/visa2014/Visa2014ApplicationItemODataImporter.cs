@@ -513,6 +513,7 @@ internal static class Visa2014ApplicationItemODataImporter
         string? workPermitItemIdMapPath,
         string? invitationItemIdMapPath,
         Visa2014SyncContext sync,
+        string? targetConnectionString,
         int? maxRows,
         bool verbose)
     {
@@ -561,6 +562,10 @@ internal static class Visa2014ApplicationItemODataImporter
             maxRows,
             verbose);
 
+        var duplicateGuard = await Visa2014ApplicationItemPersonDuplicateGuard.LoadFromSqlAsync(
+            targetConnectionString ?? "",
+            verbose);
+
         return await Visa2014SyncUpsertHelper.RunAsync(
             target,
             typeof(Visa2026.Module.BusinessObjects.ApplicationItem),
@@ -584,7 +589,14 @@ internal static class Visa2014ApplicationItemODataImporter
             batch.LegacyRowCount,
             batch.Skipped.Count,
             batch.DedupeMergedCount,
-            verbose);
+            verbose,
+            payload => duplicateGuard.TryResolveFromPayload(payload),
+            (payload, createdId) =>
+            {
+                if (Visa2014ApplicationItemPersonDuplicateGuard.TryResolveParentIds(
+                        payload, out var applicationId, out var personId))
+                    duplicateGuard.Register(applicationId, personId, createdId);
+            });
     }
 
     private static Dictionary<string, object?>? BuildSyncPayload(

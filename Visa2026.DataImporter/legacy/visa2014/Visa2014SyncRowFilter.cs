@@ -46,6 +46,7 @@ internal sealed class Visa2014SyncEntityResult
     public int FailedCount { get; init; }
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
+    public int RelinkedCount { get; init; }
     public string? IdMapPath { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
 }

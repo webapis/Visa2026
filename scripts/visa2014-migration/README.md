@@ -117,6 +117,8 @@ Do **not** use `reimport/` for staging or production cutover.
 | Person-domain children (after Person reimport) | `reimport/PersonDomainDownstream.ps1` | `cleanup/ImportedPersonDomainChildren.sql` |
 | Visa + WorkPermitItem `IsCancelled` backfill | `reimport/VisaWorkPermitCancellation.ps1` | `cleanup/ImportedVisaWorkPermitCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
 | InvitationItem `IsCancelled` backfill | `reimport/InvitationCancellation.ps1` | `cleanup/ImportedInvitationItemCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
+| Duplicate ApplicationItem per Person (on-prem prod data fix) | `Repair-DuplicateApplicationItems.ps1` | `cleanup/DuplicateApplicationItemsByPerson.sql` (preview `@Apply=0`, then `-Apply`) |
+| Duplicate AddressOfResidence per Person+site (on-prem prod data fix) | `Repair-DuplicateAddressOfResidence.ps1` | `cleanup/DuplicateAddressOfResidenceByPersonSite.sql` (preview `@Apply=0`, then `-Apply`) |
 
 ### Reconcile
 
