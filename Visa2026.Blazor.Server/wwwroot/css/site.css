@@ -24,17 +24,124 @@ app {
     height: 38px;
 }
 
-/* XAF default splash wraps the logo in a blue rounded badge; show Calik colors instead. */
-#application-splash-screen .rounded.bg-primary,
-#application-splash-screen img.rounded {
-    background: #fff !important;
-    color: inherit !important;
-    border-radius: 4px !important;
-    padding: 10px 14px !important;
-    max-width: min(320px, 85vw);
-    width: auto;
+/* Custom Calik splash: full-screen watermark, logo, loading progress, copyright. */
+#applicationLoadingPanel {
+    background: #f4f5f7 !important;
+}
+
+#applicationLoadingPanel .loading-caption {
+    display: none !important;
+}
+
+#applicationLoadingPanel .loading-border,
+#applicationLoadingPanel .loading-floated-circle {
+    display: none !important;
+}
+
+#applicationLoadingPanel > .loading-items-center {
+    position: static !important;
+    width: 100% !important;
+    height: 100vh !important;
+}
+
+#applicationLoadingPanel .visa-splash-screen {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #f4f5f7;
+}
+
+#applicationLoadingPanel .visa-splash-screen__watermark {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    width: min(520px, 72vw);
     height: auto;
+    opacity: 0.09;
+    pointer-events: none;
+    user-select: none;
+    filter: grayscale(0.15);
+}
+
+#applicationLoadingPanel .visa-splash-screen__center {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1.5rem;
+}
+
+#applicationLoadingPanel .visa-splash-screen__logo {
+    display: block;
+    width: min(400px, 58vw) !important;
+    height: auto !important;
+    max-height: none !important;
     object-fit: contain;
+}
+
+#applicationLoadingPanel .visa-splash-screen__load {
+    position: absolute;
+    left: 50%;
+    bottom: 16%;
+    transform: translateX(-50%);
+    width: min(560px, 88vw);
+    z-index: 1;
+}
+
+#applicationLoadingPanel .visa-splash-screen__load-label {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.92rem;
+    margin-bottom: 0.85rem;
+    letter-spacing: 0.01em;
+}
+
+#applicationLoadingPanel .visa-splash-screen__load-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#applicationLoadingPanel .visa-splash-screen__progress {
+    flex: 1;
+    height: 5px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.12);
+}
+
+#applicationLoadingPanel .visa-splash-screen__progress-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2563eb 0%, #22c55e 38%, #eab308 72%, #f97316 100%);
+    transition: width 0.12s ease-out;
+}
+
+#applicationLoadingPanel .visa-splash-screen__percent {
+    min-width: 2.75rem;
+    text-align: right;
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+#applicationLoadingPanel .visa-splash-screen__copyright {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.25rem;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    z-index: 1;
 }
 
 /* Suppress DevExpress evaluation license warning (Web Component tag + class-based) */
