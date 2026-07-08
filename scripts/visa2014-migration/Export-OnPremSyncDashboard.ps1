@@ -26,8 +26,7 @@ param(
     [string]$SyncHostRoot = '',
     [switch]$LoadProdConnectionFromSsh,
     [string]$SshHost = 'visa2026-onprem',
-    [switch]$IncludeHtml,
-    [switch]$IncludeFileData
+    [switch]$IncludeHtml
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,7 +61,8 @@ $outputRoot = if ($SyncHostRoot) {
 
 Write-Host "INF Exporting dashboard to $outputRoot ..." -ForegroundColor Green
 Test-OnPremSqlConnections -Config $config
-$rows = Get-OnPremSyncStateSnapshot -Config $config -IncludeFileData:$IncludeFileData
+# Always include document-copy / FileData rows for Operations report.
+$rows = Get-OnPremSyncStateSnapshot -Config $config -IncludeFileData
 $result = Export-OnPremSyncDashboard -Config $config -EntityRows $rows -OutputRoot $outputRoot -IncludeHtml:$IncludeHtml
 Write-Host "INF JSON: $($result.JsonPath)" -ForegroundColor Green
 if ($result.HtmlPath) {

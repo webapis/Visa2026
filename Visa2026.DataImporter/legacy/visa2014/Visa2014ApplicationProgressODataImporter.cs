@@ -416,9 +416,13 @@ internal static class Visa2014ApplicationProgressODataImporter
             ministryLegCountByLegacyApplicationOid);
 
         var progressIdMap = LoadOptionalProgressIdMap(sync.IdMapOutputPath);
+        var duplicateGuard = await Visa2014ApplicationProgressDuplicateGuard.LoadFromSqlAsync(
+            targetConnectionForLegCounts ?? "",
+            verbose);
         var errors = new List<string>();
         int inserted = 0;
         int updated = 0;
+        int relinked = 0;
         int skippedUnchanged = 0;
         int failed = 0;
         int skippedNoApp = 0;
@@ -487,6 +491,27 @@ internal static class Visa2014ApplicationProgressODataImporter
                 continue;
             }
 
+            if (duplicateGuard.TryResolveFromPayload(payload) is Guid existingId)
+            {
+                try
+                {
+                    await target.UpdateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), existingId, payload);
+                    progressIdMap[syntheticKey] = existingId;
+                    updated++;
+                    relinked++;
+                    if (verbose)
+                        Console.WriteLine($"  RELINK ApplicationProgress {existingId} <- {syntheticKey} (existing Application+Order)");
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    errors.Add($"{syntheticKey}: relink update failed: {ex.Message}");
+                    Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
+                }
+
+                continue;
+            }
+
             try
             {
                 var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
@@ -498,6 +523,7 @@ internal static class Visa2014ApplicationProgressODataImporter
                 }
 
                 progressIdMap[syntheticKey] = createdId.Value;
+                duplicateGuard.RegisterFromPayload(payload, createdId.Value);
                 inserted++;
                 if (inserted % 500 == 0 && !string.IsNullOrWhiteSpace(sync.IdMapOutputPath))
                     await SaveProgressIdMapAsync(sync.IdMapOutputPath, progressIdMap);
@@ -528,9 +554,10 @@ internal static class Visa2014ApplicationProgressODataImporter
             PreparedCount = batch.ImportRows.Count,
             InsertedCount = inserted,
             UpdatedCount = updated,
+            RelinkedCount = relinked,
             SkippedUnchangedCount = skippedUnchanged,
             FailedCount = failed,
-            SkippedCount = batch.Skipped.Count,
+            SkippedCount = batch.Skipped.Count + skippedNoApp,
             IdMapPath = idMapPath,
             Errors = errors,
         };

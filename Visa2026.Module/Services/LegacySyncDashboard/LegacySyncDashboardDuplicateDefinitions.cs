@@ -113,6 +113,22 @@ internal static class LegacySyncDashboardDuplicateDefinitions
             ) x
             """,
             "Passport+VisaNumber"),
+        new("ApplicationProgress",
+            """
+            SELECT COUNT(*) FROM (
+                SELECT ApplicationID, ProgressOrder FROM ApplicationProgresses
+                WHERE (GCRecord IS NULL OR GCRecord = 0) AND ApplicationID IS NOT NULL
+                GROUP BY ApplicationID, ProgressOrder HAVING COUNT(*) > 1
+            ) d
+            """,
+            """
+            SELECT ISNULL(SUM(cnt - 1), 0) FROM (
+                SELECT COUNT(*) cnt FROM ApplicationProgresses
+                WHERE (GCRecord IS NULL OR GCRecord = 0) AND ApplicationID IS NOT NULL
+                GROUP BY ApplicationID, ProgressOrder HAVING COUNT(*) > 1
+            ) x
+            """,
+            "Application+Order"),
         new("EmployeePositionHistory",
             """
             SELECT COUNT(*) FROM (

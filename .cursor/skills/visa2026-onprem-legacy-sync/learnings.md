@@ -148,3 +148,24 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Encoding**: On Windows, Cursor Write tool can save **UTF-16** for `.cs`/`.ps1` — verify first bytes or use `[IO.File]::WriteAllText(..., UTF8Encoding $false)`. SQL `PRINT CONCAT` needs scalar vars, not subqueries (Msg 1046).
 - **AddressOfResidence prod apply**: `Repair-DuplicateAddressOfResidence.ps1 -Apply` on `Visa2026DbProd` — **4787** extras soft-deleted, **681** groups resolved, **0** remaining duplicate groups post-check.
 - **DataImporter redeploy (.25)**: `dotnet publish` Release → `deploy.tgz` → extract to `DataImporter-20260708`; **kill** stray `Visa2026.DataImporter.exe` (Task Scheduler can respawn); **del + copy** `Visa2026.DataImporter.dll` / `Visa2026.Module.dll` (in-place `tar -xzf` fails when DLL locked). Updated scripts: `OnPremSyncState.ps1`, `Export-OnPremSyncDashboardCore.ps1`, `Compare-OnPremSyncState.ps1`. Task `Visa2026-OnPrem-LegacySync` disabled during deploy, re-enabled after. DLL stamp **2026-07-08 ~03:02 UTC** on `C:\visa2026-sync\tools\DataImporter\`.
+### 2026-07-08 — Document copies on Legacy sync dashboard
+
+- Dashboard export always includes **FileData** rows (Person.Photo, PassportDocument, EducationDocument, VisaDocument, WorkPermitDocument, InvitationDocument, FamilyProofDocument, MedicalRecordDocument, FileData all).
+- HTML report has a second section **Document copies / FileData** (chart + table). Module `LegacySyncDashboardFileDataDefinitions` + refresher write the same Kind=`FileData` entities on **Refresh**.
+- Prod snapshot uploaded to `C:\visa2026-sync\sync-dashboard.json|.html`. IIS redeploy needed for in-app Refresh to regenerate FileData; until then the static HTML already shows the section.
+
+### 2026-07-08 — VisaDocument file wave (prod)
+
+- **Why N/A**: VisaDocument never imported on `calik-energi-onprem-prod` (bootstrap had other docs; no `VisaDocument.json`).
+- **Sync host**: published DataImporter **1.0.0.549** to `C:\visa2026-sync\tools\DataImporter-VisaDoc\` (main `tools\DataImporter` had mismatched Blazor.Server 548 vs DataImporter 549 → missing assembly on in-process files).
+- **Import**: `--import-visa2014-files --entity Visa --property VisaDocument` → **Posted 5839**, Failed 0, No visa map 70, No blob 47, Oversize >5MB 154. Id-map: `data\id-maps\calik-energi-onprem-prod\VisaDocument.json`.
+- **Dashboard**: VisaDocument legacy SQL now counts `Visa.[GöçürmeNusga]` blobs (was null → N/A).
+### 2026-07-08 — ApplicationProgress duplicates (prod + sync guard)
+
+- **Symptom**: UI Progress (12) for `7/-1223` (Deniz Sakin) — each of 6 steps duplicated.
+- **Root cause**: ApplicationProgress sync uses synthetic keys (`legacyOid:stepCode`) in id-map. When id-map is incomplete/stale, `RunSyncAsync` INSERTs again → exact twins on `(ApplicationID, ProgressOrder)`.
+- **Prod scope**: **17** duplicate groups / **17** extras across a handful of apps (not all 12k — most were clean). Fully doubled: `7/-1223` (6+6), `7/-1227`, `7/-1209`, plus seed-step doubles on several apps.
+- **Cleanup**: `Repair-DuplicateApplicationProgress.ps1 -Apply` + `cleanup/DuplicateApplicationProgressByAppOrder.sql` — keep `MIN(ID)` per App+Order, soft-delete extras. Post-check: **0** remaining groups; `7/-1223` ProgressCnt **12 → 6**.
+- **Prevention**: `Visa2014ApplicationProgressDuplicateGuard` (`Application+Order` → MIN ID) in `RunSyncAsync` — RELINK/update instead of insert when business key exists; write synthetic key into id-map. Unit tests +3 (6 DuplicateGuard tests total).
+- **Dashboard**: ApplicationProgress added to `LegacySyncDashboardDuplicateDefinitions` + `OnPremSyncState.ps1` dup queries.
+- **Redeploy**: DataImporter DLL **2026-07-08 04:30** on `C:\visa2026-sync\tools\DataImporter\` (task disabled during copy).

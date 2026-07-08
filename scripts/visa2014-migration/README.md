@@ -119,6 +119,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | InvitationItem `IsCancelled` backfill | `reimport/InvitationCancellation.ps1` | `cleanup/ImportedInvitationItemCancellationBackfill.sql` (+ `ApplicationItems.ps1` relink) |
 | Duplicate ApplicationItem per Person (on-prem prod data fix) | `Repair-DuplicateApplicationItems.ps1` | `cleanup/DuplicateApplicationItemsByPerson.sql` (preview `@Apply=0`, then `-Apply`) |
 | Duplicate AddressOfResidence per Person+site (on-prem prod data fix) | `Repair-DuplicateAddressOfResidence.ps1` | `cleanup/DuplicateAddressOfResidenceByPersonSite.sql` (preview `@Apply=0`, then `-Apply`) |
+| Duplicate ApplicationProgress per App+Order (on-prem prod data fix) | `Repair-DuplicateApplicationProgress.ps1` | `cleanup/DuplicateApplicationProgressByAppOrder.sql` (preview `@Apply=0`, then `-Apply`) |
 
 ### Reconcile
 

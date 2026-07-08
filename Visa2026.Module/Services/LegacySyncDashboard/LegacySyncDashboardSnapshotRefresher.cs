@@ -91,6 +91,35 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
                 });
             }
 
+            foreach (var row in LegacySyncDashboardFileDataDefinitions.Rows)
+            {
+                int? legacy = row.LegacyQuery is { Length: > 0 }
+                    ? ExecuteScalarCount(legacyBuilder.ConnectionString, row.LegacyQuery)
+                    : null;
+                var migrated = ExecuteScalarCount(targetBuilder.ConnectionString, row.TargetQuery);
+                var idMap = row.IdMapEntity is { Length: > 0 }
+                    ? GetIdMapCount(mapRoot, row.IdMapEntity)
+                    : null;
+                if (!legacy.HasValue && idMap is > 0)
+                    legacy = idMap;
+                var notCompleted = legacy.HasValue && migrated.HasValue
+                    ? Math.Max(0, legacy.Value - migrated.Value)
+                    : (int?)null;
+                var syncState = GetFileDataSyncState(legacy, migrated, idMap ?? 0);
+
+                entities.Add(new LegacySyncEntityRowDto
+                {
+                    Kind = "FileData",
+                    BO = row.BO,
+                    Legacy = legacy,
+                    Migrated = migrated,
+                    NotCompleted = notCompleted,
+                    IdMap = idMap,
+                    SyncState = syncState,
+                    Note = row.Note,
+                });
+            }
+
             var runStatus = ReadRunStatus(options.SyncHostRoot);
             var waveSummary = MapWaveSummary(runStatus);
             var dashboard = new Dictionary<string, object?>
@@ -170,6 +199,23 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
         if (notCompleted <= 100)
             return "Near complete";
         return "Partial";
+    }
+
+    private static string GetFileDataSyncState(int? legacyScope, int? migrated, int fileIdMap)
+    {
+        var legacy = legacyScope ?? 0;
+        var target = migrated ?? 0;
+        if (legacy == 0)
+            return target > 0 ? "Bootstrap only" : "N/A";
+        if (target == 0 && fileIdMap == 0)
+            return "Not started";
+        if (target >= legacy && fileIdMap >= legacy)
+            return "Bootstrap complete";
+        if (target > 0 && fileIdMap > 0)
+            return $"Partial ({fileIdMap} mapped)";
+        if (target > 0)
+            return "Prod rows; no file id-map";
+        return "Not started";
     }
 
     private static string? ReadWatermarkUtc(string syncHostRoot, string legacySource)

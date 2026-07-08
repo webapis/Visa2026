@@ -85,9 +85,13 @@ function Build-OnPremSyncDashboardHtml {
     $watermark = if ($Dashboard.WatermarkUtc) { $Dashboard.WatermarkUtc } else { '(none)' }
 
     $scalarRows = @($Dashboard.Entities | Where-Object { $_.Kind -eq 'Scalar' })
+    $fileRows = @($Dashboard.Entities | Where-Object { $_.Kind -eq 'FileData' })
     $labels = ($scalarRows | ForEach-Object { $_.BO }) -join "','"
     $legacyData = ($scalarRows | ForEach-Object { if ($null -eq $_.Legacy) { 0 } else { $_.Legacy } }) -join ','
     $migratedData = ($scalarRows | ForEach-Object { if ($null -eq $_.Migrated) { 0 } else { $_.Migrated } }) -join ','
+    $fileLabels = ($fileRows | ForEach-Object { $_.BO }) -join "','"
+    $fileLegacyData = ($fileRows | ForEach-Object { if ($null -eq $_.Legacy) { 0 } else { $_.Legacy } }) -join ','
+    $fileMigratedData = ($fileRows | ForEach-Object { if ($null -eq $_.Migrated) { 0 } else { $_.Migrated } }) -join ','
 
     $ws = $Dashboard.WaveSummary
     $wavePending = if ($ws) { $ws.Pending } else { 0 }
@@ -95,7 +99,22 @@ function Build-OnPremSyncDashboardHtml {
     $waveCompleted = if ($ws) { $ws.Completed } else { 0 }
     $waveFailed = if ($ws) { $ws.Failed } else { 0 }
 
-    @"
+    $scalarTable = ($scalarRows | ForEach-Object {
+        $gap = if ($null -ne $_.NotCompleted) { $_.NotCompleted } else { '' }
+        $gapClass = if ($gap -gt 0) { 'gap-warn' } else { 'gap-ok' }
+        "        <tr><td>$($_.BO)</td><td>$($_.Legacy)</td><td>$($_.Migrated)</td><td class='$gapClass'>$gap</td><td>$($_.IdMap)</td><td>$($_.DuplicateGroups)</td><td>$($_.DuplicateExtraRows)</td><td>$($_.SyncState)</td></tr>"
+    }) -join "`n"
+
+    $fileTable = ($fileRows | ForEach-Object {
+        $gap = if ($null -ne $_.NotCompleted) { $_.NotCompleted } else { '' }
+        $gapClass = if ($gap -gt 0) { 'gap-warn' } else { 'gap-ok' }
+        "        <tr><td>$($_.BO)</td><td>$($_.Legacy)</td><td>$($_.Migrated)</td><td class='$gapClass'>$gap</td><td>$($_.IdMap)</td><td>$($_.SyncState)</td></tr>"
+    }) -join "`n"
+
+    $statusClass = ($overall -replace ' ','').ToLower()
+    $currentWaveHtml = if ($currentWave) { " &middot; Current wave: <strong>$currentWave</strong>" } else { '' }
+
+    return @"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,6 +125,7 @@ function Build-OnPremSyncDashboardHtml {
   <style>
     body { font-family: system-ui, sans-serif; margin: 1.5rem; background: #0f172a; color: #e2e8f0; }
     h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+    h2 { margin: 0 0 0.5rem; font-size: 1rem; color: #cbd5e1; }
     .meta { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.25rem; }
     .status { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
     .status-running { background: #1d4ed8; }
@@ -124,22 +144,28 @@ function Build-OnPremSyncDashboardHtml {
   <h1>Legacy sync dashboard</h1>
   <p class="meta">
     Source: $legacySource &middot; Generated: $generated &middot; Watermark: $watermark<br />
-    Overall: <span class="status status-$(($overall -replace ' ','').ToLower())">$overall</span>
-    $(if ($currentWave) { " &middot; Current wave: <strong>$currentWave</strong>" })
+    Overall: <span class="status status-$statusClass">$overall</span>$currentWaveHtml
   </p>
   <div class="grid">
     <div class="card"><canvas id="countsChart" height="120"></canvas></div>
     <div class="card"><canvas id="waveChart" height="120"></canvas></div>
   </div>
   <div class="card" style="margin-top:1rem;">
+    <h2>Scalar business objects</h2>
     <table>
       <thead><tr><th>BO</th><th>Legacy</th><th>Migrated</th><th>Gap</th><th>Id-map</th><th>Dup grp</th><th>Dup +</th><th>Status</th></tr></thead>
       <tbody>
-$(($scalarRows | ForEach-Object {
-    $gap = if ($null -ne $_.NotCompleted) { $_.NotCompleted } else { '' }
-    $gapClass = if ($gap -gt 0) { 'gap-warn' } else { 'gap-ok' }
-    "        <tr><td>$($_.BO)</td><td>$($_.Legacy)</td><td>$($_.Migrated)</td><td class='$gapClass'>$gap</td><td>$($_.IdMap)</td><td>$($_.DuplicateGroups)</td><td>$($_.DuplicateExtraRows)</td><td>$($_.SyncState)</td></tr>"
-}) -join "`n")
+$scalarTable
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:1rem;">
+    <h2>Document copies / FileData</h2>
+    <canvas id="fileCountsChart" height="90"></canvas>
+    <table style="margin-top:0.75rem;">
+      <thead><tr><th>BO</th><th>Legacy</th><th>Migrated</th><th>Gap</th><th>Id-map</th><th>Status</th></tr></thead>
+      <tbody>
+$fileTable
       </tbody>
     </table>
   </div>
@@ -165,6 +191,20 @@ $(($scalarRows | ForEach-Object {
       },
       options: { responsive: true, plugins: { title: { display: true, text: 'Wave status', color: '#e2e8f0' }, legend: { labels: { color: '#e2e8f0' } } } }
     });
+    const fileCtx = document.getElementById('fileCountsChart');
+    if (fileCtx) {
+      new Chart(fileCtx, {
+        type: 'bar',
+        data: {
+          labels: ['$fileLabels'],
+          datasets: [
+            { label: 'Legacy', data: [$fileLegacyData], backgroundColor: '#64748b' },
+            { label: 'Migrated', data: [$fileMigratedData], backgroundColor: '#a78bfa' }
+          ]
+        },
+        options: { responsive: true, plugins: { title: { display: true, text: 'Document copies / FileData', color: '#e2e8f0' } }, scales: { x: { ticks: { color: '#94a3b8', maxRotation: 45, minRotation: 20 } }, y: { ticks: { color: '#94a3b8' } } } }
+      });
+    }
   </script>
 </body>
 </html>
