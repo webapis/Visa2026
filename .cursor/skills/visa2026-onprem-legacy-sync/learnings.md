@@ -169,3 +169,15 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Prevention**: `Visa2014ApplicationProgressDuplicateGuard` (`Application+Order` → MIN ID) in `RunSyncAsync` — RELINK/update instead of insert when business key exists; write synthetic key into id-map. Unit tests +3 (6 DuplicateGuard tests total).
 - **Dashboard**: ApplicationProgress added to `LegacySyncDashboardDuplicateDefinitions` + `OnPremSyncState.ps1` dup queries.
 - **Redeploy**: DataImporter DLL **2026-07-08 04:30** on `C:\visa2026-sync\tools\DataImporter\` (task disabled during copy).
+### 2026-07-08 — Complete remediable FileData partials (prod)
+
+- **Ask**: close Partial gaps on FileData dashboard after VisaDocument wave.
+- **Person.Photo flag**: use `--id-map` (not `--person-id-map`); dry-run `Person id-map not found` was wrong flag.
+- **Runs** (`DataImporter-VisaDoc`, `Visa2026DbProd`, maps under `calik-energi-onprem-prod`):
+  - **Person.Photo**: Processed 4643, **Patched 3203**, No blob 1440, Failed 0 → dashboard **NotCompleted 5** (was ~37).
+  - **PassportDocument**: **Posted 37**, Already 3567, No map 13, No blob 1, Oversize 37 → **NotCompleted 51**.
+  - **EducationDocument**: **Posted 6**, Already 4222, No map 41, No blob 29, Oversize 40, Dup blob 16 → **NotCompleted 126**.
+  - **FamilyProofDocument**: Posted 0, Already 446, Oversize 1, Dup blob 3 → **NotCompleted 19** (hard residual).
+- **Cannot auto-complete without product change**: Oversize >5MB, missing parent id-maps, empty legacy blobs, duplicate-blob skips; **VisaDocument** residual ~205; **MedicalRecordDocument** N/A (no MedicalRecord scalar id-map).
+- **Dashboard**: re-exported from workstation; `sync-dashboard.json|.html` copied to `C:\visa2026-sync\`. Remote `tools\scripts\Export-*.ps1` UTF-16 corrupted — prefer local export + scp until scripts redeployed as UTF-8.
+
