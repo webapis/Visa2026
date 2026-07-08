@@ -120,6 +120,28 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
                 });
             }
 
+            foreach (var row in LegacySyncDashboardLookupDefinitions.Rows)
+            {
+                var migrated = ExecuteScalarCount(targetBuilder.ConnectionString, row.TargetCountQuery);
+                var duplicateGroups = ExecuteScalarCount(targetBuilder.ConnectionString, row.GroupsQuery);
+                var duplicateExtraRows = ExecuteScalarCount(targetBuilder.ConnectionString, row.ExtraRowsQuery);
+                var syncState = (duplicateGroups ?? 0) > 0 ? "Has duplicates" : "Clean";
+
+                entities.Add(new LegacySyncEntityRowDto
+                {
+                    Kind = "Lookup",
+                    BO = row.BO,
+                    Legacy = null,
+                    Migrated = migrated,
+                    NotCompleted = null,
+                    IdMap = null,
+                    DuplicateGroups = duplicateGroups,
+                    DuplicateExtraRows = duplicateExtraRows,
+                    SyncState = syncState,
+                    Note = row.Note,
+                });
+            }
+
             var runStatus = ReadRunStatus(options.SyncHostRoot);
             var waveSummary = MapWaveSummary(runStatus);
             var dashboard = new Dictionary<string, object?>

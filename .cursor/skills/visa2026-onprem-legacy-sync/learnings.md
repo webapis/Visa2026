@@ -182,3 +182,10 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Dashboard**: re-exported from workstation; `sync-dashboard.json|.html` copied to `C:\visa2026-sync\`. Remote `tools\scripts\Export-*.ps1` UTF-16 corrupted — prefer local export + scp until scripts redeployed as UTF-8.
 - **Promoted**: SKILL S10 (DLL skew), S11 (Partial hard residual), S12 (Photo `--id-map`); HTTP `:80`/`:8080` URLs; reference + user-prompts for FileData / dashboard export.
 
+
+### 2026-07-08 — Lookups section on sync dashboard
+
+- Ops-only Kind=`Lookup` rows: prod total + Dup grp / Dup + / Clean|Has duplicates (no Legacy/Gap/Id-map).
+- High-risk catalogs: Position, Department, Specialty, EducationInstitution, Country, Gender, MaritalStatus, Region, City, Lodging, OtherSite, Hotel, Hospital, BorderZoneName, WorkPermittedLocationName, ApplicationType, ApprovingMinistry.
+- C#: `LegacySyncDashboardLookupDefinitions` + refresher; PS: `Get-OnPremLookupRowDefinitions` always in snapshot; HTML card **Lookups**.
+- gitignore: `sync-dashboard.json|.html`, `sync-run-status.json` under DataImporter legacy folder.

@@ -86,6 +86,7 @@ function Build-OnPremSyncDashboardHtml {
 
     $scalarRows = @($Dashboard.Entities | Where-Object { $_.Kind -eq 'Scalar' })
     $fileRows = @($Dashboard.Entities | Where-Object { $_.Kind -eq 'FileData' })
+    $lookupRows = @($Dashboard.Entities | Where-Object { $_.Kind -eq 'Lookup' })
     $labels = ($scalarRows | ForEach-Object { $_.BO }) -join "','"
     $legacyData = ($scalarRows | ForEach-Object { if ($null -eq $_.Legacy) { 0 } else { $_.Legacy } }) -join ','
     $migratedData = ($scalarRows | ForEach-Object { if ($null -eq $_.Migrated) { 0 } else { $_.Migrated } }) -join ','
@@ -109,6 +110,12 @@ function Build-OnPremSyncDashboardHtml {
         $gap = if ($null -ne $_.NotCompleted) { $_.NotCompleted } else { '' }
         $gapClass = if ($gap -gt 0) { 'gap-warn' } else { 'gap-ok' }
         "        <tr><td>$($_.BO)</td><td>$($_.Legacy)</td><td>$($_.Migrated)</td><td class='$gapClass'>$gap</td><td>$($_.IdMap)</td><td>$($_.SyncState)</td></tr>"
+    }) -join "`n"
+
+    $lookupTable = ($lookupRows | ForEach-Object {
+        $dup = if ($null -eq $_.DuplicateGroups) { 0 } else { [int]$_.DuplicateGroups }
+        $rowClass = if ($dup -gt 0) { 'gap-warn' } else { 'gap-ok' }
+        "        <tr class='$rowClass'><td>$($_.BO)</td><td>$($_.Migrated)</td><td>$($_.DuplicateGroups)</td><td>$($_.DuplicateExtraRows)</td><td>$($_.SyncState)</td><td>$($_.Note)</td></tr>"
     }) -join "`n"
 
     $statusClass = ($overall -replace ' ','').ToLower()
@@ -166,6 +173,16 @@ $scalarTable
       <thead><tr><th>BO</th><th>Legacy</th><th>Migrated</th><th>Gap</th><th>Id-map</th><th>Status</th></tr></thead>
       <tbody>
 $fileTable
+      </tbody>
+    </table>
+  </div>
+  <div class="card" style="margin-top:1rem;">
+    <h2>Lookups (prod totals + duplicates)</h2>
+    <p class="meta" style="margin-top:0;">Ops only — not legacy sync waves. Dup key in Note.</p>
+    <table>
+      <thead><tr><th>BO</th><th>Total</th><th>Dup grp</th><th>Dup +</th><th>Status</th><th>Note</th></tr></thead>
+      <tbody>
+$lookupTable
       </tbody>
     </table>
   </div>

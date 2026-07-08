@@ -61,6 +61,139 @@ function Get-OnPremFileRowDefinitions {
     )
 }
 
+function Get-OnPremLookupRowDefinitions {
+    $alive = '(GCRecord IS NULL OR GCRecord = 0)'
+    $nameTm = 'LOWER(LTRIM(RTRIM(NameTm)))'
+    @(
+        @{
+            BO = 'Position'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM Positions WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM Positions WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Positions WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Department'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM Departments WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM Departments WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Departments WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Specialty'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM Specialties WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM Specialties WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Specialties WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'EducationInstitution'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM EducationInstitutions WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM EducationInstitutions WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM EducationInstitutions WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Country'; Note = 'Code else NameTm'
+            T = "SELECT COUNT(*) FROM Countries WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT LOWER(LTRIM(RTRIM(COALESCE(NULLIF(LTRIM(RTRIM(Code)), ''), NameTm)))) k FROM Countries WHERE $alive AND NULLIF(LTRIM(RTRIM(COALESCE(NULLIF(LTRIM(RTRIM(Code)), ''), NameTm))), '') IS NOT NULL GROUP BY LOWER(LTRIM(RTRIM(COALESCE(NULLIF(LTRIM(RTRIM(Code)), ''), NameTm)))) HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Countries WHERE $alive AND NULLIF(LTRIM(RTRIM(COALESCE(NULLIF(LTRIM(RTRIM(Code)), ''), NameTm))), '') IS NOT NULL GROUP BY LOWER(LTRIM(RTRIM(COALESCE(NULLIF(LTRIM(RTRIM(Code)), ''), NameTm)))) HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Gender'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM Genders WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM Genders WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Genders WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'MaritalStatus'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM MaritalStatuses WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM MaritalStatuses WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM MaritalStatuses WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Region'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM Regions WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM Regions WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Regions WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'City'; Note = 'Region+NameTm'
+            T = "SELECT COUNT(*) FROM Cities WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT RegionID, $nameTm FROM Cities WHERE $alive AND RegionID IS NOT NULL AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY RegionID, $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Cities WHERE $alive AND RegionID IS NOT NULL AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY RegionID, $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Lodging'; Note = 'City+FullAddress'
+            T = "SELECT COUNT(*) FROM Lodgings WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT CityID, LOWER(LTRIM(RTRIM(FullAddress))) FROM Lodgings WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(FullAddress)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(FullAddress))) HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Lodgings WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(FullAddress)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(FullAddress))) HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'OtherSite'; Note = 'City+FullAddress'
+            T = "SELECT COUNT(*) FROM OtherSites WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT CityID, LOWER(LTRIM(RTRIM(FullAddress))) FROM OtherSites WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(FullAddress)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(FullAddress))) HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM OtherSites WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(FullAddress)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(FullAddress))) HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Hotel'; Note = 'City+Name'
+            T = "SELECT COUNT(*) FROM Hotels WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT CityID, LOWER(LTRIM(RTRIM(Name))) FROM Hotels WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(Name)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(Name))) HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Hotels WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(Name)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(Name))) HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'Hospital'; Note = 'City+Name'
+            T = "SELECT COUNT(*) FROM Hospitals WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT CityID, LOWER(LTRIM(RTRIM(Name))) FROM Hospitals WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(Name)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(Name))) HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM Hospitals WHERE $alive AND CityID IS NOT NULL AND NULLIF(LTRIM(RTRIM(Name)), '') IS NOT NULL GROUP BY CityID, LOWER(LTRIM(RTRIM(Name))) HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'BorderZoneName'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM BorderZoneNames WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM BorderZoneNames WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM BorderZoneNames WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'WorkPermittedLocationName'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM WorkPermittedLocationNames WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM WorkPermittedLocationNames WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM WorkPermittedLocationNames WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'ApplicationType'; Note = 'NameTm'
+            T = "SELECT COUNT(*) FROM ApplicationTypes WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT $nameTm FROM ApplicationTypes WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM ApplicationTypes WHERE $alive AND NULLIF(LTRIM(RTRIM(NameTm)), '') IS NOT NULL GROUP BY $nameTm HAVING COUNT(*) > 1) x"
+        }
+        @{
+            BO = 'ApprovingMinistry'; Note = 'ShortNameTm'
+            T = "SELECT COUNT(*) FROM ApprovingMinistries WHERE $alive"
+            G = "SELECT COUNT(*) FROM (SELECT LOWER(LTRIM(RTRIM(ShortNameTm))) FROM ApprovingMinistries WHERE $alive AND NULLIF(LTRIM(RTRIM(ShortNameTm)), '') IS NOT NULL GROUP BY LOWER(LTRIM(RTRIM(ShortNameTm))) HAVING COUNT(*) > 1) d"
+            E = "SELECT ISNULL(SUM(cnt - 1), 0) FROM (SELECT COUNT(*) cnt FROM ApprovingMinistries WHERE $alive AND NULLIF(LTRIM(RTRIM(ShortNameTm)), '') IS NOT NULL GROUP BY LOWER(LTRIM(RTRIM(ShortNameTm))) HAVING COUNT(*) > 1) x"
+        }
+    )
+}
+
+function Get-OnPremLookupSyncSnapshot {
+    param($Config)
+
+    foreach ($row in Get-OnPremLookupRowDefinitions) {
+        $migrated = Invoke-OnPremTargetCount -Config $Config -Query $row.T
+        $groups = Invoke-OnPremTargetCount -Config $Config -Query $row.G
+        $extra = Invoke-OnPremTargetCount -Config $Config -Query $row.E
+        $state = if (($groups -as [int]) -gt 0) { 'Has duplicates' } else { 'Clean' }
+
+        [pscustomobject]@{
+            Kind               = 'Lookup'
+            BO                 = $row.BO
+            Legacy             = $null
+            Migrated           = $migrated
+            NotCompleted       = $null
+            IdMap              = $null
+            DuplicateGroups    = $groups
+            DuplicateExtraRows = $extra
+            SyncState          = $state
+            Note               = $row.Note
+        }
+    }
+}
+
 function Set-OnPremProdConnectionFromSsh {
     param(
         [string]$SshHost = 'visa2026-onprem',
@@ -341,5 +474,6 @@ function Get-OnPremSyncStateSnapshot {
     if ($IncludeFileData) {
         $rows += @(Get-OnPremFileSyncSnapshot -Config $Config)
     }
+    $rows += @(Get-OnPremLookupSyncSnapshot -Config $Config)
     return $rows
 }
