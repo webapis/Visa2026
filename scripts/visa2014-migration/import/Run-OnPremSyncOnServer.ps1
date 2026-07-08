@@ -36,12 +36,24 @@ if ([string]::IsNullOrWhiteSpace($ConfigFile)) {
     $ConfigFile = Join-Path $SyncHostRoot 'config\sync.env'
 }
 
+function Read-TextFileAutoEncoding {
+    param([string]$Path)
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFF -and $bytes[1] -eq 0xFE) {
+        return [System.Text.Encoding]::Unicode.GetString($bytes)
+    }
+    if ($bytes.Length -ge 2 -and $bytes[0] -eq 0xFE -and $bytes[1] -eq 0xFF) {
+        return [System.Text.Encoding]::BigEndianUnicode.GetString($bytes)
+    }
+    return [System.Text.Encoding]::UTF8.GetString($bytes)
+}
+
 function Import-SyncEnvFile {
     param([string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Config not found: $Path. Copy onprem-sync.env.example to sync.env and set VISA2014_SQL_PASSWORD."
     }
-    Get-Content -LiteralPath $Path | ForEach-Object {
+    Read-TextFileAutoEncoding -Path $Path -split "`r?`n" | ForEach-Object {
         $line = $_.Trim()
         if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith('#')) { return }
         $idx = $line.IndexOf('=')

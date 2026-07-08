@@ -157,8 +157,11 @@ internal static class ProjectContractApprovalLegProfileLinker
         if (string.IsNullOrWhiteSpace(code))
             return null;
 
+        // Client-side match: EF Core cannot translate StartsWith(..., StringComparison.OrdinalIgnoreCase).
         return objectSpace.GetObjectsQuery<ProjectContract>()
-            .FirstOrDefault(c => c.NameTm == code || c.NameTm.StartsWith(code, StringComparison.OrdinalIgnoreCase));
+            .ToList()
+            .FirstOrDefault(c => c.NameTm == code
+                || (c.NameTm != null && c.NameTm.StartsWith(code, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string? ReadString(JsonElement element, string propertyName) =>

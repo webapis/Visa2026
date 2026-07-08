@@ -4,7 +4,11 @@ internal static class Visa2014ContentRoot
 {
     public static string? FindDataImporterRoot()
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        var baseDir = AppContext.BaseDirectory;
+        if (File.Exists(Path.Combine(baseDir, "legacy", "visa2014", "legacy-sources.yaml")))
+            return baseDir;
+
+        var dir = new DirectoryInfo(baseDir);
         while (dir != null)
         {
             string candidate = Path.Combine(dir.FullName, "Visa2026.DataImporter");
@@ -22,6 +26,10 @@ internal static class Visa2014ContentRoot
 
     public static string? FindSolutionRoot()
     {
+        var envRoot = Environment.GetEnvironmentVariable("VISA2026_SOLUTION_ROOT");
+        if (!string.IsNullOrWhiteSpace(envRoot) && Directory.Exists(envRoot.Trim()))
+            return Path.GetFullPath(envRoot.Trim());
+
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)
         {

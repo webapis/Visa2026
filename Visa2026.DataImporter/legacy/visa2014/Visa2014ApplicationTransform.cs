@@ -909,7 +909,9 @@ internal static class Visa2014ApplicationTransform
         IReadOnlyList<Dictionary<string, object?>> importRows,
         bool verbose)
     {
-        var rulesPath = Visa2014MigrationServiceInferenceRules.ResolveRulesPath(Visa2014ContentRoot.FindSolutionRoot());
+        var rulesPath = Visa2014MigrationServiceInferenceRules.ResolveRulesPath(
+            Visa2014ContentRoot.FindSolutionRoot(),
+            Visa2014ContentRoot.FindDataImporterRoot());
         if (!File.Exists(rulesPath))
             return;
 

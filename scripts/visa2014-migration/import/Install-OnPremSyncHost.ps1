@@ -81,6 +81,21 @@ $libDir = Join-Path $SyncHostRoot 'tools\scripts\_lib'
 New-Item -ItemType Directory -Force -Path $libDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $scriptDir '..\_lib\Get-RepoRoot.ps1') -Destination (Join-Path $libDir 'Get-RepoRoot.ps1') -Force
 
+$lookupDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\lookup-translations'
+New-Item -ItemType Directory -Force -Path $lookupDst | Out-Null
+foreach ($lookupName in @('lookup-translations.yaml', 'lookup-translations.calik-energi.yaml')) {
+    $lookupSrc = Join-Path $RepoRoot "docs\VISA2014_MIGRATION\$lookupName"
+    if (Test-Path -LiteralPath $lookupSrc) {
+        Copy-Item -LiteralPath $lookupSrc -Destination (Join-Path $lookupDst $lookupName) -Force
+    }
+}
+$migrationArtifactsDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\migration-artifacts'
+New-Item -ItemType Directory -Force -Path $migrationArtifactsDst | Out-Null
+$migrationInferenceSrc = Join-Path $RepoRoot 'docs\VISA2014_MIGRATION\migration-service-inference.yaml'
+if (Test-Path -LiteralPath $migrationInferenceSrc) {
+    Copy-Item -LiteralPath $migrationInferenceSrc -Destination (Join-Path $migrationArtifactsDst 'migration-service-inference.yaml') -Force
+}
+
 if ($CopyIdMapsFromRepo) {
     $src = Join-Path $RepoRoot "Visa2026.DataImporter\legacy\visa2014\id-maps\$LegacySource"
     $dst = Join-Path $SyncHostRoot "data\id-maps\$LegacySource"

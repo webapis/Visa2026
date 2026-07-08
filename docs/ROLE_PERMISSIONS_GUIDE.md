@@ -148,6 +148,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `EducationInstitution` | Read, Write, Create |
 | `Specialty` | Read, Write, Create |
 | `Subcontractor` | Read, Write, Create |
+| `VisaPeriod` | Read, Write, Create |
 | `Rejection` | Read, Write, Create |
 | `RejectionItem` | Read, Write, Create |
 | `WorkPermit` | Read, Write, Create |
@@ -160,7 +161,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
 | `MigrationService`, `OrganizationType`, `PassportType`, `Position`, `PurposeOfTravel` |
 | `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
-| `VisaCategory`, `VisaIssuedPlace`, `VisaPeriod`, `VisaType` |
+| `VisaCategory`, `VisaIssuedPlace`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |
 | `Company`, `ProjectContract` |
 | `ExpirationAlertRule` | Read only (runtime state evaluators; no Configuration nav) |

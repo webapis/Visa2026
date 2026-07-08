@@ -302,7 +302,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ValidityDuration>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VisaCategory>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VisaIssuedPlace>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<VisaPeriod>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VisaPeriod>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VisaType>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<WorkPermitLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<MovementPermitLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -454,6 +454,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
+    // Application.VisaPeriod lookup popup — officers add/edit periods without Lookup navigation.
+    EnsureReadWriteCreatePermission<VisaPeriod>(userRole);
     // Address of residence: allow adding supporting documents inline (no Documents navigation group access needed).
     EnsureFullAccessRecursivePermission<AddressOfResidence>(userRole);
     EnsureFullAccessRecursivePermission<AddressOfResidenceDocument>(userRole);

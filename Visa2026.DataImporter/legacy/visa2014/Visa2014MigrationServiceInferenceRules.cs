@@ -49,16 +49,30 @@ internal sealed class Visa2014MigrationServiceInferenceRules
                ?? throw new InvalidOperationException("migration-service-inference.yaml deserialized to null.");
     }
 
-    public static string ResolveRulesPath(string? solutionRoot)
+    public static string ResolveRulesPath(string? solutionRoot, string? dataImporterRoot = null)
     {
-        if (solutionRoot == null)
-            throw new InvalidOperationException("Could not locate solution root for migration-service-inference.yaml.");
+        if (solutionRoot != null)
+        {
+            var fromSolution = Path.Combine(
+                solutionRoot,
+                "docs",
+                "VISA2014_MIGRATION",
+                "migration-service-inference.yaml");
+            if (File.Exists(fromSolution))
+                return fromSolution;
+        }
 
-        return Path.Combine(
-            solutionRoot,
-            "docs",
-            "VISA2014_MIGRATION",
-            "migration-service-inference.yaml");
+        if (dataImporterRoot != null)
+        {
+            var fromLegacyRoot = Path.Combine(
+                Visa2014ContentRoot.LegacyRoot(dataImporterRoot),
+                "migration-artifacts",
+                "migration-service-inference.yaml");
+            if (File.Exists(fromLegacyRoot))
+                return fromLegacyRoot;
+        }
+
+        throw new InvalidOperationException("Could not locate migration-service-inference.yaml (solution docs or published legacy/migration-artifacts).");
     }
 
     public Visa2014MigrationServiceInferenceResult Infer(

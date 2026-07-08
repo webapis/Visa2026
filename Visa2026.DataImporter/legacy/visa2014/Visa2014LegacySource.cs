@@ -72,19 +72,13 @@ internal static class Visa2014LegacySource
         if (node == null || string.IsNullOrWhiteSpace(node.Id))
             throw new InvalidOperationException($"Unknown --legacy-source '{sourceId}'. See legacy-sources.yaml.");
 
-        if (solutionRoot == null)
-            throw new InvalidOperationException("Could not locate solution root for lookup translation paths.");
-
         var lookupPaths = new List<string>();
         foreach (var relative in node.LookupTranslations ?? [])
         {
             if (string.IsNullOrWhiteSpace(relative))
                 continue;
 
-            var full = Path.IsPathRooted(relative)
-                ? relative
-                : Path.Combine(solutionRoot, relative.Replace('/', Path.DirectorySeparatorChar));
-
+            var full = ResolveLookupTranslationPath(dataImporterRoot, solutionRoot, relative);
             if (!File.Exists(full))
                 throw new FileNotFoundException($"Lookup translations file not found for source '{node.Id}'.", full);
 
@@ -107,6 +101,32 @@ internal static class Visa2014LegacySource
             lookupPaths,
             node.IdMapDir ?? $"id-maps/{node.Id}",
             node.PreviewOutput ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+    }
+
+    private static string ResolveLookupTranslationPath(string dataImporterRoot, string? solutionRoot, string relative)
+    {
+        if (Path.IsPathRooted(relative))
+            return relative;
+
+        var normalized = relative.Replace('/', Path.DirectorySeparatorChar);
+        if (!string.IsNullOrWhiteSpace(solutionRoot))
+        {
+            var fromSolution = Path.Combine(solutionRoot, normalized);
+            if (File.Exists(fromSolution))
+                return fromSolution;
+        }
+
+        var fileName = Path.GetFileName(normalized);
+        var fromLegacyRoot = Path.Combine(
+            Visa2014ContentRoot.LegacyRoot(dataImporterRoot),
+            "lookup-translations",
+            fileName);
+        if (File.Exists(fromLegacyRoot))
+            return fromLegacyRoot;
+
+        return solutionRoot == null
+            ? fromLegacyRoot
+            : Path.Combine(solutionRoot, normalized);
     }
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)

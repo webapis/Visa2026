@@ -10,7 +10,6 @@ internal static class Visa2014LegacyAuditChangeQuery
         INNER JOIN dbo.AuditedObjectWeakReference w
             ON a.AuditedObject = w.Oid
         WHERE (a.GCRecord IS NULL OR a.GCRecord = 0)
-          AND (w.GCRecord IS NULL OR w.GCRecord = 0)
           AND a.ModifiedOn >= @sinceUtc
         """;
 
