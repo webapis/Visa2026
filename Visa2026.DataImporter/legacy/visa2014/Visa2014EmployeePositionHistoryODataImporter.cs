@@ -72,12 +72,16 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
             Console.WriteLine($"INF Existing EmployeePositionHistory id-map entries: {historyIdMap.Count}");
 
         var actualPositionCache = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        var positionCache = new Dictionary<string, Guid>(StringComparer.Ordinal);
+        var departmentCache = new Dictionary<string, Guid>(StringComparer.Ordinal);
         var errors = new List<string>();
         int posted = 0;
         int failed = 0;
         int skippedNoPerson = 0;
         int skippedAlreadyImported = 0;
         int actualPositionsCreated = 0;
+        int positionsCreated = 0;
+        int departmentsCreated = 0;
 
         foreach (var row in batch.ImportRows)
         {
@@ -120,11 +124,37 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
                 if (createdActual)
                     actualPositionsCreated++;
 
-                var payload = BuildPayload(row, resolver, personId, actualPositionId.Value);
+                var positionName = row.GetValueOrDefault("Position") as string;
+                var (positionId, createdPosition) = await ResolveOrCreatePositionAsync(
+                    target, resolver, positionCache, positionName, verbose);
+                if (!positionId.HasValue)
+                {
+                    failed++;
+                    errors.Add($"{legacyOid}: could not resolve or create Position '{positionName}'");
+                    continue;
+                }
+
+                if (createdPosition)
+                    positionsCreated++;
+
+                var departmentName = row.GetValueOrDefault("Department") as string;
+                var (departmentId, createdDepartment) = await ResolveOrCreateDepartmentAsync(
+                    target, resolver, departmentCache, departmentName, verbose);
+                if (!departmentId.HasValue)
+                {
+                    failed++;
+                    errors.Add($"{legacyOid}: could not resolve or create Department '{departmentName}'");
+                    continue;
+                }
+
+                if (createdDepartment)
+                    departmentsCreated++;
+
+                var payload = BuildPayload(row, personId, actualPositionId.Value, positionId.Value, departmentId.Value);
                 if (payload == null)
                 {
                     failed++;
-                    errors.Add($"{legacyOid}: incomplete OData payload ({DescribePayloadGap(row, resolver)})");
+                    errors.Add($"{legacyOid}: incomplete OData payload ({DescribePayloadGap(row, positionId, departmentId)})");
                     continue;
                 }
 
@@ -180,6 +210,70 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
             IdMapPath = idMapPath,
             Errors = errors,
         };
+    }
+
+    private static async Task<(Guid? Id, bool Created)> ResolveOrCreatePositionAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        Dictionary<string, Guid> cache,
+        string? nameTm,
+        bool verbose)
+    {
+        var key = string.IsNullOrWhiteSpace(nameTm) ? "-" : nameTm.Trim();
+        if (cache.TryGetValue(key, out var cached))
+            return (cached, false);
+
+        var existing = resolver.ResolvePosition(key);
+        if (existing.HasValue)
+        {
+            cache[key] = existing.Value;
+            return (existing.Value, false);
+        }
+
+        var createdId = await target.CreateAsync(
+            typeof(Visa2026.Module.BusinessObjects.Position),
+            new Dictionary<string, object?> { ["NameTm"] = key });
+        if (!createdId.HasValue)
+            return (null, false);
+
+        await target.FlushAsync();
+        resolver.RegisterPosition(new Position { Id = createdId.Value, NameTm = key });
+        cache[key] = createdId.Value;
+        if (verbose)
+            Console.WriteLine($"  SAVE Position '{key}' -> {createdId.Value}");
+        return (createdId.Value, true);
+    }
+
+    private static async Task<(Guid? Id, bool Created)> ResolveOrCreateDepartmentAsync(
+        IVisa2014ImportTarget target,
+        Visa2014ODataLookupResolver resolver,
+        Dictionary<string, Guid> cache,
+        string? nameTm,
+        bool verbose)
+    {
+        var key = string.IsNullOrWhiteSpace(nameTm) ? "-" : nameTm.Trim();
+        if (cache.TryGetValue(key, out var cached))
+            return (cached, false);
+
+        var existing = resolver.ResolveDepartment(key);
+        if (existing.HasValue)
+        {
+            cache[key] = existing.Value;
+            return (existing.Value, false);
+        }
+
+        var createdId = await target.CreateAsync(
+            typeof(Visa2026.Module.BusinessObjects.Department),
+            new Dictionary<string, object?> { ["NameTm"] = key });
+        if (!createdId.HasValue)
+            return (null, false);
+
+        await target.FlushAsync();
+        resolver.RegisterDepartment(new Department { Id = createdId.Value, NameTm = key });
+        cache[key] = createdId.Value;
+        if (verbose)
+            Console.WriteLine($"  SAVE Department '{key}' -> {createdId.Value}");
+        return (createdId.Value, true);
     }
 
     private static async Task<(Guid? Id, bool Created)> ResolveOrCreateActualPositionAsync(
@@ -247,23 +341,19 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
 
     private static Dictionary<string, object?>? BuildPayload(
         Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver,
         Guid personId,
-        Guid actualPositionId)
+        Guid actualPositionId,
+        Guid positionId,
+        Guid departmentId)
     {
-        var positionId = resolver.ResolvePosition(row.GetValueOrDefault("Position") as string);
-        var departmentId = resolver.ResolveDepartment(row.GetValueOrDefault("Department") as string);
-        if (!positionId.HasValue || !departmentId.HasValue)
-            return null;
-
         if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out var startDate))
             return null;
 
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["Person"] = new { ID = personId },
-            ["Position"] = new { ID = positionId.Value },
-            ["Department"] = new { ID = departmentId.Value },
+            ["Position"] = new { ID = positionId },
+            ["Department"] = new { ID = departmentId },
             ["ActualPosition"] = new { ID = actualPositionId },
             ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
         };
@@ -277,12 +367,15 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
     private static bool TryParseDate(string? text, out DateTime date) =>
         DateTime.TryParse(text, out date);
 
-    private static string DescribePayloadGap(Dictionary<string, object?> row, Visa2014ODataLookupResolver resolver)
+    private static string DescribePayloadGap(
+        Dictionary<string, object?> row,
+        Guid? positionId,
+        Guid? departmentId)
     {
         var gaps = new List<string>();
-        if (!resolver.ResolvePosition(row.GetValueOrDefault("Position") as string).HasValue)
+        if (!positionId.HasValue)
             gaps.Add($"Position={row.GetValueOrDefault("Position")}");
-        if (!resolver.ResolveDepartment(row.GetValueOrDefault("Department") as string).HasValue)
+        if (!departmentId.HasValue)
             gaps.Add($"Department={row.GetValueOrDefault("Department")}");
         if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out _))
             gaps.Add($"StartDate={row.GetValueOrDefault("StartDate")}");
@@ -388,7 +481,12 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
         if (!actualPositionCache.TryGetValue(key, out var actualPositionId))
             return isUpdate ? BuildPayloadWithoutPerson(row, resolver, actualPositionCache) : null;
 
-        return BuildPayload(row, resolver, personId, actualPositionId);
+        var positionId = resolver.ResolvePosition(row.GetValueOrDefault("Position") as string);
+        var departmentId = resolver.ResolveDepartment(row.GetValueOrDefault("Department") as string);
+        if (!positionId.HasValue || !departmentId.HasValue)
+            return isUpdate ? BuildPayloadWithoutPerson(row, resolver, actualPositionCache) : null;
+
+        return BuildPayload(row, personId, actualPositionId, positionId.Value, departmentId.Value);
     }
 
     private static Dictionary<string, object?>? BuildPayloadWithoutPerson(

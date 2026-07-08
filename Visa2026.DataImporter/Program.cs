@@ -286,6 +286,8 @@ static void PrintHelp()
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
     Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--id-map-output path.json] [--no-wait]");
     Console.WriteLine("                [--supplement-permit-positions]  EmployeePositionHistory: import soft-deleted WH referenced by WorkPermit");
+    Console.WriteLine("                [--supplement-permit-persons]  Person: import soft-deleted Person referenced by active WorkPermit (IsArchived)");
+    Console.WriteLine("                [--supplement-permit-passports]  Passport: import Passport rows referenced by active WorkPermit");
     Console.WriteLine("  --import-visa2014-files     Legacy SQL blobs → headless ObjectSpace (requires --inprocess + scalar id-map).");
     Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|MedicalRecord --property Photo|PassportDocument|...");
     Console.WriteLine("                --inprocess --target-connection conn [--legacy-source calik-energi] [--id-map path.json]");

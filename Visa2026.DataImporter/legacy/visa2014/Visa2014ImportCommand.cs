@@ -71,6 +71,8 @@ internal static class Visa2014ImportCommand
         bool noWait = HasArg(args, "--no-wait");
         bool inProcess = HasArg(args, "--inprocess");
         bool supplementPermitPositions = HasArg(args, "--supplement-permit-positions");
+        bool supplementPermitPersons = HasArg(args, "--supplement-permit-persons");
+        bool supplementPermitPassports = HasArg(args, "--supplement-permit-passports");
 
         if (!dryRun
             && string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase)
@@ -172,9 +174,9 @@ internal static class Visa2014ImportCommand
 
             int exitCode;
             if (string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
-                exitCode = await RunPersonImportAsync(target, resolver, source, args, idMapPath, maxRows, dryRun, verbose);
+                exitCode = await RunPersonImportAsync(target, resolver, source, args, idMapPath, maxRows, dryRun, verbose, supplementPermitPersons);
             else if (string.Equals(entity, "Passport", StringComparison.OrdinalIgnoreCase))
-                exitCode = await RunPassportImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
+                exitCode = await RunPassportImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose, supplementPermitPassports);
             else if (string.Equals(entity, "Visa", StringComparison.OrdinalIgnoreCase))
                 exitCode = await RunVisaImportAsync(target, resolver, source, dataImporterRoot, args, idMapPath, maxRows, dryRun, verbose);
             else if (string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase))
@@ -235,23 +237,47 @@ internal static class Visa2014ImportCommand
         string idMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool supplementPermitPersons)
     {
+        if (supplementPermitPersons)
+            Console.WriteLine("INF Mode: --supplement-permit-persons (soft-deleted Person referenced by active WorkPermit, import as IsArchived).");
+
+        if (supplementPermitPersons && !dryRun)
+        {
+            var targetCs = GetTargetConnection(args);
+            if (!string.IsNullOrWhiteSpace(targetCs))
+            {
+                var expandCode = await Visa2014PersonIdMapExpander.ExpandAsync(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    idMapPath,
+                    targetCs,
+                    verbose);
+                if (expandCode != 0)
+                    return expandCode;
+            }
+        }
+
+        var idMapForRun = supplementPermitPersons || !dryRun ? idMapPath : null;
+
         var result = await Visa2014PersonODataImporter.RunAsync(
             target,
             resolver,
             source.ConnectionString,
             source.LookupTranslationPaths,
-            dryRun ? null : idMapPath,
+            idMapForRun,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            supplementPermitPersons);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
-            Console.WriteLine($"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}");
+            Console.WriteLine(
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}");
             if (result.IdMapPath != null)
             {
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
@@ -266,6 +292,10 @@ internal static class Visa2014ImportCommand
                     return expandCode;
             }
         }
+        else if (supplementPermitPersons && result.SkippedAlreadyImported > 0)
+        {
+            Console.WriteLine($"INF Would skip (already in id-map): {result.SkippedAlreadyImported}");
+        }
 
         return result.FailedCount > 0 ? 1 : 0;
     }
@@ -279,12 +309,17 @@ internal static class Visa2014ImportCommand
         string passportIdMapPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool supplementPermitPassports)
     {
         var personIdMapPath = GetOptionValue(args, "--person-id-map")
             ?? source.IdMapPath(dataImporterRoot, "Person");
 
         Console.WriteLine($"INF Person id-map: {personIdMapPath}");
+        if (supplementPermitPassports)
+            Console.WriteLine("INF Mode: --supplement-permit-passports (Passport rows referenced by active WorkPermit).");
+
+        var passportIdMapForRun = supplementPermitPassports || !dryRun ? passportIdMapPath : null;
 
         var result = await Visa2014PassportODataImporter.RunAsync(
             target,
@@ -292,10 +327,11 @@ internal static class Visa2014ImportCommand
             source.ConnectionString,
             source.LookupTranslationPaths,
             personIdMapPath,
-            dryRun ? null : passportIdMapPath,
+            passportIdMapForRun,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            supplementPermitPassports);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
@@ -304,7 +340,16 @@ internal static class Visa2014ImportCommand
             Console.WriteLine(
                 $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (no Person map): {result.SkippedNoPersonMap}  Skipped (already imported): {result.SkippedAlreadyImported}");
             if (result.IdMapPath != null)
+            {
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");
+                var expandCode = await Visa2014PassportIdMapExpander.ExpandAsync(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    result.IdMapPath,
+                    verbose);
+                if (expandCode != 0)
+                    return expandCode;
+            }
             if (result.FailedCount > 0)
             {
                 foreach (var error in result.Errors.Take(10))
@@ -819,6 +864,14 @@ internal static class Visa2014ImportCommand
         Console.WriteLine($"INF Passport id-map: {passportIdMapPath}");
         Console.WriteLine($"INF EmployeePositionHistory id-map: {positionHistoryIdMapPath}");
         Console.WriteLine($"INF WorkPermit id-map: {workPermitIdMapPath}");
+
+        var passportExpandCode = await Visa2014PassportIdMapExpander.ExpandAsync(
+            source.ConnectionString,
+            source.LookupTranslationPaths,
+            passportIdMapPath,
+            verbose);
+        if (passportExpandCode != 0)
+            return passportExpandCode;
 
         var result = await Visa2014WorkPermitItemODataImporter.RunAsync(
             target,

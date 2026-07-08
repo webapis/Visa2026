@@ -90,6 +90,66 @@ internal static class Visa2014PersonTransform
         WHERE p.GCRecord IS NULL
         """;
 
+    /// <summary>
+    /// Soft-deleted <c>Person</c> rows still referenced by active <c>WorkPermit.Employee</c>.
+    /// Imported as archived so WorkPermitItem FK resolution can proceed.
+    /// </summary>
+    internal const string SupplementPermitReferencedExtractSql = """
+        SELECT
+            CAST(p.Oid AS varchar(36)) AS Oid,
+            p.FirstName,
+            p.LastName,
+            p.MiddleName,
+            CONVERT(varchar(10), p.BirthDate, 23) AS BirthDate,
+            p.BirthPlace,
+            bc.NameOfCountryL AS LegacyBirthCountry,
+            p.ForeignAddress,
+            fac.NameOfCountryL AS LegacyForeignAddressCountry,
+            g.TypeOfGenderL AS LegacyGender,
+            CASE WHEN p.IsEmployee = 1 THEN '1' ELSE '0' END AS IsEmployee,
+            CASE WHEN p.IsFamilyMember = 1 THEN '1' ELSE '0' END AS IsFamilyMember,
+            CAST(p.Employee AS varchar(36)) AS LegacyEmployeeOid,
+            rel.RelativeAsL AS LegacyRelationship,
+            c.NumberOfContract AS LegacyProjectContract,
+            CAST(ms.Status AS varchar(10)) AS LegacyMaritalStatusStatus,
+            ms.StatusL AS LegacyMaritalStatusText,
+            CASE WHEN p.ActivePerson = 1 THEN '1' ELSE '0' END AS ActivePerson,
+            CASE WHEN p.Photo IS NOT NULL AND DATALENGTH(p.Photo) > 0 THEN '1' ELSE '0' END AS HasPhoto,
+            ISNULL(DATALENGTH(p.Photo), 0) AS PhotoByteLength,
+            CASE WHEN p.Photo IS NULL OR DATALENGTH(p.Photo) = 0 THEN NULL
+                 ELSE LOWER(CONVERT(varchar(64), HASHBYTES('SHA2_256', p.Photo), 2)) END AS PhotoSha256,
+            Passport.PersonalNumber AS RawPersonalNumber,
+            nc.NameOfCountryL AS LegacyNationality,
+            NULLIF(LTRIM(RTRIM(p.IDNumber)), '') AS LegacySubcontractorName
+        FROM dbo.Person p
+        OUTER APPLY (
+            SELECT TOP 1 pp.*
+            FROM dbo.Passport pp
+            WHERE pp.Person = p.Oid AND pp.GCRecord IS NULL
+            ORDER BY
+                CASE
+                    WHEN pp.PersonalNumber IS NULL OR LTRIM(RTRIM(pp.PersonalNumber)) = N'' THEN 2
+                    WHEN LTRIM(RTRIM(pp.PersonalNumber)) NOT LIKE N'%[^-.]%' ESCAPE N'\' THEN 1
+                    ELSE 0
+                END,
+                pp.PassportIssuedDate DESC,
+                pp.Oid
+        ) Passport
+        LEFT JOIN dbo.Person empSponsor ON p.IsFamilyMember = 1 AND p.Employee = empSponsor.Oid AND empSponsor.GCRecord IS NULL
+        LEFT JOIN dbo.Country bc ON p.BirthCountry = bc.Oid
+        LEFT JOIN dbo.Country fac ON p.ForeignAddressCountry = fac.Oid
+        LEFT JOIN dbo.Gender g ON p.Gender = g.Oid
+        LEFT JOIN dbo.Country nc ON Passport.Citizenship = nc.Oid
+        LEFT JOIN dbo.Relation rel ON p.FamilyMemberRelation = rel.Oid
+        LEFT JOIN dbo.Contract c ON c.Oid = COALESCE(p.Contract, empSponsor.Contract)
+        LEFT JOIN dbo.MaritalStatus ms ON p.MaritalStatus = ms.Oid
+        WHERE p.GCRecord IS NOT NULL
+          AND EXISTS (
+              SELECT 1
+              FROM dbo.WorkPermit wp
+              WHERE wp.GCRecord IS NULL AND wp.Employee = p.Oid)
+        """;
+
     internal static readonly string[] PersonMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
@@ -140,6 +200,59 @@ internal static class Visa2014PersonTransform
         };
     }
 
+    public static Visa2014PersonImportBatch PrepareSupplementPermitReferencedImportBatch(
+        string connectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        int? maxRows,
+        bool verbose)
+    {
+        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
+        var sql = maxRows is > 0
+            ? $"SELECT TOP ({maxRows}) * FROM ({SupplementPermitReferencedExtractSql}) AS q"
+            : SupplementPermitReferencedExtractSql;
+
+        var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
+        var rawRows = new List<Visa2014PersonRawRow>();
+        int parseSkipped = 0;
+        foreach (var dict in dictRows)
+        {
+            if (TryParseRawRow(dict, out var parsed))
+                rawRows.Add(parsed);
+            else
+                parseSkipped++;
+        }
+
+        if (verbose)
+            Console.WriteLine($"  Supplement permit-referenced soft-deleted Person rows: {rawRows.Count} ({parseSkipped} parse skipped).");
+
+        var transformed = TransformRows(
+            rawRows,
+            catalogs,
+            out var skipped,
+            out var unmappedDistinct,
+            out var dedupeSummary,
+            permitSupplementMode: true);
+        var importRows = transformed.ImportRows
+            .Select(row =>
+            {
+                var copy = new Dictionary<string, object?>(row, StringComparer.Ordinal);
+                copy["_legacyTable"] = "Person(permit-supplement)";
+                copy["IsArchived"] = true;
+                return copy;
+            })
+            .ToList();
+
+        return new Visa2014PersonImportBatch
+        {
+            ImportRows = importRows,
+            Skipped = skipped,
+            UnmappedLookups = unmappedDistinct,
+            DedupeSummary = dedupeSummary,
+            LegacyRowCount = rawRows.Count,
+            DedupeMergedCount = transformed.DedupeMergedCount,
+        };
+    }
+
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014PersonRawRow parsed)
     {
         parsed = null!;
@@ -180,7 +293,8 @@ internal static class Visa2014PersonTransform
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct,
-        out List<Dictionary<string, object?>> dedupeSummary)
+        out List<Dictionary<string, object?>> dedupeSummary,
+        bool permitSupplementMode = false)
     {
         skipped = [];
         unmappedDistinct = [];
@@ -199,7 +313,7 @@ internal static class Visa2014PersonTransform
             if (row.PersonalNumberOverride != null)
                 duplicateSuffixCount++;
 
-            var export = BuildExportRow(row, catalogs, out var skipReason, out var rowUnmapped);
+            var export = BuildExportRow(row, catalogs, permitSupplementMode, out var skipReason, out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -368,6 +482,7 @@ internal static class Visa2014PersonTransform
     private static Dictionary<string, object?> BuildExportRow(
         WorkingRow working,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        bool permitSupplementMode,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -386,24 +501,35 @@ internal static class Visa2014PersonTransform
             ["_photoSha256"] = raw.PhotoSha256 ?? "",
         };
 
-        if (string.IsNullOrWhiteSpace(raw.FirstName) ||
-            string.IsNullOrWhiteSpace(raw.LastName) ||
-            !raw.BirthDate.HasValue)
+        var firstName = raw.FirstName;
+        var lastName = raw.LastName;
+        var birthDate = raw.BirthDate;
+        if (permitSupplementMode)
+        {
+            if (string.IsNullOrWhiteSpace(firstName))
+                firstName = "-";
+            if (!birthDate.HasValue)
+                birthDate = new DateTime(1900, 1, 1);
+        }
+
+        if (string.IsNullOrWhiteSpace(firstName) ||
+            string.IsNullOrWhiteSpace(lastName) ||
+            !birthDate.HasValue)
         {
             skipReason = "required_null:FirstName|LastName|DateOfBirth";
-            row["FirstName"] = raw.FirstName;
-            row["LastName"] = raw.LastName;
-            row["DateOfBirth"] = raw.BirthDate;
+            row["FirstName"] = firstName;
+            row["LastName"] = lastName;
+            row["DateOfBirth"] = birthDate;
             return row;
         }
 
-        row["FirstName"] = raw.FirstName.Trim();
-        row["LastName"] = raw.LastName.Trim();
+        row["FirstName"] = firstName.Trim();
+        row["LastName"] = lastName.Trim();
         // Legacy Person.MiddleName actually held free-text work-position/title (no dedicated field in VISA2014).
         // It is NOT a real middle name → do not map to Visa2026 Person.MiddleName (was polluting FullName).
         // The value is migrated to EmployeePositionHistory.ActualPosition (current row); kept here as audit only.
         row["_legacy_MiddleName"] = string.IsNullOrWhiteSpace(raw.MiddleName) ? null : raw.MiddleName.Trim();
-        row["DateOfBirth"] = raw.BirthDate;
+        row["DateOfBirth"] = birthDate;
         row["BirthPlace"] = string.IsNullOrWhiteSpace(raw.BirthPlace) ? null : raw.BirthPlace.Trim();
         row["ForeignAddress"] = string.IsNullOrWhiteSpace(raw.ForeignAddress) ? null : raw.ForeignAddress.Trim();
         row["PersonalNumber"] = working.PersonalNumberOverride

@@ -109,3 +109,32 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **HTTP report (admin)**: `https://<slot-host>/legacy-sync/dashboard` and `/legacy-sync/dashboard.json` on prod (:443), staging (:8080), demo (:8081).
 - **Sync roots**: Production `C:\visa2026-sync`, Staging `C:\visa2026-sync-staging`, Demo `C:\visa2026-sync-demo` (`Install-OnPremSyncHost.ps1 -Profile …`).
 - **Static fallback**: open `<SyncHostRoot>\sync-dashboard.html` on the server (no auth).
+
+### 2026-07-08 — WorkPermitItem gap triage + Person supplement (prod)
+
+- **Root cause (Person)**: 2,523 pending `WorkPermit` rows referenced **soft-deleted** `Person` (`GCRecord IS NOT NULL`) never in `Person.json`. Not an Employee/Person OID mapping bug — `WorkPermit.Employee` is already `Person.Oid`.
+- **Fix shipped**: `--supplement-permit-persons` imports those persons as **`IsArchived=true`** (mirrors `--supplement-permit-positions` for EPH). Patch script `WorkPermitItem-SupplementPositions.ps1` runs Person supplement → Passport supplement → EPH supplement → WorkPermitItem.
+- **Prod run**: `--supplement-permit-persons` posted **+1,368** archived persons; `Person.json` **3274 → 4642**; copied to `C:\visa2026-sync\data\id-maps\calik-energi-onprem-prod\`.
+- **Resume safety**: supplement import pre-expands `Person.json` from target DB (PN match) and checkpoints id-map every 250 rows (partial run recovery).
+- **Remaining (Passport)**: triage after Person fix — **MissingPerson 1**, **MissingPassport 2565** (2,566 pending rows total). `--supplement-permit-passports` (WorkPermit-referenced passports, any `Passport.GCRecord`) dry-run: **0 new** rows (1,599/1,603 already in map). Passport dedupe id-map expand adds only **+1** alias — gap is **not** duplicate_merged passport OIDs at scale.
+- **Next**: SQL on `VISA2015` — distinct `WorkPermit.Passport` OIDs on pending rows vs `Passport` table / skip reasons (orphan FK, import-skipped passport rows). Do **not** use Write tool for `.ps1`/`.cs` on Windows without UTF-8 verify (UTF-16 corrupts build); use `[IO.File]::WriteAllText` with UTF-8 no BOM for new files.
+
+### 2026-07-08 — WorkPermitItem supplement wave (prod, continued)
+
+- **Passport root cause**: 2,565 pending rows referenced **soft-deleted** `Passport` rows (`GCRecord IS NOT NULL`). Soft-deleted passports often have **`Person` NULL** — supplement SQL must use `COALESCE(pp.Person, wpRef.Employee)` via `WorkPermit` OUTER APPLY (same pattern as Person supplement).
+- **Passport prod**: `--supplement-permit-passports` posted **+1,441**; `Passport.json` **3620 → 5062**.
+- **EPH root cause**: 1,389 soft-deleted `WorkHistoryOfEmployee` referenced by `WorkPermit.Position` with **`Employee` NULL** on WH row — supplement SQL needs `COALESCE(w.Employee, wpRef.Employee)`; remove `p.GCRecord IS NULL` on Person join.
+- **EPH prod**: posted **+1,251**; **137 failed** on unmapped legacy Position/Department titles (lookup gaps, Turkmen strings). `EmployeePositionHistory.json` **~2997 → 4248**.
+- **WorkPermitItem prod**: posted **+2,243**; gap **2566 → 323** pending (`WorkPermitItem.json` **3839 → 6082**). Remaining 323 = missing Person (1) + Passport (57) + EPH id-map (265, includes failed EPH supplement rows).
+- **Id-maps copied** to `C:\visa2026-sync\data\id-maps\calik-energi-onprem-prod\` (Person, Passport, EPH, WorkPermitItem).
+- **Env var**: legacy SQL password is `SQL_SERVER_10.100.128.15` (dots), not `SQL_SERVER_10_100_128_15`.
+
+### 2026-07-08 — WorkPermitItem gap closed (323 → 0)
+
+- **Remaining blockers (323 rows)**:
+  - **Person (1)**: soft-deleted `Person` with empty `FirstName` (LastName only) skipped by `required_null:FirstName|LastName|DateOfBirth`. **Fix**: `permitSupplementMode` on Person transform — coerce empty `FirstName` to `-`, missing `BirthDate` to `1900-01-01`.
+  - **Passport (57)**: all had **`ExpirationDate <= IssueDate`** on soft-deleted passports. **Fix**: `permitSupplementMode` on Passport transform — bump expiration to `IssueDate + 1 day` (`_legacy_dateRangeCoerced`).
+  - **EPH (137 failed + 265 id-map gap)**: Position/Department not in tenant seed. **Fix**: `ResolveOrCreatePositionAsync` / `ResolveOrCreateDepartmentAsync` in EPH importer (ActualPosition pattern).
+- **Prod patch run** (`WorkPermitItem-SupplementPositions.ps1` → `Visa2026DbProd`): Person **+1**, Passport **+32**, EPH **+138**, WorkPermitItem **+323** (0 failed). `WorkPermitItem.json` **6082 → 6405**; triage pending **0**; sync state **WorkPermitItem Complete**.
+- **Server**: id-maps scp'd to `C:\visa2026-sync\data\id-maps\calik-energi-onprem-prod\`. DataImporter DLL redeploy blocked if DLL locked (`Permission denied` on tar extract) — stop sync task / IIS app pool before `deploy.tgz` to `tools\DataImporter\`.
+- **Dashboard**: `Export-OnPremSyncDashboard.ps1 -LoadProdConnectionFromSsh -IncludeHtml`.

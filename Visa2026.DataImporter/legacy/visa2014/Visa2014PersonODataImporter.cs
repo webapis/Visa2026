@@ -10,6 +10,7 @@ internal sealed class Visa2014PersonImportResult
     public int PreparedCount { get; init; }
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
+    public int SkippedAlreadyImported { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -26,23 +27,47 @@ internal static class Visa2014PersonODataImporter
         string? idMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        bool supplementPermitReferencedOnly = false)
     {
-        var batch = Visa2014PersonTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose);
+        var batch = supplementPermitReferencedOnly
+            ? Visa2014PersonTransform.PrepareSupplementPermitReferencedImportBatch(
+                legacyConnectionString,
+                lookupTranslationPaths,
+                maxRows,
+                verbose)
+            : Visa2014PersonTransform.PrepareImportBatch(
+                legacyConnectionString,
+                lookupTranslationPaths,
+                maxRows,
+                verbose);
+
+        if (supplementPermitReferencedOnly && verbose)
+            Console.WriteLine("INF Mode: supplement permit-referenced soft-deleted Person rows (import as IsArchived).");
+
+        var existingIdMap = !string.IsNullOrWhiteSpace(idMapOutputPath)
+            ? Visa2014IdMapHelper.Load(idMapOutputPath)
+            : new Dictionary<Guid, Guid>();
+        if (supplementPermitReferencedOnly && verbose && existingIdMap.Count > 0)
+            Console.WriteLine($"INF Existing Person id-map entries: {existingIdMap.Count}");
 
         if (dryRun)
         {
-            Console.WriteLine($"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST ({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} duplicate suffixed).");
+            int alreadyImported = supplementPermitReferencedOnly
+                ? CountAlreadyImported(batch.ImportRows, existingIdMap)
+                : 0;
+            Console.WriteLine(
+                $"DRY RUN: {batch.ImportRows.Count} row(s) ready to POST " +
+                $"({batch.Skipped.Count} skipped, {batch.DedupeMergedCount} duplicate suffixed" +
+                (supplementPermitReferencedOnly ? $", {alreadyImported} already in id-map" : "") +
+                ").");
             return new Visa2014PersonImportResult
             {
                 LegacyRowCount = batch.LegacyRowCount,
                 PreparedCount = batch.ImportRows.Count,
                 SkippedCount = batch.Skipped.Count,
                 DedupeMergedCount = batch.DedupeMergedCount,
+                SkippedAlreadyImported = alreadyImported,
             };
         }
 
@@ -60,10 +85,11 @@ internal static class Visa2014PersonODataImporter
                 r => (Guid)r["_legacyRowId"]!,
                 r => r.GetValueOrDefault("Subcontractor") as string);
 
-        var idMap = new Dictionary<Guid, Guid>();
+        var idMap = new Dictionary<Guid, Guid>(existingIdMap);
         var errors = new List<string>();
         int posted = 0;
         int failed = 0;
+        int skippedAlreadyImported = 0;
 
         var employees = batch.ImportRows.Where(r => IsEmployeeRow(r)).ToList();
         var familyMembers = batch.ImportRows.Where(r => !IsEmployeeRow(r)).ToList();
@@ -71,6 +97,14 @@ internal static class Visa2014PersonODataImporter
         foreach (var row in employees.Concat(familyMembers))
         {
             var legacyOid = (Guid)row["_legacyRowId"]!;
+            if (supplementPermitReferencedOnly && idMap.ContainsKey(legacyOid))
+            {
+                skippedAlreadyImported++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: already in Person id-map");
+                continue;
+            }
+
             try
             {
                 var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid, employeeSubcontractorByLegacyOid);
@@ -84,6 +118,12 @@ internal static class Visa2014PersonODataImporter
 
                 idMap[legacyOid] = createdId.Value;
                 posted++;
+                if (posted % 250 == 0)
+                {
+                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported...");
+                    if (supplementPermitReferencedOnly && !string.IsNullOrWhiteSpace(idMapOutputPath))
+                        await WriteIdMapAsync(idMapOutputPath, idMap);
+                }
                 if (verbose)
                     Console.WriteLine($"  SAVE Person {createdId.Value} <- legacy {legacyOid}");
             }
@@ -101,13 +141,7 @@ internal static class Visa2014PersonODataImporter
         if (idMap.Count > 0 && !string.IsNullOrWhiteSpace(idMapOutputPath))
         {
             idMapPath = Path.GetFullPath(idMapOutputPath);
-            Directory.CreateDirectory(Path.GetDirectoryName(idMapPath)!);
-            var serializable = idMap.ToDictionary(
-                kvp => kvp.Key.ToString(),
-                kvp => kvp.Value.ToString());
-            await File.WriteAllTextAsync(
-                idMapPath,
-                JsonSerializer.Serialize(serializable, new JsonSerializerOptions { WriteIndented = true }));
+            await WriteIdMapAsync(idMapPath, idMap);
         }
 
         return new Visa2014PersonImportResult
@@ -116,11 +150,26 @@ internal static class Visa2014PersonODataImporter
             PreparedCount = batch.ImportRows.Count,
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
+            SkippedAlreadyImported = skippedAlreadyImported,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,
             Errors = errors,
         };
+    }
+
+    private static int CountAlreadyImported(
+        IReadOnlyList<Dictionary<string, object?>> importRows,
+        IReadOnlyDictionary<Guid, Guid> idMap)
+    {
+        int count = 0;
+        foreach (var row in importRows)
+        {
+            if (row["_legacyRowId"] is Guid legacyOid && idMap.ContainsKey(legacyOid))
+                count++;
+        }
+
+        return count;
     }
 
     private static bool IsEmployeeRow(Dictionary<string, object?> row) =>
@@ -151,6 +200,9 @@ internal static class Visa2014PersonODataImporter
             payload["BirthPlace"] = bp;
         if (row.GetValueOrDefault("ForeignAddress") is string fa && !string.IsNullOrWhiteSpace(fa))
             payload["ForeignAddress"] = fa;
+
+        if (row.GetValueOrDefault("IsArchived") is bool archived && archived)
+            payload["IsArchived"] = true;
 
         TrySetLookup(payload, "Gender", resolver.ResolveGender(row.GetValueOrDefault("Gender") as string));
         TrySetLookup(payload, "CountryOfBirth", resolver.ResolveCountry(row.GetValueOrDefault("CountryOfBirth") as string));
@@ -203,6 +255,18 @@ internal static class Visa2014PersonODataImporter
     {
         if (id.HasValue)
             payload[property] = new { ID = id.Value };
+    }
+
+    private static async Task WriteIdMapAsync(string idMapOutputPath, IReadOnlyDictionary<Guid, Guid> idMap)
+    {
+        var idMapPath = Path.GetFullPath(idMapOutputPath);
+        Directory.CreateDirectory(Path.GetDirectoryName(idMapPath)!);
+        var serializable = idMap.ToDictionary(
+            kvp => kvp.Key.ToString(),
+            kvp => kvp.Value.ToString());
+        await File.WriteAllTextAsync(
+            idMapPath,
+            JsonSerializer.Serialize(serializable, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     public static async Task<Visa2014SyncEntityResult> RunSyncAsync(

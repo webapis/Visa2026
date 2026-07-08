@@ -4,6 +4,8 @@ public interface ILegacySyncDashboardService
 {
     LegacySyncDashboardSnapshot GetSnapshot();
 
+    LegacySyncDashboardRefreshResult RefreshSnapshot();
+
     LegacySyncDashboardFileContent GetDashboardHtmlFile();
 
     LegacySyncDashboardFileContent GetDashboardJsonFile();

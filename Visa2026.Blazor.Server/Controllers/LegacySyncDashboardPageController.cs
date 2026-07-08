@@ -50,6 +50,23 @@ public sealed class LegacySyncDashboardPageController : Controller
         return ToActionResult(dashboardService.GetDashboardJsonFile());
     }
 
+    [HttpPost("dashboard/refresh")]
+    [Authorize]
+    public ActionResult<LegacySyncDashboardSnapshot> RefreshDashboard()
+    {
+        if (!options.Enabled)
+            return NotFound("Legacy sync dashboard is disabled in configuration.");
+
+        if (!adminChecker.IsCurrentUserAdministrator())
+            return Forbid();
+
+        var result = dashboardService.RefreshSnapshot();
+        if (!result.Success)
+            return BadRequest(result.ErrorMessage);
+
+        return Ok(result.Snapshot);
+    }
+
     private IActionResult ToActionResult(LegacySyncDashboardFileContent file)
     {
         if (file.Success && file.Content != null)

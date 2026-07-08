@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Visa2026.Module.Services.LegacySyncDashboard;
@@ -11,9 +12,18 @@ public sealed class LegacySyncDashboardService : ILegacySyncDashboardService
     };
 
     private readonly LegacySyncDashboardOptions options;
+    private readonly IConfiguration configuration;
 
-    public LegacySyncDashboardService(IOptions<LegacySyncDashboardOptions> options) =>
+    public LegacySyncDashboardService(
+        IOptions<LegacySyncDashboardOptions> options,
+        IConfiguration configuration)
+    {
         this.options = options.Value;
+        this.configuration = configuration;
+    }
+
+    public LegacySyncDashboardRefreshResult RefreshSnapshot() =>
+        new LegacySyncDashboardSnapshotRefresher(this.options, configuration).Refresh(GetSnapshot);
 
     public LegacySyncDashboardSnapshot GetSnapshot()
     {

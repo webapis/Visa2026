@@ -43,6 +43,7 @@ fields:
     missingBehavior: skip_row
     notes: |
       Legacy FK is WorkHistoryOfEmployee.Oid (not Position catalog). Main EPH import skips GCRecord rows.
+      Use --supplement-permit-persons for soft-deleted Person still referenced by active WorkPermit (import as IsArchived).
       Use --supplement-permit-positions for soft-deleted WH still referenced by active WorkPermit.
       Importer fallback: nearest active WH for employee at permit StartDate when id-map miss persists.
 

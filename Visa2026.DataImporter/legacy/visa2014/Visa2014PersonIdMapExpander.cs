@@ -49,11 +49,19 @@ internal static class Visa2014PersonIdMapExpander
             maxRows: null,
             verbose: false);
 
+        var supplementBatch = Visa2014PersonTransform.PrepareSupplementPermitReferencedImportBatch(
+            legacyConnectionString,
+            lookupTranslationPaths,
+            maxRows: null,
+            verbose: false);
+
+        var rowsToExpand = batch.ImportRows.Concat(supplementBatch.ImportRows).ToList();
+
         int addedFromPn = 0;
         await using (var conn = new SqlConnection(targetConnectionString))
         {
             await conn.OpenAsync();
-            foreach (var row in batch.ImportRows)
+            foreach (var row in rowsToExpand)
             {
                 var legacyKey = ((Guid)row["_legacyRowId"]!).ToString();
                 if (idMap.ContainsKey(legacyKey))

@@ -44,6 +44,40 @@ internal static class Visa2014PassportTransform
         WHERE pp.GCRecord IS NULL
         """;
 
+    /// <summary>
+    /// Passports referenced by active <c>WorkPermit.Passport</c>, including holders on soft-deleted <c>Person</c> rows.
+    /// </summary>
+    internal const string SupplementPermitReferencedExtractSql = """
+        SELECT
+            CAST(pp.Oid AS varchar(36)) AS Oid,
+            pp.PassportNumber,
+            pt.TypeOfPassportL,
+            ISNULL(pt.mgCode, '') AS mgCode,
+            CONVERT(varchar(10), pp.PassportIssuedDate, 23) AS PassportIssuedDate,
+            CONVERT(varchar(10), pp.PassportExpiringDate, 23) AS PassportExpiringDate,
+            pp.PassportIssuedPlace,
+            ic.NameOfCountryL AS LegacyIssuedCountry,
+            CAST(COALESCE(pp.Person, wpRef.Employee) AS varchar(36)) AS LegacyPersonOid,
+            CASE WHEN EXISTS (
+                SELECT 1 FROM dbo.PassportCopy pc
+                WHERE pc.Passport = pp.Oid AND pc.GCRecord IS NULL
+            ) THEN '1' ELSE '0' END AS HasPassportCopy,
+            0 AS PassportCopyByteLength
+        FROM dbo.Passport pp
+        OUTER APPLY (
+            SELECT TOP 1 wp.Employee
+            FROM dbo.WorkPermit wp
+            WHERE wp.GCRecord IS NULL AND wp.Passport = pp.Oid
+            ORDER BY wp.StartDateOfWorkPermit DESC, wp.Oid
+        ) wpRef
+        LEFT JOIN dbo.PassportType pt ON pp.PassportType = pt.Oid
+        LEFT JOIN dbo.Country ic ON pp.PassportIssuedCountry = ic.Oid
+        WHERE EXISTS (
+              SELECT 1
+              FROM dbo.WorkPermit wp
+              WHERE wp.GCRecord IS NULL AND wp.Passport = pp.Oid)
+        """;
+
     internal static readonly string[] PassportMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
@@ -90,6 +124,58 @@ internal static class Visa2014PassportTransform
         };
     }
 
+    public static Visa2014PersonImportBatch PrepareSupplementPermitReferencedImportBatch(
+        string connectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        int? maxRows,
+        bool verbose)
+    {
+        var catalogs = Visa2014LookupTranslator.Load(lookupTranslationPaths);
+        var sql = maxRows is > 0
+            ? $"SELECT TOP ({maxRows}) * FROM ({SupplementPermitReferencedExtractSql}) AS q"
+            : SupplementPermitReferencedExtractSql;
+
+        var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
+        var rawRows = new List<Visa2014PassportRawRow>();
+        int parseSkipped = 0;
+        foreach (var dict in dictRows)
+        {
+            if (TryParseRawRow(dict, out var parsed))
+                rawRows.Add(parsed);
+            else
+                parseSkipped++;
+        }
+
+        if (verbose)
+            Console.WriteLine($"  Supplement permit-referenced Passport rows: {rawRows.Count} ({parseSkipped} parse skipped).");
+
+        var transformed = TransformRows(
+            rawRows,
+            catalogs,
+            out var skipped,
+            out var unmappedDistinct,
+            out var dedupeSummary,
+            permitSupplementMode: true);
+        var importRows = transformed.ImportRows
+            .Select(row =>
+            {
+                var copy = new Dictionary<string, object?>(row, StringComparer.Ordinal);
+                copy["_legacyTable"] = "Passport(permit-supplement)";
+                return copy;
+            })
+            .ToList();
+
+        return new Visa2014PersonImportBatch
+        {
+            ImportRows = importRows,
+            Skipped = skipped,
+            UnmappedLookups = unmappedDistinct,
+            DedupeSummary = dedupeSummary,
+            LegacyRowCount = rawRows.Count,
+            DedupeMergedCount = transformed.DedupeMergedCount,
+        };
+    }
+
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014PassportRawRow parsed)
     {
         parsed = null!;
@@ -121,7 +207,8 @@ internal static class Visa2014PassportTransform
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> unmappedDistinct,
-        out List<Dictionary<string, object?>> dedupeSummary)
+        out List<Dictionary<string, object?>> dedupeSummary,
+        bool permitSupplementMode = false)
     {
         skipped = [];
         unmappedDistinct = [];
@@ -142,7 +229,7 @@ internal static class Visa2014PassportTransform
                 continue;
             }
 
-            var export = BuildExportRow(row, catalogs, out var skipReason, out var rowUnmapped);
+            var export = BuildExportRow(row, catalogs, permitSupplementMode, out var skipReason, out var rowUnmapped);
             foreach (var key in rowUnmapped)
                 unmappedSet.Add(key);
 
@@ -173,6 +260,51 @@ internal static class Visa2014PassportTransform
         return new Visa2014PersonTransform.TransformBatchResult(importRows, dedupeMergedCount);
     }
 
+    internal static IReadOnlyDictionary<Guid, Guid> BuildDedupeLegacyAliases(
+        string connectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        int? maxRows,
+        bool verbose)
+    {
+        var aliases = new Dictionary<Guid, Guid>();
+        AccumulateDedupeAliases(aliases, connectionString, lookupTranslationPaths, ExtractSql, maxRows, verbose);
+        AccumulateDedupeAliases(
+            aliases,
+            connectionString,
+            lookupTranslationPaths,
+            SupplementPermitReferencedExtractSql,
+            maxRows,
+            verbose: false);
+        if (verbose && aliases.Count > 0)
+            Console.WriteLine($"  Passport dedupe legacy aliases: {aliases.Count}");
+        return aliases;
+    }
+
+    private static void AccumulateDedupeAliases(
+        IDictionary<Guid, Guid> aliases,
+        string connectionString,
+        IReadOnlyList<string> lookupTranslationPaths,
+        string extractSql,
+        int? maxRows,
+        bool verbose)
+    {
+        _ = lookupTranslationPaths;
+        var sql = maxRows is > 0
+            ? $"SELECT TOP ({maxRows}) * FROM ({extractSql}) AS q"
+            : extractSql;
+
+        var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose: false);
+        var rawRows = new List<Visa2014PassportRawRow>();
+        foreach (var dict in dictRows)
+        {
+            if (TryParseRawRow(dict, out var parsed))
+                rawRows.Add(parsed);
+        }
+
+        var working = rawRows.Select(r => new WorkingRow(r)).ToList();
+        ApplyPassportNumberDedupe(working, [], aliases);
+    }
+
     private sealed class WorkingRow(Visa2014PassportRawRow Raw)
     {
         public Visa2014PassportRawRow Raw { get; } = Raw;
@@ -180,7 +312,10 @@ internal static class Visa2014PassportTransform
         public string? DedupeGroupId { get; set; }
     }
 
-    private static void ApplyPassportNumberDedupe(List<WorkingRow> rows, List<Dictionary<string, object?>> dedupeSummary)
+    private static void ApplyPassportNumberDedupe(
+        List<WorkingRow> rows,
+        List<Dictionary<string, object?>> dedupeSummary,
+        IDictionary<Guid, Guid>? mergedToCanonical = null)
     {
         var groups = rows
             .Select(r => new { Row = r, Norm = NormalizePassportNumber(r.Raw.PassportNumber) })
@@ -201,7 +336,11 @@ internal static class Visa2014PassportTransform
             {
                 member.Row.DedupeGroupId = groupId;
                 if (!ReferenceEquals(member.Row, canonical.Row))
+                {
                     member.Row.ImportAction = "duplicate_merged";
+                    if (mergedToCanonical != null)
+                        mergedToCanonical[member.Row.Raw.LegacyOid] = canonical.Row.Raw.LegacyOid;
+                }
             }
 
             dedupeSummary.Add(new Dictionary<string, object?>
@@ -219,6 +358,7 @@ internal static class Visa2014PassportTransform
     private static Dictionary<string, object?> BuildExportRow(
         WorkingRow working,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        bool permitSupplementMode,
         out string? skipReason,
         out List<string> unmapped)
     {
@@ -249,13 +389,21 @@ internal static class Visa2014PassportTransform
             return row;
         }
 
-        if (raw.ExpirationDate <= raw.IssueDate)
+        var issueDate = raw.IssueDate.Value;
+        var expirationDate = raw.ExpirationDate.Value;
+        if (expirationDate <= issueDate)
         {
-            skipReason = "invalid_date_range:ExpirationDate<=IssueDate";
-            row["PassportNumber"] = raw.PassportNumber;
-            row["IssueDate"] = raw.IssueDate;
-            row["ExpirationDate"] = raw.ExpirationDate;
-            return row;
+            if (!permitSupplementMode)
+            {
+                skipReason = "invalid_date_range:ExpirationDate<=IssueDate";
+                row["PassportNumber"] = raw.PassportNumber;
+                row["IssueDate"] = issueDate;
+                row["ExpirationDate"] = expirationDate;
+                return row;
+            }
+
+            expirationDate = issueDate.AddDays(1);
+            row["_legacy_dateRangeCoerced"] = true;
         }
 
         var passportNumber = NormalizePassportNumber(raw.PassportNumber);
@@ -263,8 +411,8 @@ internal static class Visa2014PassportTransform
             passportNumber = AppendLegacyOidTail(passportNumber, raw.LegacyOid);
 
         row["PassportNumber"] = passportNumber;
-        row["IssueDate"] = raw.IssueDate;
-        row["ExpirationDate"] = raw.ExpirationDate;
+        row["IssueDate"] = issueDate;
+        row["ExpirationDate"] = expirationDate;
         row["Authority"] = raw.Authority.Trim();
         row["Person"] = raw.LegacyPersonOid.ToString("D");
         row["IsCancelled"] = false;

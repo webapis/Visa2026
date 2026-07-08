@@ -111,7 +111,7 @@ internal sealed class Visa2014WorkPermitItemPositionResolver
                 CAST(w.Oid AS varchar(36)) AS WhOid,
                 CONVERT(varchar(10), w.StartDateOnThisPosition, 23) AS StartDate
             FROM dbo.WorkHistoryOfEmployee w
-            INNER JOIN dbo.Person p ON p.Oid = w.Employee AND p.GCRecord IS NULL
+            INNER JOIN dbo.Person p ON p.Oid = w.Employee
             WHERE w.GCRecord IS NULL
             """;
 

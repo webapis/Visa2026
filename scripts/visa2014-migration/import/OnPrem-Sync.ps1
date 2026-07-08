@@ -184,7 +184,7 @@ function Invoke-DataImporterCli {
 
     if ($script:DataImporterExe) {
         if ($LogFile) {
-            & $script:DataImporterExe @CliArgs 2>&1 | Tee-Object -FilePath $LogFile
+            & $script:DataImporterExe @CliArgs 2>&1 | Tee-Object -FilePath $LogFile | Out-Null
         }
         else {
             & $script:DataImporterExe @CliArgs
@@ -197,7 +197,7 @@ function Invoke-DataImporterCli {
         '-c', $Configuration, '--'
     ) + $CliArgs
     if ($LogFile) {
-        & dotnet @dotnetArgs 2>&1 | Tee-Object -FilePath $LogFile
+        & dotnet @dotnetArgs 2>&1 | Tee-Object -FilePath $LogFile | Out-Null
     }
     else {
         & dotnet @dotnetArgs

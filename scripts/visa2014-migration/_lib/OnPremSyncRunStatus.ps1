@@ -117,11 +117,11 @@ function Set-OnPremSyncRunWaveStarted {
 
     $status.CurrentWave = $WaveName
     $status.OverallStatus = 'Running'
-    foreach ($wave in $status.Waves) {
+    foreach ($wave in @($status.Waves)) {
         if ($wave.Name -eq $WaveName) {
-            $wave.Status = 'Running'
-            $wave.StartedUtc = (Get-Date).ToUniversalTime().ToString('o')
-            $wave.LogFile = $LogFile
+            $wave | Add-Member -NotePropertyName Status -NotePropertyValue 'Running' -Force
+            $wave | Add-Member -NotePropertyName StartedUtc -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
+            $wave | Add-Member -NotePropertyName LogFile -NotePropertyValue $LogFile -Force
             break
         }
     }
@@ -175,14 +175,16 @@ function Set-OnPremSyncRunWaveCompleted {
     $stats = Get-OnPremWaveLogStats -LogFile $logPath
     $waveStatus = if ($ExitCode -eq 0) { 'Completed' } else { 'Failed' }
 
-    foreach ($wave in $status.Waves) {
+    foreach ($wave in @($status.Waves)) {
         if ($wave.Name -eq $WaveName) {
-            $wave.Status = $waveStatus
-            $wave.CompletedUtc = (Get-Date).ToUniversalTime().ToString('o')
-            $wave.ExitCode = $ExitCode
-            if ($logPath) { $wave.LogFile = $logPath }
+            $wave | Add-Member -NotePropertyName Status -NotePropertyValue $waveStatus -Force
+            $wave | Add-Member -NotePropertyName CompletedUtc -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
+            $wave | Add-Member -NotePropertyName ExitCode -NotePropertyValue $ExitCode -Force
+            if ($logPath) { $wave | Add-Member -NotePropertyName LogFile -NotePropertyValue $logPath -Force }
             foreach ($key in $stats.Keys) {
-                if ($null -ne $stats[$key]) { $wave.$key = $stats[$key] }
+                if ($null -ne $stats[$key]) {
+                    $wave | Add-Member -NotePropertyName $key -NotePropertyValue $stats[$key] -Force
+                }
             }
             break
         }

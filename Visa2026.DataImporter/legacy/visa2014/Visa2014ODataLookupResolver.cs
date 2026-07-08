@@ -256,6 +256,18 @@ internal sealed partial class Visa2014ODataLookupResolver
             _actualPositions.Add(row);
     }
 
+    public void RegisterPosition(Position row)
+    {
+        if (row.Id != Guid.Empty)
+            _positions.Add(row);
+    }
+
+    public void RegisterDepartment(Department row)
+    {
+        if (row.Id != Guid.Empty)
+            _departments.Add(row);
+    }
+
     public Guid? ResolveApplicationType(string? name) =>
         ResolveByName(_applicationTypes, name, t => t.Name);
 

@@ -28,20 +28,26 @@ internal static class Visa2014EmployeePositionHistoryTransform
         """;
 
     /// <summary>
-    /// Soft-deleted <c>WorkHistoryOfEmployee</c> rows still referenced by active <c>WorkPermit.Position</c>
-    /// (active person only). Appended to the EPH id-map so WorkPermitItem can resolve permit FKs.
+    /// Soft-deleted <c>WorkHistoryOfEmployee</c> rows still referenced by active <c>WorkPermit.Position</c>.
+    /// Person may be soft-deleted when referenced only via archived Person supplement import.
     /// </summary>
     internal const string SupplementPermitReferencedExtractSql = """
         SELECT
             CAST(w.Oid AS varchar(36)) AS Oid,
-            CAST(w.Employee AS varchar(36)) AS LegacyPersonOid,
+            CAST(COALESCE(w.Employee, wpRef.Employee) AS varchar(36)) AS LegacyPersonOid,
             pos.TitleOfPosition,
             ISNULL(CAST(pos.Code AS varchar(100)), '') AS PositionCode,
             dep.TitleOfDepartment,
             CONVERT(varchar(10), w.StartDateOnThisPosition, 23) AS StartDateOnThisPosition,
             p.MiddleName AS PersonMiddleName
         FROM dbo.WorkHistoryOfEmployee w
-        INNER JOIN dbo.Person p ON w.Employee = p.Oid AND p.GCRecord IS NULL
+        OUTER APPLY (
+            SELECT TOP 1 wp.Employee
+            FROM dbo.WorkPermit wp
+            WHERE wp.GCRecord IS NULL AND wp.Position = w.Oid
+            ORDER BY wp.StartDateOfWorkPermit DESC, wp.Oid
+        ) wpRef
+        LEFT JOIN dbo.Person p ON p.Oid = COALESCE(w.Employee, wpRef.Employee)
         INNER JOIN dbo.Position pos ON w.Position = pos.Oid
         INNER JOIN dbo.Department dep ON w.Department = dep.Oid
         WHERE w.GCRecord IS NOT NULL

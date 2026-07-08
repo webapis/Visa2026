@@ -17,7 +17,7 @@
                 class="legacy-sync-dashboard__refresh @(_isRefreshing ? "legacy-sync-dashboard__refresh--busy" : null)"
                 disabled="@_isRefreshing"
                 @onclick="RefreshAsync">
-            Refresh
+            @(_isRefreshing ? "Refreshing…" : "Refresh")
         </button>
     </header>
 
@@ -167,7 +167,7 @@
     protected override async Task OnInitializedAsync()
     {
         _pollSeconds = Math.Max(10, DashboardOptions.Value.PollIntervalSeconds);
-        await RefreshAsync();
+        await LoadSnapshotAsync(regenerate: false);
         _cts = new CancellationTokenSource();
         _timer = new PeriodicTimer(TimeSpan.FromSeconds(_pollSeconds));
         _ = PollLoopAsync(_cts.Token);
@@ -181,19 +181,44 @@
         try
         {
             while (await _timer.WaitForNextTickAsync(token))
-                await RefreshAsync();
+                await LoadSnapshotAsync(regenerate: false);
         }
         catch (OperationCanceledException)
         {
         }
     }
 
-    private async Task RefreshAsync()
+    private Task RefreshAsync() => LoadSnapshotAsync(regenerate: true);
+
+    private async Task LoadSnapshotAsync(bool regenerate)
     {
         _isRefreshing = true;
         try
         {
-            _snapshot = DashboardService.GetSnapshot();
+            if (regenerate)
+            {
+                var result = await Task.Run(() => DashboardService.RefreshSnapshot());
+                if (result.Success && result.Snapshot != null)
+                    _snapshot = result.Snapshot;
+                else if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
+                    _snapshot = new LegacySyncDashboardSnapshot
+                    {
+                        Enabled = _snapshot.Enabled,
+                        ErrorMessage = result.ErrorMessage,
+                        LegacySource = _snapshot.LegacySource,
+                        LegacyServer = _snapshot.LegacyServer,
+                        LegacyDatabase = _snapshot.LegacyDatabase,
+                        TargetServer = _snapshot.TargetServer,
+                        TargetDatabase = _snapshot.TargetDatabase,
+                    };
+                else
+                    _snapshot = DashboardService.GetSnapshot();
+            }
+            else
+            {
+                _snapshot = DashboardService.GetSnapshot();
+            }
+
             _scalarRows = _snapshot.Entities
                 .Where(e => string.Equals(e.Kind, "Scalar", StringComparison.OrdinalIgnoreCase))
                 .ToList();

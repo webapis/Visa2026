@@ -1,11 +1,12 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Supplement soft-deleted WorkHistoryOfEmployee rows for WorkPermit.Position, then re-import missing WorkPermitItems.
+  Close WorkPermitItem id-map gaps: supplement soft-deleted Person rows, optional Passport sync,
+  supplement soft-deleted WorkHistoryOfEmployee for WorkPermit.Position, then re-import WorkPermitItems.
 
 .EXAMPLE
   .\scripts\visa2014-migration\patch\WorkPermitItem-SupplementPositions.ps1 -DryRun
-  .\scripts\visa2014-migration\patch\WorkPermitItem-SupplementPositions.ps1
+  .\scripts\visa2014-migration\patch\WorkPermitItem-SupplementPositions.ps1 -LegacySource calik-energi-onprem-prod
 #>
 [CmdletBinding()]
 param(
@@ -15,7 +16,8 @@ param(
     [int]$MaxRows = 0,
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Release",
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$SkipPassport
 )
 
 $ErrorActionPreference = "Stop"
@@ -55,6 +57,19 @@ function Invoke-Visa2014Import {
 Write-Host "=== Build ($Configuration) ===" -ForegroundColor Cyan
 dotnet build Visa2026.DataImporter/Visa2026.DataImporter.csproj -c $Configuration
 if ($LASTEXITCODE -ne 0) { throw "Build failed" }
+
+Invoke-Visa2014Import -Entity "Person" -ExtraArgs @(
+    "--supplement-permit-persons",
+    "--id-map-output", (Join-Path $mapRoot "Person.json")
+)
+
+if (-not $SkipPassport) {
+    Invoke-Visa2014Import -Entity "Passport" -ExtraArgs @(
+        "--supplement-permit-passports",
+        "--id-map-output", (Join-Path $mapRoot "Passport.json"),
+        "--person-id-map", (Join-Path $mapRoot "Person.json")
+    )
+}
 
 Invoke-Visa2014Import -Entity "EmployeePositionHistory" -ExtraArgs @(
     "--supplement-permit-positions",
