@@ -118,6 +118,14 @@ $config = @{
     }
 }
 
+if ($ctx.Profile -in @("Production", "Staging", "Demo")) {
+    $config["LegacySyncDashboard"] = @{
+        Enabled = $true
+        SyncHostRoot = (Get-Visa2026LegacySyncHostRoot -Profile $ctx.Profile)
+        PollIntervalSeconds = 30
+    }
+}
+
 $templateStagingEnabled = Resolve-Visa2026TemplateEditStagingEnabled -EnvFile $EnvFile -DefaultEnabled:$true
 $httpsEnabled = Resolve-Visa2026HttpsEnabled -EnvFile $EnvFile
 $httpsPort = Resolve-Visa2026HttpsPort -EnvFile $EnvFile

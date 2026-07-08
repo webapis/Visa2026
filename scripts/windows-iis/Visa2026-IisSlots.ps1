@@ -333,6 +333,20 @@ function Resolve-Visa2026DefaultHttpsPortForProfile {
     }
 }
 
+function Get-Visa2026LegacySyncHostRoot {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Production", "Staging", "Demo")]
+        [string]$Profile
+    )
+
+    switch ($Profile) {
+        "Staging" { return "C:\visa2026-sync-staging" }
+        "Demo" { return "C:\visa2026-sync-demo" }
+        default { return "C:\visa2026-sync" }
+    }
+}
+
 function Get-Visa2026SlotSmokeLoginPageUrl {
     param(
         [Parameter(Mandatory = $true)]
