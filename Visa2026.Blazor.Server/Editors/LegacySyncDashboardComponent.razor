@@ -1,0 +1,226 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Microsoft.Extensions.Options
+@using Visa2026.Module.Services.LegacySyncDashboard
+@implements IAsyncDisposable
+@inject ILegacySyncDashboardService DashboardService
+@inject IOptions<LegacySyncDashboardOptions> DashboardOptions
+
+<div class="legacy-sync-dashboard">
+    <header class="legacy-sync-dashboard__header">
+        <div class="legacy-sync-dashboard__header-text">
+            <h2 class="legacy-sync-dashboard__title">Legacy sync dashboard</h2>
+            <p class="legacy-sync-dashboard__subtitle">
+                VISA2015 → Visa2026 on-prem reconcile and live wave status.
+            </p>
+        </div>
+        <button type="button"
+                class="legacy-sync-dashboard__refresh @(_isRefreshing ? "legacy-sync-dashboard__refresh--busy" : null)"
+                disabled="@_isRefreshing"
+                @onclick="RefreshAsync">
+            Refresh
+        </button>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(_snapshot.ErrorMessage))
+    {
+        <div class="legacy-sync-dashboard__alert" role="alert">@_snapshot.ErrorMessage</div>
+    }
+
+    @if (_snapshot.Enabled && string.IsNullOrWhiteSpace(_snapshot.ErrorMessage))
+    {
+        <section class="legacy-sync-dashboard__summary" aria-label="Run summary">
+            <div class="legacy-sync-dashboard__stat">
+                <span class="legacy-sync-dashboard__stat-label">Overall</span>
+                <span class="legacy-sync-dashboard__pill legacy-sync-dashboard__pill--@StatusCss(_snapshot.OverallStatus)">@(_snapshot.OverallStatus ?? "Unknown")</span>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(_snapshot.CurrentWave))
+            {
+                <div class="legacy-sync-dashboard__stat">
+                    <span class="legacy-sync-dashboard__stat-label">Current wave</span>
+                    <span class="legacy-sync-dashboard__stat-value">@_snapshot.CurrentWave</span>
+                </div>
+            }
+            <div class="legacy-sync-dashboard__stat">
+                <span class="legacy-sync-dashboard__stat-label">Watermark</span>
+                <span class="legacy-sync-dashboard__stat-value">@FormatUtc(_snapshot.WatermarkUtc)</span>
+            </div>
+            <div class="legacy-sync-dashboard__stat">
+                <span class="legacy-sync-dashboard__stat-label">Snapshot</span>
+                <span class="legacy-sync-dashboard__stat-value">@FormatUtc(_snapshot.GeneratedUtc)</span>
+            </div>
+        </section>
+
+        @if (_snapshot.WaveSummary != null)
+        {
+            <section class="legacy-sync-dashboard__wave-summary">
+                <span class="legacy-sync-dashboard__chip legacy-sync-dashboard__chip--pending">Pending @_snapshot.WaveSummary.Pending</span>
+                <span class="legacy-sync-dashboard__chip legacy-sync-dashboard__chip--running">Running @_snapshot.WaveSummary.Running</span>
+                <span class="legacy-sync-dashboard__chip legacy-sync-dashboard__chip--completed">Completed @_snapshot.WaveSummary.Completed</span>
+                <span class="legacy-sync-dashboard__chip legacy-sync-dashboard__chip--failed">Failed @_snapshot.WaveSummary.Failed</span>
+            </section>
+        }
+
+        @if (_scalarRows.Count > 0)
+        {
+            <section class="legacy-sync-dashboard__chart" aria-label="Legacy vs migrated counts">
+                <h3 class="legacy-sync-dashboard__section-title">Scalar reconcile</h3>
+                <ul class="legacy-sync-dashboard__bars">
+                    @foreach (var row in _scalarRows)
+                    {
+                        var legacy = row.Legacy ?? 0;
+                        var migrated = row.Migrated ?? 0;
+                        var max = Math.Max(legacy, migrated);
+                        if (max <= 0) { max = 1; }
+                        <li class="legacy-sync-dashboard__bar-row">
+                            <span class="legacy-sync-dashboard__bar-label" title="@row.Note">@row.BO</span>
+                            <div class="legacy-sync-dashboard__bar-track">
+                                <div class="legacy-sync-dashboard__bar legacy-sync-dashboard__bar--legacy"
+                                     style="width:@Percent(legacy, max)%"
+                                     title="Legacy: @legacy"></div>
+                                <div class="legacy-sync-dashboard__bar legacy-sync-dashboard__bar--migrated"
+                                     style="width:@Percent(migrated, max)%"
+                                     title="Migrated: @migrated"></div>
+                            </div>
+                            <span class="legacy-sync-dashboard__bar-meta">
+                                @legacy / @migrated
+                                @if (row.NotCompleted is > 0)
+                                {
+                                    <span class="legacy-sync-dashboard__gap">−@row.NotCompleted</span>
+                                }
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </section>
+
+            <section class="legacy-sync-dashboard__table-wrap">
+                <table class="legacy-sync-dashboard__table">
+                    <thead>
+                        <tr>
+                            <th>BO</th>
+                            <th>Legacy</th>
+                            <th>Migrated</th>
+                            <th>Gap</th>
+                            <th>Id-map</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in _scalarRows)
+                        {
+                            <tr>
+                                <td>@row.BO</td>
+                                <td>@row.Legacy</td>
+                                <td>@row.Migrated</td>
+                                <td class="@(row.NotCompleted is > 0 ? "legacy-sync-dashboard__gap" : null)">@row.NotCompleted</td>
+                                <td>@row.IdMap</td>
+                                <td>@row.SyncState</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </section>
+        }
+
+        @if (_snapshot.Waves.Count > 0)
+        {
+            <section class="legacy-sync-dashboard__waves">
+                <h3 class="legacy-sync-dashboard__section-title">Import waves</h3>
+                <ul class="legacy-sync-dashboard__wave-list">
+                    @foreach (var wave in _snapshot.Waves)
+                    {
+                        <li class="legacy-sync-dashboard__wave legacy-sync-dashboard__wave--@StatusCss(wave.Status)">
+                            <span class="legacy-sync-dashboard__wave-name">@wave.Name</span>
+                            <span class="legacy-sync-dashboard__pill legacy-sync-dashboard__pill--@StatusCss(wave.Status)">@wave.Status</span>
+                            @if (wave.Inserted.HasValue || wave.Updated.HasValue || wave.Failed.HasValue)
+                            {
+                                <span class="legacy-sync-dashboard__wave-stats">
+                                    +@wave.Inserted · ~@wave.Updated · ✕@wave.Failed
+                                </span>
+                            }
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    }
+
+    <footer class="legacy-sync-dashboard__footer">
+        @_snapshot.LegacySource · @_snapshot.LegacyServer / @_snapshot.LegacyDatabase → @_snapshot.TargetServer / @_snapshot.TargetDatabase
+        · Poll every @_pollSeconds s
+        @if (_snapshot.Enabled && string.IsNullOrWhiteSpace(_snapshot.ErrorMessage))
+        {
+            <span> · <a href="/legacy-sync/dashboard" target="_blank" rel="noopener">Open full HTML report</a></span>
+        }
+    </footer>
+</div>
+
+@code {
+    private LegacySyncDashboardSnapshot _snapshot = new();
+    private PeriodicTimer? _timer;
+    private CancellationTokenSource? _cts;
+    private bool _isRefreshing;
+    private int _pollSeconds = 30;
+
+    private IReadOnlyList<LegacySyncEntityRowDto> _scalarRows = Array.Empty<LegacySyncEntityRowDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _pollSeconds = Math.Max(10, DashboardOptions.Value.PollIntervalSeconds);
+        await RefreshAsync();
+        _cts = new CancellationTokenSource();
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(_pollSeconds));
+        _ = PollLoopAsync(_cts.Token);
+    }
+
+    private async Task PollLoopAsync(CancellationToken token)
+    {
+        if (_timer == null)
+            return;
+
+        try
+        {
+            while (await _timer.WaitForNextTickAsync(token))
+                await RefreshAsync();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    private async Task RefreshAsync()
+    {
+        _isRefreshing = true;
+        try
+        {
+            _snapshot = DashboardService.GetSnapshot();
+            _scalarRows = _snapshot.Entities
+                .Where(e => string.Equals(e.Kind, "Scalar", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        finally
+        {
+            _isRefreshing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_cts != null)
+        {
+            await _cts.CancelAsync();
+            _cts.Dispose();
+        }
+        _timer?.Dispose();
+    }
+
+    private static string StatusCss(string? status) =>
+        (status ?? "unknown").Replace(" ", "", StringComparison.Ordinal).ToLowerInvariant();
+
+    private static string FormatUtc(DateTime? value) =>
+        value?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") ?? "—";
+
+    private static double Percent(int value, int max) =>
+        Math.Round(100.0 * value / max, 1);
+}

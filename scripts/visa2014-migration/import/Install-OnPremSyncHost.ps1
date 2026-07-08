@@ -13,10 +13,13 @@
   Run on the server after files are present to register Task Scheduler (optional).
 
 .PARAMETER SyncHostRoot
-  Default C:\visa2026-sync on 10.100.128.25.
+  Override layout root. Default from -Profile: Production C:\visa2026-sync, Staging C:\visa2026-sync-staging, Demo C:\visa2026-sync-demo.
+
+.PARAMETER Profile
+  IIS slot / legacy source profile (Production, Staging, Demo).
 
 .PARAMETER CopyIdMapsFromRepo
-  Copy id-maps/calik-energi-onprem-prod from dev repo into SyncHostRoot\data\id-maps\.
+  Copy id-maps for the profile legacy source from dev repo into SyncHostRoot\data\id-maps\.
 
 .EXAMPLE
   # From dev PC (build + deploy to local folder, then robocopy to server):
@@ -28,17 +31,31 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$SyncHostRoot = 'C:\visa2026-sync',
+    [ValidateSet('Production', 'Staging', 'Demo')]
+    [string]$Profile = 'Production',
+    [string]$SyncHostRoot = '',
     [string]$RepoRoot = '',
     [switch]$PublishFromRepo,
     [switch]$CopyIdMapsFromRepo,
     [switch]$RegisterScheduledTask,
     [string]$ScheduledTime = '02:30',
-    [string]$LegacySource = 'calik-energi-onprem-prod'
+    [string]$LegacySource = ''
 )
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $scriptDir '..\_lib\Get-OnPremSyncHostRoot.ps1')
+
+if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
+    $SyncHostRoot = Get-DefaultOnPremSyncHostRoot -Profile $Profile
+}
+if ([string]::IsNullOrWhiteSpace($LegacySource)) {
+  $LegacySource = switch ($Profile) {
+        'Staging' { 'calik-energi-onprem-staging' }
+        'Demo' { 'calik-energi-onprem-demo' }
+        default { 'calik-energi-onprem-prod' }
+    }
+}
 
 if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
     . (Join-Path $scriptDir '..\_lib\Get-RepoRoot.ps1')
@@ -80,6 +97,9 @@ Copy-Item -LiteralPath (Join-Path $scriptDir 'onprem-sync.env.example') `
 $libDir = Join-Path $SyncHostRoot 'tools\scripts\_lib'
 New-Item -ItemType Directory -Force -Path $libDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $scriptDir '..\_lib\Get-RepoRoot.ps1') -Destination (Join-Path $libDir 'Get-RepoRoot.ps1') -Force
+foreach ($libName in @('OnPremSyncState.ps1', 'OnPremSyncRunStatus.ps1', 'Export-OnPremSyncDashboardCore.ps1', 'Get-OnPremSyncHostRoot.ps1')) {
+    Copy-Item -LiteralPath (Join-Path $scriptDir "..\_lib\$libName") -Destination (Join-Path $libDir $libName) -Force
+}
 
 $lookupDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\lookup-translations'
 New-Item -ItemType Directory -Force -Path $lookupDst | Out-Null
@@ -114,8 +134,10 @@ if (-not (Test-Path -LiteralPath $configPath)) {
 }
 
 Write-Host "INF Sync host layout ready: $SyncHostRoot" -ForegroundColor Green
-Write-Host "INF Manual run on server:" -ForegroundColor DarkGray
-Write-Host "  C:\visa2026-sync\tools\scripts\Run-OnPremSyncOnServer.ps1 -Mode Sync -SkipTenantCatalogGeneration" -ForegroundColor DarkGray
+Write-Host "INF Manual run on server ($Profile):" -ForegroundColor DarkGray
+Write-Host "  $SyncHostRoot\tools\scripts\Run-OnPremSyncOnServer.ps1 -Profile $Profile -Mode Sync -SkipTenantCatalogGeneration" -ForegroundColor DarkGray
+Write-Host "INF Blazor dashboard: enable LegacySyncDashboard:SyncHostRoot=$SyncHostRoot in this slot appsettings.Production.json" -ForegroundColor DarkGray
+Write-Host "INF HTML report URL (admin): https://<host>/legacy-sync/dashboard" -ForegroundColor DarkGray
 
 if ($RegisterScheduledTask) {
     & (Join-Path $SyncHostRoot 'tools\scripts\Register-OnPremLegacySyncTask.ps1') `

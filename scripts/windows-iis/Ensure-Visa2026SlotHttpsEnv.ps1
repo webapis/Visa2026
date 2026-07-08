@@ -29,15 +29,18 @@ foreach ($line in $lines) {
     }
 }
 
-# Production serves HTTP on :80 by default; HTTPS is opt-in via prod.env (see prod.env.example).
+# Production and Demo are HTTP by default; Staging uses HTTPS (see *.env.example).
 $append = @()
-if ($Profile -ne "Production") {
+if ($Profile -eq "Staging") {
     if (-not $map.ContainsKey("HTTPS_ENABLED")) {
         $append += "HTTPS_ENABLED=true"
     }
     if (-not $map.ContainsKey("HTTPS_PORT")) {
         $append += "HTTPS_PORT=$httpsPort"
     }
+}
+elseif ($Profile -eq "Demo" -and -not $map.ContainsKey("HTTPS_ENABLED")) {
+    $append += "HTTPS_ENABLED=false"
 }
 if ($UncHost -and -not $map.ContainsKey("TEMPLATE_EDIT_UNC_HOST")) {
     $append += "TEMPLATE_EDIT_UNC_HOST=$UncHost"

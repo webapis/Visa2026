@@ -123,7 +123,8 @@ Do **not** use `reimport/` for staging or production cutover.
 | Task | Script |
 |------|--------|
 | On-prem prod sync dashboard (`.15` → `.25`, scalar + FileData + watermark) | `Compare-OnPremSyncState.ps1` (`-LegacySource calik-energi-onprem-prod`, `-ShowNotes`) |
-| Real-time sync state watch (poll + CSV log while sync runs) | `Watch-OnPremSyncState.ps1` (`-IntervalSeconds 30`, `-ClearScreen`) |
+| Export dashboard JSON/HTML (`sync-dashboard.json` on sync host) | `Export-OnPremSyncDashboard.ps1` (`-SyncHostRoot C:\visa2026-sync`, `-IncludeHtml`, `-LoadProdConnectionFromSsh`) |
+| Real-time sync state watch (poll + CSV log while sync runs) | `Watch-OnPremSyncState.ps1` (`-IntervalSeconds 30`, `-ClearScreen`, `-ExportDashboard -SyncHostRoot C:\visa2026-sync`) |
 | Local dev legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
 
 Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md).

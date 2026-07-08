@@ -91,6 +91,7 @@ $scriptFiles = @(
     "Enable-Visa2026IisSlotFirewall.ps1",
     "Enable-Visa2026IisHttps.ps1",
     "Disable-Visa2026IisHttps.ps1",
+    "Set-Visa2026SlotHttpOnly.ps1",
     "Invoke-Visa2026IisSlotConfigure.ps1",
     "Invoke-Visa2026IisSlotSmokeTest.ps1",
     "Ensure-Visa2026SlotHttpsEnv.ps1",

@@ -100,3 +100,12 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **FileData / INotifyPropertyChanged** in headless import logs was **not** ApplicationItem sync — `ApplicationRuntimeLogRetentionBackgroundService` opened `Visa2026EFCoreDbContext` without `UseChangeTrackingProxies()`. Fixed via `ApplicationRuntimeLogDbContextFactory` (all runtime-log EF helpers).
 - **ApplicationItem wave exit 1**: `FK CurrentAddressOfResidence ... not found` when id-map points at AddressOfResidence rows missing in prod (stale/partial PIA map). **Fix**: optional FK payloads use `_optionalFk` in `ObjectSpaceImportSink`; `TryAddOptionalFkFromMap` skips missing targets instead of failing the row.
 - **Redeploy** after fix: dev `Install-OnPremSyncHost.ps1` → `.25` `C:\visa2026-sync\tools\DataImporter\` so nightly `02:30` task picks up the build.
+
+### 2026-07-08 — Legacy sync dashboard (scripts + Blazor Operations)
+
+- **Artifacts on sync host** (`C:\visa2026-sync\`): `sync-run-status.json` (per-wave, written by `OnPrem-Sync.ps1`), `sync-dashboard.json` + optional `sync-dashboard.html` (reconcile snapshot).
+- **Scripts**: `Export-OnPremSyncDashboard.ps1`; `Watch-OnPremSyncState.ps1 -ExportDashboard -SyncHostRoot C:\visa2026-sync`; libs `OnPremSyncRunStatus.ps1`, `Export-OnPremSyncDashboardCore.ps1` (copied by `Install-OnPremSyncHost.ps1`).
+- **Blazor**: Operations → **Legacy sync** (`LegacySyncDashboardHost`, admin-only). Reads `sync-dashboard.json` via `LegacySyncDashboard:SyncHostRoot` in `appsettings.Production.json` (`Enabled: true`, per-slot path).
+- **HTTP report (admin)**: `https://<slot-host>/legacy-sync/dashboard` and `/legacy-sync/dashboard.json` on prod (:443), staging (:8080), demo (:8081).
+- **Sync roots**: Production `C:\visa2026-sync`, Staging `C:\visa2026-sync-staging`, Demo `C:\visa2026-sync-demo` (`Install-OnPremSyncHost.ps1 -Profile …`).
+- **Static fallback**: open `<SyncHostRoot>\sync-dashboard.html` on the server (no auth).

@@ -1,11 +1,16 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Run legacy -> prod sync on 10.100.128.25 using C:\visa2026-sync layout.
+  Run legacy -> prod sync on 10.100.128.25 using the per-slot sync-host layout.
 
 .DESCRIPTION
-  Loads C:\visa2026-sync\config\sync.env, resolves prod SQL from IIS appsettings when needed,
+  Loads <SyncHostRoot>\config\sync.env, resolves target SQL from the slot IIS appsettings when needed,
   then invokes OnPrem-Sync.ps1 with -SyncHostRoot (published DataImporter.exe — no SDK).
+
+  Default sync roots (override with -SyncHostRoot):
+    Production  C:\visa2026-sync
+    Staging     C:\visa2026-sync-staging
+    Demo        C:\visa2026-sync-demo
 
 .EXAMPLE
   # Manual nightly-style sync on .25:
@@ -19,18 +24,29 @@
 param(
     [ValidateSet('Import', 'Sync')]
     [string]$Mode = 'Sync',
+    [ValidateSet('Production', 'Staging', 'Demo')]
+    [string]$Profile = 'Production',
     [switch]$SyncFull,
     [switch]$IncludeFileWaves,
     [switch]$SkipTenantCatalogGeneration,
     [switch]$ContinueOnError,
     [string[]]$Entity = @(),
     [string]$StartAt = '',
-    [string]$SyncHostRoot = 'C:\visa2026-sync',
+    [string]$SyncHostRoot = '',
     [string]$ConfigFile = '',
-    [string]$ProdAppSettings = 'C:\inetpub\visa2026-prod\appsettings.Production.json'
+    [string]$AppSettings = ''
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot '..\_lib\Get-OnPremSyncHostRoot.ps1')
+
+if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
+    $SyncHostRoot = Get-DefaultOnPremSyncHostRoot -Profile $Profile
+}
+if ([string]::IsNullOrWhiteSpace($AppSettings)) {
+    $AppSettings = Get-OnPremSyncHostAppSettingsPath -Profile $Profile
+}
+$targetConnectionEnv = Get-OnPremSyncHostTargetConnectionEnv -Profile $Profile
 
 if ([string]::IsNullOrWhiteSpace($ConfigFile)) {
     $ConfigFile = Join-Path $SyncHostRoot 'config\sync.env'
@@ -74,16 +90,18 @@ if ([string]::IsNullOrWhiteSpace($env:VISA2014_SQL_PASSWORD)) {
     throw 'VISA2014_SQL_PASSWORD missing in sync.env (ReadOnlyUser on 10.100.128.15).'
 }
 
-if ([string]::IsNullOrWhiteSpace($env:VISA2026_PROD_SQL_CONNECTION)) {
-    if (-not (Test-Path -LiteralPath $ProdAppSettings)) {
-        throw "Set VISA2026_PROD_SQL_CONNECTION in sync.env or ensure $ProdAppSettings exists."
+if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($targetConnectionEnv, 'Process')) -and
+    [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($targetConnectionEnv, 'User'))) {
+    if (-not (Test-Path -LiteralPath $AppSettings)) {
+        throw "Set $targetConnectionEnv in sync.env or ensure $AppSettings exists."
     }
-    $cfg = Get-Content -LiteralPath $ProdAppSettings -Raw | ConvertFrom-Json
-    $env:VISA2026_PROD_SQL_CONNECTION = $cfg.ConnectionStrings.DefaultConnection
-    if ([string]::IsNullOrWhiteSpace($env:VISA2026_PROD_SQL_CONNECTION)) {
-        throw "DefaultConnection missing in $ProdAppSettings"
+    $cfg = Get-Content -LiteralPath $AppSettings -Raw | ConvertFrom-Json
+    $conn = $cfg.ConnectionStrings.DefaultConnection
+    if ([string]::IsNullOrWhiteSpace($conn)) {
+        throw "DefaultConnection missing in $AppSettings"
     }
-    Write-Host "INF Prod SQL from $ProdAppSettings (localhost\SQLEXPRESS on server)" -ForegroundColor DarkGray
+    Set-Item -Path "Env:$targetConnectionEnv" -Value $conn
+    Write-Host "INF Target SQL from $AppSettings (localhost\SQLEXPRESS on server)" -ForegroundColor DarkGray
 }
 
 $onPremSync = Join-Path $SyncHostRoot 'tools\scripts\OnPrem-Sync.ps1'
@@ -92,7 +110,7 @@ if (-not (Test-Path -LiteralPath $onPremSync)) {
 }
 
 $args = @(
-    '-Profile', 'Production',
+    '-Profile', $Profile,
     '-Mode', $Mode,
     '-SyncHostRoot', $SyncHostRoot,
     '-Configuration', 'Release',

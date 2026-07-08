@@ -27,6 +27,7 @@ param(
     [string]$TargetUser = 'sa',
     [string]$TargetPassword = '',
     [string]$LegacySource = 'calik-energi-onprem-prod',
+    [string]$SyncHostRoot = '',
     [switch]$LoadProdConnectionFromSsh,
     [string]$SshHost = 'visa2026-onprem',
     [int]$IntervalSeconds = 30,
@@ -34,12 +35,15 @@ param(
     [string]$LogPath = '',
     [switch]$IncludeFileData,
     [switch]$ClearScreen,
-    [switch]$NoConsole
+    [switch]$NoConsole,
+    [switch]$ExportDashboard
 )
 
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot '_lib\Get-RepoRoot.ps1')
 . (Join-Path $PSScriptRoot '_lib\OnPremSyncState.ps1')
+. (Join-Path $PSScriptRoot '_lib\OnPremSyncRunStatus.ps1')
+. (Join-Path $PSScriptRoot '_lib\Export-OnPremSyncDashboardCore.ps1')
 
 $repoRoot = Get-Visa2026RepoRoot
 if ($LoadProdConnectionFromSsh) {
@@ -141,6 +145,15 @@ try {
         }
 
         Add-Content -LiteralPath $LogPath -Value $csvLines -Encoding UTF8
+
+        if ($ExportDashboard) {
+            $dashRoot = if ($SyncHostRoot) {
+                (Resolve-Path -LiteralPath $SyncHostRoot).Path
+            } else {
+                Resolve-OnPremSyncStatusRoot -RepoRoot $repoRoot
+            }
+            Export-OnPremSyncDashboard -Config $config -EntityRows $rows -OutputRoot $dashRoot -IncludeHtml | Out-Null
+        }
 
         if (-not $NoConsole) {
             if ($ClearScreen) { Clear-Host }

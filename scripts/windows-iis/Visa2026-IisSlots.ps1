@@ -170,8 +170,24 @@ function Get-Visa2026IisSlotEnvTemplate {
         "# FORCE_XAF_DB_UPDATE=true"
         "# Resminamalar local sandbox template editing (HTTPS required):"
         "# TEMPLATE_EDIT_STAGING_ENABLED=true"
-        "HTTPS_ENABLED=true"
-        "HTTPS_PORT=$(Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)"
+        $(if ($Profile -eq "Staging") {
+            @(
+                "HTTPS_ENABLED=true"
+                "HTTPS_PORT=$(Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)"
+            )
+        }
+        elseif ($Profile -eq "Demo") {
+            @(
+                "# Demo playground - HTTP only (:$($slot.HttpPort))"
+                "HTTPS_ENABLED=false"
+            )
+        }
+        else {
+            @(
+                "# HTTPS_ENABLED=true"
+                "# HTTPS_PORT=$(Resolve-Visa2026DefaultHttpsPortForProfile -Profile $Profile)"
+            )
+        })
     ) -join "`r`n"
 }
 

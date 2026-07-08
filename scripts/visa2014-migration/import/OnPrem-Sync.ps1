@@ -9,7 +9,8 @@
 
   Profiles:
     Staging    — Visa2026DbStaging (:8080), calik-energi-onprem-staging id-maps
-    Production — Visa2026DbProd (:80), calik-energi-onprem-prod id-maps
+    Production — Visa2026DbProd (:443), calik-energi-onprem-prod id-maps
+    Demo       — Visa2026DbDemo (:8081), calik-energi-onprem-demo id-maps
 
   Runbook: docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md
   Agent skill: .cursor/skills/visa2026-onprem-legacy-sync/SKILL.md
@@ -50,7 +51,7 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet("Staging", "Production")]
+    [ValidateSet("Staging", "Production", "Demo")]
     [string]$Profile = "Staging",
     [string]$LegacySource = "",
     [string]$TargetConnection = "",
@@ -108,6 +109,13 @@ $profileConfig = @{
         TargetConnectionEnv  = "VISA2026_PROD_SQL_CONNECTION"
         LogPrefix            = "prod"
     }
+    Demo = @{
+        LegacySource         = "calik-energi-onprem-demo"
+        IdMapSubDir          = "calik-energi-onprem-demo"
+        ApiBaseUrl           = "http://10.100.128.25:8081"
+        TargetConnectionEnv  = "VISA2026_DEMO_SQL_CONNECTION"
+        LogPrefix            = "demo"
+    }
 }
 
 $cfg = $profileConfig[$Profile]
@@ -154,10 +162,15 @@ $syncStateDirResolved = if ([string]::IsNullOrWhiteSpace($SyncStateDir)) {
 } else { $SyncStateDir }
 
 if ($Mode -eq "Sync" -and $Profile -ne "Production") {
-    Write-Host "WRN Legacy sync is prod-only; -Profile Staging is for import/catch-up testing only." -ForegroundColor Yellow
+    Write-Host "WRN Scheduled legacy sync is prod-only; -Profile $Profile is for import/catch-up or dashboard testing." -ForegroundColor Yellow
 }
 
 New-Item -ItemType Directory -Force -Path $mapRoot, $logRoot, $syncStateDirResolved | Out-Null
+
+. (Join-Path $PSScriptRoot '..\_lib\OnPremSyncState.ps1')
+. (Join-Path $PSScriptRoot '..\_lib\OnPremSyncRunStatus.ps1')
+. (Join-Path $PSScriptRoot '..\_lib\Export-OnPremSyncDashboardCore.ps1')
+$syncStatusRoot = if ($SyncHostRoot) { $SyncHostRoot } else { Join-Path $dataImporterRoot 'legacy/visa2014' }
 
 function Get-MapPath([string]$name) {
     Join-Path $mapRoot "$name.json"
@@ -272,6 +285,7 @@ function Invoke-ImportWave {
     $logFile = Join-Path $logRoot "$logPrefix-$WaveName-$stamp.log"
     Write-Host ""
     Write-Host ">>> $WaveName  ->  $logFile" -ForegroundColor Green
+    Set-OnPremSyncRunWaveStarted -Root $syncStatusRoot -WaveName $WaveName -LogFile $logFile
 
     if ($Kind -eq "Scalar") {
         $cliVerb = if ($Mode -eq "Sync") { "--sync-visa2014" } else { "--import-visa2014" }
@@ -314,10 +328,13 @@ function Invoke-ImportWave {
         $exit = 1
     }
 
+    Set-OnPremSyncRunWaveCompleted -Root $syncStatusRoot -WaveName $WaveName -ExitCode $exit -LogFile $logFile
+
     if ($exit -ne 0) {
         Write-Host "ERR Wave $WaveName failed (exit $exit). Log: $logFile" -ForegroundColor Red
         if (-not $ContinueOnError) {
             Write-Host "INF Re-run with -StartAt $WaveName after fixing the issue." -ForegroundColor Yellow
+            Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus Failed
             exit $exit
         }
     }
@@ -479,6 +496,17 @@ if ($DryRun) { Write-Host "INF Mode: dry-run" -ForegroundColor Yellow }
 if ($Mode -eq "Sync") { Write-Host "INF Mode: delta sync (--sync-visa2014)$(if ($SyncFull) { ' + --sync-full' })" -ForegroundColor Yellow }
 if ($IncludeFileWaves) { Write-Host "INF File waves: DocumentCopies.ps1 after scalar chain" -ForegroundColor Yellow }
 
+$activeWaves = @($waves | ForEach-Object { $_.Name })
+
+Initialize-OnPremSyncRunStatus `
+    -Root $syncStatusRoot `
+    -RunId $stamp `
+    -Mode $Mode `
+    -SyncFull:($SyncFull.IsPresent) `
+    -LegacySource $LegacySource `
+    -Profile $Profile `
+    -WaveNames $activeWaves
+
 foreach ($wave in $waves) {
     if (-not $started) {
         if ($wave.Name -eq $StartAt) { $started = $true }
@@ -489,6 +517,33 @@ foreach ($wave in $waves) {
     }
 
     Invoke-ImportWave -WaveName $wave.Name -ExtraArgs $wave.Args -Kind $wave.Kind
+}
+
+$runStatusPath = Get-OnPremSyncRunStatusPath -Root $syncStatusRoot
+$finalRunStatus = Read-OnPremSyncRunStatus -Path $runStatusPath
+$anyFailed = $false
+if ($finalRunStatus -and $finalRunStatus.Waves) {
+    foreach ($w in $finalRunStatus.Waves) {
+        if ($w.Status -eq 'Failed') { $anyFailed = $true; break }
+    }
+}
+Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus $(if ($anyFailed) { 'Failed' } else { 'Completed' })
+
+try {
+    if (-not $DryRun) {
+        $dashConfig = Resolve-OnPremSyncStateConfig `
+            -LegacySource $LegacySource `
+            -TargetConnection $TargetConnection `
+            -RepoRoot $repoRoot
+        $dashConfig.MapRoot = $mapRoot
+        $dashConfig.SyncStatePath = Join-Path $syncStateDirResolved "$LegacySource.json"
+        $dashRows = Get-OnPremSyncStateSnapshot -Config $dashConfig
+        Export-OnPremSyncDashboard -Config $dashConfig -EntityRows $dashRows -OutputRoot $syncStatusRoot -IncludeHtml | Out-Null
+        Write-Host "INF Dashboard: $(Get-OnPremSyncDashboardJsonPath -Root $syncStatusRoot)" -ForegroundColor DarkGray
+    }
+}
+catch {
+    Write-Host "WRN Dashboard export skipped: $($_.Exception.Message)" -ForegroundColor Yellow
 }
 
 Write-Host ""

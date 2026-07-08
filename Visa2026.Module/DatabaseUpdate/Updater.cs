@@ -1009,6 +1009,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             DenyTypeRead<ApplicationRuntimeLog>(role);
             DenyTypeRead<BoStateNotificationInboxHost>(role);
+            DenyTypeRead<LegacySyncDashboardHost>(role);
 
             EnsureNavigationPermission(
                 role,
@@ -1017,6 +1018,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(
                 role,
                 @"Application/NavigationItems/Items/Operations/Items/StateNotifications",
+                SecurityPermissionState.Deny);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Operations/Items/LegacySyncDashboard",
                 SecurityPermissionState.Deny);
         }
 

@@ -194,6 +194,11 @@ namespace Visa2026.Blazor.Server
                         options.IsSupportChangePassword = true;
                     });
             });
+            services.Configure<Visa2026.Module.Services.LegacySyncDashboard.LegacySyncDashboardOptions>(
+                Configuration.GetSection(Visa2026.Module.Services.LegacySyncDashboard.LegacySyncDashboardOptions.SectionName));
+            services.AddSingleton<
+                Visa2026.Module.Services.LegacySyncDashboard.ILegacySyncDashboardService,
+                Visa2026.Module.Services.LegacySyncDashboard.LegacySyncDashboardService>();
             services.AddScoped<XafCultureInfoService>();
             services.AddScoped<IXafCultureInfoService, VisaXafCultureInfoService>();
 
