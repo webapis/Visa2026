@@ -1001,6 +1001,96 @@
     "tk-TM": "Hasabat şablony ýüklenip bilinmedi.",
     "ru-RU": "Не удалось загрузить шаблон отчёта."
   },
+  "UserReport.PlaceholderManual": {
+    "en": "Placeholder manual",
+    "tr-TR": "Yer tutucu el kitabı",
+    "tk-TM": "Bellikler gollanmasy",
+    "ru-RU": "Справочник заполнителей"
+  },
+  "PlaceholderManual.Title": {
+    "en": "Placeholder manual",
+    "tr-TR": "Yer tutucu el kitabı",
+    "tk-TM": "Hasabat şablonlary üçin bellikler",
+    "ru-RU": "Справочник заполнителей"
+  },
+  "PlaceholderManual.Search.Placeholder": {
+    "en": "Search code, name, or label…",
+    "tr-TR": "Kod, ad veya etiket ara…",
+    "tk-TM": "Kod, ady ýa-da düşündiriş gözle…",
+    "ru-RU": "Поиск кода, имени или подписи…"
+  },
+  "PlaceholderManual.Filter.AllScopes": {
+    "en": "All scopes",
+    "tr-TR": "Tüm kapsamlar",
+    "tk-TM": "Hemme görnüşler",
+    "ru-RU": "Все области"
+  },
+  "PlaceholderManual.Filter.Header": {
+    "en": "Header (application)",
+    "tr-TR": "Üst bilgi (başvuru)",
+    "tk-TM": "Başlyk (arza)",
+    "ru-RU": "Шапка (заявка)"
+  },
+  "PlaceholderManual.Filter.Row": {
+    "en": "Row (person line)",
+    "tr-TR": "Satır (kişi satırı)",
+    "tk-TM": "Setir (adam)",
+    "ru-RU": "Строка (лицо)"
+  },
+  "PlaceholderManual.Column.Short": {
+    "en": "Short",
+    "tr-TR": "Kısa",
+    "tk-TM": "Gysga",
+    "ru-RU": "Краткий"
+  },
+  "PlaceholderManual.Column.Canonical": {
+    "en": "Full name",
+    "tr-TR": "Tam ad",
+    "tk-TM": "Doly ady",
+    "ru-RU": "Полное имя"
+  },
+  "PlaceholderManual.Column.Label": {
+    "en": "Description",
+    "tr-TR": "Açıklama",
+    "tk-TM": "Düşündiriş",
+    "ru-RU": "Описание"
+  },
+  "PlaceholderManual.Column.Example": {
+    "en": "Example",
+    "tr-TR": "Örnek",
+    "tk-TM": "Mysal",
+    "ru-RU": "Пример"
+  },
+  "PlaceholderManual.Column.Word": {
+    "en": "Word token",
+    "tr-TR": "Word kodu",
+    "tk-TM": "Word belgisi",
+    "ru-RU": "Токен Word"
+  },
+  "PlaceholderManual.Column.Excel": {
+    "en": "Excel token",
+    "tr-TR": "Excel kodu",
+    "tk-TM": "Excel belgisi",
+    "ru-RU": "Токен Excel"
+  },
+  "PlaceholderManual.CopyWord": {
+    "en": "Copy",
+    "tr-TR": "Kopyala",
+    "tk-TM": "Göçür",
+    "ru-RU": "Копировать"
+  },
+  "PlaceholderManual.Empty": {
+    "en": "No placeholders match your search.",
+    "tr-TR": "Aramanızla eşleşen yer tutucu yok.",
+    "tk-TM": "Gözlegiňize laýyk bellik tapylmady.",
+    "ru-RU": "Нет заполнителей по вашему запросу."
+  },
+  "ApplicationReportPackage.PlaceholderManual": {
+    "en": "Placeholder manual",
+    "tr-TR": "Yer tutucu el kitabı",
+    "tk-TM": "Bellikler gollanmasy",
+    "ru-RU": "Справочник заполнителей"
+  },
   "StateChangeLog.NoSourceInfo": {
     "en": "No source object information available.",
     "tr-TR": "Kaynak nesne bilgisi yok.",

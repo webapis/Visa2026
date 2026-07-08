@@ -19,7 +19,7 @@ Row tokens resolve to **`ApplicationItem`** getters (see **`docs/WORD_REPORT_PLA
 2. Optional: put **`{{/ds.rows}}`** on the **next row**; that row is **deleted** after merge.
 3. **Do not merge cells** in the template data row (v1).
 4. Row tokens use the **`{{.PropertyName}}`** prefix (same as Word `{{#ds.rows}}` sections).
-5. Non-deleted items only (`IsDeleted = false`).
+5. One merged row per **ApplicationItem** on the application (loaded via `UserReportMergeDataHelper.GetActiveApplicationItems` — all DB rows for that application; no `IsDeleted` flag on `ApplicationItem` today).
 
 ### Seed layouts
 

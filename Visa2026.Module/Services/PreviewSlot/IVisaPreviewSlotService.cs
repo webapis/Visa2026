@@ -1,3 +1,4 @@
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.WordReports;
@@ -13,6 +14,7 @@ public enum VisaPreviewSlotMode
     ProgressLetters = 4,
     PersonDocumentCopies = 5,
     HeaderDocumentCopies = 6,
+    PlaceholderManual = 7,
 }
 
 public sealed class ResminamalarSlotRequest
@@ -25,6 +27,11 @@ public sealed class ResminamalarSlotRequest
 
     /// <summary>When set, catalog area shows this localized message instead of the report list.</summary>
     public string? EmptyCatalogMessage { get; init; }
+}
+
+public sealed class PlaceholderManualSlotRequest
+{
+    public UserReportBoType? FilterRootBoType { get; init; }
 }
 
 public sealed class VisaPreviewSlotState
@@ -50,6 +57,8 @@ public sealed class VisaPreviewSlotState
     public PersonDocumentCopiesSlotRequest? PersonDocumentCopies { get; init; }
 
     public HeaderDocumentCopiesSlotRequest? HeaderDocumentCopies { get; init; }
+
+    public PlaceholderManualSlotRequest? PlaceholderManual { get; init; }
 
     public int Version { get; init; }
 }
@@ -100,6 +109,8 @@ public interface IVisaPreviewSlotService
     Task OpenPersonDocumentCopiesAsync(PersonDocumentCopiesSlotRequest request, string? ownerViewId = null);
 
     Task OpenHeaderDocumentCopiesAsync(HeaderDocumentCopiesSlotRequest request, string? ownerViewId = null);
+
+    Task OpenPlaceholderManualAsync(PlaceholderManualSlotRequest? request = null, string? ownerViewId = null);
 
     Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null);
 

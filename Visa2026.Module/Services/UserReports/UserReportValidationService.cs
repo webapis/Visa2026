@@ -46,8 +46,9 @@ namespace Visa2026.Module.Services.UserReports
             try
             {
                 // Word templates use {{ds.Property}} — "ds" is DocxTemplater's model name, not an Application member.
-                var propertyPath = UserReportPlaceholderBindingHelper.StripFormatterSuffix(
-                    StripDocxModelPrefix(cleanPlaceholder.Trim()));
+                var propertyPath = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(
+                    UserReportPlaceholderBindingHelper.StripFormatterSuffix(
+                        StripDocxModelPrefix(cleanPlaceholder.Trim())));
 
                 // {{/ds.rows}} close markers — not a property path
                 if (propertyPath.StartsWith("/", StringComparison.Ordinal))
@@ -68,7 +69,8 @@ namespace Visa2026.Module.Services.UserReports
                 // {{IMAGE:Person_Photo}} — injected after merge; property is on ApplicationItem.
                 if (UserReportPlaceholderBindingHelper.IsImageInjectorToken(cleanPlaceholder.Trim()))
                 {
-                    var photoPath = UserReportPlaceholderBindingHelper.StripFormatterSuffix(cleanPlaceholder.Trim());
+                    var photoPath = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(
+                        UserReportPlaceholderBindingHelper.StripFormatterSuffix(cleanPlaceholder.Trim()));
                     var onItem = rootType == typeof(Application) ? typeof(ApplicationItem) : rootType;
                     var ok = PropertyExists(onItem, photoPath);
                     result.IsValid = ok;

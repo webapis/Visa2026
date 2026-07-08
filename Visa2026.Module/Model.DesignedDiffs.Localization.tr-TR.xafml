@@ -234,8 +234,6 @@
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CompanyHead" Caption="Şirket Müdürü" />
         <Member Name="CurrentState" Caption="Güncel durum" />
-        <Member Name="IsCancelled" Caption="İptal Edildi" />
-        <Member Name="IsRejected" Caption="Reddedildi" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
@@ -2415,8 +2413,6 @@
         <ColumnInfo Id="Category" Caption="Kategori" />
         <ColumnInfo Id="Company" Caption="Şirket" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
-        <ColumnInfo Id="IsCancelled" Caption="İptal Edildi" />
-        <ColumnInfo Id="IsRejected" Caption="Reddedildi" />
         <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Bitiş Tarihi" />
         <ColumnInfo Id="ExpirationState" Caption="Süre Durumu" />
@@ -2432,8 +2428,6 @@
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
-        <ColumnInfo Id="IsCancelled" Caption="İptal Edildi" />
-        <ColumnInfo Id="IsRejected" Caption="Reddedildi" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="Year" Caption="Yıl" />
@@ -2444,8 +2438,6 @@
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
-        <ColumnInfo Id="IsCancelled" Caption="İptal Edildi" />
-        <ColumnInfo Id="IsRejected" Caption="Reddedildi" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="Year" Caption="Yıl" />

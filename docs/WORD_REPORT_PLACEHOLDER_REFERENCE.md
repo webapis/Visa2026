@@ -1,10 +1,12 @@
 # Word / Excel Report Placeholder Reference
 
 > **Source of truth:** [`Visa2026.Module/BusinessObjects/Application.cs`](../Visa2026.Module/BusinessObjects/Application.cs) and [`Visa2026.Module/BusinessObjects/ApplicationItem.cs`](../Visa2026.Module/BusinessObjects/ApplicationItem.cs).  
-> Every property listed here exists on one of those types (report flatteners are `[NotMapped]` and hidden from the normal detail UI unless noted).  
+> Every property listed here exists on one of those types. Most are `[NotMapped]` flatteners hidden from the normal detail UI; some **ApplicationItem** report getters are ordinary computed properties (same merge/validation path).  
 > Update this document when you add or rename report placeholders on those BOs.
 
-**Not covered here:** keys built only inside code-backed [`IWordReportDefinition`](../Visa2026.Module/Services/WordReports/) merge dictionaries (for example split ministry address lines). See [`docs/WORD_REPORT_GENERATION_IDEA.md`](WORD_REPORT_GENERATION_IDEA.md) and per-template `*_map.md` under `Visa2026.Module/Resources/FormTemplates/`.
+**Not covered here:** keys built only inside code-backed [`IWordReportDefinition`](../Visa2026.Module/Services/WordReports/) merge dictionaries (for example split ministry address lines `ProjectContract_Ministry_RecipientBlock_Line1`). See [`docs/WORD_REPORT_GENERATION_IDEA.md`](WORD_REPORT_GENERATION_IDEA.md) and per-template `*_map.md` under `Visa2026.Module/Resources/FormTemplates/`.
+
+**User-template limitations (today):** `ProjectContract_Description`, `ProjectContract_Ministry_RecipientBlock`, and `ProjectContract_Ministry_FormOfAddress` on **Application** validate in Extract/Validate but **merge empty** — BO getters are stubs (`string.Empty`). Ministry letter content for those keys comes from **code-backed** reports (`IWordReportDefinition`) or static text in user `.docx` until the BO getters are wired to `Application.ProjectContract`.
 
 Excel user templates use the **same property names**; see [`docs/EXCEL_PLACEHOLDER_REFERENCE.md`](EXCEL_PLACEHOLDER_REFERENCE.md).
 
@@ -106,9 +108,9 @@ No `VisaType_NameTm` on **Application** — use item `Visa_TypeTm` in row loops.
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `ProjectContract_Description` | `string` | `GT-15 …` | *(from contract)* |
-| `ProjectContract_Ministry_RecipientBlock` | `string` | `Türkmenenergo` + address lines | Full ministry block |
-| `ProjectContract_Ministry_FormOfAddress` | `string` | `Durdu Baýjanowiç` | Salutation name |
+| `ProjectContract_Description` | `string` | *(empty)* in user templates | **Stub** on `Application` today — code-backed letters use `ProjectContract.Description` via `IWordReportDefinition`; user `.docx` gets blank until BO is wired |
+| `ProjectContract_Ministry_RecipientBlock` | `string` | *(empty)* in user templates | **Stub** — ministry block from `ProjectContract` in code-backed reports only |
+| `ProjectContract_Ministry_FormOfAddress` | `string` | *(empty)* in user templates | **Stub** — salutation from contract ministry leg in code-backed reports only |
 
 ### Migration service
 
@@ -151,9 +153,9 @@ Migration **code** on items: `Application_MigrationServiceCode` → e.g. `TDMGAS
 
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `TotalPersonCount` | `int` | `3` | Active lines |
+| `TotalPersonCount` | `int` | `3` | `ApplicationItems` collection count (no soft-delete filter on getter) |
 | `TotalPersonCountText` | `string` | `üç` | Turkmen words (`bir`, `iki`, …) |
-| `CancelPersonCount` | `int` | `2` | |
+| `CancelPersonCount` | `int` | `2` | Same item set as `TotalPersonCount` |
 | `CancelPersonCountText` | `string` | `iki` | |
 | `CancelVisaCount` | `int` | `3` | 2 lines × (current + next visa) |
 | `CancelVisaCountText` | `string` | `üç` | |
@@ -262,8 +264,8 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 | `Address_Type` | `string` | `Permanent` | Enum name |
 | `Address_ExpirationDate` | `DateTime?` | *(optional)* | |
 | `Address_ExpirationDateText` | `string` | `31.12.2026` | |
-| `Address_RegionTm` | `string` | *(empty)* | Not populated in code today |
-| `Address_CityTm` | `string` | *(empty)* | |
+| `Address_RegionTm` | `string` | `Aşgabat` | `CurrentAddressOfResidence.Region.NameTm` when set |
+| `Address_CityTm` | `string` | `Aşgabat şäheri` | `CurrentAddressOfResidence.City.NameTm` when set |
 
 ### Travel / check-in movement (item)
 
@@ -384,9 +386,15 @@ Use **`{{ds.Property}}`** when the root is **ApplicationItem**.
 
 ### PDF visa application (XFA) — item
 
+Also valid in **Word/Excel user templates** (same getters as XFA PDF fill). PDF field detail: `Visa2026.Module/Resources/Pdf field reference .md`.
+
 | Property | Type | Example output | Notes |
 |----------|------|----------------|--------|
-| `Pdf_FamilyMembersAggregateText` | `string` | See [multiline](#composite--multiline-outputs) | Employee household |
+| `Pdf_EducationPlaceOfStudy` | `string` | `TUR, Gündogar mediterian uniwersiteti` | Item 21 — `{Education_CountryCode}, {Education_InstitutionName}`; either part may be omitted |
+| `Pdf_FamilyMembersAggregateText` | `string` | See [multiline](#composite--multiline-outputs) | Employee household (one block) |
+| `Pdf_FamilyMembersMaritalLine1` | `string` | See [below](#pdf-family-members-marital-lines) | Maşgala ýagdaýy line 1 (split across three PDF lines) |
+| `Pdf_FamilyMembersMaritalLine2` | `string` | See [below](#pdf-family-members-marital-lines) | Line 2 |
+| `Pdf_FamilyMembersMaritalLine3` | `string` | See [below](#pdf-family-members-marital-lines) | Line 3; country code on last segment |
 | `Pdf_SpouseLastName` | `string` | `Erol` | |
 | `Pdf_SpouseFirstName` | `string` | `Firuza` | |
 | `Pdf_SpouseAdditional` | `string` | `Mine, 23.05.1985` | Middle + DOB |
@@ -444,6 +452,18 @@ AYALY ESRA AKSOY 12.10.1989, OGLY YUSUF METE AKSOY 06.12.2012, GYZY ASYA AKSOY 2
 
 (Manual `VisaApplicationFamilyMembersText` or master `FamilyMembers` when master list is non-empty.)
 
+### Pdf family members marital lines
+
+Same household data as `Pdf_FamilyMembersAggregateText`, split for the three XFA item-18 lines (`_181`–`_183`). Each line is `REL NAME DATE` segments (country code on the last segment of line 3), e.g.:
+
+```
+AYALY ESRA AKSOY 12.10.1989
+OGLY YUSUF METE AKSOY 06.12.2012
+GYZY ASYA AKSOY 26.03.2016 TUR.
+```
+
+(Source: employee `FamilyMembers` or `VisaApplicationFamilyMembersText` via `VisaFamilyMemberLinesHelper`.)
+
 ### Letter body with counts (application header)
 
 Template static text + placeholders, e.g. cancel-visa letter:
@@ -460,6 +480,10 @@ Uses `{{ds.CancelPersonCount}}` + `{{ds.CancelPersonCountText}}` and `{{ds.Cance
 
 ### Letter header (merged output)
 
+**User templates** — use static ministry addressee text until BO getters are wired; `ProjectContract_*` placeholders merge blank today (see **User-template limitations** in the header).
+
+**Code-backed ministry letters** — example merged output:
+
 ```
 TRM-2026-042
 20.01.2026
@@ -469,7 +493,7 @@ Türkmenenergo
 Hormatly Durdu Baýjanowiç!
 ```
 
-Tokens:
+Tokens (code-backed / future wired BO):
 
 ```
 {{ds.FullApplicationNumber}}

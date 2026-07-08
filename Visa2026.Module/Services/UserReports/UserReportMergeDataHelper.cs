@@ -39,13 +39,13 @@ public static class UserReportMergeDataHelper
             ["ApplicationDateText"] = application.ApplicationDateText ?? string.Empty,
             ["CompanyName"] = application.Application_Company_Name ?? string.Empty,
         };
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
     }
 
     /// <summary>Row keys aligned with <c>Sanaw_ckl.docx</c> / <c>Sanaw_uzt.docx</c> (14-column sanawy).</summary>
-    public static Dictionary<string, object> BuildSanawyRowDictionary(ApplicationItem item, int rowNo)
-    {
-        return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+    public static Dictionary<string, object> BuildSanawyRowDictionary(ApplicationItem item, int rowNo) =>
+        WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNo"] = rowNo,
             ["Person_LastName"] = item.Person_LastName ?? string.Empty,
@@ -67,8 +67,7 @@ public static class UserReportMergeDataHelper
             ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
             ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
             ["Application_BorderZoneLocation_NameTm"] = item.Application_BorderZoneLocation_NameTm ?? string.Empty,
-        };
-    }
+        });
 
     public static List<Dictionary<string, object>> BuildSanawyStyleRows(
         Application application,
@@ -181,12 +180,12 @@ public static class UserReportMergeDataHelper
         {
             ["RowNumber"] = rowNumber,
         };
-        return row;
+        return WithAliasKeys(row);
     }
 
     /// <summary>Row keys for <c>wiza_yatyrylmak_sanaw</c> merge (Word <c>{{ds.rows.*}}</c> or Excel <c>{{.*}}</c>).</summary>
     public static Dictionary<string, object> BuildWizaYatyrylmakSanawRowDictionary(ApplicationItem item, int rowNo) =>
-        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNo"] = rowNo,
             ["Person_LastName"] = item.Person_LastName ?? string.Empty,
@@ -200,11 +199,11 @@ public static class UserReportMergeDataHelper
             ["CancelVisa_NumberBlock"] = item.CancelVisa_NumberBlock ?? string.Empty,
             ["CancelVisa_StartDateBlock"] = item.CancelVisa_StartDateBlock ?? string.Empty,
             ["CancelVisa_ExpirationDateBlock"] = item.CancelVisa_ExpirationDateBlock ?? string.Empty,
-        };
+        });
 
     /// <summary>Row keys for <c>sahsy_kagyz.docx</c> (ŞAHSY KAGYZY, ItemRows + photo).</summary>
     public static Dictionary<string, object> BuildSahsyKagyzRowDictionary(ApplicationItem item, int rowNumber) =>
-        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNumber"] = rowNumber,
             ["Person_FullName"] = item.Person_FullName ?? string.Empty,
@@ -227,11 +226,11 @@ public static class UserReportMergeDataHelper
             ["Application_CompanyHead_PositionTm"] = item.Application_CompanyHead_PositionTm ?? string.Empty,
             ["Application_CompanyHead_FullName"] = item.Application_CompanyHead_FullName ?? string.Empty,
             ["Person_Photo"] = item.Person_Photo ?? Array.Empty<byte>(),
-        };
+        });
 
     /// <summary>Row keys for <c>Forma_16.docx</c> (registration certificate, ItemRows).</summary>
     public static Dictionary<string, object> BuildRegistrationForm16RowDictionary(ApplicationItem item, int rowNumber) =>
-        new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+        WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNumber"] = rowNumber,
             ["Person_FullName"] = item.Person_FullName ?? string.Empty,
@@ -268,7 +267,7 @@ public static class UserReportMergeDataHelper
             ["Application_DateText"] = item.Application_DateText ?? string.Empty,
             ["Application_FullNumber"] = item.Application_FullNumber ?? string.Empty,
             ["Person_Photo"] = item.Person_Photo ?? Array.Empty<byte>(),
-        };
+        });
 
     /// <summary>True when template row tokens use sanawy / ministry list shape (<c>Person_LastName</c>, <c>RowNo</c>).</summary>
     public static bool TemplateUsesPersonListRowPlaceholders(IEnumerable<UserReportPlaceholder>? placeholders) =>
@@ -431,13 +430,18 @@ public static class UserReportMergeDataHelper
             ["WorkPermit_WorkPermittedLocations"] = item.WorkPermit_WorkPermittedLocations ?? string.Empty,
         };
 
+        return WithAliasKeys(row);
+    }
+
+    public static Dictionary<string, object> WithAliasKeys(Dictionary<string, object> row)
+    {
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(row);
         return row;
     }
 
     /// <summary>Row keys aligned with labor-contract Word templates and Contract.docx.</summary>
-    public static Dictionary<string, object> BuildItemRowDictionary(ApplicationItem item, int rowNumber)
-    {
-        return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+    public static Dictionary<string, object> BuildItemRowDictionary(ApplicationItem item, int rowNumber) =>
+        WithAliasKeys(new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             ["RowNumber"] = rowNumber,
             ["Person_FullName"] = item.Person_FullName ?? string.Empty,
@@ -455,8 +459,7 @@ public static class UserReportMergeDataHelper
             ["Contract_PeriodFallbackText"] = item.Contract_PeriodFallbackText ?? string.Empty,
             ["Contract_SalaryText"] = item.Contract_SalaryText ?? string.Empty,
             ["Salary_CurrencyCode"] = item.Salary_CurrencyCode ?? string.Empty,
-        };
-    }
+        });
 
     public static string StripDocxModelPrefix(string pathFromTemplate)
     {
@@ -475,7 +478,8 @@ public static class UserReportMergeDataHelper
         if (obj == null || string.IsNullOrEmpty(propertyPath))
             return null;
 
-        var parts = propertyPath.Split('.');
+        var path = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(propertyPath);
+        var parts = path.Split('.');
         object? current = obj;
 
         foreach (var part in parts)

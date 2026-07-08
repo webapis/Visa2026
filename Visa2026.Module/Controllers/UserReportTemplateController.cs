@@ -6,6 +6,8 @@ using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.PreviewSlot;
+using Visa2026.Module.Services.PreviewSlot;
 using Visa2026.Module.Services.UserReports;
 
 namespace Visa2026.Module.Controllers
@@ -18,6 +20,7 @@ namespace Visa2026.Module.Controllers
     {
         private SimpleAction _extractPlaceholdersAction;
         private SimpleAction _validatePlaceholdersAction;
+        private SimpleAction _placeholderManualAction;
 
         public UserReportTemplateController()
         {
@@ -31,11 +34,16 @@ namespace Visa2026.Module.Controllers
             _validatePlaceholdersAction = new SimpleAction(this, "ValidatePlaceholders", PredefinedCategory.Edit);
             _validatePlaceholdersAction.ImageName = "Action_Validation";
             _validatePlaceholdersAction.Execute += ValidatePlaceholdersAction_Execute;
+
+            _placeholderManualAction = new SimpleAction(this, "OpenPlaceholderManual", PredefinedCategory.View);
+            _placeholderManualAction.ImageName = "Action_Help";
+            _placeholderManualAction.Execute += PlaceholderManualAction_Execute;
         }
 
         protected override void OnActivated()
         {
             base.OnActivated();
+            _placeholderManualAction.Caption = VisaUiMessages.Get("UserReport.PlaceholderManual");
             UpdateActionStates();
             View.CurrentObjectChanged += (_, _) => UpdateActionStates();
         }
@@ -139,6 +147,23 @@ namespace Visa2026.Module.Controllers
                     VisaUiMessages.Format("UserReport.ValidateError", ex.Message),
                     InformationType.Error);
             }
+        }
+
+        private void PlaceholderManualAction_Execute(object sender, SimpleActionExecuteEventArgs e)
+        {
+            var template = (UserReportTemplate)e.CurrentObject;
+            var slotService = Application.ServiceProvider.GetService<IVisaPreviewSlotService>();
+            if (slotService == null)
+            {
+                Application.ShowViewStrategy.ShowMessage(
+                    VisaUiMessages.Get("PlaceholderManual.Title"),
+                    InformationType.Warning);
+                return;
+            }
+
+            slotService.OpenPlaceholderManualAsync(
+                new PlaceholderManualSlotRequest { FilterRootBoType = template?.RootBoType },
+                VisaPreviewSlotViewHelper.ResolveOwnerViewId(View)).GetAwaiter().GetResult();
         }
 
         private bool TryEnsureTemplateEditAccess()

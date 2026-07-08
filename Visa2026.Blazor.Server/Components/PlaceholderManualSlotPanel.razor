@@ -1,0 +1,151 @@
+@namespace Visa2026.Blazor.Server.Components
+@using DevExpress.Blazor
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.UserReports
+
+<div class="placeholder-manual-slot-panel resminamalar-slot-panel">
+    <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
+        <span class="visa-preview-drawer__title">@Title</span>
+        <div class="visa-preview-drawer__header-actions">
+            <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
+                    type="button"
+                    title="@CloseLabel"
+                    @onclick="ClosePanelAsync">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="placeholder-manual-slot-panel__toolbar">
+        <input class="placeholder-manual-slot-panel__search form-control form-control-sm"
+               type="search"
+               placeholder="@SearchPlaceholder"
+               @bind="_search"
+               @bind:event="oninput" />
+        <select class="placeholder-manual-slot-panel__filter form-select form-select-sm"
+                @bind="_scopeFilter">
+            <option value="">@Msg("PlaceholderManual.Filter.AllScopes")</option>
+            <option value="Header">@Msg("PlaceholderManual.Filter.Header")</option>
+            <option value="Row">@Msg("PlaceholderManual.Filter.Row")</option>
+        </select>
+    </div>
+
+    <div class="placeholder-manual-slot-panel__body">
+        <div class="placeholder-manual-slot-panel__table-wrap">
+            <table class="placeholder-manual-slot-panel__table">
+                <thead>
+                    <tr>
+                        <th>@Msg("PlaceholderManual.Column.Short")</th>
+                        <th>@Msg("PlaceholderManual.Column.Canonical")</th>
+                        <th>@Msg("PlaceholderManual.Column.Label")</th>
+                        <th>@Msg("PlaceholderManual.Column.Example")</th>
+                        <th>@Msg("PlaceholderManual.Column.Word")</th>
+                        <th>@Msg("PlaceholderManual.Column.Excel")</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in FilteredEntries)
+                    {
+                        var usageScope = entry.Scope == UserReportPlaceholderScope.Both
+                            ? UserReportPlaceholderScope.Row
+                            : entry.Scope;
+                        var wordToken = entry.BuildWordToken(usageScope);
+                        var excelToken = entry.BuildExcelToken(usageScope);
+                        <tr>
+                            <td><code>@entry.ShortCode</code></td>
+                            <td><code class="placeholder-manual-slot-panel__canonical">@entry.CanonicalPath</code></td>
+                            <td>@entry.GetLabel(_uiCultureName)</td>
+                            <td>@entry.ExampleValue</td>
+                            <td><code class="placeholder-manual-slot-panel__token">@wordToken</code></td>
+                            <td><code class="placeholder-manual-slot-panel__token">@excelToken</code></td>
+                            <td class="placeholder-manual-slot-panel__copy-cell">
+                                <DxButton Text="@Msg("PlaceholderManual.CopyWord")"
+                                          RenderStyle="ButtonRenderStyle.Link"
+                                          SizeMode="SizeMode.Small"
+                                          CssClass="app-item-doc-copies__action-btn"
+                                          Click="@(() => CopyTokenAsync(wordToken))" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (FilteredEntries.Count == 0)
+        {
+            <p class="app-item-doc-copies__empty" role="status">@Msg("PlaceholderManual.Empty")</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public PlaceholderManualSlotRequest? Request { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    [Inject] private IUserReportPlaceholderCatalogService CatalogService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private string _uiCultureName = string.Empty;
+    private string _search = string.Empty;
+    private string _scopeFilter = string.Empty;
+    private IReadOnlyList<UserReportPlaceholderCatalogEntry> _entries = Array.Empty<UserReportPlaceholderCatalogEntry>();
+
+    private string Title => Msg("PlaceholderManual.Title");
+    private string CloseLabel => VisaUiMessages.Get("ApplicationItemDocumentCopies.Action.Close", _uiCultureName);
+    private string SearchPlaceholder => Msg("PlaceholderManual.Search.Placeholder");
+
+    private IReadOnlyList<UserReportPlaceholderCatalogEntry> FilteredEntries
+    {
+        get
+        {
+            UserReportPlaceholderScope? scope = _scopeFilter switch
+            {
+                "Header" => UserReportPlaceholderScope.Header,
+                "Row" => UserReportPlaceholderScope.Row,
+                _ => null,
+            };
+
+            return CatalogService.GetEntries(new UserReportPlaceholderManualQuery
+            {
+                RootBoType = Request?.FilterRootBoType,
+                Scope = scope,
+                Search = _search,
+            });
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+        _entries = CatalogService.GetEntries(new UserReportPlaceholderManualQuery
+        {
+            RootBoType = Request?.FilterRootBoType,
+        });
+    }
+
+    private string Msg(string key) => VisaUiMessages.Get(key, _uiCultureName);
+
+    private async Task ClosePanelAsync()
+    {
+        if (CloseRequested.HasDelegate)
+            await CloseRequested.InvokeAsync();
+    }
+
+    private async Task CopyTokenAsync(string token)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", token);
+        }
+        catch (JSException)
+        {
+            // Clipboard may be unavailable — officer can still select from table.
+        }
+    }
+}

@@ -1,3 +1,4 @@
+using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Module.Services.WordReports;
 
@@ -85,4 +86,9 @@ public static class VisaPreviewSlotOccupantKeys
 
         return $"{prefix}:{request.ParentId:N}";
     }
+
+    public static string ForPlaceholderManual(UserReportBoType? filterRootBoType) =>
+        filterRootBoType is UserReportBoType root
+            ? $"placeholder-manual:root:{root}"
+            : "placeholder-manual:all";
 }

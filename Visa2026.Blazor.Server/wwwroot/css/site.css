@@ -16,59 +16,25 @@ app {
 
 .header-logo {
     flex-shrink: 0;
-    background-color: currentColor;
-    -webkit-mask: url('../images/Logo.svg');
-    mask: url('../images/Logo.svg');
-    -webkit-mask-position: center;
-    mask-position: center;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    width: 42px;
+    background-image: url('../images/CalikLogo.png');
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 132px;
     height: 38px;
 }
 
-/* Localized header brand (Logo.svg text is English "VISA" only). */
-html[lang="tr"] .header-logo,
-html[lang="tk"] .header-logo,
-html[lang="ru"] .header-logo {
-    -webkit-mask: none;
-    mask: none;
-    background-color: transparent;
+/* XAF default splash wraps the logo in a blue rounded badge; show Calik colors instead. */
+#application-splash-screen .rounded.bg-primary,
+#application-splash-screen img.rounded {
+    background: #fff !important;
+    color: inherit !important;
+    border-radius: 4px !important;
+    padding: 10px 14px !important;
+    max-width: min(320px, 85vw);
     width: auto;
-    min-width: 48px;
-}
-
-html[lang="tr"] .header-logo::after {
-    content: "VİZE";
-    display: block;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 15px;
-    font-weight: bold;
-    color: #4A4A4A;
-    line-height: 38px;
-    white-space: nowrap;
-}
-
-html[lang="tk"] .header-logo::after {
-    content: "WIZA";
-    display: block;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 15px;
-    font-weight: bold;
-    color: #4A4A4A;
-    line-height: 38px;
-    white-space: nowrap;
-}
-
-html[lang="ru"] .header-logo::after {
-    content: "ВИЗА";
-    display: block;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 15px;
-    font-weight: bold;
-    color: #4A4A4A;
-    line-height: 38px;
-    white-space: nowrap;
+    height: auto;
+    object-fit: contain;
 }
 
 /* Suppress DevExpress evaluation license warning (Web Component tag + class-based) */
@@ -2831,7 +2797,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 .resminamalar-slot-panel,
 .document-copies-slot-panel,
 .person-document-copies-slot-panel,
-.progress-letters-slot-panel {
+.progress-letters-slot-panel,
+.placeholder-manual-slot-panel {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -3262,6 +3229,84 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-person-doc-copies__section:not(:last-child) {
     border-bottom: 1px solid var(--resminamalar-slot-border);
+}
+
+/* Placeholder manual — searchable catalog in preview slot */
+.placeholder-manual-slot-panel__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.65rem var(--resminamalar-slot-inset-x);
+    border-bottom: 1px solid var(--resminamalar-slot-border);
+    background: var(--resminamalar-slot-surface-muted);
+    flex-shrink: 0;
+}
+
+.placeholder-manual-slot-panel__search {
+    flex: 1 1 12rem;
+    min-width: 0;
+    max-width: 20rem;
+}
+
+.placeholder-manual-slot-panel__filter {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 8rem;
+}
+
+.placeholder-manual-slot-panel__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--resminamalar-slot-inset-x) 0.75rem;
+}
+
+.placeholder-manual-slot-panel__table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid var(--resminamalar-slot-border);
+    border-radius: var(--resminamalar-slot-radius);
+    background: var(--resminamalar-slot-surface);
+}
+
+.placeholder-manual-slot-panel__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+}
+
+.placeholder-manual-slot-panel__table th,
+.placeholder-manual-slot-panel__table td {
+    padding: 0.4rem 0.55rem;
+    border-bottom: 1px solid var(--resminamalar-slot-border);
+    vertical-align: top;
+    text-align: start;
+}
+
+.placeholder-manual-slot-panel__table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--resminamalar-slot-surface-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.placeholder-manual-slot-panel__table tbody tr:hover {
+    background: color-mix(in srgb, currentColor 4%, transparent);
+}
+
+.placeholder-manual-slot-panel__canonical,
+.placeholder-manual-slot-panel__token {
+    word-break: break-word;
+    white-space: normal;
+}
+
+.placeholder-manual-slot-panel__copy-cell {
+    white-space: nowrap;
 }
 
 .app-person-doc-copies__section-more {

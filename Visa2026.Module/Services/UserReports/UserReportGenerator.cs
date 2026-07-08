@@ -103,8 +103,12 @@ namespace Visa2026.Module.Services.UserReports
                 data[collectionName] = collectionData;
             }
 
+            EnrichMergeDictionary(data);
             return data;
         }
+
+        private static void EnrichMergeDictionary(Dictionary<string, object> data) =>
+            UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
 
         /// <summary>
         /// Fills <c>{{#ds.rows}}</c> from <see cref="Application.ApplicationItems"/> when the template does not map to a real collection property.
@@ -403,11 +407,14 @@ namespace Visa2026.Module.Services.UserReports
                 foreach (var rowPlaceholder in template.Placeholders.Where(p => p.IsRowProperty && p.IsValid))
                 {
                     var placeholderKey = rowPlaceholder.PlaceholderKey.TrimStart('.');
-                    var propertyName = UserReportPlaceholderBindingHelper.StripFormatterSuffix(placeholderKey);
-                    var value = GetPropertyValue(item, propertyName);
-                    rowDict[propertyName] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, propertyName);
+                    var bindKey = UserReportPlaceholderBindingHelper.StripFormatterSuffix(placeholderKey);
+                    var canonicalPath = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(
+                        string.IsNullOrWhiteSpace(rowPlaceholder.ResolvedPropertyPath) ? bindKey : rowPlaceholder.ResolvedPropertyPath);
+                    var value = GetPropertyValue(item, canonicalPath);
+                    rowDict[bindKey] = UserReportPlaceholderBindingHelper.CoerceMergeValue(value, canonicalPath);
                 }
 
+                EnrichMergeDictionary(rowDict);
                 rows.Add(rowDict);
             }
 
@@ -419,22 +426,7 @@ namespace Visa2026.Module.Services.UserReports
             if (obj == null || string.IsNullOrEmpty(propertyPath))
                 return null;
 
-            var parts = propertyPath.Split('.');
-            var current = obj;
-
-            foreach (var part in parts)
-            {
-                if (current == null)
-                    return null;
-
-                var property = current.GetType().GetProperty(part, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                if (property == null)
-                    return null;
-
-                current = property.GetValue(current);
-            }
-
-            return current;
+            return UserReportMergeDataHelper.GetPropertyValue(obj, propertyPath);
         }
 
         private Task RenderTemplateAsync(

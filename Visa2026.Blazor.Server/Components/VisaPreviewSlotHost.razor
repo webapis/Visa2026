@@ -45,6 +45,12 @@ else if (_state.Mode == VisaPreviewSlotMode.HeaderDocumentCopies && _state.Heade
                                    Request="_state.HeaderDocumentCopies"
                                    CloseRequested="CloseFromPanelAsync" />
 }
+else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
+{
+    <PlaceholderManualSlotPanel @key="_state.Version"
+                                Request="_state.PlaceholderManual"
+                                CloseRequested="CloseFromPanelAsync" />
+}
 
 @code {
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;

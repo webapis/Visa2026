@@ -111,6 +111,7 @@ public class ExcelReportGenerator : IExcelReportGenerator
             data[bindKey] = value ?? string.Empty;
         }
 
+        UserReportPlaceholderAliasRegistry.EnrichDictionary(data);
         return data;
     }
 
@@ -208,6 +209,14 @@ public class ExcelReportGenerator : IExcelReportGenerator
     {
         if (rowData != null && rowData.TryGetValue(key, out var rowValue))
             return FormatValue(rowValue);
+
+        var canonicalKey = UserReportPlaceholderAliasRegistry.ResolveCanonicalPropertyPath(key);
+        if (!string.Equals(canonicalKey, key, StringComparison.OrdinalIgnoreCase)
+            && rowData != null
+            && rowData.TryGetValue(canonicalKey, out rowValue))
+        {
+            return FormatValue(rowValue);
+        }
 
         if (item != null)
             return FormatValue(UserReportMergeDataHelper.GetPropertyValue(item, key));

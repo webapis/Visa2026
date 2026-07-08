@@ -95,6 +95,20 @@ public sealed class VisaPreviewSlotService : IVisaPreviewSlotService
         return Task.CompletedTask;
     }
 
+    public Task OpenPlaceholderManualAsync(PlaceholderManualSlotRequest? request = null, string? ownerViewId = null)
+    {
+        _state = new VisaPreviewSlotState
+        {
+            Mode = VisaPreviewSlotMode.PlaceholderManual,
+            OccupantKey = VisaPreviewSlotOccupantKeys.ForPlaceholderManual(request?.FilterRootBoType),
+            OwnerViewId = NormalizeOwnerViewId(ownerViewId),
+            PlaceholderManual = request ?? new PlaceholderManualSlotRequest(),
+            Version = _state.Version + 1,
+        };
+        StateChanged?.Invoke();
+        return Task.CompletedTask;
+    }
+
     public Task OpenFileAsync(string sourceType, Guid objectId, string? ownerViewId = null)
     {
         if (string.IsNullOrWhiteSpace(sourceType) || objectId == Guid.Empty)

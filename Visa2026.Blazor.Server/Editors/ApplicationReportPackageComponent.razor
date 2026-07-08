@@ -9,9 +9,10 @@
 @using Visa2026.Blazor.Server.Services
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services
-@using Visa2026.Module.Services.WordReports
 @using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.WordReports
 @using Visa2026.Module.Services.UserReports
+@using Visa2026.Module.BusinessObjects
 @using System.Text.Json
 @using Visa2026.Module.Services.RuntimeLogging
 
@@ -29,6 +30,11 @@
                       SizeMode="SizeMode.Small"
                       CssClass="app-item-doc-copies__action-btn"
                       Click="@ClearSelectionAsync" />
+            <DxButton Text="@Msg("ApplicationReportPackage.PlaceholderManual")"
+                      RenderStyle="ButtonRenderStyle.Link"
+                      SizeMode="SizeMode.Small"
+                      CssClass="app-item-doc-copies__action-btn"
+                      Click="@OpenPlaceholderManualAsync" />
         </div>
     }
     <div class="app-item-doc-copies__body">
@@ -223,6 +229,7 @@
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private IApplicationErrorReporter ErrorReporter { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
     private ApplicationReportPackagePreviewDialog? _previewDialog;
     private DotNetObjectReference<ApplicationReportPackageComponent>? _dotNetRef;
@@ -421,6 +428,16 @@
         _packageConfirmPending = false;
         ClearStatusMessages();
         return Task.CompletedTask;
+    }
+
+    private async Task OpenPlaceholderManualAsync()
+    {
+        var rootBoType = PackageScope == WordReportPackageScope.ApplicationItem
+            ? UserReportBoType.ApplicationItem
+            : UserReportBoType.Application;
+
+        await PreviewSlotService.OpenPlaceholderManualAsync(
+            new PlaceholderManualSlotRequest { FilterRootBoType = rootBoType });
     }
 
     private static string FormatKind(ApplicationWordReportPackageEntryKind kind) =>
