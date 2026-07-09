@@ -401,13 +401,16 @@ internal static class Visa2014ApplicationProgressODataImporter
         INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
         string? targetConnectionForLegCounts = null)
     {
+        Console.WriteLine("INF ApplicationProgress sync: loading Application id-map...");
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         if (verbose)
             Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
 
+        Console.WriteLine("INF ApplicationProgress sync: resolving ministry-leg counts...");
         var ministryLegCountByLegacyApplicationOid = await ResolveMinistryLegCountMapAsync(
             applicationIdMap, objectSpaceFactory, targetConnectionForLegCounts, verbose);
 
+        Console.WriteLine("INF ApplicationProgress sync: extracting legacy progress rows...");
         var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
             legacyConnectionString,
             lookupTranslationPaths,
@@ -415,6 +418,8 @@ internal static class Visa2014ApplicationProgressODataImporter
             verbose,
             ministryLegCountByLegacyApplicationOid);
 
+        Console.WriteLine(
+            $"INF ApplicationProgress sync: {batch.ImportRows.Count} rows prepared ({batch.LegacyRowCount} legacy); loading prod duplicate guard...");
         var progressIdMap = LoadOptionalProgressIdMap(sync.IdMapOutputPath);
         var duplicateGuard = await Visa2014ApplicationProgressDuplicateGuard.LoadFromSqlAsync(
             targetConnectionForLegCounts ?? "",
@@ -426,9 +431,16 @@ internal static class Visa2014ApplicationProgressODataImporter
         int skippedUnchanged = 0;
         int failed = 0;
         int skippedNoApp = 0;
+        int processed = 0;
 
+        Console.WriteLine($"INF ApplicationProgress sync: applying upserts ({batch.ImportRows.Count} rows)...");
         foreach (var row in batch.ImportRows)
         {
+            processed++;
+            if (processed % 500 == 0)
+                Console.WriteLine(
+                    $"INF ApplicationProgress sync progress: {processed}/{batch.ImportRows.Count} " +
+                    $"(upd {updated}, ins {inserted}, skip {skippedUnchanged}, fail {failed})");
             var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
                 ?? row.GetValueOrDefault("_legacyRowId") as string;
             if (string.IsNullOrWhiteSpace(syntheticKey))

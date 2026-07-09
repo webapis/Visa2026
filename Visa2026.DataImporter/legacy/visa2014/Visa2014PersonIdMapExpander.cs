@@ -82,7 +82,7 @@ internal static class Visa2014PersonIdMapExpander
                     cmd.CommandText = """
                         SELECT TOP 1 CAST(ID AS varchar(36))
                         FROM People
-                        WHERE GCRecord = 0
+                        WHERE (GCRecord IS NULL OR GCRecord = 0)
                           AND PersonalNumber = N'0'
                           AND UPPER(LTRIM(RTRIM(FirstName))) = @fn
                           AND UPPER(LTRIM(RTRIM(LastName))) = @ln
@@ -98,7 +98,7 @@ internal static class Visa2014PersonIdMapExpander
                     cmd.CommandText = """
                         SELECT TOP 1 CAST(ID AS varchar(36))
                         FROM People
-                        WHERE GCRecord = 0 AND PersonalNumber = @pn
+                        WHERE (GCRecord IS NULL OR GCRecord = 0) AND PersonalNumber = @pn
                         ORDER BY ID
                         """;
                     cmd.Parameters.AddWithValue("@pn", pn);

@@ -123,7 +123,9 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
             throw new InvalidOperationException($"Update target {entityType.Name}({id}) not found.");
 
         Migration.ObjectSpaceImportSink.ApplyPayload(batch.ObjectSpace, entity, payload);
-        CommitBatch(batch);
+        batch.Pending++;
+        if (batch.Pending >= _batchSize)
+            CommitBatch(batch);
         return Task.CompletedTask;
     }
 
@@ -143,7 +145,9 @@ internal sealed class Visa2014ObjectSpaceImportTarget : IVisa2014ImportTarget, I
             throw new InvalidOperationException($"Soft-delete target {entityType.Name}({id}) not found.");
 
         batch.ObjectSpace.Delete(entity);
-        CommitBatch(batch);
+        batch.Pending++;
+        if (batch.Pending >= _batchSize)
+            CommitBatch(batch);
         return Task.CompletedTask;
     }
 

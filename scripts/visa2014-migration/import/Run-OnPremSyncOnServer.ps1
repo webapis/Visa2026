@@ -129,5 +129,9 @@ New-Item -ItemType Directory -Force -Path (Split-Path $taskLog) | Out-Null
 Write-Host "=== Run-OnPremSyncOnServer ($Mode) ===" -ForegroundColor Cyan
 Write-Host "INF Log: $taskLog" -ForegroundColor DarkGray
 
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $onPremSync @args 2>&1 | Tee-Object -FilePath $taskLog
-exit $LASTEXITCODE
+$syncOutput = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $onPremSync @args 2>&1
+$exitCode = $LASTEXITCODE
+if ($syncOutput) {
+    $syncOutput | Tee-Object -FilePath $taskLog | Out-Null
+}
+exit $exitCode

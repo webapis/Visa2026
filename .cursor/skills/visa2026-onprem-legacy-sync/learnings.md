@@ -147,6 +147,7 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Dashboard**: `DuplicateGroups` + `DuplicateExtraRows` columns on scalar reconcile (`OnPremSyncState.ps1`, `Compare-OnPremSyncState.ps1`, `Export-OnPremSyncDashboardCore.ps1`, Blazor `LegacySyncDashboardComponent`, Module `LegacySyncDashboardDuplicateDefinitions`).
 - **Encoding**: On Windows, Cursor Write tool can save **UTF-16** for `.cs`/`.ps1` — verify first bytes or use `[IO.File]::WriteAllText(..., UTF8Encoding $false)`. SQL `PRINT CONCAT` needs scalar vars, not subqueries (Msg 1046).
 - **AddressOfResidence prod apply**: `Repair-DuplicateAddressOfResidence.ps1 -Apply` on `Visa2026DbProd` — **4787** extras soft-deleted, **681** groups resolved, **0** remaining duplicate groups post-check.
+- **Employee identity duplicates (prod UI)**: **76** duplicate identity groups / **77** extra employee rows on `Visa2026DbProd` (4,391 employees). **41** groups = bootstrap `.bak` person (`…D7F5`) + `--supplement-permit-persons` twin (`…AADD`); example Asım ANUL — legacy one soft-deleted OID, prod two archived rows, id-map pointed supplement OID at new row not bootstrap. **Fix shipped**: `Visa2014PersonIdentityDuplicateGuard` on supplement import (RELINK to existing PN or FirstName+LastName+DOB when PN=`0`, id-map only — no POST); `PersonIdMapExpander` uses `(GCRecord IS NULL OR GCRecord = 0)`. **Remaining ~35** groups = intentional `_dub` legacy suffix policy or mixed — not auto-merged. **Data repair** for existing 41 pairs still needed (`Repair-DuplicateEmployees.ps1` TBD). Dashboard Person dup metric still PN-only — identity dup not shown.
 - **DataImporter redeploy (.25)**: `dotnet publish` Release → `deploy.tgz` → extract to `DataImporter-20260708`; **kill** stray `Visa2026.DataImporter.exe` (Task Scheduler can respawn); **del + copy** `Visa2026.DataImporter.dll` / `Visa2026.Module.dll` (in-place `tar -xzf` fails when DLL locked). Updated scripts: `OnPremSyncState.ps1`, `Export-OnPremSyncDashboardCore.ps1`, `Compare-OnPremSyncState.ps1`. Task `Visa2026-OnPrem-LegacySync` disabled during deploy, re-enabled after. DLL stamp **2026-07-08 ~03:02 UTC** on `C:\visa2026-sync\tools\DataImporter\`.
 ### 2026-07-08 — Document copies on Legacy sync dashboard
 
@@ -189,3 +190,13 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - High-risk catalogs: Position, Department, Specialty, EducationInstitution, Country, Gender, MaritalStatus, Region, City, Lodging, OtherSite, Hotel, Hospital, BorderZoneName, WorkPermittedLocationName, ApplicationType, ApprovingMinistry.
 - C#: `LegacySyncDashboardLookupDefinitions` + refresher; PS: `Get-OnPremLookupRowDefinitions` always in snapshot; HTML card **Lookups**.
 - gitignore: `sync-dashboard.json|.html`, `sync-run-status.json` under DataImporter legacy folder.
+
+### 2026-07-09 — Repair duplicate employee Persons (bootstrap + supplement twins, prod apply)
+
+- **Script**: `Repair-DuplicateEmployees.ps1` + `cleanup/DuplicateEmployeesByIdentity.sql` (`-Scope BootstrapSupplement`).
+- **Apply (dev PC → `Visa2026DbProd`)**: **41** identity groups merged; **41** supplement twins soft-deleted (`…AADD`, `GCRecord=1`); FK repoint + child dedupe (Passport, WorkPermitItem, etc.).
+- **After counts**: active employees **4350** (was 4391); identity duplicate groups **35** (was 76); soft-deleted `…AADD` employees **41**.
+- **Person.json**: **41** id-map values remapped ExtraId → KeepId; pushed to `C:\visa2026-sync\data\id-maps\calik-energi-onprem-prod\Person.json` (local `.bak-*` on workstation during apply).
+- **Backup**: pre-apply to `E:\visa2026\backups\prod\` failed — folder did not exist (`Msg 3201`). Created `E:\visa2026\backups\prod\` on `.25`; post-repair backup **`Visa2026DbProd-post-dup-employees-20260709-092641.bak`** (~6 min).
+- **Remaining ~35** groups: legacy `_dub` / mixed — use `-Scope AllIdentity` only after manual review; not auto-merged.
+- **Prevention**: `Visa2014PersonIdentityDuplicateGuard` on `--supplement-permit-persons` — redeploy DataImporter to `C:\visa2026-sync\tools\DataImporter\` before next supplement run.

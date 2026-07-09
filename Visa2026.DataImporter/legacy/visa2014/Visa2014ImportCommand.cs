@@ -261,6 +261,7 @@ internal static class Visa2014ImportCommand
 
         var idMapForRun = supplementPermitPersons || !dryRun ? idMapPath : null;
 
+        var targetCsForRun = supplementPermitPersons ? GetTargetConnection(args) : null;
         var result = await Visa2014PersonODataImporter.RunAsync(
             target,
             resolver,
@@ -270,14 +271,17 @@ internal static class Visa2014ImportCommand
             maxRows,
             dryRun,
             verbose,
-            supplementPermitPersons);
+            supplementPermitPersons,
+            targetCsForRun);
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");
         if (!dryRun)
         {
             Console.WriteLine(
-                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  Skipped (already imported): {result.SkippedAlreadyImported}");
+                $"INF Posted: {result.PostedCount}  Failed: {result.FailedCount}  " +
+                $"Skipped (already imported): {result.SkippedAlreadyImported}  " +
+                $"Relinked (existing identity): {result.RelinkedToExisting}");
             if (result.IdMapPath != null)
             {
                 Console.WriteLine($"INF Id-map: {result.IdMapPath}");

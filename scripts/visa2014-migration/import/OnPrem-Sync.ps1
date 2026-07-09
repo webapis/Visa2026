@@ -183,26 +183,30 @@ function Invoke-DataImporterCli {
     )
 
     if ($script:DataImporterExe) {
+        $output = & $script:DataImporterExe @CliArgs 2>&1
+        $exitCode = $LASTEXITCODE
         if ($LogFile) {
-            & $script:DataImporterExe @CliArgs 2>&1 | Tee-Object -FilePath $LogFile | Out-Null
+            $output | Tee-Object -FilePath $LogFile | Out-Null
         }
-        else {
-            & $script:DataImporterExe @CliArgs
+        elseif ($output) {
+            $output | Write-Output
         }
-        return $LASTEXITCODE
+        return $exitCode
     }
 
     $dotnetArgs = @(
         'run', '--project', (Join-Path $repoRoot 'Visa2026.DataImporter\Visa2026.DataImporter.csproj'),
         '-c', $Configuration, '--'
     ) + $CliArgs
+    $output = & dotnet @dotnetArgs 2>&1
+    $exitCode = $LASTEXITCODE
     if ($LogFile) {
-        & dotnet @dotnetArgs 2>&1 | Tee-Object -FilePath $LogFile | Out-Null
+        $output | Tee-Object -FilePath $LogFile | Out-Null
     }
-    else {
-        & dotnet @dotnetArgs
+    elseif ($output) {
+        $output | Write-Output
     }
-    return $LASTEXITCODE
+    return $exitCode
 }
 
 $scalarEntities = @{

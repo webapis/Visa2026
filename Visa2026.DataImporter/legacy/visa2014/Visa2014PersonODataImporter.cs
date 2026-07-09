@@ -11,6 +11,7 @@ internal sealed class Visa2014PersonImportResult
     public int SkippedCount { get; init; }
     public int DedupeMergedCount { get; init; }
     public int SkippedAlreadyImported { get; init; }
+    public int RelinkedToExisting { get; init; }
     public int PostedCount { get; init; }
     public int FailedCount { get; init; }
     public string? IdMapPath { get; init; }
@@ -28,7 +29,8 @@ internal static class Visa2014PersonODataImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
-        bool supplementPermitReferencedOnly = false)
+        bool supplementPermitReferencedOnly = false,
+        string? targetConnectionString = null)
     {
         var batch = supplementPermitReferencedOnly
             ? Visa2014PersonTransform.PrepareSupplementPermitReferencedImportBatch(
@@ -90,6 +92,15 @@ internal static class Visa2014PersonODataImporter
         int posted = 0;
         int failed = 0;
         int skippedAlreadyImported = 0;
+        int relinkedToExisting = 0;
+
+        Visa2014PersonIdentityDuplicateGuard? duplicateGuard = null;
+        if (supplementPermitReferencedOnly)
+        {
+            duplicateGuard = await Visa2014PersonIdentityDuplicateGuard.LoadFromSqlAsync(
+                targetConnectionString ?? "",
+                verbose);
+        }
 
         var employees = batch.ImportRows.Where(r => IsEmployeeRow(r)).ToList();
         var familyMembers = batch.ImportRows.Where(r => !IsEmployeeRow(r)).ToList();
@@ -105,6 +116,26 @@ internal static class Visa2014PersonODataImporter
                 continue;
             }
 
+            if (supplementPermitReferencedOnly &&
+                duplicateGuard?.TryResolveFromImportRow(row) is Guid existingPersonId)
+            {
+                idMap[legacyOid] = existingPersonId;
+                relinkedToExisting++;
+                if (verbose)
+                {
+                    Console.WriteLine(
+                        $"  RELINK Person {existingPersonId} <- legacy {legacyOid} (existing identity match)");
+                }
+
+                if (relinkedToExisting % 250 == 0 &&
+                    !string.IsNullOrWhiteSpace(idMapOutputPath))
+                {
+                    await WriteIdMapAsync(idMapOutputPath, idMap);
+                }
+
+                continue;
+            }
+
             try
             {
                 var payload = BuildPayload(row, resolver, idMap, employeeProjectContractByLegacyOid, employeeSubcontractorByLegacyOid);
@@ -117,6 +148,7 @@ internal static class Visa2014PersonODataImporter
                 }
 
                 idMap[legacyOid] = createdId.Value;
+                duplicateGuard?.RegisterFromImportRow(row, createdId.Value);
                 posted++;
                 if (posted % 250 == 0)
                 {
@@ -151,6 +183,7 @@ internal static class Visa2014PersonODataImporter
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
             SkippedAlreadyImported = skippedAlreadyImported,
+            RelinkedToExisting = relinkedToExisting,
             PostedCount = posted,
             FailedCount = failed,
             IdMapPath = idMapPath,

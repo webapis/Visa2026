@@ -201,6 +201,8 @@ internal static class Visa2014SyncCommand
         var sync = Visa2014SyncIdMapLoader.CreateContext(idMapPath, rowFilter, propagateSoftDeletes);
 
         Visa2014SyncEntityResult result;
+        try
+        {
         if (string.Equals(entity, "Person", StringComparison.OrdinalIgnoreCase))
         {
             result = await Visa2014PersonODataImporter.RunSyncAsync(
@@ -348,6 +350,14 @@ internal static class Visa2014SyncCommand
                 softErrors);
             if (softDeleted > 0)
                 result = Visa2014SyncUpsertHelper.WithSoftDeletedCount(result, softDeleted);
+        }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"ERR {entity} sync failed: {ex.Message}");
+            if (verbose)
+                Console.Error.WriteLine(ex);
+            return 1;
         }
 
         PrintEntityResult(entity, result);

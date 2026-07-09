@@ -517,6 +517,7 @@ internal static class Visa2014ApplicationItemODataImporter
         int? maxRows,
         bool verbose)
     {
+        Console.WriteLine("INF ApplicationItem sync: loading id-maps...");
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
@@ -528,6 +529,7 @@ internal static class Visa2014ApplicationItemODataImporter
         var workPermitItemIdMap = LoadOptionalIdMap(workPermitItemIdMapPath);
         var invitationItemIdMap = LoadOptionalIdMap(invitationItemIdMapPath);
 
+        Console.WriteLine("INF ApplicationItem sync: checking Application id-map collisions...");
         var applicationIdMapCollisions = Visa2014ApplicationTransform.FindApplicationIdMapCrossDateCollisions(
             applicationIdMap,
             legacyConnectionString,
@@ -556,16 +558,20 @@ internal static class Visa2014ApplicationItemODataImporter
             Console.WriteLine($"INF InvitationItem id-map entries: {invitationItemIdMap.Count}");
         }
 
+        Console.WriteLine("INF ApplicationItem sync: extracting legacy rows...");
         var batch = Visa2014ApplicationItemTransform.PrepareImportBatch(
             legacyConnectionString,
             lookupTranslationPaths,
             maxRows,
             verbose);
 
+        Console.WriteLine(
+            $"INF ApplicationItem sync: {batch.ImportRows.Count} rows prepared ({batch.LegacyRowCount} legacy); loading prod duplicate guard...");
         var duplicateGuard = await Visa2014ApplicationItemPersonDuplicateGuard.LoadFromSqlAsync(
             targetConnectionString ?? "",
             verbose);
 
+        Console.WriteLine($"INF ApplicationItem sync: applying upserts ({batch.ImportRows.Count} rows)...");
         return await Visa2014SyncUpsertHelper.RunAsync(
             target,
             typeof(Visa2026.Module.BusinessObjects.ApplicationItem),

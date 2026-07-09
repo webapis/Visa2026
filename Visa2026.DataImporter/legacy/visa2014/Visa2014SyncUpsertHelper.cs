@@ -24,6 +24,7 @@ internal static class Visa2014SyncUpsertHelper
         int relinked = 0;
         int skippedUnchanged = 0;
         int failed = 0;
+        int processed = 0;
 
         foreach (var row in rows)
         {
@@ -31,6 +32,12 @@ internal static class Visa2014SyncUpsertHelper
 
             if (row["_legacyRowId"] is not Guid legacyOid)
                 continue;
+
+            processed++;
+            if (processed % 500 == 0)
+                Console.WriteLine(
+                    $"INF {entityName} sync progress: {processed}/{rows.Count} " +
+                    $"(upd {updated}, ins {inserted}, skip {skippedUnchanged}, fail {failed})");
 
             Dictionary<string, object?>? payload;
             try
