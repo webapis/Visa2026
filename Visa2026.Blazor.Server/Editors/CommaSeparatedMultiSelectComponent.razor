@@ -230,6 +230,13 @@
 
     protected override void OnParametersSet()
     {
+        if (!PopupVisible)
+        {
+            _catalogManageMode = false;
+            _editPopupVisible = false;
+            _deleteConfirmVisible = false;
+        }
+
         if (PopupVisible && _popupDraft.Count == 0 && (DraftSelectedItems?.Count > 0 || SelectedItems?.Count > 0))
         {
             _popupDraft = CloneSet(DraftSelectedItems?.Count > 0 ? DraftSelectedItems : SelectedItems);

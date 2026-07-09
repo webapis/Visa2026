@@ -455,7 +455,8 @@ namespace Visa2026.Module.Services
 
                 if (AppSegment(application, source, "BorderZoneLocation"))
                 {
-                    if (!TypeOk(x => x.ShowBorderZoneLocation) || application.BorderZoneLocation == null)
+                    if (!TypeOk(x => x.ShowBorderZoneLocation)
+                        || BorderZoneSelectionHelper.IsNoneValue(application.BorderZoneLocation))
                         return false;
                 }
 

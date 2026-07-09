@@ -735,7 +735,7 @@ public static class ExcelMappings
                 new() { Header = "From City",                 PayloadProperty = "FromCity",                Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "To City",                   PayloadProperty = "ToCity",                  Kind = ColumnKind.LookupByName, LookupEntity = "City" },
                 new() { Header = "Movement Permit Location",  PayloadProperty = "MovementPermitLocation",  Kind = ColumnKind.LookupByName, LookupEntity = "MovementPermitLocation" },
-                new() { Header = "Border Zone Location",      PayloadProperty = "BorderZoneLocation",      Kind = ColumnKind.LookupByName, LookupEntity = "BorderZoneLocation" },
+                new() { Header = "Border Zone Location",      PayloadProperty = "BorderZoneLocation",      Kind = ColumnKind.Scalar },
                 new() { Header = "Business Trip Start Date",  PayloadProperty = "BusinessTripStartDate",   Kind = ColumnKind.Scalar },
                 new() { Header = "Business Trip End Date",    PayloadProperty = "BusinessTripEndDate",     Kind = ColumnKind.Scalar },
                 new() { Header = "Business Trip Purpose",     PayloadProperty = "BusinessTripPurpose",     Kind = ColumnKind.LookupByName, LookupEntity = "BusinessTripPurpose" },

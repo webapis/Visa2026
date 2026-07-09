@@ -49,7 +49,7 @@ Application-level business-trip dates live on `Application` (`BusinessTripStartD
 | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Application.ApplicationType.ShowBorderZoneLocation` (hidden on registration and other types where the catalog flag is false; default `Ýok` on create). See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md). |
 | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | `ShowWorkPermittedLocations` |
 
-`BorderZoneLocation_NameTm` is a `[NotMapped]` report alias. `Application.BorderZoneLocation` (FK lookup on the **application**) is a **different** field.
+`BorderZoneLocation_NameTm` is a `[NotMapped]` report alias for the **item** line. `Application_BorderZoneLocation_NameTm` reads the **application** header; `Item_BorderZoneLocation_NameTm` is an explicit per-line alias. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](../../docs/COMMA_SEPARATED_MULTI_SELECT.md).
 
 ### Document links (gated by `ApplicationType.Show*` on the line)
 
@@ -159,7 +159,7 @@ Document links on the main tab follow the opposite pattern for many application 
 
 - **Always required:** `Application`, `Person`, `CurrentPassport`.
 - **Required when visible (application type `Show*` flags):** document links (`PreviousPassport`, `CurrentVisa`, `NextVisa`, work permit and invitation items, address, education, …) — each uses `[RuleRequiredField(TargetCriteria = …)]` matching the field's `[Appearance]` hide rule.
-- **Visible when `Show*` but not required on save:** `CurrentMedicalRecord`, `BorderZoneLocation`, `WorkPermittedLocations` — no reliable VISA2014 `PersonInApplication` source; import may leave null/empty/`Ýok`; officers can fill later.
+- **Visible when `Show*` but not required on save:** `CurrentMedicalRecord`, `WorkPermittedLocations` — no reliable VISA2014 `PersonInApplication` source; import may leave null/empty/`Ýok`; officers can fill later. **`BorderZoneLocation`** is always visible when `ShowBorderZoneLocation` (not behind the gear).
 - **Registration / travel:** **`TravelDate`** and **`CheckPoint`** are required when shown (`ShowRegistrations`; external for `CheckPoint`); always visible in the Travel group — `[ExcludeFromOptionalDetailFields]`, defaults in `ApplyRegistrationMovementDefaults`. **Gear:** `RegistrationDate`, `TravelType`, `MovementType`, `TravelNotes` are optional on save and hidden when the gear is off. Travel purpose on registration lines is **`CurrentPositionHistory`** (not a separate purpose-of-travel lookup). Application-type `[Appearance]` still gates the registration block (`ShowRegistrations`). `BusinessTripAddress` and workflow status columns use `[ExcludeFromOptionalDetailFields]`.
 - **Employee-only lines:** `CurrentPositionHistory`, `CurrentSalary`, `CurrentWorkPermitItem`, `CurrentWorkDuty` are required only when `Person.IsEmployee` and the field is shown (hidden for family members via `PersonIsFamilyMemberCriteria`).
 - **Education on registration:** `CurrentEducation` is hidden and not required on all registration application lines (`RegistrationApplicationItemContextCriteria`), including employees — `ShowCurrentEducation` in the catalog does not apply there.
@@ -176,7 +176,7 @@ Document links on the main tab follow the opposite pattern for many application 
 - **Employee vs family member on the line:** `CurrentPositionHistory`, `CurrentSalary`, `CurrentWorkDuty`, and `CurrentWorkPermitItem` are hidden when `Person.IsEmployee` is false (FKs stay null; see `ApplyCurrentFieldsFromSelectedPerson`). On registration applications, `CurrentEducation` is hidden for everyone (employees and family). Family members on registration detail show read-only **`Registration_GelmeginMaksadyTm`** instead of an empty position lookup.
 - **Appearance:** Most document and status fields use `[Appearance(..., Criteria = "!Application.ApplicationType.Show…")]`.
 - **Detail layout:** `Model.xafml` (Blazor Server) — includes `WorkPermittedLocations` next to other document fields.
-- **Border zone on item detail:** gated by `ShowBorderZoneLocation` (same as application header). `ApplicationItemDetailViewBorderZoneController` hides duplicate layout nodes for `Application.BorderZoneLocation` vs item `BorderZoneLocation`.
+- **Border zone on item detail:** gated by `ShowBorderZoneLocation` (same as application header). Only the **item-level** `BorderZoneLocation` editor is shown; `Application.BorderZoneLocation` is hidden via `ApplicationItem_HideApplicationBorderZone`.
 
 ---
 

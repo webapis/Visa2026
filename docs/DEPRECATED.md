@@ -52,7 +52,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | Name | Status | Replacement | Schema | Notes |
 |------|--------|-------------|--------|-------|
 | **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Used on `ApplicationProgress.Location`. Layer B strings in `LookupCatalogStrings.json`. |
-| **BorderZoneLocation** | Retained (UI catalog) | Comma-separated **`BorderZoneName`** on `ApplicationItem` / string on `Visa` | BO + table retained; **no** JSON catalog | Long labels for item multi-select; see [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). Do not confuse with **ApplicationLocation**. |
+| **BorderZoneLocation** | Deprecated | Comma-separated **`BorderZoneName`** on `Application`, `ApplicationItem`, and `Visa` | BO + table retained (hidden nav); **no** JSON catalog | Migrated by `ApplicationBorderZoneLocationStringUpdater` + earlier item/visa updaters. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). Do not confuse with **ApplicationLocation**. |
 | **MovementPermitLocation** | Retained (UI catalog) | Per-deployment rows in lookup UI | Table retained; excluded from manifest | See [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md). |
 
 ---
@@ -84,6 +84,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Artifact | Removed by | Replacement |
 |----------|------------|-------------|
+| `Applications.BorderZoneLocationID` | `ApplicationBorderZoneLocationStringUpdater` | `Application.BorderZoneLocation` string + **BorderZoneName** catalog |
 | `Visas.HasBorderZonePermit` | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` string + **BorderZoneName** catalog |
 | `Visa` ↔ `City` link table | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` |
 | `WorkPermitItemPermittedCity` / link table | `WorkPermitItemPermittedLocationsStringUpdater` | `WorkPermitItem.WorkPermittedLocations` + **WorkPermittedLocation** catalog |

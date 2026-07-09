@@ -67,6 +67,8 @@ public static class UserReportMergeDataHelper
             ["Person_ForeignAddress"] = item.Person_ForeignAddress ?? string.Empty,
             ["Person_ForeignAddressCountryCode"] = item.Person_ForeignAddressCountryCode ?? string.Empty,
             ["Application_BorderZoneLocation_NameTm"] = item.Application_BorderZoneLocation_NameTm ?? string.Empty,
+            ["Item_BorderZoneLocation_NameTm"] = item.Item_BorderZoneLocation_NameTm ?? string.Empty,
+            ["BorderZoneLocation_NameTm"] = item.BorderZoneLocation_NameTm ?? string.Empty,
         });
 
     public static List<Dictionary<string, object>> BuildSanawyStyleRows(

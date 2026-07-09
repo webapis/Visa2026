@@ -177,13 +177,8 @@ internal static class Visa2014ApplicationODataImporter
         TryAddOptionalFk(payload, row, "MovementPermitLocation", resolver.ResolveMovementPermitLocation);
 
         var borderZoneLabels = row.GetValueOrDefault("BorderZoneLocation") as string;
-        if (!string.IsNullOrWhiteSpace(borderZoneLabels)
-            && !IsBorderZoneNoneLabel(borderZoneLabels))
-        {
-            var borderZoneId = resolver.ResolveBorderZoneLocation(borderZoneLabels);
-            if (borderZoneId.HasValue)
-                payload["BorderZoneLocation"] = new { ID = borderZoneId.Value };
-        }
+        if (!string.IsNullOrWhiteSpace(borderZoneLabels))
+            payload["BorderZoneLocation"] = borderZoneLabels.Trim();
 
         if (TryParseDate(row.GetValueOrDefault("BusinessTripStartDate") as string, out var tripStart))
             payload["BusinessTripStartDate"] = DateTime.SpecifyKind(tripStart, DateTimeKind.Utc);

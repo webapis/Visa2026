@@ -275,6 +275,7 @@ namespace Visa2026.Module.BusinessObjects
                     .WithMany()
                     .HasForeignKey(a => a.LatestProgressId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
                  .HasFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL");

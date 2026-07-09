@@ -119,6 +119,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationItemPurposeOfTravelColumnsCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.AddressOfResidenceStartDateColumnCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.WorkPermitItemPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationItemWorkPermittedLocationsStringUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),

@@ -260,8 +260,20 @@ public static class CommaSeparatedCatalogHelper
     }
 
     private static int CountBorderZoneUsage(IObjectSpace objectSpace, string label, CatalogUsageContext? usageContext) =>
-        CountApplicationItemBorderZoneUsage(objectSpace, label, usageContext)
+        CountApplicationBorderZoneUsage(objectSpace, label, usageContext)
+        + CountApplicationItemBorderZoneUsage(objectSpace, label, usageContext)
         + CountVisaBorderZoneUsage(objectSpace, label, usageContext);
+
+    private static int CountApplicationBorderZoneUsage(
+        IObjectSpace objectSpace,
+        string label,
+        CatalogUsageContext? usageContext) =>
+        objectSpace.GetObjectsQuery<Application>()
+            .AsEnumerable()
+            .Count(app => CommaSeparatedSelectionHelper.ContainsLabel(
+                GetApplicationBorderZoneStored(app, usageContext),
+                label,
+                CommaSeparatedSelectionHelper.NoneValue));
 
     private static int CountApplicationItemBorderZoneUsage(
         IObjectSpace objectSpace,
@@ -307,6 +319,18 @@ public static class CommaSeparatedCatalogHelper
                 GetApplicationItemWorkPermittedLocationsStored(ai, usageContext),
                 label,
                 string.Empty));
+
+    private static string? GetApplicationBorderZoneStored(Application application, CatalogUsageContext? usageContext)
+    {
+        if (usageContext?.EditingObjectId != null
+            && application.ID == usageContext.EditingObjectId
+            && usageContext.EditingEffectiveStored != null)
+        {
+            return usageContext.EditingEffectiveStored;
+        }
+
+        return application.BorderZoneLocation;
+    }
 
     private static string? GetApplicationItemBorderZoneStored(ApplicationItem item, CatalogUsageContext? usageContext)
     {
@@ -365,6 +389,26 @@ public static class CommaSeparatedCatalogHelper
         string label,
         CatalogUsageContext? usageContext)
     {
+        foreach (var application in objectSpace.GetObjectsQuery<Application>().ToList())
+        {
+            var stored = GetApplicationBorderZoneStored(application, usageContext);
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(
+                    stored,
+                    label,
+                    CommaSeparatedSelectionHelper.NoneValue))
+            {
+                continue;
+            }
+
+            var parsed = CommaSeparatedSelectionHelper.ParseSelected(
+                    stored,
+                    CommaSeparatedSelectionHelper.NoneValue)
+                .Where(z => !string.Equals(z, label, StringComparison.OrdinalIgnoreCase));
+            application.BorderZoneLocation = CommaSeparatedSelectionHelper.FormatSelected(
+                parsed,
+                CommaSeparatedSelectionHelper.NoneValue);
+        }
+
         foreach (var item in objectSpace.GetObjectsQuery<ApplicationItem>().ToList())
         {
             var stored = GetApplicationItemBorderZoneStored(item, usageContext);
@@ -433,6 +477,27 @@ public static class CommaSeparatedCatalogHelper
 
     private static void RenameBorderZoneOnAllItems(IObjectSpace objectSpace, string oldLabel, string newLabel)
     {
+        var applications = objectSpace.GetObjectsQuery<Application>()
+            .Where(app => app.BorderZoneLocation != null && app.BorderZoneLocation.Contains(oldLabel))
+            .ToList();
+
+        foreach (var application in applications)
+        {
+            if (!CommaSeparatedSelectionHelper.ContainsLabel(
+                    application.BorderZoneLocation,
+                    oldLabel,
+                    CommaSeparatedSelectionHelper.NoneValue))
+            {
+                continue;
+            }
+
+            application.BorderZoneLocation = CommaSeparatedSelectionHelper.ReplaceLabel(
+                application.BorderZoneLocation,
+                oldLabel,
+                newLabel,
+                CommaSeparatedSelectionHelper.NoneValue);
+        }
+
         var applicationItems = objectSpace.GetObjectsQuery<ApplicationItem>()
             .Where(ai => ai.BorderZoneLocation != null && ai.BorderZoneLocation.Contains(oldLabel))
             .ToList();

@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.Persistent.Base;
 using System.Linq;
+using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.MigrationImport;
 using DevExpress.ExpressApp.DC;
@@ -14,8 +15,6 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp;
-using Visa2026.Module.Services;
-
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
@@ -39,6 +38,11 @@ namespace Visa2026.Module.BusinessObjects
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
     public class Application : BaseObject, IBoListRowState
     {
+        private const string DefaultBorderZoneLocationNameTm = "Ýok";
+
+        private const string BorderZoneLocationVisibleCriteria =
+            "ApplicationType is not null And ApplicationType.ShowBorderZoneLocation";
+
         private const string AppInvApplicationTypeName = "App_Inv";
         private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
         /// <summary>Default visa period for <see cref="AppInvApplicationTypeName"/> (see visa-period.json <c>Month1</c>).</summary>
@@ -545,13 +549,23 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string MovementPermitLocation_NameTm => MovementPermitLocation?.NameTm;
 
-        [Appearance("BorderZoneLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBorderZoneLocation", Context = "DetailView")]
+        [Appearance("BorderZoneLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "ApplicationType is null or !ApplicationType.ShowBorderZoneLocation", Context = "DetailView,ListView")]
         [VisibleInListView(false)]
-        public virtual BorderZoneLocation BorderZoneLocation { get; set; }
+        [MaxLength(500)]
+        [RuleRequiredField(TargetCriteria = BorderZoneLocationVisibleCriteria)]
+        [EditorAlias(CommaSeparatedMultiSelectEditorAliases.BorderZone)]
+        [CommaSeparatedMultiSelect(
+            CatalogEntityType = typeof(BorderZoneName),
+            NoneValue = CommaSeparatedSelectionHelper.NoneValue)]
+        public virtual string BorderZoneLocation { get; set; }
 
+        [Browsable(false)]
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        [NotMapped]
-        public string BorderZoneLocation_NameTm => BorderZoneLocation?.NameTm;
+        public string BorderZoneLocation_NameTm =>
+            BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation)
+                ? DefaultBorderZoneLocationNameTm
+                : BorderZoneLocation?.Trim() ?? DefaultBorderZoneLocationNameTm;
 
         [Appearance("FromCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowFromCity", Context = "DetailView")]
         [VisibleInListView(false)]
@@ -786,6 +800,11 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnCreated()
         {
             base.OnCreated();
+            if (ObjectSpaceHelper.Get(this) != null && BorderZoneSelectionHelper.IsNoneValue(BorderZoneLocation))
+            {
+                BorderZoneLocation = DefaultBorderZoneLocationNameTm;
+            }
+
             var objectSpace = ObjectSpaceHelper.Get(this);
             if (objectSpace != null)
             {

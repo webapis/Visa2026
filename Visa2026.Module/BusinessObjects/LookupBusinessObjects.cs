@@ -498,10 +498,12 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     /// <summary>
-    /// Global catalog (Layer B UI via <see cref="GlobalLookupCatalogBase"/>); rows are maintained in the app, not from <c>LookupCatalogs/*.json</c>.
+    /// Deprecated lookup catalog. Replaced by comma-separated <c>BorderZoneLocation</c> on
+    /// <see cref="Application"/>, <see cref="ApplicationItem"/>, and <see cref="Visa"/> backed by <see cref="BorderZoneName"/>.
     /// </summary>
+    [Obsolete("Use BorderZoneName catalog with comma-separated BorderZoneLocation on Application, ApplicationItem, and Visa.")]
     [DefaultClassOptions]
-    [NavigationItem("Lookup/WorkPermit/Config")]
+    [NavigationItem(false)]
     [GlobalLookupCatalog(GlobalLookupCatalogKind.BorderZoneLocation)]
     public class BorderZoneLocation : GlobalLookupCatalogBase
     {
@@ -510,7 +512,8 @@ namespace Visa2026.Module.BusinessObjects
     }
 
     /// <summary>
-    /// Short Turkmen labels for border zones selectable on <see cref="ApplicationItem"/> (comma-joined on the item).
+    /// Short Turkmen labels for border zones selectable on <see cref="Application"/>,
+    /// <see cref="ApplicationItem"/>, and <see cref="Visa"/> (comma-joined).
     /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/WorkPermit/Config")]

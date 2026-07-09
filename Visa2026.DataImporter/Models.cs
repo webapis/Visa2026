@@ -266,7 +266,7 @@ public class Application
     public MovementPermitLocation? MovementPermitLocation { get; set; }
 
     [JsonPropertyName("BorderZoneLocation")]
-    public BorderZoneLocation? BorderZoneLocation { get; set; }
+    public string? BorderZoneLocation { get; set; }
 
     [JsonPropertyName("Rejections")]
     public List<Rejection> Rejections { get; set; } = new();

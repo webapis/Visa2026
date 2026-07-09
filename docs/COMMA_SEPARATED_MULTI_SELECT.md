@@ -1,24 +1,25 @@
 # Comma-separated multi-select catalog editor
 
-Custom Blazor property editor for **short label lists** stored as a single comma-separated `nvarchar` field, with a **shared lookup catalog** for checkbox options. Used in three places in Visa2026.
+Custom Blazor property editor for **short label lists** stored as a single comma-separated `nvarchar` field, with a **shared lookup catalog** for checkbox options.
 
 ## Where it is used
 
 | Business object | Property | Catalog (lookup table) | Editor alias | Default when empty |
 |-----------------|----------|------------------------|--------------|-------------------|
-| `ApplicationItem` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` (via `CommaSeparatedSelectionHelper.NoneValue`) |
-| `Visa` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | empty string |
+| `Application` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` (via `CommaSeparatedSelectionHelper.NoneValue`) |
+| `ApplicationItem` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | `Ýok` |
+| `Visa` | `BorderZoneLocation` | `BorderZoneName` | `BorderZoneMultiSelect` | empty string (defaults to `Ýok` on create/save via `BorderZoneSelectionHelper`) |
 | `WorkPermitItem` | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
 | `ApplicationItem` | `WorkPermittedLocations` | `WorkPermittedLocationName` | `WorkPermittedLocationMultiSelect` | empty string |
 
 Configuration is on the property via `[CommaSeparatedMultiSelect(...)]` and `[EditorAlias(...)]` in:
 
+- `Visa2026.Module/BusinessObjects/Application.cs`
 - `Visa2026.Module/BusinessObjects/ApplicationItem.cs`
 - `Visa2026.Module/BusinessObjects/Visa.cs`
 - `Visa2026.Module/BusinessObjects/WorkPermitItem.cs`
-- `Visa2026.Module/BusinessObjects/ApplicationItem.cs` (`WorkPermittedLocations`; visibility via `ApplicationType.ShowWorkPermittedLocations`)
 
-**Not the same as** `Application.BorderZoneLocation` (FK to `BorderZoneLocation` lookup) — that is application-level and unrelated to this editor.
+The legacy **`BorderZoneLocation`** lookup BO/table is **deprecated** — see [`DEPRECATED.md`](DEPRECATED.md). Use **`BorderZoneName`** for catalog maintenance in the popup.
 
 ## Architecture
 
@@ -38,6 +39,7 @@ flowchart TB
     WPL[WorkPermittedLocationName]
   end
   subgraph data [Per record]
+    APP[Application.BorderZoneLocation]
     AI[ApplicationItem.BorderZoneLocation]
     V[Visa.BorderZoneLocation]
     WPI[WorkPermitItem.WorkPermittedLocations]
@@ -46,6 +48,7 @@ flowchart TB
   PE --> CAT
   CAT --> BZN
   CAT --> WPL
+  PE --> APP
   PE --> AI
   PE --> V
   PE --> WPI
@@ -56,7 +59,7 @@ flowchart TB
 ### Two layers of data
 
 1. **Catalog (shared)** — rows in `BorderZoneName` / `WorkPermittedLocationName` (`LookupBase`, `NameTm` / `Name`). All users see the same checkbox labels. Maintained in the popup (**Add**, **Edit**, **Delete**).
-2. **Selection (per item)** — comma-separated text on the current `ApplicationItem`, `Visa`, or `WorkPermitItem`. Example: `Aşgabat, Mary, Balkan`. No FK; labels must match catalog `NameTm` text.
+2. **Selection (per record)** — comma-separated text on the current `Application`, `ApplicationItem`, `Visa`, or `WorkPermitItem`. Example: `Aşgabat, Mary, Balkan`. No FK; labels must match catalog `NameTm` text.
 
 The UI list **CatalogItems** is built at runtime from the catalog (`CommaSeparatedCatalogHelper.LoadCatalogNames`) plus any labels still in the current draft selection (`MergeCatalogWithSelected`).
 
@@ -93,7 +96,8 @@ Catalog reload uses `IObjectSpace.GetObjects<T>()` (not `GetObjectsQuery`) so pe
 | `Services/CatalogOperationResult.cs` / `CatalogRenameRequest.cs` | Operation results and rename payload |
 | `Services/BorderZoneSelectionHelper.cs` | Thin alias over selection helper for border-zone call sites |
 | `BusinessObjects/LookupBusinessObjects.cs` | `BorderZoneName`, `WorkPermittedLocationName` |
-| `DatabaseUpdate/ApplicationItemBorderZoneLocationStringUpdater.cs` | Migration: string column + seed catalog |
+| `DatabaseUpdate/ApplicationBorderZoneLocationStringUpdater.cs` | Migration: Application FK → string column |
+| `DatabaseUpdate/ApplicationItemBorderZoneLocationStringUpdater.cs` | Migration: ApplicationItem FK → string column + seed catalog |
 | `DatabaseUpdate/WorkPermitItemPermittedLocationsStringUpdater.cs` | Migration: drop old city link table, string + catalog |
 | `DatabaseUpdate/LookupCatalogs/tenant/border-zone-name.json` | Tenant deploy seed for `BorderZoneName` (see [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md)) |
 | `DatabaseUpdate/LookupCatalogs/tenant/work-permitted-location-name.json` | Tenant deploy seed for `WorkPermittedLocationName` |
@@ -106,7 +110,7 @@ Catalog reload uses `IObjectSpace.GetObjects<T>()` (not `GetObjectsQuery`) so pe
 | `Editors/CommaSeparatedMultiSelectPropertyEditor.cs` | XAF property editor; wires model callbacks |
 | `Editors/CommaSeparatedMultiSelectModel.cs` | `ComponentModelBase` for the Razor component |
 | `Editors/CommaSeparatedMultiSelectComponent.razor` | Popup UI |
-| `Controllers/ApplicationItemDetailViewBorderZoneController.cs` | Hides duplicate border-zone view items on Application Item detail |
+| `Controllers/ApplicationItemDetailViewBorderZoneController.cs` | Hides report merge aliases on Application Item detail; item-level `BorderZoneLocation` editor stays visible when `ShowBorderZoneLocation` |
 | `Model.xafml` | Layout items for `BorderZoneLocation` on application item and visa; work permit layout for `WorkPermittedLocations` |
 | `wwwroot/css/site.css` | `cs-multi-select-*` styles |
 
@@ -129,6 +133,7 @@ Module updaters are registered in `Visa2026.Module/Module.cs`.
 
 ## Database
 
+- `Application.BorderZoneLocation` — `nvarchar(500)`
 - `ApplicationItem.BorderZoneLocation` — `nvarchar(500)`
 - `Visa.BorderZoneLocation` — `nvarchar(500)`
 - `WorkPermitItem.WorkPermittedLocations` — `nvarchar(500)`
@@ -142,7 +147,10 @@ Legacy `Visa` ↔ `City` many-to-many link table was removed by `VisaBorderZoneL
 
 Item-level strings and catalog labels feed existing paths, for example:
 
-- `ApplicationItem.BorderZoneLocation` / `BorderZoneLocation_NameTm`
+- `Application.BorderZoneLocation` / `BorderZoneLocation_NameTm` (application header)
+- `ApplicationItem.BorderZoneLocation` / `BorderZoneLocation_NameTm` (per line)
+- `ApplicationItem.Application_BorderZoneLocation_NameTm` (application header alias on item-root templates)
+- `ApplicationItem.Item_BorderZoneLocation_NameTm` (per-line alias)
 - `ApplicationItem.WorkPermit_WorkPermittedLocations` → `WorkPermitItem.WorkPermittedLocations`
 
 Word/Excel templates use these BO properties; they do not read `CatalogItems` directly.

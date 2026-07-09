@@ -117,7 +117,7 @@ public class ApplicationImporter
                     FromCity = record.FromCity != null ? new { ID = record.FromCity.Id } : null,
                     ToCity = record.ToCity != null ? new { ID = record.ToCity.Id } : null,
                     MovementPermitLocation = record.MovementPermitLocation != null ? new { ID = record.MovementPermitLocation.Id } : null,
-                    BorderZoneLocation = record.BorderZoneLocation != null ? new { ID = record.BorderZoneLocation.Id } : null,
+                    BorderZoneLocation = string.IsNullOrWhiteSpace(record.BorderZoneLocation) ? null : record.BorderZoneLocation.Trim(),
                 };
 
                 await _api.CreateAsync<Application>(Entity, payload);

@@ -21,6 +21,7 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
 {
     private IObjectSpace _objectSpace;
     private CommaSeparatedMultiSelectAttribute _settings;
+    private bool _keepPopupOpenAfterCatalogChange;
 
     public CommaSeparatedMultiSelectPropertyEditor(Type objectType, IModelMemberViewItem model)
         : base(objectType, model)
@@ -53,6 +54,11 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         model.PopupVisibleChanged = EventCallback.Factory.Create<bool>(this, visible =>
         {
             model.PopupVisible = visible;
+            if (!visible)
+            {
+                _keepPopupOpenAfterCatalogChange = false;
+            }
+
             if (visible)
             {
                 SetCatalogStatus(string.Empty, isError: false);
@@ -80,31 +86,23 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         _settings ??= ResolveSettings();
         ApplySettingsToComponentModel(ComponentModel);
 
-        var popupWasOpen = ComponentModel.PopupVisible;
-
         ComponentModel.ObjectSpace = _objectSpace;
         var selected = CommaSeparatedSelectionHelper.ParseSelected(PropertyValue as string, _settings.NoneValue);
         ComponentModel.SelectedItems = new HashSet<string>(selected, StringComparer.OrdinalIgnoreCase);
         ComponentModel.DisplayText = FormatDisplayText(PropertyValue as string);
         ComponentModel.ReadOnly = !AllowEdit;
 
-        if (popupWasOpen)
-        {
-            var draft = ComponentModel.DraftSelectedItems ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            ComponentModel.CatalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(
-                LoadCatalogNames(),
-                draft);
-            ComponentModel.PopupVisible = true;
-        }
-        else
-        {
-            ComponentModel.CatalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(
-                LoadCatalogNames(),
-                selected);
-            ComponentModel.DraftSelectedItems = CloneSet(ComponentModel.SelectedItems);
-            ComponentModel.NewItemName = string.Empty;
-            ComponentModel.PopupVisible = false;
-        }
+        var draft = _keepPopupOpenAfterCatalogChange
+            ? ComponentModel.DraftSelectedItems ?? CloneSet(ComponentModel.SelectedItems)
+            : CloneSet(ComponentModel.SelectedItems);
+
+        ComponentModel.CatalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(
+            LoadCatalogNames(),
+            draft);
+        ComponentModel.DraftSelectedItems = draft;
+        ComponentModel.NewItemName = string.Empty;
+        ComponentModel.PopupVisible = _keepPopupOpenAfterCatalogChange;
+        _keepPopupOpenAfterCatalogChange = false;
     }
 
     protected override object GetControlValueCore() =>
@@ -168,8 +166,7 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
         ComponentModel.CatalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(
             LoadCatalogNames(),
             draft);
-        ComponentModel.PopupVisible = true;
-
+        KeepPopupOpenAfterCatalogChange();
         return Task.CompletedTask;
     }
 
@@ -306,8 +303,17 @@ public class CommaSeparatedMultiSelectPropertyEditor : BlazorPropertyEditorBase,
 
         ComponentModel.CatalogItems = CommaSeparatedCatalogHelper.MergeCatalogWithSelected(catalog, draft)
             .ToList();
-        ComponentModel.PopupVisible = true;
+        KeepPopupOpenAfterCatalogChange();
         SetCatalogStatus(successMessage ?? string.Empty, isError: false);
+    }
+
+    private void KeepPopupOpenAfterCatalogChange()
+    {
+        _keepPopupOpenAfterCatalogChange = true;
+        if (ComponentModel != null)
+        {
+            ComponentModel.PopupVisible = true;
+        }
     }
 
     private void SetCatalogStatus(string message, bool isError)

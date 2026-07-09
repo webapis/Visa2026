@@ -294,6 +294,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [Appearance("ApplicationItem_BorderZoneLocationVisible", Visibility = ViewItemVisibility.Hide,
             Criteria = ApplicationItemBorderZoneLocationHiddenCriteria, Context = "DetailView,ListView")]
+        [ExcludeFromOptionalDetailFields]
         [VisibleInListView(false)]
         [MaxLength(500)]
         [EditorAlias(Editors.CommaSeparatedMultiSelectEditorAliases.BorderZone)]
@@ -1113,7 +1114,12 @@ namespace Visa2026.Module.BusinessObjects
         public string VisaCategory_NameTm => Application_VisaCategory_NameTm;
 
         [XafDisplayName("Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Application_BorderZoneLocation_NameTm => BorderZoneLocation_NameTm;
+        public string Application_BorderZoneLocation_NameTm =>
+            Application?.BorderZoneLocation_NameTm ?? DefaultBorderZoneLocationNameTm;
+
+        [Browsable(false)]
+        [XafDisplayName("Item Border Zone Location (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
+        public string Item_BorderZoneLocation_NameTm => BorderZoneLocation_NameTm;
 
         [XafDisplayName("Application Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Application_DateText => $"{Application?.ApplicationDate:dd.MM.yyyy}";
