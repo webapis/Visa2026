@@ -48,7 +48,6 @@
   </Options>
   <Views>
     <ListView Id="ApplicationUser_ListView" Caption="Users" />
-    <ListView Id="City_ListView" Criteria="IsMostlyUsed = true" />
     <DetailView Id="BoStateNotificationInboxHost_DetailView" Caption="State notifications" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="bo-state-inbox-detail">
       <Items>
         <PropertyEditor Id="InboxUi" PropertyName="InboxUi" ShowCaption="False" IsNewNode="True" />
