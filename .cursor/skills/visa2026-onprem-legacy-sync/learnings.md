@@ -241,3 +241,13 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Apply prod**: `Repair-DuplicateAddressOfResidence.ps1 -Apply` — **483** extras soft-deleted; **0** remaining duplicate groups; active AOR **4947**.
 - **Apply local dev**: same SQL against `Visa2026` — **809** groups / **4494** extras removed (repeated import runs).
 - **Prevention (repo)**: `Visa2014AddressOfResidenceSiteDuplicateGuard` on sync insert; `Visa2014AddressOfResidenceTargetMatcher` before PIA-inferred create and legacy import insert when `--target-connection` / sync target CS set.
+
+### 2026-07-09 — W2 staging refresh from prod backup (post-deploy 1.0.0.557)
+
+- **Workflow**: SKILL W2 — backup `Visa2026DbProd` → restore `Visa2026DbStaging` (not legacy sync).
+- **Disk**: **E:** ~23 GB free — removed prior `Visa2026DbProd-post-dup-employees-20260709-092641.bak` (~41 GB) before new backup.
+- **Backup**: `E:\visa2026\backups\prod\Visa2026DbProd-pre-staging-refresh-20260709-015852.bak` (**38.76 GB**, ~5 min).
+- **Restore**: `Restore-Visa2026SqlBackup.ps1 -Profile Staging` with `-OverrideDataPath`/`-OverrideLogPath` `E:\visa2026\sql-data` (~4 min).
+- **DB update**: `Run-Visa2026DbUpdateOnServer.ps1 -Profile Staging -ForceUpdate` (exit **0**, ~4 min).
+- **Smoke**: `http://10.100.128.25:8080/LoginPage` → **200**. Staging app already on **1.0.0.557** from earlier IIS deploy.
+- **Note**: One-off backup helper ran on server at `C:\visa2026-deploy\iis\Backup-Visa2026ProdDatabase.ps1` — consider promoting to repo `scripts/windows-iis/` for repeat W2 runs.

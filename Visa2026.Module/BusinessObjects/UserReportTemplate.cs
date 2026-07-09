@@ -21,6 +21,7 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem("Reports")]
     [DefaultProperty(nameof(TemplateName))]
     [ModelDefault("Caption", "User Report Template")]
+    [ModelDefault("IsCloneable", "True")]
     [FileAttachment(nameof(TemplateFile))]
     public class UserReportTemplate : BaseObject
     {
@@ -108,7 +109,10 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "Sort Order")]
         public virtual int SortOrder { get; set; } = 0;
 
+        [Aggregated]
         [Browsable(false)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
         public virtual IList<UserReportPlaceholder> Placeholders { get; set; }
 
         [NotMapped]

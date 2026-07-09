@@ -1007,6 +1007,12 @@
     "tk-TM": "Bellikler gollanmasy",
     "ru-RU": "Справочник заполнителей"
   },
+  "UserReport.CloneNameSuffix": {
+    "en": " - Copy",
+    "tr-TR": " - Kopya",
+    "tk-TM": " - Göçürme",
+    "ru-RU": " - Копия"
+  },
   "PlaceholderManual.Title": {
     "en": "Placeholder manual",
     "tr-TR": "Yer tutucu el kitabı",

@@ -95,3 +95,12 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Commit**: `458ed8a6` — Lookups section on legacy sync dashboard + gitignore for generated sync snapshots.
 - **Deploy**: `Deploy-Visa2026AllIisSlotsRemote.ps1 -ForceUpdate` → publish `visa2026-iis-1.0.0.553` to Prod/Staging/Demo.
 - **Smoke**: HTTP LoginPage **200** on :80 / :8080 / :8081; `publish-version.txt` GitSha `458ed8a` on all three `inetpub` folders. Sites HTTP-only (no HTTPS bindings) as previously configured on host.
+
+### 2026-07-09 — Prod + Staging deploy 1.0.0.557 (Person detail tabs)
+
+- **Commit**: `e422045` — Person editable vs issued tab groups, tab counts, CV & personal files rename.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Production -ForceUpdate` then `-Profile Staging -ForceUpdate -SkipPublish` (dev PC → `visa2026-onprem`).
+- **Publish**: `dist/visa2026-iis-1.0.0.557` (Release).
+- **HTTP env**: `HTTPS_ENABLED=false` on both `prod.env` and `staging.env` — HTTP-only smoke as requested.
+- **Smoke**: `http://10.100.128.25/LoginPage` and `:8080/LoginPage` → **200**; `publish-version.txt` AssemblyVersion **1.0.0.557**, GitSha **e422045** on both slots.
+- **Duration**: ~8 min prod (publish + scp + DB update), ~5 min staging (reuse publish).

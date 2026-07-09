@@ -4142,6 +4142,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ähli {0} ýer tutujy dogry!",
             ["ru-RU"] = "Все {0} заполнителей корректны!",
         },
+        ["UserReport.CloneNameSuffix"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = " - Copy",
+            ["tr-TR"] = " - Kopya",
+            ["tk-TM"] = " - Göçürme",
+            ["ru-RU"] = " - Копия",
+        },
         ["UserReport.ExtractedPlaceholders"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Extracted {0} placeholder(s). Run validation to check against BO properties.",

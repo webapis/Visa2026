@@ -134,6 +134,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(LocalizedDisplayName))]
+    [ModelDefault("IsCloneable", "True")]
     public class ApplicationType : LookupBase
     {
         public ApplicationType()
@@ -239,6 +240,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual string ApplicationTypeFilterNames { get; set; }
         [Browsable(false)]
+        [Aggregated]
         [InverseProperty(nameof(ApplicationReason.ApplicationType))]
         public virtual IList<ApplicationReason> ApplicationReasons { get; set; }
     }
@@ -454,6 +456,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem("Lookup/Visa/Config")]
     [GlobalLookupCatalog(GlobalLookupCatalogKind.VisaPeriod)]
+    [ModelDefault("IsCloneable", "True")]
     public class VisaPeriod : GlobalLookupCatalogBase
     {
         [ModelDefault("AllowEdit", "False")]
