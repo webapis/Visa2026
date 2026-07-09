@@ -626,13 +626,14 @@
     </DetailView>
     <ListView Id="InvitationItem_ListView">
       <Columns>
-        <ColumnInfo Id="Invitation" Index="-1" />
-        <ColumnInfo Id="IsCancelled" Index="-1" />
         <ColumnInfo Id="IsChanged" Index="-1" />
         <ColumnInfo Id="InvitationItemName" Index="0" Width="180" />
         <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
         <ColumnInfo Id="Person" Index="2" Width="120" />
         <ColumnInfo Id="Passport" Index="3" Width="100" />
+        <ColumnInfo Id="Invitation" Index="4" Width="120" />
+        <ColumnInfo Id="IsCancelled" Index="5" Width="80" />
+        <ColumnInfo Id="IsUsed" Index="6" Width="72" />
       </Columns>
     </ListView>
     <DetailView Id="Lodging_DetailView">
@@ -1363,16 +1364,16 @@
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
         <ColumnInfo Id="Passport" Index="-1" />
-        <ColumnInfo Id="WorkPermit" Index="-1" />
         <ColumnInfo Id="WorkPermitItemName" Index="0" Width="180" />
         <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
         <ColumnInfo Id="Person" Index="2" Width="120" />
-        <ColumnInfo Id="WorkPermitNumber" Index="3" Width="90" />
-        <ColumnInfo Id="StartDate" Index="4" Width="100" />
-        <ColumnInfo Id="ExpirationDate" Index="5" Width="100" />
-        <ColumnInfo Id="DaysRemaining" Index="6" Width="72" />
-        <ColumnInfo Id="WorkPermittedLocations" Index="7" Width="240" />
-        <ColumnInfo Id="ASNumber" Index="8" Width="90" />
+        <ColumnInfo Id="WorkPermit" Index="3" Width="120" />
+        <ColumnInfo Id="WorkPermitNumber" Index="4" Width="90" />
+        <ColumnInfo Id="StartDate" Index="5" Width="100" />
+        <ColumnInfo Id="ExpirationDate" Index="6" Width="100" />
+        <ColumnInfo Id="DaysRemaining" Index="7" Width="72" />
+        <ColumnInfo Id="WorkPermittedLocations" Index="8" Width="240" />
+        <ColumnInfo Id="ASNumber" Index="9" Width="90" />
       </Columns>
     </ListView>
   </Views>

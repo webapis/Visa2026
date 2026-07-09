@@ -81,8 +81,11 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.InvitationItem.DocumentCopiesListLink),
                 nameof(BusinessObjects.InvitationItem.Person),
                 nameof(BusinessObjects.InvitationItem.Passport),
+                nameof(BusinessObjects.InvitationItem.Invitation),
+                nameof(BusinessObjects.InvitationItem.IsCancelled),
+                nameof(BusinessObjects.InvitationItem.IsUsed),
             ],
-            [180, 56, 120, 100]
+            [180, 56, 120, 100, 120, 80, 72]
         ),
         (
             "WorkPermitItem_ListView",
@@ -90,6 +93,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.WorkPermitItem.WorkPermitItemName),
                 nameof(BusinessObjects.WorkPermitItem.DocumentCopiesListLink),
                 nameof(BusinessObjects.WorkPermitItem.Person),
+                nameof(BusinessObjects.WorkPermitItem.WorkPermit),
                 nameof(BusinessObjects.WorkPermitItem.WorkPermitNumber),
                 nameof(BusinessObjects.WorkPermitItem.StartDate),
                 nameof(BusinessObjects.WorkPermitItem.ExpirationDate),
@@ -97,7 +101,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.WorkPermitItem.WorkPermittedLocations),
                 nameof(BusinessObjects.WorkPermitItem.ASNumber),
             ],
-            [180, 56, 120, 90, 100, 100, 72, 240, 90]
+            [180, 56, 120, 120, 90, 100, 100, 72, 240, 90]
         ),
         (
             "RejectionItem_ListView",

@@ -18,6 +18,7 @@ namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem("WorkPermit")]
+    [DefaultProperty(nameof(WorkPermitNumber))]
     [SupportsOptionalDetailFields]
     public class WorkPermit : BaseObject, IOptionalDetailFields
     {
