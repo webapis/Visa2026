@@ -125,6 +125,12 @@ SET i.LodgingID = e.KeepId
 FROM dbo.LodgingImages i
 INNER JOIN #Extras e ON e.ExtraId = i.LodgingID;
 
+UPDATE k
+SET k.CityID = e.ExtraCityId
+FROM dbo.Lodgings k
+INNER JOIN #Extras e ON e.KeepId = k.ID
+WHERE k.CityID IS NULL AND e.ExtraCityId IS NOT NULL;
+
 UPDATE l
 SET l.GCRecord = 1
 FROM dbo.Lodgings l

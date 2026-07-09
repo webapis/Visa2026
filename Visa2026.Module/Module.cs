@@ -158,6 +158,7 @@ namespace Visa2026.Module
             updaters.Add(new ApplicationMigrationSlaProfileViewsUpdater());
             updaters.Add(new ApprovalLegProfileMinistryLegViewsUpdater());
             updaters.Add(new ApplicationProgressHistoryViewsUpdater());
+            updaters.Add(new PersonNestedListViewsUpdater());
             updaters.Add(new ExpirationAlertRuleViewsUpdater());
             updaters.Add(new ListViewShowFindPanelModelUpdater());
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());

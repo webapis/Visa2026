@@ -533,25 +533,8 @@ internal sealed partial class Visa2014ODataLookupResolver
     public Guid? ResolveRegion(string? nameTm) =>
         ResolveByNameTm(_regions, nameTm, r => r.NameTm);
 
-    public Guid? ResolveCity(string? nameTm, string? regionNameTm = null)
-    {
-        if (string.IsNullOrWhiteSpace(regionNameTm))
-            return ResolveByNameTm(_cities, nameTm, c => c.NameTm);
-
-        foreach (var city in _cities)
-        {
-            if (!Visa2014CatalogMatchHelper.KeysEqual(city.NameTm, nameTm)
-                && !string.Equals(city.NameTm?.Trim(), nameTm?.Trim(), StringComparison.Ordinal))
-                continue;
-
-            if (city.Region != null && Visa2014CatalogMatchHelper.KeysEqual(city.Region.NameTm, regionNameTm))
-                return city.Id;
-            if (Visa2014CatalogMatchHelper.KeysEqual(city.RegionName, regionNameTm))
-                return city.Id;
-        }
-
-        return ResolveByNameTm(_cities, nameTm, c => c.NameTm);
-    }
+    public Guid? ResolveCity(string? nameTm, string? regionNameTm = null) =>
+        Visa2014CityLookupMatcher.Resolve(_cities, nameTm, regionNameTm);
 
     public Guid? ResolveLodging(string? cityNameTm, string? regionNameTm, string? fullAddress)
     {

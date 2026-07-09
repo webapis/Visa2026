@@ -91,7 +91,7 @@ Each person holds **identity** data, **project contract** scope, **document hist
 | `Passports` | `Passport` | Aggregated; visas nested on passport. |
 | `MedicalRecords` | `MedicalRecord` | Aggregated. |
 | `AddressesOfResidence` | `AddressOfResidence` | Aggregated. |
-| `Documents` | `PersonDocument` | Employee file copies (e.g. CV); hidden for family members. |
+| `Documents` | `PersonDocument` | Employee CV and other personal files (`Person.Tab.CvAndPersonalFiles` tab — after Educations/Passports); hidden for family members. Not passport/education scans or issued workflow docs. |
 | `FamilyRelationDocuments` | `PersonFamilyRelationDocument` | Family relation proof copies; family members only. |
 | `Images` | `FamilyMemberImage` | Optional; often hidden until gear toggle. |
 | `WorkPermitItems` | `WorkPermitItem` | Aggregated; read-only list on person. |
@@ -125,7 +125,8 @@ Each person holds **identity** data, **project contract** scope, **document hist
 
 - **Navigation:** `Lookup/Person` (concrete list/detail for all persons).
 - **Employee vs family:** same `Person` DetailView; fields toggled by `IsEmployee` (set at create/import, not flipped casually in UI).
-- **Optional collections:** `ShowOptionalFields` gear reveals low-priority tabs (documents, images, etc.) — `IOptionalDetailFields`.
+- **Optional collections:** `ShowOptionalFields` gear reveals low-priority **scalar** fields — `IOptionalDetailFields`. **Not** for distinguishing editable vs issued **collection** tabs; see [`docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md`](../../docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md).
+- **Nested collection tabs:** Typed detail views split **Person record data** (`PersonRecordTabs`) from **Issued documents (view only)** (`IssuedDocumentsTabs`). Issued tabs hidden on new Person until first save.
 - **Importer:** `Persons` sheet uses `Person` entity; upsert often by `Email` (employees). See `Visa2026.DataImporter/SCENARIO_GUIDE.md`.
 
 ---
@@ -136,6 +137,7 @@ Each person holds **identity** data, **project contract** scope, **document hist
 |-------|----------|
 | Application line items | [`ApplicationItem.md`](ApplicationItem.md) |
 | Person document copies (planned preview slot) | [`docs/PERSON_DOCUMENT_COPIES.md`](../../docs/PERSON_DOCUMENT_COPIES.md) |
+| Nested collection tabs (editable vs issued) | [`docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md`](../../docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md) |
 | Application header | [`APPLICATION.md`](APPLICATION.md) |
 | Manual visa family lines | [`docs/VISA_FAMILY_MEMBERS_TEXT_EDITOR.md`](../../docs/VISA_FAMILY_MEMBERS_TEXT_EDITOR.md) |
 | Legacy removals (`Company` on person, etc.) | [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md) |

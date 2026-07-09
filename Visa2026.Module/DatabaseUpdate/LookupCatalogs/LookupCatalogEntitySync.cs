@@ -267,12 +267,45 @@ internal static class LookupCatalogEntitySync
             }
         }
 
+        if (entityType == typeof(City) && definition.MatchKey == LookupCatalogMatchKey.NameAndRegion)
+            removed += RemoveDuplicateCityNullRegionOrphans(objectSpace);
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Merges orphan Cities (null <see cref="City.Region"/>) into the Region-linked row with the same <see cref="LookupBase.NameTm"/>.
+    /// Identity keys differ (<c>T:name</c> vs <c>R:region|T:name</c>) so the standard dedupe pass does not group them.
+    /// </summary>
+    private static int RemoveDuplicateCityNullRegionOrphans(IObjectSpace objectSpace)
+    {
+        var cities = objectSpace.GetObjects(typeof(City)).Cast<City>().ToList();
+        var duplicateNameGroups = cities
+            .Where(c => !string.IsNullOrWhiteSpace(c.NameTm) || !string.IsNullOrWhiteSpace(c.Name))
+            .GroupBy(c => LookupCatalogMatchHelper.NormalizeKey(c.NameTm ?? c.Name ?? string.Empty), StringComparer.Ordinal)
+            .Where(g => g.Key.Length > 0 && g.Count() > 1)
+            .Where(g => g.Any(c => c.Region != null) && g.Any(c => c.Region == null))
+            .ToList();
+
+        int removed = 0;
+        foreach (var group in duplicateNameGroups)
+        {
+            var keeper = group.Where(c => c.Region != null).OrderBy(c => c.ID).First();
+            foreach (var duplicate in group.Where(c => c.ID != keeper.ID))
+            {
+                RepointLookupReferences(objectSpace, typeof(City), duplicate, keeper);
+                objectSpace.Delete(duplicate);
+                removed++;
+            }
+        }
+
         return removed;
     }
 
     private static object SelectCatalogKeeper(IEnumerable<object> group) =>
         group
             .OrderByDescending(HasPopulatedCatalogTitle)
+            .ThenByDescending(row => row is City city && city.Region != null)
             .ThenBy(GetRowId)
             .First();
 

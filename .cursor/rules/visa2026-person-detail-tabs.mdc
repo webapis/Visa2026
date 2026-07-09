@@ -1,0 +1,21 @@
+---
+description: Person typed DetailView — editable vs issued nested collection tabs
+globs: Visa2026.Module/BusinessObjects/Person.cs,Visa2026.Module/PersonNestedCollectionLayout.cs,Visa2026.Module/Model/PersonNestedListViewsUpdater.cs,Visa2026.Module/Controllers/PersonNestedReadOnlyListViewController.cs,Visa2026.Blazor.Server/Controllers/PersonDetailViewIssuedDocumentsLayoutController.cs,Visa2026.Blazor.Server/Model.xafml
+alwaysApply: false
+---
+
+# Person DetailView — nested collection tabs
+
+Officers confuse **editable person master data** tabs with **browse-only issued-document** tabs on `Person_DetailView_Employee`, `_FamilyMember`, `_TemporaryVisitor`.
+
+**Canonical doc:** [`docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md`](../../docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md)
+
+## Quick rules
+
+- **Two tab groups:** `PersonRecordTabs` (editable) + `IssuedDocumentsTabs` (read-only), inside `PersonCollectionSections`. Do not put both kinds in one `Tabs` strip.
+- **Read-only nested ListViews:** `PersonNestedListViewsUpdater` + `PersonNestedReadOnlyListViewController` — IDs in `PersonNestedCollectionLayout.ReadOnlyNestedListViewIds`.
+- **New Person:** hide `IssuedDocumentsTabs`, show `PersonNewRecordIssuedHint` — `PersonDetailViewIssuedDocumentsLayoutController` (Blazor).
+- **CSS:** `visa-person-record-tabs`, `visa-person-issued-tabs`, `visa-person-new-record-issued-hint` in `site.css`.
+- **Localization:** `Person.DetailSection.*` keys in `UiStrings.messages.json`; regenerate catalog after edits.
+- **Do not** use `ShowOptionalFields` gear for collection tabs ([`OPTIONAL_DETAIL_FIELDS.md`](../../docs/OPTIONAL_DETAIL_FIELDS.md)).
+- **Windows UTF-8:** new `.cs` files via PowerShell UTF-8 no BOM if Cursor tools corrupt encoding (`CS1056 \0`).

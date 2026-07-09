@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Data.SqlClient;
 using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -28,7 +29,8 @@ internal static class Visa2014AddressOfResidenceODataImporter
         string? addressIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        string? targetConnectionString = null)
     {
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         if (verbose)
@@ -109,6 +111,16 @@ internal static class Visa2014AddressOfResidenceODataImporter
                     continue;
                 }
 
+                var existingId = await TryMatchExistingAddressAsync(targetConnectionString, personId, row);
+                if (existingId.HasValue)
+                {
+                    addressIdMap[legacyOid] = existingId.Value;
+                    skippedAlreadyImported++;
+                    if (verbose)
+                        Console.WriteLine($"  SKIP {legacyOid}: existing AddressOfResidence {existingId.Value} (site match)");
+                    continue;
+                }
+
                 var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.AddressOfResidence), payload);
                 if (!createdId.HasValue)
                 {
@@ -146,6 +158,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
                 lookupTranslationPaths,
                 personIdMap,
                 addressIdMap,
+                targetConnectionString,
                 verbose);
             if (inferredPosted > 0 || inferredSkipped > 0)
                 Console.WriteLine(
@@ -263,6 +276,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         IReadOnlyList<string> lookupTranslationPaths,
         IReadOnlyDictionary<Guid, Guid> personIdMap,
         Dictionary<Guid, Guid> addressIdMap,
+        string? targetConnectionString,
         bool verbose)
     {
         RegisterSponsorCanonicalFromExistingLegacyAor(
@@ -293,6 +307,16 @@ internal static class Visa2014AddressOfResidenceODataImporter
 
             try
             {
+                var existingId = await TryMatchExistingAddressAsync(targetConnectionString, personId, plan.ImportRow);
+                if (existingId.HasValue)
+                {
+                    Visa2014PiaAddressInference.RegisterPlanAliases(plan, existingId.Value, addressIdMap);
+                    skipped++;
+                    if (verbose)
+                        Console.WriteLine($"  SKIP inferred {plan.SyntheticLegacyOid}: existing AddressOfResidence {existingId.Value}");
+                    continue;
+                }
+
                 var payload = Visa2014AddressOfResidenceImportApplier.BuildODataPayload(plan.ImportRow, resolver, personId);
                 if (payload == null)
                 {
@@ -399,6 +423,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
         IReadOnlyList<string> lookupTranslationPaths,
         string personIdMapPath,
         Visa2014SyncContext sync,
+        string? targetConnectionString,
         int? maxRows,
         bool verbose)
     {
@@ -414,6 +439,10 @@ internal static class Visa2014AddressOfResidenceODataImporter
 
         var normalizedRows = NormalizeLegacyRowIds(batch.ImportRows);
 
+        var duplicateGuard = await Visa2014AddressOfResidenceSiteDuplicateGuard.LoadFromSqlAsync(
+            targetConnectionString ?? "",
+            verbose);
+
         return await Visa2014SyncUpsertHelper.RunAsync(
             target,
             typeof(Visa2026.Module.BusinessObjects.AddressOfResidence),
@@ -424,7 +453,22 @@ internal static class Visa2014AddressOfResidenceODataImporter
             batch.LegacyRowCount,
             batch.Skipped.Count,
             batch.DedupeMergedCount,
-            verbose);
+            verbose,
+            payload => duplicateGuard.TryResolveFromPayload(payload),
+            (payload, createdId) => duplicateGuard.RegisterFromPayload(payload, createdId));
+    }
+
+    private static async Task<Guid?> TryMatchExistingAddressAsync(
+        string? targetConnectionString,
+        Guid personId,
+        IReadOnlyDictionary<string, object?> importRow)
+    {
+        if (string.IsNullOrWhiteSpace(targetConnectionString))
+            return null;
+
+        await using var connection = new SqlConnection(targetConnectionString);
+        await connection.OpenAsync();
+        return await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(connection, personId, importRow);
     }
 
     private static List<Dictionary<string, object?>> NormalizeLegacyRowIds(

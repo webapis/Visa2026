@@ -589,7 +589,8 @@ internal static class Visa2014ImportCommand
             dryRun ? null : addressIdMapPath,
             maxRows,
             dryRun,
-            verbose);
+            verbose,
+            GetTargetConnection(args));
 
         Console.WriteLine($"INF Legacy SQL rows: {result.LegacyRowCount}");
         Console.WriteLine($"INF Prepared: {result.PreparedCount}  Skipped: {result.SkippedCount}  Dedupe merged: {result.DedupeMergedCount}");

@@ -2525,6 +2525,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Maşgala agzy",
             ["ru-RU"] = "Член семьи",
         },
+        ["Person.DetailSection.IssuedDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued documents (view only)",
+            ["tr-TR"] = "Verilen belgeler (yalnızca görüntüleme)",
+            ["tk-TM"] = "Berlen resminamalar (diňe görmek)",
+            ["ru-RU"] = "Выданные документы (только просмотр)",
+        },
+        ["Person.DetailSection.NewRecordIssuedHint"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application items, work permits, and invitations appear here after you process applications. Add passports, education, and other person data in the tabs above.",
+            ["tr-TR"] = "Başvuru kalemleri, iş izinleri ve davetiyeler, başvuruları işledikten sonra burada görünür. Pasaport, eğitim ve diğer kişi verilerini yukarıdaki sekmelerden ekleyin.",
+            ["tk-TM"] = "Arza elementleri, iş rugsatlary we çakylyklar arzalary işläniňizden soň şu ýerde peýda bolýar. Pasport, bilim we beýleki şahsy maglumatlary ýokardaky goýmaklardan goşuň.",
+            ["ru-RU"] = "Позиции заявок, разрешения на работу и приглашения появятся здесь после обработки заявок. Паспорта, образование и другие данные лица добавляйте на вкладках выше.",
+        },
+        ["Person.DetailSection.NewRecordIssuedHint.Visitor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application items and invitations appear here after you process applications. Add passports and other person data in the tabs above.",
+            ["tr-TR"] = "Başvuru kalemleri ve davetiyeler, başvuruları işledikten sonra burada görünür. Pasaport ve diğer kişi verilerini yukarıdaki sekmelerden ekleyin.",
+            ["tk-TM"] = "Arza elementleri we çakylyklar arzalary işläniňizden soň şu ýerde peýda bolýar. Pasport we beýleki maglumatlary ýokardaky goýmaklardan goşuň.",
+            ["ru-RU"] = "Позиции заявок и приглашения появятся здесь после обработки заявок. Паспорта и другие данные добавляйте на вкладках выше.",
+        },
+        ["Person.DetailSection.PersonRecordData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person record data",
+            ["tr-TR"] = "Kişi kayıt verileri",
+            ["tk-TM"] = "Şahsy ýazgy maglumatlary",
+            ["ru-RU"] = "Данные личного дела",
+        },
+        ["Person.Tab.CvAndPersonalFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "CV & personal files",
+            ["tr-TR"] = "CV ve kişisel dosyalar",
+            ["tk-TM"] = "CV we şahsy faýllar",
+            ["ru-RU"] = "Резюме и личные файлы",
+        },
         ["PersonDocumentCopies.Action.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Close",

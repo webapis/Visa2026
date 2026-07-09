@@ -200,3 +200,44 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **Backup**: pre-apply to `E:\visa2026\backups\prod\` failed — folder did not exist (`Msg 3201`). Created `E:\visa2026\backups\prod\` on `.25`; post-repair backup **`Visa2026DbProd-post-dup-employees-20260709-092641.bak`** (~6 min).
 - **Remaining ~35** groups: legacy `_dub` / mixed — use `-Scope AllIdentity` only after manual review; not auto-merged.
 - **Prevention**: `Visa2014PersonIdentityDuplicateGuard` on `--supplement-permit-persons` — redeploy DataImporter to `C:\visa2026-sync\tools\DataImporter\` before next supplement run.
+
+### 2026-07-09 — Repair duplicate Cities (null vs set Region, prod preview)
+
+- **Script**: `Repair-DuplicateCities.ps1` + `cleanup/DuplicateCitiesByNameTm.sql` (default `-Scope NullVsSetRegion`).
+- **Root cause**: global `city.json` sync created Region-linked rows (`…771520A`); orphan name-only rows (`…76DB918`) from bootstrap/import resolver fallback — `LookupCatalogEntitySync` never merges `T:{name}` with `R:{region}|T:{name}`.
+- **Preview (dev PC → `Visa2026DbProd`)**: **89** groups; **89** null-Region extras to soft-delete; **2098** active `AddressesOfResidence.CityID` repoints; **0** Lodgings/Hotels on extras; active Cities **178** → **89** after apply.
+- **Keep rule**: row with `RegionID` set (canonical seed); extras are always null-Region batch.
+- **Apply**: `Repair-DuplicateCities.ps1 -Apply` after backup to `E:\visa2026\backups\prod\` (folder exists since employee repair).
+- **Follow-up (prevention, not in repair)**: tighten `GetCatalogIdentityKey` / `ResolveCity` so import does not link to null-Region when region is known.
+
+### 2026-07-09 — Repair duplicate Cities (prod apply)
+
+- **Apply (dev PC → `Visa2026DbProd`)**: **89** groups merged; **2098** `AddressesOfResidence.CityID` repointed; **89** null-Region extras soft-deleted (`GCRecord=1`).
+- **After counts**: active Cities **89** (was 178); NullVsSet + all NameTm duplicate groups **0**.
+- **Backup**: pre-apply `BACKUP DATABASE` to `E:\visa2026\backups\prod\` failed — **E:** ~23 GB free, existing post-employee `.bak` ~39 GB. Rollback: `Visa2026DbProd-post-dup-employees-20260709-092641.bak` on `E:\visa2026\backups\prod\`.
+- **Prevention shipped (repo, not yet on `.25` IIS/sync host)**: `LookupCatalogEntitySync.RemoveDuplicateCityNullRegionOrphans` on catalog dedupe; `Visa2014CityLookupMatcher` — region-scoped resolve no orphan fallback; name-only prefers Region-linked row.
+
+### 2026-07-09 — Prevention deploy to `.25` (sync host + IIS all slots)
+
+- **Sync host**: `Install-OnPremSyncHost.ps1 -PublishFromRepo` → `dist\visa2026-sync-deploy`; `sync-deploy.tgz` (~280 MB) extracted to `C:\visa2026-sync\tools\`. **Tar alone did not refresh DLL timestamps** — force `scp` of `Visa2026.Module.dll` + `Visa2026.DataImporter.dll` after disable task + `taskkill DataImporter`.
+- **Task**: `Visa2026-OnPrem-LegacySync` **disabled** during copy, **re-enabled** after (`02:30` nightly).
+- **IIS**: `Deploy-Visa2026AllIisSlotsRemote.ps1 -ForceUpdate` — prod `publish-version.txt` **1.0.0.556** / GitSha `5092545`; smoke **200** on :80 / :8080 / :8081.
+- **Ships**: City orphan dedupe (`LookupCatalogEntitySync`), `Visa2014CityLookupMatcher`, `Visa2014PersonIdentityDuplicateGuard` (supplement persons).
+- **Disk**: **E:** ~23 GB free — still cannot take second ~40 GB `.bak` beside post-employee backup; free or archive before next full backup.
+
+### 2026-07-09 — Lodging null CityID backfill (prod)
+
+- **Symptom**: Lodging ListView — first rows empty **City** column (18 / 73 active had `CityID` NULL).
+- **Root cause**: `Repair-DuplicateLodgings` keeper = most **AOR** refs; extras with `CityID` soft-deleted without copying city to keeper. Import rows also had null city when legacy city resolve failed.
+- **Fix**: `Backfill-LodgingCityFromAor.ps1` + `cleanup/BackfillLodgingCityFromAor.sql` — plurality `AddressesOfResidence.CityID` (≥50% vote); soft-delete zero-AOR duplicate addresses (keep `MIN(ID)` per `FullAddress`).
+- **Apply**: **8** city backfills; **8** orphan dupes soft-deleted; active Lodgings **73 → 65**; null `CityID` **18 → 2** (zero-AOR unique addresses — manual / tenant catalog if needed).
+- **Final 2 rows**: `lodging.calik-energi.json` — km-9 gara ýol → **Türkmenabat şäheri** (Lebap); Parahat substation → **Serhetabat etraby** (catalog spelling Serdarabat). Direct SQL; **0** null `CityID` on active Lodgings.
+- **Prevention**: `DuplicateLodgingsByFullAddress.sql` now copies `ExtraCityId` → keeper when keeper `CityID` is null before soft-delete.
+
+### 2026-07-09 — Duplicate AddressOfResidence per Person+site (prod apply + local dev)
+
+- **UI report**: screenshot of **6 identical** Lodging rows was from **local dev** `(localdb)\Visa2026` — not prod. Prod example (Abdelmalik) has **distinct** sites (10 km vs 6.7 km) — legitimate two rows.
+- **Prod SQL (separate migration artifact)**: **483** exact duplicate groups (`Person+Type+City+FullAddress`, all pairs); **414** persons; **265** `ApplicationItems` on extras.
+- **Apply prod**: `Repair-DuplicateAddressOfResidence.ps1 -Apply` — **483** extras soft-deleted; **0** remaining duplicate groups; active AOR **4947**.
+- **Apply local dev**: same SQL against `Visa2026` — **809** groups / **4494** extras removed (repeated import runs).
+- **Prevention (repo)**: `Visa2014AddressOfResidenceSiteDuplicateGuard` on sync insert; `Visa2014AddressOfResidenceTargetMatcher` before PIA-inferred create and legacy import insert when `--target-connection` / sync target CS set.

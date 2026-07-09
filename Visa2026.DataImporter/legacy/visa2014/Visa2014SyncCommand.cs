@@ -256,7 +256,7 @@ internal static class Visa2014SyncCommand
                 ?? source.IdMapPath(dataImporterRoot, "Person");
             result = await Visa2014AddressOfResidenceODataImporter.RunSyncAsync(
                 target, resolver, source.ConnectionString, source.LookupTranslationPaths,
-                personIdMapPath, sync, maxRows, verbose);
+                personIdMapPath, sync, GetTargetConnection(args), maxRows, verbose);
         }
         else if (string.Equals(entity, "Application", StringComparison.OrdinalIgnoreCase))
         {

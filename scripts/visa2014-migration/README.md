@@ -121,7 +121,9 @@ Do **not** use `reimport/` for staging or production cutover.
 | Duplicate AddressOfResidence per Person+site (on-prem prod data fix) | `Repair-DuplicateAddressOfResidence.ps1` | `cleanup/DuplicateAddressOfResidenceByPersonSite.sql` (preview `@Apply=0`, then `-Apply`) |
 | Duplicate ApplicationProgress per App+Order (on-prem prod data fix) | `Repair-DuplicateApplicationProgress.ps1` | `cleanup/DuplicateApplicationProgressByAppOrder.sql` (preview `@Apply=0`, then `-Apply`) |
 | Duplicate Lodging by FullAddress (on-prem prod data fix) | `Repair-DuplicateLodgings.ps1` | `cleanup/DuplicateLodgingsByFullAddress.sql` (preview `@Apply=0`, then `-Apply`) |
+| Lodging null CityID backfill from AOR plurality (on-prem prod) | `Backfill-LodgingCityFromAor.ps1` | `cleanup/BackfillLodgingCityFromAor.sql` (preview then `-Apply`) |
 | Duplicate employee Persons (bootstrap + supplement twins, on-prem prod) | `Repair-DuplicateEmployees.ps1` | `cleanup/DuplicateEmployeesByIdentity.sql` (default `-Scope BootstrapSupplement`; preview then `-Apply -UpdateIdMap -PersonIdMapPath …`) |
+| Duplicate City by NameTm (null vs set Region, on-prem prod) | `Repair-DuplicateCities.ps1` | `cleanup/DuplicateCitiesByNameTm.sql` (default `-Scope NullVsSetRegion`; preview `@Apply=0`, then `-Apply`) |
 
 ### Reconcile
 
