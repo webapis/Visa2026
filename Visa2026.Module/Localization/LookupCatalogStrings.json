@@ -74,6 +74,60 @@
       "tk-TM": "2-NJI IŞ YLALAŞYK BERILMEDI",
       "ru-RU": "Отказ (2-я инстанция)"
     },
+    "3_REVIEW_STARTED": {
+      "en-US": "3rd ministry review (in progress)",
+      "tr-TR": "3. bakanlık incelemesinde",
+      "tk-TM": "3-NJI IŞ YLALAŞYKDA",
+      "ru-RU": "На согласовании (3-я инстанция)"
+    },
+    "3_REVIEW_APPROVED": {
+      "en-US": "3rd ministry review approved",
+      "tr-TR": "3. bakanlık onayı alındı",
+      "tk-TM": "3-NJI IŞ YLALAŞYK ALYNDY",
+      "ru-RU": "Согласовано (3-я инстанция)"
+    },
+    "3_REVIEW_REJECTED": {
+      "en-US": "3rd ministry review rejected",
+      "tr-TR": "3. bakanlık onayı reddedildi",
+      "tk-TM": "3-NJI IŞ YLALAŞYK BERILMEDI",
+      "ru-RU": "Отказ (3-я инстанция)"
+    },
+    "4_REVIEW_STARTED": {
+      "en-US": "4th ministry review (in progress)",
+      "tr-TR": "4. bakanlık incelemesinde",
+      "tk-TM": "4-NJI IŞ YLALAŞYKDA",
+      "ru-RU": "На согласовании (4-я инстанция)"
+    },
+    "4_REVIEW_APPROVED": {
+      "en-US": "4th ministry review approved",
+      "tr-TR": "4. bakanlık onayı alındı",
+      "tk-TM": "4-NJI IŞ YLALAŞYK ALYNDY",
+      "ru-RU": "Согласовано (4-я инстанция)"
+    },
+    "4_REVIEW_REJECTED": {
+      "en-US": "4th ministry review rejected",
+      "tr-TR": "4. bakanlık onayı reddedildi",
+      "tk-TM": "4-NJI IŞ YLALAŞYK BERILMEDI",
+      "ru-RU": "Отказ (4-я инстанция)"
+    },
+    "5_REVIEW_STARTED": {
+      "en-US": "5th ministry review (in progress)",
+      "tr-TR": "5. bakanlık incelemesinde",
+      "tk-TM": "5-NJI IŞ YLALAŞYKDA",
+      "ru-RU": "На согласовании (5-я инстанция)"
+    },
+    "5_REVIEW_APPROVED": {
+      "en-US": "5th ministry review approved",
+      "tr-TR": "5. bakanlık onayı alındı",
+      "tk-TM": "5-NJI IŞ YLALAŞYK ALYNDY",
+      "ru-RU": "Согласовано (5-я инстанция)"
+    },
+    "5_REVIEW_REJECTED": {
+      "en-US": "5th ministry review rejected",
+      "tr-TR": "5. bakanlık onayı reddedildi",
+      "tk-TM": "5-NJI IŞ YLALAŞYK BERILMEDI",
+      "ru-RU": "Отказ (5-я инстанция)"
+    },
     "PROCESS_STARTED": {
       "en-US": "In processing",
       "tr-TR": "İşleniyor",
@@ -268,11 +322,103 @@
       "tk-TM": "2-NJI MINISTRLIKDE",
       "ru-RU": "Во 2-м министерстве"
     },
+    "AT_THE_MINISTERY_3": {
+      "en-US": "At 3rd ministry",
+      "tr-TR": "3. bakanlıkta",
+      "tk-TM": "3-NJI MINISTRLIKDE",
+      "ru-RU": "В 3-м министерстве"
+    },
+    "AT_THE_MINISTERY_4": {
+      "en-US": "At 4th ministry",
+      "tr-TR": "4. bakanlıkta",
+      "tk-TM": "4-NJI MINISTRLIKDE",
+      "ru-RU": "В 4-м министерстве"
+    },
+    "AT_THE_MINISTERY_5": {
+      "en-US": "At 5th ministry",
+      "tr-TR": "5. bakanlıkta",
+      "tk-TM": "5-NJI MINISTRLIKDE",
+      "ru-RU": "В 5-м министерстве"
+    },
     "AT_MIGRATION_SERVICE": {
       "en-US": "At migration service",
       "tr-TR": "Göç dairesinde",
       "tk-TM": "MIGRASIÝA GULLUGYNDA",
       "ru-RU": "В миграционной службе"
+    }
+  },
+  "migration-service": {
+    "tdmgas": {
+      "en-US": "Migration service — Ashgabat city",
+      "tr-TR": "Göç dairesi — Aşgabat şehri",
+      "tk-TM": "Aşgabat ş. müdirligi",
+      "ru-RU": "Миграционная служба — г. Ашхабад"
+    },
+    "tdmgah": {
+      "en-US": "Migration service — Ahal region",
+      "tr-TR": "Göç dairesi — Ahal ili",
+      "tk-TM": "Ahal welaýaty müdirligi",
+      "ru-RU": "Миграционная служба — Ахалский велаят"
+    },
+    "tdmgmr": {
+      "en-US": "Migration service — Mary region",
+      "tr-TR": "Göç dairesi — Mary ili",
+      "tk-TM": "Mary welaýaty müdirligi",
+      "ru-RU": "Миграционная служба — Марыйский велаят"
+    },
+    "tdmg-serh": {
+      "en-US": "Migration service — Serhetabat (Mary)",
+      "tr-TR": "Göç dairesi — Serhetabat (Mary)",
+      "tk-TM": "Serhetabat ş. bölümi",
+      "ru-RU": "Миграционная служба — Серахс (Мары)"
+    },
+    "tdmg-yl": {
+      "en-US": "Migration service — Yoloten (Mary)",
+      "tr-TR": "Göç dairesi — Yolöten (Mary)",
+      "tk-TM": "Ýolöten etrap bölümi",
+      "ru-RU": "Миграционная служба — Ёлётен (Мары)"
+    },
+    "tdmg-gyz": {
+      "en-US": "Migration service — Gyzylarbat (Balkan)",
+      "tr-TR": "Göç dairesi — Gyzylarbat (Balkan)",
+      "tk-TM": "Gyzylarbat etrap bölümi",
+      "ru-RU": "Миграционная служба — Кызыларбат (Балкан)"
+    },
+    "tdmg-tb": {
+      "en-US": "Migration service — Turkmenbashy (Balkan)",
+      "tr-TR": "Göç dairesi — Türkmenbaşı (Balkan)",
+      "tk-TM": "Türkmenbaşy ş. bölümi",
+      "ru-RU": "Миграционная служба — Туркменбаши (Балкан)"
+    },
+    "tdmgbn": {
+      "en-US": "Migration service — Balkan region",
+      "tr-TR": "Göç dairesi — Balkan ili",
+      "tk-TM": "Balkan welaýaty müdirligi",
+      "ru-RU": "Миграционная служба — Балканский велаят"
+    },
+    "tdmg-lb": {
+      "en-US": "Migration service — Lebap region",
+      "tr-TR": "Göç dairesi — Lebap ili",
+      "tk-TM": "Lebap welaýaty müdirligi",
+      "ru-RU": "Миграционная служба — Лебапский велаят"
+    },
+    "tdmgkr": {
+      "en-US": "Migration service — Kerki (Lebap)",
+      "tr-TR": "Göç dairesi — Kerki (Lebap)",
+      "tk-TM": "Kerki ş. bölümi",
+      "ru-RU": "Миграционная служба — Керки (Лебап)"
+    },
+    "tdmg-atyr": {
+      "en-US": "Migration service — Atamyrat (Lebap)",
+      "tr-TR": "Göç dairesi — Atamyrat (Lebap)",
+      "tk-TM": "Atamyrat ş. bölümi",
+      "ru-RU": "Миграционная служба — Атамурат (Лебап)"
+    },
+    "tdmg-dz": {
+      "en-US": "Migration service — Dashoguz region",
+      "tr-TR": "Göç dairesi — Daşoguz ili",
+      "tk-TM": "Daşoguz welaýaty",
+      "ru-RU": "Миграционная служба — Дашогузский велаят"
     }
   }
 }

@@ -81,6 +81,7 @@
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />
+      <Item Id="LegacySyncDashboard" Caption="Eski sistem senkronizasyonu" />
       <Item Id="Lookup" Caption="Referans">
         <Items>
           <Item Id="Application" Caption="Başvuru">

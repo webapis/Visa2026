@@ -81,6 +81,7 @@
       <Item Id="Housing" Caption="Ýaşaýyş" />
       <Item Id="Invitation" Caption="Çakylyk" />
       <Item Id="InvitationItem" Caption="Çakylyk elementleri" />
+      <Item Id="LegacySyncDashboard" Caption="Köne ulgam sinhronizasiýasy" />
       <Item Id="Lookup" Caption="Maglumat">
         <Items>
           <Item Id="Application" Caption="Arza">
@@ -306,7 +307,7 @@
       <OwnMembers>
         <Member Name="Entry" Caption="Giriş" />
         <Member Name="Exit" Caption="Çykyş" />
-        <Member Name="Stay" Caption="Galış" />
+        <Member Name="Stay" Caption="Galyş" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationLocation" Caption="Arza ýeri">
@@ -3153,7 +3154,7 @@
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationLifecycleStage">
         <LocalizationItem Name="Entry" Value="Giriş" />
         <LocalizationItem Name="Exit" Value="Çykyş" />
-        <LocalizationItem Name="Stay" Value="Galış" />
+        <LocalizationItem Name="Stay" Value="Galyş" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ApplicationProgressRouteKind">
         <LocalizationItem Name="DirectToMigrationService" Value="Migrasiýa gönümel" />

@@ -9,6 +9,7 @@
     "Recycle Bin": { "tr-TR": "Geri Dönüşüm", "tk-TM": "Geri gaýtaryş", "ru-RU": "Корзина" },
     "Operations": { "tr-TR": "İşlemler", "tk-TM": "Amallar", "ru-RU": "Операции" },
     "StateNotifications": { "tr-TR": "Durum bildirimleri", "tk-TM": "Ýagdaý habarnamalary", "ru-RU": "Уведомления о состоянии" },
+    "LegacySyncDashboard": { "tr-TR": "Eski sistem senkronizasyonu", "tk-TM": "Köne ulgam sinhronizasiýasy", "ru-RU": "Синхронизация с устаревшей системой" },
     "UserFeedback": { "tr-TR": "Kullanıcı geri bildirimi", "tk-TM": "Ulanyjy pikirleri", "ru-RU": "Отзывы пользователей" }
   },
   "actions": {

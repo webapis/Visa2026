@@ -1,6 +1,7 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
@@ -25,7 +26,7 @@ public static class ApplicationItemVisaDefaults
         if (passport == null)
         {
             application?.ShowViewStrategy.ShowMessage(
-                "Please create or select Current Passport first, then create Visa.",
+                VisaUiMessages.Get("ApplicationItem.SelectPassportBeforeVisa"),
                 InformationType.Warning);
             return false;
         }

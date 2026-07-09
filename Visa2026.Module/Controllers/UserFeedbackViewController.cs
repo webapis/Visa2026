@@ -20,7 +20,7 @@ public sealed class UserFeedbackViewController : ObjectViewController<ObjectView
     {
         _markInProgressAction = new SimpleAction(this, "UserFeedbackMarkInProgress", PredefinedCategory.Edit)
         {
-            Caption = "Mark in progress",
+            Caption = VisaUiMessages.Get("UserFeedback.Action.MarkInProgress"),
             ImageName = "Action_Grant",
             SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects,
             ConfirmationMessage = null
@@ -29,7 +29,7 @@ public sealed class UserFeedbackViewController : ObjectViewController<ObjectView
 
         _markFixedAction = new SimpleAction(this, "UserFeedbackMarkFixed", PredefinedCategory.Edit)
         {
-            Caption = "Mark fixed",
+            Caption = VisaUiMessages.Get("UserFeedback.Action.MarkFixed"),
             ImageName = "Action_Valid",
             SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects,
             ConfirmationMessage = null

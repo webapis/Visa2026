@@ -48,6 +48,7 @@ internal static partial class LookupLocalizationKeys
             EducationLevel => ResolveEducationLevel(row),
             ApplicationState => ResolveApplicationState(row),
             ApplicationLocation => ResolveApplicationLocation(row),
+            MigrationService => ResolveStoredKey(row),
             Region => ResolveRegion(row),
             ValidityDuration => ResolveValidityDuration(row),
             CheckPoint => ResolveCheckPoint(row),

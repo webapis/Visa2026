@@ -28,7 +28,7 @@ public sealed class BoStateNotificationInboxModelUpdater : ModelNodesGeneratorUp
         var navItem = operations.Items["StateNotifications"]
             ?? operations.Items.AddNode<IModelNavigationItem>("StateNotifications");
         navItem.View = detailView;
-        navItem.Caption = "State notifications";
+        navItem.Caption = Localization.VisaUiMessages.Get("StateNotification.Title");
         navItem.ImageName = "BO_Validation";
     }
 }

@@ -5,6 +5,7 @@ using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
 using AppBO = Visa2026.Module.BusinessObjects.Application;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers
@@ -20,7 +21,7 @@ namespace Visa2026.Module.Controllers
             {
                 ImageName = "Action_Edit_Object",
                 SelectionDependencyType = SelectionDependencyType.RequireSingleObject,
-                ToolTip = "Open the full Application record for the selected row",
+                ToolTip = VisaUiMessages.Get("VisaStatus.OpenApplication.ToolTip"),
             };
             _openApplicationAction.Execute += OnOpenApplication;
         }

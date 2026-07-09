@@ -81,6 +81,7 @@
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />
+      <Item Id="LegacySyncDashboard" Caption="Синхронизация с устаревшей системой" />
       <Item Id="Lookup" Caption="Справочники">
         <Items>
           <Item Id="Application" Caption="Заявка">

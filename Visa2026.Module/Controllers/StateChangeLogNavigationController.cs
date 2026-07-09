@@ -15,13 +15,13 @@ namespace Visa2026.Module.Controllers
             TargetObjectType = typeof(StateChangeLog);
 
             var openSourceAction = new SimpleAction(this, "OpenSourceObject", PredefinedCategory.View);
-            openSourceAction.ToolTip = "Navigate to the object that triggered this log entry.";
+            openSourceAction.ToolTip = VisaUiMessages.Get("StateChangeLog.OpenSource.ToolTip");
             openSourceAction.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
             openSourceAction.ImageName = "Action_Link"; 
             openSourceAction.Execute += OpenSourceAction_Execute;
 
             var openTargetAction = new SimpleAction(this, "OpenTargetObject", PredefinedCategory.View);
-            openTargetAction.ToolTip = "Navigate to the object affected by this log entry.";
+            openTargetAction.ToolTip = VisaUiMessages.Get("StateChangeLog.OpenTarget.ToolTip");
             openTargetAction.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
             openTargetAction.ImageName = "Action_Link";
             openTargetAction.Execute += OpenTargetAction_Execute;

@@ -2,6 +2,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.BaseImpl.EF;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
@@ -27,7 +28,7 @@ public static class ApplicationItemPersonLinkedDefaults
         if (appItem.Person == null)
         {
             application?.ShowViewStrategy.ShowMessage(
-                "Please select Person on the application line first.",
+                VisaUiMessages.Get("ApplicationItem.SelectPersonFirst"),
                 InformationType.Warning);
             return false;
         }

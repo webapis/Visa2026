@@ -13,13 +13,18 @@ internal static partial class LookupLocalizationKeys
 
     private static readonly HashSet<string> ApplicationStateSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        "IS_BEING_PREPARED", "1_REVIEW_STARTED", "2_REVIEW_STARTED", "1_REVIEW_APPROVED", "2_REVIEW_APPROVED",
-        "1_REVIEW_REJECTED", "2_REVIEW_REJECTED", "PROCESS_STARTED", "PROCESS_CANCELLED", "PROCESS_REJECTED", "PROCESS_ISSUED",
+        "IS_BEING_PREPARED",
+        "1_REVIEW_STARTED", "2_REVIEW_STARTED", "3_REVIEW_STARTED", "4_REVIEW_STARTED", "5_REVIEW_STARTED",
+        "1_REVIEW_APPROVED", "2_REVIEW_APPROVED", "3_REVIEW_APPROVED", "4_REVIEW_APPROVED", "5_REVIEW_APPROVED",
+        "1_REVIEW_REJECTED", "2_REVIEW_REJECTED", "3_REVIEW_REJECTED", "4_REVIEW_REJECTED", "5_REVIEW_REJECTED",
+        "PROCESS_STARTED", "PROCESS_CANCELLED", "PROCESS_REJECTED", "PROCESS_ISSUED",
     };
 
     private static readonly HashSet<string> ApplicationLocationSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
-        "AT_OFFICE", "AT_THE_MINISTERY_1", "AT_THE_MINISTERY_2", "AT_MIGRATION_SERVICE",
+        "AT_OFFICE",
+        "AT_THE_MINISTERY_1", "AT_THE_MINISTERY_2", "AT_THE_MINISTERY_3", "AT_THE_MINISTERY_4", "AT_THE_MINISTERY_5",
+        "AT_MIGRATION_SERVICE",
     };
 
     private static readonly HashSet<string> RegionSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
@@ -67,10 +72,19 @@ internal static partial class LookupLocalizationKeys
             ["TAYYARLYKDA"] = "IS_BEING_PREPARED",
             ["1-NJI IŞ YLALAŞYKDA"] = "1_REVIEW_STARTED",
             ["2-NJI IŞ YLALAŞYKDA"] = "2_REVIEW_STARTED",
+            ["3-NJI IŞ YLALAŞYKDA"] = "3_REVIEW_STARTED",
+            ["4-NJI IŞ YLALAŞYKDA"] = "4_REVIEW_STARTED",
+            ["5-NJI IŞ YLALAŞYKDA"] = "5_REVIEW_STARTED",
             ["1-NJI IŞ YLALAŞYK ALYNDY"] = "1_REVIEW_APPROVED",
             ["2-NJI IŞ YLALAŞYK ALYNDY"] = "2_REVIEW_APPROVED",
+            ["3-NJI IŞ YLALAŞYK ALYNDY"] = "3_REVIEW_APPROVED",
+            ["4-NJI IŞ YLALAŞYK ALYNDY"] = "4_REVIEW_APPROVED",
+            ["5-NJI IŞ YLALAŞYK ALYNDY"] = "5_REVIEW_APPROVED",
             ["1-NJI IŞ YLALAŞYK BERILMEDI"] = "1_REVIEW_REJECTED",
             ["2-NJI IŞ YLALAŞYK BERILMEDI"] = "2_REVIEW_REJECTED",
+            ["3-NJI IŞ YLALAŞYK BERILMEDI"] = "3_REVIEW_REJECTED",
+            ["4-NJI IŞ YLALAŞYK BERILMEDI"] = "4_REVIEW_REJECTED",
+            ["5-NJI IŞ YLALAŞYK BERILMEDI"] = "5_REVIEW_REJECTED",
             ["İŞLENMEKDE"] = "PROCESS_STARTED",
             ["ISLENMEKDE"] = "PROCESS_STARTED",
             ["ÝÜZTUTMA ÝATYRYLDY"] = "PROCESS_CANCELLED",
@@ -87,6 +101,9 @@ internal static partial class LookupLocalizationKeys
             ["OFISDE"] = "AT_OFFICE",
             ["1-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_1",
             ["2-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_2",
+            ["3-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_3",
+            ["4-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_4",
+            ["5-NJI MINISTRLIKDE"] = "AT_THE_MINISTERY_5",
             ["MIGRASIÝA GULLUGYNDA"] = "AT_MIGRATION_SERVICE",
             ["MIGRASIYA GULLUGYNDA"] = "AT_MIGRATION_SERVICE",
         };

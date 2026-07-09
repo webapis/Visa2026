@@ -145,6 +145,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Duýduryş: {0} arhiwlenen. Bu adamyň arza setirinde bolmagy gerekdigini tassyklaň.",
             ["ru-RU"] = "Внимание: {0} в архиве. Подтвердите, что эта персона должна быть в строке заявки.",
         },
+        ["ApplicationItem.SelectPassportBeforeVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Please create or select Current Passport first, then create Visa.",
+            ["tr-TR"] = "Önce Güncel Pasaport oluşturun veya seçin, sonra Vize oluşturun.",
+            ["tk-TM"] = "Ilki bilen Häzirki pasporty dörediň ýa-da saýlaň, soňra Wiza dörediň.",
+            ["ru-RU"] = "Сначала создайте или выберите текущий паспорт, затем создайте визу.",
+        },
+        ["ApplicationItem.SelectPersonFirst"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Please select Person on the application line first.",
+            ["tr-TR"] = "Önce başvuru satırında Kişi seçin.",
+            ["tk-TM"] = "Ilki bilen arza setirinde Adam saýlaň.",
+            ["ru-RU"] = "Сначала выберите лицо в строке заявки.",
+        },
         ["ApplicationItemDocumentCopies.Action.BatchSummary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Batch summary",
@@ -2091,6 +2105,48 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Çakylyk resminama nusgalary",
             ["ru-RU"] = "Копии документов приглашения",
         },
+        ["LegacySync.OpenInNewTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open in new tab",
+            ["tr-TR"] = "Yeni sekmede aç",
+            ["tk-TM"] = "Täze goýmada aç",
+            ["ru-RU"] = "Открыть в новой вкладке",
+        },
+        ["LegacySync.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refresh",
+            ["tr-TR"] = "Yenile",
+            ["tk-TM"] = "Täzele",
+            ["ru-RU"] = "Обновить",
+        },
+        ["LegacySync.Refreshing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refreshing…",
+            ["tr-TR"] = "Yenileniyor…",
+            ["tk-TM"] = "Täzelenýär…",
+            ["ru-RU"] = "Обновление…",
+        },
+        ["LegacySync.ReportFrameTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Legacy sync report",
+            ["tr-TR"] = "Eski sistem senkronizasyon raporu",
+            ["tk-TM"] = "Köne ulgam sinhronizasiýa hasabaty",
+            ["ru-RU"] = "Отчёт синхронизации с устаревшей системой",
+        },
+        ["LegacySync.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "VISA2015 → Visa2026 on-prem reconcile (HTML report).",
+            ["tr-TR"] = "VISA2015 → Visa2026 yerinde mutabakat (HTML raporu).",
+            ["tk-TM"] = "VISA2015 → Visa2026 ýerli deňeşdirme (HTML hasabaty).",
+            ["ru-RU"] = "Сверка VISA2015 → Visa2026 на площадке (HTML-отчёт).",
+        },
+        ["LegacySync.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Legacy sync",
+            ["tr-TR"] = "Eski sistem senkronizasyonu",
+            ["tk-TM"] = "Köne ulgam sinhronizasiýasy",
+            ["ru-RU"] = "Синхронизация с устаревшей системой",
+        },
         ["MinistryReviewSlaSettings.NotConfigured"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA.",
@@ -3043,6 +3099,48 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ret resminama nusgalary",
             ["ru-RU"] = "Копии документов отказа",
         },
+        ["RuntimeLog.Action.MarkFixed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark fixed",
+            ["tr-TR"] = "Düzeltildi olarak işaretle",
+            ["tk-TM"] = "Düzedildi diýip belläň",
+            ["ru-RU"] = "Отметить как исправлено",
+        },
+        ["RuntimeLog.Action.MarkIgnored"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark ignored",
+            ["tr-TR"] = "Yoksay olarak işaretle",
+            ["tk-TM"] = "Ähmiýetsiz diýip belläň",
+            ["ru-RU"] = "Отметить как игнорируемое",
+        },
+        ["RuntimeLog.Action.MarkInProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark in progress",
+            ["tr-TR"] = "İşlemde olarak işaretle",
+            ["tk-TM"] = "Işlenýär diýip belläň",
+            ["ru-RU"] = "Отметить как в работе",
+        },
+        ["RuntimeLog.Confirm.MarkFixed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark selected runtime error(s) as fixed?",
+            ["tr-TR"] = "Seçili çalışma zamanı hatalarını düzeltildi olarak işaretlemek istiyor musunuz?",
+            ["tk-TM"] = "Saýlanan iş wagty ýalňyşlyklaryny düzedildi diýip bellemek isleýärsiňizmi?",
+            ["ru-RU"] = "Отметить выбранные ошибки выполнения как исправленные?",
+        },
+        ["RuntimeLog.Confirm.MarkIgnored"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark selected runtime error(s) as ignored?",
+            ["tr-TR"] = "Seçili çalışma zamanı hatalarını yoksay olarak işaretlemek istiyor musunuz?",
+            ["tk-TM"] = "Saýlanan iş wagty ýalňyşlyklaryny ähmiýetsiz diýip bellemek isleýärsiňizmi?",
+            ["ru-RU"] = "Отметить выбранные ошибки выполнения как игнорируемые?",
+        },
+        ["RuntimeLog.Confirm.MarkInProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark selected runtime error(s) as in progress?",
+            ["tr-TR"] = "Seçili çalışma zamanı hatalarını işlemde olarak işaretlemek istiyor musunuz?",
+            ["tk-TM"] = "Saýlanan iş wagty ýalňyşlyklaryny işlenýär diýip bellemek isleýärsiňizmi?",
+            ["ru-RU"] = "Отметить выбранные ошибки выполнения как «в работе»?",
+        },
         ["RuntimeLog.Header.Tooltip.Default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Runtime errors — server log inbox",
@@ -3112,6 +3210,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Hedef nesne bilgisi yok.",
             ["tk-TM"] = "Maksat obýekt maglumaty ýok.",
             ["ru-RU"] = "Нет сведений о целевом объекте.",
+        },
+        ["StateChangeLog.OpenSource.ToolTip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Navigate to the object that triggered this log entry.",
+            ["tr-TR"] = "Bu günlük kaydını tetikleyen nesneye gidin.",
+            ["tk-TM"] = "Bu žurnal ýazgysyny döreden obýekte geçiň.",
+            ["ru-RU"] = "Перейти к объекту, вызвавшему эту запись журнала.",
+        },
+        ["StateChangeLog.OpenTarget.ToolTip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Navigate to the object affected by this log entry.",
+            ["tr-TR"] = "Bu günlük kaydından etkilenen nesneye gidin.",
+            ["tk-TM"] = "Bu žurnal ýazgysyndan täsirlenen obýekte geçiň.",
+            ["ru-RU"] = "Перейти к объекту, затронутому этой записью журнала.",
         },
         ["StateChangeLog.ParseIdError"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3932,6 +4044,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Synag ygtyýarnamasynyň möhleti gutardy",
             ["ru-RU"] = "Срок пробной лицензии истёк",
         },
+        ["UserFeedback.Action.MarkFixed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark fixed",
+            ["tr-TR"] = "Düzeltildi olarak işaretle",
+            ["tk-TM"] = "Düzedildi diýlip bellen",
+            ["ru-RU"] = "Отметить исправленным",
+        },
+        ["UserFeedback.Action.MarkInProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark in progress",
+            ["tr-TR"] = "Devam ediyor olarak işaretle",
+            ["tk-TM"] = "Işlenilýär diýlip bellen",
+            ["ru-RU"] = "Отметить «в работе»",
+        },
         ["UserFeedback.Dialog.Attachment"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Attachment (optional)",
@@ -4365,6 +4491,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Kaydetmeden önce tüm aile satırlarını doldurun.",
             ["tk-TM"] = "Saklamazdan öň ähli maşgala setirlerini dolduryň.",
             ["ru-RU"] = "Заполните все строки о родственниках перед сохранением.",
+        },
+        ["VisaStatus.OpenApplication.ToolTip"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open the full Application record for the selected row",
+            ["tr-TR"] = "Seçili satırın tam Başvuru kaydını aç",
+            ["tk-TM"] = "Saýlanan setiriň doly Arza ýazgysyny aç",
+            ["ru-RU"] = "Открыть полную запись заявки для выбранной строки",
         },
         ["Word.Toast.Close"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

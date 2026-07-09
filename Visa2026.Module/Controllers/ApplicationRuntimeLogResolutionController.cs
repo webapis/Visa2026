@@ -6,6 +6,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects.Operations;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Module.Controllers;
@@ -33,28 +34,28 @@ public sealed class ApplicationRuntimeLogResolutionController : ObjectViewContro
 
         markInProgressAction = new SimpleAction(this, "ApplicationRuntimeLogMarkInProgress", PredefinedCategory.Edit)
         {
-            Caption = "Mark in progress",
+            Caption = VisaUiMessages.Get("RuntimeLog.Action.MarkInProgress"),
             ImageName = "Action_Grant",
             SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects,
-            ConfirmationMessage = "Mark selected runtime error(s) as in progress?"
+            ConfirmationMessage = VisaUiMessages.Get("RuntimeLog.Confirm.MarkInProgress")
         };
         markInProgressAction.Execute += MarkInProgressActionOnExecute;
 
         markFixedAction = new SimpleAction(this, "ApplicationRuntimeLogMarkFixed", PredefinedCategory.Edit)
         {
-            Caption = "Mark fixed",
+            Caption = VisaUiMessages.Get("RuntimeLog.Action.MarkFixed"),
             ImageName = "Action_Validation_Validate",
             SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects,
-            ConfirmationMessage = "Mark selected runtime error(s) as fixed?"
+            ConfirmationMessage = VisaUiMessages.Get("RuntimeLog.Confirm.MarkFixed")
         };
         markFixedAction.Execute += MarkFixedActionOnExecute;
 
         markIgnoredAction = new SimpleAction(this, "ApplicationRuntimeLogMarkIgnored", PredefinedCategory.Edit)
         {
-            Caption = "Mark ignored",
+            Caption = VisaUiMessages.Get("RuntimeLog.Action.MarkIgnored"),
             ImageName = "Action_Deny",
             SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects,
-            ConfirmationMessage = "Mark selected runtime error(s) as ignored?"
+            ConfirmationMessage = VisaUiMessages.Get("RuntimeLog.Confirm.MarkIgnored")
         };
         markIgnoredAction.Execute += MarkIgnoredActionOnExecute;
     }

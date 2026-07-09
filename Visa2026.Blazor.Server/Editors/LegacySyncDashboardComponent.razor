@@ -1,5 +1,6 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Microsoft.Extensions.Options
+@using Visa2026.Module.Localization
 @using Visa2026.Module.Services.LegacySyncDashboard
 @implements IAsyncDisposable
 @inject ILegacySyncDashboardService DashboardService
@@ -8,9 +9,9 @@
 <div class="legacy-sync-dashboard">
     <header class="legacy-sync-dashboard__header">
         <div class="legacy-sync-dashboard__header-text">
-            <h2 class="legacy-sync-dashboard__title">Legacy sync</h2>
+            <h2 class="legacy-sync-dashboard__title">@VisaUiMessages.Get("LegacySync.Title")</h2>
             <p class="legacy-sync-dashboard__subtitle">
-                VISA2015 → Visa2026 on-prem reconcile (HTML report).
+                @VisaUiMessages.Get("LegacySync.Subtitle")
             </p>
         </div>
         <div class="legacy-sync-dashboard__actions">
@@ -18,13 +19,13 @@
                href="@LegacySyncDashboardPaths.DashboardHtml"
                target="_blank"
                rel="noopener">
-                Open in new tab
+                @VisaUiMessages.Get("LegacySync.OpenInNewTab")
             </a>
             <button type="button"
                     class="legacy-sync-dashboard__refresh @(_isRefreshing ? "legacy-sync-dashboard__refresh--busy" : null)"
                     disabled="@_isRefreshing"
                     @onclick="RefreshAsync">
-                @(_isRefreshing ? "Refreshing…" : "Refresh")
+                @(_isRefreshing ? VisaUiMessages.Get("LegacySync.Refreshing") : VisaUiMessages.Get("LegacySync.Refresh"))
             </button>
         </div>
     </header>
@@ -38,7 +39,7 @@
     {
         <iframe class="legacy-sync-dashboard__frame"
                 src="@_frameSource"
-                title="Legacy sync report"
+                title="@VisaUiMessages.Get("LegacySync.ReportFrameTitle")"
                 loading="lazy"></iframe>
     }
 </div>

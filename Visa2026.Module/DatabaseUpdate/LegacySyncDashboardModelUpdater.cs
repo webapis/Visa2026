@@ -25,7 +25,7 @@ public sealed class LegacySyncDashboardModelUpdater : ModelNodesGeneratorUpdater
         var navItem = operations.Items["LegacySyncDashboard"]
             ?? operations.Items.AddNode<IModelNavigationItem>("LegacySyncDashboard");
         navItem.View = detailView;
-        navItem.Caption = "Legacy sync";
+        navItem.Caption = Localization.VisaUiMessages.Get("LegacySync.Title");
         navItem.ImageName = "BO_List";
     }
 }

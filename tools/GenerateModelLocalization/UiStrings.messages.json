@@ -2789,6 +2789,120 @@
     "tk-TM": "Işlenilýär diýlip bellendi.",
     "ru-RU": "Отмечено как в работе."
   },
+  "UserFeedback.Action.MarkInProgress": {
+    "en": "Mark in progress",
+    "tr-TR": "Devam ediyor olarak işaretle",
+    "tk-TM": "Işlenilýär diýlip bellen",
+    "ru-RU": "Отметить «в работе»"
+  },
+  "UserFeedback.Action.MarkFixed": {
+    "en": "Mark fixed",
+    "tr-TR": "Düzeltildi olarak işaretle",
+    "tk-TM": "Düzedildi diýlip bellen",
+    "ru-RU": "Отметить исправленным"
+  },
+  "ApplicationItem.SelectPersonFirst": {
+    "en": "Please select Person on the application line first.",
+    "tr-TR": "Önce başvuru satırında Kişi seçin.",
+    "tk-TM": "Ilki bilen arza setirinde Adam saýlaň.",
+    "ru-RU": "Сначала выберите лицо в строке заявки."
+  },
+  "ApplicationItem.SelectPassportBeforeVisa": {
+    "en": "Please create or select Current Passport first, then create Visa.",
+    "tr-TR": "Önce Güncel Pasaport oluşturun veya seçin, sonra Vize oluşturun.",
+    "tk-TM": "Ilki bilen Häzirki pasporty dörediň ýa-da saýlaň, soňra Wiza dörediň.",
+    "ru-RU": "Сначала создайте или выберите текущий паспорт, затем создайте визу."
+  },
+  "RuntimeLog.Action.MarkInProgress": {
+    "en": "Mark in progress",
+    "tr-TR": "İşlemde olarak işaretle",
+    "tk-TM": "Işlenýär diýip belläň",
+    "ru-RU": "Отметить как в работе"
+  },
+  "RuntimeLog.Action.MarkFixed": {
+    "en": "Mark fixed",
+    "tr-TR": "Düzeltildi olarak işaretle",
+    "tk-TM": "Düzedildi diýip belläň",
+    "ru-RU": "Отметить как исправлено"
+  },
+  "RuntimeLog.Action.MarkIgnored": {
+    "en": "Mark ignored",
+    "tr-TR": "Yoksay olarak işaretle",
+    "tk-TM": "Ähmiýetsiz diýip belläň",
+    "ru-RU": "Отметить как игнорируемое"
+  },
+  "RuntimeLog.Confirm.MarkInProgress": {
+    "en": "Mark selected runtime error(s) as in progress?",
+    "tr-TR": "Seçili çalışma zamanı hatalarını işlemde olarak işaretlemek istiyor musunuz?",
+    "tk-TM": "Saýlanan iş wagty ýalňyşlyklaryny işlenýär diýip bellemek isleýärsiňizmi?",
+    "ru-RU": "Отметить выбранные ошибки выполнения как «в работе»?"
+  },
+  "RuntimeLog.Confirm.MarkFixed": {
+    "en": "Mark selected runtime error(s) as fixed?",
+    "tr-TR": "Seçili çalışma zamanı hatalarını düzeltildi olarak işaretlemek istiyor musunuz?",
+    "tk-TM": "Saýlanan iş wagty ýalňyşlyklaryny düzedildi diýip bellemek isleýärsiňizmi?",
+    "ru-RU": "Отметить выбранные ошибки выполнения как исправленные?"
+  },
+  "RuntimeLog.Confirm.MarkIgnored": {
+    "en": "Mark selected runtime error(s) as ignored?",
+    "tr-TR": "Seçili çalışma zamanı hatalarını yoksay olarak işaretlemek istiyor musunuz?",
+    "tk-TM": "Saýlanan iş wagty ýalňyşlyklaryny ähmiýetsiz diýip bellemek isleýärsiňizmi?",
+    "ru-RU": "Отметить выбранные ошибки выполнения как игнорируемые?"
+  },
+  "StateChangeLog.OpenSource.ToolTip": {
+    "en": "Navigate to the object that triggered this log entry.",
+    "tr-TR": "Bu günlük kaydını tetikleyen nesneye gidin.",
+    "tk-TM": "Bu žurnal ýazgysyny döreden obýekte geçiň.",
+    "ru-RU": "Перейти к объекту, вызвавшему эту запись журнала."
+  },
+  "StateChangeLog.OpenTarget.ToolTip": {
+    "en": "Navigate to the object affected by this log entry.",
+    "tr-TR": "Bu günlük kaydından etkilenen nesneye gidin.",
+    "tk-TM": "Bu žurnal ýazgysyndan täsirlenen obýekte geçiň.",
+    "ru-RU": "Перейти к объекту, затронутому этой записью журнала."
+  },
+  "VisaStatus.OpenApplication.ToolTip": {
+    "en": "Open the full Application record for the selected row",
+    "tr-TR": "Seçili satırın tam Başvuru kaydını aç",
+    "tk-TM": "Saýlanan setiriň doly Arza ýazgysyny aç",
+    "ru-RU": "Открыть полную запись заявки для выбранной строки"
+  },
+  "LegacySync.Title": {
+    "en": "Legacy sync",
+    "tr-TR": "Eski sistem senkronizasyonu",
+    "tk-TM": "Köne ulgam sinhronizasiýasy",
+    "ru-RU": "Синхронизация с устаревшей системой"
+  },
+  "LegacySync.Subtitle": {
+    "en": "VISA2015 → Visa2026 on-prem reconcile (HTML report).",
+    "tr-TR": "VISA2015 → Visa2026 yerinde mutabakat (HTML raporu).",
+    "tk-TM": "VISA2015 → Visa2026 ýerli deňeşdirme (HTML hasabaty).",
+    "ru-RU": "Сверка VISA2015 → Visa2026 на площадке (HTML-отчёт)."
+  },
+  "LegacySync.OpenInNewTab": {
+    "en": "Open in new tab",
+    "tr-TR": "Yeni sekmede aç",
+    "tk-TM": "Täze goýmada aç",
+    "ru-RU": "Открыть в новой вкладке"
+  },
+  "LegacySync.Refresh": {
+    "en": "Refresh",
+    "tr-TR": "Yenile",
+    "tk-TM": "Täzele",
+    "ru-RU": "Обновить"
+  },
+  "LegacySync.Refreshing": {
+    "en": "Refreshing…",
+    "tr-TR": "Yenileniyor…",
+    "tk-TM": "Täzelenýär…",
+    "ru-RU": "Обновление…"
+  },
+  "LegacySync.ReportFrameTitle": {
+    "en": "Legacy sync report",
+    "tr-TR": "Eski sistem senkronizasyon raporu",
+    "tk-TM": "Köne ulgam sinhronizasiýa hasabaty",
+    "ru-RU": "Отчёт синхронизации с устаревшей системой"
+  },
   "AddressOfResidence.LodgingDocumentsGuidance": {
     "en": "Documents are stored on the Lodging record (not on this address). Select a lodging above, then open Lookup → Housing → Lodging to add or change files.",
     "tr-TR": "Belgeler bu ikamet kaydında değil, Konaklama kaydında tutulur. Yukarıdan bir konaklama seçin; dosya eklemek veya değiştirmek için Referans → Konut → Konaklama kaydını açın.",
