@@ -229,6 +229,7 @@
         <Member Name="ApplicationReason" Caption="Arza sebäbi" />
         <Member Name="ApplicationType" Caption="Arza görnüşi" />
         <Member Name="ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi" />
+        <Member Name="ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
         <Member Name="Category" Caption="Kategoriýa" />
         <Member Name="Company" Caption="Kompaniýa" />
@@ -576,7 +577,7 @@
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfile" Caption="Tassyklama ministrlik profili">
+    <Class Name="Visa2026.Module.BusinessObjects.ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri profili">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
         <Member Name="Code" Caption="Kod" />
@@ -2512,8 +2513,8 @@
         <ColumnInfo Id="Name" Caption="Ady" />
       </Columns>
     </ListView>
-    <DetailView Id="ApprovalLegProfile_DetailView" Caption="Tassyklama ministrlik profili" />
-    <ListView Id="ApprovalLegProfile_ListView" Caption="Tassyklama ministrlik profilleri" />
+    <DetailView Id="ApprovalLegProfile_DetailView" Caption="Ministrlik ylalaşyk ädimleri profili" />
+    <ListView Id="ApprovalLegProfile_ListView" Caption="Ministrlik ylalaşyk ädimleri profilleri" />
     <DetailView Id="ApprovalLegProfileMinistryLeg_DetailView" Caption="Ministrlik ädimi" />
     <ListView Id="ApprovalLegProfileMinistryLeg_ListView" Caption="Ministrlik ädimleri" />
     <DetailView Id="ApprovingMinistry_DetailView" Caption="Tassyklýan ministrlik" />

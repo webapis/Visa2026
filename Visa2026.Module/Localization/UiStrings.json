@@ -131,6 +131,7 @@
         "ApplicationType": { "en-US": "Application type", "tr-TR": "Başvuru Türü", "tk-TM": "Arza görnüşi", "ru-RU": "Тип заявки" },
         "ApplicationReason": { "en-US": "Application reason", "tr-TR": "Başvuru Nedeni", "tk-TM": "Arza sebäbi", "ru-RU": "Причина" },
         "ProjectContract": { "en-US": "Project contract", "tr-TR": "Proje Sözleşmesi", "tk-TM": "Taslama şertnamasy", "ru-RU": "Контракт проекта" },
+        "ApprovalLegProfile": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Ministrlik ylalaşyk ädimleri", "ru-RU": "Профиль этапов министерств" },
         "MigrationService": { "en-US": "Migration service", "tr-TR": "Göç Dairesi", "tk-TM": "Migrasiýa gullugy", "ru-RU": "Миграционная служба" },
         "Company": { "en-US": "Company", "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
         "CompanyHead": { "en-US": "Company head", "tr-TR": "Şirket Müdürü", "tk-TM": "Kompaniýa müdiri", "ru-RU": "Руководитель" },

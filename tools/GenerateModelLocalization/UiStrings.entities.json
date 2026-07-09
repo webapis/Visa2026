@@ -191,8 +191,8 @@
       }
     },
     "ApprovalLegProfile": {
-      "caption": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Tassyklama ministrlik profili", "ru-RU": "Профиль этапов министерств" },
-      "listCaption": { "en-US": "Approval leg profiles", "tr-TR": "Onay bakanlık profilleri", "tk-TM": "Tassyklama ministrlik profilleri", "ru-RU": "Профили этапов министерств" },
+      "caption": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Ministrlik ylalaşyk ädimleri profili", "ru-RU": "Профиль этапов министерств" },
+      "listCaption": { "en-US": "Approval leg profiles", "tr-TR": "Onay bakanlık profilleri", "tk-TM": "Ministrlik ylalaşyk ädimleri profilleri", "ru-RU": "Профили этапов министерств" },
       "lookup": true,
       "members": {
         "Code": { "en-US": "Code", "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },

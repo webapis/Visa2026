@@ -229,6 +229,7 @@
         <Member Name="ApplicationReason" Caption="Причина" />
         <Member Name="ApplicationType" Caption="Тип заявки" />
         <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
+        <Member Name="ApprovalLegProfile" Caption="Профиль этапов министерств" />
         <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
         <Member Name="Category" Caption="Категория" />
         <Member Name="Company" Caption="Компания" />

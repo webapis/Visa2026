@@ -51,14 +51,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Progress history already exists. Changing the approval leg profile may change which ministry steps apply to new progress rows. Review existing steps.",
             ["tr-TR"] = "İlerleme geçmişi mevcut. Onay bakanlık profilini değiştirmek yeni adımlar için bakanlık sürecini etkileyebilir. Mevcut adımları kontrol edin.",
-            ["tk-TM"] = "Ösüş taryhy bar. Tassyklama ministrlik profilini üýtgetmek täze ädimler üçin ministrlik tapgyrlaryny üýtgedip biler. Bar bolan ädimleri barlaň.",
+            ["tk-TM"] = "Ösüş taryhy bar. Ministrlik ylalaşyk ädimleri profilini üýtgetmek täze ädimler üçin ministrlik tapgyrlaryny üýtgedip biler. Bar bolan ädimleri barlaň.",
             ["ru-RU"] = "История прогресса уже есть. Смена профиля этапов может изменить министерские шаги для новых записей. Проверьте существующие шаги.",
         },
         ["Application.ApprovalLegProfileLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "The selected approval leg profile has no ministry legs configured.",
             ["tr-TR"] = "Seçilen onay bakanlık profilinde bakanlık adımı tanımlı değil.",
-            ["tk-TM"] = "Saýlanan tassyklama ministrlik profilinde ministrlik ädimi ýok.",
+            ["tk-TM"] = "Saýlanan ministrlik ylalaşyk ädimleri profilinde ministrlik ädimi ýok.",
             ["ru-RU"] = "У выбранного профиля этапов министерств не настроены шаги.",
         },
         ["Application.ApprovalLegProfileMinistryDepthChanged"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -821,7 +821,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Select an approval leg profile before advancing beyond office preparation.",
             ["tr-TR"] = "Ofis hazırlığından sonraki adıma geçmeden önce onay bakanlık profilini seçin.",
-            ["tk-TM"] = "Ofis taýýarlygyndan soňky ädime geçmezden ozal tassyklama ministrlik profilini saýlaň.",
+            ["tk-TM"] = "Ofis taýýarlygyndan soňky ädime geçmezden ozal ministrlik ylalaşyk ädimleri profilini saýlaň.",
             ["ru-RU"] = "Выберите профиль этапов министерств перед переходом после подготовки в офисе.",
         },
         ["ApplicationProgress.CannotAdvanceFromTerminal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1689,14 +1689,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Add at least one ministry leg to this approval leg profile.",
             ["tr-TR"] = "Bu onay bakanlık profiline en az bir bakanlık adımı ekleyin.",
-            ["tk-TM"] = "Bu tassyklama ministrlik profiline azyndan bir ministrlik ädimi goşuň.",
+            ["tk-TM"] = "Bu ministrlik ylalaşyk ädimleri profiline azyndan bir ministrlik ädimi goşuň.",
             ["ru-RU"] = "Добавьте хотя бы один этап министерства в этот профиль.",
         },
         ["ApprovalLegProfile.MinistryLegsStructuralEditBlocked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "This approval leg profile is already used by applications. Duplicate it to change ministry legs.",
             ["tr-TR"] = "Bu onay bakanlık profili başvurularda kullanılıyor. Bakanlık adımlarını değiştirmek için kopyalayın.",
-            ["tk-TM"] = "Bu tassyklama ministrlik profili arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
+            ["tk-TM"] = "Bu ministrlik ylalaşyk ädimleri profili arzalarda ulanylýar. Ministrlik ädimlerini üýtgetmek üçin göçürip alň.",
             ["ru-RU"] = "Этот профиль этапов уже используется заявками. Скопируйте его, чтобы изменить этапы министерств.",
         },
         ["ApprovalLegProfile.MinistryLegWarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1710,7 +1710,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Save the approval leg profile before saving this ministry leg.",
             ["tr-TR"] = "Bu bakanlık adımını kaydetmeden önce onay bakanlık profilini kaydedin.",
-            ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal tassyklama ministrlik profilini ýazdyryň.",
+            ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal ministrlik ylalaşyk ädimleri profilini ýazdyryň.",
             ["ru-RU"] = "Сохраните профиль этапов перед сохранением этого этапа министерства.",
         },
         ["BorderZoneDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
