@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.Module.Services;
 
@@ -138,7 +139,24 @@ public static class ApplicationTypeDevelopmentReadiness
             return ApplicationTypeReadinessStatus.Ready;
         if (Matches(PendingByName, PendingBySelectionCode, name, selectionCode))
             return ApplicationTypeReadinessStatus.Pending;
+
+        // Cloned / admin-created variants: valid code but legacy Name not in the seed map → Pending (selectable for testing).
+        if (IsUserDefinedVariant(name, selectionCode))
+            return ApplicationTypeReadinessStatus.Pending;
+
         return ApplicationTypeReadinessStatus.NotReady;
+    }
+
+    private static bool IsUserDefinedVariant(string? name, string? selectionCode)
+    {
+        if (string.IsNullOrWhiteSpace(selectionCode)
+            || selectionCode.Length != 3
+            || !int.TryParse(selectionCode, out _))
+        {
+            return false;
+        }
+
+        return !ApplicationTypeSelectionCodeSeed.TryGetByName(name, out _);
     }
 
     /// <summary>Ready and Pending types can be selected (Pending for stakeholder/testing before approval).</summary>

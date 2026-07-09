@@ -2,6 +2,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.CloneObject;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers;
 
@@ -51,7 +52,9 @@ public class LookupCatalogCloneController : ViewController
             && e.SourceObject is ApplicationType applicationTypeSource)
         {
             ApplyLookupNameClone(applicationTypeClone, applicationTypeSource, suffix);
-            applicationTypeClone.SelectionCode = string.Empty;
+            applicationTypeClone.SelectionCode =
+                ApplicationTypeSelectionCodeHelper.SuggestNextSelectionCode(ObjectSpace, applicationTypeSource.SelectionCode)
+                ?? string.Empty;
             applicationTypeClone.LocalizationKey = string.Empty;
             applicationTypeClone.Code = string.Empty;
             applicationTypeClone.IsDefault = false;
