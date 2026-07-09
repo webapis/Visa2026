@@ -1727,6 +1727,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual EmployeeSalary CurrentSalary { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
+        [ExcludeFromOptionalDetailFields]
         [DataSourceProperty(nameof(AvailableMedicalRecords))]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
