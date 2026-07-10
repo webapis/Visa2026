@@ -41,7 +41,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="81.92148760330579" Index="1">
+          <LayoutGroup Id="Documents_Group" ShowCaption="True" Caption="Address copies" Direction="Vertical" RelativeSize="81.92148760330579" Index="1">
             <LayoutItem Id="Documents" RelativeSize="100" />
           </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" Caption=" " RelativeSize="38.01652892561984" Removed="True">
@@ -394,7 +394,7 @@
             <LayoutGroup Id="BorderZoneItems" RelativeSize="100">
               <LayoutItem Id="BorderZoneItems" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Border zone copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
@@ -445,7 +445,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="53.24232081911263">
+          <LayoutGroup Id="Documents_Group" ShowCaption="True" Caption="Diploma copies" Direction="Vertical" RelativeSize="53.24232081911263">
             <LayoutItem Id="Documents" RelativeSize="100" />
           </LayoutGroup>
         </LayoutGroup>
@@ -581,7 +581,7 @@
             <LayoutGroup Id="InvitationItems" RelativeSize="100">
               <LayoutItem Id="InvitationItems" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Invitation copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
@@ -681,7 +681,7 @@
             </LayoutGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="77.86206896551724">
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Passport copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
             <LayoutGroup Id="Visas" RelativeSize="100">
@@ -744,7 +744,7 @@
             <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="4">
               <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="CV &amp; personal files" Index="5" RelativeSize="100" IsNewNode="True">
               <LayoutItem Id="Documents" Index="0" RelativeSize="100" ViewItem="Documents" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="6" RelativeSize="100" IsNewNode="True">
@@ -1294,7 +1294,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="35.87115666178624" Index="1">
+          <LayoutGroup Id="Documents_Group" ShowCaption="True" Caption="Visa copies" Direction="Vertical" RelativeSize="35.87115666178624" Index="1">
             <LayoutItem Id="Documents" RelativeSize="100" />
           </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="2.342606149341142" Caption="SizeableEditors" Removed="True">
@@ -1332,7 +1332,7 @@
             <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
               <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" VerticalAlign="NotSet" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Work permit copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>

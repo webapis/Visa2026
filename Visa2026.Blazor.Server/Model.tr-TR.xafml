@@ -97,8 +97,8 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
-          <LayoutGroup Id="Documents" Caption="İkamet kopyaları" />
-          <LayoutGroup Id="Documents_Group" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="Documents" Caption="Adres kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="Adres kopyaları" />
           <LayoutGroup Id="LodgingDocuments" Caption="Konaklama kopyaları" />
         </LayoutGroup>
       </Layout>
@@ -125,12 +125,19 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Lodging_DetailView" Caption="Konaklama">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Konaklama kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView" Caption="Kişi">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
           <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
-          <LayoutGroup Id="Documents" Caption="Kişi dosya kopyaları" />
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
           <LayoutGroup Id="Educations" Caption="Eğitim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
           <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
@@ -160,6 +167,7 @@
     <DetailView Id="Person_DetailView_Employee" Caption="Çalışan">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
           <LayoutGroup Id="Person" Caption="Çalışan" />
         </LayoutGroup>
       </Layout>
@@ -191,7 +199,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Davet">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Davet kopyaları" />
+          <LayoutGroup Id="Documents" Caption="Davetiye kopyaları" />
           <LayoutGroup Id="Invitation" Caption="Davet" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
         </LayoutGroup>

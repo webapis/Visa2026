@@ -97,9 +97,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
-          <LayoutGroup Id="Documents" Caption="Копии адреса проживания" />
-          <LayoutGroup Id="Documents_Group" Caption="Копии адреса проживания" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Копии проживания" />
+          <LayoutGroup Id="Documents" Caption="Копии адреса" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии адреса" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Копии жилья" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -125,12 +125,19 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Lodging_DetailView" Caption="Проживание">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии жилья" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView" Caption="Лицо">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
           <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
-          <LayoutGroup Id="Documents" Caption="Копии файлов лица" />
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
           <LayoutGroup Id="Educations" Caption="Образование" />
           <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
           <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
@@ -160,6 +167,7 @@
     <DetailView Id="Person_DetailView_Employee" Caption="Сотрудник">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
           <LayoutGroup Id="Person" Caption="Сотрудник" />
         </LayoutGroup>
       </Layout>
@@ -210,7 +218,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Копии РНТ" />
+            <LayoutGroup Id="Documents" Caption="Копии разрешения на работу" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

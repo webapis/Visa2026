@@ -209,13 +209,13 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии адреса проживания" />
+        <Member Name="Documents" Caption="Копии адреса" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullAddress" Caption="Полный адрес" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
-        <Member Name="LodgingDocuments" Caption="Копии проживания" />
+        <Member Name="LodgingDocuments" Caption="Копии жилья" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Region" Caption="Регион" />
         <Member Name="StartDate" Caption="Дата начала" />
@@ -700,6 +700,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии приграничной зоны" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Элемент погран. зоны">
@@ -901,7 +902,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии дипломов" />
+        <Member Name="Documents" Caption="Копии диплома" />
         <Member Name="EducationCountry" Caption="Страна обучения" />
         <Member Name="EducationDescription" Caption="Описание образования" />
         <Member Name="EducationInstitution" Caption="Учебное заведение" />
@@ -1181,7 +1182,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии проживания" />
+        <Member Name="Documents" Caption="Копии жилья" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Видимость Mail Merge">
@@ -1237,7 +1238,7 @@
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="DocumentNumber" Caption="Номер документа" />
-        <Member Name="Documents" Caption="Копии мед. записи" />
+        <Member Name="Documents" Caption="Копии медицинской записи" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
@@ -1510,7 +1511,7 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DateOfBirth" Caption="Дата рождения" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии файлов лица" />
+        <Member Name="Documents" Caption="Резюме и личные файлы" />
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
@@ -1606,7 +1607,7 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Примечание" />
-        <Member Name="Documents" Caption="Копии контракта проекта" />
+        <Member Name="Documents" Caption="Копии проектного договора" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -2285,7 +2286,7 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии РНТ" />
+        <Member Name="Documents" Caption="Копии разрешения на работу" />
         <Member Name="IsApplicationNotRequired" Caption="Заявка не требуется" />
         <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IssuedDate" Caption="Дата выдачи" />
@@ -2378,9 +2379,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
-          <LayoutGroup Id="Documents" Caption="Копии адреса проживания" />
-          <LayoutGroup Id="Documents_Group" Caption="Копии адреса проживания" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Копии проживания" />
+          <LayoutGroup Id="Documents" Caption="Копии адреса" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии адреса" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Копии жилья" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2542,7 +2543,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Копии пограничной зоны" />
+            <LayoutGroup Id="Documents" Caption="Копии приграничной зоны" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
@@ -2593,7 +2594,7 @@
     <DetailView Id="Education_DetailView" Caption="Образование">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents_Group" Caption="Копии дипломов" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии диплома" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2682,13 +2683,25 @@
     </ListView>
     <DetailView Id="LocalEmployee_DetailView" Caption="Местный сотрудник" />
     <ListView Id="LocalEmployee_ListView" Caption="Местные сотрудники" />
-    <DetailView Id="Lodging_DetailView" Caption="Проживание" />
+    <DetailView Id="Lodging_DetailView" Caption="Проживание">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии жилья" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Lodging_ListView" Caption="Проживание" />
     <DetailView Id="MailMergeVisibility_DetailView" Caption="Видимость Mail Merge" />
     <ListView Id="MailMergeVisibility_ListView" Caption="Видимость Mail Merge" />
     <DetailView Id="MaritalStatus_DetailView" Caption="Семейное положение" />
     <ListView Id="MaritalStatus_ListView" Caption="Семейное положение" />
-    <DetailView Id="MedicalRecord_DetailView" Caption="Мед. запись" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Мед. запись">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии медицинской записи" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="MedicalRecord_ListView" Caption="Мед. записи">
       <Columns>
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
@@ -2747,7 +2760,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
           <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
-          <LayoutGroup Id="Documents" Caption="Копии файлов лица" />
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
           <LayoutGroup Id="Educations" Caption="Образование" />
           <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
           <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
@@ -2777,6 +2790,7 @@
     <ListView Id="Person_DetailView_Employee" Caption="Сотрудник">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
           <LayoutGroup Id="Person" Caption="Сотрудник" />
         </LayoutGroup>
       </Layout>
@@ -2899,7 +2913,13 @@
     </ListView>
     <DetailView Id="Position_DetailView" Caption="Должность" />
     <ListView Id="Position_ListView" Caption="Должности" />
-    <DetailView Id="ProjectContract_DetailView" Caption="Контракт проекта" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Контракт проекта">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии проектного договора" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="ProjectContract_ListView" Caption="Контракты проекта" />
     <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Этап министерства" />
     <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Этапы министерств" />
@@ -3044,7 +3064,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Копии РНТ" />
+            <LayoutGroup Id="Documents" Caption="Копии разрешения на работу" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

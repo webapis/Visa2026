@@ -106,7 +106,7 @@ public sealed class DetailViewTabCountController : ViewController<DetailView>
     private void RegisterBaseCaption(string layoutTabId, IModelLayoutGroup modelGroup)
     {
         _baseCaptions[layoutTabId] = StripCount(
-            PersonNestedTabCaptionHelper.TryGetBaseCaption(layoutTabId)
+            DocumentCollectionTabCaptionHelper.TryGetBaseCaption(View.Id, layoutTabId)
             ?? modelGroup.Caption
             ?? layoutTabId);
     }

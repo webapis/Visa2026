@@ -2939,6 +2939,72 @@
     "tk-TM": "CV we şahsy faýllar",
     "ru-RU": "Резюме и личные файлы"
   },
+  "Passport.Tab.DocumentCopies": {
+    "en": "Passport copies",
+    "tr-TR": "Pasaport kopyaları",
+    "tk-TM": "Pasport nusgalary",
+    "ru-RU": "Копии паспорта"
+  },
+  "Education.Tab.DocumentCopies": {
+    "en": "Diploma copies",
+    "tr-TR": "Diploma kopyaları",
+    "tk-TM": "Diplom nusgalary",
+    "ru-RU": "Копии диплома"
+  },
+  "Visa.Tab.DocumentCopies": {
+    "en": "Visa copies",
+    "tr-TR": "Vize kopyaları",
+    "tk-TM": "Wiza nusgalary",
+    "ru-RU": "Копии визы"
+  },
+  "WorkPermit.Tab.DocumentCopies": {
+    "en": "Work permit copies",
+    "tr-TR": "Çalışma izni kopyaları",
+    "tk-TM": "Iş rugsady nusgalary",
+    "ru-RU": "Копии разрешения на работу"
+  },
+  "Invitation.Tab.DocumentCopies": {
+    "en": "Invitation copies",
+    "tr-TR": "Davetiye kopyaları",
+    "tk-TM": "Çakylyk nusgalary",
+    "ru-RU": "Копии приглашения"
+  },
+  "Rejection.Tab.DocumentCopies": {
+    "en": "Rejection copies",
+    "tr-TR": "Ret kopyaları",
+    "tk-TM": "Ret nusgalary",
+    "ru-RU": "Копии отказа"
+  },
+  "BorderZone.Tab.DocumentCopies": {
+    "en": "Border zone copies",
+    "tr-TR": "Sınır bölgesi kopyaları",
+    "tk-TM": "Serhet zolagy nusgalary",
+    "ru-RU": "Копии приграничной зоны"
+  },
+  "MedicalRecord.Tab.DocumentCopies": {
+    "en": "Medical record copies",
+    "tr-TR": "Sağlık kaydı kopyaları",
+    "tk-TM": "Lukmançylyk ýazgysy nusgalary",
+    "ru-RU": "Копии медицинской записи"
+  },
+  "Lodging.Tab.DocumentCopies": {
+    "en": "Lodging copies",
+    "tr-TR": "Konaklama kopyaları",
+    "tk-TM": "Ýaşaýyş ýeri nusgalary",
+    "ru-RU": "Копии жилья"
+  },
+  "ProjectContract.Tab.DocumentCopies": {
+    "en": "Project contract copies",
+    "tr-TR": "Proje sözleşmesi kopyaları",
+    "tk-TM": "Taslama şertnamasy nusgalary",
+    "ru-RU": "Копии проектного договора"
+  },
+  "AddressOfResidence.Tab.DocumentCopies": {
+    "en": "Address copies",
+    "tr-TR": "Adres kopyaları",
+    "tk-TM": "Salgy nusgalary",
+    "ru-RU": "Копии адреса"
+  },
   "Person.DetailSection.IssuedDocuments": {
     "en": "Issued documents (view only)",
     "tr-TR": "Verilen belgeler (yalnızca görüntüleme)",

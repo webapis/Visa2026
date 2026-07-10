@@ -17,5 +17,6 @@ Officers confuse **editable person master data** tabs with **browse-only issued-
 - **New Person:** hide `IssuedDocumentsTabs`, show `PersonNewRecordIssuedHint` — `PersonDetailViewIssuedDocumentsLayoutController` (Blazor).
 - **CSS:** `visa-person-record-tabs`, `visa-person-issued-tabs`, `visa-person-new-record-issued-hint` in `site.css`.
 - **Localization:** `Person.DetailSection.*` keys in `UiStrings.messages.json`; regenerate catalog after edits.
+- **Documents tab captions:** parent-specific via `DocumentCollectionTabCaptionHelper` (not generic "Documents") — Passport copies, Diploma copies, CV & personal files, etc.
 - **Do not** use `ShowOptionalFields` gear for collection tabs ([`OPTIONAL_DETAIL_FIELDS.md`](../../docs/OPTIONAL_DETAIL_FIELDS.md)).
 - **Windows UTF-8:** new `.cs` files via PowerShell UTF-8 no BOM if Cursor tools corrupt encoding (`CS1056 \0`).

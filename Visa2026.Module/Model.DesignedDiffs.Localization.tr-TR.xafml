@@ -209,7 +209,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="İkamet kopyaları" />
+        <Member Name="Documents" Caption="Adres kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="FullAddress" Caption="Tam Adres" />
@@ -700,6 +700,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Sınır bölgesi kopyaları" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Sınır Bölgesi Kalemi">
@@ -1150,7 +1151,7 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Davet kopyaları" />
+        <Member Name="Documents" Caption="Davetiye kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="InvitationItems" Caption="Davet Kalemleri" />
         <Member Name="InvitationNumber" Caption="Davet No" />
@@ -1510,7 +1511,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DateOfBirth" Caption="Doğum Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Kişi dosya kopyaları" />
+        <Member Name="Documents" Caption="CV ve kişisel dosyalar" />
         <Member Name="Educations" Caption="Eğitimler" />
         <Member Name="Email" Caption="E-posta" />
         <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
@@ -2378,8 +2379,8 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
-          <LayoutGroup Id="Documents" Caption="İkamet kopyaları" />
-          <LayoutGroup Id="Documents_Group" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="Documents" Caption="Adres kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="Adres kopyaları" />
           <LayoutGroup Id="LodgingDocuments" Caption="Konaklama kopyaları" />
         </LayoutGroup>
       </Layout>
@@ -2646,7 +2647,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Davet">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Davet kopyaları" />
+          <LayoutGroup Id="Documents" Caption="Davetiye kopyaları" />
           <LayoutGroup Id="Invitation" Caption="Davet" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
         </LayoutGroup>
@@ -2682,13 +2683,25 @@
     </ListView>
     <DetailView Id="LocalEmployee_DetailView" Caption="Yerel Çalışan" />
     <ListView Id="LocalEmployee_ListView" Caption="Yerel Çalışanlar" />
-    <DetailView Id="Lodging_DetailView" Caption="Konaklama" />
+    <DetailView Id="Lodging_DetailView" Caption="Konaklama">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Konaklama kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Lodging_ListView" Caption="Konaklamalar" />
     <DetailView Id="MailMergeVisibility_DetailView" Caption="Mail Merge Görünürlüğü" />
     <ListView Id="MailMergeVisibility_ListView" Caption="Mail Merge Görünürlükleri" />
     <DetailView Id="MaritalStatus_DetailView" Caption="Medeni Hal" />
     <ListView Id="MaritalStatus_ListView" Caption="Medeni Haller" />
-    <DetailView Id="MedicalRecord_DetailView" Caption="Sağlık Kaydı" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Sağlık Kaydı">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Sağlık kaydı kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="MedicalRecord_ListView" Caption="Sağlık Kayıtları">
       <Columns>
         <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
@@ -2747,7 +2760,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
           <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
-          <LayoutGroup Id="Documents" Caption="Kişi dosya kopyaları" />
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
           <LayoutGroup Id="Educations" Caption="Eğitim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
           <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
@@ -2777,6 +2790,7 @@
     <ListView Id="Person_DetailView_Employee" Caption="Çalışan">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
           <LayoutGroup Id="Person" Caption="Çalışan" />
         </LayoutGroup>
       </Layout>
@@ -2899,7 +2913,13 @@
     </ListView>
     <DetailView Id="Position_DetailView" Caption="Pozisyon" />
     <ListView Id="Position_ListView" Caption="Pozisyonlar" />
-    <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Proje sözleşmesi kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="ProjectContract_ListView" Caption="Proje Sözleşmeleri" />
     <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Bakanlık adımı" />
     <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Bakanlık adımları" />

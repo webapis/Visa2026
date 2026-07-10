@@ -47,6 +47,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["AddressOfResidence.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address copies",
+            ["tr-TR"] = "Adres kopyaları",
+            ["tk-TM"] = "Salgy nusgalary",
+            ["ru-RU"] = "Копии адреса",
+        },
         ["Application.ApprovalLegProfileChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Progress history already exists. Changing the approval leg profile may change which ministry steps apply to new progress rows. Review existing steps.",
@@ -1727,6 +1734,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal ministrlik ylalaşyk ädimleri profilini ýazdyryň.",
             ["ru-RU"] = "Сохраните профиль этапов перед сохранением этого этапа министерства.",
         },
+        ["BorderZone.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone copies",
+            ["tr-TR"] = "Sınır bölgesi kopyaları",
+            ["tk-TM"] = "Serhet zolagy nusgalary",
+            ["ru-RU"] = "Копии приграничной зоны",
+        },
         ["BorderZoneDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Copies",
@@ -2007,6 +2021,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Taryh",
             ["ru-RU"] = "История",
         },
+        ["Education.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diploma copies",
+            ["tr-TR"] = "Diploma kopyaları",
+            ["tk-TM"] = "Diplom nusgalary",
+            ["ru-RU"] = "Копии диплома",
+        },
         ["EmployeeSalary.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0}",
@@ -2076,6 +2097,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Başvuru {0}",
             ["tk-TM"] = "Arza {0}",
             ["ru-RU"] = "Заявка {0}",
+        },
+        ["Invitation.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation copies",
+            ["tr-TR"] = "Davetiye kopyaları",
+            ["tk-TM"] = "Çakylyk nusgalary",
+            ["ru-RU"] = "Копии приглашения",
         },
         ["InvitationDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2147,6 +2175,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Köne ulgam sinhronizasiýasy",
             ["ru-RU"] = "Синхронизация с устаревшей системой",
         },
+        ["Lodging.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lodging copies",
+            ["tr-TR"] = "Konaklama kopyaları",
+            ["tk-TM"] = "Ýaşaýyş ýeri nusgalary",
+            ["ru-RU"] = "Копии жилья",
+        },
+        ["MedicalRecord.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical record copies",
+            ["tr-TR"] = "Sağlık kaydı kopyaları",
+            ["tk-TM"] = "Lukmançylyk ýazgysy nusgalary",
+            ["ru-RU"] = "Копии медицинской записи",
+        },
         ["MinistryReviewSlaSettings.NotConfigured"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA.",
@@ -2160,6 +2202,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Uyarı (iş günleri), azami iş günlerinden küçük olmalıdır.",
             ["tk-TM"] = "Duýduryş (iş günleri) iň ýokary iş günlerinden az bolmaly.",
             ["ru-RU"] = "Порог предупреждения (рабочие дни) должен быть меньше максимального числа рабочих дней.",
+        },
+        ["Passport.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport copies",
+            ["tr-TR"] = "Pasaport kopyaları",
+            ["tk-TM"] = "Pasport nusgalary",
+            ["ru-RU"] = "Копии паспорта",
         },
         ["Pdf.Packaging.ApplicationId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3057,6 +3106,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal taslama şertnamasyny ýazdyryň.",
             ["ru-RU"] = "Сохраните контракт проекта перед сохранением этого этапа министерства.",
         },
+        ["ProjectContract.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project contract copies",
+            ["tr-TR"] = "Proje sözleşmesi kopyaları",
+            ["tk-TM"] = "Taslama şertnamasy nusgalary",
+            ["ru-RU"] = "Копии проектного договора",
+        },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Recycle Bin ({0})",
@@ -3070,6 +3126,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0} numaralı ret — {1}",
             ["tk-TM"] = "{0} belgili ret — {1}",
             ["ru-RU"] = "Отказ {0} от {1}",
+        },
+        ["Rejection.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection copies",
+            ["tr-TR"] = "Ret kopyaları",
+            ["tk-TM"] = "Ret nusgalary",
+            ["ru-RU"] = "Копии отказа",
         },
         ["RejectionDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4345,6 +4408,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýer tutujylary barlananda ýalňyşlyk: {0}",
             ["ru-RU"] = "Ошибка проверки заполнителей: {0}",
         },
+        ["Visa.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa copies",
+            ["tr-TR"] = "Vize kopyaları",
+            ["tk-TM"] = "Wiza nusgalary",
+            ["ru-RU"] = "Копии визы",
+        },
         ["VisaFamilyMembersText.AddMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Add member",
@@ -4610,6 +4680,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Resminamalar'ı açmadan önce başvuruyu kaydedin.",
             ["tk-TM"] = "Resminamalary açmazdan ozal arzany ýazdyryň.",
             ["ru-RU"] = "Сохраните заявку перед открытием Resminamalar.",
+        },
+        ["WorkPermit.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit copies",
+            ["tr-TR"] = "Çalışma izni kopyaları",
+            ["tk-TM"] = "Iş rugsady nusgalary",
+            ["ru-RU"] = "Копии разрешения на работу",
         },
         ["WorkPermitDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

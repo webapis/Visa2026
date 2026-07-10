@@ -4,11 +4,10 @@ namespace Visa2026.Module;
 
 /// <summary>
 /// Runtime base captions for Person typed detail nested collection tabs (before count suffix).
+/// Delegates Documents captions to <see cref="DocumentCollectionTabCaptionHelper"/>.
 /// </summary>
 public static class PersonNestedTabCaptionHelper
 {
-    public static string? TryGetBaseCaption(string layoutTabId) =>
-        layoutTabId == PersonNestedCollectionLayout.CvAndPersonalFilesTab
-            ? VisaUiMessages.Get(PersonNestedCollectionLayout.CvAndPersonalFilesTabCaptionKey)
-            : null;
+    public static string? TryGetBaseCaption(string detailViewId, string layoutTabId) =>
+        DocumentCollectionTabCaptionHelper.TryGetBaseCaption(detailViewId, layoutTabId);
 }

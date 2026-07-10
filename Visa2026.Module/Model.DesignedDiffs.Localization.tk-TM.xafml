@@ -209,13 +209,13 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Ýaşaýyş salgysy nusgalary" />
+        <Member Name="Documents" Caption="Salgy nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullAddress" Caption="Doly salgy" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
-        <Member Name="LodgingDocuments" Caption="Ýaşaýyş nusgalary" />
+        <Member Name="LodgingDocuments" Caption="Ýaşaýyş ýeri nusgalary" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="Region" Caption="Welaýat" />
         <Member Name="StartDate" Caption="Başlanýan senesi" />
@@ -700,6 +700,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="Documents" Caption="Serhet zolagy nusgalary" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Serhet sebiti elementi">
@@ -901,7 +902,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Diploma nusgalary" />
+        <Member Name="Documents" Caption="Diplom nusgalary" />
         <Member Name="EducationCountry" Caption="Bilim ýurdy" />
         <Member Name="EducationDescription" Caption="Bilim düşündirişi" />
         <Member Name="EducationInstitution" Caption="Bilim edarasy" />
@@ -1181,7 +1182,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Ýaşaýyş nusgalary" />
+        <Member Name="Documents" Caption="Ýaşaýyş ýeri nusgalary" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Mail merge görnüşliligi">
@@ -1237,7 +1238,7 @@
         <Member Name="DaysRemaining" Caption="Galan gün" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="DocumentNumber" Caption="Resminama belgisi" />
-        <Member Name="Documents" Caption="Saglyk ýazgysy nusgalary" />
+        <Member Name="Documents" Caption="Lukmançylyk ýazgysy nusgalary" />
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="IssueDate" Caption="Berlen senesi" />
@@ -1510,7 +1511,7 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DateOfBirth" Caption="Doglan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Documents" Caption="Adam faýl nusgalary" />
+        <Member Name="Documents" Caption="CV we şahsy faýllar" />
         <Member Name="Educations" Caption="Bilimler" />
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="EmployeeContracts" Caption="Işgär şertnamalary" />
@@ -2378,9 +2379,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Ýaşaýyş salgysy" />
-          <LayoutGroup Id="Documents" Caption="Ýaşaýyş salgysy nusgalary" />
-          <LayoutGroup Id="Documents_Group" Caption="Ýaşaýyş salgysy nusgalary" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş nusgalary" />
+          <LayoutGroup Id="Documents" Caption="Salgy nusgalary" />
+          <LayoutGroup Id="Documents_Group" Caption="Salgy nusgalary" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş ýeri nusgalary" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2542,7 +2543,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Serhet sebiti nusgalary" />
+            <LayoutGroup Id="Documents" Caption="Serhet zolagy nusgalary" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
@@ -2593,7 +2594,7 @@
     <DetailView Id="Education_DetailView" Caption="Bilim">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents_Group" Caption="Diploma nusgalary" />
+          <LayoutGroup Id="Documents_Group" Caption="Diplom nusgalary" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2682,13 +2683,25 @@
     </ListView>
     <DetailView Id="LocalEmployee_DetailView" Caption="Ýerli işgär" />
     <ListView Id="LocalEmployee_ListView" Caption="Ýerli işgärler" />
-    <DetailView Id="Lodging_DetailView" Caption="Ýaşaýyş jaýy" />
+    <DetailView Id="Lodging_DetailView" Caption="Ýaşaýyş jaýy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Ýaşaýyş ýeri nusgalary" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Lodging_ListView" Caption="Ýaşaýyş jaýlary" />
     <DetailView Id="MailMergeVisibility_DetailView" Caption="Mail merge görnüşliligi" />
     <ListView Id="MailMergeVisibility_ListView" Caption="Mail merge görnüşlilikleri" />
     <DetailView Id="MaritalStatus_DetailView" Caption="Maşgala ýagdaýy" />
     <ListView Id="MaritalStatus_ListView" Caption="Maşgala ýagdaýlary" />
-    <DetailView Id="MedicalRecord_DetailView" Caption="Saglyk ýazgysy" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Saglyk ýazgysy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Lukmançylyk ýazgysy nusgalary" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="MedicalRecord_ListView" Caption="Saglyk ýazgylary">
       <Columns>
         <ColumnInfo Id="DaysRemaining" Caption="Galan gün" />
@@ -2747,7 +2760,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
           <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
-          <LayoutGroup Id="Documents" Caption="Adam faýl nusgalary" />
+          <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
           <LayoutGroup Id="Educations" Caption="Bilim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Işgär şertnamalary" />
           <LayoutGroup Id="FamilyMembers" Caption="Maşgalalar" />
@@ -2777,6 +2790,7 @@
     <ListView Id="Person_DetailView_Employee" Caption="Işgär">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
           <LayoutGroup Id="Person" Caption="Işgär" />
         </LayoutGroup>
       </Layout>
@@ -2899,7 +2913,13 @@
     </ListView>
     <DetailView Id="Position_DetailView" Caption="Wezipesi" />
     <ListView Id="Position_ListView" Caption="Wezipeler" />
-    <DetailView Id="ProjectContract_DetailView" Caption="Taslama şertnamasy" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Taslama şertnamasy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Taslama şertnamasy nusgalary" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="ProjectContract_ListView" Caption="Taslama şertnamalary" />
     <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Ministrlik ädimi" />
     <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Ministrlik ädimleri" />

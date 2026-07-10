@@ -26,7 +26,7 @@
       "layoutGroups": {
         "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+        "Documents": { "tr-TR": "Davetiye kopyaları", "tk-TM": "Çakylyk nusgalary", "ru-RU": "Копии приглашения" }
       }
     },
     "Invitation_InvitationItems_ListView": {
@@ -52,7 +52,7 @@
     "Rejection_DetailView": {
       "layoutGroups": {
         "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+        "Documents": { "tr-TR": "Ret kopyaları", "tk-TM": "Ret nusgalary", "ru-RU": "Копии отказа" },
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" }
       }
     },
