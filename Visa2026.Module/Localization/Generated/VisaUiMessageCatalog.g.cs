@@ -782,6 +782,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Azyndan bir arza setiri saýlaň.",
             ["ru-RU"] = "Выберите хотя бы одну строку заявки.",
         },
+        ["ApplicationMigration.Sla.DefaultLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Migration service",
+            ["tr-TR"] = "Göç dairesi",
+            ["tk-TM"] = "Migrasiýa gullugy",
+            ["ru-RU"] = "Миграционная служба",
+        },
         ["ApplicationMigration.Sla.Ok"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0}: day {1} of {2}",
@@ -795,6 +802,41 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0}: {1}. gün / {2} (süre aşımı)",
             ["tk-TM"] = "{0}: {1}-nji gün / {2} (möhlet geçdi)",
             ["ru-RU"] = "{0}: день {1} из {2} (просрочено)",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-3-DAYS"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 3 days",
+            ["tr-TR"] = "3 güne kadar",
+            ["tk-TM"] = "3 güne çenli",
+            ["ru-RU"] = "До 3 дней",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-45-DAYS"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 45 days",
+            ["tr-TR"] = "45 güne kadar",
+            ["tk-TM"] = "45 güne çenli",
+            ["ru-RU"] = "До 45 дней",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-ONE-MONTH"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 1 month",
+            ["tr-TR"] = "1 aya kadar",
+            ["tk-TM"] = "1 aýa çenli",
+            ["ru-RU"] = "До 1 месяца",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-ONE-WEEK"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 1 week",
+            ["tr-TR"] = "1 haftaya kadar",
+            ["tk-TM"] = "1 hepdä çenli",
+            ["ru-RU"] = "До 1 недели",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-TWO-WEEKS"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 2 weeks",
+            ["tr-TR"] = "2 haftaya kadar",
+            ["tk-TM"] = "2 hepdä çenli",
+            ["ru-RU"] = "До 2 недель",
         },
         ["ApplicationMigration.Sla.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

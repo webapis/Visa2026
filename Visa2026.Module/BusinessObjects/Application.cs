@@ -185,9 +185,8 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
         public void WarmListViewDisplayCache()
         {
-            if (listViewDisplayState != null)
-                return;
-
+            // Always recompute: the grid may have evaluated NotMapped SLA fields before
+            // ApplicationListViewPreloadController included MigrationSlaProfile / LatestProgress.
             var state = ApplicationListViewDisplayState.Resolve(this);
             listViewDisplayState = state;
             listRowCssClass = state.ListRowCssClass;
@@ -259,14 +258,14 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public bool IsWorkflowTerminal => IsCancelled || IsRejected || IsIssued;
 
-        [XafDisplayName("Iş günleri")]
+        [XafDisplayName("Working days")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
         [NotMapped]
         public int? WorkingDaysInCurrentStep => ListViewDisplay.WorkingDaysInCurrentStep;
 
-        [XafDisplayName("Tassyklama möhleti")]
+        [XafDisplayName("Approval deadline")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(true)]
         [VisibleInListView(true)]
@@ -277,14 +276,14 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ProgressSlaAppearanceCode => ListViewDisplay.ProgressSlaAppearanceCode;
 
-        [XafDisplayName("Migrasiýa iş günleri")]
+        [XafDisplayName("Migration working days")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
         public int? WorkingDaysInMigrationStep => ListViewDisplay.WorkingDaysInMigrationStep;
 
-        [XafDisplayName("Migrasiýa möhleti")]
+        [XafDisplayName("Migration deadline")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]

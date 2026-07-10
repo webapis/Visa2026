@@ -1541,6 +1541,42 @@
     "tk-TM": "{0}: {1}-nji gün / {2} (möhlet geçdi)",
     "ru-RU": "{0}: день {1} из {2} (просрочено)"
   },
+  "ApplicationMigration.Sla.DefaultLabel": {
+    "en": "Migration service",
+    "tr-TR": "Göç dairesi",
+    "tk-TM": "Migrasiýa gullugy",
+    "ru-RU": "Миграционная служба"
+  },
+  "ApplicationMigration.Sla.Profile.UP-TO-3-DAYS": {
+    "en": "Up to 3 days",
+    "tr-TR": "3 güne kadar",
+    "tk-TM": "3 güne çenli",
+    "ru-RU": "До 3 дней"
+  },
+  "ApplicationMigration.Sla.Profile.UP-TO-ONE-WEEK": {
+    "en": "Up to 1 week",
+    "tr-TR": "1 haftaya kadar",
+    "tk-TM": "1 hepdä çenli",
+    "ru-RU": "До 1 недели"
+  },
+  "ApplicationMigration.Sla.Profile.UP-TO-TWO-WEEKS": {
+    "en": "Up to 2 weeks",
+    "tr-TR": "2 haftaya kadar",
+    "tk-TM": "2 hepdä çenli",
+    "ru-RU": "До 2 недель"
+  },
+  "ApplicationMigration.Sla.Profile.UP-TO-ONE-MONTH": {
+    "en": "Up to 1 month",
+    "tr-TR": "1 aya kadar",
+    "tk-TM": "1 aýa çenli",
+    "ru-RU": "До 1 месяца"
+  },
+  "ApplicationMigration.Sla.Profile.UP-TO-45-DAYS": {
+    "en": "Up to 45 days",
+    "tr-TR": "45 güne kadar",
+    "tk-TM": "45 güne çenli",
+    "ru-RU": "До 45 дней"
+  },
   "ApplicationMigration.Sla.Ok": {
     "en": "{0}: day {1} of {2}",
     "tr-TR": "{0}: {1}. gün / {2}",

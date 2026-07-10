@@ -244,11 +244,15 @@
         <Member Name="FullApplicationNumber" Caption="Doly arza belgisi" />
         <Member Name="Invitations" Caption="Çakylyklar" />
         <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsForFamily" Caption="Maşgala üçin" />
         <Member Name="IsManualEntry" Caption="El bilen giriş" />
+        <Member Name="IsRejected" Caption="Ret edildi" />
         <Member Name="MigrationService" Caption="Migrasiýa gullugy" />
+        <Member Name="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <Member Name="Month" Caption="Aý" />
         <Member Name="MovementPermitLocation" Caption="Hereket rugsady ýeri" />
+        <Member Name="ProgressSlaStatement" Caption="Tassyklama möhleti" />
         <Member Name="ProjectContract" Caption="Taslama şertnamasy" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Wekil" />
@@ -256,6 +260,8 @@
         <Member Name="VisaCategory" Caption="Wiza kategoriýasy" />
         <Member Name="VisaPeriod" Caption="Wiza möhleti" />
         <Member Name="VisaType" Caption="Wiza görnüşi" />
+        <Member Name="WorkingDaysInCurrentStep" Caption="Iş günleri" />
+        <Member Name="WorkingDaysInMigrationStep" Caption="Migrasiýa iş günleri" />
         <Member Name="WorkPermits" Caption="Iş rugsatnamalary" />
         <Member Name="Year" Caption="Ýyl" />
       </OwnMembers>

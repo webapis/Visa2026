@@ -244,11 +244,15 @@
         <Member Name="FullApplicationNumber" Caption="Полный номер" />
         <Member Name="Invitations" Caption="Приглашения" />
         <Member Name="IsActive" Caption="Активен" />
+        <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IsForFamily" Caption="Для семьи" />
         <Member Name="IsManualEntry" Caption="Ручной ввод" />
+        <Member Name="IsRejected" Caption="Отклонено" />
         <Member Name="MigrationService" Caption="Миграционная служба" />
+        <Member Name="MigrationSlaStatement" Caption="Срок миграции" />
         <Member Name="Month" Caption="Месяц" />
         <Member Name="MovementPermitLocation" Caption="Место разрешения на перемещение" />
+        <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="Rejections" Caption="Отказы" />
         <Member Name="Representative" Caption="Представитель" />
@@ -256,6 +260,8 @@
         <Member Name="VisaCategory" Caption="Категория визы" />
         <Member Name="VisaPeriod" Caption="Срок визы" />
         <Member Name="VisaType" Caption="Тип визы" />
+        <Member Name="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <Member Name="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <Member Name="WorkPermits" Caption="РНТ" />
         <Member Name="Year" Caption="Год" />
       </OwnMembers>

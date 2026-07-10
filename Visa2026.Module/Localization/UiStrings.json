@@ -151,6 +151,32 @@
           "tk-TM": "Häzirki ýagdaý",
           "ru-RU": "Текущее состояние"
         },
+        "IsCancelled": { "en-US": "Cancelled", "tr-TR": "İptal", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
+        "IsRejected": { "en-US": "Rejected", "tr-TR": "Reddedildi", "tk-TM": "Ret edildi", "ru-RU": "Отклонено" },
+        "WorkingDaysInCurrentStep": {
+          "en-US": "Working days",
+          "tr-TR": "İş günleri",
+          "tk-TM": "Iş günleri",
+          "ru-RU": "Рабочие дни"
+        },
+        "ProgressSlaStatement": {
+          "en-US": "Approval deadline",
+          "tr-TR": "Onay süresi",
+          "tk-TM": "Tassyklama möhleti",
+          "ru-RU": "Срок согласования"
+        },
+        "WorkingDaysInMigrationStep": {
+          "en-US": "Migration working days",
+          "tr-TR": "Migrasyon iş günleri",
+          "tk-TM": "Migrasiýa iş günleri",
+          "ru-RU": "Рабочие дни миграции"
+        },
+        "MigrationSlaStatement": {
+          "en-US": "Migration deadline",
+          "tr-TR": "Migrasyon süresi",
+          "tk-TM": "Migrasiýa möhleti",
+          "ru-RU": "Срок миграции"
+        },
         "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
         "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
         "Rejections": { "en-US": "Rejections", "tr-TR": "Retler", "tk-TM": "Retler", "ru-RU": "Отказы" },

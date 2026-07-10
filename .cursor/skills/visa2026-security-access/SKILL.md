@@ -48,7 +48,7 @@ disable-model-invocation: false
 |------|-------------------|-------------|
 | **Administrators** | `true` | Super administrator — full bypass; do **not** verify officer access as Admin only |
 | **Users** | `false` | Immigration officers — main permission matrix in `CreateUserRole()` |
-| **UsersReadOnly** | `false` | Parallel-period officers — view/search only while legacy `VISA2015` is system of record |
+| **UsersReadOnly** | `false` | Parallel-period / **reader** officers — view/search only while legacy `VISA2015` is system of record (same Application process-tracking columns as Users) |
 | **VisaOffice** | `false` | Tenant **Configuration** nav, project contracts, ministries, Resminamalar templates (`CreateVisaOfficeRole()`) |
 | **Default** | `false` | Self-service profile / password / culture only |
 

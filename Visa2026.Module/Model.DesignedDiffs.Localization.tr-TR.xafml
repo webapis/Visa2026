@@ -244,11 +244,15 @@
         <Member Name="FullApplicationNumber" Caption="Tam Başvuru No" />
         <Member Name="Invitations" Caption="Davetler" />
         <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="IsCancelled" Caption="İptal" />
         <Member Name="IsForFamily" Caption="Aile İçin" />
         <Member Name="IsManualEntry" Caption="Manuel Giriş" />
+        <Member Name="IsRejected" Caption="Reddedildi" />
         <Member Name="MigrationService" Caption="Göç Dairesi" />
+        <Member Name="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <Member Name="Month" Caption="Ay" />
         <Member Name="MovementPermitLocation" Caption="Hareket İzni Yeri" />
+        <Member Name="ProgressSlaStatement" Caption="Onay süresi" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Temsilci" />
@@ -256,6 +260,8 @@
         <Member Name="VisaCategory" Caption="Vize Kategorisi" />
         <Member Name="VisaPeriod" Caption="Vize Süresi" />
         <Member Name="VisaType" Caption="Vize Türü" />
+        <Member Name="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <Member Name="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <Member Name="WorkPermits" Caption="Çalışma İzinleri" />
         <Member Name="Year" Caption="Yıl" />
       </OwnMembers>

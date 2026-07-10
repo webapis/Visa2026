@@ -281,6 +281,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // =====================================================================
         userRole.AddTypePermissionsRecursively<ApplicationTypeFilter>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Migration deadline ListView column resolves ApplicationType.MigrationSlaProfile (MaxDays / labels).
+        userRole.AddTypePermissionsRecursively<ApplicationMigrationSlaProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationState>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<CheckPoint>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -487,6 +489,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
     EnsureReadOnlyPermission<ExpirationAlertRule>(userRole);
 
+    // Application ListView process-tracking columns (status, approval/migration SLA).
+    EnsureApplicationProcessTrackingReadPermissions(userRole, officerCanWriteProgress: true);
+
     EnsureUserFeedbackOfficerPermissions(userRole);
     EnsureAdminOnlyOperationsDeny(userRole);
 
@@ -602,7 +607,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<Person>(role);
             EnsureReadOnlyPermission<Application>(role);
             EnsureReadOnlyPermission<ApplicationItem>(role);
-            EnsureReadOnlyPermission<ApplicationProgress>(role);
             EnsureReadOnlyPermission<Passport>(role);
             EnsureReadOnlyPermission<Visa>(role);
             EnsureReadOnlyPermission<Education>(role);
@@ -631,7 +635,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<AddressOfResidenceDocument>(role);
             EnsureReadOnlyPermission<BorderZoneName>(role);
             EnsureReadOnlyPermission<WorkPermittedLocationName>(role);
-            EnsureReadOnlyPermission<ApplicationApprovalLegSnapshot>(role);
             EnsureReadOnlyPermission<UserReportTemplate>(role);
             EnsureReadOnlyPermission<UserReportPlaceholder>(role);
             EnsureReadOnlyPermission<UserReportTemplateApplicationType>(role);
@@ -641,15 +644,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             EnsureReadOnlyPermission<ApplicationTypeFilter>(role);
             EnsureReadOnlyPermission<ApplicationType>(role);
-            EnsureReadOnlyPermission<ApplicationState>(role);
-            EnsureReadOnlyPermission<ApplicationLocation>(role);
             EnsureReadOnlyPermission<CheckPoint>(role);
             EnsureReadOnlyPermission<Country>(role);
             EnsureReadOnlyPermission<Department>(role);
             EnsureReadOnlyPermission<EducationLevel>(role);
             EnsureReadOnlyPermission<Gender>(role);
             EnsureReadOnlyPermission<MaritalStatus>(role);
-            EnsureReadOnlyPermission<MigrationService>(role);
             EnsureReadOnlyPermission<OrganizationType>(role);
             EnsureReadOnlyPermission<PassportType>(role);
             EnsureReadOnlyPermission<PurposeOfTravel>(role);
@@ -664,14 +664,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<WorkPermitLocation>(role);
             EnsureReadOnlyPermission<MovementPermitLocation>(role);
             EnsureReadOnlyPermission<BorderZoneLocation>(role);
-            EnsureReadOnlyPermission<ProjectContract>(role);
-            EnsureReadOnlyPermission<ApprovingMinistry>(role);
-            EnsureReadOnlyPermission<ApprovalLegProfile>(role);
-            EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
-            EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ApplicationNumberingProfile>(role);
             EnsureReadOnlyPermission<ExpirationAlertRule>(role);
             EnsureReadOnlyPermission<PdfFormMapping>(role);
+
+            // Same process-tracking reads as Users (status + approval/migration SLA columns); no write.
+            EnsureApplicationProcessTrackingReadPermissions(role, officerCanWriteProgress: false);
 
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -680,6 +678,45 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureTypePermission<BusinessObjects.ApplicationItemReportPackageListHost>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
 
             EnsureDenyTypeAccess<UserFeedback>(role);
+        }
+
+        /// <summary>
+        /// Grants types needed to display Application ListView process-tracking columns
+        /// (Current status, Approval/Migration working days &amp; deadlines). No Configuration navigation.
+        /// Shared by <c>Users</c> and <c>UsersReadOnly</c> (reader officers).
+        /// </summary>
+        /// <param name="officerCanWriteProgress">
+        /// When true (Users): officers may create/update progress and approval snapshots.
+        /// When false (UsersReadOnly): progress and snapshots are read-only.
+        /// </param>
+        static void EnsureApplicationProcessTrackingReadPermissions(PermissionPolicyRole role, bool officerCanWriteProgress)
+        {
+            if (role == null)
+                return;
+
+            // Migration deadline / working days — ApplicationType.MigrationSlaProfile
+            EnsureReadOnlyPermission<ApplicationMigrationSlaProfile>(role);
+            // Current status labels
+            EnsureReadOnlyPermission<ApplicationState>(role);
+            EnsureReadOnlyPermission<ApplicationLocation>(role);
+            EnsureReadOnlyPermission<MigrationService>(role);
+            // Approval deadline / working days — Application.ApprovalLegSnapshots
+            EnsureReadOnlyPermission<ApprovingMinistry>(role);
+            EnsureReadOnlyPermission<ApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
+            EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ProjectContract>(role);
+
+            if (officerCanWriteProgress)
+            {
+                EnsureFullAccessRecursivePermission<ApplicationProgress>(role);
+                EnsureReadWriteCreatePermission<ApplicationApprovalLegSnapshot>(role);
+            }
+            else
+            {
+                EnsureReadOnlyPermission<ApplicationProgress>(role);
+                EnsureReadOnlyPermission<ApplicationApprovalLegSnapshot>(role);
+            }
         }
 
         static void EnsureDenyTypeAccess<T>(PermissionPolicyRole role) where T : class
