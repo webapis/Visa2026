@@ -167,9 +167,19 @@ if ($Mode -eq "Sync" -and $Profile -ne "Production") {
 
 New-Item -ItemType Directory -Force -Path $mapRoot, $logRoot, $syncStateDirResolved | Out-Null
 
-. (Join-Path $PSScriptRoot '..\_lib\OnPremSyncState.ps1')
-. (Join-Path $PSScriptRoot '..\_lib\OnPremSyncRunStatus.ps1')
-. (Join-Path $PSScriptRoot '..\_lib\Export-OnPremSyncDashboardCore.ps1')
+function Resolve-OnPremMigrationLibPath {
+    param([Parameter(Mandatory)][string]$FileName)
+    foreach ($candidate in @(
+            (Join-Path $PSScriptRoot "_lib\$FileName"),
+            (Join-Path $PSScriptRoot "..\_lib\$FileName")
+        )) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+    throw "Lib not found: $FileName under $PSScriptRoot\_lib or ..\_lib (sync-host vs repo layout)."
+}
+. (Resolve-OnPremMigrationLibPath 'OnPremSyncState.ps1')
+. (Resolve-OnPremMigrationLibPath 'OnPremSyncRunStatus.ps1')
+. (Resolve-OnPremMigrationLibPath 'Export-OnPremSyncDashboardCore.ps1')
 $syncStatusRoot = if ($SyncHostRoot) { $SyncHostRoot } else { Join-Path $dataImporterRoot 'legacy/visa2014' }
 
 function Get-MapPath([string]$name) {

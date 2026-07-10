@@ -36,10 +36,9 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
         if (string.IsNullOrWhiteSpace(targetConnectionString))
             return Fail("DefaultConnection is not configured.");
 
-        var legacyPassword = Environment.GetEnvironmentVariable("SQL_SERVER_10.100.128.15")
-            ?? Environment.GetEnvironmentVariable("VISA2014_SQL_PASSWORD");
+        var legacyPassword = ResolveLegacySqlPassword(options.SyncHostRoot);
         if (string.IsNullOrWhiteSpace(legacyPassword))
-            return Fail("Set SQL_SERVER_10.100.128.15 or VISA2014_SQL_PASSWORD for legacy SQL.");
+            return Fail("Set SQL_SERVER_10.100.128.15 or VISA2014_SQL_PASSWORD (process/machine env), or VISA2014_SQL_PASSWORD in <SyncHostRoot>\\config\\sync.env.");
 
         try
         {
@@ -313,5 +312,49 @@ internal sealed class LegacySyncDashboardSnapshotRefresher
         }
 
         return summary;
+    }
+    private static string? ResolveLegacySqlPassword(string syncHostRoot)
+    {
+        var fromEnv = Environment.GetEnvironmentVariable("SQL_SERVER_10.100.128.15")
+            ?? Environment.GetEnvironmentVariable("VISA2014_SQL_PASSWORD");
+        if (!string.IsNullOrWhiteSpace(fromEnv))
+            return fromEnv.Trim();
+
+        // IIS app pools usually have no user env; sync host keeps the password in sync.env for Task Scheduler.
+        var syncEnvPath = Path.Combine(syncHostRoot, "config", "sync.env");
+        if (!File.Exists(syncEnvPath))
+            return null;
+
+        try
+        {
+            foreach (var rawLine in File.ReadAllLines(syncEnvPath))
+            {
+                var line = rawLine.Trim();
+                if (line.Length == 0 || line.StartsWith('#') || !line.Contains('='))
+                    continue;
+
+                var idx = line.IndexOf('=');
+                if (idx < 1)
+                    continue;
+
+                var name = line[..idx].Trim();
+                if (!name.Equals("VISA2014_SQL_PASSWORD", StringComparison.OrdinalIgnoreCase)
+                    && !name.Equals("SQL_SERVER_10.100.128.15", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var value = line[(idx + 1)..].Trim();
+                if (value.Length >= 2 && value.StartsWith('"') && value.EndsWith('"'))
+                    value = value[1..^1];
+
+                if (!string.IsNullOrWhiteSpace(value))
+                    return value;
+            }
+        }
+        catch
+        {
+            return null;
+        }
+
+        return null;
     }
 }

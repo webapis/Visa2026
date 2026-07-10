@@ -6,6 +6,15 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-10 — Ministrlik empty on ApplicationProgress (missing snapshots)
+
+- **Symptom**: Progress detail **Ministrlik** blank; Progress list status shows `1st ministry review approved` without `- Energetika` (or similar).
+- **Root cause**: `MinistryStepLabel` / `StatusListLabel` only read `Application.ApprovalLegSnapshots`. Snapshots are created when the officer changes **ApprovalLegProfile** in the Application detail controller, or during data-import `OnSaving`. Imported / older apps often have a profile + ministry progress rows but **empty snapshots**.
+- **Fix (runtime)**: `GetMinistryShortNameForLeg` falls back to live `ApprovalLegProfile.MinistryLegs` → `ApprovingMinistry.ShortNameTm`. `EnsureSnapshots` heals incomplete snapshots on every Application / Progress save.
+- **Fix (migrated data)**: `patch/Application-ApprovalLegSnapshots.ps1` / `--backfill-application-approval-leg-snapshots` — do **not** use `ApplicationProgress-MinistryLegs.ps1` (deletes progress).
+- **Prevent**: Do not resolve ministry labels from snapshots alone when `ApprovalLegProfile` is set; keep snapshot heal on save for SLA / persistence.
+- **Cross-skill**: visa2014-to-visa2026-import | visa2026-onprem-legacy-sync
+
 ### 2026-06-15 — Migration service SLA (Phase 2)
 
 - **Scope**: `ApplicationMigrationSlaProfile` tenant lookup + per-`ApplicationType` FK; runtime via `ApplicationMigrationSlaHelper`; ListView columns `WorkingDaysInMigrationStep`, `MigrationSlaStatement`; row tint merged into `ProgressSlaAppearanceCode` (ministry first, then migration).

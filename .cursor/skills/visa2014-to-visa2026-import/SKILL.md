@@ -559,6 +559,7 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 | Application cleanup deleted 0 rows | `ImportedApplications.sql` must match `GCRecord = 0` (not `NULL` only) — see [import-practices § Full application domain](./import-practices.md) |
 | Reimport skipped all rows (“already imported”) | Stale downstream id-maps / orphan WorkPermit or Invitation rows after Application wipe — purge BO tables + id-maps before re-import |
 | Direct-migration apps have ministry progress | `reimport/ApplicationProgress.ps1` only — do **not** run `--correct-application-progress-ministry-legs` after that fix |
+| Progress **Ministrlik** empty (status missing `- Energetika`) | `patch/Application-ApprovalLegSnapshots.ps1` — backfills snapshots only; **not** `ApplicationProgress-MinistryLegs.ps1` (that deletes/regens progress) |
 | `Applications.ps1` only — items/progress empty | Run full application-domain chain (WorkPermit → Invitation → ApplicationItem → ApplicationProgress) — [import-practices](./import-practices.md) |
 
 Longer fixes → [learnings.md](./learnings.md) · [import-practices.md](./import-practices.md).

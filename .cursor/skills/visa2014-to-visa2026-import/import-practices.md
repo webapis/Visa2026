@@ -264,6 +264,7 @@ Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem 
 | SQL cleanup fails on `CurrentInvitationItemID` FK | Cleanup NULLs ApplicationItem permit/invitation FKs before deleting permit/invitation rows |
 | WorkPermit/Invitation import posts **0** (“already imported”) | Application wipe left orphan permit/invitation rows + stale id-maps — delete those BO tables and remove `WorkPermit.json`, `WorkPermitItem.json`, `Invitation.json`, `InvitationItem.json` before re-import |
 | Direct-migration apps show ministry progress steps | Reimport ApplicationProgress only — **do not** run `--correct-application-progress-ministry-legs` afterward (that patch is for via-ministry apps missing legs) |
+| Progress **Ministrlik** blank / status missing ministry suffix | `patch/Application-ApprovalLegSnapshots.ps1` (`--backfill-application-approval-leg-snapshots`) — fills `ApprovalLegSnapshots` from profile; does **not** touch progress rows |
 | WorkPermit `Application` FK null | Expected on current pilot — headers from `WorkPermitLetter`; Application link is a later backfill |
 
 **Pilot verify:** app **8/-967** — `App_Reg_Check_Out`, 1 progress step (`IS_BEING_PREPARED` @ `AT_OFFICE`), 2 items, 0 direct-ministry review rows.

@@ -10,6 +10,16 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 
 ## Entries
 
+### 2026-07-10 — Empty Ministrlik on migrated progress (snapshot backfill)
+
+- **Symptom**: Officers see blank **Ministrlik** on ApplicationProgress; status missing ministry suffix. Runtime fallback fixed new opens; historical rows still need DB snapshots for SLA / persistence.
+- **Fix tool**: `scripts/visa2014-migration/patch/Application-ApprovalLegSnapshots.ps1` → `--backfill-application-approval-leg-snapshots` (no progress delete).
+- **Not**: `ApplicationProgress-MinistryLegs.ps1` (delete/regen).
+- **Local verify**: dry-run + apply on LocalDB `Visa2026` → **4701** apps backfilled (of 4705 via-ministry with profile).
+- **Prod `.25` (2026-07-10)**: EF CLI failed — `Invalid column name 'BorderZoneLocation'` (prod schema behind Module). Used SQL `cleanup/BackfillApplicationApprovalLegSnapshots.sql` via SSH `sqlcmd` on `Visa2026DbProd`: preview **4708** apps / **9122** rows → apply inserted **9122**; **RemainingGaps=0**; active snapshots **9130** (8 prior + 9122). Full `.bak` skipped — DB ~40 GB, C: 26 GB / E: 17 GB free; safety CSV of prior 8 rows on `E:\visa2026\backups\prod\`.
+- **Wrapper**: `patch/Application-ApprovalLegSnapshots-Sql.ps1` for schema-drift hosts.
+- **Cross-skill**: visa2014-to-visa2026-import (CLI) | visa2026-application-progress (label resolution)
+
 ### 2026-07-06 — Skill + OnPrem-Sync.ps1 shipped
 
 - **What**: New skill `visa2026-onprem-legacy-sync`; orchestrator `OnPrem-Sync.ps1` with `-Profile Staging|Production`.
@@ -251,3 +261,26 @@ Promotion rules: [MATURITY.md](./MATURITY.md) · shared [on-prem-deploy/MATURITY
 - **DB update**: `Run-Visa2026DbUpdateOnServer.ps1 -Profile Staging -ForceUpdate` (exit **0**, ~4 min).
 - **Smoke**: `http://10.100.128.25:8080/LoginPage` → **200**. Staging app already on **1.0.0.557** from earlier IIS deploy.
 - **Note**: One-off backup helper ran on server at `C:\visa2026-deploy\iis\Backup-Visa2026ProdDatabase.ps1` — consider promoting to repo `scripts/windows-iis/` for repeat W2 runs.
+
+### 2026-07-10 — Nightly task check: fired but failed (lib path)
+
+- **Checked** on `.25`: task `Visa2026-OnPrem-LegacySync` **Enabled**, State Ready, schedule **02:30** daily.
+- **Last run**: **2026-07-09 02:30:30** (server local = Pacific) → **LastTaskResult=1** (Event 201 return code **2147942401** = ERROR_INVALID_FUNCTION / script exit 1). Finished in **~1 second** — no new `logs\sync-run-*.log`.
+- **Next run**: 2026-07-10 02:30:30 (not yet due at check time ~20:54 PDT Jul 9).
+- **Root cause**: `Run-OnPremSyncOnServer.ps1` dotsources `..\_lib\Get-OnPremSyncHostRoot.ps1` (expects `tools\_lib\`), but `Install-OnPremSyncHost.ps1` copies libs to **`tools\scripts\_lib\`**. File exists at `C:\visa2026-sync\tools\scripts\_lib\Get-OnPremSyncHostRoot.ps1`; `tools\_lib\` is empty/missing → immediate CommandNotFoundException.
+- **Evidence**: no import-logs after Jul 9; watermark `LastSuccessfulRunUtc` still **2026-07-08T04:38:11Z**; newest orchestrator log is `sync-run-20260707-212639.log` (manual/older run with wave failures / false ERR on exit 0).
+- **Fix (not applied this check)**: change Run script to `Join-Path $PSScriptRoot '_lib\Get-OnPremSyncHostRoot.ps1'` (or also copy to `tools\_lib`), redeploy scripts to sync host, smoke-run `Run-OnPremSyncOnServer.ps1 -Mode Sync ...` once before next 02:30.
+
+### 2026-07-10 — Fixed sync-host lib path + manual catch-up started
+
+- **Bug**: `Run-OnPremSyncOnServer.ps1` / `OnPrem-Sync.ps1` used `..\_lib\` (repo layout). Install copies libs to **`tools\scripts\_lib\`**, so nightly task failed immediately after Jul 8 redeploy.
+- **Fix (repo + scp to `.25`)**: `Resolve-OnPremMigrationLibPath` tries `$PSScriptRoot\_lib\` then `..\_lib\`.
+- **Manual run**: started `Run-OnPremSyncOnServer.ps1 -Mode Sync -SkipTenantCatalogGeneration -ContinueOnError` on `.25` (~20:59 PDT Jul 9). Past lib load; waves `prod-Person-20260709-205855` / `prod-Passport-20260709-205855` writing; DataImporter active. Orchestrator log: `logs\sync-run-20260709-205950.log`.
+
+### 2026-07-10 — Dashboard Refresh failed: missing legacy SQL env in IIS
+
+- **Symptom**: Operations → Legacy sync **Refresh** shows yellow: `Set SQL_SERVER_10.100.128.15 or VISA2014_SQL_PASSWORD for legacy SQL`.
+- **Cause**: Refresh runs in **Visa2026-Prod** AppPoolIdentity; password only in `C:\visa2026-sync\config\sync.env` (Task Scheduler), not Machine/User env.
+- **Immediate fix on `.25`**: set Machine `VISA2014_SQL_PASSWORD` + `SQL_SERVER_10.100.128.15` from sync.env; recycle `Visa2026-Prod`.
+- **Code fix (repo)**: `LegacySyncDashboardSnapshotRefresher.ResolveLegacySqlPassword` also reads `<SyncHostRoot>\config\sync.env` (needs IIS redeploy).
+- **Also**: regenerated `sync-dashboard.json|.html` from workstation with current `sync-run-status` (Overall **CompletedWithErrors**, 6 Failed waves). Scalar table Status remains count-reconcile, not wave exit.

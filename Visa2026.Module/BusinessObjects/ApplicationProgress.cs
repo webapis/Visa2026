@@ -151,6 +151,13 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             TryAssignOrder();
+            if (Application != null)
+            {
+                ApprovalLegProfileMinistryHelper.EnsureSnapshots(
+                    ObjectSpaceHelper.Get(this) ?? ObjectSpaceHelper.Get(Application),
+                    Application);
+            }
+
             base.OnSaving();
             if (Application != null)
                 ApplicationLatestProgressSyncHelper.Sync(Application, ObjectSpaceHelper.Get(this));

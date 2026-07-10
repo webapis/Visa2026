@@ -882,31 +882,7 @@ namespace Visa2026.Module.BusinessObjects
                 ApplyManualEntryNumbering(GetNumberingConfiguration());
             }
 
-            SyncApprovalLegSnapshotsForDataImport();
-        }
-
-        private void SyncApprovalLegSnapshotsForDataImport()
-        {
-            if (!MigrationImportContext.IsDataImport)
-                return;
-
-            var objectSpace = ObjectSpaceHelper.Get(this);
-            if (objectSpace == null || ApprovalLegProfile == null)
-                return;
-
-            if (!ApplicationProgressProfileResolver.RequiresApprovalLegProfile(this))
-                return;
-
-            var expectedLegs = ApprovalLegProfileMinistryHelper.GetLegCount(ApprovalLegProfile);
-            if (expectedLegs <= 0)
-                return;
-
-            var snapshotLegs = ApprovalLegSnapshots?
-                .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
-            if (snapshotLegs == expectedLegs)
-                return;
-
-            ApprovalLegProfileMinistryHelper.ApplySnapshot(objectSpace, this, ApprovalLegProfile);
+            ApprovalLegProfileMinistryHelper.EnsureSnapshots(ObjectSpaceHelper.Get(this), this);
         }
 
         /// <summary>

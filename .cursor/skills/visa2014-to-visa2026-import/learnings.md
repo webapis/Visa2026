@@ -135,6 +135,19 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 
 > **Script paths (2026-07):** VISA2014 migration PowerShell/SQL moved from `scripts/local/` to **`scripts/visa2014-migration/`** — see [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md). Older entries below may still cite `scripts/local/…`; use the README index for current names.
 
+### 2026-07-10 — Application ApprovalLegSnapshot backfill (Ministrlik) — tool added
+
+- **Phase**: correction (CLI + patch script)
+- **Mode**: correction
+- **Outcome**: success (local + prod)
+- **Environment**: local LocalDB `Visa2026`; prod `10.100.128.25\SQLEXPRESS` / `Visa2026DbProd`
+- **Script / CLI**: `patch/Application-ApprovalLegSnapshots.ps1` → `--backfill-application-approval-leg-snapshots`; prod used SQL `cleanup/BackfillApplicationApprovalLegSnapshots.sql` (EF blocked by missing `BorderZoneLocation`)
+- **Symptom**: Migrated via-ministry apps have progress rows but empty **Ministrlik** / status without `- Energetika` — `ApprovalLegSnapshots` never created at import.
+- **Do not use**: `patch/ApplicationProgress-MinistryLegs.ps1` / `--correct-application-progress-ministry-legs` (deletes + regenerates progress).
+- **Counts (local apply)**: scanned **4705** → needing **4701** → backfilled **4701**
+- **Counts (prod apply)**: needing **4708** → inserted **9122** snapshots; **RemainingGaps=0**; active **9130**
+- **Prevent**: Prefer snapshot backfill for label-only gaps; on schema-behind hosts use SQL patch; reserve ministry-legs patch for apps missing `*_REVIEW_*` progress rows.
+
 ### 2026-07-03 — ApplicationItem — reimport after PersonDomainDownstream FK wipe (success)
 
 - **Phase**: partial-reimport (follow-up to Person-domain downstream cleanup that NULLed ApplicationItem FK columns)

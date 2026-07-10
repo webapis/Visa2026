@@ -38,7 +38,17 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-. (Join-Path $PSScriptRoot '..\_lib\Get-OnPremSyncHostRoot.ps1')
+function Resolve-OnPremMigrationLibPath {
+    param([Parameter(Mandatory)][string]$FileName)
+    foreach ($candidate in @(
+            (Join-Path $PSScriptRoot "_lib\$FileName"),
+            (Join-Path $PSScriptRoot "..\_lib\$FileName")
+        )) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+    throw "Lib not found: $FileName under $PSScriptRoot\_lib or ..\_lib (sync-host vs repo layout)."
+}
+. (Resolve-OnPremMigrationLibPath 'Get-OnPremSyncHostRoot.ps1')
 
 if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
     $SyncHostRoot = Get-DefaultOnPremSyncHostRoot -Profile $Profile

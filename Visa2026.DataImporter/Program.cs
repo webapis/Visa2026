@@ -170,6 +170,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--patch-visa2014-application-project-contract",
         "--correct-visa-application-types",
         "--correct-application-progress-ministry-legs",
+        "--backfill-application-approval-leg-snapshots",
         "--correct-application-progress-order",
         "--correct-person-subcontractor",
         "--correct-person-relationship",
@@ -314,6 +315,7 @@ static void PrintHelp()
     Console.WriteLine("  --patch-visa2014-application-project-contract  PATCH Application.ProjectContract (ShowProjectContract types)");
     Console.WriteLine("  --correct-visa-application-types  Retype App_Visa_Ext→708, FM via-ministry + progress regen (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-progress-ministry-legs  Regenerate progress for via-ministry apps missing ministry legs (profile/snapshot leg count; --legacy-source, --dry-run)");
+    Console.WriteLine("  --backfill-application-approval-leg-snapshots  Fill ApprovalLegSnapshots from ApprovalLegProfile (Ministrlik; no progress delete; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-application-progress-order  Recompute ApplicationProgress.Order from workflow sequence (all apps; --target-connection, --dry-run)");
     Console.WriteLine("  --correct-person-subcontractor  Patch Person.Subcontractor from legacy IDNumber / Tasaron (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-person-relationship  Patch Person.Relationship from legacy FamilyMemberRelation (--legacy-source, --dry-run)");
@@ -600,6 +602,16 @@ if (HasArg(args, "--correct-application-progress-ministry-legs"))
     Log.Phase("VISA2014 ApplicationProgress ministry-leg correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationProgressMinistryLegCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--backfill-application-approval-leg-snapshots"))
+{
+    Log.Phase("VISA2014 Application ApprovalLegSnapshot backfill (Ministrlik)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ApplicationApprovalLegSnapshotBackfill.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

@@ -156,6 +156,24 @@ $env:VISA2026_PROD_SQL_CONNECTION = "Server=10.100.128.25\SQLEXPRESS;Database=Vi
 
 **Local dev** (localhost SQL): `Compare-LegacyMigratedCounts.ps1 -ShowIdMap`.
 
+### One-off: empty Ministrlik on migrated progress
+
+Progress rows exist but **Ministrlik** / status suffix blank → missing `ApprovalLegSnapshots` (not missing progress).
+
+```powershell
+# Prefer EF when target schema matches Module:
+.\scripts\visa2014-migration\patch\Application-ApprovalLegSnapshots.ps1 -DryRun `
+  -TargetConnection $env:VISA2026_PROD_SQL_CONNECTION
+
+# If EF fails (schema behind Module, e.g. missing BorderZoneLocation) — SQL on .25:
+.\scripts\visa2014-migration\patch\Application-ApprovalLegSnapshots-Sql.ps1 -RunOnServerViaSsh -DryRun
+.\scripts\visa2014-migration\patch\Application-ApprovalLegSnapshots-Sql.ps1 -RunOnServerViaSsh -Apply
+```
+
+Do **not** use `ApplicationProgress-MinistryLegs.ps1` for this — that deletes and regenerates progress.
+
+**Prod 2026-07-10:** SQL apply inserted **9122** snapshots for **4708** apps; RemainingGaps=0.
+
 **Real-time** (second terminal while `OnPrem-Sync.ps1` runs):
 
 ```powershell
