@@ -135,6 +135,47 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 
 > **Script paths (2026-07):** VISA2014 migration PowerShell/SQL moved from `scripts/local/` to **`scripts/visa2014-migration/`** — see [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md). Older entries below may still cite `scripts/local/…`; use the README index for current names.
 
+### 2026-07-11 — Demo wipe-business + full reimport started
+
+- **Phase**: end-to-end (on-prem Demo)
+- **Mode**: end-to-end (`OnPrem-Sync.ps1 -Profile Demo -Mode Import`)
+- **Outcome**: stopped on Passport fail; resumed after fix
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` · `C:\visa2026-sync-demo` · task `Visa2026-OnPrem-DemoImportOnce`
+- **Policy**: **do not** pass `-ContinueOnError` on Demo full import — one failed BO must stop the chain so we can fix and `-StartAt` resume
+- **Passport fail**: 3642 posted / **5 failed** — legacy IssuedCountry **UAE** translated to Code `UAE` but Demo catalog only has **ARE** → `BuildPayload` null
+- **Fix**: `lookup-translations.yaml` `UAE` → target **ARE**; resume `-StartAt Passport` (no ContinueOnError)
+- **Side effect of ContinueOnError**: Visa completed; Education/EPH partially ran — resume skips via id-map
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh -ClearScreen`
+- **Cross-skill**: visa2026-onprem-legacy-sync
+
+### 2026-07-10 — ApplicationProgress import live percent (Demo resume)
+
+- **Phase**: end-to-end (on-prem Demo) — ApplicationProgress wave
+- **Mode**: end-to-end (`-Profile Demo -Mode Import -StartAt ApplicationProgress`)
+- **Outcome**: in progress (progress sidecar live)
+- **Environment**: `Visa2026DbDemo` / `C:\visa2026-sync-demo` · RunId **20260710-052517**
+- **Change**: Import path now writes `ApplicationProgress.sync-progress.json` every 100 rows with `processed/total/percent` + flushes stdout (same pattern as Sync upsert helper).
+- **Counts**: **54985** prepared progress rows from **12354** legacy apps; early sample `100/54985 (0.2%)` posted=49 failed=51
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh -ClearScreen` shows Wave progress bar from sidecar
+- **Prevent**: Do not rely on redirected wave `.log` alone for mid-wave counts; redeploy DataImporter after progress-reporting changes
+- **Cross-skill**: visa2026-onprem-legacy-sync
+
+### 2026-07-10 — Full fresh Demo import started (Visa2026DbDemo / :8081)
+
+- **Phase**: end-to-end (on-prem Demo)
+- **Mode**: end-to-end (`OnPrem-Sync.ps1 -Profile Demo -Mode Import`)
+- **Outcome**: in progress (Person completed; Passport running)
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` · sync host `C:\visa2026-sync-demo` · legacy `10.100.128.15` / `VISA2015`
+- **Script / CLI**: Scheduled Task `Visa2026-OnPrem-DemoImportOnce` → `Run-OnPremSyncOnServer.ps1 -Profile Demo -Mode Import -ContinueOnError` (SYSTEM; survives SSH)
+- **Preflight**: Demo IIS upgraded **556 → 566**; wiped business rows (NULL `LatestProgressId` before delete); **no `-IncludeFileWaves`** (E: ~17 GB free; prod DB ~41 GB with files)
+- **Blockers fixed this run**:
+  1. Parallel prod DataImporter holds `:5002` → set `VISA2026_MIGRATION_IMPORT_URLS=http://127.0.0.1:5012` (not `ASPNETCORE_URLS`); `OnPrem-Sync.ps1` now auto-offsets Staging/Demo ports
+  2. Fresh id-maps: `Visa2014IdMapHelper.Load` requires file → create empty `{}` stubs; orchestrator now stubs on `-Mode Import`
+- **Counts so far**: People **3280** posted; Passport wave started; id-map `Person.json` ~272 KB
+- **Watch**: `Watch-OnPremSyncRun.ps1` with `-SyncHostRoot C:\visa2026-sync-demo` (or SSH); UI `http://10.100.128.25:8081/LoginPage`
+- **Prevent**: Do not clear id-map dir without leaving `{}` stubs; do not run two headless hosts on `:5002`; move Demo MDF to `E:\visa2026\sql-data\` before file waves
+- **Cross-skill**: visa2026-onprem-legacy-sync | visa2026-windows-iis-deploy
+
 ### 2026-07-10 — Application ApprovalLegSnapshot backfill (Ministrlik) — tool added
 
 - **Phase**: correction (CLI + patch script)
@@ -1128,3 +1169,82 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Follow-up**: revalidate `ApplicationResult.Result == 1 → IsCancelled` heuristic (likely not cancellation); consider dropping or replacing that path in `Visa2014LegacyInvitationItemCancellationIndex` so index count matches importable rows. `InvitationItem` status distribution: 4897 none / 52 `IsChanged` / 6 `IsCancelled`.
 - **UTF-8**: rewrite `.ps1` / `.sql` with `[System.IO.File]::WriteAllText(..., UTF8Encoding(false))` if Cursor `Write` corrupts encoding (parse error on first run).
 
+
+### 2026-07-11 — Demo Import: stop-on-failure; Passport UAE; Education gaps
+
+- **Stop-on-failure**: OnPrem-Sync default (no `-ContinueOnError`) confirmed on Demo — Education fail exit 1 halted chain before EmployeePositionHistory.
+- **Passport**: calik Country overlay replaced base values[]; UAE identity-passed → ResolveCountry miss (ARE only). Merge Load() + explicit UAE→ARE in calik overlay. Resume Posted 5 / Failed 0.
+- **Education**: 47 incomplete payloads — EducationInstitution / Specialty NameTm not in Demo tenant catalogs (encoding-sensitive labels). Fix catalogs or allow_null policy before `-StartAt Education`.
+
+### 2026-07-11 — Zero FailedCount; Education institution/specialty seed catch-up
+
+- **Rule**: no tolerable FailedCount unless deliberate exclusion (skipped, not failed). Documented in import-practices §7b + onprem-legacy-sync hard rule 8.
+- **Education Demo**: missing 47 institution + related specialty labels vs live `.15`; SQL seed + refreshed calik-energi JSON (1500/1083). Resume Posted 47 / Failed 0.
+
+### 2026-07-11 — Intentional exclusions require approval + registry
+
+- **Rule**: skips only via `docs/VISA2014_MIGRATION/import-exclusions.yaml` (`status: approved`) with why, counts, approvedBy/At. FailedCount is never an exclusion.
+- **Seeded**: EXC-APPTYPE-E33-E55 (105 apps / 204 items), EXC-VISA-ISSUEDPLACE-EMBASSY (18 visas).
+- **Docs**: import-practices §7c, onprem hard rule 8, SKILL link, import-strategy pointer.
+
+### 2026-07-11 — Demo AddressOfResidence diagnosis
+
+- **Initial**: Posted 0 / Failed 5122. Gaps reported as City=...
+- **Root cause 1**: `Visa2014CityLookupMatcher` requires Region match; ObjectSpace loader left `City.Region`/`RegionName` empty (Demo `RegionName` all null). Fixed ObjectSpace Region load + name-only fallback when no city has region metadata.
+- **Root cause 2**: Demo `Lodgings` count was **0** after wipe (tenant lodging catalog not re-synced). `ForceUpdate` Demo -> Lodgings **76**.
+- **After fix**: Posted **3069** + PIA **970**; Failed **80** (City/Lodging gaps: Serdarabat, Beýik Saparmyrat…, Serhetabat + a few lodging/other-site scalars). Chain stopped (no ContinueOnError).
+- **Next**: align remaining city region links / lodging FullAddress normalize for ~80 rows; write full error list (not Take(10)).
+
+### 2026-07-11 — AoR geography policy (b): prefer legacy Region when Wiki/OSM agrees
+
+- **Decision**: City.Region catalog aligned to Wikipedia/OSM; import prefers legacy Region+City when that pair matches; if legacy Region is wrong but city name is unique among region-linked rows, use catalog City.Region.
+- **city.json**: Serhetabat etraby → Mary; Serdarabat etraby → Lebap; Beýik Saparmyrat… → Lebap (historical Beýik district).
+- **Demo SQL**: in-place RegionID updates for those cities; filled 3 Lodging.CityID nulls (Watan/Parahat/Çemenabat).
+- **Code**: `Visa2014CityLookupMatcher` unique region-linked fallback; ImportApplier sets Region from City after resolve; gap exporter CLI `--export-visa2014-import-gaps`.
+- **Result**: import-gap preview **80 → 9** remaining (mostly lodging/other-site scalar still unresolved after city fix).
+
+- **Follow-up**: unique Region-FK fallback (ignore null-Region orphan + RegionName enrich duplicates) → gap preview **0**; would-post 67 legacy + 14 PIA. Resume Demo -StartAt AddressOfResidence after deploying updated DataImporter to sync host.
+
+### 2026-07-11 — Turkmenistan geography reference SQLite DB
+
+- **Path**: `Visa2026.DataImporter/legacy/visa2014/reference/turkmenistan-geography.db` (6 regions, ~89 cities + aliases).
+- **Seed**: `region.json` + `city.json` + `geography-overrides.json` (Wiki/OSM conflict cities).
+- **Rebuild**: `--rebuild-visa2014-geography-db`.
+- **Import**: AddressOfResidence uses store policy (b) — keep legacy Region when it matches DB; else use DB Region for city name.
+
+### 2026-07-11 — Mandatory lookup preflight before full Import
+
+- **Gate**: `--preflight-visa2014-lookups` (Phase A catalog sampleQuery + Phase B entity transforms + optional target DB key check).
+- **Orchestrator**: `OnPrem-Sync.ps1 -Mode Import` runs preflight automatically; `-SkipLookupPreflight` only for approved exceptions; `-LookupPreflight` enables it for Sync.
+- **Wrapper**: `scripts/visa2014-migration/import/Preflight-LookupAudit.ps1`.
+- **Why**: live lookup drift (Education institutions, City/Region from FullAddress) must be audited → translated → seeded before Import, not discovered mid-wave as FailedCount.
+
+### 2026-07-11 — Skill: Full Import order = lookup resolution → preflight → Import
+
+- **Named process**: **lookup resolution** (audit → translate → seed LookupCatalogs/tenant JSON), then **lookup preflight**, then full Import.
+- **Updated**: visa2014-to-visa2026-import `SKILL.md` (§ Full Import order), `import-practices.md`; onprem-legacy-sync hard rule 9 + preflight table.
+- **Calik**: base + `lookup-translations.calik-energi.yaml`.
+
+### 2026-07-11 — user-prompts for lookup resolution / preflight
+
+- Added `visa2014-to-visa2026-import/user-prompts.md` (resolution, preflight, Calik, full Import order).
+- Linked from import `SKILL.md`; Demo/lookup openers added to onprem `user-prompts.md`.
+
+### 2026-07-11 — Demo lookup preflight (calik-energi-onprem-demo)
+
+- **Run**: `.25` `C:\visa2026-sync-demo`; report `lookup-preflight-demo-20260710-232046.json`.
+- **Result**: FAILED — Blocking=30 Allowed=47 TargetCatalogs=0 (target key load still broken).
+- **Gaps**: CityByName ~12 distinct (Atamyrat, Baharly, Balkanabat, Beyik…, Dowletli, Hojambaz, Serdar, Serdarabat, Tejen, Turkmenabat, Turkmenbasy) on Application/ApplicationItem; City (null) x2; Region free-text x3; CheckPoint sampleQuery syntax.
+- **Next**: lookup resolution for CityByName + fix CheckPoint query / target key loader before full Import.
+
+### 2026-07-11 — Obsolete visa2026-onprem-legacy-sync; sole migration skill
+
+- **Decision**: stop using `@visa2026-onprem-legacy-sync`. All data migration (lookup resolution, preflight, Demo/Prod Import on .25) is `@visa2014-to-visa2026-import` only.
+- **Obsolete skill**: `disable-model-invocation: true`; stub points here; learnings/reference kept as archive.
+- **Updated**: AGENTS.md, ON_PREM runbook, on-prem-deploy MATURITY, import SKILL + user-prompts (Demo/Prod section).
+
+### 2026-07-11 � Removed delta Sync (keep Import)
+
+- **Removed**: `--sync-visa2014` / `--sync-full` / `--sync-since` / `--sync-state-dir` / `--no-soft-delete-sync`; `Visa2014SyncCommand` + StateStore/IdMapLoader/RowFilter; `RunSyncAsync` on OData importers; soft-delete sync query; Sync-only PS1s (Register task, Compare/Export/Watch SyncState, OnPremSyncState lib); `LegacySyncDashboard` (Module + Blazor); skill folder `visa2026-onprem-legacy-sync`.
+- **Kept**: `OnPrem-Sync.ps1` Import-only; `--import-visa2014`; lookup preflight; `Visa2014SyncPayloadFkHelper`; Import progress sidecars on `Visa2014SyncUpsertHelper`; host roots `C:\visa2026-sync*`.
+- **Ops**: disable Task Scheduler `Visa2026-OnPrem-LegacySync` on `.25` manually if still registered.

@@ -101,7 +101,7 @@ Waves match [`importPhases`](../../Visa2026.DataImporter/legacy/visa2014/order.y
 | **Production** | `Visa2026DbProd` | Cutover only after staging sign-off |
 | **On-prem IIS** | `10.100.128.25` (:80 / :8080 / :8081) | See [ON_PREM_IIS_MIGRATION_RUNBOOK.md](./ON_PREM_IIS_MIGRATION_RUNBOOK.md) — legacy SQL `10.100.128.15` |
 
-**Parallel period (on-prem):** officers **view/search only** in Visa2026; legacy `VISA2015` remains system of record; planned **nightly one-way sync** legacy → Visa2026 until cutover (`import-strategy.yaml` → `onPremDeployment.parallelPeriod`).
+**Parallel period (on-prem):** officers **view/search only** in Visa2026; legacy `VISA2015` remains system of record; catch-up via **Import** (`OnPrem-Sync.ps1` / `--import-visa2014`) — **no** delta Sync (`import-strategy.yaml` → `onPremDeployment.parallelPeriod`).
 
 **Rules:**
 

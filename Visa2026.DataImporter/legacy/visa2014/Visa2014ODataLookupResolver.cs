@@ -536,6 +536,31 @@ internal sealed partial class Visa2014ODataLookupResolver
     public Guid? ResolveCity(string? nameTm, string? regionNameTm = null) =>
         Visa2014CityLookupMatcher.Resolve(_cities, nameTm, regionNameTm);
 
+    /// <summary>Region FK from the resolved City catalog row (Wikipedia/OSM-aligned when catalogs are correct).</summary>
+    public Guid? ResolveRegionForCity(Guid cityId)
+    {
+        var city = _cities.FirstOrDefault(c => c.Id == cityId);
+        if (city == null)
+            return null;
+        if (city.Region != null)
+            return city.Region.Id;
+        if (!string.IsNullOrWhiteSpace(city.RegionName))
+            return ResolveRegion(city.RegionName);
+        return null;
+    }
+
+    public string? GetCityRegionNameTm(Guid cityId)
+    {
+        var city = _cities.FirstOrDefault(c => c.Id == cityId);
+        if (city == null)
+            return null;
+        if (!string.IsNullOrWhiteSpace(city.Region?.NameTm))
+            return city.Region.NameTm;
+        if (!string.IsNullOrWhiteSpace(city.RegionName))
+            return city.RegionName;
+        return null;
+    }
+
     public Guid? ResolveLodging(string? cityNameTm, string? regionNameTm, string? fullAddress)
     {
         var exact = ResolveSiteByCityAndScalar(_lodgings, cityNameTm, regionNameTm, fullAddress, l => l.FullAddress);

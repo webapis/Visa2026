@@ -81,7 +81,6 @@
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />
-      <Item Id="LegacySyncDashboard" Caption="Eski sistem senkronizasyonu" />
       <Item Id="Lookup" Caption="Referans">
         <Items>
           <Item Id="Application" Caption="Başvuru">
@@ -175,6 +174,7 @@
       <Item Id="Work Permit Tracking" Caption="İş İzni Takibi" />
       <Item Id="WorkPermit" Caption="Çalışma İzni" />
       <Item Id="WorkPermitItem" Caption="İş İzni Kalemleri" />
+      <Item Id="ForeignWorkerMaglumat" Caption="Yabancı uyruklu çalışanlar bilgisi" />
     </Items>
   </NavigationItems>
   <BOModel>
@@ -2311,6 +2311,31 @@
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ForeignWorkerMaglumat" Caption="Yabancı uyruklu çalışanlar bilgisi">
+      <OwnMembers>
+        <Member Name="FullName" Caption="A.S.A" />
+        <Member Name="DateOfBirth" Caption="Doğum tarihi" />
+        <Member Name="NationalityCode" Caption="Uyruğu" />
+        <Member Name="BirthAndNationality" Caption="Doğum yılı ve uyruğu" />
+        <Member Name="PassportNumber" Caption="Pasaport no" />
+        <Member Name="PassportExpirationDate" Caption="Pasaport süresi" />
+        <Member Name="PassportBlock" Caption="Pasaport no ve süresi" />
+        <Member Name="EducationLevelTm" Caption="Eğitim" />
+        <Member Name="PositionNameTm" Caption="Görevi" />
+        <Member Name="ResidenceAddress" Caption="Türkmenistan'daki ikamet adresi" />
+        <Member Name="WorkPermitNumber" Caption="İzin no" />
+        <Member Name="WorkPermitStartDate" Caption="İzin başlangıcı" />
+        <Member Name="WorkPermitExpirationDate" Caption="İzin bitişi" />
+        <Member Name="WorkPermitIsCancelled" Caption="İptal" />
+        <Member Name="IsValid" Caption="Geçerli" />
+        <Member Name="PermitBlock" Caption="İzin no ve süresi" />
+        <Member Name="VisaNumber" Caption="Vize no" />
+        <Member Name="VisaStartDate" Caption="Vize başlangıcı" />
+        <Member Name="VisaExpirationDate" Caption="Vize bitişi" />
+        <Member Name="VisaBlock" Caption="Vize no ve süresi" />
+        <Member Name="Remarks" Caption="Not" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="İş İzni Kalemi">
       <OwnMembers>
         <Member Name="ASNumber" Caption="AS Numarası" />
@@ -3113,6 +3138,8 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="ForeignWorkerMaglumat_ListView" Caption="Yabancı uyruklu çalışanlar bilgisi" />
+    <DetailView Id="ForeignWorkerMaglumat_DetailView" Caption="Yabancı uyruklu çalışanlar bilgisi" />
     <ListView Id="WorkPermitItem_ListView" Caption="İş İzni Kalemleri">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="AS Numarası" />

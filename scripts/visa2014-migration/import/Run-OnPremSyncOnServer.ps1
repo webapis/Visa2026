@@ -1,11 +1,12 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Run legacy -> prod sync on 10.100.128.25 using the per-slot sync-host layout.
+  Run legacy → Visa2026 Import on 10.100.128.25 using the per-slot sync-host layout.
 
 .DESCRIPTION
   Loads <SyncHostRoot>\config\sync.env, resolves target SQL from the slot IIS appsettings when needed,
   then invokes OnPrem-Sync.ps1 with -SyncHostRoot (published DataImporter.exe — no SDK).
+  Import-only (--import-visa2014). No nightly Sync / --sync-visa2014.
 
   Default sync roots (override with -SyncHostRoot):
     Production  C:\visa2026-sync
@@ -13,22 +14,18 @@
     Demo        C:\visa2026-sync-demo
 
 .EXAMPLE
-  # Manual nightly-style sync on .25:
-  C:\visa2026-sync\tools\scripts\Run-OnPremSyncOnServer.ps1 -Mode Sync
+  C:\visa2026-sync\tools\scripts\Run-OnPremSyncOnServer.ps1 -SkipTenantCatalogGeneration
 
 .EXAMPLE
-  # First catch-up after bootstrap:
-  C:\visa2026-sync\tools\scripts\Run-OnPremSyncOnServer.ps1 -Mode Sync -SyncFull -SkipTenantCatalogGeneration
+  C:\visa2026-sync-demo\tools\scripts\Run-OnPremSyncOnServer.ps1 -Profile Demo -ContinueOnError
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Import', 'Sync')]
-    [string]$Mode = 'Sync',
     [ValidateSet('Production', 'Staging', 'Demo')]
     [string]$Profile = 'Production',
-    [switch]$SyncFull,
     [switch]$IncludeFileWaves,
     [switch]$SkipTenantCatalogGeneration,
+    [switch]$SkipLookupPreflight,
     [switch]$ContinueOnError,
     [string[]]$Entity = @(),
     [string]$StartAt = '',
@@ -95,6 +92,10 @@ function Import-SyncEnvFile {
 
 Import-SyncEnvFile -Path $ConfigFile
 $env:VISA2026_SYNC_HOST_ROOT = $SyncHostRoot
+# In-process DataImporter hosts Blazor Startup; Production appsettings has SQLEXPRESS (not LocalDB).
+if ([string]::IsNullOrWhiteSpace($env:ASPNETCORE_ENVIRONMENT)) {
+    $env:ASPNETCORE_ENVIRONMENT = 'Production'
+}
 
 if ([string]::IsNullOrWhiteSpace($env:VISA2014_SQL_PASSWORD)) {
     throw 'VISA2014_SQL_PASSWORD missing in sync.env (ReadOnlyUser on 10.100.128.15).'
@@ -121,14 +122,13 @@ if (-not (Test-Path -LiteralPath $onPremSync)) {
 
 $args = @(
     '-Profile', $Profile,
-    '-Mode', $Mode,
     '-SyncHostRoot', $SyncHostRoot,
     '-Configuration', 'Release',
     '-SkipPostImportCorrections'
 )
-if ($SyncFull) { $args += '-SyncFull' }
 if ($IncludeFileWaves) { $args += '-IncludeFileWaves' }
 if ($SkipTenantCatalogGeneration) { $args += '-SkipTenantCatalogGeneration' }
+if ($SkipLookupPreflight) { $args += '-SkipLookupPreflight' }
 if ($ContinueOnError) { $args += '-ContinueOnError' }
 if ($Entity.Count -gt 0) { $args += @('-Entity') + $Entity }
 if ($StartAt) { $args += @('-StartAt', $StartAt) }
@@ -136,7 +136,7 @@ if ($StartAt) { $args += @('-StartAt', $StartAt) }
 $taskLog = Join-Path $SyncHostRoot "logs\sync-run-$(Get-Date -Format yyyyMMdd-HHmmss).log"
 New-Item -ItemType Directory -Force -Path (Split-Path $taskLog) | Out-Null
 
-Write-Host "=== Run-OnPremSyncOnServer ($Mode) ===" -ForegroundColor Cyan
+Write-Host "=== Run-OnPremSyncOnServer (Import) ===" -ForegroundColor Cyan
 Write-Host "INF Log: $taskLog" -ForegroundColor DarkGray
 
 $syncOutput = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $onPremSync @args 2>&1

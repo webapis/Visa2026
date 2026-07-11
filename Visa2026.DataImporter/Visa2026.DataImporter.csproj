@@ -37,6 +37,9 @@
     <Content Include="legacy\visa2014\legacy-sources.yaml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="legacy\visa2014\reference\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\docs\VISA2014_MIGRATION\lookup-translations.yaml">
       <Link>legacy\visa2014\lookup-translations\lookup-translations.yaml</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -63,6 +66,7 @@
   <ItemGroup>
     <PackageReference Include="ExcelDataReader" Version="3.8.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.11" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.5" />

@@ -1,9 +1,10 @@
 ---
 name: visa2014-to-visa2026-import
 description: >-
-  VISA2014 → Visa2026 migration: Excel preview; approve strategy before code; read learnings each
-  session; append learnings after every import attempt (success or failure); VISA2015 source of truth;
-  confirm each BO; OData / in-process import; partial reimport (dev only); reuse existing migration scripts before creating new ones.
+  VISA2014 → Visa2026 data migration (sole skill for this): Excel preview; lookup resolution;
+  lookup preflight; approve strategy; VISA2015 source of truth; Calik Energi Demo/Prod Import on
+  10.100.128.25 (OnPrem-Sync.ps1); OData / in-process import; partial reimport (dev); learnings
+  after every import attempt. Chat openers: user-prompts.md. Import only (no delta Sync).
 disable-model-invocation: false
 ---
 
@@ -21,17 +22,21 @@ disable-model-invocation: false
 
 **Status tracker (done / in progress / issues):** [STATUS.md](../../../docs/VISA2014_MIGRATION/STATUS.md) · [migration-status.yaml](../../../docs/VISA2014_MIGRATION/migration-status.yaml)
 
+**Intentional exclusions (approved skips only):** [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml) — why, counts, approver; FailedCount ≠ exclusion
+
 **Three-layer mapping:** [table-mappings.yaml](../../../docs/VISA2014_MIGRATION/table-mappings.yaml) · [field-maps/](../../../Visa2026.DataImporter/legacy/visa2014/field-maps/) · [lookup-translations.yaml](../../../docs/VISA2014_MIGRATION/lookup-translations.yaml)
 
 **Per-BO dossiers:** [discovery/README.md](../../../docs/VISA2014_MIGRATION/discovery/README.md)
 
 **Target OData import patterns:** [visa2026-dataimporter](../visa2026-dataimporter/SKILL.md) · [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md)
 
-**Lookup alignment:** [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) · [LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)
+**Lookup alignment:** [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) · [LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md) · [LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md)
 
 **Import best practices:** [import-practices.md](./import-practices.md) — **read before Phase 3+**
 
 **Commands and SQL templates:** [reference.md](./reference.md) · **Migration scripts (reuse first):** [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md)
+
+**Chat openers:** [user-prompts.md](./user-prompts.md) (`@visa2014-to-visa2026-import`)
 
 ---
 
@@ -43,14 +48,62 @@ disable-model-invocation: false
 |------|----------------|
 | Import one BO | `dotnet run … --import-visa2014 --entity <BO>` |
 | Resume / full local chain | `import/Run-HeadlessChain.ps1` (`-StartAt`) |
-| Staging / on-prem waves | `import/OnPrem-Sync.ps1` (`-Profile Staging|Production`) · see [visa2026-onprem-legacy-sync](../visa2026-onprem-legacy-sync/SKILL.md) |
+| **On-prem Demo / Staging / Prod Import** | `import/OnPrem-Sync.ps1` (`-Profile Demo\|Staging\|Production`) · sync host `C:\visa2026-sync*` on `.25` · [ON_PREM_IIS_MIGRATION_RUNBOOK.md](../../../docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md) |
 | Tenant JSON before Application | `import/Invoke-TenantCatalogGeneration.ps1` |
+| **Lookup resolution** (audit → translate → seed) | [LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md) · `lookup-translations.yaml` (+ company overlay) · `LookupCatalogs/` / tenant JSON |
+| **Lookup preflight** (gate before full Import) | `import/Preflight-LookupAudit.ps1` / `--preflight-visa2014-lookups` |
 | Dev: fix one BO after delete | `reimport/<Entity>.ps1` + `cleanup/*.sql` |
 | Same script, different scope | Add **parameters** (`-MaxRows`, `-DryRun`, `-TargetConnection`) — not a new file |
 
 **New script only** when no CLI flag, orchestrator, or existing helper covers the workflow — then add one README row and append [learnings.md](./learnings.md). Prefer C# in `Visa2026.DataImporter` over duplicate PowerShell wrappers.
 
 **Experience loop:** [MATURITY.md](./MATURITY.md) — **read before every task** · [learnings.md](./learnings.md) — **append after every import attempt** (success **or** failure)
+
+---
+
+## Full Import order (locked)
+
+Before any full / Demo / on-prem **Import** chain:
+
+```text
+1. Lookup resolution   — audit live VISA2015 DISTINCT values
+                         → translate (lookup-translations.yaml + company overlay)
+                         → seed gaps into Visa2026 LookupCatalogs / tenant JSON + ForceUpdate
+2. Lookup preflight    — Preflight-LookupAudit.ps1 / --preflight-visa2014-lookups (exit 0)
+3. Full Import         — OnPrem-Sync.ps1 / Run-HeadlessChain / --import-visa2014 waves
+```
+
+| Name | Role |
+|------|------|
+| **Lookup resolution** | Human + YAML + catalog seed work ([LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md)). Do **not** bulk-import legacy lookup tables. |
+| **Lookup preflight** | Automated gate; `OnPrem-Sync.ps1` runs it unless `-SkipLookupPreflight`. |
+| **Import-time translate** | During POST, resolve FKs via layer 3 only — no inventing catalog rows mid-wave. |
+
+**Çalik Enerji:** base `lookup-translations.yaml` + overlay `lookup-translations.calik-energi.yaml` (see `legacy-sources.yaml` `calik-energi*`).
+
+Do **not** run full Import first and “fix lookups after FailedCount” — resolve + preflight first.
+
+---
+
+## On-prem hosts (Calik Energi) — under this skill
+
+All Demo/Prod migration chat and agent work uses **this** skill. Orchestrator `OnPrem-Sync.ps1` is **Import-only** (`--import-visa2014`). Delta Sync (`--sync-visa2014`, nightly Sync task, LegacySyncDashboard) was **removed**.
+
+| Slot | URL | Database | Legacy source id | Sync host on `.25` |
+|------|-----|----------|------------------|--------------------|
+| **Demo** | `http://10.100.128.25:8081` | `Visa2026DbDemo` | `calik-energi-onprem-demo` | `C:\visa2026-sync-demo` |
+| **Staging** | `:8080` | `Visa2026DbStaging` | (refresh from prod `.bak` — IIS skill) | `C:\visa2026-sync-staging` |
+| **Production** | `:80` | `Visa2026DbProd` | `calik-energi-onprem-prod` | `C:\visa2026-sync` |
+
+| Need | How |
+|------|-----|
+| Legacy SQL (`.15`) | MCP **`visa2014-sql-remote`** → `VISA2015` |
+| Lookup preflight on Demo | `Preflight-LookupAudit.ps1` / published DI on sync-demo · [user-prompts.md](./user-prompts.md) |
+| Full Import | `OnPrem-Sync.ps1 -Profile Demo\|Production` (preflight auto) |
+| Watch Import | `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh` |
+| IIS / ForceUpdate / staging bak | [visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md) |
+
+**Hard rules for Import:** no `-ContinueOnError` on full/Demo Import; zero FailedCount unless [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml); lookup resolution → preflight → Import.
 
 ---
 
@@ -121,14 +174,16 @@ Binary photos / scans / attachments after scalar BO import?
 Strategy approved + BO confirmed — build importer?
   → § Phase 2 — Implementation (shell then per entity)
 
-Legacy lookup values for current BO?
-  → § Lookup audit (often dossier step 6)
+Legacy lookup values / catalog gaps before Import?
+  → § Full Import order (locked) — **lookup resolution** then **lookup preflight**
+  → § Phase 2 (lookup) · LOOKUP_RESOLUTION_STRATEGY.md
 
 One entity end-to-end (Person pilot)?
-  → § Phase 3 — Pilot OData import
+  → § Phase 3 — Pilot OData import (after lookup resolution for that BO’s catalogs)
 
 Full transactional import?
-  → § Phase 4+ — order.yaml sequence + import-practices.md
+  → § Full Import order (locked) · Phase 4+ · import-practices.md
+  → lookup preflight must pass first
 
 Import run / upsert / reconciliation?
   → § Import best practices (import-practices.md)
@@ -142,8 +197,9 @@ Partial reimport one BO during migration implementation (local dev)?
   → Application header fix: § Full application domain (not Applications.ps1 alone)
   → Respect order.yaml dependsOn — parents before children; re-run downstream if parent changed
 
-End-to-end migration (staging / prod cutover)?
-  → import/OnPrem-Sync.ps1 or import/Run-HeadlessChain.ps1 · order.yaml sequence — not reimport/ · on-prem LAN: [visa2026-onprem-legacy-sync](../visa2026-onprem-legacy-sync/SKILL.md)
+End-to-end migration (Demo / staging / prod cutover)?
+  → import/OnPrem-Sync.ps1 or import/Run-HeadlessChain.ps1 · order.yaml — § On-prem hosts
+  → not reimport/ · IIS slot work: visa2026-windows-iis-deploy
 
 End of session with verified outcome?
   → Append learnings.md (MATURITY.md loop)
@@ -434,7 +490,7 @@ Per field or target-only gap:
 
 - `use_default` — apply `defaultValue` / `default` kind
 - `allow_null` — when validation allows
-- `skip_row` — legacy row not imported (log count)
+- `skip_row` — legacy row not imported (log count). **Requires** an **`approved`** entry in [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml) (why, how many, who approved). Unapproved skips are bugs; `FailedCount > 0` is never an exclusion.
 - `block_import` / `block_entity` — stop until mapping fixed
 
 Never invent ministry/legal catalog values — use `lookup-translations.yaml` or block.
@@ -452,16 +508,21 @@ Run duplicate probe SQL during discovery; record `duplicateGroups` in dossier `m
 
 ---
 
-## Phase 2 (lookup) — Lookup value audit (layer 3)
+## Phase 2 (lookup) — Lookup resolution (layer 3)
 
-Part of each BO dossier (step 6); optional cross-BO audit before full import:
+**Name:** **lookup resolution** — audit → translate → seed (not “import lookups”).
 
-1. For each `lookupCatalog` in field-maps, ensure `lookup-translations.yaml` has a `catalogs[]` entry.
-2. Every distinct legacy value sampled from SQL has a `values[]` row (`legacy` → `target`).
-3. Target values exist in Visa2026 ([`LOOKUP_SEEDING.md`](../../../docs/LOOKUP_SEEDING.md), [`visa2026-lookup-data`](../visa2026-lookup-data/SKILL.md)).
+Part of each BO dossier (step 6); **required for all catalogs** before a full Import (see § Full Import order):
+
+1. For each `lookupCatalog` in field-maps, ensure `lookup-translations.yaml` (and company overlay) has a `catalogs[]` entry.
+2. Every distinct legacy value used in live data has a `values[]` row **or** documented `unmappedPolicy` / `identityPassThrough`.
+3. Target values exist in Visa2026 — global [`LookupCatalogs/`](../../../Visa2026.Module/DatabaseUpdate/LookupCatalogs/) and/or tenant JSON ([`LOOKUP_SEEDING.md`](../../../docs/LOOKUP_SEEDING.md), [`visa2026-lookup-data`](../visa2026-lookup-data/SKILL.md)). Add missing rows via seed path, then map.
 4. **ApplicationType** targets use catalog `Name` keys (`App_Inv`, not display title).
+5. Run **lookup preflight** (`Preflight-LookupAudit.ps1`) — exit 0 before full Import.
 
-Do not import lookup FKs by matching strings between databases.
+Canonical strategy: [LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md) · comparisons: [lookup-comparisons/](../../../docs/VISA2014_MIGRATION/lookup-comparisons/).
+
+Do not import lookup FKs by matching strings between databases. Do not POST new global lookup rows during transactional import.
 
 ---
 
@@ -474,12 +535,13 @@ Do not import lookup FKs by matching strings between databases.
 0. **`import-strategy.yaml`** → `status: approved`.
 1. **`importConfirmed: true`** on dossier + `order.yaml` for this entity (Phase 1b).
 2. Target = **Visa2026DbDev** (or disposable DB) on first runs.
-2. **Blazor.Server running** — lookups + org singletons seeded ([LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)).
-3. **Server ready** — wait for `https://localhost:5001` (DataImporter pattern).
-4. **Prerequisite lookups** verified via OData GET — abort if critical catalogs empty.
-5. **BO exposed** in `WebApiServiceExtensions.cs`.
-6. **Layer 3 complete** for all `lookupCatalog` fields in the batch.
-7. **Application** imports: ApplicationType visibility preflight ([visa2026-dataimporter](../visa2026-dataimporter/SKILL.md)) — do not skip on prod migration without sign-off.
+3. **Lookup resolution complete** for catalogs used by this batch (§ Full Import order) — then **lookup preflight** exit 0 for full chains.
+4. **Blazor.Server / Module updaters** — lookups + org singletons seeded ([LOOKUP_SEEDING.md](../../../docs/LOOKUP_SEEDING.md)).
+5. **Server ready** — wait for `https://localhost:5001` (DataImporter pattern) when using OData.
+6. **Prerequisite lookups** verified via OData GET / SQL — abort if critical catalogs empty.
+7. **BO exposed** in `WebApiServiceExtensions.cs` (OData path).
+8. **Layer 3 complete** for all `lookupCatalog` fields in the batch.
+9. **Application** imports: ApplicationType visibility preflight ([visa2026-dataimporter](../visa2026-dataimporter/SKILL.md)) — do not skip on prod migration without sign-off.
 
 ### ETL pipeline (every entity)
 

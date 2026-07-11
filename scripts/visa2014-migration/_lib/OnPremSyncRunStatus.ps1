@@ -1,18 +1,8 @@
-# Live sync-run status JSON for on-prem legacy sync (sync-run-status.json).
+# Live Import-run status JSON for on-prem legacy Import (sync-run-status.json).
 
 function Get-OnPremSyncRunStatusPath {
     param([string]$Root)
     Join-Path $Root 'sync-run-status.json'
-}
-
-function Get-OnPremSyncDashboardJsonPath {
-    param([string]$Root)
-    Join-Path $Root 'sync-dashboard.json'
-}
-
-function Get-OnPremSyncDashboardHtmlPath {
-    param([string]$Root)
-    Join-Path $Root 'sync-dashboard.html'
 }
 
 function Resolve-OnPremSyncStatusRoot {
@@ -59,8 +49,6 @@ function Initialize-OnPremSyncRunStatus {
     param(
         [string]$Root,
         [string]$RunId,
-        [string]$Mode,
-        [bool]$SyncFull,
         [string]$LegacySource,
         [string]$Profile,
         [string[]]$WaveNames,
@@ -89,8 +77,8 @@ function Initialize-OnPremSyncRunStatus {
         RunId         = $RunId
         StartedUtc    = $startedUtc
         UpdatedUtc    = $startedUtc
-        Mode          = $Mode
-        SyncFull      = $SyncFull
+        CompletedUtc  = $null
+        Mode          = 'Import'
         LegacySource  = $LegacySource
         Profile       = $Profile
         OverallStatus = 'Running'
@@ -207,9 +195,9 @@ function Complete-OnPremSyncRunStatus {
     $status = Read-OnPremSyncRunStatus -Path $path
     if (-not $status) { return }
 
-    $status.OverallStatus = $OverallStatus
-    $status.CurrentWave = $null
-    $status.CompletedUtc = (Get-Date).ToUniversalTime().ToString('o')
+    $status | Add-Member -NotePropertyName OverallStatus -NotePropertyValue $OverallStatus -Force
+    $status | Add-Member -NotePropertyName CurrentWave -NotePropertyValue $null -Force
+    $status | Add-Member -NotePropertyName CompletedUtc -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
     Write-OnPremSyncRunStatus -Path $path -Status $status
 }
 

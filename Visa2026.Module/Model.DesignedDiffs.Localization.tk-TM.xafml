@@ -81,7 +81,6 @@
       <Item Id="Housing" Caption="Ýaşaýyş" />
       <Item Id="Invitation" Caption="Çakylyk" />
       <Item Id="InvitationItem" Caption="Çakylyk elementleri" />
-      <Item Id="LegacySyncDashboard" Caption="Köne ulgam sinhronizasiýasy" />
       <Item Id="Lookup" Caption="Maglumat">
         <Items>
           <Item Id="Application" Caption="Arza">
@@ -175,6 +174,7 @@
       <Item Id="Work Permit Tracking" Caption="Iş rugsady yzaragy" />
       <Item Id="WorkPermit" Caption="Iş rugsady" />
       <Item Id="WorkPermitItem" Caption="Iş rugsady elementleri" />
+      <Item Id="ForeignWorkerMaglumat" Caption="Daşary ýurt raýatlary maglumaty" />
     </Items>
   </NavigationItems>
   <BOModel>
@@ -2311,6 +2311,31 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ForeignWorkerMaglumat" Caption="Daşary ýurt raýatlary maglumaty">
+      <OwnMembers>
+        <Member Name="FullName" Caption="F.A.A" />
+        <Member Name="DateOfBirth" Caption="Doglan senesi" />
+        <Member Name="NationalityCode" Caption="Raýatlygy" />
+        <Member Name="BirthAndNationality" Caption="Doglan ýyly we raýatlygy" />
+        <Member Name="PassportNumber" Caption="Pasport belgisi" />
+        <Member Name="PassportExpirationDate" Caption="Pasport möhleti" />
+        <Member Name="PassportBlock" Caption="Pasport belgisi we möhleti" />
+        <Member Name="EducationLevelTm" Caption="Bilimi" />
+        <Member Name="PositionNameTm" Caption="Wezipesi" />
+        <Member Name="ResidenceAddress" Caption="Türkmenistan-daky anyk ýaşaýan salgysy" />
+        <Member Name="WorkPermitNumber" Caption="Rugsatnama belgisi" />
+        <Member Name="WorkPermitStartDate" Caption="Rugsatnama başy" />
+        <Member Name="WorkPermitExpirationDate" Caption="Rugsatnama soňy" />
+        <Member Name="WorkPermitIsCancelled" Caption="Ýatyrylan" />
+        <Member Name="IsValid" Caption="Dogry (valid)" />
+        <Member Name="PermitBlock" Caption="Rugsatnama belgisi we möhleti" />
+        <Member Name="VisaNumber" Caption="Wiza belgisi" />
+        <Member Name="VisaStartDate" Caption="Wiza başy" />
+        <Member Name="VisaExpirationDate" Caption="Wiza soňy" />
+        <Member Name="VisaBlock" Caption="Wiza belgisi we möhleti" />
+        <Member Name="Remarks" Caption="Bellik" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Iş rugsady elementi">
       <OwnMembers>
         <Member Name="ASNumber" Caption="AS belgisi" />
@@ -3113,6 +3138,8 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="ForeignWorkerMaglumat_ListView" Caption="Daşary ýurt raýatlary maglumaty" />
+    <DetailView Id="ForeignWorkerMaglumat_DetailView" Caption="Daşary ýurt raýatlary maglumaty" />
     <ListView Id="WorkPermitItem_ListView" Caption="Iş rugsady elementleri">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="AS belgisi" />

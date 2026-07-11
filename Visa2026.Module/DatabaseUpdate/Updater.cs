@@ -455,6 +455,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<BorderZoneItem>(userRole);
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
+    EnsureReadOnlyPermission<ForeignWorkerMaglumat>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
     // Application.VisaPeriod lookup popup — officers add/edit periods without Lookup navigation.
     EnsureReadWriteCreatePermission<VisaPeriod>(userRole);
@@ -560,6 +561,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/ForeignWorkerMaglumat", SecurityPermissionState.Allow);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
@@ -627,6 +629,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<RejectionItem>(role);
             EnsureReadOnlyPermission<WorkPermit>(role);
             EnsureReadOnlyPermission<WorkPermitItem>(role);
+            EnsureReadOnlyPermission<ForeignWorkerMaglumat>(role);
             EnsureReadOnlyPermission<FileData>(role);
             EnsureReadOnlyPermission<Position>(role);
             EnsureReadOnlyPermission<ActualPosition>(role);
@@ -1046,7 +1049,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             DenyTypeRead<ApplicationRuntimeLog>(role);
             DenyTypeRead<BoStateNotificationInboxHost>(role);
-            DenyTypeRead<LegacySyncDashboardHost>(role);
 
             EnsureNavigationPermission(
                 role,
@@ -1055,10 +1057,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(
                 role,
                 @"Application/NavigationItems/Items/Operations/Items/StateNotifications",
-                SecurityPermissionState.Deny);
-            EnsureNavigationPermission(
-                role,
-                @"Application/NavigationItems/Items/Operations/Items/LegacySyncDashboard",
                 SecurityPermissionState.Deny);
         }
 

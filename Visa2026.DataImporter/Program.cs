@@ -150,12 +150,10 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--export-lookup-catalogs",
         "--export-seed",
         "--export-visa2014-preview",
+        "--preflight-visa2014-lookups",
+        "--catalog-only",
+        "--skip-target-check",
         "--import-visa2014",
-        "--sync-visa2014",
-        "--sync-since",
-        "--sync-state-dir",
-        "--sync-full",
-        "--no-soft-delete-sync",
         "--generate-visa2014-tenant-catalogs",
         "--expand-visa2014-id-map",
         "--rebuild-visa2014-id-maps",
@@ -230,8 +228,6 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
                       string.Equals(token, "--password", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--file", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--id-map-output", StringComparison.OrdinalIgnoreCase) ||
-                      string.Equals(token, "--sync-since", StringComparison.OrdinalIgnoreCase) ||
-                      string.Equals(token, "--sync-state-dir", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--target-connection", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--legacy-source", StringComparison.OrdinalIgnoreCase) ||
                       string.Equals(token, "--batch-size", StringComparison.OrdinalIgnoreCase)) &&
@@ -277,15 +273,20 @@ static void PrintHelp()
     Console.WriteLine("  --export-visa2014-preview   Legacy SQL → Excel preview (requires --entity Person|Passport|Visa|Education|EmployeePositionHistory|EmployeeSalary|WorkPermit|WorkPermitItem|AddressOfResidence|PrivateHouse|Lodging|Hotel|Hospital|OtherSite|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg).");
     Console.WriteLine("      Options: --entity Person|Passport|Visa|Education|EmployeePositionHistory|WorkPermit|WorkPermitItem|Application|ApplicationItem|ApplicationProgress|ProjectContractMinistryLeg [--legacy-source calik-energi|gap-insaat] [--output path.xlsx]");
     Console.WriteLine("                [--connection conn] [--max-rows N]");
+    Console.WriteLine("  --export-visa2014-import-gaps  Target-aware Excel of unresolved import rows (manual review; not exclusions).");
+    Console.WriteLine("      Options: --entity AddressOfResidence --inprocess --target-connection conn [--legacy-source calik-energi-onprem-demo]");
+    Console.WriteLine("  --preflight-visa2014-lookups  Audit live lookups → translate → verify target catalogs (gate before full Import).");
+    Console.WriteLine("      Options: [--legacy-source …] [--target-connection conn] [--catalog-only] [--skip-target-check]");
+    Console.WriteLine("                [--entity Person,AddressOfResidence,…] [--max-rows N] [--output report.json]");
+    Console.WriteLine("                [--person-id-map path] [--address-id-map path] [--output path.xlsx] [--max-rows N]");
+    Console.WriteLine("  --rebuild-visa2014-geography-db  Build reference SQLite DB of Turkmenistan regions/cities for import conflict resolution.");
+    Console.WriteLine("      Options: [--output path\\turkmenistan-geography.db] [--verbose]");
     Console.WriteLine("  --generate-visa2014-tenant-catalogs  VISA2015 → tenant project-contract + approval-leg-profile JSON (order.yaml steps).");
     Console.WriteLine("      Options: [--legacy-source calik-energi|calik-energi-onprem-staging] [--connection conn] [--force]");
-    Console.WriteLine("  --sync-visa2014           Legacy SQL → Visa2026 delta sync (requires --inprocess).");
-    Console.WriteLine("      Options: [--entity Person|Passport|...] [--legacy-source calik-energi-onprem-prod]");
-    Console.WriteLine("                --inprocess --target-connection conn [--sync-full] [--sync-since <utc>]");
-    Console.WriteLine("                [--sync-state-dir path] [--no-soft-delete-sync] [--dry-run] [--batch-size N]");
     Console.WriteLine("  --import-visa2014           Legacy SQL → Visa2026 headless ObjectSpace (requires --inprocess).");
     Console.WriteLine("      Options: --entity Person|Passport|... [--legacy-source calik-energi] [--inprocess] [--target-connection conn]");
-    Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("                [--max-rows N] [--dry-run] [--batch-size N] [--parallelism N] [--id-map-output path.json] [--no-wait]");
+    Console.WriteLine("                --parallelism: worker count for Application/ApplicationItem/ApplicationProgress (default 4; headless only)");
     Console.WriteLine("                [--supplement-permit-positions]  EmployeePositionHistory: import soft-deleted WH referenced by WorkPermit");
     Console.WriteLine("                [--supplement-permit-persons]  Person: import soft-deleted Person referenced by active WorkPermit (IsArchived)");
     Console.WriteLine("                [--supplement-permit-passports]  Passport: import Passport rows referenced by active WorkPermit");
@@ -435,6 +436,46 @@ if (HasArg(args, "--export-visa2014-preview"))
     return;
 }
 
+if (HasArg(args, "--export-visa2014-import-gaps"))
+{
+    Log.Phase("VISA2014 import-gap Excel preview (lookup failures for manual review)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014ImportGapPreviewCommand.RunAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--preflight-visa2014-lookups"))
+{
+    Log.Phase("VISA2014 lookup preflight (audit → translate → target map)");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = Visa2014LookupPreflightCommand.Run(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--rebuild-visa2014-geography-db"))
+{
+    Log.Phase("Rebuild Turkmenistan geography reference SQLite DB");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    try
+    {
+        var output = GetOptionValue(args, "--output");
+        Visa2014TurkmenistanGeographyDbBuilder.Rebuild(output, isVerbose);
+        Log.Close();
+        Environment.ExitCode = 0;
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex.Message);
+        Log.Close();
+        Environment.ExitCode = 1;
+    }
+    return;
+}
+
 if (HasArg(args, "--expand-visa2014-id-map"))
 {
     Log.Phase("VISA2014 id-map expand");
@@ -469,16 +510,6 @@ if (HasArg(args, "--generate-visa2014-tenant-catalogs"))
 
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = Visa2014TenantCatalogGenerationCommand.Run(dataImporterRoot, args, isVerbose);
-    Log.Close();
-    Environment.ExitCode = exitCode;
-    return;
-}
-
-if (HasArg(args, "--sync-visa2014"))
-{
-    Log.Phase("VISA2014 delta sync");
-    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
-    int exitCode = await Visa2014SyncCommand.RunAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;
@@ -1274,6 +1305,10 @@ static class Log
 
     public static void Init()
     {
+        // OnPrem-Sync redirects stdout to the wave log; without flush, progress lines
+        // stay buffered for minutes during ApplicationItem / large upserts.
+        if (Console.Out is StreamWriter consoleOut)
+            consoleOut.AutoFlush = true;
         var path = Path.Combine(
             AppContext.BaseDirectory,
             $"import_{DateTime.Now:yyyyMMdd_HHmmss}.log");

@@ -177,6 +177,33 @@ For each BO batch:
 - [ ] Gap decisions (E1–E5) reviewed for values with `row_count > 0`
 - [ ] No reliance on importing legacy lookup tables
 - [ ] Target catalog verified on `Visa2026DbDev` via OData GET sample
+- [ ] **Lookup preflight passed** — `--preflight-visa2014-lookups` (or `import/Preflight-LookupAudit.ps1`) exit 0; `OnPrem-Sync.ps1 -Mode Import` runs this automatically
+
+### Automated preflight (mandatory before full Import)
+
+```text
+1. AUDIT     — DISTINCT live values (sampleQuery per catalog) + entity transforms
+               (e.g. FullAddress → Region/City on AddressOfResidence)
+2. TRANSLATE — lookup-translations.yaml (+ tenant overlay)
+3. ATTACH    — missing targets → seed JSON / tenant catalog + ForceUpdate, then map
+4. VERIFY    — --target-connection checks translated keys exist on Visa2026
+5. IMPORT    — only when blocking gaps = 0
+```
+
+```powershell
+dotnet run --project Visa2026.DataImporter -c Release -- `
+  --preflight-visa2014-lookups `
+  --legacy-source calik-energi-onprem-demo `
+  --target-connection $env:VISA2026_DEMO_SQL_CONNECTION
+
+# or
+.\scripts\visa2014-migration\import\Preflight-LookupAudit.ps1 `
+  -LegacySource calik-energi-onprem-demo `
+  -TargetConnection $env:VISA2026_DEMO_SQL_CONNECTION
+```
+
+Exit **0** = pass. Exit **2** = blocking gaps (fix seeds/translations; do not Import).  
+`OnPrem-Sync.ps1 -Mode Import` runs this gate unless `-SkipLookupPreflight`.
 
 ---
 
@@ -185,3 +212,4 @@ For each BO batch:
 | Date | Change |
 |------|--------|
 | 2026-06-20 | Initial strategy: target catalogs authoritative; translate only; gap/duplicate handling |
+| 2026-07-11 | Mandatory automated lookup preflight before full Import (`--preflight-visa2014-lookups`) |

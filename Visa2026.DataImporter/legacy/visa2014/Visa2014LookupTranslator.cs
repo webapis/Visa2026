@@ -45,6 +45,15 @@ internal static class Visa2014LookupTranslator
                     continue;
 
                 var map = new Dictionary<string, string>(StringComparer.Ordinal);
+                // Later YAML files (tenant overlays) merge into the same catalog: keep base
+                // values[] and let overlay keys override. Replacing wholesale wiped Person-wave
+                // Country aliases (e.g. UAE→ARE) when calik-energi set identityPassThrough + values:[].
+                if (result.TryGetValue(catalog.TargetCatalog, out var existing))
+                {
+                    foreach (var (legacy, target) in existing.LegacyToTarget)
+                        map[legacy] = target;
+                }
+
                 foreach (var row in catalog.Values ?? [])
                 {
                     if (string.IsNullOrWhiteSpace(row.Legacy) || string.IsNullOrWhiteSpace(row.Target))
@@ -55,9 +64,15 @@ internal static class Visa2014LookupTranslator
                 result[catalog.TargetCatalog] = new Visa2014LookupCatalog
                 {
                     TargetCatalog = catalog.TargetCatalog,
-                    TargetMatchProperty = catalog.TargetMatchProperty ?? "Name",
-                    UnmappedPolicy = catalog.UnmappedPolicy ?? "block_row",
-                    IdentityPassThrough = catalog.IdentityPassThrough,
+                    TargetMatchProperty = catalog.TargetMatchProperty
+                        ?? existing?.TargetMatchProperty
+                        ?? "Name",
+                    UnmappedPolicy = catalog.UnmappedPolicy
+                        ?? existing?.UnmappedPolicy
+                        ?? "block_row",
+                    // Overlay may enable identityPassThrough; once true in any file, keep it
+                    // unless this node explicitly sets false after a prior true (rare).
+                    IdentityPassThrough = catalog.IdentityPassThrough || (existing?.IdentityPassThrough ?? false),
                     LegacyToTarget = map,
                 };
             }

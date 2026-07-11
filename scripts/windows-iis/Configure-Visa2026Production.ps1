@@ -116,13 +116,8 @@ $config = @{
         Slot = $ctx.Profile
         ShowOnLoginPage = $true
     }
-}
-
-if ($ctx.Profile -in @("Production", "Staging", "Demo")) {
-    $config["LegacySyncDashboard"] = @{
-        Enabled = $true
-        SyncHostRoot = (Get-Visa2026LegacySyncHostRoot -Profile $ctx.Profile)
-        PollIntervalSeconds = 30
+    MaglumatCsvExport = @{
+        ApiKey = if ($envMap.ContainsKey("MAGLUMAT_CSV_API_KEY")) { $envMap["MAGLUMAT_CSV_API_KEY"] } else { "" }
     }
 }
 

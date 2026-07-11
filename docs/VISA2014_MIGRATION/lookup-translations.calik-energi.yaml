@@ -70,12 +70,17 @@ catalogs:
       completedAt: 2026-06-26
       scope: Education
       notes: Education uses Country.mgCode (field-map); Person wave audited NameOfCountryL — 38 rows had mgCode outside Person-scope values[] before pass-through.
-    values: []
+    values:
+      # Aliases that must survive overlay merge (base Person-wave values are merged in Load()).
+      - legacy: UAE
+        target: ARE
+        notes: Legacy NameOfCountryL UAE; Visa2026 Country.Code is ISO ARE
     unmappedPolicy: skip_row
     unmappedDefault: null
     notes: |
       identityPassThrough maps legacy mgCode → Visa2026 Country.Code (ISO alpha-3 in seed).
-      Person-wave explicit values[] remain in base lookup-translations.yaml when codes match.
+      Loader merges this catalog with base lookup-translations.yaml (overlay keys win; base aliases kept).
+      Explicit UAE→ARE here so Passport IssuedCountry works even if merge order changes.
 
   - targetCatalog: EducationInstitution
     targetMatchProperty: NameTm

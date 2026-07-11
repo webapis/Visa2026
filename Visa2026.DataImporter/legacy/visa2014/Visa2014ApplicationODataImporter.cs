@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using DevExpress.ExpressApp;
 using Visa2026.DataImporter;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -27,7 +29,10 @@ internal static class Visa2014ApplicationODataImporter
         string? applicationIdMapOutputPath,
         int? maxRows,
         bool dryRun,
-        bool verbose)
+        bool verbose,
+        INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
+        int parallelism = 0,
+        int batchSize = 50)
     {
         var batch = Visa2014ApplicationTransform.PrepareImportBatch(
             legacyConnectionString,
@@ -49,70 +54,64 @@ internal static class Visa2014ApplicationODataImporter
             };
         }
 
-        var applicationIdMap = LoadOptionalApplicationIdMap(applicationIdMapOutputPath);
+        var applicationIdMap = new ConcurrentDictionary<Guid, Guid>(
+            LoadOptionalApplicationIdMap(applicationIdMapOutputPath));
         if (verbose && applicationIdMap.Count > 0)
             Console.WriteLine($"INF Existing Application id-map entries: {applicationIdMap.Count}");
 
-        var errors = new List<string>();
-        int posted = 0;
-        int failed = 0;
-        int skippedAlreadyImported = 0;
-
-        foreach (var row in batch.ImportRows)
-        {
-            var legacyOid = (Guid)row["_legacyRowId"]!;
-            if (applicationIdMap.ContainsKey(legacyOid))
+        var degree = parallelism > 0 ? parallelism : Visa2014ParallelImportPoster.DefaultDegree;
+        var stats = await Visa2014ParallelImportPoster.PostAsync(
+            batch.ImportRows,
+            degree,
+            target,
+            objectSpaceFactory,
+            batchSize,
+            async (row, workerTarget) =>
             {
-                skippedAlreadyImported++;
-                if (verbose)
-                    Console.WriteLine($"  SKIP {legacyOid}: already in Application id-map");
-                continue;
-            }
-
-            try
-            {
-                var payload = BuildPayload(row, resolver);
-                if (payload == null)
+                var legacyOid = (Guid)row["_legacyRowId"]!;
+                if (applicationIdMap.ContainsKey(legacyOid))
                 {
-                    failed++;
-                    var detail = DescribePayloadGap(row, resolver);
-                    errors.Add($"{legacyOid}: incomplete OData payload ({detail})");
-                    continue;
+                    if (verbose)
+                        Console.WriteLine($"  SKIP {legacyOid}: already in Application id-map");
+                    return new ParallelRowOutcome(ParallelRowKind.SkippedAlready);
                 }
 
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.Application), payload);
-                if (!createdId.HasValue)
+                try
                 {
-                    failed++;
-                    errors.Add($"{legacyOid}: create returned null");
-                    continue;
-                }
+                    var payload = BuildPayload(row, resolver);
+                    if (payload == null)
+                    {
+                        var detail = DescribePayloadGap(row, resolver);
+                        return new ParallelRowOutcome(
+                            ParallelRowKind.Failed,
+                            $"{legacyOid}: incomplete OData payload ({detail})");
+                    }
 
-                applicationIdMap[legacyOid] = createdId.Value;
-                posted++;
-                if (posted % 250 == 0)
+                    var createdId = await workerTarget.CreateAsync(
+                        typeof(Visa2026.Module.BusinessObjects.Application), payload);
+                    if (!createdId.HasValue)
+                        return new ParallelRowOutcome(ParallelRowKind.Failed, $"{legacyOid}: create returned null");
+
+                    applicationIdMap[legacyOid] = createdId.Value;
+                    if (verbose)
+                        Console.WriteLine($"  SAVE Application {createdId.Value} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
+                    return new ParallelRowOutcome(ParallelRowKind.Posted);
+                }
+                catch (Exception ex)
                 {
-                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedAlreadyImported} already imported...");
-                    if (!string.IsNullOrWhiteSpace(applicationIdMapOutputPath))
-                        await Visa2014IdMapHelper.SaveAsync(applicationIdMapOutputPath, applicationIdMap);
+                    Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
+                    return new ParallelRowOutcome(ParallelRowKind.Failed, $"{legacyOid}: {ex.Message}");
                 }
-                if (verbose)
-                    Console.WriteLine($"  SAVE Application {createdId.Value} <- legacy {legacyOid} ({row.GetValueOrDefault("FullApplicationNumber")})");
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                errors.Add($"{legacyOid}: {ex.Message}");
-                Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
-            }
-        }
-
-        await target.FlushAsync();
+            },
+            "Application",
+            applicationIdMapOutputPath);
 
         string? idMapPath = null;
         if (applicationIdMap.Count > 0 && !string.IsNullOrWhiteSpace(applicationIdMapOutputPath))
         {
-            await Visa2014IdMapHelper.SaveAsync(applicationIdMapOutputPath, applicationIdMap);
+            await Visa2014IdMapHelper.SaveAsync(
+                applicationIdMapOutputPath,
+                new Dictionary<Guid, Guid>(applicationIdMap));
             idMapPath = Path.GetFullPath(applicationIdMapOutputPath);
         }
 
@@ -122,11 +121,11 @@ internal static class Visa2014ApplicationODataImporter
             PreparedCount = batch.ImportRows.Count,
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
-            SkippedAlreadyImported = skippedAlreadyImported,
-            PostedCount = posted,
-            FailedCount = failed,
+            SkippedAlreadyImported = stats.SkippedAlready,
+            PostedCount = stats.Posted,
+            FailedCount = stats.Failed,
             IdMapPath = idMapPath,
-            Errors = errors,
+            Errors = stats.Errors,
         };
     }
 
@@ -266,33 +265,5 @@ internal static class Visa2014ApplicationODataImporter
             return new Dictionary<Guid, Guid>();
 
         return Visa2014IdMapHelper.Load(path);
-    }
-
-    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
-        IVisa2014ImportTarget target,
-        Visa2014ODataLookupResolver resolver,
-        string legacyConnectionString,
-        IReadOnlyList<string> lookupTranslationPaths,
-        Visa2014SyncContext sync,
-        int? maxRows,
-        bool verbose)
-    {
-        var batch = Visa2014ApplicationTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose);
-
-        return await Visa2014SyncUpsertHelper.RunAsync(
-            target,
-            typeof(Visa2026.Module.BusinessObjects.Application),
-            "Application",
-            batch.ImportRows,
-            sync,
-            row => BuildPayload(row, resolver),
-            batch.LegacyRowCount,
-            batch.Skipped.Count,
-            batch.DedupeMergedCount,
-            verbose);
     }
 }

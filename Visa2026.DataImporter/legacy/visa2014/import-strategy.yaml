@@ -40,6 +40,8 @@ strategy:
   mappingArtifacts: yaml
   legacyGuidPolicy: id-map         # do not reuse legacy GUIDs as Visa2026 ID
   lookupPolicy: translate_only     # never import legacy lookup tables; use Visa2026 seed + lookup-translations*.yaml
+  # Intentional row skips (not failures): docs/VISA2014_MIGRATION/import-exclusions.yaml — must be status:approved
+  intentionalExclusionsRegistry: docs/VISA2014_MIGRATION/import-exclusions.yaml
   dedupePolicy: before_post
   firstTargetDatabase: Visa2026DbDev
   attachmentsWave: last
@@ -102,13 +104,13 @@ onPremDeployment:
   parallelPeriod:
     legacySystemOfRecord: true
     visa2026OfficerWrites: false          # view/search only until cutover
-    syncDirection: legacy_to_visa2026_only
+    catchUpPath: import_only              # OnPrem-Sync.ps1 / --import-visa2014 (delta Sync removed)
     conflictPolicy: legacy_wins
-    scheduledSyncStatus: planned          # requires --sync-visa2014 / delta upsert (not v1)
-    recommendedSchedule:
-      staging: nightly_off_peak
-      production: nightly_off_peak_until_cutover
-      demo: manual_or_clone_from_staging
+    scheduledDeltaSyncStatus: removed     # --sync-visa2014 / nightly Sync / LegacySyncDashboard deleted
+    recommendedCatchUp:
+      production: manual_import_as_needed
+      staging: restore_from_prod_bak
+      demo: manual_import_or_clone
 
 openDecisions:
   - id: odata-service-account

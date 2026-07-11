@@ -93,11 +93,11 @@ Do **not** use `reimport/` for staging or production cutover.
 |------|--------|-------|
 | Full local chain (in-process) | `import/Run-HeadlessChain.ps1` | `-StartAt <Entity>` to resume |
 | Document copies only (photos + scans) | `import/DocumentCopies.ps1` | `-StartAt WorkPermitDocument` to resume mid-wave |
-| On-prem sync (staging or prod) | `import/OnPrem-Sync.ps1` | `-Profile Staging|Production`; `-IncludeFileWaves` for scans |
-| **Sync host on `.25`** (no SDK) | `import/Install-OnPremSyncHost.ps1` | Publish + `C:\visa2026-sync`; then `Run-OnPremSyncOnServer.ps1` |
-| Nightly Task Scheduler (prod) | `import/Register-OnPremLegacySyncTask.ps1` | After `sync.env` + manual trial week |
+| On-prem Import (Demo / Staging / Prod) | `import/OnPrem-Sync.ps1` | Import-only (`--import-visa2014`); `-Profile Staging\|Production\|Demo`; `-IncludeFileWaves` for scans |
+| **Import host on `.25`** (no SDK) | `import/Install-OnPremSyncHost.ps1` | Publish + `C:\visa2026-sync*`; then `Run-OnPremSyncOnServer.ps1` |
 | On-prem staging (wrapper) | `import/OnPrem-Staging.ps1` | Delegates to `OnPrem-Sync.ps1 -Profile Staging` |
 | Tenant catalog generation | `import/Invoke-TenantCatalogGeneration.ps1` | Wraps `--generate-visa2014-tenant-catalogs` |
+| **Lookup preflight** (before full Import) | `import/Preflight-LookupAudit.ps1` | `--preflight-visa2014-lookups`; also auto-run by `OnPrem-Sync.ps1` unless `-SkipLookupPreflight` |
 | ApplicationItem import only | `import/ApplicationItems.ps1` | Parents + id-maps must exist |
 | WorkPermit + WorkPermitItem import | `import/WorkPermits.ps1` | After Person/Passport/EPH id-maps |
 | Single entity (any BO) | *(no script)* | `dotnet run … --import-visa2014 --entity <BO>` |
@@ -126,14 +126,13 @@ Do **not** use `reimport/` for staging or production cutover.
 | Duplicate employee Persons (bootstrap + supplement twins, on-prem prod) | `Repair-DuplicateEmployees.ps1` | `cleanup/DuplicateEmployeesByIdentity.sql` (default `-Scope BootstrapSupplement`; preview then `-Apply -UpdateIdMap -PersonIdMapPath …`) |
 | Duplicate City by NameTm (null vs set Region, on-prem prod) | `Repair-DuplicateCities.ps1` | `cleanup/DuplicateCitiesByNameTm.sql` (default `-Scope NullVsSetRegion`; preview `@Apply=0`, then `-Apply`) |
 
-### Reconcile
+### Reconcile / live Import status
 
 | Task | Script |
 |------|--------|
-| On-prem prod sync dashboard (`.15` → `.25`, scalar + FileData + watermark) | `Compare-OnPremSyncState.ps1` (`-LegacySource calik-energi-onprem-prod`, `-ShowNotes`) |
-| Export dashboard JSON/HTML (`sync-dashboard.json` on sync host) | `Export-OnPremSyncDashboard.ps1` (`-SyncHostRoot C:\visa2026-sync`, `-IncludeHtml`, `-LoadProdConnectionFromSsh`) |
-| Real-time sync state watch (poll + CSV log while sync runs) | `Watch-OnPremSyncState.ps1` (`-IntervalSeconds 30`, `-ClearScreen`, `-ExportDashboard -SyncHostRoot C:\visa2026-sync`) |
-| Local dev legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
+| Live **wave** table from `sync-run-status.json` | `Watch-OnPremSyncRun.ps1` (`-Profile Demo\|Production -ViaSsh -ClearScreen`) |
+| Live **import** table (waves + Δ + target DB counts) | `Watch-OnPremImportLive.ps1` (`-Profile Demo -ViaSsh -ClearScreen`) |
+| Local / on-prem legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
 
 Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md).
 
@@ -160,9 +159,11 @@ Preview row helper: `catalogs/Import-PreviewCatalogRows.ps1`.
 
 ---
 
-## Sync host on 10.100.128.25 (production server)
+## Import host on 10.100.128.25 (on-prem server)
 
-**Layout:** `C:\visa2026-sync\` — published `DataImporter.exe`, id-maps, sync-state, logs. No .NET SDK required on the server.
+**Layout:** `C:\visa2026-sync\` (Production), `C:\visa2026-sync-staging\`, `C:\visa2026-sync-demo\` — published `DataImporter.exe`, id-maps, import logs. No .NET SDK required on the server.
+
+**Import-only:** these hosts run `--import-visa2014` waves via `OnPrem-Sync.ps1`. There is **no** nightly Task Scheduler Sync, **no** `--sync-visa2014`, and **no** sync-state / sync-dashboard scripts.
 
 ### 1. Deploy from dev PC (one-time / after importer updates)
 
@@ -174,29 +175,26 @@ Preview row helper: `catalogs/Import-PreviewCatalogRows.ps1`.
   -CopyIdMapsFromRepo
 ```
 
-On **`.25`**, edit `C:\visa2026-sync\config\sync.env` — set `VISA2014_SQL_PASSWORD` (ReadOnlyUser on `.15`). Prod SQL defaults from `C:\inetpub\visa2026-prod\appsettings.Production.json` (`localhost\SQLEXPRESS`).
+On **`.25`**, edit `C:\visa2026-sync\config\sync.env` — set `VISA2014_SQL_PASSWORD` (ReadOnlyUser on `.15`). Target SQL defaults from the slot `appsettings.Production.json` (`localhost\SQLEXPRESS`).
 
-### 2. Manual run on server
-
-```powershell
-C:\visa2026-sync\tools\scripts\Run-OnPremSyncOnServer.ps1 -Mode Sync -SkipTenantCatalogGeneration
-# First catch-up: add -SyncFull
-```
-
-### 3. Nightly Task Scheduler (after manual trial week)
+### 2. Manual Import on server
 
 ```powershell
-# On .25 as Administrator:
-C:\visa2026-sync\tools\scripts\Register-OnPremLegacySyncTask.ps1 -ScheduledTime 02:30
+# Lookup resolution + preflight must pass first (or use -SkipLookupPreflight only after an approved exception)
+C:\visa2026-sync\tools\scripts\Run-OnPremSyncOnServer.ps1 -SkipTenantCatalogGeneration
+
+# Demo slot:
+C:\visa2026-sync-demo\tools\scripts\Run-OnPremSyncOnServer.ps1 -Profile Demo -SkipTenantCatalogGeneration
 ```
 
-**Network:** `.25` must reach `.15:1433` (legacy) and local `localhost\SQLEXPRESS` (prod).
+**Network:** `.25` must reach `.15:1433` (legacy) and local `localhost\SQLEXPRESS` (target slot DB).
+
+**Live status while Import runs:** `Watch-OnPremImportLive.ps1` / `Watch-OnPremSyncRun.ps1` from the repo (SSH or on-server).
 
 ---
 
 ```powershell
 .\scripts\visa2014-migration\setup\Restore-LegacyDatabase.ps1
-.\scripts\visa2014-migration\Compare-OnPremSyncState.ps1 -LegacySource calik-energi-onprem-prod -ShowNotes
 .\scripts\visa2014-migration\Compare-LegacyMigratedCounts.ps1 -ShowIdMap
 .\scripts\visa2014-migration\import\Invoke-TenantCatalogGeneration.ps1
 .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Staging -TargetConnection "Server=...;Database=...;"

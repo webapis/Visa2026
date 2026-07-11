@@ -79,14 +79,32 @@ internal sealed partial class Visa2014ODataLookupResolver
         _visaCategories = MapLookupDto<Bo.VisaCategory, Dto.VisaCategory>(objectSpace);
         _projectContracts = MapLookupDto<Bo.ProjectContract, Dto.ProjectContract>(objectSpace);
         _approvalLegProfiles = MapLookupDto<Bo.ApprovalLegProfile, Dto.ApprovalLegProfile>(objectSpace);
-        _cities = MapLookup(objectSpace.GetObjectsQuery<Bo.City>(), x => new Dto.City
+        // Region navigation must be read here: CityLookupMatcher scopes by region, and Demo/prod
+        // often leave City.RegionName null even when RegionID is set.
+        _cities = MapLookup(objectSpace.GetObjectsQuery<Bo.City>(), x =>
         {
-            Id = x.ID,
-            Name = x.Name ?? "",
-            NameTm = x.NameTm ?? "",
-            Code = x.Code ?? "",
-            IsDefault = x.IsDefault,
-            RegionName = x.RegionName,
+            var regionName = !string.IsNullOrWhiteSpace(x.RegionName)
+                ? x.RegionName
+                : x.Region?.NameTm;
+            return new Dto.City
+            {
+                Id = x.ID,
+                Name = x.Name ?? "",
+                NameTm = x.NameTm ?? "",
+                Code = x.Code ?? "",
+                IsDefault = x.IsDefault,
+                RegionName = regionName ?? "",
+                Region = x.Region == null
+                    ? null
+                    : new Dto.Region
+                    {
+                        Id = x.Region.ID,
+                        Name = x.Region.Name ?? "",
+                        NameTm = x.Region.NameTm ?? "",
+                        Code = x.Region.Code ?? "",
+                        IsDefault = x.Region.IsDefault,
+                    },
+            };
         });
         _movementPermitLocations = MapLookupDto<Bo.MovementPermitLocation, Dto.MovementPermitLocation>(objectSpace);
         _borderZoneLocations = MapLookupDto<Bo.BorderZoneLocation, Dto.BorderZoneLocation>(objectSpace);

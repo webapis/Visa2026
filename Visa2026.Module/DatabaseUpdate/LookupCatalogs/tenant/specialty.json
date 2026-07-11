@@ -265,6 +265,9 @@
                      "NameTm":  "Binagär"
                  },
                  {
+                     "NameTm":  "Biologiki energiýa çeşmelerini ulanmak tehnologiýasy"
+                 },
+                 {
                      "NameTm":  "Birleşdirilen materiallardan önümleri işläp taýýarlamak we öndürmek"
                  },
                  {
@@ -305,6 +308,9 @@
                  },
                  {
                      "NameTm":  "Demir önümleri ýokary basyş güýjünde işläp taýýarlamak üçin enjamlar we tehnologiýalar"
+                 },
+                 {
+                     "NameTm":  "Demir önümleriniň inženerçiligi"
                  },
                  {
                      "NameTm":  "Demir önümleriniň tehnologiýalary/Senagat turbageçirijileri gurnaýjy, kebşirleme"
@@ -362,6 +368,9 @@
                  },
                  {
                      "NameTm":  "Dolandyryş we Awtomatizasiýa inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Dolandyryş we Awtomatlaşdyryş inženerligi"
                  },
                  {
                      "NameTm":  "Dolandyryş, motorçylyk"
@@ -574,10 +583,13 @@
                      "NameTm":  "Elektrika inženerçiligi"
                  },
                  {
+                     "NameTm":  "Elektrika tehnologiýalary"
+                 },
+                 {
                      "NameTm":  "ELEKTRIKA WE ELEKTRONIKA INJENERÇILIGI"
                  },
                  {
-                     "NameTm":  "Elektrika we Elektronika Inženerçiligi"
+                     "NameTm":  "Elektrika we elektronika inženerçiligi"
                  },
                  {
                      "NameTm":  "Elektrika we elektronika tilsimatlar pudagy/Senagat Hyzmat ediş"
@@ -590,6 +602,9 @@
                  },
                  {
                      "NameTm":  "Elektrika, elektrik şit gurnama amallary"
+                 },
+                 {
+                     "NameTm":  "Elektrika-elektronik tehnologiýasy"
                  },
                  {
                      "NameTm":  "Elektrika-elektronika"
@@ -631,13 +646,16 @@
                      "NameTm":  "Elektrika-elektronika tilsimaty"
                  },
                  {
+                     "NameTm":  "Elektrik-Awtomatizasiýasy"
+                 },
+                 {
                      "NameTm":  "Elektrikçi,Elektrik-Elektronik tehnologiýalary"
                  },
                  {
                      "NameTm":  "Elektrik-elektron senagaty boýunça tehnik"
                  },
                  {
-                     "NameTm":  "elektrik-elektron tehnologiýasy/şekillendiriş we ses ulgamlary"
+                     "NameTm":  "Elektrik-elektron tehnologiýasy/şekillendiriş we ses ulgamlary"
                  },
                  {
                      "NameTm":  "Elektrik-Elektronik inženeri"
@@ -680,6 +698,9 @@
                  },
                  {
                      "NameTm":  "Elektrik-Elektronika tehnologiýasy"
+                 },
+                 {
+                     "NameTm":  "Elektrik-elektronika tehnologiýasy ugry, senagat tehniki hyamat ediş we abatlaýyş"
                  },
                  {
                      "NameTm":  "Elektrik-elektronika we mehanika inženerçiligi"
@@ -883,6 +904,9 @@
                      "NameTm":  "Energetika (elektrik)"
                  },
                  {
+                     "NameTm":  "Energetika boýunça mugallym"
+                 },
+                 {
                      "NameTm":  "energetika inženeri"
                  },
                  {
@@ -908,6 +932,9 @@
                  },
                  {
                      "NameTm":  "Energiýa ulgamlarda depginleri sazlamak"
+                 },
+                 {
+                     "NameTm":  "Energiýany kämilleşdirmek (öwürmek) we dolandyrmak"
                  },
                  {
                      "NameTm":  "Energo-maşyn gurluşyk"
@@ -1186,6 +1213,9 @@
                      "NameTm":  "Halkara logistika"
                  },
                  {
+                     "NameTm":  "Halkara marketingi dolandyryş hünäri boýunça ylymlaryň magistri"
+                 },
+                 {
                      "NameTm":  "Halkara täjirçilik"
                  },
                  {
@@ -1288,7 +1318,13 @@
                      "NameTm":  "Himiýa önümçiliginiň galyndylaryny gaýtadan işlemek boýunça apparatçy"
                  },
                  {
+                     "NameTm":  "Himiýa senagaty inženerçiligi"
+                 },
+                 {
                      "NameTm":  "Himiýa senagatynyň we gurluşyk materiallary kärhanalarynyň mehanizmleri-enjamlary, mehaniki tehnigi"
+                 },
+                 {
+                     "NameTm":  "Himiýa we elektrohimiýa inženerçiligi"
                  },
                  {
                      "NameTm":  "Himiýa we metallurgiýa inženeri"
@@ -1364,6 +1400,9 @@
                  },
                  {
                      "NameTm":  "Içerki binagärçilik"
+                 },
+                 {
+                     "NameTm":  "Içki arhitektura"
                  },
                  {
                      "NameTm":  "İçki binagärlik (interýer arhitektura)"
@@ -1498,7 +1537,19 @@
                      "NameTm":  "İş tejribeli kran operatory"
                  },
                  {
+                     "NameTm":  "İş tejribeli, Hünär şahadatnamaly-Tokar stanogynda işlemek boýunça mehanik"
+                 },
+                 {
+                     "NameTm":  "İş tejrıbelı, Nebit-himiýa senagatynda tehniki howpsuzlyk"
+                 },
+                 {
+                     "NameTm":  "İş tejribeli,himiki arassalaýyş ulgamlary"
+                 },
+                 {
                      "NameTm":  "İş tejribeli,mebel montažy we gurnama işleri"
+                 },
+                 {
+                     "NameTm":  "İş tejribeli,Nebit-himiýa senagatynda tehniki howpsuzlyk"
                  },
                  {
                      "NameTm":  "İş tejribeli,Zähmeti goramak we tehniki howpsuzlyk"
@@ -1630,7 +1681,7 @@
                      "NameTm":  "Kibernetika, amaly we mukdar taýdan matematik"
                  },
                  {
-                     "NameTm":  "kompýuter inženerçiligi"
+                     "NameTm":  "Kompýuter inženerçiligi"
                  },
                  {
                      "NameTm":  "Kompýuter inženeri"
@@ -1709,6 +1760,9 @@
                  },
                  {
                      "NameTm":  "Landşaft binagäri"
+                 },
+                 {
+                     "NameTm":  "LM-30-Energetika we ýadro inženerçiligi"
                  },
                  {
                      "NameTm":  "LMS100 2-nji derejeli ýylylyk bölüminiň tehniki hyzmaty"
@@ -1837,9 +1891,6 @@
                      "NameTm":  "maşyngurluşygynyň tehniki önümçiligi"
                  },
                  {
-                     "NameTm":  "Maşyngurluşyk inženerligi"
-                 },
-                 {
                      "NameTm":  "maşyngurluşyk tehnigi"
                  },
                  {
@@ -1900,9 +1951,6 @@
                      "NameTm":  "Mehanika"
                  },
                  {
-                     "NameTm":  "Mehanıka"
-                 },
-                 {
                      "NameTm":  "Mehanika boýunça senagat hünärmeni- tehnik"
                  },
                  {
@@ -1940,6 +1988,9 @@
                  },
                  {
                      "NameTm":  "mehanika inženeri/halkara kebşirleme inženeri"
+                 },
+                 {
+                     "NameTm":  "Mehanika inženeri/Işewürligi dolandyryş hünäri boýunça magistr derejeli"
                  },
                  {
                      "NameTm":  "Mehanika inženeri/kebşirleme inženeri"
@@ -2317,6 +2368,9 @@
                      "NameTm":  "Nebit-gaz agtaryş we ulanyş"
                  },
                  {
+                     "NameTm":  "Nebit-himiýa senagatynda tehniki hyzmat işgärleri üçin töwekgelçilikleriň öňüni alyş okuwy"
+                 },
+                 {
                      "NameTm":  "Nemis dili/mugallym"
                  },
                  {
@@ -2555,6 +2609,9 @@
                  },
                  {
                      "NameTm":  "Senagat inženerçiligi"
+                 },
+                 {
+                     "NameTm":  "Senagat inženerçilik"
                  },
                  {
                      "NameTm":  "Senagat inženeri"
@@ -2960,6 +3017,9 @@
                  },
                  {
                      "NameTm":  "Uçujy Enjamlaryň we Hereketlendirijileriň Tehniki Ulanylşy boýunça Inžener"
+                 },
+                 {
+                     "NameTm":  "Ugry ýok"
                  },
                  {
                      "NameTm":  "Ulag elektrotehnika inženeriýa ,magistr derejesi"

@@ -2175,48 +2175,6 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Çakylyk resminama nusgalary",
             ["ru-RU"] = "Копии документов приглашения",
         },
-        ["LegacySync.OpenInNewTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Open in new tab",
-            ["tr-TR"] = "Yeni sekmede aç",
-            ["tk-TM"] = "Täze goýmada aç",
-            ["ru-RU"] = "Открыть в новой вкладке",
-        },
-        ["LegacySync.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Refresh",
-            ["tr-TR"] = "Yenile",
-            ["tk-TM"] = "Täzele",
-            ["ru-RU"] = "Обновить",
-        },
-        ["LegacySync.Refreshing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Refreshing…",
-            ["tr-TR"] = "Yenileniyor…",
-            ["tk-TM"] = "Täzelenýär…",
-            ["ru-RU"] = "Обновление…",
-        },
-        ["LegacySync.ReportFrameTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Legacy sync report",
-            ["tr-TR"] = "Eski sistem senkronizasyon raporu",
-            ["tk-TM"] = "Köne ulgam sinhronizasiýa hasabaty",
-            ["ru-RU"] = "Отчёт синхронизации с устаревшей системой",
-        },
-        ["LegacySync.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "VISA2015 → Visa2026 on-prem reconcile (HTML report).",
-            ["tr-TR"] = "VISA2015 → Visa2026 yerinde mutabakat (HTML raporu).",
-            ["tk-TM"] = "VISA2015 → Visa2026 ýerli deňeşdirme (HTML hasabaty).",
-            ["ru-RU"] = "Сверка VISA2015 → Visa2026 на площадке (HTML-отчёт).",
-        },
-        ["LegacySync.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Legacy sync",
-            ["tr-TR"] = "Eski sistem senkronizasyonu",
-            ["tk-TM"] = "Köne ulgam sinhronizasiýasy",
-            ["ru-RU"] = "Синхронизация с устаревшей системой",
-        },
         ["Lodging.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Lodging copies",

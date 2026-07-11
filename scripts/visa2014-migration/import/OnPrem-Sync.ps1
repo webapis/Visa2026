@@ -6,14 +6,18 @@
 .DESCRIPTION
   Runs Visa2026.DataImporter --import-visa2014 entity-by-entity per order.yaml.
   All scalar writes use --inprocess (headless XAF ObjectSpace).
+  Large waves (Application / ApplicationItem / ApplicationProgress) post with
+  --parallelism (default 4 workers; each worker owns its own ObjectSpace).
 
   Profiles:
     Staging    — Visa2026DbStaging (:8080), calik-energi-onprem-staging id-maps
     Production — Visa2026DbProd (:443), calik-energi-onprem-prod id-maps
     Demo       — Visa2026DbDemo (:8081), calik-energi-onprem-demo id-maps
 
+  Import-only (--import-visa2014). No delta Sync / --sync-visa2014 path.
+
   Runbook: docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md
-  Agent skill: .cursor/skills/visa2026-onprem-legacy-sync/SKILL.md
+  Agent skill: .cursor/skills/visa2014-to-visa2026-import/SKILL.md
 
 .PARAMETER Profile
   Target IIS slot. Maps legacy source, id-map dir, and default connection env var.
@@ -24,27 +28,21 @@
 .PARAMETER IncludeFileWaves
   After scalar waves, run DocumentCopies.ps1 (photos, passport/visa scans, etc.).
 
+.PARAMETER SyncHostRoot
+  Server layout root (e.g. C:\visa2026-sync on 10.100.128.25). Uses published Visa2026.DataImporter.exe
+  instead of dotnet run. See Install-OnPremSyncHost.ps1.
+
+.PARAMETER SkipLookupPreflight
+  Skip the mandatory lookup audit gate. Use only when resuming after a verified preflight
+  in the same session, or for emergency catch-up.
+
 .EXAMPLE
   $env:VISA2014_SQL_PASSWORD = '...'
   .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Staging `
     -TargetConnection $env:VISA2026_STAGING_SQL_CONNECTION
 
-.PARAMETER Mode
-  Import — initial load / new-row catch-up (--import-visa2014).
-  Sync — delta upsert (--sync-visa2014): inserts, updates, soft-deletes.
-
-.PARAMETER SyncFull
-  With -Mode Sync: update all id-mapped rows (first manual run). Default: audit incremental since last watermark.
-
-.PARAMETER SyncStateDir
-  Optional directory for per-slot sync watermark JSON (default: Visa2026.DataImporter/legacy/visa2014/sync-state/).
-
-.PARAMETER SyncHostRoot
-  Server layout root (e.g. C:\visa2026-sync on 10.100.128.25). Uses published Visa2026.DataImporter.exe
-  instead of dotnet run. See Install-OnPremSyncHost.ps1.
-
 .EXAMPLE
-  .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -Mode Sync -SyncFull
+  .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Demo -SkipTenantCatalogGeneration
 
 .EXAMPLE
   .\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Staging -DryRun -Entity Person
@@ -59,17 +57,16 @@ param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Release",
     [int]$BatchSize = 50,
+    [int]$Parallelism = 4,
     [string[]]$Entity = @(),
     [string]$StartAt = "",
     [switch]$DryRun,
+    # When set, keep running later waves after a wave fails. Default (unset) = stop on first failure.
     [switch]$ContinueOnError,
     [switch]$SkipTenantCatalogGeneration,
     [switch]$SkipPostImportCorrections,
+    [switch]$SkipLookupPreflight,
     [switch]$IncludeFileWaves,
-    [ValidateSet("Import", "Sync")]
-    [string]$Mode = "Import",
-    [switch]$SyncFull,
-    [string]$SyncStateDir = "",
     [string]$SyncHostRoot = ""
 )
 
@@ -153,19 +150,23 @@ if ([string]::IsNullOrWhiteSpace($env:VISA2014_SQL_PASSWORD) -and -not $DryRun) 
     throw "Set VISA2014_SQL_PASSWORD (user env) for ReadOnlyUser on 10.100.128.15."
 }
 
-$syncStateDirResolved = if ([string]::IsNullOrWhiteSpace($SyncStateDir)) {
-    if ($SyncHostRoot) {
-        Join-Path $SyncHostRoot 'data\sync-state'
-    } else {
-        Join-Path $dataImporterRoot "legacy/visa2014/sync-state"
+New-Item -ItemType Directory -Force -Path $mapRoot, $logRoot | Out-Null
+
+# Fresh Import: Visa2014IdMapHelper.Load requires the file to exist (even empty {}).
+# Create missing stubs so greenfield Demo/Staging loads do not fail on Person.
+$idMapStubNames = @(
+    'Person', 'Passport', 'Visa', 'Education', 'EmployeePositionHistory', 'EmployeeSalary',
+    'AddressOfResidence', 'Application', 'WorkPermit', 'WorkPermitItem', 'Invitation', 'InvitationItem',
+    'ApplicationItem', 'ApplicationProgress', 'MedicalRecord', 'MedicalRecordDocument',
+    'EducationDocument', 'PassportCopy', 'VisaDocument', 'FamilyProofDocument',
+    'InvitationDocument', 'WorkPermitDocument'
+)
+foreach ($stubName in $idMapStubNames) {
+    $stubPath = Join-Path $mapRoot "$stubName.json"
+    if (-not (Test-Path -LiteralPath $stubPath)) {
+        [System.IO.File]::WriteAllText($stubPath, '{}', [System.Text.UTF8Encoding]::new($false))
     }
-} else { $SyncStateDir }
-
-if ($Mode -eq "Sync" -and $Profile -ne "Production") {
-    Write-Host "WRN Scheduled legacy sync is prod-only; -Profile $Profile is for import/catch-up or dashboard testing." -ForegroundColor Yellow
 }
-
-New-Item -ItemType Directory -Force -Path $mapRoot, $logRoot, $syncStateDirResolved | Out-Null
 
 function Resolve-OnPremMigrationLibPath {
     param([Parameter(Mandatory)][string]$FileName)
@@ -177,9 +178,7 @@ function Resolve-OnPremMigrationLibPath {
     }
     throw "Lib not found: $FileName under $PSScriptRoot\_lib or ..\_lib (sync-host vs repo layout)."
 }
-. (Resolve-OnPremMigrationLibPath 'OnPremSyncState.ps1')
 . (Resolve-OnPremMigrationLibPath 'OnPremSyncRunStatus.ps1')
-. (Resolve-OnPremMigrationLibPath 'Export-OnPremSyncDashboardCore.ps1')
 $syncStatusRoot = if ($SyncHostRoot) { $SyncHostRoot } else { Join-Path $dataImporterRoot 'legacy/visa2014' }
 
 function Get-MapPath([string]$name) {
@@ -192,31 +191,99 @@ function Invoke-DataImporterCli {
         [string]$LogFile = ''
     )
 
-    if ($script:DataImporterExe) {
-        $output = & $script:DataImporterExe @CliArgs 2>&1
-        $exitCode = $LASTEXITCODE
-        if ($LogFile) {
-            $output | Tee-Object -FilePath $LogFile | Out-Null
+    # Prefer env for SQL auth. CLI --target-connection breaks on "User Id=..." (space)
+    # and yields "Invalid value for key 'Encrypt'" / "Login failed for user 'sa'".
+    if (-not [string]::IsNullOrWhiteSpace($TargetConnection)) {
+        $env:ConnectionStrings__DefaultConnection = $TargetConnection
+        $env:ASPNETCORE_ENVIRONMENT = 'Production'
+        $safeCs = $TargetConnection `
+            -replace '(?i)\bUser Id=', 'UID=' `
+            -replace '(?i)\bPassword=', 'PWD='
+        for ($i = 0; $i -lt $CliArgs.Count; $i++) {
+            if ($CliArgs[$i] -eq '--target-connection' -and ($i + 1) -lt $CliArgs.Count) {
+                $CliArgs[$i + 1] = $safeCs
+                break
+            }
         }
-        elseif ($output) {
-            $output | Write-Output
-        }
-        return $exitCode
     }
 
-    $dotnetArgs = @(
-        'run', '--project', (Join-Path $repoRoot 'Visa2026.DataImporter\Visa2026.DataImporter.csproj'),
-        '-c', $Configuration, '--'
-    ) + $CliArgs
-    $output = & dotnet @dotnetArgs 2>&1
-    $exitCode = $LASTEXITCODE
-    if ($LogFile) {
-        $output | Tee-Object -FilePath $LogFile | Out-Null
+    # HeadlessMigrationHost defaults to :5002. Parallel slot imports need distinct ports
+    # (VISA2026_MIGRATION_IMPORT_URLS). Keep Production on 5002; Staging/Demo offset.
+    if ([string]::IsNullOrWhiteSpace($env:VISA2026_MIGRATION_IMPORT_URLS)) {
+        $env:VISA2026_MIGRATION_IMPORT_URLS = switch ($Profile) {
+            'Staging' { 'http://127.0.0.1:5011' }
+            'Demo' { 'http://127.0.0.1:5012' }
+            default { 'http://127.0.0.1:5002' }
+        }
     }
-    elseif ($output) {
-        $output | Write-Output
+
+    # Stream to log via Start-Process redirects. Do NOT capture `& exe 2>&1` into
+    # a PowerShell variable — Education/Visa waves emit thousands of stderr lines
+    # ("incomplete payload") and that + Start-Transcript kills the orchestrator
+    # host with no wave log (Tee-Object only ran after exit).
+    $outLog = $LogFile
+    $errLog = ''
+    if ([string]::IsNullOrWhiteSpace($outLog)) {
+        $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) 'visa2026-sync'
+        if (-not (Test-Path -LiteralPath $tmpDir)) {
+            New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+        }
+        $outLog = Join-Path $tmpDir ("di-{0}.out.log" -f [guid]::NewGuid().ToString('N'))
+        $errLog = Join-Path $tmpDir ("di-{0}.err.log" -f [guid]::NewGuid().ToString('N'))
     }
-    return $exitCode
+    else {
+        $errLog = "$LogFile.err"
+    }
+
+    $filePath = $null
+    $argumentList = $null
+    if ($script:DataImporterExe) {
+        $filePath = $script:DataImporterExe
+        $argumentList = $CliArgs
+    }
+    else {
+        $filePath = 'dotnet'
+        $argumentList = @(
+            'run', '--project', (Join-Path $repoRoot 'Visa2026.DataImporter\Visa2026.DataImporter.csproj'),
+            '-c', $Configuration, '--'
+        ) + $CliArgs
+    }
+
+    $workDir = if ($script:DataImporterExe) {
+        Split-Path -Parent $script:DataImporterExe
+    } else {
+        $repoRoot
+    }
+
+    # Escape args for ProcessStartInfo (spaces in --target-connection etc.)
+    $argString = ($argumentList | ForEach-Object {
+        $a = [string]$_
+        if ($a -match '[\s"]') { '"' + ($a -replace '"', '\"') + '"' } else { $a }
+    }) -join ' '
+
+    $p = Start-Process -FilePath $filePath -ArgumentList $argString `
+        -WorkingDirectory $workDir `
+        -RedirectStandardOutput $outLog `
+        -RedirectStandardError $errLog `
+        -PassThru -NoNewWindow -Wait
+    $exitCode = $p.ExitCode
+    if ($null -eq $exitCode) { $exitCode = 1 }
+
+    if ($LogFile -and (Test-Path -LiteralPath $errLog) -and (Get-Item -LiteralPath $errLog).Length -gt 0) {
+        Add-Content -LiteralPath $LogFile -Value (Get-Content -LiteralPath $errLog -Raw) -Encoding UTF8
+    }
+
+    if (-not $LogFile) {
+        if (Test-Path -LiteralPath $outLog) {
+            Get-Content -LiteralPath $outLog | ForEach-Object { Write-Host $_ }
+        }
+        if (Test-Path -LiteralPath $errLog) {
+            Get-Content -LiteralPath $errLog | ForEach-Object { Write-Host $_ -ForegroundColor DarkYellow }
+        }
+        Remove-Item -LiteralPath $outLog, $errLog -Force -ErrorAction SilentlyContinue
+    }
+
+    return ,[int]$exitCode
 }
 
 $scalarEntities = @{
@@ -302,17 +369,11 @@ function Invoke-ImportWave {
     Set-OnPremSyncRunWaveStarted -Root $syncStatusRoot -WaveName $WaveName -LogFile $logFile
 
     if ($Kind -eq "Scalar") {
-        $cliVerb = if ($Mode -eq "Sync") { "--sync-visa2014" } else { "--import-visa2014" }
         $waveCli = @(
-            $cliVerb,
+            "--import-visa2014",
             "--legacy-source", $LegacySource,
             "--no-wait"
         ) + $ExtraArgs
-
-        if ($Mode -eq "Sync") {
-            $waveCli += @("--sync-state-dir", $syncStateDirResolved)
-            if ($SyncFull) { $waveCli += "--sync-full" }
-        }
 
         if (-not $scalarEntities.ContainsKey($WaveName)) {
             throw "Entity $WaveName is not configured for scalar in-process import."
@@ -320,7 +381,7 @@ function Invoke-ImportWave {
         if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
             throw "TargetConnection required for in-process entity $WaveName."
         }
-        $waveCli += @("--inprocess", "--target-connection", $TargetConnection, "--batch-size", $BatchSize)
+        $waveCli += @("--inprocess", "--target-connection", $TargetConnection, "--batch-size", $BatchSize, "--parallelism", $Parallelism)
     }
     else {
         $waveCli = @(
@@ -500,14 +561,14 @@ if (-not $started) {
     Write-Host "INF Resume mode: skipping entities until '$StartAt'..." -ForegroundColor Yellow
 }
 
-Write-Host "=== VISA2014 on-prem sync ($Profile) ===" -ForegroundColor Cyan
+Write-Host "=== VISA2014 on-prem Import ($Profile) ===" -ForegroundColor Cyan
 if ($SyncHostRoot) { Write-Host "INF Sync host: $SyncHostRoot (published exe)" -ForegroundColor DarkGray }
 Write-Host "INF Legacy source: $LegacySource (SQL 10.100.128.15 / VISA2015)"
 Write-Host "INF Target API:    $ApiBaseUrl"
 Write-Host "INF Id-map dir:    $mapRoot"
 Write-Host "INF Log dir:       $logRoot"
-if ($DryRun) { Write-Host "INF Mode: dry-run" -ForegroundColor Yellow }
-if ($Mode -eq "Sync") { Write-Host "INF Mode: delta sync (--sync-visa2014)$(if ($SyncFull) { ' + --sync-full' })" -ForegroundColor Yellow }
+Write-Host "INF Mode: Import (--import-visa2014)" -ForegroundColor DarkGray
+if ($DryRun) { Write-Host "INF Dry-run" -ForegroundColor Yellow }
 if ($IncludeFileWaves) { Write-Host "INF File waves: DocumentCopies.ps1 after scalar chain" -ForegroundColor Yellow }
 
 $activeWaves = @($waves | ForEach-Object { $_.Name })
@@ -515,11 +576,36 @@ $activeWaves = @($waves | ForEach-Object { $_.Name })
 Initialize-OnPremSyncRunStatus `
     -Root $syncStatusRoot `
     -RunId $stamp `
-    -Mode $Mode `
-    -SyncFull:($SyncFull.IsPresent) `
     -LegacySource $LegacySource `
     -Profile $Profile `
     -WaveNames $activeWaves
+
+# Lookup preflight gate: mandatory for Import (audit → translate → target map).
+if (-not $SkipLookupPreflight) {
+    Write-Host ""
+    Write-Host ">>> lookupPreflight (audit → translate → attach/map)" -ForegroundColor Green
+    $preflightLog = Join-Path $logRoot "$logPrefix-lookup-preflight-$stamp.log"
+    $preflightArgs = @(
+        "--preflight-visa2014-lookups",
+        "--legacy-source", $LegacySource,
+        "--verbose"
+    )
+    if (-not [string]::IsNullOrWhiteSpace($TargetConnection)) {
+        $preflightArgs += @("--target-connection", $TargetConnection)
+    }
+    $preflightExit = Invoke-DataImporterCli -CliArgs $preflightArgs -LogFile $preflightLog
+    if ($preflightExit -ne 0) {
+        Write-Host "ERR Lookup preflight failed (exit $preflightExit). Fix catalogs/translations, then re-run." -ForegroundColor Red
+        Write-Host "INF Report/log: $preflightLog" -ForegroundColor Yellow
+        Write-Host "INF Bypass only with -SkipLookupPreflight after an approved exception." -ForegroundColor Yellow
+        Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus Failed
+        exit $preflightExit
+    }
+    Write-Host "INF Lookup preflight passed." -ForegroundColor Green
+}
+else {
+    Write-Host "WRN Lookup preflight skipped (-SkipLookupPreflight)." -ForegroundColor Yellow
+}
 
 foreach ($wave in $waves) {
     if (-not $started) {
@@ -543,27 +629,8 @@ if ($finalRunStatus -and $finalRunStatus.Waves) {
 }
 Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus $(if ($anyFailed) { 'Failed' } else { 'Completed' })
 
-try {
-    if (-not $DryRun) {
-        $dashConfig = Resolve-OnPremSyncStateConfig `
-            -LegacySource $LegacySource `
-            -TargetConnection $TargetConnection `
-            -RepoRoot $repoRoot
-        $dashConfig.MapRoot = $mapRoot
-        $dashConfig.SyncStatePath = Join-Path $syncStateDirResolved "$LegacySource.json"
-        $dashRows = Get-OnPremSyncStateSnapshot -Config $dashConfig
-        Export-OnPremSyncDashboard -Config $dashConfig -EntityRows $dashRows -OutputRoot $syncStatusRoot -IncludeHtml | Out-Null
-        Write-Host "INF Dashboard: $(Get-OnPremSyncDashboardJsonPath -Root $syncStatusRoot)" -ForegroundColor DarkGray
-    }
-}
-catch {
-    Write-Host "WRN Dashboard export skipped: $($_.Exception.Message)" -ForegroundColor Yellow
-}
-
 Write-Host ""
-if ($Mode -ne "Sync") {
-    Invoke-PostImportCorrections -Conn $TargetConnection
-}
+Invoke-PostImportCorrections -Conn $TargetConnection
 
 if ($IncludeFileWaves -and -not $DryRun) {
     if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
@@ -585,5 +652,6 @@ if ($IncludeFileWaves -and -not $DryRun) {
 }
 
 Write-Host "=== On-prem $Profile import waves finished ===" -ForegroundColor Cyan
-Write-Host "INF Reconcile: scripts/visa2014-migration/Compare-OnPremSyncState.ps1 (-LegacySource calik-energi-onprem-prod)"
+Write-Host "INF Live wave status: scripts/visa2014-migration/Watch-OnPremImportLive.ps1 (-Profile $Profile)"
+Write-Host "INF Reconcile counts: scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1 (-ShowIdMap)"
 Write-Host "INF Officer read-only UAT: $ApiBaseUrl/LoginPage"

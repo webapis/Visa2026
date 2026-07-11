@@ -25,6 +25,8 @@ Discovery/mapping rules live in [SKILL.md](./SKILL.md) and [VISA2014_MIGRATION.m
 | 5 | **Idempotent runs** | Re-run safe via natural-key upsert + id-map |
 | 6 | **Pilot → reconcile → expand** | One **confirmed** BO on disposable DB before full prod cutover |
 | 7 | **Log skips and failures** | `skip_row`, unmapped lookups, OData 400 — no silent drops |
+| 7b | **Zero FailedCount** | A wave must finish with **FailedCount = 0**. Do not accept “N failed, continue”. |
+| 7c | **Intentional exclusions = approved + documented** | A row may be **skipped** (not failed) only if it has an **`approved`** entry in [`import-exclusions.yaml`](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml): **why**, **how**, **counts** (headers/items/labels), **approvedBy/At**, evidence. Draft, then human approve, then wire `skip_row`, then reconcile Skipped* to documented counts. Unapproved skips are bugs. |
 | 8 | **Partial reimport = dev only** | `reimport/` scripts delete one BO scope on a **disposable** local DB while fixing importers — not staging/prod end-to-end |
 | 9 | **Dependency order always** | Full and partial reimport both follow `order.yaml` `dependsOn` — parents must exist (and id-maps resolve) before children; if you partial-reimport a parent, re-run downstream BOs in order |
 | 10 | **Reuse scripts first** | Search [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md) before adding a `.ps1`; prefer DataImporter CLI + `-StartAt` / `-MaxRows` on existing scripts; new file only when nothing fits |
@@ -57,8 +59,9 @@ Run in order:
 5. **Verify prerequisite lookups** — Country, Department, Position, ApplicationType, etc. exist in target DB (Module updaters ran once). **Abort** if critical catalogs empty.
 6. **Org singletons** — `CompanyProfile`, default `ProjectContract` if BO validation requires them (IMPORTING.md Phase 3).
 7. **OData exposure** — every imported BO registered in `WebApiServiceExtensions.cs`.
-8. **Lookup translations complete** — layer 3 mapped for every `lookupCatalog` used in current batch.
-9. **ApplicationType visibility** — if importing `Application` / `ApplicationItem`, catalog `Show*` flags should match Module ([visa2026-dataimporter](../visa2026-dataimporter/SKILL.md) visibility preflight). Fix catalog or DB before bulk import; avoid `--skip-visibility-preflight` except debug.
+8. **Lookup resolution complete** — layer 3 mapped for every `lookupCatalog` used in current batch ([LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md)); seed gaps into `LookupCatalogs/` / tenant JSON first.
+9. **Lookup preflight** — for full / Demo / on-prem Import chains, `Preflight-LookupAudit.ps1` / `--preflight-visa2014-lookups` exit **0** before waves (`OnPrem-Sync.ps1 -Mode Import` runs this automatically).
+10. **ApplicationType visibility** — if importing `Application` / `ApplicationItem`, catalog `Show*` flags should match Module ([visa2026-dataimporter](../visa2026-dataimporter/SKILL.md) visibility preflight). Fix catalog or DB before bulk import; avoid `--skip-visibility-preflight` except debug.
 
 ---
 
@@ -106,13 +109,21 @@ Mirror [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md) scenario idem
 
 ## Lookup resolution
 
+**Ops order (locked):** lookup resolution → lookup preflight → full Import. See [SKILL.md § Full Import order](./SKILL.md).
+
+**Name:** **lookup resolution** = audit live values → translate (`lookup-translations.yaml` + company overlay) → seed missing Visa2026 catalog rows (`LookupCatalogs/` / tenant JSON). Not bulk-import of legacy lookup tables.
+
+**At transform / POST time** (after resolution + preflight):
+
 1. Read legacy column value.
 2. Translate with `lookup-translations.yaml` (`legacy` → `target`).
-3. Resolve target row: OData GET on catalog with `$filter={targetMatchProperty} eq '...'`.
+3. Resolve target row: OData GET / ObjectSpace on catalog with `$filter={targetMatchProperty} eq '...'`.
 4. **Cache** lookups in memory per run (`BaseImporter` `_lookupCache` pattern) — one GET per distinct translated value.
 5. **Unmapped legacy value:** honor `unmappedPolicy` (`block_row` for required FKs — do not POST null and hope).
 
-**Do not** POST new global lookup rows during prod migration unless explicitly planned — use existing Module catalogs + translation table.
+**Do not** POST new global lookup rows during prod migration unless explicitly planned — use existing Module catalogs + translation table. Fix gaps in resolution/preflight, not mid-wave.
+
+**Çalik Enerji:** `lookup-translations.yaml` + `lookup-translations.calik-energi.yaml`.
 
 ---
 

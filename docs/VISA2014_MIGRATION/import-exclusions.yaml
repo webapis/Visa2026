@@ -1,0 +1,107 @@
+# VISA2014 -> Visa2026 — intentional import exclusions (approved skips)
+#
+# Gate: a row may be skipped (not failed) ONLY when an entry here has status: approved.
+# FailedCount > 0 is never an exclusion — fix the mapping/catalog or add an approved skip.
+#
+# Required fields per entry:
+#   id, entity, status (draft|approved|retired), approvedAt, approvedBy,
+#   why, how (mechanism), counts (legacyRows / skippedAtTransform / notes),
+#   evidence (artifacts), implementation (paths that enforce the skip)
+#
+# Process:
+#   1. Draft entry with measured counts (SQL / Excel preview skipped sheet).
+#   2. Human approves (chat / review) -> status: approved + approvedAt/By.
+#   3. Wire skip_row / missingBehavior / transform filter to match this id.
+#   4. Import summary Skipped* must reconcile to counts (within documented tolerance).
+#   5. Append learnings.md; link this id.
+#
+# Do NOT use -ContinueOnError to paper over FailedCount. Do NOT leave silent drops.
+
+version: 1
+canonicalDoc: docs/VISA2014_MIGRATION/import-exclusions.yaml
+related:
+  - docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md
+  - .cursor/skills/visa2014-to-visa2026-import/import-practices.md
+  - docs/VISA2014_MIGRATION/lookup-translations.yaml
+
+exclusions:
+  - id: EXC-APPTYPE-E33-E55
+    entity: Application
+    alsoAffects: [ApplicationItem, ApplicationProgress]
+    status: approved
+    approvedAt: 2026-06-29
+    approvedBy: developer / officer sign-off (chat)
+    legacySource: calik-energi
+    why: |
+      Legacy ApplicationType composites E:33:na:na:na and E:55:na:na:na have no Visa2026
+      ApplicationType.Name mapping. Product decision: do not migrate these subtypes
+      (not block the whole Application wave).
+    how: skip_row
+    mechanism: |
+      lookup-translations ApplicationType unmappedPolicy=skip_row;
+      field-maps/Application.yaml composite missingBehavior=skip_row.
+    counts:
+      applicationHeadersSkipped: 105
+      breakdown:
+        - key: "E:33:na:na:na"
+          applications: 92
+          applicationItems: 187
+        - key: "E:55:na:na:na"
+          applications: 13
+          applicationItems: 17
+      applicationItemsSkipped: 204
+      applicationProgressParentSkips: 108
+      notes: |
+        Preview Application-preview.calik-energi.xlsx: 12237 legacy -> 12129 import / 108 skipped
+        (105 type skips + 3 required-null — required-null is separate, not this exclusion).
+        Audit list historically also referred to E:44; canonical unmapped keys are E:33 + E:55.
+    evidence:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml#ApplicationType
+      - docs/VISA2014_MIGRATION/lookup-comparisons/ApplicationType.md
+      - .cursor/skills/visa2014-to-visa2026-import/learnings.md (2026-06-29 ApplicationType skip)
+    implementation:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - Visa2026.DataImporter/legacy/visa2014/field-maps/Application.yaml
+
+  - id: EXC-VISA-ISSUEDPLACE-EMBASSY
+    entity: Visa
+    status: approved
+    approvedAt: 2026-06-21
+    approvedBy: developer sign-off (Visa import approval)
+    legacySource: calik-energi
+    why: |
+      18 visas use embassy / out-of-catalog VisaIssuedPlace labels. Do not default to
+      Asgabat MGP; skip those rows until a catalog decision exists.
+    how: skip_row
+    mechanism: VisaIssuedPlace unmappedPolicy=skip_row + nullFkPolicy=skip_row
+    counts:
+      visaRowsSkipped: 18
+      mappedVisaRows: 6023
+      unmappedLabelsSample:
+        - Mary H.M.
+        - BAKU
+      notes: Exact label list in lookup-comparisons/VisaIssuedPlace.md / lookup-translations audit.
+    evidence:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml#VisaIssuedPlace
+      - docs/VISA2014_MIGRATION/lookup-comparisons/VisaIssuedPlace.md
+    implementation:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+
+# Template for new exclusions (copy, set status: draft until approved):
+#  - id: EXC-ENTITY-SHORT
+#    entity: <BO>
+#    status: draft
+#    approvedAt: null
+#    approvedBy: null
+#    legacySource: calik-energi
+#    why: |
+#      <business reason — why not fixable / why not import>
+#    how: skip_row
+#    mechanism: |
+#      <where enforced>
+#    counts:
+#      legacyRowsInScope: 0
+#      skippedAtTransform: 0
+#      notes: measure via SQL + Excel skipped sheet before approval
+#    evidence: []
+#    implementation: []

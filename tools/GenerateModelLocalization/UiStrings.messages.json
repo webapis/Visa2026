@@ -2903,42 +2903,6 @@
     "tk-TM": "Saýlanan setiriň doly Arza ýazgysyny aç",
     "ru-RU": "Открыть полную запись заявки для выбранной строки"
   },
-  "LegacySync.Title": {
-    "en": "Legacy sync",
-    "tr-TR": "Eski sistem senkronizasyonu",
-    "tk-TM": "Köne ulgam sinhronizasiýasy",
-    "ru-RU": "Синхронизация с устаревшей системой"
-  },
-  "LegacySync.Subtitle": {
-    "en": "VISA2015 → Visa2026 on-prem reconcile (HTML report).",
-    "tr-TR": "VISA2015 → Visa2026 yerinde mutabakat (HTML raporu).",
-    "tk-TM": "VISA2015 → Visa2026 ýerli deňeşdirme (HTML hasabaty).",
-    "ru-RU": "Сверка VISA2015 → Visa2026 на площадке (HTML-отчёт)."
-  },
-  "LegacySync.OpenInNewTab": {
-    "en": "Open in new tab",
-    "tr-TR": "Yeni sekmede aç",
-    "tk-TM": "Täze goýmada aç",
-    "ru-RU": "Открыть в новой вкладке"
-  },
-  "LegacySync.Refresh": {
-    "en": "Refresh",
-    "tr-TR": "Yenile",
-    "tk-TM": "Täzele",
-    "ru-RU": "Обновить"
-  },
-  "LegacySync.Refreshing": {
-    "en": "Refreshing…",
-    "tr-TR": "Yenileniyor…",
-    "tk-TM": "Täzelenýär…",
-    "ru-RU": "Обновление…"
-  },
-  "LegacySync.ReportFrameTitle": {
-    "en": "Legacy sync report",
-    "tr-TR": "Eski sistem senkronizasyon raporu",
-    "tk-TM": "Köne ulgam sinhronizasiýa hasabaty",
-    "ru-RU": "Отчёт синхронизации с устаревшей системой"
-  },
   "AddressOfResidence.LodgingDocumentsGuidance": {
     "en": "Documents are stored on the Lodging record (not on this address). Select a lodging above, then open Lookup → Housing → Lodging to add or change files.",
     "tr-TR": "Belgeler bu ikamet kaydında değil, Konaklama kaydında tutulur. Yukarıdan bir konaklama seçin; dosya eklemek veya değiştirmek için Referans → Konut → Konaklama kaydını açın.",

@@ -104,3 +104,19 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **HTTP env**: `HTTPS_ENABLED=false` on both `prod.env` and `staging.env` — HTTP-only smoke as requested.
 - **Smoke**: `http://10.100.128.25/LoginPage` and `:8080/LoginPage` → **200**; `publish-version.txt` AssemblyVersion **1.0.0.557**, GitSha **e422045** on both slots.
 - **Duration**: ~8 min prod (publish + scp + DB update), ~5 min staging (reuse publish).
+
+### 2026-07-10 — Staging deploy 1.0.0.566 (HTTP)
+
+- **Commit**: `ee84d498` (HEAD) — SLA visibility for officers + prior Ministrlik/snapshot work.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Staging -ForceUpdate` → `dist/visa2026-iis-1.0.0.566`.
+- **HTTP**: `HTTPS_ENABLED` not true in `staging.env` — skipped `Enable-Visa2026IisHttps.ps1` (expected for HTTP-only).
+- **Smoke**: `http://10.100.128.25:8080/LoginPage` → **200**; `publish-version.txt` AssemblyVersion **1.0.0.566**, GitSha **ee84d49**.
+- **DB**: `--updateDatabase --forceUpdate` on `Visa2026DbStaging` (exit 0).
+
+### 2026-07-10 — Production deploy 1.0.0.566 (HTTP)
+
+- **Same bits**: reused staging publish via `-SkipPublish -PublishPath dist/visa2026-iis-1.0.0.566`.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Production -ForceUpdate -SkipPublish …` (exit 0, ~4.5 min).
+- **HTTP**: `HTTPS_ENABLED` not true in `prod.env` — skipped HTTPS enable (expected).
+- **Smoke**: `http://10.100.128.25/LoginPage` → **200**; `publish-version.txt` **1.0.0.566** / **ee84d49**.
+- **DB**: `--updateDatabase --forceUpdate` on `Visa2026DbProd` (brings schema forward, e.g. `BorderZoneLocation`).

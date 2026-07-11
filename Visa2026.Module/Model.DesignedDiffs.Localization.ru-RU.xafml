@@ -81,7 +81,6 @@
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />
-      <Item Id="LegacySyncDashboard" Caption="Синхронизация с устаревшей системой" />
       <Item Id="Lookup" Caption="Справочники">
         <Items>
           <Item Id="Application" Caption="Заявка">
@@ -175,6 +174,7 @@
       <Item Id="Work Permit Tracking" Caption="Учёт РНТ" />
       <Item Id="WorkPermit" Caption="Разрешения на работу" />
       <Item Id="WorkPermitItem" Caption="Позиции РНТ" />
+      <Item Id="ForeignWorkerMaglumat" Caption="Сведения об иностранных гражданах" />
     </Items>
   </NavigationItems>
   <BOModel>
@@ -2311,6 +2311,31 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ForeignWorkerMaglumat" Caption="Сведения об иностранных гражданах">
+      <OwnMembers>
+        <Member Name="FullName" Caption="ФИО" />
+        <Member Name="DateOfBirth" Caption="Дата рождения" />
+        <Member Name="NationalityCode" Caption="Гражданство" />
+        <Member Name="BirthAndNationality" Caption="Год рождения и гражданство" />
+        <Member Name="PassportNumber" Caption="Номер паспорта" />
+        <Member Name="PassportExpirationDate" Caption="Срок паспорта" />
+        <Member Name="PassportBlock" Caption="Паспорт и срок" />
+        <Member Name="EducationLevelTm" Caption="Образование" />
+        <Member Name="PositionNameTm" Caption="Должность" />
+        <Member Name="ResidenceAddress" Caption="Адрес проживания в Туркменистане" />
+        <Member Name="WorkPermitNumber" Caption="Номер разрешения" />
+        <Member Name="WorkPermitStartDate" Caption="Начало разрешения" />
+        <Member Name="WorkPermitExpirationDate" Caption="Окончание разрешения" />
+        <Member Name="WorkPermitIsCancelled" Caption="Аннулирован" />
+        <Member Name="IsValid" Caption="Действителен" />
+        <Member Name="PermitBlock" Caption="Разрешение и срок" />
+        <Member Name="VisaNumber" Caption="Номер визы" />
+        <Member Name="VisaStartDate" Caption="Начало визы" />
+        <Member Name="VisaExpirationDate" Caption="Окончание визы" />
+        <Member Name="VisaBlock" Caption="Виза и срок" />
+        <Member Name="Remarks" Caption="Примечание" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Позиция РНТ">
       <OwnMembers>
         <Member Name="ASNumber" Caption="Номер AS" />
@@ -3113,6 +3138,8 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="ForeignWorkerMaglumat_ListView" Caption="Сведения об иностранных гражданах" />
+    <DetailView Id="ForeignWorkerMaglumat_DetailView" Caption="Сведения об иностранных гражданах" />
     <ListView Id="WorkPermitItem_ListView" Caption="Позиции РНТ">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="Номер AS" />

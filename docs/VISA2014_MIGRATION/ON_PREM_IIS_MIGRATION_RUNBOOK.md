@@ -6,7 +6,7 @@
 
 **IIS slot layout:** [ON_PREM_WINDOWS_IIS.md](../ON_PREM_WINDOWS_IIS.md) · [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md)
 
-**Import commands:** [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) · [order.yaml](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) · **Agent skill:** [visa2026-onprem-legacy-sync](../../.cursor/skills/visa2026-onprem-legacy-sync/SKILL.md)
+**Import commands:** [import-practices.md](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md) · [order.yaml](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) · **Agent skill:** [visa2014-to-visa2026-import](../../.cursor/skills/visa2014-to-visa2026-import/SKILL.md)
 
 **Legacy SQL (read-only discovery):** Cursor MCP **`visa2014-sql-remote`** → `10.100.128.15` / `VISA2015` / `ReadOnlyUser` (see [`.cursor/mcp.json`](../../.cursor/mcp.json)).
 
@@ -35,12 +35,12 @@ During the period when officers still work in the **legacy** system and use Visa
 |------|----------|
 | Officers write in legacy | **Yes** — `VISA2015` on `10.100.128.15` remains **system of record** |
 | Officers write in Visa2026 | **No** — **view and search only** until cutover |
-| Sync direction | **One-way:** legacy → Visa2026 only |
+| Catch-up path | **Import-only** (`OnPrem-Sync.ps1` / `--import-visa2014`) — **no** delta Sync |
 | Conflict policy | **Legacy wins** (safe because Visa2026 has no officer edits) |
 
 **Enforcement (recommended):** assign officers a **read-only** XAF role on Prod/Staging during parallel period (Navigate + Read; deny Create/Write/Delete on business types). See [ROLE_PERMISSIONS_GUIDE.md](../ROLE_PERMISSIONS_GUIDE.md). Importer uses a separate service account with write access.
 
-**Cutover:** stop legacy writes → run **final delta sync** → switch officers to full Prod role → disable scheduled sync jobs.
+**Cutover:** stop legacy writes → run **final Import catch-up** → switch officers to full Prod role. Ops: disable any leftover Task Scheduler task `Visa2026-OnPrem-LegacySync` on `.25` if still present.
 
 ---
 
@@ -165,10 +165,10 @@ Resume: `-StartAt Application`. Single entity: `-Entity ApplicationItem`. Transf
 ### Cutover day
 
 1. Announce legacy **read-only** (or stop legacy app).
-2. Run **final sync** pass (all entities + attachments).
+2. Run **final Import** catch-up (all entities + attachments).
 3. Reconcile counts; smoke-test critical flows.
 4. Promote officers to full write role on Prod.
-5. Stop scheduled sync tasks.
+5. Disable leftover Task Scheduler task `Visa2026-OnPrem-LegacySync` on `.25` if still present.
 6. Archive id-maps and logs securely.
 
 ### Rollback
@@ -178,45 +178,21 @@ Resume: `-StartAt Application`. Single entity: `-Entity ApplicationItem`. Transf
 
 ---
 
-## Scheduled one-way sync (parallel period)
+## Catch-up Import (parallel period)
 
-**Status:** **`--sync-visa2014` v1 shipped** — insert + update + soft-delete for scalar entities via `--inprocess`. File bytes remain a separate weekly wave.
+**Status:** Delta Sync (`--sync-visa2014`, nightly Sync task, LegacySyncDashboard) was **removed**. Catch-up uses **Import** only.
 
-Because officers **do not write** in Visa2026 during parallel period, **legacy-wins** scheduled sync is **safe**.
-
-### Recommended schedule (after manual trial week)
-
-| Slot | Schedule | Command |
-|------|----------|---------|
-| **Production** | Nightly off-peak on **`.25`** | `OnPrem-Sync.ps1 -Profile Production -Mode Sync` |
-| **Staging** | After prod sync | Prod `.bak` restore — not legacy |
-| **Demo** | Manual clone from staging | |
-
-### First manual run (prod)
+| Slot | How |
+|------|-----|
+| **Production** | Manual `OnPrem-Sync.ps1 -Profile Production` on `.25` (lookup preflight auto) |
+| **Staging** | Prod `.bak` restore — not legacy Import |
+| **Demo** | `OnPrem-Sync.ps1 -Profile Demo` |
 
 ```powershell
-# After id-map bootstrap (copy calik-energi → calik-energi-onprem-prod)
-.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -Mode Sync -SyncFull
+.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production
 ```
 
-### Nightly incremental (prod on `.25`)
-
-```powershell
-.\scripts\visa2014-migration\import\OnPrem-Sync.ps1 -Profile Production -Mode Sync
-```
-
-Or direct CLI:
-
-```powershell
-dotnet run --project Visa2026.DataImporter -c Release -- `
-  --sync-visa2014 --inprocess --legacy-source calik-energi-onprem-prod `
-  --target-connection $env:VISA2026_PROD_SQL_CONNECTION `
-  --sync-state-dir C:\path\to\Visa2026\Visa2026.DataImporter\legacy\visa2014\sync-state
-```
-
-**Flags:** `--sync-full` (all mapped rows) · `--sync-since <utc>` · `--no-soft-delete-sync` · `--entity Application` (single BO)
-
-Until operators enable Task Scheduler, run manually and check `import-logs/`.
+File/image bytes remain a separate wave (`--import-visa2014-files`). Check `import-logs/` after each run.
 
 ---
 
@@ -230,4 +206,5 @@ Follow [`order.yaml`](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) st
 
 | Date | Change |
 |------|--------|
-| 2026-06-21 | Initial runbook — `.25` IIS slots, `.15` legacy SQL, read-only Visa2026 parallel period, planned nightly sync |
+| 2026-06-21 | Initial runbook — `.25` IIS slots, `.15` legacy SQL, read-only Visa2026 parallel period |
+| 2026-07-11 | Removed delta Sync; Import-only catch-up; deleted onprem-legacy-sync skill |
