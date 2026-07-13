@@ -6,8 +6,9 @@
 .DESCRIPTION
   Runs Visa2026.DataImporter --import-visa2014 entity-by-entity per order.yaml.
   All scalar writes use --inprocess (headless XAF ObjectSpace).
-  Large waves (Application / ApplicationItem / ApplicationProgress) post with
-  --parallelism (default 4 workers; each worker owns its own ObjectSpace).
+  Large waves Application / ApplicationProgress post with --parallelism
+  (default 1 worker; raise for faster ApplicationProgress). ApplicationItem posts
+  sequentially (same loop style as Education / Passport).
 
   Profiles:
     Staging    — Visa2026DbStaging (:8080), calik-energi-onprem-staging id-maps
@@ -57,7 +58,7 @@ param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Release",
     [int]$BatchSize = 50,
-    [int]$Parallelism = 4,
+    [int]$Parallelism = 1,
     [string[]]$Entity = @(),
     [string]$StartAt = "",
     [switch]$DryRun,
@@ -224,9 +225,16 @@ function Invoke-DataImporterCli {
     if (-not [string]::IsNullOrWhiteSpace($TargetConnection)) {
         $env:ConnectionStrings__DefaultConnection = $TargetConnection
         $env:ASPNETCORE_ENVIRONMENT = 'Production'
+        # Encrypt=False breaks some Microsoft.Data.SqlClient builds ("Invalid value for key 'Encrypt'").
         $safeCs = $TargetConnection `
             -replace '(?i)\bUser Id=', 'UID=' `
-            -replace '(?i)\bPassword=', 'PWD='
+            -replace '(?i)\bPassword=', 'PWD=' `
+            -replace '(?i)\bEncrypt\s*=\s*False\b', 'Encrypt=Optional' `
+            -replace '(?i)\bEncrypt\s*=\s*True\b', 'Encrypt=Mandatory'
+        if ($safeCs -notmatch '(?i)\bEncrypt\s*=') {
+            $safeCs = $safeCs.TrimEnd(';') + ';Encrypt=Optional'
+        }
+        $env:ConnectionStrings__DefaultConnection = $safeCs
         for ($i = 0; $i -lt $CliArgs.Count; $i++) {
             if ($CliArgs[$i] -eq '--target-connection' -and ($i + 1) -lt $CliArgs.Count) {
                 $CliArgs[$i + 1] = $safeCs
@@ -409,7 +417,10 @@ function Invoke-ImportWave {
         if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
             throw "TargetConnection required for in-process entity $WaveName."
         }
-        $waveCli += @("--inprocess", "--target-connection", $TargetConnection, "--batch-size", $BatchSize, "--parallelism", $Parallelism)
+        $waveCli += @("--inprocess", "--batch-size", $BatchSize, "--parallelism", "$Parallelism")
+        # Prefer ConnectionStrings__DefaultConnection env (set below via Invoke-DataImporterCli).
+        # Do NOT pass --target-connection on the CLI: Start-Process single-string ArgumentList
+        # mangles "User Id=..." / long CS values and can corrupt Boolean keywords.
     }
     else {
         $waveCli = @(

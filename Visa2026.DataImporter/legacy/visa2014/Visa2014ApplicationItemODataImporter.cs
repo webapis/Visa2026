@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.Text.Json;
 using DevExpress.ExpressApp;
 using Visa2026.DataImporter;
 
@@ -40,10 +38,14 @@ internal static class Visa2014ApplicationItemODataImporter
         int? maxRows,
         bool dryRun,
         bool verbose,
+        // Retained for call-site compatibility; ApplicationItem posts sequentially (like Education).
         INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
         int parallelism = 0,
         int batchSize = 50)
     {
+        _ = objectSpaceFactory;
+        _ = parallelism;
+        _ = batchSize;
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
         var passportIdMap = Visa2014IdMapHelper.Load(passportIdMapPath);
@@ -132,87 +134,166 @@ internal static class Visa2014ApplicationItemODataImporter
         if (verbose && applicationItemIdMap.Count > 0)
             Console.WriteLine($"INF Existing ApplicationItem id-map entries: {applicationItemIdMap.Count}");
 
-        var applicationItemIdMapConcurrent = new ConcurrentDictionary<Guid, Guid>(applicationItemIdMap);
-        var degree = parallelism > 0 ? parallelism : Visa2014ParallelImportPoster.DefaultDegree;
-        var stats = await Visa2014ParallelImportPoster.PostAsync(
-            batch.ImportRows,
-            degree,
-            target,
-            objectSpaceFactory,
-            batchSize,
-            async (row, workerTarget) =>
-            {
-                var legacyOid = (Guid)row["_legacyRowId"]!;
-                if (applicationItemIdMapConcurrent.ContainsKey(legacyOid))
-                {
-                    if (verbose)
-                        Console.WriteLine($"  SKIP {legacyOid}: already in ApplicationItem id-map");
-                    return new ParallelRowOutcome(ParallelRowKind.SkippedAlready);
-                }
-
-                if (!TryResolveRequiredIds(
-                        row,
-                        applicationIdMap,
-                        personIdMap,
-                        passportIdMap,
-                        out var applicationId,
-                        out var personId,
-                        out var passportId,
-                        out var missingReason))
-                {
-                    if (verbose)
-                        Console.WriteLine($"  SKIP {legacyOid}: {missingReason}");
-                    return new ParallelRowOutcome(ParallelRowKind.SkippedMissing);
-                }
-
-                try
-                {
-                    var payload = BuildPayload(
-                        row,
-                        resolver,
-                        applicationId,
-                        personId,
-                        passportId,
-                        passportIdMap,
-                        visaIdMap,
-                        positionHistoryIdMap,
-                        addressIdMap,
-                        educationIdMap,
-                        employeeSalaryIdMap,
-                        workPermitItemIdMap,
-                        invitationItemIdMap);
-                    if (payload == null)
-                    {
-                        return new ParallelRowOutcome(
-                            ParallelRowKind.Failed,
-                            $"{legacyOid}: incomplete OData payload ({DescribePayloadGap(row, resolver)})");
-                    }
-
-                    var createdId = await workerTarget.CreateAsync(
-                        typeof(Visa2026.Module.BusinessObjects.ApplicationItem), payload);
-                    if (!createdId.HasValue)
-                        return new ParallelRowOutcome(ParallelRowKind.Failed, $"{legacyOid}: create returned null");
-
-                    applicationItemIdMapConcurrent[legacyOid] = createdId.Value;
-                    if (verbose)
-                        Console.WriteLine($"  SAVE ApplicationItem {createdId.Value} <- legacy {legacyOid}");
-                    return new ParallelRowOutcome(ParallelRowKind.Posted);
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
-                    return new ParallelRowOutcome(ParallelRowKind.Failed, $"{legacyOid}: {ex.Message}");
-                }
-            },
+        // Sequential post (same pattern as Education / Passport) — not ParallelImportPoster.
+        var total = batch.ImportRows.Count;
+        Console.WriteLine($"INF ApplicationItem sequential post: {total} row(s)");
+        Console.Out.Flush();
+        Visa2014SyncUpsertHelper.WriteSyncProgressFile(
+            applicationItemIdMapOutputPath,
             "ApplicationItem",
-            applicationItemIdMapOutputPath);
+            processed: 0,
+            total,
+            updated: 0,
+            inserted: 0,
+            skippedUnchanged: 0,
+            failed: 0,
+            phase: "posting");
+
+        var posted = 0;
+        var failed = 0;
+        var skippedAlready = 0;
+        var skippedMissing = 0;
+        var processed = 0;
+        var errors = new List<string>();
+
+        foreach (var row in batch.ImportRows)
+        {
+            var legacyOid = (Guid)row["_legacyRowId"]!;
+            if (applicationItemIdMap.ContainsKey(legacyOid))
+            {
+                skippedAlready++;
+                processed++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: already in ApplicationItem id-map");
+                Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                    applicationItemIdMapOutputPath,
+                    "ApplicationItem",
+                    processed,
+                    total,
+                    posted,
+                    failed,
+                    skippedAlready + skippedMissing);
+                continue;
+            }
+
+            if (!TryResolveRequiredIds(
+                    row,
+                    applicationIdMap,
+                    personIdMap,
+                    passportIdMap,
+                    out var applicationId,
+                    out var personId,
+                    out var passportId,
+                    out var missingReason))
+            {
+                skippedMissing++;
+                processed++;
+                if (verbose)
+                    Console.WriteLine($"  SKIP {legacyOid}: {missingReason}");
+                Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                    applicationItemIdMapOutputPath,
+                    "ApplicationItem",
+                    processed,
+                    total,
+                    posted,
+                    failed,
+                    skippedAlready + skippedMissing);
+                continue;
+            }
+
+            try
+            {
+                var payload = BuildPayload(
+                    row,
+                    resolver,
+                    applicationId,
+                    personId,
+                    passportId,
+                    passportIdMap,
+                    visaIdMap,
+                    positionHistoryIdMap,
+                    addressIdMap,
+                    educationIdMap,
+                    employeeSalaryIdMap,
+                    workPermitItemIdMap,
+                    invitationItemIdMap);
+                if (payload == null)
+                {
+                    failed++;
+                    processed++;
+                    errors.Add($"{legacyOid}: incomplete OData payload ({DescribePayloadGap(row, resolver)})");
+                    Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                        applicationItemIdMapOutputPath,
+                        "ApplicationItem",
+                        processed,
+                        total,
+                        posted,
+                        failed,
+                        skippedAlready + skippedMissing);
+                    continue;
+                }
+
+                var createdId = await target.CreateAsync(
+                    typeof(Visa2026.Module.BusinessObjects.ApplicationItem), payload);
+                if (!createdId.HasValue)
+                {
+                    failed++;
+                    processed++;
+                    errors.Add($"{legacyOid}: create returned null");
+                    Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                        applicationItemIdMapOutputPath,
+                        "ApplicationItem",
+                        processed,
+                        total,
+                        posted,
+                        failed,
+                        skippedAlready + skippedMissing);
+                    continue;
+                }
+
+                applicationItemIdMap[legacyOid] = createdId.Value;
+                posted++;
+                processed++;
+                if (verbose)
+                    Console.WriteLine($"  SAVE ApplicationItem {createdId.Value} <- legacy {legacyOid}");
+            }
+            catch (Exception ex)
+            {
+                failed++;
+                processed++;
+                errors.Add($"{legacyOid}: {ex.Message}");
+                Console.Error.WriteLine($"ERR {legacyOid}: {ex.Message}");
+            }
+
+            Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                applicationItemIdMapOutputPath,
+                "ApplicationItem",
+                processed,
+                total,
+                posted,
+                failed,
+                skippedAlready + skippedMissing);
+        }
+
+        await target.FlushAsync();
+        Visa2014SyncUpsertHelper.WriteSyncProgressFile(
+            applicationItemIdMapOutputPath,
+            "ApplicationItem",
+            processed,
+            total,
+            updated: 0,
+            inserted: posted,
+            skippedUnchanged: skippedAlready + skippedMissing,
+            failed: failed,
+            phase: "done");
+        Console.Out.Flush();
 
         string? idMapPath = null;
-        if (applicationItemIdMapConcurrent.Count > 0 && !string.IsNullOrWhiteSpace(applicationItemIdMapOutputPath))
+        if (applicationItemIdMap.Count > 0 && !string.IsNullOrWhiteSpace(applicationItemIdMapOutputPath))
         {
             await Visa2014IdMapHelper.SaveAsync(
                 applicationItemIdMapOutputPath,
-                new Dictionary<Guid, Guid>(applicationItemIdMapConcurrent));
+                applicationItemIdMap);
             idMapPath = Path.GetFullPath(applicationItemIdMapOutputPath);
         }
 
@@ -222,15 +303,14 @@ internal static class Visa2014ApplicationItemODataImporter
             PreparedCount = batch.ImportRows.Count,
             SkippedCount = batch.Skipped.Count,
             DedupeMergedCount = batch.DedupeMergedCount,
-            SkippedMissingRequiredIdMap = stats.SkippedMissing,
-            SkippedAlreadyImported = stats.SkippedAlready,
-            PostedCount = stats.Posted,
-            FailedCount = stats.Failed,
+            SkippedMissingRequiredIdMap = skippedMissing,
+            SkippedAlreadyImported = skippedAlready,
+            PostedCount = posted,
+            FailedCount = failed,
             IdMapPath = idMapPath,
-            Errors = stats.Errors,
+            Errors = errors,
         };
     }
-
     private sealed record ApplicationItemImportGap(
         int AlreadyImported,
         int MissingRequiredIdMap,

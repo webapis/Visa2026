@@ -1368,3 +1368,55 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Fix 2**: DocumentCopies sets `ConnectionStrings__DefaultConnection` + safe `--target-connection` (same as OnPrem-Sync); Demo file-waves re-run via task with correct CS
 - **Also**: archive history index coerces `ElapsedSeconds` when JSON yields Object[] (avoids `op_Division`)
 - **Outcome**: file-waves re-run in progress — Target SQL=`localhost\SQLEXPRESS`/`Visa2026DbDemo`; Id-map=`...\data\id-maps\...\Person.json`; Person-Photo Running
+
+### 2026-07-13 — Production hard wipe + Import (future prod; no backup)
+
+- **Phase**: end-to-end (Prod wipe + scalar Import)
+- **Outcome**: **running** after Encrypt/login fixes
+- **Wipe**: business tables cleared on `Visa2026DbProd`; id-maps cleared under `C:\visa2026-sync\data\id-maps\calik-energi-onprem-prod`; lookups/templates kept. No prod `.bak` (user: not official prod yet).
+- **Disk**: moved `C:\visa2026\backups` → `E:\visa2026\backups` before wipe (C: was ~2.5 GB free)
+- **Failures then fixes**:
+  1. Stale DI missing `--preflight-visa2014-lookups` → refresh published DataImporter on sync host
+  2. `Encrypt=False` → `Invalid value for key 'Encrypt'` (Microsoft.Data.SqlClient) → use `Encrypt=Optional` / `Mandatory`; OnPrem-Sync + ContentRoot normalize
+  3. Env-normalize script mangled `VISA2014_SQL_PASSWORD` and created `SQL_SERVER_10.100.128.15=...;Encrypt=Optional` → restore password; embed Password into `VISA2014_SQL_CONNECTION`; drop mangled key
+  4. SYSTEM task Login failed for ReadOnlyUser when CS lacked Password (env inject flaky) → embed password in CS
+  5. Person wave: `Visa2014LegacySqlGuard.DescribeLegacyConnection` used `SqlConnectionStringBuilder` which rejected `Encrypt=Optional` even when `SqlConnection.Open` worked → try/catch + MaskConnectionForLog fallback
+- **RunId**: `20260713-025546` Overall=Running; Person Completed (Posted 3306 / Failed 0; People=3306); Passport Running
+- **Task**: `Visa2026-OnPrem-ProdImportOnce` → `-Profile Production -SkipTenantCatalogGeneration -SkipLookupPreflight -StartAt Person` (scalar only; file waves later)
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh`; status `C:\visa2026-sync\sync-run-status.json` (wrap Tee fills only after Run-OnPremSyncOnServer exits)
+
+
+### 2026-07-13 — Prod Education Failed(15) then Failed(3); fixed with exact Unicode seeds
+
+- **Run**: `20260713-025546` Failed at Education (Posted 3157 / Failed 15)
+- **Cause**: missing `EducationInstitutions` / `Specialties` NameTm rows — same Demo gaps plus Turkmen Unicode (dotless `ı`, `ş`, `ý`, `ü`, `ç`) that ASCII/`Riko` seeds do not match
+- **Fix**: INSERT exact titles from VISA2015 via hex→UTF-16 (sqlcmd `-y 0 -Y`) into Prod; also copy known Demo rows first
+- **Resume**: `-StartAt Education -SkipLookupPreflight -SkipTenantCatalogGeneration`
+- **Outcome**: RunId `20260713-031108` Education **Completed** Failed=0 (Posted 3 catch-up; Educations=3172); continued to EmployeePositionHistory
+- **Lesson**: seed NameTm from legacy hex when console mangling hides `ı` vs `i`; verify LEN matches legacy LEN
+
+
+### 2026-07-13 — Prod ApplicationItem fail; sync.env parse bug (same Demo resume path)
+
+- **Phase**: end-to-end (Prod resume ApplicationItem)
+- **Symptom**: Watch showed ApplicationItem 0/21780 for ~14m (prepare, not hang); later `-StartAt ApplicationItem` failed in ~3s with exit `-532462766` (`0xE0434352` CLR) or `Invalid value for key 'Multiple Active Result Sets'`
+- **Root cause**: `Run-OnPremSyncOnServer.ps1` `Import-SyncEnvFile` used `Read-TextFileAutoEncoding -Path $Path -split` **without parentheses**. PowerShell binds `$Path -split` first → whole `sync.env` becomes one line → only `VISA2014_SQL_PASSWORD` is set (value = rest of file). `VISA2026_PROD_SQL_CONNECTION` never loads → appsettings fallback; CS builders choke on embedded newlines after `MultipleActiveResultSets=true`
+- **Fix**: `(Read-TextFileAutoEncoding -Path $Path) -split` in repo + patched on `.25` prod/demo sync hosts; Encrypt normalized on prod `sync.env`
+- **Resume (same as Demo)**: `Visa2026-OnPrem-ProdImportOnce` → `Run-OnPremSyncOnServer.ps1 -Profile Production -SkipTenantCatalogGeneration -SkipLookupPreflight -StartAt ApplicationItem -Parallelism 1`
+- **Outcome**: RunId `20260713-040316` Overall=Running; `parallel post: 21781 row(s), workers=1`; DI posting in progress (early 0% is normal)
+- **Prevent**: always parenthesize `Read-TextFileAutoEncoding` before `-split`; verify password env length ~11 not hundreds after sync.env edits
+
+### 2026-07-13 — ApplicationItem import: sequential post (no ParallelImportPoster)
+
+- **Phase**: import-code
+- **Context**: Prod ApplicationItem hung at 0/N on first CreateAsync via ParallelImportPoster (workers=1 or 4); Demo had completed earlier with workers=4
+- **Change**: `Visa2014ApplicationItemODataImporter` posts like Education/Passport — sequential `foreach` + `CreateAsync` + `FlushAsync` + progress sidecar; `--parallelism` ignored for this entity
+- **OnPrem-Sync**: comment updated (Application/ApplicationProgress may still use parallelism)
+- **Next**: publish DataImporter to `C:\visa2026-sync` and resume `-StartAt ApplicationItem`
+
+### 2026-07-13 — Prod ApplicationItem sequential resume (after `_legacyRowId` fix)
+
+- **Phase**: end-to-end (Prod `-StartAt ApplicationItem`)
+- **Deploy**: published DataImporter to `C:\visa2026-sync\tools\DataImporter`; RunId `20260713-045401`
+- **Bug**: first sequential build used `_legacyOid` (KeyNotFound) — must be `_legacyRowId`
+- **Outcome**: sequential post alive — ~2000/21786 (~9%), posted~1984 failed=0, DB ApplicationItems rising (~2050)

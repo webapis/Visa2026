@@ -41,8 +41,30 @@ internal static class Visa2014LegacySqlGuard
 
     public static string DescribeLegacyConnection(string legacyConnectionString, string? legacyDatabase = null)
     {
-        var builder = new SqlConnectionStringBuilder(legacyConnectionString);
-        var database = legacyDatabase ?? builder.InitialCatalog ?? "VISA2015";
-        return $"Server={builder.DataSource};Database={database};Auth={(string.IsNullOrWhiteSpace(builder.UserID) ? "Windows" : "SQL")}";
+        // Never use SqlConnectionStringBuilder here: mangled env / Encrypt keyword variants throw
+        // FormatException or ArgumentException and abort the wave before any rows post.
+        return MaskConnectionForLog(legacyConnectionString, legacyDatabase);
+    }
+
+    private static string MaskConnectionForLog(string connectionString, string? legacyDatabase)
+    {
+        string? server = null;
+        string? database = legacyDatabase;
+        string? user = null;
+        foreach (var part in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (part.StartsWith("Server=", StringComparison.OrdinalIgnoreCase) ||
+                part.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+                server = part[(part.IndexOf('=') + 1)..].Trim();
+            else if (part.StartsWith("Database=", StringComparison.OrdinalIgnoreCase) ||
+                     part.StartsWith("Initial Catalog=", StringComparison.OrdinalIgnoreCase))
+                database ??= part[(part.IndexOf('=') + 1)..].Trim();
+            else if (part.StartsWith("User Id=", StringComparison.OrdinalIgnoreCase) ||
+                     part.StartsWith("UID=", StringComparison.OrdinalIgnoreCase) ||
+                     part.StartsWith("UserID=", StringComparison.OrdinalIgnoreCase))
+                user = part[(part.IndexOf('=') + 1)..].Trim();
+        }
+
+        return $"Server={server ?? "?"};Database={database ?? "VISA2015"};Auth={(string.IsNullOrWhiteSpace(user) ? "Windows" : "SQL")}";
     }
 }

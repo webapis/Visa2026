@@ -29,6 +29,7 @@ param(
     [switch]$ContinueOnError,
     [string[]]$Entity = @(),
     [string]$StartAt = '',
+    [int]$Parallelism = 0,
     [string]$SyncHostRoot = '',
     [string]$ConfigFile = '',
     [string]$AppSettings = ''
@@ -76,7 +77,9 @@ function Import-SyncEnvFile {
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Config not found: $Path. Copy onprem-sync.env.example to sync.env and set VISA2014_SQL_PASSWORD."
     }
-    Read-TextFileAutoEncoding -Path $Path -split "`r?`n" | ForEach-Object {
+    # Parentheses required: without them, `$Path -split` binds first and the whole
+    # file becomes one "line" → only the first KEY is set (value = rest of file).
+    (Read-TextFileAutoEncoding -Path $Path) -split "`r?`n" | ForEach-Object {
         $line = $_.Trim()
         if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith('#')) { return }
         $idx = $line.IndexOf('=')
@@ -92,6 +95,21 @@ function Import-SyncEnvFile {
 
 Import-SyncEnvFile -Path $ConfigFile
 $env:VISA2026_SYNC_HOST_ROOT = $SyncHostRoot
+# Scrub accidental newlines inside connection env values (corrupted sync.env / copy paste).
+foreach ($connKey in @(
+        'VISA2014_SQL_CONNECTION',
+        'VISA2026_PROD_SQL_CONNECTION',
+        'VISA2026_STAGING_SQL_CONNECTION',
+        'VISA2026_DEMO_SQL_CONNECTION',
+        'ConnectionStrings__DefaultConnection'
+    )) {
+    $connVal = [Environment]::GetEnvironmentVariable($connKey, 'Process')
+    if (-not [string]::IsNullOrWhiteSpace($connVal) -and $connVal -match '[\r\n]') {
+        $clean = ($connVal -replace '[\r\n]+', '').Trim()
+        Set-Item -Path "Env:$connKey" -Value $clean
+        Write-Host "WRN Scrubbed embedded newlines from $connKey" -ForegroundColor Yellow
+    }
+}
 # In-process DataImporter hosts Blazor Startup; Production appsettings has SQLEXPRESS (not LocalDB).
 if ([string]::IsNullOrWhiteSpace($env:ASPNETCORE_ENVIRONMENT)) {
     $env:ASPNETCORE_ENVIRONMENT = 'Production'
@@ -132,6 +150,7 @@ if ($SkipLookupPreflight) { $args += '-SkipLookupPreflight' }
 if ($ContinueOnError) { $args += '-ContinueOnError' }
 if ($Entity.Count -gt 0) { $args += @('-Entity') + $Entity }
 if ($StartAt) { $args += @('-StartAt', $StartAt) }
+if ($Parallelism -gt 0) { $args += @('-Parallelism', $Parallelism) }
 
 $taskLog = Join-Path $SyncHostRoot "logs\sync-run-$(Get-Date -Format yyyyMMdd-HHmmss).log"
 New-Item -ItemType Directory -Force -Path (Split-Path $taskLog) | Out-Null

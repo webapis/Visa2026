@@ -113,8 +113,11 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// When true, changing <see cref="Person"/> does not run
-        /// <see cref="ApplyCurrentFieldsFromSelectedPerson"/> or person-triggered sync rules.
-        /// VISA2014 OData import sets this so legacy-mapped FKs (passport, visa, position, …) are kept.
+        /// <see cref="ApplyCurrentFieldsFromSelectedPerson"/> or person-triggered sync rules, and changing
+        /// <see cref="CurrentVisa"/>, <see cref="CurrentWorkPermitItem"/>, <see cref="CurrentInvitationItem"/>,
+        /// or <see cref="PreviousInvitationItem"/> skips their <see cref="CrossObjectSyncHelper"/> rule dispatch too.
+        /// VISA2014 OData import sets this so legacy-mapped FKs (passport, visa, position, …) are kept
+        /// without re-running per-property SyncRule evaluation for every imported row.
         /// </summary>
         [Browsable(false)]
         [VisibleInDetailView(false)]
@@ -1619,7 +1622,7 @@ namespace Visa2026.Module.BusinessObjects
                     var oldValue = currentVisa;
                     currentVisa = value;
 
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentVisa), oldValue);
                     }
@@ -1649,7 +1652,7 @@ namespace Visa2026.Module.BusinessObjects
                     if (value != null && Application?.ApplicationType?.ShowWorkPermittedLocations == true)
                         WorkPermittedLocations = value.WorkPermittedLocations ?? string.Empty;
 
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentWorkPermitItem), oldValue);
                     }
@@ -1678,7 +1681,7 @@ namespace Visa2026.Module.BusinessObjects
                     var oldValue = currentInvitationItem;
                     currentInvitationItem = value;
 
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem), oldValue);
                     }
@@ -1701,7 +1704,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     var oldValue = previousInvitationItem;
                     previousInvitationItem = value;
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(PreviousInvitationItem), oldValue);
                 }
             }
