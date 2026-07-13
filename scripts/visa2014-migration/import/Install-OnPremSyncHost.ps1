@@ -94,8 +94,14 @@ Copy-Item -LiteralPath (Join-Path $scriptDir 'onprem-sync.env.example') `
 $libDir = Join-Path $SyncHostRoot 'tools\scripts\_lib'
 New-Item -ItemType Directory -Force -Path $libDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $scriptDir '..\_lib\Get-RepoRoot.ps1') -Destination (Join-Path $libDir 'Get-RepoRoot.ps1') -Force
-foreach ($libName in @('OnPremSyncRunStatus.ps1', 'Get-OnPremSyncHostRoot.ps1')) {
+foreach ($libName in @('OnPremSyncRunStatus.ps1', 'Get-OnPremSyncHostRoot.ps1', 'OnPremImportRunArchive.ps1')) {
     Copy-Item -LiteralPath (Join-Path $scriptDir "..\_lib\$libName") -Destination (Join-Path $libDir $libName) -Force
+}
+foreach ($toolName in @('Compare-OnPremImportRuns.ps1', 'Archive-OnPremImportRun.ps1')) {
+    $toolSrc = Join-Path $scriptDir "..\$toolName"
+    if (Test-Path -LiteralPath $toolSrc) {
+        Copy-Item -LiteralPath $toolSrc -Destination (Join-Path $SyncHostRoot "tools\scripts\$toolName") -Force
+    }
 }
 
 $lookupDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\lookup-translations'
@@ -105,6 +111,12 @@ foreach ($lookupName in @('lookup-translations.yaml', 'lookup-translations.calik
     if (Test-Path -LiteralPath $lookupSrc) {
         Copy-Item -LiteralPath $lookupSrc -Destination (Join-Path $lookupDst $lookupName) -Force
     }
+}
+$cityJsonSrc = Join-Path $RepoRoot 'Visa2026.Module\DatabaseUpdate\LookupCatalogs\city.json'
+$cityJsonDstDir = Join-Path $SyncHostRoot 'tools\DataImporter\LookupCatalogs'
+if (Test-Path -LiteralPath $cityJsonSrc) {
+    New-Item -ItemType Directory -Force -Path $cityJsonDstDir | Out-Null
+    Copy-Item -LiteralPath $cityJsonSrc -Destination (Join-Path $cityJsonDstDir 'city.json') -Force
 }
 $migrationArtifactsDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\migration-artifacts'
 New-Item -ItemType Directory -Force -Path $migrationArtifactsDst | Out-Null

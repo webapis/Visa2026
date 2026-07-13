@@ -68,6 +68,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ImportReimportHistoryHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog));
         }
@@ -164,6 +165,8 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxModelUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ImportReimportHistoryModelUpdater());
+            updaters.Add(new DatabaseUpdate.ImportReimportHistoryDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackModelUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackViewsUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackDetailViewUpdater());

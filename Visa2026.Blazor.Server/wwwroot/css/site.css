@@ -3680,3 +3680,116 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     text-decoration: underline;
     text-underline-offset: 0.12em;
 }
+
+/* Import reimport history (Operations — Administrators) */
+.import-history-detail .xaf-detail-view,
+.import-history-detail .layout-main,
+.import-history-detail .layout-SimpleEditors,
+.import-history-detail .layout-ImportReimportHistoryHost,
+.import-history-detail .layout-item-HistoryUi {
+    height: 100%;
+    min-height: 0;
+}
+
+.import-history {
+    padding: 0.75rem 1rem 1.5rem;
+    max-width: 1100px;
+    color: var(--bs-body-color, #212529);
+}
+
+.import-history__title {
+    font-size: 1.25rem;
+    margin: 0 0 0.25rem;
+}
+
+.import-history__subtitle,
+.import-history__path,
+.import-history__hint {
+    color: var(--bs-secondary-color, #6c757d);
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.import-history__section {
+    margin-top: 1.25rem;
+}
+
+.import-history__section h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+}
+
+.import-history__table-wrap {
+    overflow: auto;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 4px;
+    background: var(--bs-body-bg, #fff);
+}
+
+.import-history__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.import-history__table th,
+.import-history__table td {
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    padding: 0.35rem 0.5rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.import-history__table th {
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    position: sticky;
+    top: 0;
+}
+
+.import-history__row--fail td:nth-child(3),
+.import-history__row--anomaly {
+    background: #ffe8e8;
+}
+
+.import-history__compare-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.import-history__compare-bar label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+}
+
+.import-history__compare-bar select {
+    min-width: 12rem;
+    padding: 0.25rem 0.4rem;
+}
+
+.import-history__btn {
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--bs-border-color, #adb5bd);
+    border-radius: 4px;
+    background: var(--bs-primary, #0d6efd);
+    color: #fff;
+    cursor: pointer;
+}
+
+.import-history__empty {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px dashed var(--bs-border-color, #adb5bd);
+    border-radius: 4px;
+}
+
+.import-history__ok {
+    color: #0a7a2f;
+}
+
+.import-history__anomalies {
+    margin: 0.25rem 0 0 1.1rem;
+}

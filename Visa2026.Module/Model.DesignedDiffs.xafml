@@ -36,6 +36,7 @@
       <Item Id="Operations" Caption="Operations" ImageName="BO_Task" IsNewNode="True">
         <Items>
           <Item Id="StateNotifications" Caption="State notifications" ViewId="BoStateNotificationInboxHost_DetailView" ImageName="BO_Validation" IsNewNode="True" />
+          <Item Id="ImportReimportHistory" Caption="Import reimport history" ViewId="ImportReimportHistoryHost_DetailView" ImageName="BO_Report" IsNewNode="True" />
         </Items>
       </Item>
       <Item Id="Application" Caption="Applications"><Items><Item Id="Application_DirectMigration" Caption="Applications (direct migration)"><Items><Item Id="ApplicationItem_DirectMigration" Caption="Application items (migration)" /></Items></Item><Item Id="Application_ViaMinistries" Caption="Applications (via ministry)"><Items><Item Id="ApplicationItem_ViaMinistries" Caption="Application items (ministry)" /></Items></Item></Items></Item></Items>
@@ -57,6 +58,20 @@
           <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
             <LayoutGroup Id="BoStateNotificationInboxHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
               <LayoutItem Id="InboxUi" ViewItem="InboxUi" ShowCaption="False" RelativeSize="100" Index="0" IsNewNode="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <DetailView Id="ImportReimportHistoryHost_DetailView" Caption="Import reimport history" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="import-history-detail" IsNewNode="True">
+      <Items>
+        <PropertyEditor Id="HistoryUi" PropertyName="HistoryUi" ShowCaption="False" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" Direction="Vertical" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+            <LayoutGroup Id="ImportReimportHistoryHost" ShowCaption="False" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
+              <LayoutItem Id="HistoryUi" ViewItem="HistoryUi" ShowCaption="False" RelativeSize="100" Index="0" IsNewNode="True" />
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>

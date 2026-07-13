@@ -58,6 +58,8 @@ Shared repo root: `_lib/Get-RepoRoot.ps1`. Dot-source **after** `param()`, not i
 | Partial reimport ApplicationItems (dev only) | `reimport/ApplicationItems.ps1` | SQL cleanup → rebuild parent id-maps → in-process import → corrections. **Procedure:** [import-practices.md § Partial reimport](./import-practices.md#partial-reimport-dev-implementation-only) |
 | Çalik tenant catalogs | `catalogs/generate/*.ps1`, `catalogs/deploy/*.ps1` | See README in that folder |
 | Patch ApprovalLegProfile | `patch/Application-ApprovalLegProfile.ps1` | After Application import |
+| Reimport history archive | Auto in `import/OnPrem-Sync.ps1` → `history\runs\<RunId>\` | Manual: `Archive-OnPremImportRun.ps1` |
+| Compare two reimports | `Compare-OnPremImportRuns.ps1` | Dashboard `history\index.html` + compare HTML; `-FailOnAnomaly` |
 
 Per-entity import without a dedicated script: `dotnet run --project Visa2026.DataImporter -- --import-visa2014 --entity <BO> …`
 

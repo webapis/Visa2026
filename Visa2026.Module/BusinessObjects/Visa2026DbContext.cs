@@ -121,6 +121,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VisaTransferStatus> VisaTransferStatus { get; set; }
         public DbSet<VisaCancelExtStatus> VisaCancelExtStatus { get; set; }
         public DbSet<VisaCancellationStatus> VisaCancellationStatus { get; set; }
+        public DbSet<ForeignWorkerMaglumat> ForeignWorkerMaglumat { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -240,6 +241,11 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(c => c.Passport).WithMany().HasForeignKey(c => c.PassportID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.CurrentState).WithMany().HasForeignKey(c => c.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(c => c.CheckOutState).WithMany().HasForeignKey(c => c.CheckOutStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<ForeignWorkerMaglumat>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("View_ForeignWorkerMaglumat");
             });
 
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {

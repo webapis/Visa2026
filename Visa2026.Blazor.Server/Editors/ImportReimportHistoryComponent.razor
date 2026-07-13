@@ -1,0 +1,222 @@
+@namespace Visa2026.Blazor.Server.Editors
+@using Visa2026.Module.Services.ImportHistory
+
+<div class="import-history">
+    <header class="import-history__header">
+        <h2 class="import-history__title">Import reimport history</h2>
+        <p class="import-history__subtitle">
+            Archived on-prem Import runs (hard-delete reimport friendly). Compare target DbCounts between two RunIds.
+        </p>
+        @if (!string.IsNullOrWhiteSpace(_rootPath))
+        {
+            <p class="import-history__path"><code>@_rootPath</code></p>
+        }
+    </header>
+
+    @if (!_available)
+    {
+        <div class="import-history__empty">
+            <p>@_unavailableReason</p>
+            <p>Configure <code>ImportHistory:RootPath</code> (or set <code>DeploymentEnvironment:Slot</code> to Demo/Staging/Production) and ensure the app pool can read the sync-host <code>history</code> folder.</p>
+        </div>
+    }
+    else if (_runs.Count == 0)
+    {
+        <div class="import-history__empty">
+            <p>No archived runs yet. Finish an Import (<code>OnPrem-Sync.ps1</code>) or run <code>Archive-OnPremImportRun.ps1</code>.</p>
+        </div>
+    }
+    else
+    {
+        <section class="import-history__section">
+            <h3>Archived runs</h3>
+            <div class="import-history__table-wrap">
+                <table class="import-history__table">
+                    <thead>
+                        <tr>
+                            <th>RunId</th>
+                            <th>Profile</th>
+                            <th>Overall</th>
+                            <th>Waves OK</th>
+                            <th>Fail</th>
+                            <th>Elapsed</th>
+                            <th>CompletedUtc</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var r in _runs)
+                        {
+                            <tr class="@(r.OverallStatus == "Failed" ? "import-history__row--fail" : null)">
+                                <td>@r.RunId</td>
+                                <td>@r.Profile</td>
+                                <td>@r.OverallStatus</td>
+                                <td>@r.WavesCompleted</td>
+                                <td>@r.WavesFailed</td>
+                                <td>@FormatElapsed(r.ElapsedSeconds)</td>
+                                <td>@r.CompletedUtc</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="import-history__section import-history__compare-bar">
+            <label>
+                Left
+                <select @bind="_leftRunId">
+                    @foreach (var r in _runs)
+                    {
+                        <option value="@r.RunId">@r.RunId</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Right
+                <select @bind="_rightRunId">
+                    @foreach (var r in _runs)
+                    {
+                        <option value="@r.RunId">@r.RunId</option>
+                    }
+                </select>
+            </label>
+            <button type="button" class="import-history__btn" @onclick="RunCompare">Compare</button>
+        </section>
+
+        @if (_compare != null)
+        {
+            <section class="import-history__section">
+                <h3>Anomalies (@_compare.Anomalies.Count)</h3>
+                <p class="import-history__hint">
+                    Thresholds: |delta| &gt;= @_compare.AbsoluteCountThreshold and |delta%| &gt;= @_compare.RelativePercentThreshold%
+                    (Left @_compare.LeftRunId → Right @_compare.RightRunId)
+                </p>
+                @if (_compare.Anomalies.Count == 0)
+                {
+                    <p class="import-history__ok">No anomalies under current thresholds.</p>
+                }
+                else
+                {
+                    <ul class="import-history__anomalies">
+                        @foreach (var a in _compare.Anomalies)
+                        {
+                            <li>@a</li>
+                        }
+                    </ul>
+                }
+            </section>
+
+            <section class="import-history__section">
+                <h3>Target DB counts</h3>
+                <div class="import-history__table-wrap">
+                    <table class="import-history__table">
+                        <thead>
+                            <tr>
+                                <th>BO</th>
+                                <th>Left</th>
+                                <th>Right</th>
+                                <th>Delta</th>
+                                <th>|Delta|%</th>
+                                <th>Flag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in _compare.BoRows)
+                            {
+                                <tr class="@(row.Anomaly ? "import-history__row--anomaly" : null)">
+                                    <td>@row.BO</td>
+                                    <td>@row.Left</td>
+                                    <td>@row.Right</td>
+                                    <td>@row.Delta</td>
+                                    <td>@(row.AbsPct.HasValue ? $"{row.AbsPct}%" : "")</td>
+                                    <td>@(row.Anomaly ? "ANOMALY" : "")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="import-history__section">
+                <h3>Waves</h3>
+                <div class="import-history__table-wrap">
+                    <table class="import-history__table">
+                        <thead>
+                            <tr>
+                                <th>Wave</th>
+                                <th>Left</th>
+                                <th>Right</th>
+                                <th>Fail L</th>
+                                <th>Fail R</th>
+                                <th>Exit L</th>
+                                <th>Exit R</th>
+                                <th>Flag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in _compare.WaveRows)
+                            {
+                                <tr class="@(row.Regressed ? "import-history__row--anomaly" : null)">
+                                    <td>@row.Wave</td>
+                                    <td>@row.LeftStatus</td>
+                                    <td>@row.RightStatus</td>
+                                    <td>@row.LeftFailed</td>
+                                    <td>@row.RightFailed</td>
+                                    <td>@row.LeftExit</td>
+                                    <td>@row.RightExit</td>
+                                    <td>@(row.Regressed ? "REGRESSED" : "")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+        else if (_runs.Count < 2)
+        {
+            <p class="import-history__hint">Need at least two archived runs to compare.</p>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public IImportReimportHistoryReader? Reader { get; set; }
+
+    private IReadOnlyList<ImportReimportRunSummary> _runs = Array.Empty<ImportReimportRunSummary>();
+    private ImportReimportCompareResult? _compare;
+    private string _leftRunId = "";
+    private string _rightRunId = "";
+    private bool _available;
+    private string? _unavailableReason;
+    private string? _rootPath;
+
+    protected override void OnParametersSet()
+    {
+        _available = Reader?.IsAvailable == true;
+        _unavailableReason = Reader?.UnavailableReason;
+        _rootPath = Reader?.ResolvedRootPath;
+        _runs = Reader?.ListRuns() ?? Array.Empty<ImportReimportRunSummary>();
+
+        if (_runs.Count >= 1 && string.IsNullOrEmpty(_rightRunId))
+            _rightRunId = _runs[0].RunId;
+        if (_runs.Count >= 2 && string.IsNullOrEmpty(_leftRunId))
+            _leftRunId = _runs[1].RunId;
+        else if (_runs.Count == 1 && string.IsNullOrEmpty(_leftRunId))
+            _leftRunId = _runs[0].RunId;
+    }
+
+    private void RunCompare()
+    {
+        _compare = Reader?.Compare(_leftRunId, _rightRunId);
+    }
+
+    private static string FormatElapsed(int? seconds)
+    {
+        if (seconds is null)
+            return "";
+        var m = seconds.Value / 60;
+        var s = seconds.Value % 60;
+        return $"{m:00}:{s:00}";
+    }
+}

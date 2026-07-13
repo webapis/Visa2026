@@ -116,6 +116,14 @@ $config = @{
         Slot = $ctx.Profile
         ShowOnLoginPage = $true
     }
+    ImportHistory = @{
+        # App pool identity must be able to read this folder (sync-host history archives).
+        RootPath = switch ($ctx.Profile) {
+            'Demo' { 'C:\visa2026-sync-demo\history' }
+            'Staging' { 'C:\visa2026-sync-staging\history' }
+            default { 'C:\visa2026-sync\history' }
+        }
+    }
     MaglumatCsvExport = @{
         ApiKey = if ($envMap.ContainsKey("MAGLUMAT_CSV_API_KEY")) { $envMap["MAGLUMAT_CSV_API_KEY"] } else { "" }
     }

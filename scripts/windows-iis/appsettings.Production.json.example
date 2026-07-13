@@ -28,6 +28,9 @@
       "IssuerSigningKey": "CHANGE-THIS-TO-A-LONG-RANDOM-SECRET-32-CHARS-MIN"
     }
   },
+  "MaglumatCsvExport": {
+    "ApiKey": "CHANGE-ME-LONG-RANDOM-MAGLUMAT-KEY"
+  },
   "DevExpress": {
     "ExpressApp": {
       "Languages": "en-US;tr-TR;tk-TM;ru-RU",
@@ -84,5 +87,12 @@
         ]
       }
     }
+  },
+  "DeploymentEnvironment": {
+    "Slot": "Production",
+    "ShowOnLoginPage": true
+  },
+  "ImportHistory": {
+    "RootPath": "C:\\visa2026-sync\\history"
   }
 }

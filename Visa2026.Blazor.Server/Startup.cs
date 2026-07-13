@@ -25,6 +25,8 @@ using Visa2026.Blazor.Server.Hubs;
 using Visa2026.Blazor.Server.Middleware;
 using Visa2026.Module.Services.RuntimeLogging;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services.ImportHistory;
+using Visa2026.Blazor.Server.Services.ImportHistory;
 
 namespace Visa2026.Blazor.Server
 {
@@ -235,6 +237,8 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<IBoStateNotificationSummaryService, BoStateNotificationPrototypeSummaryService>();
             services.AddScoped<IUserFeedbackSubmitService, UserFeedbackSubmitService>();
             services.AddSingleton<BoStateNotificationNavigationHelper>();
+            services.Configure<ImportHistoryOptions>(Configuration.GetSection(ImportHistoryOptions.SectionName));
+            services.AddSingleton<IImportReimportHistoryReader, ImportReimportHistoryReader>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<PersonDocumentCopyPdfMerger>();
             services.AddScoped<HeaderDocumentCopyPdfMerger>();

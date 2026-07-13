@@ -126,13 +126,18 @@ Do **not** use `reimport/` for staging or production cutover.
 | Duplicate employee Persons (bootstrap + supplement twins, on-prem prod) | `Repair-DuplicateEmployees.ps1` | `cleanup/DuplicateEmployeesByIdentity.sql` (default `-Scope BootstrapSupplement`; preview then `-Apply -UpdateIdMap -PersonIdMapPath …`) |
 | Duplicate City by NameTm (null vs set Region, on-prem prod) | `Repair-DuplicateCities.ps1` | `cleanup/DuplicateCitiesByNameTm.sql` (default `-Scope NullVsSetRegion`; preview `@Apply=0`, then `-Apply`) |
 
-### Reconcile / live Import status
+### Reconcile / live Import status / reimport history
 
 | Task | Script |
 |------|--------|
 | Live **wave** table from `sync-run-status.json` | `Watch-OnPremSyncRun.ps1` (`-Profile Demo\|Production -ViaSsh -ClearScreen`) |
 | Live **import** table (waves + Δ + target DB counts) | `Watch-OnPremImportLive.ps1` (`-Profile Demo -ViaSsh -ClearScreen`) |
+| **Archive** current Import run (status + DbCounts) | `Archive-OnPremImportRun.ps1` (`-Profile Demo`) — also auto-run at end of `OnPrem-Sync.ps1` |
+| **Compare** two reimport archives (anomaly Δ) | `Compare-OnPremImportRuns.ps1` (`-Profile Demo` [-Left] [-Right] [-FailOnAnomaly]) |
 | Local / on-prem legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
+
+**Reimport history dashboard:** `<SyncHostRoot>\history\index.html` (immutable `history\runs\<RunId>\`: `run-status.json`, `db-counts.json`, `meta.json`).  
+**In-app (Administrators):** Operations → **Import reimport history** (reads the same folder via `ImportHistory:RootPath` in appsettings; app-pool identity needs read ACL on `history\`).
 
 Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md).
 

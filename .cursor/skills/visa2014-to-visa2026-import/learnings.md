@@ -1248,3 +1248,72 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Removed**: `--sync-visa2014` / `--sync-full` / `--sync-since` / `--sync-state-dir` / `--no-soft-delete-sync`; `Visa2014SyncCommand` + StateStore/IdMapLoader/RowFilter; `RunSyncAsync` on OData importers; soft-delete sync query; Sync-only PS1s (Register task, Compare/Export/Watch SyncState, OnPremSyncState lib); `LegacySyncDashboard` (Module + Blazor); skill folder `visa2026-onprem-legacy-sync`.
 - **Kept**: `OnPrem-Sync.ps1` Import-only; `--import-visa2014`; lookup preflight; `Visa2014SyncPayloadFkHelper`; Import progress sidecars on `Visa2014SyncUpsertHelper`; host roots `C:\visa2026-sync*`.
 - **Ops**: disable Task Scheduler `Visa2026-OnPrem-LegacySync` on `.25` manually if still registered.
+
+### 2026-07-13 — Demo hard wipe + reimport blocked by lookup preflight
+
+- **Phase**: end-to-end (on-prem Demo wipe + Import)
+- **Outcome**: wipe/seed success; Import **not started** (preflight exit 2)
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` · sync host `C:\visa2026-sync-demo` · legacy `10.100.128.15` / `VISA2015`
+- **Wipe**: DROP+CREATE `Visa2026DbDemo` (sqlcmd `-E -C`); cleared id-maps + `{}` stubs; `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate`; LoginPage HTTP 200; redeployed DataImporter (post delta-Sync removal)
+- **Import**: `Run-OnPremSyncOnServer.ps1 -Profile Demo` stopped at lookup preflight — **30 blocking** gaps
+- **Blockers**: CheckPoint sampleQuery syntax (`CheckPoint` reserved); CityByName ~12 cities on Application/ApplicationItem (encoding/normalize); City `(null)` x2; Region free-text x3 (AoR/Lodging)
+- **Person..EPH Phase B**: OK in preflight
+- **Next**: lookup resolution for CityByName (+ fix CheckPoint brackets on live YAML) then re-run preflight; or user-approved `-SkipLookupPreflight` (Application waves will still hit CityByName)
+
+### 2026-07-13 — Demo preflight fixed (CityByName + CheckPoint); Import started
+
+- **Phase**: end-to-end (Demo after hard wipe)
+- **Outcome**: preflight **exit 0**; Import **Running** (RunId `20260712-205532`, wave Person)
+- **Fixes**:
+  1. CheckPoint sampleQuery: `pia.[CheckPoint]` (reserved word)
+  2. CityByName: `identityPassThrough` + city.json NameTm identity enrich in `Visa2014LookupTranslator.Load` + fold-match targets; Application city aliases in YAML
+  3. City/Region: `unmappedPolicy: allow_null` for skip-row free-text/null city gaps (still skipped at import)
+  4. City sampleQuery keeps `dbo.[SäherEtrap]` (ASCII `SeherEtrap` is invalid on live VISA2015)
+- **Deploy**: republished DI + YAML + `LookupCatalogs/city.json` to `C:\visa2026-sync-demo`
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; log `logs\sync-run-20260712-205532.log` / wrap `demo-import-wrap-20260712-205531`
+
+### 2026-07-13 â€” Demo Import restart after orphaned Person wave
+
+- **Phase**: end-to-end (Demo Import restart)
+- **Outcome**: **success** (restart); prior run 20260712-205532 was **dead/orphaned**, not slow
+- **Environment**: 10.100.128.25 / Visa2026DbDemo Â· sync host C:\visa2026-sync-demo Â· legacy 10.100.128.15 / VISA2015
+- **Prior failure**: RunId 20260712-205532 â€” DI logged headless host on :5012 then stopped (~17s); no Progress lines; People=0; status stuck Overall=Running; DataImporter: alive=False; sync-run log never written. Watch elapsed time was stale status, not slow Person.
+- **Restart**: marked stale status Failed; launched wrap via `Win32_Process.Create` (survives SSH); `Run-OnPremSyncOnServer.ps1 -Profile Demo -SkipTenantCatalogGeneration -SkipLookupPreflight`
+- **New run**: RunId `20260712-211301` â€” Person **Posted 3303 / Failed 0** (~1 min); People=3303; advanced to Passport; DI alive
+- **Ops tip**: prefer `Win32_Process.Create` or equivalent detach for Demo Import on .25; do not trust Watch `Running` alone â€” check `alive` + People delta + Progress lines
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; wrap `logs\demo-import-wrap-20260712-211259.log`; sync-run `logs\sync-run-20260712-211300.log`
+
+
+### 2026-07-13 â€” Demo Education Failed (54 incomplete payload); catalogs gap; resume OK
+
+- **Phase**: end-to-end (Demo Import after wipe)
+- **Outcome**: Education **Failed** exit 1 (54 incomplete Institution/Specialty); after catalog refresh **Completed** Failed=0 (Posted 54 catch-up)
+- **Environment**: `Visa2026DbDemo` / live `10.100.128.15` VISA2015
+- **Symptom**: Person/Passport/Visa OK; Education 3115 posted / 54 failed; Overall Failed (stop-on-failure)
+- **Cause**: live Education labels ahead of Demo tenant catalogs (~52 Institution + ~32 Specialty exact gaps). Preflight Education `UnmappedLookupCount=0` because `identityPassThrough` â€” does not prove ObjectSpace catalog rows exist.
+- **Fix**: regenerated `education-institution*.json` / `specialty*.json` from live DISTINCT (~1507 / ~1085); tenant manifest **37â†’38**; disk overlay `C:\inetpub\visa2026-demo\LookupCatalogs\tenant\` + `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate`; resume `-StartAt Education`
+- **Resume**: RunId `20260712-212802` â€” Education Posted 54 / already 3115 / Failed 0; Educations=3169; continued to EPH then AddressOfResidence
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`
+
+
+### 2026-07-13 â€” Import reimport history archive + compare dashboard
+
+- **Phase**: tooling (on-prem Import ops)
+- **Outcome**: shipped archive + HTML index + compare CLI
+- **Artifacts**:
+  - `scripts/visa2014-migration/_lib/OnPremImportRunArchive.ps1`
+  - `Archive-OnPremImportRun.ps1` / `Compare-OnPremImportRuns.ps1`
+  - `OnPrem-Sync.ps1` archives on Complete / wave-fail / preflight-fail
+  - Dashboard: `<SyncHostRoot>\history\index.html`; runs under `history\runs\<RunId>\`
+- **Demo**: archived RunId `20260712-212802` (current completed reimport); need a second archive before compare is meaningful
+- **Note**: Import-only (hard-delete reimport friendly); not delta Sync
+
+
+### 2026-07-13 ? Import reimport history in XAF Navigation (Administrators)
+
+- **Phase**: tooling (on-prem Import ops UI)
+- **Outcome**: Operations ? Import reimport history (non-persistent host + Blazor editor)
+- **Data**: reads `history\runs\<RunId>\*.json` via `ImportHistory:RootPath` (defaults from `DeploymentEnvironment:Slot`)
+- **Security**: deny Users type/nav; Administrators via `IsAdministrative`
+- **Ops**: app pool must read `C:\visa2026-sync*\history`; `Configure-Visa2026Production.ps1` writes ImportHistory.RootPath per slot
+

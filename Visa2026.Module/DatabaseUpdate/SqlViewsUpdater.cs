@@ -21,8 +21,196 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewVisaTransferStatus();
             CreateViewVisaCancelExtStatus();
             CreateViewVisaCancellationStatus();
+            CreateViewForeignWorkerMaglumat();
             CreateFunctions();
             CreateFunctionRegistrationState();
+        }
+
+        /// <summary>
+        /// One row per non-archived person with a current WorkPermitItem (latest StartDate, then ID).
+        /// Mirrors PersonCurrentItems for passport/visa/education/address; MAGLUMAT Excel export source.
+        /// </summary>
+        private void CreateViewForeignWorkerMaglumat()
+        {
+            ExecuteNonQueryCommand(@"
+                CREATE OR ALTER VIEW [dbo].[View_ForeignWorkerMaglumat] AS
+                SELECT
+                    cur_wp.ID,
+                    p.ID AS PersonID,
+                    CONCAT_WS(N' ',
+                        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+                        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+                        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+                    ) AS FullName,
+                    p.DateOfBirth,
+                    c.Code AS NationalityCode,
+                    COALESCE(snap_pp.PassportNumber, cur_pp.PassportNumber) AS PassportNumber,
+                    COALESCE(snap_pp.ExpirationDate, cur_pp.ExpirationDate) AS PassportExpirationDate,
+                    cur_edu.EducationLevelTm,
+                    pos.NameTm AS PositionNameTm,
+                    cur_addr.ResidenceAddress,
+                    cur_wp.WorkPermitNumber,
+                    cur_wp.StartDate AS WorkPermitStartDate,
+                    cur_wp.ExpirationDate AS WorkPermitExpirationDate,
+                    CAST(ISNULL(cur_wp.IsCancelled, 0) AS bit) AS WorkPermitIsCancelled,
+                    CAST(CASE
+                        WHEN ISNULL(cur_wp.IsCancelled, 0) = 0
+                         AND CAST(cur_wp.StartDate AS date) <= CAST(GETDATE() AS date)
+                         AND CAST(cur_wp.ExpirationDate AS date) >= CAST(GETDATE() AS date)
+                        THEN 1 ELSE 0
+                    END AS bit) AS IsValid,
+                    cur_visa.VisaNumber,
+                    cur_visa.StartDate AS VisaStartDate,
+                    cur_visa.ExpirationDate AS VisaExpirationDate,
+                    CAST(NULL AS nvarchar(max)) AS Remarks,
+                    -- Multiline blocks for Excel parity (dd.MM.yyyy)
+                    NULLIF(LTRIM(RTRIM(CONCAT(
+                        ISNULL(CONVERT(varchar(10), p.DateOfBirth, 104), N''),
+                        CASE
+                            WHEN p.DateOfBirth IS NOT NULL AND NULLIF(LTRIM(RTRIM(c.Code)), N'') IS NOT NULL
+                                THEN CHAR(13) + CHAR(10)
+                            ELSE N''
+                        END,
+                        ISNULL(c.Code, N'')
+                    ))), N'') AS BirthAndNationality,
+                    NULLIF(LTRIM(RTRIM(CONCAT(
+                        ISNULL(COALESCE(snap_pp.PassportNumber, cur_pp.PassportNumber), N''),
+                        CASE
+                            WHEN COALESCE(snap_pp.PassportNumber, cur_pp.PassportNumber) IS NOT NULL
+                             AND COALESCE(snap_pp.ExpirationDate, cur_pp.ExpirationDate) IS NOT NULL
+                                THEN CHAR(13) + CHAR(10)
+                            ELSE N''
+                        END,
+                        ISNULL(CONVERT(varchar(10), COALESCE(snap_pp.ExpirationDate, cur_pp.ExpirationDate), 104), N'')
+                    ))), N'') AS PassportBlock,
+                    NULLIF(LTRIM(RTRIM(CONCAT(
+                        ISNULL(cur_wp.WorkPermitNumber, N''),
+                        CASE
+                            WHEN NULLIF(LTRIM(RTRIM(cur_wp.WorkPermitNumber)), N'') IS NOT NULL
+                                THEN CHAR(13) + CHAR(10)
+                            ELSE N''
+                        END,
+                        ISNULL(CONVERT(varchar(10), cur_wp.StartDate, 104), N''),
+                        CASE
+                            WHEN cur_wp.StartDate IS NOT NULL AND cur_wp.ExpirationDate IS NOT NULL
+                                THEN CHAR(13) + CHAR(10)
+                            WHEN cur_wp.ExpirationDate IS NOT NULL
+                                THEN N''
+                            ELSE N''
+                        END,
+                        ISNULL(CONVERT(varchar(10), cur_wp.ExpirationDate, 104), N'')
+                    ))), N'') AS PermitBlock,
+                    NULLIF(LTRIM(RTRIM(CONCAT(
+                        ISNULL(cur_visa.VisaNumber, N''),
+                        CASE
+                            WHEN NULLIF(LTRIM(RTRIM(cur_visa.VisaNumber)), N'') IS NOT NULL
+                             AND cur_visa.StartDate IS NOT NULL
+                                THEN CHAR(13) + CHAR(10)
+                            ELSE N''
+                        END,
+                        ISNULL(CONVERT(varchar(10), cur_visa.StartDate, 104), N''),
+                        CASE
+                            WHEN cur_visa.StartDate IS NOT NULL AND cur_visa.ExpirationDate IS NOT NULL
+                                THEN CHAR(13) + CHAR(10)
+                            ELSE N''
+                        END,
+                        ISNULL(CONVERT(varchar(10), cur_visa.ExpirationDate, 104), N'')
+                    ))), N'') AS VisaBlock
+                FROM People p
+                -- Live rows in this DB use GCRecord = 0 (import/default); classic XAF soft-delete uses NULL.
+                LEFT JOIN Countries c ON p.NationalityID = c.ID AND ISNULL(c.GCRecord, 0) = 0
+                -- CROSS APPLY: only people with a current WorkPermitItem (guarantees non-null ID for EF key).
+                CROSS APPLY (
+                    SELECT TOP 1
+                        wpi.ID,
+                        wpi.PassportID,
+                        wpi.CurrentPositionHistoryID,
+                        wpi.WorkPermitNumber,
+                        wpi.StartDate,
+                        wpi.ExpirationDate,
+                        wpi.IsCancelled
+                    FROM WorkPermitItems wpi
+                    WHERE wpi.PersonID = p.ID
+                      AND ISNULL(wpi.GCRecord, 0) = 0
+                      AND wpi.StartDate IS NOT NULL
+                      AND CAST(wpi.StartDate AS date) > CAST('0001-01-01' AS date)
+                    ORDER BY wpi.StartDate DESC, wpi.ID DESC
+                ) cur_wp
+                LEFT JOIN Passports snap_pp
+                    ON snap_pp.ID = cur_wp.PassportID AND ISNULL(snap_pp.GCRecord, 0) = 0
+                OUTER APPLY (
+                    SELECT TOP 1 pp.PassportNumber, pp.ExpirationDate
+                    FROM Passports pp
+                    WHERE pp.PersonID = p.ID
+                      AND ISNULL(pp.GCRecord, 0) = 0
+                      AND pp.IssueDate IS NOT NULL
+                    ORDER BY pp.IssueDate DESC, pp.ID DESC
+                ) cur_pp
+                LEFT JOIN EmployeePositionHistories eph
+                    ON eph.ID = cur_wp.CurrentPositionHistoryID AND ISNULL(eph.GCRecord, 0) = 0
+                LEFT JOIN Positions pos
+                    ON pos.ID = eph.PositionID AND ISNULL(pos.GCRecord, 0) = 0
+                OUTER APPLY (
+                    SELECT TOP 1 el.NameTm AS EducationLevelTm
+                    FROM Educations e
+                    LEFT JOIN EducationLevels el ON el.ID = e.EducationLevelID AND ISNULL(el.GCRecord, 0) = 0
+                    WHERE e.PersonID = p.ID
+                      AND ISNULL(e.GCRecord, 0) = 0
+                    ORDER BY TRY_CAST(NULLIF(LTRIM(RTRIM(e.GraduationYear)), N'') AS int) DESC, e.ID DESC
+                ) cur_edu
+                OUTER APPLY (
+                    SELECT TOP 1
+                        CONCAT_WS(N', ',
+                            NULLIF(LTRIM(RTRIM(reg.NameTm)), N''),
+                            NULLIF(LTRIM(RTRIM(cit.NameTm)), N''),
+                            NULLIF(LTRIM(RTRIM(
+                                CASE
+                                    WHEN a.Type = 0 THEN COALESCE(NULLIF(LTRIM(RTRIM(l.FullAddress)), N''), a.FullAddress)
+                                    WHEN a.Type = 1 THEN COALESCE(NULLIF(LTRIM(RTRIM(h.Name)), N''), a.FullAddress)
+                                    WHEN a.Type = 3 THEN COALESCE(NULLIF(LTRIM(RTRIM(hosp.Name)), N''), a.FullAddress)
+                                    WHEN a.Type = 4 THEN COALESCE(NULLIF(LTRIM(RTRIM(osite.FullAddress)), N''), a.FullAddress)
+                                    ELSE a.FullAddress
+                                END
+                            )), N'')
+                        ) AS ResidenceAddress
+                    FROM AddressesOfResidence a
+                    LEFT JOIN Regions reg ON reg.ID = a.RegionID AND ISNULL(reg.GCRecord, 0) = 0
+                    LEFT JOIN Cities cit ON cit.ID = a.CityID AND ISNULL(cit.GCRecord, 0) = 0
+                    LEFT JOIN Lodgings l ON l.ID = a.LodgingID AND ISNULL(l.GCRecord, 0) = 0
+                    LEFT JOIN Hotels h ON h.ID = a.HotelID AND ISNULL(h.GCRecord, 0) = 0
+                    LEFT JOIN Hospitals hosp ON hosp.ID = a.HospitalID AND ISNULL(hosp.GCRecord, 0) = 0
+                    LEFT JOIN OtherSites osite ON osite.ID = a.OtherSiteID AND ISNULL(osite.GCRecord, 0) = 0
+                    WHERE a.PersonID = p.ID
+                      AND ISNULL(a.GCRecord, 0) = 0
+                    ORDER BY
+                        CASE
+                            WHEN a.ExpirationDate IS NULL
+                              OR CAST(a.ExpirationDate AS date) >= CAST(GETDATE() AS date) THEN 0
+                            ELSE 1
+                        END,
+                        CASE
+                            WHEN a.ExpirationDate IS NULL
+                              OR CAST(a.ExpirationDate AS date) >= CAST(GETDATE() AS date)
+                                THEN ISNULL(a.ExpirationDate, CAST('9999-12-31' AS datetime2))
+                            ELSE ISNULL(a.ExpirationDate, CAST('0001-01-01' AS datetime2))
+                        END DESC,
+                        a.ID DESC
+                ) cur_addr
+                OUTER APPLY (
+                    SELECT TOP 1 v.VisaNumber, v.StartDate, v.ExpirationDate
+                    FROM Passports pp
+                    INNER JOIN Visas v ON v.PassportID = pp.ID AND ISNULL(v.GCRecord, 0) = 0
+                    WHERE pp.PersonID = p.ID
+                      AND ISNULL(pp.GCRecord, 0) = 0
+                      AND ISNULL(v.IsCancelled, 0) = 0
+                      AND v.StartDate IS NOT NULL
+                      AND CAST(v.StartDate AS date) > CAST('0001-01-01' AS date)
+                      AND CAST(v.StartDate AS date) <= CAST(GETDATE() AS date)
+                    ORDER BY v.StartDate DESC, v.IssueDate DESC, v.ID DESC
+                ) cur_visa
+                WHERE ISNULL(p.GCRecord, 0) = 0
+                  AND ISNULL(p.IsArchived, 0) = 0
+            ", false); // do not swallow errors — stale Maglumat view causes SqlNullValueException on null ID
         }
 
         private void CreateViewVisaExtensionTracking()

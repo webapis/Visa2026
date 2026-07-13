@@ -49,6 +49,7 @@ disable-model-invocation: false
 | Import one BO | `dotnet run … --import-visa2014 --entity <BO>` |
 | Resume / full local chain | `import/Run-HeadlessChain.ps1` (`-StartAt`) |
 | **On-prem Demo / Staging / Prod Import** | `import/OnPrem-Sync.ps1` (`-Profile Demo\|Staging\|Production`) · sync host `C:\visa2026-sync*` on `.25` · [ON_PREM_IIS_MIGRATION_RUNBOOK.md](../../../docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md) |
+| **Reimport history / compare** | Auto-archive under `history\runs\<RunId>\` · `Compare-OnPremImportRuns.ps1` · dashboard `history\index.html` · manual `Archive-OnPremImportRun.ps1` |
 | Tenant JSON before Application | `import/Invoke-TenantCatalogGeneration.ps1` |
 | **Lookup resolution** (audit → translate → seed) | [LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md) · `lookup-translations.yaml` (+ company overlay) · `LookupCatalogs/` / tenant JSON |
 | **Lookup preflight** (gate before full Import) | `import/Preflight-LookupAudit.ps1` / `--preflight-visa2014-lookups` |

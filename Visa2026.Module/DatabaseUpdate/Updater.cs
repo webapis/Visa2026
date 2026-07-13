@@ -1039,8 +1039,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
-        /// Application runtime log and state-notification inbox — super administrators only
-        /// (<see cref="PermissionPolicyRole.IsAdministrative"/>). State inbox is a future-release prototype.
+        /// Application runtime log, state-notification inbox, and Import reimport history —
+        /// super administrators only (<see cref="PermissionPolicyRole.IsAdministrative"/>).
         /// </summary>
         static void EnsureAdminOnlyOperationsDeny(PermissionPolicyRole role)
         {
@@ -1049,6 +1049,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             DenyTypeRead<ApplicationRuntimeLog>(role);
             DenyTypeRead<BoStateNotificationInboxHost>(role);
+            DenyTypeRead<ImportReimportHistoryHost>(role);
 
             EnsureNavigationPermission(
                 role,
@@ -1057,6 +1058,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(
                 role,
                 @"Application/NavigationItems/Items/Operations/Items/StateNotifications",
+                SecurityPermissionState.Deny);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Operations/Items/ImportReimportHistory",
                 SecurityPermissionState.Deny);
         }
 

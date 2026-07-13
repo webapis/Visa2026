@@ -663,16 +663,18 @@ catalogs:
       - legacy: DZ
         target: DZ
     identityPassThrough: true
-    unmappedPolicy: block_row
+    unmappedPolicy: allow_null
     notes: |
       Approved 2026-06-27 for AddressOfResidence. mgCode equals Visa2026 LocalizationKey/PdfForm_Code.
       Rows without Region FK use AddressLine prefix inference in transform.
+      allow_null (2026-07-13): free-text AddressLine leftovers that fail region resolve are skipped at import
+      (AoR/Lodging preflight was blocking on Region:<address snippet>).
 
   - targetCatalog: City
     targetMatchProperty: PdfForm_Code
     legacy:
       storage: legacy_lookup_table
-      table: dbo.ŞeherEtrap
+      table: dbo.[ŞäherEtrap]
       column: mgCode
       valueKind: scalar
       sampleQuery: |
@@ -689,20 +691,23 @@ catalogs:
       scope: AddressOfResidence
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
     identityPassThrough: true
-    unmappedPolicy: block_row
-    notes: Primary City resolve on AddressOfResidence rows with ŞeherEtrap.mgCode.
+    unmappedPolicy: allow_null
+    notes: |
+      Primary City resolve on AddressOfResidence rows with ŞäherEtrap.mgCode.
+      allow_null (2026-07-13): City:(null) rows are skipped at import — do not block Demo preflight.
 
   - targetCatalog: CityByName
     targetMatchProperty: NameTm
     legacy:
       storage: legacy_lookup_table
-      table: dbo.ŞeherEtrap
-      column: ŞeherEtrapL
+      table: dbo.[ŞäherEtrap]
+      column: ŞäherEtrapL
       valueKind: scalar
     audit:
       completedAt: 2026-06-27
       scope: AddressOfResidence
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+    identityPassThrough: true
     values:
       - legacy: Asgabat şäheri
         target: Aşgabat şäheri
@@ -716,8 +721,43 @@ catalogs:
         target: Ýolöten etraby
       - legacy: Türkmenbaşy etraby
         target: Türkmenbaşy etraby
+      # Application / ApplicationItem CityByName gaps (Demo preflight 2026-07-13)
+      - legacy: Atamyrat etraby
+        target: Atamyrat etraby
+      - legacy: Atamyrat şäheri
+        target: Atamyrat şäheri
+      - legacy: Baharly etraby
+        target: Baharly etraby
+      - legacy: Balkanabat şäheri
+        target: Balkanabat şäheri
+      - legacy: Beýik Saparmyrat Türkmenbaşy ad. etraby
+        target: Beýik Saparmyrat Türkmenbaşy ad. etraby
+      - legacy: Beyik Saparmyrat Türkmenbasy ad. etraby
+        target: Beýik Saparmyrat Türkmenbaşy ad. etraby
+      - legacy: Döwletli etraby
+        target: Döwletli etraby
+      - legacy: Dowletli etraby
+        target: Döwletli etraby
+      - legacy: Hojambaz etraby
+        target: Hojambaz etraby
+      - legacy: Serdar şäheri
+        target: Serdar şäheri
+      - legacy: Serdarabat etraby
+        target: Serdarabat etraby
+      - legacy: Tejen şäheri
+        target: Tejen şäheri
+      - legacy: Türkmenabat şäheri
+        target: Türkmenabat şäheri
+      - legacy: Turkmenabat şäheri
+        target: Türkmenabat şäheri
+      - legacy: Türkmenbaşy şäheri
+        target: Türkmenbaşy şäheri
+      - legacy: Turkmenbasy şäheri
+        target: Türkmenbaşy şäheri
     unmappedPolicy: block_row
-    notes: Fallback when ŞeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.
+    notes: |
+      Fallback when SeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.
+      identityPassThrough + city.json NameTm enrich (Import/Preflight) resolves Application CityByName.
 
   - targetCatalog: Urgency
     targetMatchProperty: LocalizationKey
@@ -997,7 +1037,7 @@ catalogs:
       sampleQuery: |
         SELECT cp.TitleOfCheckPoint, cp.TitleOfCheckPointL, COUNT(*) cnt
         FROM dbo.PersonInApplication pia
-        JOIN dbo.[CheckPoint] cp ON cp.Oid = pia.CheckPoint
+        JOIN dbo.[CheckPoint] cp ON cp.Oid = pia.[CheckPoint]
         WHERE pia.GCRecord IS NULL
         GROUP BY cp.TitleOfCheckPoint, cp.TitleOfCheckPointL ORDER BY cnt DESC;
     audit:

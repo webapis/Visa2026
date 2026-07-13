@@ -179,7 +179,32 @@ function Resolve-OnPremMigrationLibPath {
     throw "Lib not found: $FileName under $PSScriptRoot\_lib or ..\_lib (sync-host vs repo layout)."
 }
 . (Resolve-OnPremMigrationLibPath 'OnPremSyncRunStatus.ps1')
+. (Resolve-OnPremMigrationLibPath 'OnPremImportRunArchive.ps1')
 $syncStatusRoot = if ($SyncHostRoot) { $SyncHostRoot } else { Join-Path $dataImporterRoot 'legacy/visa2014' }
+
+function Invoke-ArchiveCurrentImportRun {
+    param([string]$Reason = '')
+    $flags = @()
+    if ($DryRun) { $flags += 'DryRun' }
+    if ($SkipLookupPreflight) { $flags += 'SkipLookupPreflight' }
+    if ($SkipTenantCatalogGeneration) { $flags += 'SkipTenantCatalogGeneration' }
+    if ($ContinueOnError) { $flags += 'ContinueOnError' }
+    if ($IncludeFileWaves) { $flags += 'IncludeFileWaves' }
+    if ($StartAt) { $flags += "StartAt=$StartAt" }
+    if ($Reason) { $flags += $Reason }
+    try {
+        Save-OnPremImportRunArchive `
+            -SyncHostRoot $syncStatusRoot `
+            -Profile $Profile `
+            -RunId $stamp `
+            -StartAt $StartAt `
+            -Flags $flags `
+            -Force:$false | Out-Null
+    }
+    catch {
+        Write-Warning "Import run archive failed: $($_.Exception.Message)"
+    }
+}
 
 function Get-MapPath([string]$name) {
     Join-Path $mapRoot "$name.json"
@@ -410,6 +435,7 @@ function Invoke-ImportWave {
         if (-not $ContinueOnError) {
             Write-Host "INF Re-run with -StartAt $WaveName after fixing the issue." -ForegroundColor Yellow
             Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus Failed
+            Invoke-ArchiveCurrentImportRun -Reason "WaveFailed=$WaveName"
             exit $exit
         }
     }
@@ -599,6 +625,7 @@ if (-not $SkipLookupPreflight) {
         Write-Host "INF Report/log: $preflightLog" -ForegroundColor Yellow
         Write-Host "INF Bypass only with -SkipLookupPreflight after an approved exception." -ForegroundColor Yellow
         Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus Failed
+        Invoke-ArchiveCurrentImportRun -Reason 'LookupPreflightFailed'
         exit $preflightExit
     }
     Write-Host "INF Lookup preflight passed." -ForegroundColor Green
@@ -628,6 +655,7 @@ if ($finalRunStatus -and $finalRunStatus.Waves) {
     }
 }
 Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus $(if ($anyFailed) { 'Failed' } else { 'Completed' })
+Invoke-ArchiveCurrentImportRun -Reason $(if ($anyFailed) { 'FinishedWithFailures' } else { 'Finished' })
 
 Write-Host ""
 Invoke-PostImportCorrections -Conn $TargetConnection
@@ -653,5 +681,7 @@ if ($IncludeFileWaves -and -not $DryRun) {
 
 Write-Host "=== On-prem $Profile import waves finished ===" -ForegroundColor Cyan
 Write-Host "INF Live wave status: scripts/visa2014-migration/Watch-OnPremImportLive.ps1 (-Profile $Profile)"
+Write-Host "INF Reimport history: $(Join-Path (Get-OnPremImportRunHistoryRoot -SyncHostRoot $syncStatusRoot) 'index.html')"
+Write-Host "INF Compare reimports: scripts/visa2014-migration/Compare-OnPremImportRuns.ps1 (-Profile $Profile)"
 Write-Host "INF Reconcile counts: scripts/visa2014-migration/Compare-LegacyMigratedCounts.ps1 (-ShowIdMap)"
 Write-Host "INF Officer read-only UAT: $ApiBaseUrl/LoginPage"
