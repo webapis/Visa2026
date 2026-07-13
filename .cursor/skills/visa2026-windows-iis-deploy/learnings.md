@@ -120,3 +120,13 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **HTTP**: `HTTPS_ENABLED` not true in `prod.env` — skipped HTTPS enable (expected).
 - **Smoke**: `http://10.100.128.25/LoginPage` → **200**; `publish-version.txt` **1.0.0.566** / **ee84d49**.
 - **DB**: `--updateDatabase --forceUpdate` on `Visa2026DbProd` (brings schema forward, e.g. `BorderZoneLocation`).
+
+### 2026-07-13 — Demo deploy 1.0.0.568 (HTTP only)
+
+- **Commit**: `d2a83fc7` — Import reimport history XAF nav + Maglumat CSV + education catalog gaps.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate` → publish `1.0.0.568` copied; `HTTPS_ENABLED=false` in `demo.env` (HTTP :8081 only — skip Enable-Visa2026IisHttps).
+- **Binding**: `http/*:8081:`; `ImportHistory:RootPath` = `C:\visa2026-sync-demo\history`.
+- **Issue**: Demo `--forceUpdate` on large `Visa2026DbDemo` ran very long; local SSH deploy hung after copy; app pool left **Stopped** → HTTP **503**.
+- **Fix**: `appcmd start apppool Visa2026-Demo`; smoke `http://10.100.128.25:8081/LoginPage` → **200**.
+- **Prevent**: After long Demo ForceUpdate, confirm pool Started; smoke HTTP not HTTPS for Demo.
+

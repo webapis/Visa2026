@@ -136,8 +136,9 @@ Do **not** use `reimport/` for staging or production cutover.
 | **Compare** two reimport archives (anomaly Δ) | `Compare-OnPremImportRuns.ps1` (`-Profile Demo` [-Left] [-Right] [-FailOnAnomaly]) |
 | Local / on-prem legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
 
-**Reimport history dashboard:** `<SyncHostRoot>\history\index.html` (immutable `history\runs\<RunId>\`: `run-status.json`, `db-counts.json`, `meta.json`).  
-**In-app (Administrators):** Operations → **Import reimport history** (reads the same folder via `ImportHistory:RootPath` in appsettings; app-pool identity needs read ACL on `history\`).
+**Reimport history dashboard:** `<SyncHostRoot>\history\index.html` (immutable `history\runs\<RunId>\`: `run-status.json`, `db-counts.json`, `file-waves.json`, `file-presence.json`, `meta.json`).  
+**In-app (Administrators):** Operations → **Import reimport history** — scalar DbCounts + **Document copies / file waves** + **file presence** (reads the same folder via `ImportHistory:RootPath`; app-pool identity needs read ACL on `history\`).  
+**File waves:** `OnPrem-Sync.ps1 -IncludeFileWaves` runs [`import/DocumentCopies.ps1`](import/DocumentCopies.ps1) **before** final archive (so file results land in the same RunId).
 
 Procedure: [import-practices.md § Partial reimport](../../.cursor/skills/visa2014-to-visa2026-import/import-practices.md).
 

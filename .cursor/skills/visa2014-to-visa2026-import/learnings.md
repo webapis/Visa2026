@@ -1317,3 +1317,54 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Security**: deny Users type/nav; Administrators via `IsAdministrative`
 - **Ops**: app pool must read `C:\visa2026-sync*\history`; `Configure-Visa2026Production.ps1` writes ImportHistory.RootPath per slot
 
+
+### 2026-07-13 - Archive file waves only after DocumentCopies
+- Reimport history must be finalized after scalar corrections and optional `DocumentCopies.ps1`; archive `file-waves-status.json` plus target file-presence metrics, and force a failed archive before a non-continue file-wave exit.
+### 2026-07-13 — Document copies on Import reimport history (Phase A + gap inventory)
+
+- **Phase**: tooling (archive + XAF history UI)
+- **Archive order**: scalar → postImportCorrections → optional DocumentCopies (`-IncludeFileWaves`) → Complete → Archive
+- **Artifacts per RunId**: `file-waves.json` (Included + Steps), `file-presence.json` (Photo / *Document vs parents), `meta.FileWavesIncluded`
+- **UI**: Operations → Import reimport history sections for file waves + file presence Left/Right
+- **DocumentCopies.ps1 covered today**: Person.Photo, PassportDocument, VisaDocument, EducationDocument, WorkPermitDocument, InvitationDocument, FamilyProofDocument
+- **Gap inventory (Phase B — not added yet)**: only add when `importConfirmed` + importer exists
+  - MedicalRecordDocument (presence metric already; import step not in DocumentCopies.ps1)
+  - RejectionDocument, BorderZoneDocument, AddressOfResidenceDocument, LodgingDocument, ProjectContractDocument, PersonFamilyRelationDocument
+  - ApplicationProgress.MinistryLetterFile (FileData) — separate from DocumentCopies child docs
+  - EducationDocument / VisaDocument tables may be missing on some Demo DBs (PresentCount null soft-fail) until BO/schema registered
+- **Demo backfill**: RunId `20260712-212802` got `file-waves.json` Included=false + live `file-presence.json` (photos/docs mostly 0 without file waves)
+
+
+### 2026-07-13 — Demo hard wipe + reimport with -IncludeFileWaves (started)
+
+- **Phase**: end-to-end (Demo wipe + Import + DocumentCopies)
+- **Outcome**: **started** (in progress)
+- **Wipe**: business tables cleared (People/Apps/docs=0); lookups/templates kept; id-maps cleared under `C:\visa2026-sync-demo\data\id-maps\calik-energi-onprem-demo`
+- **Import**: scheduled task `Visa2026-OnPrem-DemoImportFileWaves` → `Run-OnPremSyncOnServer.ps1 -Profile Demo -IncludeFileWaves -SkipTenantCatalogGeneration` (no ContinueOnError)
+- **RunId**: `20260712-235158` Overall=Running; Person done (~3304 People); Passport Running; DI alive
+- **Disk**: C ~18.6 GB free, E ~17.4 GB free — watch space during file waves (photos/scans)
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; wrap `logs\demo-import-wrap-20260712-235156.log`; sync-run `logs\sync-run-20260712-235158.log`
+- **Expect**: after scalar waves, DocumentCopies.ps1 then archive with `file-waves.json` Included=true + file-presence
+
+
+### 2026-07-13 — Demo Education Failed (5) on IncludeFileWaves reimport; fixed + resumed
+
+- **Run**: `20260712-235158` Failed at Education (Posted 3165 / Failed 5) — stop-on-failure
+- **Cause**: missing catalog rows for composite labels
+  - Institution: `Lizabon s. orta mekdep,CCVD-VCA okuw kursy`
+  - Specialty (1 remaining after institution seed): exact legacy `Speciality.TitleOfSpeciality` via `Education.Spcialty` (Unicode İ/ş/ý/ç/ü)
+- **Fix**: INSERT into Demo `EducationInstitutions` / `Specialties` with `GCRecord=0` (NULL GCRecord insert fails)
+- **Resume**: `-StartAt Education -IncludeFileWaves -SkipLookupPreflight -SkipTenantCatalogGeneration`
+- **Outcome**: Education **Completed** Failed=0 (Posted 1 catch-up / already 3169); Educations=3170; continued to EPH then AddressOfResidence (RunId `20260713-000016`)
+- **Note**: keep exact Unicode from legacy when seeding; ASCII approximations do not resolve
+
+
+### 2026-07-13 — Demo IncludeFileWaves: scalars OK, DocumentCopies Failed (id-map path + LocalDB)
+
+- **Run**: `20260713-000016` Overall=Failed after ApplicationProgress Completed (scalar Fail=0; Person/Passport/Visa Pending due to `-StartAt Education`)
+- **Cause 1**: `DocumentCopies.ps1` on SyncHostRoot used DataImporter default id-map under `tools\DataImporter\legacy\visa2014\id-maps\...` → `Person id-map not found` (maps live at `data\id-maps\calik-energi-onprem-demo\`)
+- **Fix 1**: pass explicit `--id-map` / `--*-id-map` to `$SyncHostRoot\data\id-maps\<LegacySource>\*.json`
+- **Cause 2** (file-waves-only re-run): wrap used wrong env `VISA2026_DEMO_CONNECTION` + `appsettings.json` (LocalDB); correct is `VISA2026_DEMO_SQL_CONNECTION` / `appsettings.Production.json`
+- **Fix 2**: DocumentCopies sets `ConnectionStrings__DefaultConnection` + safe `--target-connection` (same as OnPrem-Sync); Demo file-waves re-run via task with correct CS
+- **Also**: archive history index coerces `ElapsedSeconds` when JSON yields Object[] (avoids `op_Division`)
+- **Outcome**: file-waves re-run in progress — Target SQL=`localhost\SQLEXPRESS`/`Visa2026DbDemo`; Id-map=`...\data\id-maps\...\Person.json`; Person-Photo Running

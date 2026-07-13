@@ -82,6 +82,7 @@ if ($PublishFromRepo) {
 
 $scriptsToCopy = @(
     'OnPrem-Sync.ps1',
+    'DocumentCopies.ps1',
     'Run-OnPremSyncOnServer.ps1',
     'Preflight-LookupAudit.ps1'
 )

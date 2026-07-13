@@ -5,7 +5,7 @@
     <header class="import-history__header">
         <h2 class="import-history__title">Import reimport history</h2>
         <p class="import-history__subtitle">
-            Archived on-prem Import runs (hard-delete reimport friendly). Compare target DbCounts between two RunIds.
+            Archived on-prem Import runs (hard-delete reimport friendly). Compare target DbCounts, document-copy file waves, and file presence between two RunIds.
         </p>
         @if (!string.IsNullOrWhiteSpace(_rootPath))
         {
@@ -39,6 +39,7 @@
                             <th>Overall</th>
                             <th>Waves OK</th>
                             <th>Fail</th>
+                            <th>Files</th>
                             <th>Elapsed</th>
                             <th>CompletedUtc</th>
                         </tr>
@@ -52,6 +53,7 @@
                                 <td>@r.OverallStatus</td>
                                 <td>@r.WavesCompleted</td>
                                 <td>@r.WavesFailed</td>
+                                <td>@(r.FileWavesIncluded == true ? "Yes" : r.FileWavesIncluded == false ? "No" : "?")</td>
                                 <td>@FormatElapsed(r.ElapsedSeconds)</td>
                                 <td>@r.CompletedUtc</td>
                             </tr>
@@ -107,7 +109,7 @@
             </section>
 
             <section class="import-history__section">
-                <h3>Target DB counts</h3>
+                <h3>BO Summary</h3>
                 <div class="import-history__table-wrap">
                     <table class="import-history__table">
                         <thead>
@@ -138,7 +140,7 @@
             </section>
 
             <section class="import-history__section">
-                <h3>Waves</h3>
+                <h3>Wave Comparison</h3>
                 <div class="import-history__table-wrap">
                     <table class="import-history__table">
                         <thead>
@@ -171,10 +173,104 @@
                     </table>
                 </div>
             </section>
-        }
-        else if (_runs.Count < 2)
-        {
-            <p class="import-history__hint">Need at least two archived runs to compare.</p>
+
+            <section class="import-history__section">
+                <h3>Document copies / file waves</h3>
+                @if (!_compare.FileWavesIncludedLeft || !_compare.FileWavesIncludedRight)
+                {
+                    <div class="import-history__empty">
+                        @if (!_compare.FileWavesIncludedLeft)
+                        {
+                            <p>Left <code>@_compare.LeftRunId</code>: file waves not part of this RunId@(!string.IsNullOrWhiteSpace(_compare.FileWavesNoteLeft) ? $" — {_compare.FileWavesNoteLeft}" : ""). Reimport with <code>-IncludeFileWaves</code>.</p>
+                        }
+                        @if (!_compare.FileWavesIncludedRight)
+                        {
+                            <p>Right <code>@_compare.RightRunId</code>: file waves not part of this RunId@(!string.IsNullOrWhiteSpace(_compare.FileWavesNoteRight) ? $" — {_compare.FileWavesNoteRight}" : ""). Reimport with <code>-IncludeFileWaves</code>.</p>
+                        }
+                    </div>
+                }
+                @if (_compare.FileWaveRows.Count == 0)
+                {
+                    <p class="import-history__hint">No file-wave steps archived for the selected runs.</p>
+                }
+                else
+                {
+                    <div class="import-history__table-wrap">
+                        <table class="import-history__table">
+                            <thead>
+                                <tr>
+                                    <th>Step</th>
+                                    <th>Left</th>
+                                    <th>Right</th>
+                                    <th>Exit L</th>
+                                    <th>Exit R</th>
+                                    <th>Posted L</th>
+                                    <th>Posted R</th>
+                                    <th>Flag</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in _compare.FileWaveRows)
+                                {
+                                    <tr class="@(row.Regressed ? "import-history__row--anomaly" : null)">
+                                        <td>@(string.IsNullOrWhiteSpace(row.Name) ? row.Key : row.Name)</td>
+                                        <td>@row.LeftStatus</td>
+                                        <td>@row.RightStatus</td>
+                                        <td>@row.LeftExit</td>
+                                        <td>@row.RightExit</td>
+                                        <td>@row.LeftPosted</td>
+                                        <td>@row.RightPosted</td>
+                                        <td>@(row.Regressed ? "REGRESSED" : "")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+
+            <section class="import-history__section">
+                <h3>File presence</h3>
+                <p class="import-history__hint">Photo / *Document coverage vs parent BO counts (gaps that DbCounts alone miss).</p>
+                @if (_compare.FilePresenceRows.Count == 0)
+                {
+                    <p class="import-history__hint">No <code>file-presence.json</code> in selected archives (re-archive or run a new Import).</p>
+                }
+                else
+                {
+                    <div class="import-history__table-wrap">
+                        <table class="import-history__table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Parent L</th>
+                                    <th>Present L</th>
+                                    <th>Parent R</th>
+                                    <th>Present R</th>
+                                    <th>Δ Present</th>
+                                    <th>|Δ|%</th>
+                                    <th>Flag</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in _compare.FilePresenceRows)
+                                {
+                                    <tr class="@(row.Anomaly ? "import-history__row--anomaly" : null)" title="@row.Notes">
+                                        <td>@row.Metric</td>
+                                        <td>@row.LeftParent</td>
+                                        <td>@row.LeftPresent</td>
+                                        <td>@row.RightParent</td>
+                                        <td>@row.RightPresent</td>
+                                        <td>@row.DeltaPresent</td>
+                                        <td>@(row.AbsPct.HasValue ? $"{row.AbsPct}%" : "")</td>
+                                        <td>@(row.Anomaly ? "ANOMALY" : "")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
         }
     }
 </div>

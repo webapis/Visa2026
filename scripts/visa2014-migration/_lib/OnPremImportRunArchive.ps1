@@ -84,6 +84,68 @@ function Get-OnPremImportTargetDbCounts {
     return , $counts
 }
 
+function Get-OnPremImportFilePresence {
+    param(
+        [ValidateSet('Production', 'Staging', 'Demo')]
+        [string]$Profile = 'Demo'
+    )
+
+    $databaseName = Get-OnPremImportProfileDbName -Profile $Profile
+    $specs = @(
+        @{ Metric='Person.Photo'; Parent='People'; Present='People'; PresentPredicate='[Photo] IS NOT NULL'; Notes='Active people with a photo' },
+        @{ Metric='PassportDocument'; Parent='Passports'; Present='PassportDocuments'; Notes='Document rows compared with active passports' },
+        @{ Metric='VisaDocument'; Parent='Visas'; Present='VisaDocument'; Notes='Document rows compared with active visas' },
+        @{ Metric='EducationDocument'; Parent='Educations'; Present='EducationDocument'; Notes='Document rows compared with active educations' },
+        @{ Metric='WorkPermitDocument'; Parent='WorkPermits'; Present='WorkPermitDocuments'; Notes='Document rows compared with active work permits' },
+        @{ Metric='InvitationDocument'; Parent='Invitations'; Present='InvitationDocuments'; Notes='Document rows compared with active invitations' },
+        @{ Metric='PersonDocument'; Parent='People'; Present='PersonDocuments'; Notes='Family-proof/person document rows compared with active people' },
+        @{ Metric='MedicalRecordDocument'; Parent='MedicalRecords'; Present='MedicalRecordDocuments'; Notes='Document rows compared with active medical records; missing table soft-fails to null' }
+    )
+
+    $sqlParts = @("SET NOCOUNT ON; USE [$databaseName];", 'DECLARE @results TABLE (Metric nvarchar(100), ParentCount int NULL, PresentCount int NULL, Notes nvarchar(300));')
+    foreach ($spec in $specs) {
+        $metric = ([string]$spec.Metric).Replace("'", "''")
+        $parent = [string]$spec.Parent
+        $present = [string]$spec.Present
+        $notes = ([string]$spec.Notes).Replace("'", "''")
+        $presentPredicate = if ($spec.PresentPredicate) { " AND $($spec.PresentPredicate)" } else { '' }
+        $sqlParts += @"
+DECLARE @parent_$($sqlParts.Count) int = NULL, @present_$($sqlParts.Count) int = NULL, @q_$($sqlParts.Count) nvarchar(max);
+IF OBJECT_ID(N'dbo.[$parent]', N'U') IS NOT NULL
+BEGIN
+  SET @q_$($sqlParts.Count) = N'SELECT @out=COUNT(*) FROM dbo.[$parent]' + CASE WHEN COL_LENGTH(N'dbo.$parent', N'GCRecord') IS NOT NULL THEN N' WHERE (GCRecord IS NULL OR GCRecord = 0)' ELSE N'' END;
+  EXEC sp_executesql @q_$($sqlParts.Count), N'@out int OUTPUT', @out=@parent_$($sqlParts.Count) OUTPUT;
+END;
+IF OBJECT_ID(N'dbo.[$present]', N'U') IS NOT NULL
+BEGIN
+  SET @q_$($sqlParts.Count) = N'SELECT @out=COUNT(*) FROM dbo.[$present]' + CASE WHEN COL_LENGTH(N'dbo.$present', N'GCRecord') IS NOT NULL THEN N' WHERE (GCRecord IS NULL OR GCRecord = 0)$presentPredicate' ELSE N'$(if ($presentPredicate) { ' WHERE ' + $presentPredicate.Substring(5) } else { '' })' END;
+  EXEC sp_executesql @q_$($sqlParts.Count), N'@out int OUTPUT', @out=@present_$($sqlParts.Count) OUTPUT;
+END;
+INSERT @results VALUES (N'$metric', @parent_$($sqlParts.Count), @present_$($sqlParts.Count), N'$notes');
+"@
+    }
+    $sqlParts += "SELECT Metric, COALESCE(CONVERT(varchar(20), ParentCount), 'NULL'), COALESCE(CONVERT(varchar(20), PresentCount), 'NULL'), Notes FROM @results ORDER BY Metric;"
+    $rows = @(sqlcmd -S 'localhost\SQLEXPRESS' -E -C -Q ($sqlParts -join ' ') -W -s '|' -h -1 2>$null)
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "File presence query failed for $databaseName."
+        return , @()
+    }
+
+    $metrics = @()
+    foreach ($row in $rows) {
+        if (-not $row -or -not $row.Trim() -or $row -match 'rows affected') { continue }
+        $bits = $row.Trim() -split '\|', 4
+        if ($bits.Count -lt 4) { continue }
+        $parentCount = $null
+        $presentCount = $null
+        $parsed = 0
+        if ($bits[1].Trim() -ne 'NULL' -and [int]::TryParse($bits[1].Trim(), [ref]$parsed)) { $parentCount = $parsed }
+        $parsed = 0
+        if ($bits[2].Trim() -ne 'NULL' -and [int]::TryParse($bits[2].Trim(), [ref]$parsed)) { $presentCount = $parsed }
+        $metrics += [ordered]@{ Metric=$bits[0].Trim(); ParentCount=$parentCount; PresentCount=$presentCount; Notes=$bits[3].Trim() }
+    }
+    return , $metrics
+}
 function Write-OnPremImportJsonFile {
     param(
         [Parameter(Mandatory)][string]$Path,
@@ -93,7 +155,7 @@ function Write-OnPremImportJsonFile {
     if ($parent -and -not (Test-Path -LiteralPath $parent)) {
         New-Item -ItemType Directory -Force -Path $parent | Out-Null
     }
-    $json = $Object | ConvertTo-Json -Depth 10
+    $json = ConvertTo-Json -InputObject $Object -Depth 10 -Compress:$false
     [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding $false))
 }
 
@@ -154,6 +216,43 @@ function Save-OnPremImportRunArchive {
             Counts       = @($dbCounts)
         })
 
+
+    $filePresence = @()
+    if (-not $SkipDbCounts) {
+        try {
+            $filePresence = @(Get-OnPremImportFilePresence -Profile $Profile)
+        }
+        catch {
+            Write-Warning "File presence capture failed: $($_.Exception.Message)"
+        }
+        Write-OnPremImportJsonFile -Path (Join-Path $dir 'file-presence.json') -Object ([ordered]@{
+                Profile      = $Profile
+                DatabaseName = Get-OnPremImportProfileDbName -Profile $Profile
+                CapturedUtc  = (Get-Date).ToUniversalTime().ToString('o')
+                Metrics      = @($filePresence)
+            })
+    }
+
+    $includeFileWavesFlag = @($Flags) -contains 'IncludeFileWaves'
+    $fileWavesStatusPath = Join-Path $SyncHostRoot 'file-waves-status.json'
+    $fileWaves = $null
+    if (Test-Path -LiteralPath $fileWavesStatusPath) {
+        try {
+            $fileWaves = Get-Content -LiteralPath $fileWavesStatusPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        }
+        catch {
+            Write-Warning "File wave status read failed: $($_.Exception.Message)"
+        }
+    }
+    if ($null -eq $fileWaves) {
+        $fileWaves = [ordered]@{
+            Included = [bool]$includeFileWavesFlag
+            Steps    = @()
+            Note     = if ($includeFileWavesFlag) { 'IncludeFileWaves was requested but file-waves-status.json was missing' } else { 'File waves not run for this RunId' }
+        }
+    }
+    Write-OnPremImportJsonFile -Path (Join-Path $dir 'file-waves.json') -Object $fileWaves
+    $fileWavesIncluded = [bool]($includeFileWavesFlag -or ($fileWaves.PSObject.Properties.Name -contains 'Included' -and $fileWaves.Included))
     $waveSummary = @{ Pending = 0; Running = 0; Completed = 0; Failed = 0 }
     if (Get-Command Get-OnPremSyncWaveSummary -ErrorAction SilentlyContinue) {
         $waveSummary = Get-OnPremSyncWaveSummary -RunStatus $status
@@ -189,7 +288,8 @@ function Save-OnPremImportRunArchive {
         CompletedUtc   = $status.CompletedUtc
         ElapsedSeconds = $elapsedSec
         StartAt        = $StartAt
-        Flags          = @($Flags)
+        Flags             = @($Flags)
+        FileWavesIncluded = $fileWavesIncluded
         WaveSummary    = $waveSummary
         SyncHostRoot   = $SyncHostRoot
         ArchivedUtc    = (Get-Date).ToUniversalTime().ToString('o')
@@ -269,8 +369,11 @@ function Update-OnPremImportRunHistoryIndex {
 
     $rowsHtml = New-Object System.Text.StringBuilder
     foreach ($r in $runs) {
-        $elapsed = if ($null -ne $r.ElapsedSeconds) {
-            '{0:00}:{1:00}' -f [int]([math]::Floor($r.ElapsedSeconds / 60)), ($r.ElapsedSeconds % 60)
+        $elapsedSecRaw = $r.ElapsedSeconds
+        if ($elapsedSecRaw -is [System.Array]) { $elapsedSecRaw = $elapsedSecRaw | Select-Object -First 1 }
+        $elapsed = if ($null -ne $elapsedSecRaw -and "$elapsedSecRaw" -ne '') {
+            $elapsedSecInt = [int]$elapsedSecRaw
+            '{0:00}:{1:00}' -f [int]([math]::Floor($elapsedSecInt / 60)), ($elapsedSecInt % 60)
         } else { '' }
         $statusClass = switch ($r.OverallStatus) {
             'Completed' { 'ok' }
@@ -286,7 +389,7 @@ function Update-OnPremImportRunHistoryIndex {
   <td>$($r.WavesFailed)</td>
   <td>$elapsed</td>
   <td>$($r.CompletedUtc)</td>
-  <td><a href="runs/$($r.RunId)/db-counts.json">db-counts</a> | <a href="runs/$($r.RunId)/meta.json">meta</a></td>
+  <td><a href="runs/$($r.RunId)/db-counts.json">db-counts</a> | <a href="runs/$($r.RunId)/file-waves.json">file-waves</a> | <a href="runs/$($r.RunId)/file-presence.json">file-presence</a> | <a href="runs/$($r.RunId)/meta.json">meta</a></td>
 </tr>
 "@).Trim())
     }
@@ -348,10 +451,23 @@ function Compare-OnPremImportRunArchives {
         [double]$RelativePercentThreshold = 1.0
     )
 
+    function Get-OnPremImportFlatDbCountRows([object]$Counts) {
+        $out = @()
+        foreach ($c in @($Counts)) {
+            if ($null -eq $c) { continue }
+            if ($c -is [System.Array] -or ($c.PSObject.TypeNames -contains "System.Object[]")) {
+                $out += @(Get-OnPremImportFlatDbCountRows $c)
+                continue
+            }
+            if ($c.BO) { $out += $c }
+        }
+        return $out
+    }
+
     $leftMap = @{}
-    foreach ($c in @($Left.Db.Counts)) { $leftMap[[string]$c.BO] = [int]$c.Count }
+    foreach ($c in @(Get-OnPremImportFlatDbCountRows $Left.Db.Counts)) { $leftMap[[string]$c.BO] = [int]$c.Count }
     $rightMap = @{}
-    foreach ($c in @($Right.Db.Counts)) { $rightMap[[string]$c.BO] = [int]$c.Count }
+    foreach ($c in @(Get-OnPremImportFlatDbCountRows $Right.Db.Counts)) { $rightMap[[string]$c.BO] = [int]$c.Count }
 
     $allBos = @($leftMap.Keys + $rightMap.Keys | Select-Object -Unique)
     $boRows = @()

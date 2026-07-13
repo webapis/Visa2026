@@ -183,7 +183,10 @@ function Resolve-OnPremMigrationLibPath {
 $syncStatusRoot = if ($SyncHostRoot) { $SyncHostRoot } else { Join-Path $dataImporterRoot 'legacy/visa2014' }
 
 function Invoke-ArchiveCurrentImportRun {
-    param([string]$Reason = '')
+    param(
+        [string]$Reason = '',
+        [switch]$Force
+    )
     $flags = @()
     if ($DryRun) { $flags += 'DryRun' }
     if ($SkipLookupPreflight) { $flags += 'SkipLookupPreflight' }
@@ -199,7 +202,7 @@ function Invoke-ArchiveCurrentImportRun {
             -RunId $stamp `
             -StartAt $StartAt `
             -Flags $flags `
-            -Force:$false | Out-Null
+            -Force:$Force | Out-Null
     }
     catch {
         Write-Warning "Import run archive failed: $($_.Exception.Message)"
@@ -598,6 +601,8 @@ if ($DryRun) { Write-Host "INF Dry-run" -ForegroundColor Yellow }
 if ($IncludeFileWaves) { Write-Host "INF File waves: DocumentCopies.ps1 after scalar chain" -ForegroundColor Yellow }
 
 $activeWaves = @($waves | ForEach-Object { $_.Name })
+$previousFileWaveStatus = Join-Path $syncStatusRoot 'file-waves-status.json'
+if (Test-Path -LiteralPath $previousFileWaveStatus) { Remove-Item -LiteralPath $previousFileWaveStatus -Force }
 
 Initialize-OnPremSyncRunStatus `
     -Root $syncStatusRoot `
@@ -654,30 +659,48 @@ if ($finalRunStatus -and $finalRunStatus.Waves) {
         if ($w.Status -eq 'Failed') { $anyFailed = $true; break }
     }
 }
-Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus $(if ($anyFailed) { 'Failed' } else { 'Completed' })
-Invoke-ArchiveCurrentImportRun -Reason $(if ($anyFailed) { 'FinishedWithFailures' } else { 'Finished' })
 
 Write-Host ""
 Invoke-PostImportCorrections -Conn $TargetConnection
 
 if ($IncludeFileWaves -and -not $DryRun) {
+    $documentCopiesExit = 0
     if ([string]::IsNullOrWhiteSpace($TargetConnection)) {
-        throw "TargetConnection required for file waves."
+        Write-Host "ERR TargetConnection required for file waves." -ForegroundColor Red
+        $documentCopiesExit = 1
     }
-    Write-Host ""
-    Write-Host ">>> DocumentCopies (file waves)" -ForegroundColor Green
-    $docArgs = @{
-        TargetConnection = $TargetConnection
-        LegacySource     = $LegacySource
-        Configuration    = $Configuration
+    else {
+        Write-Host ""
+        Write-Host ">>> DocumentCopies (file waves)" -ForegroundColor Green
+        $docArgs = @{
+            TargetConnection = $TargetConnection
+            LegacySource     = $LegacySource
+            Configuration    = $Configuration
+            SyncHostRoot     = $SyncHostRoot
+        }
+        try {
+            & (Join-Path $PSScriptRoot 'DocumentCopies.ps1') @docArgs
+            $documentCopiesExit = $LASTEXITCODE
+        }
+        catch {
+            $documentCopiesExit = 1
+            Write-Host "ERR DocumentCopies invocation failed: $($_.Exception.Message)" -ForegroundColor Red
+        }
     }
-    if ($ContinueOnError) { $docArgs['ErrorAction'] = 'Continue' }
-    & (Join-Path $PSScriptRoot 'DocumentCopies.ps1') @docArgs
-    if ($LASTEXITCODE -ne 0 -and -not $ContinueOnError) {
-        Write-Host "ERR DocumentCopies failed (exit $LASTEXITCODE)." -ForegroundColor Red
-        exit $LASTEXITCODE
+
+    if ($documentCopiesExit -ne 0) {
+        $anyFailed = $true
+        Write-Host "ERR DocumentCopies failed (exit $documentCopiesExit)." -ForegroundColor Red
+        if (-not $ContinueOnError) {
+            Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus Failed
+            Invoke-ArchiveCurrentImportRun -Reason 'DocumentCopiesFailed' -Force
+            exit $documentCopiesExit
+        }
     }
 }
+
+Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus $(if ($anyFailed) { 'Failed' } else { 'Completed' })
+Invoke-ArchiveCurrentImportRun -Reason $(if ($anyFailed) { 'FinishedWithFailures' } else { 'Finished' })
 
 Write-Host "=== On-prem $Profile import waves finished ===" -ForegroundColor Cyan
 Write-Host "INF Live wave status: scripts/visa2014-migration/Watch-OnPremImportLive.ps1 (-Profile $Profile)"

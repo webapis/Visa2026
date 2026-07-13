@@ -4,10 +4,11 @@
   Live incremental table of on-prem VISA2014 import/sync progress (waves + DB counts).
 
 .DESCRIPTION
-  Polls sync-run-status.json and target SQL row counts; prints a colored wave
-  table (Completed=green, Running=cyan, Failed=red, Pending=gray) with
-  per-sample deltas (DeltaIns / DeltaUpd / DeltaDb) and a live percent bar from
-  {entity}.sync-progress.json (updated every ~100 rows; survives stdout buffering).
+  Polls sync-run-status.json, optional file-waves-status.json, and target SQL
+  row counts; prints a colored wave table (Completed=green, Running=cyan,
+  Failed=red, Pending=gray) with per-sample deltas (DeltaIns / DeltaUpd /
+  DeltaDb), a live percent bar from {entity}.sync-progress.json, and a
+  DocumentCopies file-wave step table when IncludeFileWaves is active.
 
   Profiles map to sync-host root + database:
     Production  C:\visa2026-sync       Visa2026DbProd
@@ -149,8 +150,10 @@ function Get-RemoteSnapshot {
         DataImporters  = $diJson
         TaskState      = [string]$meta.TaskState
         TaskLastResult = [string]$meta.TaskLastResult
+        TaskName       = [string]$meta.TaskName
         DbCounts       = $dbCounts
         ProgressJson   = [string]$meta.ProgressJson
+        FileWavesJson  = [string]$meta.FileWavesJson
     }
 }
 
@@ -186,8 +189,10 @@ function Get-LocalSnapshot {
         DataImporters  = $diJson
         TaskState      = [string]$meta.TaskState
         TaskLastResult = [string]$meta.TaskLastResult
+        TaskName       = [string]$meta.TaskName
         DbCounts       = $dbCounts
         ProgressJson   = [string]$meta.ProgressJson
+        FileWavesJson  = [string]$meta.FileWavesJson
     }
 }
 
@@ -358,6 +363,82 @@ function Write-ColoredWaveTable {
     }
 }
 
+function Format-FileWaveElapsed([object]$Seconds) {
+    if ($null -eq $Seconds -or "$Seconds" -eq '') { return '' }
+    try {
+        $sec = [int]$Seconds
+        if ($sec -lt 0) { return '' }
+        $ts = [TimeSpan]::FromSeconds($sec)
+        if ($ts.TotalHours -ge 1) { return ('{0:h\:mm\:ss}' -f $ts) }
+        return ('{0:mm\:ss}' -f $ts)
+    } catch { return '' }
+}
+
+function Write-FileWaveTable {
+    param([string]$FileWavesJson)
+
+    if ([string]::IsNullOrWhiteSpace($FileWavesJson)) {
+        Write-Host '--- File waves ---' -ForegroundColor Cyan
+        Write-Host '(no file-waves-status.json — IncludeFileWaves not started or cleared)' -ForegroundColor DarkGray
+        return $false
+    }
+
+    $fw = $null
+    try { $fw = $FileWavesJson | ConvertFrom-Json } catch {
+        Write-Host '--- File waves ---' -ForegroundColor Cyan
+        Write-Host '(file-waves-status.json unreadable)' -ForegroundColor DarkYellow
+        return $false
+    }
+
+    $overall = [string]$fw.OverallStatus
+    $overallColor = Get-StatusColor -Status $overall
+    Write-Host -NoNewline '--- File waves (DocumentCopies)  Overall=' -ForegroundColor Cyan
+    Write-Host -NoNewline $overall -ForegroundColor $overallColor
+    if ($fw.StartedUtc) {
+        $elapsed = Format-Elapsed -StartedUtc ([string]$fw.StartedUtc) -CompletedUtc ([string]$fw.CompletedUtc)
+        Write-Host ("  Elapsed={0} ---" -f $elapsed) -ForegroundColor Cyan
+    } else {
+        Write-Host ' ---' -ForegroundColor Cyan
+    }
+
+    $fmt = '{0,-4} {1,-22} {2,-28} {3,-12} {4,5} {5,8} {6,-40}'
+    Write-Host ($fmt -f 'Mark', 'Key', 'Name', 'Status', 'Exit', 'Elapsed', 'Posted/Prepared') -ForegroundColor DarkGray
+    Write-Host ($fmt -f '----', '---', '----', '------', '----', '-------', '---------------') -ForegroundColor DarkGray
+
+    $anyActive = $false
+    foreach ($step in @($fw.Steps)) {
+        $st = [string]$step.Status
+        if ($st -eq 'Running') { $anyActive = $true }
+        $marker = switch ($st) {
+            'Running' { '>' }
+            'Failed' { '!' }
+            'Completed' { 'ok' }
+            default { '' }
+        }
+        $statusColor = Get-StatusColor -Status $st
+        $rowColor = switch ($marker) {
+            '>' { 'Cyan' }
+            '!' { 'Red' }
+            'ok' { 'Green' }
+            default { 'Gray' }
+        }
+        $hint = ''
+        if ($step.Posted) { $hint = [string]$step.Posted }
+        elseif ($step.Prepared) { $hint = [string]$step.Prepared }
+        if ($hint.Length -gt 40) { $hint = $hint.Substring(0, 37) + '...' }
+
+        Write-Host -NoNewline (('{0,-4}' -f $marker)) -ForegroundColor $rowColor
+        Write-Host -NoNewline ((' {0,-22}' -f [string]$step.Key)) -ForegroundColor $rowColor
+        Write-Host -NoNewline ((' {0,-28}' -f [string]$step.Name)) -ForegroundColor $rowColor
+        Write-Host -NoNewline ((' {0,-12}' -f $st)) -ForegroundColor $statusColor
+        Write-Host -NoNewline ((' {0,5}' -f $(if ($null -eq $step.ExitCode) { '' } else { [string]$step.ExitCode }))) -ForegroundColor Gray
+        Write-Host -NoNewline ((' {0,8}' -f (Format-FileWaveElapsed $step.ElapsedSeconds))) -ForegroundColor Gray
+        Write-Host ((' {0,-40}' -f $hint)) -ForegroundColor DarkGray
+    }
+
+    return ($anyActive -or $overall -eq 'Running')
+}
+
 function Write-LiveDashboard {
     param($Snap, [datetime]$SampleTime)
 
@@ -399,7 +480,8 @@ function Write-LiveDashboard {
     Write-Host ("DataImporter: alive={0}  entity={1}  pid={2}" -f ($di.Count -gt 0), $diEntity, $diPids) -ForegroundColor $diColor
     if ($Snap.TaskState) {
         $taskColor = if ($Snap.TaskState -eq 'Running') { 'Cyan' } else { 'DarkGray' }
-        Write-Host ("Task: State={0}  LastResult={1}" -f $Snap.TaskState, $Snap.TaskLastResult) -ForegroundColor $taskColor
+        $taskLabel = if ($Snap.TaskName) { $Snap.TaskName } else { 'Task' }
+        Write-Host ("Task: {0}  State={1}  LastResult={2}" -f $taskLabel, $Snap.TaskState, $Snap.TaskLastResult) -ForegroundColor $taskColor
     }
     Write-Host ("Interval={0}s  |  Ctrl+C to stop" -f $IntervalSeconds) -ForegroundColor DarkGray
     Write-Host ''
@@ -453,6 +535,9 @@ function Write-LiveDashboard {
         Write-Host '(no wave rows)' -ForegroundColor Yellow
     }
 
+    Write-Host ''
+    $fileWavesActive = Write-FileWaveTable -FileWavesJson ([string]$Snap.FileWavesJson)
+
     # --- DB counts with deltas ---
     if (-not $NoDbCounts) {
         $dbMap = Parse-DbCounts -Text $Snap.DbCounts
@@ -502,7 +587,10 @@ function Write-LiveDashboard {
     }
 
     # Explicit return so Format-Table does not become the function output
-    return $status
+    return [pscustomobject]@{
+        Status           = $status
+        FileWavesActive  = [bool]$fileWavesActive
+    }
 }
 
 # --- main loop ---
@@ -534,7 +622,9 @@ try {
         }
 
         if ($ClearScreen) { Clear-Host }
-        $status = Write-LiveDashboard -Snap $snap -SampleTime $sampleTime
+        $dash = Write-LiveDashboard -Snap $snap -SampleTime $sampleTime
+        $status = $dash.Status
+        $fileWavesActive = [bool]$dash.FileWavesActive
 
         $overall = if ($status) { [string]$status.OverallStatus } else { '' }
         $diAlive = $false
@@ -544,7 +634,8 @@ try {
             }
         } catch { $diAlive = $false }
 
-        if ($overall -in @('Completed', 'CompletedWithErrors', 'Failed') -and -not $diAlive) {
+        # Keep watching while DocumentCopies is still Running even if scalar Overall=Failed.
+        if ($overall -in @('Completed', 'CompletedWithErrors', 'Failed') -and -not $diAlive -and -not $fileWavesActive) {
             Write-Host ''
             Write-Host ("INF Run finished ({0}). Exiting watch." -f $overall) -ForegroundColor Green
             break

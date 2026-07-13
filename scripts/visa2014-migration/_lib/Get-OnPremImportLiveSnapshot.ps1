@@ -54,22 +54,36 @@ Get-Process -Name 'Visa2026.DataImporter' -ErrorAction SilentlyContinue | ForEac
         if ($path -like ("*\" + $rootLeaf + "\*") -or $cmd -like ("*" + $rootLeaf + "*")) {
             $entity = ''
             if ($cmd -match '--entity\s+(\w+)') { $entity = $Matches[1] }
+            if ($cmd -match '--property\s+(\w+)') {
+                $prop = $Matches[1]
+                $entity = if ($entity) { "$entity.$prop" } else { $prop }
+            }
+            elseif ($cmd -match '--import-visa2014-files') {
+                if ($entity) { $entity = "$entity (files)" } else { $entity = 'files' }
+            }
             $diList += @{ Pid = $_.Id; Entity = $entity }
         }
     } catch {}
 }
 
-$taskName = switch ($Profile) {
-    'Demo' { 'Visa2026-OnPrem-DemoImportOnce' }
-    default { 'Visa2026-OnPrem-ManualSyncOnce' }
+$taskNames = switch ($Profile) {
+    'Demo' { @('Visa2026-OnPrem-DemoFileWavesOnly', 'Visa2026-OnPrem-DemoImportOnce', 'Visa2026-OnPrem-DemoImportFileWaves') }
+    default { @('Visa2026-OnPrem-ManualSyncOnce') }
 }
 $taskState = ''
 $taskLast = ''
-$task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
-if ($task) {
+$taskName = ''
+foreach ($candidate in $taskNames) {
+    $task = Get-ScheduledTask -TaskName $candidate -ErrorAction SilentlyContinue
+    if (-not $task) { continue }
     $ti = $task | Get-ScheduledTaskInfo
-    $taskState = [string]$task.State
-    $taskLast = [string]$ti.LastTaskResult
+    # Prefer a Running task; otherwise keep the first hit.
+    if (-not $taskName -or [string]$task.State -eq 'Running') {
+        $taskName = $candidate
+        $taskState = [string]$task.State
+        $taskLast = [string]$ti.LastTaskResult
+        if ($taskState -eq 'Running') { break }
+    }
 }
 
 $dbLines = @()
@@ -114,14 +128,24 @@ if ($currentWave) {
     }
 }
 
+$fileWavesJson = ''
+$fileWavesPath = Join-Path $SyncHostRoot 'file-waves-status.json'
+if (Test-Path -LiteralPath $fileWavesPath) {
+    try {
+        $fileWavesJson = (Get-Content -LiteralPath $fileWavesPath -Raw -Encoding UTF8).Trim()
+    } catch {}
+}
+
 $payload = @{
     StatusExists   = [bool](Test-Path -LiteralPath $statusPath)
     StatusPath     = $statusPath
     DataImporters  = @($diList)
     TaskState      = $taskState
     TaskLastResult = $taskLast
+    TaskName       = $taskName
     DbCountLines   = @($dbLines)
     ProgressJson   = $progressJson
+    FileWavesJson  = $fileWavesJson
 }
 # Depth 3, compact — keep small for SSH
-$payload | ConvertTo-Json -Compress -Depth 4
+$payload | ConvertTo-Json -Compress -Depth 6
