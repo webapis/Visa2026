@@ -1420,3 +1420,16 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Deploy**: published DataImporter to `C:\visa2026-sync\tools\DataImporter`; RunId `20260713-045401`
 - **Bug**: first sequential build used `_legacyOid` (KeyNotFound) — must be `_legacyRowId`
 - **Outcome**: sequential post alive — ~2000/21786 (~9%), posted~1984 failed=0, DB ApplicationItems rising (~2050)
+
+### 2026-07-13 — Prod ApplicationProgress hang (batch-size 50) → sequential flush-per-row
+
+- **Phase**: end-to-end (Prod ApplicationProgress after ApplicationItem Completed)
+- **Symptom**: Watch `100/55068 posted=49 fail=51` then freeze at `200` with `DbCount=0`; DI CPU climbing; already `workers=1`
+- **Root cause**: importer intended one-row commits (`progressBatchSize=1`) but with `parallelism=1` ParallelImportPoster uses the **shared** headless target opened with `--batch-size 50`. First `CommitChanges` of ~50 ApplicationProgress rows fights `Application.LatestProgress` and hangs. Early `49/51` fail ratio matched Demo noise (incomplete State/Location payloads) and is unrelated to the hang.
+- **Fix**: `Visa2014ApplicationProgressODataImporter` sequential `foreach` + owned `Visa2014ObjectSpaceImportTarget(batchSize:1)` (flush per row); `--parallelism` ignored; log first 25 payload gaps to stderr
+- **Deploy**: published DI to `C:\visa2026-sync\tools\DataImporter`; resume RunId `20260713-051356` `-StartAt ApplicationProgress`
+- **Outcome (verified early)**: `sequential post: 55070`; ~3100/55070 posted~3091 failed=0 skipped=9; `ApplicationProgresses` DB count rising in lockstep (~3105)
+- **Ops note**: wrap scripts must pass `-StartAt` on **one line** — backtick line-continuation inside `@"..."@` here-strings drops args (first resume wrongly started Person)
+- **Prevent**: never batch ApplicationProgress commits; do not trust DbCount=0 alone when shared batch>1 (rows may be uncommitted)
+- **Cross-skill**: visa2026-windows-iis-deploy
+

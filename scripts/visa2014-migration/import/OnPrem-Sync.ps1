@@ -6,9 +6,9 @@
 .DESCRIPTION
   Runs Visa2026.DataImporter --import-visa2014 entity-by-entity per order.yaml.
   All scalar writes use --inprocess (headless XAF ObjectSpace).
-  Large waves Application / ApplicationProgress post with --parallelism
-  (default 1 worker; raise for faster ApplicationProgress). ApplicationItem posts
-  sequentially (same loop style as Education / Passport).
+  Application / ApplicationItem / ApplicationProgress post sequentially
+  (ParallelImportPoster / shared batch-size>1 hung Prod on LatestProgress commits).
+  --parallelism is ignored for those waves; kept for CLI compatibility.
 
   Profiles:
     Staging    — Visa2026DbStaging (:8080), calik-energi-onprem-staging id-maps
