@@ -124,6 +124,9 @@ namespace Visa2026.Module.DatabaseUpdate
         /// </summary>
         private void RunVisaApplicationItemOrphanCleanupSql()
         {
+            if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+                return;
+
             const string sql = @"
 IF OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL OR OBJECT_ID(N'dbo.Visas', N'U') IS NULL
     RETURN;
@@ -174,6 +177,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         /// </summary>
         private void DropAllApplicationItemsForeignKeysToVisas()
         {
+            if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+                return;
+
             const string sql = @"
 IF OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL OR OBJECT_ID(N'dbo.Visas', N'U') IS NULL
     RETURN;
@@ -223,6 +229,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureVisaOfficeConfigurationPermissions(visaOfficeRole);
             EnsureUserReportTemplateOfficerPermissions(visaOfficeRole);
             EnsureVisaOfficeNavigationPermissions(visaOfficeRole);
+            EnsureReportDashboardOfficerPermissions(visaOfficeRole);
             EnsureAdminOnlyOperationsDeny(visaOfficeRole);
 
             return visaOfficeRole;
@@ -435,6 +442,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);
 
     EnsureUsersOfficerNavigationPermissions(userRole);
+    EnsureReportDashboardOfficerPermissions(userRole);
 
     // Users: EducationInstitution, Specialty, Position & Lodging — read/write/create only (no delete), including existing roles.
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
@@ -513,6 +521,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             }
 
             EnsureUsersOfficerNavigationPermissions(role);
+            EnsureReportDashboardOfficerPermissions(role);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Deny);
@@ -522,12 +531,32 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             return role;
         }
 
+        /// <summary>Report Dashboard home — readable by all officer roles.</summary>
+        static void EnsureReportDashboardOfficerPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureTypePermission<BusinessObjects.ReportDashboard.ReportDashboardHost>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Home/Items/ReportDashboard",
+                SecurityPermissionState.Allow);
+        }
+
         /// <summary>Shared case-officer navigation for <c>Users</c> and <c>UsersReadOnly</c> roles.</summary>
         static void EnsureUsersOfficerNavigationPermissions(PermissionPolicyRole role)
         {
             if (role == null)
                 return;
 
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/Home/Items/ReportDashboard",
+                SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);

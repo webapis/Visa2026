@@ -69,12 +69,14 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ImportReimportHistoryHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
-            return new ModuleUpdater[]
+            // Full list for SQL Server. PostgreSQL Demo pilot: ObjectSpace seed/config only (no T-SQL schema helpers).
+            var sqlServerUpdaters = new ModuleUpdater[]
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationUserThemePreferenceSchemaUpdater(objectSpace, versionFromDB),
@@ -146,6 +148,31 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractMinistryLegsSchemaCleanupUpdater(objectSpace, versionFromDB)
             };
+
+            if (DatabaseProviderDetector.IsPostgreSql(objectSpace))
+            {
+                return new ModuleUpdater[]
+                {
+                    new DatabaseUpdate.Updater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.TenantUserSeedUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.LookupBaseNameTmBackfillUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ProjectContractTitleDescriptionMergeUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB)
+                };
+            }
+
+            return sqlServerUpdaters;
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
         {
@@ -167,6 +194,8 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ImportReimportHistoryModelUpdater());
             updaters.Add(new DatabaseUpdate.ImportReimportHistoryDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ReportDashboardModelUpdater());
+            updaters.Add(new DatabaseUpdate.ReportDashboardDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackModelUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackViewsUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackDetailViewUpdater());

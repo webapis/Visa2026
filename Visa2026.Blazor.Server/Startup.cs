@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -26,6 +26,7 @@ using Visa2026.Blazor.Server.Middleware;
 using Visa2026.Module.Services.RuntimeLogging;
 using Visa2026.Module.DatabaseUpdate;
 using Visa2026.Module.Services.ImportHistory;
+using Visa2026.Module.Services.ReportDashboard;
 using Visa2026.Blazor.Server.Services.ImportHistory;
 
 namespace Visa2026.Blazor.Server
@@ -131,9 +132,11 @@ namespace Visa2026.Blazor.Server
                     }
 
                     // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal salary columns idempotently.
+                    // These helpers are T-SQL / SQL Server only — skip on PostgreSQL Demo.
                     var connectionString = Configuration.GetConnectionString("DefaultConnection")
                         ?? Configuration.GetConnectionString("ConnectionString");
-                    if (!string.IsNullOrWhiteSpace(connectionString))
+                    if (!string.IsNullOrWhiteSpace(connectionString)
+                        && DatabaseProviderDetector.IsSqlServer(connectionString))
                     {
                         ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
                         ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
@@ -151,12 +154,7 @@ namespace Visa2026.Blazor.Server
                                 string connectionString = Configuration.GetConnectionString("DefaultConnection")
                                     ?? Configuration.GetConnectionString("ConnectionString");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                businessObjectDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
-                                {
-                                    sqlOptions.CommandTimeout(180);
-                                    // EF Core 8: split queries for multi-collection Includes (avoids cartesian explosion / warning 20504).
-                                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                                });
+                                DatabaseProviderDetector.ConfigureEfCore(businessObjectDbContextOptions, connectionString);
                                 // Required for HasChangeTrackingStrategy(ChangingAndChangedNotifications*) with BaseImpl types (e.g. FileData):
                                 // proxies supply INotifyPropertyChanged / INotifyPropertyChanging on the CLR types. See DX doc XAF0031 / 404292.
                                 businessObjectDbContextOptions.UseChangeTrackingProxies();
@@ -168,11 +166,7 @@ namespace Visa2026.Blazor.Server
                                 string connectionString = Configuration.GetConnectionString("DefaultConnection")
                                     ?? Configuration.GetConnectionString("ConnectionString");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                auditHistoryDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
-                                {
-                                    sqlOptions.CommandTimeout(180);
-                                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                                });
+                                DatabaseProviderDetector.ConfigureEfCore(auditHistoryDbContextOptions, connectionString);
                                 auditHistoryDbContextOptions.UseChangeTrackingProxies();
                                 auditHistoryDbContextOptions.UseObjectSpaceLinkProxies();
                                 auditHistoryDbContextOptions.UseLazyLoadingProxies();
@@ -239,6 +233,8 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<BoStateNotificationNavigationHelper>();
             services.Configure<ImportHistoryOptions>(Configuration.GetSection(ImportHistoryOptions.SectionName));
             services.AddSingleton<IImportReimportHistoryReader, ImportReimportHistoryReader>();
+            // PROTOTYPE: using mock data — swap to ReportDashboardQueryService when UX is finalized
+            services.AddScoped<IReportDashboardQueryService, ReportDashboardMockQueryService>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<PersonDocumentCopyPdfMerger>();
             services.AddScoped<HeaderDocumentCopyPdfMerger>();
@@ -268,15 +264,15 @@ namespace Visa2026.Blazor.Server
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection")
                 ?? Configuration.GetConnectionString("ConnectionString");
-            if (!string.IsNullOrWhiteSpace(connectionString))
+            if (!string.IsNullOrWhiteSpace(connectionString)
+                && DatabaseProviderDetector.IsSqlServer(connectionString))
             {
                 ApplicationRuntimeLogSchemaSql.ApplyIfMissing(connectionString);
                 MinistryReviewSlaSettingsSchemaSql.ApplyIfMissing(connectionString);
+                BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
+                    app.ApplicationServices,
+                    app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
             }
-
-            BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
-                app.ApplicationServices,
-                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
 
             UserReportTemplateSeedGate.EnsureSeeded(
                 app.ApplicationServices,
