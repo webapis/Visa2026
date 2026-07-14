@@ -13,6 +13,7 @@ description: >-
 Canonical doc: `docs/REPORT_DASHBOARD.md`
 Experience log: `learnings.md` (read before starting, append after every verified change).
 File map and SQL view schema: `reference.md`.
+SQL view implementation plan and status tracker: `IMPLEMENTATION_PLAN.md`.
 
 ---
 
@@ -46,6 +47,8 @@ The component never queries the database. All data comes through the service int
 
 Keep `ReportDashboardMockQueryService` registered until ALL categories have real views. Swap per category by checking `subReport` in the real service and falling back to mock rows for unfinished sub-reports.
 
+See `IMPLEMENTATION_PLAN.md` for the exact SQL for all 9 views, the EF entity checklist, and the per-category status tracker.
+
 ---
 
 ## Adding a new category (checklist)
@@ -75,61 +78,18 @@ Keep `ReportDashboardMockQueryService` registered until ALL categories have real
 
 ## SQL view convention
 
-One view per category. File: `Visa2026.Module/SqlViews/vw_rd_[category].sql`
+One view per category (or per view-tree where sub-reports need different joins).
+See `IMPLEMENTATION_PLAN.md` for the 9 specific views, exact SQL, and status tracker.
 
-Category view names:
-- `vw_rd_visa`
-- `vw_rd_invitation`
-- `vw_rd_registration`
-- `vw_rd_work_permit`
-- `vw_rd_travel`
-- `vw_rd_border_zone`
-- `vw_rd_passport`
+File location: `Visa2026.Module/SqlViews/vw_rd_[category].sql`
 
-### Required columns
-
-| Column | Type | Maps to |
-|--------|------|---------|
-| `PersonOid` | uniqueidentifier | `ReportDashboardPreviewRow.RecordId` |
-| `PersonName` | nvarchar | `.Name` |
-| `ProjectName` | nvarchar | `.Project` |
-| `ColumnA` | nvarchar | `.ColumnA` (category-specific label) |
-| `ColumnB` | nvarchar | `.ColumnB` (category-specific label) |
-| `StatusLabel` | nvarchar | `.Status` (chart grouping key) |
-| `StatusCssClass` | nvarchar | `.StatusCssClass` |
-| `SubReportKey` | nvarchar | filter by `subReport` parameter |
-| `RecordDate` | datetime2 | cutoff filter (`>= @cutoff`) |
-
-### Bucket CASE pattern (in the view)
-
-```sql
-CASE
-  WHEN ExpirationDate IS NULL                          THEN 'Pending'
-  WHEN ExpirationDate  < GETDATE()                    THEN 'Expired'
-  WHEN ExpirationDate <= DATEADD(day, 30, GETDATE())  THEN 'Expiring (<30 days)'
-  WHEN ExpirationDate <= DATEADD(day, 90, GETDATE())  THEN 'Expiring Soon'
-  ELSE 'Valid'
-END AS StatusLabel,
-CASE
-  WHEN ExpirationDate IS NULL                          THEN 'st-pending'
-  WHEN ExpirationDate  < GETDATE()                    THEN 'st-expiring'
-  WHEN ExpirationDate <= DATEADD(day, 30, GETDATE())  THEN 'st-expiring'
-  WHEN ExpirationDate <= DATEADD(day, 90, GETDATE())  THEN 'st-pending'
-  ELSE 'st-approved'
-END AS StatusCssClass
-```
-
-### EF mapping
-
+EF mapping pattern:
 ```csharp
-// In Visa2026DbContext:
-public DbSet<VwRdVisa> VwRdVisa => Set<VwRdVisa>();
-
-// In OnModelCreating:
-modelBuilder.Entity<VwRdVisa>().HasNoKey().ToView("vw_rd_visa");
+// DbContext property:
+public DbSet<VwRdMyCategory> VwRdMyCategory => Set<VwRdMyCategory>();
+// OnModelCreating:
+modelBuilder.Entity<VwRdMyCategory>().HasNoKey().ToView("vw_rd_my_category");
 ```
-
-The keyless entity class mirrors the view columns exactly.
 
 ---
 
@@ -145,13 +105,13 @@ The keyless entity class mirrors the view columns exactly.
 | (no class) | Gray `#8896a8` | Unknown / unclassified |
 
 Use `st-approved/pending/expiring` for validity states.
-Use `st-cat-1..5` for categorical groupings (type, citizenship, region) where color represents identity, not urgency.
+Use `st-cat-1..5` for categorical groupings (type, citizenship, region).
 
 ---
 
 ## Service registration
 
-`Visa2026.Blazor.Server/Startup.cs` line:
+`Visa2026.Blazor.Server/Startup.cs`:
 
 ```csharp
 // Prototype (mock):
@@ -161,10 +121,9 @@ services.AddScoped<IReportDashboardQueryService, ReportDashboardMockQueryService
 services.AddScoped<IReportDashboardQueryService, ReportDashboardQueryService>();
 ```
 
-Swap when all categories have working SQL views.
-
 ---
 
 ## Key files
 
-See `reference.md` for the complete file map with class names and line count hints.
+See `reference.md` for the complete file map with class names.
+See `IMPLEMENTATION_PLAN.md` for the SQL view specifications and promotion status.
