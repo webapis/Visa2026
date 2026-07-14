@@ -17,7 +17,7 @@ Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server E
 
 One server runs **three independent slots** (separate site, app pool, publish folder, database, data-protection keys).
 
-**Provider switch:** one publish binary. Default is SQL Express. Demo may use **PostgreSQL** via `EFCORE_PROVIDER=Postgres` in `demo.env` ([Dual EF providers](../../../docs/ON_PREM_WINDOWS_IIS.md#dual-ef-providers-sql-server--postgresql); [reference.md](./reference.md)). Prod/Staging stay on SQL Express until an explicit cutover.
+**Provider switch:** one publish binary. Default is SQL Express. Demo may use **PostgreSQL** via `EFCORE_PROVIDER=Postgres` in `demo.env` ([Dual EF providers](../../../docs/ON_PREM_WINDOWS_IIS.md#dual-ef-providers-sql-server--postgresql); [reference.md](./reference.md)). **Install/config Postgres first:** [visa2026-postgresql](../visa2026-postgresql/SKILL.md). Prod/Staging stay on SQL Express until an explicit cutover.
 
 **Officers browse HTTPS only** (required for Resminamalar **Edit template** / File System Access API). HTTP bindings on the same ports may remain for **redirect to HTTPS** (`-RedirectHttpToHttps`).
 

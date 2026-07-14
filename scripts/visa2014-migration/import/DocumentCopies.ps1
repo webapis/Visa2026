@@ -101,12 +101,19 @@ try {
 
     # Prefer env for SQL auth. CLI --target-connection breaks on "User Id=..." (space)
     # and host startup can otherwise fall back to LocalDB from published appsettings.
+    # Npgsql (Host= / Username=): do not rewrite Password→PWD — that breaks Postgres drivers.
     if (-not [string]::IsNullOrWhiteSpace($TargetConnection)) {
         $env:ConnectionStrings__DefaultConnection = $TargetConnection
         $env:ASPNETCORE_ENVIRONMENT = 'Production'
-        $safeCs = $TargetConnection `
-            -replace '(?i)\bUser Id=', 'UID=' `
-            -replace '(?i)\bPassword=', 'PWD='
+        $isPostgres = $TargetConnection -match '(?i)(^|;)\s*Host\s*=' -or
+            $TargetConnection -match '(?i)EFCoreProvider\s*=\s*Postgres'
+        $safeCs = if ($isPostgres) {
+            $TargetConnection
+        } else {
+            $TargetConnection `
+                -replace '(?i)\bUser Id=', 'UID=' `
+                -replace '(?i)\bPassword=', 'PWD='
+        }
         for ($ci = 0; $ci -lt $commonArgs.Count; $ci++) {
             if ($commonArgs[$ci] -eq '--target-connection' -and ($ci + 1) -lt $commonArgs.Count) {
                 $commonArgs[$ci + 1] = $safeCs

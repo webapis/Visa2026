@@ -65,7 +65,7 @@ One publish binary supports both providers. Choose per **slot** via env + connec
 
 **Demo pilot (verified on `10.100.128.25`):**
 
-1. Install PostgreSQL (binaries + service `postgresql-x64-16`) — see `Install-PostgreSqlForVisa2026.ps1` / host learnings.
+1. Install PostgreSQL (binaries + service `postgresql-x64-16`) — Agent skill [visa2026-postgresql](../.cursor/skills/visa2026-postgresql/SKILL.md); script `Install-PostgreSqlForVisa2026.ps1`.
 2. Create empty DB matching `DB_NAME` (e.g. `visa2026_demo`).
 3. Set Demo env as in [demo.env.example](../scripts/windows-iis/env/demo.env.example).
 4. Deploy: `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate -EnableForceXafDbUpdate`.

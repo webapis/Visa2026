@@ -2,7 +2,7 @@
 
 **Runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../../docs/ON_PREM_WINDOWS_IIS.md)
 
-**Agent skill:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [user-prompts.md](../../.cursor/skills/visa2026-windows-iis-deploy/user-prompts.md) · [learnings.md](../../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)
+**Agent skills:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [visa2026-postgresql](../../.cursor/skills/visa2026-postgresql/SKILL.md) (Demo Postgres download/install) · [user-prompts.md](../../.cursor/skills/visa2026-windows-iis-deploy/user-prompts.md)
 
 Use when the company host is **Windows Server** and **Docker / WSL is not acceptable**. The app runs as **ASP.NET Core** behind **IIS**; SQL Server runs **on Windows** (same machine).
 
@@ -40,6 +40,7 @@ Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates
 | `Get-Visa2026RuntimeErrorsForPull.ps1` | Windows Server | Query `ApplicationRuntimeLogs` JSON for Cursor inbox pull |
 | `Pull-Visa2026RuntimeErrorsRemote.ps1` | Dev PC (SSH) | Pull prod/staging/demo runtime errors into `.cursor/runtime-errors/inbox` |
 | `Install-SqlServerExpress.ps1` | Windows Server | SQL Server 2022 Express (`SQLEXPRESS`) |
+| `Install-PostgreSqlForVisa2026.ps1` | Windows Server | PostgreSQL 16 download/install + create Demo DB (see [visa2026-postgresql](../../.cursor/skills/visa2026-postgresql/SKILL.md); prefer binaries zip under SSH) |
 | `Configure-SqlExpressSaLogin.ps1` | Windows Server | After manual SQL install: mixed mode, `sa` |
 | `Restore-Visa2026SqlBackup.ps1` | Windows Server | Restore `.bak` (`-Profile Production` default) |
 | `Install-Visa2026ServerPrerequisites.ps1` | Windows Server | IIS + .NET 8 Hosting Bundle |

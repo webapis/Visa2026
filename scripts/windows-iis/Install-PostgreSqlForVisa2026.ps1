@@ -26,9 +26,18 @@ function Read-DotEnvMap([string]$Path) {
 }
 
 function Find-Psql {
-    Get-ChildItem "C:\Program Files\PostgreSQL" -Recurse -Filter psql.exe -ErrorAction SilentlyContinue |
-        Sort-Object FullName -Descending |
-        Select-Object -First 1 -ExpandProperty FullName
+    $roots = @(
+        "C:\PostgreSQL",
+        "C:\Program Files\PostgreSQL"
+    )
+    foreach ($root in $roots) {
+        if (-not (Test-Path -LiteralPath $root)) { continue }
+        $hit = Get-ChildItem $root -Recurse -Filter psql.exe -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
+        if ($hit) { return $hit }
+    }
+    return $null
 }
 
 $envMap = Read-DotEnvMap $EnvFile
@@ -85,7 +94,7 @@ if (-not $psql) {
     }
 
     $psql = Find-Psql
-    if (-not $psql) { throw "psql.exe not found after install under C:\Program Files\PostgreSQL" }
+    if (-not $psql) { throw "psql.exe not found after install under C:\PostgreSQL or C:\Program Files\PostgreSQL" }
 }
 
 Write-Host "Using psql: $psql" -ForegroundColor Green
