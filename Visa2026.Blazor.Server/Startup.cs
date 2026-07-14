@@ -1,4 +1,4 @@
-using DevExpress.ExpressApp.ApplicationBuilder;
+﻿using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -233,8 +233,9 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<BoStateNotificationNavigationHelper>();
             services.Configure<ImportHistoryOptions>(Configuration.GetSection(ImportHistoryOptions.SectionName));
             services.AddSingleton<IImportReimportHistoryReader, ImportReimportHistoryReader>();
-            // PROTOTYPE: using mock data — swap to ReportDashboardQueryService when UX is finalized
-            services.AddScoped<IReportDashboardQueryService, ReportDashboardMockQueryService>();
+            services.AddScoped<ReportDashboardQueryService>();
+            services.AddScoped<ReportDashboardMockQueryService>();
+            services.AddScoped<IReportDashboardQueryService, ReportDashboardHybridQueryService>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<PersonDocumentCopyPdfMerger>();
             services.AddScoped<HeaderDocumentCopyPdfMerger>();
