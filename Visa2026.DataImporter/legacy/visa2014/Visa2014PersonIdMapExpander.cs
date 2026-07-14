@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -58,6 +59,18 @@ internal static class Visa2014PersonIdMapExpander
         var rowsToExpand = batch.ImportRows.Concat(supplementBatch.ImportRows).ToList();
 
         int addedFromPn = 0;
+        // PN collision scan uses SqlClient + T-SQL (TOP 1 / N''). Skip on PostgreSQL
+        // targets (Demo dual-provider pilot); dedupe aliases above still apply.
+        if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
+        {
+            await File.WriteAllTextAsync(
+                idMapPath,
+                JsonSerializer.Serialize(idMap, new JsonSerializerOptions { WriteIndented = true }));
+            Console.WriteLine(
+                $"INF Id-map expanded: {before} → {idMap.Count} (+{idMap.Count - before}; dedupe {addedFromDedupe}, PN collision skipped on PostgreSQL)");
+            return 0;
+        }
+
         await using (var conn = new SqlConnection(targetConnectionString))
         {
             await conn.OpenAsync();

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using DevExpress.ExpressApp;
 using System.Linq;
 using DevExpress.ExpressApp.Blazor.DesignTime;
@@ -17,6 +17,9 @@ namespace Visa2026.Blazor.Server
         }
         public static int Main(string[] args)
         {
+            // Must be set before any Npgsql type mapping runs (Demo PostgreSQL pilot).
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             if (ContainsArgument(args, "help") || ContainsArgument(args, "h"))
             {
                 Console.WriteLine("Updates the database when its version does not match the application's version.");

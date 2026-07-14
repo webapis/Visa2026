@@ -25,7 +25,8 @@ internal static class ApplicationUserThemePreferenceStartupGate
 
         var connectionString = services.GetService<IConfiguration>()?.GetConnectionString("DefaultConnection")
             ?? services.GetService<IConfiguration>()?.GetConnectionString("ConnectionString");
-        if (!string.IsNullOrWhiteSpace(connectionString))
+        if (!string.IsNullOrWhiteSpace(connectionString)
+            && DatabaseProviderDetector.IsSqlServer(connectionString))
         {
             ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
         }

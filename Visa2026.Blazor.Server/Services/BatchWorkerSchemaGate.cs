@@ -32,6 +32,12 @@ internal static class BatchWorkerSchemaGate
             return;
         }
 
+        // T-SQL helpers — skip on PostgreSQL (Demo pilot); EF schema from XAF/ModuleUpdaters covers tables.
+        if (Visa2026.Module.DatabaseUpdate.DatabaseProviderDetector.IsPostgreSql(connectionString))
+        {
+            return;
+        }
+
         try
         {
             using var connection = new SqlConnection(connectionString);
@@ -96,6 +102,10 @@ internal static class BatchWorkerSchemaGate
         var connectionString = services.GetService<IConfiguration>()?.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
             return false;
+
+        // PostgreSQL Demo: EF creates tables via XAF update; skip SQL Server readiness probe.
+        if (Visa2026.Module.DatabaseUpdate.DatabaseProviderDetector.IsPostgreSql(connectionString))
+            return true;
 
         try
         {

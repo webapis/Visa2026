@@ -1,0 +1,48 @@
+---
+description: Never write or leave source as UTF-16 - UTF-8 no BOM only; recover corrupted files
+alwaysApply: true
+---
+
+# Source encoding - UTF-8 only (no UTF-16)
+
+On Windows, Cursor **Write** / **StrReplace** can save text as **UTF-16 LE**. That breaks `dotnet build` (`CS1056 Unexpected character '\0'`), PowerShell parse, and SQL scripts.
+
+## Never do
+
+- Do **not** save `.cs`, `.ps1`, `.sql`, `.json`, `.md`, `.yaml`, `.xafml`, or other repo text as UTF-16.
+- Do **not** "fix" encoding by re-writing with tools that may emit UTF-16 again (`Out-File` default, `Set-Content` without `-Encoding utf8NoBOM`, `Write`/`StrReplace` in a loop without verifying bytes).
+- Do **not** treat `\0` / mojibake on line 1 as a real syntax bug - check encoding first.
+
+## Always do
+
+- Prefer **UTF-8 without BOM** for all text sources in this repo.
+- After creating or heavily editing a file with Cursor tools on Windows, if build/parse fails oddly, **verify encoding** before debugging logic:
+
+```powershell
+# First bytes of a .cs file should be "using" -> 117,115,105,110 (not 255,254 / 0 between chars)
+([System.IO.File]::ReadAllBytes($path)[0..7] | ForEach-Object { $_.ToString('X2') }) -join ' '
+```
+
+## Converting UTF-16-corrupted files back to UTF-8
+
+When a file is already UTF-16 (BOM `FF FE`, or every other byte `00`):
+
+```powershell
+$path = 'C:\full\path\to\File.cs'
+$text = [System.IO.File]::ReadAllText($path)   # .NET detects UTF-16 via BOM
+$utf8 = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($path, $text, $utf8)
+```
+
+- Use **`[System.IO.File]::WriteAllText(..., UTF8Encoding($false))`** - not `Out-File`, not `Set-Content` without explicit UTF-8 no BOM.
+- Re-read bytes: `.cs` starting with `using` must begin `75 73 69 6E` (hex), not `FF FE` or `75 00 73 00`.
+- Prefer one PowerShell rewrite over repeated Cursor `Write` on the same corrupted path.
+
+## New files when tools keep corrupting encoding
+
+Write content via PowerShell UTF-8 no BOM instead of relying on Cursor `Write` for that file:
+
+```powershell
+$utf8 = New-Object System.Text.UTF8Encoding $false
+[System.IO.File]::WriteAllText($path, $content, $utf8)
+```

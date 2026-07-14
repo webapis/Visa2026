@@ -2,6 +2,7 @@ using System.Data;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
+using Visa2026.Module.DatabaseUpdate;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -542,6 +543,17 @@ internal static class Visa2014LookupPreflightCommand
         bool verbose)
     {
         var result = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+        // Demo PostgreSQL pilot: target keys are still SQL Server–shaped (brackets / dbo).
+        // Skip rather than fail; Phase A still audits legacy VISA2015. Use --skip-target-check
+        // explicitly if you want the same behaviour without Postgres detection.
+        if (DatabaseProviderDetector.IsPostgreSql(targetConnection))
+        {
+            Console.WriteLine(
+                "WRN Skipping target lookup key load (PostgreSQL) — SqlClient / T-SQL map not used against Npgsql.");
+            return result;
+        }
+
         var tableMap = BuildTargetTableMap();
 
         using var conn = new SqlConnection(targetConnection);

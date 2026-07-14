@@ -196,6 +196,13 @@ DocProject/Help/html
 
 # Click-Once directory
 publish/
+# Local DataImporter / on-prem publish staging (agent or manual zip deploy)
+.publish/
+
+# One-off local SSH/import scratch scripts (never commit)
+/tmp-*.ps1
+/tmp-*.sql
+/tmp-*/
 
 # Publish Web Output
 *.[Pp]ublish.xml

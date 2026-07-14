@@ -88,16 +88,62 @@ foreach ($candidate in $taskNames) {
 
 $dbLines = @()
 if (-not $NoDbCounts) {
-    $parts = @()
-    foreach ($bo in $dbCountMap.Keys) {
-        $t = $dbCountMap[$bo]
-        $parts += "SELECT '$bo' AS BO, COUNT(*) AS C FROM [$t] WHERE GCRecord IS NULL OR GCRecord = 0"
+    $usePostgres = $false
+    $pgDatabase = 'visa2026_demo'
+    $pgPass = $null
+    if ($Profile -eq 'Demo') {
+        $demoAppSettings = 'C:\inetpub\visa2026-demo\appsettings.Production.json'
+        $demoEnv = 'C:\visa2026\env\demo.env'
+        if (Test-Path -LiteralPath $demoAppSettings) {
+            try {
+                $cs = (Get-Content -LiteralPath $demoAppSettings -Raw | ConvertFrom-Json).ConnectionStrings.DefaultConnection
+                if ($cs -match '(?i)EFCoreProvider\s*=\s*(Postgres|PostgreSQL)' -or ($cs -match '(?i)(^|;)\s*Host\s*=')) {
+                    $usePostgres = $true
+                    if ($cs -match '(?i)Database\s*=\s*([^;]+)') { $pgDatabase = $Matches[1].Trim() }
+                }
+            } catch {}
+        }
+        if ($usePostgres -and (Test-Path -LiteralPath $demoEnv)) {
+            Get-Content -LiteralPath $demoEnv | ForEach-Object {
+                if ($_ -match '^PG_PASSWORD=(.*)$') { $pgPass = $Matches[1].Trim() }
+                if ($_ -match '^DB_NAME=(.*)$') { $pgDatabase = $Matches[1].Trim() }
+            }
+        }
     }
-    $sql = "SET NOCOUNT ON; USE [$dbName]; " + ($parts -join ' UNION ALL ') + ';'
-    $rows = sqlcmd -S 'localhost\SQLEXPRESS' -E -C -Q $sql -W -s '|' -h -1 2>$null
-    foreach ($r in @($rows)) {
-        if ($r -and $r.Trim() -and $r -notmatch 'rows affected' -and $r -match '\|') {
-            $dbLines += $r.Trim()
+
+    if ($usePostgres) {
+        $psql = 'C:\PostgreSQL\16\bin\psql.exe'
+        if (-not (Test-Path -LiteralPath $psql)) {
+            $psql = Get-Command psql -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
+        }
+        if ($psql -and $pgPass) {
+            $env:PGPASSWORD = $pgPass
+            $unionParts = @()
+            foreach ($bo in $dbCountMap.Keys) {
+                $t = $dbCountMap[$bo]
+                $unionParts += "SELECT '$bo' AS bo, COUNT(*)::int AS c FROM public.`"$t`" WHERE `"GCRecord`" IS NULL OR `"GCRecord`" = 0"
+            }
+            $sqlFile = Join-Path $env:TEMP ("visa2026-dbcounts-{0}.sql" -f [guid]::NewGuid().ToString('N'))
+            ($unionParts -join "`nUNION ALL`n") + ';' | Set-Content -LiteralPath $sqlFile -Encoding UTF8
+            $rows = & $psql -h localhost -U postgres -d $pgDatabase -t -A -F '|' -f $sqlFile 2>$null
+            Remove-Item -LiteralPath $sqlFile -Force -ErrorAction SilentlyContinue
+            foreach ($r in @($rows)) {
+                if ($r -and $r.Trim() -and $r -match '\|') { $dbLines += $r.Trim() }
+            }
+        }
+    }
+    else {
+        $parts = @()
+        foreach ($bo in $dbCountMap.Keys) {
+            $t = $dbCountMap[$bo]
+            $parts += "SELECT '$bo' AS BO, COUNT(*) AS C FROM [$t] WHERE GCRecord IS NULL OR GCRecord = 0"
+        }
+        $sql = "SET NOCOUNT ON; USE [$dbName]; " + ($parts -join ' UNION ALL ') + ';'
+        $rows = sqlcmd -S 'localhost\SQLEXPRESS' -E -C -Q $sql -W -s '|' -h -1 2>$null
+        foreach ($r in @($rows)) {
+            if ($r -and $r.Trim() -and $r -notmatch 'rows affected' -and $r -match '\|') {
+                $dbLines += $r.Trim()
+            }
         }
     }
 }

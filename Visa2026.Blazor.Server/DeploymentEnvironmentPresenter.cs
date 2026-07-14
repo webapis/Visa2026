@@ -73,6 +73,25 @@ public static class DeploymentEnvironmentPresenter
 
         try
         {
+            if (Visa2026.Module.DatabaseUpdate.DatabaseProviderDetector.IsPostgreSql(connectionString))
+            {
+                foreach (var part in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    var eq = part.IndexOf('=');
+                    if (eq <= 0)
+                        continue;
+                    var key = part[..eq].Trim();
+                    var value = part[(eq + 1)..].Trim();
+                    if (key.Equals("Database", StringComparison.OrdinalIgnoreCase)
+                        || key.Equals("DB", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return string.IsNullOrWhiteSpace(value) ? null : value;
+                    }
+                }
+
+                return null;
+            }
+
             var builder = new SqlConnectionStringBuilder(connectionString);
             return string.IsNullOrWhiteSpace(builder.InitialCatalog) ? null : builder.InitialCatalog.Trim();
         }

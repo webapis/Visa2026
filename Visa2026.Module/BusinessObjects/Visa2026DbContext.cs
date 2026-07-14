@@ -16,6 +16,25 @@ namespace Visa2026.Module.BusinessObjects
         {
             Database.SetCommandTimeout(180); // 3-minute timeout; the default 30s is too short for complex prefetch queries
         }
+
+        /// <summary>
+        /// Filtered-index predicates: SQL Server uses <c>[Col]</c>; PostgreSQL uses <c>"Col"</c>.
+        /// Bool filters use <c>= 0</c> on SQL Server and <c>= FALSE</c> on PostgreSQL.
+        /// </summary>
+        private string IndexFilter(string sqlServerPredicate)
+        {
+            var provider = Database.ProviderName ?? string.Empty;
+            if (!provider.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
+                return sqlServerPredicate;
+
+            return sqlServerPredicate
+                .Replace("[", "\"", StringComparison.Ordinal)
+                .Replace("]", "\"", StringComparison.Ordinal)
+                .Replace("N''", "''", StringComparison.Ordinal)
+                .Replace("N'0'", "'0'", StringComparison.Ordinal)
+                .Replace("= 0", "= FALSE", StringComparison.Ordinal);
+        }
+
         //public DbSet<ModuleInfo> ModulesInfo { get; set; }
         public DbSet<ModelDifference> ModelDifferences { get; set; }
         public DbSet<ModelDifferenceAspect> ModelDifferenceAspects { get; set; }
@@ -165,7 +184,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.HasIndex(e => new { e.ProjectContractId, e.ApprovalLegProfileId })
                     .IsUnique()
-                    .HasFilter("[GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<TravelHistory>(b =>
@@ -184,7 +203,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 b.HasIndex(t => t.SourceApplicationItemID)
                     .IsUnique()
-                    .HasFilter("[SourceApplicationItemID] IS NOT NULL AND [GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[SourceApplicationItemID] IS NOT NULL AND [GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {
@@ -259,7 +278,7 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeId })
                     .IsUnique()
-                    .HasFilter("[GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<UserReportTemplateProjectContract>(b => {
@@ -273,7 +292,7 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(l => new { l.UserReportTemplateId, l.ProjectContractId })
                     .IsUnique()
-                    .HasFilter("[GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<Application>(b => {
@@ -284,7 +303,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
-                 .HasFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL");
+                 .HasFilter(IndexFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL"));
                 b.HasIndex("ApplicationTypeID")
                  .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
             });
@@ -303,7 +322,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(t => t.SelectionCode).HasMaxLength(3);
                 b.HasIndex(t => t.SelectionCode)
                     .IsUnique()
-                    .HasFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''");
+                    .HasFilter(IndexFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''"));
                 b.HasOne(t => t.MigrationSlaProfile)
                     .WithMany(p => p.ApplicationTypes)
                     .HasForeignKey(t => t.MigrationSlaProfileId)
@@ -398,7 +417,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<Person>()
                 .HasIndex(p => p.PersonalNumber)
                 .IsUnique()
-                .HasFilter("[PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'");
+                .HasFilter(IndexFilter("[PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'"));
 
             // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
             // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-
@@ -465,7 +484,8 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<BusinessObjects.Operations.ApplicationRuntimeLog>(b =>
             {
-                b.Property(x => x.StackTrace).HasColumnType("nvarchar(max)");
+                // Provider-agnostic: SQL Server → nvarchar(max), PostgreSQL → text.
+                b.Property(x => x.StackTrace);
                 b.HasIndex(x => x.OccurredAtUtc);
                 b.HasIndex(x => x.Severity);
                 b.HasIndex(x => x.CorrelationId);

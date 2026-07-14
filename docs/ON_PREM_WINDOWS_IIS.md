@@ -43,9 +43,35 @@ Slot manifest and scripts: [scripts/windows-iis/Visa2026-IisSlots.ps1](../script
 |-----------|------------|
 | Web host | Three IIS sites (one publish folder per slot) |
 | App | .NET 8 **Visa2026.Blazor.Server** (same build copied to each slot) |
-| Database | **SQL Server** Express on Windows — `Visa2026DbProd` / `Staging` / `Demo` |
+| Database | **SQL Server** Express on Windows for Prod/Staging (`Visa2026DbProd` / `Visa2026DbStaging`). **Demo** can use SQL Server (`Visa2026DbDemo`) **or** PostgreSQL (`visa2026_demo`) — see [Dual EF providers](#dual-ef-providers-sql-server--postgresql) below. |
 | Secrets | Per-slot env: `C:\visa2026\env\prod.env`, `staging.env`, `demo.env` |
 | Reports / PDF | Windows fonts (Times New Roman, etc.) — no Linux font stack |
+
+### Dual EF providers (SQL Server + PostgreSQL)
+
+One publish binary supports both providers. Choose per **slot** via env + connection string (never mix providers in the same database).
+
+| Mode | Env (`C:\visa2026\env\<slot>.env`) | Connection (written by `Configure-Visa2026Production.ps1`) |
+|------|-------------------------------------|------------------------------------------------------------|
+| **SQL Server** (default) | Omit `EFCORE_PROVIDER` (or leave unset). `DB_NAME=Visa2026Db…`, `SA_PASSWORD=…` | `Server=localhost\SQLEXPRESS;Database=…;User Id=sa;…` |
+| **PostgreSQL** | `EFCORE_PROVIDER=Postgres`, `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASSWORD`, `DB_NAME=visa2026_demo` | `Host=…;Port=…;Database=…;Username=…;Password=…;Persist Security Info=True;EFCoreProvider=Postgres` |
+
+**App behavior** (`DatabaseProviderDetector`):
+
+- `UseSqlServer` vs `UseNpgsql` from the connection string.
+- SQL Server–only ModuleUpdaters / T-SQL schema helpers are **skipped** on PostgreSQL (slim updater allowlist for greenfield/Demo).
+- Filtered unique indexes use provider-aware SQL (`IndexFilter`).
+- `Npgsql.EnableLegacyTimestampBehavior` is enabled for Unspecified `DateTime` seed values.
+
+**Demo pilot (verified on `10.100.128.25`):**
+
+1. Install PostgreSQL (binaries + service `postgresql-x64-16`) — see `Install-PostgreSqlForVisa2026.ps1` / host learnings.
+2. Create empty DB matching `DB_NAME` (e.g. `visa2026_demo`).
+3. Set Demo env as in [demo.env.example](../scripts/windows-iis/env/demo.env.example).
+4. Deploy: `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate -EnableForceXafDbUpdate`.
+5. Smoke: `http://<server>:8081/LoginPage` → HTTP 200. Then `Remove-Visa2026ForceXafDbUpdate.ps1 -Profile Demo`.
+
+**Prod / Staging:** stay on SQL Express until an explicit Postgres cutover. Feature parity on Postgres (PDF mappings, SQL views, Maglumat raw SQL, full ModuleUpdater set) is **not** claimed yet — expand the allowlist as updaters are made provider-safe.
 
 ---
 

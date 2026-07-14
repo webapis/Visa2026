@@ -162,9 +162,16 @@ public static class RegistrationTravelHistorySyncService
         if (objectSpace is not EFCoreObjectSpace efObjectSpace)
             return;
 
-        efObjectSpace.DbContext.Database.ExecuteSqlRaw(
-            "DELETE FROM [TravelHistories] WHERE [SourceApplicationItemID] = {0} AND [GCRecord] IS NOT NULL",
-            applicationItemId);
+        var db = efObjectSpace.DbContext;
+        var stale = db.Set<TravelHistory>()
+            .IgnoreQueryFilters()
+            .Where(th => th.SourceApplicationItemID == applicationItemId && th.GCRecord != null)
+            .ToList();
+        if (stale.Count == 0)
+            return;
+
+        db.Set<TravelHistory>().RemoveRange(stale);
+        db.SaveChanges();
     }
 
     private static void PhysicalDeleteTravelHistoryById(Guid travelHistoryId, IObjectSpace objectSpace)
@@ -172,9 +179,15 @@ public static class RegistrationTravelHistorySyncService
         if (objectSpace is not EFCoreObjectSpace efObjectSpace)
             return;
 
-        efObjectSpace.DbContext.Database.ExecuteSqlRaw(
-            "DELETE FROM [TravelHistories] WHERE [ID] = {0}",
-            travelHistoryId);
+        var db = efObjectSpace.DbContext;
+        var entity = db.Set<TravelHistory>()
+            .IgnoreQueryFilters()
+            .FirstOrDefault(th => th.ID == travelHistoryId);
+        if (entity == null)
+            return;
+
+        db.Set<TravelHistory>().Remove(entity);
+        db.SaveChanges();
     }
 
     private static TravelHistory? FindOrCreateLinkedTravelHistory(

@@ -451,19 +451,35 @@
   box-sizing: border-box;
 }
 
-.rd-overview-card {
-  display: flex;
-  flex-direction: column;
+/* Cards are <button> elements — reset XAF / Fluent button chrome that collapses layout */
+.rd-overview-card,
+button.rd-overview-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
   gap: 14px;
   background: var(--rd-bg);
   border: 1px solid var(--rd-border);
   border-radius: var(--rd-radius);
-  padding: 22px 24px;
-  text-align: left;
+  padding: 22px 24px !important;
+  text-align: left !important;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
   font: inherit;
+  color: inherit;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  height: auto !important;
   min-height: 220px;
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible !important;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
 }
 .rd-overview-card:hover {
   border-color: var(--rd-accent);

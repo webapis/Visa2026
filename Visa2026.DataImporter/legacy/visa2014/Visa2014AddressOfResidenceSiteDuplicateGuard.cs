@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Visa2026.Module.DatabaseUpdate;
 using ModuleResidenceType = Visa2026.Module.BusinessObjects.ResidenceType;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
@@ -38,6 +39,13 @@ internal sealed class Visa2014AddressOfResidenceSiteDuplicateGuard
         var guard = new Visa2014AddressOfResidenceSiteDuplicateGuard();
         if (string.IsNullOrWhiteSpace(targetConnectionString))
             return guard;
+
+        if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
+        {
+            if (verbose)
+                Console.WriteLine("WRN AddressOfResidence site duplicate guard skipped (PostgreSQL — SqlClient/T-SQL map).");
+            return guard;
+        }
 
         await using var connection = new SqlConnection(targetConnectionString);
         await connection.OpenAsync(cancellationToken);

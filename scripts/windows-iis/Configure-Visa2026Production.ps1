@@ -45,17 +45,38 @@ $envMap = Read-DotEnvMap $EnvFile
 $saPassword = $envMap["SA_PASSWORD"]
 $devexpressKey = $envMap["DEVEXPRESS_LICENSEKEY"]
 $dbName = if ($envMap.ContainsKey("DB_NAME")) { $envMap["DB_NAME"] } else { $defaultDbName }
+$efCoreProvider = if ($envMap.ContainsKey("EFCORE_PROVIDER")) { $envMap["EFCORE_PROVIDER"].Trim() } else { "" }
 
-if ([string]::IsNullOrWhiteSpace($saPassword)) { throw "SA_PASSWORD missing in $EnvFile" }
 if ([string]::IsNullOrWhiteSpace($devexpressKey)) { throw "DEVEXPRESS_LICENSEKEY missing in $EnvFile" }
 
-if ($SqlPort -gt 0) {
-    $serverPart = if ($SqlServer -match '\\') { "$SqlServer,$SqlPort" } else { "$SqlServer,$SqlPort" }
+$isPostgres = $efCoreProvider -match '^(?i)Postgres(ql)?$'
+if ($isPostgres) {
+    $pgHost = if ($envMap.ContainsKey("PG_HOST") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_HOST"])) { $envMap["PG_HOST"].Trim() } else { "localhost" }
+    $pgPort = if ($envMap.ContainsKey("PG_PORT") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_PORT"])) { $envMap["PG_PORT"].Trim() } else { "5432" }
+    $pgUser = if ($envMap.ContainsKey("PG_USER") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_USER"])) { $envMap["PG_USER"].Trim() } else { "postgres" }
+    $pgPassword = if ($envMap.ContainsKey("PG_PASSWORD") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_PASSWORD"])) {
+        $envMap["PG_PASSWORD"]
+    } elseif (-not [string]::IsNullOrWhiteSpace($saPassword)) {
+        $saPassword
+    } else {
+        throw "PG_PASSWORD (or SA_PASSWORD fallback) missing in $EnvFile for PostgreSQL"
+    }
+    if ([string]::IsNullOrWhiteSpace($dbName)) { throw "DB_NAME missing in $EnvFile" }
+    # Persist Security Info=True required for XAF + Npgsql (DX doc 404290).
+    $connectionString = "Host=$pgHost;Port=$pgPort;Database=$dbName;Username=$pgUser;Password=$pgPassword;Persist Security Info=True;EFCoreProvider=Postgres"
+    Write-Host "Provider: PostgreSQL ($pgHost`:$pgPort / $dbName)" -ForegroundColor Cyan
 }
 else {
-    $serverPart = $SqlServer
+    if ([string]::IsNullOrWhiteSpace($saPassword)) { throw "SA_PASSWORD missing in $EnvFile" }
+    if ($SqlPort -gt 0) {
+        $serverPart = if ($SqlServer -match '\\') { "$SqlServer,$SqlPort" } else { "$SqlServer,$SqlPort" }
+    }
+    else {
+        $serverPart = $SqlServer
+    }
+    $connectionString = "Server=$serverPart;Database=$dbName;User Id=sa;Password=$saPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False"
+    Write-Host "Provider: SQL Server ($serverPart / $dbName)" -ForegroundColor Cyan
 }
-$connectionString = "Server=$serverPart;Database=$dbName;User Id=sa;Password=$saPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False"
 
 $jwtSecret = [guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N")
 

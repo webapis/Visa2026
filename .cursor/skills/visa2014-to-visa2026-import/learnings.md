@@ -1433,3 +1433,89 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Prevent**: never batch ApplicationProgress commits; do not trust DbCount=0 alone when shared batch>1 (rows may be uncommitted)
 - **Cross-skill**: visa2026-windows-iis-deploy
 
+
+### 2026-07-14 — Prod file waves started (DocumentCopies only)
+
+- **Phase**: file-wave (Production, after scalar ApplicationProgress Completed)
+- **Mode**: file-wave only (`DocumentCopies.ps1`, not full scalar re-run)
+- **Environment**: `C:\visa2026-sync` · `Visa2026DbProd` on `E:\visa2026\sql-data\` (~145 GB free on E:; C: ~15 GB)
+- **Script**: task `Visa2026-OnPrem-ProdFileWavesOnce` → DocumentCopies `-LegacySource calik-energi-onprem-prod -StartAt Person-Photo`
+- **Outcome**: started — `file-waves-status.json` Overall=Running; Person-Photo Running; id-map path correct under `data\id-maps\...`
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh -ClearScreen` (File waves table)
+- **Prevent**: do not use `-IncludeFileWaves` without `-StartAt` if you only want files — that re-prepares all scalars; call DocumentCopies directly after scalar Complete
+
+
+### 2026-07-14 — Prod DocumentCopies failed mid EducationDocument (filegroup full); Demo removed
+
+- **File waves**: Person-Photo / PassportDocument / VisaDocument OK; EducationDocument Posted 3682 / Failed 605 then abort — `Could not allocate space for object dbo.FileData` (PRIMARY full)
+- **Mitigation**: removed Demo IIS + `Visa2026DbDemo` (~15 GB on C:) — C: free now ~32 GB; Prod/Staging untouched
+- **Resume next**: after confirming Prod data file can grow on E:, `DocumentCopies.ps1 -StartAt EducationDocument` (id-map skip already imported diplomas)
+- **Cross-skill**: visa2026-windows-iis-deploy
+
+
+### 2026-07-14 — Prod FileData hit SQL Express 50 GB cap; reclaim + resume EducationDocument
+
+- **Root cause**: `Visa2026DbProd` is Express Edition — licensed max **51200 MB (50 GB)**. MDF was 100% full (`FileData` ~48.9 GB). `ALTER ... SIZE` beyond 50 GB fails with licensed limit.
+- **Reclaim**: deleted ~992k `SyncRuleLogs`; `DBCC SHRINKFILE` → ~**0.7 GB** headroom (used ~49.29 / 50 GB). Demo removal freed C: only (Prod lives on E:).
+- **Resume**: DocumentCopies `-StartAt EducationDocument` with EducationDocument id-map **3682** keys (match DB). Task `Visa2026-OnPrem-ProdFileWavesOnce`.
+- **Risk**: remaining Education + WorkPermit/Invitation/FamilyProof may refill the 50 GB cap — lasting fix is **upgrade off Express** (Developer/Standard) or externalize FileData.
+- **Cross-skill**: visa2026-windows-iis-deploy
+
+
+
+### 2026-07-14 — Demo PostgreSQL Person pilot (scalar import, in-process)
+
+- **Phase**: end-to-end pilot (Demo PG target, Person only)
+- **Environment**: `10.100.128.25` · IIS `Visa2026-Demo` `:8081` · PG `visa2026_demo` (`EFCoreProvider=Postgres`) · sync host `C:\visa2026-sync-demo` · legacy `10.100.128.15` / `VISA2015`
+- **Deploy**: republished `Visa2026.DataImporter` to `C:\visa2026-sync-demo\tools\DataImporter`; `config\sync.env` with `VISA2014_SQL_PASSWORD` + `VISA2026_MIGRATION_IMPORT_URLS=http://127.0.0.1:5012`; target CS from `C:\inetpub\visa2026-demo\appsettings.Production.json` via `ConnectionStrings__DefaultConnection`
+- **Code gates (Postgres pilot)**:
+  - `Visa2014LookupPreflightCommand.LoadTargetCatalogKeys` — skip SqlClient target catalog load when `DatabaseProviderDetector.IsPostgreSql`
+  - `OnPrem-Sync.ps1` `Invoke-DataImporterCli` — do not append `Encrypt=Optional` to Npgsql connection strings
+  - `Visa2014PersonIdMapExpander` — skip PN-collision SqlClient scan on PostgreSQL (dedupe aliases still apply)
+  - `Visa2014ImportTrackingLogCleanup` — skip T-SQL `OBJECT_ID` cleanup on PostgreSQL
+- **Run**: direct `--import-visa2014 --entity Person --inprocess --max-rows 50 --batch-size 25` (log `demo-Person-pilot2-20260714-002442.log`)
+- **Outcome**: **exit 0** · Prepared 50 · Posted **50** / Failed **0** · PG `People` count **50** · id-map **50** keys · `PN collision skipped on PostgreSQL`
+- **First attempt**: Posted 50 then exit **1** — post-import `Visa2014PersonIdMapExpander` opened `SqlConnection` on Npgsql CS (`Keyword not supported: 'host'`). Fixed by PG skip above.
+- **Preflight**: use `-SkipLookupPreflight` for full Demo chain until Npgsql target catalog loader exists (Phase A legacy audit still runs when preflight enabled; target Phase A missing-target checks are empty on PG skip).
+- **Still SQL-only on target** (not hit by Person pilot): duplicate guards (`Visa2014PersonIdentityDuplicateGuard`, ApplicationItem/Progress guards), `Visa2014TargetIdMapRebuild`, archive/watch DbCounts — gate or Npgsql port before full scalar chain.
+- **File waves**: not attempted on PG (`FileData` / SqlClient paths unchanged).
+- **Prevent**: never run `OnPrem-Sync` Encrypt normalization on Postgres CS; verify exit code after pilot — posted count alone is insufficient when post-import hooks use SqlClient.
+
+
+### 2026-07-14 — Demo PG full scalar Import started (after Person pilot)
+
+- **Phase**: end-to-end (Demo PostgreSQL scalar chain)
+- **Prep**: redeployed DataImporter + OnPrem scripts to `C:\visa2026-sync-demo`; wiped pilot `People` (50); reset id-map JSON stubs
+- **Task**: `Visa2026-OnPrem-DemoImportOnce` → `Run-OnPremSyncOnServer.ps1 -Profile Demo -SkipTenantCatalogGeneration -SkipLookupPreflight` (SYSTEM)
+- **RunId**: `20260714-003304`
+- **Early outcome**: Person **Completed** exit 0 — Posted **3310** / Failed **0** (Dedupe merged 21); PG `People`=3310; id-map expand skipped PN collision on PostgreSQL
+- **In progress**: Passport done → current wave **Visa** (DI still running)
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh` · status `C:\visa2026-sync-demo\sync-run-status.json`
+- **Note**: wrap script must use real newlines (literal `` `r`n `` text breaks the scheduled task)
+
+
+### 2026-07-14 — Demo PG Education catalog gap; regenerate from VISA2015 + resume
+
+- **Symptom**: Run `20260714-003304` Education Failed exit 1 — Posted 3158 / Failed 18 (incomplete Institution/Specialty payloads); repo `education-institution.calik-energi.json` (1507 rows) lacked live labels (e.g. Lizabon, IHK Regensburg, Puerto-Riko, Jemgyyet ylymlary)
+- **First seed attempt**: deployed repo calik-energi JSON + manifest bump 39 + ForceUpdate → PG counts 1507/1085 but same 18 failures (stale catalog vs live VISA2015)
+- **Fix**: `generate-from-legacy.ps1` on `.25` — sqlcmd `10.100.128.15` / `VISA2015` DISTINCT Education institutions + specialties → overlay `C:\inetpub\visa2026-demo\LookupCatalogs\tenant\` + ForceUpdate (manifest 40) → **1512** institutions / **1089** specialties
+- **Resume**: `-StartAt Education` RunId `20260714-005140` — Education **Completed** Posted **18** catch-up / Failed **0** (3158 already in id-map); continued to EmployeePositionHistory
+- **Prevent**: for Demo PG greenfield, always regenerate tenant education/specialty JSON from live legacy before Import; repo calik-energi files can lag live `.15`
+
+
+### 2026-07-14 — Demo PG AddressOfResidence SqlClient host; Watch DbCounts blank
+
+- **Watch**: ViaSsh DbCount column empty — `Get-OnPremImportLiveSnapshot.ps1` always used `sqlcmd` / `Visa2026DbDemo` on SQLEXPRESS (DB gone / not PG). Fix: Demo detects `EFCoreProvider=Postgres` from `C:\inetpub\visa2026-demo\appsettings.Production.json` and uses `psql` → `visa2026_demo` (quoted table names). Sample now shows Person|3310 … AddressOfResidence|5148.
+- **AddressOfResidence Failed(5148)**: every row `Keyword not supported: 'host'` — `TryMatchExistingAddressAsync` opened `SqlConnection` on Npgsql CS (site-match before Create). Also gated `Visa2014AddressOfResidenceSiteDuplicateGuard.LoadFromSqlAsync` for PG.
+- **Fix**: skip site-match SqlClient path when `DatabaseProviderDetector.IsPostgreSql`; republish DI to `C:\visa2026-sync-demo`
+- **Resume**: `-StartAt AddressOfResidence` RunId `20260714-005636` — **Completed** Posted **5148** / Failed **0** (incl. PIA-inferred 1125); continued to EmployeeSalary
+- **Prevent**: any per-row target SqlClient helper fails loudly N times on Postgres; gate at entry. Watch must know Demo is PG after Express Demo removal.
+
+
+### 2026-07-14 ? Demo PG ApplicationItem T-SQL bracket DELETE (RegistrationTravelHistorySync)
+
+- **Symptom**: Run `20260714-005636` ApplicationItem ~61% ? sidecar **posted=49 fail=13319+**; PG `ApplicationItems`=0; `.err` `42601: syntax error at or near "["` on `DELETE FROM [TravelHistories] WHERE [SourceApplicationItemID] = ?`
+- **Cause**: `RegistrationTravelHistorySyncService` `ExecuteSqlRaw` T-SQL runs on every ApplicationItem save (clear soft-deleted travel rows before unique index). Demo Import uses **`--inprocess`** OData on `:5012` ? fix must land in **`C:\visa2026-sync-demo\tools\DataImporter\Visa2026.Module.dll`**, not IIS alone.
+- **Fix**: replace raw DELETE with EF `IgnoreQueryFilters()` + `RemoveRange`/`Remove` + `SaveChanges()` (provider-agnostic). Deploy Module DLL to DataImporter folder; restart `-StartAt ApplicationItem`.
+- **Resume**: RunId `20260714-013121` ? after deploy **inserted 1091+ / failed 0** within first ~1100 rows (0 err lines).
+- **Prevent**: any `ExecuteSqlRaw` with `[brackets]` breaks on Npgsql; prefer EF or quote/bracket translate like `Visa2026EFCoreDbContext.IndexFilter`. In-process import = DataImporter Module copy, not only `C:\inetpub\visa2026-demo`.

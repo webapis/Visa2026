@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Visa2026.DataImporter;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -422,6 +423,10 @@ internal static class Visa2014AddressOfResidenceODataImporter
         IReadOnlyDictionary<string, object?> importRow)
     {
         if (string.IsNullOrWhiteSpace(targetConnectionString))
+            return null;
+
+        // Site-match scan uses SqlClient + T-SQL. Skip on PostgreSQL (Demo dual-provider pilot).
+        if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
             return null;
 
         await using var connection = new SqlConnection(targetConnectionString);

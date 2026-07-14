@@ -225,14 +225,23 @@ function Invoke-DataImporterCli {
     if (-not [string]::IsNullOrWhiteSpace($TargetConnection)) {
         $env:ConnectionStrings__DefaultConnection = $TargetConnection
         $env:ASPNETCORE_ENVIRONMENT = 'Production'
-        # Encrypt=False breaks some Microsoft.Data.SqlClient builds ("Invalid value for key 'Encrypt'").
-        $safeCs = $TargetConnection `
-            -replace '(?i)\bUser Id=', 'UID=' `
-            -replace '(?i)\bPassword=', 'PWD=' `
-            -replace '(?i)\bEncrypt\s*=\s*False\b', 'Encrypt=Optional' `
-            -replace '(?i)\bEncrypt\s*=\s*True\b', 'Encrypt=Mandatory'
-        if ($safeCs -notmatch '(?i)\bEncrypt\s*=') {
-            $safeCs = $safeCs.TrimEnd(';') + ';Encrypt=Optional'
+        # SQL Server only: Encrypt=False breaks some Microsoft.Data.SqlClient builds.
+        # Do not rewrite Npgsql strings (Host=... / EFCoreProvider=Postgres) — Encrypt= is not valid there.
+        $isPostgres = ($TargetConnection -match '(?i)(^|;)\s*EFCoreProvider\s*=\s*(Postgres|PostgreSQL)\b') -or
+            (($TargetConnection -match '(?i)(^|;)\s*Host\s*=') -and
+             ($TargetConnection -notmatch '(?i)(^|;)\s*(Data Source|Server|Initial Catalog)\s*='))
+        if ($isPostgres) {
+            $safeCs = $TargetConnection
+        }
+        else {
+            $safeCs = $TargetConnection `
+                -replace '(?i)\bUser Id=', 'UID=' `
+                -replace '(?i)\bPassword=', 'PWD=' `
+                -replace '(?i)\bEncrypt\s*=\s*False\b', 'Encrypt=Optional' `
+                -replace '(?i)\bEncrypt\s*=\s*True\b', 'Encrypt=Mandatory'
+            if ($safeCs -notmatch '(?i)\bEncrypt\s*=') {
+                $safeCs = $safeCs.TrimEnd(';') + ';Encrypt=Optional'
+            }
         }
         $env:ConnectionStrings__DefaultConnection = $safeCs
         for ($i = 0; $i -lt $CliArgs.Count; $i++) {
