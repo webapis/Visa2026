@@ -32,7 +32,7 @@ public sealed class ReportDashboardModel : ComponentModelBase
     }
     public string ChartView
     {
-        get => GetPropertyValue<string>() is { Length: > 0 } s ? s : "bar";
+        get => GetPropertyValue<string>() is { Length: > 0 } s ? s : "pie";
         set => SetPropertyValue(value);
     }
     public int DateRangeMonths
@@ -41,6 +41,12 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     public bool ShowAllView
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Passport only: when false (default), exclude Person.IsArchived.</summary>
+    public bool IncludeArchivedPersons
     {
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
@@ -101,6 +107,11 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     public EventCallback<bool> ShowAllViewChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> IncludeArchivedPersonsChanged
     {
         get => GetPropertyValue<EventCallback<bool>>();
         set => SetPropertyValue(value);

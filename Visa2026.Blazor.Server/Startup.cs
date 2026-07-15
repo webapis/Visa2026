@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;

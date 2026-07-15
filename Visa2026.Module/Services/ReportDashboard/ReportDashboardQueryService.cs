@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.EFCore;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ReportDashboard;
@@ -61,6 +64,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             ReportDashboardCategory.Passport =>
                 objectSpace.GetObjectsQuery<Passport>()
                     .Count(p => p.Person != null && p.Person.PersonRole == role
+                                && !p.Person.IsArchived
                                 && (p.ExpirationDate == null || p.ExpirationDate >= cutoff)),
             _ => 0
         };
@@ -72,7 +76,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         ReportDashboardCategory category,
         string projectKey,
         int dateRangeMonths = 6,
-        string subReport = "default")
+        string subReport = "default",
+        bool includeArchivedPersons = false)
     {
         var cutoff = DateTime.Today.AddMonths(-dateRangeMonths);
         var role = ReportDashboardCatalog.ToPersonRole(personType);
@@ -91,7 +96,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             ReportDashboardCategory.WorkPermit    => LoadWorkPermit(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             ReportDashboardCategory.Travel        => LoadTravel(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
             ReportDashboardCategory.BorderZone    => LoadBorderZone(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
-            ReportDashboardCategory.Passport      => LoadPassport(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            ReportDashboardCategory.Passport      => LoadPassport(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, includeArchivedPersons),
             _                                     => EmptyPanel(personType, category, subReport, excelHint, excelConfigured)
         };
     }
@@ -329,35 +334,208 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     private static ReportDashboardPanelData LoadPassport(
         IObjectSpace objectSpace, PersonRecordRole role, string projectKey,
         ReportDashboardPersonType personType, string subReport,
-        string? excelHint, bool excelConfigured, DateTime cutoff)
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        bool includeArchivedPersons)
+    {
+        // View-backed: by-validity / by-type / by-citizenship (same vw_rd_passport).
+        return LoadPassportFromView(
+            objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+            includeArchivedPersons);
+    }
+
+    /// <summary>
+    /// Loads Passport panel from <c>vw_rd_passport</c> (latest passport per person).
+    /// By default excludes archived persons; pass includeArchivedPersons to include them.
+    /// Status/chart dimension depends on <paramref name="subReport"/>:
+    /// by-validity → ValidityLabel; by-type → TypeLabel; by-citizenship → CitizenshipLabel (Person.Nationality).
+    /// </summary>
+    private static ReportDashboardPanelData LoadPassportFromView(
+        IObjectSpace objectSpace, PersonRecordRole role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        bool includeArchivedPersons)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return LoadPassportLegacy(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, includeArchivedPersons);
+        }
+
+        _ = cutoff;
+        var roleCode = (int)role;
+        var categorical = subReport is "by-type" or "by-citizenship";
+
+        IQueryable<VwRdPassport> query = db.VwRdPassport
+            .AsNoTracking()
+            .Where(r => r.PersonRoleCode == roleCode);
+
+        if (!includeArchivedPersons)
+            query = query.Where(r => !r.IsArchived);
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(r =>
+                r.ProjectNameTm == projectKey
+                || r.ProjectName == projectKey
+                || r.ProjectNameRaw == projectKey);
+        }
+
+        try
+        {
+            List<ReportDashboardStatusBucket> buckets;
+            if (categorical)
+            {
+                IQueryable<string?> labelQuery = subReport == "by-citizenship"
+                    ? query.Select(r => r.CitizenshipLabel)
+                    : query.Select(r => r.TypeLabel);
+
+                var catRows = labelQuery
+                    .GroupBy(l => l)
+                    .Select(g => new { Label = g.Key, Count = g.Count() })
+                    .OrderByDescending(g => g.Count)
+                    .ToList();
+
+                buckets = AssignCategoricalCss(catRows.Select(t => (t.Label ?? string.Empty, t.Count)).ToList());
+            }
+            else
+            {
+                var validityRows = query
+                    .GroupBy(r => new { r.ValidityLabel, r.ValidityCssClass })
+                    .Select(g => new
+                    {
+                        Label = g.Key.ValidityLabel,
+                        CssClass = g.Key.ValidityCssClass,
+                        Count = g.Count()
+                    })
+                    .ToList();
+
+                buckets = validityRows
+                    .Select(g => new ReportDashboardStatusBucket
+                    {
+                        Label = g.Label ?? string.Empty,
+                        CssClass = g.CssClass ?? "st-pending",
+                        Count = g.Count
+                    })
+                    .OrderByDescending(b => b.Count)
+                    .ToList();
+            }
+
+            var totalCount = buckets.Sum(b => b.Count);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            IQueryable<VwRdPassport> previewQuery = subReport switch
+            {
+                "by-type" => query.OrderBy(r => r.TypeLabel).ThenBy(r => r.ExpirationDate),
+                "by-citizenship" => query.OrderBy(r => r.CitizenshipLabel).ThenBy(r => r.ExpirationDate),
+                _ => query.OrderBy(r => r.ValidityLabel == "Expired").ThenBy(r => r.ExpirationDate)
+            };
+
+            var rows = previewQuery
+                .Take(PreviewLimit)
+                .AsEnumerable()
+                .Select(r =>
+                {
+                    var status = subReport switch
+                    {
+                        "by-type" => r.TypeLabel ?? string.Empty,
+                        "by-citizenship" => r.CitizenshipLabel ?? string.Empty,
+                        _ => r.ValidityLabel ?? string.Empty
+                    };
+                    var css = categorical
+                        ? (cssByLabel.TryGetValue(status, out var c) ? c : "st-cat-1")
+                        : (r.ValidityCssClass ?? "st-pending");
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.PassportNumber ?? string.Empty,
+                        ColumnB = FormatDate(r.ExpirationDate),
+                        Status = status,
+                        StatusCssClass = css
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Passport, subReport, rows,
+                excelHint, excelConfigured, buckets, totalCount);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable)
+        {
+            return LoadPassportLegacy(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, includeArchivedPersons);
+        }
+    }
+
+    private static List<ReportDashboardStatusBucket> AssignCategoricalCss(
+        List<(string Label, int Count)> groups)
+    {
+        string[] palette = ["st-cat-1", "st-cat-2", "st-cat-3", "st-cat-4", "st-cat-5"];
+        return groups
+            .Select((g, i) => new ReportDashboardStatusBucket
+            {
+                Label = g.Label,
+                Count = g.Count,
+                CssClass = palette[i % palette.Length]
+            })
+            .ToList();
+    }
+    private static ReportDashboardPanelData LoadPassportLegacy(
+        IObjectSpace objectSpace, PersonRecordRole role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        bool includeArchivedPersons)
     {
         var query = objectSpace.GetObjectsQuery<Passport>()
             .Where(p => p.Person != null && p.Person.PersonRole == role
+                        && !p.IsCancelled
                         && (p.ExpirationDate == null || p.ExpirationDate >= cutoff));
+
+        if (!includeArchivedPersons)
+            query = query.Where(p => !p.Person!.IsArchived);
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
             query = query.Where(p => p.Person!.ProjectContract != null
                 && (p.Person.ProjectContract.Name == projectKey || p.Person.ProjectContract.NameTm == projectKey));
 
         var today = DateTime.Today;
-        var rows = query.Take(PreviewLimit).AsEnumerable().Select(p =>
-        {
-            var status = PassportValidityBucket(p.ExpirationDate, today);
-            return new ReportDashboardPreviewRow
+        // Same rule as vw_rd_passport: one passport per person (latest IssueDate).
+        var latest = query.AsEnumerable()
+            .GroupBy(p => p.Person!.ID)
+            .Select(g => g.OrderByDescending(p => p.IssueDate).ThenByDescending(p => p.ID).First())
+            .ToList();
+
+        var buckets = latest
+            .GroupBy(p => PassportValidityBucket(p.ExpirationDate, today))
+            .Select(g => new ReportDashboardStatusBucket
+            {
+                Label = g.Key,
+                Count = g.Count(),
+                CssClass = PassportValidityCss(g.First().ExpirationDate, today)
+            })
+            .OrderByDescending(b => b.Count)
+            .ToList();
+
+        var rows = latest
+            .OrderBy(p => PassportValidityBucket(p.ExpirationDate, today) == "Expired")
+            .ThenBy(p => p.ExpirationDate)
+            .Take(PreviewLimit)
+            .Select(p => new ReportDashboardPreviewRow
             {
                 RecordId = p.ID,
                 Name = p.Person?.FullName ?? string.Empty,
                 Project = ProjectLabel(p.Person?.ProjectContract),
                 ColumnA = p.PassportNumber ?? string.Empty,
                 ColumnB = FormatDate(p.ExpirationDate),
-                Status = status,
+                Status = PassportValidityBucket(p.ExpirationDate, today),
                 StatusCssClass = PassportValidityCss(p.ExpirationDate, today)
-            };
-        }).ToList();
+            })
+            .ToList();
 
-        return BuildPanel(personType, ReportDashboardCategory.Passport, subReport, rows, excelHint, excelConfigured);
+        return BuildPanel(
+            personType, ReportDashboardCategory.Passport, subReport, rows,
+            excelHint, excelConfigured, buckets, latest.Count);
     }
-
     // ---- Panel builder ---------------------------------------------------
 
     private static ReportDashboardPanelData BuildPanel(
@@ -366,9 +544,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string subReport,
         List<ReportDashboardPreviewRow> rows,
         string? excelHint,
-        bool excelConfigured)
+        bool excelConfigured,
+        IReadOnlyList<ReportDashboardStatusBucket>? statusBuckets = null,
+        int? totalCount = null)
     {
-        var buckets = rows
+        var buckets = statusBuckets?.ToList() ?? rows
             .GroupBy(r => r.Status)
             .Select(g => new ReportDashboardStatusBucket
             {
@@ -393,6 +573,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             TableHeaders          = ReportDashboardCatalog.TableHeaders(category, subReport),
             StatusBuckets         = buckets,
             PreviewRows           = rows,
+            TotalCount            = totalCount ?? rows.Count,
             ExcelTemplateNameHint = excelHint,
             ExcelConfigured       = excelConfigured,
             ListViewId            = ReportDashboardCatalog.ListViewId(category)
@@ -426,7 +607,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         var days = (expiration.Value.Date - today).Days;
         if (days < 0)  return "Expired";
         if (days < 30) return "Expiring (<30 days)";
-        if (days < 60) return "Valid (<60 days)";
+        if (days <= 90) return "Valid (31-90 days)";
         return "Valid (>90 days)";
     }
 
@@ -436,7 +617,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         var days = (expiration.Value.Date - today).Days;
         if (days < 0)  return "st-expiring";
         if (days < 30) return "st-expiring";
-        if (days < 60) return "st-pending";
+        if (days <= 90) return "st-pending";
         return "st-approved";
     }
 

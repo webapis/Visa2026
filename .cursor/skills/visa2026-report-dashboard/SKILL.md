@@ -45,7 +45,7 @@ The component never queries the database. All data comes through the service int
 | 3 - Real loader | `ReportDashboardQueryService.Load[Category]()` | Parity with mock output |
 | 4 - Switch | `Startup.cs`: swap `MockQueryService` to `ReportDashboardQueryService` | One category at a time |
 
-Keep `ReportDashboardMockQueryService` registered until ALL categories have real views. Swap per category by checking `subReport` in the real service and falling back to mock rows for unfinished sub-reports.
+Prefer `ReportDashboardHybridQueryService`: register concrete Mock + Real, bind interface to Hybrid. Promote via `RealSubReports` as `(category, subReport)` pairs (snapshot stays mock until `vw_rd_snapshot_counts`). Keep mock registered until all sub-reports are verified.
 
 See `IMPLEMENTATION_PLAN.md` for the exact SQL for all 9 views, the EF entity checklist, and the per-category status tracker.
 

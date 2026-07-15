@@ -63,7 +63,8 @@ public sealed class ReportDashboardPanelData
     public IReadOnlyList<string>               TableHeaders  { get; init; } = Array.Empty<string>();
     public IReadOnlyList<ReportDashboardStatusBucket> StatusBuckets { get; init; } = Array.Empty<ReportDashboardStatusBucket>();
     public IReadOnlyList<ReportDashboardPreviewRow>   PreviewRows   { get; init; } = Array.Empty<ReportDashboardPreviewRow>();
-    public int    TotalCount          => PreviewRows.Count;
+    /// <summary>Full matched-row count for the panel (may exceed <see cref="PreviewRows"/> length).</summary>
+    public int    TotalCount          { get; init; }
     public string? ExcelTemplateNameHint { get; init; }
     public bool   ExcelConfigured     { get; init; }
     public string ListViewId          { get; init; } = string.Empty;

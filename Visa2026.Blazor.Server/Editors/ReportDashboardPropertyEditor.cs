@@ -46,15 +46,17 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             Category          = initialCategory,
             SubReport         = ReportDashboardCatalog.DefaultSubReport(initialCategory),
             ProjectKey        = "All",
-            ChartView         = "bar",
+            ChartView         = "pie",
             DateRangeMonths   = 6,
             ShowAllView       = true,
+            IncludeArchivedPersons = false,
             PersonTypeChanged   = EventCallback.Factory.Create<ReportDashboardPersonType>(this, OnPersonTypeChanged),
             CategoryChanged     = EventCallback.Factory.Create<ReportDashboardCategory>(this, OnCategoryChanged),
             SubReportChanged    = EventCallback.Factory.Create<string>(this, OnSubReportChanged),
             ProjectKeyChanged   = EventCallback.Factory.Create<string>(this, OnProjectKeyChanged),
             ChartViewChanged    = EventCallback.Factory.Create<string>(this, OnChartViewChanged),
             ShowAllViewChanged  = EventCallback.Factory.Create<bool>(this, OnShowAllViewChanged),
+            IncludeArchivedPersonsChanged = EventCallback.Factory.Create<bool>(this, OnIncludeArchivedPersonsChanged),
             OpenExcelRequested      = EventCallback.Factory.Create(this, OnOpenExcelAsync),
             OpenListViewRequested   = EventCallback.Factory.Create<string?>(this, OnOpenListView),
             DateRangeChanged        = EventCallback.Factory.Create<int>(this, OnDateRangeChanged)
@@ -73,6 +75,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     {
         ComponentModel.Category    = category;
         ComponentModel.SubReport   = ReportDashboardCatalog.DefaultSubReport(category);
+        ComponentModel.ChartView   = DefaultChartViewFor(category, ComponentModel.SubReport);
         ComponentModel.ShowAllView = false;
         ComponentModel.AllPanels   = null;
         Refresh(ComponentModel);
@@ -81,6 +84,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     private void OnSubReportChanged(string subReport)
     {
         ComponentModel.SubReport = subReport;
+        ComponentModel.ChartView = DefaultChartViewFor(ComponentModel.Category, subReport);
         Refresh(ComponentModel);
     }
 
@@ -90,6 +94,13 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         Refresh(ComponentModel);
     }
 
+
+    private static string DefaultChartViewFor(ReportDashboardCategory category, string subReport) =>
+        (category, subReport) switch
+        {
+            (ReportDashboardCategory.Passport, "by-citizenship") => "bar",
+            _ => "pie"
+        };
     private void OnChartViewChanged(string chartView)
     {
         ComponentModel.ChartView = chartView;
@@ -104,6 +115,12 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     private void OnShowAllViewChanged(bool showAll)
     {
         ComponentModel.ShowAllView = showAll;
+        Refresh(ComponentModel);
+    }
+
+    private void OnIncludeArchivedPersonsChanged(bool includeArchived)
+    {
+        ComponentModel.IncludeArchivedPersons = includeArchived;
         Refresh(ComponentModel);
     }
 
@@ -126,7 +143,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                 var defaultSub = ReportDashboardCatalog.DefaultSubReport(cat);
                 allPanels[cat] = _queryService.LoadPanel(
                     objectSpace, model.PersonType, cat, model.ProjectKey,
-                    model.DateRangeMonths, defaultSub);
+                    model.DateRangeMonths, defaultSub, includeArchivedPersons: false);
             }
             model.AllPanels = allPanels;
             model.Panel     = null;
@@ -140,7 +157,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                 model.Category,
                 model.ProjectKey,
                 model.DateRangeMonths,
-                model.SubReport);
+                model.SubReport,
+                model.IncludeArchivedPersons);
         }
     }
 

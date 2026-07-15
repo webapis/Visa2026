@@ -54,8 +54,12 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         ReportDashboardCategory category,
         string projectKey,
         int dateRangeMonths = 6,
-        string subReport = "default") =>
-        (category, subReport) switch
+        string subReport = "default",
+        bool includeArchivedPersons = false)
+    {
+        // Mock passport data has no archived flag; parameter kept for interface parity.
+        if (includeArchivedPersons) { /* no-op */ }
+        return (category, subReport) switch
         {
             // Visa (formerly Visa Extension)
             (ReportDashboardCategory.VisaExtension, "app-progress") => Build(personType, category, subReport, VisaByAppProgress(),  projectKey),
@@ -83,6 +87,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             (ReportDashboardCategory.Passport, _)                => Build(personType, category, subReport, PassportByValidity(),    projectKey),
             _ => Build(personType, category, subReport, [], projectKey)
         };
+    }
 
     // ===== Visa (Visa Extension) — 4 sub-reports ==========================
 
@@ -374,6 +379,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             TableHeaders          = ReportDashboardCatalog.TableHeaders(category, subReport),
             StatusBuckets         = buckets,
             PreviewRows           = rows,
+            TotalCount            = rows.Count,
             ExcelTemplateNameHint = ReportDashboardCatalog.ExcelTemplateNameHint(category),
             ExcelConfigured       = excelConfigured,
             ListViewId            = ReportDashboardCatalog.ListViewId(category)

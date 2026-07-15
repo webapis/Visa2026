@@ -12,5 +12,6 @@ public interface IReportDashboardQueryService
         ReportDashboardCategory category,
         string projectKey,
         int dateRangeMonths = 6,
-        string subReport = "default");
+        string subReport = "default",
+        bool includeArchivedPersons = false);
 }

@@ -4,25 +4,21 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.Services.ReportDashboard;
 
 /// <summary>
-/// Delegates per-category to either the real EF query service or the mock.
-/// Promote a category by adding it to <see cref="RealCategories"/> once its
-/// queries are verified in the target environment.
+/// Gradual promotion: mock remains the default for UI appeal.
+/// Promote one <c>(category, subReport)</c> at a time via <see cref="RealSubReports"/>.
+/// Snapshot stays on mock until counts are promoted separately.
 /// </summary>
 public sealed class ReportDashboardHybridQueryService : IReportDashboardQueryService
 {
     /// <summary>
-    /// Categories that have been promoted to real EF queries.
-    /// Add each category here one at a time as it is verified.
+    /// Sub-reports that load from SQL views / real EF queries.
+    /// Add entries one at a time after verifying each view.
     /// </summary>
-    private static readonly HashSet<ReportDashboardCategory> RealCategories =
+    private static readonly HashSet<(ReportDashboardCategory Category, string SubReport)> RealSubReports =
     [
-        ReportDashboardCategory.Registration,
-        ReportDashboardCategory.Passport,
-        ReportDashboardCategory.WorkPermit,
-        ReportDashboardCategory.BorderZone,
-        ReportDashboardCategory.Invitation,
-        ReportDashboardCategory.Travel,
-        ReportDashboardCategory.VisaExtension,
+        (ReportDashboardCategory.Passport, "by-validity"),
+        (ReportDashboardCategory.Passport, "by-type"),
+        (ReportDashboardCategory.Passport, "by-citizenship"),
     ];
 
     private readonly ReportDashboardQueryService _real;
@@ -37,10 +33,10 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     }
 
     /// <summary>
-    /// Snapshot always uses the real service so counts are accurate.
+    /// Keep overview counts / project chips on mock until snapshot view ships.
     /// </summary>
     public ReportDashboardSnapshot LoadSnapshot(IObjectSpace objectSpace, int dateRangeMonths = 6)
-        => _real.LoadSnapshot(objectSpace, dateRangeMonths);
+        => _mock.LoadSnapshot(objectSpace, dateRangeMonths);
 
     public ReportDashboardPanelData LoadPanel(
         IObjectSpace objectSpace,
@@ -48,9 +44,17 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         ReportDashboardCategory category,
         string projectKey,
         int dateRangeMonths = 6,
-        string subReport = "default")
+        string subReport = "default",
+        bool includeArchivedPersons = false)
     {
-        IReportDashboardQueryService service = RealCategories.Contains(category) ? _real : _mock;
-        return service.LoadPanel(objectSpace, personType, category, projectKey, dateRangeMonths, subReport);
+        var key = (category, subReport);
+        // Default sub-report key for Passport is "by-validity"
+        if (category == ReportDashboardCategory.Passport
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "by-validity");
+
+        IReportDashboardQueryService service = RealSubReports.Contains(key) ? _real : _mock;
+        return service.LoadPanel(
+            objectSpace, personType, category, projectKey, dateRangeMonths, subReport, includeArchivedPersons);
     }
 }

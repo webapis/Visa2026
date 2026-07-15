@@ -141,6 +141,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VisaCancelExtStatus> VisaCancelExtStatus { get; set; }
         public DbSet<VisaCancellationStatus> VisaCancellationStatus { get; set; }
         public DbSet<ForeignWorkerMaglumat> ForeignWorkerMaglumat { get; set; }
+        public DbSet<VwRdPassport> VwRdPassport { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -265,6 +266,11 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<ForeignWorkerMaglumat>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("View_ForeignWorkerMaglumat");
+            });
+
+            modelBuilder.Entity<VwRdPassport>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_passport");
             });
 
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {

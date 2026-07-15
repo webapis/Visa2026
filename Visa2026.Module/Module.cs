@@ -168,6 +168,7 @@ namespace Visa2026.Module
                     new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                     new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
                     new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
+                    new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
                     new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB)
                 };
             }

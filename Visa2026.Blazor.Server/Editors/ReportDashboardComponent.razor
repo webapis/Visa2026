@@ -149,15 +149,37 @@
 
                     @if (ReportDashboardCatalog.SubReports(Category).Count > 1)
                     {
-                        <div class="rd-sub-tabs" role="tablist">
-                            @foreach (var sub in ReportDashboardCatalog.SubReports(Category))
+                        <div class="rd-sub-tabs-row">
+                            <div class="rd-sub-tabs" role="tablist">
+                                @foreach (var sub in ReportDashboardCatalog.SubReports(Category))
+                                {
+                                    <button type="button"
+                                            class="rd-sub-tab @(SubReport == sub.Key ? "active" : null)"
+                                            @onclick="() => OnSubReport(sub.Key)">
+                                        @sub.Label
+                                    </button>
+                                }
+                            </div>
+                            @if (Category == ReportDashboardCategory.Passport)
                             {
-                                <button type="button"
-                                        class="rd-sub-tab @(SubReport == sub.Key ? "active" : null)"
-                                        @onclick="() => OnSubReport(sub.Key)">
-                                    @sub.Label
-                                </button>
+                                <label class="rd-include-archived" title="Include persons marked IsArchived">
+                                    <input type="checkbox"
+                                           checked="@IncludeArchivedPersons"
+                                           @onchange="OnIncludeArchivedChanged" />
+                                    <span>Include archived</span>
+                                </label>
                             }
+                        </div>
+                    }
+                    else if (Category == ReportDashboardCategory.Passport)
+                    {
+                        <div class="rd-sub-tabs-row">
+                            <label class="rd-include-archived" title="Include persons marked IsArchived">
+                                <input type="checkbox"
+                                       checked="@IncludeArchivedPersons"
+                                       @onchange="OnIncludeArchivedChanged" />
+                                <span>Include archived</span>
+                            </label>
                         </div>
                     }
 
@@ -165,9 +187,9 @@
                         <div class="rd-chart-toolbar">
                             <span class="rd-chart-toolbar-label">View</span>
                             <div class="rd-view-switch">
-                                <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>List</button>
                                 <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>Pie Chart</button>
                                 <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>Bar Chart</button>
+                                <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>List</button>
                             </div>
                         </div>
 
@@ -201,11 +223,11 @@
                                     @foreach (var bucket in FilteredBuckets)
                                     {
                                         var pct = FilteredTotal > 0 ? (int)Math.Round(100.0 * bucket.Count / FilteredTotal) : 0;
-                                        <button type="button" class="rd-legend-item" @onclick="() => OnListView(bucket.Label)">
+                                        <button type="button" class="rd-legend-item" title="@bucket.Label" @onclick="() => OnListView(bucket.Label)">
                                             <span class="rd-legend-dot @bucket.CssClass"></span>
-                                            @bucket.Label
+                                            <span class="rd-legend-label">@bucket.Label</span>
                                             <span class="rd-legend-count">@bucket.Count</span>
-                                            (@pct%)
+                                            <span class="rd-legend-pct">@pct%</span>
                                         </button>
                                     }
                                 </div>
@@ -278,9 +300,10 @@
     [Parameter] public ReportDashboardCategory   Category        { get; set; } = ReportDashboardCategory.VisaExtension;
     [Parameter] public string                    SubReport       { get; set; } = "default";
     [Parameter] public string                    ProjectKey      { get; set; } = "All";
-    [Parameter] public string                    ChartView       { get; set; } = "bar";
+    [Parameter] public string                    ChartView       { get; set; } = "pie";
     [Parameter] public int                       DateRangeMonths { get; set; } = 6;
     [Parameter] public bool                      ShowAllView     { get; set; } = true;
+    [Parameter] public bool                      IncludeArchivedPersons { get; set; }
 
     [Parameter] public EventCallback<ReportDashboardPersonType> PersonTypeChanged   { get; set; }
     [Parameter] public EventCallback<ReportDashboardCategory>   CategoryChanged     { get; set; }
@@ -288,6 +311,7 @@
     [Parameter] public EventCallback<string>                    ProjectKeyChanged   { get; set; }
     [Parameter] public EventCallback<string>                    ChartViewChanged    { get; set; }
     [Parameter] public EventCallback<bool>                      ShowAllViewChanged  { get; set; }
+    [Parameter] public EventCallback<bool>                      IncludeArchivedPersonsChanged { get; set; }
     [Parameter] public EventCallback                            OpenExcelRequested  { get; set; }
     [Parameter] public EventCallback<string?>                   OpenListViewRequested { get; set; }
     [Parameter] public EventCallback<int>                       DateRangeChanged    { get; set; }
@@ -314,13 +338,15 @@
     }
 
     private IReadOnlyList<ReportDashboardPreviewRow>   FilteredRows    => Panel?.PreviewRows ?? Array.Empty<ReportDashboardPreviewRow>();
-    private int                                         FilteredTotal   => FilteredRows.Count;
+    private int                                         FilteredTotal   => Panel is { TotalCount: > 0 } p ? p.TotalCount : FilteredRows.Count;
     private IReadOnlyList<ReportDashboardStatusBucket> FilteredBuckets =>
-        FilteredRows
-            .GroupBy(r => r.Status)
-            .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
-            .OrderByDescending(b => b.Count)
-            .ToList();
+        Panel?.StatusBuckets is { Count: > 0 } buckets
+            ? buckets
+            : FilteredRows
+                .GroupBy(r => r.Status)
+                .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
+                .OrderByDescending(b => b.Count)
+                .ToList();
 
     private IReadOnlyList<ReportDashboardStatusBucket> GetOverviewBuckets(ReportDashboardCategory category)
     {
@@ -397,6 +423,16 @@
     private async Task OnExcel()                                           => await OpenExcelRequested.InvokeAsync();
     private async Task OnListView(string? status)                          => await OpenListViewRequested.InvokeAsync(status);
     private async Task OnShowAll()                                         => await ShowAllViewChanged.InvokeAsync(true);
+    private async Task OnIncludeArchivedChanged(ChangeEventArgs e)
+    {
+        var include = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => false
+        };
+        await IncludeArchivedPersonsChanged.InvokeAsync(include);
+    }
 
     private async Task OnPeriodChange(ChangeEventArgs e)
     {
