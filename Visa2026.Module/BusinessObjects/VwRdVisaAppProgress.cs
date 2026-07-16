@@ -5,28 +5,23 @@ using System.ComponentModel.DataAnnotations;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Report Dashboard passport row from vw_rd_passport.
-/// One row per ApplicationItem with CurrentPassport set.
-/// ApplicationDate comes from the parent Application (dashboard date filter).
+/// Report Dashboard Visa Application Progress row from vw_rd_visa_app_progress.
+/// One ApplicationItem per row (visa-extension types with CurrentVisa).
 /// </summary>
 [Browsable(false)]
-public class VwRdPassport
+public class VwRdVisaAppProgress
 {
     [Key]
     public virtual Guid ID { get; set; }
-    public virtual Guid? PassportOid { get; set; }
     public virtual Guid? PersonOid { get; set; }
     public virtual string PersonName { get; set; }
     public virtual string ProjectName { get; set; }
     public virtual string ProjectNameRaw { get; set; }
     public virtual string ProjectNameTm { get; set; }
     public virtual int PersonRoleCode { get; set; }
-    public virtual string PassportNumber { get; set; }
-    public virtual DateTime? ExpirationDate { get; set; }
+    public virtual string ApplicationNumber { get; set; }
     public virtual DateTime? ApplicationDate { get; set; }
-    public virtual string TypeLabel { get; set; }
-    public virtual string CitizenshipLabel { get; set; }
-    public virtual string ValidityLabel { get; set; }
-    public virtual string ValidityCssClass { get; set; }
+    public virtual string ProgressStateLabel { get; set; }
+    public virtual string ProgressStateCssClass { get; set; }
     public virtual bool IsArchived { get; set; }
 }

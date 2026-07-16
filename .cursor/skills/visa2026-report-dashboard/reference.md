@@ -192,10 +192,12 @@ public DbSet<VwRdMyCategory> VwRdMyCategory => Set<VwRdMyCategory>();
 
 | Category | Sub-report keys | Status |
 |----------|----------------|--------|
-| `VisaExtension` (displayed as "Visa") | `visa-state`, `app-progress`, `by-category`, `by-period` | Mock only |
+| `Application` | `by-progress`, `by-type` | Real: both via `vw_rd_application` (before Visa) |
+| `VisaExtension` (displayed as "Visa") | `visa-state`, `app-progress`, `by-category`, `by-type`, `by-period`, `by-days-remaining` | Real: visa-state, app-progress, by-category, by-type, by-period, by-days-remaining |
 | `Invitation` | `issued-inv`, `app-progress` | Mock only |
 | `Registration` | `default` | Mock only |
-| `WorkPermit` | `default` | Mock only |
+| `WorkPermit` | `by-days-remaining`, `by-status` | Real: by-days-remaining (`vw_rd_work_permit`); by-status mock/legacy |
+| `WorkPermit` | `by-status` | Mock only |
 | `Travel` | `default` | Mock only |
 | `BorderZone` | `default` | Mock only |
 | `Passport` | `by-type`, `by-citizenship`, `by-validity` | Mock only |

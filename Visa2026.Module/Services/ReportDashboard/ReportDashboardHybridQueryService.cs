@@ -16,9 +16,23 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     /// </summary>
     private static readonly HashSet<(ReportDashboardCategory Category, string SubReport)> RealSubReports =
     [
+        (ReportDashboardCategory.Application, "by-progress"),
+        (ReportDashboardCategory.Application, "by-type"),
         (ReportDashboardCategory.Passport, "by-validity"),
         (ReportDashboardCategory.Passport, "by-type"),
         (ReportDashboardCategory.Passport, "by-citizenship"),
+        (ReportDashboardCategory.WorkPermit, "by-days-remaining"),
+        (ReportDashboardCategory.VisaExtension, "app-progress"),
+        (ReportDashboardCategory.VisaExtension, "visa-state"),
+        (ReportDashboardCategory.VisaExtension, "by-category"),
+        (ReportDashboardCategory.VisaExtension, "by-type"),
+        (ReportDashboardCategory.VisaExtension, "by-period"),
+        (ReportDashboardCategory.VisaExtension, "by-days-remaining"),
+        (ReportDashboardCategory.Education, "by-level"),
+        (ReportDashboardCategory.Education, "by-country"),
+        (ReportDashboardCategory.Education, "by-specialty"),
+        (ReportDashboardCategory.PositionHistory, "by-status"),
+        (ReportDashboardCategory.PositionHistory, "by-position"),
     ];
 
     private readonly ReportDashboardQueryService _real;
@@ -33,10 +47,22 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     }
 
     /// <summary>
-    /// Keep overview counts / project chips on mock until snapshot view ships.
+    /// Project chips + person-type tabs from SQL views; category sidebar counts stay on mock.
     /// </summary>
-    public ReportDashboardSnapshot LoadSnapshot(IObjectSpace objectSpace, int dateRangeMonths = 6)
-        => _mock.LoadSnapshot(objectSpace, dateRangeMonths);
+    public ReportDashboardSnapshot LoadSnapshot(
+        IObjectSpace objectSpace,
+        int dateRangeMonths = 6,
+        ReportDashboardPersonType personType = ReportDashboardPersonType.All)
+    {
+        var mock = _mock.LoadSnapshot(objectSpace, dateRangeMonths, personType);
+        var real = _real.LoadSnapshot(objectSpace, dateRangeMonths, personType);
+        return new ReportDashboardSnapshot
+        {
+            Projects = real.Projects.Count > 1 ? real.Projects : mock.Projects,
+            CategoryCounts = mock.CategoryCounts,
+            PersonRoleCounts = real.PersonRoleCounts.Count > 0 ? real.PersonRoleCounts : mock.PersonRoleCounts
+        };
+    }
 
     public ReportDashboardPanelData LoadPanel(
         IObjectSpace objectSpace,
@@ -45,16 +71,37 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         string projectKey,
         int dateRangeMonths = 6,
         string subReport = "default",
-        bool includeArchivedPersons = false)
+        bool includeArchivedPersons = false,
+        bool oneLastValidVisaPerPerson = false,
+        bool oneLastValidWorkPermitPerPerson = false,
+        bool includeCompletedApplicationProcesses = false,
+        bool includeCancelledApplicationProcesses = false)
     {
         var key = (category, subReport);
         // Default sub-report key for Passport is "by-validity"
         if (category == ReportDashboardCategory.Passport
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
             key = (category, "by-validity");
+        if (category == ReportDashboardCategory.WorkPermit
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport) || subReport == "by-validity"))
+            key = (category, "by-days-remaining");
+        if (category == ReportDashboardCategory.VisaExtension
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "visa-state");
+        if (category == ReportDashboardCategory.Application
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "by-progress");
+        if (category == ReportDashboardCategory.Education
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "by-level");
+        if (category == ReportDashboardCategory.PositionHistory
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "by-status");
 
         IReportDashboardQueryService service = RealSubReports.Contains(key) ? _real : _mock;
         return service.LoadPanel(
-            objectSpace, personType, category, projectKey, dateRangeMonths, subReport, includeArchivedPersons);
+            objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
+            includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
+            includeCompletedApplicationProcesses, includeCancelledApplicationProcesses);
     }
 }

@@ -10,6 +10,7 @@
                 {
                     <button type="button"
                             class="rd-chip @(ProjectKey == chip.Key ? "active" : null)"
+                            disabled="@ShowLoading"
                             @onclick="() => OnProject(chip.Key)">
                         @chip.Label
                         @if (chip.Key != "All")
@@ -20,14 +21,14 @@
                 }
                 @if (HiddenProjectCount > 0)
                 {
-                    <button type="button" class="rd-chip rd-chip-more" @onclick="ToggleProjectsExpanded">
+                    <button type="button" class="rd-chip rd-chip-more" disabled="@ShowLoading" @onclick="ToggleProjectsExpanded">
                         @(_projectsExpanded ? "Show less" : $"+{HiddenProjectCount} more")
                     </button>
                 }
             </div>
             <div class="rd-period-select">
                 <span class="rd-period-label">Last</span>
-                <select class="rd-period-picker" @onchange="OnPeriodChange">
+                <select class="rd-period-picker" disabled="@ShowLoading" @onchange="OnPeriodChange">
                     <option value="6"  selected="@(DateRangeMonths == 6)">6 months</option>
                     <option value="7"  selected="@(DateRangeMonths == 7)">7 months</option>
                     <option value="8"  selected="@(DateRangeMonths == 8)">8 months</option>
@@ -42,42 +43,68 @@
         </div>
 
         <div class="rd-tabs-underline" role="tablist">
+            <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.All ? "active" : null)"
+                    disabled="@ShowLoading"
+                    @onclick="() => OnPersonType(ReportDashboardPersonType.All)">@PersonTypeTabLabel(ReportDashboardPersonType.All)</button>
             <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.Employees ? "active" : null)"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.Employees)">Employees</button>
+                    disabled="@ShowLoading"
+                    @onclick="() => OnPersonType(ReportDashboardPersonType.Employees)">@PersonTypeTabLabel(ReportDashboardPersonType.Employees)</button>
             <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.FamilyMembers ? "active" : null)"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.FamilyMembers)">Family Members</button>
+                    disabled="@ShowLoading"
+                    @onclick="() => OnPersonType(ReportDashboardPersonType.FamilyMembers)">@PersonTypeTabLabel(ReportDashboardPersonType.FamilyMembers)</button>
             <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.TemporaryVisitors ? "active" : null)"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.TemporaryVisitors)">Temporary Visitors</button>
+                    disabled="@ShowLoading"
+                    @onclick="() => OnPersonType(ReportDashboardPersonType.TemporaryVisitors)">@PersonTypeTabLabel(ReportDashboardPersonType.TemporaryVisitors)</button>
         </div>
 
         <div class="rd-body">
             <div class="rd-cat-nav" role="tablist">
                 <button type="button"
                         class="rd-cat-tab rd-cat-tab-overview @(ShowAllView ? "active" : null)"
+                        disabled="@ShowLoading"
                         @onclick="OnShowAll">
                     <span>Overview</span>
                 </button>
                 @foreach (var category in ReportDashboardCatalog.Categories)
                 {
-                    var count = GetCategoryCount(category);
                     <button type="button"
                             class="rd-cat-tab @(!ShowAllView && Category == category ? "active" : null)"
+                            disabled="@ShowLoading"
                             @onclick="() => OnCategory(category)">
                         <span>@ReportDashboardCatalog.CategoryLabel(category)</span>
-                        <span class="rd-cat-tab-count">@count</span>
                     </button>
                 }
             </div>
 
-            <div class="rd-report-area">
+            <div class="rd-report-area @(ShowLoading ? "rd-report-area--loading" : null)">
+                @if (ShowLoading)
+                {
+                    <div class="rd-loading-overlay" role="status" aria-live="polite" aria-busy="true">
+                        <div class="rd-loading-panel">
+                            <div class="rd-loading-label">
+                                @(string.IsNullOrWhiteSpace(EffectiveLoadingMessage) ? "Loading…" : EffectiveLoadingMessage)
+                            </div>
+                            <div class="rd-loading-track"
+                                 role="progressbar"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 aria-valuenow="@EffectiveLoadingPercent"
+                                 aria-label="Loading progress">
+                                <div class="rd-loading-fill"
+                                     style="width:@(EffectiveLoadingPercent.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                            </div>
+                            <div class="rd-loading-pct">@EffectiveLoadingPercent%</div>
+                        </div>
+                    </div>
+                }
                 @if (ShowAllView)
                 {
                     <div class="rd-overview-grid">
                         @foreach (var category in ReportDashboardCatalog.Categories)
                         {
-                            var count    = GetCategoryCount(category);
-                            var subs     = ReportDashboardCatalog.SubReports(category);
                             var buckets  = GetOverviewBuckets(category);
+                            var count    = GetOverviewTotal(category, buckets);
+                            var subs     = ReportDashboardCatalog.SubReports(category);
                             var total    = buckets.Sum(b => b.Count);
                             var maxCount = buckets.Count > 0 ? buckets.Max(b => b.Count) : 1;
                             <button type="button" class="rd-overview-card" @onclick="() => OnCategory(category)">
@@ -153,33 +180,132 @@
                             <div class="rd-sub-tabs" role="tablist">
                                 @foreach (var sub in ReportDashboardCatalog.SubReports(Category))
                                 {
+                                    var subCount = GetSubReportCount(sub.Key);
                                     <button type="button"
                                             class="rd-sub-tab @(SubReport == sub.Key ? "active" : null)"
                                             @onclick="() => OnSubReport(sub.Key)">
-                                        @sub.Label
+                                        @if (subCount >= 0)
+                                        {
+                                            <text>@sub.Label (@subCount)</text>
+                                        }
+                                        else
+                                        {
+                                            @sub.Label
+                                        }
                                     </button>
                                 }
                             </div>
-                            @if (Category == ReportDashboardCategory.Passport)
-                            {
-                                <label class="rd-include-archived" title="Include persons marked IsArchived">
-                                    <input type="checkbox"
-                                           checked="@IncludeArchivedPersons"
-                                           @onchange="OnIncludeArchivedChanged" />
-                                    <span>Include archived</span>
-                                </label>
-                            }
+                            <div class="rd-sub-tab-filters">
+                                @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Include applications whose latest progress is Process Issued (PROCESS_ISSUED)">
+                                        <input type="checkbox"
+                                               checked="@IncludeCompletedApplicationProcesses"
+                                               @onchange="OnIncludeCompletedApplicationChanged" />
+                                        <span>Include completed</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Include applications whose latest progress is Process Cancelled (PROCESS_CANCELLED)">
+                                        <input type="checkbox"
+                                               checked="@IncludeCancelledApplicationProcesses"
+                                               @onchange="OnIncludeCancelledApplicationChanged" />
+                                        <span>Include cancelled</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Count each person once using their valid visa with the latest expiry (vs all valid visas)">
+                                        <input type="checkbox"
+                                               checked="@OneLastValidVisaPerPerson"
+                                               @onchange="OnOneLastValidVisaChanged" />
+                                        <span>One last valid visa per person</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Count each person once using their valid work permit with the latest expiry (vs all valid work permits)">
+                                        <input type="checkbox"
+                                               checked="@OneLastValidWorkPermitPerPerson"
+                                               @onchange="OnOneLastValidWorkPermitChanged" />
+                                        <span>One last valid work permit per person</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
+                                {
+                                    <label class="rd-panel-filter" title="Include persons marked IsArchived">
+                                        <input type="checkbox"
+                                               checked="@IncludeArchivedPersons"
+                                               @onchange="OnIncludeArchivedChanged" />
+                                        <span>Include archived</span>
+                                    </label>
+                                }
+                            </div>
                         </div>
                     }
-                    else if (Category == ReportDashboardCategory.Passport)
+                    else if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category)
+                          || ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category)
+                          || ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category)
+                          || ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category)
+                          || ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
                     {
                         <div class="rd-sub-tabs-row">
-                            <label class="rd-include-archived" title="Include persons marked IsArchived">
-                                <input type="checkbox"
-                                       checked="@IncludeArchivedPersons"
-                                       @onchange="OnIncludeArchivedChanged" />
-                                <span>Include archived</span>
-                            </label>
+                            <div class="rd-sub-tab-filters">
+                                @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Include applications whose latest progress is Process Issued (PROCESS_ISSUED)">
+                                        <input type="checkbox"
+                                               checked="@IncludeCompletedApplicationProcesses"
+                                               @onchange="OnIncludeCompletedApplicationChanged" />
+                                        <span>Include completed</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Include applications whose latest progress is Process Cancelled (PROCESS_CANCELLED)">
+                                        <input type="checkbox"
+                                               checked="@IncludeCancelledApplicationProcesses"
+                                               @onchange="OnIncludeCancelledApplicationChanged" />
+                                        <span>Include cancelled</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Count each person once using their valid visa with the latest expiry (vs all valid visas)">
+                                        <input type="checkbox"
+                                               checked="@OneLastValidVisaPerPerson"
+                                               @onchange="OnOneLastValidVisaChanged" />
+                                        <span>One last valid visa per person</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Count each person once using their valid work permit with the latest expiry (vs all valid work permits)">
+                                        <input type="checkbox"
+                                               checked="@OneLastValidWorkPermitPerPerson"
+                                               @onchange="OnOneLastValidWorkPermitChanged" />
+                                        <span>One last valid work permit per person</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
+                                {
+                                    <label class="rd-panel-filter" title="Include persons marked IsArchived">
+                                        <input type="checkbox"
+                                               checked="@IncludeArchivedPersons"
+                                               @onchange="OnIncludeArchivedChanged" />
+                                        <span>Include archived</span>
+                                    </label>
+                                }
+                            </div>
                         </div>
                     }
 
@@ -295,6 +421,7 @@
 @code {
     [Parameter] public ReportDashboardSnapshot?  Snapshot    { get; set; }
     [Parameter] public ReportDashboardPanelData? Panel       { get; set; }
+    [Parameter] public IReadOnlyDictionary<string, int>? SubReportCounts { get; set; }
     [Parameter] public IReadOnlyDictionary<ReportDashboardCategory, ReportDashboardPanelData>? AllPanels { get; set; }
     [Parameter] public ReportDashboardPersonType PersonType      { get; set; } = ReportDashboardPersonType.Employees;
     [Parameter] public ReportDashboardCategory   Category        { get; set; } = ReportDashboardCategory.VisaExtension;
@@ -303,7 +430,14 @@
     [Parameter] public string                    ChartView       { get; set; } = "pie";
     [Parameter] public int                       DateRangeMonths { get; set; } = 6;
     [Parameter] public bool                      ShowAllView     { get; set; } = true;
+    [Parameter] public bool                      IsLoading       { get; set; }
+    [Parameter] public int                       LoadingProgressPercent { get; set; }
+    [Parameter] public string                    LoadingMessage  { get; set; } = string.Empty;
     [Parameter] public bool                      IncludeArchivedPersons { get; set; }
+    [Parameter] public bool                      OneLastValidVisaPerPerson { get; set; }
+    [Parameter] public bool                      OneLastValidWorkPermitPerPerson { get; set; }
+    [Parameter] public bool                      IncludeCompletedApplicationProcesses { get; set; }
+    [Parameter] public bool                      IncludeCancelledApplicationProcesses { get; set; }
 
     [Parameter] public EventCallback<ReportDashboardPersonType> PersonTypeChanged   { get; set; }
     [Parameter] public EventCallback<ReportDashboardCategory>   CategoryChanged     { get; set; }
@@ -312,12 +446,41 @@
     [Parameter] public EventCallback<string>                    ChartViewChanged    { get; set; }
     [Parameter] public EventCallback<bool>                      ShowAllViewChanged  { get; set; }
     [Parameter] public EventCallback<bool>                      IncludeArchivedPersonsChanged { get; set; }
+    [Parameter] public EventCallback<bool>                      OneLastValidVisaPerPersonChanged { get; set; }
+    [Parameter] public EventCallback<bool>                      OneLastValidWorkPermitPerPersonChanged { get; set; }
+    [Parameter] public EventCallback<bool>                      IncludeCompletedApplicationProcessesChanged { get; set; }
+    [Parameter] public EventCallback<bool>                      IncludeCancelledApplicationProcessesChanged { get; set; }
+    [Parameter] public EventCallback                            InitialLoadRequested { get; set; }
     [Parameter] public EventCallback                            OpenExcelRequested  { get; set; }
     [Parameter] public EventCallback<string?>                   OpenListViewRequested { get; set; }
     [Parameter] public EventCallback<int>                       DateRangeChanged    { get; set; }
 
     private bool _projectsExpanded;
+    private bool _initialLoadStarted;
+    private bool _localLoading;
+    private string _localLoadingMessage = "Loading…";
     private const int VisibleProjectChipLimit = 5;
+
+    private bool ShowLoading => IsLoading || _localLoading;
+    private string EffectiveLoadingMessage =>
+        IsLoading && !string.IsNullOrWhiteSpace(LoadingMessage) ? LoadingMessage : _localLoadingMessage;
+    private int EffectiveLoadingPercent => IsLoading ? LoadingProgressPercent : 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Parent owns the overlay once its IsLoading flag is set.
+        if (IsLoading)
+            _localLoading = false;
+    }
 
     private IEnumerable<ReportDashboardProjectChip> VisibleProjects
     {
@@ -347,17 +510,6 @@
                 .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
                 .OrderByDescending(b => b.Count)
                 .ToList();
-
-    private IReadOnlyList<ReportDashboardStatusBucket> GetOverviewBuckets(ReportDashboardCategory category)
-    {
-        if (AllPanels == null || !AllPanels.TryGetValue(category, out var panel))
-            return Array.Empty<ReportDashboardStatusBucket>();
-        return panel.PreviewRows
-            .GroupBy(r => r.Status)
-            .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
-            .OrderByDescending(b => b.Count)
-            .ToList();
-    }
 
     private string MiniPieStyle(IReadOnlyList<ReportDashboardStatusBucket> buckets, int total)
     {
@@ -409,20 +561,109 @@
 
     private int GetCategoryCount(ReportDashboardCategory category)
     {
+        // Prefer real panel totals when Overview (or any AllPanels) already loaded them.
+        if (AllPanels != null && AllPanels.TryGetValue(category, out var panel))
+        {
+            if (panel.TotalCount > 0)
+                return panel.TotalCount;
+            if (panel.StatusBuckets is { Count: > 0 } buckets)
+                return buckets.Sum(b => b.Count);
+        }
+
         if (Snapshot?.CategoryCounts == null) return 0;
         return Snapshot.CategoryCounts.TryGetValue((PersonType, category), out var count) ? count : 0;
     }
 
+    private int GetOverviewTotal(
+        ReportDashboardCategory category,
+        IReadOnlyList<ReportDashboardStatusBucket> buckets)
+    {
+        if (AllPanels != null && AllPanels.TryGetValue(category, out var panel) && panel.TotalCount > 0)
+            return panel.TotalCount;
+        var fromBuckets = buckets.Sum(b => b.Count);
+        return fromBuckets > 0 ? fromBuckets : GetCategoryCount(category);
+    }
+
+    private string PersonTypeTabLabel(ReportDashboardPersonType personType)
+    {
+        var name = ReportDashboardCatalog.PersonTypeLabel(personType);
+        var count = 0;
+        if (Snapshot?.PersonRoleCounts != null
+            && Snapshot.PersonRoleCounts.TryGetValue(personType, out var n))
+            count = n;
+        return $"{name} ({count})";
+    }
+
+    /// <summary>Returns total for a sub-tab; -1 when counts are not loaded yet.</summary>
+    private int GetSubReportCount(string subKey)
+    {
+        if (SubReportCounts != null && SubReportCounts.TryGetValue(subKey, out var n))
+            return n;
+        // Active panel fallback while counts dictionary is warming up.
+        if (string.Equals(SubReport, subKey, StringComparison.Ordinal) && Panel != null)
+            return Panel.TotalCount;
+        return -1;
+    }
+
+    private IReadOnlyList<ReportDashboardStatusBucket> GetOverviewBuckets(ReportDashboardCategory category)
+    {
+        if (AllPanels == null || !AllPanels.TryGetValue(category, out var panel))
+            return Array.Empty<ReportDashboardStatusBucket>();
+
+        // Use full StatusBuckets (view/SQL totals) — never regroup PreviewRows (Take(50) skew).
+        if (panel.StatusBuckets is { Count: > 0 } buckets)
+            return buckets;
+
+        return panel.PreviewRows
+            .GroupBy(r => r.Status)
+            .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
+            .OrderByDescending(b => b.Count)
+            .ToList();
+    }
+
     private void ToggleProjectsExpanded() => _projectsExpanded = !_projectsExpanded;
 
-    private async Task OnPersonType(ReportDashboardPersonType personType) => await PersonTypeChanged.InvokeAsync(personType);
-    private async Task OnCategory(ReportDashboardCategory category)       => await CategoryChanged.InvokeAsync(category);
-    private async Task OnSubReport(string key)                             => await SubReportChanged.InvokeAsync(key);
-    private async Task OnProject(string key)                               => await ProjectKeyChanged.InvokeAsync(key);
+    private async Task BeginLocalLoadingAsync(string message)
+    {
+        _localLoading = true;
+        _localLoadingMessage = message;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(1);
+    }
+
+    private async Task OnPersonType(ReportDashboardPersonType personType)
+    {
+        await BeginLocalLoadingAsync("Loading…");
+        await PersonTypeChanged.InvokeAsync(personType);
+    }
+
+    private async Task OnCategory(ReportDashboardCategory category)
+    {
+        await BeginLocalLoadingAsync("Loading report…");
+        await CategoryChanged.InvokeAsync(category);
+    }
+
+    private async Task OnSubReport(string key)
+    {
+        await BeginLocalLoadingAsync("Loading report…");
+        await SubReportChanged.InvokeAsync(key);
+    }
+
+    private async Task OnProject(string key)
+    {
+        await BeginLocalLoadingAsync("Loading…");
+        await ProjectKeyChanged.InvokeAsync(key);
+    }
+
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private async Task OnExcel()                                           => await OpenExcelRequested.InvokeAsync();
     private async Task OnListView(string? status)                          => await OpenListViewRequested.InvokeAsync(status);
-    private async Task OnShowAll()                                         => await ShowAllViewChanged.InvokeAsync(true);
+
+    private async Task OnShowAll()
+    {
+        await BeginLocalLoadingAsync("Loading overview…");
+        await ShowAllViewChanged.InvokeAsync(true);
+    }
     private async Task OnIncludeArchivedChanged(ChangeEventArgs e)
     {
         var include = e.Value switch
@@ -432,6 +673,50 @@
             _ => false
         };
         await IncludeArchivedPersonsChanged.InvokeAsync(include);
+    }
+
+    private async Task OnOneLastValidVisaChanged(ChangeEventArgs e)
+    {
+        var oneLast = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => false
+        };
+        await OneLastValidVisaPerPersonChanged.InvokeAsync(oneLast);
+    }
+
+    private async Task OnOneLastValidWorkPermitChanged(ChangeEventArgs e)
+    {
+        var oneLast = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => false
+        };
+        await OneLastValidWorkPermitPerPersonChanged.InvokeAsync(oneLast);
+    }
+
+    private async Task OnIncludeCompletedApplicationChanged(ChangeEventArgs e)
+    {
+        var include = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => false
+        };
+        await IncludeCompletedApplicationProcessesChanged.InvokeAsync(include);
+    }
+
+    private async Task OnIncludeCancelledApplicationChanged(ChangeEventArgs e)
+    {
+        var include = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => false
+        };
+        await IncludeCancelledApplicationProcessesChanged.InvokeAsync(include);
     }
 
     private async Task OnPeriodChange(ChangeEventArgs e)

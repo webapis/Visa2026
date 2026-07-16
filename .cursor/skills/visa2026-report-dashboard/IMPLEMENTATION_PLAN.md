@@ -9,15 +9,18 @@ Update the **Status** column and append to `learnings.md` as each view ships.
 
 | View | Category | Sub-reports served | Phase | Status |
 |------|----------|--------------------|-------|--------|
+| `vw_rd_application` | Application | **by-progress**, **by-type** (live) | 1 | EF Wired |
 | `vw_rd_passport` | Passport | by-type, by-citizenship, **by-validity** (live) | 1 | EF Wired (by-validity only) |
 | `vw_rd_registration` | Registration | default | 1 | Planned |
-| `vw_rd_work_permit` | WorkPermit | default | 1 | Planned |
+| `vw_rd_work_permit` | WorkPermit | **by-validity** (live), by-status | 1 | EF Wired (by-validity) |
 | `vw_rd_border_zone` | BorderZone | default | 1 | Planned |
 | `vw_rd_travel` | Travel | default | 2 | Planned |
 | `vw_rd_invitation_issued` | Invitation | issued-inv | 2 | Planned |
-| `vw_rd_visa_state` | Visa | visa-state, by-category, by-period | 3 | Planned |
+| `vw_rd_visa_state` | Visa | visa-state | 1 | EF Wired (Extension Started) |`n| `vw_rd_visa_by_category` | Visa | by-category | 1 | EF Wired |`n| `vw_rd_visa_by_type` | Visa | by-type | 1 | EF Wired |
 | `vw_rd_app_progress` | Visa + Invitation | app-progress (both) | 3 | Planned |
-| `vw_rd_snapshot_counts` | All (snapshot) | LoadSnapshot counts | 4 | Planned |
+| `vw_rd_education` | Education | by-level, by-country, by-specialty | 1 | EF Wired |
+| `vw_rd_position_history` | PositionHistory | by-status, by-position | 1 | EF Wired |
+| `vw_rd_snapshot_counts` | All (snapshot) | LoadSnapshot counts | 4 | Cancelled (sidebar totals removed) |
 
 **Status values:** `Planned` → `In Progress` → `View Created` → `EF Wired` → `Done`
 
@@ -99,7 +102,9 @@ END AS StatusCssClass
 
 ### vw_rd_passport
 
-**Category:** Passport — Sub-reports: `by-type`, `by-citizenship`, `by-validity`
+**Category:** Passport — Sub-reports: `by-type`, `by-citizenship`, `by-validity`  
+
+**Universe (2026-07-16):** one row per `ApplicationItem` with `CurrentPassport`; filter `Applications.ApplicationDate` via dashboard date range (not latest passport per person).
 
 **Tables:**
 - `Passports` (main, GCRecord filter)
@@ -565,7 +570,8 @@ For each view, create a keyless entity class and register it. Files go in `Visa2
 
 | Class name | View name | DbSet property |
 |------------|-----------|---------------|
-| `VwRdPassport` | `vw_rd_passport` | `VwRdPassport` |
+| `VwRdPassport` | `vw_rd_application` | Application | **by-progress**, **by-type** (live) | 1 | EF Wired |
+| `vw_rd_passport` | `VwRdPassport` |
 | `VwRdRegistration` | `vw_rd_registration` | `VwRdRegistration` |
 | `VwRdWorkPermit` | `vw_rd_work_permit` | `VwRdWorkPermit` |
 | `VwRdBorderZone` | `vw_rd_border_zone` | `VwRdBorderZone` |

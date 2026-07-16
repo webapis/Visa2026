@@ -142,6 +142,19 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VisaCancellationStatus> VisaCancellationStatus { get; set; }
         public DbSet<ForeignWorkerMaglumat> ForeignWorkerMaglumat { get; set; }
         public DbSet<VwRdPassport> VwRdPassport { get; set; }
+        public DbSet<VwRdWorkPermit> VwRdWorkPermit { get; set; }
+        public DbSet<VwRdVisaAppProgress> VwRdVisaAppProgress { get; set; }
+        public DbSet<VwRdProject> VwRdProject { get; set; }
+        public DbSet<VwRdPersonRole> VwRdPersonRole { get; set; }
+        public DbSet<VwRdVisaState> VwRdVisaState { get; set; }
+        public DbSet<VwRdVisaByCategory> VwRdVisaByCategory { get; set; }
+        public DbSet<VwRdVisaByType> VwRdVisaByType { get; set; }
+        public DbSet<VwRdVisaByPeriod> VwRdVisaByPeriod { get; set; }
+        public DbSet<VwRdVisaByDaysRemaining> VwRdVisaByDaysRemaining { get; set; }
+        public DbSet<VwRdApplication> VwRdApplication { get; set; }
+        public DbSet<VwRdEducation> VwRdEducation { get; set; }
+        public DbSet<VwRdEducationByCountry> VwRdEducationByCountry { get; set; }
+        public DbSet<VwRdPositionHistory> VwRdPositionHistory { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -271,6 +284,71 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdPassport>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_passport");
+            });
+
+            modelBuilder.Entity<VwRdWorkPermit>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit");
+            });
+
+            modelBuilder.Entity<VwRdVisaAppProgress>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_app_progress");
+            });
+
+            modelBuilder.Entity<VwRdProject>(b => {
+                b.HasKey(t => new { t.ProjectOid, t.PersonRoleCode });
+                b.ToView("vw_rd_projects");
+            });
+
+            modelBuilder.Entity<VwRdPersonRole>(b => {
+                b.HasKey(t => t.PersonRoleCode);
+                b.ToView("vw_rd_person_roles");
+            });
+
+            modelBuilder.Entity<VwRdVisaState>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_state");
+            });
+
+            modelBuilder.Entity<VwRdVisaByCategory>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_category");
+            });
+
+            modelBuilder.Entity<VwRdVisaByType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_type");
+            });
+
+            modelBuilder.Entity<VwRdVisaByPeriod>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_period");
+            });
+
+            modelBuilder.Entity<VwRdVisaByDaysRemaining>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_days_remaining");
+            });
+
+            modelBuilder.Entity<VwRdApplication>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application");
+            });
+
+            modelBuilder.Entity<VwRdEducation>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_education");
+            });
+
+            modelBuilder.Entity<VwRdEducationByCountry>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_education_by_country");
+            });
+
+            modelBuilder.Entity<VwRdPositionHistory>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_position_history");
             });
 
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {

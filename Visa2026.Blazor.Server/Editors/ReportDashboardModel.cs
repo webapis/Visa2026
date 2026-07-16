@@ -45,8 +45,42 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
     }
-    /// <summary>Passport only: when false (default), exclude Person.IsArchived.</summary>
+    /// <summary>
+    /// Passport / Work Permit: when false (default), exclude Person.IsArchived.
+    /// </summary>
     public bool IncludeArchivedPersons
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>
+    /// Visa: when true, count one last valid visa per person (latest expiry) on by-* sub-reports.
+    /// </summary>
+    public bool OneLastValidVisaPerPerson
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>
+    /// Work Permit: when true, count one last valid work permit per person (latest expiry) on By Days Remaining.
+    /// </summary>
+    public bool OneLastValidWorkPermitPerPerson
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>
+    /// Application: when false (default), exclude latest progress PROCESS_ISSUED.
+    /// </summary>
+    public bool IncludeCompletedApplicationProcesses
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>
+    /// Application: when false (default), exclude latest progress PROCESS_CANCELLED.
+    /// </summary>
+    public bool IncludeCancelledApplicationProcesses
     {
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
@@ -54,6 +88,12 @@ public sealed class ReportDashboardModel : ComponentModelBase
     public ReportDashboardPanelData? Panel
     {
         get => GetPropertyValue<ReportDashboardPanelData?>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>TotalCount per sub-report key for the active category (sub-tab badges).</summary>
+    public IReadOnlyDictionary<string, int>? SubReportCounts
+    {
+        get => GetPropertyValue<IReadOnlyDictionary<string, int>?>();
         set => SetPropertyValue(value);
     }
     public IReadOnlyDictionary<ReportDashboardCategory, ReportDashboardPanelData>? AllPanels
@@ -64,6 +104,29 @@ public sealed class ReportDashboardModel : ComponentModelBase
     public ReportDashboardSnapshot? Snapshot
     {
         get => GetPropertyValue<ReportDashboardSnapshot?>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>True while panels/snapshot are loading after a tab or filter change.</summary>
+    public bool IsLoading
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>0–100 determinate progress while <see cref="IsLoading"/>.</summary>
+    public int LoadingProgressPercent
+    {
+        get => GetPropertyValue<int>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Short status text shown with the progress bar.</summary>
+    public string LoadingMessage
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value ?? string.Empty);
+    }
+    public EventCallback InitialLoadRequested
+    {
+        get => GetPropertyValue<EventCallback>();
         set => SetPropertyValue(value);
     }
     public EventCallback OpenExcelRequested
@@ -112,6 +175,26 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     public EventCallback<bool> IncludeArchivedPersonsChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> OneLastValidVisaPerPersonChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> OneLastValidWorkPermitPerPersonChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> IncludeCompletedApplicationProcessesChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> IncludeCancelledApplicationProcessesChanged
     {
         get => GetPropertyValue<EventCallback<bool>>();
         set => SetPropertyValue(value);

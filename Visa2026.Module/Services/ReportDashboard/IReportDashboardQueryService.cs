@@ -4,7 +4,10 @@ namespace Visa2026.Module.Services.ReportDashboard;
 
 public interface IReportDashboardQueryService
 {
-    ReportDashboardSnapshot LoadSnapshot(IObjectSpace objectSpace, int dateRangeMonths = 6);
+    ReportDashboardSnapshot LoadSnapshot(
+        IObjectSpace objectSpace,
+        int dateRangeMonths = 6,
+        ReportDashboardPersonType personType = ReportDashboardPersonType.All);
 
     ReportDashboardPanelData LoadPanel(
         IObjectSpace objectSpace,
@@ -13,5 +16,9 @@ public interface IReportDashboardQueryService
         string projectKey,
         int dateRangeMonths = 6,
         string subReport = "default",
-        bool includeArchivedPersons = false);
+        bool includeArchivedPersons = false,
+        bool oneLastValidVisaPerPerson = false,
+        bool oneLastValidWorkPermitPerPerson = false,
+        bool includeCompletedApplicationProcesses = false,
+        bool includeCancelledApplicationProcesses = false);
 }

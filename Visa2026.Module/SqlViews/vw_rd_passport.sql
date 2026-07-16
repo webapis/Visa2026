@@ -1,8 +1,10 @@
 -- Report Dashboard: Passport category.
--- One row per Person: latest non-cancelled passport by IssueDate (then ID).
+-- One row per ApplicationItem that references a CurrentPassport.
+-- Date filter (dashboard top-right) applies to Applications.ApplicationDate in the C# loader.
 CREATE OR ALTER VIEW [dbo].[vw_rd_passport] AS
 SELECT
-    pp.ID                                                               AS ID,
+    ai.ID                                                               AS ID,
+    pp.ID                                                               AS PassportOid,
     p.ID                                                                AS PersonOid,
     CONCAT_WS(N' ',
         NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
@@ -19,6 +21,7 @@ SELECT
     p.PersonRole                                                        AS PersonRoleCode,
     COALESCE(pp.PassportNumber, N'')                                    AS PassportNumber,
     pp.ExpirationDate                                                   AS ExpirationDate,
+    a.ApplicationDate                                                   AS ApplicationDate,
     COALESCE(NULLIF(LTRIM(RTRIM(pt.NameTm)), N''), pt.Name, N'Unknown') AS TypeLabel,
     COALESCE(NULLIF(LTRIM(RTRIM(nat.NameTm)), N''), nat.Name, N'Unknown') AS CitizenshipLabel,
     CASE
@@ -40,25 +43,19 @@ SELECT
       ELSE                                                                         N'st-approved'
     END                                                                 AS ValidityCssClass,
     CAST(ISNULL(p.IsArchived, 0) AS bit)                                    AS IsArchived
-FROM (
-    SELECT
-        pp0.*,
-        ROW_NUMBER() OVER (
-            PARTITION BY pp0.PersonID
-            ORDER BY
-                CASE WHEN pp0.IssueDate IS NULL THEN 1 ELSE 0 END,
-                pp0.IssueDate DESC,
-                pp0.ID DESC
-        ) AS rn
-    FROM Passports pp0
-    WHERE ISNULL(pp0.GCRecord, 0) = 0
-      AND ISNULL(pp0.IsCancelled, 0) = 0
-) pp
+FROM ApplicationItems ai
+INNER JOIN Applications a
+    ON a.ID = ai.ApplicationID
+   AND ISNULL(a.GCRecord, 0) = 0
+INNER JOIN Passports pp
+    ON pp.ID = ai.CurrentPassportID
+   AND ISNULL(pp.GCRecord, 0) = 0
 INNER JOIN People p
-    ON p.ID = pp.PersonID
+    ON p.ID = ai.PersonID
    AND ISNULL(p.GCRecord, 0) = 0
 LEFT JOIN ProjectContracts pc
-    ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+    ON pc.ID = COALESCE(a.ProjectContractID, p.ProjectContractID)
+   AND ISNULL(pc.GCRecord, 0) = 0
 LEFT JOIN People sp
     ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
 LEFT JOIN ProjectContracts spc
@@ -67,4 +64,5 @@ LEFT JOIN PassportTypes pt
     ON pt.ID = pp.PassportTypeID AND ISNULL(pt.GCRecord, 0) = 0
 LEFT JOIN Countries nat
     ON nat.ID = p.NationalityID AND ISNULL(nat.GCRecord, 0) = 0
-WHERE pp.rn = 1;
+WHERE ISNULL(ai.GCRecord, 0) = 0
+  AND ai.CurrentPassportID IS NOT NULL;

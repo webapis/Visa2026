@@ -194,17 +194,63 @@
   border-left-color: var(--rd-accent);
   font-weight: 600;
 }
-.rd-cat-tab-count {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--rd-muted);
-  background: #eef1f4;
-  padding: 1px 7px;
-  border-radius: 999px;
-}
-.rd-cat-tab.active .rd-cat-tab-count { background: #fff; color: var(--rd-accent); }
+.rd-report-area { flex: 1; padding: 24px 26px 30px; min-width: 0; position: relative; }
+.rd-report-area--loading { min-height: 280px; }
 
-.rd-report-area { flex: 1; padding: 24px 26px 30px; min-width: 0; }
+/* Dim full content; keep the progress panel near the top so it stays in view
+   when the report area is taller than the viewport (after first load). */
+.rd-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(48px, 10vh) 16px 24px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(1px);
+  pointer-events: all;
+}
+.rd-loading-panel {
+  position: sticky;
+  top: 24px;
+  width: min(360px, 88%);
+  padding: 18px 20px 16px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--rd-border, #e2e6eb);
+  box-shadow: 0 10px 32px rgba(20, 30, 45, 0.16);
+}
+.rd-loading-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rd-text, #1f2937);
+  margin-bottom: 10px;
+}
+.rd-loading-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e8edf3;
+  overflow: hidden;
+}
+.rd-loading-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--rd-accent, #2f6fed), #5b8ff9);
+  transition: width 0.2s ease;
+}
+.rd-loading-pct {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--rd-muted, #6b7280);
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+.rd-cat-tab:disabled,
+.rd-tab-underline:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 .rd-report-head {
   display: flex;
@@ -430,7 +476,8 @@
   margin-bottom: 0;
   flex: 1 1 auto;
 }
-.rd-include-archived {
+.rd-include-archived,
+.rd-panel-filter {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -443,11 +490,20 @@
   white-space: nowrap;
   flex: 0 0 auto;
 }
-.rd-include-archived input {
+.rd-include-archived input,
+.rd-panel-filter input {
   margin: 0;
   accent-color: var(--rd-accent, #1a6bb5);
 }
-.rd-include-archived:hover { color: var(--rd-text); }
+.rd-include-archived:hover,
+.rd-panel-filter:hover { color: var(--rd-text); }
+.rd-sub-tab-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
 .rd-sub-tab {
   appearance: none;
   background: none;

@@ -5,6 +5,8 @@ namespace Visa2026.Module.Services.ReportDashboard;
 
 public enum ReportDashboardPersonType
 {
+    /// <summary>Employees + Family Members + Temporary Visitors combined.</summary>
+    All,
     Employees,
     FamilyMembers,
     TemporaryVisitors
@@ -12,13 +14,16 @@ public enum ReportDashboardPersonType
 
 public enum ReportDashboardCategory
 {
+    Application,
     VisaExtension,
     Invitation,
     Registration,
     WorkPermit,
     Travel,
     BorderZone,
-    Passport
+    Passport,
+    Education,
+    PositionHistory
 }
 
 /// <summary>A named report variant within a category (e.g. "By Type", "By Citizenship").</summary>
@@ -75,4 +80,7 @@ public sealed class ReportDashboardSnapshot
     public IReadOnlyList<ReportDashboardProjectChip> Projects { get; init; } = Array.Empty<ReportDashboardProjectChip>();
     public IReadOnlyDictionary<(ReportDashboardPersonType PersonType, ReportDashboardCategory Category), int> CategoryCounts { get; init; }
         = new Dictionary<(ReportDashboardPersonType, ReportDashboardCategory), int>();
+    /// <summary>Non-archived people totals for All / Employees / Family / Temporary Visitors tabs.</summary>
+    public IReadOnlyDictionary<ReportDashboardPersonType, int> PersonRoleCounts { get; init; }
+        = new Dictionary<ReportDashboardPersonType, int>();
 }
