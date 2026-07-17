@@ -135,12 +135,16 @@ internal sealed partial class Visa2014ODataLookupResolver
             var nameTmProperty = typeof(TDto).GetProperty(nameof(Dto.Gender.NameTm));
             var codeProperty = typeof(TDto).GetProperty(nameof(Dto.Gender.Code));
             var isDefaultProperty = typeof(TDto).GetProperty(nameof(Dto.Gender.IsDefault));
+            // Required for VisaType / VisaCategory / PassportType / EducationLevel resolve by
+            // LocalizationKey. Omitting this caused every in-process Visa to land on default WP.
+            var localizationKeyProperty = typeof(TDto).GetProperty(nameof(Dto.VisaType.LocalizationKey));
 
             idProperty?.SetValue(dto, x.ID);
             nameProperty?.SetValue(dto, x.Name ?? "");
             nameTmProperty?.SetValue(dto, x.NameTm ?? "");
             codeProperty?.SetValue(dto, x.Code ?? "");
             isDefaultProperty?.SetValue(dto, x.IsDefault);
+            localizationKeyProperty?.SetValue(dto, x.LocalizationKey ?? "");
             return dto;
         });
 }

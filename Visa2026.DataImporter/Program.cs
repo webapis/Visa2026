@@ -176,6 +176,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--correct-application-item-person-current",
         "--correct-application-item-application-parent",
         "--correct-application-type-composite",
+        "--correct-visa-type",
         "--correct-application-visa-type",
         "--export-visa2014-actual-positions",
         "--apply-visa2014-actual-positions",
@@ -325,6 +326,7 @@ static void PrintHelp()
     Console.WriteLine("  --correct-application-item-person-current  Backfill ApplicationItem CurrentEducation/CurrentSalary/CurrentWorkPermitItem from Person (--dry-run)");
     Console.WriteLine("  --correct-application-item-application-parent  Reparent ApplicationItems after Application id-map rebuild (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-type-composite  Retype Application.ApplicationType from legacy SubType enum (--legacy-source, --dry-run)");
+    Console.WriteLine("  --correct-visa-type  Patch Visa.VisaType from legacy TypeOfVisaL:mgCode (--legacy-source, --dry-run)");
     Console.WriteLine("  --correct-application-visa-type  Infer Application.VisaType from ApplicationType.Name (no legacy FK; --target-connection, --dry-run)");
     Console.WriteLine("           from legacy Application.Contract or linked Person.Contract (identity pass-through).");
     Console.WriteLine("      Options: [--legacy-source calik-energi] [--application-id-map path.json]");
@@ -715,6 +717,16 @@ if (HasArg(args, "--correct-application-type-composite"))
     Log.Phase("VISA2014 Application ApplicationType composite correction");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = await Visa2014ApplicationTypeCompositeCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--correct-visa-type"))
+{
+    Log.Phase("VISA2014 Visa VisaType correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014VisaTypeCorrection.RunCommandAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

@@ -40,6 +40,8 @@ internal static class Visa2014VisaODataImporter
             maxRows,
             verbose);
 
+        LogPreparedVisaTypeHistogram(batch.ImportRows);
+
         if (dryRun)
         {
             int missingPassport = CountMissingPassportMap(batch.ImportRows, passportIdMap);
@@ -55,6 +57,8 @@ internal static class Visa2014VisaODataImporter
                 SkippedNoPassportMap = missingPassport,
             };
         }
+
+        resolver.EnsureVisaTypeLookupKeysLoaded();
 
         var visaIdMap = LoadOptionalVisaIdMap(visaIdMapOutputPath);
         if (verbose && visaIdMap.Count > 0)
@@ -230,5 +234,35 @@ internal static class Visa2014VisaODataImporter
             return new Dictionary<Guid, Guid>();
 
         return Visa2014IdMapHelper.Load(path);
+    }
+
+    private static void LogPreparedVisaTypeHistogram(IReadOnlyList<Dictionary<string, object?>> importRows)
+    {
+        var groups = importRows
+            .GroupBy(r => (r.GetValueOrDefault("VisaType") as string)?.Trim() ?? "(null)", StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(g => g.Count())
+            .ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var summary = string.Join(", ", groups.Select(g => $"{g.Key}={g.Count()}"));
+        Console.WriteLine($"INF Prepared VisaType histogram: {summary}");
+
+        var wpCount = groups
+            .Where(g => string.Equals(g.Key, "WP", StringComparison.OrdinalIgnoreCase))
+            .Sum(g => g.Count());
+        var nonWp = importRows.Count - wpCount;
+        var legacyNonWp = importRows.Count(r =>
+        {
+            var composite = r.GetValueOrDefault("_legacy_VisaTypeComposite") as string;
+            return !string.IsNullOrWhiteSpace(composite)
+                && !composite.StartsWith("WP:", StringComparison.OrdinalIgnoreCase);
+        });
+
+        if (importRows.Count >= 100 && legacyNonWp > 0 && nonWp == 0)
+        {
+            throw new InvalidOperationException(
+                $"Prepared Visa rows collapsed to WP only ({wpCount}/{importRows.Count}) while " +
+                $"{legacyNonWp} legacy rows are non-WP (BS/FM/GL/EX). Check lookup-translations VisaType mapping.");
+        }
     }
 }

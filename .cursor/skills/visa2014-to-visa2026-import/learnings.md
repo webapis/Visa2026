@@ -4,6 +4,14 @@
 
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
+### 2026-07-17 — Visa.VisaType collapsed to WP (LocalizationKey missing on in-process DTOs)
+
+- **Phase**: import / correction
+- **Symptom**: In-process Visa import set every `Visa.VisaType` to default WP because `MapLookupDto` omitted `LocalizationKey`.
+- **Fix**: copy `LocalizationKey` in `MapLookupDto`; stop silent default fallback in `ResolveVisaType` / related resolvers; `EnsureVisaTypeLookupKeysLoaded` + prepared-row histogram guard; CLI `--correct-visa-type` backfills from legacy `TypeOfVisaL:mgCode`.
+- **Artifacts**: `Visa2014VisaTypeCorrection.cs`, `Visa2014VisaODataImporter.cs`, `Visa2014ODataLookupResolver*.cs`, `Program.cs`.
+
+
 ### 2026-07-17 — Application.VisaType inferred from ApplicationType (no legacy FK)
 
 - **Phase**: mapping
