@@ -170,6 +170,18 @@ internal static class Visa2014ApplicationODataImporter
         TryAddOptionalFk(payload, row, "Urgency", resolver.ResolveUrgency);
         TryAddOptionalFk(payload, row, "VisaPeriod", resolver.ResolveVisaPeriod);
         TryAddOptionalFk(payload, row, "VisaCategory", value => resolver.ResolveVisaCategory(value));
+        // Prefer explicit transform inference; fall back if older preview rows omit VisaType.
+        var visaTypeKey = row.GetValueOrDefault("VisaType") as string;
+        if (string.IsNullOrWhiteSpace(visaTypeKey))
+            visaTypeKey = Visa2014ApplicationVisaTypeInference.TryGetVisaTypeLocalizationKey(
+                row.GetValueOrDefault("ApplicationType") as string);
+        if (!string.IsNullOrWhiteSpace(visaTypeKey))
+        {
+            var visaTypeId = resolver.ResolveVisaType(visaTypeKey.Trim());
+            if (visaTypeId.HasValue)
+                payload["VisaType"] = new { ID = visaTypeId.Value };
+        }
+
         TryAddOptionalFk(payload, row, "ProjectContract", resolver.ResolveProjectContract);
         TryAddOptionalFk(payload, row, "ApprovalLegProfile", resolver.ResolveApprovalLegProfile);
         TryAddOptionalFk(payload, row, "ToCity", value => resolver.ResolveCity(value));

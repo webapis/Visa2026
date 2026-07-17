@@ -4,6 +4,20 @@
 
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
+### 2026-07-17 — Application.VisaType inferred from ApplicationType (no legacy FK)
+
+- **Phase**: mapping
+- **Dossier**: docs/VISA2014_MIGRATION/discovery/Application.yaml / field-maps/Application.yaml
+- **Symptom**: Legacy `dbo.Application` has VisaPeriod/VisaCategory but **no VisaType**; local PG import had every Application.VisaType = WP (catalog IsDefault).
+- **Inference map** (`Visa2014ApplicationVisaTypeInference`, LocalizationKey):
+  - `App_Inv_And_WP` / `App_Visa_and_WP_Ext` / `App_Inv_According_to_WP` / `App_Visa_Ext_According_to_WP` → **WP** (`WP-Işçi Wiza`)
+  - `App_Inv` → **BS1** (`BS1-İşerwürlik`)
+  - `App_Inv_FM` / `App_Visa_Ext_FM` / `App_Visa_For_New_Born_FM` → **FM** (`FM-Maşgala`)
+  - `App_Visa_Ext` / `App_Exit_Visa` → **EX** (`EX-Çykyş`) — user confirmed App_Visa_Ext = EX
+  - `App_Sevice_Passport` → **OF** (`OF-Gulluk`)
+- **Artifacts**: transform sets `VisaType`; OData importer posts FK; `Application.TryGetDefaultVisaLookupKeys` aligned; CLI `--correct-application-visa-type` for existing DBs; unit tests 15 passed.
+- **Follow-up**: run correction on local PG after stopping F5 lock.
+
 **Canonical plan:** [docs/VISA2014_MIGRATION.md](../../../docs/VISA2014_MIGRATION.md) · [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md)
 
 **Not here:** Visa2026 seed scenarios — [visa2026-dataimporter](../visa2026-dataimporter/SKILL.md). **Import runbook:** [import-practices.md](./import-practices.md).
@@ -1243,24 +1257,24 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Obsolete skill**: `disable-model-invocation: true`; stub points here; learnings/reference kept as archive.
 - **Updated**: AGENTS.md, ON_PREM runbook, on-prem-deploy MATURITY, import SKILL + user-prompts (Demo/Prod section).
 
-### 2026-07-11 � Removed delta Sync (keep Import)
+### 2026-07-11 � Removed delta Sync (keep Import)
 
 - **Removed**: `--sync-visa2014` / `--sync-full` / `--sync-since` / `--sync-state-dir` / `--no-soft-delete-sync`; `Visa2014SyncCommand` + StateStore/IdMapLoader/RowFilter; `RunSyncAsync` on OData importers; soft-delete sync query; Sync-only PS1s (Register task, Compare/Export/Watch SyncState, OnPremSyncState lib); `LegacySyncDashboard` (Module + Blazor); skill folder `visa2026-onprem-legacy-sync`.
 - **Kept**: `OnPrem-Sync.ps1` Import-only; `--import-visa2014`; lookup preflight; `Visa2014SyncPayloadFkHelper`; Import progress sidecars on `Visa2014SyncUpsertHelper`; host roots `C:\visa2026-sync*`.
 - **Ops**: disable Task Scheduler `Visa2026-OnPrem-LegacySync` on `.25` manually if still registered.
 
-### 2026-07-13 � Demo hard wipe + reimport blocked by lookup preflight
+### 2026-07-13 � Demo hard wipe + reimport blocked by lookup preflight
 
 - **Phase**: end-to-end (on-prem Demo wipe + Import)
 - **Outcome**: wipe/seed success; Import **not started** (preflight exit 2)
-- **Environment**: `10.100.128.25` / `Visa2026DbDemo` � sync host `C:\visa2026-sync-demo` � legacy `10.100.128.15` / `VISA2015`
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` � sync host `C:\visa2026-sync-demo` � legacy `10.100.128.15` / `VISA2015`
 - **Wipe**: DROP+CREATE `Visa2026DbDemo` (sqlcmd `-E -C`); cleared id-maps + `{}` stubs; `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate`; LoginPage HTTP 200; redeployed DataImporter (post delta-Sync removal)
-- **Import**: `Run-OnPremSyncOnServer.ps1 -Profile Demo` stopped at lookup preflight � **30 blocking** gaps
+- **Import**: `Run-OnPremSyncOnServer.ps1 -Profile Demo` stopped at lookup preflight � **30 blocking** gaps
 - **Blockers**: CheckPoint sampleQuery syntax (`CheckPoint` reserved); CityByName ~12 cities on Application/ApplicationItem (encoding/normalize); City `(null)` x2; Region free-text x3 (AoR/Lodging)
 - **Person..EPH Phase B**: OK in preflight
 - **Next**: lookup resolution for CityByName (+ fix CheckPoint brackets on live YAML) then re-run preflight; or user-approved `-SkipLookupPreflight` (Application waves will still hit CityByName)
 
-### 2026-07-13 � Demo preflight fixed (CityByName + CheckPoint); Import started
+### 2026-07-13 � Demo preflight fixed (CityByName + CheckPoint); Import started
 
 - **Phase**: end-to-end (Demo after hard wipe)
 - **Outcome**: preflight **exit 0**; Import **Running** (RunId `20260712-205532`, wave Person)
@@ -1268,7 +1282,7 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
   1. CheckPoint sampleQuery: `pia.[CheckPoint]` (reserved word)
   2. CityByName: `identityPassThrough` + city.json NameTm identity enrich in `Visa2014LookupTranslator.Load` + fold-match targets; Application city aliases in YAML
   3. City/Region: `unmappedPolicy: allow_null` for skip-row free-text/null city gaps (still skipped at import)
-  4. City sampleQuery keeps `dbo.[S�herEtrap]` (ASCII `SeherEtrap` is invalid on live VISA2015)
+  4. City sampleQuery keeps `dbo.[S�herEtrap]` (ASCII `SeherEtrap` is invalid on live VISA2015)
 - **Deploy**: republished DI + YAML + `LookupCatalogs/city.json` to `C:\visa2026-sync-demo`
 - **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; log `logs\sync-run-20260712-205532.log` / wrap `demo-import-wrap-20260712-205531`
 

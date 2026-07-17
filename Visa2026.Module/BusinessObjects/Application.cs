@@ -45,6 +45,15 @@ namespace Visa2026.Module.BusinessObjects
 
         private const string AppInvApplicationTypeName = "App_Inv";
         private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
+        private const string AppInvAccordingToWpApplicationTypeName = "App_Inv_According_to_WP";
+        private const string AppVisaAndWpExtApplicationTypeName = "App_Visa_and_WP_Ext";
+        private const string AppVisaExtAccordingToWpApplicationTypeName = "App_Visa_Ext_According_to_WP";
+        private const string AppInvFmApplicationTypeName = "App_Inv_FM";
+        private const string AppVisaExtFmApplicationTypeName = "App_Visa_Ext_FM";
+        private const string AppVisaForNewBornFmApplicationTypeName = "App_Visa_For_New_Born_FM";
+        private const string AppVisaExtApplicationTypeName = "App_Visa_Ext";
+        private const string AppExitVisaApplicationTypeName = "App_Exit_Visa";
+        private const string AppServicePassportApplicationTypeName = "App_Sevice_Passport";
         /// <summary>Default visa period for <see cref="AppInvApplicationTypeName"/> (see visa-period.json <c>Month1</c>).</summary>
         private const string AppInvDefaultVisaPeriodLocalizationKey = "Month1";
         /// <summary>Default visa type for <see cref="AppInvApplicationTypeName"/> (see visa-type.json <c>BS1</c>).</summary>
@@ -55,8 +64,14 @@ namespace Visa2026.Module.BusinessObjects
         private const string AppInvAndWpDefaultVisaPeriodLocalizationKey = "Month6";
         /// <summary>Default visa category for <see cref="AppInvAndWpApplicationTypeName"/> (see visa-category.json <c>Multiple</c> / köp gezeklik).</summary>
         private const string AppInvAndWpDefaultVisaCategoryLocalizationKey = "Multiple";
-        /// <summary>Default visa type for <see cref="AppInvAndWpApplicationTypeName"/> (see visa-type.json <c>WP</c> / WP-Işçi Wiza).</summary>
-        private const string AppInvAndWpDefaultVisaTypeLocalizationKey = "WP";
+        /// <summary>Default visa type for WP-linked application types (see visa-type.json <c>WP</c> / WP-Işçi Wiza).</summary>
+        private const string WpDefaultVisaTypeLocalizationKey = "WP";
+        /// <summary>Default visa type for family-member invitation / extension types (see visa-type.json <c>FM</c>).</summary>
+        private const string FmDefaultVisaTypeLocalizationKey = "FM";
+        /// <summary>Default visa type for exit / App_Visa_Ext (see visa-type.json <c>EX</c> / EX-Çykyş).</summary>
+        private const string ExDefaultVisaTypeLocalizationKey = "EX";
+        /// <summary>Default visa type for service-passport invitation (see visa-type.json <c>OF</c>).</summary>
+        private const string OfDefaultVisaTypeLocalizationKey = "OF";
 
         /// <summary>Registration and business-trip application types target a migration-service office.</summary>
         private const string MigrationServiceVisibleCriteria =
@@ -368,11 +383,35 @@ namespace Visa2026.Module.BusinessObjects
                 return true;
             }
 
-            if (string.Equals(applicationTypeName, AppInvAndWpApplicationTypeName, StringComparison.Ordinal))
+            if (string.Equals(applicationTypeName, AppInvAndWpApplicationTypeName, StringComparison.Ordinal)
+                || string.Equals(applicationTypeName, AppInvAccordingToWpApplicationTypeName, StringComparison.Ordinal)
+                || string.Equals(applicationTypeName, AppVisaAndWpExtApplicationTypeName, StringComparison.Ordinal)
+                || string.Equals(applicationTypeName, AppVisaExtAccordingToWpApplicationTypeName, StringComparison.Ordinal))
             {
                 visaPeriodLocalizationKey = AppInvAndWpDefaultVisaPeriodLocalizationKey;
                 visaCategoryLocalizationKey = AppInvAndWpDefaultVisaCategoryLocalizationKey;
-                visaTypeLocalizationKey = AppInvAndWpDefaultVisaTypeLocalizationKey;
+                visaTypeLocalizationKey = WpDefaultVisaTypeLocalizationKey;
+                return true;
+            }
+
+            if (string.Equals(applicationTypeName, AppInvFmApplicationTypeName, StringComparison.Ordinal)
+                || string.Equals(applicationTypeName, AppVisaExtFmApplicationTypeName, StringComparison.Ordinal)
+                || string.Equals(applicationTypeName, AppVisaForNewBornFmApplicationTypeName, StringComparison.Ordinal))
+            {
+                visaTypeLocalizationKey = FmDefaultVisaTypeLocalizationKey;
+                return true;
+            }
+
+            if (string.Equals(applicationTypeName, AppVisaExtApplicationTypeName, StringComparison.Ordinal)
+                || string.Equals(applicationTypeName, AppExitVisaApplicationTypeName, StringComparison.Ordinal))
+            {
+                visaTypeLocalizationKey = ExDefaultVisaTypeLocalizationKey;
+                return true;
+            }
+
+            if (string.Equals(applicationTypeName, AppServicePassportApplicationTypeName, StringComparison.Ordinal))
+            {
+                visaTypeLocalizationKey = OfDefaultVisaTypeLocalizationKey;
                 return true;
             }
 

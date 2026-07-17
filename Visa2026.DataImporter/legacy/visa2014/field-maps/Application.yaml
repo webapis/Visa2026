@@ -158,9 +158,17 @@ propertyGaps:
       missingBehavior: omit
       notes: Set from ApplicationType.SelectionCode on load
     - property: VisaType
-      default: from_application_type_defaults
+      default: inferred_from_application_type
       missingBehavior: use_default
-      notes: No legacy header FK — ApplyDefaultsForApplicationType on type set
+      notes: |
+        No legacy Application.VisaType FK. Infer from ApplicationType.Name via
+        Visa2014ApplicationVisaTypeInference (LocalizationKey):
+          App_Inv_And_WP / App_Visa_and_WP_Ext / App_Inv_According_to_WP / App_Visa_Ext_According_to_WP → WP (WP-Işçi Wiza)
+          App_Inv → BS1 (BS1-İşerwürlik)
+          App_Inv_FM / App_Visa_Ext_FM / App_Visa_For_New_Born_FM → FM (FM-Maşgala)
+          App_Visa_Ext / App_Exit_Visa → EX (EX-Çykyş)
+          App_Sevice_Passport → OF (OF-Gulluk)
+        Import sets VisaType on transform; UI ApplyDefaultsForApplicationType mirrors the same keys.
     - property: MigrationService
       default: null
       missingBehavior: allow_null
@@ -387,4 +395,4 @@ export:
 notes: |
   Header-only scope. PersonInApplication → ApplicationItem (next discovery).
   Ministry/process scalars → ApplicationProgress deferred entity.
-  VisaType header default from ApplicationType OnCreated logic when ShowVisaType.
+  VisaType header inferred from ApplicationType (Visa2014ApplicationVisaTypeInference); no legacy FK.

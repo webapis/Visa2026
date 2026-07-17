@@ -109,7 +109,7 @@ internal static class Visa2014ApplicationTransform
         "_legacyManualNumber", "_legacySubtypeId",
         "FullApplicationNumber", "ApplicationNumber", "AppNumberPrefix",
         "ApplicationDate", "Year", "Month", "IsManualEntry", "ApplicationType",
-        "MigrationService", "Urgency", "VisaPeriod", "VisaCategory", "ProjectContract", "ApprovalLegProfile",
+        "MigrationService", "Urgency", "VisaPeriod", "VisaCategory", "VisaType", "ProjectContract", "ApprovalLegProfile",
         "BorderZoneLocation", "MovementPermitLocation",
         "ToCity", "BusinessTripStartDate", "BusinessTripEndDate",
         "_legacy_DepartmentForRegistration", "_legacy_DepartmentForRegistrationName",
@@ -440,6 +440,9 @@ internal static class Visa2014ApplicationTransform
         if (!TrySetApplicationType(row, catalogs, applicationTypeComposite, unmapped, ref skipReason))
             return row;
 
+        // Legacy Application has no VisaType — infer from resolved ApplicationType.Name.
+        TrySetInferredVisaType(row);
+
         TrySetMigrationService(row, catalogs, raw, unmapped);
         if (raw.LegacyPersonOid is { } personOid && personOid != Guid.Empty)
             row["_legacyPersonOid"] = personOid;
@@ -661,6 +664,15 @@ internal static class Visa2014ApplicationTransform
             unmapped.Add(reason);
 
         row["Urgency"] = "NORM";
+    }
+
+    private static void TrySetInferredVisaType(Dictionary<string, object?> row)
+    {
+        var applicationTypeName = row.GetValueOrDefault("ApplicationType") as string;
+        if (Visa2014ApplicationVisaTypeInference.TryInferVisaType(applicationTypeName, out var visaTypeKey))
+            row["VisaType"] = visaTypeKey;
+        else
+            row["VisaType"] = null;
     }
 
     private static void TrySetVisaPeriod(
