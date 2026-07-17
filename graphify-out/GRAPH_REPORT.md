@@ -1,581 +1,600 @@
-# Graph Report - Visa2026  (2026-07-17)
+# Graph Report - .  (2026-07-17)
 
 ## Corpus Check
-- 1759 files · ~1,583,960 words
-- Verdict: corpus is large enough that graph structure adds value.
+- cluster-only mode — file stats not available
 
 ## Summary
-- 11242 nodes · 23049 edges · 727 communities (639 shown, 88 thin omitted)
+- 11141 nodes · 22992 edges · 768 communities (660 shown, 108 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 355 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `755f182d`
+- Built from commit: `a689c1cf`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- Community 0
-- Community 1
-- Community 2
-- Community 3
-- Community 4
-- Community 5
-- Community 6
-- Community 7
-- Community 8
-- Community 9
-- Community 10
-- Community 11
-- Community 12
-- Community 13
-- Community 14
-- Community 15
-- Community 16
-- Community 17
-- Community 18
-- Community 19
-- Community 20
-- Community 21
-- Community 22
-- Community 23
-- Community 24
-- Community 25
-- Community 26
-- Community 27
-- Community 28
-- Community 29
-- Community 30
-- Community 31
-- Community 32
-- Community 33
-- Community 34
-- Community 35
-- Community 36
-- Community 37
-- Community 38
-- Community 39
-- Community 40
-- Community 41
-- Community 42
-- Community 43
-- Community 44
-- Community 45
-- Community 46
-- Community 47
-- Community 48
-- Community 49
-- Community 50
-- Community 51
-- Community 52
-- Community 53
-- Community 54
-- Community 55
-- Community 56
-- Community 57
-- Community 58
-- Community 59
-- Community 60
-- Community 61
-- Community 62
-- Community 63
-- Community 64
-- Community 65
-- Community 66
-- Community 67
-- Community 68
-- Community 69
-- Community 70
-- Community 71
-- Community 72
-- Community 73
-- Community 74
-- Community 75
-- Community 76
-- Community 77
-- Community 78
-- Community 79
-- Community 80
-- Community 81
-- Community 82
-- Community 83
-- Community 84
-- Community 85
-- Community 86
-- Community 87
-- Community 88
-- Community 89
-- Community 90
-- Community 91
-- Community 92
-- Community 93
-- Community 94
-- Community 95
-- Community 96
-- Community 97
-- Community 98
-- Community 99
-- Community 100
-- Community 101
-- Community 102
-- Community 103
-- Community 104
-- Community 105
-- Community 106
-- Community 107
+- Visa2026.Module.BusinessObjects
+- CommaSeparatedMultiSelectPropertyEditor
+- Visa2026EFCoreDbContext
+- .ImportInferredFromPiaAsync
+- Visa2014ApplicationProgressTransform
+- IVisa2014ImportTarget
+- IExpirationLogic
+- ExcelImporter
+- ApiClient
+- Visa2026.Module.Services
+- Visa2026.Module.Editors
+- Models.cs
+- .Run
+- Application
+- .Query
+- Visa2026.Module.DatabaseUpdate
+- ReportDashboardQueryService
+- SystemSettings
+- Visa2014LookupCatalog
+- Visa2026.Module.Services.RuntimeLogging
+- Visa2026.Module.BusinessObjects.StateNotifications
+- .RunCommandAsync
+- ApplicationItem
+- Visa
+- Visa2014ProjectContractMinistryLegPreviewExporter
+- ApplicationReportPackageComponent.razor
+- UserThemeHelper
+- OnPremImportRunArchive.ps1
+- OptionalDetailFieldsController
+- .ApplyImportObjectSpaceHooks
+- .PrepareImportBatch
+- .Resolve
+- Visa2014ODataLookupResolver
+- Person
+- ApprovalLegProfileMinistryHelper
+- BaseObject
+- Visa2026.Module.Services.UserReports
+- IVisaPreviewSlotService.cs
+- Visa2014LegacyInvitationItemCancellationIndex
+- .Get
+- .BuildZipAsync
+- ApplicationRuntimeLogEntry
+- RejectionItem
+- LookupBase
+- ApplicationItemDocumentCopiesComponent.razor
+- Visa2014PersonImportBatch
+- ApplicationProgressDeleteController
+- LookupCatalogEntitySync
+- Visa2014ApplicationItemTransform
+- Visa2026.DataImporter.Legacy.Visa2014
+- ApplicationSupportingDocumentsPacker
+- .Run
+- .TryBuildPreviewBundleAsync
+- BaseImporter
+- UserReportTemplate
+- .RunAsync
+- .PrepareInferenceRows
+- .ListLegacyCopyRowsAsync
+- .RunAsync
+- ReportDashboardPersonType
+- ImportReimportHistoryReader
+- .RunAsync
+- ApplicationTypeSelectionController
+- ApplicationItemDocumentCopiesPreviewDialog.razor
+- ApplicationItemDocumentPackageOptions
+- Visa2014AddressOfResidenceTransform
+- Visa2026.Blazor.Server.WebApi
+- ModuleUpdater
+- DocumentBase
+- ApplicationProgressMinistryLetterFileAccess
+- ApplicationReportPackagePreviewDialog.razor
+- .Load
+- CommaSeparatedMultiSelectComponent.razor
+- Visa2026.Module
+- BoStateNotificationInboxComponent.razor
+- ApplicationProgressProfileResolver
+- ApplicationType
+- .GenerateUserEntryOutputsAsync
+- ReportDashboardMockQueryService
+- E2ETestBase
+- ApplicationProgress
+- ReportDashboardPropertyEditor
+- .IdMapPath
+- ViewController
+- ReportDashboardComponent.razor
+- AddressOfResidence
+- ApplicationProgressLegCodes
+- Visa2026.DataImporter
+- VisaPreviewSlotHost.razor
+- UserReportMergeDataHelper
+- .GenerateAsync
+- ShowReportController
+- Repair-WindowsOpenSshServer.ps1
+- MedicalRecord
+- .Format
+- ApplicationRuntimeLogResolutionSummary
+- Watch-Visa2026BlazorServerLogs.ps1
+- Visa2014AddressOfResidenceSiteDuplicateGuard
+- .WriteWorkbook
+- .GetLatest
+- ApplicationRuntimeLog
+- WordUserReportImageInjector
+- VisaFamilyMembersTextComponent.razor
+- .Sync
+- ApplicationItemDocumentCopiesController
+- ProjectContractTitleDescriptionMergeUpdater
+- Visa2026.Module.Services.HeaderLinkedDocuments
+- Visa2026.Blazor.Server.Controllers
 - Community 108
-- Community 109
+- ReportDashboardCategory
 - Community 110
-- Community 111
+- Visa2014AddressLineNormalizer
 - Community 112
-- Community 113
-- Community 114
-- Community 115
-- Community 116
+- Visa2014SalaryAmountNormalizer
+- .RunAsync
+- VisaListViewController
+- Updater
 - Community 117
 - Community 118
 - Community 119
-- Community 120
-- Community 121
-- Community 122
-- Community 123
-- Community 124
-- Community 125
-- Community 126
-- Community 127
-- Community 128
-- Community 129
-- Community 130
-- Community 131
-- Community 132
-- Community 133
-- Community 134
-- Community 135
-- Community 136
-- Community 137
-- Community 138
-- Community 139
-- Community 140
-- Community 141
-- Community 142
-- Community 143
-- Community 144
-- Community 145
-- Community 146
-- Community 147
-- Community 148
-- Community 149
-- Community 150
-- Community 151
-- Community 152
-- Community 153
-- Community 154
-- Community 155
-- Community 156
-- Community 157
-- Community 158
-- Community 159
-- Community 160
-- Community 161
-- Community 162
-- Community 163
-- Community 164
-- Community 165
-- Community 166
-- Community 167
-- Community 168
-- Community 169
-- Community 170
-- Community 171
-- Community 172
-- Community 173
-- Community 174
-- Community 175
-- Community 176
-- Community 177
-- Community 178
-- Community 179
-- Community 180
-- Community 181
-- Community 182
-- Community 183
-- Community 184
-- Community 185
-- Community 186
-- Community 187
-- Community 188
-- Community 189
-- Community 190
-- Community 191
-- Community 192
-- Community 193
-- Community 194
-- Community 195
-- Community 196
-- Community 197
-- Community 198
-- Community 199
-- Community 200
-- Community 201
-- Community 202
-- Community 203
-- Community 204
-- Community 205
-- Community 206
-- Community 207
-- Community 208
-- Community 209
-- Community 210
-- Community 211
-- Community 212
-- Community 213
-- Community 214
-- Community 215
-- Community 216
-- Community 217
-- Community 218
-- Community 219
-- Community 220
-- Community 221
-- Community 222
+- HeaderDocumentCopiesFamily
+- Task
+- .Log
+- ApplicationRuntimeLogSeverity
+- ModelNodesGeneratorUpdater
+- PersonDocumentCopiesComponent.razor
+- HeaderDocumentCopiesInlinePreview.razor
+- .RunAsync
+- Visa2014VisaTransform
+- ApplicationProgressRouteHelper
+- .CollectUserTemplateHints
+- SqlViewsUpdater
+- .ScrubSecrets
+- PersonListViewController
+- ObjectViewController
+- RegistrationListViewController
+- Program
+- PersonDocumentCopiesInlinePreview.razor
+- ProgressLettersInlinePreview.razor
+- ApplicationImporter
+- Visa2014PassportTransform
+- ApplicationProgressProfileResolverTests
+- UserReportBoType
+- TemplateOutputFormat
+- LookupCatalogDefinition
+- RuntimeErrorAlertHost.razor
+- ApplicationRuntimeLogRetentionBackgroundService
+- Visa2014ApplicationItemCancelledFlagsMapper
+- UserReportTemplateStagingImportResult
+- Visa2014EducationTransform
+- .PrepareImportBatch
+- Invitation
+- UserReportTemplateUpdater
+- BusinessTripSanawyTemplateGenerator
+- VisaFilePreviewDrawer.razor
+- HeaderDocumentCopiesSlotPanel.razor
+- DetailViewTabCountController
+- ApplicationProgressMinistryLetterFileNameClickController
+- PersonDocumentCopiesListLinkClickController
+- VisaFamilyMembersTextPropertyEditor
+- .TryApply
+- ApprovalLegProfileMinistryLegCatalogSync
+- HeaderParentListViewColumns
+- UserFeedbackHeaderPanel.razor
+- YamlScenario
+- EasyTestHostProcessLauncher
+- ResminamalarSlotPanel.razor
+- .Upload
+- VisaFamilyMemberLineDto
+- .GetVisibleRecords
+- Visa2026.Module.Tests.BusinessObjects
+- Visa2026.Module.BusinessObjects.Feedback
+- CustomNavigationUpdater
+- .RemoveDuplicateCatalogRows
+- ApplicationTypeQuickCodeComponent.razor
+- ApplicationListViewPreloadController
+- ApplicationItemDocumentCopiesModel
+- ApplicationTypeQuickCodePropertyEditor
+- Visa2014ActualPositionReview
+- .RegisterFromImportRow
+- .PostAsync
+- .Parse
+- DocumentCopiesSlotPanel.razor
+- ApplicationMigrationSlaProfileTypeLinkCatalogTests
+- visa2014-sql-remote
+- EasyTestBlazorNavigationHelper
+- .ProcessOneBatchAsync
+- LookupLocalization
+- UserReportTemplateMaintenanceService
+- ApplicationTypeConfigurationSeed
+- VersionViewItemAdapter
+- Visa2026.E2E.Tests
+- ApplicationProgressGridSortLockController
+- HeaderDocumentCopiesComponent.razor
+- NestedListViewTabCountController
+- ApplicationWordReportPackageCatalogEntry
+- PersonDocumentCopiesSlotPanel.razor
+- .ResolveSiteByCityAndScalar
+- Visa2014ApplicationItemPersonDuplicateGuard
+- .Resolve
+- .Normalize
+- .Resolve
+- ExpirationAlertRuleSaveController
+- .GetRootObjectSpace
+- UserReportPlaceholderCatalogEntry
+- Visa2026.Module.Services.StateEvaluation
+- .TryGetBaseCaption
+- ApplicationItemDocumentFileAccess
+- Visa2014ApplicationProgressDuplicateGuard
+- .RebuildEntityAsync
+- LookupCatalogCloneController
+- .EnsureConfigured
+- .RebuildAsync
+- .ListLegacyCopyRowsAsync
+- Visa2026.Blazor.Server
+- ApplicationRuntimeLogContextAccessor
+- PersonDocumentCopyPdfMerger
+- .TryGetPayloadFkId
+- .Resolve
+- ApplicationItemWordReportsController
+- ApplicationProgressMinistryLettersController
+- ReportDashboardPostgresViewsUpdater
+- .LoadRows
 - Community 223
-- Community 224
-- Community 225
-- Community 226
-- Community 227
-- Community 228
-- Community 229
-- Community 230
-- Community 231
-- Community 232
-- Community 233
-- Community 234
-- Community 235
-- Community 236
-- Community 237
-- Community 238
-- Community 239
-- Community 240
-- Community 241
-- Community 242
-- Community 243
-- Community 244
-- Community 245
+- .ClearAfterSuccessfulImportAsync
+- ApplicationTypeVisibilityCatalog
+- .FormatForCulture
+- .ListLegacyCopyRowsAsync
+- .ListLegacyVisaRowsAsync
+- ProgressLettersCatalogComponent.razor
+- WordReportBatchToastHost.razor
+- VisaFamilyMembersTextModel
+- .Configure
+- .PrepareForTestSession
+- VisaExtensionStatusController
+- VisaTransferStatusController
+- .TryBuild
+- UserReportVisibilityService
+- visa2026-sql-local
+- .RunCommandAsync
+- .RunCommandAsync
+- visa2026-sql-local
+- ProgressLettersSlotPanel.razor
+- ShowMailMergeController
+- .Sync
+- .RunCommandAsync
 - Community 246
-- Community 247
-- Community 248
-- Community 249
-- Community 250
-- Community 251
-- Community 252
-- Community 253
-- Community 254
-- Community 255
-- Community 256
-- Community 257
-- Community 258
-- Community 259
-- Community 260
-- Community 261
-- Community 262
-- Community 263
-- Community 264
-- Community 265
-- Community 266
+- .Parse
+- UserFeedbackViewController
+- ApplicationItemDocumentCopyPdfMerger
+- MailMergeVisibilityCacheService
+- VisaFamilyMemberLinesHelper
+- StateNotificationHeaderBadge.razor
+- Visa2026BlazorModule
+- .IsPostgreSql
+- LookupLocalizationLookupListViewUpdater
+- DocumentFileUploadConstraints
+- .Submit
+- ApplicationItemReportPackageListPropertyEditor
+- VisaLocalization
+- .RunAsync
+- .RunAsync
+- .RunAsync
+- .ResolveOrCreateActualPositionAsync
+- SeedFieldRules
+- SyncRuleCacheController
+- PdfFormMappingUpdater
 - Community 267
-- Community 268
-- Community 269
+- .MapLookup
+- Log
 - Community 270
-- Community 271
-- Community 272
-- Community 273
-- Community 274
-- Community 275
-- Community 276
-- Community 277
-- Community 278
-- Community 279
-- Community 280
-- Community 281
-- Community 282
-- Community 283
-- Community 284
-- Community 285
-- Community 286
-- Community 287
-- Community 288
-- Community 289
-- Community 290
-- Community 291
-- Community 292
-- Community 293
-- Community 294
-- Community 295
-- Community 296
-- Community 297
-- Community 298
-- Community 299
-- Community 300
-- Community 301
-- Community 302
-- Community 303
-- Community 304
-- Community 305
-- Community 306
-- Community 307
-- Community 308
-- Community 309
-- Community 310
-- Community 311
-- Community 312
-- Community 313
-- Community 314
-- Community 315
-- Community 316
-- Community 317
-- Community 318
-- Community 319
-- Community 320
-- Community 321
-- Community 322
-- Community 323
-- Community 324
-- Community 325
-- Community 326
-- Community 327
-- Community 328
-- Community 329
-- Community 330
-- Community 331
-- Community 332
-- Community 333
-- Community 334
-- Community 335
-- Community 336
-- Community 337
-- Community 338
-- Community 339
-- Community 340
-- Community 341
-- Community 342
-- Community 343
-- Community 344
-- Community 345
-- Community 346
-- Community 347
-- Community 348
-- Community 349
-- Community 350
-- Community 351
-- Community 352
-- Community 353
-- Community 354
-- Community 355
-- Community 356
-- Community 357
-- Community 358
-- Community 359
-- Community 360
-- Community 361
-- Community 362
-- Community 363
-- Community 364
-- Community 365
-- Community 366
-- Community 367
-- Community 368
-- Community 369
-- Community 370
-- Community 371
-- Community 372
-- Community 373
-- Community 374
-- Community 375
-- Community 376
-- Community 377
-- Community 378
-- Community 379
-- Community 380
-- Community 381
-- Community 382
-- Community 383
-- Community 384
-- Community 385
-- Community 386
-- Community 387
-- Community 388
-- Community 389
-- Community 390
-- Community 391
-- Community 392
-- Community 393
-- Community 394
-- Community 395
-- Community 396
-- Community 397
-- Community 398
-- Community 399
-- Community 400
-- Community 401
-- Community 402
-- Community 403
-- Community 404
-- Community 405
-- Community 406
-- Community 407
-- Community 408
-- Community 409
-- Community 410
-- Community 411
-- Community 412
-- Community 413
-- Community 414
-- Community 415
-- Community 417
-- Community 418
-- Community 419
-- Community 420
-- Community 421
-- Community 422
-- Community 423
-- Community 424
-- Community 425
-- Community 426
-- Community 427
-- Community 428
-- Community 429
-- Community 430
-- Community 431
-- Community 432
-- Community 433
-- Community 434
-- Community 435
-- Community 436
-- Community 437
-- Community 438
-- Community 439
-- Community 440
-- Community 441
-- Community 442
-- Community 443
-- Community 444
-- Community 445
-- Community 446
-- Community 447
-- Community 448
-- Community 449
-- Community 450
-- Community 451
-- Community 452
-- Community 453
-- Community 454
-- Community 455
-- Community 457
-- Community 458
-- Community 459
-- Community 460
-- Community 461
-- Community 462
-- Community 463
-- Community 464
-- Community 465
-- Community 466
-- Community 467
-- Community 468
-- Community 469
-- Community 470
-- Community 471
-- Community 472
-- Community 473
-- Community 474
-- Community 475
-- Community 476
-- Community 477
-- Community 478
-- Community 479
-- Community 480
-- Community 485
-- Community 486
-- Community 489
-- Community 490
-- Community 491
-- Community 492
-- Community 493
-- Community 494
-- Community 495
-- Community 496
-- Community 497
-- Community 498
-- Community 499
-- Community 500
-- Community 501
-- Community 502
-- Community 503
-- Community 504
-- Community 505
-- Community 506
-- Community 507
-- Community 508
-- Community 509
-- Community 510
-- Community 513
-- Community 516
-- Community 521
-- Community 522
-- Community 523
-- Community 524
-- Community 525
-- Community 526
-- Community 527
-- Community 528
-- Community 529
-- Community 530
-- Community 531
-- Community 532
-- Community 534
-- Community 535
-- Community 537
-- Community 539
-- Community 541
-- Community 542
-- Community 563
-- Community 564
-- Community 700
-- Community 701
-- Community 702
-- UiScenarioEphemeralUserModelDifferenceStore
-- .GetExcludedPersonIds
-- WordReportGenerationBatch
-- ApplicationProgressMinistryLetterFileSchemaSql
-- ApplicationRuntimeLogViewsUpdater
-- ProjectContractApprovalLegProfileSchemaSql
-- PdfFormFillerService
-- ReportVisibilityCacheController
-- ApplicationProgressMinistryLetterFileSchemaUpdater
-- .ExtractPlaceholdersAsync
-- RepoPaths
-- VwRdPositionHistory
-- ProjectContractMinistryLegsSchemaCleanupUpdater
-- .IsAllowed
-- Func
-- HashSet
-- IReadOnlyDictionary
+- .CountWorkingDaysInclusive
+- FileCursorRuntimeErrorInboxWriter
+- PlaceholderManualSlotPanel.razor
+- ApplicationItemDocumentCopiesListPropertyEditor
+- .RunCommandAsync
+- .ApplyLegacyCancelledFlags
+- .RunCommandAsync
+- .RunCommandAsync
+- .RunAsync
+- Visa2014TurkmenistanGeographyStore
+- .RunAsync
+- .DeleteAsync
 - List
-- InlineData
-- Theory
-- object
-- StreamWriter
-- Action
-- IList
+- PdfFormMappingCacheController
+- VisaCancelExtStatusController
+- VisaCancellationStatusController
+- Program
+- BlazorPropertyEditorBase
+- ComponentModelBase
+- ControllerBase
+- Visa2026.Blazor.Server
+- PersonDetailViewIssuedDocumentsLayoutController
+- ODataBatch.cs
+- EasyTestSessionFixture
+- PdfMappingHelper
+- Visa2026Module
+- Visa2026.DataImporter
+- .EnsureCreated
+- Install-WslDockerEngine.ps1
+- WordReportBatchesController
+- BoStateNotificationNavigationHelper
+- .CanEditTemplates
+- Visa2026.Module.BusinessObjects.ReportDashboard
+- .RunAsync
+- WindowController
+- SyncRulesController
+- UserFeedbackDetailViewUpdater
+- .Submit
+- ApplicationRuntimeLogTextHelper
+- UserReportPlaceholderCatalogModels.cs
+- .ValidateSinglePlaceholder
+- ApplicationItemPdfController
+- .ListRowsNeedingPatchAsync
+- DocumentPreviewPopupWindowState
+- .RunAsync
+- .GetCsv
+- ApplicationProgressHistoryViewsUpdater
+- ApplicationDetailViewDefaultTabController
+- template-staging-local.js
+- .RunAsync
+- Visa2014WorkPermitItemPersonDuplicateGuard
+- .TryValidateSlaValues
+- PersonDocumentCopiesController
+- .EnsureDefaultRoleSelfWrite
+- SoftDeleteColumnsCleanupUpdater
+- IApplicationRuntimeLogResolution
+- WordUserReportMergeImageExtractor
+- .TryEnqueueApplication
+- CircuitHandlerProxy
+- runtime-error-inbox-common.ps1
+- ApplicationItemLookupDefaultsController
+- .TryCreateMergeSlicePdfStream
+- Visa2026.E2E.Tests
+- Configure-SqlExpressSaLogin.ps1
+- .ApplyStoredCultureAfterLogonAsync
+- DeploymentEnvironmentPresenter
+- ApplicationReportPackageListPropertyEditor
+- OptionalDetailFieldsTogglePropertyEditor
+- .RunCommandAsync
+- HttpApplicationRuntimeLogAdminChecker
+- ApplicationProgressImporter
+- .PullAsync
+- BusinessTripPlanImporter
+- EmployeePositionHistoryImporter
+- InvitationImporter
+- MedicalRecordImporter
+- RejectionImporter
+- TravelHistoryImporter
+- WorkPermitImporter
+- WorkPermitItemImporter
+- .CustomizeTypesInfo
+- ApplicationTypeMigrationSlaWarningController
+- ApplicationProgressDetailViewController
+- ApprovalLegProfile
+- WordReportsController
+- IUserReportTemplateMaintenanceService
+- LookupBaseDetailViewModelUpdater
+- ApplicationUser
+- _Imports.razor
+- .TryCreateOnObjectSpace
+- PdfBatchToastHost.razor
+- GridSearchBoxLocalizationController
+- .OnLinesCommittedAsync
+- .TryNormalizeCulture
+- .EnsureReady
+- .TryCreate
+- ApplicationItemImporter
+- EducationImporter
+- .Build
+- .LoadChangedLegacyOidsAsync
+- .Rebuild
+- LodgingImporter
+- OrganizationSingletonImporter
+- PassportImporter
+- ProjectContractImporter
+- RejectionItemImporter
+- VisaImporter
+- .Export
+- UserReportTemplateController
+- ApplicationItemBorderZoneLocationStringUpdater
+- ApplicationProgressListLabelHelperTests
+- AuthenticationController
+- VisaXafCultureInfoService
+- Install-WindowsOpenSshServer.ps1
+- Bump-Version.ps1
+- ProjectContract-CalikEnergi.ps1
+- ApplicationDetailViewBorderZoneController
+- ApplicationProgressRowAppearanceController
+- ApplicationReportPackageModel
+- AddressOfResidenceImporter
+- .Parse
+- .Export
+- Visa2014ApplicationProgressSeedHelper
+- ApprovalLegProfileMinistryHelper.cs
+- .FilterEducationByApplicationDate
+- ApplicationProgressRowStateRefreshController
+- PersonDetailViewVariantController
+- ApplicationItemMovementFlattenUpdater
+- ApplicationTypeSelectionCodeSeed
+- EmployeeContractSchemaCleanupUpdater
+- OrganizationLegacySchemaCleanupUpdater
+- VisaBorderZoneLocationStringUpdater
+- ApplicationMigrationSlaProfileViewsUpdater
+- .ExtractPlaceholdersAsync
+- Visa2026BlazorApplication
+- .SetCulture
+- ApplicationRuntimeLogNavigationHelper
+- WebApiServiceExtensions
+- .Export
+- .Export
+- .MapApplicationData
+- ApplicationProgressListSortController
+- ApprovalLegProfileMinistryLegObjectSpaceHooks
+- StateChangeLogViewController
+- ApplicationBorderZoneLocationStringUpdater
+- WorkPermitItemPermittedLocationsStringUpdater
+- .ApplyIfNeeded
+- .LogWithCode
+- ApplicationMigrationSlaProfileCatalogLoaderTests.cs
+- .WorkflowTerminalFlags_ReflectLatestProgressState
+- Attribute
+- Visa2014LookupTranslator.cs
+- ProxyHubConnectionHandler
+- DeletionSyncController
+- App.razor
+- IComplexViewItem
+- _Host.cshtml
+- Set-Visa2026TemplateEditOfficeTrust.ps1
+- Visa2026.Module.Tests
+- PersonDetailViewBlazorUrlController
+- PersonListViewBlazorNavigationController
+- ApprovalLegProfileMinistryLegListSortController
+- ExpirationStateRefreshController
+- E2ETestDataSeed.cs
+- EducationGraduationYearStringUpdater
+- EmployeeSalaryAmountStringUpdater
+- HeaderDocumentCopiesListViewColumnUpdater
+- PersonDocumentCopiesListViewColumnUpdater
+- PersonIsActiveColumnsCleanupUpdater
+- PersonRoleMigrationUpdater
+- ApprovalLegProfileMinistryLegViewsUpdater
+- PersonNestedListViewsUpdater
+- .TryGetBaseCaption
+- UiScenarioEphemeralUserModelDifferenceStore
+- ExcelTemplateSpike.csproj
+- RuntimeLogResolution.csproj
+- Build-DockerImages.ps1
+- Import-PreviewCatalogRows.ps1
+- ApplicationItemDetailViewBorderZoneController
+- UserCultureController
+- ImportReimportHistoryComponent.razor
+- .InvokeAsync
+- ApplicationListViewController
+- ApplicationMailMergeTemplatesController
+- ApplicationItemCurrentSalarySchemaSql
+- ApplicationProgressOrderSchemaSql
+- .FirstOrDefault
+- MailMergeUpdater
+- PersonCurrentColumnsCleanupUpdater
+- PersonFamilyRelationDocumentMigrationUpdater
+- ProjectContractApprovalLegProfileSchemaSql
+- ProjectContractLegacyColumnsCleanupUpdater
+- UserFeedbackViewsUpdater
+- LocalizedLookupTypes
+- TenantLookupTypes
+- .IsAllowed
+- PersonLinkedDocumentsSnapshot
+- .Deserialize
+- .Open
+- UrgencyDuplicateCleanupUpdater
+- Run-DataImporter.ps1
+- .Resolve
+- .FromLegacyStatusL
+- VisaIssuingApplicationTypes
+- .RefreshMappingsAction_Execute
+- PersonNestedReadOnlyListViewController
+- StateChangeTrackingDeleteController
+- AddressOfResidenceStartDateColumnCleanupUpdater
+- ApplicationItemCurrentSalarySchemaUpdater
+- ApplicationItemPurposeOfTravelColumnsCleanupUpdater
+- ApplicationListQueryPerformanceSchemaUpdater
+- ApplicationProgressMinistryLetterFileSchemaUpdater
+- ApplicationProgressOrderSchemaUpdater
+- ApplicationRuntimeLogModelUpdater
+- InvitationHeaderStatusColumnsCleanupUpdater
+- MinistryReviewSlaSettingsSchemaUpdater
+- MinistrySchemaCleanupUpdater
+- PassportCurrentVisaColumnCleanupUpdater
+- ProjectContractApprovalLegProfileSchemaUpdater
+- ProjectContractApprovalProfileSchemaCleanupUpdater
+- SubcontractorContactColumnsCleanupUpdater
+- VisaVisibilityToggleColumnsCleanupUpdater
+- WorkPermitApplicationNotRequiredColumnCleanupUpdater
+- WorkPermitItemStatusColumnsCleanupUpdater
+- ListViewShowFindPanelModelUpdater
+- ApplicationItemLinkedDocumentsSnapshot
+- .ExtractPlaceholdersAsync
+- DocumentCopies.ps1
+- Run-OnPremSyncOnServer.ps1
+- DocumentPreviewPopupWindowButtons.razor
+- ApplicationProgressCatalogCodes.cs
+- OrganizationPassportLineHelper.cs
+- PdfFormMapping
+- VwRdApplication
+- VwRdVisaAppProgress
+- VwRdVisaByCategory
+- VwRdVisaByDaysRemaining
+- VwRdVisaByPeriod
+- VwRdVisaByType
+- VwRdVisaState
+- ApplicationNumberingProfileMigrationUpdater
+- ImportReimportHistoryModelUpdater
+- LookupBaseNameTmBackfillUpdater
+- LookupBaseNameTmPdfFormMappingUpdater
+- ProjectContractMinistryLegsSchemaCleanupUpdater
+- StateChangeRulesUpdater
+- VisaBorderZoneLocationYokDefaultUpdater
+- LookupLocalizationDisplay.cs
+- .BuildPackagingNotesText
+- install-docker-engine.sh
+- Update-LocalDatabase.ps1
+- Get-RepoRoot.ps1
+- GenerateApprovalLegProfileCatalog.csproj
+- GenerateModelLocalization.csproj
+- Visa2014ODataLookupResolver.cs
+- ApplicationProgressDefaults.cs
+- ApplicationProgressListLabelHelper
+- ApplicationProgressRouteNavigation.cs
+- ApplicationProgressSlaCodes.cs
+- ExpirationAlertBusinessObjectKeys.cs
+- manifest.json
+- manifest.json
+- visa2026-entrypoint.sh
+- fresh-install.sh script
+- update-app.sh script
+- droplet-backup.sh
+- pre-commit
+- remote-compose-sql-up.sh
+- ensure-openssh-server.sh
+- remote-compose-sql-up.sh
+- OptionalDetailFieldsToggleComponent.razor
+- DataImporterBoolParser
+- View_VisaExtensionStatus.postgres.sql
+- vw_rd_application.sql
+- vw_rd_application.postgres.sql
+- vw_rd_education.sql
+- vw_rd_education_by_country.sql
+- vw_rd_education_by_country.postgres.sql
+- vw_rd_education.postgres.sql
+- vw_rd_passport.sql
+- vw_rd_passport.postgres.sql
+- vw_rd_person_roles.sql
+- vw_rd_person_roles.postgres.sql
+- vw_rd_position_history.sql
+- vw_rd_position_history.postgres.sql
+- vw_rd_projects.sql
+- vw_rd_projects.postgres.sql
+- vw_rd_visa_app_progress.sql
+- vw_rd_visa_app_progress.postgres.sql
+- vw_rd_visa_by_category.sql
+- vw_rd_visa_by_category.postgres.sql
+- vw_rd_visa_by_days_remaining.sql
+- vw_rd_visa_by_days_remaining.postgres.sql
+- vw_rd_visa_by_period.sql
+- vw_rd_visa_by_period.postgres.sql
+- vw_rd_visa_by_type.sql
+- vw_rd_visa_by_type.postgres.sql
+- vw_rd_visa_state.sql
+- vw_rd_visa_state.postgres.sql
+- vw_rd_work_permit.sql
+- vw_rd_work_permit.postgres.sql
 
 ## God Nodes (most connected - your core abstractions)
 1. `Visa2026.Module.BusinessObjects` - 444 edges
 2. `Application` - 188 edges
 3. `Visa2026.DataImporter.Legacy.Visa2014` - 163 edges
 4. `Visa2026EFCoreDbContext` - 154 edges
-5. `ApplicationItem` - 150 edges
+5. `ApplicationItem` - 151 edges
 6. `Visa2026.Module.DatabaseUpdate` - 125 edges
-7. `Visa2026.Module.Services` - 103 edges
+7. `Visa2026.Module.Services` - 104 edges
 8. `Person` - 99 edges
 9. `Visa2026.Module.Localization` - 88 edges
 10. `Visa2026.Module.Controllers` - 74 edges
@@ -595,475 +614,475 @@
 ## Import Cycles
 - None detected.
 
-## Communities (727 total, 88 thin omitted)
+## Communities (768 total, 108 thin omitted)
 
-### Community 0 - "Community 0"
-Cohesion: 0.03
-Nodes (19): Visa2026.Module.Appearance, Visa2026.Module.BusinessObjects, Visa2026.Module.Controllers, Visa2026.Module.Localization, Visa2026.Module.Model, Visa2026.Module.Module_Interface, ProgressTransition, ApplicationStatus (+11 more)
-
-### Community 1 - "Community 1"
+### Community 0 - "Visa2026.Module.BusinessObjects"
 Cohesion: 0.04
-Nodes (46): Visa2026.Module.Services.MigrationImport, Visa2026.Blazor.Server.Services.Migration, Visa2026.Blazor.Server.Middleware, IAsyncDisposable, IDisposable, IHost, ValueTask, HttpContext (+38 more)
+Nodes (9): Visa2026.Module.Services.PersonLinkedDocuments, Visa2026.Module.Appearance, Visa2026.Module.BusinessObjects, Visa2026.Module.Controllers, Visa2026.Module.Localization, Visa2026.Module.Model, Visa2026.Module.Services.PreviewSlot, Visa2026.Module.Module_Interface (+1 more)
 
-### Community 2 - "Community 2"
-Cohesion: 0.05
-Nodes (63): AuditDataItemPersistent, AuditEFCoreWeakReference, DbContext, DbSet, HCategory, IGrouping, ModelBuilder, ModelDifference (+55 more)
-
-### Community 3 - "Community 3"
-Cohesion: 0.05
-Nodes (30): SourceNode, ApiClient, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationApprovalLegProfilePatch (+22 more)
-
-### Community 4 - "Community 4"
-Cohesion: 0.08
-Nodes (17): EmployeeCurrency, DateTime, EmployeeSalary, DateTime, IList, string, Person, DateTime (+9 more)
-
-### Community 5 - "Community 5"
+### Community 1 - "CommaSeparatedMultiSelectPropertyEditor"
 Cohesion: 0.05
 Nodes (36): UiTexts, EventCallback, HashSet, IEnumerable, IObjectSpace, Type, CommaSeparatedMultiSelectModel, bool (+28 more)
 
-### Community 6 - "Community 6"
-Cohesion: 0.04
-Nodes (35): Visa2026.DataImporter.Legacy.Visa2014, Dictionary, IReadOnlyList, Visa2014ApplicationItemPreviewExporter, Dictionary, IReadOnlyList, Visa2014ApplicationProgressPreviewExporter, Dictionary (+27 more)
+### Community 2 - "Visa2026EFCoreDbContext"
+Cohesion: 0.05
+Nodes (65): AuditDataItemPersistent, AuditEFCoreWeakReference, DbContext, DbSet, HCategory, ModelBuilder, ModelDifference, ModelDifferenceAspect (+57 more)
 
-### Community 7 - "Community 7"
-Cohesion: 0.11
-Nodes (30): double, CancellationToken, Exception, ILogger, IObjectSpace, IServiceScopeFactory, List, Task (+22 more)
-
-### Community 8 - "Community 8"
-Cohesion: 0.07
-Nodes (33): Dictionary, IReadOnlyDictionary, IReadOnlyList, List, string, HospitalAccumulator, Visa2014HospitalTransform, Dictionary (+25 more)
-
-### Community 9 - "Community 9"
+### Community 3 - ".ImportInferredFromPiaAsync"
 Cohesion: 0.06
 Nodes (42): Failed, PiaAddressCandidateRow, PiaInferredAddressBatch, PiaInferredAddressPlan, Posted, Dictionary, Guid, IDictionary (+34 more)
 
-### Community 10 - "Community 10"
+### Community 4 - "Visa2014ApplicationProgressTransform"
+Cohesion: 0.05
+Nodes (31): Visa2026.DataImporter.Legacy.Visa2014.Tests, SynthesisStep, Fact, Visa2014ApplicationMinistryLegCountResolverTests, DateTime, Dictionary, Func, Guid (+23 more)
+
+### Community 5 - "IVisa2014ImportTarget"
 Cohesion: 0.07
-Nodes (33): headerIndex, DataParser, Dictionary, Guid, IEnumerable, IReadOnlyList, List, rows (+25 more)
+Nodes (36): DateTime, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationProgressImportResult, Visa2014ApplicationProgressODataImporter (+28 more)
 
-### Community 11 - "Community 11"
-Cohesion: 0.10
-Nodes (16): Visa2026.DataImporter.Legacy.Visa2014.Tests, SynthesisStep, Fact, Visa2014ApplicationMinistryLegCountResolverTests, DateTime, Dictionary, Guid, IReadOnlyDictionary (+8 more)
-
-### Community 12 - "Community 12"
+### Community 6 - "IExpirationLogic"
 Cohesion: 0.05
 Nodes (45): int, ExpirationAlertRule, IObjectSpace, IReadOnlyDictionary, ExpirationAlertRuleHelper, DateTime, IObjectSpace, ExpirationLogicHelper (+37 more)
 
-### Community 13 - "Community 13"
-Cohesion: 0.06
-Nodes (37): LegacyFamilyProofRow, LegacyParentOid, ParentNumber, Dictionary, Guid, int, IReadOnlyList, List (+29 more)
+### Community 7 - "ExcelImporter"
+Cohesion: 0.09
+Nodes (28): headerIndex, Dictionary, Guid, IEnumerable, IReadOnlyList, List, rows, string (+20 more)
 
-### Community 14 - "Community 14"
-Cohesion: 0.03
-Nodes (37): Visa2026.Module.Editors, Visa2026.Module.BusinessObjects.ReportDashboard, NonPersistentBaseObject, ApplicationItemDocumentCopiesListHost, ApplicationItemReportPackageListHost, Guid, ApplicationReportPackageListHost, ImportReimportHistoryHost (+29 more)
+### Community 8 - "ApiClient"
+Cohesion: 0.05
+Nodes (42): ExistingDoc, HttpClient, System.Net.Http.Json, Guid, JsonSerializerOptions, List, string, Task (+34 more)
 
-### Community 15 - "Community 15"
+### Community 9 - "Visa2026.Module.Services"
 Cohesion: 0.04
-Nodes (40): Action, ApplicationApprovalLegSnapshot, ApplicationItem, ApplicationListViewDisplayState, ApplicationLocation, ApplicationProgress, ApplicationProgressRouteKind, ApplicationState (+32 more)
+Nodes (14): Visa2026.Blazor.Server.Editors, Visa2026.Module.Tests.Services, Visa2026.Module.Services, Visa2026.Module.Services.ApplicationItemLinkedDocuments, Visa2026.Module.Services.ImportHistory, IJSRuntime, Stream, Task (+6 more)
 
-### Community 16 - "Community 16"
+### Community 10 - "Visa2026.Module.Editors"
+Cohesion: 0.04
+Nodes (30): Visa2026.Blazor.Server.Localization, Visa2026.Module.Editors, NonPersistentBaseObject, ApplicationItemDocumentCopiesListHost, ApplicationItemReportPackageListHost, Guid, ApplicationReportPackageListHost, ImportReimportHistoryHost (+22 more)
+
+### Community 11 - "Models.cs"
 Cohesion: 0.10
 Nodes (67): DateTime, Guid, List, string, ActualPosition, AddressOfResidence, Application, ApplicationItem (+59 more)
 
-### Community 17 - "Community 17"
-Cohesion: 0.13
-Nodes (17): ExcelMergeMode, UserReportBoType, Task, IList, Task, ExcelReportValidationService, IList, Task (+9 more)
-
-### Community 18 - "Community 18"
-Cohesion: 0.09
-Nodes (25): CatalogNode, ValueNode, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Visa2014AddressOfResidenceLegacyLoader, Dictionary (+17 more)
-
-### Community 19 - "Community 19"
+### Community 12 - ".Run"
 Cohesion: 0.04
-Nodes (12): Visa2026.Module.DatabaseUpdate, Visa2026.Module.BusinessObjects.Feedback, Visa2026.Module.DatabaseUpdate.LookupCatalogs, Visa2026.Module.Services.Feedback, PredefinedReportsUpdater, string, ApplicationLatestProgressSchemaSql, string (+4 more)
+Nodes (28): Dictionary, IReadOnlyList, Visa2014ApplicationItemPreviewExporter, Dictionary, IReadOnlyList, Visa2014ApplicationProgressPreviewExporter, Dictionary, IReadOnlyList (+20 more)
 
-### Community 20 - "Community 20"
+### Community 13 - "Application"
+Cohesion: 0.04
+Nodes (26): Format, Padding, Prefix, Seed, Action, DateTime, Guid, IList (+18 more)
+
+### Community 14 - ".Query"
 Cohesion: 0.06
-Nodes (19): DateTime, Guid, IList, string, ApplicationItem, MovementType, TravelType, ObjectChangedEventArgs (+11 more)
+Nodes (32): Dictionary, IReadOnlyDictionary, IReadOnlyList, List, string, HospitalAccumulator, Visa2014HospitalTransform, Dictionary (+24 more)
 
-### Community 21 - "Community 21"
-Cohesion: 0.04
-Nodes (17): Visa2026.Module.Services.WordReports, Visa2026.Module.Services.ExcelReports, Visa2026.Module.Tests.UserReports, Visa2026.Module.Services.UserReports, Regex, UserReportPlaceholderPatterns, IConfiguration, IServiceCollection (+9 more)
+### Community 15 - "Visa2026.Module.DatabaseUpdate"
+Cohesion: 0.03
+Nodes (19): Visa2026.Module.DatabaseUpdate, Visa2026.Module.DatabaseUpdate.LookupCatalogs, PredefinedReportsUpdater, string, ApplicationLatestProgressSchemaSql, string, ApplicationListQueryPerformanceSchemaSql, SqlConnection (+11 more)
 
-### Community 22 - "Community 22"
-Cohesion: 0.17
-Nodes (13): INonSecuredObjectSpaceFactory, IReadOnlyList, Task, Visa2014FilesImportCommand, DateTime, INonSecuredObjectSpaceFactory, IReadOnlyList, Task (+5 more)
+### Community 16 - "ReportDashboardQueryService"
+Cohesion: 0.19
+Nodes (12): Label, PersonRecordRole, ReportDashboardPanelData, ReportDashboardStatusBucket, DateTime, Func, Guid, HashSet (+4 more)
 
-### Community 23 - "Community 23"
-Cohesion: 0.04
-Nodes (12): Visa2026.Module.Services.PersonLinkedDocuments, Visa2026.Blazor.Server.WebApi, Visa2026.Blazor.Server.Editors, Visa2026.Module.Tests.Services, Visa2026.Module.Services, Visa2026.Module.Services.ApplicationItemLinkedDocuments, Visa2026.Module.Services.ImportHistory, IApplicationBuilder (+4 more)
-
-### Community 24 - "Community 24"
-Cohesion: 0.18
-Nodes (15): Label, PersonRecordRole, ReportDashboardPanelData, ReportDashboardPersonType, ReportDashboardStatusBucket, DateTime, Func, Guid (+7 more)
-
-### Community 25 - "Community 25"
-Cohesion: 0.05
-Nodes (19): Visa2026.Tools.RuntimeLogResolution, Visa2026.Module.BusinessObjects.Operations, Visa2026.Module.Services.RuntimeLogging, Visa2026.Blazor.Server.Services, IConfiguration, IServiceCollection, ApplicationRuntimeLogHostExtensions, string (+11 more)
-
-### Community 26 - "Community 26"
+### Community 17 - "SystemSettings"
 Cohesion: 0.06
 Nodes (27): decimal, int, IObjectSpace, string, ApplicationNumberingProfile, DateTime, IObjectSpace, AuthorizedRepresentative (+19 more)
 
-### Community 27 - "Community 27"
-Cohesion: 0.09
-Nodes (12): Visa2026.Module.Services.StateNotifications, Visa2026.Module.BusinessObjects.StateNotifications, BoStateNotificationPrototypeData, CustomShowNavigationItemEventArgs, ShowNavigationItemController, BoStateNotificationInboxNavigationController, ModelNode, NavigationItemNodeGenerator (+4 more)
+### Community 18 - "Visa2014LookupCatalog"
+Cohesion: 0.10
+Nodes (20): ApplicationImportIdentity, DateTime, Dictionary, Guid, HashSet, IReadOnlyDictionary, IReadOnlyList, List (+12 more)
 
-### Community 28 - "Community 28"
-Cohesion: 0.08
-Nodes (16): DateTime, Guid, IEnumerable, IObjectSpace, IReadOnlyList, ApplicationProgressOrderHelper, DeleteObjectsViewController, EventArgs (+8 more)
+### Community 19 - "Visa2026.Module.Services.RuntimeLogging"
+Cohesion: 0.05
+Nodes (19): Visa2026.Tools.RuntimeLogResolution, Visa2026.Module.BusinessObjects.Operations, Visa2026.Module.Services.RuntimeLogging, Visa2026.Blazor.Server.Services, IConfiguration, IServiceCollection, ApplicationRuntimeLogHostExtensions, string (+11 more)
 
-### Community 29 - "Community 29"
-Cohesion: 0.07
-Nodes (9): Visa2026.Blazor.Server.Localization, Visa2026.Blazor.Server.Controllers, Visa2026.Blazor.Server.Hubs, Hub, Microsoft.AspNetCore.Authorization, System.Security.Claims, Guid, SubmitResponse (+1 more)
+### Community 20 - "Visa2026.Module.BusinessObjects.StateNotifications"
+Cohesion: 0.05
+Nodes (26): Visa2026.Module.Services.StateNotifications, Visa2026.Module.BusinessObjects.StateNotifications, EventCallback, IReadOnlyList, Type, BoStateNotificationInboxModel, IComponentModel, IObjectSpace (+18 more)
 
-### Community 30 - "Community 30"
-Cohesion: 0.07
-Nodes (23): IDeserializer, ISerializer, Dictionary, HashSet, IReadOnlyDictionary, SeedFieldRules, Dictionary, IReadOnlyDictionary (+15 more)
+### Community 21 - ".RunCommandAsync"
+Cohesion: 0.05
+Nodes (34): IAsyncDisposable, IDisposable, IHost, ValueTask, INonSecuredObjectSpaceFactory, string, HeadlessMigrationHost, INonSecuredObjectSpaceFactory (+26 more)
 
-### Community 31 - "Community 31"
-Cohesion: 0.20
-Nodes (8): HashSet, IReadOnlyDictionary, List, Visa2014LookupCatalog, Dictionary, string, Visa2014ApplicationRawRow, Visa2014ApplicationTransform
+### Community 22 - "ApplicationItem"
+Cohesion: 0.06
+Nodes (20): DateTime, Guid, IList, string, ApplicationItem, MovementType, TravelType, ObjectChangedEventArgs (+12 more)
 
-### Community 32 - "Community 32"
+### Community 23 - "Visa"
+Cohesion: 0.04
+Nodes (38): DateTime, IList, Passport, DateTime, IList, Visa, DateTime, Guid (+30 more)
+
+### Community 24 - "Visa2014ProjectContractMinistryLegPreviewExporter"
+Cohesion: 0.06
+Nodes (25): ContractLegSpec, DistinctMinistrySpec, MinistryBreakdownRow, DateTime, string, Visa2014ApplicationApprovalLegProfileInference, Dictionary, IReadOnlyDictionary (+17 more)
+
+### Community 25 - "ApplicationReportPackageComponent.razor"
 Cohesion: 0.04
 Nodes (55): ApplicationReportPackagePreviewDialog, ReportPackagePreviewRequest, UserReportTemplateStagingDownloadJsResult, ApplySyncCollectResultAsync, CancelPackageConfirm, CanEditTemplate, ClearSelectionAsync, ClearStatusMessages (+47 more)
 
-### Community 33 - "Community 33"
+### Community 26 - "UserThemeHelper"
+Cohesion: 0.07
+Nodes (23): LoggingOffEventArgs, SizeMode, Theme, ThemeFluentAccentColor, ThemeMode, BlazorApplication, bool, EventArgs (+15 more)
+
+### Community 27 - "OnPremImportRunArchive.ps1"
 Cohesion: 0.07
 Nodes (42): Invoke-ArchiveCurrentImportRun(), Invoke-DataImporterCli(), Invoke-ImportWave(), Invoke-PostImportCorrections(), Invoke-TenantCatalogGenerationIfNeeded(), Compare-OnPremImportRunArchives(), Get-OnPremImportDbCountMap(), Get-OnPremImportFilePresence() (+34 more)
 
-### Community 34 - "Community 34"
-Cohesion: 0.09
-Nodes (13): IObjectSpace, string, ApplicationProgressProfileResolver, CancelEventArgs, Application, DetailView, EventArgs, ObjectChangedEventArgs (+5 more)
-
-### Community 35 - "Community 35"
-Cohesion: 0.16
-Nodes (10): AppearanceAttribute, IMemberInfo, IObjectSpace, IReadOnlyList, ITypeInfo, ITypesInfo, string, Type (+2 more)
-
-### Community 36 - "Community 36"
-Cohesion: 0.11
-Nodes (10): Guid, INonSecuredObjectSpaceFactory, PersonDocumentFileAccess, PersonDocumentCopiesLocalization, Guid, PersonLinkedDocumentFile, Expression, IObjectSpace (+2 more)
-
-### Community 37 - "Community 37"
+### Community 28 - "OptionalDetailFieldsController"
 Cohesion: 0.06
-Nodes (25): CreateCustomCurrentObjectDetailViewEventArgs, CustomizeShowViewParametersEventArgs, ShowViewParameters, DetailView, EventArgs, PersonDetailViewBlazorUrlController, HandledEventArgs, ListView (+17 more)
+Nodes (25): AppearanceAttribute, IMemberInfo, IObjectSpace, IReadOnlyList, ITypeInfo, ITypesInfo, string, Type (+17 more)
 
-### Community 38 - "Community 38"
-Cohesion: 0.09
-Nodes (23): ApplicationReason, Guid, ApplicationType, Guid, UserReportTemplateApplicationType, Guid, ApplicationItemLinkedDocumentFile, Guid (+15 more)
-
-### Community 39 - "Community 39"
-Cohesion: 0.05
-Nodes (36): BaseObject, ISecurityUserLoginInfo, DateTime, IList, string, AddressOfResidence, Guid, ApplicationApprovalLegSnapshot (+28 more)
-
-### Community 40 - "Community 40"
-Cohesion: 0.04
-Nodes (45): ApplicationItemDocumentCopiesPreviewDialog, DocumentCopiesInlinePreviewRequest, CancelPackageConfirm, ClearPackageStatus, ConfirmDownloadPackageAsync, EnqueuePackageAsync, FormatMsg, FormatSize (+37 more)
-
-### Community 42 - "Community 42"
+### Community 29 - ".ApplyImportObjectSpaceHooks"
 Cohesion: 0.08
-Nodes (27): CatalogAuditRow, DefaultMatchProperty, EntityAuditRow, GapRow, IDataRecord, Legacy, Table, Count (+19 more)
+Nodes (28): Dictionary, Guid, HashSet, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, string, Task, Visa2014ApplicationMinistryLegCountResolver (+20 more)
 
-### Community 43 - "Community 43"
+### Community 30 - ".PrepareImportBatch"
+Cohesion: 0.07
+Nodes (27): ApplicationTypeVisibilityCatalog, Guid, HashSet, IReadOnlyDictionary, IReadOnlyList, string, Visa2014LegacyDocumentCancellationIndex, Dictionary (+19 more)
+
+### Community 31 - ".Resolve"
+Cohesion: 0.06
+Nodes (25): Guid, IReadOnlyList, IReadOnlySet, Task, Visa2014ApplicationProgressSeedCleanup, Visa2014ApplicationProgressSeedCleanupResult, INonSecuredObjectSpaceFactory, IReadOnlyList (+17 more)
+
+### Community 33 - "Person"
+Cohesion: 0.08
+Nodes (17): EmployeeCurrency, DateTime, EmployeeSalary, DateTime, IList, string, Person, DateTime (+9 more)
+
+### Community 34 - "ApprovalLegProfileMinistryHelper"
+Cohesion: 0.17
+Nodes (12): CancelEventArgs, Guid, IEnumerable, IObjectSpace, IReadOnlyList, List, ApprovalLegProfileMinistryHelper, Guid (+4 more)
+
+### Community 35 - "BaseObject"
+Cohesion: 0.04
+Nodes (34): BaseObject, ISecurityUserLoginInfo, ActualPosition, Guid, ApplicationApprovalLegSnapshot, Guid, ApplicationUserLoginInfo, DateTime (+26 more)
+
+### Community 36 - "Visa2026.Module.Services.UserReports"
+Cohesion: 0.04
+Nodes (13): Visa2026.Module.Services.WordReports, Visa2026.Module.Services.ExcelReports, Visa2026.Module.Tests.UserReports, Visa2026.Blazor.Server.Middleware, Visa2026.Module.Services.UserReports, Visa2026.Blazor.Server.Hubs, Hub, ApplicationRuntimeLogHub (+5 more)
+
+### Community 37 - "IVisaPreviewSlotService.cs"
+Cohesion: 0.10
+Nodes (24): Guid, Task, VisaPreviewSlotService, ApplicationItemDocumentPackageOptions, Guid, IReadOnlyList, Task, DocumentCopiesInlinePreviewRequest (+16 more)
+
+### Community 38 - "Visa2014LegacyInvitationItemCancellationIndex"
 Cohesion: 0.07
 Nodes (22): Dictionary, IReadOnlyList, Visa2014InvitationItemPreviewExporter, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List (+14 more)
 
-### Community 44 - "Community 44"
-Cohesion: 0.18
-Nodes (8): Dictionary, IList, List, Stream, Task, UserReportGenerator, Type, UserReportPlaceholderBindingHelper
-
-### Community 45 - "Community 45"
+### Community 39 - ".Get"
 Cohesion: 0.09
-Nodes (25): ApplicationRow, CityOverride, ConfidenceCounts, RegionRule, Rules, DateTime, Dictionary, Guid (+17 more)
+Nodes (15): SimpleActionExecuteEventArgs, ClearVisibilityCacheController, SimpleActionExecuteEventArgs, StateChangeLogNavigationController, Dictionary, ApplicationItemDocumentCopiesSlotLocalization, PersonDocumentCopiesLocalization, Guid (+7 more)
 
-### Community 46 - "Community 46"
+### Community 40 - ".BuildZipAsync"
+Cohesion: 0.06
+Nodes (28): Item, Content, IObjectSpace, IReadOnlyList, string, ApplicationFilledFormPdfGenerator, Dictionary, Stream (+20 more)
+
+### Community 41 - "ApplicationRuntimeLogEntry"
+Cohesion: 0.06
+Nodes (25): SentryEvent, SentryLevel, IOptionsMonitor, SentryApplicationRuntimeLogBridge, CancellationToken, ILogger, Task, ApplicationRuntimeLogBackgroundService (+17 more)
+
+### Community 42 - "RejectionItem"
+Cohesion: 0.06
+Nodes (26): BaseObject, ConcurrentDictionary, Guid, IObjectSpace, CrossObjectSyncHelper, SyncRuleDefinition, PersonLinkedItemBase, RejectionItem (+18 more)
+
+### Community 43 - "LookupBase"
+Cohesion: 0.09
+Nodes (22): IList, ApplicationMigrationSlaProfile, ApprovingMinistry, LookupBase, Dictionary, ProfileIndex, Dictionary, HashSet (+14 more)
+
+### Community 44 - "ApplicationItemDocumentCopiesComponent.razor"
+Cohesion: 0.04
+Nodes (45): ApplicationItemDocumentCopiesPreviewDialog, DocumentCopiesInlinePreviewRequest, CancelPackageConfirm, ClearPackageStatus, ConfirmDownloadPackageAsync, EnqueuePackageAsync, FormatMsg, FormatSize (+37 more)
+
+### Community 45 - "Visa2014PersonImportBatch"
 Cohesion: 0.11
-Nodes (17): LookupBase, Dictionary, HashSet, LookupLocalizationKeys, LookupLocalizationKeys, HashSet, LookupLocalizationKeys, Dictionary (+9 more)
+Nodes (18): IReadOnlyList, Visa2014EmployeeSalaryPreviewExporter, IReadOnlyList, Task, Visa2014PersonIdMapExpander, Dictionary, Guid, IReadOnlyDictionary (+10 more)
 
-### Community 47 - "Community 47"
-Cohesion: 0.28
-Nodes (5): Dictionary, IObjectSpace, JsonElement, Type, DataImporterBoolParser
+### Community 46 - "ApplicationProgressDeleteController"
+Cohesion: 0.08
+Nodes (16): DateTime, Guid, IEnumerable, IObjectSpace, IReadOnlyList, ApplicationProgressOrderHelper, DeleteObjectsViewController, EventArgs (+8 more)
 
-### Community 48 - "Community 48"
-Cohesion: 0.14
-Nodes (17): ActiveWorkHistoryRow, DateTime, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014WorkPermitItemImportResult (+9 more)
+### Community 47 - "LookupCatalogEntitySync"
+Cohesion: 0.17
+Nodes (8): Dictionary, HashSet, IObjectSpace, IReadOnlyList, JsonElement, List, Type, LookupCatalogEntitySync
 
-### Community 49 - "Community 49"
+### Community 48 - "Visa2014ApplicationItemTransform"
 Cohesion: 0.10
 Nodes (22): ApplicationItemTransformContext, Oid, StartDate, DateTime, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList (+14 more)
 
-### Community 50 - "Community 50"
-Cohesion: 0.11
-Nodes (14): Category, Visa2026.Module.Services.ReportDashboard, PersonType, IObjectSpace, IReportDashboardQueryService, HashSet, IObjectSpace, ReportDashboardHybridQueryService (+6 more)
+### Community 49 - "Visa2026.DataImporter.Legacy.Visa2014"
+Cohesion: 0.08
+Nodes (20): Visa2026.Module.Services.MigrationImport, Visa2026.Blazor.Server.Services.Migration, Visa2026.DataImporter.Legacy.Visa2014, SourceNode, INonSecuredObjectSpaceFactory, IReadOnlyList, Task, Visa2014ApplicationApprovalLegSnapshotBackfill (+12 more)
 
-### Community 51 - "Community 51"
+### Community 50 - "ApplicationSupportingDocumentsPacker"
+Cohesion: 0.29
+Nodes (12): CancellationToken, FileData, HashSet, ILogger, int, IObjectSpace, List, MemoryStream (+4 more)
+
+### Community 51 - ".Run"
+Cohesion: 0.08
+Nodes (27): CatalogAuditRow, DefaultMatchProperty, EntityAuditRow, GapRow, IDataRecord, Legacy, Table, Count (+19 more)
+
+### Community 52 - ".TryBuildPreviewBundleAsync"
+Cohesion: 0.07
+Nodes (28): Guid, HttpGet, IActionResult, IReadOnlyList, Task, WordReportPackagePreviewController, Guid, IHttpContextAccessor (+20 more)
+
+### Community 53 - "BaseImporter"
+Cohesion: 0.07
+Nodes (22): Action, ConcurrentDictionary, Func, IEnumerable, string, Task, BaseImporter, Guid (+14 more)
+
+### Community 54 - "UserReportTemplate"
+Cohesion: 0.12
+Nodes (17): ApplicabilityMode, FileData, IList, Type, UserReportTemplate, IList, Stream, Task (+9 more)
+
+### Community 55 - ".RunAsync"
+Cohesion: 0.10
+Nodes (20): ActiveWorkHistoryRow, DateTime, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014WorkPermitItemImportResult (+12 more)
+
+### Community 56 - ".PrepareInferenceRows"
+Cohesion: 0.09
+Nodes (25): ApplicationRow, CityOverride, ConfidenceCounts, RegionRule, Rules, DateTime, Dictionary, Guid (+17 more)
+
+### Community 57 - ".ListLegacyCopyRowsAsync"
+Cohesion: 0.09
+Nodes (18): LegacyParentOid, ParentNumber, Visa2014InvitationDocumentImporter, SqlConnection, Task, Visa2014LegacyTableColumnResolver, Dictionary, Func (+10 more)
+
+### Community 58 - ".RunAsync"
+Cohesion: 0.08
+Nodes (23): DateTime, Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014InvitationImportResult (+15 more)
+
+### Community 59 - "ReportDashboardPersonType"
+Cohesion: 0.10
+Nodes (18): Category, Visa2026.Module.Services.ReportDashboard, PersonType, IObjectSpace, IReportDashboardQueryService, HashSet, IObjectSpace, ReportDashboardHybridQueryService (+10 more)
+
+### Community 60 - "ImportReimportHistoryReader"
 Cohesion: 0.09
 Nodes (26): Visa2026.Blazor.Server.Services.ImportHistory, FileStepSnap, FileWavesArchive, ImportHistoryOptions, PresenceSnap, Dictionary, IConfiguration, IEnumerable (+18 more)
 
-### Community 52 - "Community 52"
-Cohesion: 0.12
-Nodes (20): LegacySpidRow, Dictionary, Guid, IReadOnlyDictionary, Task, Visa2014IdMapHelper, Dictionary, Guid (+12 more)
-
-### Community 53 - "Community 53"
-Cohesion: 0.20
-Nodes (7): CancelEventArgs, IObjectSpace, IReadOnlyList, List, ApprovalLegProfileMinistryHelper, CancelEventArgs, ObjectManipulatingEventArgs
-
-### Community 54 - "Community 54"
-Cohesion: 0.06
-Nodes (30): SentryEvent, SentryLevel, IOptionsMonitor, SentryApplicationRuntimeLogBridge, CancellationToken, ILogger, Task, ApplicationRuntimeLogBackgroundService (+22 more)
-
-### Community 55 - "Community 55"
-Cohesion: 0.05
-Nodes (39): AfterWindowModeChangedAsync, CloseAsync, DownloadBatchSummaryAsync, DownloadPreviewPdfAsync, FormatPreviewLoadingLabel, Msg, OnPopupShown, OnResizeCompleted (+31 more)
-
-### Community 56 - "Community 56"
+### Community 61 - ".RunAsync"
 Cohesion: 0.10
-Nodes (15): LegacyDocumentCancellationFlags, ApplicationTypeVisibilityCatalog, IDictionary, int, IReadOnlyDictionary, string, LegacyDocumentCancellationFlags, Visa2014ApplicationItemCancelledFlagsMapper (+7 more)
+Nodes (22): LegacySpidRow, CancellationToken, DateTime, Guid, SqlConnection, string, Task, Visa2014LegacyAuditIssueDateHelper (+14 more)
 
-### Community 57 - "Community 57"
-Cohesion: 0.15
-Nodes (11): Guid, IReadOnlyList, ApplicationWordReportPackageCatalog, ApplicationWordReportPackageCatalogEntry, ApplicationWordReportPackageEntryKind, IReadOnlyList, IReadOnlySet, ApplicationWordReportPackageReadinessSummary (+3 more)
-
-### Community 58 - "Community 58"
-Cohesion: 0.13
-Nodes (16): DateTime, Guid, IConfiguration, IReadOnlyList, JsonSerializerOptions, Task, TimeSpan, Program (+8 more)
-
-### Community 59 - "Community 59"
-Cohesion: 0.09
-Nodes (16): CatalogRow, Visa2026.DataImporter, Dictionary, IReadOnlyCollection, IReadOnlyDictionary, JsonSerializerOptions, List, string (+8 more)
-
-### Community 60 - "Community 60"
-Cohesion: 0.12
-Nodes (8): EasyTestParameter, SupportedOSPlatform, IApplicationContext, IEnumerable, string, TimeSpan, E2ETestBase, Fact
-
-### Community 61 - "Community 61"
-Cohesion: 0.05
-Nodes (37): AfterWindowModeChangedAsync, CloseAsync, DownloadOfficeFileAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OnPopupShown, OnResizeCompleted (+29 more)
-
-### Community 62 - "Community 62"
-Cohesion: 0.11
-Nodes (17): ApplicationTypeVisibilityCatalog, Guid, HashSet, IReadOnlyDictionary, string, Visa2014LegacyDocumentCancellationIndex, Dictionary, Guid (+9 more)
-
-### Community 63 - "Community 63"
-Cohesion: 0.20
-Nodes (6): ApplicationProgressSlaHelper, DateTime, Fact, ApplicationProgressSlaHelperTests, Fact, ApplicationProgressTransitionHelperThreeLegTests
-
-### Community 64 - "Community 64"
+### Community 62 - "ApplicationTypeSelectionController"
 Cohesion: 0.15
 Nodes (8): bool, DetailView, EventArgs, ILogger, ObjectChangedEventArgs, PropertyEditor, string, ApplicationTypeSelectionController
 
-### Community 65 - "Community 65"
-Cohesion: 0.11
-Nodes (21): ApplicationItemImportGap, DateTime, Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task (+13 more)
+### Community 63 - "ApplicationItemDocumentCopiesPreviewDialog.razor"
+Cohesion: 0.05
+Nodes (39): AfterWindowModeChangedAsync, CloseAsync, DownloadBatchSummaryAsync, DownloadPreviewPdfAsync, FormatPreviewLoadingLabel, Msg, OnPopupShown, OnResizeCompleted (+31 more)
 
-### Community 66 - "Community 66"
+### Community 64 - "ApplicationItemDocumentPackageOptions"
+Cohesion: 0.09
+Nodes (22): Guid, IHttpContextAccessor, IReadOnlyList, Task, ApplicationItemDocumentPackageEnqueueOutcome, ApplicationItemDocumentPackageEnqueueService, PdfBatchDiplomaScope, PdfBatchEnqueueOptions (+14 more)
+
+### Community 65 - "Visa2014AddressOfResidenceTransform"
+Cohesion: 0.13
+Nodes (13): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Visa2014AddressOfResidenceLegacyLoader, Dictionary, Guid, IReadOnlyDictionary (+5 more)
+
+### Community 66 - "Visa2026.Blazor.Server.WebApi"
+Cohesion: 0.29
+Nodes (4): Visa2026.Blazor.Server.WebApi, IApplicationBuilder, IWebHostEnvironment, WebApiAppExtensions
+
+### Community 67 - "ModuleUpdater"
+Cohesion: 0.06
+Nodes (14): ModuleUpdater, ApplicationItemWorkPermittedLocationsStringUpdater, ApplicationLegacyColumnsCleanupUpdater, ApplicationLineItemsConsolidationUpdater, ApprovalLegProfileSeedUpdater, LookupLocalizationKeyUpdater, OrganizationPdfFormMappingUpdater, PdfGenerationBatchRequestedCultureUpdater (+6 more)
+
+### Community 68 - "DocumentBase"
+Cohesion: 0.05
+Nodes (22): AddressOfResidenceDocument, DateTime, IList, BorderZone, BorderZoneDocument, BorderZoneItem, FileData, DocumentBase (+14 more)
+
+### Community 69 - "ApplicationProgressMinistryLetterFileAccess"
+Cohesion: 0.08
+Nodes (21): Guid, HttpGet, IActionResult, ApplicationProgressMinistryLetterPreviewController, Guid, string, Task, ApplicationProgressLetterPreviewSource (+13 more)
+
+### Community 70 - "ApplicationReportPackagePreviewDialog.razor"
+Cohesion: 0.05
+Nodes (37): AfterWindowModeChangedAsync, CloseAsync, DownloadOfficeFileAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OnPopupShown, OnResizeCompleted (+29 more)
+
+### Community 71 - ".Load"
+Cohesion: 0.14
+Nodes (16): ApplicationItemImportGap, DateTime, Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task (+8 more)
+
+### Community 72 - "CommaSeparatedMultiSelectComponent.razor"
 Cohesion: 0.05
 Nodes (36): DxCheckBox, ApplyPopupAsync, CancelDeleteConfirmAsync, CancelEditPopupAsync, CancelPopupAsync, CloneSet, ConfirmDeleteAsync, FocusAddButtonAsync (+28 more)
 
-### Community 67 - "Community 67"
-Cohesion: 0.06
-Nodes (31): ExistingDoc, HttpClient, System.Net.Http.Json, Guid, JsonSerializerOptions, List, string, Task (+23 more)
-
-### Community 68 - "Community 68"
+### Community 73 - "Visa2026.Module"
 Cohesion: 0.05
-Nodes (36): Azure.Identity (1.17.1), ClosedXML (0.104.2), DevExpress.Document.Processor (25.2.6), DevExpress.ExpressApp.AuditTrail.EFCore (25.2.6), DevExpress.ExpressApp.CloneObject (25.2.6), DevExpress.ExpressApp.ConditionalAppearance (25.2.6), DevExpress.ExpressApp.EFCore (25.2.6), DevExpress.ExpressApp.Notifications (25.2.6) (+28 more)
+Nodes (37): Azure.Identity (1.17.1), DevExpress.Document.Processor (25.2.6), DevExpress.ExpressApp.AuditTrail.EFCore (25.2.6), DevExpress.ExpressApp.CloneObject (25.2.6), DevExpress.ExpressApp.ConditionalAppearance (25.2.6), DevExpress.ExpressApp.EFCore (25.2.6), DevExpress.ExpressApp.Notifications (25.2.6), DevExpress.ExpressApp.Office (25.2.6) (+29 more)
 
-### Community 69 - "Community 69"
-Cohesion: 0.09
-Nodes (17): PrintSelectionBaseController, bool, ChoiceActionItem, EventArgs, IEnumerable, Type, ShowReportController, IEnumerable (+9 more)
-
-### Community 70 - "Community 70"
+### Community 74 - "BoStateNotificationInboxComponent.razor"
 Cohesion: 0.05
 Nodes (36): ApplyFilters, ApplyPendingHeaderFilter, CategoryCss, CategoryLabel, FormatCardTitle, FormatDaysRemaining, LocalizedBoType, LocalizedHandledBy (+28 more)
 
-### Community 71 - "Community 71"
-Cohesion: 0.19
-Nodes (9): ActualPosition, ApiClient, Guid, HashSet, IReadOnlyList, List, string, Task (+1 more)
+### Community 75 - "ApplicationProgressProfileResolver"
+Cohesion: 0.12
+Nodes (9): IObjectSpace, string, ApplicationProgressProfileResolver, CancelEventArgs, Application, DetailView, EventArgs, ObjectChangedEventArgs (+1 more)
 
-### Community 72 - "Community 72"
-Cohesion: 0.10
-Nodes (15): Dictionary, IReadOnlyDictionary, IReadOnlyList, Visa2014EmployeeSalaryPreviewExporter, Dictionary, IReadOnlyDictionary, IReadOnlyList, List (+7 more)
+### Community 76 - "ApplicationType"
+Cohesion: 0.14
+Nodes (15): ApplicationReason, Guid, ApplicationType, Guid, ApplicationItemLinkedDocumentFile, Guid, IReadOnlyList, Type (+7 more)
 
-### Community 73 - "Community 73"
-Cohesion: 0.07
-Nodes (23): BaseObject, ConcurrentDictionary, Guid, IObjectSpace, CrossObjectSyncHelper, SyncRuleDefinition, PersonLinkedItemBase, RejectionItem (+15 more)
+### Community 77 - ".GenerateUserEntryOutputsAsync"
+Cohesion: 0.14
+Nodes (20): CancellationToken, FileName, Guid, IObjectSpace, IReadOnlyList, IReadOnlySet, IServiceProvider, List (+12 more)
 
-### Community 74 - "Community 74"
+### Community 78 - "ReportDashboardMockQueryService"
 Cohesion: 0.23
 Nodes (5): Dictionary, List, ReportDashboardMockQueryService, Guid, ReportDashboardPreviewRow
 
-### Community 75 - "Community 75"
+### Community 79 - "E2ETestBase"
+Cohesion: 0.12
+Nodes (8): EasyTestParameter, SupportedOSPlatform, IApplicationContext, IEnumerable, string, TimeSpan, E2ETestBase, Fact
+
+### Community 80 - "ApplicationProgress"
+Cohesion: 0.11
+Nodes (16): ProgressStep, ProgressTransition, DateTime, FileData, IList, ApplicationProgress, HashSet, IEnumerable (+8 more)
+
+### Community 81 - "ReportDashboardPropertyEditor"
 Cohesion: 0.13
 Nodes (10): EventCallback, IReadOnlyDictionary, Type, ReportDashboardModel, IComponentModel, int, IObjectSpace, Task (+2 more)
 
-### Community 76 - "Community 76"
-Cohesion: 0.09
-Nodes (23): DateTime, Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014InvitationImportResult (+15 more)
+### Community 82 - ".IdMapPath"
+Cohesion: 0.23
+Nodes (9): DateTime, INonSecuredObjectSpaceFactory, IReadOnlyList, Task, Visa2014ImportCommand, IReadOnlyDictionary, Visa2014LegacySourceProfile, IReadOnlyList (+1 more)
 
-### Community 77 - "Community 77"
-Cohesion: 0.14
-Nodes (12): ApplicabilityMode, UserReportPlaceholder, FileData, IList, Type, UserReportTemplate, Dictionary, IEnumerable (+4 more)
-
-### Community 78 - "Community 78"
-Cohesion: 0.10
-Nodes (12): Visa2026.Blazor.Server, EasyTestHostMode, IConfiguration, HostingEnvironmentFlags, string, ImportHistoryOptions, DateTime, UsageLicenseOptions (+4 more)
-
-### Community 79 - "Community 79"
+### Community 83 - "ViewController"
 Cohesion: 0.06
-Nodes (31): ApplicationTypeConfigurationRowDto, ProfileIndex, IList, ApplicationMigrationSlaProfile, ApplicationLifecycleStage, Dictionary, IEnumerable, IReadOnlyList (+23 more)
+Nodes (21): ViewController, EventHandler, ListView, string, ApplicationItemGridColumnFitController, ListView, string, ApplicationListViewAppearanceController (+13 more)
 
-### Community 80 - "Community 80"
-Cohesion: 0.12
-Nodes (15): ProgressStep, ProgressTransition, DateTime, FileData, IList, ApplicationProgress, HashSet, IEnumerable (+7 more)
-
-### Community 81 - "Community 81"
+### Community 84 - "ReportDashboardComponent.razor"
 Cohesion: 0.06
 Nodes (34): BeginLocalLoadingAsync, CategoryDateRangeTitle, CssToHex, GetCategoryCount, GetOverviewBuckets, GetOverviewTotal, GetSubReportCount, MiniPieStyle (+26 more)
 
-### Community 82 - "Community 82"
-Cohesion: 0.14
-Nodes (15): IReadOnlyList, Task, Visa2014PersonIdMapExpander, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List (+7 more)
+### Community 85 - "AddressOfResidence"
+Cohesion: 0.10
+Nodes (19): Dictionary, Guid, IObjectSpace, IReadOnlyDictionary, IReadOnlyList, Visa2014ApplicationItemLegacyAddressResolver, DateTime, IList (+11 more)
 
-### Community 83 - "Community 83"
+### Community 86 - "ApplicationProgressLegCodes"
+Cohesion: 0.09
+Nodes (11): IReadOnlyCollection, IReadOnlyDictionary, BoStateAppearance, BoStateAppearanceColors, int, IReadOnlyList, ApplicationProgressLegCodes, InlineData (+3 more)
+
+### Community 87 - "Visa2026.DataImporter"
+Cohesion: 0.08
+Nodes (12): Visa2026.DataImporter, DataParser, Dictionary, JsonSerializerOptions, LookupCatalogExporter, Task, LookupDumper, Dictionary (+4 more)
+
+### Community 88 - "VisaPreviewSlotHost.razor"
 Cohesion: 0.06
 Nodes (33): DocumentCopiesSlotPanel, HeaderDocumentCopiesSlotPanel, PersonDocumentCopiesSlotPanel, PlaceholderManualSlotPanel, ProgressLettersSlotPanel, ResminamalarSlotPanel, ApplyStateAsync, CloseFromJsAsync (+25 more)
 
-### Community 84 - "Community 84"
-Cohesion: 0.10
+### Community 89 - "UserReportMergeDataHelper"
+Cohesion: 0.19
+Nodes (6): Dictionary, IEnumerable, IList, IObjectSpace, List, UserReportMergeDataHelper
+
+### Community 90 - ".GenerateAsync"
+Cohesion: 0.11
 Nodes (17): IXLCell, IXLRow, IXLWorksheet, Dictionary, Func, IList, IReadOnlyDictionary, Stream (+9 more)
 
-### Community 85 - "Community 85"
-Cohesion: 0.07
-Nodes (19): ViewController, EventHandler, ListView, string, ApplicationItemGridColumnFitController, ListView, string, ApplicationListViewAppearanceController (+11 more)
-
-### Community 86 - "Community 86"
-Cohesion: 0.11
-Nodes (14): EventCallback, Guid, IReadOnlyList, Type, ApplicationItemDocumentCopiesModel, IReadOnlyList, ApplicationItemLinkedDocumentMergedGroup, Guid (+6 more)
-
-### Community 87 - "Community 87"
-Cohesion: 0.17
-Nodes (9): IReadOnlyList, UserReportPlaceholderCatalogEntry, UserReportPlaceholderManualQuery, UserReportPlaceholderScope, IReadOnlyDictionary, IReadOnlyList, Lazy, IUserReportPlaceholderCatalogService (+1 more)
-
-### Community 88 - "Community 88"
+### Community 91 - "ShowReportController"
 Cohesion: 0.09
-Nodes (17): CancellationToken, ILogger, IOptionsMonitor, Task, TimeSpan, ApplicationRuntimeLogRetentionBackgroundService, DateTime, int (+9 more)
+Nodes (17): PrintSelectionBaseController, bool, ChoiceActionItem, EventArgs, IEnumerable, Type, ShowReportController, IEnumerable (+9 more)
 
-### Community 89 - "Community 89"
-Cohesion: 0.14
-Nodes (12): Image, Type, PdfFormMapping, PdfMappingMode, SimpleActionExecuteEventArgs, Dictionary, ICollection, IList (+4 more)
-
-### Community 90 - "Community 90"
-Cohesion: 0.05
-Nodes (17): ModuleUpdater, ApplicationItemWorkPermittedLocationsStringUpdater, ApplicationLegacyColumnsCleanupUpdater, ApplicationLineItemsConsolidationUpdater, ApplicationTypeConfigurationUpdater, Dictionary, IReadOnlyDictionary, ApplicationTypeSelectionCodeSeed (+9 more)
-
-### Community 91 - "Community 91"
-Cohesion: 0.07
-Nodes (23): IEnumerable, Task, ApplicationTypeFilterImporter, Action, ConcurrentDictionary, Func, IEnumerable, string (+15 more)
-
-### Community 92 - "Community 92"
-Cohesion: 0.07
-Nodes (30): Dictionary, Guid, HashSet, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, string, Task, Visa2014ApplicationMinistryLegCountResolver (+22 more)
-
-### Community 93 - "Community 93"
-Cohesion: 0.09
-Nodes (11): ContractTemplate, DateTime, IList, Invitation, bool, InvitationItem, BaseObject, Action (+3 more)
-
-### Community 94 - "Community 94"
+### Community 92 - "Repair-WindowsOpenSshServer.ps1"
 Cohesion: 0.12
 Nodes (23): Backup-FileIfExists(), Copy-OpenSshBinariesToDirectory(), Get-OpenSshVersionLabel(), Get-SshdServiceInfo(), Invoke-SshHandshakeAttempt(), Invoke-Win32OpenSshReinstall(), Repair-AdministratorsAuthorizedKeys(), Repair-EnsureSshdPortListening() (+15 more)
 
-### Community 95 - "Community 95"
-Cohesion: 0.23
-Nodes (11): Guid, IHttpContextAccessor, INonSecuredObjectSpaceFactory, IReadOnlyList, Task, ApplicationWordReportPackageEnqueueOutcome, ApplicationWordReportPackageEnqueueService, ApplicationWordReportPackageFileAccess (+3 more)
+### Community 93 - "MedicalRecord"
+Cohesion: 0.06
+Nodes (17): AddressOfResidenceImage, FamilyMemberImage, ImageBase, InvitationImage, DateTime, IList, MedicalRecord, MedicalRecordDocument (+9 more)
 
-### Community 96 - "Community 96"
-Cohesion: 0.08
-Nodes (12): AddressOfResidenceImage, FamilyMemberImage, ImageBase, InvitationImage, DateTime, IList, MedicalRecord, MedicalRecordDocument (+4 more)
-
-### Community 97 - "Community 97"
+### Community 94 - ".Format"
 Cohesion: 0.15
 Nodes (13): Guid, HeaderLinkedDocumentFile, IReadOnlyList, HeaderLinkedDocumentRecord, Expression, Func, Guid, IObjectSpace (+5 more)
 
-### Community 98 - "Community 98"
-Cohesion: 0.18
-Nodes (15): CancellationToken, Guid, Task, IUserReportTemplateMaintenanceService, UserReportTemplateExtractResult, UserReportTemplateExtractValidateResult, UserReportTemplateValidateResult, CancellationToken (+7 more)
+### Community 95 - "ApplicationRuntimeLogResolutionSummary"
+Cohesion: 0.09
+Nodes (20): ApplicationRuntimeLogDbContextFactory, IConfiguration, ApplicationRuntimeLogResolutionHelper, DateTime, Guid, ApplicationRuntimeLogResolutionSummary, DateTime, int (+12 more)
 
-### Community 99 - "Community 99"
-Cohesion: 0.12
-Nodes (10): ObjectViewController, CancelEventArgs, DetailView, ObjectManipulatingEventArgs, ApprovalLegProfileMinistryLegDetailDefaultsController, DetailView, PersonDetailViewController, DetailView (+2 more)
-
-### Community 100 - "Community 100"
+### Community 96 - "Watch-Visa2026BlazorServerLogs.ps1"
 Cohesion: 0.12
 Nodes (22): Find-LocalDockerContainerByPort(), Get-IisSlotProfileByHttpPort(), Get-LatestIisStdoutLogPath(), Resolve-Visa2026LogTransport(), Start-Visa2026DockerLogFollow(), Start-Visa2026IisStdoutFollow(), Test-Visa2026DockerAvailable(), Wait-ForIisStdoutLog() (+14 more)
 
-### Community 101 - "Community 101"
+### Community 97 - "Visa2014AddressOfResidenceSiteDuplicateGuard"
 Cohesion: 0.14
 Nodes (13): SiteKind, CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, SiteKey (+5 more)
 
-### Community 102 - "Community 102"
-Cohesion: 0.25
-Nodes (12): CancellationToken, FileName, Guid, IObjectSpace, IReadOnlyList, IReadOnlySet, IServiceProvider, List (+4 more)
+### Community 98 - ".WriteWorkbook"
+Cohesion: 0.12
+Nodes (10): Dictionary, IReadOnlyList, List, Visa2014ApplicationPreviewExporter, IReadOnlyDictionary, IReadOnlyList, ZipArchive, Visa2014MinimalXlsxWriter (+2 more)
 
-### Community 103 - "Community 103"
-Cohesion: 0.16
-Nodes (14): BatchState, ApiClient, Dictionary, Guid, INonSecuredObjectSpaceFactory, int, IObjectSpace, IReadOnlyDictionary (+6 more)
+### Community 99 - ".GetLatest"
+Cohesion: 0.11
+Nodes (9): IObjectSpace, ApplicationLatestProgressSyncHelper, IEnumerable, IObjectSpace, ApplicationProgressPrimaryStateCodeResolver, int, ApplicationLatestProgressSchemaUpdater, Fact (+1 more)
 
-### Community 104 - "Community 104"
+### Community 100 - "ApplicationRuntimeLog"
+Cohesion: 0.11
+Nodes (15): DateTime, Guid, ApplicationRuntimeLog, ApplicationRuntimeLogDeploymentEnvironment, ApplicationRuntimeLogResolutionStatus, ObjectView, SimpleAction, SimpleActionExecuteEventArgs (+7 more)
+
+### Community 101 - "WordUserReportImageInjector"
 Cohesion: 0.12
 Nodes (16): Drawing, HeightEmu, long, MainDocumentPart, Text, Dictionary, IEnumerable, IReadOnlyDictionary (+8 more)
 
-### Community 105 - "Community 105"
+### Community 102 - "VisaFamilyMembersTextComponent.razor"
 Cohesion: 0.07
 Nodes (29): DxDateEdit, DxDateTimeMaskProperties, ApplyPopupAsync, CancelDeleteConfirmAsync, CancelEditPopupAsync, CancelPopupAsync, CloneLines, ConfirmDeleteAsync (+21 more)
 
-### Community 106 - "Community 106"
-Cohesion: 0.18
-Nodes (9): Dictionary, Guid, ICollection, IEnumerable, IReadOnlyDictionary, IReadOnlyList, string, Visa2014WorkPermitLocationBitMatrix (+1 more)
+### Community 103 - ".Sync"
+Cohesion: 0.10
+Nodes (17): ProfileIndex, IEnumerable, IReadOnlyList, ApplicationMigrationSlaProfileTypeLinkResolver, ApplicationMigrationSlaProfileTypeLinkUpdater, IObjectSpace, JsonSerializerOptions, List (+9 more)
 
-### Community 107 - "Community 107"
-Cohesion: 0.16
-Nodes (5): SecurityPermissionState, PermissionPolicyRole, PermissionPolicyRole, string, Updater
+### Community 104 - "ApplicationItemDocumentCopiesController"
+Cohesion: 0.10
+Nodes (16): VisaPreviewSlotCloseController, EventArgs, Guid, IReadOnlyList, List, ListView, SimpleAction, SimpleActionExecuteEventArgs (+8 more)
+
+### Community 105 - "ProjectContractTitleDescriptionMergeUpdater"
+Cohesion: 0.11
+Nodes (10): Visa2026.Module.Tests.DatabaseUpdate, int, LookupCatalogMatchHelper, Dictionary, IReadOnlyList, JsonElement, List, ProjectContractTitleDescriptionMergeUpdater (+2 more)
+
+### Community 106 - "Visa2026.Module.Services.HeaderLinkedDocuments"
+Cohesion: 0.14
+Nodes (6): Visa2026.Module.Services.HeaderLinkedDocuments, System.Linq.Expressions, City, DevExpress.Blazor, DxComboBox, Visa2026.Module.BusinessObjects
+
+### Community 107 - "Visa2026.Blazor.Server.Controllers"
+Cohesion: 0.04
+Nodes (17): Visa2026.Blazor.Server.Controllers, Visa2026.Module, Visa2026.Module.Tests, Visa2026.Blazor.Server.Theming, Microsoft.AspNetCore.Authorization, System.Security.Claims, Guid, SubmitResponse (+9 more)
 
 ### Community 108 - "Community 108"
 Cohesion: 0.07
 Nodes (28): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadBatchSummaryAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OpenAsync (+20 more)
 
-### Community 109 - "Community 109"
-Cohesion: 0.12
+### Community 109 - "ReportDashboardCategory"
+Cohesion: 0.14
 Nodes (6): int, IReadOnlyList, string, Type, ReportDashboardCatalog, ReportDashboardCategory
 
 ### Community 110 - "Community 110"
 Cohesion: 0.07
 Nodes (28): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadOfficeFileAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OpenAsync (+20 more)
 
-### Community 111 - "Community 111"
-Cohesion: 0.07
-Nodes (28): Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationItemApplicationParentCorrection, Visa2014ApplicationItemApplicationParentCorrectionResult (+20 more)
+### Community 111 - "Visa2014AddressLineNormalizer"
+Cohesion: 0.15
+Nodes (3): Regex, string, Visa2014AddressLineNormalizer
 
 ### Community 112 - "Community 112"
-Cohesion: 0.23
-Nodes (11): DateTime, Dictionary, Guid, HashSet, IReadOnlyDictionary, IReadOnlyList, IReadOnlySet, List (+3 more)
-
-### Community 113 - "Community 113"
 Cohesion: 0.15
-Nodes (10): IList, ApprovalLegProfile, CancelEventArgs, DetailView, ApprovalLegProfileMinistryController, Frame, IObjectSpace, NestedFrame (+2 more)
+Nodes (14): Dictionary, IReadOnlyList, Visa2014EmployeePositionHistoryPreviewExporter, DateTime, Dictionary, Guid, HashSet, IReadOnlyDictionary (+6 more)
 
-### Community 114 - "Community 114"
+### Community 113 - "Visa2014SalaryAmountNormalizer"
 Cohesion: 0.12
-Nodes (15): HashSet, int, IReadOnlyList, PersonDocumentCopiesCatalogFilter, Guid, IReadOnlyList, Type, PersonLinkedDocumentRecord (+7 more)
+Nodes (13): Dictionary, IReadOnlyDictionary, Dictionary, IReadOnlyDictionary, IReadOnlyList, List, string, Visa2014EmployeeSalaryRawRow (+5 more)
 
-### Community 115 - "Community 115"
-Cohesion: 0.04
-Nodes (38): ActualPosition, DateTime, EmployeePositionHistory, IOptionalDetailFields, DateTime, IList, Passport, DateTime (+30 more)
+### Community 114 - ".RunAsync"
+Cohesion: 0.13
+Nodes (13): LegacyFamilyProofRow, Dictionary, Guid, int, IReadOnlyList, List, SqlConnection, Task (+5 more)
 
-### Community 116 - "Community 116"
+### Community 115 - "VisaListViewController"
 Cohesion: 0.09
 Nodes (15): PersonIds, Guid, ILogger, IReadOnlyList, ListView, VisaListViewController, Caption, Criteria (+7 more)
 
+### Community 116 - "Updater"
+Cohesion: 0.21
+Nodes (4): SecurityPermissionState, PermissionPolicyRole, string, Updater
+
 ### Community 117 - "Community 117"
-Cohesion: 0.12
-Nodes (12): Action, CancellationToken, CancellationTokenSource, GridCustomizeElementEventArgs, HashSet, IGridColumn, ListView, ListViewProcessCurrentObjectController (+4 more)
+Cohesion: 0.09
+Nodes (15): Action, CancellationToken, CancellationTokenSource, GridCustomizeElementEventArgs, HandledEventArgs, HashSet, IGridColumn, ListView (+7 more)
 
 ### Community 118 - "Community 118"
 Cohesion: 0.11
@@ -1073,1405 +1092,1405 @@ Nodes (14): DxGridListEditor, IGrid, ListViewGridTotalCountConfigurator, Action,
 Cohesion: 0.11
 Nodes (18): CancellationToken, Exception, ILogger, int, IServiceProvider, IServiceScopeFactory, SqlConnection, Task (+10 more)
 
-### Community 120 - "Community 120"
-Cohesion: 0.23
-Nodes (7): Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList, MemoryStream, HeaderDocumentCopyPdfMerger
+### Community 120 - "HeaderDocumentCopiesFamily"
+Cohesion: 0.07
+Nodes (24): Guid, INonSecuredObjectSpaceFactory, IObjectSpace, HeaderDocumentFileAccess, EventArgs, HashSet, List, SimpleAction (+16 more)
 
-### Community 121 - "Community 121"
-Cohesion: 0.25
-Nodes (10): Created, DateTime, Dictionary, Guid, Id, IReadOnlyDictionary, IReadOnlyList, Task (+2 more)
+### Community 121 - "Task"
+Cohesion: 0.19
+Nodes (12): BatchState, ApiClient, Dictionary, Guid, INonSecuredObjectSpaceFactory, int, IReadOnlyDictionary, Task (+4 more)
 
-### Community 122 - "Community 122"
-Cohesion: 0.05
-Nodes (26): Visa2026.Module.Localization.Generated, CustomizePopupWindowParamsEventArgs, PopupWindowShowAction, PopupWindowShowActionExecuteEventArgs, ApplicationProgressListLabelHelper, IEnumerable, SimpleAction, SimpleActionExecuteEventArgs (+18 more)
-
-### Community 123 - "Community 123"
+### Community 122 - ".Log"
 Cohesion: 0.07
 Nodes (23): Channel, ChannelReader, ConcurrentQueue, EventId, ILoggerProvider, IHttpContextAccessor, HttpApplicationRuntimeLogUserContext, ApplicationRuntimeLogEnvironmentHelper (+15 more)
 
-### Community 124 - "Community 124"
+### Community 123 - "ApplicationRuntimeLogSeverity"
 Cohesion: 0.09
 Nodes (17): IHubContext, CancellationToken, IOptionsMonitor, LogLevel, Task, SignalRApplicationRuntimeLogNotifier, ApplicationRuntimeLogSeverity, LogLevel (+9 more)
 
-### Community 125 - "Community 125"
-Cohesion: 0.06
-Nodes (22): ModelNodesGeneratorUpdater, ModelNode, NavigationItemNodeGenerator, ApplicationRuntimeLogModelUpdater, ModelDetailViewItemsNodesGenerator, ModelNode, BoStateNotificationInboxDetailViewUpdater, ModelDetailViewItemsNodesGenerator (+14 more)
+### Community 124 - "ModelNodesGeneratorUpdater"
+Cohesion: 0.08
+Nodes (19): ModelNodesGeneratorUpdater, IModelListView, ModelNode, ModelViewsNodesGenerator, ApplicationRuntimeLogViewsUpdater, ModelDetailViewItemsNodesGenerator, ModelNode, HistoryDashboardViewItemUpdater (+11 more)
 
-### Community 126 - "Community 126"
+### Community 125 - "PersonDocumentCopiesComponent.razor"
 Cohesion: 0.07
 Nodes (26): PersonDocumentCopiesInlinePreviewRequest, CollapseSectionAsync, ExpandSectionAsync, FormatMsg, FormatSize, GetRecordCssClass, GetRecordSummary, GetShowMoreLabel (+18 more)
 
-### Community 127 - "Community 127"
+### Community 126 - "HeaderDocumentCopiesInlinePreview.razor"
 Cohesion: 0.07
 Nodes (26): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OpenAsync, OpenPdfAsync (+18 more)
 
-### Community 128 - "Community 128"
-Cohesion: 0.18
-Nodes (7): DateTime, Guid, IEnumerable, string, Task, ApplicationImporter, ApplicationImporterTests
-
-### Community 130 - "Community 130"
-Cohesion: 0.13
-Nodes (13): StateKey, ApplicationProgressHelper, Guid, ILogger, IReadOnlyList, ListView, RegistrationListViewController, Caption (+5 more)
-
-### Community 131 - "Community 131"
-Cohesion: 0.08
-Nodes (25): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OpenAsync, OpenPdfAsync (+17 more)
-
-### Community 132 - "Community 132"
-Cohesion: 0.08
-Nodes (25): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadPreviewPdfAsync, FormatMsg, IsImageContentType, Msg, OpenAsync (+17 more)
-
-### Community 133 - "Community 133"
-Cohesion: 0.15
-Nodes (14): IReadOnlyList, Task, Visa2014PassportIdMapExpander, Dictionary, Guid, IDictionary, IReadOnlyDictionary, IReadOnlyList (+6 more)
-
-### Community 134 - "Community 134"
-Cohesion: 0.14
-Nodes (8): Visa2026.Module.Tests, InlineData, Theory, ApprovalLegProfileCodeHelperTests, Fact, InlineData, Theory, DocumentCollectionTabCaptionHelperTests
-
-### Community 135 - "Community 135"
-Cohesion: 0.12
-Nodes (14): DateTime, Guid, ApplicationRuntimeLog, ApplicationRuntimeLogDeploymentEnvironment, ApplicationRuntimeLogResolutionStatus, ObjectView, SimpleAction, SimpleActionExecuteEventArgs (+6 more)
-
-### Community 136 - "Community 136"
-Cohesion: 0.12
-Nodes (13): TemplateOutputFormat, string, TemplateEditStagingOptions, DateTime, Guid, JsonSerializerOptions, UserReportTemplateStagingMeta, GeneratedRegex (+5 more)
-
-### Community 137 - "Community 137"
-Cohesion: 0.22
-Nodes (7): Dictionary, JsonElement, List, LookupCatalogFile, LookupCatalogManifest, JsonSerializerOptions, LookupCatalogResourceLoader
-
-### Community 138 - "Community 138"
-Cohesion: 0.08
-Nodes (24): ApplicationRuntimeLogNavigationHelper, Microsoft.AspNetCore.SignalR.Client, DisconnectHubAsync, DismissToast, DisposeAsync, EnsureHubConnectionAsync, FormatCount, FormatSeverity (+16 more)
-
-### Community 139 - "Community 139"
-Cohesion: 0.07
-Nodes (23): ContractLegSpec, DistinctMinistrySpec, MinistryBreakdownRow, DateTime, string, Visa2014ApplicationApprovalLegProfileInference, Dictionary, IReadOnlyDictionary (+15 more)
-
-### Community 140 - "Community 140"
-Cohesion: 0.22
-Nodes (5): Version, LookupCatalogSyncPolicy, Func, string, LookupCatalogSyncUpdater
-
-### Community 141 - "Community 141"
-Cohesion: 0.15
-Nodes (10): Guid, List, UserReportTemplateStagingDownloadJsResult, UserReportTemplateStagingLocalCollectJsResult, UserReportTemplateStagingLocalUploadJsItem, Guid, IHttpContextAccessor, Task (+2 more)
-
-### Community 142 - "Community 142"
-Cohesion: 0.14
-Nodes (12): Dictionary, IReadOnlyList, Visa2014WorkPermitPreviewExporter, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List (+4 more)
-
-### Community 143 - "Community 143"
-Cohesion: 0.16
-Nodes (7): IReadOnlyList, LocationCode, StateCode, string, ApplicationProgressRouteHelper, ApplicationProgressRouteKind, MinistryReviewDepth
-
-### Community 145 - "Community 145"
-Cohesion: 0.16
-Nodes (9): IEnumerable, IList, int, IObjectSpace, IReadOnlyList, List, ApplicationWordReportPackageDryRunEvaluator, IReadOnlyList (+1 more)
-
-### Community 146 - "Community 146"
-Cohesion: 0.22
-Nodes (7): CancellationToken, IObjectSpace, IReadOnlySet, Stream, Task, ISet, ZipEntryFileNameSanitizer
-
-### Community 147 - "Community 147"
-Cohesion: 0.14
-Nodes (10): Body, Visa2026.Module.Services.WordTemplates, TableCellProperties, TableRow, uint, Paragraph, Run, string (+2 more)
-
-### Community 148 - "Community 148"
-Cohesion: 0.08
-Nodes (23): FilePreviewSourceRegistry, Close, CloseFromJsAsync, CloseSlotAsync, DisposeAsync, DownloadAsync, LoadAsync, OnAfterRenderAsync (+15 more)
-
-### Community 149 - "Community 149"
-Cohesion: 0.08
-Nodes (23): HeaderDocumentCopiesComponent, HeaderDocumentCopiesInlinePreview, BuildBindingKey, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync (+15 more)
-
-### Community 150 - "Community 150"
-Cohesion: 0.14
-Nodes (10): IModelLayoutGroup, ListPropertyEditor, DetailView, Dictionary, HashSet, IEnumerable, IModelLayoutViewItem, IModelNode (+2 more)
-
-### Community 151 - "Community 151"
-Cohesion: 0.18
-Nodes (8): ModelNodesGeneratorUpdaters, IEnumerable, IObjectSpace, ModuleUpdater, Type, Version, XafApplication, Visa2026Module
-
-### Community 152 - "Community 152"
-Cohesion: 0.11
-Nodes (12): Action, CancellationToken, CancellationTokenSource, GridCustomizeElementEventArgs, HandledEventArgs, IGridColumn, ListView, ListViewProcessCurrentObjectController (+4 more)
-
-### Community 153 - "Community 153"
-Cohesion: 0.11
-Nodes (12): Action, CancellationToken, CancellationTokenSource, GridCustomizeElementEventArgs, HandledEventArgs, IGridColumn, ListView, ListViewProcessCurrentObjectController (+4 more)
-
-### Community 154 - "Community 154"
-Cohesion: 0.13
-Nodes (11): IComponentModel, IEnumerable, IObjectSpace, List, XafApplication, VisaFamilyMembersTextPropertyEditor, string, VisaFamilyMembersTextEditorAliases (+3 more)
-
-### Community 155 - "Community 155"
-Cohesion: 0.08
-Nodes (20): DetailViewCreatedEventArgs, Action, BaseObject, DetailView, ApplicationItemLookupDefaultsController, Action, BaseObject, DetailView (+12 more)
-
-### Community 156 - "Community 156"
-Cohesion: 0.18
-Nodes (13): ApprovalLegProfileSeedUpdater, created, IObjectSpace, IReadOnlyList, JsonSerializerOptions, List, string, updated (+5 more)
-
-### Community 157 - "Community 157"
-Cohesion: 0.18
-Nodes (10): ApplicationItemDocumentPackageOptions, ApplicationItemDocumentBatchSummaryKind, ApplicationItemDocumentBatchSummaryKindMapping, Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList (+2 more)
-
-### Community 158 - "Community 158"
+### Community 127 - ".RunAsync"
 Cohesion: 0.21
-Nodes (6): DetailView, DxFormLayoutTabPagesModel, EventArgs, ItemCreatedEventArgs, string, ApplicationDetailViewDefaultTabController
+Nodes (7): INonSecuredObjectSpaceFactory, IReadOnlyList, Task, Visa2014FilesImportCommand, CancellationToken, Task, Visa2014LegacySqlGuard
 
-### Community 159 - "Community 159"
-Cohesion: 0.13
-Nodes (13): Columns, ViewId, Dictionary, IEnumerable, IModelListView, IModelViews, ITypeInfo, string (+5 more)
-
-### Community 160 - "Community 160"
-Cohesion: 0.09
-Nodes (22): FeedbackContext, InputFile, SubmitResult, UserFeedbackHeaderPanel, CapturePageAsync, ClearScreenshotAsync, CloseDialog, Dispose (+14 more)
-
-### Community 161 - "Community 161"
-Cohesion: 0.17
-Nodes (9): Item, Content, IObjectSpace, IReadOnlyList, string, ApplicationFilledFormPdfGenerator, Dictionary, Stream (+1 more)
-
-### Community 162 - "Community 162"
-Cohesion: 0.13
-Nodes (11): Process, EasyTestFixtureContext, IApplicationContext, TimeSpan, EasyTestApplicationLauncher, StreamWriter, string, EasyTestHostProcessLauncher (+3 more)
-
-### Community 163 - "Community 163"
-Cohesion: 0.09
-Nodes (22): ReportPackageInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnAfterRenderAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, Application (+14 more)
-
-### Community 164 - "Community 164"
-Cohesion: 0.16
-Nodes (11): SizeMode, Theme, ThemeFluentAccentColor, ThemeMode, BlazorApplication, int, IThemeService, IXafSizeModeService (+3 more)
-
-### Community 165 - "Community 165"
-Cohesion: 0.15
-Nodes (15): ActionResult, CancellationToken, Guid, HttpPost, IFormFile, RequestFormLimits, RequestSizeLimit, Task (+7 more)
-
-### Community 166 - "Community 166"
-Cohesion: 0.11
-Nodes (12): IReadOnlyList, line1, line2, line3, List, DateTime, Guid, VisaFamilyMemberLineDto (+4 more)
-
-### Community 167 - "Community 167"
-Cohesion: 0.05
-Nodes (23): AddressOfResidenceDocument, DateTime, IList, BorderZone, BorderZoneDocument, BorderZoneItem, FileData, DocumentBase (+15 more)
-
-### Community 168 - "Community 168"
-Cohesion: 0.11
-Nodes (13): HashSet, string, VisaIssuingApplicationTypes, DetailView, IObjectSpace, string, XafApplication, ApplicationItemVisaDefaults (+5 more)
-
-### Community 169 - "Community 169"
-Cohesion: 0.11
-Nodes (9): Visa2026.Module.Tests.BusinessObjects, Fact, Guid, HashSet, IObjectSpace, ApplicationItemAvailablePeopleFilterTests, ApplicationProgressLegCodesDecisionTests, Fact (+1 more)
-
-### Community 170 - "Community 170"
-Cohesion: 0.20
-Nodes (9): IModelNavigationItem, IModelNavigationItems, IModelListView, IModelViews, ModelNode, ModelViewsNodesGenerator, NavigationItemNodeGenerator, CustomNavigationUpdater (+1 more)
-
-### Community 171 - "Community 171"
-Cohesion: 0.09
-Nodes (21): Readiness, ClosePopup, ClosePopupAsync, GetStatusCssClass, GetStatusSymbol, GetStatusTitle, OnApplicationTypeLinkClickAsync, OnPopupVisibleChangedAsync (+13 more)
-
-### Community 172 - "Community 172"
-Cohesion: 0.13
-Nodes (13): bool, CancellationToken, CancellationTokenSource, EventHandler, Guid, HashSet, IGrid, int (+5 more)
-
-### Community 173 - "Community 173"
-Cohesion: 0.08
-Nodes (21): Guid, HttpGet, IActionResult, ApplicationProgressMinistryLetterPreviewController, Guid, string, Task, ApplicationProgressLetterPreviewSource (+13 more)
-
-### Community 174 - "Community 174"
-Cohesion: 0.13
-Nodes (11): EventCallback, IObjectSpace, IReadOnlyList, Type, ApplicationTypeQuickCodeModel, IComponentModel, IObjectSpace, string (+3 more)
-
-### Community 175 - "Community 175"
-Cohesion: 0.07
-Nodes (32): Guid, Task, VisaPreviewSlotService, EventArgs, Guid, IReadOnlyList, List, ListView (+24 more)
-
-### Community 176 - "Community 176"
+### Community 128 - "Visa2014VisaTransform"
 Cohesion: 0.18
-Nodes (10): CancellationToken, DateTime, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014PersonIdentityDuplicateGuard (+2 more)
+Nodes (11): Dictionary, Guid, HashSet, IReadOnlyDictionary, IReadOnlyList, List, string, TransformBatchResult (+3 more)
 
-### Community 177 - "Community 177"
-Cohesion: 0.09
-Nodes (17): Guid, INonSecuredObjectSpaceFactory, IObjectSpace, HeaderDocumentFileAccess, EventArgs, HashSet, List, SimpleAction (+9 more)
-
-### Community 178 - "Community 178"
-Cohesion: 0.17
-Nodes (5): IReadOnlyList, Regex, LegacyMaritalStatusLParser, Fact, LegacyMaritalStatusLParserTests
-
-### Community 179 - "Community 179"
-Cohesion: 0.10
-Nodes (20): ApplicationItemDocumentCopiesComponent, DocumentCopiesInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, ApplicationItem (+12 more)
-
-### Community 180 - "Community 180"
-Cohesion: 0.18
-Nodes (12): ApplicationTypeCatalogRowDto, ApplicationMigrationSlaProfileCatalogRowDto, Fact, HashSet, IReadOnlyList, JsonSerializerOptions, List, ApplicationMigrationSlaProfileCatalogFileDto (+4 more)
-
-### Community 181 - "Community 181"
-Cohesion: 0.17
-Nodes (9): DateTime, FileData, Guid, UserFeedback, UserFeedbackSeverity, UserFeedbackStatus, UserFeedbackType, Guid (+1 more)
-
-### Community 182 - "Community 182"
-Cohesion: 0.23
-Nodes (5): TenantCatalogRow, Action, Func, IEnumerable, IReadOnlyList
-
-### Community 183 - "Community 183"
-Cohesion: 0.16
-Nodes (6): GlobalLookupCatalogKind, Dictionary, IReadOnlyDictionary, Lazy, Type, LookupLocalization
-
-### Community 184 - "Community 184"
-Cohesion: 0.16
-Nodes (9): Guid, ApprovalLegProfileMinistryLeg, ApprovingMinistry, CancelEventArgs, DetailView, Frame, IObjectSpace, SimpleAction (+1 more)
-
-### Community 185 - "Community 185"
-Cohesion: 0.11
-Nodes (13): ComponentBase, Visa2026.Blazor.Server.Components, IComponentAdapter, IModelViewItem, RenderFragment, RenderTreeBuilder, ViewItem, string (+5 more)
-
-### Community 186 - "Community 186"
-Cohesion: 0.10
-Nodes (9): Visa2026.E2E.Tests, EasyTestBrowserMode, TimeSpan, EasyTestCITuning, int, string, EasyTestHostEnvironment, EasyTestWebDriverPath (+1 more)
-
-### Community 187 - "Community 187"
-Cohesion: 0.10
-Nodes (19): HeaderDocumentCopiesInlinePreviewRequest, FormatMsg, FormatSize, GetRecordCssClass, GetRecordSummary, IsPreviewLoading, Msg, OnRefreshClick (+11 more)
-
-### Community 188 - "Community 188"
-Cohesion: 0.20
-Nodes (6): IBindingList, ListChangedEventArgs, EventArgs, ListView, string, NestedListViewTabCountController
-
-### Community 189 - "Community 189"
-Cohesion: 0.10
-Nodes (19): PersonDocumentCopiesComponent, PersonDocumentCopiesInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, DevExpress.ExpressApp (+11 more)
-
-### Community 190 - "Community 190"
-Cohesion: 0.11
-Nodes (11): DbContextOptionsBuilder, IServiceCollection, SqlConnection, string, ApplicationItemCurrentSalarySchemaSql, SqlConnection, string, ApplicationProgressOrderSchemaSql (+3 more)
-
-### Community 191 - "Community 191"
-Cohesion: 0.18
-Nodes (9): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014ApplicationItemPersonDuplicateGuard, Fact (+1 more)
-
-### Community 192 - "Community 192"
-Cohesion: 0.28
-Nodes (9): DateTime, Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationProgressImportResult (+1 more)
-
-### Community 193 - "Community 193"
-Cohesion: 0.19
-Nodes (9): City, Guid, IReadOnlyList, Visa2014CityLookupMatcher, City, Fact, Guid, List (+1 more)
-
-### Community 194 - "Community 194"
-Cohesion: 0.11
-Nodes (10): IReadOnlyList, string, DocumentExpirationAlertConfigurationKeys, DetailView, ObjectManipulatingEventArgs, ExpirationAlertRuleDeleteController, ExpirationAlertRuleNewController, ExpirationAlertRuleSaveController (+2 more)
-
-### Community 195 - "Community 195"
-Cohesion: 0.04
-Nodes (47): 2026-06-20 — Country — Person-scope lookup audit complete, 2026-06-20 — Person — bootstrap + discovery complete, 2026-06-20 — Person — Passport.PersonalNumber deep dive, 2026-06-20 — Person — Visa2026 PersonalNumber uniqueness, 2026-06-21 — BorderZoneName lookup comparison (Çalik VISA2015), 2026-06-21 — MaritalStatus — Status int approved + lookup review gate, 2026-06-21 — Multi-company legacy path — Çalik VISA2025, 2026-06-21 — Person — excel preview export (+39 more)
-
-### Community 196 - "Community 196"
-Cohesion: 0.13
-Nodes (5): Visa2026.Module.Services.StateEvaluation, Visa2026.Module.Services.StateEvaluation.Evaluators, Guid, BoStateResult, StateSeverity
-
-### Community 197 - "Community 197"
-Cohesion: 0.21
-Nodes (18): DATABASE_NAME, GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOOLSETS, SERVER_NAME, SQL_AUTH_MODE, SQL_PASSWORD, SQL_PORT, SQL_USERNAME (+10 more)
-
-### Community 198 - "Community 198"
-Cohesion: 0.15
-Nodes (9): DxGridDataColumnModel, Action, DxGridListEditor, EventHandler, GridCustomizeElementEventArgs, IEnumerable, ListView, string (+1 more)
-
-### Community 199 - "Community 199"
-Cohesion: 0.27
-Nodes (5): IWebDriver, IWebElement, IApplicationContext, TimeSpan, EasyTestBlazorNavigationHelper
-
-### Community 200 - "Community 200"
-Cohesion: 0.16
-Nodes (14): LegacyEducationOid, PersonFullName, Dictionary, Guid, int, IReadOnlyList, LegacyCopyOid, List (+6 more)
-
-### Community 201 - "Community 201"
-Cohesion: 0.31
-Nodes (6): TypeFieldValues, Dictionary, Guid, IObjectSpace, TypeFieldValues, Visa2014AddressOfResidenceImportApplier
-
-### Community 202 - "Community 202"
-Cohesion: 0.22
-Nodes (6): DetailView, ItemCreatedEventArgs, DocumentCollectionCaptionLayoutController, Dictionary, string, DocumentCollectionTabCaptionHelper
-
-### Community 203 - "Community 203"
-Cohesion: 0.24
-Nodes (10): Guid, HttpGet, IActionResult, DocumentFileDownloadController, Guid, IConfiguration, INonSecuredObjectSpaceFactory, IReadOnlyList (+2 more)
-
-### Community 204 - "Community 204"
-Cohesion: 0.11
-Nodes (12): IApplicationBuilder, ILogger, IServiceProvider, UserReportTemplateSeedGate, IApplicationBuilder, IConfiguration, IWebHostEnvironment, Startup (+4 more)
-
-### Community 205 - "Community 205"
-Cohesion: 0.19
-Nodes (9): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014ApplicationProgressDuplicateGuard, Fact (+1 more)
-
-### Community 206 - "Community 206"
-Cohesion: 0.23
-Nodes (8): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List, SqlConnection, Task, Visa2014TargetIdMapRebuild
-
-### Community 207 - "Community 207"
-Cohesion: 0.18
-Nodes (6): ApplicationMigrationSlaHelper, ApplicationProgressSlaResult, ApplicationProgressSlaStatus, DateTime, Fact, ApplicationMigrationSlaHelperTests
-
-### Community 208 - "Community 208"
-Cohesion: 0.12
-Nodes (9): CloneObjectViewController, CustomShowClonedObjectEventArgs, int, LookupCatalogCloneController, CloneObjectViewController, CustomShowClonedObjectEventArgs, UserReportTemplateCloneController, IObjectSpace (+1 more)
-
-### Community 209 - "Community 209"
-Cohesion: 0.26
-Nodes (5): EventArgs, List, SimpleAction, SimpleActionExecuteEventArgs, PersonDocumentCopiesController
-
-### Community 210 - "Community 210"
-Cohesion: 0.16
-Nodes (8): IModelDetailView, PersonDetailViewItemsCopyHelper, IModelDetailView, IModelViews, PersonTypedDetailViewFactory, ModelDetailViewItemsNodesGenerator, ModelNode, PersonTypedDetailViewModelUpdater
-
-### Community 211 - "Community 211"
-Cohesion: 0.21
-Nodes (11): ApplicationItemDisambiguator, Result, Dictionary, Guid, IReadOnlyList, List, SqlConnection, Task (+3 more)
-
-### Community 212 - "Community 212"
-Cohesion: 0.12
-Nodes (15): LegacyPassportOid, PassportNumber, Regex, Visa2014LegacyFileNameHelper, Dictionary, Guid, int, IReadOnlyList (+7 more)
-
-### Community 213 - "Community 213"
-Cohesion: 0.19
-Nodes (11): LegacyRelationshipRow, Dictionary, Guid, IEnumerable, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task (+3 more)
-
-### Community 214 - "Community 214"
-Cohesion: 0.13
-Nodes (16): LegacyVisaOid, int, SqlConnection, Visa2014LegacyBlobColumnResolver, Dictionary, Guid, int, IReadOnlyList (+8 more)
-
-### Community 215 - "Community 215"
-Cohesion: 0.13
-Nodes (8): Visa2026.Blazor.Server.Theming, BlazorApplication, bool, IThemeService, IXafSizeModeService, LogonEventArgs, Task, UserThemeController
-
-### Community 216 - "Community 216"
-Cohesion: 0.11
-Nodes (17): DevExpress.Drawing.Skia (25.2.6), DevExpress.ExpressApp.Blazor (25.2.6), DevExpress.ExpressApp.EasyTest.BlazorAdapter (25.2.6), DevExpress.ExpressApp.FileAttachment.Blazor (25.2.6), DevExpress.ExpressApp.Notifications.Blazor (25.2.6), DevExpress.ExpressApp.Office.Blazor (25.2.6), DevExpress.ExpressApp.ReportsV2.Blazor (25.2.6), DevExpress.ExpressApp.Validation.Blazor (25.2.6) (+9 more)
-
-### Community 217 - "Community 217"
-Cohesion: 0.09
-Nodes (22): Guid, IHttpContextAccessor, IReadOnlyList, Task, ApplicationItemDocumentPackageEnqueueOutcome, ApplicationItemDocumentPackageEnqueueService, PdfBatchDiplomaScope, PdfBatchEnqueueOptions (+14 more)
-
-### Community 218 - "Community 218"
-Cohesion: 0.23
-Nodes (7): Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList, MemoryStream, PersonDocumentCopyPdfMerger
-
-### Community 219 - "Community 219"
-Cohesion: 0.17
-Nodes (10): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014PassportPersonNumberDuplicateGuard, Guid (+2 more)
-
-### Community 220 - "Community 220"
+### Community 129 - "ApplicationProgressRouteHelper"
 Cohesion: 0.14
-Nodes (11): EventArgs, Guid, List, ListView, SimpleAction, SimpleActionExecuteEventArgs, ApplicationItemWordReportsController, Guid (+3 more)
+Nodes (8): IEnumerable, IReadOnlyList, LocationCode, StateCode, string, ApplicationProgressRouteHelper, ApplicationProgressRouteKind, MinistryReviewDepth
 
-### Community 221 - "Community 221"
-Cohesion: 0.17
-Nodes (10): EventArgs, ListView, SimpleAction, SimpleActionExecuteEventArgs, ApplicationProgressMinistryLettersController, Frame, Guid, IObjectSpace (+2 more)
+### Community 130 - ".CollectUserTemplateHints"
+Cohesion: 0.16
+Nodes (10): UserReportPlaceholder, IEnumerable, IList, int, IObjectSpace, IReadOnlyList, List, ApplicationWordReportPackageDryRunEvaluator (+2 more)
 
-### Community 223 - "Community 223"
-Cohesion: 0.20
-Nodes (13): Guid, IReadOnlyList, UserReportTemplateStagingExportResult, UserReportTemplateStagingImportAllResult, UserReportTemplateStagingImportResult, UserReportTemplateStagingImportStatus, CancellationToken, FileData (+5 more)
-
-### Community 224 - "Community 224"
-Cohesion: 0.05
-Nodes (43): 2026-06-21 — Lodging dedupe + site catalog deploy + AddressOfResidence importConfirmed (calik-energi), 2026-06-21 — On-prem IIS migration runbook + parallel period, 2026-06-29 — AddressOfResidence full OData import (calik-energi), 2026-06-29 — Application Excel preview export (calik-energi), 2026-06-29 — Application — Phase 1 discovery complete, 2026-06-29 — Application preview reviewed; importConfirmed, 2026-06-29 — ApplicationItem Excel preview export, 2026-06-29 — ApplicationItem — Phase 1 discovery complete (+35 more)
-
-### Community 225 - "Community 225"
-Cohesion: 0.12
-Nodes (16): ProgressLettersInlinePreviewRequest, FormatDate, FormatMsg, GetEntryCssClass, GetEntryDomId, IsPreviewLoading, Msg, OnParametersSetAsync (+8 more)
-
-### Community 226 - "Community 226"
-Cohesion: 0.12
-Nodes (16): Dismiss, DisposeAsync, LocalizeStatus, Msg, OnInitializedAsync, PollLoopAsync, DevExpress.ExpressApp.Blazor.Services, FetchResult (+8 more)
-
-### Community 227 - "Community 227"
-Cohesion: 0.17
-Nodes (8): bool, LogonEventArgs, UserCultureController, BlazorApplication, HttpContext, Task, XafApplication, UserCultureHelper
-
-### Community 228 - "Community 228"
-Cohesion: 0.14
-Nodes (10): EventCallback, IObjectSpace, IReadOnlyList, Type, VisaFamilyMembersTextModel, Guid, CountryLookupItem, Guid (+2 more)
-
-### Community 229 - "Community 229"
-Cohesion: 0.22
-Nodes (8): IReadOnlyList, List, TenantCatalogGenerationSection, TenantCatalogGenerationStep, Visa2014OrderCatalog, Visa2014OrderDocument, IReadOnlyList, Visa2014TenantCatalogGenerationCommand
-
-### Community 230 - "Community 230"
-Cohesion: 0.21
-Nodes (5): EasyTestFixtureContext, TimeSpan, EasyTestHostLifecycle, EasyTestFixtureContext, EasyTestPreflight
-
-### Community 231 - "Community 231"
-Cohesion: 0.13
-Nodes (8): IObjectSpace, ApplicationLatestProgressSyncHelper, ApplicationListViewDisplayState, IEnumerable, IObjectSpace, ApplicationProgressPrimaryStateCodeResolver, Fact, ApplicationLatestProgressSyncTests
-
-### Community 232 - "Community 232"
-Cohesion: 0.05
-Nodes (42): 2026-07-06 — ApplicationItem cancel flags fan-out + reimport (calik-energi), 2026-07-06 — Dev reimport InvitationItem cancellation (`InvitationCancellation.ps1`), 2026-07-06 — Dev reimport Visa + WorkPermitItem cancellation (`VisaWorkPermitCancellation.ps1`), 2026-07-06 — P0.5 invitation document `IsCancelled` backfill (InvitationItem), 2026-07-06 — P0 document `IsCancelled` backfill (Visa + WorkPermitItem transforms), 2026-07-11 — AoR geography policy (b): prefer legacy Region when Wiki/OSM agrees, 2026-07-11 — Demo AddressOfResidence diagnosis, 2026-07-11 — Demo Import: stop-on-failure; Passport UAE; Education gaps (+34 more)
-
-### Community 233 - "Community 233"
-Cohesion: 0.12
-Nodes (8): ListView, SimpleAction, SimpleActionExecuteEventArgs, VisaExtensionStatusController, Caption, Criteria, string, VisaExtFilterService
-
-### Community 234 - "Community 234"
-Cohesion: 0.12
-Nodes (8): ListView, SimpleAction, SimpleActionExecuteEventArgs, VisaTransferStatusController, Caption, Criteria, string, VisaTransferFilterService
-
-### Community 235 - "Community 235"
-Cohesion: 0.14
-Nodes (3): Regex, string, Visa2014AddressLineNormalizer
-
-### Community 236 - "Community 236"
-Cohesion: 0.21
-Nodes (10): AuditRowsDeleted, CleanupResult, OrphanWeakReferenceRowsDeleted, RuntimeLogRowsDeleted, CancellationToken, DateTime, SqlConnection, Task (+2 more)
-
-### Community 237 - "Community 237"
-Cohesion: 0.12
-Nodes (15): DATABASE_NAME, GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOOLSETS, SERVER_NAME, SQL_AUTH_MODE, SQL_PASSWORD, SQL_PORT, SQL_USERNAME (+7 more)
-
-### Community 238 - "Community 238"
-Cohesion: 0.12
-Nodes (15): DATABASE_NAME, GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOOLSETS, SERVER_NAME, SQL_AUTH_MODE, SQL_PASSWORD, SQL_PORT, SQL_USERNAME (+7 more)
-
-### Community 239 - "Community 239"
-Cohesion: 0.12
-Nodes (15): ProgressLettersCatalogComponent, ProgressLettersInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, Application (+7 more)
-
-### Community 240 - "Community 240"
+### Community 132 - ".ScrubSecrets"
 Cohesion: 0.25
 Nodes (5): SentryAspNetCoreOptions, IConfiguration, IServiceCollection, SentryHostExtensions, WebHostBuilderContext
 
-### Community 241 - "Community 241"
+### Community 133 - "PersonListViewController"
+Cohesion: 0.11
+Nodes (14): CreateCustomCurrentObjectDetailViewEventArgs, CustomizeShowViewParametersEventArgs, ShowViewParameters, CancelEventArgs, HandledEventArgs, ListView, ListViewProcessCurrentObjectController, PersonListViewController (+6 more)
+
+### Community 134 - "ObjectViewController"
+Cohesion: 0.08
+Nodes (16): ObjectViewController, DateTime, Guid, ForeignWorkerMaglumat, DetailView, ObjectManipulatingEventArgs, ApprovalLegProfileMinistryLegDetailDefaultsController, ListView (+8 more)
+
+### Community 135 - "RegistrationListViewController"
+Cohesion: 0.13
+Nodes (13): StateKey, ApplicationProgressHelper, Guid, ILogger, IReadOnlyList, ListView, RegistrationListViewController, Caption (+5 more)
+
+### Community 136 - "Program"
+Cohesion: 0.16
+Nodes (11): DateTime, Guid, IConfiguration, IReadOnlyList, JsonSerializerOptions, Task, TimeSpan, Program (+3 more)
+
+### Community 137 - "PersonDocumentCopiesInlinePreview.razor"
+Cohesion: 0.08
+Nodes (25): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadPreviewPdfAsync, FormatMsg, Msg, OpenAsync, OpenPdfAsync (+17 more)
+
+### Community 138 - "ProgressLettersInlinePreview.razor"
+Cohesion: 0.08
+Nodes (25): CloseAsync, ClosePreviewAsync, DisposeAsync, DownloadPreviewPdfAsync, FormatMsg, IsImageContentType, Msg, OpenAsync (+17 more)
+
+### Community 139 - "ApplicationImporter"
+Cohesion: 0.12
+Nodes (14): DateTime, Guid, IEnumerable, string, Task, ApplicationImporter, ApplicationImporterTests, IEnumerable (+6 more)
+
+### Community 140 - "Visa2014PassportTransform"
+Cohesion: 0.20
+Nodes (11): Dictionary, Guid, IDictionary, IReadOnlyDictionary, IReadOnlyList, List, string, TransformBatchResult (+3 more)
+
+### Community 142 - "UserReportBoType"
+Cohesion: 0.13
+Nodes (17): ExcelMergeMode, UserReportBoType, Task, IList, Task, ExcelReportValidationService, IList, Task (+9 more)
+
+### Community 143 - "TemplateOutputFormat"
+Cohesion: 0.12
+Nodes (13): TemplateOutputFormat, string, TemplateEditStagingOptions, DateTime, Guid, JsonSerializerOptions, UserReportTemplateStagingMeta, GeneratedRegex (+5 more)
+
+### Community 144 - "LookupCatalogDefinition"
+Cohesion: 0.14
+Nodes (13): created, skipped, updated, Dictionary, JsonElement, List, LookupCatalogDefinition, LookupCatalogFile (+5 more)
+
+### Community 145 - "RuntimeErrorAlertHost.razor"
+Cohesion: 0.08
+Nodes (24): ApplicationRuntimeLogNavigationHelper, Microsoft.AspNetCore.SignalR.Client, DisconnectHubAsync, DismissToast, DisposeAsync, EnsureHubConnectionAsync, FormatCount, FormatSeverity (+16 more)
+
+### Community 146 - "ApplicationRuntimeLogRetentionBackgroundService"
+Cohesion: 0.10
+Nodes (18): BackgroundService, CancellationToken, ILogger, Task, TimeSpan, TempFileCleanupService, CancellationToken, ILogger (+10 more)
+
+### Community 147 - "Visa2014ApplicationItemCancelledFlagsMapper"
+Cohesion: 0.14
+Nodes (10): LegacyDocumentCancellationFlags, ApplicationTypeVisibilityCatalog, int, IReadOnlyDictionary, string, LegacyDocumentCancellationFlags, Visa2014ApplicationItemCancelledFlagsMapper, ApplicationTypeVisibilityCatalog (+2 more)
+
+### Community 148 - "UserReportTemplateStagingImportResult"
+Cohesion: 0.12
+Nodes (16): Guid, List, UserReportTemplateStagingDownloadJsResult, UserReportTemplateStagingLocalCollectJsResult, UserReportTemplateStagingLocalUploadJsItem, Guid, IHttpContextAccessor, Task (+8 more)
+
+### Community 149 - "Visa2014EducationTransform"
+Cohesion: 0.17
+Nodes (10): Dictionary, IReadOnlyList, Visa2014EducationPreviewExporter, Dictionary, IReadOnlyDictionary, IReadOnlyList, List, string (+2 more)
+
+### Community 150 - ".PrepareImportBatch"
+Cohesion: 0.14
+Nodes (12): Dictionary, IReadOnlyList, Visa2014WorkPermitPreviewExporter, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List (+4 more)
+
+### Community 151 - "Invitation"
+Cohesion: 0.14
+Nodes (10): DateTime, IList, Invitation, bool, InvitationItem, IOptionalDetailFields, Action, IObjectSpace (+2 more)
+
+### Community 152 - "UserReportTemplateUpdater"
+Cohesion: 0.14
+Nodes (11): Func, Guid, HashSet, IList, IReadOnlyList, IServiceProvider, List, Stream (+3 more)
+
+### Community 153 - "BusinessTripSanawyTemplateGenerator"
+Cohesion: 0.14
+Nodes (10): Body, Visa2026.Module.Services.WordTemplates, TableCellProperties, TableRow, uint, Paragraph, Run, string (+2 more)
+
+### Community 154 - "VisaFilePreviewDrawer.razor"
+Cohesion: 0.08
+Nodes (23): FilePreviewSourceRegistry, Close, CloseFromJsAsync, CloseSlotAsync, DisposeAsync, DownloadAsync, LoadAsync, OnAfterRenderAsync (+15 more)
+
+### Community 155 - "HeaderDocumentCopiesSlotPanel.razor"
+Cohesion: 0.08
+Nodes (23): HeaderDocumentCopiesComponent, HeaderDocumentCopiesInlinePreview, BuildBindingKey, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync (+15 more)
+
+### Community 156 - "DetailViewTabCountController"
+Cohesion: 0.15
+Nodes (10): IModelLayoutGroup, ListPropertyEditor, DetailView, Dictionary, HashSet, IEnumerable, IModelLayoutViewItem, IModelNode (+2 more)
+
+### Community 157 - "ApplicationProgressMinistryLetterFileNameClickController"
+Cohesion: 0.11
+Nodes (12): Action, CancellationToken, CancellationTokenSource, GridCustomizeElementEventArgs, HandledEventArgs, IGridColumn, ListView, ListViewProcessCurrentObjectController (+4 more)
+
+### Community 158 - "PersonDocumentCopiesListLinkClickController"
+Cohesion: 0.11
+Nodes (12): Action, CancellationToken, CancellationTokenSource, GridCustomizeElementEventArgs, HandledEventArgs, IGridColumn, ListView, ListViewProcessCurrentObjectController (+4 more)
+
+### Community 159 - "VisaFamilyMembersTextPropertyEditor"
+Cohesion: 0.13
+Nodes (11): IComponentModel, IEnumerable, IObjectSpace, List, XafApplication, VisaFamilyMembersTextPropertyEditor, string, VisaFamilyMembersTextEditorAliases (+3 more)
+
+### Community 160 - ".TryApply"
+Cohesion: 0.11
+Nodes (15): Action, BaseObject, DetailView, Func, IObjectSpace, string, XafApplication, ApplicationItemPersonLinkedDefaults (+7 more)
+
+### Community 161 - "ApprovalLegProfileMinistryLegCatalogSync"
+Cohesion: 0.19
+Nodes (12): created, IObjectSpace, IReadOnlyList, JsonSerializerOptions, List, string, updated, ApprovalLegProfileCatalogFile (+4 more)
+
+### Community 162 - "HeaderParentListViewColumns"
+Cohesion: 0.13
+Nodes (13): Columns, ViewId, Dictionary, IEnumerable, IModelListView, IModelViews, ITypeInfo, string (+5 more)
+
+### Community 163 - "UserFeedbackHeaderPanel.razor"
+Cohesion: 0.09
+Nodes (22): FeedbackContext, InputFile, SubmitResult, UserFeedbackHeaderPanel, CapturePageAsync, ClearScreenshotAsync, CloseDialog, Dispose (+14 more)
+
+### Community 164 - "YamlScenario"
+Cohesion: 0.16
+Nodes (11): IDeserializer, ISerializer, Dictionary, List, YamlAnchor, YamlRoot, YamlScenario, List (+3 more)
+
+### Community 165 - "EasyTestHostProcessLauncher"
+Cohesion: 0.13
+Nodes (11): Process, EasyTestFixtureContext, IApplicationContext, TimeSpan, EasyTestApplicationLauncher, StreamWriter, string, EasyTestHostProcessLauncher (+3 more)
+
+### Community 166 - "ResminamalarSlotPanel.razor"
+Cohesion: 0.09
+Nodes (22): ReportPackageInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnAfterRenderAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, Application (+14 more)
+
+### Community 167 - ".Upload"
+Cohesion: 0.15
+Nodes (15): ActionResult, CancellationToken, Guid, HttpPost, IFormFile, RequestFormLimits, RequestSizeLimit, Task (+7 more)
+
+### Community 168 - "VisaFamilyMemberLineDto"
+Cohesion: 0.11
+Nodes (12): IReadOnlyList, line1, line2, line3, List, DateTime, Guid, VisaFamilyMemberLineDto (+4 more)
+
+### Community 169 - ".GetVisibleRecords"
+Cohesion: 0.18
+Nodes (10): HashSet, int, IReadOnlyList, PersonDocumentCopiesCatalogFilter, Guid, IReadOnlyList, Type, PersonLinkedDocumentRecord (+2 more)
+
+### Community 170 - "Visa2026.Module.Tests.BusinessObjects"
+Cohesion: 0.11
+Nodes (9): Visa2026.Module.Tests.BusinessObjects, Fact, Guid, HashSet, IObjectSpace, ApplicationItemAvailablePeopleFilterTests, ApplicationProgressLegCodesDecisionTests, Fact (+1 more)
+
+### Community 171 - "Visa2026.Module.BusinessObjects.Feedback"
+Cohesion: 0.12
+Nodes (11): Visa2026.Module.BusinessObjects.Feedback, Visa2026.Module.Services.Feedback, DateTime, FileData, Guid, UserFeedback, UserFeedbackSeverity, UserFeedbackStatus (+3 more)
+
+### Community 172 - "CustomNavigationUpdater"
+Cohesion: 0.20
+Nodes (9): IModelNavigationItem, IModelNavigationItems, IModelListView, IModelViews, ModelNode, ModelViewsNodesGenerator, NavigationItemNodeGenerator, CustomNavigationUpdater (+1 more)
+
+### Community 173 - ".RemoveDuplicateCatalogRows"
+Cohesion: 0.13
+Nodes (8): PropertyInfo, Guid, IEnumerable, Version, LookupCatalogSyncPolicy, Func, string, LookupCatalogSyncUpdater
+
+### Community 174 - "ApplicationTypeQuickCodeComponent.razor"
+Cohesion: 0.09
+Nodes (21): Readiness, ClosePopup, ClosePopupAsync, GetStatusCssClass, GetStatusSymbol, GetStatusTitle, OnApplicationTypeLinkClickAsync, OnPopupVisibleChangedAsync (+13 more)
+
+### Community 175 - "ApplicationListViewPreloadController"
+Cohesion: 0.13
+Nodes (13): bool, CancellationToken, CancellationTokenSource, EventHandler, Guid, HashSet, IGrid, int (+5 more)
+
+### Community 176 - "ApplicationItemDocumentCopiesModel"
+Cohesion: 0.09
+Nodes (17): EventCallback, Guid, IReadOnlyList, Type, ApplicationItemDocumentCopiesModel, IReadOnlyList, ApplicationItemLinkedDocumentMergedGroup, Guid (+9 more)
+
+### Community 177 - "ApplicationTypeQuickCodePropertyEditor"
+Cohesion: 0.13
+Nodes (11): EventCallback, IObjectSpace, IReadOnlyList, Type, ApplicationTypeQuickCodeModel, IComponentModel, IObjectSpace, string (+3 more)
+
+### Community 178 - "Visa2014ActualPositionReview"
+Cohesion: 0.19
+Nodes (9): ActualPosition, ApiClient, Guid, HashSet, IReadOnlyList, List, string, Task (+1 more)
+
+### Community 179 - ".RegisterFromImportRow"
+Cohesion: 0.18
+Nodes (10): CancellationToken, DateTime, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014PersonIdentityDuplicateGuard (+2 more)
+
+### Community 180 - ".PostAsync"
+Cohesion: 0.17
+Nodes (10): Func, INonSecuredObjectSpaceFactory, int, IReadOnlyList, Task, ParallelPostStats, ParallelRowKind, ParallelRowOutcome (+2 more)
+
+### Community 181 - ".Parse"
+Cohesion: 0.17
+Nodes (5): IReadOnlyList, Regex, LegacyMaritalStatusLParser, Fact, LegacyMaritalStatusLParserTests
+
+### Community 182 - "DocumentCopiesSlotPanel.razor"
+Cohesion: 0.10
+Nodes (20): ApplicationItemDocumentCopiesComponent, DocumentCopiesInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, ApplicationItem (+12 more)
+
+### Community 183 - "ApplicationMigrationSlaProfileTypeLinkCatalogTests"
+Cohesion: 0.18
+Nodes (12): ApplicationTypeCatalogRowDto, ApplicationMigrationSlaProfileCatalogRowDto, Fact, HashSet, IReadOnlyList, JsonSerializerOptions, List, ApplicationMigrationSlaProfileCatalogFileDto (+4 more)
+
+### Community 184 - "visa2014-sql-remote"
+Cohesion: 0.18
+Nodes (20): DATABASE_NAME, GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOOLSETS, SERVER_NAME, SQL_AUTH_MODE, SQL_PASSWORD, SQL_PORT, SQL_USERNAME (+12 more)
+
+### Community 185 - "EasyTestBlazorNavigationHelper"
+Cohesion: 0.27
+Nodes (5): IWebDriver, IWebElement, IApplicationContext, TimeSpan, EasyTestBlazorNavigationHelper
+
+### Community 186 - ".ProcessOneBatchAsync"
+Cohesion: 0.15
+Nodes (10): CancellationToken, Exception, ILogger, IObjectSpace, IServiceScopeFactory, List, Task, TimeSpan (+2 more)
+
+### Community 187 - "LookupLocalization"
+Cohesion: 0.17
+Nodes (6): GlobalLookupCatalogKind, Dictionary, IReadOnlyDictionary, Lazy, Type, LookupLocalization
+
+### Community 188 - "UserReportTemplateMaintenanceService"
+Cohesion: 0.18
+Nodes (12): IList, Stream, Task, IUserReportPlaceholderExtractor, CancellationToken, FileData, Guid, ILogger (+4 more)
+
+### Community 189 - "ApplicationTypeConfigurationSeed"
+Cohesion: 0.20
+Nodes (10): ApplicationTypeConfigurationRowDto, ApplicationLifecycleStage, ApplicationTypeConfigurationApplier, ApplicationTypeConfigurationRow, IReadOnlyDictionary, IReadOnlyList, Lazy, List (+2 more)
+
+### Community 190 - "VersionViewItemAdapter"
+Cohesion: 0.11
+Nodes (13): ComponentBase, Visa2026.Blazor.Server.Components, IComponentAdapter, IModelViewItem, RenderFragment, RenderTreeBuilder, ViewItem, string (+5 more)
+
+### Community 191 - "Visa2026.E2E.Tests"
+Cohesion: 0.10
+Nodes (9): Visa2026.E2E.Tests, EasyTestBrowserMode, TimeSpan, EasyTestCITuning, int, string, EasyTestHostEnvironment, EasyTestWebDriverPath (+1 more)
+
+### Community 192 - "ApplicationProgressGridSortLockController"
+Cohesion: 0.15
+Nodes (9): DxGridDataColumnModel, Action, DxGridListEditor, EventHandler, GridCustomizeElementEventArgs, IEnumerable, ListView, string (+1 more)
+
+### Community 193 - "HeaderDocumentCopiesComponent.razor"
+Cohesion: 0.10
+Nodes (19): HeaderDocumentCopiesInlinePreviewRequest, FormatMsg, FormatSize, GetRecordCssClass, GetRecordSummary, IsPreviewLoading, Msg, OnRefreshClick (+11 more)
+
+### Community 194 - "NestedListViewTabCountController"
+Cohesion: 0.13
+Nodes (10): IBindingList, ListChangedEventArgs, Action, EventArgs, Func, ListView, string, INestedTabCaptionTarget (+2 more)
+
+### Community 195 - "ApplicationWordReportPackageCatalogEntry"
+Cohesion: 0.14
+Nodes (14): Level, MessageKey, Guid, IReadOnlyList, ApplicationWordReportPackageCatalog, ApplicationWordReportPackageCatalogEntry, ApplicationWordReportPackageEntryKind, IList (+6 more)
+
+### Community 196 - "PersonDocumentCopiesSlotPanel.razor"
+Cohesion: 0.10
+Nodes (19): PersonDocumentCopiesComponent, PersonDocumentCopiesInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, DevExpress.ExpressApp (+11 more)
+
+### Community 197 - ".ResolveSiteByCityAndScalar"
+Cohesion: 0.22
+Nodes (5): TenantCatalogRow, Action, Func, IEnumerable, IReadOnlyList
+
+### Community 198 - "Visa2014ApplicationItemPersonDuplicateGuard"
+Cohesion: 0.18
+Nodes (9): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014ApplicationItemPersonDuplicateGuard, Fact (+1 more)
+
+### Community 199 - ".Resolve"
+Cohesion: 0.19
+Nodes (9): City, Guid, IReadOnlyList, Visa2014CityLookupMatcher, City, Fact, Guid, List (+1 more)
+
+### Community 200 - ".Normalize"
+Cohesion: 0.23
+Nodes (7): Dictionary, List, SeedIssue, SeedIssueKind, SeedScenarioProcessor, SeedScenarioProcessResult, SeedScenarioValidator
+
+### Community 201 - ".Resolve"
+Cohesion: 0.15
+Nodes (7): ApplicationListViewDisplayState, ApplicationMigrationSlaHelper, ApplicationProgressSlaResult, ApplicationProgressSlaStatus, DateTime, Fact, ApplicationMigrationSlaHelperTests
+
+### Community 202 - "ExpirationAlertRuleSaveController"
+Cohesion: 0.11
+Nodes (10): IReadOnlyList, string, DocumentExpirationAlertConfigurationKeys, DetailView, ObjectManipulatingEventArgs, ExpirationAlertRuleDeleteController, ExpirationAlertRuleNewController, ExpirationAlertRuleSaveController (+2 more)
+
+### Community 203 - ".GetRootObjectSpace"
+Cohesion: 0.18
+Nodes (8): IObjectSpace, ObjectSpaceHelper, CancelEventArgs, DetailView, Frame, IObjectSpace, SimpleAction, ApprovalLegProfileMinistryLegSaveGuardController
+
+### Community 204 - "UserReportPlaceholderCatalogEntry"
+Cohesion: 0.17
+Nodes (9): IReadOnlyList, UserReportPlaceholderCatalogEntry, UserReportPlaceholderManualQuery, UserReportPlaceholderScope, IReadOnlyDictionary, IReadOnlyList, Lazy, IUserReportPlaceholderCatalogService (+1 more)
+
+### Community 205 - "Visa2026.Module.Services.StateEvaluation"
+Cohesion: 0.12
+Nodes (5): Visa2026.Module.Services.StateEvaluation, Visa2026.Module.Services.StateEvaluation.Evaluators, Guid, BoStateResult, StateSeverity
+
+### Community 206 - ".TryGetBaseCaption"
+Cohesion: 0.14
+Nodes (10): DetailView, ItemCreatedEventArgs, DocumentCollectionCaptionLayoutController, Dictionary, string, DocumentCollectionTabCaptionHelper, Fact, InlineData (+2 more)
+
+### Community 207 - "ApplicationItemDocumentFileAccess"
+Cohesion: 0.24
+Nodes (10): Guid, HttpGet, IActionResult, DocumentFileDownloadController, Guid, IConfiguration, INonSecuredObjectSpaceFactory, IReadOnlyList (+2 more)
+
+### Community 208 - "Visa2014ApplicationProgressDuplicateGuard"
+Cohesion: 0.19
+Nodes (9): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014ApplicationProgressDuplicateGuard, Fact (+1 more)
+
+### Community 209 - ".RebuildEntityAsync"
+Cohesion: 0.14
+Nodes (11): Dictionary, IReadOnlyList, Visa2014InvitationPreviewExporter, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List (+3 more)
+
+### Community 210 - "LookupCatalogCloneController"
+Cohesion: 0.12
+Nodes (9): CloneObjectViewController, CustomShowClonedObjectEventArgs, int, LookupCatalogCloneController, CloneObjectViewController, CustomShowClonedObjectEventArgs, UserReportTemplateCloneController, IObjectSpace (+1 more)
+
+### Community 211 - ".EnsureConfigured"
+Cohesion: 0.13
+Nodes (10): IModelDetailView, PersonDetailViewItemsCopyHelper, IModelApplication, IModelDetailView, IModelViews, PersonTypedDetailViewConfigurator, IModelDetailView, IModelViews (+2 more)
+
+### Community 212 - ".RebuildAsync"
+Cohesion: 0.21
+Nodes (11): ApplicationItemDisambiguator, Result, Dictionary, Guid, IReadOnlyList, List, SqlConnection, Task (+3 more)
+
+### Community 213 - ".ListLegacyCopyRowsAsync"
+Cohesion: 0.14
+Nodes (14): LegacyEducationOid, PersonFullName, Dictionary, Guid, int, IReadOnlyList, LegacyCopyOid, List (+6 more)
+
+### Community 214 - "Visa2026.Blazor.Server"
+Cohesion: 0.11
+Nodes (18): DevExpress.Drawing.Skia (25.2.6), DevExpress.ExpressApp.Blazor (25.2.6), DevExpress.ExpressApp.FileAttachment.Blazor (25.2.6), DevExpress.ExpressApp.Notifications.Blazor (25.2.6), DevExpress.ExpressApp.Office.Blazor (25.2.6), DevExpress.ExpressApp.ReportsV2.Blazor (25.2.6), DevExpress.ExpressApp.Validation.Blazor (25.2.6), DevExpress.ExpressApp.WebApi (25.2.6) (+10 more)
+
+### Community 215 - "ApplicationRuntimeLogContextAccessor"
+Cohesion: 0.14
+Nodes (11): RuntimeLogContext, HttpContext, RequestDelegate, string, Task, CorrelationIdMiddleware, AsyncLocal, IDisposable (+3 more)
+
+### Community 216 - "PersonDocumentCopyPdfMerger"
+Cohesion: 0.16
+Nodes (10): Guid, INonSecuredObjectSpaceFactory, PersonDocumentFileAccess, Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList (+2 more)
+
+### Community 217 - ".TryGetPayloadFkId"
+Cohesion: 0.17
+Nodes (10): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014PassportPersonNumberDuplicateGuard, Guid (+2 more)
+
+### Community 218 - ".Resolve"
+Cohesion: 0.20
+Nodes (6): ApplicationProgressSlaHelper, DateTime, Fact, ApplicationProgressSlaHelperTests, Fact, ApplicationProgressTransitionHelperThreeLegTests
+
+### Community 219 - "ApplicationItemWordReportsController"
+Cohesion: 0.14
+Nodes (11): EventArgs, Guid, List, ListView, SimpleAction, SimpleActionExecuteEventArgs, ApplicationItemWordReportsController, Guid (+3 more)
+
+### Community 220 - "ApplicationProgressMinistryLettersController"
+Cohesion: 0.17
+Nodes (10): EventArgs, ListView, SimpleAction, SimpleActionExecuteEventArgs, ApplicationProgressMinistryLettersController, Frame, Guid, IObjectSpace (+2 more)
+
+### Community 222 - ".LoadRows"
+Cohesion: 0.18
+Nodes (8): Guid, IList, IObjectSpace, ApplicationTypeCodePickerHelper, ApplicationTypeCodePickerRow, HashSet, ApplicationTypeDevelopmentReadiness, ApplicationTypeReadinessStatus
+
+### Community 223 - "Community 223"
+Cohesion: 0.29
+Nodes (7): CancellationToken, FileData, Guid, INonSecuredObjectSpaceFactory, IObjectSpace, Task, UserReportTemplateStagingService
+
+### Community 224 - ".ClearAfterSuccessfulImportAsync"
+Cohesion: 0.19
+Nodes (10): AuditRowsDeleted, CleanupResult, OrphanWeakReferenceRowsDeleted, RuntimeLogRowsDeleted, CancellationToken, DateTime, SqlConnection, Task (+2 more)
+
+### Community 225 - "ApplicationTypeVisibilityCatalog"
+Cohesion: 0.15
+Nodes (12): CatalogRow, Dictionary, IReadOnlyCollection, IReadOnlyDictionary, JsonSerializerOptions, List, string, ApplicationTypeVisibilityCatalog (+4 more)
+
+### Community 226 - ".FormatForCulture"
+Cohesion: 0.13
+Nodes (8): Visa2026.Module.Localization.Generated, Dictionary, VisaUiMessageCatalog, IObjectSpace, PdfPackagingNotesCultureResolver, PdfPackagingNotesLocalization, string, VisaUiMessages
+
+### Community 227 - ".ListLegacyCopyRowsAsync"
+Cohesion: 0.15
+Nodes (13): LegacyPassportOid, PassportNumber, Dictionary, Guid, int, IReadOnlyList, LegacyCopyOid, List (+5 more)
+
+### Community 228 - ".ListLegacyVisaRowsAsync"
+Cohesion: 0.15
+Nodes (13): LegacyVisaOid, Dictionary, Guid, int, IReadOnlyList, List, SqlConnection, string (+5 more)
+
+### Community 229 - "ProgressLettersCatalogComponent.razor"
+Cohesion: 0.12
+Nodes (16): ProgressLettersInlinePreviewRequest, FormatDate, FormatMsg, GetEntryCssClass, GetEntryDomId, IsPreviewLoading, Msg, OnParametersSetAsync (+8 more)
+
+### Community 230 - "WordReportBatchToastHost.razor"
+Cohesion: 0.12
+Nodes (16): Dismiss, DisposeAsync, LocalizeStatus, Msg, OnInitializedAsync, PollLoopAsync, DevExpress.ExpressApp.Blazor.Services, FetchResult (+8 more)
+
+### Community 231 - "VisaFamilyMembersTextModel"
+Cohesion: 0.14
+Nodes (10): EventCallback, IObjectSpace, IReadOnlyList, Type, VisaFamilyMembersTextModel, Guid, CountryLookupItem, Guid (+2 more)
+
+### Community 232 - ".Configure"
+Cohesion: 0.12
+Nodes (11): ILogger, IServiceProvider, UserReportTemplateSeedGate, IApplicationBuilder, IConfiguration, IWebHostEnvironment, Startup, string (+3 more)
+
+### Community 233 - ".PrepareForTestSession"
+Cohesion: 0.21
+Nodes (5): EasyTestFixtureContext, TimeSpan, EasyTestHostLifecycle, EasyTestFixtureContext, EasyTestPreflight
+
+### Community 234 - "VisaExtensionStatusController"
+Cohesion: 0.12
+Nodes (8): ListView, SimpleAction, SimpleActionExecuteEventArgs, VisaExtensionStatusController, Caption, Criteria, string, VisaExtFilterService
+
+### Community 235 - "VisaTransferStatusController"
+Cohesion: 0.12
+Nodes (8): ListView, SimpleAction, SimpleActionExecuteEventArgs, VisaTransferStatusController, Caption, Criteria, string, VisaTransferFilterService
+
+### Community 236 - ".TryBuild"
+Cohesion: 0.18
+Nodes (10): ApplicationItemDocumentPackageOptions, ApplicationItemDocumentBatchSummaryKind, ApplicationItemDocumentBatchSummaryKindMapping, Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList (+2 more)
+
+### Community 237 - "UserReportVisibilityService"
+Cohesion: 0.21
+Nodes (6): IUserReportVisibilityService, IObjectSpace, List, UserReportTemplateVisibilityHelper, IEnumerable, UserReportVisibilityService
+
+### Community 238 - "visa2026-sql-local"
+Cohesion: 0.12
+Nodes (15): DATABASE_NAME, GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOOLSETS, SERVER_NAME, SQL_AUTH_MODE, SQL_PASSWORD, SQL_PORT, SQL_USERNAME (+7 more)
+
+### Community 239 - ".RunCommandAsync"
+Cohesion: 0.22
+Nodes (10): LegacyRelationshipRow, Dictionary, Guid, IEnumerable, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task (+2 more)
+
+### Community 240 - ".RunCommandAsync"
+Cohesion: 0.22
+Nodes (10): LegacySubcontractorRow, Dictionary, Guid, IEnumerable, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task (+2 more)
+
+### Community 241 - "visa2026-sql-local"
+Cohesion: 0.12
+Nodes (15): DATABASE_NAME, GITHUB_PERSONAL_ACCESS_TOKEN, GITHUB_TOOLSETS, SERVER_NAME, SQL_AUTH_MODE, SQL_PASSWORD, SQL_PORT, SQL_USERNAME (+7 more)
+
+### Community 242 - "ProgressLettersSlotPanel.razor"
+Cohesion: 0.12
+Nodes (15): ProgressLettersCatalogComponent, ProgressLettersInlinePreview, ClosePanelAsync, HandleInlinePreviewAsync, OnInitialized, OnParametersSet, OnPreviewClosedAsync, Application (+7 more)
+
+### Community 243 - "ShowMailMergeController"
 Cohesion: 0.19
 Nodes (7): SingleChoiceAction, SingleChoiceActionExecuteEventArgs, bool, EventArgs, ILogger, ObjectView, ShowMailMergeController
 
-### Community 242 - "Community 242"
+### Community 244 - ".Sync"
 Cohesion: 0.17
 Nodes (11): UserManager, IObjectSpace, IReadOnlyList, JsonSerializerOptions, List, string, TenantUserCatalog, TenantUserCatalogLoader (+3 more)
 
-### Community 243 - "Community 243"
-Cohesion: 0.14
-Nodes (7): PropertyInfo, Guid, HashSet, IEnumerable, IReadOnlyList, List, LookupCatalogEntitySync
-
-### Community 244 - "Community 244"
+### Community 245 - ".RunCommandAsync"
 Cohesion: 0.26
 Nodes (8): Guid, IReadOnlyList, List, string, Task, AddressOfResidenceIdRow, Visa2014AddressOfResidencePurge, Visa2014AddressOfResidencePurgeResult
-
-### Community 245 - "Community 245"
-Cohesion: 0.17
-Nodes (10): Dictionary, IReadOnlyList, Visa2014EducationPreviewExporter, Dictionary, IReadOnlyDictionary, IReadOnlyList, List, string (+2 more)
 
 ### Community 246 - "Community 246"
 Cohesion: 0.28
 Nodes (8): DateTime, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014EmployeeSalaryImportResult, Visa2014EmployeeSalaryODataImporter
 
-### Community 247 - "Community 247"
-Cohesion: 0.14
-Nodes (11): Func, Guid, HashSet, IList, IReadOnlyList, IServiceProvider, List, Stream (+3 more)
-
-### Community 248 - "Community 248"
-Cohesion: 0.23
-Nodes (9): Dictionary, Guid, IEnumerable, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014PersonAddressOfResidenceFromPiaCorrection (+1 more)
-
-### Community 249 - "Community 249"
-Cohesion: 0.21
+### Community 247 - ".Parse"
+Cohesion: 0.19
 Nodes (7): GeneratedRegex, Regex, ApplicationManualNumberParser, Fact, InlineData, Theory, ApplicationManualNumberParserTests
 
-### Community 250 - "Community 250"
-Cohesion: 0.32
-Nodes (4): EventArgs, IObjectSpace, ApprovalLegProfileMinistryLegObjectSpaceHooks, ObjectSpaceCreatedEventArgs
-
-### Community 251 - "Community 251"
+### Community 248 - "UserFeedbackViewController"
 Cohesion: 0.21
 Nodes (6): EventArgs, IList, ObjectView, SimpleAction, SimpleActionExecuteEventArgs, UserFeedbackViewController
 
-### Community 252 - "Community 252"
+### Community 249 - "ApplicationItemDocumentCopyPdfMerger"
+Cohesion: 0.19
+Nodes (9): Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList, MemoryStream, ApplicationItemDocumentCopyPdfMerger, Guid (+1 more)
+
+### Community 250 - "MailMergeVisibilityCacheService"
 Cohesion: 0.15
 Nodes (10): IEnumerable, Type, IMailMergeVisibilityCacheService, bool, ConcurrentDictionary, IEnumerable, IObjectSpaceFactory, object (+2 more)
 
-### Community 253 - "Community 253"
+### Community 251 - "VisaFamilyMemberLinesHelper"
 Cohesion: 0.25
 Nodes (4): DateTime, IEnumerable, string, VisaFamilyMemberLinesHelper
 
-### Community 254 - "Community 254"
+### Community 252 - "StateNotificationHeaderBadge.razor"
 Cohesion: 0.13
 Nodes (14): BoStateNotificationNavigationHelper, Dispose, FormatCount, OnInitialized, OnLocationChanged, OpenInboxAsync, HttpApplicationRuntimeLogAdminChecker, IBoStateNotificationSummaryService (+6 more)
 
-### Community 255 - "Community 255"
-Cohesion: 0.12
-Nodes (10): CreateCustomModelDifferenceStoreEventArgs, ModuleBase, IEnumerable, IObjectSpace, ModuleUpdater, Version, XafApplication, Visa2026BlazorModule (+2 more)
+### Community 253 - "Visa2026BlazorModule"
+Cohesion: 0.13
+Nodes (9): CreateCustomModelDifferenceStoreEventArgs, IEnumerable, IObjectSpace, ModuleUpdater, Version, XafApplication, Visa2026BlazorModule, XafApplication (+1 more)
 
-### Community 256 - "Community 256"
+### Community 254 - ".IsPostgreSql"
+Cohesion: 0.20
+Nodes (5): DbContextOptionsBuilder, IServiceCollection, IObjectSpace, string, DatabaseProviderDetector
+
+### Community 255 - "LookupLocalizationLookupListViewUpdater"
 Cohesion: 0.18
 Nodes (10): IModelBOModel, IModelListView, IModelViews, ModelBOModelClassNodesGenerator, ModelNode, ModelViewsNodesGenerator, string, Type (+2 more)
 
-### Community 257 - "Community 257"
+### Community 256 - "DocumentFileUploadConstraints"
 Cohesion: 0.25
 Nodes (6): ReadOnlySpan, FileData, HashSet, int, string, DocumentFileUploadConstraints
 
-### Community 258 - "Community 258"
-Cohesion: 0.14
-Nodes (11): RuntimeLogContext, HttpContext, RequestDelegate, string, Task, CorrelationIdMiddleware, AsyncLocal, IDisposable (+3 more)
-
-### Community 259 - "Community 259"
+### Community 257 - ".Submit"
 Cohesion: 0.16
 Nodes (12): SubmitForm, SubmitResponse, ActionResult, HttpPost, IFormFile, RequestFormLimits, RequestSizeLimit, Task (+4 more)
 
-### Community 260 - "Community 260"
+### Community 258 - "ApplicationItemReportPackageListPropertyEditor"
 Cohesion: 0.19
 Nodes (7): Guid, IComponentModel, IObjectSpace, IReadOnlyList, Task, XafApplication, ApplicationItemReportPackageListPropertyEditor
 
-### Community 261 - "Community 261"
-Cohesion: 0.24
-Nodes (8): Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationTypeCompositeCorrection, Visa2014ApplicationTypeCompositeCorrectionResult
+### Community 259 - "VisaLocalization"
+Cohesion: 0.16
+Nodes (7): CultureInfo, IApplicationBuilder, IList, IReadOnlyList, IServiceCollection, string, VisaLocalization
 
-### Community 262 - "Community 262"
+### Community 260 - ".RunAsync"
 Cohesion: 0.31
 Nodes (7): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014InvitationItemImportResult, Visa2014InvitationItemODataImporter
 
-### Community 263 - "Community 263"
+### Community 261 - ".RunAsync"
 Cohesion: 0.35
 Nodes (7): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014PassportImportResult, Visa2014PassportODataImporter
 
-### Community 264 - "Community 264"
+### Community 262 - ".RunAsync"
+Cohesion: 0.25
+Nodes (9): Dictionary, Guid, IEnumerable, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014PersonAddressOfResidenceFromPiaCorrection (+1 more)
+
+### Community 263 - ".ResolveOrCreateActualPositionAsync"
+Cohesion: 0.24
+Nodes (9): ApiClient, Created, Dictionary, Guid, Id, IReadOnlyList, Task, Visa2014PersonMiddleNameCleanupResult (+1 more)
+
+### Community 264 - "SeedFieldRules"
+Cohesion: 0.19
+Nodes (5): Dictionary, HashSet, IReadOnlyDictionary, SeedFieldRules, IReadOnlyDictionary
+
+### Community 265 - "SyncRuleCacheController"
 Cohesion: 0.17
 Nodes (6): bool, CancelEventArgs, EventArgs, IObjectSpace, ObjectSpaceCreatedEventArgs, SyncRuleCacheController
 
-### Community 265 - "Community 265"
+### Community 266 - "PdfFormMappingUpdater"
 Cohesion: 0.21
 Nodes (5): IObjectSpace, EducationPlacePdfFormMappingUpdater, IObjectSpace, FamilyMembersPdfFormMappingUpdater, PdfFormMappingUpdater
-
-### Community 266 - "Community 266"
-Cohesion: 0.23
-Nodes (5): Dictionary, IReadOnlyList, JsonElement, List, ProjectContractTitleDescriptionMergeUpdater
 
 ### Community 267 - "Community 267"
 Cohesion: 0.19
 Nodes (8): Exception, Guid, ApplicationErrorReport, Exception, Guid, ApplicationErrorReporterExtensions, IApplicationErrorReporter, NullApplicationErrorReporter
 
-### Community 268 - "Community 268"
+### Community 268 - ".MapLookup"
+Cohesion: 0.18
+Nodes (7): CityCatalogRow, List, Task, Func, IObjectSpace, IQueryable, List
+
+### Community 269 - "Log"
 Cohesion: 0.22
 Nodes (4): ConsoleColor, object, StreamWriter, Log
-
-### Community 269 - "Community 269"
-Cohesion: 0.22
-Nodes (5): Visa2026.Module.Tests.DatabaseUpdate, int, LookupCatalogMatchHelper, Fact, LookupCatalogMatchHelperTests
 
 ### Community 270 - "Community 270"
 Cohesion: 0.31
 Nodes (6): Visa2026.DataImporter.Migration, Guid, IObjectSpace, IReadOnlyDictionary, Type, ObjectSpaceImportSink
 
-### Community 271 - "Community 271"
-Cohesion: 0.07
-Nodes (14): Visa2026.Module.Services.PreviewSlot, Visa2026.Module.Services.HeaderLinkedDocuments, System.Linq.Expressions, City, DevExpress.Blazor, DxComboBox, Visa2026.Module.BusinessObjects, Guid (+6 more)
-
-### Community 272 - "Community 272"
+### Community 271 - ".CountWorkingDaysInclusive"
 Cohesion: 0.20
 Nodes (7): DayOfWeek, DateTime, WorkingDaysHelper, Fact, InlineData, Theory, WorkingDaysHelperTests
 
-### Community 273 - "Community 273"
+### Community 272 - "FileCursorRuntimeErrorInboxWriter"
 Cohesion: 0.18
 Nodes (10): IHostEnvironment, CancellationToken, Guid, ILogger, IOptionsMonitor, Task, FileCursorRuntimeErrorInboxWriter, LogLevel (+2 more)
 
-### Community 274 - "Community 274"
+### Community 273 - "PlaceholderManualSlotPanel.razor"
 Cohesion: 0.14
 Nodes (13): ClosePanelAsync, CopyTokenAsync, Msg, OnInitialized, DevExpress.Blazor, DxButton, Microsoft.JSInterop, UserReportPlaceholderCatalogEntry (+5 more)
 
-### Community 275 - "Community 275"
-Cohesion: 0.13
-Nodes (11): HttpContext, HttpRequest, RequestDelegate, Task, VisaCulturePersistenceMiddleware, CultureInfo, IList, IReadOnlyList (+3 more)
-
-### Community 276 - "Community 276"
+### Community 274 - "ApplicationItemDocumentCopiesListPropertyEditor"
 Cohesion: 0.20
 Nodes (7): Guid, IComponentModel, IObjectSpace, IReadOnlyList, Task, XafApplication, ApplicationItemDocumentCopiesListPropertyEditor
 
-### Community 277 - "Community 277"
-Cohesion: 0.32
-Nodes (7): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014EducationImportResult, Visa2014EducationODataImporter
+### Community 275 - ".RunCommandAsync"
+Cohesion: 0.24
+Nodes (8): Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationItemApplicationParentCorrection, Visa2014ApplicationItemApplicationParentCorrectionResult
 
-### Community 278 - "Community 278"
+### Community 276 - ".ApplyLegacyCancelledFlags"
+Cohesion: 0.31
+Nodes (5): IDictionary, ApplicationTypeVisibilityCatalog, Dictionary, Fact, Visa2014ApplicationItemCancelledFlagsMapperTests
+
+### Community 277 - ".RunCommandAsync"
+Cohesion: 0.25
+Nodes (8): Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationTypeCompositeCorrection, Visa2014ApplicationTypeCompositeCorrectionResult
+
+### Community 278 - ".RunCommandAsync"
+Cohesion: 0.26
+Nodes (7): Guid, IReadOnlyList, List, string, Task, Visa2014EducationDocumentPurge, Visa2014EducationDocumentPurgeResult
+
+### Community 279 - ".RunAsync"
 Cohesion: 0.34
 Nodes (7): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014PersonImportResult, Visa2014PersonODataImporter
 
-### Community 279 - "Community 279"
-Cohesion: 0.10
-Nodes (12): Visa2014CatalogMatchHelper, Visa2014ResidenceClassifier, Dictionary, JsonElement, List, SqliteConnection, Visa2014TurkmenistanGeographyDbBuilder, SqliteConnection (+4 more)
+### Community 280 - "Visa2014TurkmenistanGeographyStore"
+Cohesion: 0.19
+Nodes (5): SqliteConnection, string, Visa2014TurkmenistanGeographyStore, Fact, Visa2014TurkmenistanGeographyStoreTests
 
-### Community 280 - "Community 280"
+### Community 281 - ".RunAsync"
 Cohesion: 0.33
 Nodes (7): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014VisaImportResult, Visa2014VisaODataImporter
 
-### Community 281 - "Community 281"
-Cohesion: 0.23
-Nodes (7): DateTime, Guid, ExternalArrival, ExternalDeparture, InternalArrival, InternalDeparture, TravelHistory
+### Community 282 - ".DeleteAsync"
+Cohesion: 0.11
+Nodes (11): Guid, Guid, IEnumerable, string, Task, InvitationItemImporter, Guid, IEnumerable (+3 more)
 
-### Community 282 - "Community 282"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdPassport
+### Community 283 - "List"
+Cohesion: 0.18
+Nodes (8): DateTime, Guid, VwRdPassport, DateTime, Guid, VwRdPositionHistory, IEnumerable, List
 
-### Community 283 - "Community 283"
+### Community 284 - "PdfFormMappingCacheController"
 Cohesion: 0.19
 Nodes (6): bool, CancelEventArgs, EventArgs, IObjectSpace, ObjectSpaceCreatedEventArgs, PdfFormMappingCacheController
 
-### Community 284 - "Community 284"
+### Community 285 - "VisaCancelExtStatusController"
 Cohesion: 0.15
 Nodes (6): ListView, VisaCancelExtStatusController, Caption, Criteria, string, VisaCancelExtFilterService
 
-### Community 285 - "Community 285"
+### Community 286 - "VisaCancellationStatusController"
 Cohesion: 0.15
 Nodes (6): ListView, VisaCancellationStatusController, Caption, Criteria, string, VisaCancellationFilterService
 
-### Community 286 - "Community 286"
-Cohesion: 0.20
-Nodes (5): IComponentModel, IEnumerable, IObjectSpace, XafApplication, CityLookupAutoClearPropertyEditor
+### Community 287 - "Program"
+Cohesion: 0.22
+Nodes (6): BindingFlags, IDesignTimeApplicationFactory, IHostBuilder, Type, XafApplication, Program
 
-### Community 287 - "Community 287"
+### Community 288 - "BlazorPropertyEditorBase"
 Cohesion: 0.18
-Nodes (7): CityCatalogRow, List, Task, Func, IObjectSpace, IQueryable, List
+Nodes (6): BlazorPropertyEditorBase, IComponentModel, IEnumerable, IObjectSpace, XafApplication, CityLookupAutoClearPropertyEditor
 
-### Community 288 - "Community 288"
-Cohesion: 0.14
-Nodes (13): ComponentModelBase, EventCallback, IReadOnlyList, Type, BoStateNotificationInboxModel, EventCallback, Expression, Func (+5 more)
+### Community 289 - "ComponentModelBase"
+Cohesion: 0.15
+Nodes (12): ComponentModelBase, EventCallback, Expression, Func, IEnumerable, Type, CityLookupAutoClearModel, Type (+4 more)
 
-### Community 289 - "Community 289"
+### Community 290 - "ControllerBase"
 Cohesion: 0.22
 Nodes (10): ControllerBase, MyLatestDto, ActionResult, DateTime, Guid, HttpGet, IActionResult, INonSecuredObjectSpaceFactory (+2 more)
 
-### Community 290 - "Community 290"
-Cohesion: 0.08
-Nodes (9): Visa2026.Module, bool, MailMergeFeature, string, PersonDetailViewIds, AsyncLocal, PersonDetailViewNavigationContext, string (+1 more)
+### Community 291 - "Visa2026.Blazor.Server"
+Cohesion: 0.15
+Nodes (6): Visa2026.Blazor.Server, EasyTestHostMode, IConfiguration, HostingEnvironmentFlags, string, ImportHistoryOptions
 
-### Community 291 - "Community 291"
+### Community 292 - "PersonDetailViewIssuedDocumentsLayoutController"
 Cohesion: 0.22
 Nodes (6): DxFormLayoutGroupModel, DetailView, DxFormLayoutTabPagesModel, EventArgs, ItemCreatedEventArgs, PersonDetailViewIssuedDocumentsLayoutController
 
-### Community 292 - "Community 292"
+### Community 293 - "ODataBatch.cs"
 Cohesion: 0.21
 Nodes (9): HttpContent, HttpResponseMessage, IEnumerable, List, Task, BatchOperation, BatchResponse, BatchResultItem (+1 more)
 
-### Community 293 - "Community 293"
+### Community 294 - "EasyTestSessionFixture"
 Cohesion: 0.17
 Nodes (9): IAsyncLifetime, ICollectionFixture, string, EasyTestCollection, EasyTestFixtureContext, IApplicationContext, string, Task (+1 more)
 
-### Community 294 - "Community 294"
+### Community 295 - "PdfMappingHelper"
+Cohesion: 0.32
+Nodes (4): Image, IList, PdfFormMappingDefinition, PdfMappingHelper
+
+### Community 296 - "Visa2026Module"
+Cohesion: 0.17
+Nodes (9): ModelNodesGeneratorUpdaters, ModuleBase, IEnumerable, IObjectSpace, ModuleUpdater, Type, Version, XafApplication (+1 more)
+
+### Community 297 - "Visa2026.DataImporter"
 Cohesion: 0.15
 Nodes (13): Microsoft.Data.Sqlite (8.0.11), Microsoft.Extensions.Http (8.0.1), System.Text.Encoding.CodePages (10.0.5), System.Text.Json (9.0.6), YamlDotNet (16.3.0), Visa2026.DataImporter, net8.0, ExcelDataReader (3.8.0) (+5 more)
 
-### Community 295 - "Community 295"
+### Community 298 - ".EnsureCreated"
 Cohesion: 0.21
 Nodes (5): ProcessStartInfo, TimeSpan, EasyTestDatabaseProvisioner, string, EasyTestHostLaunch
 
-### Community 296 - "Community 296"
+### Community 299 - "Install-WslDockerEngine.ps1"
 Cohesion: 0.32
 Nodes (11): Enable-WslSystemd(), Get-WslDistroNames(), Install-DockerEngineInWsl(), Install-WslOptionalComponent(), Install-WslUbuntuIfNeeded(), Invoke-WslExe(), Invoke-WslExeLive(), Resolve-WslDistroName() (+3 more)
 
-### Community 297 - "Community 297"
+### Community 300 - "WordReportBatchesController"
 Cohesion: 0.27
 Nodes (9): ActionResult, DateTime, Guid, HttpGet, IActionResult, INonSecuredObjectSpaceFactory, WordReportBatchesController, WordReportBatchStatusDto (+1 more)
 
-### Community 298 - "Community 298"
+### Community 301 - "BoStateNotificationNavigationHelper"
 Cohesion: 0.23
 Nodes (6): ChoiceActionItem, ChoiceActionItemCollection, XafApplication, BoStateNotificationNavigationHelper, bool, BoStateNotificationInboxFilterService
 
-### Community 299 - "Community 299"
+### Community 302 - ".CanEditTemplates"
 Cohesion: 0.21
 Nodes (6): Guid, string, UserReportTemplateEditLinkService, Guid, IObjectSpace, UserReportTemplateEditAccess
 
-### Community 300 - "Community 300"
+### Community 303 - "Visa2026.Module.BusinessObjects.ReportDashboard"
+Cohesion: 0.14
+Nodes (8): Visa2026.Module.BusinessObjects.ReportDashboard, ReportDashboardHost, ModelDetailViewItemsNodesGenerator, ModelNode, ReportDashboardDetailViewUpdater, ModelNode, NavigationItemNodeGenerator, ReportDashboardModelUpdater
+
+### Community 304 - ".RunAsync"
 Cohesion: 0.27
 Nodes (7): DateTime, Dictionary, Guid, IReadOnlyList, Task, Visa2014WorkPermitImportResult, Visa2014WorkPermitODataImporter
 
-### Community 301 - "Community 301"
-Cohesion: 0.17
-Nodes (12): Func, IVisa2014ImportTarget, DateTime, Dictionary, Guid, INonSecuredObjectSpaceFactory, IReadOnlyList, string (+4 more)
-
-### Community 302 - "Community 302"
+### Community 305 - "WindowController"
 Cohesion: 0.15
 Nodes (7): CustomShowNavigationItemEventArgs, ShowNavigationItemController, ImportReimportHistoryNavigationController, CustomShowNavigationItemEventArgs, ShowNavigationItemController, ReportDashboardNavigationController, WindowController
 
-### Community 303 - "Community 303"
+### Community 306 - "SyncRulesController"
 Cohesion: 0.21
 Nodes (6): List, SimpleAction, SimpleActionExecuteEventArgs, SyncRulesController, Type, SyncRulesUpdater
 
-### Community 304 - "Community 304"
+### Community 307 - "UserFeedbackDetailViewUpdater"
 Cohesion: 0.24
 Nodes (8): IEnumerable, IModelDetailView, IModelLayoutViewItem, IModelNode, ModelDetailViewItemsNodesGenerator, ModelNode, string, UserFeedbackDetailViewUpdater
 
-### Community 305 - "Community 305"
+### Community 308 - ".Submit"
 Cohesion: 0.19
 Nodes (7): FileData, HashSet, int, UserFeedbackFileConstraints, Guid, INonSecuredObjectSpaceFactory, UserFeedbackSubmitService
 
-### Community 306 - "Community 306"
-Cohesion: 0.24
-Nodes (6): BindingFlags, IDesignTimeApplicationFactory, IHostBuilder, Type, XafApplication, Program
-
-### Community 307 - "Community 307"
-Cohesion: 0.13
-Nodes (10): bool, ConditionalWeakTable, DetailView, EventArgs, ObjectChangedEventArgs, OptionalDetailFieldsController, DetailView, ISet (+2 more)
-
-### Community 308 - "Community 308"
-Cohesion: 0.25
-Nodes (4): BlazorApplication, CustomizeLanguageEventArgs, DatabaseVersionMismatchEventArgs, Visa2026BlazorApplication
-
-### Community 309 - "Community 309"
-Cohesion: 0.21
-Nodes (9): FamilyId, SponsorContractId, Guid, IReadOnlyList, List, string, Task, Visa2014FamilyMemberProjectContractSync (+1 more)
-
-### Community 310 - "Community 310"
-Cohesion: 0.18
-Nodes (5): HorizontalAlignment, VerticalAlignment, string, DocumentPreviewPopupWindowMode, DocumentPreviewPopupWindowState
-
-### Community 311 - "Community 311"
-Cohesion: 0.21
-Nodes (9): LegacyEmployeeStatusL, Guid, IReadOnlyList, SqlConnection, string, Task, LegacyEmployeeStatusL, Visa2014PersonVisaFamilyTextImporter (+1 more)
-
-### Community 312 - "Community 312"
-Cohesion: 0.20
-Nodes (9): Produces, SqlDataReader, CancellationToken, HttpGet, IActionResult, IConfiguration, ILogger, Task (+1 more)
-
-### Community 313 - "Community 313"
-Cohesion: 0.30
-Nodes (6): SortingDirection, IModelListView, ModelNode, ModelViewsNodesGenerator, string, ApplicationProgressHistoryViewsUpdater
-
-### Community 314 - "Community 314"
-Cohesion: 0.27
-Nodes (4): DeploymentEnvironmentOptions, IConfiguration, DeploymentEnvironmentBadgeViewModel, DeploymentEnvironmentPresenter
-
-### Community 315 - "Community 315"
-Cohesion: 0.26
-Nodes (6): readExports(), registerExport(), removeExport(), resolveTemplateId(), uploadFile(), writeExports()
-
-### Community 316 - "Community 316"
+### Community 309 - "ApplicationRuntimeLogTextHelper"
 Cohesion: 0.23
-Nodes (7): DateTime, Guid, IEnumerable, string, Task, AddressOfResidenceImporter, ResidenceType
+Nodes (6): GeneratedRegex, Guid, IReadOnlyList, KeyValuePair, Regex, ApplicationRuntimeLogTextHelper
 
-### Community 317 - "Community 317"
-Cohesion: 0.23
-Nodes (8): Guid, int, IReadOnlyList, KeyValuePair, List, Task, Visa2014PersonPhotoImporter, Visa2014PersonPhotoImportResult
-
-### Community 318 - "Community 318"
-Cohesion: 0.24
-Nodes (7): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014WorkPermitItemPersonDuplicateGuard
-
-### Community 319 - "Community 319"
-Cohesion: 0.27
-Nodes (3): int, string, SoftDeleteColumnsCleanupUpdater
-
-### Community 320 - "Community 320"
-Cohesion: 0.17
-Nodes (11): ApplicationRuntimeLogResolutionHelper, DateTime, Guid, ApplicationRuntimeLogResolutionSummary, CancellationToken, Guid, IReadOnlyList, Task (+3 more)
-
-### Community 321 - "Community 321"
-Cohesion: 0.19
-Nodes (7): DateTime, GeneratedRegex, Guid, IReadOnlyList, KeyValuePair, Regex, ApplicationRuntimeLogTextHelper
-
-### Community 322 - "Community 322"
-Cohesion: 0.35
-Nodes (7): Dictionary, IEnumerable, IReadOnlyDictionary, IReadOnlyList, List, string, WordUserReportMergeImageExtractor
-
-### Community 323 - "Community 323"
-Cohesion: 0.35
-Nodes (6): Circuit, CircuitHandler, IScopedCircuitHandler, CancellationToken, Task, CircuitHandlerProxy
-
-### Community 324 - "Community 324"
-Cohesion: 0.36
-Nodes (9): Add-RuntimeErrorHookPromptedId(), Get-RuntimeErrorHookPromptedState(), Get-RuntimeErrorHookStatePath(), Get-RuntimeErrorInboxDirectory(), Get-RuntimeErrorInboxDocuments(), Get-RuntimeErrorProjectRoot(), Save-RuntimeErrorHookPromptedState(), Test-RuntimeErrorHookDisabled() (+1 more)
-
-### Community 325 - "Community 325"
-Cohesion: 0.18
-Nodes (11): coverlet.collector (6.0.3), Selenium.Support (4.4.0), Selenium.WebDriver (4.4.0), Visa2026.E2E.Tests, net8.0, DevExpress.ExpressApp.EasyTest.BlazorAdapter (25.2.6), Microsoft.Data.SqlClient (6.1.2), Microsoft.NET.Test.Sdk (17.11.1) (+3 more)
-
-### Community 326 - "Community 326"
-Cohesion: 0.25
-Nodes (5): Add-SqlStartupArgument(), Invoke-Sql(), Invoke-SqlSingleUserBootstrap(), Remove-SqlStartupArgument(), Restart-SqlInstance()
-
-### Community 327 - "Community 327"
-Cohesion: 0.16
-Nodes (9): IComponentModel, IObjectSpace, Task, XafApplication, ApplicationReportPackageListPropertyEditor, HttpContext, IServiceProvider, IXafCultureInfoService (+1 more)
-
-### Community 328 - "Community 328"
-Cohesion: 0.16
-Nodes (8): EventCallback, Type, OptionalDetailFieldsToggleModel, IComponentModel, IObjectSpace, Task, XafApplication, OptionalDetailFieldsTogglePropertyEditor
-
-### Community 329 - "Community 329"
-Cohesion: 0.11
-Nodes (13): ISecurityUserLockout, ISecurityUserWithLoginInfo, PermissionPolicyUser, IHttpContextAccessor, IServiceScopeFactory, HttpApplicationRuntimeLogAdminChecker, DateTime, IEnumerable (+5 more)
-
-### Community 330 - "Community 330"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, ApplicationProgressImporter
-
-### Community 331 - "Community 331"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, BusinessTripPlanImporter
-
-### Community 332 - "Community 332"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, EmployeePositionHistoryImporter
-
-### Community 333 - "Community 333"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, InvitationImporter
-
-### Community 334 - "Community 334"
-Cohesion: 0.27
-Nodes (3): Dictionary, JsonSerializerOptions, LookupCatalogExporter
-
-### Community 335 - "Community 335"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, MedicalRecordImporter
-
-### Community 336 - "Community 336"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, RejectionImporter
-
-### Community 337 - "Community 337"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, TravelHistoryImporter
-
-### Community 338 - "Community 338"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, WorkPermitImporter
-
-### Community 339 - "Community 339"
-Cohesion: 0.25
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, WorkPermitItemImporter
-
-### Community 340 - "Community 340"
-Cohesion: 0.20
-Nodes (6): RegistrationTravelHistoryBackfillUpdater, Guid, IObjectSpace, string, Type, RegistrationTravelHistorySyncService
-
-### Community 341 - "Community 341"
-Cohesion: 0.30
-Nodes (4): IObjectSpace, MinistryReviewSlaHelper, Fact, MinistryReviewSlaHelperTests
-
-### Community 342 - "Community 342"
-Cohesion: 0.20
-Nodes (5): CancelEventArgs, DetailView, ObjectsManipulatingEventArgs, ApplicationMigrationSlaProfileDeleteController, ApplicationTypeMigrationSlaWarningController
-
-### Community 343 - "Community 343"
-Cohesion: 0.14
-Nodes (14): Guid, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList, ApplicationWordReportBatchEnqueueResult, ApplicationWordReportBatchEnqueueService, IObjectSpace, IServiceProvider (+6 more)
-
-### Community 344 - "Community 344"
-Cohesion: 0.24
-Nodes (4): DetailView, ObjectChangedEventArgs, ApplicationProgressCommitValidationController, ApplicationProgressDetailViewController
-
-### Community 345 - "Community 345"
-Cohesion: 0.11
-Nodes (13): VisaPreviewSlotCloseController, DetailView, EventArgs, SimpleAction, SimpleActionExecuteEventArgs, WordReportsController, Guid, IReadOnlyList (+5 more)
-
-### Community 346 - "Community 346"
-Cohesion: 0.19
-Nodes (7): BoStateNotificationCategory, DateTime, Guid, BoStateNotificationItem, BoStateNotificationSeverity, BoStateNotificationStatus, BoStateNotificationDisplayLocalization
-
-### Community 347 - "Community 347"
-Cohesion: 0.19
-Nodes (8): Guid, IList, IObjectSpace, ApplicationTypeCodePickerHelper, ApplicationTypeCodePickerRow, HashSet, ApplicationTypeDevelopmentReadiness, ApplicationTypeReadinessStatus
-
-### Community 348 - "Community 348"
-Cohesion: 0.18
-Nodes (9): DateTime, Guid, IReadOnlyList, ApplicationRuntimeLogRemotePullResult, CancellationToken, DateTime, IConfiguration, Task (+1 more)
-
-### Community 349 - "Community 349"
-Cohesion: 0.29
-Nodes (6): IModelClass, ModelBOModelClassNodesGenerator, ModelNode, string, Type, LookupBaseDetailViewModelUpdater
-
-### Community 350 - "Community 350"
-Cohesion: 0.19
-Nodes (11): LegacySubcontractorRow, Dictionary, Guid, IEnumerable, INonSecuredObjectSpaceFactory, IReadOnlyDictionary, IReadOnlyList, Task (+3 more)
-
-### Community 351 - "Community 351"
-Cohesion: 0.20
-Nodes (9): Microsoft.AspNetCore.Components.Authorization, Microsoft.AspNetCore.Components.Forms, Microsoft.AspNetCore.Components.Routing, Microsoft.AspNetCore.Components.Web.Virtualization, Visa2026.Blazor.Server, DevExpress.Blazor, DevExpress.ExpressApp.Blazor.Components, Microsoft.AspNetCore.Components.Web (+1 more)
-
-### Community 352 - "Community 352"
-Cohesion: 0.20
-Nodes (9): Dismiss, DisposeAsync, LocalizeStatus, OnInitializedAsync, PollLoopAsync, FetchResult, IJSRuntime, NavigationManager (+1 more)
-
-### Community 353 - "Community 353"
-Cohesion: 0.33
-Nodes (4): IReadOnlyList, Task, Guid, IObjectSpace
-
-### Community 354 - "Community 354"
-Cohesion: 0.12
-Nodes (10): ILogger, IServiceProvider, ApplicationUserThemePreferenceStartupGate, IObjectSpace, string, ApplicationUserThemePreferencePermissions, SqlConnection, string (+2 more)
-
-### Community 355 - "Community 355"
-Cohesion: 0.24
-Nodes (5): ConcurrentDictionary, Guid, WordReportBatchTrackNotifier, Guid, IWordReportBatchTrackNotifier
-
-### Community 356 - "Community 356"
-Cohesion: 0.29
-Nodes (5): Guid, IEnumerable, string, Task, ApplicationItemImporter
-
-### Community 357 - "Community 357"
-Cohesion: 0.29
-Nodes (5): Guid, IEnumerable, string, Task, BusinessTripAddressImporter
-
-### Community 358 - "Community 358"
-Cohesion: 0.29
-Nodes (5): Guid, IEnumerable, string, Task, EducationImporter
-
-### Community 359 - "Community 359"
-Cohesion: 0.29
-Nodes (5): Guid, IEnumerable, string, Task, InvitationItemImporter
-
-### Community 360 - "Community 360"
-Cohesion: 0.12
-Nodes (10): Dictionary, IReadOnlyList, List, Visa2014ApplicationPreviewExporter, IReadOnlyDictionary, IReadOnlyList, ZipArchive, Visa2014MinimalXlsxWriter (+2 more)
-
-### Community 361 - "Community 361"
-Cohesion: 0.20
-Nodes (8): CancellationToken, DateTime, Guid, HashSet, IReadOnlyCollection, string, Task, Visa2014LegacyAuditChangeQuery
-
-### Community 362 - "Community 362"
-Cohesion: 0.17
-Nodes (7): ApplicationImportIdentity, Visa2014PersonImportBatch, DateTime, Guid, IReadOnlyList, ApplicationImportIdentity, WorkingRow
-
-### Community 363 - "Community 363"
-Cohesion: 0.27
-Nodes (5): Guid, IEnumerable, string, Task, LodgingImporter
-
-### Community 364 - "Community 364"
-Cohesion: 0.24
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, PassportImporter
-
-### Community 365 - "Community 365"
-Cohesion: 0.27
-Nodes (5): Guid, IEnumerable, string, Task, ProjectContractImporter
-
-### Community 366 - "Community 366"
-Cohesion: 0.29
-Nodes (5): Guid, IEnumerable, string, Task, RejectionItemImporter
-
-### Community 367 - "Community 367"
-Cohesion: 0.24
-Nodes (6): DateTime, Guid, IEnumerable, string, Task, VisaImporter
-
-### Community 368 - "Community 368"
-Cohesion: 0.09
-Nodes (12): IReadOnlyCollection, IReadOnlyDictionary, BoStateAppearance, BoStateAppearanceColors, IEnumerable, int, IReadOnlyList, ApplicationProgressLegCodes (+4 more)
-
-### Community 369 - "Community 369"
-Cohesion: 0.19
-Nodes (9): Guid, ILogger, INonSecuredObjectSpaceFactory, IObjectSpace, IReadOnlyList, MemoryStream, ApplicationItemDocumentCopyPdfMerger, Guid (+1 more)
-
-### Community 371 - "Community 371"
-Cohesion: 0.24
-Nodes (9): ApiClient, Created, Dictionary, Guid, Id, IReadOnlyList, Task, Visa2014PersonMiddleNameCleanupResult (+1 more)
-
-### Community 372 - "Community 372"
-Cohesion: 0.13
-Nodes (9): Guid, IList, ProjectContract, Guid, ProjectContractApprovalLegProfile, ProjectContractDocument, ProjectContractImage, Guid (+1 more)
-
-### Community 374 - "Community 374"
-Cohesion: 0.22
-Nodes (7): AuthenticationStandardLogonParameters, Visa2026.Blazor.Server.JWT, SignInManager, HttpPost, IActionResult, IConfiguration, AuthenticationController
-
-### Community 375 - "Community 375"
-Cohesion: 0.22
-Nodes (7): IXafCultureInfoService, CultureInfo, IList, NavigationManager, Task, VisaXafCultureInfoService, XafCultureInfoService
-
-### Community 376 - "Community 376"
-Cohesion: 0.36
-Nodes (6): Ensure-SshFirewallRule(), Get-OpenSshServerCapability(), Install-OpenSshFromWin32Zip(), Repair-OpenSshServerCapability(), Start-SshdService(), Write-Step()
-
-### Community 378 - "Community 378"
-Cohesion: 0.33
-Nodes (5): Fold-Turkmen(), Leg-Suffix(), Map-MinistryShortName(), Normalize-MatchText(), To-LocalizationKey()
-
-### Community 379 - "Community 379"
-Cohesion: 0.28
-Nodes (5): DetailView, PropertyEditor, string, ViewItem, ApplicationDetailViewBorderZoneController
-
-### Community 380 - "Community 380"
-Cohesion: 0.28
-Nodes (4): Action, GridCustomizeElementEventArgs, ListView, ApplicationProgressRowAppearanceController
-
-### Community 381 - "Community 381"
-Cohesion: 0.29
-Nodes (5): CancellationToken, CancellationTokenSource, ListView, Task, GridSearchBoxLocalizationController
-
-### Community 382 - "Community 382"
-Cohesion: 0.22
-Nodes (7): EventCallback, Guid, IReadOnlyList, Type, ApplicationReportPackageModel, WordReportDefinitionScopeHelper, WordReportPackageScope
-
-### Community 383 - "Community 383"
-Cohesion: 0.31
-Nodes (5): Dictionary, Func, IEnumerable, List, CsvParser
-
-### Community 384 - "Community 384"
-Cohesion: 0.28
-Nodes (4): DateTime, Dictionary, string, Visa2014ApplicationProgressSeedHelper
-
-### Community 385 - "Community 385"
-Cohesion: 0.31
-Nodes (5): AsyncLocal, IDisposable, LegCommitRedirectScope, PopScope, PrepareLegsForCommitScope
-
-### Community 386 - "Community 386"
-Cohesion: 0.22
-Nodes (5): Guid, VwRdEducation, Guid, VwRdEducationByCountry, IQueryable
-
-### Community 387 - "Community 387"
-Cohesion: 0.31
-Nodes (3): EventArgs, ObjectChangedEventArgs, ApplicationProgressRowStateRefreshController
-
-### Community 392 - "Community 392"
-Cohesion: 0.31
-Nodes (6): IModelListView, IModelViews, ModelNode, ModelViewsNodesGenerator, string, ApplicationMigrationSlaProfileViewsUpdater
-
-### Community 393 - "Community 393"
-Cohesion: 0.14
-Nodes (10): IList, Stream, Task, IUserReportPlaceholderExtractor, HashSet, IList, OpenXmlElement, Stream (+2 more)
-
-### Community 394 - "Community 394"
-Cohesion: 0.43
-Nodes (4): CookieOptions, HttpResponse, HttpRequest, VisaCultureCookie
-
-### Community 395 - "Community 395"
-Cohesion: 0.15
-Nodes (12): 2026-06-27 — AddressOfResidence OData importer (calik-energi), 2026-06-29 — AddressOfResidence OData importer verified (dry-run + pilot gate), 2026-07-17 — Application.VisaType inferred from ApplicationType (no legacy FK), Discovery / mapping, Entry templates, Excel preview, Import run (failed or partial), Learnings (append-only): visa2014-to-visa2026-import (+4 more)
-
-### Community 396 - "Community 396"
-Cohesion: 0.43
-Nodes (4): ChoiceActionItem, ChoiceActionItemCollection, XafApplication, ApplicationRuntimeLogNavigationHelper
-
-### Community 397 - "Community 397"
-Cohesion: 0.57
-Nodes (3): IConfiguration, IServiceCollection, WebApiServiceExtensions
-
-### Community 398 - "Community 398"
-Cohesion: 0.36
-Nodes (6): Dictionary, Guid, IObjectSpace, IReadOnlyDictionary, IReadOnlyList, Visa2014ApplicationItemLegacyAddressResolver
-
-### Community 399 - "Community 399"
-Cohesion: 0.31
-Nodes (8): Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, List, string, Visa2014WorkPermitItemRawRow, Visa2014WorkPermitItemTransform
-
-### Community 400 - "Community 400"
-Cohesion: 0.39
-Nodes (3): Dictionary, IReadOnlyList, Visa2014PassportPreviewExporter
-
-### Community 401 - "Community 401"
-Cohesion: 0.39
-Nodes (3): Dictionary, IReadOnlyList, Visa2014VisaPreviewExporter
-
-### Community 402 - "Community 402"
-Cohesion: 0.32
-Nodes (4): EventArgs, ListView, string, ApplicationProgressListSortController
-
-### Community 403 - "Community 403"
-Cohesion: 0.32
-Nodes (4): DetailView, EventArgs, ListView, StateChangeLogViewController
-
-### Community 406 - "Community 406"
-Cohesion: 0.46
-Nodes (4): Exception, ILogger, LogLevel, ApplicationRuntimeLogLoggerExtensions
-
-### Community 407 - "Community 407"
-Cohesion: 0.25
-Nodes (6): ApplicationMigrationSlaProfileCatalogRowDto, Fact, List, ApplicationMigrationSlaProfileCatalogFileDto, ApplicationMigrationSlaProfileCatalogLoaderTests, ApplicationMigrationSlaProfileCatalogRowDto
-
-### Community 408 - "Community 408"
-Cohesion: 0.31
-Nodes (4): Guid, IEnumerable, IObjectSpace, ObjectSpaceHelper
-
-### Community 409 - "Community 409"
-Cohesion: 0.29
-Nodes (4): Attribute, ExcludeFromOptionalDetailFieldsAttribute, GlobalLookupCatalogAttribute, SupportsOptionalDetailFieldsAttribute
-
-### Community 410 - "Community 410"
-Cohesion: 0.29
-Nodes (5): ConnectionContext, HubConnectionHandler, IValueManagerStorageContainerInitializer, Task, ProxyHubConnectionHandler
-
-### Community 411 - "Community 411"
-Cohesion: 0.29
-Nodes (4): DeletingEventArgs, DeleteObjectsViewController, ObjectView, DeletionSyncController
-
-### Community 412 - "Community 412"
+### Community 310 - "UserReportPlaceholderCatalogModels.cs"
 Cohesion: 0.19
 Nodes (9): IReadOnlyDictionary, JsonSerializerOptions, string, UserReportPlaceholderAliasMaps, UserReportPlaceholderCatalogLoader, Dictionary, List, UserReportPlaceholderCatalogEntryDto (+1 more)
 
-### Community 413 - "Community 413"
-Cohesion: 0.29
-Nodes (6): Found, LayoutView, NotFound, PageTitle, Router, RouteView
-
-### Community 414 - "Community 414"
-Cohesion: 0.13
-Nodes (12): BlazorPropertyEditorBase, IComplexViewItem, IComponentModel, IObjectSpace, Task, XafApplication, BoStateNotificationInboxPropertyEditor, IComponentModel (+4 more)
-
-### Community 415 - "Community 415"
-Cohesion: 0.29
-Nodes (6): Microsoft.Extensions.Configuration.IConfiguration, route:/, DevExpress.ExpressApp.Blazor.Components, System.Globalization, Visa2026.Blazor.Server.Localization, Visa2026.Module
-
-### Community 417 - "Community 417"
-Cohesion: 0.52
-Nodes (6): Remove-RestrictedSiteEntry(), Set-DwordRegistryValue(), Set-IntranetZoneDomain(), Set-IntranetZoneRange(), Set-ZoneDomain(), Set-ZoneRange()
-
-### Community 418 - "Community 418"
-Cohesion: 0.29
-Nodes (6): Visa2026.Module.Tests, net8.0, Microsoft.NET.Test.Sdk (17.11.1), xunit (2.9.3), xunit.runner.visualstudio (3.1.4), Microsoft.NET.Sdk
-
-### Community 419 - "Community 419"
-Cohesion: 0.24
-Nodes (5): LoggingOffEventArgs, EventArgs, Guid, IObjectSpace, XafApplication
-
-### Community 420 - "Community 420"
+### Community 311 - ".ValidateSinglePlaceholder"
 Cohesion: 0.29
 Nodes (5): IList, ITypesInfo, Task, Type, UserReportValidationService
 
-### Community 421 - "Community 421"
-Cohesion: 0.29
-Nodes (6): INonSecuredObjectSpaceFactory, IReadOnlyList, Task, Visa2014ODataLookupResolver, Visa2014ApplicationVisaTypeCorrection, Visa2014ApplicationVisaTypeCorrectionResult
+### Community 312 - "ApplicationItemPdfController"
+Cohesion: 0.20
+Nodes (7): CustomizePopupWindowParamsEventArgs, PopupWindowShowAction, PopupWindowShowActionExecuteEventArgs, IEnumerable, SimpleAction, SimpleActionExecuteEventArgs, ApplicationItemPdfController
 
-### Community 422 - "Community 422"
-Cohesion: 0.29
-Nodes (4): ObjectChangedEventArgs, ObjectView, string, ExpirationStateRefreshController
+### Community 313 - ".ListRowsNeedingPatchAsync"
+Cohesion: 0.21
+Nodes (9): FamilyId, SponsorContractId, Guid, IReadOnlyList, List, string, Task, Visa2014FamilyMemberProjectContractSync (+1 more)
 
-### Community 423 - "Community 423"
-Cohesion: 0.48
-Nodes (6): string, E2ETestEmployeeCreateValues, E2ETestLoginValues, E2ETestPassportCreateValues, E2ETestPassportFieldCaptions, E2ETestPersonFieldCaptions
-
-### Community 426 - "Community 426"
-Cohesion: 0.33
-Nodes (5): IModelListView, ModelNode, ModelViewsNodesGenerator, string, HeaderDocumentCopiesListViewColumnUpdater
-
-### Community 427 - "Community 427"
-Cohesion: 0.33
-Nodes (5): IModelListView, ModelNode, ModelViewsNodesGenerator, string, PersonDocumentCopiesListViewColumnUpdater
-
-### Community 430 - "Community 430"
-Cohesion: 0.33
-Nodes (5): IModelListView, ModelNode, ModelViewsNodesGenerator, string, ApprovalLegProfileMinistryLegViewsUpdater
-
-### Community 431 - "Community 431"
-Cohesion: 0.33
-Nodes (4): IModelListView, ModelNode, ModelViewsNodesGenerator, PersonNestedListViewsUpdater
-
-### Community 432 - "Community 432"
-Cohesion: 0.48
-Nodes (3): PersonNestedTabCaptionHelper, Fact, PersonNestedTabCaptionHelperTests
-
-### Community 433 - "Community 433"
-Cohesion: 0.33
-Nodes (5): ExcelDataReader.DataSet (3.7.0), net8.0, ClosedXML (0.104.2), ExcelDataReader (3.7.0), Microsoft.NET.Sdk
-
-### Community 434 - "Community 434"
-Cohesion: 0.33
-Nodes (5): Microsoft.Extensions.Configuration (8.0.1), Microsoft.Extensions.Configuration.EnvironmentVariables (8.0.1), Microsoft.Extensions.Configuration.Json (8.0.1), net8.0, Microsoft.NET.Sdk
-
-### Community 437 - "Community 437"
-Cohesion: 0.40
-Nodes (4): DetailView, string, ViewItem, ApplicationItemDetailViewBorderZoneController
-
-### Community 438 - "Community 438"
-Cohesion: 0.26
-Nodes (5): Guid, IEnumerable, string, Task, VisaTypeImporter
-
-### Community 439 - "Community 439"
-Cohesion: 0.47
-Nodes (4): Action, Func, INestedTabCaptionTarget, NestedTabCaptionTarget
-
-### Community 440 - "Community 440"
-Cohesion: 0.25
-Nodes (5): InlineData, Theory, Dictionary, Visa2014ApplicationVisaTypeInference, Visa2014ApplicationVisaTypeInferenceTests
-
-### Community 441 - "Community 441"
-Cohesion: 0.33
-Nodes (5): FormatElapsed, OnParametersSet, ImportReimportRunSummary, RunCompare, Visa2026.Module.Services.ImportHistory
-
-### Community 442 - "Community 442"
+### Community 314 - "DocumentPreviewPopupWindowState"
 Cohesion: 0.18
-Nodes (7): IJSRuntime, Stream, Task, BlazorFileDownloader, Stream, Task, IFileDownloader
+Nodes (5): HorizontalAlignment, VerticalAlignment, string, DocumentPreviewPopupWindowMode, DocumentPreviewPopupWindowState
 
-### Community 443 - "Community 443"
-Cohesion: 0.33
-Nodes (3): ListView, ObjectCreatedEventArgs, ApplicationListViewController
+### Community 315 - ".RunAsync"
+Cohesion: 0.21
+Nodes (9): LegacyEmployeeStatusL, Guid, IReadOnlyList, SqlConnection, string, Task, LegacyEmployeeStatusL, Visa2014PersonVisaFamilyTextImporter (+1 more)
 
-### Community 444 - "Community 444"
-Cohesion: 0.33
-Nodes (3): ListView, ObjectCreatedEventArgs, ApplicationMailMergeTemplatesController
+### Community 316 - ".GetCsv"
+Cohesion: 0.20
+Nodes (9): Produces, SqlDataReader, CancellationToken, HttpGet, IActionResult, IConfiguration, ILogger, Task (+1 more)
 
-### Community 445 - "Community 445"
-Cohesion: 0.33
-Nodes (4): Func, IObjectSpace, Type, LookupCatalogQueryHelper
+### Community 317 - "ApplicationProgressHistoryViewsUpdater"
+Cohesion: 0.30
+Nodes (6): SortingDirection, IModelListView, ModelNode, ModelViewsNodesGenerator, string, ApplicationProgressHistoryViewsUpdater
 
-### Community 450 - "Community 450"
-Cohesion: 0.40
-Nodes (4): IModelListView, ModelNode, ModelViewsNodesGenerator, UserFeedbackViewsUpdater
+### Community 318 - "ApplicationDetailViewDefaultTabController"
+Cohesion: 0.21
+Nodes (6): DetailView, DxFormLayoutTabPagesModel, EventArgs, ItemCreatedEventArgs, string, ApplicationDetailViewDefaultTabController
 
-### Community 451 - "Community 451"
-Cohesion: 0.31
-Nodes (6): Level, MessageKey, IList, IObjectSpace, ApplicationWordReportPackageReadinessEvaluator, ApplicationWordReportPackageReadinessLevel
+### Community 319 - "template-staging-local.js"
+Cohesion: 0.26
+Nodes (6): readExports(), registerExport(), removeExport(), resolveTemplateId(), uploadFile(), writeExports()
 
-### Community 452 - "Community 452"
-Cohesion: 0.29
-Nodes (4): Guid, Task, IdHolder, OrganizationSingletonImporter
+### Community 320 - ".RunAsync"
+Cohesion: 0.23
+Nodes (8): Guid, int, IReadOnlyList, KeyValuePair, List, Task, Visa2014PersonPhotoImporter, Visa2014PersonPhotoImportResult
 
-### Community 453 - "Community 453"
-Cohesion: 0.47
-Nodes (3): Guid, IReadOnlyList, ApplicationWordReportPackageApplicationItemIdsHelper
+### Community 321 - "Visa2014WorkPermitItemPersonDuplicateGuard"
+Cohesion: 0.24
+Nodes (7): CancellationToken, Dictionary, Guid, IReadOnlyDictionary, string, Task, Visa2014WorkPermitItemPersonDuplicateGuard
 
-### Community 454 - "Community 454"
-Cohesion: 0.40
-Nodes (3): DocxTemplate, Stream, DocxTemplateFactory
+### Community 322 - ".TryValidateSlaValues"
+Cohesion: 0.30
+Nodes (4): IObjectSpace, MinistryReviewSlaHelper, Fact, MinistryReviewSlaHelperTests
 
-### Community 457 - "Community 457"
+### Community 323 - "PersonDocumentCopiesController"
+Cohesion: 0.26
+Nodes (5): EventArgs, List, SimpleAction, SimpleActionExecuteEventArgs, PersonDocumentCopiesController
+
+### Community 324 - ".EnsureDefaultRoleSelfWrite"
+Cohesion: 0.21
+Nodes (5): IObjectSpace, PermissionPolicyRole, string, ApplicationUserThemePreferencePermissions, ApplicationUserThemePreferenceSchemaUpdater
+
+### Community 325 - "SoftDeleteColumnsCleanupUpdater"
 Cohesion: 0.27
-Nodes (6): created, skipped, updated, LookupCatalogDefinition, LookupCatalogMatchKey, LookupCatalogSyncMode
+Nodes (3): int, string, SoftDeleteColumnsCleanupUpdater
 
-### Community 466 - "Community 466"
-Cohesion: 0.36
-Nodes (4): Dictionary, IReadOnlyList, string, Visa2014AddressOfResidenceImportGapPreviewExporter
-
-### Community 469 - "Community 469"
-Cohesion: 0.22
-Nodes (7): CancellationToken, DateTime, Guid, SqlConnection, string, Task, Visa2014LegacyAuditIssueDateHelper
-
-### Community 480 - "Community 480"
-Cohesion: 0.40
-Nodes (3): ModelNode, ModelViewsNodesGenerator, ListViewShowFindPanelModelUpdater
-
-### Community 489 - "Community 489"
-Cohesion: 0.50
-Nodes (3): DevExpress.Blazor, DxButton, Microsoft.AspNetCore.Components
-
-### Community 490 - "Community 490"
-Cohesion: 0.67
-Nodes (3): string, ApplicationProgressLocationCodes, ApplicationProgressStateCodes
-
-### Community 492 - "Community 492"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdApplication
-
-### Community 493 - "Community 493"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdVisaAppProgress
-
-### Community 494 - "Community 494"
-Cohesion: 0.22
-Nodes (7): DateTime, Guid, ForeignWorkerMaglumat, ListView, SimpleAction, SimpleActionExecuteEventArgs, ForeignWorkerMaglumatController
-
-### Community 495 - "Community 495"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdVisaByDaysRemaining
-
-### Community 496 - "Community 496"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdVisaByPeriod
-
-### Community 497 - "Community 497"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdVisaByType
-
-### Community 498 - "Community 498"
-Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdVisaState
-
-### Community 499 - "Community 499"
-Cohesion: 0.39
-Nodes (4): Content, FileName, MemoryStream, ApplicationWordReportOfficePreviewPdfConverter
-
-### Community 500 - "Community 500"
-Cohesion: 0.29
-Nodes (6): BackgroundService, CancellationToken, ILogger, Task, TimeSpan, TempFileCleanupService
-
-### Community 502 - "Community 502"
-Cohesion: 0.32
-Nodes (6): Guid, HttpGet, IActionResult, IReadOnlyList, Task, WordReportPackagePreviewController
-
-### Community 504 - "Community 504"
-Cohesion: 0.39
-Nodes (3): Dictionary, IReadOnlyList, Visa2014AddressOfResidencePreviewExporter
-
-### Community 508 - "Community 508"
-Cohesion: 0.39
-Nodes (3): Dictionary, IReadOnlyList, Visa2014EmployeePositionHistoryPreviewExporter
-
-### Community 509 - "Community 509"
+### Community 326 - "IApplicationRuntimeLogResolution"
 Cohesion: 0.25
-Nodes (5): IObjectSpace, ITypeInfo, ITypesInfo, Type, OptionalDetailFieldsSupport
+Nodes (7): CancellationToken, Guid, IReadOnlyList, Task, IApplicationRuntimeLogResolution, Guid, RuntimeLogResolutionUpdate
 
-### Community 525 - "Community 525"
-Cohesion: 0.29
-Nodes (3): HandledEventArgs, int, HeaderDocumentCopiesLinkClickGate
+### Community 327 - "WordUserReportMergeImageExtractor"
+Cohesion: 0.35
+Nodes (7): Dictionary, IEnumerable, IReadOnlyDictionary, IReadOnlyList, List, string, WordUserReportMergeImageExtractor
 
-### Community 564 - "Community 564"
-Cohesion: 0.38
-Nodes (3): EventArgs, ListView, ApprovalLegProfileMinistryLegListSortController
+### Community 328 - ".TryEnqueueApplication"
+Cohesion: 0.21
+Nodes (7): Guid, IObjectSpace, IReadOnlyList, ApplicationWordReportBatchEnqueueResult, IReadOnlyList, IReadOnlySet, ApplicationWordReportPackageSelectionHelper
 
-### Community 700 - "Community 700"
+### Community 329 - "CircuitHandlerProxy"
+Cohesion: 0.35
+Nodes (6): Circuit, CircuitHandler, IScopedCircuitHandler, CancellationToken, Task, CircuitHandlerProxy
+
+### Community 330 - "runtime-error-inbox-common.ps1"
+Cohesion: 0.36
+Nodes (9): Add-RuntimeErrorHookPromptedId(), Get-RuntimeErrorHookPromptedState(), Get-RuntimeErrorHookStatePath(), Get-RuntimeErrorInboxDirectory(), Get-RuntimeErrorInboxDocuments(), Get-RuntimeErrorProjectRoot(), Save-RuntimeErrorHookPromptedState(), Test-RuntimeErrorHookDisabled() (+1 more)
+
+### Community 331 - "ApplicationItemLookupDefaultsController"
+Cohesion: 0.31
+Nodes (5): DetailViewCreatedEventArgs, Action, BaseObject, DetailView, ApplicationItemLookupDefaultsController
+
+### Community 332 - ".TryCreateMergeSlicePdfStream"
+Cohesion: 0.25
+Nodes (5): double, ILogger, IReadOnlyList, Stream, SupportingDocumentsPdfSharpHelper
+
+### Community 333 - "Visa2026.E2E.Tests"
+Cohesion: 0.18
+Nodes (11): coverlet.collector (6.0.3), Selenium.Support (4.4.0), Selenium.WebDriver (4.4.0), Visa2026.E2E.Tests, net8.0, DevExpress.ExpressApp.EasyTest.BlazorAdapter (25.2.6), Microsoft.Data.SqlClient (6.1.2), Microsoft.NET.Test.Sdk (17.11.1) (+3 more)
+
+### Community 334 - "Configure-SqlExpressSaLogin.ps1"
+Cohesion: 0.25
+Nodes (5): Add-SqlStartupArgument(), Invoke-Sql(), Invoke-SqlSingleUserBootstrap(), Remove-SqlStartupArgument(), Restart-SqlInstance()
+
+### Community 335 - ".ApplyStoredCultureAfterLogonAsync"
+Cohesion: 0.25
+Nodes (6): LogonEventArgs, BlazorApplication, HttpContext, Task, XafApplication, UserCultureHelper
+
+### Community 336 - "DeploymentEnvironmentPresenter"
+Cohesion: 0.31
+Nodes (4): DeploymentEnvironmentOptions, IConfiguration, DeploymentEnvironmentBadgeViewModel, DeploymentEnvironmentPresenter
+
+### Community 337 - "ApplicationReportPackageListPropertyEditor"
+Cohesion: 0.25
+Nodes (5): IComponentModel, IObjectSpace, Task, XafApplication, ApplicationReportPackageListPropertyEditor
+
+### Community 338 - "OptionalDetailFieldsTogglePropertyEditor"
+Cohesion: 0.24
+Nodes (5): IComponentModel, IObjectSpace, Task, XafApplication, OptionalDetailFieldsTogglePropertyEditor
+
+### Community 339 - ".RunCommandAsync"
+Cohesion: 0.27
+Nodes (8): ApiClient, Dictionary, Guid, IReadOnlyDictionary, IReadOnlyList, Task, Visa2014ApplicationApprovalLegProfilePatch, Visa2014ApplicationApprovalLegProfilePatchResult
+
+### Community 340 - "HttpApplicationRuntimeLogAdminChecker"
+Cohesion: 0.24
+Nodes (5): IHttpContextAccessor, IServiceScopeFactory, HttpApplicationRuntimeLogAdminChecker, IObjectSpace, ApplicationRuntimeLogAdminHelper
+
+### Community 341 - "ApplicationProgressImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, ApplicationProgressImporter
+
+### Community 342 - ".PullAsync"
+Cohesion: 0.18
+Nodes (9): DateTime, Guid, IReadOnlyList, ApplicationRuntimeLogRemotePullResult, CancellationToken, DateTime, IConfiguration, Task (+1 more)
+
+### Community 343 - "BusinessTripPlanImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, BusinessTripPlanImporter
+
+### Community 344 - "EmployeePositionHistoryImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, EmployeePositionHistoryImporter
+
+### Community 345 - "InvitationImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, InvitationImporter
+
+### Community 346 - "MedicalRecordImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, MedicalRecordImporter
+
+### Community 347 - "RejectionImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, RejectionImporter
+
+### Community 348 - "TravelHistoryImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, TravelHistoryImporter
+
+### Community 349 - "WorkPermitImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, WorkPermitImporter
+
+### Community 350 - "WorkPermitItemImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, WorkPermitItemImporter
+
+### Community 351 - ".CustomizeTypesInfo"
 Cohesion: 0.22
 Nodes (6): ITypesInfo, BoStateRowAppearanceRegistration, ITypesInfo, Type, MailMergeFeatureRegistration, ITypesInfo
 
-### Community 701 - "Community 701"
+### Community 352 - "ApplicationTypeMigrationSlaWarningController"
+Cohesion: 0.20
+Nodes (5): CancelEventArgs, DetailView, ObjectsManipulatingEventArgs, ApplicationMigrationSlaProfileDeleteController, ApplicationTypeMigrationSlaWarningController
+
+### Community 353 - "ApplicationProgressDetailViewController"
+Cohesion: 0.24
+Nodes (4): DetailView, ObjectChangedEventArgs, ApplicationProgressCommitValidationController, ApplicationProgressDetailViewController
+
+### Community 354 - "ApprovalLegProfile"
+Cohesion: 0.13
+Nodes (10): IList, ApprovalLegProfile, CancelEventArgs, DetailView, ApprovalLegProfileMinistryController, Frame, IObjectSpace, NestedFrame (+2 more)
+
+### Community 355 - "WordReportsController"
+Cohesion: 0.24
+Nodes (5): DetailView, EventArgs, SimpleAction, SimpleActionExecuteEventArgs, WordReportsController
+
+### Community 356 - "IUserReportTemplateMaintenanceService"
+Cohesion: 0.38
+Nodes (7): CancellationToken, Guid, Task, IUserReportTemplateMaintenanceService, UserReportTemplateExtractResult, UserReportTemplateExtractValidateResult, UserReportTemplateValidateResult
+
+### Community 357 - "LookupBaseDetailViewModelUpdater"
+Cohesion: 0.29
+Nodes (6): IModelClass, ModelBOModelClassNodesGenerator, ModelNode, string, Type, LookupBaseDetailViewModelUpdater
+
+### Community 358 - "ApplicationUser"
+Cohesion: 0.22
+Nodes (8): ISecurityUserLockout, ISecurityUserWithLoginInfo, PermissionPolicyUser, DateTime, IEnumerable, IList, ISecurityUserLoginInfo, ApplicationUser
+
+### Community 359 - "_Imports.razor"
+Cohesion: 0.20
+Nodes (9): Microsoft.AspNetCore.Components.Authorization, Microsoft.AspNetCore.Components.Forms, Microsoft.AspNetCore.Components.Routing, Microsoft.AspNetCore.Components.Web.Virtualization, Visa2026.Blazor.Server, DevExpress.Blazor, DevExpress.ExpressApp.Blazor.Components, Microsoft.AspNetCore.Components.Web (+1 more)
+
+### Community 360 - ".TryCreateOnObjectSpace"
 Cohesion: 0.31
-Nodes (3): ReportDashboardProjectChip, Count, IReadOnlyDictionary
+Nodes (6): TypeFieldValues, Dictionary, Guid, IObjectSpace, TypeFieldValues, Visa2014AddressOfResidenceImportApplier
 
-### Community 702 - "Community 702"
+### Community 361 - "PdfBatchToastHost.razor"
+Cohesion: 0.20
+Nodes (9): Dismiss, DisposeAsync, LocalizeStatus, OnInitializedAsync, PollLoopAsync, FetchResult, IJSRuntime, NavigationManager (+1 more)
+
+### Community 362 - "GridSearchBoxLocalizationController"
+Cohesion: 0.29
+Nodes (5): CancellationToken, CancellationTokenSource, ListView, Task, GridSearchBoxLocalizationController
+
+### Community 363 - ".OnLinesCommittedAsync"
 Cohesion: 0.33
-Nodes (4): IModelApplication, IModelDetailView, IModelViews, PersonTypedDetailViewConfigurator
+Nodes (4): IReadOnlyList, Task, Guid, IObjectSpace
 
-### Community 703 - "UiScenarioEphemeralUserModelDifferenceStore"
+### Community 364 - ".TryNormalizeCulture"
+Cohesion: 0.31
+Nodes (5): HttpContext, HttpRequest, RequestDelegate, Task, VisaCulturePersistenceMiddleware
+
+### Community 365 - ".EnsureReady"
+Cohesion: 0.22
+Nodes (6): ILogger, IServiceProvider, ApplicationUserThemePreferenceStartupGate, SqlConnection, string, ApplicationUserThemePreferenceSchemaSql
+
+### Community 366 - ".TryCreate"
+Cohesion: 0.24
+Nodes (6): DateTime, UsageLicenseOptions, DateTime, IConfiguration, UsageLicenseBannerViewModel, UsageLicensePresenter
+
+### Community 367 - "ApplicationItemImporter"
+Cohesion: 0.29
+Nodes (5): Guid, IEnumerable, string, Task, ApplicationItemImporter
+
+### Community 368 - "EducationImporter"
+Cohesion: 0.29
+Nodes (5): Guid, IEnumerable, string, Task, EducationImporter
+
+### Community 369 - ".Build"
+Cohesion: 0.20
+Nodes (7): Guid, IObjectSpace, IReadOnlyList, ApplicationProgressLetterCatalogBuilder, DateTime, Guid, ApplicationProgressLetterCatalogEntry
+
+### Community 370 - ".LoadChangedLegacyOidsAsync"
+Cohesion: 0.20
+Nodes (8): CancellationToken, DateTime, Guid, HashSet, IReadOnlyCollection, string, Task, Visa2014LegacyAuditChangeQuery
+
+### Community 371 - ".Rebuild"
+Cohesion: 0.33
+Nodes (5): Dictionary, JsonElement, List, SqliteConnection, Visa2014TurkmenistanGeographyDbBuilder
+
+### Community 372 - "LodgingImporter"
+Cohesion: 0.27
+Nodes (5): Guid, IEnumerable, string, Task, LodgingImporter
+
+### Community 373 - "OrganizationSingletonImporter"
+Cohesion: 0.29
+Nodes (4): Guid, Task, IdHolder, OrganizationSingletonImporter
+
+### Community 374 - "PassportImporter"
+Cohesion: 0.24
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, PassportImporter
+
+### Community 375 - "ProjectContractImporter"
+Cohesion: 0.27
+Nodes (5): Guid, IEnumerable, string, Task, ProjectContractImporter
+
+### Community 376 - "RejectionItemImporter"
+Cohesion: 0.29
+Nodes (5): Guid, IEnumerable, string, Task, RejectionItemImporter
+
+### Community 377 - "VisaImporter"
+Cohesion: 0.24
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, VisaImporter
+
+### Community 378 - ".Export"
+Cohesion: 0.39
+Nodes (3): Dictionary, IReadOnlyList, Visa2014PassportPreviewExporter
+
+### Community 379 - "UserReportTemplateController"
+Cohesion: 0.31
+Nodes (4): DetailView, SimpleAction, SimpleActionExecuteEventArgs, UserReportTemplateController
+
+### Community 382 - "AuthenticationController"
+Cohesion: 0.22
+Nodes (7): AuthenticationStandardLogonParameters, Visa2026.Blazor.Server.JWT, SignInManager, HttpPost, IActionResult, IConfiguration, AuthenticationController
+
+### Community 383 - "VisaXafCultureInfoService"
+Cohesion: 0.22
+Nodes (7): IXafCultureInfoService, CultureInfo, IList, NavigationManager, Task, VisaXafCultureInfoService, XafCultureInfoService
+
+### Community 384 - "Install-WindowsOpenSshServer.ps1"
+Cohesion: 0.36
+Nodes (6): Ensure-SshFirewallRule(), Get-OpenSshServerCapability(), Install-OpenSshFromWin32Zip(), Repair-OpenSshServerCapability(), Start-SshdService(), Write-Step()
+
+### Community 386 - "ProjectContract-CalikEnergi.ps1"
+Cohesion: 0.33
+Nodes (5): Fold-Turkmen(), Leg-Suffix(), Map-MinistryShortName(), Normalize-MatchText(), To-LocalizationKey()
+
+### Community 387 - "ApplicationDetailViewBorderZoneController"
+Cohesion: 0.28
+Nodes (5): DetailView, PropertyEditor, string, ViewItem, ApplicationDetailViewBorderZoneController
+
+### Community 388 - "ApplicationProgressRowAppearanceController"
+Cohesion: 0.28
+Nodes (4): Action, GridCustomizeElementEventArgs, ListView, ApplicationProgressRowAppearanceController
+
+### Community 389 - "ApplicationReportPackageModel"
+Cohesion: 0.22
+Nodes (7): EventCallback, Guid, IReadOnlyList, Type, ApplicationReportPackageModel, WordReportDefinitionScopeHelper, WordReportPackageScope
+
+### Community 390 - "AddressOfResidenceImporter"
+Cohesion: 0.25
+Nodes (6): DateTime, Guid, IEnumerable, string, Task, AddressOfResidenceImporter
+
+### Community 391 - ".Parse"
+Cohesion: 0.31
+Nodes (5): Dictionary, Func, IEnumerable, List, CsvParser
+
+### Community 392 - ".Export"
+Cohesion: 0.36
+Nodes (4): Dictionary, IReadOnlyList, string, Visa2014AddressOfResidenceImportGapPreviewExporter
+
+### Community 393 - "Visa2014ApplicationProgressSeedHelper"
+Cohesion: 0.28
+Nodes (4): DateTime, Dictionary, string, Visa2014ApplicationProgressSeedHelper
+
+### Community 395 - "ApprovalLegProfileMinistryHelper.cs"
+Cohesion: 0.31
+Nodes (5): AsyncLocal, IDisposable, LegCommitRedirectScope, PopScope, PrepareLegsForCommitScope
+
+### Community 396 - ".FilterEducationByApplicationDate"
+Cohesion: 0.22
+Nodes (5): Guid, VwRdEducation, Guid, VwRdEducationByCountry, IQueryable
+
+### Community 397 - "ApplicationProgressRowStateRefreshController"
+Cohesion: 0.31
+Nodes (3): EventArgs, ObjectChangedEventArgs, ApplicationProgressRowStateRefreshController
+
+### Community 398 - "PersonDetailViewVariantController"
+Cohesion: 0.33
+Nodes (4): bool, DetailView, EventArgs, PersonDetailViewVariantController
+
+### Community 400 - "ApplicationTypeSelectionCodeSeed"
+Cohesion: 0.22
+Nodes (5): ApplicationTypeConfigurationUpdater, Dictionary, IReadOnlyDictionary, ApplicationTypeSelectionCodeSeed, ApplicationTypeSelectionCodeUpdater
+
+### Community 404 - "ApplicationMigrationSlaProfileViewsUpdater"
+Cohesion: 0.31
+Nodes (6): IModelListView, IModelViews, ModelNode, ModelViewsNodesGenerator, string, ApplicationMigrationSlaProfileViewsUpdater
+
+### Community 405 - ".ExtractPlaceholdersAsync"
+Cohesion: 0.25
+Nodes (6): HashSet, IList, OpenXmlElement, Stream, Task, UserReportPlaceholderExtractor
+
+### Community 406 - "Visa2026BlazorApplication"
+Cohesion: 0.25
+Nodes (4): BlazorApplication, CustomizeLanguageEventArgs, DatabaseVersionMismatchEventArgs, Visa2026BlazorApplication
+
+### Community 407 - ".SetCulture"
+Cohesion: 0.43
+Nodes (4): CookieOptions, HttpResponse, HttpRequest, VisaCultureCookie
+
+### Community 408 - "ApplicationRuntimeLogNavigationHelper"
+Cohesion: 0.43
+Nodes (4): ChoiceActionItem, ChoiceActionItemCollection, XafApplication, ApplicationRuntimeLogNavigationHelper
+
+### Community 409 - "WebApiServiceExtensions"
+Cohesion: 0.57
+Nodes (3): IConfiguration, IServiceCollection, WebApiServiceExtensions
+
+### Community 410 - ".Export"
+Cohesion: 0.39
+Nodes (3): Dictionary, IReadOnlyList, Visa2014AddressOfResidencePreviewExporter
+
+### Community 412 - ".Export"
+Cohesion: 0.39
+Nodes (3): Dictionary, IReadOnlyList, Visa2014VisaPreviewExporter
+
+### Community 413 - ".MapApplicationData"
+Cohesion: 0.36
+Nodes (4): SimpleActionExecuteEventArgs, Dictionary, ICollection, ILogger
+
+### Community 414 - "ApplicationProgressListSortController"
+Cohesion: 0.32
+Nodes (4): EventArgs, ListView, string, ApplicationProgressListSortController
+
+### Community 415 - "ApprovalLegProfileMinistryLegObjectSpaceHooks"
+Cohesion: 0.47
+Nodes (3): EventArgs, IObjectSpace, ApprovalLegProfileMinistryLegObjectSpaceHooks
+
+### Community 416 - "StateChangeLogViewController"
+Cohesion: 0.32
+Nodes (4): DetailView, EventArgs, ListView, StateChangeLogViewController
+
+### Community 419 - ".ApplyIfNeeded"
+Cohesion: 0.32
+Nodes (4): ObjectSpaceCreatedEventArgs, ConditionalWeakTable, IObjectSpace, MigrationImportAuditTrailObjectSpaceHooks
+
+### Community 420 - ".LogWithCode"
+Cohesion: 0.46
+Nodes (4): Exception, ILogger, LogLevel, ApplicationRuntimeLogLoggerExtensions
+
+### Community 421 - "ApplicationMigrationSlaProfileCatalogLoaderTests.cs"
+Cohesion: 0.25
+Nodes (6): ApplicationMigrationSlaProfileCatalogRowDto, Fact, List, ApplicationMigrationSlaProfileCatalogFileDto, ApplicationMigrationSlaProfileCatalogLoaderTests, ApplicationMigrationSlaProfileCatalogRowDto
+
+### Community 422 - ".WorkflowTerminalFlags_ReflectLatestProgressState"
+Cohesion: 0.29
+Nodes (4): Fact, InlineData, Theory, ApplicationWorkflowTerminalTests
+
+### Community 423 - "Attribute"
+Cohesion: 0.29
+Nodes (4): Attribute, ExcludeFromOptionalDetailFieldsAttribute, GlobalLookupCatalogAttribute, SupportsOptionalDetailFieldsAttribute
+
+### Community 424 - "Visa2014LookupTranslator.cs"
+Cohesion: 0.33
+Nodes (6): CatalogNode, ValueNode, List, CatalogNode, LookupRoot, ValueNode
+
+### Community 425 - "ProxyHubConnectionHandler"
+Cohesion: 0.29
+Nodes (5): ConnectionContext, HubConnectionHandler, IValueManagerStorageContainerInitializer, Task, ProxyHubConnectionHandler
+
+### Community 426 - "DeletionSyncController"
+Cohesion: 0.29
+Nodes (4): DeletingEventArgs, DeleteObjectsViewController, ObjectView, DeletionSyncController
+
+### Community 427 - "App.razor"
+Cohesion: 0.29
+Nodes (6): Found, LayoutView, NotFound, PageTitle, Router, RouteView
+
+### Community 428 - "IComplexViewItem"
+Cohesion: 0.33
+Nodes (5): IComplexViewItem, IComponentModel, IObjectSpace, XafApplication, ImportReimportHistoryPropertyEditor
+
+### Community 429 - "_Host.cshtml"
+Cohesion: 0.29
+Nodes (6): Microsoft.Extensions.Configuration.IConfiguration, route:/, DevExpress.ExpressApp.Blazor.Components, System.Globalization, Visa2026.Blazor.Server.Localization, Visa2026.Module
+
+### Community 431 - "Set-Visa2026TemplateEditOfficeTrust.ps1"
+Cohesion: 0.52
+Nodes (6): Remove-RestrictedSiteEntry(), Set-DwordRegistryValue(), Set-IntranetZoneDomain(), Set-IntranetZoneRange(), Set-ZoneDomain(), Set-ZoneRange()
+
+### Community 432 - "Visa2026.Module.Tests"
+Cohesion: 0.29
+Nodes (6): Visa2026.Module.Tests, net8.0, Microsoft.NET.Test.Sdk (17.11.1), xunit (2.9.3), xunit.runner.visualstudio (3.1.4), Microsoft.NET.Sdk
+
+### Community 433 - "PersonDetailViewBlazorUrlController"
+Cohesion: 0.38
+Nodes (3): DetailView, EventArgs, PersonDetailViewBlazorUrlController
+
+### Community 434 - "PersonListViewBlazorNavigationController"
+Cohesion: 0.29
+Nodes (4): HandledEventArgs, ListView, ListViewProcessCurrentObjectController, PersonListViewBlazorNavigationController
+
+### Community 435 - "ApprovalLegProfileMinistryLegListSortController"
+Cohesion: 0.38
+Nodes (3): EventArgs, ListView, ApprovalLegProfileMinistryLegListSortController
+
+### Community 436 - "ExpirationStateRefreshController"
+Cohesion: 0.29
+Nodes (4): ObjectChangedEventArgs, ObjectView, string, ExpirationStateRefreshController
+
+### Community 437 - "E2ETestDataSeed.cs"
+Cohesion: 0.48
+Nodes (6): string, E2ETestEmployeeCreateValues, E2ETestLoginValues, E2ETestPassportCreateValues, E2ETestPassportFieldCaptions, E2ETestPersonFieldCaptions
+
+### Community 440 - "HeaderDocumentCopiesListViewColumnUpdater"
+Cohesion: 0.33
+Nodes (5): IModelListView, ModelNode, ModelViewsNodesGenerator, string, HeaderDocumentCopiesListViewColumnUpdater
+
+### Community 441 - "PersonDocumentCopiesListViewColumnUpdater"
+Cohesion: 0.33
+Nodes (5): IModelListView, ModelNode, ModelViewsNodesGenerator, string, PersonDocumentCopiesListViewColumnUpdater
+
+### Community 444 - "ApprovalLegProfileMinistryLegViewsUpdater"
+Cohesion: 0.33
+Nodes (5): IModelListView, ModelNode, ModelViewsNodesGenerator, string, ApprovalLegProfileMinistryLegViewsUpdater
+
+### Community 445 - "PersonNestedListViewsUpdater"
+Cohesion: 0.33
+Nodes (4): IModelListView, ModelNode, ModelViewsNodesGenerator, PersonNestedListViewsUpdater
+
+### Community 446 - ".TryGetBaseCaption"
+Cohesion: 0.48
+Nodes (3): PersonNestedTabCaptionHelper, Fact, PersonNestedTabCaptionHelperTests
+
+### Community 447 - "UiScenarioEphemeralUserModelDifferenceStore"
 Cohesion: 0.40
 Nodes (3): ModelApplicationBase, ModelDifferenceStore, UiScenarioEphemeralUserModelDifferenceStore
 
-### Community 704 - ".GetExcludedPersonIds"
+### Community 448 - "ExcelTemplateSpike.csproj"
 Cohesion: 0.33
-Nodes (4): Guid, HashSet, IObjectSpace, ApplicationItemAvailablePeopleFilter
+Nodes (5): ExcelDataReader.DataSet (3.7.0), net8.0, ClosedXML (0.104.2), ExcelDataReader (3.7.0), Microsoft.NET.Sdk
 
-### Community 705 - "WordReportGenerationBatch"
+### Community 449 - "RuntimeLogResolution.csproj"
+Cohesion: 0.33
+Nodes (5): Microsoft.Extensions.Configuration (8.0.1), Microsoft.Extensions.Configuration.EnvironmentVariables (8.0.1), Microsoft.Extensions.Configuration.Json (8.0.1), net8.0, Microsoft.NET.Sdk
+
+### Community 452 - "ApplicationItemDetailViewBorderZoneController"
 Cohesion: 0.40
-Nodes (5): DateTime, FileData, Guid, WordReportGenerationBatch, WordReportGenerationBatchStatus
+Nodes (4): DetailView, string, ViewItem, ApplicationItemDetailViewBorderZoneController
 
-### Community 706 - "ApplicationProgressMinistryLetterFileSchemaSql"
+### Community 455 - "ImportReimportHistoryComponent.razor"
+Cohesion: 0.33
+Nodes (5): FormatElapsed, OnParametersSet, ImportReimportRunSummary, RunCompare, Visa2026.Module.Services.ImportHistory
+
+### Community 456 - ".InvokeAsync"
+Cohesion: 0.47
+Nodes (4): HttpContext, RequestDelegate, Task, MigrationImportContextMiddleware
+
+### Community 457 - "ApplicationListViewController"
+Cohesion: 0.33
+Nodes (3): ListView, ObjectCreatedEventArgs, ApplicationListViewController
+
+### Community 458 - "ApplicationMailMergeTemplatesController"
+Cohesion: 0.33
+Nodes (3): ListView, ObjectCreatedEventArgs, ApplicationMailMergeTemplatesController
+
+### Community 459 - "ApplicationItemCurrentSalarySchemaSql"
 Cohesion: 0.40
-Nodes (3): SqlConnection, string, ApplicationProgressMinistryLetterFileSchemaSql
+Nodes (3): SqlConnection, string, ApplicationItemCurrentSalarySchemaSql
 
-### Community 707 - "ApplicationRuntimeLogViewsUpdater"
+### Community 460 - "ApplicationProgressOrderSchemaSql"
 Cohesion: 0.40
-Nodes (4): IModelListView, ModelNode, ModelViewsNodesGenerator, ApplicationRuntimeLogViewsUpdater
+Nodes (3): SqlConnection, string, ApplicationProgressOrderSchemaSql
 
-### Community 708 - "ProjectContractApprovalLegProfileSchemaSql"
+### Community 461 - ".FirstOrDefault"
+Cohesion: 0.33
+Nodes (4): Func, IObjectSpace, Type, LookupCatalogQueryHelper
+
+### Community 465 - "ProjectContractApprovalLegProfileSchemaSql"
 Cohesion: 0.40
 Nodes (3): SqlConnection, string, ProjectContractApprovalLegProfileSchemaSql
 
-### Community 709 - "PdfFormFillerService"
+### Community 467 - "UserFeedbackViewsUpdater"
 Cohesion: 0.40
-Nodes (4): Dictionary, ILogger, Stream, PdfFormFillerService
+Nodes (4): IModelListView, ModelNode, ModelViewsNodesGenerator, UserFeedbackViewsUpdater
 
-### Community 712 - ".ExtractPlaceholdersAsync"
+### Community 468 - "LocalizedLookupTypes"
+Cohesion: 0.47
+Nodes (4): IReadOnlyList, Lazy, Type, LocalizedLookupTypes
+
+### Community 469 - "TenantLookupTypes"
+Cohesion: 0.47
+Nodes (4): IReadOnlyList, Lazy, Type, TenantLookupTypes
+
+### Community 471 - "PersonLinkedDocumentsSnapshot"
+Cohesion: 0.47
+Nodes (3): Guid, IReadOnlyList, PersonLinkedDocumentsSnapshot
+
+### Community 472 - ".Deserialize"
+Cohesion: 0.47
+Nodes (3): Guid, IReadOnlyList, ApplicationWordReportPackageApplicationItemIdsHelper
+
+### Community 473 - ".Open"
+Cohesion: 0.40
+Nodes (3): DocxTemplate, Stream, DocxTemplateFactory
+
+### Community 477 - ".Resolve"
+Cohesion: 0.40
+Nodes (4): HttpContext, IServiceProvider, IXafCultureInfoService, VisaUiCultureResolver
+
+### Community 479 - "VisaIssuingApplicationTypes"
+Cohesion: 0.40
+Nodes (3): HashSet, string, VisaIssuingApplicationTypes
+
+### Community 480 - ".RefreshMappingsAction_Execute"
+Cohesion: 0.40
+Nodes (3): SimpleActionExecuteEventArgs, PdfFormMappingController, IObjectSpace
+
+### Community 489 - "ApplicationRuntimeLogModelUpdater"
+Cohesion: 0.40
+Nodes (3): ModelNode, NavigationItemNodeGenerator, ApplicationRuntimeLogModelUpdater
+
+### Community 500 - "ListViewShowFindPanelModelUpdater"
+Cohesion: 0.40
+Nodes (3): ModelNode, ModelViewsNodesGenerator, ListViewShowFindPanelModelUpdater
+
+### Community 501 - "ApplicationItemLinkedDocumentsSnapshot"
+Cohesion: 0.50
+Nodes (3): Guid, IReadOnlyList, ApplicationItemLinkedDocumentsSnapshot
+
+### Community 502 - ".ExtractPlaceholdersAsync"
 Cohesion: 0.40
 Nodes (4): IList, Stream, Task, ExcelTemplatePlaceholderExtractor
 
-### Community 714 - "VwRdPositionHistory"
+### Community 511 - "DocumentPreviewPopupWindowButtons.razor"
 Cohesion: 0.50
-Nodes (3): DateTime, Guid, VwRdPositionHistory
+Nodes (3): DevExpress.Blazor, DxButton, Microsoft.AspNetCore.Components
+
+### Community 512 - "ApplicationProgressCatalogCodes.cs"
+Cohesion: 0.67
+Nodes (3): string, ApplicationProgressLocationCodes, ApplicationProgressStateCodes
+
+### Community 514 - "PdfFormMapping"
+Cohesion: 0.67
+Nodes (3): Type, PdfFormMapping, PdfMappingMode
+
+### Community 515 - "VwRdApplication"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdApplication
+
+### Community 516 - "VwRdVisaAppProgress"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdVisaAppProgress
+
+### Community 517 - "VwRdVisaByCategory"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdVisaByCategory
+
+### Community 518 - "VwRdVisaByDaysRemaining"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdVisaByDaysRemaining
+
+### Community 519 - "VwRdVisaByPeriod"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdVisaByPeriod
+
+### Community 520 - "VwRdVisaByType"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdVisaByType
+
+### Community 521 - "VwRdVisaState"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, VwRdVisaState
+
+### Community 523 - "ImportReimportHistoryModelUpdater"
+Cohesion: 0.50
+Nodes (3): ModelNode, NavigationItemNodeGenerator, ImportReimportHistoryModelUpdater
+
+### Community 531 - ".BuildPackagingNotesText"
+Cohesion: 0.50
+Nodes (3): DateTime, Guid, IReadOnlyList
 
 ## Knowledge Gaps
-- **1139 isolated node(s):** `2026-07-17 — Application.VisaType inferred from ApplicationType (no legacy FK)`, `When to append (required)`, `Discovery / mapping`, `Strategy / plan`, `Excel preview` (+1134 more)
+- **1030 isolated node(s):** `dxdocs`, `npx`, `@connorbritain/mssql-mcp-reader`, `SERVER_NAME`, `SQL_PORT` (+1025 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **88 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **108 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Visa2026.Module.BusinessObjects` connect `Community 0` to `Community 1`, `Community 2`, `Community 4`, `Community 11`, `Community 524`, `Community 12`, `Community 14`, `Community 15`, `Community 526`, `Community 527`, `Community 17`, `Community 528`, `Community 19`, `Community 21`, `Community 20`, `Community 23`, `Community 24`, `Community 25`, `Community 28`, `Community 29`, `Community 34`, `Community 38`, `Community 39`, `Community 50`, `Community 63`, `Community 73`, `Community 77`, `Community 79`, `Community 87`, `Community 89`, `Community 93`, `Community 96`, `Community 101`, `Community 113`, `Community 115`, `Community 130`, `Community 134`, `Community 136`, `Community 139`, `Community 156`, `Community 167`, `Community 168`, `Community 169`, `Community 173`, `Community 175`, `Community 180`, `Community 183`, `Community 184`, `.GetExcludedPersonIds`, `WordReportGenerationBatch`, `Community 194`, `Community 196`, `VwRdPositionHistory`, `Community 207`, `Community 215`, `Community 217`, `Community 223`, `Community 231`, `Community 242`, `Community 248`, `Community 271`, `Community 272`, `Community 281`, `Community 282`, `Community 290`, `Community 329`, `Community 341`, `Community 368`, `Community 372`, `Community 385`, `Community 386`, `Community 408`, `Community 409`, `Community 412`, `Community 466`, `Community 490`, `Community 491`, `Community 492`, `Community 493`, `Community 494`, `Community 495`, `Community 496`, `Community 497`, `Community 498`?**
-  _High betweenness centrality (0.318) - this node is a cross-community bridge._
-- **Why does `Visa2026.DataImporter.Legacy.Visa2014` connect `Community 6` to `Community 1`, `Community 3`, `Community 8`, `Community 9`, `Community 11`, `Community 523`, `Community 13`, `Community 18`, `Community 22`, `Community 42`, `Community 43`, `Community 45`, `Community 48`, `Community 49`, `Community 52`, `Community 56`, `Community 62`, `Community 65`, `Community 67`, `Community 71`, `Community 72`, `Community 76`, `Community 82`, `Community 92`, `Community 101`, `Community 103`, `Community 106`, `Community 111`, `Community 112`, `Community 121`, `Community 133`, `Community 139`, `Community 142`, `Community 176`, `Community 191`, `Community 192`, `Community 193`, `Community 200`, `Community 201`, `Community 205`, `Community 206`, `Community 211`, `Community 212`, `Community 213`, `Community 214`, `Community 219`, `Community 229`, `Community 235`, `Community 236`, `Community 244`, `Community 245`, `Community 246`, `Community 248`, `Community 261`, `Community 262`, `Community 263`, `Community 268`, `Community 277`, `Community 278`, `Community 279`, `Community 280`, `Community 300`, `Community 301`, `Community 309`, `Community 311`, `Community 317`, `Community 318`, `Community 350`, `Community 360`, `Community 361`, `Community 362`, `Community 371`, `Community 384`, `Community 398`, `Community 399`, `Community 400`, `Community 401`, `Community 421`, `Community 440`, `Community 458`, `Community 466`, `Community 469`, `Community 504`, `Community 508`?**
-  _High betweenness centrality (0.174) - this node is a cross-community bridge._
-- **Why does `Visa2026.Module.DatabaseUpdate` connect `Community 19` to `Community 0`, `Community 129`, `Community 388`, `Community 389`, `Community 390`, `Community 9`, `Community 14`, `Community 404`, `Community 21`, `Community 23`, `Community 25`, `Community 27`, `Community 159`, `Community 290`, `Community 423`, `Community 424`, `Community 425`, `Community 42`, `Community 169`, `Community 428`, `Community 429`, `Community 186`, `Community 190`, `Community 447`, `Community 702`, `Community 449`, `ApplicationProgressMinistryLetterFileSchemaSql`, `Community 319`, `ProjectContractApprovalLegProfileSchemaSql`, `ApplicationProgressMinistryLetterFileSchemaUpdater`, `ProjectContractMinistryLegsSchemaCleanupUpdater`, `Community 204`, `Community 462`, `Community 463`, `Community 464`, `Community 82`, `Community 467`, `Community 468`, `Community 210`, `Community 470`, `Community 471`, `Community 472`, `Community 473`, `Community 90`, `Community 474`, `Community 475`, `Community 476`, `Community 222`, `Community 477`, `Community 478`, `Community 479`, `Community 354`, `Community 101`, `Community 236`, `Community 501`, `Community 507`, `Community 125`?**
-  _High betweenness centrality (0.085) - this node is a cross-community bridge._
-- **What connects `2026-07-17 — Application.VisaType inferred from ApplicationType (no legacy FK)`, `When to append (required)`, `Discovery / mapping` to the rest of the system?**
-  _1139 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.03235728346456693 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.03939808481532148 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.04588607594936709 - nodes in this community are weakly interconnected._
+- **Why does `Visa2026.Module.BusinessObjects` connect `Visa2026.Module.BusinessObjects` to `ApplicationProgressCatalogCodes.cs`, `OrganizationPassportLineHelper.cs`, `Visa2026EFCoreDbContext`, `PdfFormMapping`, `Visa2014ApplicationProgressTransform`, `VwRdApplication`, `IExpirationLogic`, `VwRdVisaAppProgress`, `VwRdVisaByCategory`, `Visa2026.Module.Services`, `Visa2026.Module.Editors`, `VwRdVisaState`, `VwRdVisaByDaysRemaining`, `Application`, `VwRdVisaByPeriod`, `Visa2026.Module.DatabaseUpdate`, `ReportDashboardQueryService`, `VwRdVisaByType`, `LookupLocalizationDisplay.cs`, `Visa2026.Module.Services.RuntimeLogging`, `ApplicationItem`, `Visa`, `Visa2014ProjectContractMinistryLegPreviewExporter`, `Person`, `ApplicationProgressDefaults.cs`, `BaseObject`, `Visa2026.Module.Services.UserReports`, `ApplicationProgressRouteNavigation.cs`, `ApplicationProgressSlaCodes.cs`, `ApprovalLegProfileMinistryHelper`, `ExpirationAlertBusinessObjectKeys.cs`, `IVisaPreviewSlotService.cs`, `RejectionItem`, `LookupBase`, `ApplicationProgressDeleteController`, `Visa2026.DataImporter.Legacy.Visa2014`, `UserReportTemplate`, `ReportDashboardPersonType`, `ApplicationItemDocumentPackageOptions`, `DocumentBase`, `ApplicationProgressMinistryLetterFileAccess`, `ApplicationType`, `ApplicationProgress`, `AddressOfResidence`, `ApplicationProgressLegCodes`, `MedicalRecord`, `Visa2014AddressOfResidenceSiteDuplicateGuard`, `.GetLatest`, `.Sync`, `Visa2026.Module.Services.HeaderLinkedDocuments`, `Visa2026.Blazor.Server.Controllers`, `.CollectUserTemplateHints`, `ObjectViewController`, `RegistrationListViewController`, `UserReportBoType`, `TemplateOutputFormat`, `UserReportTemplateStagingImportResult`, `Invitation`, `ApprovalLegProfileMinistryLegCatalogSync`, `Visa2026.Module.Tests.BusinessObjects`, `Visa2026.Module.BusinessObjects.Feedback`, `ApplicationMigrationSlaProfileTypeLinkCatalogTests`, `LookupLocalization`, `.Resolve`, `ExpirationAlertRuleSaveController`, `.GetRootObjectSpace`, `Visa2026.Module.Services.StateEvaluation`, `.Resolve`, `.Sync`, `.CountWorkingDaysInclusive`, `List`, `PdfMappingHelper`, `UserReportPlaceholderCatalogModels.cs`, `.TryValidateSlaValues`, `ApprovalLegProfile`, `ApplicationUser`, `.Build`, `ApplicationProgressListLabelHelperTests`, `.Export`, `ApprovalLegProfileMinistryHelper.cs`, `.FilterEducationByApplicationDate`, `.WorkflowTerminalFlags_ReflectLatestProgressState`, `Attribute`, `LocalizedLookupTypes`, `TenantLookupTypes`, `VisaIssuingApplicationTypes`?**
+  _High betweenness centrality (0.275) - this node is a cross-community bridge._
+- **Why does `Visa2026.DataImporter.Legacy.Visa2014` connect `Visa2026.DataImporter.Legacy.Visa2014` to `Visa2014VisaTransform`, `.ImportInferredFromPiaAsync`, `Visa2014ApplicationProgressTransform`, `IVisa2014ImportTarget`, `.RunAsync`, `.RunAsync`, `.Export`, `ApiClient`, `Visa2014ApplicationProgressSeedHelper`, `.ResolveOrCreateActualPositionAsync`, `.Run`, `Visa2014PassportTransform`, `.Query`, `Log`, `Visa2014LookupCatalog`, `Visa2014ApplicationItemCancelledFlagsMapper`, `.ApplyLegacyCancelledFlags`, `Visa2014EducationTransform`, `.RunCommandAsync`, `.RunAsync`, `Visa2014ProjectContractMinistryLegPreviewExporter`, `Visa2014TurkmenistanGeographyStore`, `.Export`, `.RunAsync`, `.Export`, `.ApplyImportObjectSpaceHooks`, `.PrepareImportBatch`, `.Resolve`, `Visa2014ODataLookupResolver.cs`, `Visa2014LegacyInvitationItemCancellationIndex`, `Visa2014LookupTranslator.cs`, `Visa2014PersonImportBatch`, `Visa2014ApplicationItemTransform`, `.RunAsync`, `Visa2014ActualPositionReview`, `.Run`, `.PostAsync`, `.RegisterFromImportRow`, `.RunAsync`, `.PrepareInferenceRows`, `.ListRowsNeedingPatchAsync`, `.ListLegacyCopyRowsAsync`, `.RunAsync`, `.RunAsync`, `.RunAsync`, `.RunAsync`, `Visa2014AddressOfResidenceTransform`, `Visa2014WorkPermitItemPersonDuplicateGuard`, `Visa2014ApplicationItemPersonDuplicateGuard`, `.Load`, `.Resolve`, `Visa2014ApplicationProgressDuplicateGuard`, `.RebuildEntityAsync`, `.RunCommandAsync`, `.RebuildAsync`, `AddressOfResidence`, `.ListLegacyCopyRowsAsync`, `.TryGetPayloadFkId`, `.FromLegacyStatusL`, `.ClearAfterSuccessfulImportAsync`, `Visa2014AddressOfResidenceSiteDuplicateGuard`, `.WriteWorkbook`, `.ListLegacyCopyRowsAsync`, `.ListLegacyVisaRowsAsync`, `.TryCreateOnObjectSpace`, `Visa2014AddressLineNormalizer`, `Community 112`, `Visa2014SalaryAmountNormalizer`, `.RunAsync`, `.LoadChangedLegacyOidsAsync`, `.Rebuild`, `.RunCommandAsync`, `Community 246`, `.PrepareImportBatch`, `.Export`, `.RunAsync`?**
+  _High betweenness centrality (0.175) - this node is a cross-community bridge._
+- **Why does `Visa2026.Module.DatabaseUpdate` connect `Visa2026.Module.DatabaseUpdate` to `Visa2026.Module.BusinessObjects`, `.ImportInferredFromPiaAsync`, `SqlViewsUpdater`, `Visa2026.Module.Services`, `ApplicationNumberingProfileMigrationUpdater`, `LookupBaseNameTmPdfFormMappingUpdater`, `ProjectContractMinistryLegsSchemaCleanupUpdater`, `ApplicationItemMovementFlattenUpdater`, `ApplicationTypeSelectionCodeSeed`, `EmployeeContractSchemaCleanupUpdater`, `OrganizationLegacySchemaCleanupUpdater`, `Visa2026.Module.Services.RuntimeLogging`, `VisaBorderZoneLocationYokDefaultUpdater`, `ApplicationBorderZoneLocationStringUpdater`, `HeaderParentListViewColumns`, `Visa2026.Module.Services.UserReports`, `Visa2026.Module.Tests.BusinessObjects`, `Visa2026.Module.BusinessObjects.Feedback`, `Visa2014PersonImportBatch`, `Visa2026.Module.BusinessObjects.ReportDashboard`, `.Run`, `E2ETestDataSeed.cs`, `EducationGraduationYearStringUpdater`, `EmployeeSalaryAmountStringUpdater`, `PersonIsActiveColumnsCleanupUpdater`, `PersonRoleMigrationUpdater`, `Visa2026.E2E.Tests`, `ModuleUpdater`, `.EnsureDefaultRoleSelfWrite`, `SoftDeleteColumnsCleanupUpdater`, `ApplicationItemCurrentSalarySchemaSql`, `ApplicationProgressOrderSchemaSql`, `PersonCurrentColumnsCleanupUpdater`, `ProjectContractApprovalLegProfileSchemaSql`, `ProjectContractLegacyColumnsCleanupUpdater`, `.EnsureConfigured`, `ReportDashboardPostgresViewsUpdater`, `.ClearAfterSuccessfulImportAsync`, `Visa2014AddressOfResidenceSiteDuplicateGuard`, `AddressOfResidenceStartDateColumnCleanupUpdater`, `ApplicationItemCurrentSalarySchemaUpdater`, `ApplicationItemPurposeOfTravelColumnsCleanupUpdater`, `ApplicationListQueryPerformanceSchemaUpdater`, `ApplicationProgressMinistryLetterFileSchemaUpdater`, `ApplicationProgressOrderSchemaUpdater`, `ApplicationRuntimeLogModelUpdater`, `.Configure`, `Visa2026.Blazor.Server.Controllers`, `InvitationHeaderStatusColumnsCleanupUpdater`, `.EnsureReady`, `MinistryReviewSlaSettingsSchemaUpdater`, `MinistrySchemaCleanupUpdater`, `PassportCurrentVisaColumnCleanupUpdater`, `ProjectContractApprovalLegProfileSchemaUpdater`, `ProjectContractApprovalProfileSchemaCleanupUpdater`, `SubcontractorContactColumnsCleanupUpdater`, `VisaVisibilityToggleColumnsCleanupUpdater`, `WorkPermitApplicationNotRequiredColumnCleanupUpdater`, `WorkPermitItemStatusColumnsCleanupUpdater`, `ModelNodesGeneratorUpdater`, `.IsPostgreSql`?**
+  _High betweenness centrality (0.094) - this node is a cross-community bridge._
+- **What connects `dxdocs`, `npx`, `@connorbritain/mssql-mcp-reader` to the rest of the system?**
+  _1030 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Visa2026.Module.BusinessObjects` be split into smaller, more focused modules?**
+  _Cohesion score 0.03705234159779614 - nodes in this community are weakly interconnected._
+- **Should `CommaSeparatedMultiSelectPropertyEditor` be split into smaller, more focused modules?**
+  _Cohesion score 0.05194805194805195 - nodes in this community are weakly interconnected._
+- **Should `Visa2026EFCoreDbContext` be split into smaller, more focused modules?**
+  _Cohesion score 0.0453781512605042 - nodes in this community are weakly interconnected._

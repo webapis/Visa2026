@@ -3,9 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
-# DevExpress license files — do not commit
+# DevExpress license files â€” do not commit
 DevExpress.Key/
-# Microsoft Core Fonts (.ttf) for Docker — keep local only; see docker/fonts/msttcore/README.txt
+# Microsoft Core Fonts (.ttf) for Docker â€” keep local only; see docker/fonts/msttcore/README.txt
 docker/fonts/msttcore/*.ttf
 docker/fonts/msttcore/*.TTF
 docker/fonts/msttcore/*.ttc
@@ -443,7 +443,7 @@ Visa2026.Module/Resources/Templates/_c/
 Visa2026.Module/Resources/Templates/*.zip
 visa2026-prod.bak.20260525-1713
 
-# VISA2014 → Visa2026 legacy migration (local PII — do not commit)
+# VISA2014 â†’ Visa2026 legacy migration (local PII â€” do not commit)
 Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
 Visa2026.DataImporter/legacy/visa2014/preview-export/*.xlsx
 Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsm
@@ -463,7 +463,7 @@ Visa2026.DataImporter/legacy/visa2014/sync-dashboard.html
 Visa2026.DataImporter/legacy/visa2014/sync-run-status.json
 dist/
 
-# E2E — Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)
+# E2E â€” Selenium Edge driver (install locally; see Visa2026.E2E.Tests/README.md)
 Visa2026.E2E.Tests/.webdrivers/
 
 # EasyTest host launcher logs (under test output bin/; explicit for clarity)
@@ -480,3 +480,4 @@ graphify-out/cost.json
 graphify-out/cache/
 graphify-out/memory/
 graphify-out/reflections/
+graphify-out/20*/

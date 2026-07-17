@@ -37,7 +37,7 @@
   ".cursor/mcp.json": {
     "mtime": 1784291575.0191674,
     "ast_hash": "dcafb6fd7147b1d78178fe2b9fde402c",
-    "semantic_hash": ""
+    "semantic_hash": "dcafb6fd7147b1d78178fe2b9fde402c"
   },
   ".mcp.json": {
     "mtime": 1781014084.8049886,
@@ -850,9 +850,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "Visa2026.Blazor.Server/Visa2026.Blazor.Server.csproj": {
-    "mtime": 1784291620.6374547,
-    "ast_hash": "cef3f6051810625edc0472528542738a",
-    "semantic_hash": ""
+    "mtime": 1784291881.6074674,
+    "ast_hash": "1c39e4d06cc2f11808a95056c57e02ae",
+    "semantic_hash": "1c39e4d06cc2f11808a95056c57e02ae"
   },
   "Visa2026.Blazor.Server/WebApi/WebApiAppExtensions.cs": {
     "mtime": 1777010394.2727938,
@@ -5820,9 +5820,9 @@
     "semantic_hash": "ad2af108c5316c811ccfa3decc29f40f"
   },
   "Visa2026.Module/Visa2026.Module.csproj": {
-    "mtime": 1784291620.6291122,
-    "ast_hash": "1ae04c0a574c2cbb20913173c0b038cb",
-    "semantic_hash": ""
+    "mtime": 1784291881.590282,
+    "ast_hash": "32815631f798dc379d7e1f78d7e97a99",
+    "semantic_hash": "32815631f798dc379d7e1f78d7e97a99"
   },
   "Visa2026.Module/appsettings.json": {
     "mtime": 1783921816.7848058,
@@ -7155,8 +7155,8 @@
     "semantic_hash": ""
   },
   ".cursor/skills/visa2014-to-visa2026-import/learnings.md": {
-    "mtime": 1784291595.8478334,
-    "ast_hash": "d2c8445d630c563b969237499f6fd852",
+    "mtime": 1784291865.9369538,
+    "ast_hash": "0d9e62ad029c157be177ce4c1ba5caed",
     "semantic_hash": ""
   },
   ".cursor/skills/visa2014-to-visa2026-import/reference.md": {
