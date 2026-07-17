@@ -40,6 +40,10 @@ SELECT
         NULLIF(BTRIM(pos."Name"), ''),
         'Unknown'
     )                                                                       AS "PositionLabel",
+    COALESCE(
+        NULLIF(BTRIM(ap."Name"), ''),
+        'Unknown'
+    )                                                                       AS "ActualPositionLabel",
     COALESCE(p."IsArchived", FALSE)                                         AS "IsArchived"
 FROM "EmployeePositionHistories" eph
 INNER JOIN "People" p
@@ -53,4 +57,6 @@ LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sponsor."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
 LEFT JOIN "Positions" pos
     ON pos."ID" = eph."PositionID" AND COALESCE(pos."GCRecord", 0) = 0
+LEFT JOIN "ActualPositions" ap
+    ON ap."ID" = eph."ActualPositionID" AND COALESCE(ap."GCRecord", 0) = 0
 WHERE COALESCE(eph."GCRecord", 0) = 0;

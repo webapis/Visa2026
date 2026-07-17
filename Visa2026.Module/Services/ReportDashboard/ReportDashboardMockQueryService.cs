@@ -28,30 +28,39 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Registration)]  = 89,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.WorkPermit)]    = 71,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Travel)]        = 28,
+        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.AddressOfResidence)] = 84,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.BorderZone)]    = 18,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Passport)]         = 147,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Education)]        = 92,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.PositionHistory)]  = 85,
+        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Subcontractor)]    = 85,
+        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.MedicalRecord)]    = 78,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Application)]   = 28,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.VisaExtension)] = 31,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Invitation)]    = 22,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Registration)]  = 52,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.WorkPermit)]    = 0,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Travel)]        = 14,
+        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.AddressOfResidence)] = 48,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.BorderZone)]    = 0,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Passport)]         = 82,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Education)]        = 40,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.PositionHistory)]  = 0,
+        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Subcontractor)]    = 52,
+        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.MedicalRecord)]    = 45,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Application)]   = 10,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.VisaExtension)] = 12,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Invitation)]    = 8,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Registration)]  = 4,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.WorkPermit)]    = 0,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Travel)]        = 6,
+        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.AddressOfResidence)] = 3,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.BorderZone)]    = 0,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Passport)]         = 12,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Education)]        = 3,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.PositionHistory)]  = 0,
+        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Subcontractor)]    = 8,
+        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.MedicalRecord)]    = 4,
         // All = Employees + Family Members + Temporary Visitors
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Application)]      = 136,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.VisaExtension)]    = 106,
@@ -59,10 +68,13 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Registration)]     = 145,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.WorkPermit)]       = 71,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Travel)]           = 48,
+        [(ReportDashboardPersonType.All, ReportDashboardCategory.AddressOfResidence)] = 135,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.BorderZone)]       = 18,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Passport)]         = 241,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Education)]        = 135,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.PositionHistory)]  = 85,
+        [(ReportDashboardPersonType.All, ReportDashboardCategory.Subcontractor)]    = 145,
+        [(ReportDashboardPersonType.All, ReportDashboardCategory.MedicalRecord)]    = 127,
     };
 
     public ReportDashboardSnapshot LoadSnapshot(
@@ -86,6 +98,28 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         };
     }
 
+    public ReportDashboardSubReportListing ListSubReports(
+        IObjectSpace objectSpace,
+        ReportDashboardPersonType personType,
+        ReportDashboardCategory category,
+        string projectKey,
+        int dateRangeMonths = 6,
+        bool includeCompletedApplicationProcesses = false,
+        bool includeCancelledApplicationProcesses = false)
+    {
+        _ = objectSpace;
+        _ = personType;
+        _ = projectKey;
+        _ = dateRangeMonths;
+        _ = includeCompletedApplicationProcesses;
+        _ = includeCancelledApplicationProcesses;
+        return new ReportDashboardSubReportListing
+        {
+            SubReports = ReportDashboardCatalog.SubReports(category),
+            Counts = new Dictionary<string, int>(StringComparer.Ordinal)
+        };
+    }
+
     public ReportDashboardPanelData LoadPanel(
         IObjectSpace _,
         ReportDashboardPersonType personType,
@@ -97,10 +131,12 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         bool oneLastValidVisaPerPerson = false,
         bool oneLastValidWorkPermitPerPerson = false,
         bool includeCompletedApplicationProcesses = false,
-        bool includeCancelledApplicationProcesses = false)
+        bool includeCancelledApplicationProcesses = false,
+        bool validVisaPersonsOnly = true)
     {
-        // Mock passport data has no archived flag; parameter kept for interface parity.
+        // Include-archived toggle is for WP/Education/etc.
         if (includeArchivedPersons) { /* no-op */ }
+        if (validVisaPersonsOnly) { /* no-op */ }
         // Application completed/cancelled filters are real-view only (Hybrid).
         if (includeCompletedApplicationProcesses || includeCancelledApplicationProcesses) { /* no-op */ }
         var applyOneLastVisa = oneLastValidVisaPerPerson
@@ -111,18 +147,17 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             && ReportDashboardCatalog.SubReportCountsValidWorkPermits(subReport);
         return (category, subReport) switch
         {
-            // Application (header applications — mock until vw_rd_application)
-            (ReportDashboardCategory.Application, "by-type") => Build(personType, category, subReport, ApplicationByType(), projectKey),
-            (ReportDashboardCategory.Application, _)         => Build(personType, category, subReport, ApplicationByProgress(), projectKey),
+            // Application — Application Status (combined state label)
+            (ReportDashboardCategory.Application, _) => Build(
+                personType, category, subReport, ApplicationByStatus(), projectKey,
+                subReportLabel: "Application Status"),
             // Visa (formerly Visa Extension)
-            (ReportDashboardCategory.VisaExtension, "app-progress") => Build(personType, category, subReport, VisaByAppProgress(),  projectKey),
             (ReportDashboardCategory.VisaExtension, "by-category")  => Build(personType, category, subReport, VisaByCategory(),     projectKey, oneLastValidVisaPerPerson: applyOneLastVisa),
             (ReportDashboardCategory.VisaExtension, "by-type")      => Build(personType, category, subReport, VisaByType(),         projectKey, oneLastValidVisaPerPerson: applyOneLastVisa),
             (ReportDashboardCategory.VisaExtension, "by-period")         => Build(personType, category, subReport, VisaByPeriod(),         projectKey, oneLastValidVisaPerPerson: applyOneLastVisa),
             (ReportDashboardCategory.VisaExtension, "by-days-remaining") => Build(personType, category, subReport, VisaByDaysRemaining(), projectKey, oneLastValidVisaPerPerson: applyOneLastVisa),
             (ReportDashboardCategory.VisaExtension, _)                   => Build(personType, category, subReport, VisaByState(),        projectKey, excelConfigured: true),
             // Invitation
-            (ReportDashboardCategory.Invitation, "app-progress") => Build(personType, category, subReport, InvitationByAppProgress(), projectKey),
             (ReportDashboardCategory.Invitation, _)              => Build(personType, category, subReport, InvitationIssued(),        projectKey),
             // Registration
             (ReportDashboardCategory.Registration, "by-region")  => Build(personType, category, subReport, RegistrationByRegion(),   projectKey),
@@ -133,6 +168,12 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             // Travel
             (ReportDashboardCategory.Travel, "by-status")        => Build(personType, category, subReport, TravelByStatus(), projectKey),
             (ReportDashboardCategory.Travel, _)                  => Build(personType, category, subReport, TravelByMonth(),  projectKey),
+            // Address of Residence
+            (ReportDashboardCategory.AddressOfResidence, "by-region") => Build(personType, category, subReport, AddressByRegion(), projectKey),
+            (ReportDashboardCategory.AddressOfResidence, "by-city")   => Build(personType, category, subReport, AddressByCity(), projectKey),
+            (ReportDashboardCategory.AddressOfResidence, "by-address-type") => Build(personType, category, subReport, AddressByAddressType(), projectKey),
+            (ReportDashboardCategory.AddressOfResidence, "by-address") => Build(personType, category, subReport, AddressByAddress(), projectKey),
+            (ReportDashboardCategory.AddressOfResidence, _)           => Build(personType, category, subReport, AddressByValidity(), projectKey),
             // Border Zone
             (ReportDashboardCategory.BorderZone, "by-zone")      => Build(personType, category, subReport, BorderZoneByZone(),     projectKey),
             (ReportDashboardCategory.BorderZone, _)              => Build(personType, category, subReport, BorderZoneByValidity(), projectKey),
@@ -145,8 +186,12 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             (ReportDashboardCategory.Education, "by-specialty") => Build(personType, category, subReport, EducationBySpecialty(), projectKey),
             (ReportDashboardCategory.Education, _)              => Build(personType, category, subReport, EducationByLevel(),     projectKey),
             // Position History (mock until vw_rd_position_history)
-            (ReportDashboardCategory.PositionHistory, "by-position") => Build(personType, category, subReport, PositionHistoryByPosition(), projectKey),
-            (ReportDashboardCategory.PositionHistory, _)             => Build(personType, category, subReport, PositionHistoryByStatus(),   projectKey),
+            (ReportDashboardCategory.PositionHistory, "by-actual-position") => Build(personType, category, subReport, PositionHistoryByActualPosition(), projectKey),
+            (ReportDashboardCategory.PositionHistory, _)             => Build(personType, category, subReport, PositionHistoryByPosition(), projectKey),
+            // Subcontractor (Person.Subcontractor — By Company)
+            (ReportDashboardCategory.Subcontractor, _) => Build(personType, category, subReport, SubcontractorByCompany(), projectKey),
+            // Medical Records
+            (ReportDashboardCategory.MedicalRecord, _) => Build(personType, category, subReport, MedicalRecordByValidity(), projectKey),
             _ => Build(personType, category, subReport, [], projectKey)
         };
     }
@@ -169,53 +214,33 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Serdar Geldiyew",     "Gurlusyk UZT",     "V-2025-0614", "Jun 14, 2026", "Extension Cancelled",    "st-expiring"),
     ];
 
-    /// Application for Visa Extensions: grouped by ApplicationProgress state
     // ===== Application ====================================================
 
-    private static List<ReportDashboardPreviewRow> ApplicationByProgress() =>
+    private static List<ReportDashboardPreviewRow> ApplicationByStatus() =>
     [
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "APP-2026-0101", "Jan 08, 2026", "Being Prepared",     "st-pending"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "APP-2026-0112", "Jan 12, 2026", "1st Review Started", "st-pending"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "APP-2026-0125", "Jan 20, 2026", "1st Review Approved","st-approved"),
-        R("Hans Muller",         "Gaz Stansiasy",    "APP-2026-0138", "Feb 02, 2026", "2nd Review Started", "st-pending"),
-        R("John Smith",          "Seismiki Barlag",  "APP-2026-0150", "Feb 14, 2026", "Process Started",    "st-pending"),
-        R("Alina Makarova",      "Gurlusyk UZT",     "APP-2026-0161", "Feb 28, 2026", "Process Issued",     "st-approved"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0173", "Mar 10, 2026", "Process Rejected",   "st-expiring"),
-        R("Leyli Annagur.",      "Elektrik Stansia", "APP-2026-0184", "Mar 22, 2026", "Being Prepared",     "st-pending"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "APP-2026-0196", "Apr 05, 2026", "1st Review Started", "st-pending"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "APP-2026-0208", "Apr 18, 2026", "2nd Review Approved","st-approved"),
-    ];
-
-    private static List<ReportDashboardPreviewRow> ApplicationByType() =>
-    [
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "APP-2026-0101", "Jan 08, 2026", "Visa Extension",     "st-cat-1"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "APP-2026-0112", "Jan 12, 2026", "Visa Extension",     "st-cat-1"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "APP-2026-0125", "Jan 20, 2026", "Invitation",         "st-cat-2"),
-        R("Hans Muller",         "Gaz Stansiasy",    "APP-2026-0138", "Feb 02, 2026", "Work Permit",        "st-cat-3"),
-        R("John Smith",          "Seismiki Barlag",  "APP-2026-0150", "Feb 14, 2026", "Registration",       "st-cat-4"),
-        R("Alina Makarova",      "Gurlusyk UZT",     "APP-2026-0161", "Feb 28, 2026", "Visa Extension",     "st-cat-1"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0173", "Mar 10, 2026", "Travel",             "st-cat-5"),
-        R("Leyli Annagur.",      "Elektrik Stansia", "APP-2026-0184", "Mar 22, 2026", "Invitation",         "st-cat-2"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "APP-2026-0196", "Apr 05, 2026", "Border Zone",        "st-cat-3"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "APP-2026-0208", "Apr 18, 2026", "Work Permit",        "st-cat-3"),
+        R("Mehmet Yilmaz", "Gurlusyk UZT", "APP-2026-0101", "Jan 08, 2026",
+            "Being Prepared · 1 ministry · Energetika · —", "st-pending"),
+        R("Viktor Petrov", "Gurlusyk UZT", "APP-2026-0112", "Jan 12, 2026",
+            "1st Review Started · 1 ministry · Energetika · On track · 3/10", "st-pending"),
+        R("Kemal Aydin", "Gaz Stansiasy", "APP-2026-0125", "Jan 20, 2026",
+            "1st Review Approved · 1 ministry · — · —", "st-approved"),
+        R("Hans Muller", "Gaz Stansiasy", "APP-2026-0138", "Feb 02, 2026",
+            "2nd Review Started · 2 ministries · Gurluşyk · —", "st-pending"),
+        R("John Smith", "Seismiki Barlag", "APP-2026-0150", "Feb 14, 2026",
+            "Process Started · None · — · On track · 2/7", "st-pending"),
+        R("Alina Makarova", "Gurlusyk UZT", "APP-2026-0161", "Feb 28, 2026",
+            "Process Issued · 1 ministry · Energetika · —", "st-approved"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0173", "Mar 10, 2026",
+            "Process Rejected · None · — · —", "st-expiring"),
+        R("Leyli Annagur.", "Elektrik Stansia", "APP-2026-0184", "Mar 22, 2026",
+            "Being Prepared · 1 ministry · — · —", "st-pending"),
+        R("Oleg Kovalev", "Seismiki Barlag", "APP-2026-0196", "Apr 05, 2026",
+            "1st Review Started · 1 ministry · — · —", "st-pending"),
+        R("Serdar Geldiyew", "Gurlusyk UZT", "APP-2026-0208", "Apr 18, 2026",
+            "2nd Review Approved · 2 ministries · Gurluşyk · —", "st-approved"),
     ];
 
     // ===== Visa ===========================================================
-
-    private static List<ReportDashboardPreviewRow> VisaByAppProgress() =>
-    [
-        // ColumnA = app#, ColumnB = app date, Status = progress state (drives chart buckets)
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "APP-2026-0341", "Jan 15, 2026", "Being Prepared",    "st-pending"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "APP-2026-0358", "Jan 28, 2026", "1st Review Started","st-pending"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "APP-2026-0372", "Feb 03, 2026", "1st Review Approved","st-approved"),
-        R("Hans Muller",         "Gaz Stansiasy",    "APP-2026-0389", "Feb 17, 2026", "2nd Review Started","st-pending"),
-        R("John Smith",          "Seismiki Barlag",  "APP-2026-0401", "Mar 02, 2026", "Being Prepared",    "st-pending"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "APP-2026-0415", "Mar 20, 2026", "Process Started",   "st-pending"),
-        R("Leyli Annagurbanowa", "Elektrik Stansia", "APP-2026-0430", "Apr 05, 2026", "Process Issued",    "st-approved"),
-        R("Alina Makarova",      "Gurlusyk UZT",     "APP-2026-0444", "Apr 18, 2026", "1st Review Started","st-pending"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0451", "May 01, 2026", "Process Rejected",  "st-expiring"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "APP-2026-0463", "May 14, 2026", "2nd Review Approved","st-approved"),
-    ];
 
     /// By Visa Category: Status = VisaCategory only (not Visa State)
     private static List<ReportDashboardPreviewRow> VisaByCategory() =>
@@ -277,7 +302,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Viktor Petrov",       "Gurlusyk UZT",     "V-2025-1031", "Jan 25, 2027", "≥ 6 months", "st-approved"),
     ];
 
-    // ===== Invitation — 2 sub-reports =====================================
+    // ===== Invitation =====================================================
 
     /// Issued Invitations: grouped by remaining validity (exclusive buckets)
     private static List<ReportDashboardPreviewRow> InvitationIssued() =>
@@ -294,22 +319,6 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Alina Makarova",      "Gurlusyk UZT",     "INV-2025-0083", "May 15, 2026", "Expired",           "st-expiring"),
         R("Leyli Annagur.",      "Elektrik Stansia", "INV-2025-0091", "Apr 30, 2026", "Used",              "st-approved"),
         R("Cary Durdyyew",       "Gurlusyk UZT",     "INV-2025-0095", "Mar 20, 2026", "Used",              "st-approved"),
-    ];
-
-    /// Application Progress: invitation applications grouped by progress state
-    private static List<ReportDashboardPreviewRow> InvitationByAppProgress() =>
-    [
-        // ColumnA = app#, ColumnB = app date, Status = progress state (drives chart buckets)
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "APP-2026-0501", "Feb 01, 2026", "Being Prepared",     "st-pending"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "APP-2026-0512", "Feb 10, 2026", "Being Prepared",     "st-pending"),
-        R("John Smith",          "Seismiki Barlag",  "APP-2026-0525", "Feb 20, 2026", "1st Review Started", "st-pending"),
-        R("Hans Muller",         "Gaz Stansiasy",    "APP-2026-0538", "Mar 05, 2026", "1st Review Started", "st-pending"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "APP-2026-0550", "Mar 15, 2026", "1st Review Approved","st-approved"),
-        R("Alina Makarova",      "Gurlusyk UZT",     "APP-2026-0561", "Mar 25, 2026", "2nd Review Started", "st-pending"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0573", "Apr 04, 2026", "Process Started",    "st-pending"),
-        R("Leyli Annagur.",      "Elektrik Stansia", "APP-2026-0584", "Apr 14, 2026", "Process Issued",     "st-approved"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "APP-2026-0596", "Apr 25, 2026", "Process Issued",     "st-approved"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "APP-2026-0608", "May 05, 2026", "Process Rejected",   "st-expiring"),
     ];
 
     // ===== Registration ===================================================
@@ -393,6 +402,60 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Hans Muller",    "Gaz Stansiasy",   "APP-2025-00389", "Aug 17, 2025", "Approved", "st-approved"),
         R("Alina Makarova", "Gurlusyk UZT",    "APP-2025-00401", "Sep 02, 2025", "Approved", "st-approved"),
         R("Cary Durdyyew",  "Gurlusyk UZT",    "APP-2025-00415", "Sep 25, 2025", "Approved", "st-approved"),
+    ];
+
+    // ===== Address of Residence ===========================================
+
+    private static List<ReportDashboardPreviewRow> AddressByValidity() =>
+    [
+        // Private House Validity states: ExpirationNotSet | Valid | Expiring | Expired
+        R("Mehmet Yilmaz",  "Gurlusyk UZT",    "Ashgabat, Berkararlyk", "Dec 31, 2026", "Valid",             "st-approved"),
+        R("Viktor Petrov",  "Gurlusyk UZT",    "Mary, Merkezi",         "",             "ExpirationNotSet",  "st-pending"),
+        R("John Smith",     "Seismiki Barlag", "Balkanabat",            "Apr 02, 2026", "Expiring",          "st-expiring"),
+        R("Hans Muller",    "Gaz Stansiasy",   "Dashoguz",              "Jan 10, 2025", "Expired",           "st-expiring"),
+        R("Alina Makarova", "Gurlusyk UZT",    "Turkmenabat",           "Nov 20, 2026", "Valid",             "st-approved"),
+        R("Cary Durdyyew",  "Gurlusyk UZT",    "Ashgabat, Kopetdag",    "May 01, 2026", "Expiring",          "st-expiring"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AddressByRegion() =>
+    [
+        R("Mehmet Yilmaz",  "Gurlusyk UZT",    "Ashgabat, Berkararlyk", "Dec 31, 2026", "Ashgabat", "st-cat-1"),
+        R("Viktor Petrov",  "Gurlusyk UZT",    "Mary, Merkezi",         "Aug 15, 2026", "Mary",     "st-cat-2"),
+        R("John Smith",     "Seismiki Barlag", "Balkanabat",            "Apr 02, 2026", "Balkan",   "st-cat-3"),
+        R("Hans Muller",    "Gaz Stansiasy",   "Dashoguz",              "Jan 10, 2025", "Dashoguz", "st-cat-4"),
+        R("Alina Makarova", "Gurlusyk UZT",    "Turkmenabat",           "Nov 20, 2026", "Lebap",    "st-cat-5"),
+        R("Cary Durdyyew",  "Gurlusyk UZT",    "Ashgabat, Kopetdag",    "May 01, 2026", "Ashgabat", "st-cat-1"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AddressByCity() =>
+    [
+        R("Mehmet Yilmaz",  "Gurlusyk UZT",    "Ashgabat, Berkararlyk", "Dec 31, 2026", "Ashgabat",   "st-cat-1"),
+        R("Viktor Petrov",  "Gurlusyk UZT",    "Mary, Merkezi",         "Aug 15, 2026", "Mary",       "st-cat-2"),
+        R("John Smith",     "Seismiki Barlag", "Balkanabat",            "Apr 02, 2026", "Balkanabat", "st-cat-3"),
+        R("Hans Muller",    "Gaz Stansiasy",   "Dashoguz",              "Jan 10, 2025", "Dashoguz",   "st-cat-4"),
+        R("Alina Makarova", "Gurlusyk UZT",    "Turkmenabat",           "Nov 20, 2026", "Turkmenabat", "st-cat-5"),
+        R("Cary Durdyyew",  "Gurlusyk UZT",    "Ashgabat, Kopetdag",    "May 01, 2026", "Ashgabat",   "st-cat-1"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AddressByAddressType() =>
+    [
+        R("Mehmet Yilmaz",  "Gurlusyk UZT",    "Ashgabat, Berkararlyk", "Dec 31, 2026", "Lodging",        "st-cat-1"),
+        R("Viktor Petrov",  "Gurlusyk UZT",    "Mary, Merkezi",         "Aug 15, 2026", "Private House",  "st-cat-2"),
+        R("John Smith",     "Seismiki Barlag", "Balkanabat",            "Apr 02, 2026", "Hotel",          "st-cat-3"),
+        R("Hans Muller",    "Gaz Stansiasy",   "Dashoguz",              "Jan 10, 2025", "Hospital",       "st-cat-4"),
+        R("Alina Makarova", "Gurlusyk UZT",    "Turkmenabat",           "Nov 20, 2026", "Other",          "st-cat-5"),
+        R("Cary Durdyyew",  "Gurlusyk UZT",    "Ashgabat, Kopetdag",    "May 01, 2026", "Lodging",        "st-cat-1"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AddressByAddress() =>
+    [
+        // ColumnA = Region · City, Status = Region + City + FullAddress (chart buckets)
+        R("Mehmet Yilmaz",  "Gurlusyk UZT",    "Ashgabat, Ashgabat", "Dec 31, 2026", "Ashgabat, Ashgabat, Berkararlyk etraby, 12", "st-cat-1"),
+        R("Viktor Petrov",  "Gurlusyk UZT",    "Mary, Mary",         "Aug 15, 2026", "Mary, Mary, Merkezi, 5",                     "st-cat-2"),
+        R("John Smith",     "Seismiki Barlag", "Balkan, Balkanabat", "Apr 02, 2026", "Balkan, Balkanabat, hotel Merkez",          "st-cat-3"),
+        R("Hans Muller",    "Gaz Stansiasy",   "Dashoguz, Dashoguz", "Jan 10, 2025", "Dashoguz, Dashoguz, hospital",              "st-cat-4"),
+        R("Alina Makarova", "Gurlusyk UZT",    "Lebap, Turkmenabat", "Nov 20, 2026", "Lebap, Turkmenabat, Lebap, 9",              "st-cat-5"),
+        R("Cary Durdyyew",  "Gurlusyk UZT",    "Ashgabat, Ashgabat", "May 01, 2026", "Ashgabat, Ashgabat, Kopetdag etraby, 3",   "st-cat-1"),
     ];
 
     // ===== Border Zone ====================================================
@@ -508,22 +571,9 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
 
     // ===== Position History ===============================================
 
-    private static List<ReportDashboardPreviewRow> PositionHistoryByStatus() =>
-    [
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "Engineer",           "Jan 12, 2022", "Current", "st-approved"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "Site Supervisor",    "Mar 01, 2021", "Current", "st-approved"),
-        R("John Smith",          "Seismiki Barlag",  "Geophysicist",       "Jun 15, 2023", "Current", "st-approved"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "Electrical Eng.",    "Sep 01, 2020", "Current", "st-approved"),
-        R("Alina Makarova",      "Gurlusyk UZT",     "QA Specialist",      "Feb 10, 2019", "Ended",   "st-pending"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "Technician",         "Apr 20, 2018", "Ended",   "st-pending"),
-        R("Hans Muller",         "Gaz Stansiasy",    "Project Engineer",   "Nov 05, 2022", "Current", "st-approved"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "Field Engineer",     "Jul 22, 2021", "Current", "st-approved"),
-        R("Leyli Annagurbanowa", "Elektrik Stansia", "Accountant",         "Jan 08, 2024", "Current", "st-approved"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "Foreman",            "May 14, 2017", "Ended",   "st-pending"),
-    ];
-
     private static List<ReportDashboardPreviewRow> PositionHistoryByPosition() =>
     [
+        // Status = Position (visa reports)
         R("Mehmet Yilmaz",       "Gurlusyk UZT",     "Engineer",           "Jan 12, 2022", "Engineer",           "st-cat-1"),
         R("Viktor Petrov",       "Gurlusyk UZT",     "Site Supervisor",    "Mar 01, 2021", "Site Supervisor",    "st-cat-2"),
         R("John Smith",          "Seismiki Barlag",  "Geophysicist",       "Jun 15, 2023", "Geophysicist",       "st-cat-3"),
@@ -534,6 +584,53 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Oleg Kovalev",        "Seismiki Barlag",  "Field Engineer",     "Jul 22, 2021", "Field Engineer",     "st-cat-3"),
         R("Leyli Annagurbanowa", "Elektrik Stansia", "Accountant",         "Jan 08, 2024", "Accountant",         "st-cat-4"),
         R("Serdar Geldiyew",     "Gurlusyk UZT",     "Foreman",            "May 14, 2017", "Foreman",            "st-cat-5"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> PositionHistoryByActualPosition() =>
+    [
+        // ColumnA = visa Position, Status = Position (actual / company)
+        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "Engineer",           "Jan 12, 2022", "Senior Field Engineer", "st-cat-1"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "Site Supervisor",    "Mar 01, 2021", "Site Lead",             "st-cat-2"),
+        R("John Smith",          "Seismiki Barlag",  "Geophysicist",       "Jun 15, 2023", "Survey Specialist",     "st-cat-3"),
+        R("Kemal Aydin",         "Gaz Stansiasy",    "Electrical Eng.",    "Sep 01, 2020", "E&I Engineer",          "st-cat-4"),
+        R("Alina Makarova",      "Gurlusyk UZT",     "QA Specialist",      "Feb 10, 2019", "QA Lead",               "st-cat-5"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "Technician",         "Apr 20, 2018", "Plant Technician",      "st-cat-1"),
+        R("Hans Muller",         "Gaz Stansiasy",    "Project Engineer",   "Nov 05, 2022", "Project Engineer",      "st-cat-2"),
+        R("Oleg Kovalev",        "Seismiki Barlag",  "Field Engineer",     "Jul 22, 2021", "Field Engineer",        "st-cat-3"),
+        R("Leyli Annagurbanowa", "Elektrik Stansia", "Accountant",         "Jan 08, 2024", "Payroll Accountant",    "st-cat-4"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "Foreman",            "May 14, 2017", "Crew Foreman",          "st-cat-5"),
+    ];
+
+    // ===== Subcontractor ==================================================
+
+    private static List<ReportDashboardPreviewRow> SubcontractorByCompany() =>
+    [
+        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "Employee",           "Jan 12, 2022", "Calik Enerji",       "st-cat-1"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "Employee",           "Mar 01, 2021", "Calik Enerji",       "st-cat-1"),
+        R("John Smith",          "Seismiki Barlag",  "Employee",           "Jun 15, 2023", "Gap Insaat",         "st-cat-2"),
+        R("Kemal Aydin",         "Gaz Stansiasy",    "Employee",           "Sep 01, 2020", "Polimeks",           "st-cat-3"),
+        R("Alina Makarova",      "Gurlusyk UZT",     "Family Member",      "Feb 10, 2019", "Calik Enerji",       "st-cat-1"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "Employee",           "Apr 20, 2018", "Ronesans",           "st-cat-4"),
+        R("Hans Muller",         "Gaz Stansiasy",    "Employee",           "Nov 05, 2022", "Polimeks",           "st-cat-3"),
+        R("Oleg Kovalev",        "Seismiki Barlag",  "Employee",           "Jul 22, 2021", "Gap Insaat",         "st-cat-2"),
+        R("Leyli Annagurbanowa", "Elektrik Stansia", "Family Member",      "Jan 08, 2024", "Ronesans",           "st-cat-4"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "Employee",           "May 14, 2017", "Unassigned",         "st-cat-5"),
+    ];
+
+    // ===== Medical Records ================================================
+
+    private static List<ReportDashboardPreviewRow> MedicalRecordByValidity() =>
+    [
+        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "MR-2025-1012", "Oct 12, 2026", "Approved",           "st-approved"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "MR-2025-1031", "Mar 15, 2027", "Approved",           "st-approved"),
+        R("John Smith",          "Seismiki Barlag",  "MR-2025-0904", "Jan 04, 2026", "Expiring (<30 days)", "st-expiring"),
+        R("Kemal Aydin",         "Gaz Stansiasy",    "MR-2025-1130", "Nov 30, 2026", "Approved",           "st-approved"),
+        R("Alina Makarova",      "Gurlusyk UZT",     "MR-2025-1018", "Feb 18, 2026", "Expiring Soon",      "st-expiring"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "MR-2024-0801", "Sep 01, 2025", "Expired",            "st-expiring"),
+        R("Hans Muller",         "Gaz Stansiasy",    "MR-2025-0722", "Apr 22, 2026", "Expiring Soon",      "st-expiring"),
+        R("Oleg Kovalev",        "Seismiki Barlag",  "MR-2025-0610", "May 10, 2026", "Approved",           "st-approved"),
+        R("Leyli Annagurbanowa", "Elektrik Stansia", "MR-2025-1201", "Dec 01, 2026", "Approved",           "st-approved"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "MR-2024-0614", "Jun 14, 2025", "Expired",            "st-expiring"),
     ];
 
     // ===== helpers ========================================================
@@ -549,7 +646,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         List<ReportDashboardPreviewRow> allRows,
         string projectKey,
         bool excelConfigured = false,
-        bool oneLastValidVisaPerPerson = false)
+        bool oneLastValidVisaPerPerson = false,
+        string? subReportLabel = null)
     {
         var rows = projectKey == "All"
             ? allRows
@@ -575,8 +673,10 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             .OrderByDescending(b => b.Count)
             .ToList();
 
-        var subLabel = ReportDashboardCatalog.SubReports(category)
-            .FirstOrDefault(s => s.Key == subReport)?.Label ?? subReport;
+        var subLabel = !string.IsNullOrWhiteSpace(subReportLabel)
+            ? subReportLabel!
+            : ReportDashboardCatalog.SubReports(category)
+                .FirstOrDefault(s => s.Key == subReport)?.Label ?? subReport;
 
         return new ReportDashboardPanelData
         {

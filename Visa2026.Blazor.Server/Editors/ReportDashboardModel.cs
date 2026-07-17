@@ -37,7 +37,31 @@ public sealed class ReportDashboardModel : ComponentModelBase
     }
     public int DateRangeMonths
     {
-        get => GetPropertyValue<int>() is > 0 and var m ? m : 6;
+        get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Passport-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentPassport).</summary>
+    public int PassportDateRangeMonths
+    {
+        get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Position History-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentPositionHistory).</summary>
+    public int PositionHistoryDateRangeMonths
+    {
+        get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Address of Residence-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentAddressOfResidence).</summary>
+    public int AddressOfResidenceDateRangeMonths
+    {
+        get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Medical Records-local Last N months (Application.ApplicationDate on ApplicationItem.CurrentMedicalRecord).</summary>
+    public int MedicalRecordDateRangeMonths
+    {
+        get => GetPropertyValue<int>() is > 0 and var m ? m : ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
         set => SetPropertyValue(value);
     }
     public bool ShowAllView
@@ -46,7 +70,7 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     /// <summary>
-    /// Passport / Work Permit: when false (default), exclude Person.IsArchived.
+    /// Work Permit / Education / etc.: when false (default), exclude Person.IsArchived.
     /// </summary>
     public bool IncludeArchivedPersons
     {
@@ -65,6 +89,14 @@ public sealed class ReportDashboardModel : ComponentModelBase
     /// Work Permit: when true, count one last valid work permit per person (latest expiry) on By Days Remaining.
     /// </summary>
     public bool OneLastValidWorkPermitPerPerson
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>
+    /// When true (default), include only persons with at least one valid visa.
+    /// </summary>
+    public bool ValidVisaPersonsOnly
     {
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
@@ -144,6 +176,26 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<EventCallback<int>>();
         set => SetPropertyValue(value);
     }
+    public EventCallback<int> PassportDateRangeChanged
+    {
+        get => GetPropertyValue<EventCallback<int>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<int> PositionHistoryDateRangeChanged
+    {
+        get => GetPropertyValue<EventCallback<int>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<int> AddressOfResidenceDateRangeChanged
+    {
+        get => GetPropertyValue<EventCallback<int>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<int> MedicalRecordDateRangeChanged
+    {
+        get => GetPropertyValue<EventCallback<int>>();
+        set => SetPropertyValue(value);
+    }
     public EventCallback<ReportDashboardPersonType> PersonTypeChanged
     {
         get => GetPropertyValue<EventCallback<ReportDashboardPersonType>>();
@@ -185,6 +237,11 @@ public sealed class ReportDashboardModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
     public EventCallback<bool> OneLastValidWorkPermitPerPersonChanged
+    {
+        get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<bool> ValidVisaPersonsOnlyChanged
     {
         get => GetPropertyValue<EventCallback<bool>>();
         set => SetPropertyValue(value);

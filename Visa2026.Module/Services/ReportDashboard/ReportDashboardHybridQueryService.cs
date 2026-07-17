@@ -13,26 +13,31 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     /// <summary>
     /// Sub-reports that load from SQL views / real EF queries.
     /// Add entries one at a time after verifying each view.
+    /// Application category is always real (Application Status combined label).
     /// </summary>
     private static readonly HashSet<(ReportDashboardCategory Category, string SubReport)> RealSubReports =
     [
-        (ReportDashboardCategory.Application, "by-progress"),
-        (ReportDashboardCategory.Application, "by-type"),
         (ReportDashboardCategory.Passport, "by-validity"),
         (ReportDashboardCategory.Passport, "by-type"),
         (ReportDashboardCategory.Passport, "by-citizenship"),
         (ReportDashboardCategory.WorkPermit, "by-days-remaining"),
-        (ReportDashboardCategory.VisaExtension, "app-progress"),
         (ReportDashboardCategory.VisaExtension, "visa-state"),
         (ReportDashboardCategory.VisaExtension, "by-category"),
         (ReportDashboardCategory.VisaExtension, "by-type"),
         (ReportDashboardCategory.VisaExtension, "by-period"),
         (ReportDashboardCategory.VisaExtension, "by-days-remaining"),
+        (ReportDashboardCategory.AddressOfResidence, "by-validity"),
+        (ReportDashboardCategory.AddressOfResidence, "by-region"),
+        (ReportDashboardCategory.AddressOfResidence, "by-city"),
+        (ReportDashboardCategory.AddressOfResidence, "by-address-type"),
+        (ReportDashboardCategory.AddressOfResidence, "by-address"),
         (ReportDashboardCategory.Education, "by-level"),
         (ReportDashboardCategory.Education, "by-country"),
         (ReportDashboardCategory.Education, "by-specialty"),
-        (ReportDashboardCategory.PositionHistory, "by-status"),
         (ReportDashboardCategory.PositionHistory, "by-position"),
+        (ReportDashboardCategory.PositionHistory, "by-actual-position"),
+        (ReportDashboardCategory.Subcontractor, "by-company"),
+        (ReportDashboardCategory.MedicalRecord, "by-validity"),
     ];
 
     private readonly ReportDashboardQueryService _real;
@@ -64,6 +69,28 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         };
     }
 
+    public ReportDashboardSubReportListing ListSubReports(
+        IObjectSpace objectSpace,
+        ReportDashboardPersonType personType,
+        ReportDashboardCategory category,
+        string projectKey,
+        int dateRangeMonths = 6,
+        bool includeCompletedApplicationProcesses = false,
+        bool includeCancelledApplicationProcesses = false)
+    {
+        // Prefer Real for Application (and any future real-backed listings).
+        if (category == ReportDashboardCategory.Application)
+        {
+            return _real.ListSubReports(
+                objectSpace, personType, category, projectKey, dateRangeMonths,
+                includeCompletedApplicationProcesses, includeCancelledApplicationProcesses);
+        }
+
+        return _mock.ListSubReports(
+            objectSpace, personType, category, projectKey, dateRangeMonths,
+            includeCompletedApplicationProcesses, includeCancelledApplicationProcesses);
+    }
+
     public ReportDashboardPanelData LoadPanel(
         IObjectSpace objectSpace,
         ReportDashboardPersonType personType,
@@ -75,8 +102,18 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool oneLastValidVisaPerPerson = false,
         bool oneLastValidWorkPermitPerPerson = false,
         bool includeCompletedApplicationProcesses = false,
-        bool includeCancelledApplicationProcesses = false)
+        bool includeCancelledApplicationProcesses = false,
+        bool validVisaPersonsOnly = true)
     {
+        if (category == ReportDashboardCategory.Application)
+        {
+            return _real.LoadPanel(
+                objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
+                includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
+                includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
+                validVisaPersonsOnly);
+        }
+
         var key = (category, subReport);
         // Default sub-report key for Passport is "by-validity"
         if (category == ReportDashboardCategory.Passport
@@ -86,22 +123,26 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport) || subReport == "by-validity"))
             key = (category, "by-days-remaining");
         if (category == ReportDashboardCategory.VisaExtension
-            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport) || subReport == "app-progress"))
             key = (category, "visa-state");
-        if (category == ReportDashboardCategory.Application
-            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
-            key = (category, "by-progress");
         if (category == ReportDashboardCategory.Education
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
             key = (category, "by-level");
         if (category == ReportDashboardCategory.PositionHistory
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport) || subReport == "by-status"))
+            key = (category, "by-position");
+        if (category == ReportDashboardCategory.Subcontractor
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
-            key = (category, "by-status");
+            key = (category, "by-company");
+        if (category == ReportDashboardCategory.MedicalRecord
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "by-validity");
 
         IReportDashboardQueryService service = RealSubReports.Contains(key) ? _real : _mock;
         return service.LoadPanel(
             objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
             includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
-            includeCompletedApplicationProcesses, includeCancelledApplicationProcesses);
+            includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
+            validVisaPersonsOnly);
     }
 }

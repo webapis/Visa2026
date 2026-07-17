@@ -1,6 +1,7 @@
 -- Report Dashboard: Passport category.
 -- One row per ApplicationItem that references a CurrentPassport.
--- Date filter (dashboard top-right) applies to Applications.ApplicationDate in the C# loader.
+-- C# loader keeps one last passport per person (latest IssueDate).
+-- Date filter applies to Applications.ApplicationDate in the C# loader.
 CREATE OR ALTER VIEW [dbo].[vw_rd_passport] AS
 SELECT
     ai.ID                                                               AS ID,
@@ -20,6 +21,7 @@ SELECT
     COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameTm,
     p.PersonRole                                                        AS PersonRoleCode,
     COALESCE(pp.PassportNumber, N'')                                    AS PassportNumber,
+    pp.IssueDate                                                        AS IssueDate,
     pp.ExpirationDate                                                   AS ExpirationDate,
     a.ApplicationDate                                                   AS ApplicationDate,
     COALESCE(NULLIF(LTRIM(RTRIM(pt.NameTm)), N''), pt.Name, N'Unknown') AS TypeLabel,

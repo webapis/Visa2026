@@ -48,11 +48,16 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             SubReport         = ReportDashboardCatalog.DefaultSubReport(initialCategory),
             ProjectKey        = "All",
             ChartView         = "pie",
-            DateRangeMonths   = 6,
+            DateRangeMonths   = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            PassportDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            PositionHistoryDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            AddressOfResidenceDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            MedicalRecordDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
             ShowAllView       = true,
             IncludeArchivedPersons = false,
             OneLastValidVisaPerPerson = true,
             OneLastValidWorkPermitPerPerson = true,
+            ValidVisaPersonsOnly = true,
             IncludeCompletedApplicationProcesses = false,
             IncludeCancelledApplicationProcesses = false,
             PersonTypeChanged   = EventCallback.Factory.Create<ReportDashboardPersonType>(this, OnPersonTypeChanged),
@@ -64,6 +69,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             IncludeArchivedPersonsChanged = EventCallback.Factory.Create<bool>(this, OnIncludeArchivedPersonsChanged),
             OneLastValidVisaPerPersonChanged = EventCallback.Factory.Create<bool>(this, OnOneLastValidVisaPerPersonChanged),
             OneLastValidWorkPermitPerPersonChanged = EventCallback.Factory.Create<bool>(this, OnOneLastValidWorkPermitPerPersonChanged),
+            ValidVisaPersonsOnlyChanged = EventCallback.Factory.Create<bool>(this, OnValidVisaPersonsOnlyChanged),
             IncludeCompletedApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCompletedApplicationProcessesChanged),
             IncludeCancelledApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCancelledApplicationProcessesChanged),
             IsLoading               = true,
@@ -71,7 +77,11 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             LoadingProgressPercent  = 0,
             OpenExcelRequested      = EventCallback.Factory.Create(this, OnOpenExcelAsync),
             OpenListViewRequested   = EventCallback.Factory.Create<string?>(this, OnOpenListView),
-            DateRangeChanged        = EventCallback.Factory.Create<int>(this, OnDateRangeChanged)
+            DateRangeChanged        = EventCallback.Factory.Create<int>(this, OnDateRangeChanged),
+            PassportDateRangeChanged = EventCallback.Factory.Create<int>(this, OnPassportDateRangeChanged),
+            PositionHistoryDateRangeChanged = EventCallback.Factory.Create<int>(this, OnPositionHistoryDateRangeChanged),
+            AddressOfResidenceDateRangeChanged = EventCallback.Factory.Create<int>(this, OnAddressOfResidenceDateRangeChanged),
+            MedicalRecordDateRangeChanged = EventCallback.Factory.Create<int>(this, OnMedicalRecordDateRangeChanged)
         };
         model.InitialLoadRequested = EventCallback.Factory.Create(this, () => RefreshAsync(model));
         return model;
@@ -113,9 +123,17 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     private static string DefaultChartViewFor(ReportDashboardCategory category, string subReport) =>
         (category, subReport) switch
         {
+            (ReportDashboardCategory.Application, _) => "bar",
             (ReportDashboardCategory.Passport, "by-citizenship") => "bar",
             (ReportDashboardCategory.Education, "by-country") => "bar",
             (ReportDashboardCategory.Education, "by-specialty") => "bar",
+            (ReportDashboardCategory.PositionHistory, "by-position") => "bar",
+            (ReportDashboardCategory.PositionHistory, "by-actual-position") => "bar",
+            (ReportDashboardCategory.Subcontractor, "by-company") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-region") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-city") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-address-type") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-address") => "bar",
             _ => "pie"
         };
     private void OnChartViewChanged(string chartView)
@@ -128,6 +146,41 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         ComponentModel.DateRangeMonths = months;
         return RefreshAsync(ComponentModel);
     }
+
+    private Task OnPassportDateRangeChanged(int months)
+    {
+        ComponentModel.PassportDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnPositionHistoryDateRangeChanged(int months)
+    {
+        ComponentModel.PositionHistoryDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnAddressOfResidenceDateRangeChanged(int months)
+    {
+        ComponentModel.AddressOfResidenceDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnMedicalRecordDateRangeChanged(int months)
+    {
+        ComponentModel.MedicalRecordDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private static int ResolveDateRangeMonths(ReportDashboardModel model, ReportDashboardCategory category) =>
+        category switch
+        {
+            ReportDashboardCategory.Education => model.DateRangeMonths,
+            ReportDashboardCategory.Passport => model.PassportDateRangeMonths,
+            ReportDashboardCategory.PositionHistory => model.PositionHistoryDateRangeMonths,
+            ReportDashboardCategory.AddressOfResidence => model.AddressOfResidenceDateRangeMonths,
+            ReportDashboardCategory.MedicalRecord => model.MedicalRecordDateRangeMonths,
+            _ => ReportDashboardCatalog.DefaultCategoryDateRangeMonths
+        };
 
     private Task OnShowAllViewChanged(bool showAll)
     {
@@ -150,6 +203,12 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     private Task OnOneLastValidWorkPermitPerPersonChanged(bool oneLast)
     {
         ComponentModel.OneLastValidWorkPermitPerPerson = oneLast;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnValidVisaPersonsOnlyChanged(bool validVisaOnly)
+    {
+        ComponentModel.ValidVisaPersonsOnly = validVisaOnly;
         return RefreshAsync(ComponentModel);
     }
 
@@ -206,11 +265,14 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     var defaultSub = ReportDashboardCatalog.DefaultSubReport(cat);
                     allPanels[cat] = _queryService.LoadPanel(
                         objectSpace, model.PersonType, cat, model.ProjectKey,
-                        model.DateRangeMonths, defaultSub, includeArchivedPersons: false,
+                        ResolveDateRangeMonths(model, cat), defaultSub, includeArchivedPersons: false,
                         oneLastValidVisaPerPerson: false,
                         oneLastValidWorkPermitPerPerson: false,
                         includeCompletedApplicationProcesses: false,
-                        includeCancelledApplicationProcesses: false);
+                        includeCancelledApplicationProcesses: false,
+                        validVisaPersonsOnly: ReportDashboardCatalog.SupportsValidVisaPersonsOnly(cat)
+                            ? model.ValidVisaPersonsOnly
+                            : false);
 
                     // Progressive fill so Overview cards appear as each category finishes.
                     model.AllPanels = new Dictionary<ReportDashboardCategory, ReportDashboardPanelData>(allPanels);
@@ -243,13 +305,14 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                         model.PersonType,
                         model.Category,
                         model.ProjectKey,
-                        model.DateRangeMonths,
+                        ResolveDateRangeMonths(model, model.Category),
                         sub.Key,
                         model.IncludeArchivedPersons,
                         model.OneLastValidVisaPerPerson,
                         model.OneLastValidWorkPermitPerPerson,
                         model.IncludeCompletedApplicationProcesses,
-                        model.IncludeCancelledApplicationProcesses);
+                        model.IncludeCancelledApplicationProcesses,
+                        model.ValidVisaPersonsOnly);
                     counts[sub.Key] = panel.TotalCount;
                     if (string.Equals(sub.Key, model.SubReport, StringComparison.Ordinal)
                         || (activePanel == null && subReports.Count == 1))
@@ -269,11 +332,12 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     {
                         activePanel = _queryService.LoadPanel(
                             objectSpace, model.PersonType, model.Category, model.ProjectKey,
-                            model.DateRangeMonths, fallbackKey, model.IncludeArchivedPersons,
+                            ResolveDateRangeMonths(model, model.Category), fallbackKey, model.IncludeArchivedPersons,
                             model.OneLastValidVisaPerPerson,
                             model.OneLastValidWorkPermitPerPerson,
                             model.IncludeCompletedApplicationProcesses,
-                            model.IncludeCancelledApplicationProcesses);
+                            model.IncludeCancelledApplicationProcesses,
+                            model.ValidVisaPersonsOnly);
                         counts[fallbackKey] = activePanel.TotalCount;
                     }
                 }
@@ -343,9 +407,10 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         var category   = ComponentModel.Category;
         var type       = ReportDashboardCatalog.ListViewType(category);
         var listViewId = ReportDashboardCatalog.ListViewId(category);
+        var includeArchived = ComponentModel.IncludeArchivedPersons;
         var criteria   = ReportDashboardCatalog.BuildListCriteria(
             ComponentModel.PersonType, category, ComponentModel.ProjectKey, statusLabel,
-            ComponentModel.IncludeArchivedPersons);
+            includeArchived);
 
         var objectSpace      = _application.CreateObjectSpace(type);
         var collectionSource = _application.CreateCollectionSource(objectSpace, type, listViewId);

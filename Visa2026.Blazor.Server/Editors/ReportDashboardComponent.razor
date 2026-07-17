@@ -26,20 +26,7 @@
                     </button>
                 }
             </div>
-            <div class="rd-period-select">
-                <span class="rd-period-label">Last</span>
-                <select class="rd-period-picker" disabled="@ShowLoading" @onchange="OnPeriodChange">
-                    <option value="6"  selected="@(DateRangeMonths == 6)">6 months</option>
-                    <option value="7"  selected="@(DateRangeMonths == 7)">7 months</option>
-                    <option value="8"  selected="@(DateRangeMonths == 8)">8 months</option>
-                    <option value="9"  selected="@(DateRangeMonths == 9)">9 months</option>
-                    <option value="10" selected="@(DateRangeMonths == 10)">10 months</option>
-                    <option value="11" selected="@(DateRangeMonths == 11)">11 months</option>
-                    <option value="12" selected="@(DateRangeMonths == 12)">1 year</option>
-                    <option value="24" selected="@(DateRangeMonths == 24)">2 years</option>
-                    <option value="36" selected="@(DateRangeMonths == 36)">3 years</option>
-                </select>
-            </div>
+            @* Last-N months moved to Education (and Overview Education filter) — not global. *@
         </div>
 
         <div class="rd-tabs-underline" role="tablist">
@@ -99,6 +86,63 @@
                 }
                 @if (ShowAllView)
                 {
+                    <div class="rd-overview-toolbar">
+                        <div class="rd-period-select"
+                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Education: ApplicationItem.CurrentEducation with Application.ApplicationDate in range")">
+                            <span class="rd-period-label">Education · Last</span>
+                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
+                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.Education, e)">
+                                @foreach (var m in PeriodMonthOptions)
+                                {
+                                    <option value="@m" selected="@(DateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="rd-period-select"
+                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked (aligns with Visa By Category)" : "Passport: ApplicationItem.CurrentPassport with Application.ApplicationDate in range")">
+                            <span class="rd-period-label">Passport · Last</span>
+                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
+                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.Passport, e)">
+                                @foreach (var m in PeriodMonthOptions)
+                                {
+                                    <option value="@m" selected="@(PassportDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="rd-period-select"
+                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Position History: ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range")">
+                            <span class="rd-period-label">Position · Last</span>
+                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
+                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.PositionHistory, e)">
+                                @foreach (var m in PeriodMonthOptions)
+                                {
+                                    <option value="@m" selected="@(PositionHistoryDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="rd-period-select"
+                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Address of Residence: ApplicationItem.CurrentAddressOfResidence with Application.ApplicationDate in range")">
+                            <span class="rd-period-label">Address · Last</span>
+                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
+                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.AddressOfResidence, e)">
+                                @foreach (var m in PeriodMonthOptions)
+                                {
+                                    <option value="@m" selected="@(AddressOfResidenceDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="rd-period-select"
+                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Medical Records: ApplicationItem.CurrentMedicalRecord with Application.ApplicationDate in range")">
+                            <span class="rd-period-label">Medical · Last</span>
+                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
+                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.MedicalRecord, e)">
+                                @foreach (var m in PeriodMonthOptions)
+                                {
+                                    <option value="@m" selected="@(MedicalRecordDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
                     <div class="rd-overview-grid">
                         @foreach (var category in ReportDashboardCatalog.Categories)
                         {
@@ -196,6 +240,23 @@
                                 }
                             </div>
                             <div class="rd-sub-tab-filters">
+                                @if (ReportDashboardCatalog.SupportsCategoryDateRange(Category))
+                                {
+                                    <div class="rd-period-select"
+                                         title="@(ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly
+                                             ? "Ignored while Valid visa only is checked"
+                                             : CategoryDateRangeTitle(Category))">
+                                        <span class="rd-period-label">Last</span>
+                                        <select class="rd-period-picker"
+                                                disabled="@(ShowLoading || (ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly))"
+                                                @onchange="e => OnCategoryPeriodChange(Category, e)">
+                                            @foreach (var m in PeriodMonthOptions)
+                                            {
+                                                <option value="@m" selected="@(ActiveCategoryDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                }
                                 @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
                                 {
                                     <label class="rd-panel-filter"
@@ -234,6 +295,16 @@
                                                checked="@OneLastValidWorkPermitPerPerson"
                                                @onchange="OnOneLastValidWorkPermitChanged" />
                                         <span>One last valid work permit per person</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Include only persons with at least one valid visa (not cancelled, expiry on or after today)">
+                                        <input type="checkbox"
+                                               checked="@ValidVisaPersonsOnly"
+                                               @onchange="OnValidVisaPersonsOnlyChanged" />
+                                        <span>Valid visa only</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
@@ -251,11 +322,30 @@
                     else if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category)
                           || ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category)
                           || ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category)
+                          || ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category)
                           || ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category)
-                          || ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
+                          || ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category)
+                          || ReportDashboardCatalog.SupportsCategoryDateRange(Category))
                     {
                         <div class="rd-sub-tabs-row">
                             <div class="rd-sub-tab-filters">
+                                @if (ReportDashboardCatalog.SupportsCategoryDateRange(Category))
+                                {
+                                    <div class="rd-period-select"
+                                         title="@(ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly
+                                             ? "Ignored while Valid visa only is checked"
+                                             : CategoryDateRangeTitle(Category))">
+                                        <span class="rd-period-label">Last</span>
+                                        <select class="rd-period-picker"
+                                                disabled="@(ShowLoading || (ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly))"
+                                                @onchange="e => OnCategoryPeriodChange(Category, e)">
+                                            @foreach (var m in PeriodMonthOptions)
+                                            {
+                                                <option value="@m" selected="@(ActiveCategoryDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                }
                                 @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
                                 {
                                     <label class="rd-panel-filter"
@@ -294,6 +384,16 @@
                                                checked="@OneLastValidWorkPermitPerPerson"
                                                @onchange="OnOneLastValidWorkPermitChanged" />
                                         <span>One last valid work permit per person</span>
+                                    </label>
+                                }
+                                @if (ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category))
+                                {
+                                    <label class="rd-panel-filter"
+                                           title="Include only persons with at least one valid visa (not cancelled, expiry on or after today)">
+                                        <input type="checkbox"
+                                               checked="@ValidVisaPersonsOnly"
+                                               @onchange="OnValidVisaPersonsOnlyChanged" />
+                                        <span>Valid visa only</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
@@ -367,8 +467,9 @@
                                 {
                                     var width = maxCount > 0 ? (100.0 * bucket.Count / maxCount) : 0;
                                     <button type="button" class="rd-bar-row" @onclick="() => OnListView(bucket.Label)">
-                                        <span class="rd-bar-row-label">
-                                            <span class="rd-legend-dot @bucket.CssClass"></span>@bucket.Label
+                                        <span class="rd-bar-row-label" title="@bucket.Label">
+                                            <span class="rd-legend-dot @bucket.CssClass"></span>
+                                            <span class="rd-bar-row-label-text">@bucket.Label</span>
                                         </span>
                                         <span class="rd-bar-row-track">
                                             <span class="rd-bar-row-fill @bucket.CssClass"
@@ -428,7 +529,11 @@
     [Parameter] public string                    SubReport       { get; set; } = "default";
     [Parameter] public string                    ProjectKey      { get; set; } = "All";
     [Parameter] public string                    ChartView       { get; set; } = "pie";
-    [Parameter] public int                       DateRangeMonths { get; set; } = 6;
+    [Parameter] public int                       DateRangeMonths { get; set; } = ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+    [Parameter] public int                       PassportDateRangeMonths { get; set; } = ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+    [Parameter] public int                       PositionHistoryDateRangeMonths { get; set; } = ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+    [Parameter] public int                       AddressOfResidenceDateRangeMonths { get; set; } = ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
+    [Parameter] public int                       MedicalRecordDateRangeMonths { get; set; } = ReportDashboardCatalog.DefaultCategoryDateRangeMonths;
     [Parameter] public bool                      ShowAllView     { get; set; } = true;
     [Parameter] public bool                      IsLoading       { get; set; }
     [Parameter] public int                       LoadingProgressPercent { get; set; }
@@ -438,6 +543,7 @@
     [Parameter] public bool                      OneLastValidWorkPermitPerPerson { get; set; }
     [Parameter] public bool                      IncludeCompletedApplicationProcesses { get; set; }
     [Parameter] public bool                      IncludeCancelledApplicationProcesses { get; set; }
+    [Parameter] public bool                      ValidVisaPersonsOnly { get; set; } = true;
 
     [Parameter] public EventCallback<ReportDashboardPersonType> PersonTypeChanged   { get; set; }
     [Parameter] public EventCallback<ReportDashboardCategory>   CategoryChanged     { get; set; }
@@ -450,10 +556,15 @@
     [Parameter] public EventCallback<bool>                      OneLastValidWorkPermitPerPersonChanged { get; set; }
     [Parameter] public EventCallback<bool>                      IncludeCompletedApplicationProcessesChanged { get; set; }
     [Parameter] public EventCallback<bool>                      IncludeCancelledApplicationProcessesChanged { get; set; }
+    [Parameter] public EventCallback<bool>                      ValidVisaPersonsOnlyChanged { get; set; }
     [Parameter] public EventCallback                            InitialLoadRequested { get; set; }
     [Parameter] public EventCallback                            OpenExcelRequested  { get; set; }
     [Parameter] public EventCallback<string?>                   OpenListViewRequested { get; set; }
     [Parameter] public EventCallback<int>                       DateRangeChanged    { get; set; }
+    [Parameter] public EventCallback<int>                       PassportDateRangeChanged { get; set; }
+    [Parameter] public EventCallback<int>                       PositionHistoryDateRangeChanged { get; set; }
+    [Parameter] public EventCallback<int>                       AddressOfResidenceDateRangeChanged { get; set; }
+    [Parameter] public EventCallback<int>                       MedicalRecordDateRangeChanged { get; set; }
 
     private bool _projectsExpanded;
     private bool _initialLoadStarted;
@@ -697,6 +808,17 @@
         await OneLastValidWorkPermitPerPersonChanged.InvokeAsync(oneLast);
     }
 
+    private async Task OnValidVisaPersonsOnlyChanged(ChangeEventArgs e)
+    {
+        var validOnly = e.Value switch
+        {
+            bool b => b,
+            string s when bool.TryParse(s, out var parsed) => parsed,
+            _ => true
+        };
+        await ValidVisaPersonsOnlyChanged.InvokeAsync(validOnly);
+    }
+
     private async Task OnIncludeCompletedApplicationChanged(ChangeEventArgs e)
     {
         var include = e.Value switch
@@ -719,9 +841,53 @@
         await IncludeCancelledApplicationProcessesChanged.InvokeAsync(include);
     }
 
-    private async Task OnPeriodChange(ChangeEventArgs e)
+    private static readonly int[] PeriodMonthOptions = [6, 7, 8, 9, 10, 11, 12, 24, 36];
+
+    private int ActiveCategoryDateRangeMonths => Category switch
     {
-        if (int.TryParse(e.Value?.ToString(), out var months) && months > 0)
+        ReportDashboardCategory.Passport => PassportDateRangeMonths,
+        ReportDashboardCategory.PositionHistory => PositionHistoryDateRangeMonths,
+        ReportDashboardCategory.AddressOfResidence => AddressOfResidenceDateRangeMonths,
+        ReportDashboardCategory.MedicalRecord => MedicalRecordDateRangeMonths,
+        _ => DateRangeMonths
+    };
+
+    private static string CategoryDateRangeTitle(ReportDashboardCategory category) => category switch
+    {
+        ReportDashboardCategory.Passport =>
+            "Passport: ApplicationItem.CurrentPassport with Application.ApplicationDate in range",
+        ReportDashboardCategory.PositionHistory =>
+            "Position History: ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range",
+        ReportDashboardCategory.AddressOfResidence =>
+            "Address of Residence: ApplicationItem.CurrentAddressOfResidence with Application.ApplicationDate in range",
+        ReportDashboardCategory.MedicalRecord =>
+            "Medical Records: ApplicationItem.CurrentMedicalRecord with Application.ApplicationDate in range",
+        _ =>
+            "Education: ApplicationItem.CurrentEducation with Application.ApplicationDate in range"
+    };
+
+    private static string PeriodMonthLabel(int months) => months switch
+    {
+        12 => "1 year",
+        24 => "2 years",
+        36 => "3 years",
+        _ => $"{months} months"
+    };
+
+    private async Task OnCategoryPeriodChange(ReportDashboardCategory category, ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var months) || months <= 0)
+            return;
+
+        if (category == ReportDashboardCategory.Passport)
+            await PassportDateRangeChanged.InvokeAsync(months);
+        else if (category == ReportDashboardCategory.PositionHistory)
+            await PositionHistoryDateRangeChanged.InvokeAsync(months);
+        else if (category == ReportDashboardCategory.AddressOfResidence)
+            await AddressOfResidenceDateRangeChanged.InvokeAsync(months);
+        else if (category == ReportDashboardCategory.MedicalRecord)
+            await MedicalRecordDateRangeChanged.InvokeAsync(months);
+        else
             await DateRangeChanged.InvokeAsync(months);
     }
 }

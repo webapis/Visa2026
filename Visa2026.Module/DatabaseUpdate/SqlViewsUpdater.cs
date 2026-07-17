@@ -553,6 +553,7 @@ SELECT
     COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameTm,
     p.PersonRole                                                        AS PersonRoleCode,
     COALESCE(pp.PassportNumber, N'')                                    AS PassportNumber,
+    pp.IssueDate                                                        AS IssueDate,
     pp.ExpirationDate                                                   AS ExpirationDate,
     a.ApplicationDate                                                   AS ApplicationDate,
     COALESCE(NULLIF(LTRIM(RTRIM(pt.NameTm)), N''), pt.Name, N'Unknown') AS TypeLabel,
@@ -1392,6 +1393,10 @@ SELECT
         NULLIF(LTRIM(RTRIM(pos.Name)), N''),
         N'Unknown'
     )                                                                   AS PositionLabel,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(ap.Name)), N''),
+        N'Unknown'
+    )                                                                   AS ActualPositionLabel,
     CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
 FROM EmployeePositionHistories eph
 INNER JOIN People p
@@ -1405,6 +1410,8 @@ LEFT JOIN ProjectContracts spc
     ON spc.ID = sponsor.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
 LEFT JOIN Positions pos
     ON pos.ID = eph.PositionID AND ISNULL(pos.GCRecord, 0) = 0
+LEFT JOIN ActualPositions ap
+    ON ap.ID = eph.ActualPositionID AND ISNULL(ap.GCRecord, 0) = 0
 WHERE ISNULL(eph.GCRecord, 0) = 0;
 ", true);
         }

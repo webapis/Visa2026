@@ -1,6 +1,7 @@
 -- Report Dashboard: Passport (PostgreSQL).
 -- One row per ApplicationItem that references a CurrentPassport.
--- Date filter (dashboard top-right) applies to Applications.ApplicationDate in the C# loader.
+-- C# loader keeps one last passport per person (latest IssueDate).
+-- Date filter applies to Applications.ApplicationDate in the C# loader.
 -- Soft-delete: COALESCE("GCRecord", 0) = 0. IsArchived is exposed for app-side toggle.
 DROP VIEW IF EXISTS vw_rd_passport;
 CREATE VIEW vw_rd_passport AS
@@ -22,6 +23,7 @@ SELECT
     COALESCE(pc."NameTm", spc."NameTm", '')                                 AS "ProjectNameTm",
     p."PersonRole"                                                          AS "PersonRoleCode",
     COALESCE(pp."PassportNumber", '')                                       AS "PassportNumber",
+    pp."IssueDate"                                                          AS "IssueDate",
     pp."ExpirationDate"                                                     AS "ExpirationDate",
     a."ApplicationDate"                                                     AS "ApplicationDate",
     COALESCE(NULLIF(BTRIM(pt."NameTm"), ''), pt."Name", 'Unknown')          AS "TypeLabel",

@@ -9,6 +9,18 @@ public interface IReportDashboardQueryService
         int dateRangeMonths = 6,
         ReportDashboardPersonType personType = ReportDashboardPersonType.All);
 
+    /// <summary>
+    /// Sub-report tabs for a category (static catalog; counts empty unless a future category fills them).
+    /// </summary>
+    ReportDashboardSubReportListing ListSubReports(
+        IObjectSpace objectSpace,
+        ReportDashboardPersonType personType,
+        ReportDashboardCategory category,
+        string projectKey,
+        int dateRangeMonths = 6,
+        bool includeCompletedApplicationProcesses = false,
+        bool includeCancelledApplicationProcesses = false);
+
     ReportDashboardPanelData LoadPanel(
         IObjectSpace objectSpace,
         ReportDashboardPersonType personType,
@@ -20,5 +32,6 @@ public interface IReportDashboardQueryService
         bool oneLastValidVisaPerPerson = false,
         bool oneLastValidWorkPermitPerPerson = false,
         bool includeCompletedApplicationProcesses = false,
-        bool includeCancelledApplicationProcesses = false);
+        bool includeCancelledApplicationProcesses = false,
+        bool validVisaPersonsOnly = true);
 }

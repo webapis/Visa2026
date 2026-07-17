@@ -6,7 +6,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Report Dashboard Position History row from vw_rd_position_history.
-/// One EmployeePositionHistory per row (by-status / by-position).
+/// One EmployeePositionHistory per row (by-status / visa Position / actual Position).
 /// </summary>
 [Browsable(false)]
 public class VwRdPositionHistory
@@ -24,5 +24,7 @@ public class VwRdPositionHistory
     public virtual string StatusLabel { get; set; }
     public virtual string StatusCssClass { get; set; }
     public virtual string PositionLabel { get; set; }
+    /// <summary>EmployeePositionHistory.ActualPosition.Name (company title).</summary>
+    public virtual string ActualPositionLabel { get; set; }
     public virtual bool IsArchived { get; set; }
 }

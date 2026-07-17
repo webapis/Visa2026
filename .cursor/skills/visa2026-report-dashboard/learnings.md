@@ -4,6 +4,15 @@ Date format: `YYYY-MM-DD`
 
 ---
 
+## 2026-07-17 — Application Status: default Bar Chart + equal label/bar width
+
+**Change:** `DefaultChartViewFor(Application, _)` → `bar` (was pie). Bar row grid `140px 1fr 34px` → `1fr 1fr 48px` so label and bar track share width equally; label text `nowrap` + ellipsis with `title` for overflow.
+
+**Why:** Application Status combined labels (state · location · depth · profile) were wrapping in a 140px column and hard to scan.
+
+**Files:** `ReportDashboardPropertyEditor.cs`, `report-dashboard.css`, `ReportDashboardComponent.razor`.
+
+---
 ## 2026-07-14 — Initial dashboard implementation
 
 **What was built:**
@@ -257,7 +266,8 @@ Date format: `YYYY-MM-DD`
 
 **Ask:** Sidebar category counts (Visa 106, Invitation 75, …) are confusing vs panel TOTAL RECORDS / sub-report totals.
 
-**Change:** ReportDashboardComponent.razor — vertical d-cat-tab shows label only (no count badge). Removed unused .rd-cat-tab-count CSS.
+**Change:** ReportDashboardComponent.razor — vertical 
+d-cat-tab shows label only (no count badge). Removed unused .rd-cat-tab-count CSS.
 
 **Note:** Overview card counts and person-type tab counts (Employees (2851)) kept. Phase 4 w_rd_snapshot_counts for sidebar totals is not needed unless Overview/person-type still want a dedicated count view later.
 
@@ -414,3 +424,213 @@ Date format: `YYYY-MM-DD`
 **Cause:** Overlay used align-items:center over a tall rd-report-area (chart + table), so the panel sat in the vertical middle - often below the viewport. User only saw the white dim layer.
 
 **Fix:** Pin overlay content to the top (flex-start + top padding); paint overlay immediately in the component before parent refresh; Task.Delay(16) before heavy DB work; clear stale Panel on category/sub-report change.
+
+## 2026-07-16 — Education local Last-N months (ApplicationItem.CurrentEducation)
+
+**Ask:** Move global Last-N filter into Education only; filter Education sub-reports + Overview Education card.
+
+**Rule:** Include Education only if used as ApplicationItem.CurrentEducation and Application.ApplicationDate is within Last N months (default **9**). Educations never linked in-range are excluded (no unused bucket).
+
+**UI:** Removed top-right global period picker. Period control on Education sub-tab filters and Overview toolbar (Education-scoped label).
+
+**Wire:** LoadEducation / by-country / legacy filter via ApplicationItems Any(... ApplicationDate >= cutoff). SupportsCategoryDateRange(Education).
+
+## 2026-07-16 — Passport local Last-N months (separate from Education)
+
+**Ask:** Passport category also gets its own Last N months control.
+
+**Change:** PassportDateRangeMonths (default 9) independent of Education DateRangeMonths. SupportsCategoryDateRange includes Passport. Overview toolbar shows Education + Passport pickers. ResolveDateRangeMonths routes LoadPanel cutoff per category (Passport already filtered by Application.ApplicationDate on CurrentPassport rows).
+
+## 2026-07-16 — Position History local Last-N months
+
+**Ask:** Position History gets its own Last N months (like Education/Passport).
+
+**Rule:** Include EmployeePositionHistory only when used as ApplicationItem.CurrentPositionHistory and Application.ApplicationDate is within range (default 9).
+
+**UI:** PositionHistoryDateRangeMonths; Overview toolbar Position · Last; category Last control via SupportsCategoryDateRange.
+
+## 2026-07-16 — Address of Residence category (below Travel)
+
+**Ask:** Add AddressOfResidence vertical category tab below Travel.
+
+**Shipped:** Category after Travel; sub-reports By Validity + By Region; own Last N months (default 9) via ApplicationItem.CurrentAddressOfResidence + Application.ApplicationDate; Include archived; By Region default bar chart. Real Hybrid loaders; mock counts/rows for Overview until snapshot promotion.
+
+## 2026-07-17 — AddressOfResidence FullAddress lazy-load crash (AsNoTracking)
+
+**Symptom:** InvalidOperationException — navigation AddressOfResidence.Lodging cannot be loaded because FK/shadow props and entity is not tracked. Stack: LoadAddressOfResidence → a.FullAddress → Lodging getter.
+
+**Cause:** Dashboard query uses AsNoTracking; FullAddress touches Lodging/Hotel/Hospital/OtherSite via lazy proxies. Shadow FKs only load when tracked.
+
+**Fix:** Eager .Include Lodging, Hotel, Hospital, OtherSite (plus Person/Region) in LoadAddressOfResidence; wrap FullAddress access in try/catch as belt-and-suspenders.
+
+## 2026-07-17 — Address of Residence By City
+
+**Ask:** Add a By City sub-report alongside By Validity and By Region.
+
+**Change:** Group the same date-filtered AddressOfResidence records by the City lookup, show City in the preview status column, and use the categorical bar chart. City is eagerly included because the real loader uses AsNoTracking.
+
+## 2026-07-17 — Valid visa only filter (multi-category)
+
+**Ask:** Checkbox to include only persons with a valid visa, alongside Last N months; default checked.
+
+**Scope:** Registration, Work Permit, Travel, Border Zone, Passport, Education, Position History, Address of Residence.
+
+**Rule:** When checked, filter to Person IDs with at least one Visa where !IsCancelled and ExpirationDate >= today (same as Visa dashboard valid visa). Unchecked = no visa-person filter.
+
+**UI:** Valid visa only checkbox in category filter row; ValidVisaPersonsOnly default true on model.
+## 2026-07-17 — Passport Last-N must AND with Valid visa only
+
+**Ask:** Filtering = Last N months AND Valid visa only (when checked). Passport/Education totals need not match (different row types).
+
+**Bug:** Passport allowed ApplicationDate IS NULL through the date filter (
+ull || >= cutoff), so Last N was not strict.
+
+**Fix:** Passport view + legacy require ApplicationDate != null && >= cutoff, then AND Valid visa person IDs when checkbox is on. Education already used ApplicationDate >= cutoff + Valid visa AND.
+## 2026-07-17 — Passport: one last passport per person (IssueDate)
+
+**Ask:** Passport sub-reports should include only each person's last passport; last = latest IssueDate.
+
+**Change:** Added IssueDate to vw_rd_passport (SS + PG + updaters + VwRdPassport). LoadPassportFromView / Legacy filter Last N + Valid visa, then TakeOneLastPassportPerPerson (IssueDate DESC, PassportOid DESC) — same ranking as PersonCurrentItems.GetCurrentPassport. Totals/charts/preview use the deduped set (one row per person).
+
+**Deploy note:** Restart app (or FORCE_XAF_DB_UPDATE) so SqlViewsUpdater recreates the view with IssueDate; otherwise UndefinedColumn falls back to legacy path which also dedupes.
+## 2026-07-17 — Passport Valid visa only ignores Last N months
+
+**Ask:** When Valid visa only is checked on Passport, total must match Visa By Category (one last valid visa per person); Last N months must be ignored.
+
+**Change:** Passport branches: Valid visa only → load Passports for valid-visa person IDs (no ApplicationDate cutoff), one last passport per person by IssueDate. Unchecked → existing Last-N ApplicationItem path. UI disables Passport Last picker while Valid visa only is on.
+## 2026-07-17 — Address Valid visa only ignores Last N months
+
+**Ask:** Apply Passport filtering pattern to Address of Residence.
+
+**Change:** When Valid visa only is checked, Address of Residence ignores Last N months / ApplicationItem.CurrentAddressOfResidence usage and loads addresses for valid-visa person IDs, then keeps one current address per person using PersonCurrentItems.GetCurrentAddressOfResidence ranking (valid current address preferred; latest expiration then ID). The Address Last picker is disabled while Valid visa only is on. Unchecked still uses the Last-N ApplicationItem.CurrentAddressOfResidence path.
+## 2026-07-17 — Position History Valid visa only ignores Last N months
+
+**Ask:** Apply Passport / Address filtering pattern to Position History.
+
+**Change:** When Valid visa only is checked, Position History ignores Last N months / ApplicationItem.CurrentPositionHistory usage and loads vw_rd_position_history for valid-visa person IDs, then keeps one current position per person (prefer StatusLabel != Ended, then latest StartDate, then ID — same ranking as PersonCurrentItems.GetCurrentPositionHistory). Position Last picker disabled while Valid visa only is on. Unchecked still uses Last-N ApplicationItem path.
+## 2026-07-17 — Education Valid visa only ignores Last N months
+
+**Ask:** Apply Passport / Position History filtering pattern to Education so Valid visa only can align closer to Visa By Category person set.
+
+**Change:** When Valid visa only is checked, Education ignores Last N months / ApplicationItem.CurrentEducation usage and loads vw_rd_education (and by-country view / legacy) for valid-visa person IDs, then keeps one current education per person (latest GraduationYear then ID — same ranking as PersonCurrentItems.GetCurrentEducation). Education Last picker disabled while Valid visa only is on. Unchecked still uses Last-N ApplicationItem path. Totals may still be below Visa By Category when some valid-visa people have no education row.
+## 2026-07-17 — Subcontractor vertical category
+
+**Ask:** Add Subcontractor tab to Report Dashboard vertical tabs below Position History.
+
+**Change:**
+- Enum: `Subcontractor` after `PositionHistory`
+- Catalog: label Subcontractor; sub-report `by-company` (By Company); ListView `Person_ListView`; Valid visa only + Include archived; no Last-N (master data on Person)
+- Mock Overview counts + preview rows
+- Real `LoadSubcontractor` groups `Person` by `Subcontractor.NameTm` (Unassigned when null); Hybrid promotes `(Subcontractor, by-company)`; default chart bar
+
+**Note:** Sidebar category counts still mock via Hybrid snapshot until `vw_rd_snapshot_counts`.
+## 2026-07-17 — Medical Records vertical category
+
+**Ask:** Add Medical Records tab below Subcontractor on Report Dashboard vertical tabs.
+
+**Change:**
+- Enum: `MedicalRecord` after `Subcontractor`; label Medical Records
+- Sub-report `by-validity`; ListView `MedicalRecord_ListView`
+- Last-N via `ApplicationItem.CurrentMedicalRecord` + `Application.ApplicationDate` (Medical · Last toolbar); ignored when Valid visa only
+- Valid visa only + Include archived; one current medical per person (latest IssueDate then ID)
+- Real `LoadMedicalRecord` + Hybrid promote `(MedicalRecord, by-validity)`
+## 2026-07-17 — Passport Archived sub-report (replace Include archived)
+
+**Ask:** Refactor Passport category — dedicated Archived sub-report; remove Include archived checkbox for Passport.
+
+**Archived means (any of):**
+1. `Person.IsArchived`
+2. Passport is not the person's last (latest `IssueDate`, tie-break ID — same as `GetCurrentPassport`)
+3. Passport is last and `ExpirationDate <= today - 1 month`
+
+**Active** (By Validity / Type / Citizenship): last passport only; person not archived; not expired for a full month. Recently expired (<1 month) stay in By Validity as Expired.
+
+**Archived chart buckets (reason priority):** Person archived → Superseded → Expired (>1 month).
+
+**Wire:** Catalog sub-report `archived`; remove Passport from `SupportsIncludeArchivedPersons` (WP/Education/etc. keep checkbox); `LoadPassportArchived`; Hybrid promotes `(Passport, archived)`; Open ListView includes archived persons when on Archived tab.
+
+**Person scope for Archived:** same as active (Valid visa only IDs, or persons with ApplicationItem.CurrentPassport in Last N months).
+## 2026-07-17 — Address of Residence: Address Type + By Address sub-reports
+
+**Ask:** Add Address Type and By Address tabs next to By Validity / By Region / By City.
+
+**Change:**
+- Catalog keys `by-address-type` (Address Type), `by-address` (By Address); table headers; Hybrid promotes both
+- Real `LoadAddressOfResidence`: group by `ResidenceType` (Lodging / Hotel / Private House / Hospital / Other / Unknown) or `FullAddress` (Unknown when blank); By Address preview ColumnA = City
+- Default chart bar for both; mock preview rows added
+
+## 2026-07-17 — By Address includes Region + City + FullAddress
+
+**Ask:** By Address chart/labels should include FullAddress, Region, and City (not FullAddress alone).
+
+**Change:** Group/chart by `AddressOfResidence.DisplayAddress` (Region, City, FullAddress). Preview ColumnA = Region · City; Status = full display string.
+## 2026-07-17 — Address By Validity = Private House only
+
+**Ask:** By Validity is related only to Private House address type.
+
+**Change:** `LoadAddressOfResidence` by-validity path filters `Type == ResidenceType.PrivateHouse` before expiry buckets. Other Address sub-reports (Region/City/Address Type/By Address) still include all types. Fixes Pending-heavy pie when Lodging rows have no ExpirationDate.
+## 2026-07-17 — Rename Address By Validity → Private House Validity
+
+**Ask:** Rename tab to represent Private House validity.
+
+**Change:** Catalog key `private-house-validity`, label **Private House Validity** (was by-validity / By Validity). Hybrid promote updated. Query path unchanged (still Private House filter on non-categorical address sub-reports).
+## 2026-07-17 — Address sub-tab label: By Private House Validity
+
+**Ask:** Rename the "By Validity" sub-report tab (not the category).
+
+**Change:** Keep key `by-validity`; Label = **By Private House Validity**. Reverted `private-house-validity` key rename.
+## 2026-07-17 — Private House Validity states
+
+**Ask:** By Private House Validity states: empty ExpirationDate → ExpirationNotSet; with date → Valid / Expiring / Expired.
+
+**Change:** `PrivateHouseValidityBucket` + CSS; Expiring window from `ExpirationAlertRule` for AddressOfResidence (fallback 30 days, same as Document expiration alerts). No longer uses generic ExpirationBucket (Pending/Approved/Expiring Soon).
+## 2026-07-17 — Remove Passport Archived sub-report
+
+**Ask:** Remove Archived sub-report from Passport; not needed right now.
+
+**Change:** Dropped catalog tab `archived`, Hybrid promote, mock rows, `LoadPassportArchived` path, and Open ListView archived special-case. Passport keeps By Validity / Type / Citizenship only (still excludes Person.IsArchived).
+## 2026-07-17 — Position History: visa vs actual Position tabs
+
+**Ask:** Rename By Position → Position (visa reports); add Position (actual / company) from EmployeePositionHistory.Position vs ActualPosition.
+
+**Change:**
+- Catalog: `by-position` label **Position (visa reports)**; new `by-actual-position` **Position (actual / company)**
+- `vw_rd_position_history` (+ SS/PG updaters): `ActualPositionLabel` from ActualPositions.Name
+- Load groups by PositionLabel vs ActualPositionLabel; preview ColumnA = visa PositionName
+- Hybrid promote + bar default for both
+## 2026-07-17 — Remove Position History By Status
+
+**Ask:** Do not need By Status sub-report for Position History.
+
+**Change:** Dropped catalog/Hybrid/mock By Status; default is Position (visa reports). Legacy `by-status` key remaps to `by-position`.
+## 2026-07-17 — Remove Invitation Application Progress sub-report
+
+**Ask:** Remove Application Progress sub-report from Invitation category.
+
+**Change:** Catalog keeps only `issued-inv` (Issued Invitations); dropped mock `InvitationByAppProgress` and table-header arm. Visa category `app-progress` unchanged.
+## 2026-07-17 — Remove Visa Application Progress sub-report
+
+**Ask:** Remove Application Progress from Visa category sub-reports.
+
+**Change:** Dropped catalog `app-progress`, Hybrid promote, mock `VisaByAppProgress`. Legacy `app-progress` key remaps to Visa State. Application category By Progress unchanged.
+## 2026-07-17 — Application: ApplicationType tabs + combined State label
+
+**Ask:** Refactor Application category — tabs = ApplicationTypes in current filters; chart State = combined `State · Ministry depth · Approval leg · Migration SLA`; remove By Progress / By Type; tab order by count desc; hide zero-count types; table keeps App # / App Date with Status = combined label.
+
+**Change:**
+- Catalog: static Application entry is overview chip only (`all`); detail tabs from `ListSubReports` (`type:{guid:N}`)
+- `IReportDashboardQueryService.ListSubReports` + PropertyEditor `DynamicSubReports`; Hybrid always uses Real for Application
+- `LoadApplication` EF path with `FormatApplicationCombinedStateLabel` (CurrentState, FormatMinistryReviewDepthLabel, ApprovalLegProfile name, MigrationSlaStatement)
+- Table headers: Name / Project / App # / App Date / State
+- Empty types hidden; re-sort on filter change via ListSubReports
+
+**Watch-outs:** Combined labels need Application BO display helpers (not vw_rd_application alone). Overview Application card still loads `all` (all types under filters).
+## 2026-07-17 — Application: single Application Status sub-report
+
+**Ask:** Remove ApplicationType sub-report tabs; add Application Status where chart status is the combined label State · Ministry depth · Approval leg · Migration SLA.
+
+**Change:**
+- Catalog: only `app-status` / Application Status (no type tabs)
+- Dropped dynamic `ListSubReports` ApplicationType listing and UI `DynamicSubReports`
+- `LoadApplication` always groups by combined state label; remaps legacy by-progress/by-type/all/type:* → app-status
+- Single sub-report → no detail sub-tabs row (Count == 1)

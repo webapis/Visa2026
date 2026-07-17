@@ -20,10 +20,13 @@ public enum ReportDashboardCategory
     Registration,
     WorkPermit,
     Travel,
+    AddressOfResidence,
     BorderZone,
     Passport,
     Education,
-    PositionHistory
+    PositionHistory,
+    Subcontractor,
+    MedicalRecord
 }
 
 /// <summary>A named report variant within a category (e.g. "By Type", "By Citizenship").</summary>
@@ -31,6 +34,17 @@ public sealed class ReportDashboardSubReport
 {
     public string Key   { get; init; } = "default";
     public string Label { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Sub-report tabs with optional counts (used when a category needs dynamic tab listing).
+/// </summary>
+public sealed class ReportDashboardSubReportListing
+{
+    public IReadOnlyList<ReportDashboardSubReport> SubReports { get; init; } =
+        Array.Empty<ReportDashboardSubReport>();
+    public IReadOnlyDictionary<string, int> Counts { get; init; } =
+        new Dictionary<string, int>(StringComparer.Ordinal);
 }
 
 public sealed class ReportDashboardProjectChip
