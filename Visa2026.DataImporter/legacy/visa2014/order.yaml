@@ -12,6 +12,10 @@
 #   - Lookup review gate: personWaveComplete in lookup-comparisons/lookup-review-queue.yaml before Person importConfirmed.
 #   - Application importConfirmed requires applicationWaveComplete in the same queue.
 #   - If a dependency is blocked, downstream BOs stay not_started unless waived in mapping.notes.
+#   - IMPORT CHAIN GATE: never start the next entities[] row until the previous import wave
+#     succeeds (process exit 0 AND FailedCount = 0). Children depend on parent id-maps /
+#     rows from earlier BOs. Omitting a parent BO (e.g. importing ApplicationItem without
+#     WorkPermitItem / InvitationItem) is a chain bug — fix the orchestrator step list.
 #
 # When adding a BO: insert at the correct dependency position (not at the end unless it is a leaf).
 
@@ -33,6 +37,7 @@ tenantCatalogGeneration:
     - calik-energi-onprem-staging
     - calik-energi-onprem-prod
     - calik-energi-onprem-demo
+    - calik-energi-local-pg
   steps:
     - id: project-contract-calik-energi
       script: scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1
@@ -372,3 +377,10 @@ postImportCorrections:
       notes: |
         Greenfield: CurrentEducation/CurrentSalary resolve at ApplicationItem OData import when Show* gates pass.
         This correction backfills null FKs on DBs imported before that wiring shipped.
+    - id: visa-type
+      cliFlag: --correct-visa-type
+      dependsOn:
+        - Visa
+      notes: |
+        Greenfield (after 2026-07-15): MapLookupDto copies LocalizationKey so Visa import resolves BS1/FM/OF/EX.
+        This correction rematches Visa.VisaType from legacy TypeOfVisaL:mgCode on DBs imported when LocalizationKey was missing (all WP).

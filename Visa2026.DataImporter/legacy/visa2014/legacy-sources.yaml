@@ -89,6 +89,17 @@ sources:
       - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
     idMapDir: id-maps/calik-energi-onprem-demo
 
+
+  - id: calik-energi-local-pg
+    label: Calik Enerji — local PostgreSQL (dev PC)
+    companyProfile: Calyk Enerji Sanayi we Tijaret A.S.
+    legacyDatabase: VISA2015
+    connectionString: "Server=10.100.128.15;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    targetDeployment: local-pg
+    lookupTranslations:
+      - docs/VISA2014_MIGRATION/lookup-translations.yaml
+      - docs/VISA2014_MIGRATION/lookup-translations.calik-energi.yaml
+    idMapDir: id-maps/calik-energi-local-pg
   - id: gap-insaat
     label: Gap İnşaat
     companyProfile: Gap İnşaat (legacy VISA2015 snapshot)

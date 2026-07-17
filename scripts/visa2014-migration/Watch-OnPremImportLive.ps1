@@ -11,12 +11,13 @@
   DocumentCopies file-wave step table when IncludeFileWaves is active.
 
   Profiles map to sync-host root + database:
-    Production  C:\visa2026-sync       Visa2026DbProd
-    Staging     C:\visa2026-sync-staging Visa2026DbStaging
-    Demo        C:\visa2026-sync-demo  Visa2026DbDemo
+    Production  C:\visa2026-sync              Visa2026DbProd / visa2026_prod
+    Staging     C:\visa2026-sync-staging      Visa2026DbStaging / visa2026_staging
+    Demo        C:\visa2026-sync-demo         Visa2026DbDemo / visa2026_demo  (.25 :8081)
+    Local       artifacts/local-pg-import     local PostgreSQL visa2026 (dev PC)
 
 .EXAMPLE
-  # Workstation — watch Demo import (current fresh migrate):
+  # Workstation — watch on-prem Demo import (.25 :8081):
   .\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh -ClearScreen
 
 .EXAMPLE
@@ -26,10 +27,14 @@
 .EXAMPLE
   # Production catch-up waves only (skip SQL counts):
   .\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh -NoDbCounts -ClearScreen
+
+.EXAMPLE
+  # Local PostgreSQL scalar chain on this PC (default root: artifacts/local-pg-import):
+  .\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Production', 'Staging', 'Demo')]
+    [ValidateSet('Production', 'Staging', 'Demo', 'Local')]
     [string]$Profile = 'Demo',
 
     [string]$SyncHostRoot = '',
@@ -52,6 +57,10 @@ $scriptDir = $PSScriptRoot
 . (Join-Path $scriptDir '_lib\Get-OnPremSyncHostRoot.ps1')
 . (Join-Path $scriptDir '_lib\OnPremSyncRunStatus.ps1')
 
+if ($Profile -eq 'Local' -and $ViaSsh) {
+    throw "Profile Local is this PC only - do not use -ViaSsh (Demo/Staging/Production use -ViaSsh for .25)."
+}
+
 if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
     $SyncHostRoot = Get-DefaultOnPremSyncHostRoot -Profile $Profile
 }
@@ -59,6 +68,7 @@ if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
 $dbName = switch ($Profile) {
     'Staging' { 'Visa2026DbStaging' }
     'Demo' { 'Visa2026DbDemo' }
+    'Local' { 'visa2026 (local PG)' }
     default { 'Visa2026DbProd' }
 }
 

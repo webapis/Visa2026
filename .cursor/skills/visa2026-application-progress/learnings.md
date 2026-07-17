@@ -6,6 +6,13 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-17 — ApprovalLegProfile column on Applications (via ministry) ListView
+
+- **Request**: Show **Approval leg profile** on `Application_ListView_ViaMinistries` only (not Direct migration / default Application list).
+- **Approach**: Keep `[VisibleInListView(false)]` on `Application.ApprovalLegProfile`; enable the column via model `Index` on ViaMinistries + `CustomViewClonerUpdater.SetColumnVisibility`; captions in DesignedDiffs + tr/ru/tk localization; Blazor `Model.xafml` column width/index.
+- **Preload**: `ApplicationListViewPreloadController` Includes `ApprovalLegProfile.MinistryLegs.ApprovingMinistry` so `DefaultProperty` `MinistriesLabel` (e.g. Türkmenenergo-Energetika) renders without N+1.
+- **Prevent**: Do not flip `VisibleInListView(true)` globally — that would pollute Direct migration lists; mirror Person TemporaryVisitors `ProjectContract` pattern (view-specific Index).
+- **Cross-skill**: —
 ### 2026-07-10 — Ministrlik empty on ApplicationProgress (missing snapshots)
 
 - **Symptom**: Progress detail **Ministrlik** blank; Progress list status shows `1st ministry review approved` without `- Energetika` (or similar).

@@ -44,9 +44,13 @@ $steps = @(
     @{ Key = 'AddressOfResidence';      Kind = 'scalar'; Name = 'AddressOfResidence';      Extra = @() },
     @{ Key = 'MedicalRecordDocument';   Kind = 'files';  Name = 'MedicalRecord.MedicalRecordDocument'; Extra = @('--import-visa2014-files','--entity','MedicalRecord','--property','MedicalRecordDocument') },
     @{ Key = 'Application';             Kind = 'scalar'; Name = 'Application';             Extra = @('--skip-tenant-catalog-generation') },
+    # order.yaml: WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem
+    # Do not start the next BO unless the previous wave succeeds (exit 0 + FailedCount 0).
     @{ Key = 'WorkPermit';              Kind = 'scalar'; Name = 'WorkPermit';              Extra = @() },
+    @{ Key = 'WorkPermitItem';          Kind = 'scalar'; Name = 'WorkPermitItem';          Extra = @() },
     @{ Key = 'WorkPermitDocument';      Kind = 'files';  Name = 'WorkPermit.WorkPermitDocument'; Extra = @('--import-visa2014-files','--entity','WorkPermit','--property','WorkPermitDocument') },
     @{ Key = 'Invitation';              Kind = 'scalar'; Name = 'Invitation';              Extra = @() },
+    @{ Key = 'InvitationItem';          Kind = 'scalar'; Name = 'InvitationItem';          Extra = @() },
     @{ Key = 'InvitationDocument';      Kind = 'files';  Name = 'Invitation.InvitationDocument'; Extra = @('--import-visa2014-files','--entity','Invitation','--property','InvitationDocument') },
     @{ Key = 'FamilyProofDocument';     Kind = 'files';  Name = 'Person.FamilyProofDocument'; Extra = @('--import-visa2014-files','--entity','Person','--property','FamilyProofDocument') },
     @{ Key = 'ApplicationItem';         Kind = 'scalar'; Name = 'ApplicationItem';         Extra = @() },
@@ -75,8 +79,10 @@ foreach ($step in $steps) {
     $summary += "  $key -> exit=$code  |  $($preparedLine.Trim())  |  $($postedLine.Trim())"
     $posted = if ($postedLine -match '(?:Posted|Patched):\s*(\d+)') { [int]$matches[1] } else { -1 }
     $prepared = if ($preparedLine -match 'Prepared:\s*(\d+)') { [int]$matches[1] } else { -1 }
-    if ($posted -le 0 -and $prepared -gt 0) {
-        Write-Host "STEP_FAILED $key exit=$code (0 posted/patched / $prepared prepared)" -ForegroundColor Red
+    $failed = if ($postedLine -match 'Failed:\s*(\d+)') { [int]$matches[1] } else { 0 }
+    # Import chain gate: do not start the next BO unless this wave succeeds.
+    if ($code -ne 0 -or $failed -gt 0 -or ($posted -le 0 -and $prepared -gt 0)) {
+        Write-Host "STEP_FAILED $key exit=$code failed=$failed (posted/patched=$posted / prepared=$prepared) — halt chain" -ForegroundColor Red
         $summary | ForEach-Object { Write-Host $_ }
         exit 1
     }

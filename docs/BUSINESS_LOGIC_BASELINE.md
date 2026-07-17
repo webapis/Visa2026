@@ -60,7 +60,7 @@ Finalized from stakeholder input:
 - Process history engine: `ApplicationProgress` timeline where latest date/time entry is authoritative for current process state.
 - Cross-object linkage model: `ApplicationItem` links person/object records to specific application flows (for example `CurrentVisa` linkage).
 - **Visa issuance traceability**: A saved **`Visa`** may reference **`IssuingApplicationItem`** (the **`ApplicationItem`** whose parent **`Application`** produced the visa) when that data exists; it is optional on the detail view (gear toggle). Legacy/pre-system visas may omit it. **`ApplicationItem.CurrentVisa`** remains the complementary link when an application line **references** a visa as its target (inverse: **`Visa.AssociatedApplicationItems`**). See **`Visa2026.Module/BusinessObjects/Visa.md`** §3.
-- Operational visibility layer: State Dashboard with strict click-to-open exact-state record navigation.
+- Operational visibility layer: **Report Dashboard** (home) with charts and Excel / ListView drill-down — see [`REPORT_DASHBOARD.md`](REPORT_DASHBOARD.md). (Old State Dashboard tiles removed.)
 - Governance layer: baseline business-logic documentation as source of truth for rule-to-code alignment.
 
 ### 1.8 State Calculation Complexity Levels

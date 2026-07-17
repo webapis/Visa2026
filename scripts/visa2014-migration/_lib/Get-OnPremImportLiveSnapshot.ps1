@@ -2,7 +2,7 @@
 # Runs ON the sync host (.25). Emits compact JSON (no StatusJson — watcher SCPs that file).
 [CmdletBinding()]
 param(
-    [ValidateSet('Production', 'Staging', 'Demo')]
+    [ValidateSet('Production', 'Staging', 'Demo', 'Local')]
     [string]$Profile = 'Demo',
     [string]$SyncHostRoot = '',
     [switch]$NoDbCounts
@@ -14,6 +14,10 @@ if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
     $SyncHostRoot = switch ($Profile) {
         'Staging' { 'C:\visa2026-sync-staging' }
         'Demo' { 'C:\visa2026-sync-demo' }
+        'Local' {
+            $repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
+            Join-Path $repo 'artifacts\local-pg-import'
+        }
         default { 'C:\visa2026-sync' }
     }
 }
@@ -21,6 +25,7 @@ if ([string]::IsNullOrWhiteSpace($SyncHostRoot)) {
 $dbName = switch ($Profile) {
     'Staging' { 'Visa2026DbStaging' }
     'Demo' { 'Visa2026DbDemo' }
+    'Local' { 'visa2026' }
     default { 'Visa2026DbProd' }
 }
 
@@ -45,13 +50,25 @@ $dbCountMap = [ordered]@{
     ApplicationProgress      = 'ApplicationProgresses'
 }
 
+$localPgEnvPath = Join-Path $SyncHostRoot 'local-pg.env'
+$isLocalPgRoot = Test-Path -LiteralPath $localPgEnvPath
+
 $diList = @()
-Get-Process -Name 'Visa2026.DataImporter' -ErrorAction SilentlyContinue | ForEach-Object {
-    try {
-        $cim = Get-CimInstance Win32_Process -Filter ("ProcessId=" + $_.Id) -ErrorAction SilentlyContinue
-        $path = if ($cim) { $cim.ExecutablePath } else { '' }
-        $cmd = if ($cim) { $cim.CommandLine } else { '' }
-        if ($path -like ("*\" + $rootLeaf + "\*") -or $cmd -like ("*" + $rootLeaf + "*")) {
+# DataImporter may run as "dotnet.exe … Visa2026.DataImporter" (local) or published Visa2026.DataImporter.exe (on-prem).
+$diProcessNames = @('Visa2026.DataImporter', 'dotnet')
+foreach ($procName in $diProcessNames) {
+    Get-Process -Name $procName -ErrorAction SilentlyContinue | ForEach-Object {
+        try {
+            $cim = Get-CimInstance Win32_Process -Filter ("ProcessId=" + $_.Id) -ErrorAction SilentlyContinue
+            $path = if ($cim) { $cim.ExecutablePath } else { '' }
+            $cmd = if ($cim) { $cim.CommandLine } else { '' }
+            if (-not $cmd) { return }
+            $isImporter = ($procName -eq 'Visa2026.DataImporter') -or ($cmd -match 'Visa2026\.DataImporter')
+            if (-not $isImporter) { return }
+            $matchesRoot = $path -like ("*\" + $rootLeaf + "\*") -or $cmd -like ("*" + $rootLeaf + "*")
+            $matchesLocal = $isLocalPgRoot -and ($cmd -match 'import-visa2014|calik-energi-local-pg')
+            if (-not ($matchesRoot -or $matchesLocal)) { return }
+
             $entity = ''
             if ($cmd -match '--entity\s+(\w+)') { $entity = $Matches[1] }
             if ($cmd -match '--property\s+(\w+)') {
@@ -62,13 +79,14 @@ Get-Process -Name 'Visa2026.DataImporter' -ErrorAction SilentlyContinue | ForEac
                 if ($entity) { $entity = "$entity (files)" } else { $entity = 'files' }
             }
             $diList += @{ Pid = $_.Id; Entity = $entity }
-        }
-    } catch {}
+        } catch {}
+    }
 }
 
 $taskNames = switch ($Profile) {
     'Demo' { @('Visa2026-OnPrem-DemoFileWavesOnly', 'Visa2026-OnPrem-DemoImportOnce', 'Visa2026-OnPrem-DemoImportFileWaves') }
-    default { @('Visa2026-OnPrem-ManualSyncOnce') }
+    'Local' { @() }
+    default { @('Visa2026-OnPrem-ProdFileWavesOnce', 'Visa2026-OnPrem-ManualSyncOnce') }
 }
 $taskState = ''
 $taskLast = ''
@@ -87,26 +105,93 @@ foreach ($candidate in $taskNames) {
 }
 
 $dbLines = @()
+$localPgUser = 'postgres'
+$localIdMapSubDir = ''
+if ($isLocalPgRoot) {
+    Get-Content -LiteralPath $localPgEnvPath | ForEach-Object {
+        if ($_ -match '^PG_PASSWORD=(.*)$') { $script:localPgPassFromEnv = $Matches[1].Trim() }
+        if ($_ -match '^DB_NAME=(.*)$') { $script:localPgDbFromEnv = $Matches[1].Trim() }
+        if ($_ -match '^PG_USER=(.*)$') { $localPgUser = $Matches[1].Trim() }
+        if ($_ -match '^ID_MAP_SUBDIR=(.*)$') { $localIdMapSubDir = $Matches[1].Trim() }
+    }
+}
+
 if (-not $NoDbCounts) {
     $usePostgres = $false
     $pgDatabase = 'visa2026_demo'
     $pgPass = $null
-    if ($Profile -eq 'Demo') {
-        $demoAppSettings = 'C:\inetpub\visa2026-demo\appsettings.Production.json'
-        $demoEnv = 'C:\visa2026\env\demo.env'
-        if (Test-Path -LiteralPath $demoAppSettings) {
-            try {
-                $cs = (Get-Content -LiteralPath $demoAppSettings -Raw | ConvertFrom-Json).ConnectionStrings.DefaultConnection
-                if ($cs -match '(?i)EFCoreProvider\s*=\s*(Postgres|PostgreSQL)' -or ($cs -match '(?i)(^|;)\s*Host\s*=')) {
-                    $usePostgres = $true
-                    if ($cs -match '(?i)Database\s*=\s*([^;]+)') { $pgDatabase = $Matches[1].Trim() }
+    $pgUser = 'postgres'
+
+    # Dev PC: SyncHostRoot with local-pg.env (artifacts/local-pg-import)
+    if ($isLocalPgRoot) {
+        $usePostgres = $true
+        $pgDatabase = if ($script:localPgDbFromEnv) { $script:localPgDbFromEnv } else { 'visa2026' }
+        $pgPass = $script:localPgPassFromEnv
+        $pgUser = $localPgUser
+    }
+    else {
+        # Slot IIS appsettings + env — Demo/Staging/Production may all be PostgreSQL.
+        $slotMeta = switch ($Profile) {
+            'Staging' {
+                @{
+                    AppSettings = 'C:\inetpub\visa2026-staging\appsettings.Production.json'
+                    EnvFile     = 'C:\visa2026\env\staging.env'
+                    SyncEnvKey  = 'VISA2026_STAGING_SQL_CONNECTION'
+                    DefaultDb   = 'visa2026_staging'
                 }
+            }
+            'Demo' {
+                @{
+                    AppSettings = 'C:\inetpub\visa2026-demo\appsettings.Production.json'
+                    EnvFile     = 'C:\visa2026\env\demo.env'
+                    SyncEnvKey  = 'VISA2026_DEMO_SQL_CONNECTION'
+                    DefaultDb   = 'visa2026_demo'
+                }
+            }
+            default {
+                @{
+                    # Multi-slot path (not legacy C:\inetpub\visa2026, which may still point at SQLEXPRESS).
+                    AppSettings = 'C:\inetpub\visa2026-prod\appsettings.Production.json'
+                    EnvFile     = 'C:\visa2026\env\prod.env'
+                    SyncEnvKey  = 'VISA2026_PROD_SQL_CONNECTION'
+                    DefaultDb   = 'visa2026_prod'
+                }
+            }
+        }
+
+        $pgDatabase = $slotMeta.DefaultDb
+        $cs = $null
+        if (Test-Path -LiteralPath $slotMeta.AppSettings) {
+            try {
+                $cs = (Get-Content -LiteralPath $slotMeta.AppSettings -Raw | ConvertFrom-Json).ConnectionStrings.DefaultConnection
             } catch {}
         }
-        if ($usePostgres -and (Test-Path -LiteralPath $demoEnv)) {
-            Get-Content -LiteralPath $demoEnv | ForEach-Object {
+        $syncEnvPath = Join-Path $SyncHostRoot 'config\sync.env'
+        if (-not $cs -and (Test-Path -LiteralPath $syncEnvPath)) {
+            $keyPrefix = $slotMeta.SyncEnvKey + '='
+            $line = Get-Content -LiteralPath $syncEnvPath | Where-Object { $_ -like ($keyPrefix + '*') } | Select-Object -First 1
+            if ($line) { $cs = $line.Substring($keyPrefix.Length) }
+        }
+        if ($cs -and ($cs -match '(?i)EFCoreProvider\s*=\s*(Postgres|PostgreSQL)' -or $cs -match '(?i)(^|;)\s*Host\s*=')) {
+            $usePostgres = $true
+            if ($cs -match '(?i)Database\s*=\s*([^;]+)') { $pgDatabase = $Matches[1].Trim() }
+            if ($cs -match '(?i)Password\s*=\s*([^;]+)') { $pgPass = $Matches[1].Trim() }
+            if ($cs -match '(?i)Username\s*=\s*([^;]+)') { $pgUser = $Matches[1].Trim() }
+            elseif ($cs -match '(?i)User Id\s*=\s*([^;]+)') { $pgUser = $Matches[1].Trim() }
+        }
+        if ($usePostgres -and (Test-Path -LiteralPath $slotMeta.EnvFile)) {
+            Get-Content -LiteralPath $slotMeta.EnvFile | ForEach-Object {
                 if ($_ -match '^PG_PASSWORD=(.*)$') { $pgPass = $Matches[1].Trim() }
                 if ($_ -match '^DB_NAME=(.*)$') { $pgDatabase = $Matches[1].Trim() }
+                if ($_ -match '^PG_USER=(.*)$') { $pgUser = $Matches[1].Trim() }
+            }
+        }
+        if ($usePostgres -and -not $pgPass -and (Test-Path -LiteralPath $syncEnvPath)) {
+            Get-Content -LiteralPath $syncEnvPath | ForEach-Object {
+                if ($_ -match ('^' + [regex]::Escape($slotMeta.SyncEnvKey) + '=(.*)$')) {
+                    $syncCs = $Matches[1]
+                    if ($syncCs -match '(?i)Password\s*=\s*([^;]+)') { $pgPass = $Matches[1].Trim() }
+                }
             }
         }
     }
@@ -125,7 +210,7 @@ if (-not $NoDbCounts) {
             }
             $sqlFile = Join-Path $env:TEMP ("visa2026-dbcounts-{0}.sql" -f [guid]::NewGuid().ToString('N'))
             ($unionParts -join "`nUNION ALL`n") + ';' | Set-Content -LiteralPath $sqlFile -Encoding UTF8
-            $rows = & $psql -h localhost -U postgres -d $pgDatabase -t -A -F '|' -f $sqlFile 2>$null
+            $rows = & $psql -h localhost -U $pgUser -d $pgDatabase -t -A -F '|' -f $sqlFile 2>$null
             Remove-Item -LiteralPath $sqlFile -Force -ErrorAction SilentlyContinue
             foreach ($r in @($rows)) {
                 if ($r -and $r.Trim() -and $r -match '\|') { $dbLines += $r.Trim() }
@@ -155,6 +240,7 @@ $idMapSubDir = switch ($Profile) {
     'Demo' { 'calik-energi-onprem-demo' }
     default { 'calik-energi-onprem-prod' }
 }
+if ($localIdMapSubDir) { $idMapSubDir = $localIdMapSubDir }
 $statusObj = $null
 try {
     if (Test-Path -LiteralPath $statusPath) {

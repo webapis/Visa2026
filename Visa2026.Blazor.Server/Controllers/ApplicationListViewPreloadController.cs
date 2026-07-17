@@ -180,6 +180,9 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.Location)
             .Include(application => application.ApplicationType!).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
+            .Include(application => application.ApprovalLegProfile!)
+                .ThenInclude(profile => profile.MinistryLegs)
+                .ThenInclude(leg => leg.ApprovingMinistry)
             .Include(application => application.ApprovalLegSnapshots)
             .AsSplitQuery()
             .ToList();

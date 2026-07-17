@@ -2471,6 +2471,7 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Sene" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
         <ColumnInfo Id="Month" Caption="Aý" />

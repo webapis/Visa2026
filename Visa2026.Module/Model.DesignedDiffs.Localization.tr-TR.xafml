@@ -2471,6 +2471,7 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Onay bakanlık profili" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="Month" Caption="Ay" />

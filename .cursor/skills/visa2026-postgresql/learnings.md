@@ -12,3 +12,11 @@
 - **Fix**: **Binaries zip** → extract to `C:\PostgreSQL\16` → `initdb` (let initdb create `data`) → `pg_ctl register` service `postgresql-x64-16` → `createdb visa2026_demo`. Wire `demo.env` with `EFCORE_PROVIDER=Postgres` + `PG_*`; `Configure-Visa2026Production.ps1 -Profile Demo`.
 - **Prevent**: Prefer binaries path for SSH installs; keep EDB script for interactive/RDP when it works. Document both in skill reference.
 - **Skill**: visa2026-postgresql
+
+### 2026-07-15 — Local PC PostgreSQL 16 (dev launch profile)
+- **Symptom**: Need Postgres on developer Windows for F5 (not IIS Demo).
+- **Try**: EDB binaries zip `postgresql-16.9-1-windows-x64-binaries.zip` → `C:\PostgreSQL\16` → `initdb -U postgres -A scram-sha-256` (let initdb create `data`) → `pg_ctl start` (service register needed elevation; `postgresql-x64-16` registered Stopped until reboot/Start-Service) → `createdb visa2026`.
+- **Test**: `psql -h localhost -U postgres -d visa2026 -c "SELECT version();"` OK (16.9).
+- **Fix / wire**: Launch profile `Visa2026 - PostgreSQL` in `Visa2026.Blazor.Server/Properties/launchSettings.json` with `EFCoreProvider=Postgres`; local password `Visa2026Local`; helper `scripts/local/Start-LocalPostgreSql.ps1`.
+- **Prevent**: Prefer binaries zip on local too; without admin use `pg_ctl start` until service is elevated once. Do not point LocalDB and Postgres at the same DB name differently — LocalDB stays `Visa2026`, Postgres `visa2026`.
+- **Skill**: visa2026-postgresql.

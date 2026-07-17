@@ -1,6 +1,8 @@
 # State Implementation Prompt Templates
 
-Use these templates when asking an AI assistant to implement or update a state on the State Dashboard.
+> **Note:** The State Dashboard UI was **removed**. Home-page BI is the **[Report Dashboard](REPORT_DASHBOARD.md)**. Use these templates for **evaluator / SQL view / appearance** state work only — ignore steps that mention `StateDashboardComponent.razor`.
+
+Use these templates when asking an AI assistant to implement or update a BO state (evaluator or SQL).
 Copy the relevant template, fill in the `[ ]` placeholders, and paste into the chat.
 
 > **Core principle:** The only difference between states is their criteria.

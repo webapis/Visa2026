@@ -1,8 +1,8 @@
-# State Dashboard — State Specifications
+# State specifications (evaluators / SQL)
 
-> **Purpose:** Single source of truth for every state shown on the State Dashboard.  
-> All dashboard UI, BO evaluators, and SQL views must conform to the definitions here.  
-> AI assistants and developers should read this file before implementing or modifying any state logic.
+> **Superseded UI:** The old **State Dashboard** home (`StateDashboardComponent`) was **removed**. Officer BI home is now the **[Report Dashboard](REPORT_DASHBOARD.md)**.  
+> **Purpose of this file:** criteria and status codes for BO evaluators, SQL views, ListView colors, and notifications — **not** home-page tile wiring.  
+> References to `StateDashboardComponent.razor` below are historical; do not reintroduce that UI.
 >
 > **This is a living document.** States are created, updated, and deleted throughout the life of the project.
 > Every change — add, modify, remove — must use the same design, patterns, and file structure as every other state.

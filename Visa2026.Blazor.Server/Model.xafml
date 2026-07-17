@@ -263,6 +263,7 @@
         <ColumnInfo Id="IsCancelled" Width="70" />
         <ColumnInfo Id="IsRejected" Width="70" />
         <ColumnInfo Id="ApplicationType" Width="109" />
+        <ColumnInfo Id="ApprovalLegProfile" Index="8" Width="180" />
       </Columns>
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />

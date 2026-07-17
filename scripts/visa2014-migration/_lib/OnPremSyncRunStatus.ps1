@@ -135,6 +135,13 @@ function Get-OnPremWaveLogStats {
         $stats.Inserted = [int]$Matches[1]
         $stats.Updated = [int]$Matches[2]
     }
+    # Headless --import-visa2014 reports Posted (not Inserted/Updated).
+    if ($null -eq $stats.Inserted -and $text -match 'INF Posted:\s*(\d+)') {
+        $stats.Inserted = [int]$Matches[1]
+    }
+    if ($null -eq $stats.Updated -and $text -match 'INF Patched:\s*(\d+)') {
+        $stats.Updated = [int]$Matches[1]
+    }
     if ($text -match 'Soft-deleted:\s*(\d+)') {
         $stats.SoftDeleted = [int]$Matches[1]
     }
@@ -143,6 +150,12 @@ function Get-OnPremWaveLogStats {
     }
     if ($text -match 'INF (\S+) legacy rows:\s*(\d+)') {
         $stats.LegacyRows = [int]$Matches[2]
+    }
+    elseif ($text -match 'INF Legacy SQL rows:\s*(\d+)') {
+        $stats.LegacyRows = [int]$Matches[1]
+    }
+    elseif ($null -eq $stats.LegacyRows -and $text -match 'INF Prepared:\s*(\d+)') {
+        $stats.LegacyRows = [int]$Matches[1]
     }
     return $stats
 }

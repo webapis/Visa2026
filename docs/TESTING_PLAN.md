@@ -100,7 +100,7 @@ Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **Application
 | E2E-030 | Create Application (canonical type `App_Inv`) | Planned |
 | E2E-021 | Add ApplicationItem with person | Planned |
 | E2E-022 | Add ApplicationProgress milestone | Planned |
-| E2E-023 | State Dashboard tile → filtered list | Planned |
+| E2E-023 | Report Dashboard home → filtered ListView | Planned |
 
 ### Tier 3+ — Compliance, output, security, features
 

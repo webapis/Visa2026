@@ -284,6 +284,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewViaMinistries,
                 ApplicationProgressRouteNavigation.CriteriaViaMinistries);
+            if (modelViews[ApplicationProgressRouteNavigation.ListViewViaMinistries] is IModelListView viaMinistriesListView)
+                SetColumnVisibility(viaMinistriesListView, nameof(BusinessObjects.Application.ApprovalLegProfile), true);
             CloneApplicationListViewIfMissing(
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewDirectMigration,

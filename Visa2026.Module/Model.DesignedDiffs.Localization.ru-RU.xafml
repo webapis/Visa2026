@@ -2471,6 +2471,7 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль этапов министерств" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="Month" Caption="Месяц" />

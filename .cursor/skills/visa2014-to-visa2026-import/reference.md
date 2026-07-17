@@ -47,6 +47,8 @@ Shared repo root: `_lib/Get-RepoRoot.ps1`. Dot-source **after** `param()`, not i
 
 **Order rule:** Full and partial reimport both follow [`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml) `dependsOn`. Orchestration scripts run entities in that order; partial reimport is one BO at a time but only when parents are already valid — re-run downstream BOs in order after a parent partial reimport.
 
+**Stop-before-next:** Do not start the next BO until the previous wave exits **0** with **FailedCount = 0**. Chain step lists must include every parent BO in `order.yaml` (including `WorkPermitItem` / `InvitationItem` before `ApplicationItem`). See [SKILL.md § Import chain gate](./SKILL.md).
+
 | When | Script | Notes |
 |------|--------|-------|
 | Restore **VISA2015** on dev PC | `setup/Restore-LegacyDatabase.ps1` | Wraps `migration-scripts/Restore-BackupToLocalSql.ps1` |

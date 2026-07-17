@@ -2,6 +2,8 @@
 
 Applies when **loading** data into Visa2026 (Phase 3+). **Extract** always from **`VISA2015`** (not inferred from VISA2014 repo).
 
+**Çalik Enerji on-prem:** import data **and** lookup mapping values are sourced **only** from legacy **`10.100.128.15` / `VISA2015`**. Demo/Staging/Prod on **`10.100.128.25`** are **targets**, never alternate sources (no Demo→Prod dump as Import substitute; no copying catalogs from Visa2026 DBs). See [SKILL.md § Hard rule — Calik Energi data source](./SKILL.md).
+
 **Prerequisite:** [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) **`approved`** in `import-strategy.yaml`. Phase 1 discovery **`complete`** and Phase **1b** **`importConfirmed: true`** per entity — see [VISA2014_MIGRATION.md § Import confirmation gate](../../../docs/VISA2014_MIGRATION.md). Do not implement import code or POST until gates pass.
 
 **Experience:** read [learnings.md](./learnings.md) before work; **append after every import attempt** (success or failure) per [MATURITY.md](./MATURITY.md).
@@ -21,6 +23,8 @@ Discovery/mapping rules live in [SKILL.md](./SKILL.md) and [VISA2014_MIGRATION.m
 | 1 | **Headless XAF ObjectSpace** into Visa2026 (`--inprocess`) | Same validation/rules as UI — never direct SQL into Visa2026; **no OData writes** for migration (scalar or file waves) |
 | 2 | **Never write** to `VISA2015` | Legacy is read-only source |
 | 3 | **Dependency order** from `order.yaml` | FKs and id-map must exist before children |
+| 3b | **Stop before next BO** | Never start the **next** `order.yaml` entity until the **previous** wave succeeds (**exit 0** + **FailedCount = 0**). No `-ContinueOnError` on full chains. |
+| 3c | **Chain must include all parents** | Orchestrator step lists must match `order.yaml` (e.g. `WorkPermitItem` + `InvitationItem` before `ApplicationItem`). Omitting a parent BO is a bug, not a shortcut. |
 | 4 | **Three-layer mapping** at transform time | Table → column → lookup value before POST |
 | 5 | **Idempotent runs** | Re-run safe via natural-key upsert + id-map |
 | 6 | **Pilot → reconcile → expand** | One **confirmed** BO on disposable DB before full prod cutover |
@@ -84,6 +88,24 @@ VISA2015 (read SQL)
 | Transform | Layer 3 **before** OData lookup query — never `$filter` with raw legacy string on target |
 | Load | One entity batch per `order.yaml` row; children after parents |
 | Map IDs | Write `id-map/{Entity}-{legacyGuid}.json` on every successful create |
+| Gate | After each BO: exit 0 + FailedCount 0 **before** starting the next `order.yaml` entity |
+
+### Chain halt (orchestrators)
+
+```text
+for each entity in order.yaml entities[] (top → bottom):
+  run --import-visa2014 --entity <Entity>
+  if exit != 0 OR FailedCount > 0:
+    STOP  # do not start any later BO
+    fix root cause; resume at failed entity (-StartAt / --entity)
+  else:
+    continue
+```
+
+**Canonical application-domain slice:**  
+`Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress`
+
+Reference orchestrator with full list: `import/OnPrem-Sync.ps1`. Headless / local chains must include the same item waves.
 
 ---
 
@@ -280,7 +302,7 @@ Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem 
 
 **Pilot verify:** app **8/-967** — `App_Reg_Check_Out`, 1 progress step (`IS_BEING_PREPARED` @ `AT_OFFICE`), 2 items, 0 direct-ministry review rows.
 
-**Note:** `import/Run-HeadlessChain.ps1` still skips WorkPermit and Invitation — use the recipe above or individual import scripts; `order.yaml` is authoritative.
+**Note:** `order.yaml` is authoritative. `Run-HeadlessChain.ps1` / local PG chains must include **WorkPermitItem** and **InvitationItem** before ApplicationItem (same as `OnPrem-Sync.ps1`). If a chain omitted those waves, treat it as a script bug and fix the step list — do not “catch up” by only importing ApplicationItem.
 
 ### Partial reimport — ApplicationItem only
 

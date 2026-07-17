@@ -116,6 +116,9 @@ catalogs:
         target: FRA
       - legacy: GBR
         target: GBR
+      - legacy: UK
+        target: GBR
+        notes: Legacy NameOfCountry/NameOfCountryL sometimes UK (mgCode null); Visa2026 Code is GBR
       - legacy: GEO
         target: GEO
       - legacy: GRC

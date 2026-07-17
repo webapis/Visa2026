@@ -52,7 +52,7 @@ When you **must** add a script: place it in the correct folder below, dot-source
 | `catalogs/` | Shared helpers (`Import-PreviewCatalogRows.ps1`) |
 | `import/` | OData / in-process entity import and **end-to-end** orchestration |
 | `reimport/` | **Partial reimport** (dev only): delete one BO scope + re-run that entity |
-| `cleanup/` | SQL for partial reimport scope deletes |
+| `cleanup/` | SQL for partial reimport scope deletes; **`Wipe-LocalPostgresTransactional.sql`** — local PG wipe of transactional BOs (keep lookups) |
 | `patch/` | One-off headless corrections after import |
 | `_lib/` | `Get-RepoRoot.ps1` |
 
@@ -131,7 +131,8 @@ Do **not** use `reimport/` for staging or production cutover.
 | Task | Script |
 |------|--------|
 | Live **wave** table from `sync-run-status.json` | `Watch-OnPremSyncRun.ps1` (`-Profile Demo\|Production -ViaSsh -ClearScreen`) |
-| Live **import** table (waves + Δ + target DB counts) | `Watch-OnPremImportLive.ps1` (`-Profile Demo -ViaSsh -ClearScreen`) |
+| Live **import** table (waves + Δ + target DB counts) | `Watch-OnPremImportLive.ps1` (`-Profile Demo\|Production -ViaSsh -ClearScreen`) |
+| Live import on **local PostgreSQL** (this PC) | `Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen` (chain: `artifacts/local-pg-import/Run-LocalPgScalarChain.ps1`) |
 | **Archive** current Import run (status + DbCounts) | `Archive-OnPremImportRun.ps1` (`-Profile Demo`) — also auto-run at end of `OnPrem-Sync.ps1` |
 | **Compare** two reimport archives (anomaly Δ) | `Compare-OnPremImportRuns.ps1` (`-Profile Demo` [-Left] [-Right] [-FailOnAnomaly]) |
 | Local / on-prem legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |

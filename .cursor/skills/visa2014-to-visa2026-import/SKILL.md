@@ -2,9 +2,10 @@
 name: visa2014-to-visa2026-import
 description: >-
   VISA2014 → Visa2026 data migration (sole skill for this): Excel preview; lookup resolution;
-  lookup preflight; approve strategy; VISA2015 source of truth; Calik Energi Demo/Prod Import on
-  10.100.128.25 (OnPrem-Sync.ps1); OData / in-process import; partial reimport (dev); learnings
-  after every import attempt. Chat openers: user-prompts.md. Import only (no delta Sync).
+  lookup preflight; approve strategy; Calik Energi ALWAYS sources import + lookup mapping from
+  legacy VISA2015 on 10.100.128.15 (never Demo/Prod Visa2026 DBs); targets on 10.100.128.25
+  (OnPrem-Sync.ps1); OData / in-process import; partial reimport (dev); learnings after every
+  import attempt. Chat openers: user-prompts.md. Import only (no delta Sync).
 disable-model-invocation: false
 ---
 
@@ -49,6 +50,7 @@ disable-model-invocation: false
 | Import one BO | `dotnet run … --import-visa2014 --entity <BO>` |
 | Resume / full local chain | `import/Run-HeadlessChain.ps1` (`-StartAt`) |
 | **On-prem Demo / Staging / Prod Import** | `import/OnPrem-Sync.ps1` (`-Profile Demo\|Staging\|Production`) · sync host `C:\visa2026-sync*` on `.25` · [ON_PREM_IIS_MIGRATION_RUNBOOK.md](../../../docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md) |
+| **Local PG import (this PC)** | `artifacts/local-pg-import/Run-LocalPgScalarChain.ps1` · watch `Watch-OnPremImportLive.ps1 -Profile Local` (not Demo — Demo is `.25 :8081`) |
 | **Reimport history / compare** | Auto-archive under `history\runs\<RunId>\` · `Compare-OnPremImportRuns.ps1` · dashboard `history\index.html` · manual `Archive-OnPremImportRun.ps1` |
 | Tenant JSON before Application | `import/Invoke-TenantCatalogGeneration.ps1` |
 | **Lookup resolution** (audit → translate → seed) | [LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md) · `lookup-translations.yaml` (+ company overlay) · `LookupCatalogs/` / tenant JSON |
@@ -67,20 +69,21 @@ disable-model-invocation: false
 Before any full / Demo / on-prem **Import** chain:
 
 ```text
-1. Lookup resolution   — audit live VISA2015 DISTINCT values
+1. Lookup resolution   — audit live VISA2015 DISTINCT values on 10.100.128.15 (Calik)
                          → translate (lookup-translations.yaml + company overlay)
                          → seed gaps into Visa2026 LookupCatalogs / tenant JSON + ForceUpdate
 2. Lookup preflight    — Preflight-LookupAudit.ps1 / --preflight-visa2014-lookups (exit 0)
 3. Full Import         — OnPrem-Sync.ps1 / Run-HeadlessChain / --import-visa2014 waves
+                         (reads same VISA2015; writes Demo/Prod targets on .25 only)
 ```
 
 | Name | Role |
 |------|------|
-| **Lookup resolution** | Human + YAML + catalog seed work ([LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md)). Do **not** bulk-import legacy lookup tables. |
+| **Lookup resolution** | Human + YAML + catalog seed work ([LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md)). Audit **legacy** DISTINCT only. Do **not** bulk-import legacy lookup tables. Do **not** copy labels from Demo/Prod Visa2026 DBs. |
 | **Lookup preflight** | Automated gate; `OnPrem-Sync.ps1` runs it unless `-SkipLookupPreflight`. |
 | **Import-time translate** | During POST, resolve FKs via layer 3 only — no inventing catalog rows mid-wave. |
 
-**Çalik Enerji:** base `lookup-translations.yaml` + overlay `lookup-translations.calik-energi.yaml` (see `legacy-sources.yaml` `calik-energi*`).
+**Çalik Enerji:** base `lookup-translations.yaml` + overlay `lookup-translations.calik-energi.yaml` (see `legacy-sources.yaml` `calik-energi*`). Source SQL for audits + Import: **`10.100.128.15` / `VISA2015`**.
 
 Do **not** run full Import first and “fix lookups after FailedCount” — resolve + preflight first.
 
@@ -90,21 +93,66 @@ Do **not** run full Import first and “fix lookups after FailedCount” — res
 
 All Demo/Prod migration chat and agent work uses **this** skill. Orchestrator `OnPrem-Sync.ps1` is **Import-only** (`--import-visa2014`). Delta Sync (`--sync-visa2014`, nightly Sync task, LegacySyncDashboard) was **removed**.
 
-| Slot | URL | Database | Legacy source id | Sync host on `.25` |
-|------|-----|----------|------------------|--------------------|
-| **Demo** | `http://10.100.128.25:8081` | `Visa2026DbDemo` | `calik-energi-onprem-demo` | `C:\visa2026-sync-demo` |
-| **Staging** | `:8080` | `Visa2026DbStaging` | (refresh from prod `.bak` — IIS skill) | `C:\visa2026-sync-staging` |
-| **Production** | `:80` | `Visa2026DbProd` | `calik-energi-onprem-prod` | `C:\visa2026-sync` |
+### Hard rule — Calik Energi data source (do not violate)
+
+For **Çalik Enerji** (`calik-energi*`), **import rows** and **lookup mapping / resolution** (DISTINCT audits, gap labels, catalog seed text, translation overlays, EducationInstitution/Specialty and all other NameTm labels) **must** come from the **legacy** database only:
+
+| Role | Host | Database | Notes |
+|------|------|----------|--------|
+| **Source (only)** | **`10.100.128.15`** | **`VISA2015`** | Read-only. System of record. MCP **`visa2014-sql-remote`**. Sync env `VISA2014_SQL_CONNECTION`. |
+| **Targets (never source)** | **`10.100.128.25`** | Demo / Staging / Prod (`Visa2026Db*` or Postgres `visa2026_*`) | Visa2026 IIS + sync host. Import **destination** only. |
+
+**Forbidden as import or lookup-mapping source** (even when faster):
+
+- Demo / Staging / Prod Visa2026 SQL or Postgres on `.25` (including `visa2026_demo` → `visa2026_prod` dump/restore as a substitute for Import)
+- Copying catalog rows from one Visa2026 target into another instead of seeding from `VISA2015` DISTINCT / `lookup-translations*.yaml` / Generate-* scripts
+- LocalDB / other company snapshots when working Calik on-prem profiles
+
+**Allowed:** use Demo/Prod as **target** for Import, preflight against the chosen target catalogs, and ForceUpdate after seeding from legacy-derived JSON. Gap *reports* from Demo preflight are fine; the **values to seed** still come from `.15` / `VISA2015`.
+
+Confirm connection before Import: `Server=10.100.128.15;Database=VISA2015;…` in `C:\visa2026-sync*\config\sync.env` (not a Visa2026 DB).
+
+| Slot | URL | Target database (Visa2026) | Legacy source id | Sync host |
+|------|-----|----------------------------|------------------|-----------|
+| **Demo** | `http://10.100.128.25:8081` | `Visa2026DbDemo` / `visa2026_demo` | `calik-energi-onprem-demo` | `C:\visa2026-sync-demo` on `.25` |
+| **Staging** | `:8080` | `Visa2026DbStaging` | (refresh from prod `.bak` — IIS skill) | `C:\visa2026-sync-staging` on `.25` |
+| **Production** | `:80` / HTTPS | `Visa2026DbProd` / `visa2026_prod` | `calik-energi-onprem-prod` | `C:\visa2026-sync` on `.25` |
+| **Local** | local F5 / localhost PG | `visa2026` (this PC Postgres) | `calik-energi-local-pg` | repo `artifacts/local-pg-import` (no SSH) |
 
 | Need | How |
 |------|-----|
-| Legacy SQL (`.15`) | MCP **`visa2014-sql-remote`** → `VISA2015` |
+| Legacy SQL (source) | MCP **`visa2014-sql-remote`** → **`10.100.128.15`** / **`VISA2015`** |
 | Lookup preflight on Demo | `Preflight-LookupAudit.ps1` / published DI on sync-demo · [user-prompts.md](./user-prompts.md) |
-| Full Import | `OnPrem-Sync.ps1 -Profile Demo\|Production` (preflight auto) |
-| Watch Import | `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh` |
+| Full Import (on-prem) | `OnPrem-Sync.ps1 -Profile Demo\|Production` (preflight auto; still reads `.15`) |
+| Watch Import (on-prem Demo) | `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh` |
+| Watch Import (**local PG**) | `Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen` — **not** `-Profile Demo` |
+| Local PG scalar chain | `artifacts/local-pg-import/Run-LocalPgScalarChain.ps1` |
 | IIS / ForceUpdate / staging bak | [visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md) |
 
-**Hard rules for Import:** no `-ContinueOnError` on full/Demo Import; zero FailedCount unless [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml); lookup resolution → preflight → Import.
+**Hard rules for Import:** no `-ContinueOnError` on full/Demo Import; zero FailedCount unless [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml); lookup resolution → preflight → Import; **source always `.15` / `VISA2015`**.
+
+---
+
+## Import chain gate — order.yaml + stop on previous failure (mandatory)
+
+**Canonical sequence:** [`order.yaml`](../../../Visa2026.DataImporter/legacy/visa2014/order.yaml) `entities[]` (top → bottom). Every `dependsOn` must appear earlier. Orchestrators (`OnPrem-Sync.ps1`, `Run-HeadlessChain.ps1`, local PG chains, entity scripts) **must** list the same BOs — including item waves (`WorkPermitItem`, `InvitationItem`) before `ApplicationItem`.
+
+**Stop-before-next (hard rule):**
+
+1. Import **one** BO wave at a time in `order.yaml` order.
+2. **Do not start** the next BO until the current wave **succeeds**:
+   - process **exit code 0**, and
+   - **FailedCount = 0** (skipped rows only via approved [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml)).
+3. On failure / non-zero FailedCount: **halt the chain**, fix, resume with `-StartAt` / `--entity` at the failed BO — never “continue for speed.”
+4. **Never omit** a parent BO that later waves depend on (example: importing `ApplicationItem` after `WorkPermit`/`Invitation` **headers only**, skipping `WorkPermitItem`/`InvitationItem`, leaves empty item tables and broken Current* FKs).
+
+**Why:** each later BO resolves FKs and id-maps from earlier BOs (`Person` → documents → `Application` → permits/invitations **items** → `ApplicationItem` → `ApplicationProgress`). A partial/failed parent poisons every child run.
+
+**Agent checklist before any chain:**
+
+- [ ] Step list matches `order.yaml` (headers **and** items).
+- [ ] No `-ContinueOnError` / silent skip of failed waves.
+- [ ] After each wave: check exit code + Posted/Failed; only then start the next entity.
 
 ---
 
@@ -143,6 +191,7 @@ Do not skip step 1 or 3. Skipping failure entries guarantees the next session re
 6. First imports: **Visa2026DbDev** — not production Visa2026. Read [import-practices.md](./import-practices.md) before Phase 3+.
 7. **One BO at a time** — only one `discoveryStatus: in_progress`.
 8. **Dependency order** — never discover or import a BO before its `dependsOn` dossiers are closed.
+8b. **Import chain gate** — never start the next BO until the previous import wave succeeds (exit 0 + FailedCount 0). See § Import chain gate.
 9. **Strategy before code** — do **not** implement `--import-visa2014` until [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) is **`approved`** in `import-strategy.yaml`.
 10. **Document before implement** — do **not** POST OData for an entity until dossier + `order.yaml` have **`importConfirmed: true`**.
 
@@ -562,11 +611,11 @@ SQL extract → dedupe → transform (columns + lookup values) → resolve id-ma
 2. `--verbose` (or equivalent) on first run.
 3. **Reconcile** counts + spot-check via id-map ([import-practices.md](./import-practices.md) § Reconciliation).
 4. **Append [learnings.md](./learnings.md)** — required.
-5. Only then next entity in `order.yaml`.
+5. Only then next entity in `order.yaml` — and only if this wave **succeeded** (§ Import chain gate).
 
 ### Do not
 
-Direct SQL into Visa2026 · raw legacy strings on target lookups · import children before parent id-map · parallel cross-entity POST · invent catalog rows · first run on production · **implement import before strategy `approved`** · **POST OData before `importConfirmed: true`** · **skip learnings append after verified work**.
+Direct SQL into Visa2026 · raw legacy strings on target lookups · import children before parent id-map · **start the next BO after a failed / incomplete parent wave** · omit parent item BOs from a chain · parallel cross-entity POST · invent catalog rows · first run on production · **implement import before strategy `approved`** · **POST OData before `importConfirmed: true`** · **skip learnings append after verified work**.
 
 ---
 
@@ -608,6 +657,8 @@ Follow [import-practices.md](./import-practices.md) for every batch.
 | Agent wrote importer before mapping done | Complete Phase 1 + confirmation gate first |
 | Wrong BO discovered first | Use **`order.yaml`** pick algorithm — do not choose by convenience |
 | Application before Person | Invalid — `dependsOn` not satisfied |
+| Next BO after failed parent wave | Forbidden — § Import chain gate; halt, fix, resume at failed entity |
+| ApplicationItem without WorkPermitItem / InvitationItem | Forbidden — omitted parent item BOs; fix orchestrator step list |
 | Two BOs `in_progress` | Finish or reset one |
 | Blocked dependency | Fix upstream dossier or document waiver before downstream |
 | OData 400 | BO missing from `WebApiServiceExtensions.cs` |
