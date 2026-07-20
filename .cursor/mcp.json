@@ -71,12 +71,6 @@
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}",
         "GITHUB_TOOLSETS": "repos,issues,pull_requests,actions"
       }
-    },
-    "graphify": {
-      "command": "graphify-mcp",
-      "args": [
-        "graphify-out/graph.json"
-      ]
     }
   }
 }
