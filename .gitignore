@@ -474,3 +474,10 @@ Visa2026.E2E.Tests/recordings/
 
 # DevExpress Model Editor auto-creates these beside Model.xafml; use Model.{culture}.xafml from GenerateModelLocalization
 Visa2026.Blazor.Server/Model_*.xafml
+
+# Graphify knowledge graph (commit graph.json / GRAPH_REPORT.md; keep local-only noise out)
+graphify-out/cost.json
+graphify-out/cache/
+graphify-out/memory/
+graphify-out/reflections/
+graphify-out/20*/
