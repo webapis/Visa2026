@@ -96,7 +96,7 @@ Transition graph built for `legCount` clamped to `ApplicationProgressLegCodes.Ma
 
 ## Adding N-th ministry leg (checklist)
 
-1. `application-state.json`: `{n}_REVIEW_STARTED`, `_APPROVED`, `_REJECTED`
+1. `application-state.json`: `{n}_REVIEW_APPROVED`, `{n}_REVIEW_REJECTED` (no `_REVIEW_STARTED` — removed from active workflow)
 2. `application-location.json`: `AT_THE_MINISTERY_{n}`
 3. Bump `LookupCatalogs/manifest.json` version
 4. Confirm `ApplicationProgressLegCodes.MaxLegCount >= n`
@@ -124,7 +124,7 @@ dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug -p:Enabl
 
 | Question | Owner |
 |----------|--------|
-| Which color for `2_REVIEW_STARTED` on Application list? | **visa2026-bo-state-colors** |
+| Which color for `2_REVIEW_APPROVED` on Application list? | **visa2026-bo-state-colors** |
 | Why is next step `PROCESS_STARTED` illegal? | **this skill** (transitions) |
 | Seed GT-15 contract rows | **visa2026-lookup-data** + `ProjectContractMinistrySeedUpdater` |
 | Column missing after deploy | **visa2026-lifecycle-docker** + schema updater here |

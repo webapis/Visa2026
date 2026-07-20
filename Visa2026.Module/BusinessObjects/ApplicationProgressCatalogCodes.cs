@@ -5,10 +5,12 @@ namespace Visa2026.Module.BusinessObjects
     {
         public const string IsBeingPrepared = "IS_BEING_PREPARED";
 
+        /// <summary>Legacy — retained for existing rows only; not offered in new progress.</summary>
         public const string Review1Started = "1_REVIEW_STARTED";
         public const string Review1Approved = "1_REVIEW_APPROVED";
         public const string Review1Rejected = "1_REVIEW_REJECTED";
 
+        /// <summary>Legacy — retained for existing rows only; not offered in new progress.</summary>
         public const string Review2Started = "2_REVIEW_STARTED";
         public const string Review2Approved = "2_REVIEW_APPROVED";
         public const string Review2Rejected = "2_REVIEW_REJECTED";

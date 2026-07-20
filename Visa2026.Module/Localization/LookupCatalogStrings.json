@@ -38,18 +38,6 @@
       "tk-TM": "TAÝÝARLYKDA",
       "ru-RU": "На подготовке"
     },
-    "1_REVIEW_STARTED": {
-      "en-US": "1st ministry review (in progress)",
-      "tr-TR": "1. bakanlık incelemesinde",
-      "tk-TM": "1-NJI IŞ YLALAŞYKDA",
-      "ru-RU": "На согласовании (1-я инстанция)"
-    },
-    "2_REVIEW_STARTED": {
-      "en-US": "2nd ministry review (in progress)",
-      "tr-TR": "2. bakanlık incelemesinde",
-      "tk-TM": "2-NJI IŞ YLALAŞYKDA",
-      "ru-RU": "На согласовании (2-я инстанция)"
-    },
     "1_REVIEW_APPROVED": {
       "en-US": "1st ministry review approved",
       "tr-TR": "1. bakanlık onayı alındı",
@@ -74,12 +62,6 @@
       "tk-TM": "2-NJI IŞ YLALAŞYK BERILMEDI",
       "ru-RU": "Отказ (2-я инстанция)"
     },
-    "3_REVIEW_STARTED": {
-      "en-US": "3rd ministry review (in progress)",
-      "tr-TR": "3. bakanlık incelemesinde",
-      "tk-TM": "3-NJI IŞ YLALAŞYKDA",
-      "ru-RU": "На согласовании (3-я инстанция)"
-    },
     "3_REVIEW_APPROVED": {
       "en-US": "3rd ministry review approved",
       "tr-TR": "3. bakanlık onayı alındı",
@@ -92,12 +74,6 @@
       "tk-TM": "3-NJI IŞ YLALAŞYK BERILMEDI",
       "ru-RU": "Отказ (3-я инстанция)"
     },
-    "4_REVIEW_STARTED": {
-      "en-US": "4th ministry review (in progress)",
-      "tr-TR": "4. bakanlık incelemesinde",
-      "tk-TM": "4-NJI IŞ YLALAŞYKDA",
-      "ru-RU": "На согласовании (4-я инстанция)"
-    },
     "4_REVIEW_APPROVED": {
       "en-US": "4th ministry review approved",
       "tr-TR": "4. bakanlık onayı alındı",
@@ -109,12 +85,6 @@
       "tr-TR": "4. bakanlık onayı reddedildi",
       "tk-TM": "4-NJI IŞ YLALAŞYK BERILMEDI",
       "ru-RU": "Отказ (4-я инстанция)"
-    },
-    "5_REVIEW_STARTED": {
-      "en-US": "5th ministry review (in progress)",
-      "tr-TR": "5. bakanlık incelemesinde",
-      "tk-TM": "5-NJI IŞ YLALAŞYKDA",
-      "ru-RU": "На согласовании (5-я инстанция)"
     },
     "5_REVIEW_APPROVED": {
       "en-US": "5th ministry review approved",

@@ -34,12 +34,11 @@ public class Visa2014ApplicationMinistryLegCountResolverTests
 
         var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
-        Assert.Equal(7, steps.Count);
-        Assert.Contains(steps, s => s.StateCode == "1_REVIEW_STARTED");
+        Assert.Equal(5, steps.Count);
         Assert.Contains(steps, s => s.StateCode == "1_REVIEW_APPROVED");
-        Assert.Contains(steps, s => s.StateCode == "2_REVIEW_STARTED");
         Assert.Contains(steps, s => s.StateCode == "2_REVIEW_APPROVED");
         Assert.Contains(steps, s => s.StateCode == "PROCESS_STARTED");
         Assert.Contains(steps, s => s.StateCode == "PROCESS_ISSUED");
+        Assert.DoesNotContain(steps, s => s.StateCode.EndsWith("_REVIEW_STARTED", StringComparison.Ordinal));
     }
 }

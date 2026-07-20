@@ -4,6 +4,18 @@
 
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
+
+### 2026-07-20 — Local PG wipe + scalar reimport from .15 (REVIEW_STARTED cleanup)
+
+- **Phase**: end-to-end (local PostgreSQL `visa2026`, source `10.100.128.15` / `VISA2015`, legacy-source `calik-energi-local-pg`)
+- **Goal**: Full scalar reimport so `ApplicationProgress` regenerates without `_REVIEW_STARTED` / «N-NJI IŞ YLALAŞYKDA» rows (transform already updated).
+- **Prep**: Stopped F5 Blazor; `Wipe-LocalPostgresTransactional.sql` (People/Apps → 0); **must clear id-maps under both** `Visa2026.DataImporter\legacy\...\id-maps\calik-energi-local-pg` **and** `bin\Debug\net8.0\legacy\...\id-maps\calik-energi-local-pg`.
+- **Attempt 1 (failed)**: Cleared only source-tree id-maps → Passport Posted 2 / Skipped already-imported 3661; Visa Failed 4 (stale Passport GUIDs) + Skipped already-imported 6089. **Prevent**: always wipe **bin** id-maps on local PG reimport.
+- **Attempt 2**: Cleared bin+source maps, rewipe, `Run-LocalPgScalarChain.ps1 -StartAt Person -SkipTenantCatalogGeneration` (tenant catalogs already regenerated from .15). Person 3316 / Passport 3663 / Visa 6093 Failed 0.
+- **Education gap**: 1 fail — Specialty `Zähmeti goramak we howpsuzlyk` missing on target (exists on .15; catalog had only `… we tehniki howpsuzlyk` variants). Inserted Specialty row (`GCRecord=0`); appended to `specialty.calik-energi.json`. Resume `-StartAt Education` → Education catch-up Posted 1 Failed 0; EPH 3068; Salary 2961; AoR 5169.
+- **In progress**: RunId `20260720-152656` — Application wave Running → WorkPermit…ApplicationProgress. Watch: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`. Logs: `artifacts/local-pg-import/chain-console-from15-resume-education2-20260720.log`.
+- **Artifacts**: wipe SQL; LocalPgScalarChain; specialty JSON append.
+
 ### 2026-07-17 — Visa.VisaType collapsed to WP (LocalizationKey missing on in-process DTOs)
 
 - **Phase**: import / correction

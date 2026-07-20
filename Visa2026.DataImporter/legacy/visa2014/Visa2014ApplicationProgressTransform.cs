@@ -243,19 +243,7 @@ internal static class Visa2014ApplicationProgressTransform
             var slotDates = BuildMinistrySlotDates(raw, appDate, endDate, ministryLegCount);
             for (var leg = 1; leg <= ministryLegCount; leg++)
             {
-                var startedSlot = (leg - 1) * 2;
-                var approvedSlot = startedSlot + 1;
-                var startedDate = slotDates[startedSlot];
-                var approvedDate = slotDates[approvedSlot];
-                if (approvedDate < startedDate)
-                    approvedDate = startedDate;
-
-                steps.Add(new SynthesisStep(
-                    $"leg_{leg}_started",
-                    $"{leg}_REVIEW_STARTED",
-                    $"AT_THE_MINISTERY_{leg}",
-                    startedDate,
-                    null));
+                var approvedDate = slotDates[leg - 1];
 
                 steps.Add(new SynthesisStep(
                     $"leg_{leg}_approved",
@@ -355,7 +343,7 @@ internal static class Visa2014ApplicationProgressTransform
         DateTime endDate,
         int ministryLegCount)
     {
-        var slotCount = ministryLegCount * 2;
+        var slotCount = ministryLegCount;
         var slots = new DateTime?[slotCount];
         AssignKnownLegDates(raw, slots);
         FillInterpolatedSlotDates(appDate, endDate, slots);
@@ -433,15 +421,10 @@ internal static class Visa2014ApplicationProgressTransform
     {
         if (stepCode == "prepare")
             return 0;
-        if (stepCode.StartsWith("leg_", StringComparison.Ordinal) && stepCode.EndsWith("_started", StringComparison.Ordinal))
-        {
-            if (TryParseLegStepCode(stepCode, out var leg))
-                return 10 + leg * 2;
-        }
         if (stepCode.StartsWith("leg_", StringComparison.Ordinal) && stepCode.EndsWith("_approved", StringComparison.Ordinal))
         {
             if (TryParseLegStepCode(stepCode, out var leg))
-                return 11 + leg * 2;
+                return 10 + leg * 2;
         }
 
         return stepCode switch

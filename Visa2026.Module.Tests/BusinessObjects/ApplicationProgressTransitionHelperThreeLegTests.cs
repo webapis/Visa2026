@@ -14,19 +14,43 @@ public class ApplicationProgressTransitionHelperThreeLegTests
 
         Assert.True(IsAllowed(app,
             ApplicationProgressStateCodes.IsBeingPrepared, ApplicationProgressLocationCodes.AtOffice,
-            ApplicationProgressLegCodes.ReviewStarted(1), ApplicationProgressLegCodes.AtMinistry(1)));
+            ApplicationProgressLegCodes.ReviewApproved(1), ApplicationProgressLegCodes.AtMinistry(1)));
 
         Assert.True(IsAllowed(app,
             ApplicationProgressLegCodes.ReviewApproved(1), ApplicationProgressLegCodes.AtMinistry(1),
-            ApplicationProgressLegCodes.ReviewStarted(2), ApplicationProgressLegCodes.AtMinistry(2)));
+            ApplicationProgressLegCodes.ReviewApproved(2), ApplicationProgressLegCodes.AtMinistry(2)));
 
         Assert.True(IsAllowed(app,
             ApplicationProgressLegCodes.ReviewApproved(2), ApplicationProgressLegCodes.AtMinistry(2),
-            ApplicationProgressLegCodes.ReviewStarted(3), ApplicationProgressLegCodes.AtMinistry(3)));
+            ApplicationProgressLegCodes.ReviewApproved(3), ApplicationProgressLegCodes.AtMinistry(3)));
 
         Assert.True(IsAllowed(app,
             ApplicationProgressLegCodes.ReviewApproved(3), ApplicationProgressLegCodes.AtMinistry(3),
             ApplicationProgressStateCodes.ProcessStarted, ApplicationProgressLocationCodes.AtMigrationService));
+    }
+
+    [Fact]
+    public void ThreeLegProfile_AllowsRejectionFromPriorApprovedStep()
+    {
+        var app = BuildThreeLegApplication();
+
+        Assert.True(IsAllowed(app,
+            ApplicationProgressStateCodes.IsBeingPrepared, ApplicationProgressLocationCodes.AtOffice,
+            ApplicationProgressLegCodes.ReviewRejected(1), ApplicationProgressLegCodes.AtMinistry(1)));
+
+        Assert.True(IsAllowed(app,
+            ApplicationProgressLegCodes.ReviewApproved(1), ApplicationProgressLegCodes.AtMinistry(1),
+            ApplicationProgressLegCodes.ReviewRejected(2), ApplicationProgressLegCodes.AtMinistry(2)));
+    }
+
+    [Fact]
+    public void ThreeLegProfile_BlocksReviewStartedTransitions()
+    {
+        var app = BuildThreeLegApplication();
+
+        Assert.False(IsAllowed(app,
+            ApplicationProgressStateCodes.IsBeingPrepared, ApplicationProgressLocationCodes.AtOffice,
+            ApplicationProgressLegCodes.ReviewStarted(1), ApplicationProgressLegCodes.AtMinistry(1)));
     }
 
     private static bool IsAllowed(

@@ -148,7 +148,7 @@ namespace Visa2026.Module.BusinessObjects
 
             var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProgressLegCodes.MaxLegCount);
 
-            var list = new List<string>(SharedStateCodes.Length + legCount * 3);
+            var list = new List<string>(SharedStateCodes.Length + legCount * 2);
 
             list.AddRange(SharedStateCodes);
 
@@ -381,7 +381,7 @@ namespace Visa2026.Module.BusinessObjects
 
                 ? (ApplicationProgressStateCodes.ProcessStarted, ApplicationProgressLocationCodes.AtMigrationService)
 
-                : (ApplicationProgressLegCodes.ReviewStarted(1), ApplicationProgressLegCodes.AtMinistry(1));
+                : (ApplicationProgressLegCodes.ReviewApproved(1), ApplicationProgressLegCodes.AtMinistry(1));
 
         }
 

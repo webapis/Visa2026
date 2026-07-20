@@ -335,7 +335,9 @@ public static class ApplicationProgressTransitionHelper
 
         if (IsTransitionAllowed(route.Value, legCount, fromStep, toStep))
         {
-            if (ApplicationProgressLegCodes.IsMinistryReviewStartedStateCode(progress.State?.Code)
+            if (progress.State?.Code != null
+                && progress.State.Code.Trim().EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
+                && ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(progress.State.Code, out _)
                 && objectSpace != null
                 && route.Value == ApplicationProgressRouteKind.ViaMinistries
                 && !MinistryReviewSlaHelper.TryValidateConfigured(objectSpace, out _))
@@ -421,31 +423,33 @@ public static class ApplicationProgressTransitionHelper
         }
 
         var legCount = Math.Clamp(ministryLegCount, 1, ApplicationProgressLegCodes.MaxLegCount);
-        var ministrySteps = new List<ProgressStep>();
+        var approvedSteps = new List<ProgressStep>();
 
         for (var leg = 1; leg <= legCount; leg++)
         {
-            var review = Step(ApplicationProgressLegCodes.ReviewStarted(leg), ApplicationProgressLegCodes.AtMinistry(leg));
             var approved = Step(ApplicationProgressLegCodes.ReviewApproved(leg), ApplicationProgressLegCodes.AtMinistry(leg));
             var rejected = Step(ApplicationProgressLegCodes.ReviewRejected(leg), ApplicationProgressLegCodes.AtMinistry(leg));
-            ministrySteps.Add(review);
-            ministrySteps.Add(approved);
+            approvedSteps.Add(approved);
 
             if (leg == 1)
-                edges.Add(new ProgressTransition(prep, review));
+            {
+                edges.Add(new ProgressTransition(prep, approved));
+                edges.Add(new ProgressTransition(prep, rejected));
+            }
             else
-                edges.Add(new ProgressTransition(ministrySteps[(leg - 2) * 2 + 1], review));
-
-            edges.Add(new ProgressTransition(review, approved));
-            edges.Add(new ProgressTransition(review, rejected));
+            {
+                var priorApproved = approvedSteps[leg - 2];
+                edges.Add(new ProgressTransition(priorApproved, approved));
+                edges.Add(new ProgressTransition(priorApproved, rejected));
+            }
         }
 
-        var lastApproved = ministrySteps[^1];
+        var lastApproved = approvedSteps[^1];
         edges.Add(new ProgressTransition(lastApproved, processStarted));
 
         AddProcessOutcomes(edges, processStarted);
         var cancellationFrom = new List<ProgressStep> { prep, processStarted };
-        cancellationFrom.AddRange(ministrySteps.Where((_, i) => i % 2 == 0));
+        cancellationFrom.AddRange(approvedSteps);
         AddCancellationFromActiveSteps(edges, cancellationFrom.ToArray());
 
         return edges;

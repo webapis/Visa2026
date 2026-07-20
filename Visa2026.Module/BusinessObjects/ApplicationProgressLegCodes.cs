@@ -11,10 +11,24 @@ public static class ApplicationProgressLegCodes
 {
     public const int MaxLegCount = 5;
 
+    /// <summary>Legacy state code — retained for parsing existing rows only; not offered in new progress.</summary>
     public static string ReviewStarted(int leg) => $"{leg}_REVIEW_STARTED";
     public static string ReviewApproved(int leg) => $"{leg}_REVIEW_APPROVED";
     public static string ReviewRejected(int leg) => $"{leg}_REVIEW_REJECTED";
     public static string AtMinistry(int leg) => $"AT_THE_MINISTERY_{leg}";
+
+    public static bool IsLegacyReviewStartedCode(string? stateCode) =>
+        IsMinistryReviewStartedStateCode(stateCode);
+
+    public static bool IsActiveMinistryStateCode(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        var trimmed = stateCode.Trim();
+        return trimmed.EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
+            || trimmed.EndsWith("_REVIEW_REJECTED", StringComparison.OrdinalIgnoreCase);
+    }
 
     public static bool IsReviewStateCode(string? stateCode) =>
         TryParseMinistryLegFromStateCode(stateCode, out _);
@@ -82,7 +96,6 @@ public static class ApplicationProgressLegCodes
 
     public static IReadOnlyList<string> GetReviewStateCodesForLeg(int leg) =>
     [
-        ReviewStarted(leg),
         ReviewApproved(leg),
         ReviewRejected(leg)
     ];

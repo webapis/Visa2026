@@ -28,9 +28,9 @@ public static class ApplicationProgressOrderSchemaSql
                     ORDER BY
                         CASE
                             WHEN st.Code = N'IS_BEING_PREPARED' THEN 0
-                            WHEN st.Code LIKE N'[1-5]_REVIEW_STARTED' THEN 10 + CAST(LEFT(st.Code, 1) AS int) * 2
-                            WHEN st.Code LIKE N'[1-5]_REVIEW_APPROVED' OR st.Code LIKE N'[1-5]_REVIEW_REJECTED'
-                                THEN 11 + CAST(LEFT(st.Code, 1) AS int) * 2
+                            WHEN st.Code LIKE N'[1-5]_REVIEW_STARTED' THEN 9 + CAST(LEFT(st.Code, 1) AS int) * 2
+                            WHEN st.Code LIKE N'[1-5]_REVIEW_APPROVED' THEN 10 + CAST(LEFT(st.Code, 1) AS int) * 2
+                            WHEN st.Code LIKE N'[1-5]_REVIEW_REJECTED' THEN 11 + CAST(LEFT(st.Code, 1) AS int) * 2
                             WHEN st.Code = N'PROCESS_STARTED' THEN 999
                             WHEN st.Code = N'PROCESS_ISSUED' THEN 1000
                             WHEN st.Code = N'PROCESS_CANCELLED' THEN 1001
@@ -63,9 +63,9 @@ public static class ApplicationProgressOrderSchemaSql
                     ORDER BY
                         CASE
                             WHEN st.Code = N'IS_BEING_PREPARED' THEN 0
-                            WHEN st.Code LIKE N'[1-5]_REVIEW_STARTED' THEN 10 + CAST(LEFT(st.Code, 1) AS int) * 2
-                            WHEN st.Code LIKE N'[1-5]_REVIEW_APPROVED' OR st.Code LIKE N'[1-5]_REVIEW_REJECTED'
-                                THEN 11 + CAST(LEFT(st.Code, 1) AS int) * 2
+                            WHEN st.Code LIKE N'[1-5]_REVIEW_STARTED' THEN 9 + CAST(LEFT(st.Code, 1) AS int) * 2
+                            WHEN st.Code LIKE N'[1-5]_REVIEW_APPROVED' THEN 10 + CAST(LEFT(st.Code, 1) AS int) * 2
+                            WHEN st.Code LIKE N'[1-5]_REVIEW_REJECTED' THEN 11 + CAST(LEFT(st.Code, 1) AS int) * 2
                             WHEN st.Code = N'PROCESS_STARTED' THEN 999
                             WHEN st.Code = N'PROCESS_ISSUED' THEN 1000
                             WHEN st.Code = N'PROCESS_CANCELLED' THEN 1001

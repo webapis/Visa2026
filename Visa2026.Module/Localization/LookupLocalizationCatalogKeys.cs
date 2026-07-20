@@ -14,7 +14,6 @@ internal static partial class LookupLocalizationKeys
     private static readonly HashSet<string> ApplicationStateSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
         "IS_BEING_PREPARED",
-        "1_REVIEW_STARTED", "2_REVIEW_STARTED", "3_REVIEW_STARTED", "4_REVIEW_STARTED", "5_REVIEW_STARTED",
         "1_REVIEW_APPROVED", "2_REVIEW_APPROVED", "3_REVIEW_APPROVED", "4_REVIEW_APPROVED", "5_REVIEW_APPROVED",
         "1_REVIEW_REJECTED", "2_REVIEW_REJECTED", "3_REVIEW_REJECTED", "4_REVIEW_REJECTED", "5_REVIEW_REJECTED",
         "PROCESS_STARTED", "PROCESS_CANCELLED", "PROCESS_REJECTED", "PROCESS_ISSUED",
@@ -70,11 +69,6 @@ internal static partial class LookupLocalizationKeys
         {
             ["TAÝÝARLYKDA"] = "IS_BEING_PREPARED",
             ["TAYYARLYKDA"] = "IS_BEING_PREPARED",
-            ["1-NJI IŞ YLALAŞYKDA"] = "1_REVIEW_STARTED",
-            ["2-NJI IŞ YLALAŞYKDA"] = "2_REVIEW_STARTED",
-            ["3-NJI IŞ YLALAŞYKDA"] = "3_REVIEW_STARTED",
-            ["4-NJI IŞ YLALAŞYKDA"] = "4_REVIEW_STARTED",
-            ["5-NJI IŞ YLALAŞYKDA"] = "5_REVIEW_STARTED",
             ["1-NJI IŞ YLALAŞYK ALYNDY"] = "1_REVIEW_APPROVED",
             ["2-NJI IŞ YLALAŞYK ALYNDY"] = "2_REVIEW_APPROVED",
             ["3-NJI IŞ YLALAŞYK ALYNDY"] = "3_REVIEW_APPROVED",

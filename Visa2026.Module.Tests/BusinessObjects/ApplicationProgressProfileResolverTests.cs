@@ -47,7 +47,7 @@ public class ApplicationProgressProfileResolverTests
         var progress = new ApplicationProgress
         {
             Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Approved },
             Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
         };
 
@@ -223,7 +223,7 @@ public class ApplicationProgressProfileResolverTests
         var progress = new ApplicationProgress
         {
             Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
+            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Approved },
             Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
         };
 

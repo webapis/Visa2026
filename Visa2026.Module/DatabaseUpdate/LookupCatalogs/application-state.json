@@ -7,18 +7,6 @@
                      "IsDefault":  true
                  },
                  {
-                     "NameTm":  "1-NJI IŞ YLALAŞYKDA",
-                     "Code":  "1_REVIEW_STARTED",
-                     "LocalizationKey":  "1_REVIEW_STARTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "2-NJI IŞ YLALAŞYKDA",
-                     "Code":  "2_REVIEW_STARTED",
-                     "LocalizationKey":  "2_REVIEW_STARTED",
-                     "IsDefault":  false
-                 },
-                 {
                      "NameTm":  "1-NJI IŞ YLALAŞYK ALYNDY",
                      "Code":  "1_REVIEW_APPROVED",
                      "LocalizationKey":  "1_REVIEW_APPROVED",
@@ -43,12 +31,6 @@
                      "IsDefault":  false
                  },
                  {
-                     "NameTm":  "3-NJI IŞ YLALAŞYKDA",
-                     "Code":  "3_REVIEW_STARTED",
-                     "LocalizationKey":  "3_REVIEW_STARTED",
-                     "IsDefault":  false
-                 },
-                 {
                      "NameTm":  "3-NJI IŞ YLALAŞYK ALYNDY",
                      "Code":  "3_REVIEW_APPROVED",
                      "LocalizationKey":  "3_REVIEW_APPROVED",
@@ -61,12 +43,6 @@
                      "IsDefault":  false
                  },
                  {
-                     "NameTm":  "4-NJI IŞ YLALAŞYKDA",
-                     "Code":  "4_REVIEW_STARTED",
-                     "LocalizationKey":  "4_REVIEW_STARTED",
-                     "IsDefault":  false
-                 },
-                 {
                      "NameTm":  "4-NJI IŞ YLALAŞYK ALYNDY",
                      "Code":  "4_REVIEW_APPROVED",
                      "LocalizationKey":  "4_REVIEW_APPROVED",
@@ -76,12 +52,6 @@
                      "NameTm":  "4-NJI IŞ YLALAŞYK BERILMEDI",
                      "Code":  "4_REVIEW_REJECTED",
                      "LocalizationKey":  "4_REVIEW_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "5-NJI IŞ YLALAŞYKDA",
-                     "Code":  "5_REVIEW_STARTED",
-                     "LocalizationKey":  "5_REVIEW_STARTED",
                      "IsDefault":  false
                  },
                  {

@@ -34,15 +34,16 @@ public class Visa2014ApplicationProgressTransformTests
 
         var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
-        Assert.Equal(7, steps.Count);
-        Assert.Equal("2_REVIEW_APPROVED", steps[4].StateCode);
-        Assert.Equal("PROCESS_STARTED", steps[5].StateCode);
-        Assert.Equal("AT_MIGRATION_SERVICE", steps[5].LocationCode);
-        Assert.True(steps[5].Date < steps[6].Date);
-        Assert.Equal("PROCESS_ISSUED", steps[6].StateCode);
-        Assert.Equal("AT_MIGRATION_SERVICE", steps[6].LocationCode);
-        Assert.Equal(new DateTime(2014, 6, 27), steps[6].Date);
-        Assert.Equal("ProcessNumber: AS455977", steps[6].Description);
+        Assert.Equal(5, steps.Count);
+        Assert.Equal("2_REVIEW_APPROVED", steps[2].StateCode);
+        Assert.Equal("PROCESS_STARTED", steps[3].StateCode);
+        Assert.Equal("AT_MIGRATION_SERVICE", steps[3].LocationCode);
+        Assert.True(steps[3].Date < steps[4].Date);
+        Assert.Equal("PROCESS_ISSUED", steps[4].StateCode);
+        Assert.Equal("AT_MIGRATION_SERVICE", steps[4].LocationCode);
+        Assert.Equal(new DateTime(2014, 6, 27), steps[4].Date);
+        Assert.Equal("ProcessNumber: AS455977", steps[4].Description);
+        Assert.DoesNotContain(steps, s => s.StateCode.EndsWith("_REVIEW_STARTED", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -110,13 +111,13 @@ public class Visa2014ApplicationProgressTransformTests
 
         var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
 
-        Assert.Equal(6, steps.Count);
+        Assert.Equal(4, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[^1].StateCode);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
     }
 
     [Fact]
-    public void SynthesizeSteps_OutOfOrderLegacyDates_KeepsMinistryPairsAdjacent()
+    public void SynthesizeSteps_OutOfOrderLegacyDates_KeepsMinistryApprovalsOrdered()
     {
         var raw = new Visa2014ApplicationProgressRawRow(
             LegacyApplicationOid: Guid.NewGuid(),
@@ -144,13 +145,11 @@ public class Visa2014ApplicationProgressTransformTests
 
         var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 3);
 
-        Assert.Equal(8, steps.Count);
-        Assert.Equal("1_REVIEW_STARTED", steps[1].StateCode);
-        Assert.Equal("1_REVIEW_APPROVED", steps[2].StateCode);
-        Assert.Equal("2_REVIEW_STARTED", steps[3].StateCode);
-        Assert.Equal("2_REVIEW_APPROVED", steps[4].StateCode);
-        Assert.Equal("3_REVIEW_STARTED", steps[5].StateCode);
-        Assert.Equal("3_REVIEW_APPROVED", steps[6].StateCode);
-        Assert.Equal("PROCESS_STARTED", steps[7].StateCode);
+        Assert.Equal(5, steps.Count);
+        Assert.Equal("1_REVIEW_APPROVED", steps[1].StateCode);
+        Assert.Equal("2_REVIEW_APPROVED", steps[2].StateCode);
+        Assert.Equal("3_REVIEW_APPROVED", steps[3].StateCode);
+        Assert.Equal("PROCESS_STARTED", steps[4].StateCode);
+        Assert.DoesNotContain(steps, s => s.StateCode.EndsWith("_REVIEW_STARTED", StringComparison.Ordinal));
     }
 }
