@@ -51,7 +51,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Name | Status | Replacement | Schema | Notes |
 |------|--------|-------------|--------|-------|
-| **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Used on `ApplicationProgress.Location`. Layer B strings in `LookupCatalogStrings.json`. |
+| **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Catalog retained; **no longer** used on `ApplicationProgress` (progress is state-only). Layer B strings in `LookupCatalogStrings.json`. |
 | **BorderZoneLocation** | Deprecated | Comma-separated **`BorderZoneName`** on `Application`, `ApplicationItem`, and `Visa` | BO + table retained (hidden nav); **no** JSON catalog | Migrated by `ApplicationBorderZoneLocationStringUpdater` + earlier item/visa updaters. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). Do not confuse with **ApplicationLocation**. |
 | **MovementPermitLocation** | Retained (UI catalog) | Per-deployment rows in lookup UI | Table retained; excluded from manifest | See [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md). |
 

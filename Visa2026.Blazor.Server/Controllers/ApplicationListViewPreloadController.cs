@@ -178,7 +178,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         var applications = ObjectSpace.GetObjectsQuery<Application>()
             .Where(application => batchIds.Contains(application.ID))
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
-            .Include(application => application.LatestProgress!).ThenInclude(progress => progress.Location)
+            .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
             .Include(application => application.ApplicationType!).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
             .Include(application => application.ApprovalLegProfile!)
                 .ThenInclude(profile => profile.MinistryLegs)

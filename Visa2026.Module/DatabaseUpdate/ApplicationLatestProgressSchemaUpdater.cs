@@ -40,8 +40,6 @@ public sealed class ApplicationLatestProgressSchemaUpdater : ModuleUpdater
                 .Take(BackfillBatchSize)
                 .Include(application => application.LatestProgress!)
                     .ThenInclude(progress => progress.State)
-                .Include(application => application.LatestProgress!)
-                    .ThenInclude(progress => progress.Location)
                 .ToList();
 
             if (applications.Count == 0)

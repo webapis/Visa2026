@@ -1,94 +1,100 @@
 {
-    "rows":  [
-                 {
-                     "NameTm":  "TAÝÝARLYKDA",
-                     "Code":  "IS_BEING_PREPARED",
-                     "LocalizationKey":  "IS_BEING_PREPARED",
-                     "IsDefault":  true
-                 },
-                 {
-                     "NameTm":  "1-NJI IŞ YLALAŞYK ALYNDY",
-                     "Code":  "1_REVIEW_APPROVED",
-                     "LocalizationKey":  "1_REVIEW_APPROVED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "2-NJI IŞ YLALAŞYK ALYNDY",
-                     "Code":  "2_REVIEW_APPROVED",
-                     "LocalizationKey":  "2_REVIEW_APPROVED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "1-NJI IŞ YLALAŞYK BERILMEDI",
-                     "Code":  "1_REVIEW_REJECTED",
-                     "LocalizationKey":  "1_REVIEW_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "2-NJI IŞ YLALAŞYK BERILMEDI",
-                     "Code":  "2_REVIEW_REJECTED",
-                     "LocalizationKey":  "2_REVIEW_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "3-NJI IŞ YLALAŞYK ALYNDY",
-                     "Code":  "3_REVIEW_APPROVED",
-                     "LocalizationKey":  "3_REVIEW_APPROVED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "3-NJI IŞ YLALAŞYK BERILMEDI",
-                     "Code":  "3_REVIEW_REJECTED",
-                     "LocalizationKey":  "3_REVIEW_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "4-NJI IŞ YLALAŞYK ALYNDY",
-                     "Code":  "4_REVIEW_APPROVED",
-                     "LocalizationKey":  "4_REVIEW_APPROVED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "4-NJI IŞ YLALAŞYK BERILMEDI",
-                     "Code":  "4_REVIEW_REJECTED",
-                     "LocalizationKey":  "4_REVIEW_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "5-NJI IŞ YLALAŞYK ALYNDY",
-                     "Code":  "5_REVIEW_APPROVED",
-                     "LocalizationKey":  "5_REVIEW_APPROVED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "5-NJI IŞ YLALAŞYK BERILMEDI",
-                     "Code":  "5_REVIEW_REJECTED",
-                     "LocalizationKey":  "5_REVIEW_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "İŞLENMEKDE",
-                     "Code":  "PROCESS_STARTED",
-                     "LocalizationKey":  "PROCESS_STARTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "ÝÜZTUTMA ÝATYRYLDY",
-                     "Code":  "PROCESS_CANCELLED",
-                     "LocalizationKey":  "PROCESS_CANCELLED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "GARŞYLYK BERILDI",
-                     "Code":  "PROCESS_REJECTED",
-                     "LocalizationKey":  "PROCESS_REJECTED",
-                     "IsDefault":  false
-                 },
-                 {
-                     "NameTm":  "RESMILEŞDİRİLDİ",
-                     "Code":  "PROCESS_ISSUED",
-                     "LocalizationKey":  "PROCESS_ISSUED",
-                     "IsDefault":  false
-                 }
-             ]
+    "rows": [
+        {
+            "NameTm": "Ofisde",
+            "Code": "IS_BEING_PREPARED",
+            "LocalizationKey": "IS_BEING_PREPARED",
+            "IsDefault": true
+        },
+        {
+            "NameTm": "Ylalaşyga Iberildi",
+            "Code": "1_REVIEW_STARTED",
+            "LocalizationKey": "1_REVIEW_STARTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ylalaşykdan çykdy",
+            "Code": "1_REVIEW_APPROVED",
+            "LocalizationKey": "1_REVIEW_APPROVED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ministrlikden gelmedi",
+            "Code": "1_REVIEW_REJECTED",
+            "LocalizationKey": "1_REVIEW_REJECTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ylalaşykdan çykdy",
+            "Code": "2_REVIEW_APPROVED",
+            "LocalizationKey": "2_REVIEW_APPROVED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ministrlikden gelmedi",
+            "Code": "2_REVIEW_REJECTED",
+            "LocalizationKey": "2_REVIEW_REJECTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ylalaşykdan çykdy",
+            "Code": "3_REVIEW_APPROVED",
+            "LocalizationKey": "3_REVIEW_APPROVED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ministrlikden gelmedi",
+            "Code": "3_REVIEW_REJECTED",
+            "LocalizationKey": "3_REVIEW_REJECTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ylalaşykdan çykdy",
+            "Code": "4_REVIEW_APPROVED",
+            "LocalizationKey": "4_REVIEW_APPROVED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ministrlikden gelmedi",
+            "Code": "4_REVIEW_REJECTED",
+            "LocalizationKey": "4_REVIEW_REJECTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ylalaşykdan çykdy",
+            "Code": "5_REVIEW_APPROVED",
+            "LocalizationKey": "5_REVIEW_APPROVED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ministrlikden gelmedi",
+            "Code": "5_REVIEW_REJECTED",
+            "LocalizationKey": "5_REVIEW_REJECTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Işlenilýär",
+            "Code": "PROCESS_STARTED",
+            "LocalizationKey": "PROCESS_STARTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Ýüz tutma ýatyryldy",
+            "Code": "PROCESS_CANCELLED",
+            "LocalizationKey": "PROCESS_CANCELLED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Garşylyk berildi",
+            "Code": "PROCESS_REJECTED",
+            "LocalizationKey": "PROCESS_REJECTED",
+            "IsDefault": false
+        },
+        {
+            "NameTm": "Resmileşdirildi",
+            "Code": "PROCESS_ISSUED",
+            "LocalizationKey": "PROCESS_ISSUED",
+            "IsDefault": false
+        }
+    ]
 }

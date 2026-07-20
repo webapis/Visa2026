@@ -445,20 +445,17 @@ internal static class Visa2014ApplicationProgressODataImporter
         Guid applicationId)
     {
         var stateCode = row.GetValueOrDefault("State") as string;
-        var locationCode = row.GetValueOrDefault("Location") as string;
         if (!TryParseDate(row.GetValueOrDefault("Date") as string, out var date))
             return null;
 
         var stateId = resolver.ResolveApplicationState(stateCode);
-        var locationId = resolver.ResolveApplicationLocation(locationCode);
-        if (!stateId.HasValue || !locationId.HasValue)
+        if (!stateId.HasValue)
             return null;
 
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["Application"] = new { ID = applicationId },
             ["State"] = new { ID = stateId.Value },
-            ["Location"] = new { ID = locationId.Value },
             ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
         };
 
@@ -477,8 +474,6 @@ internal static class Visa2014ApplicationProgressODataImporter
         var gaps = new List<string>();
         if (!resolver.ResolveApplicationState(row.GetValueOrDefault("State") as string).HasValue)
             gaps.Add($"State={row.GetValueOrDefault("State")}");
-        if (!resolver.ResolveApplicationLocation(row.GetValueOrDefault("Location") as string).HasValue)
-            gaps.Add($"Location={row.GetValueOrDefault("Location")}");
         if (!TryParseDate(row.GetValueOrDefault("Date") as string, out _))
             gaps.Add($"Date={row.GetValueOrDefault("Date")}");
         return gaps.Count > 0 ? string.Join("; ", gaps) : "unknown";

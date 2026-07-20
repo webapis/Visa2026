@@ -430,9 +430,6 @@ public class ApplicationProgress
     [JsonPropertyName("State")]
     public ApplicationState? State { get; set; }
 
-    [JsonPropertyName("Location")]
-    public ApplicationLocation? Location { get; set; }
-
     [JsonPropertyName("Date")]
     public DateTime Date { get; set; }
 

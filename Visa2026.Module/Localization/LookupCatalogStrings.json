@@ -33,93 +33,99 @@
   },
   "application-state": {
     "IS_BEING_PREPARED": {
-      "en-US": "In preparation",
-      "tr-TR": "Hazırlanıyor",
-      "tk-TM": "TAÝÝARLYKDA",
-      "ru-RU": "На подготовке"
+      "en-US": "At office",
+      "tr-TR": "Ofiste",
+      "tk-TM": "Ofisde",
+      "ru-RU": "В офисе"
+    },
+    "1_REVIEW_STARTED": {
+      "en-US": "Sent for agreement",
+      "tr-TR": "Mutabakata gönderildi",
+      "tk-TM": "Ylalaşyga Iberildi",
+      "ru-RU": "Отправлено на согласование"
     },
     "1_REVIEW_APPROVED": {
-      "en-US": "1st ministry review approved",
-      "tr-TR": "1. bakanlık onayı alındı",
-      "tk-TM": "1-NJI IŞ YLALAŞYK ALYNDY",
-      "ru-RU": "Согласовано (1-я инстанция)"
+      "en-US": "Cleared agreement",
+      "tr-TR": "Mutabakattan çıktı",
+      "tk-TM": "Ylalaşykdan çykdy",
+      "ru-RU": "Вышло из согласования"
     },
     "2_REVIEW_APPROVED": {
-      "en-US": "2nd ministry review approved",
-      "tr-TR": "2. bakanlık onayı alındı",
-      "tk-TM": "2-NJI IŞ YLALAŞYK ALYNDY",
-      "ru-RU": "Согласовано (2-я инстанция)"
+      "en-US": "Cleared agreement",
+      "tr-TR": "Mutabakattan çıktı",
+      "tk-TM": "Ylalaşykdan çykdy",
+      "ru-RU": "Вышло из согласования"
     },
     "1_REVIEW_REJECTED": {
-      "en-US": "1st ministry review rejected",
-      "tr-TR": "1. bakanlık onayı reddedildi",
-      "tk-TM": "1-NJI IŞ YLALAŞYK BERILMEDI",
-      "ru-RU": "Отказ (1-я инстанция)"
+      "en-US": "Not received from ministry",
+      "tr-TR": "Bakanlıktan gelmedi",
+      "tk-TM": "Ministrlikden gelmedi",
+      "ru-RU": "Не получено из министерства"
     },
     "2_REVIEW_REJECTED": {
-      "en-US": "2nd ministry review rejected",
-      "tr-TR": "2. bakanlık onayı reddedildi",
-      "tk-TM": "2-NJI IŞ YLALAŞYK BERILMEDI",
-      "ru-RU": "Отказ (2-я инстанция)"
+      "en-US": "Not received from ministry",
+      "tr-TR": "Bakanlıktan gelmedi",
+      "tk-TM": "Ministrlikden gelmedi",
+      "ru-RU": "Не получено из министерства"
     },
     "3_REVIEW_APPROVED": {
-      "en-US": "3rd ministry review approved",
-      "tr-TR": "3. bakanlık onayı alındı",
-      "tk-TM": "3-NJI IŞ YLALAŞYK ALYNDY",
-      "ru-RU": "Согласовано (3-я инстанция)"
+      "en-US": "Cleared agreement",
+      "tr-TR": "Mutabakattan çıktı",
+      "tk-TM": "Ylalaşykdan çykdy",
+      "ru-RU": "Вышло из согласования"
     },
     "3_REVIEW_REJECTED": {
-      "en-US": "3rd ministry review rejected",
-      "tr-TR": "3. bakanlık onayı reddedildi",
-      "tk-TM": "3-NJI IŞ YLALAŞYK BERILMEDI",
-      "ru-RU": "Отказ (3-я инстанция)"
+      "en-US": "Not received from ministry",
+      "tr-TR": "Bakanlıktan gelmedi",
+      "tk-TM": "Ministrlikden gelmedi",
+      "ru-RU": "Не получено из министерства"
     },
     "4_REVIEW_APPROVED": {
-      "en-US": "4th ministry review approved",
-      "tr-TR": "4. bakanlık onayı alındı",
-      "tk-TM": "4-NJI IŞ YLALAŞYK ALYNDY",
-      "ru-RU": "Согласовано (4-я инстанция)"
+      "en-US": "Cleared agreement",
+      "tr-TR": "Mutabakattan çıktı",
+      "tk-TM": "Ylalaşykdan çykdy",
+      "ru-RU": "Вышло из согласования"
     },
     "4_REVIEW_REJECTED": {
-      "en-US": "4th ministry review rejected",
-      "tr-TR": "4. bakanlık onayı reddedildi",
-      "tk-TM": "4-NJI IŞ YLALAŞYK BERILMEDI",
-      "ru-RU": "Отказ (4-я инстанция)"
+      "en-US": "Not received from ministry",
+      "tr-TR": "Bakanlıktan gelmedi",
+      "tk-TM": "Ministrlikden gelmedi",
+      "ru-RU": "Не получено из министерства"
     },
     "5_REVIEW_APPROVED": {
-      "en-US": "5th ministry review approved",
-      "tr-TR": "5. bakanlık onayı alındı",
-      "tk-TM": "5-NJI IŞ YLALAŞYK ALYNDY",
-      "ru-RU": "Согласовано (5-я инстанция)"
+      "en-US": "Cleared agreement",
+      "tr-TR": "Mutabakattan çıktı",
+      "tk-TM": "Ylalaşykdan çykdy",
+      "ru-RU": "Вышло из согласования"
     },
     "5_REVIEW_REJECTED": {
-      "en-US": "5th ministry review rejected",
-      "tr-TR": "5. bakanlık onayı reddedildi",
-      "tk-TM": "5-NJI IŞ YLALAŞYK BERILMEDI",
-      "ru-RU": "Отказ (5-я инстанция)"
+      "en-US": "Not received from ministry",
+      "tr-TR": "Bakanlıktan gelmedi",
+      "tk-TM": "Ministrlikden gelmedi",
+      "ru-RU": "Не получено из министерства"
     },
     "PROCESS_STARTED": {
-      "en-US": "In processing",
+      "en-US": "Processing",
       "tr-TR": "İşleniyor",
-      "tk-TM": "İŞLENMEKDE",
+      "tk-TM": "Işlenilýär",
       "ru-RU": "В обработке"
     },
     "PROCESS_CANCELLED": {
-      "en-US": "Application cancelled",
-      "tr-TR": "Başvuru iptal edildi",
-      "tk-TM": "ÝÜZTUTMA ÝATYRYLDY",
+      "en-US": "Cancelled",
+      "tr-TR": "İptal edildi",
+      "tk-TM": "Ýüz tutma ýatyryldy",
       "ru-RU": "Заявление отменено"
     },
     "PROCESS_REJECTED": {
       "en-US": "Rejected",
       "tr-TR": "Reddedildi",
-      "tk-TM": "GARŞYLYK BERILDI",
+      "tk-TM": "Garşylyk berildi",
       "ru-RU": "Отказ"
     },
     "PROCESS_ISSUED": {
       "en-US": "Issued",
       "tr-TR": "Düzenlendi",
-      "tk-TM": "RESMILEŞDİRİLDİ",
+      "tk-TM": "Resmileşdirildi",
       "ru-RU": "Оформлено"
     }
   },

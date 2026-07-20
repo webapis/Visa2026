@@ -15,7 +15,6 @@ public class ApplicationLatestProgressSyncTests
             Date = new DateTime(2024, 6, 2),
             Order = 2,
             State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessRejected },
-            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice },
         };
 
         ApplicationLatestProgressSyncHelper.Apply(application, latest);

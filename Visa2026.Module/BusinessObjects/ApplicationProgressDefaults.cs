@@ -1,6 +1,9 @@
 namespace Visa2026.Module.BusinessObjects
 {
-    /// <summary>Stable codes for the initial <see cref="ApplicationProgress"/> row on new <see cref="Application"/>.</summary>
+    /// <summary>
+    /// Legacy office codes. New applications do not seed a prep progress row —
+    /// office is implied until the first explicit step.
+    /// </summary>
     public static class ApplicationProgressDefaults
     {
         public const string InitialStateCode = "IS_BEING_PREPARED";

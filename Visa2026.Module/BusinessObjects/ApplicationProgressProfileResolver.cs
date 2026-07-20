@@ -777,15 +777,9 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    private static bool IsOfficePreparationStep(ApplicationProgress progress) =>
-
+        private static bool IsOfficePreparationStep(ApplicationProgress progress) =>
         progress.State != null
-
-        && progress.Location != null
-
-        && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)
-
-        && string.Equals(progress.Location.Code, ApplicationProgressLocationCodes.AtOffice, StringComparison.OrdinalIgnoreCase);
+        && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
 
 
 

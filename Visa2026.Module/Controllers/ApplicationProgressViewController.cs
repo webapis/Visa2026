@@ -83,7 +83,7 @@ public sealed class ApplicationProgressCommitValidationController : ViewControll
 }
 
 /// <summary>
-/// Suggests state/location defaults and refreshes location choices on the <see cref="ApplicationProgress"/> detail view.
+/// Suggests state defaults on the <see cref="ApplicationProgress"/> detail view.
 /// </summary>
 public sealed class ApplicationProgressDetailViewController : ObjectViewController<DetailView, ApplicationProgress>
 {
@@ -120,7 +120,6 @@ public sealed class ApplicationProgressDetailViewController : ObjectViewControll
             return;
 
         ApplicationProgressTransitionHelper.TryApplySuggestedNextStep(progress);
-        ApplicationProgressTransitionHelper.TryApplyDefaultLocationForState(progress);
         View.Refresh();
     }
 }

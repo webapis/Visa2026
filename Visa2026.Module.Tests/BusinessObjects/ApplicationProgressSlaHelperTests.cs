@@ -31,8 +31,7 @@ public class ApplicationProgressSlaHelperTests
             WorkingDaysAgo(3),
             maxDays: 10,
             warningDays: 8,
-            legCount: 1,
-            locationCode: ApplicationProgressLocationCodes.AtOffice);
+            legCount: 1);
 
         var sla = ApplicationProgressSlaHelper.Resolve(app);
 
@@ -48,8 +47,7 @@ public class ApplicationProgressSlaHelperTests
             WorkingDaysAgo(9),
             maxDays: 10,
             warningDays: 8,
-            legCount: 1,
-            locationCode: ApplicationProgressLocationCodes.AtOffice);
+            legCount: 1);
 
         var sla = ApplicationProgressSlaHelper.Resolve(app);
 
@@ -65,8 +63,7 @@ public class ApplicationProgressSlaHelperTests
             WorkingDaysAgo(11),
             maxDays: 10,
             warningDays: 8,
-            legCount: 1,
-            locationCode: ApplicationProgressLocationCodes.AtOffice);
+            legCount: 1);
 
         var sla = ApplicationProgressSlaHelper.Resolve(app);
 
@@ -97,13 +94,11 @@ public class ApplicationProgressSlaHelperTests
                 {
                     Date = WorkingDaysAgo(9),
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
                 },
                 new ApplicationProgress
                 {
                     Date = DateTime.Today,
                     State = new ApplicationState { Code = ApplicationProgressLegCodes.ReviewStarted(1) },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLegCodes.AtMinistry(1) }
                 }
             ],
             ApprovalLegSnapshots =
@@ -139,13 +134,29 @@ public class ApplicationProgressSlaHelperTests
         Assert.False(string.IsNullOrWhiteSpace(error));
     }
 
+
+    private static Application BuildImpliedOfficeApplication(
+        DateTime applicationDate,
+        int maxDays,
+        int warningDays,
+        int legCount)
+    {
+        var app = BuildApplication(
+            ApplicationProgressStateCodes.IsBeingPrepared,
+            applicationDate,
+            maxDays,
+            warningDays,
+            legCount);
+        app.ApplicationDate = applicationDate;
+        app.ProgressHistory = [];
+        return app;
+    }
     private static Application BuildApplication(
         string stateCode,
         DateTime progressDate,
         int maxDays,
         int warningDays,
-        int legCount,
-        string? locationCode = null)
+        int legCount)
     {
         var snapshots = Enumerable.Range(1, legCount)
             .Select(sequence => new ApplicationApprovalLegSnapshot
@@ -180,10 +191,6 @@ public class ApplicationProgressSlaHelperTests
                 {
                     Date = progressDate,
                     State = new ApplicationState { Code = stateCode },
-                    Location = new ApplicationLocation
-                    {
-                        Code = locationCode ?? ApplicationProgressLegCodes.AtMinistry(1)
-                    }
                 }
             ],
             ApprovalLegSnapshots = snapshots

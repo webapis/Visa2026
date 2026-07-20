@@ -5,17 +5,20 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 
 public class ApplicationProgressLegCodesDecisionTests
 {
-    [Theory]
-    [InlineData(1)]
-    [InlineData(3)]
-    public void GetReviewStateCodesForLeg_ExcludesReviewStarted(int leg)
+    [Fact]
+    public void GetReviewStateCodesForLeg_IncludesStartedForFirstLegOnly()
     {
-        var codes = ApplicationProgressLegCodes.GetReviewStateCodesForLeg(leg);
+        var leg1 = ApplicationProgressLegCodes.GetReviewStateCodesForLeg(1);
+        Assert.Equal(3, leg1.Count);
+        Assert.Contains(ApplicationProgressLegCodes.ReviewStarted(1), leg1);
+        Assert.Contains(ApplicationProgressLegCodes.ReviewApproved(1), leg1);
+        Assert.Contains(ApplicationProgressLegCodes.ReviewRejected(1), leg1);
 
-        Assert.Equal(2, codes.Count);
-        Assert.Contains(ApplicationProgressLegCodes.ReviewApproved(leg), codes);
-        Assert.Contains(ApplicationProgressLegCodes.ReviewRejected(leg), codes);
-        Assert.DoesNotContain(ApplicationProgressLegCodes.ReviewStarted(leg), codes);
+        var leg3 = ApplicationProgressLegCodes.GetReviewStateCodesForLeg(3);
+        Assert.Equal(2, leg3.Count);
+        Assert.Contains(ApplicationProgressLegCodes.ReviewApproved(3), leg3);
+        Assert.Contains(ApplicationProgressLegCodes.ReviewRejected(3), leg3);
+        Assert.DoesNotContain(ApplicationProgressLegCodes.ReviewStarted(3), leg3);
     }
 
     [Theory]

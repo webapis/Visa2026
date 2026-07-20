@@ -6,11 +6,10 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class ApplicationMigrationSlaHelperTests
 {
     [Fact]
-    public void Resolve_ReturnsNone_WhenNotAtMigrationService()
+    public void Resolve_ReturnsNone_WhenNotProcessStarted()
     {
         var app = BuildApplication(
             ApplicationProgressStateCodes.Review1Started,
-            ApplicationProgressLocationCodes.AtMinistry1,
             WorkingDaysAgo(5),
             maxDays: 10,
             warningDays: 8);
@@ -26,7 +25,6 @@ public class ApplicationMigrationSlaHelperTests
     {
         var app = BuildApplication(
             ApplicationProgressStateCodes.ProcessStarted,
-            ApplicationProgressLocationCodes.AtMigrationService,
             WorkingDaysAgo(3),
             maxDays: 10,
             warningDays: 8);
@@ -42,7 +40,6 @@ public class ApplicationMigrationSlaHelperTests
     {
         var app = BuildApplication(
             ApplicationProgressStateCodes.ProcessStarted,
-            ApplicationProgressLocationCodes.AtMigrationService,
             WorkingDaysAgo(9),
             maxDays: 10,
             warningDays: 8);
@@ -58,7 +55,6 @@ public class ApplicationMigrationSlaHelperTests
     {
         var app = BuildApplication(
             ApplicationProgressStateCodes.ProcessStarted,
-            ApplicationProgressLocationCodes.AtMigrationService,
             WorkingDaysAgo(11),
             maxDays: 10,
             warningDays: 8);
@@ -84,7 +80,6 @@ public class ApplicationMigrationSlaHelperTests
                 {
                     Date = WorkingDaysAgo(5),
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMigrationService }
                 }
             ]
         };
@@ -95,19 +90,16 @@ public class ApplicationMigrationSlaHelperTests
     }
 
     [Fact]
-    public void IsMigrationServiceProcessStartedStep_RequiresBothStateAndLocation()
+    public void IsMigrationServiceProcessStartedStep_IsStateOnly()
     {
         Assert.True(ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(
-            ApplicationProgressStateCodes.ProcessStarted,
-            ApplicationProgressLocationCodes.AtMigrationService));
+            ApplicationProgressStateCodes.ProcessStarted));
         Assert.False(ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(
-            ApplicationProgressStateCodes.ProcessStarted,
-            ApplicationProgressLocationCodes.AtOffice));
+            ApplicationProgressStateCodes.IsBeingPrepared));
     }
 
     private static Application BuildApplication(
         string stateCode,
-        string locationCode,
         DateTime progressDate,
         int maxDays,
         int warningDays)
@@ -130,7 +122,6 @@ public class ApplicationMigrationSlaHelperTests
                 {
                     Date = progressDate,
                     State = new ApplicationState { Code = stateCode },
-                    Location = new ApplicationLocation { Code = locationCode }
                 }
             ]
         };

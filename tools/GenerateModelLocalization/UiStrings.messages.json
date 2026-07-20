@@ -1392,7 +1392,7 @@
     "ru-RU": "Состояние «{0}» нельзя указать для места «{1}»."
   },
   "ApplicationProgress.FirstStepMustBeOfficePreparation": {
-    "en": "The first progress step must be office preparation (in preparation at office).",
+    "en": "The first progress step must be sent for agreement (Ylalaşyga Iberildi) or processing (direct route).",
     "tr-TR": "İlk ilerleme adımı ofis hazırlığı olmalıdır (hazırlanıyor @ ofiste).",
     "tk-TM": "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (taýýarlykda @ ofisde).",
     "ru-RU": "Первый шаг прогресса — подготовка в офисе."

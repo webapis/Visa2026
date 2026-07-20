@@ -6,6 +6,24 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-20 — Office implied (no IS_BEING_PREPARED seed)
+
+- **Decision**: Do not write `IS_BEING_PREPARED` progress rows. Empty history = at office until first explicit step (`1_REVIEW_STARTED` / `PROCESS_STARTED`). Catalog code kept for ListView implied label (Ofisde) and legacy rows.
+- **Transitions**: First step from empty history is `Ylalaşyga Iberildi` (via ministries) or `PROCESS_STARTED` (direct). Legacy prep rows can still advance.
+- **Import**: No synthetic prepare step.
+- **Prevent**: Do not re-enable `ApplicationProgressInitializer` seeding.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+### 2026-07-20 — Legacy-aligned naming + remove Location from progress
+
+- **Decision**: Restore first-leg-only `1_REVIEW_STARTED` ("Ministrlige iberilen"); legs 2–5 stay approval/rejection only. Drop `ApplicationProgress.Location` — labels are state (+ ministry short name). Keep `ApplicationLocation` catalog unused by progress.
+- **Labels**: Ofisde / Sent to ministry / Received from ministry / Processing / Issued (tk+en in `application-state.json` + `LookupCatalogStrings.json`).
+- **Transitions**: `prep → 1_REVIEW_STARTED → 1_REVIEW_APPROVED`; later legs from prior approved; suggested next after prep = `1_REVIEW_STARTED`.
+- **Import**: synthesize `1_REVIEW_STARTED` then approvals; no Location payload.
+- **Schema**: `ApplicationProgressLocationDropSchemaUpdater` drops `LocationID`.
+- **Prevent**: Do not re-add `2..5_REVIEW_STARTED` for new progress; do not require Location on progress save.
+- **Cross-skill**: visa2014-to-visa2026-import
+
 ### 2026-07-17 — ApprovalLegProfile column on Applications (via ministry) ListView
 
 - **Request**: Show **Approval leg profile** on `Application_ListView_ViaMinistries` only (not Direct migration / default Application list).

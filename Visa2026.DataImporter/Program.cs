@@ -1239,7 +1239,7 @@ try
         Log.Ok($"ApplicationItem: {appItem.Id}");
 
         Log.Step("Logging initial application progress...");
-        await appProgressImporter.CreateOneAsync(application.Id, appState!.Id, appLocation!.Id, DateTime.Now, "Application submitted.");
+        await appProgressImporter.CreateOneAsync(application.Id, appState!.Id, DateTime.Now, "Application submitted.");
         Log.Ok("Phase 5 complete.");
         #endregion
 

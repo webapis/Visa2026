@@ -16,7 +16,6 @@ public static class ApplicationProgressLetterCatalogBuilder
         return objectSpace.GetObjectsQuery<ApplicationProgress>()
             .Include(p => p.Application)
             .Include(p => p.State)
-            .Include(p => p.Location)
             .Include(p => p.MinistryLetterFile)
             .Where(p => p.Application != null && p.Application.ID == applicationId)
             .Where(p => p.MinistryLetterFile != null && p.MinistryLetterFile.Size > 0)

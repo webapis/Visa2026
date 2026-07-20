@@ -14,6 +14,7 @@ internal static partial class LookupLocalizationKeys
     private static readonly HashSet<string> ApplicationStateSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
         "IS_BEING_PREPARED",
+        "1_REVIEW_STARTED",
         "1_REVIEW_APPROVED", "2_REVIEW_APPROVED", "3_REVIEW_APPROVED", "4_REVIEW_APPROVED", "5_REVIEW_APPROVED",
         "1_REVIEW_REJECTED", "2_REVIEW_REJECTED", "3_REVIEW_REJECTED", "4_REVIEW_REJECTED", "5_REVIEW_REJECTED",
         "PROCESS_STARTED", "PROCESS_CANCELLED", "PROCESS_REJECTED", "PROCESS_ISSUED",
@@ -67,8 +68,14 @@ internal static partial class LookupLocalizationKeys
     private static readonly Dictionary<string, string> ApplicationStateNameToKey =
         new(StringComparer.OrdinalIgnoreCase)
         {
+            ["Ofisde"] = "IS_BEING_PREPARED",
             ["TAÝÝARLYKDA"] = "IS_BEING_PREPARED",
             ["TAYYARLYKDA"] = "IS_BEING_PREPARED",
+            ["Ministrlige iberilen"] = "1_REVIEW_STARTED",
+            ["Ylalaşyga Iberildi"] = "1_REVIEW_STARTED",
+            ["Ministrlikden gelen"] = "1_REVIEW_APPROVED",
+            ["Ylalaşykdan çykdy"] = "1_REVIEW_APPROVED",
+            ["Ministrlikden gelmedi"] = "1_REVIEW_REJECTED",
             ["1-NJI IŞ YLALAŞYK ALYNDY"] = "1_REVIEW_APPROVED",
             ["2-NJI IŞ YLALAŞYK ALYNDY"] = "2_REVIEW_APPROVED",
             ["3-NJI IŞ YLALAŞYK ALYNDY"] = "3_REVIEW_APPROVED",
@@ -79,12 +86,16 @@ internal static partial class LookupLocalizationKeys
             ["3-NJI IŞ YLALAŞYK BERILMEDI"] = "3_REVIEW_REJECTED",
             ["4-NJI IŞ YLALAŞYK BERILMEDI"] = "4_REVIEW_REJECTED",
             ["5-NJI IŞ YLALAŞYK BERILMEDI"] = "5_REVIEW_REJECTED",
+            ["Işlenilýär"] = "PROCESS_STARTED",
             ["İŞLENMEKDE"] = "PROCESS_STARTED",
             ["ISLENMEKDE"] = "PROCESS_STARTED",
+            ["Ýüz tutma ýatyryldy"] = "PROCESS_CANCELLED",
             ["ÝÜZTUTMA ÝATYRYLDY"] = "PROCESS_CANCELLED",
             ["YUZTUTMA YATYRYLDY"] = "PROCESS_CANCELLED",
+            ["Garşylyk berildi"] = "PROCESS_REJECTED",
             ["GARŞYLYK BERILDI"] = "PROCESS_REJECTED",
             ["GARSYLYK BERILDI"] = "PROCESS_REJECTED",
+            ["Resmileşdirildi"] = "PROCESS_ISSUED",
             ["RESMILEŞDİRİLDİ"] = "PROCESS_ISSUED",
             ["RESMILESdirildi"] = "PROCESS_ISSUED",
         };

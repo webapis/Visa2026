@@ -47,7 +47,6 @@ public class ApplicationWorkflowTerminalTests
                 {
                     Date = new DateTime(2024, 6, 1),
                     State = new ApplicationState { Code = stateCode },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
                 }
             ]
         };

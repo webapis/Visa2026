@@ -33,7 +33,7 @@ internal static class Visa2014ApplicationProgressTransform
     internal static readonly string[] ApplicationProgressMainColumnOrder =
     [
         "_legacyRowId", "_legacyApplicationOid", "_syntheticStepKey", "_importAction", "_processKind",
-        "Application", "State", "Location", "Order", "Date", "Description",
+        "Application", "State", "Order", "Date", "Description",
         "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite",
         "_legacy_ProcessNumber", "_legacy_MinisteriesDocumentNumber",
     ];
@@ -199,7 +199,6 @@ internal static class Visa2014ApplicationProgressTransform
                     ["_processKind"] = raw.IsLongProcess ? "long" : "simple",
                     ["Application"] = raw.LegacyApplicationOid.ToString("D"),
                     ["State"] = step.StateCode,
-                    ["Location"] = step.LocationCode,
                     ["Order"] = stepIndex + 1,
                     ["Date"] = step.Date.ToString("yyyy-MM-dd"),
                     ["Description"] = step.Description,
@@ -222,19 +221,12 @@ internal static class Visa2014ApplicationProgressTransform
         };
     }
 
-    internal sealed record SynthesisStep(string StepCode, string StateCode, string LocationCode, DateTime Date, string? Description);
+    internal sealed record SynthesisStep(string StepCode, string StateCode, DateTime Date, string? Description);
 
     internal static List<SynthesisStep> SynthesizeSteps(Visa2014ApplicationProgressRawRow raw, int ministryLegCount)
     {
         var steps = new List<SynthesisStep>();
         var appDate = raw.ManualApplicationDate!.Value;
-
-        steps.Add(new SynthesisStep(
-            "prepare",
-            "IS_BEING_PREPARED",
-            "AT_OFFICE",
-            appDate,
-            null));
 
         ministryLegCount = Math.Clamp(ministryLegCount, 0, 5);
         if (ministryLegCount > 0)
@@ -245,10 +237,24 @@ internal static class Visa2014ApplicationProgressTransform
             {
                 var approvedDate = slotDates[leg - 1];
 
+                if (leg == 1)
+                {
+                    var startedDate = IsLegacyDateSet(raw.DateForwardedToMonistery)
+                        ? raw.DateForwardedToMonistery!.Value
+                        : appDate;
+                    if (startedDate > approvedDate)
+                        startedDate = approvedDate;
+
+                    steps.Add(new SynthesisStep(
+                        "leg_1_started",
+                        "1_REVIEW_STARTED",
+                        startedDate,
+                        null));
+                }
+
                 steps.Add(new SynthesisStep(
                     $"leg_{leg}_approved",
                     $"{leg}_REVIEW_APPROVED",
-                    $"AT_THE_MINISTERY_{leg}",
                     approvedDate,
                     BuildLegApprovedDescription(raw, leg)));
             }
@@ -261,7 +267,7 @@ internal static class Visa2014ApplicationProgressTransform
         var shouldAddMigrationIssued = hasProcessCompletion;
         if (shouldAddMigrationStarted)
         {
-            var priorDate = steps[^1].Date;
+            var priorDate = steps.Count > 0 ? steps[^1].Date : appDate;
             var issuedDate = raw.ProcessDate ?? priorDate;
             var startedDate = shouldAddMigrationIssued
                 ? ResolveMigrationStartedDate(issuedDate, priorDate)
@@ -269,7 +275,6 @@ internal static class Visa2014ApplicationProgressTransform
             steps.Add(new SynthesisStep(
                 "migration_started",
                 "PROCESS_STARTED",
-                "AT_MIGRATION_SERVICE",
                 startedDate,
                 null));
 
@@ -278,7 +283,6 @@ internal static class Visa2014ApplicationProgressTransform
                 steps.Add(new SynthesisStep(
                     "migration_issued",
                     "PROCESS_ISSUED",
-                    "AT_MIGRATION_SERVICE",
                     issuedDate,
                     FormatLegacyRef("ProcessNumber", raw.ProcessNumber)));
             }
@@ -286,22 +290,20 @@ internal static class Visa2014ApplicationProgressTransform
 
         if (raw.Cancelled)
         {
-            var date = raw.ProcessDate ?? steps[^1].Date;
+            var date = raw.ProcessDate ?? (steps.Count > 0 ? steps[^1].Date : appDate);
             steps.Add(new SynthesisStep(
                 "cancelled",
                 "PROCESS_CANCELLED",
-                "AT_OFFICE",
                 date,
                 "Legacy Cancelled=1"));
         }
 
         if (raw.Rejected)
         {
-            var date = raw.ProcessDate ?? steps[^1].Date;
+            var date = raw.ProcessDate ?? (steps.Count > 0 ? steps[^1].Date : appDate);
             steps.Add(new SynthesisStep(
                 "rejected",
                 "PROCESS_REJECTED",
-                "AT_MIGRATION_SERVICE",
                 date,
                 "Legacy Rejected=1"));
         }
@@ -421,10 +423,12 @@ internal static class Visa2014ApplicationProgressTransform
     {
         if (stepCode == "prepare")
             return 0;
+        if (stepCode.Equals("leg_1_started", StringComparison.Ordinal))
+            return 11;
         if (stepCode.StartsWith("leg_", StringComparison.Ordinal) && stepCode.EndsWith("_approved", StringComparison.Ordinal))
         {
             if (TryParseLegStepCode(stepCode, out var leg))
-                return 10 + leg * 2;
+                return 10 + leg * 2 + (leg == 1 ? 1 : 0);
         }
 
         return stepCode switch

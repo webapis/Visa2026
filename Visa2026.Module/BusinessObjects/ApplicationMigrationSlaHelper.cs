@@ -15,8 +15,9 @@ public static class ApplicationMigrationSlaHelper
         if (latest?.State?.Code == null || latest.Date == default)
             return default;
 
-        if (!IsMigrationServiceProcessStartedStep(latest.State.Code, latest.Location?.Code))
+        if (!IsMigrationServiceProcessStartedStep(latest.State.Code))
             return default;
+
 
         var profile = application.ApplicationType?.MigrationSlaProfile;
         if (profile?.MaxDaysInReview is not > 0)
@@ -85,9 +86,8 @@ public static class ApplicationMigrationSlaHelper
         return VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
     }
 
-    public static bool IsMigrationServiceProcessStartedStep(string? stateCode, string? locationCode) =>
-        string.Equals(stateCode, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase)
-        && string.Equals(locationCode, ApplicationProgressLocationCodes.AtMigrationService, StringComparison.OrdinalIgnoreCase);
+    public static bool IsMigrationServiceProcessStartedStep(string? stateCode) =>
+        string.Equals(stateCode, ApplicationProgressStateCodes.ProcessStarted, StringComparison.OrdinalIgnoreCase);
 
     public static bool IsTerminalMigrationState(string? stateCode) =>
         stateCode != null

@@ -1,6 +1,6 @@
 # Application progress — state validation and time scopes
 
-> **Purpose:** Specify how `ApplicationProgress` records workflow position for an `Application`, how **`ApplicationState`** and **`ApplicationLocation`** combine, how **`DaysElapsed`** time scopes apply, and what validation/alerts officers need when advancing the process **manually**.
+> **Purpose:** Specify how `ApplicationProgress` records workflow position for an `Application`, how **`ApplicationState`** (and optional ministry short name) identify the step, how **`DaysElapsed`** time scopes apply, and what validation/alerts officers need when advancing the process **manually**.
 >
 > **Related:**
 > - [`APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) — **approval flows**, ministry legs, **`ProjectContract`** depth (Phase 1)
@@ -40,7 +40,7 @@ Officers do **not** edit the current state in place. They **add a new progress r
 | **State** | `ApplicationState` | `IS_BEING_PREPARED`, `1_REVIEW_APPROVED`, `PROCESS_ISSUED` | *What happened in the workflow?* (preparing, review, issued, rejected, …) |
 | **Location** | `ApplicationLocation` | `AT_OFFICE`, `AT_THE_MINISTERY_1`, `AT_MIGRATION_SERVICE` | *Who holds the file physically?* |
 
-Both are required on every `ApplicationProgress` row today. Validation and SLA rules should treat **`(State.Code, Location.Code)`** as the **process step key**, not `State` alone.
+Validation and SLA rules treat **`State.Code`** as the process step key. Ministry context uses snapshot/profile short names, not `ApplicationLocation`.
 
 **Deprecated:** [`ApplicationStatus`](../Visa2026.Module/BusinessObjects/ApplicationStatus.cs) enum (`Office`, `ToMinistry`, `Processed`) — replaced by progress + `ApplicationLocation`. See [`DEPRECATED.md`](DEPRECATED.md).
 

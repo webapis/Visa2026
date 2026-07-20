@@ -1049,20 +1049,8 @@ namespace Visa2026.Module.BusinessObjects
                 .ToList();
         }
 
-        private IList<ApplicationLocation> LoadAvailableProgressLocations()
-        {
-            var objectSpace = ObjectSpaceHelper.Get(this);
-            if (objectSpace == null)
-                return Array.Empty<ApplicationLocation>();
-
-            var allowedCodes = ApplicationProgressRouteHelper.GetAllowedLocationCodes(this)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            return objectSpace.GetObjectsQuery<ApplicationLocation>()
-                .Where(l => l.Code != null && allowedCodes.Contains(l.Code))
-                .OrderBy(s => s.Code)
-                .ToList();
-        }
+        private IList<ApplicationLocation> LoadAvailableProgressLocations() =>
+            Array.Empty<ApplicationLocation>();
 
         private IList<ApprovalLegProfile> LoadAvailableApprovalLegProfiles()
         {

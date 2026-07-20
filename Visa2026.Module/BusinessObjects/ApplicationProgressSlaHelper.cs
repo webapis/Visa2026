@@ -8,21 +8,29 @@ public static class ApplicationProgressSlaHelper
 {
     public static ApplicationProgressSlaResult Resolve(Application? application, ApplicationProgress? latest = null)
     {
-        if (application?.ProgressHistory == null)
+        if (application == null)
             return default;
 
         latest ??= ApplicationProgressHelper.GetLatest(application.ProgressHistory);
+
+        int leg;
+        DateTime anchorDate;
         if (latest?.State?.Code == null || latest.Date == default)
-            return default;
-
-        if (!TryResolvePendingMinistryLeg(application, latest, out var leg, out var anchorDate))
-            return default;
-
-        if (ApplicationProgressLegCodes.IsMinistryReviewStartedStateCode(latest.State.Code))
         {
-            var previous = GetPreviousProgress(application, latest);
-            if (previous?.Date != default)
-                anchorDate = previous.Date;
+            if (!TryResolveImpliedOfficePendingLeg(application, out leg, out anchorDate))
+                return default;
+        }
+        else
+        {
+            if (!TryResolvePendingMinistryLeg(application, latest, out leg, out anchorDate))
+                return default;
+
+            if (ApplicationProgressLegCodes.IsMinistryReviewStartedStateCode(latest.State.Code))
+            {
+                var previous = GetPreviousProgress(application, latest);
+                if (previous?.Date != default)
+                    anchorDate = previous.Date;
+            }
         }
 
         var snapshot = application.ApprovalLegSnapshots?
@@ -65,6 +73,33 @@ public static class ApplicationProgressSlaHelper
                 days,
                 max)
         };
+    }
+
+    private static bool TryResolveImpliedOfficePendingLeg(
+        Application application,
+        out int leg,
+        out DateTime anchorDate)
+    {
+        leg = 0;
+        anchorDate = default;
+
+        var route = ApplicationProgressRouteHelper.GetTypePickerRouteFilter(application);
+        if (route != ApplicationProgressRouteKind.ViaMinistries)
+            return false;
+
+        if (ApplicationProgressProfileResolver.GetMinistryLegCount(application) <= 0)
+            return false;
+
+        // Any explicit progress means we are past implied office.
+        if (application.ProgressHistory?.Any(p =>
+                !string.Equals(p.State?.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)) == true)
+            return false;
+
+        leg = 1;
+        anchorDate = application.ApplicationDate != default
+            ? application.ApplicationDate.Date
+            : DateTime.Today;
+        return true;
     }
 
     private static bool TryResolvePendingMinistryLeg(
@@ -118,8 +153,7 @@ public static class ApplicationProgressSlaHelper
     }
 
     private static bool IsOfficePreparation(ApplicationProgress progress) =>
-        string.Equals(progress.State?.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)
-        && string.Equals(progress.Location?.Code, ApplicationProgressLocationCodes.AtOffice, StringComparison.OrdinalIgnoreCase);
+        string.Equals(progress.State?.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
 
     private static ApplicationProgress? GetPreviousProgress(Application application, ApplicationProgress current)
     {
