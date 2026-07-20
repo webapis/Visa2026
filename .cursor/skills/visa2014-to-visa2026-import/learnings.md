@@ -5,6 +5,17 @@
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
 
+### 2026-07-20 — ApplicationProgress partial reimport (local PG, state-only model)
+
+- **Phase**: partial-reimport
+- **Mode**: single-entity `--entity ApplicationProgress` / `--legacy-source calik-energi-local-pg` / in-process Postgres target
+- **Prep**: NULLed `Applications.LatestProgressId`; DELETE 45905 progress rows for `IsManualEntry` apps; cleared `ApplicationProgress.json` (+ sync-progress) under **source and bin** id-maps; copied `Application.json` from bin → source (source tree had stubs only).
+- **Result**: Posted **38411** / Failed **0** / Skipped (no Application map) **120** / Parent-skipped **172** / Seeds removed **0**. DB `"ApplicationProgresses"` = 38411. Exit 0 (~24 min).
+- **Log**: `legacy/visa2014/import-logs/reimport-ApplicationProgress-localpg-20260720-171707.log`
+- **Shape**: transform no longer posts `IS_BEING_PREPARED`; first ministry step = `1_REVIEW_STARTED` (`leg_1_started`). Stock `reimport/ApplicationProgress.ps1` is LocalDB/`calik-energi` — use PG cleanup + `--legacy-source calik-energi-local-pg` for this PC.
+- **Note**: `LocationID` column may still exist until Module schema updater runs (F5 / DB update); new rows do not depend on Location.
+
+
 ### 2026-07-20 — Local PG wipe + scalar reimport from .15 (REVIEW_STARTED cleanup)
 
 - **Phase**: end-to-end (local PostgreSQL `visa2026`, source `10.100.128.15` / `VISA2015`, legacy-source `calik-energi-local-pg`)
