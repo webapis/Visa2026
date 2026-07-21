@@ -260,32 +260,25 @@ internal static class Visa2014ApplicationProgressTransform
             }
         }
 
-        var hasProcessCompletion = IsLegacyDateSet(raw.ProcessDate)
+        // Legacy ProcessDate / ProcessNumber mark migration-service processing start — not completion.
+        // PROCESS_ISSUED is synthesized from a separate legacy source (follow-up).
+        var hasProcessStart = IsLegacyDateSet(raw.ProcessDate)
             || !string.IsNullOrWhiteSpace(raw.ProcessNumber);
         var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !raw.Rejected;
-        var shouldAddMigrationStarted = hasProcessCompletion || ministryRouteComplete;
-        var shouldAddMigrationIssued = hasProcessCompletion;
-        if (shouldAddMigrationStarted)
+        if (hasProcessStart || ministryRouteComplete)
         {
             var priorDate = steps.Count > 0 ? steps[^1].Date : appDate;
-            var issuedDate = raw.ProcessDate ?? priorDate;
-            var startedDate = shouldAddMigrationIssued
-                ? ResolveMigrationStartedDate(issuedDate, priorDate)
+            var startedDate = IsLegacyDateSet(raw.ProcessDate)
+                ? raw.ProcessDate!.Value
                 : ResolveMigrationInProgressDate(priorDate);
+            if (steps.Count > 0 && startedDate <= priorDate)
+                startedDate = priorDate.AddDays(1);
+
             steps.Add(new SynthesisStep(
                 "migration_started",
                 "PROCESS_STARTED",
                 startedDate,
-                null));
-
-            if (shouldAddMigrationIssued)
-            {
-                steps.Add(new SynthesisStep(
-                    "migration_issued",
-                    "PROCESS_ISSUED",
-                    issuedDate,
-                    FormatLegacyRef("ProcessNumber", raw.ProcessNumber)));
-            }
+                FormatLegacyRef("ProcessNumber", raw.ProcessNumber)));
         }
 
         if (raw.Cancelled)
@@ -470,9 +463,6 @@ internal static class Visa2014ApplicationProgressTransform
             ["_reason"] = reason,
             ["_processKind"] = raw.IsLongProcess ? "long" : "simple",
         };
-
-    private static DateTime ResolveMigrationStartedDate(DateTime issuedDate, DateTime priorDate) =>
-        issuedDate > priorDate ? priorDate.AddDays(1) : priorDate;
 
     private static DateTime ResolveMigrationInProgressDate(DateTime priorDate) =>
         priorDate.AddDays(1);

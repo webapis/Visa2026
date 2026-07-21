@@ -38,8 +38,10 @@ propertyGaps:
       disposition: synthesize
     - column: ProcessDate
       disposition: synthesize
+      notes: Migration-service processing start → PROCESS_STARTED (not completion)
     - column: ProcessNumber
       disposition: synthesize
+      notes: Description on PROCESS_STARTED; completion uses a separate legacy source (follow-up)
     - column: Cancelled
       disposition: synthesize
       notes: Terminal PROCESS_CANCELLED override

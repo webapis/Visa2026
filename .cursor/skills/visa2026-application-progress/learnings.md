@@ -6,6 +6,13 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-21 — Import: ProcessDate/ProcessNumber on PROCESS_STARTED only
+
+- **Decision**: Legacy `ProcessDate` + `ProcessNumber` = **Işlenilýär** start, not **Resmileşdirildi**. Import puts `ProcessNumber: …` on `PROCESS_STARTED`; no `PROCESS_ISSUED` from these fields until completion source is mapped.
+- **Example**: App `12/-7010` — ministry steps then `PROCESS_STARTED` @ ProcessDate with `ProcessNumber: AS538188`.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+
 ### 2026-07-20 — Office implied (no IS_BEING_PREPARED seed)
 
 - **Decision**: Do not write `IS_BEING_PREPARED` progress rows. Empty history = at office until first explicit step (`1_REVIEW_STARTED` / `PROCESS_STARTED`). Catalog code kept for ListView implied label (Ofisde) and legacy rows.

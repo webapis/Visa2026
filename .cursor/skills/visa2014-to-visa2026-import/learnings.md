@@ -5,6 +5,26 @@
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
 
+### 2026-07-21 — ApplicationProgress: ProcessDate/ProcessNumber = processing start (not issued)
+- **Phase**: partial-reimport (local PG, after ProcessDate/ProcessNumber → PROCESS_STARTED fix)
+- **Result**: Posted **26348** / Failed **0** / Skipped (no Application map) **60** / Parent-skipped **172**. DB = 26348 rows. Exit 0 (~15 min).
+- **Shape**: **0** `PROCESS_ISSUED` rows (was ~12063 before); `PROCESS_STARTED` = 12110 with ProcessNumber on Description. Total rows ~26k vs ~38k prior reimport.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-084658.log`
+
+
+- **Phase**: mapping / transform correction
+- **Decision**: Legacy `Application.ProcessDate` + `ProcessNumber` mark **migration-service processing start** (`PROCESS_STARTED`), not completion. `ProcessNumber` goes on the started step Description. Do **not** synthesize `PROCESS_ISSUED` from these columns.
+- **Follow-up**: `PROCESS_ISSUED` will use a separate legacy completion source (TBD).
+- **Code**: `Visa2014ApplicationProgressTransform.SynthesizeSteps` — removed `migration_issued` branch; tests updated (+ app `12/-7010` / AS538188 case).
+- **Reimport**: partial ApplicationProgress reimport required after deploy to drop bogus issued rows from prior transform.
+
+
+### 2026-07-21 — ApplicationProgress partial reimport (ProcessDate = start only)
+
+- **Phase**: partial-reimport (local PG, after ProcessDate/ProcessNumber → PROCESS_STARTED fix)
+- **Result**: Posted **26348** / Failed **0** / Skipped (no Application map) **60** / Parent-skipped **172**. DB = 26348 rows. Exit 0 (~15 min).
+- **Shape**: **0** `PROCESS_ISSUED` rows (was ~12063 before); `PROCESS_STARTED` = 12110 with ProcessNumber on Description. Total rows ~26k vs ~38k prior reimport.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-084658.log`
 ### 2026-07-20 — ApplicationProgress partial reimport (local PG, state-only model)
 
 - **Phase**: partial-reimport
