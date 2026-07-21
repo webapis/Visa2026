@@ -183,12 +183,21 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .Include(application => application.ApprovalLegProfile!)
                 .ThenInclude(profile => profile.MinistryLegs)
                 .ThenInclude(leg => leg.ApprovingMinistry)
+            .Include(application => application.VisaPeriod)
+            .Include(application => application.VisaType)
             .Include(application => application.ApprovalLegSnapshots)
             .AsSplitQuery()
             .ToList();
 
+        var itemCounts = ObjectSpace.GetObjectsQuery<ApplicationItem>()
+            .Where(item => batchIds.Contains(item.Application.ID))
+            .GroupBy(item => item.Application.ID)
+            .Select(group => new { ApplicationId = group.Key, Count = group.Count() })
+            .ToDictionary(x => x.ApplicationId, x => x.Count);
+
         foreach (var application in applications)
         {
+            application.SetListViewTotalPersonCount(itemCounts.GetValueOrDefault(application.ID, 0));
             application.InvalidateListViewDisplayCache();
             application.WarmListViewDisplayCache();
             preloadedIds.Add(application.ID);

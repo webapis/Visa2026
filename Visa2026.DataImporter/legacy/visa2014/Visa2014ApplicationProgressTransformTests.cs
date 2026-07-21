@@ -40,7 +40,7 @@ public class Visa2014ApplicationProgressTransformTests
         Assert.Equal("2_REVIEW_APPROVED", steps[2].StateCode);
         Assert.Equal("PROCESS_STARTED", steps[3].StateCode);
         Assert.Equal(new DateTime(2014, 6, 27), steps[3].Date);
-        Assert.Equal("ProcessNumber: AS455977", steps[3].Description);
+        Assert.Equal("AS455977", steps[3].Description);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
         Assert.DoesNotContain(steps, s => s.StateCode == "IS_BEING_PREPARED");
         Assert.DoesNotContain(steps, s => s.StateCode is "2_REVIEW_STARTED" or "3_REVIEW_STARTED");
@@ -78,7 +78,7 @@ public class Visa2014ApplicationProgressTransformTests
         Assert.Single(steps);
         Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
         Assert.Equal(new DateTime(2014, 6, 15), steps[0].Date);
-        Assert.Equal("ProcessNumber: P-1", steps[0].Description);
+        Assert.Equal("P-1", steps[0].Description);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
     }
 
@@ -192,7 +192,161 @@ public class Visa2014ApplicationProgressTransformTests
         Assert.Equal("1_REVIEW_APPROVED", steps[1].StateCode);
         Assert.Equal("PROCESS_STARTED", steps[2].StateCode);
         Assert.Equal(new DateTime(2015, 12, 24), steps[2].Date);
-        Assert.Equal("ProcessNumber: AS538188", steps[2].Description);
+        Assert.Equal("AS538188", steps[2].Description);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
     }
+
+    [Fact]
+    public void SynthesizeSteps_WithInvitationCompletion_AddsProcessIssued()
+    {
+        var raw = BuildRaw(processDate: new DateTime(2015, 12, 24), processNumber: "AS538188");
+        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+            new DateTime(2016, 1, 14),
+            "InvitationNumber",
+            "01//77");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 1, completion);
+
+        Assert.Equal(4, steps.Count);
+        Assert.Equal("PROCESS_STARTED", steps[2].StateCode);
+        Assert.Equal(new DateTime(2015, 12, 24), steps[2].Date);
+        Assert.Equal("AS538188", steps[2].Description);
+        Assert.Equal("PROCESS_ISSUED", steps[3].StateCode);
+        Assert.Equal(new DateTime(2016, 1, 14), steps[3].Date);
+        Assert.Equal("01//77", steps[3].Description);
+    }
+
+    [Fact]
+    public void SynthesizeSteps_WithWorkPermitCompletionOnly_AddsStartedThenIssued()
+    {
+        var raw = BuildRaw(processDate: null, processNumber: null);
+        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+            new DateTime(2014, 6, 20),
+            "WorkPermitNumber",
+            "WP-42");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
+
+        Assert.Equal(2, steps.Count);
+        Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
+        Assert.Equal(new DateTime(2014, 6, 2), steps[0].Date);
+        Assert.Equal("PROCESS_ISSUED", steps[1].StateCode);
+        Assert.Equal(new DateTime(2014, 6, 20), steps[1].Date);
+        Assert.Equal("WP-42", steps[1].Description);
+    }
+
+    [Fact]
+    public void SynthesizeSteps_CancelledWithCompletion_DoesNotAddProcessIssued()
+    {
+        var raw = BuildRaw(cancelled: true);
+        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+            new DateTime(2016, 1, 14),
+            "InvitationNumber",
+            "01//77");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
+
+        Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
+        Assert.Contains(steps, s => s.StateCode == "PROCESS_CANCELLED");
+    }
+
+    [Fact]
+    public void SynthesizeSteps_LongProcess_MinisteriesDocumentNumberOnLeg2NotLeg1()
+    {
+        var raw = new Visa2014ApplicationProgressRawRow(
+            LegacyApplicationOid: Guid.NewGuid(),
+            ManualApplicationNumber: "7/-1177",
+            ManualApplicationDate: new DateTime(2026, 7, 13),
+            IsLongProcess: true,
+            ForEmployee: true,
+            ForFamilyMember: false,
+            EmployeeSubtypeId: 1,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null,
+            DateForwardedToMonistery: new DateTime(2026, 7, 13),
+            MinisteriesDocumentDate: new DateTime(2026, 7, 17),
+            MinisteriesDocumentNumber: "7/2820",
+            DateForwardedToMinConstruction: null,
+            DocNumberForwardedToMinConstruction: null,
+            ProcessDate: new DateTime(2026, 7, 18),
+            ProcessNumber: null,
+            Cancelled: false,
+            Rejected: false);
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 2);
+
+        var leg1Approved = steps.Single(s => s.StateCode == "1_REVIEW_APPROVED");
+        var leg2Approved = steps.Single(s => s.StateCode == "2_REVIEW_APPROVED");
+
+        Assert.Null(leg1Approved.Description);
+        Assert.Equal("MinisteriesDocumentNumber: 7/2820", leg2Approved.Description);
+    }
+
+    [Fact]
+    public void SynthesizeSteps_ThreeLegs_ConstructionDocOnLeg3()
+    {
+        var raw = new Visa2014ApplicationProgressRawRow(
+            LegacyApplicationOid: Guid.NewGuid(),
+            ManualApplicationNumber: "537",
+            ManualApplicationDate: new DateTime(2026, 4, 1),
+            IsLongProcess: true,
+            ForEmployee: true,
+            ForFamilyMember: false,
+            EmployeeSubtypeId: 1,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null,
+            DateForwardedToMonistery: new DateTime(2026, 4, 1),
+            MinisteriesDocumentDate: new DateTime(2026, 5, 2),
+            MinisteriesDocumentNumber: "7/1730",
+            DateForwardedToMinConstruction: new DateTime(2026, 4, 25),
+            DocNumberForwardedToMinConstruction: "7/1622-Gurluşyk ministrligi",
+            ProcessDate: new DateTime(2026, 5, 4),
+            ProcessNumber: null,
+            Cancelled: false,
+            Rejected: false);
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 3);
+
+        Assert.Null(steps.Single(s => s.StateCode == "1_REVIEW_APPROVED").Description);
+        Assert.Equal("MinisteriesDocumentNumber: 7/1730",
+            steps.Single(s => s.StateCode == "2_REVIEW_APPROVED").Description);
+        Assert.Equal("DocNumberForwardedToMinConstruction: 7/1622-Gurluşyk ministrligi",
+            steps.Single(s => s.StateCode == "3_REVIEW_APPROVED").Description);
+    }
+
+    private static Visa2014ApplicationProgressRawRow BuildRaw(
+        DateTime? processDate = null,
+        string? processNumber = null,
+        bool cancelled = false) =>
+        new(
+            LegacyApplicationOid: Guid.NewGuid(),
+            ManualApplicationNumber: "100",
+            ManualApplicationDate: new DateTime(2014, 6, 1),
+            IsLongProcess: false,
+            ForEmployee: true,
+            ForFamilyMember: false,
+            EmployeeSubtypeId: 1,
+            FamilySubtypeId: null,
+            HasInvitationWpFk: false,
+            InvitationAndWorkPermitRequired: null,
+            HasWizaWpFk: false,
+            WizaAndWorkPermitRequired: null,
+            ChangeInformation: null,
+            DateForwardedToMonistery: null,
+            MinisteriesDocumentDate: null,
+            MinisteriesDocumentNumber: null,
+            DateForwardedToMinConstruction: null,
+            DocNumberForwardedToMinConstruction: null,
+            ProcessDate: processDate,
+            ProcessNumber: processNumber,
+            Cancelled: cancelled,
+            Rejected: false);
 }

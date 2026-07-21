@@ -174,7 +174,6 @@
       <Item Id="Work Permit Tracking" Caption="Учёт РНТ" />
       <Item Id="WorkPermit" Caption="Разрешения на работу" />
       <Item Id="WorkPermitItem" Caption="Позиции РНТ" />
-      <Item Id="ForeignWorkerMaglumat" Caption="Сведения об иностранных гражданах" />
     </Items>
   </NavigationItems>
   <BOModel>
@@ -244,10 +243,10 @@
         <Member Name="FullApplicationNumber" Caption="Полный номер" />
         <Member Name="Invitations" Caption="Приглашения" />
         <Member Name="IsActive" Caption="Активен" />
-        <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IsForFamily" Caption="Для семьи" />
         <Member Name="IsManualEntry" Caption="Ручной ввод" />
-        <Member Name="IsRejected" Caption="Отклонено" />
+        <Member Name="LatestProgressDate" Caption="Дата прогресса" />
+        <Member Name="LatestProgressState" Caption="Состояние" />
         <Member Name="MigrationService" Caption="Миграционная служба" />
         <Member Name="MigrationSlaStatement" Caption="Срок миграции" />
         <Member Name="Month" Caption="Месяц" />
@@ -256,6 +255,7 @@
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="Rejections" Caption="Отказы" />
         <Member Name="Representative" Caption="Представитель" />
+        <Member Name="TotalPersonCount" Caption="Количество лиц" />
         <Member Name="Urgency" Caption="Срочность" />
         <Member Name="VisaCategory" Caption="Категория визы" />
         <Member Name="VisaPeriod" Caption="Срок визы" />
@@ -2311,31 +2311,6 @@
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ForeignWorkerMaglumat" Caption="Сведения об иностранных гражданах">
-      <OwnMembers>
-        <Member Name="FullName" Caption="ФИО" />
-        <Member Name="DateOfBirth" Caption="Дата рождения" />
-        <Member Name="NationalityCode" Caption="Гражданство" />
-        <Member Name="BirthAndNationality" Caption="Год рождения и гражданство" />
-        <Member Name="PassportNumber" Caption="Номер паспорта" />
-        <Member Name="PassportExpirationDate" Caption="Срок паспорта" />
-        <Member Name="PassportBlock" Caption="Паспорт и срок" />
-        <Member Name="EducationLevelTm" Caption="Образование" />
-        <Member Name="PositionNameTm" Caption="Должность" />
-        <Member Name="ResidenceAddress" Caption="Адрес проживания в Туркменистане" />
-        <Member Name="WorkPermitNumber" Caption="Номер разрешения" />
-        <Member Name="WorkPermitStartDate" Caption="Начало разрешения" />
-        <Member Name="WorkPermitExpirationDate" Caption="Окончание разрешения" />
-        <Member Name="WorkPermitIsCancelled" Caption="Аннулирован" />
-        <Member Name="IsValid" Caption="Действителен" />
-        <Member Name="PermitBlock" Caption="Разрешение и срок" />
-        <Member Name="VisaNumber" Caption="Номер визы" />
-        <Member Name="VisaStartDate" Caption="Начало визы" />
-        <Member Name="VisaExpirationDate" Caption="Окончание визы" />
-        <Member Name="VisaBlock" Caption="Виза и срок" />
-        <Member Name="Remarks" Caption="Примечание" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Позиция РНТ">
       <OwnMembers>
         <Member Name="ASNumber" Caption="Номер AS" />
@@ -2453,7 +2428,14 @@
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="IsActive" Caption="Активен" />
         <ColumnInfo Id="IsManualEntry" Caption="Ручной ввод" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
+        <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
@@ -2463,7 +2445,14 @@
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
+        <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
@@ -2471,10 +2460,19 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
-        <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль этапов министерств" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
+        <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
+        <ColumnInfo Id="VisaType" Caption="Тип визы" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
@@ -3139,8 +3137,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="ForeignWorkerMaglumat_ListView" Caption="Сведения об иностранных гражданах" />
-    <DetailView Id="ForeignWorkerMaglumat_DetailView" Caption="Сведения об иностранных гражданах" />
     <ListView Id="WorkPermitItem_ListView" Caption="Позиции РНТ">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="Номер AS" />

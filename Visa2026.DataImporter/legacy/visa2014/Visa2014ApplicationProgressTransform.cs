@@ -77,7 +77,8 @@ internal static class Visa2014ApplicationProgressTransform
         IReadOnlyList<string> lookupTranslationPaths,
         int? maxRows,
         bool verbose,
-        IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid = null)
+        IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid = null,
+        IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>? completionByLegacyApplicationOid = null)
     {
         _ = lookupTranslationPaths;
         var sql = maxRows is > 0
@@ -98,7 +99,14 @@ internal static class Visa2014ApplicationProgressTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        return TransformRows(rawRows, ministryLegCountByLegacyApplicationOid, out var skipped, out var dedupeSummary);
+        completionByLegacyApplicationOid ??= Visa2014ApplicationProgressCompletionIndex.Load(connectionString, verbose);
+
+        return TransformRows(
+            rawRows,
+            ministryLegCountByLegacyApplicationOid,
+            completionByLegacyApplicationOid,
+            out var skipped,
+            out var dedupeSummary);
     }
 
     internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014ApplicationProgressRawRow parsed)
@@ -137,6 +145,7 @@ internal static class Visa2014ApplicationProgressTransform
     private static Visa2014PersonImportBatch TransformRows(
         IReadOnlyList<Visa2014ApplicationProgressRawRow> rawRows,
         IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid,
+        IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>? completionByLegacyApplicationOid,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> dedupeSummary)
     {
@@ -170,7 +179,10 @@ internal static class Visa2014ApplicationProgressTransform
             }
 
             var ministryLegCount = ResolveMinistryLegCount(raw, ministryLegCountByLegacyApplicationOid);
-            var steps = SynthesizeSteps(raw, ministryLegCount);
+            Visa2014ApplicationProgressCompletionEvidence? completion = null;
+            if (completionByLegacyApplicationOid != null)
+                completionByLegacyApplicationOid.TryGetValue(raw.LegacyApplicationOid, out completion);
+            var steps = SynthesizeSteps(raw, ministryLegCount, completion);
             if (steps.Count == 0)
             {
                 skipped.Add(BuildParentSkippedRow(raw, composite, "no_synthesized_steps"));
@@ -223,7 +235,10 @@ internal static class Visa2014ApplicationProgressTransform
 
     internal sealed record SynthesisStep(string StepCode, string StateCode, DateTime Date, string? Description);
 
-    internal static List<SynthesisStep> SynthesizeSteps(Visa2014ApplicationProgressRawRow raw, int ministryLegCount)
+    internal static List<SynthesisStep> SynthesizeSteps(
+        Visa2014ApplicationProgressRawRow raw,
+        int ministryLegCount,
+        Visa2014ApplicationProgressCompletionEvidence? completion = null)
     {
         var steps = new List<SynthesisStep>();
         var appDate = raw.ManualApplicationDate!.Value;
@@ -261,7 +276,7 @@ internal static class Visa2014ApplicationProgressTransform
         }
 
         // Legacy ProcessDate / ProcessNumber mark migration-service processing start — not completion.
-        // PROCESS_ISSUED is synthesized from a separate legacy source (follow-up).
+        // PROCESS_ISSUED is synthesized from invitation/work-permit evidence (ApplicationResult / PersonInApplication.WorkPermit).
         var hasProcessStart = IsLegacyDateSet(raw.ProcessDate)
             || !string.IsNullOrWhiteSpace(raw.ProcessNumber);
         var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !raw.Rejected;
@@ -278,7 +293,39 @@ internal static class Visa2014ApplicationProgressTransform
                 "migration_started",
                 "PROCESS_STARTED",
                 startedDate,
-                FormatLegacyRef("ProcessNumber", raw.ProcessNumber)));
+                FormatLegacyDescriptionValue(raw.ProcessNumber)));
+        }
+
+        if (!raw.Cancelled && !raw.Rejected && completion is { HasCompletion: true })
+        {
+            var priorDate = steps.Count > 0 ? steps[^1].Date : appDate;
+            if (!steps.Exists(s => s.StateCode == "PROCESS_STARTED"))
+            {
+                var startedDate = ResolveMigrationInProgressDate(priorDate);
+                if (completion.CompletionDate.HasValue && startedDate >= completion.CompletionDate.Value)
+                    startedDate = completion.CompletionDate.Value.AddDays(-1);
+                if (startedDate < appDate)
+                    startedDate = appDate;
+                if (steps.Count > 0 && startedDate <= priorDate)
+                    startedDate = priorDate.AddDays(1);
+
+                steps.Add(new SynthesisStep(
+                    "migration_started",
+                    "PROCESS_STARTED",
+                    startedDate,
+                    null));
+                priorDate = startedDate;
+            }
+
+            var issuedDate = completion.CompletionDate ?? priorDate.AddDays(1);
+            if (issuedDate <= priorDate)
+                issuedDate = priorDate.AddDays(1);
+
+            steps.Add(new SynthesisStep(
+                "migration_issued",
+                "PROCESS_ISSUED",
+                issuedDate,
+                FormatLegacyDescriptionValue(completion.SourceValue)));
         }
 
         if (raw.Cancelled)
@@ -407,8 +454,10 @@ internal static class Visa2014ApplicationProgressTransform
     private static string? BuildLegApprovedDescription(Visa2014ApplicationProgressRawRow raw, int leg) =>
         leg switch
         {
-            1 => FormatLegacyRef("MinisteriesDocumentNumber", raw.MinisteriesDocumentNumber),
-            2 => FormatLegacyRef("DocNumberForwardedToMinConstruction", raw.DocNumberForwardedToMinConstruction),
+            // Leg 1 (e.g. Türkmenenergo) is implied from ApprovalLegProfile — no legacy doc on this step.
+            1 => null,
+            2 => FormatLegacyRef("MinisteriesDocumentNumber", raw.MinisteriesDocumentNumber),
+            3 => FormatLegacyRef("DocNumberForwardedToMinConstruction", raw.DocNumberForwardedToMinConstruction),
             _ => null,
         };
 
@@ -472,6 +521,9 @@ internal static class Visa2014ApplicationProgressTransform
 
     private static string? FormatLegacyRef(string label, string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : $"{label}: {value.Trim()}";
+
+    private static string? FormatLegacyDescriptionValue(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static DateTime? TryParseDate(string? text) =>
         DateTime.TryParse(text, out var parsed) ? parsed : null;

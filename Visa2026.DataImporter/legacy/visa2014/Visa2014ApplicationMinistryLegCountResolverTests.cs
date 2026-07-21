@@ -40,7 +40,6 @@ public class Visa2014ApplicationMinistryLegCountResolverTests
         Assert.Contains(steps, s => s.StateCode == "2_REVIEW_APPROVED");
         Assert.Contains(steps, s => s.StateCode == "PROCESS_STARTED");
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
-        Assert.DoesNotContain(steps, s => s.StateCode == "IS_BEING_PREPARED");
         Assert.DoesNotContain(steps, s => s.StateCode is "2_REVIEW_STARTED" or "3_REVIEW_STARTED");
     }
 }

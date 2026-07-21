@@ -142,6 +142,12 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string ApplicationDateText => ApplicationDate.ToString("dd.MM.yyyy");
 
+        [XafDisplayName("Person count")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public int TotalPersonCount => listViewTotalPersonCount ?? ApplicationItems?.Count ?? 0;
+
         private string applicationTypeQuickCode;
 
         [XafDisplayName("Application Type Code")]
@@ -189,6 +195,7 @@ namespace Visa2026.Module.BusinessObjects
 
         private ApplicationListViewDisplayState? listViewDisplayState;
         private string? listRowCssClass;
+        private int? listViewTotalPersonCount;
 
         /// <summary>Clears cached ListView computed fields (progress display, SLA, row color).</summary>
         public void InvalidateListViewDisplayCache()
@@ -196,6 +203,8 @@ namespace Visa2026.Module.BusinessObjects
             listViewDisplayState = null;
             listRowCssClass = null;
         }
+
+        public void SetListViewTotalPersonCount(int count) => listViewTotalPersonCount = count;
 
         /// <summary>Precomputes ListView display fields after related collections are preloaded.</summary>
         public void WarmListViewDisplayCache()
@@ -238,29 +247,26 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Current status")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(true)]
-        [VisibleInListView(true)]
+        [VisibleInListView(false)]
         [NotMapped]
         public string CurrentState => ListViewDisplay.CurrentState;
 
-        /// <summary>Latest progress is <c>PROCESS_CANCELLED</c> (legacy <c>Application.Cancelled</c>).</summary>
-        [XafDisplayName("Cancelled")]
-        [ToolTip("Derived from the latest workflow progress step. Add a PROCESS_CANCELLED progress row to cancel.")]
+        /// <summary>Localized state from the latest <see cref="ApplicationProgress"/> row.</summary>
+        [XafDisplayName("Latest progress state")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
-        public bool IsCancelled =>
-            LatestProgressId != null ? LatestIsCancelled : ListViewDisplay.IsCancelled;
+        public string LatestProgressState => ListViewDisplay.CurrentState;
 
-        /// <summary>Latest progress is <c>PROCESS_REJECTED</c> (legacy <c>Application.Rejected</c>).</summary>
-        [XafDisplayName("Rejected")]
-        [ToolTip("Derived from the latest workflow progress step. Add a PROCESS_REJECTED progress row to reject.")]
+        /// <summary>Date from the latest <see cref="ApplicationProgress"/> row.</summary>
+        [XafDisplayName("Latest progress date")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
-        public bool IsRejected =>
-            LatestProgressId != null ? LatestIsRejected : ListViewDisplay.IsRejected;
+        public DateTime? LatestProgressDate => ListViewDisplay.LatestProgressDate;
 
         /// <summary>Latest progress is <c>PROCESS_ISSUED</c>.</summary>
         [Browsable(false)]
@@ -271,7 +277,7 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>Closed workflow: issued, rejected, or cancelled at migration service.</summary>
         [Browsable(false)]
         [NotMapped]
-        public bool IsWorkflowTerminal => IsCancelled || IsRejected || IsIssued;
+        public bool IsWorkflowTerminal => ApplicationProgressProfileResolver.IsWorkflowTerminal(this);
 
         [XafDisplayName("Working days")]
         [ModelDefault("AllowEdit", "False")]
@@ -297,6 +303,16 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(true)]
         [NotMapped]
         public int? WorkingDaysInMigrationStep => ListViewDisplay.WorkingDaysInMigrationStep;
+
+        [Appearance("ApprovalLegProfileVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApprovalLegProfile", Context = "DetailView")]
+        [VisibleInListView(false)]
+        [ImmediatePostData]
+        [DataSourceProperty(nameof(AvailableApprovalLegProfiles))]
+        public virtual ApprovalLegProfile ApprovalLegProfile { get; set; }
+
+        [Browsable(false)]
+        [NotMapped]
+        public IList<ApprovalLegProfile> AvailableApprovalLegProfiles => LoadAvailableApprovalLegProfiles();
 
         [XafDisplayName("Migration deadline")]
         [ModelDefault("AllowEdit", "False")]
@@ -418,6 +434,18 @@ namespace Visa2026.Module.BusinessObjects
             return false;
         }
 
+        [Appearance("VisaPeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaPeriod", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual VisaPeriod VisaPeriod { get; set; }
+
+        [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaCategory", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual VisaCategory VisaCategory { get; set; }
+
+        [Appearance("VisaTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaType", Context = "DetailView")]
+        [VisibleInListView(false)]
+        public virtual VisaType VisaType { get; set; }
+
         [Browsable(false)]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
@@ -432,16 +460,6 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public bool IsProjectContractLocked =>
             ApplicationType?.ShowProjectContract == true && IsLockedAfterOfficePreparation;
-
-        [Appearance("ApprovalLegProfileVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApprovalLegProfile", Context = "DetailView")]
-        [VisibleInListView(false)]
-        [ImmediatePostData]
-        [DataSourceProperty(nameof(AvailableApprovalLegProfiles))]
-        public virtual ApprovalLegProfile ApprovalLegProfile { get; set; }
-
-        [Browsable(false)]
-        [NotMapped]
-        public IList<ApprovalLegProfile> AvailableApprovalLegProfiles => LoadAvailableApprovalLegProfiles();
 
         [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
         [VisibleInListView(false)]
@@ -461,18 +479,6 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual Urgency Urgency { get; set; }
-
-        [Appearance("VisaPeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaPeriod", Context = "DetailView")]
-        [VisibleInListView(false)]
-        public virtual VisaPeriod VisaPeriod { get; set; }
-
-        [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaCategory", Context = "DetailView")]
-        [VisibleInListView(false)]
-        public virtual VisaCategory VisaCategory { get; set; }
-
-        [Appearance("VisaTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaType", Context = "DetailView")]
-        [VisibleInListView(false)]
-        public virtual VisaType VisaType { get; set; }
 
         [Appearance("MigrationServiceVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = MigrationServiceVisibleCriteria, Context = "DetailView")]
         [VisibleInListView(false)]
@@ -614,10 +620,6 @@ namespace Visa2026.Module.BusinessObjects
         public virtual City ToCity { get; set; }
 
         #region Person Count
-        [XafDisplayName("Total Person Count"), VisibleInDetailView(false), VisibleInListView(false)]
-        [NotMapped]
-        public int TotalPersonCount => ApplicationItems?.Count ?? 0;
-
         [XafDisplayName("Total Person Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string TotalPersonCountText => NumberToTurkmenWords(TotalPersonCount);
@@ -824,16 +826,6 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [MaxLength(255)]
         public virtual string? LatestProgressDisplay { get; set; }
-
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        public virtual bool LatestIsCancelled { get; set; }
-
-        [Browsable(false)]
-        [VisibleInDetailView(false)]
-        [VisibleInListView(false)]
-        public virtual bool LatestIsRejected { get; set; }
 
         public override void OnCreated()
         {

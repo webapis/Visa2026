@@ -101,10 +101,8 @@
                 <LayoutGroup Id="Item2" ShowCaption="True" Caption="Progress" CaptionLocation="Top" Index="1" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows-tabbed" IsNewNode="True">
                   <LayoutGroup Id="ProgressCurrentStatus" ShowCaption="False" CustomCSSClassName="visa-progress-current-status" Direction="Horizontal" Index="0" RelativeSize="8.333333333333334" IsNewNode="True">
                     <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="22.82471626733922" IsNewNode="True" />
-                    <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="1" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="IsRejected" ViewItem="IsRejected" Index="2" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="WorkingDaysInCurrentStep" ViewItem="WorkingDaysInCurrentStep" Index="3" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="ProgressSlaStatement" ViewItem="ProgressSlaStatement" Index="4" RelativeSize="19.672131147540984" IsNewNode="True" />
+                    <LayoutItem Id="WorkingDaysInCurrentStep" ViewItem="WorkingDaysInCurrentStep" Index="1" RelativeSize="19.167717528373267" IsNewNode="True" />
+                    <LayoutItem Id="ProgressSlaStatement" ViewItem="ProgressSlaStatement" Index="2" RelativeSize="19.672131147540984" IsNewNode="True" />
                   </LayoutGroup>
                   <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="1" RelativeSize="91.66666666666667" IsNewNode="True">
                     <LayoutItem Id="ProgressHistory" CustomCSSClassName="xaf-show-all-rows" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
@@ -231,39 +229,53 @@
     </DetailView>
     <ListView Id="Application_ListView">
       <Columns>
-        <ColumnInfo Id="FullApplicationNumber" Width="150" />
-        <ColumnInfo Id="Year" Width="43" />
-        <ColumnInfo Id="Month" Width="56" />
-        <ColumnInfo Id="ApplicationDate" Width="108" />
-        <ColumnInfo Id="CurrentState" Width="89" />
-        <ColumnInfo Id="IsCancelled" Width="70" />
-        <ColumnInfo Id="IsRejected" Width="70" />
-        <ColumnInfo Id="ApplicationType" Width="109" />
+        <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
+        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Month" Index="2" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
+        <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Index="7" Width="72" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Index="9" Width="96" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="10" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="11" Width="109" />
       </Columns>
     </ListView>
     <ListView Id="Application_ListView_DirectMigration">
       <Columns>
-        <ColumnInfo Id="FullApplicationNumber" Width="150" />
-        <ColumnInfo Id="Year" Width="43" />
-        <ColumnInfo Id="Month" Width="56" />
-        <ColumnInfo Id="ApplicationDate" Width="108" />
-        <ColumnInfo Id="CurrentState" Width="89" />
-        <ColumnInfo Id="IsCancelled" Width="70" />
-        <ColumnInfo Id="IsRejected" Width="70" />
-        <ColumnInfo Id="ApplicationType" Width="109" />
+        <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
+        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Month" Index="2" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
+        <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Index="7" Width="72" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Index="9" Width="96" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="10" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="11" Width="109" />
       </Columns>
     </ListView>
     <ListView Id="Application_ListView_ViaMinistries">
       <Columns>
-        <ColumnInfo Id="FullApplicationNumber" Width="150" />
-        <ColumnInfo Id="Year" Width="43" />
-        <ColumnInfo Id="Month" Width="56" />
-        <ColumnInfo Id="ApplicationDate" Width="108" />
-        <ColumnInfo Id="CurrentState" Width="89" />
-        <ColumnInfo Id="IsCancelled" Width="70" />
-        <ColumnInfo Id="IsRejected" Width="70" />
-        <ColumnInfo Id="ApplicationType" Width="109" />
-        <ColumnInfo Id="ApprovalLegProfile" Index="8" Width="180" />
+        <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
+        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Month" Index="2" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
+        <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Index="7" Width="72" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Index="9" Width="96" />
+        <ColumnInfo Id="ApprovalLegProfile" Index="10" Width="180" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="11" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="12" Width="109" />
+        <ColumnInfo Id="VisaPeriod" Index="13" Width="110" />
+        <ColumnInfo Id="VisaType" Index="14" Width="110" />
       </Columns>
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />

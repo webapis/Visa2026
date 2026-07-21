@@ -7,8 +7,7 @@ internal readonly struct ApplicationListViewDisplayState
 {
     public string PrimaryStateCode { get; init; }
     public string CurrentState { get; init; }
-    public bool IsCancelled { get; init; }
-    public bool IsRejected { get; init; }
+    public DateTime? LatestProgressDate { get; init; }
     public int? WorkingDaysInCurrentStep { get; init; }
     public string ProgressSlaStatement { get; init; }
     public int? WorkingDaysInMigrationStep { get; init; }
@@ -34,8 +33,7 @@ internal readonly struct ApplicationListViewDisplayState
         {
             PrimaryStateCode = primaryStateCode,
             CurrentState = ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty,
-            IsCancelled = string.Equals(primaryStateCode, ApplicationProgressStateCodes.ProcessCancelled, StringComparison.OrdinalIgnoreCase),
-            IsRejected = string.Equals(primaryStateCode, ApplicationProgressStateCodes.ProcessRejected, StringComparison.OrdinalIgnoreCase),
+            LatestProgressDate = latest?.Date,
             WorkingDaysInCurrentStep = progressSla.WorkingDaysInCurrentStep,
             ProgressSlaStatement = ApplicationProgressSlaHelper.FormatStatement(progressSla),
             WorkingDaysInMigrationStep = migrationSla.WorkingDaysInCurrentStep,

@@ -21,14 +21,14 @@
           "caption": {
             "en-US": "Applications (via ministry)",
             "tr-TR": "Başvurular (bakanlık süreci)",
-            "tk-TM": "Arzalar (ministrlik arkaly)",
+            "tk-TM": "Ministrlikler bilen ylalaşylýan ýüztutmalar",
             "ru-RU": "Заявки (через министерства)"
           },
           "children": {
             "ApplicationItem_ViaMinistries": {
               "en-US": "Application items (ministry)",
               "tr-TR": "Başvuru kalemleri (bakanlık)",
-              "tk-TM": "Arza elementleri (ministrlik)",
+              "tk-TM": "Ýüztutmadaky raýatlar",
               "ru-RU": "Позиции (через министерства)"
             }
           }
@@ -37,14 +37,14 @@
           "caption": {
             "en-US": "Applications (direct migration)",
             "tr-TR": "Başvurular (doğrudan migrasyon)",
-            "tk-TM": "Arzalar (migrasiýa gönümel)",
+            "tk-TM": "Ylalaşyk zerur bolmadyk ýüztutmalar",
             "ru-RU": "Заявки (напрямую в миграцию)"
           },
           "children": {
             "ApplicationItem_DirectMigration": {
               "en-US": "Application items (migration)",
               "tr-TR": "Başvuru kalemleri (migrasyon)",
-              "tk-TM": "Arza elementleri (migrasiýa)",
+              "tk-TM": "Ýüztutmadaky raýatlar",
               "ru-RU": "Позиции (напрямую в миграцию)"
             }
           }
@@ -151,8 +151,18 @@
           "tk-TM": "Häzirki ýagdaý",
           "ru-RU": "Текущее состояние"
         },
-        "IsCancelled": { "en-US": "Cancelled", "tr-TR": "İptal", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
-        "IsRejected": { "en-US": "Rejected", "tr-TR": "Reddedildi", "tk-TM": "Ret edildi", "ru-RU": "Отклонено" },
+        "LatestProgressState": {
+          "en-US": "Status",
+          "tr-TR": "Durum",
+          "tk-TM": "Ýagdaý",
+          "ru-RU": "Состояние"
+        },
+        "LatestProgressDate": {
+          "en-US": "Progress date",
+          "tr-TR": "İlerleme tarihi",
+          "tk-TM": "Ýagdaý senesi",
+          "ru-RU": "Дата прогресса"
+        },
         "WorkingDaysInCurrentStep": {
           "en-US": "Working days",
           "tr-TR": "İş günleri",
@@ -176,6 +186,12 @@
           "tr-TR": "Migrasyon süresi",
           "tk-TM": "Migrasiýa möhleti",
           "ru-RU": "Срок миграции"
+        },
+        "TotalPersonCount": {
+          "en-US": "Person count",
+          "tr-TR": "Kişi sayısı",
+          "tk-TM": "Adam sany",
+          "ru-RU": "Количество лиц"
         },
         "ApplicationItems": { "en-US": "Application items", "tr-TR": "Başvuru Kalemleri", "tk-TM": "Arza elementleri", "ru-RU": "Позиции" },
         "Invitations": { "en-US": "Invitations", "tr-TR": "Davetler", "tk-TM": "Çakylyklar", "ru-RU": "Приглашения" },
@@ -310,20 +326,62 @@
     "Application_ListView": {
       "caption": { "en-US": "Applications", "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
       "columns": {
-        "IsManualEntry": { "en-US": "Manual entry", "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
-        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер" },
-        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
-        "Category": { "en-US": "Category", "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
-        "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
+        "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
+        "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
+        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
+        "TotalPersonCount": {
+          "en-US": "Person count",
+          "tr-TR": "Kişi sayısı",
+          "tk-TM": "Adam sany",
+          "ru-RU": "Количество лиц"
+        },
+        "LatestProgressState": {
+          "en-US": "Status",
+          "tr-TR": "Durum",
+          "tk-TM": "Ýagdaý",
+          "ru-RU": "Состояние"
+        },
+        "LatestProgressDate": {
+          "en-US": "Progress date",
+          "tr-TR": "İlerleme tarihi",
+          "tk-TM": "Ýagdaý senesi",
+          "ru-RU": "Дата прогресса"
+        },
         "CurrentState": {
           "en-US": "Current status",
           "tr-TR": "Güncel durum",
           "tk-TM": "Häzirki ýagdaý",
           "ru-RU": "Текущее состояние"
         },
+        "WorkingDaysInCurrentStep": {
+          "en-US": "Working days",
+          "tr-TR": "İş günleri",
+          "tk-TM": "Iş günleri",
+          "ru-RU": "Рабочие дни"
+        },
+        "ProgressSlaStatement": {
+          "en-US": "Approval deadline",
+          "tr-TR": "Onay süresi",
+          "tk-TM": "Tassyklama möhleti",
+          "ru-RU": "Срок согласования"
+        },
+        "WorkingDaysInMigrationStep": {
+          "en-US": "Migration working days",
+          "tr-TR": "Migrasyon iş günleri",
+          "tk-TM": "Migrasiýa iş günleri",
+          "ru-RU": "Рабочие дни миграции"
+        },
+        "MigrationSlaStatement": {
+          "en-US": "Migration deadline",
+          "tr-TR": "Migrasyon süresi",
+          "tk-TM": "Migrasiýa möhleti",
+          "ru-RU": "Срок миграции"
+        },
+        "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
+        "IsManualEntry": { "en-US": "Manual entry", "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
+        "Category": { "en-US": "Category", "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
         "ExpirationDate": { "en-US": "Expiration date", "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
-        "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
-        "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
         "DaysRemaining": { "en-US": "Days remaining", "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "en-US": "Expiration status", "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
@@ -334,31 +392,108 @@
       "caption": {
         "en-US": "Applications via ministry",
         "tr-TR": "Bakanlık süreci başvuruları",
-        "tk-TM": "Ministrlik arkaly arzalar",
+        "tk-TM": "Ministrlikler bilen ylalaşylýan ýüztutmalar",
         "ru-RU": "Заявки через министерства"
       },
       "columns": {
-        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
+        "TotalPersonCount": {
+          "en-US": "Person count",
+          "tr-TR": "Kişi sayısı",
+          "tk-TM": "Adam sany",
+          "ru-RU": "Количество лиц"
+        },
+        "LatestProgressState": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "LatestProgressDate": {
+          "en-US": "Progress date",
+          "tr-TR": "İlerleme tarihi",
+          "tk-TM": "Ýagdaý senesi",
+          "ru-RU": "Дата прогресса"
+        },
         "CurrentState": { "en-US": "Current status", "tr-TR": "Güncel durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
-        "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" }
+        "WorkingDaysInCurrentStep": {
+          "en-US": "Working days",
+          "tr-TR": "İş günleri",
+          "tk-TM": "Iş günleri",
+          "ru-RU": "Рабочие дни"
+        },
+        "ProgressSlaStatement": {
+          "en-US": "Approval deadline",
+          "tr-TR": "Onay süresi",
+          "tk-TM": "Tassyklama möhleti",
+          "ru-RU": "Срок согласования"
+        },
+        "WorkingDaysInMigrationStep": {
+          "en-US": "Migration working days",
+          "tr-TR": "Migrasyon iş günleri",
+          "tk-TM": "Migrasiýa iş günleri",
+          "ru-RU": "Рабочие дни миграции"
+        },
+        "ApprovalLegProfile": { "en-US": "Approval leg profile", "tr-TR": "Onay bakanlık profili", "tk-TM": "Ylalaşyk ädimleri", "ru-RU": "Профиль согласования" },
+        "MigrationSlaStatement": {
+          "en-US": "Migration deadline",
+          "tr-TR": "Migrasyon süresi",
+          "tk-TM": "Migrasiýa möhleti",
+          "ru-RU": "Срок миграции"
+        },
+        "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" },
+        "VisaPeriod": { "en-US": "Visa period", "tr-TR": "Vize Süresi", "tk-TM": "Wiza möhleti", "ru-RU": "Срок визы" },
+        "VisaType": { "en-US": "Visa type", "tr-TR": "Vize Türü", "tk-TM": "Wiza görnüşi", "ru-RU": "Тип визы" }
       }
     },
     "Application_ListView_DirectMigration": {
       "caption": {
         "en-US": "Applications (direct migration)",
         "tr-TR": "Doğrudan migrasyon başvuruları",
-        "tk-TM": "Migrasiýa gönümel arzalar",
+        "tk-TM": "Ylalaşyk zerur bolmadyk ýüztutmalar",
         "ru-RU": "Заявки напрямую в миграцию"
       },
       "columns": {
-        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Arza belgisi", "ru-RU": "Номер" },
+        "FullApplicationNumber": { "en-US": "Application number", "tr-TR": "Başvuru No", "tk-TM": "Ýüztutmanyň belgisi", "ru-RU": "Номер" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Sene", "ru-RU": "Дата" },
+        "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
+        "TotalPersonCount": {
+          "en-US": "Person count",
+          "tr-TR": "Kişi sayısı",
+          "tk-TM": "Adam sany",
+          "ru-RU": "Количество лиц"
+        },
+        "LatestProgressState": { "en-US": "Status", "tr-TR": "Durum", "tk-TM": "Ýagdaý", "ru-RU": "Состояние" },
+        "LatestProgressDate": {
+          "en-US": "Progress date",
+          "tr-TR": "İlerleme tarihi",
+          "tk-TM": "Ýagdaý senesi",
+          "ru-RU": "Дата прогресса"
+        },
         "CurrentState": { "en-US": "Current status", "tr-TR": "Güncel durum", "tk-TM": "Häzirki ýagdaý", "ru-RU": "Текущее состояние" },
+        "WorkingDaysInCurrentStep": {
+          "en-US": "Working days",
+          "tr-TR": "İş günleri",
+          "tk-TM": "Iş günleri",
+          "ru-RU": "Рабочие дни"
+        },
+        "ProgressSlaStatement": {
+          "en-US": "Approval deadline",
+          "tr-TR": "Onay süresi",
+          "tk-TM": "Tassyklama möhleti",
+          "ru-RU": "Срок согласования"
+        },
+        "WorkingDaysInMigrationStep": {
+          "en-US": "Migration working days",
+          "tr-TR": "Migrasyon iş günleri",
+          "tk-TM": "Migrasiýa iş günleri",
+          "ru-RU": "Рабочие дни миграции"
+        },
+        "MigrationSlaStatement": {
+          "en-US": "Migration deadline",
+          "tr-TR": "Migrasyon süresi",
+          "tk-TM": "Migrasiýa möhleti",
+          "ru-RU": "Срок миграции"
+        },
         "ApplicationType": { "en-US": "Type", "tr-TR": "Tür", "tk-TM": "Görnüşi", "ru-RU": "Тип" }
       }
     },
@@ -366,7 +501,7 @@
       "caption": {
         "en-US": "Application items (ministry)",
         "tr-TR": "Başvuru kalemleri (bakanlık süreci)",
-        "tk-TM": "Arza elementleri (ministrlik)",
+        "tk-TM": "Ýüztutmadaky raýatlar",
         "ru-RU": "Позиции заявки (через министерства)"
       }
     },
@@ -374,7 +509,7 @@
       "caption": {
         "en-US": "Application items (direct migration)",
         "tr-TR": "Başvuru kalemleri (doğrudan migrasyon)",
-        "tk-TM": "Arza elementleri (migrasiýa gönümel)",
+        "tk-TM": "Ýüztutmadaky raýatlar",
         "ru-RU": "Позиции заявки (напрямую в миграцию)"
       }
     },

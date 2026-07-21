@@ -8,6 +8,12 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ### 2026-07-21 — Import: ProcessDate/ProcessNumber on PROCESS_STARTED only
 
+### 2026-07-21 — Import completion from Invitations / WorkPermits
+
+- **Decision**: `PROCESS_ISSUED` when legacy has issued invitation (`ApplicationResult` + `PersonInInvitation`) or work permit (`PersonInApplication.WorkPermit`). Date/number from latest invitation or work-permit evidence; cancelled/rejected apps skip issued.
+- **Cross-skill**: visa2014-to-visa2026-import (`Visa2014ApplicationProgressCompletionIndex`).
+
+
 - **Decision**: Legacy `ProcessDate` + `ProcessNumber` = **Işlenilýär** start, not **Resmileşdirildi**. Import puts `ProcessNumber: …` on `PROCESS_STARTED`; no `PROCESS_ISSUED` from these fields until completion source is mapped.
 - **Example**: App `12/-7010` — ministry steps then `PROCESS_STARTED` @ ProcessDate with `ProcessNumber: AS538188`.
 - **Cross-skill**: visa2014-to-visa2026-import

@@ -30,18 +30,19 @@ propertyGaps:
       disposition: synthesize
     - column: MinisteriesDocumentNumber
       disposition: synthesize
-      notes: Appended to Description on ministry_return step
+      notes: Description on leg 2 REVIEW_APPROVED (Energetika); leg 1 ministry implied from ApprovalLegProfile
     - column: DateForwardedToMinConstruction
       disposition: synthesize
       notes: Leg 2 when contract has ≥2 MinistryLegs (273 Çalik rows)
     - column: DocNumberForwardedToMinConstruction
       disposition: synthesize
+      notes: Description on leg 3 REVIEW_APPROVED (construction ministry) when profile has ≥3 legs
     - column: ProcessDate
       disposition: synthesize
       notes: Migration-service processing start → PROCESS_STARTED (not completion)
     - column: ProcessNumber
       disposition: synthesize
-      notes: Description on PROCESS_STARTED; completion uses a separate legacy source (follow-up)
+      notes: Description on PROCESS_STARTED; completion from ApplicationResult (Invitation) or PersonInApplication.WorkPermit
     - column: Cancelled
       disposition: synthesize
       notes: Terminal PROCESS_CANCELLED override

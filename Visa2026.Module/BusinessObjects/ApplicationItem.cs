@@ -1776,7 +1776,10 @@ namespace Visa2026.Module.BusinessObjects
             InvitationItemIsCancelled
             || VisaIsCancelled
             || IsCancelled
-            || (Application?.IsCancelled ?? false);
+            || string.Equals(
+                Application?.PrimaryStateCode,
+                ApplicationProgressStateCodes.ProcessCancelled,
+                StringComparison.OrdinalIgnoreCase);
 
 		[ExcludeFromOptionalDetailFields]
 		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView,ListView")]

@@ -174,7 +174,6 @@
       <Item Id="Work Permit Tracking" Caption="İş İzni Takibi" />
       <Item Id="WorkPermit" Caption="Çalışma İzni" />
       <Item Id="WorkPermitItem" Caption="İş İzni Kalemleri" />
-      <Item Id="ForeignWorkerMaglumat" Caption="Yabancı uyruklu çalışanlar bilgisi" />
     </Items>
   </NavigationItems>
   <BOModel>
@@ -244,10 +243,10 @@
         <Member Name="FullApplicationNumber" Caption="Tam Başvuru No" />
         <Member Name="Invitations" Caption="Davetler" />
         <Member Name="IsActive" Caption="Aktif" />
-        <Member Name="IsCancelled" Caption="İptal" />
         <Member Name="IsForFamily" Caption="Aile İçin" />
         <Member Name="IsManualEntry" Caption="Manuel Giriş" />
-        <Member Name="IsRejected" Caption="Reddedildi" />
+        <Member Name="LatestProgressDate" Caption="İlerleme tarihi" />
+        <Member Name="LatestProgressState" Caption="Durum" />
         <Member Name="MigrationService" Caption="Göç Dairesi" />
         <Member Name="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <Member Name="Month" Caption="Ay" />
@@ -256,6 +255,7 @@
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Temsilci" />
+        <Member Name="TotalPersonCount" Caption="Kişi sayısı" />
         <Member Name="Urgency" Caption="Aciliyet" />
         <Member Name="VisaCategory" Caption="Vize Kategorisi" />
         <Member Name="VisaPeriod" Caption="Vize Süresi" />
@@ -2311,31 +2311,6 @@
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ForeignWorkerMaglumat" Caption="Yabancı uyruklu çalışanlar bilgisi">
-      <OwnMembers>
-        <Member Name="FullName" Caption="A.S.A" />
-        <Member Name="DateOfBirth" Caption="Doğum tarihi" />
-        <Member Name="NationalityCode" Caption="Uyruğu" />
-        <Member Name="BirthAndNationality" Caption="Doğum yılı ve uyruğu" />
-        <Member Name="PassportNumber" Caption="Pasaport no" />
-        <Member Name="PassportExpirationDate" Caption="Pasaport süresi" />
-        <Member Name="PassportBlock" Caption="Pasaport no ve süresi" />
-        <Member Name="EducationLevelTm" Caption="Eğitim" />
-        <Member Name="PositionNameTm" Caption="Görevi" />
-        <Member Name="ResidenceAddress" Caption="Türkmenistan'daki ikamet adresi" />
-        <Member Name="WorkPermitNumber" Caption="İzin no" />
-        <Member Name="WorkPermitStartDate" Caption="İzin başlangıcı" />
-        <Member Name="WorkPermitExpirationDate" Caption="İzin bitişi" />
-        <Member Name="WorkPermitIsCancelled" Caption="İptal" />
-        <Member Name="IsValid" Caption="Geçerli" />
-        <Member Name="PermitBlock" Caption="İzin no ve süresi" />
-        <Member Name="VisaNumber" Caption="Vize no" />
-        <Member Name="VisaStartDate" Caption="Vize başlangıcı" />
-        <Member Name="VisaExpirationDate" Caption="Vize bitişi" />
-        <Member Name="VisaBlock" Caption="Vize no ve süresi" />
-        <Member Name="Remarks" Caption="Not" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="İş İzni Kalemi">
       <OwnMembers>
         <Member Name="ASNumber" Caption="AS Numarası" />
@@ -2453,7 +2428,14 @@
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="IsActive" Caption="Aktif" />
         <ColumnInfo Id="IsManualEntry" Caption="Manuel Giriş" />
+        <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Durum" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
@@ -2463,7 +2445,14 @@
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Durum" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
@@ -2474,7 +2463,16 @@
         <ColumnInfo Id="ApprovalLegProfile" Caption="Onay bakanlık profili" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Durum" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />
+        <ColumnInfo Id="VisaType" Caption="Vize Türü" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
@@ -3139,8 +3137,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="ForeignWorkerMaglumat_ListView" Caption="Yabancı uyruklu çalışanlar bilgisi" />
-    <DetailView Id="ForeignWorkerMaglumat_DetailView" Caption="Yabancı uyruklu çalışanlar bilgisi" />
     <ListView Id="WorkPermitItem_ListView" Caption="İş İzni Kalemleri">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="AS Numarası" />

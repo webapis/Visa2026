@@ -4,8 +4,44 @@
 
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
+### 2026-07-21 — ApplicationProgress partial reimport (raw ProcessNumber / InvitationNumber descriptions)
+
+- **Phase**: partial-reimport (local PG, after `FormatLegacyDescriptionValue` — no `ProcessNumber:` / `InvitationNumber:` labels)
+- **Prep**: PG cleanup (`cleanup-applicationprogress.sql`); clear `ApplicationProgress.json` id-map; DataImporter Debug build.
+- **Result**: Posted **~30680** / Failed **0** / Skipped **18** (terminal progress log truncated at 8500/30764; exit 0 ~13 min). DB = **30696** `ApplicationProgresses`.
+- **Shape**: `ProcessNumber:` prefix = **0**; `InvitationNumber:` prefix = **0**; `2_REVIEW_APPROVED` + `MinisteriesDocumentNumber:` = **3274**; `PROCESS_ISSUED` = **4340**.
+- **Spot-check**: `7/-1206` → `PROCESS_STARTED` Description `CO0223973`, `PROCESS_ISSUED` `CO323977`.
+- **Code**: `Visa2014ApplicationProgressTransform.FormatLegacyDescriptionValue` for started/issued; ministry refs still use `FormatLegacyRef` labels.
+
+### 2026-07-21 — ApplicationProgress partial reimport (MinisteriesDocumentNumber → leg 2)
+
+- **Phase**: partial-reimport (local PG, after `BuildLegApprovedDescription` shift)
+- **Prep**: NULL `LatestProgressId`; DELETE manual-entry `ApplicationProgresses`; clear `ApplicationProgress.json` (+ sync-progress) source id-map; rebuild DataImporter if `runtimeconfig.json` missing after killing `dotnet`/`Visa2026.DataImporter`.
+- **Result**: Posted **30692** / Failed **0** / Skipped (no Application map) **66** / Parent-skipped **167**. DB = **30692** rows. Exit 0 (~25 min).
+- **Shape**: `1_REVIEW_APPROVED` with Description = **0**; `2_REVIEW_APPROVED` with `MinisteriesDocumentNumber:` = **3273**; `PROCESS_ISSUED` = **4339**.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-110757.log`
+- **PG cleanup SQL**: `artifacts/local-pg-import/cleanup-applicationprogress.sql` (use `C:\PostgreSQL\16\bin\psql.exe` — not in PATH). **Do not** run cleanup while import is in progress.
+
+### 2026-07-21 — ApplicationProgress: MinisteriesDocumentNumber on leg 2 only
+
+- **Mapping**: `MinisteriesDocumentNumber` → `2_REVIEW_APPROVED` Description (Energetika); leg 1 approved has no doc (ministry from `ApprovalLegProfile`). `DocNumberForwardedToMinConstruction` → leg 3 when present.
+- **Code**: `Visa2014ApplicationProgressTransform.BuildLegApprovedDescription`; tests `SynthesizeSteps_LongProcess_MinisteriesDocumentNumberOnLeg2NotLeg1`, `SynthesizeSteps_ThreeLegs_ConstructionDocOnLeg3`.
+
 
 ### 2026-07-21 — ApplicationProgress: ProcessDate/ProcessNumber = processing start (not issued)
+### 2026-07-21 — ApplicationProgress: PROCESS_ISSUED from Invitation / WorkPermit evidence
+### 2026-07-21 — ApplicationProgress partial reimport (invitation/WP completion)
+
+- **Phase**: partial-reimport (local PG, after completion-index)
+- **Result**: Posted **30692** / Failed **0** / Skipped (no Application map) **62** / Parent-skipped **167**. Completion index: **4513** apps. DB = 30692 rows (`PROCESS_ISSUED` = 4339). Exit 0 (~19 min).
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-092326.log`
+
+
+- **Phase**: mapping / transform
+- **Rule**: Legacy app is complete when it has issued **ApplicationResult** (Invitation + PersonInInvitation) and/or **PersonInApplication.WorkPermit** → synthesize `PROCESS_ISSUED` with `InvitationNumber` / `WorkPermitNumber` + issued date. `ProcessDate`/`ProcessNumber` remain **PROCESS_STARTED** only.
+- **Code**: `Visa2014ApplicationProgressCompletionIndex` + `SynthesizeSteps` completion branch; auto-loaded in `PrepareImportBatch`.
+- **Reimport**: partial ApplicationProgress reimport after deploy to add issued rows.
+
 - **Phase**: partial-reimport (local PG, after ProcessDate/ProcessNumber → PROCESS_STARTED fix)
 - **Result**: Posted **26348** / Failed **0** / Skipped (no Application map) **60** / Parent-skipped **172**. DB = 26348 rows. Exit 0 (~15 min).
 - **Shape**: **0** `PROCESS_ISSUED` rows (was ~12063 before); `PROCESS_STARTED` = 12110 with ProcessNumber on Description. Total rows ~26k vs ~38k prior reimport.

@@ -58,14 +58,14 @@
     <Items>
       <Item Id="Application" Caption="Arzalar">
         <Items>
-          <Item Id="Application_DirectMigration" Caption="Arzalar (migrasiýa gönümel)">
+          <Item Id="Application_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
             <Items>
-              <Item Id="ApplicationItem_DirectMigration" Caption="Arza elementleri (migrasiýa)" />
+              <Item Id="ApplicationItem_DirectMigration" Caption="Ýüztutmadaky raýatlar" />
             </Items>
           </Item>
-          <Item Id="Application_ViaMinistries" Caption="Arzalar (ministrlik arkaly)">
+          <Item Id="Application_ViaMinistries" Caption="Ministrlikler bilen ylalaşylýan ýüztutmalar">
             <Items>
-              <Item Id="ApplicationItem_ViaMinistries" Caption="Arza elementleri (ministrlik)" />
+              <Item Id="ApplicationItem_ViaMinistries" Caption="Ýüztutmadaky raýatlar" />
             </Items>
           </Item>
         </Items>
@@ -174,7 +174,6 @@
       <Item Id="Work Permit Tracking" Caption="Iş rugsady yzaragy" />
       <Item Id="WorkPermit" Caption="Iş rugsady" />
       <Item Id="WorkPermitItem" Caption="Iş rugsady elementleri" />
-      <Item Id="ForeignWorkerMaglumat" Caption="Daşary ýurt raýatlary maglumaty" />
     </Items>
   </NavigationItems>
   <BOModel>
@@ -244,10 +243,10 @@
         <Member Name="FullApplicationNumber" Caption="Doly arza belgisi" />
         <Member Name="Invitations" Caption="Çakylyklar" />
         <Member Name="IsActive" Caption="Işjeň" />
-        <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsForFamily" Caption="Maşgala üçin" />
         <Member Name="IsManualEntry" Caption="El bilen giriş" />
-        <Member Name="IsRejected" Caption="Ret edildi" />
+        <Member Name="LatestProgressDate" Caption="Ýagdaý senesi" />
+        <Member Name="LatestProgressState" Caption="Ýagdaý" />
         <Member Name="MigrationService" Caption="Migrasiýa gullugy" />
         <Member Name="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <Member Name="Month" Caption="Aý" />
@@ -256,6 +255,7 @@
         <Member Name="ProjectContract" Caption="Taslama şertnamasy" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Wekil" />
+        <Member Name="TotalPersonCount" Caption="Adam sany" />
         <Member Name="Urgency" Caption="Gyssaglylyk" />
         <Member Name="VisaCategory" Caption="Wiza kategoriýasy" />
         <Member Name="VisaPeriod" Caption="Wiza möhleti" />
@@ -2311,31 +2311,6 @@
         <Member Name="DeletedBy" Caption="Pozan" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ForeignWorkerMaglumat" Caption="Daşary ýurt raýatlary maglumaty">
-      <OwnMembers>
-        <Member Name="FullName" Caption="F.A.A" />
-        <Member Name="DateOfBirth" Caption="Doglan senesi" />
-        <Member Name="NationalityCode" Caption="Raýatlygy" />
-        <Member Name="BirthAndNationality" Caption="Doglan ýyly we raýatlygy" />
-        <Member Name="PassportNumber" Caption="Pasport belgisi" />
-        <Member Name="PassportExpirationDate" Caption="Pasport möhleti" />
-        <Member Name="PassportBlock" Caption="Pasport belgisi we möhleti" />
-        <Member Name="EducationLevelTm" Caption="Bilimi" />
-        <Member Name="PositionNameTm" Caption="Wezipesi" />
-        <Member Name="ResidenceAddress" Caption="Türkmenistan-daky anyk ýaşaýan salgysy" />
-        <Member Name="WorkPermitNumber" Caption="Rugsatnama belgisi" />
-        <Member Name="WorkPermitStartDate" Caption="Rugsatnama başy" />
-        <Member Name="WorkPermitExpirationDate" Caption="Rugsatnama soňy" />
-        <Member Name="WorkPermitIsCancelled" Caption="Ýatyrylan" />
-        <Member Name="IsValid" Caption="Dogry (valid)" />
-        <Member Name="PermitBlock" Caption="Rugsatnama belgisi we möhleti" />
-        <Member Name="VisaNumber" Caption="Wiza belgisi" />
-        <Member Name="VisaStartDate" Caption="Wiza başy" />
-        <Member Name="VisaExpirationDate" Caption="Wiza soňy" />
-        <Member Name="VisaBlock" Caption="Wiza belgisi we möhleti" />
-        <Member Name="Remarks" Caption="Bellik" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.WorkPermitItem" Caption="Iş rugsady elementi">
       <OwnMembers>
         <Member Name="ASNumber" Caption="AS belgisi" />
@@ -2442,7 +2417,7 @@
     </DetailView>
     <ListView Id="Application_ListView" Caption="Arzalar">
       <Columns>
-        <ColumnInfo Id="ApplicationDate" Caption="Sene" />
+        <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="Category" Caption="Kategoriýa" />
         <ColumnInfo Id="Company" Caption="Kompaniýa" />
@@ -2450,31 +2425,54 @@
         <ColumnInfo Id="DaysRemaining" Caption="Galan gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
         <ColumnInfo Id="ExpirationState" Caption="Möhlet ýagdaýy" />
-        <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
         <ColumnInfo Id="IsActive" Caption="Işjeň" />
         <ColumnInfo Id="IsManualEntry" Caption="El bilen giriş" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Iş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasiýa iş günleri" />
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_DirectMigration" Caption="Migrasiýa gönümel arzalar">
+    <ListView Id="Application_ListView_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
       <Columns>
-        <ColumnInfo Id="ApplicationDate" Caption="Sene" />
+        <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
-        <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Iş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasiýa iş günleri" />
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
-    <ListView Id="Application_ListView_ViaMinistries" Caption="Ministrlik arkaly arzalar">
+    <ListView Id="Application_ListView_ViaMinistries" Caption="Ministrlikler bilen ylalaşylýan ýüztutmalar">
       <Columns>
-        <ColumnInfo Id="ApplicationDate" Caption="Sene" />
+        <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
-        <ColumnInfo Id="ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Ylalaşyk ädimleri" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
-        <ColumnInfo Id="FullApplicationNumber" Caption="Arza belgisi" />
+        <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasiýa möhleti" />
         <ColumnInfo Id="Month" Caption="Aý" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Tassyklama möhleti" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Adam sany" />
+        <ColumnInfo Id="VisaPeriod" Caption="Wiza möhleti" />
+        <ColumnInfo Id="VisaType" Caption="Wiza görnüşi" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Iş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasiýa iş günleri" />
         <ColumnInfo Id="Year" Caption="Ýyl" />
       </Columns>
     </ListView>
@@ -2499,8 +2497,8 @@
         <ColumnInfo Id="TravelDate" Caption="Syýahat senesi" />
       </Columns>
     </ListView>
-    <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Arza elementleri (migrasiýa gönümel)" />
-    <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Arza elementleri (ministrlik)" />
+    <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Ýüztutmadaky raýatlar" />
+    <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Ýüztutmadaky raýatlar" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Resminama nusgalary" />
     <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Resminamalar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Arza ýeri" />
@@ -3139,8 +3137,6 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="ForeignWorkerMaglumat_ListView" Caption="Daşary ýurt raýatlary maglumaty" />
-    <DetailView Id="ForeignWorkerMaglumat_DetailView" Caption="Daşary ýurt raýatlary maglumaty" />
     <ListView Id="WorkPermitItem_ListView" Caption="Iş rugsady elementleri">
       <Columns>
         <ColumnInfo Id="ASNumber" Caption="AS belgisi" />

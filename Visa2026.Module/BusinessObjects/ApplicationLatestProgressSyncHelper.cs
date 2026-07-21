@@ -47,8 +47,6 @@ public static class ApplicationLatestProgressSyncHelper
             application.LatestProgress = null;
             application.LatestPrimaryStateCode = null;
             application.LatestProgressDisplay = null;
-            application.LatestIsCancelled = false;
-            application.LatestIsRejected = false;
             return;
         }
 
@@ -56,14 +54,6 @@ public static class ApplicationLatestProgressSyncHelper
         application.LatestPrimaryStateCode = primaryCode;
         application.LatestProgressDisplay =
             ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty;
-        application.LatestIsCancelled = string.Equals(
-            primaryCode,
-            ApplicationProgressStateCodes.ProcessCancelled,
-            StringComparison.OrdinalIgnoreCase);
-        application.LatestIsRejected = string.Equals(
-            primaryCode,
-            ApplicationProgressStateCodes.ProcessRejected,
-            StringComparison.OrdinalIgnoreCase);
 
         if (CanLinkLatestProgress(latest, objectSpace))
         {

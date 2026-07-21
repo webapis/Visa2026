@@ -21,8 +21,6 @@ public class ApplicationLatestProgressSyncTests
 
         Assert.Equal(latest.ID, application.LatestProgressId);
         Assert.Equal(ApplicationProgressStateCodes.ProcessRejected, application.LatestPrimaryStateCode);
-        Assert.True(application.LatestIsRejected);
-        Assert.False(application.LatestIsCancelled);
         Assert.False(string.IsNullOrWhiteSpace(application.LatestProgressDisplay));
     }
 

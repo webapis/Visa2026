@@ -15,14 +15,6 @@ public static class ApplicationLatestProgressSchemaSql
         IF COL_LENGTH(N'dbo.Applications', N'LatestProgressDisplay') IS NULL
             ALTER TABLE dbo.Applications ADD LatestProgressDisplay nvarchar(255) NULL;
 
-        IF COL_LENGTH(N'dbo.Applications', N'LatestIsCancelled') IS NULL
-            ALTER TABLE dbo.Applications ADD LatestIsCancelled bit NOT NULL
-                CONSTRAINT DF_Applications_LatestIsCancelled DEFAULT (0);
-
-        IF COL_LENGTH(N'dbo.Applications', N'LatestIsRejected') IS NULL
-            ALTER TABLE dbo.Applications ADD LatestIsRejected bit NOT NULL
-                CONSTRAINT DF_Applications_LatestIsRejected DEFAULT (0);
-
         IF NOT EXISTS (
             SELECT 1 FROM sys.foreign_keys
             WHERE name = N'FK_Applications_ApplicationProgresses_LatestProgressId')

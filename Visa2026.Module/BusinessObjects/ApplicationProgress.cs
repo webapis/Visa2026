@@ -44,7 +44,7 @@ namespace Visa2026.Module.BusinessObjects
         /// <summary>1-based step sequence within the parent application's progress history.</summary>
         [Column("ProgressOrder")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [VisibleInDetailView(false)]
         public virtual int Order { get; set; }
 
         [RuleRequiredField]
@@ -56,6 +56,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual string Description { get; set; }
 
         [XafDisplayName("Ministrlik")]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [NotMapped]
         public string MinistryStepLabel =>

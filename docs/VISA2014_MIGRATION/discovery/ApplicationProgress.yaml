@@ -90,15 +90,15 @@ mapping:
         dateSource: DateForwardedToMonistery
       - step: ministry_return
         when: MinisteriesDocumentDate >= 2000-01-01 OR MinisteriesDocumentNumber non-empty
-        state: 1_REVIEW_APPROVED
-        location: AT_THE_MINISTERY_1
+        state: 2_REVIEW_APPROVED
+        location: AT_THE_MINISTERY_2
         dateSource: MinisteriesDocumentDate
         descriptionFields: [MinisteriesDocumentNumber]
-        openDecision: location after approval — AT_OFFICE vs stay AT_THE_MINISTERY_1
+        notes: Leg 1 approved (Türkmenenergo) has no doc — ministry from ApprovalLegProfile
       - step: ministry_2_forward
-        when: DateForwardedToMinConstruction >= 2000-01-01 AND ProjectContract.MinistryLegs >= 2
-        state: 2_REVIEW_STARTED
-        location: AT_THE_MINISTERY_2
+        when: DateForwardedToMinConstruction >= 2000-01-01 AND ProjectContract.MinistryLegs >= 3
+        state: 3_REVIEW_STARTED
+        location: AT_THE_MINISTERY_3
         dateSource: DateForwardedToMinConstruction
         descriptionFields: [DocNumberForwardedToMinConstruction]
       - step: migration_started
