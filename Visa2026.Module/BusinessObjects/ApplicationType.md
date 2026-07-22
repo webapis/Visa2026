@@ -18,7 +18,6 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 |---------------|-----------|-------------|--------------------------------|
 | `LifecycleStage` | `ApplicationLifecycleStage` (Enum) | Specifies the stage of the application lifecycle this type belongs to (e.g., Entry, Stay, Exit). | |
 | `Category` | `ApplicationTypeCategory` (Enum) | Specifies if the application type is for an `Employee`, `FamilyMember`, or `Both`. | Required. |
-| `OrganizationType` | `OrganizationType` (Lookup) | A required reference to the parent organization type (e.g., "Iş Buýrujy", "Migrasiýa"). | Required. |
 | `DurationInDays` | `int` | The number of days used to calculate the default expiration date for an Application. | |
 | `ApplicationProgressRoute` | `ApplicationProgressRouteKind` (Enum) | Ministry workflow vs direct to migration service (`ViaMinistries`, `DirectToMigrationService`). Seeded in `ApplicationTypeConfigurationCatalog.json`; drives allowed `ApplicationProgress` state/location codes. | |
 | `MinistryReviewDepth` | `MinistryReviewDepth` (Enum) | `None`, `FirstMinistryOnly`, or `FirstAndSecondMinistry` when route is `ViaMinistries`. | |
@@ -30,7 +29,10 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 | `ShowRejections` | `bool` | Controls visibility of the `Rejections` collection in the `Application` Detail View. | |
 | `ShowWorkPermits` | `bool` | Controls visibility of the `WorkPermits` collection in the `Application` Detail View. | |
 | `ShowRegistrations` | `bool` | Controls visibility of the `Registrations` collection in the `Application` Detail View. | |
-| `ShowVisas` | `bool` | Controls visibility of the `Visas` collection in the `Application` Detail View. | |
+| `ShowVisas` | `bool` | Controls visibility of the `Visas` collection in the `Application` Detail View. **UI only** — not the same as `CanIssueVisa`. | |
+| `CanIssueVisa` | `bool` | Capability: successful processing may produce a new `Visa`. Seeded in catalog; drives `Visa.IssuingApplicationItem` filtering. Distinct from `Show*` UI flags. | |
+| `CanIssueInvitation` | `bool` | Capability: successful processing may produce a new `Invitation`. Drives `Invitation.Application` filtering. Distinct from `ShowInvitations`. | |
+| `CanIssueWorkPermit` | `bool` | Capability: successful processing may produce a new `WorkPermit`. Drives `WorkPermit.Application` filtering. Distinct from `ShowWorkPermits`. | |
 | `ShowApplicationItems` | `bool` | Controls visibility of the `ApplicationItems` collection in the `Application` Detail View. | |
 | `ShowApplicationReason` | `bool` | Legacy flag (Application reason field on Application is not used). | |
 | `ShowMigrationService` | `bool` | Controls visibility of the `MigrationService` property in the `Application` Detail View. | |
@@ -59,7 +61,8 @@ This object inherits from the `LookupBase` class, which provides the standard `N
 
 ## 5. Relationships to Other Objects
 
-- **`OrganizationType` (OrganizationType)**: A many-to-one relationship to the `OrganizationType` object. This creates a hierarchical structure where each `ApplicationType` belongs to a specific `OrganizationType`.
+- **`ApplicationMigrationSlaProfile`**: Optional SLA tier for migration-service processing (`MigrationSlaProfile` / `MigrationSlaProfileId`).
+- **`ApplicationReason`**: Nested reasons collection (legacy / import; hidden from Application Type detail).
 
 ---
 

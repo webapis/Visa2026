@@ -40,6 +40,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **ApplicationTypeFilter** | Deprecated | `ApplicationType.SelectionCode` + `ApplicationTypeCodePickerHelper` (hundreds grouping) | Table retained; **not** in `LookupCatalogs/manifest.json` | Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
 | **ApplicationType `App_Visa_Ext` (702)** | Deprecated | **`App_Visa_and_WP_Ext` (708)** — Extend visa and work permit | Row retained; hidden from type-code picker | Employee visa extension only; legacy `E:7:*` imports map to 708. Migrated rows corrected via `--correct-visa-application-types`. |
 | **ApplicabilityMode** (enum) | Deprecated | `UserReportTemplate.ApplicableTypeLinks`, `ApplicableProjectContractLinks`, `VisibilityCriteria` | Enum column on `UserReportTemplates` retained | `[Obsolete]` on enum and `UserReportTemplate.ApplicabilityMode`. |
+| **VisaIssuingApplicationTypes** (name allowlist) | Removed | `ApplicationType.CanIssueVisa` + `ApplicationTypeCapabilities` | — | Hardcoded `ApplicationType.Name` set replaced by seeded capability flag. |
 | **ApplicationStatus** (enum) | Deprecated | `ApplicationProgress` + `Application.CurrentState`; locations via **ApplicationLocation** catalog | Enum unused on `Application` BO; may remain in old import models | Docs in [`docs/BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8b still describe the old enum — prefer §8c progress model for new work. |
 
 ### Lookups: seeding vs UI-only (not always “deprecated”)
@@ -52,6 +53,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | Name | Status | Replacement | Schema | Notes |
 |------|--------|-------------|--------|-------|
 | **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Catalog retained; **no longer** used on `ApplicationProgress` (progress is state-only). Layer B strings in `LookupCatalogStrings.json`. |
+| **OrganizationType** | Removed | — (obsolete lookup; unused by `Application` / `ApplicationType`) | Table/FK dropped by `OrganizationTypeSchemaCleanupUpdater` | Formerly under Lookup/Organization; leftover DetailView layout nodes removed. |
 | **BorderZoneLocation** | Deprecated | Comma-separated **`BorderZoneName`** on `Application`, `ApplicationItem`, and `Visa` | BO + table retained (hidden nav); **no** JSON catalog | Migrated by `ApplicationBorderZoneLocationStringUpdater` + earlier item/visa updaters. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). Do not confuse with **ApplicationLocation**. |
 | **MovementPermitLocation** | Retained (UI catalog) | Per-deployment rows in lookup UI | Table retained; excluded from manifest | See [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md). |
 
@@ -86,6 +88,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | Artifact | Removed by | Replacement |
 |----------|------------|-------------|
 | `Applications.LatestIsCancelled`, `Applications.LatestIsRejected` | `ApplicationLatestTerminalFlagsColumnsCleanupUpdater` | `ApplicationProgress` terminal states; `LatestPrimaryStateCode` / `CurrentState` |
+| **OrganizationType** / `OrganizationTypes` (+ `Applications.OrganizationTypeID`, `ApplicationTypes.OrganizationTypeID`) | `OrganizationTypeSchemaCleanupUpdater` | Obsolete; unused |
 | `Visas.HasBorderZonePermit` | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` string + **BorderZoneName** catalog |
 | `Visa` ↔ `City` link table | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` |
 | `WorkPermitItemPermittedCity` / link table | `WorkPermitItemPermittedLocationsStringUpdater` | `WorkPermitItem.WorkPermittedLocations` + **WorkPermittedLocation** catalog |

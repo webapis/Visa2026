@@ -203,6 +203,21 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool ShowMovementPermitLocation { get; set; }
         public virtual bool ShowBorderZoneLocation { get; set; }
 
+        /// <summary>Successful processing of this type may produce a new <see cref="Visa"/>.</summary>
+        [VisibleInListView(true)]
+        [XafDisplayName("May issue visa")]
+        public virtual bool CanIssueVisa { get; set; }
+
+        /// <summary>Successful processing of this type may produce a new <see cref="Invitation"/>.</summary>
+        [VisibleInListView(true)]
+        [XafDisplayName("May issue invitation")]
+        public virtual bool CanIssueInvitation { get; set; }
+
+        /// <summary>Successful processing of this type may produce a new <see cref="WorkPermit"/>.</summary>
+        [VisibleInListView(true)]
+        [XafDisplayName("May issue work permit")]
+        public virtual bool CanIssueWorkPermit { get; set; }
+
         // --- These flags control the visibility of fields in the nested ApplicationItem Detail View ---
         public virtual bool ShowPreviousPassport { get; set; }
         public virtual bool ShowCurrentVisa { get; set; }
@@ -329,19 +344,6 @@ namespace Visa2026.Module.BusinessObjects
     [GlobalLookupCatalog(GlobalLookupCatalogKind.MigrationService)]
     public class MigrationService : GlobalLookupCatalogBase
     {
-    }
-
-    [DefaultClassOptions]
-    [NavigationItem("Lookup/Organization/Config")]
-    [DefaultProperty(nameof(NameTm))]
-    public class OrganizationType : LookupBase
-    {
-        public OrganizationType()
-        {
-            ApplicationTypes = new ObservableCollection<ApplicationType>();
-        }
-
-        public virtual IList<ApplicationType> ApplicationTypes { get; set; }
     }
 
     [DefaultClassOptions]

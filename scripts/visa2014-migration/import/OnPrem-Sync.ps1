@@ -359,6 +359,7 @@ function Invoke-PostImportCorrections {
         @{ Name = "PersonRelationship"; Flag = "--correct-person-relationship" },
         @{ Name = "PersonAddressPia"; Flag = "--correct-person-address-of-residence" },
         @{ Name = "ApplicationItemPersonCurrent"; Flag = "--correct-application-item-person-current" },
+        @{ Name = "VisaType"; Flag = "--correct-visa-type" },
         @{ Name = "VisaIssuingApplicationItem"; Flag = "--correct-visa2014-issuing-application-item" }
     )
 

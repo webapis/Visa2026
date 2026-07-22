@@ -35,7 +35,7 @@ public static class ApplicationItemVisaDefaults
 
         if (visa.IssuingApplicationItem == null
             && appItem.Application?.ApplicationType != null
-            && VisaIssuingApplicationTypes.IsAllowed(appItem.Application.ApplicationType)
+            && ApplicationTypeCapabilities.CanIssueVisa(appItem.Application.ApplicationType)
             && passport.Person != null
             && appItem.Person != null
             && appItem.Person.ID == passport.Person.ID)

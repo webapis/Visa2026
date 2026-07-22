@@ -128,7 +128,6 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkDuty> WorkDuties { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
-        public DbSet<OrganizationType> OrganizationTypes { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
         public DbSet<ApplicationProgress> ApplicationProgresses { get; set; }
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }

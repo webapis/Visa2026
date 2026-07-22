@@ -454,6 +454,8 @@ catalogs:
     unmappedDefault: WP
     notes: |
       Approved 2026-06-26 for Visa import (permits-and-visas). Resolve by LocalizationKey, not PdfForm_Code alone (TR2/BS1 share 14).
+      Person override (2026-07-22): family-member persons (IsFamilyMember=1, IsEmployee=0)
+      always import VisaType FM — legacy often stores WP:11 incorrectly (~637 rows on Çalik).
       Application/ApplicationItem FK audit deferred to Application wave.
 
   - targetCatalog: VisaCategory

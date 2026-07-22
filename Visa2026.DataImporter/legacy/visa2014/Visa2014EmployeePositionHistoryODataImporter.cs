@@ -111,7 +111,8 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
 
             try
             {
-                var actualPositionName = row.GetValueOrDefault("ActualPosition") as string ?? "-";
+                var actualPositionName = Visa2014ActualPositionNormalizer.Normalize(
+                    row.GetValueOrDefault("ActualPosition") as string);
                 var (actualPositionId, createdActual) = await ResolveOrCreateActualPositionAsync(
                     target, resolver, actualPositionCache, actualPositionName, verbose);
                 if (!actualPositionId.HasValue)

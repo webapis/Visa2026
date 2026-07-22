@@ -400,6 +400,7 @@
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
         "ApplicationDate": { "en-US": "Date", "tr-TR": "Tarih", "tk-TM": "Ýüztutmanyň senesi", "ru-RU": "Дата" },
+        "Urgency": { "en-US": "Urgency", "tr-TR": "Aciliyet", "tk-TM": "Gyssaglylyk", "ru-RU": "Срочность" },
         "TotalPersonCount": {
           "en-US": "Person count",
           "tr-TR": "Kişi sayısı",

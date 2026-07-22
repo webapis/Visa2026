@@ -183,6 +183,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .Include(application => application.ApprovalLegProfile!)
                 .ThenInclude(profile => profile.MinistryLegs)
                 .ThenInclude(leg => leg.ApprovingMinistry)
+            .Include(application => application.Urgency)
             .Include(application => application.VisaPeriod)
             .Include(application => application.VisaType)
             .Include(application => application.ApprovalLegSnapshots)

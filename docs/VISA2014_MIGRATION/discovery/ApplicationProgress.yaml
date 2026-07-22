@@ -130,6 +130,20 @@ mapping:
           under ApplicationResult Result=Rejection for the same Application (maps to
           ApplicationItems.Count == sum(Rejection.RejectionItems) after import).
           OR with rare header Application.Rejected=1. Partial coverage does not reject.
+    completionEvidence:
+      - source: Invitation (ApplicationResult Result=0 with PersonInInvitation)
+        state: PROCESS_ISSUED
+        descriptionFields: [InvitationNumber]
+      - source: WorkPermit on PersonInApplication
+        state: PROCESS_ISSUED
+        descriptionFields: [WorkPermitNumber]
+      - source: |
+          Extension subtype 7 — every PersonInApplication has a Visa with ProcessNumber=PIA
+          (same FK as Visa.IssuingApplicationItem). Inv/WP evidence wins if both present.
+          Partial visa coverage does not issue.
+        state: PROCESS_ISSUED
+        dateSource: max Visa.VisaIssuedDate
+        descriptionFields: [VisaNumber]
     skipParentApplication:
       - parent ApplicationType E:44/E:55 skipped at header import — no progress rows
     initializerConflict: |

@@ -70,13 +70,51 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// Optional link to a visa application. When set, invitation items are limited to people on that application.
+        /// Only applications whose type has <see cref="ApplicationType.CanIssueInvitation"/> are offered.
         /// </summary>
         [ImmediatePostData]
         [VisibleInListView(false)]
         [VisibleInDetailView(true)]
         [VisibleInLookupListView(false)]
+        [DataSourceProperty(nameof(AvailableApplications))]
         [ToolTip("Link this invitation to an application when one exists. Leave empty for standalone invitations.")]
         public virtual Application Application { get; set; }
+
+        /// <summary>
+        /// Candidate applications for <see cref="Application"/> (types that may produce an invitation).
+        /// </summary>
+        [NotMapped]
+        [Browsable(false)]
+        public IList<Application> AvailableApplications
+        {
+            get
+            {
+                var objectSpace = ObjectSpaceHelper.Get(this);
+                if (objectSpace == null)
+                    return new List<Application>();
+
+                return objectSpace.GetObjectsQuery<Application>()
+                    .Where(a => a.ApplicationType != null && a.ApplicationType.CanIssueInvitation)
+                    .OrderByDescending(a => a.ApplicationDate)
+                    .ThenBy(a => a.FullApplicationNumber)
+                    .ToList();
+            }
+        }
+
+        [RuleFromBoolProperty(
+            "Invitation_ApplicationTypeAllowed",
+            DefaultContexts.Save,
+            "Application must be a type that can issue an invitation.")]
+        [Browsable(false)]
+        public bool IsApplicationTypeAllowed
+        {
+            get
+            {
+                if (Application == null)
+                    return true;
+                return ApplicationTypeCapabilities.CanIssueInvitation(Application.ApplicationType);
+            }
+        }
 
         [Aggregated]
         [InverseProperty(nameof(InvitationItem.Invitation))]

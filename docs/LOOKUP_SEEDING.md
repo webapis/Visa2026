@@ -11,7 +11,7 @@ How reference / lookup tables are populated and kept in sync across dev, Docker,
 - **Version-controlled** lookup data in git (not Excel as the runtime source).
 - **Automatic sync on deploy** when the app starts (XAF `ModuleUpdater`), without editing rows in the Blazor lookup UI.
 - **Same product build** can ship shared ministry catalogs to every customer, while **company-specific** data (positions, ministries, etc.) lives in a separate tenant pack.
-- **`ApplicationType`** visibility flags (`Show*`) and ministry **`SelectionCode`** values stay correct after every release.
+- **`ApplicationType`** visibility flags (`Show*`), **capability** flags (`CanIssue*`, e.g. `CanIssueVisa`), and ministry **`SelectionCode`** values stay correct after every release.
 
 ---
 
@@ -98,8 +98,8 @@ Each catalog is a JSON file:
 
 | Component | Role |
 |-----------|------|
-| `LookupCatalogs/ApplicationTypeConfigurationCatalog.json` | **Source of truth** for ApplicationType rows + `Show*` flags |
-| `ApplicationTypeConfigurationSeed` + `.Data.cs` | Generated output used by updater; one row per `ApplicationType.Name`; **all `Show*` flags overwritten** on deploy |
+| `LookupCatalogs/ApplicationTypeConfigurationCatalog.json` | **Source of truth** for ApplicationType rows + `Show*` UI flags + capability flags (`CanIssueVisa`, `CanIssueInvitation`, `CanIssueWorkPermit`, …) |
+| `ApplicationTypeConfigurationSeed` + `.Data.cs` | Generated output used by updater; one row per `ApplicationType.Name`; **all `Show*` and capability flags overwritten** on deploy |
 | `ApplicationTypeSelectionCodeUpdater` | Sets ministry `SelectionCode` from `ApplicationTypeSelectionCodeSeed` |
 | Regenerate `.Data.cs` | `scripts/local/Generate-ApplicationTypeConfigurationSeed.ps1` (from `ApplicationTypeConfigurationCatalog.json`) |
 

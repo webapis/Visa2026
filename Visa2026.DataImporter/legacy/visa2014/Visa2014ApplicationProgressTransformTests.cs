@@ -236,6 +236,23 @@ public class Visa2014ApplicationProgressTransformTests
     }
 
     [Fact]
+    public void SynthesizeSteps_WithVisaExtensionCompletion_AddsProcessIssued()
+    {
+        var raw = BuildRaw(processDate: null, processNumber: null);
+        var completion = new Visa2014ApplicationProgressCompletionEvidence(
+            new DateTime(2018, 5, 1),
+            "VisaNumber",
+            "V-EXT-1");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0, completion);
+
+        Assert.Contains(steps, s => s.StateCode == "PROCESS_STARTED");
+        var issued = Assert.Single(steps, s => s.StateCode == "PROCESS_ISSUED");
+        Assert.Equal(new DateTime(2018, 5, 1), issued.Date);
+        Assert.Equal("V-EXT-1", issued.Description);
+    }
+
+    [Fact]
     public void SynthesizeSteps_CancelledWithCompletion_DoesNotAddProcessIssued()
     {
         var raw = BuildRaw(cancelled: true);

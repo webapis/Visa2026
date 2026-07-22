@@ -25,7 +25,6 @@ internal static class TenantLookupTypes
         typeof(WorkPermittedLocationName),
         typeof(WorkPermitLocation),
         typeof(MovementPermitLocation),
-        typeof(OrganizationType),
         typeof(ApplicationTypeFilter),
     ];
 }

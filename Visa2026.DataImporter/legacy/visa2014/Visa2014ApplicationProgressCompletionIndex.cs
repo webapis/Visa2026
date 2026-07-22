@@ -1,8 +1,9 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
-/// Legacy application completion evidence from issued invitation (ApplicationResult) or work permit (PersonInApplication.WorkPermit).
-/// Mirrors Visa2026 <c>Application.Invitations</c> / <c>Application.WorkPermits</c> being populated after import.
+/// Legacy application completion evidence from issued invitation (ApplicationResult),
+/// work permit (PersonInApplication.WorkPermit), or full visa coverage on extension subtype 7.
+/// Mirrors Visa2026 Application.Invitations / WorkPermits / Visa.IssuingApplicationItem after import.
 /// </summary>
 internal sealed record Visa2014ApplicationProgressCompletionEvidence(
     DateTime? CompletionDate,
@@ -20,7 +21,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
 {
     private static readonly DateTime LegacyDateThreshold = new(2000, 1, 1);
 
-    internal const string LoadSql = """
+    internal const string InvitationWorkPermitLoadSql = """
         SELECT
             CAST(a.Oid AS varchar(36)) AS ApplicationOid,
             CONVERT(varchar(10), inv.IssuedDate, 23) AS InvitationIssuedDate,
@@ -65,30 +66,113 @@ internal static class Visa2014ApplicationProgressCompletionIndex
               OR NULLIF(LTRIM(RTRIM(wp.Number)), '') IS NOT NULL)
         """;
 
+    /// <summary>
+    /// Extension apps (employee/FM subtype 7) where every PIA has a Visa via ProcessNumber.
+    /// </summary>
+    internal const string VisaExtensionLoadSql = """
+        SELECT
+            CAST(a.Oid AS varchar(36)) AS ApplicationOid,
+            pia.ItemCount AS ApplicationItemCount,
+            linked.VisaLinkedCount,
+            CONVERT(varchar(10), sample.MaxVisaIssuedDate, 23) AS MaxVisaIssuedDate,
+            sample.SampleVisaNumber
+        FROM dbo.Application a
+        LEFT JOIN dbo.ApplicationTypeForEmployee ate ON ate.Oid = a.ApplicationTypeForEmployee
+        LEFT JOIN dbo.ApplicationTypeForFamilyMember atfm ON atfm.Oid = a.ApplicationTypeForFamilyMember
+        CROSS APPLY (
+            SELECT COUNT_BIG(*) AS ItemCount
+            FROM dbo.PersonInApplication pia
+            WHERE pia.Application = a.Oid
+              AND pia.GCRecord IS NULL
+        ) pia
+        CROSS APPLY (
+            SELECT COUNT_BIG(*) AS VisaLinkedCount
+            FROM dbo.PersonInApplication pia2
+            WHERE pia2.Application = a.Oid
+              AND pia2.GCRecord IS NULL
+              AND EXISTS (
+                  SELECT 1
+                  FROM dbo.Visa v
+                  WHERE v.ProcessNumber = pia2.Oid
+                    AND v.GCRecord IS NULL)
+        ) linked
+        OUTER APPLY (
+            SELECT
+                MAX(v.VisaIssuedDate) AS MaxVisaIssuedDate,
+                (
+                    SELECT TOP 1 NULLIF(LTRIM(RTRIM(v2.VisaNumber)), '')
+                    FROM dbo.PersonInApplication pia3
+                    INNER JOIN dbo.Visa v2 ON v2.ProcessNumber = pia3.Oid AND v2.GCRecord IS NULL
+                    WHERE pia3.Application = a.Oid
+                      AND pia3.GCRecord IS NULL
+                    ORDER BY v2.VisaIssuedDate DESC, v2.Oid
+                ) AS SampleVisaNumber
+            FROM dbo.PersonInApplication pia4
+            INNER JOIN dbo.Visa v ON v.ProcessNumber = pia4.Oid AND v.GCRecord IS NULL
+            WHERE pia4.Application = a.Oid
+              AND pia4.GCRecord IS NULL
+        ) sample
+        WHERE a.GCRecord IS NULL
+          AND (
+              ate.TypeOfApplicationForEmployee = 7
+              OR atfm.TypeOfApplicationForFamilyMember = 7)
+          AND pia.ItemCount > 0
+          AND pia.ItemCount = linked.VisaLinkedCount
+        """;
+
+    // Backward-compatible alias used by older call sites / docs.
+    internal const string LoadSql = InvitationWorkPermitLoadSql;
+
     public static IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence> Load(
         string connectionString,
         bool verbose)
     {
-        var dictRows = Visa2014SqlCmdReader.Query(connectionString, LoadSql, verbose);
         var map = new Dictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>();
-        foreach (var row in dictRows)
+
+        foreach (var row in Visa2014SqlCmdReader.Query(connectionString, InvitationWorkPermitLoadSql, verbose))
         {
-            if (!row.TryGetValue("ApplicationOid", out var oidText)
-                || !Guid.TryParse(oidText?.Trim(), out var applicationOid))
+            if (!TryParseApplicationOid(row, out var applicationOid))
                 continue;
 
-            var evidence = BuildEvidence(row);
+            var evidence = BuildInvitationWorkPermitEvidence(row);
             if (evidence.HasCompletion)
                 map[applicationOid] = evidence;
         }
 
+        var invitationWorkPermitCount = map.Count;
+        var visaExtensionAdded = 0;
+
+        foreach (var row in Visa2014SqlCmdReader.Query(connectionString, VisaExtensionLoadSql, verbose))
+        {
+            if (!TryParseApplicationOid(row, out var applicationOid))
+                continue;
+            if (map.ContainsKey(applicationOid))
+                continue;
+
+            var evidence = BuildVisaExtensionEvidence(row);
+            if (!evidence.HasCompletion)
+                continue;
+
+            map[applicationOid] = evidence;
+            visaExtensionAdded++;
+        }
+
         if (verbose)
-            Console.WriteLine($"INF ApplicationProgress completion index: {map.Count} legacy application(s) with invitation/work-permit evidence.");
+        {
+            Console.WriteLine(
+                $"INF ApplicationProgress completion index: {map.Count} legacy application(s) " +
+                $"(invitation/work-permit={invitationWorkPermitCount}, visa-extension-added={visaExtensionAdded}).");
+        }
 
         return map;
     }
 
-    internal static Visa2014ApplicationProgressCompletionEvidence BuildEvidence(IReadOnlyDictionary<string, string?> row)
+    internal static Visa2014ApplicationProgressCompletionEvidence BuildEvidence(
+        IReadOnlyDictionary<string, string?> row) =>
+        BuildInvitationWorkPermitEvidence(row);
+
+    internal static Visa2014ApplicationProgressCompletionEvidence BuildInvitationWorkPermitEvidence(
+        IReadOnlyDictionary<string, string?> row)
     {
         var invitationDate = TryParseDate(row.GetValueOrDefault("InvitationIssuedDate"));
         var workPermitDate = TryParseDate(row.GetValueOrDefault("WorkPermitIssuedDate"));
@@ -115,6 +199,58 @@ internal static class Visa2014ApplicationProgressCompletionIndex
             workPermitNumber ?? invitationNumber);
     }
 
+    internal static Visa2014ApplicationProgressCompletionEvidence BuildVisaExtensionEvidence(
+        IReadOnlyDictionary<string, string?> row)
+    {
+        var itemCount = ParseCount(row.GetValueOrDefault("ApplicationItemCount"));
+        var visaLinkedCount = ParseCount(row.GetValueOrDefault("VisaLinkedCount"));
+        if (itemCount <= 0 || itemCount != visaLinkedCount)
+            return new Visa2014ApplicationProgressCompletionEvidence(null, "", null);
+
+        var completionDate = TryParseDate(row.GetValueOrDefault("MaxVisaIssuedDate"));
+        var visaNumber = NormalizeRef(row.GetValueOrDefault("SampleVisaNumber"));
+        if (!IsLegacyDateSet(completionDate) && visaNumber == null)
+            return new Visa2014ApplicationProgressCompletionEvidence(null, "", null);
+
+        return new Visa2014ApplicationProgressCompletionEvidence(
+            IsLegacyDateSet(completionDate) ? completionDate : null,
+            "VisaNumber",
+            visaNumber);
+    }
+
+    /// <summary>
+    /// Merge helper for tests: invitation/work-permit wins over visa-extension for the same app.
+    /// </summary>
+    internal static Dictionary<Guid, Visa2014ApplicationProgressCompletionEvidence> Merge(
+        IEnumerable<(Guid ApplicationOid, Visa2014ApplicationProgressCompletionEvidence Evidence)> invitationWorkPermit,
+        IEnumerable<(Guid ApplicationOid, Visa2014ApplicationProgressCompletionEvidence Evidence)> visaExtension)
+    {
+        var map = new Dictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>();
+        foreach (var (oid, evidence) in invitationWorkPermit)
+        {
+            if (evidence.HasCompletion)
+                map[oid] = evidence;
+        }
+
+        foreach (var (oid, evidence) in visaExtension)
+        {
+            if (!evidence.HasCompletion || map.ContainsKey(oid))
+                continue;
+            map[oid] = evidence;
+        }
+
+        return map;
+    }
+
+    private static bool TryParseApplicationOid(
+        IReadOnlyDictionary<string, string?> row,
+        out Guid applicationOid)
+    {
+        applicationOid = default;
+        return row.TryGetValue("ApplicationOid", out var oidText)
+            && Guid.TryParse(oidText?.Trim(), out applicationOid);
+    }
+
     private static bool PreferInvitation(DateTime? invitationDate, DateTime? workPermitDate)
     {
         if (!IsLegacyDateSet(invitationDate))
@@ -123,6 +259,9 @@ internal static class Visa2014ApplicationProgressCompletionIndex
             return true;
         return invitationDate!.Value >= workPermitDate!.Value;
     }
+
+    private static int ParseCount(string? text) =>
+        int.TryParse(text?.Trim(), out var n) && n >= 0 ? n : 0;
 
     private static string? NormalizeRef(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

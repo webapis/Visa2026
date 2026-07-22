@@ -308,7 +308,7 @@ internal static class Visa2014ApplicationProgressTransform
         }
 
         // Legacy ProcessDate / ProcessNumber mark migration-service processing start — not completion.
-        // PROCESS_ISSUED is synthesized from invitation/work-permit evidence (ApplicationResult / PersonInApplication.WorkPermit).
+        // PROCESS_ISSUED from invitation/work-permit evidence, or full Visa.ProcessNumber coverage on extension subtype 7.
         var hasProcessStart = IsLegacyDateSet(raw.ProcessDate)
             || !string.IsNullOrWhiteSpace(raw.ProcessNumber);
         var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !effectiveRejected;

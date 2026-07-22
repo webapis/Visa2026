@@ -1608,7 +1608,9 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [XafDisplayName("Current Visa")]
         [InverseProperty(nameof(Visa.AssociatedApplicationItems))]
-        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
+        // ListView column visibility is model/controller-driven: nested Appearance cannot reliably
+        // resolve Application.ApplicationType (often null → column stays hidden even when ShowCurrentVisa).
+        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = ShowCurrentVisaRequiredCriteria)]
         [ForeignKey(nameof(CurrentVisaId))] // Explicitly define foreign key
         [DataSourceProperty(nameof(AvailableVisas))]
@@ -1630,7 +1632,7 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         // Foreign key property for CurrentVisa
-        [Appearance("VisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
+        [Appearance("VisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
         public virtual Guid? CurrentVisaId { get; set; }
 
         private WorkPermitItem currentWorkPermitItem;

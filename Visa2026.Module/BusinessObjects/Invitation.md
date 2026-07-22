@@ -23,10 +23,11 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 | `InvitationNumber` | `string` | The official reference number of the invitation letter. | Required; Max 50 chars. |
 | `StartDate` | `DateTime` | The date the invitation becomes valid. | Required. |
 | `ExpirationDate` | `DateTime?` | Expiry (from `StartDate` + `ValidityDuration`). | Required; always visible on detail view. |
-| `Application` | `Application` | Optional link to a visa application. | Optional (gear); when set, limits `InvitationItem.Person` to application lines. |
+| `Application` | `Application` | Optional link to a visa application. Lookup limited to types with `CanIssueInvitation`. | Optional (gear); when set, limits `InvitationItem.Person` to application lines. |
 | `ValidityDuration` | `ValidityDuration` | Validity length (e.g. 3 months). | Required. |
 | `DaysRemaining` | `int` | Days until `ExpirationDate`. | Read-only; always visible on detail view. |
 | `ExpirationState` | `ExpirationState` | Active / expiring / expired. | Read-only. |
+| `AvailableApplications` | `IList<Application>` | Datasource for `Application`: `ApplicationType.CanIssueInvitation`. | Not mapped; not browsable. |
 | `AvailablePeople` | `IList<Person>` | Person lookup for new items: application lines when `Application` is set; otherwise all active people. | Not mapped; not browsable. |
 
 ---
@@ -44,6 +45,7 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 - **`UpdateExpirationDate`**: `ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays)` when both are set.
 - **`IExpirationLogic`**: `ExpirationDate`, `DaysRemaining`, `ExpirationState`.
 - **`IPersonLinkParent`**: `Application` and `AvailablePeople` for `InvitationItem` data sources and validation.
+- **`IsApplicationTypeAllowed`**: when `Application` is set, requires `ApplicationType.CanIssueInvitation`.
 
 ---
 

@@ -37,4 +37,47 @@ public class Visa2014ApplicationProgressCompletionIndexTests
         Assert.Equal("WorkPermitNumber", evidence.SourceLabel);
         Assert.Equal("WP-99", evidence.SourceValue);
     }
+
+    [Fact]
+    public void BuildVisaExtensionEvidence_RequiresFullPiaCoverage()
+    {
+        var partial = Visa2014ApplicationProgressCompletionIndex.BuildVisaExtensionEvidence(
+            new Dictionary<string, string?>(StringComparer.Ordinal)
+            {
+                ["ApplicationItemCount"] = "3",
+                ["VisaLinkedCount"] = "2",
+                ["MaxVisaIssuedDate"] = "2018-05-01",
+                ["SampleVisaNumber"] = "V-1",
+            });
+        Assert.False(partial.HasCompletion);
+
+        var full = Visa2014ApplicationProgressCompletionIndex.BuildVisaExtensionEvidence(
+            new Dictionary<string, string?>(StringComparer.Ordinal)
+            {
+                ["ApplicationItemCount"] = "3",
+                ["VisaLinkedCount"] = "3",
+                ["MaxVisaIssuedDate"] = "2018-05-01",
+                ["SampleVisaNumber"] = "V-1",
+            });
+        Assert.True(full.HasCompletion);
+        Assert.Equal(new DateTime(2018, 5, 1), full.CompletionDate);
+        Assert.Equal("VisaNumber", full.SourceLabel);
+        Assert.Equal("V-1", full.SourceValue);
+    }
+
+    [Fact]
+    public void Merge_PrefersInvitationWorkPermitOverVisaExtension()
+    {
+        var appOid = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        var inv = new Visa2014ApplicationProgressCompletionEvidence(
+            new DateTime(2016, 1, 1), "InvitationNumber", "INV-1");
+        var visa = new Visa2014ApplicationProgressCompletionEvidence(
+            new DateTime(2018, 5, 1), "VisaNumber", "V-1");
+
+        var map = Visa2014ApplicationProgressCompletionIndex.Merge(
+            [(appOid, inv)],
+            [(appOid, visa)]);
+
+        Assert.Equal("InvitationNumber", map[appOid].SourceLabel);
+    }
 }

@@ -131,6 +131,10 @@ fields:
       - IVisaType_Data.TypeOfVisaL
       - IVisaType_Data.mgCode
     missingBehavior: skip_row
+    notes: |
+      Override: Person.IsFamilyMember=1 AND IsEmployee=0 → LocalizationKey FM
+      (legacy often stores WP:11 on family visas). Else TypeOfVisaL:mgCode map;
+      unmappedDefault WP. Re-apply with --correct-visa-type on existing DBs.
 
   - source: VisaCategory
     target: VisaCategory

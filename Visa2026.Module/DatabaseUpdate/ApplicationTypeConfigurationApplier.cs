@@ -26,7 +26,7 @@ internal static class ApplicationTypeConfigurationApplier
             ApplyShowFlags(target, source);
     }
 
-    /// <summary>Always overwrites every <c>Show*</c> flag from seed (deploy policy).</summary>
+    /// <summary>Always overwrites every <c>Show*</c> UI flag and capability flag (e.g. <c>CanIssueVisa</c>) from seed (deploy policy).</summary>
     public static void ApplyShowFlags(ApplicationType target, ApplicationTypeConfigurationRow source)
     {
         target.ShowProjectContract = source.ShowProjectContract;
@@ -48,6 +48,9 @@ internal static class ApplicationTypeConfigurationApplier
         target.ShowToCity = source.ShowToCity;
         target.ShowMovementPermitLocation = source.ShowMovementPermitLocation;
         target.ShowBorderZoneLocation = source.ShowBorderZoneLocation;
+        target.CanIssueVisa = source.CanIssueVisa;
+        target.CanIssueInvitation = source.CanIssueInvitation;
+        target.CanIssueWorkPermit = source.CanIssueWorkPermit;
         target.ShowPreviousPassport = source.ShowPreviousPassport;
         target.ShowCurrentVisa = source.ShowCurrentVisa;
         target.ShowNextVisa = source.ShowNextVisa;

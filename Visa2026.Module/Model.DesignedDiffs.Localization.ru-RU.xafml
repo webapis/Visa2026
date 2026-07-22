@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
   <ActionDesign>
     <Actions>
@@ -485,6 +485,9 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="ApplicationProgressRoute" Caption="Маршрут прогресса" />
         <Member Name="Category" Caption="Категория" />
+        <Member Name="CanIssueVisa" Caption="Может выдать визу" />
+        <Member Name="CanIssueInvitation" Caption="Может выдать приглашение" />
+        <Member Name="CanIssueWorkPermit" Caption="Может выдать разрешение на работу" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -1354,48 +1357,7 @@
         <Member Name="Exit" Caption="Выезд" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Тип организации">
-      <OwnMembers>
-        <Member Name="Application" Caption="Заявка" />
-        <Member Name="Code" Caption="Код" />
-        <Member Name="Company" Caption="Компания" />
-        <Member Name="CurrentState" Caption="Состояние" />
-        <Member Name="Date" Caption="Дата" />
-        <Member Name="DateDeleted" Caption="Дата удаления" />
-        <Member Name="DaysRemaining" Caption="Осталось дней" />
-        <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Department" Caption="Отдел" />
-        <Member Name="Description" Caption="Описание" />
-        <Member Name="EndDate" Caption="Дата окончания" />
-        <Member Name="ExpirationDate" Caption="Срок действия" />
-        <Member Name="ExpirationState" Caption="Статус срока" />
-        <Member Name="ExtensionRequired" Caption="Требуется продление" />
-        <Member Name="File" Caption="Файл" />
-        <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
-        <Member Name="InvitationItem" Caption="Позиция приглашения" />
-        <Member Name="IsActive" Caption="Активен" />
-        <Member Name="IsCancelled" Caption="Отменено" />
-        <Member Name="IsChanged" Caption="Изменено" />
-        <Member Name="IsDefault" Caption="По умолчанию" />
-        <Member Name="IsExtended" Caption="Продлено" />
-        <Member Name="IssueDate" Caption="Дата выдачи" />
-        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
-        <Member Name="Location" Caption="Место" />
-        <Member Name="Name" Caption="Имя" />
-        <Member Name="NameTm" Caption="Название (Tm)" />
-        <Member Name="Notes" Caption="Примечания" />
-        <Member Name="Passport" Caption="Паспорт" />
-        <Member Name="Person" Caption="Лицо" />
-        <Member Name="Position" Caption="Должность" />
-        <Member Name="RegistrationState" Caption="Статус регистрации" />
-        <Member Name="StartDate" Caption="Дата начала" />
-        <Member Name="State" Caption="Состояние" />
-        <Member Name="ValidityDuration" Caption="Срок действия" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
+        <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
       <OwnMembers>
         <Member Name="Authority" Caption="Орган выдачи" />
         <Member Name="CurrentVisa" Caption="Текущая виза" />
@@ -2392,7 +2354,11 @@
       </Layout>
     </DetailView>
     <ListView Id="AddressOfResidence_ListView" Caption="Адреса проживания" />
-    <ListView Id="Application_ApplicationItems_ListView" Caption="Позиции заявки" />
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Позиции заявки">
+      <Columns>
+        <ColumnInfo Id="CurrentVisa" Caption="Виза" />
+      </Columns>
+    </ListView>
     <DetailView Id="Application_DetailView" Caption="Заявка">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2459,6 +2425,7 @@
     <ListView Id="Application_ListView_ViaMinistries" Caption="Заявки через министерства">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
+        <ColumnInfo Id="Urgency" Caption="Срочность" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
@@ -2748,8 +2715,6 @@
     <ListView Id="MinistryReviewSlaSettings_ListView" Caption="SLA министерской проверки" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Место разрешения на перемещение" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Места разрешения" />
-    <DetailView Id="OrganizationType_DetailView" Caption="Тип организации" />
-    <ListView Id="OrganizationType_ListView" Caption="Типы организации" />
     <DetailView Id="Passport_DetailView" Caption="Паспорт">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

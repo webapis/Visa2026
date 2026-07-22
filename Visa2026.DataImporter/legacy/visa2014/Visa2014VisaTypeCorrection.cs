@@ -18,8 +18,8 @@ internal sealed class Visa2014VisaTypeCorrectionResult
 }
 
 /// <summary>
-/// Patches Visa.VisaType from legacy TypeOfVisaL:mgCode via lookup-translations (id-map or VisaNumber match).
-/// Fixes in-process imports that collapsed every row to default WP because LocalizationKey was not mapped.
+/// Patches Visa.VisaType from the Visa transform (family-member → FM; else TypeOfVisaL:mgCode).
+/// Also repairs older imports that collapsed every row to default WP when LocalizationKey was not mapped.
 /// </summary>
 internal static class Visa2014VisaTypeCorrection
 {

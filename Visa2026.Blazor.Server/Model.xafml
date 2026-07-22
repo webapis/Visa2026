@@ -59,7 +59,7 @@
         <ColumnInfo Id="TravelDate" Index="4" />
         <ColumnInfo Id="CheckPoint" Index="5" />
         <ColumnInfo Id="CurrentPassport" Index="6" />
-        <ColumnInfo Id="CurrentVisa" Index="7" />
+        <ColumnInfo Id="CurrentVisa" Index="7" Caption="Visa" />
         <ColumnInfo Id="CurrentPositionHistory" Index="8" />
         <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
       </Columns>
@@ -73,7 +73,6 @@
                 <LayoutGroup Id="Application" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
                   <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="55.926860025220684" IsNewNode="True">
                     <LayoutItem Id="IsForFamily" Index="0" RelativeSize="1.7361111111111112" IsNewNode="True" />
-                    <LayoutItem Id="OrganizationType" Index="1" RelativeSize="1.7361111111111112" IsNewNode="True" />
                     <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="5.555555555555555" IsNewNode="True" />
                     <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
                     <LayoutItem Id="ApplicationReason" Index="4" RelativeSize="1.7361111111111112" IsNewNode="True" />
@@ -99,12 +98,7 @@
                   </LayoutGroup>
                 </LayoutGroup>
                 <LayoutGroup Id="Item2" ShowCaption="True" Caption="Progress" CaptionLocation="Top" Index="1" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows-tabbed" IsNewNode="True">
-                  <LayoutGroup Id="ProgressCurrentStatus" ShowCaption="False" CustomCSSClassName="visa-progress-current-status" Direction="Horizontal" Index="0" RelativeSize="8.333333333333334" IsNewNode="True">
-                    <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="22.82471626733922" IsNewNode="True" />
-                    <LayoutItem Id="WorkingDaysInCurrentStep" ViewItem="WorkingDaysInCurrentStep" Index="1" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="ProgressSlaStatement" ViewItem="ProgressSlaStatement" Index="2" RelativeSize="19.672131147540984" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="1" RelativeSize="91.66666666666667" IsNewNode="True">
+                  <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="0" RelativeSize="100" IsNewNode="True">
                     <LayoutItem Id="ProgressHistory" CustomCSSClassName="xaf-show-all-rows" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
                   </LayoutGroup>
                 </LayoutGroup>
@@ -134,7 +128,6 @@
                   <LayoutGroup Id="Application" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
                     <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="56.20384047267356" IsNewNode="True">
                       <LayoutItem Id="IsForFamily" Index="0" RelativeSize="2.0408163265306123" IsNewNode="True" />
-                      <LayoutItem Id="OrganizationType" Index="1" RelativeSize="2.0408163265306123" IsNewNode="True" />
                       <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="6.530612244897959" IsNewNode="True" />
                       <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="6.530612244897959" IsNewNode="True" />
                       <LayoutItem Id="ApplicationReason" Index="4" RelativeSize="2.0408163265306123" IsNewNode="True" />
@@ -196,7 +189,6 @@
                 <LayoutItem Id="CurrentState" RelativeSize="6.387225548902196" Removed="True" />
                 <LayoutItem Id="FullApplicationNumber" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="IsForFamily" RelativeSize="5.788423153692615" />
-                <LayoutItem Id="OrganizationType" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="ProjectContract" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="Representative" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="Urgency" RelativeSize="8.782435129740518" />
@@ -265,17 +257,18 @@
         <ColumnInfo Id="Year" Index="1" Width="43" />
         <ColumnInfo Id="Month" Index="2" Width="56" />
         <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
-        <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
-        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
-        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="Urgency" Index="4" Width="110" />
+        <ColumnInfo Id="TotalPersonCount" Index="5" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="6" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="7" Width="108" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
-        <ColumnInfo Id="ProgressSlaStatement" Index="7" Width="140" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
-        <ColumnInfo Id="ApprovalLegProfile" Index="8" Width="180" />
-        <ColumnInfo Id="MigrationSlaStatement" Index="9" Width="160" />
-        <ColumnInfo Id="ApplicationType" Index="10" Width="109" />
-        <ColumnInfo Id="VisaPeriod" Index="11" Width="110" />
-        <ColumnInfo Id="VisaType" Index="12" Width="110" />
+        <ColumnInfo Id="ApprovalLegProfile" Index="9" Width="180" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="10" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="11" Width="109" />
+        <ColumnInfo Id="VisaPeriod" Index="12" Width="110" />
+        <ColumnInfo Id="VisaType" Index="13" Width="110" />
       </Columns>
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />

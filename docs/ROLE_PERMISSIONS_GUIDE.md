@@ -114,7 +114,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 
 | Type | Notes |
 |------|-------|
-| `OrganizationType`, `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
+| `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
 | `ApplicationType` | Link popup on migration SLA profile detail |
 
 ### Navigation (allow)
@@ -160,7 +160,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `ApplicationTypeFilter`, `ApplicationType`, `ApplicationState`, `ApplicationLocation` |
 | `ApplicationMigrationSlaProfile` | Read only (Migration deadline column via `ApplicationType.MigrationSlaProfile`; no Configuration nav) — also via `EnsureApplicationProcessTrackingReadPermissions` |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
-| `MigrationService`, `OrganizationType`, `PassportType`, `Position`, `PurposeOfTravel` |
+| `MigrationService`, `PassportType`, `Position`, `PurposeOfTravel` |
 | `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
 | `VisaCategory`, `VisaIssuedPlace`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |

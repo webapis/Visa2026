@@ -56,7 +56,9 @@ mapping:
     Import ALL active visa rows (1,460 passports have >1 visa — expected).
     Passport FK via Passport id-map (legacy Visa.Passport → Visa2026 Passport.ID).
     All 6,041 rows have active Passport FK; 0 orphan.
-    VisaType: join VisaType → IVisaType_Data; map TypeOfVisaL + mgCode → Visa2026 LocalizationKey (see legacyStats).
+    VisaType: |
+      join VisaType → IVisaType_Data; map TypeOfVisaL + mgCode → LocalizationKey.
+      Override: Person.IsFamilyMember=1 AND IsEmployee=0 → FM (legacy often WP:11).
     VisaCategory: CategoryOfVisaL + mgCode (1/2/4) → Single/Double/Multiple.
     VisaIssuedPlace: IssuedPlaceOfVisaL → NameTm; 5 aliases; 18 visas (DELİ, Pekin, London, …) skip_row — see VisaIssuedPlace.md.
     BorderZoneLocation: bit matrix → comma-separated NameTm; 5452+2 → Ýok; catalog expanded — see BorderZoneName.md.

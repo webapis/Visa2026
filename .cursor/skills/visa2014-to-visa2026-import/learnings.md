@@ -7,6 +7,18 @@
 
 
 
+### 2026-07-22 — ActualPosition dirty titles (numeric / no-letters → "-")
+
+- **Phase**: data-quality / mapping fix (pre-reimport + post-import cleanup)
+- **Problem**: ActualPosition catalog bloated (~1410–1433 rows); many Titles are Position.Code-style numbers (617-, 1902 -, 1 216, .) — not real positions. UI shows Lookup/Organization/Config → Actual Position.
+- **Rule**: if value has **no alphabetic letter**, treat as unset → canonical Name `-` (required placeholder). Real titles (letters) kept. Long task descriptions still need human CSV review (Guess=review).
+- **Code**: Visa2014ActualPositionNormalizer wired into EmployeePositionHistory transform + OData importer + MiddleName cleanup + review Guess/--auto-no-letters.
+- **Existing DB (from checked-in CSV)**: **193** no-letter Titles, **340** EmployeePositionHistory usages → dash via:
+  `dotnet run --project Visa2026.DataImporter -- --apply-visa2014-actual-positions --auto-no-letters [--dry-run] [--api-base-url …]`
+  Prefer dry-run first. Requires Blazor/OData up (cleanup is OData-only).
+- **Reimport**: normalizer prevents recreating numeric ActualPositions on next EmployeePositionHistory wave.
+- **Tests**: Visa2014ActualPositionNormalizerTests (build blocked this session by running `--import-visa2014 --entity ApplicationProgress` PID locking DLLs — re-run after that finishes).
+
 ### 2026-07-22 — Full scalar reimport .15 → local PG (finished)
 
 - **Phase**: full wipe + scalar chain result
@@ -1818,3 +1830,19 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Idempotent**: re-run should report Already correct for the same links.
 - **Docs**: `field-maps/Visa.yaml`, `discovery/Visa.yaml` note the correction.
 - **Not in scope**: `InvitationItem` on Visa (legacy has no Invitation FK).
+
+### 2026-07-22 — ApplicationProgress PROCESS_ISSUED for extension subtype 7 (full visa coverage)
+
+- **Rule**: For employee/FM subtype **7**, synthesize `PROCESS_ISSUED` when every non-deleted PIA has a `Visa.ProcessNumber` → that PIA. Inv/WP completion evidence still wins when present. Partial coverage does not issue. Cancelled/Rejected still block.
+- **Date / Description**: `max(VisaIssuedDate)` / sample `VisaNumber` (`SourceLabel=VisaNumber`).
+- **Code**: `Visa2014ApplicationProgressCompletionIndex` second SQL + merge; unit tests; field-map + discovery notes.
+- **Local PG reimport**: DELETE ApplicationProgress **30725**; Posted **30794** / Failed **0** / Skipped no-App-map **66** / Parent-skipped **162**.
+- **Completion index**: **4432** apps (invitation/work-permit=**4370**, visa-extension-added=**62**).
+- **Log**: `reimport-ApplicationProgress-localpg-20260722-155408.log`
+
+### 2026-07-22 — Family-member visas force VisaType FM (override legacy WP)
+
+- **Problem**: Legacy often stores `WP:11` on visas for `IsFamilyMember` persons (e.g. `A1733149` / Serpil Demirbilek); import copied WP faithfully (~637 visas / 170 persons on Çalik).
+- **Rule**: `Person.IsFamilyMember=1 AND IsEmployee=0` → `VisaType` LocalizationKey **FM** (before TypeOfVisaL:mgCode map). Employees unchanged.
+- **Code**: `Visa2014VisaTransform.ResolveVisaTypeLocalizationKey`; `--correct-visa-type` reuses transform; wired in OnPrem-Sync / HeadlessChain postImportCorrections.
+- **Local PG correction**: Visas in scope **6143**; updated **652**; already correct **5450**; histogram WP=3422, BS1=1651, FM=1000, OF=55, EX=15. `A1733149` → FM; FM-person still-WP → **0**.

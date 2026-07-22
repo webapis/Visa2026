@@ -41,7 +41,7 @@ public static class ApplicationProgressProfileResolver
     /// Excludes <see cref="Application.ProgressHistory"/> so officers may delete the last step.
     /// </summary>
     public const string TerminalLockedApplicationDetailTargetItems =
-        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApplicationType;ApplicationReason;ApprovalLegProfile;ProjectContract;MigrationService;FromCity;ToCity;BusinessTripStartDate;BusinessTripEndDate;BusinessTripPurpose;VisaPeriod;VisaType;VisaCategory;MovementPermitLocation;BorderZoneLocation;Urgency;IsForFamily;OrganizationType;ApplicationItems;Invitations;Rejections;WorkPermits";
+        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApplicationType;ApplicationReason;ApprovalLegProfile;ProjectContract;MigrationService;FromCity;ToCity;BusinessTripStartDate;BusinessTripEndDate;BusinessTripPurpose;VisaPeriod;VisaType;VisaCategory;MovementPermitLocation;BorderZoneLocation;Urgency;IsForFamily;ApplicationItems;Invitations;Rejections;WorkPermits";
 
 
 

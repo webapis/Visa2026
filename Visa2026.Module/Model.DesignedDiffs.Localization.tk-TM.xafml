@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
@@ -485,6 +485,9 @@
         <Member Name="Application" Caption="Arza" />
         <Member Name="ApplicationProgressRoute" Caption="Ösüş ugry" />
         <Member Name="Category" Caption="Kategoriýa" />
+        <Member Name="CanIssueVisa" Caption="Wiza berip bilýär" />
+        <Member Name="CanIssueInvitation" Caption="Çakylyk berip bilýär" />
+        <Member Name="CanIssueWorkPermit" Caption="Iş rugsatnama berip bilýär" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Kompaniýa" />
         <Member Name="CurrentState" Caption="Ýagdaýy" />
@@ -1354,48 +1357,7 @@
         <Member Name="Exit" Caption="Çykyş" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Gurama görnüşi">
-      <OwnMembers>
-        <Member Name="Application" Caption="Arza" />
-        <Member Name="Code" Caption="Kod" />
-        <Member Name="Company" Caption="Kompaniýa" />
-        <Member Name="CurrentState" Caption="Ýagdaýy" />
-        <Member Name="Date" Caption="Sene" />
-        <Member Name="DateDeleted" Caption="Pozulan senesi" />
-        <Member Name="DaysRemaining" Caption="Galan gün" />
-        <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="Department" Caption="Bölüm" />
-        <Member Name="Description" Caption="Düşündiriş" />
-        <Member Name="EndDate" Caption="Gutarýan senesi" />
-        <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
-        <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
-        <Member Name="ExtensionRequired" Caption="Uzadylmagy gerek" />
-        <Member Name="File" Caption="Faýl" />
-        <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="HasInvitation" Caption="Çakylyk bar" />
-        <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
-        <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
-        <Member Name="IsCancelled" Caption="Ýatyryldy" />
-        <Member Name="IsChanged" Caption="Üýtgedildi" />
-        <Member Name="IsDefault" Caption="Bellenen" />
-        <Member Name="IsExtended" Caption="Uzaldy" />
-        <Member Name="IssueDate" Caption="Berlen senesi" />
-        <Member Name="IssuingApplicationItem" Caption="Berýän arza elementi" />
-        <Member Name="Location" Caption="Ýer" />
-        <Member Name="Name" Caption="Ady" />
-        <Member Name="NameTm" Caption="Ady (Tm)" />
-        <Member Name="Notes" Caption="Bellikler" />
-        <Member Name="Passport" Caption="Pasport" />
-        <Member Name="Person" Caption="Adam" />
-        <Member Name="Position" Caption="Wezipesi" />
-        <Member Name="RegistrationState" Caption="Hasaba alnyş ýagdaýy" />
-        <Member Name="StartDate" Caption="Başlanýan senesi" />
-        <Member Name="State" Caption="Ýagdaý" />
-        <Member Name="ValidityDuration" Caption="Möhleti" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasport">
+        <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasport">
       <OwnMembers>
         <Member Name="Authority" Caption="Berýän edara" />
         <Member Name="CurrentVisa" Caption="Häzirki wiza" />
@@ -2392,7 +2354,11 @@
       </Layout>
     </DetailView>
     <ListView Id="AddressOfResidence_ListView" Caption="Ýaşaýyş salgylary" />
-    <ListView Id="Application_ApplicationItems_ListView" Caption="Arza elementleri" />
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Arza elementleri">
+      <Columns>
+        <ColumnInfo Id="CurrentVisa" Caption="Wiza" />
+      </Columns>
+    </ListView>
     <DetailView Id="Application_DetailView" Caption="Arza">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2459,6 +2425,7 @@
     <ListView Id="Application_ListView_ViaMinistries" Caption="Ministrlikler bilen ylalaşylýan ýüztutmalar">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Ýüztutmanyň senesi" />
+        <ColumnInfo Id="Urgency" Caption="Gyssaglylyk" />
         <ColumnInfo Id="ApplicationType" Caption="Görnüşi" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Ylalaşyk ädimleri" />
         <ColumnInfo Id="CurrentState" Caption="Häzirki ýagdaý" />
@@ -2748,8 +2715,6 @@
     <ListView Id="MinistryReviewSlaSettings_ListView" Caption="Ministrlik barlagy SLA" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Hereket rugsady ýeri" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Hereket rugsady ýerleri" />
-    <DetailView Id="OrganizationType_DetailView" Caption="Gurama görnüşi" />
-    <ListView Id="OrganizationType_ListView" Caption="Gurama görnüşleri" />
     <DetailView Id="Passport_DetailView" Caption="Pasport">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">

@@ -126,7 +126,7 @@ Clears `CurrentVisa`, `NextVisa`, and `WorkPermittedLocations` when the parent t
 
 ## 4. Visa linkage (issuing line vs target visa)
 
-- **`Visa.IssuingApplicationItem`**: From a **visa** back to the **application line under which that visa was issued** (person + parent application). Validated against allowed issuing application types.
+- **`Visa.IssuingApplicationItem`**: From a **visa** back to the **application line under which that visa was issued** (person + parent application). Validated against **`ApplicationType.CanIssueVisa`**.
 - **`ApplicationItem.CurrentVisa`**: From a **line** to the **visa used as input** for this procedure (extension, cancellation, registration context, etc.). Inverse: `Visa.AssociatedApplicationItems`.
 - **`ApplicationItem.NextVisa`**: Optional **future** visa on the line when `ShowNextVisa` is true.
 

@@ -178,10 +178,11 @@ namespace Visa2026.Module.BusinessObjects
                     return new List<ApplicationItem>();
                 }
 
-                var allowedNames = VisaIssuingApplicationTypes.AllowedApplicationTypeNames.ToArray();
                 return objectSpace.GetObjectsQuery<ApplicationItem>()
                     .Where(ai => ai.Person != null && ai.Person.ID == person.ID)
-                    .Where(ai => ai.Application != null && ai.Application.ApplicationType != null && allowedNames.Contains(ai.Application.ApplicationType.Name))
+                    .Where(ai => ai.Application != null
+                        && ai.Application.ApplicationType != null
+                        && ai.Application.ApplicationType.CanIssueVisa)
                     .OrderBy(ai => ai.ApplicationItemName)
                     .ToList();
             }
@@ -242,8 +243,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (IssuingApplicationItem == null) return true;
                 var applicationType = IssuingApplicationItem.Application?.ApplicationType;
-                if (applicationType == null) return false;
-                return VisaIssuingApplicationTypes.IsAllowed(applicationType);
+                return ApplicationTypeCapabilities.CanIssueVisa(applicationType);
             }
         }
 

@@ -21,7 +21,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | `ExpirationDate` | `DateTime?` | Validity end. | Required; must be greater than `StartDate` (`RuleCriteria`). |
 | `BorderZoneLocation` | `string` | Comma-separated border zone labels (`BorderZoneName` catalog). Required; defaults to **`Ýok`** when unset (no border zones). | `[RuleRequiredField]`; multi-select sentinel `Ýok`. |
 | `Passport` | `Passport` | Passport this visa is stamped on. | Required. |
-| **`AvailableIssuingApplicationItems`** | — | **Not mapped.** Filtered **`ApplicationItem`** list: same **`Person`** as **`Passport`**, **`ApplicationType.Name`** in **`VisaIssuingApplicationTypes`**, not soft-deleted. Drives **`IssuingApplicationItem`** lookup (`[DataSourceProperty]`). |
+| **`AvailableIssuingApplicationItems`** | — | **Not mapped.** Filtered **`ApplicationItem`** list: same **`Person`** as **`Passport`**, parent **`ApplicationType.CanIssueVisa`**, not soft-deleted. Drives **`IssuingApplicationItem`** lookup (`[DataSourceProperty]`). |
 | **`IssuingApplicationItem`** | **`ApplicationItem`** | **The application line for the visa holder** under which this visa was issued. | **Optional** (gear). When set: same **`Person`** as **`Passport.Person`**, allowed **`ApplicationType.Name`**. UI caption: *Issuing Application Item*. |
 | **`AvailableInvitationItems`** | — | **Not mapped.** **`InvitationItem`** rows for **`Passport.Person`**. Drives **`InvitationItem`** lookup. |
 | `InvitationItem` | `InvitationItem` | Linked invitation line item for the visa holder. | **Optional** (gear). Person must match **`Passport.Person`** when set. |
@@ -53,7 +53,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 
 **Rule:** **`IssuingApplicationItem`** and **`InvitationItem`** are **not required** at save. When **`IssuingApplicationItem`** is set, person and application-type checks apply.
 
-**Allowed issuing application types (when issuing item is used):** The parent **`Application`**’s **`ApplicationType.Name`** must be in **`VisaIssuingApplicationTypes`** (invitation flows, extensions, exit visa, passport change, etc.).
+**Allowed issuing application types (when issuing item is used):** The parent **`Application`**’s **`ApplicationType.CanIssueVisa`** must be true (seeded for invitation flows, extensions, exit visa, passport change, etc.).
 
 ---
 
@@ -62,7 +62,7 @@ Key fields as implemented in `Visa.cs` (not exhaustive for derived/UI-only membe
 | Mechanism | Purpose |
 |-----------|---------|
 | `IsPersonValid` (`RuleFromBoolProperty`) | When **`IssuingApplicationItem`** is set, ensures **`IssuingApplicationItem.Person`** matches **`Passport.Person`**. |
-| `IsIssuingApplicationTypeAllowed` (`RuleFromBoolProperty`) | When **`IssuingApplicationItem`** is set, ensures **`ApplicationType.Name`** is in **`VisaIssuingApplicationTypes`**. |
+| `IsIssuingApplicationTypeAllowed` (`RuleFromBoolProperty`) | When **`IssuingApplicationItem`** is set, ensures **`ApplicationType.CanIssueVisa`**. |
 | `IsInvitationPersonValid` | When **`InvitationItem`** is set, ensures invitation person matches **`Passport.Person`**. |
 
 Lookup choices for **`IssuingApplicationItem`** come from **`AvailableIssuingApplicationItems`**; for **`InvitationItem`** from **`AvailableInvitationItems`** (**`[DataSourceProperty]`**).
@@ -92,7 +92,7 @@ Implemented in the **`IssueDate`** setter in `Visa.cs`; **`CrossObjectSyncHelper
 
 ## 6. Related documentation
 
-- **`VisaIssuingApplicationTypes.cs`** — canonical allowlist (**`Names`** array); **`AllowedApplicationTypeNames`** used for validation and **`Visa.AvailableIssuingApplicationItems`**.
+- **`ApplicationType.CanIssueVisa`** / **`ApplicationTypeCapabilities`** — capability flag (seeded in catalog); used for validation and **`Visa.AvailableIssuingApplicationItems`**.
 - **`ApplicationItem.md`** — **`CurrentVisa`** vs **`Visa.IssuingApplicationItem`** (target vs issuing).
 - **`APPLICATION.md`** — parent **`Application`** and **`ApplicationItems`** collection.
 - **`docs/BUSINESS_LOGIC_BASELINE.md`** — traceability and linkage to applications.

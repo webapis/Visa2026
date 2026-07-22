@@ -12,6 +12,7 @@ internal sealed record Visa2014VisaRawRow(
     DateTime? StartDate,
     DateTime? ExpirationDate,
     Guid LegacyPassportOid,
+    bool IsFamilyMemberPerson,
     bool BzDasoguz,
     bool BzTagtabazar,
     bool BzSerhetabat,
@@ -71,10 +72,12 @@ internal static class Visa2014VisaTransform
             CASE WHEN ISNULL(bz.Garabogaz, 0) = 1 THEN '1' ELSE '0' END AS BzGarabogaz,
             CASE WHEN ISNULL(bz.Sarahs, 0) = 1 THEN '1' ELSE '0' END AS BzSarahs,
             CASE WHEN ISNULL(bz.Etrek, 0) = 1 THEN '1' ELSE '0' END AS BzEtrek,
+            CASE WHEN ISNULL(person.IsFamilyMember, 0) = 1 AND ISNULL(person.IsEmployee, 0) = 0 THEN '1' ELSE '0' END AS IsFamilyMemberPerson,
             CASE WHEN v.[GöçürmeNusga] IS NOT NULL AND DATALENGTH(v.[GöçürmeNusga]) > 0 THEN '1' ELSE '0' END AS HasVisaDocument,
             ISNULL(DATALENGTH(v.[GöçürmeNusga]), 0) AS VisaDocumentByteLength
         FROM dbo.Visa v
         INNER JOIN dbo.Passport p ON v.Passport = p.Oid AND p.GCRecord IS NULL
+        INNER JOIN dbo.Person person ON person.Oid = p.Person AND person.GCRecord IS NULL
         LEFT JOIN dbo.VisaType vt ON v.VisaType = vt.Oid
         LEFT JOIN dbo.IVisaType_Data d ON vt.IVisaType_Data = d.Oid
         LEFT JOIN dbo.VisaCategory vc ON v.VisaCategory = vc.Oid
@@ -91,7 +94,7 @@ internal static class Visa2014VisaTransform
         "IssueDate", "StartDate", "ExpirationDate", "BorderZoneLocation", "Passport",
         "ExtensionRequired", "IsCancelled", "IsChanged", "IsExtended", "ShowOptionalFields",
         "InvitationItem", "IssuingApplicationItem", "Notes",
-        "_legacy_VisaTypeComposite", "_legacy_VisaCategoryComposite",
+        "_legacy_VisaTypeComposite", "_legacy_VisaTypePersonOverride", "_legacy_VisaCategoryComposite",
         "_legacy_IssuedPlaceOfVisaL", "_legacy_PassportOid",
     ];
 
@@ -160,6 +163,7 @@ internal static class Visa2014VisaTransform
             StartDate: DateTime.TryParse(row.GetValueOrDefault("VisaStartDate"), out var start) ? start : null,
             ExpirationDate: DateTime.TryParse(row.GetValueOrDefault("VisaEndDate"), out var expires) ? expires : null,
             LegacyPassportOid: legacyPassportOid,
+            IsFamilyMemberPerson: row.GetValueOrDefault("IsFamilyMemberPerson") == "1",
             BzDasoguz: row.GetValueOrDefault("BzDasoguz") == "1",
             BzTagtabazar: row.GetValueOrDefault("BzTagtabazar") == "1",
             BzSerhetabat: row.GetValueOrDefault("BzSerhetabat") == "1",
@@ -345,7 +349,7 @@ internal static class Visa2014VisaTransform
 
         var visaTypeComposite = BuildComposite(raw.TypeOfVisaL, raw.MgCode);
         row["_legacy_VisaTypeComposite"] = visaTypeComposite;
-        TrySetVisaType(row, catalogs, visaTypeComposite, unmapped);
+        TrySetVisaType(row, catalogs, visaTypeComposite, raw.IsFamilyMemberPerson, unmapped);
 
         var visaCategoryComposite = BuildComposite(raw.CategoryOfVisaL, raw.CategoryMgCode);
         row["_legacy_VisaCategoryComposite"] = visaCategoryComposite;
@@ -364,21 +368,46 @@ internal static class Visa2014VisaTransform
         Dictionary<string, object?> row,
         IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
         string composite,
+        bool isFamilyMemberPerson,
         List<string> unmapped)
     {
+        var key = ResolveVisaTypeLocalizationKey(
+            isFamilyMemberPerson, composite, catalogs, out var reason, out var personOverride);
+        row["VisaType"] = key;
+        if (personOverride)
+            row["_legacy_VisaTypePersonOverride"] = "family_member->FM";
+        if (reason != null)
+            unmapped.Add(reason);
+    }
+
+    /// <summary>
+    /// Family-member persons always map to FM (legacy often stores WP:11 incorrectly).
+    /// Otherwise TypeOfVisaL:mgCode via lookup-translations; unmapped default WP.
+    /// </summary>
+    internal static string ResolveVisaTypeLocalizationKey(
+        bool isFamilyMemberPerson,
+        string composite,
+        IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        out string? unmappedReason,
+        out bool personOverride)
+    {
+        unmappedReason = null;
+        personOverride = false;
+        if (isFamilyMemberPerson)
+        {
+            personOverride = true;
+            return "FM";
+        }
+
         if (Visa2014LookupTranslator.TryTranslate(catalogs, "VisaType", composite, out var target, out var reason) &&
             !string.IsNullOrWhiteSpace(target))
         {
-            row["VisaType"] = target;
-            if (reason != null)
-                unmapped.Add(reason);
-            return;
+            unmappedReason = reason;
+            return target!;
         }
 
-        if (reason != null)
-            unmapped.Add(reason);
-
-        row["VisaType"] = "WP";
+        unmappedReason = reason;
+        return "WP";
     }
 
     private static void TrySetVisaCategory(

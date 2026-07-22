@@ -419,9 +419,10 @@ postImportCorrections:
       cliFlag: --correct-visa-type
       dependsOn:
         - Visa
+        - Person
       notes: |
-        Greenfield (after 2026-07-15): MapLookupDto copies LocalizationKey so Visa import resolves BS1/FM/OF/EX.
-        This correction rematches Visa.VisaType from legacy TypeOfVisaL:mgCode on DBs imported when LocalizationKey was missing (all WP).
+        Rematches Visa.VisaType from transform: family-member persons → FM; else TypeOfVisaL:mgCode.
+        Also repairs older imports that collapsed to default WP (LocalizationKey missing on DTOs).
     - id: visa-issuing-application-item
       cliFlag: --correct-visa2014-issuing-application-item
       dependsOn:

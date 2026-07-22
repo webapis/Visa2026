@@ -246,7 +246,7 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [XafDisplayName("Current status")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [NotMapped]
         public string CurrentState => ListViewDisplay.CurrentState;
@@ -281,14 +281,14 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Working days")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [NotMapped]
         public int? WorkingDaysInCurrentStep => ListViewDisplay.WorkingDaysInCurrentStep;
 
         [XafDisplayName("Approval deadline")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
         public string ProgressSlaStatement => ListViewDisplay.ProgressSlaStatement;
