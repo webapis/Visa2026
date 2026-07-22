@@ -56,7 +56,7 @@
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="Application" Caption="Arzalar">
+      <Item Id="Application" Caption="Ýüztutmalar">
         <Items>
           <Item Id="Application_DirectMigration" Caption="Ylalaşyk zerur bolmadyk ýüztutmalar">
             <Items>

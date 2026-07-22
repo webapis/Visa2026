@@ -15,7 +15,7 @@
       }
     },
     "Application": {
-      "caption": { "en-US": "Applications", "tr-TR": "Başvurular", "tk-TM": "Arzalar", "ru-RU": "Заявки" },
+      "caption": { "en-US": "Applications", "tr-TR": "Başvurular", "tk-TM": "Ýüztutmalar", "ru-RU": "Заявки" },
       "children": {
         "Application_ViaMinistries": {
           "caption": {

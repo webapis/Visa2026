@@ -68,7 +68,7 @@ namespace Visa2026.Module.BusinessObjects
         private const string WpDefaultVisaTypeLocalizationKey = "WP";
         /// <summary>Default visa type for family-member invitation / extension types (see visa-type.json <c>FM</c>).</summary>
         private const string FmDefaultVisaTypeLocalizationKey = "FM";
-        /// <summary>Default visa type for exit / App_Visa_Ext (see visa-type.json <c>EX</c> / EX-Çykyş).</summary>
+        /// <summary>Default visa type for exit visa (see visa-type.json <c>EX</c> / EX-Çykyş).</summary>
         private const string ExDefaultVisaTypeLocalizationKey = "EX";
         /// <summary>Default visa type for service-passport invitation (see visa-type.json <c>OF</c>).</summary>
         private const string OfDefaultVisaTypeLocalizationKey = "OF";
@@ -282,7 +282,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Working days")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(true)]
-        [VisibleInListView(true)]
+        [VisibleInListView(false)]
         [NotMapped]
         public int? WorkingDaysInCurrentStep => ListViewDisplay.WorkingDaysInCurrentStep;
 
@@ -300,7 +300,7 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Migration working days")]
         [ModelDefault("AllowEdit", "False")]
         [VisibleInDetailView(false)]
-        [VisibleInListView(true)]
+        [VisibleInListView(false)]
         [NotMapped]
         public int? WorkingDaysInMigrationStep => ListViewDisplay.WorkingDaysInMigrationStep;
 
@@ -418,8 +418,13 @@ namespace Visa2026.Module.BusinessObjects
                 return true;
             }
 
-            if (string.Equals(applicationTypeName, AppVisaExtApplicationTypeName, StringComparison.Ordinal)
-                || string.Equals(applicationTypeName, AppExitVisaApplicationTypeName, StringComparison.Ordinal))
+            if (string.Equals(applicationTypeName, AppVisaExtApplicationTypeName, StringComparison.Ordinal))
+            {
+                visaTypeLocalizationKey = WpDefaultVisaTypeLocalizationKey;
+                return true;
+            }
+
+            if (string.Equals(applicationTypeName, AppExitVisaApplicationTypeName, StringComparison.Ordinal))
             {
                 visaTypeLocalizationKey = ExDefaultVisaTypeLocalizationKey;
                 return true;

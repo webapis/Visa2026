@@ -280,9 +280,10 @@
     <component type="typeof(AlertsHandler)" render-mode="Server" />
     <component type="typeof(Visa2026.Blazor.Server.Components.PdfBatchToastHost)" render-mode="Server" />
     <component type="typeof(Visa2026.Blazor.Server.Components.WordReportBatchToastHost)" render-mode="Server" />
-    <component type="typeof(Visa2026.Blazor.Server.Components.StateNotificationHeaderBadge)" render-mode="Server" />
-    <component type="typeof(Visa2026.Blazor.Server.Components.RuntimeErrorAlertHost)" render-mode="Server" />
-    <component type="typeof(Visa2026.Blazor.Server.Components.UserFeedbackHeaderPanel)" render-mode="Server" />
+    @* Hidden header widgets: state notifications, runtime-error badge, user feedback *@
+    @* <component type="typeof(Visa2026.Blazor.Server.Components.StateNotificationHeaderBadge)" render-mode="Server" /> *@
+    @* <component type="typeof(Visa2026.Blazor.Server.Components.RuntimeErrorAlertHost)" render-mode="Server" /> *@
+    @* <component type="typeof(Visa2026.Blazor.Server.Components.UserFeedbackHeaderPanel)" render-mode="Server" /> *@
 
     <script src="~/js/user-feedback-capture.js"></script>
     <script src="~/js/template-staging-local.js" asp-append-version="true"></script>
