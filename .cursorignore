@@ -1,4 +1,4 @@
-﻿# Build outputs
+# Build outputs
 **/bin/
 **/obj/
 **/[Dd]ebug/
@@ -50,12 +50,18 @@ publish/
 *.pubxml
 *.publishproj
 
-# VISA2014 migration — local PII / id maps
+# VISA2014 migration - local PII / id maps / import noise
 Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsx
 Visa2026.DataImporter/legacy/visa2014/preview-export/**/*.xlsm
 Visa2026.DataImporter/legacy/visa2014/preview-export/_*.txt
 Visa2026.DataImporter/legacy/visa2014/id-maps/
 Visa2026.DataImporter/legacy/visa2014/id-map/
+Visa2026.DataImporter/legacy/visa2014/import-logs/
+Visa2026.DataImporter/legacy/visa2014/file-import/
+Visa2026.DataImporter/legacy/visa2014/sync-state/
+Visa2026.DataImporter/legacy/visa2014/sync-dashboard.json
+Visa2026.DataImporter/legacy/visa2014/sync-dashboard.html
+Visa2026.DataImporter/legacy/visa2014/sync-run-status.json
 
 # Runtime error inbox (may contain prod stack traces)
 .cursor/runtime-errors/inbox/*
