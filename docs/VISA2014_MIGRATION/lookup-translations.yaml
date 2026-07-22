@@ -819,7 +819,7 @@ catalogs:
     audit:
       completedAt: 2026-06-29
       scope: Application
-      distinctLegacyValuesUsed: 12
+      distinctLegacyValuesUsed: 13
       allMappedToTarget: true
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaPeriod.md
     values:
@@ -837,6 +837,9 @@ catalogs:
         target: Day15
       - legacy: "20 ( yigrimi )gün:GUN:20"
         target: Day20
+      - legacy: "30 (otuz) gün::30"
+        target: Day30
+        notes: 43 Application rows on Çalik VISA2015 (2026-07-21)
       - legacy: "1 (bir) yyl:YYL:365"
         target: Year1
       - legacy: "2 (iki) ay:AY:61"

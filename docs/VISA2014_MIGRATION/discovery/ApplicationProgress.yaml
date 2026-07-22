@@ -118,12 +118,18 @@ mapping:
         location: AT_OFFICE
         dateSource: last_non_null_progress_date_or_ApplicationDate
         priority: after_synthesis
-      - when: Rejected = 1
+      - when: Rejected = 1 OR full RejectionItem coverage
         state: PROCESS_REJECTED
         location: AT_MIGRATION_SERVICE
-        dateSource: ProcessDate
+        dateSource: |
+          Prefer max ApplicationResult.IssuedDate (Result=Rejection) when full coverage;
+          else Application.ProcessDate; else prior step / ApplicationDate.
         priority: after_synthesis
-        notes: Header Rejected rare on Çalik; item-level rejection may override in permits wave
+        notes: |
+          Full coverage = PersonInApplication count > 0 AND equals total PersonInInvitation
+          under ApplicationResult Result=Rejection for the same Application (maps to
+          ApplicationItems.Count == sum(Rejection.RejectionItems) after import).
+          OR with rare header Application.Rejected=1. Partial coverage does not reject.
     skipParentApplication:
       - parent ApplicationType E:44/E:55 skipped at header import — no progress rows
     initializerConflict: |

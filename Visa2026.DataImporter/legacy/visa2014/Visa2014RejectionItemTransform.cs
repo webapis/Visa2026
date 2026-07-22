@@ -1,34 +1,32 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed record Visa2014InvitationItemRawRow(
+internal sealed record Visa2014RejectionItemRawRow(
     Guid LegacyOid,
     Guid? LegacyPersonOid,
     Guid? LegacyPassportOid,
-    Guid? LegacyInvitationOid,
-    int? ApplicationResultResult);
+    Guid? LegacyRejectionOid);
 
-internal static class Visa2014InvitationItemTransform
+internal static class Visa2014RejectionItemTransform
 {
     internal const string ExtractSql = """
         SELECT
             CAST(pii.Oid AS varchar(36)) AS Oid,
             CAST(COALESCE(pii.Employee, pii.FamilyMember) AS varchar(36)) AS PersonOid,
             CAST(pii.Passport AS varchar(36)) AS PassportOid,
-            CAST(pii.Invitation AS varchar(36)) AS InvitationOid,
-            ar.Result AS ApplicationResultResult
+            CAST(pii.Invitation AS varchar(36)) AS RejectionOid
         FROM dbo.PersonInInvitation pii
         INNER JOIN dbo.ApplicationResult ar
             ON ar.Oid = pii.Invitation
            AND ar.GCRecord IS NULL
-           AND ar.Result = 0
+           AND ar.Result = 1
         WHERE pii.GCRecord IS NULL
         """;
 
-    internal static readonly string[] InvitationItemMainColumnOrder =
+    internal static readonly string[] RejectionItemMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_importAction",
-        "Person", "Passport", "Invitation", "IsCancelled",
-        "_legacy_PersonOid", "_legacy_PassportOid", "_legacy_InvitationOid", "_legacy_ApplicationResultResult",
+        "Person", "Passport", "Rejection", "Reason",
+        "_legacy_PersonOid", "_legacy_PassportOid", "_legacy_RejectionOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -39,11 +37,11 @@ internal static class Visa2014InvitationItemTransform
     {
         _ = lookupTranslationPaths;
         var sql = maxRows is > 0
-            ? $"SELECT TOP ({maxRows}) * FROM ({ExtractSql}) AS q"
-            : ExtractSql;
+            ? $"SELECT TOP ({maxRows}) * FROM ({ExtractSql}) AS q ORDER BY Oid"
+            : $"{ExtractSql} ORDER BY Oid";
 
         var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
-        var rawRows = new List<Visa2014InvitationItemRawRow>();
+        var rawRows = new List<Visa2014RejectionItemRawRow>();
         int parseSkipped = 0;
         foreach (var dict in dictRows)
         {
@@ -56,31 +54,21 @@ internal static class Visa2014InvitationItemTransform
         if (verbose && parseSkipped > 0)
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
-        var cancellationIndex = Visa2014LegacyInvitationItemCancellationIndex.Load(
-            connectionString,
-            lookupTranslationPaths,
-            verbose);
-
-        return TransformRows(rawRows, cancellationIndex, out var skipped);
+        return TransformRows(rawRows, out var skipped);
     }
 
-    internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014InvitationItemRawRow parsed)
+    internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014RejectionItemRawRow parsed)
     {
         parsed = null!;
         if (!row.TryGetValue("Oid", out var oidText) ||
             !Guid.TryParse(oidText?.Trim(), out var legacyOid))
             return false;
 
-        int? result = int.TryParse(row.GetValueOrDefault("ApplicationResultResult"), out var parsedResult)
-            ? parsedResult
-            : null;
-
-        parsed = new Visa2014InvitationItemRawRow(
+        parsed = new Visa2014RejectionItemRawRow(
             LegacyOid: legacyOid,
             LegacyPersonOid: TryParseGuid(row.GetValueOrDefault("PersonOid")),
             LegacyPassportOid: TryParseGuid(row.GetValueOrDefault("PassportOid")),
-            LegacyInvitationOid: TryParseGuid(row.GetValueOrDefault("InvitationOid")),
-            ApplicationResultResult: result);
+            LegacyRejectionOid: TryParseGuid(row.GetValueOrDefault("RejectionOid")));
         return true;
     }
 
@@ -88,8 +76,7 @@ internal static class Visa2014InvitationItemTransform
         Guid.TryParse(text?.Trim(), out var oid) ? oid : null;
 
     private static Visa2014PersonImportBatch TransformRows(
-        IReadOnlyList<Visa2014InvitationItemRawRow> rawRows,
-        Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
+        IReadOnlyList<Visa2014RejectionItemRawRow> rawRows,
         out List<Dictionary<string, object?>> skipped)
     {
         skipped = [];
@@ -97,7 +84,7 @@ internal static class Visa2014InvitationItemTransform
 
         foreach (var raw in rawRows)
         {
-            var export = BuildExportRow(raw, cancellationIndex, out var skipReason);
+            var export = BuildExportRow(raw, out var skipReason);
             if (skipReason != null)
             {
                 export["_skipReason"] = skipReason;
@@ -120,8 +107,7 @@ internal static class Visa2014InvitationItemTransform
     }
 
     private static Dictionary<string, object?> BuildExportRow(
-        Visa2014InvitationItemRawRow raw,
-        Visa2014LegacyInvitationItemCancellationIndex cancellationIndex,
+        Visa2014RejectionItemRawRow raw,
         out string? skipReason)
     {
         skipReason = null;
@@ -133,24 +119,20 @@ internal static class Visa2014InvitationItemTransform
             ["_importAction"] = "import",
             ["_legacy_PersonOid"] = raw.LegacyPersonOid?.ToString("D"),
             ["_legacy_PassportOid"] = raw.LegacyPassportOid?.ToString("D"),
-            ["_legacy_InvitationOid"] = raw.LegacyInvitationOid?.ToString("D"),
-            ["_legacy_ApplicationResultResult"] = raw.ApplicationResultResult,
+            ["_legacy_RejectionOid"] = raw.LegacyRejectionOid?.ToString("D"),
+            ["Reason"] = null,
         };
 
         if (!raw.LegacyPersonOid.HasValue)
             skipReason = "missing_fk:Person";
         if (!raw.LegacyPassportOid.HasValue)
             skipReason ??= "missing_fk:Passport";
-        if (!raw.LegacyInvitationOid.HasValue)
-            skipReason ??= "missing_fk:Invitation";
+        if (!raw.LegacyRejectionOid.HasValue)
+            skipReason ??= "missing_fk:Rejection";
 
         row["Person"] = raw.LegacyPersonOid?.ToString("D");
         row["Passport"] = raw.LegacyPassportOid?.ToString("D");
-        row["Invitation"] = raw.LegacyInvitationOid?.ToString("D");
-        row["IsCancelled"] = Visa2014LegacyInvitationItemCancellationIndex.ResolveIsCancelled(
-            raw.ApplicationResultResult,
-            raw.LegacyOid,
-            cancellationIndex);
+        row["Rejection"] = raw.LegacyRejectionOid?.ToString("D");
         return row;
     }
 }

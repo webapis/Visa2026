@@ -42,6 +42,13 @@
                      "IsDefault":  false
                  },
                  {
+                     "NameTm":  "30 (otuz) gün",
+                     "LocalizationKey":  "Day30",
+                     "PdfForm__Code":  "GUN",
+                     "PdfForm_Count":  30,
+                     "IsDefault":  false
+                 },
+                 {
                      "NameTm":  "4 (dört) aý",
                      "LocalizationKey":  "Month4",
                      "PdfForm__Code":  "AY",

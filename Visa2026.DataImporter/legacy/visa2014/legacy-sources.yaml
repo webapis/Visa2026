@@ -39,6 +39,8 @@ sources:
       WorkPermitItem: preview-export/WorkPermitItem-preview.calik-energi.xlsx
       Invitation: preview-export/Invitation-preview.calik-energi.xlsx
       InvitationItem: preview-export/InvitationItem-preview.calik-energi.xlsx
+      Rejection: preview-export/Rejection-preview.calik-energi.xlsx
+      RejectionItem: preview-export/RejectionItem-preview.calik-energi.xlsx
       AddressOfResidence: preview-export/AddressOfResidence-preview.calik-energi.xlsx
       Lodging: preview-export/Lodging-preview.calik-energi.xlsx
       Hotel: preview-export/Hotel-preview.calik-energi.xlsx

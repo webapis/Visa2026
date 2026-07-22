@@ -78,7 +78,8 @@ internal static class Visa2014ApplicationProgressTransform
         int? maxRows,
         bool verbose,
         IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid = null,
-        IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>? completionByLegacyApplicationOid = null)
+        IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>? completionByLegacyApplicationOid = null,
+        IReadOnlyDictionary<Guid, Visa2014ApplicationProgressRejectionEvidence>? rejectionByLegacyApplicationOid = null)
     {
         _ = lookupTranslationPaths;
         var sql = maxRows is > 0
@@ -100,11 +101,13 @@ internal static class Visa2014ApplicationProgressTransform
             Console.WriteLine($"  Skipped {parseSkipped} sqlcmd row(s) with invalid shape.");
 
         completionByLegacyApplicationOid ??= Visa2014ApplicationProgressCompletionIndex.Load(connectionString, verbose);
+        rejectionByLegacyApplicationOid ??= Visa2014ApplicationProgressRejectionIndex.Load(connectionString, verbose);
 
         return TransformRows(
             rawRows,
             ministryLegCountByLegacyApplicationOid,
             completionByLegacyApplicationOid,
+            rejectionByLegacyApplicationOid,
             out var skipped,
             out var dedupeSummary);
     }
@@ -146,6 +149,7 @@ internal static class Visa2014ApplicationProgressTransform
         IReadOnlyList<Visa2014ApplicationProgressRawRow> rawRows,
         IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid,
         IReadOnlyDictionary<Guid, Visa2014ApplicationProgressCompletionEvidence>? completionByLegacyApplicationOid,
+        IReadOnlyDictionary<Guid, Visa2014ApplicationProgressRejectionEvidence>? rejectionByLegacyApplicationOid,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> dedupeSummary)
     {
@@ -182,7 +186,10 @@ internal static class Visa2014ApplicationProgressTransform
             Visa2014ApplicationProgressCompletionEvidence? completion = null;
             if (completionByLegacyApplicationOid != null)
                 completionByLegacyApplicationOid.TryGetValue(raw.LegacyApplicationOid, out completion);
-            var steps = SynthesizeSteps(raw, ministryLegCount, completion);
+            Visa2014ApplicationProgressRejectionEvidence? rejection = null;
+            if (rejectionByLegacyApplicationOid != null)
+                rejectionByLegacyApplicationOid.TryGetValue(raw.LegacyApplicationOid, out rejection);
+            var steps = SynthesizeSteps(raw, ministryLegCount, completion, rejection);
             if (steps.Count == 0)
             {
                 skipped.Add(BuildParentSkippedRow(raw, composite, "no_synthesized_steps"));
@@ -207,6 +214,7 @@ internal static class Visa2014ApplicationProgressTransform
                     ["_legacyRowId"] = $"{raw.LegacyApplicationOid:D}:{step.StepCode}",
                     ["_legacyApplicationOid"] = raw.LegacyApplicationOid.ToString("D"),
                     ["_syntheticStepKey"] = $"{raw.LegacyApplicationOid:D}:{step.StepCode}",
+                    ["_stepCode"] = step.StepCode,
                     ["_importAction"] = "import",
                     ["_processKind"] = raw.IsLongProcess ? "long" : "simple",
                     ["Application"] = raw.LegacyApplicationOid.ToString("D"),
@@ -214,6 +222,11 @@ internal static class Visa2014ApplicationProgressTransform
                     ["Order"] = stepIndex + 1,
                     ["Date"] = step.Date.ToString("yyyy-MM-dd"),
                     ["Description"] = step.Description,
+                    ["_lineage_State"] = "synthesized step → ApplicationState.Code",
+                    ["_lineage_Date"] = step.DateSource,
+                    ["_lineage_Description"] = step.DescriptionSource,
+                    ["_lineage_Order"] = "1-based after workflow sort",
+                    ["_lineage_Application"] = "dbo.Application.Oid → Application id-map",
                     ["_legacy_ManualApplicationNumber"] = raw.ManualApplicationNumber,
                     ["_legacy_ApplicationTypeComposite"] = composite,
                     ["_legacy_ProcessNumber"] = raw.ProcessNumber,
@@ -233,15 +246,17 @@ internal static class Visa2014ApplicationProgressTransform
         };
     }
 
-    internal sealed record SynthesisStep(string StepCode, string StateCode, DateTime Date, string? Description);
+    internal sealed record SynthesisStep(string StepCode, string StateCode, DateTime Date, string? Description, string? DateSource = null, string? DescriptionSource = null);
 
     internal static List<SynthesisStep> SynthesizeSteps(
         Visa2014ApplicationProgressRawRow raw,
         int ministryLegCount,
-        Visa2014ApplicationProgressCompletionEvidence? completion = null)
+        Visa2014ApplicationProgressCompletionEvidence? completion = null,
+        Visa2014ApplicationProgressRejectionEvidence? rejection = null)
     {
         var steps = new List<SynthesisStep>();
         var appDate = raw.ManualApplicationDate!.Value;
+        var effectiveRejected = raw.Rejected || rejection is { HasFullCoverage: true };
 
         ministryLegCount = Math.Clamp(ministryLegCount, 0, 5);
         if (ministryLegCount > 0)
@@ -254,16 +269,31 @@ internal static class Visa2014ApplicationProgressTransform
 
                 if (leg == 1)
                 {
-                    var startedDate = IsLegacyDateSet(raw.DateForwardedToMonistery)
-                        ? raw.DateForwardedToMonistery!.Value
-                        : appDate;
+                    string startedDateSource;
+                    DateTime startedDate;
+                    if (IsLegacyDateSet(raw.DateForwardedToMonistery))
+                    {
+                        startedDate = raw.DateForwardedToMonistery!.Value;
+                        startedDateSource = "dbo.Application.DateForwardedToMonistery";
+                    }
+                    else
+                    {
+                        startedDate = appDate;
+                        startedDateSource = "dbo.Application.ManualApplicationDate (fallback)";
+                    }
+
                     if (startedDate > approvedDate)
+                    {
                         startedDate = approvedDate;
+                        startedDateSource += " (clamped to leg-1 approved slot)";
+                    }
 
                     steps.Add(new SynthesisStep(
                         "leg_1_started",
                         "1_REVIEW_STARTED",
                         startedDate,
+                        null,
+                        startedDateSource,
                         null));
                 }
 
@@ -271,7 +301,9 @@ internal static class Visa2014ApplicationProgressTransform
                     $"leg_{leg}_approved",
                     $"{leg}_REVIEW_APPROVED",
                     approvedDate,
-                    BuildLegApprovedDescription(raw, leg)));
+                    BuildLegApprovedDescription(raw, leg),
+                    ResolveApprovedLegDateSource(raw, leg),
+                    ResolveApprovedLegDescriptionSource(leg)));
             }
         }
 
@@ -279,24 +311,32 @@ internal static class Visa2014ApplicationProgressTransform
         // PROCESS_ISSUED is synthesized from invitation/work-permit evidence (ApplicationResult / PersonInApplication.WorkPermit).
         var hasProcessStart = IsLegacyDateSet(raw.ProcessDate)
             || !string.IsNullOrWhiteSpace(raw.ProcessNumber);
-        var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !raw.Rejected;
+        var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !effectiveRejected;
         if (hasProcessStart || ministryRouteComplete)
         {
             var priorDate = steps.Count > 0 ? steps[^1].Date : appDate;
             var startedDate = IsLegacyDateSet(raw.ProcessDate)
                 ? raw.ProcessDate!.Value
                 : ResolveMigrationInProgressDate(priorDate);
+            var startedDateSource = IsLegacyDateSet(raw.ProcessDate)
+                ? "dbo.Application.ProcessDate"
+                : "synthesized (ministry route complete / prior+1)";
             if (steps.Count > 0 && startedDate <= priorDate)
+            {
                 startedDate = priorDate.AddDays(1);
+                startedDateSource = "prior step Date + 1 day (ordering)";
+            }
 
             steps.Add(new SynthesisStep(
                 "migration_started",
                 "PROCESS_STARTED",
                 startedDate,
-                FormatLegacyDescriptionValue(raw.ProcessNumber)));
+                FormatLegacyDescriptionValue(raw.ProcessNumber),
+                startedDateSource,
+                string.IsNullOrWhiteSpace(raw.ProcessNumber) ? null : "dbo.Application.ProcessNumber"));
         }
 
-        if (!raw.Cancelled && !raw.Rejected && completion is { HasCompletion: true })
+        if (!raw.Cancelled && !effectiveRejected && completion is { HasCompletion: true })
         {
             var priorDate = steps.Count > 0 ? steps[^1].Date : appDate;
             if (!steps.Exists(s => s.StateCode == "PROCESS_STARTED"))
@@ -313,19 +353,31 @@ internal static class Visa2014ApplicationProgressTransform
                     "migration_started",
                     "PROCESS_STARTED",
                     startedDate,
+                    null,
+                    "synthesized before completion evidence",
                     null));
                 priorDate = startedDate;
             }
 
             var issuedDate = completion.CompletionDate ?? priorDate.AddDays(1);
+            var issuedDateSource = completion.CompletionDate.HasValue
+                ? $"completion evidence ({completion.SourceLabel})"
+                : "prior step Date + 1 day (no completion date)";
             if (issuedDate <= priorDate)
+            {
                 issuedDate = priorDate.AddDays(1);
+                issuedDateSource = "prior step Date + 1 day (ordering)";
+            }
 
             steps.Add(new SynthesisStep(
                 "migration_issued",
                 "PROCESS_ISSUED",
                 issuedDate,
-                FormatLegacyDescriptionValue(completion.SourceValue)));
+                FormatLegacyDescriptionValue(completion.SourceValue),
+                issuedDateSource,
+                string.IsNullOrWhiteSpace(completion.SourceValue)
+                    ? null
+                    : $"completion evidence value ({completion.SourceLabel})"));
         }
 
         if (raw.Cancelled)
@@ -335,17 +387,22 @@ internal static class Visa2014ApplicationProgressTransform
                 "cancelled",
                 "PROCESS_CANCELLED",
                 date,
-                "Legacy Cancelled=1"));
+                "Legacy Cancelled=1",
+                raw.ProcessDate.HasValue ? "dbo.Application.ProcessDate" : "prior step Date",
+                "dbo.Application.Cancelled"));
         }
 
-        if (raw.Rejected)
+        if (effectiveRejected)
         {
-            var date = raw.ProcessDate ?? (steps.Count > 0 ? steps[^1].Date : appDate);
+            var (date, dateSource) = ResolveRejectedStepDate(raw, rejection, steps, appDate);
+            var (description, descriptionSource) = ResolveRejectedStepDescription(raw, rejection);
             steps.Add(new SynthesisStep(
                 "rejected",
                 "PROCESS_REJECTED",
                 date,
-                "Legacy Rejected=1"));
+                description,
+                dateSource,
+                descriptionSource));
         }
 
         return steps
@@ -355,6 +412,84 @@ internal static class Visa2014ApplicationProgressTransform
             .ToList();
     }
 
+    private static (DateTime Date, string DateSource) ResolveRejectedStepDate(
+        Visa2014ApplicationProgressRawRow raw,
+        Visa2014ApplicationProgressRejectionEvidence? rejection,
+        List<SynthesisStep> steps,
+        DateTime appDate)
+    {
+        if (IsLegacyDateSet(rejection?.RejectionDate))
+        {
+            return (
+                rejection!.RejectionDate!.Value,
+                "ApplicationResult.IssuedDate (Result=Rejection, max)");
+        }
+
+        if (IsLegacyDateSet(raw.ProcessDate))
+            return (raw.ProcessDate!.Value, "dbo.Application.ProcessDate");
+
+        if (steps.Count > 0)
+            return (steps[^1].Date, "prior step Date");
+
+        return (appDate, "dbo.Application.ManualApplicationDate");
+    }
+
+    private static (string Description, string DescriptionSource) ResolveRejectedStepDescription(
+        Visa2014ApplicationProgressRawRow raw,
+        Visa2014ApplicationProgressRejectionEvidence? rejection)
+    {
+        var fromCoverage = rejection is { HasFullCoverage: true };
+        if (fromCoverage && raw.Rejected)
+        {
+            var coverage = FormatRejectionCoverageDescription(rejection!);
+            return (
+                $"Legacy Rejected=1; {coverage}",
+                "dbo.Application.Rejected + RejectionItem coverage");
+        }
+
+        if (fromCoverage)
+        {
+            return (
+                FormatRejectionCoverageDescription(rejection!),
+                "RejectionItem coverage vs ApplicationItem (PersonInApplication)");
+        }
+
+        return ("Legacy Rejected=1", "dbo.Application.Rejected");
+    }
+
+    private static string FormatRejectionCoverageDescription(
+        Visa2014ApplicationProgressRejectionEvidence rejection)
+    {
+        var text =
+            $"Rejection coverage {rejection.ApplicationItemCount}/{rejection.RejectionItemCount}";
+        if (!string.IsNullOrWhiteSpace(rejection.RejectionNumbers))
+            text += $" ({rejection.RejectionNumbers})";
+        return text;
+    }
+
+
+    private static string ResolveApprovedLegDateSource(Visa2014ApplicationProgressRawRow raw, int leg) =>
+        leg switch
+        {
+            1 when IsLegacyDateSet(raw.DateForwardedToMonistery) => "dbo.Application.DateForwardedToMonistery (leg slot)",
+            1 => "interpolated ministry slot (leg 1)",
+            2 when IsLegacyDateSet(raw.MinisteriesDocumentDate) => "dbo.Application.MinisteriesDocumentDate",
+            2 when !string.IsNullOrWhiteSpace(raw.MinisteriesDocumentNumber) =>
+                "dbo.Application.DateForwardedToMonistery / MinisteriesDocumentDate (leg 2 slot)",
+            2 => "interpolated ministry slot (leg 2)",
+            3 when IsLegacyDateSet(raw.DateForwardedToMinConstruction) => "dbo.Application.DateForwardedToMinConstruction",
+            3 => "interpolated ministry slot (leg 3)",
+            _ => $"interpolated ministry slot (leg {leg})",
+        };
+
+    private static string? ResolveApprovedLegDescriptionSource(int leg) =>
+        leg switch
+        {
+            1 => null,
+            2 => "dbo.Application.MinisteriesDocumentNumber",
+            3 => "dbo.Application.DocNumberForwardedToMinConstruction",
+            _ => null,
+        };
     private static int ResolveMinistryLegCount(
         Visa2014ApplicationProgressRawRow raw,
         IReadOnlyDictionary<Guid, int>? ministryLegCountByLegacyApplicationOid)

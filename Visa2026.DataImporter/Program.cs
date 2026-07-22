@@ -151,6 +151,7 @@ static IReadOnlyList<string> GetUnknownFlags(IReadOnlyList<string> args)
         "--export-seed",
         "--export-visa2014-preview",
         "--preflight-visa2014-lookups",
+        "--verify-visa2014-mapping",
         "--catalog-only",
         "--skip-target-check",
         "--import-visa2014",
@@ -278,6 +279,7 @@ static void PrintHelp()
     Console.WriteLine("  --export-visa2014-import-gaps  Target-aware Excel of unresolved import rows (manual review; not exclusions).");
     Console.WriteLine("      Options: --entity AddressOfResidence --inprocess --target-connection conn [--legacy-source calik-energi-onprem-demo]");
     Console.WriteLine("  --preflight-visa2014-lookups  Audit live lookups → translate → verify target catalogs (gate before full Import).");
+    Console.WriteLine("  --verify-visa2014-mapping   Post-import expected vs actual (Application|ApplicationProgress; --entity --tier --sample/--full --report/--report-html).");
     Console.WriteLine("      Options: [--legacy-source …] [--target-connection conn] [--catalog-only] [--skip-target-check]");
     Console.WriteLine("                [--entity Person,AddressOfResidence,…] [--max-rows N] [--output report.json]");
     Console.WriteLine("                [--person-id-map path] [--address-id-map path] [--output path.xlsx] [--max-rows N]");
@@ -455,6 +457,16 @@ if (HasArg(args, "--preflight-visa2014-lookups"))
     Log.Phase("VISA2014 lookup preflight (audit → translate → target map)");
     bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
     int exitCode = Visa2014LookupPreflightCommand.Run(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
+if (HasArg(args, "--verify-visa2014-mapping"))
+{
+    Log.Phase("VISA2014 mapping verify");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014MappingVerifyCommand.RunAsync(args, isVerbose);
     Log.Close();
     Environment.ExitCode = exitCode;
     return;

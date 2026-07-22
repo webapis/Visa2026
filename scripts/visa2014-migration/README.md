@@ -136,6 +136,7 @@ Do **not** use `reimport/` for staging or production cutover.
 | **Archive** current Import run (status + DbCounts) | `Archive-OnPremImportRun.ps1` (`-Profile Demo`) — also auto-run at end of `OnPrem-Sync.ps1` |
 | **Compare** two reimport archives (anomaly Δ) | `Compare-OnPremImportRuns.ps1` (`-Profile Demo` [-Left] [-Right] [-FailOnAnomaly]) |
 | Local / on-prem legacy vs migrated row counts | `Compare-LegacyMigratedCounts.ps1` (`-ShowIdMap` for id-map column) |
+| **Mapping verify** (property + lookup expected vs actual) | `import/Verify-Mapping.ps1` / `--verify-visa2014-mapping` (Application pilot) — [MAPPING_VERIFICATION.md](../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) |
 
 **Reimport history dashboard:** `<SyncHostRoot>\history\index.html` (immutable `history\runs\<RunId>\`: `run-status.json`, `db-counts.json`, `file-waves.json`, `file-presence.json`, `meta.json`).  
 **In-app (Administrators):** Operations → **Import reimport history** — scalar DbCounts + **Document copies / file waves** + **file presence** (reads the same folder via `ImportHistory:RootPath`; app-pool identity needs read ACL on `history\`).  

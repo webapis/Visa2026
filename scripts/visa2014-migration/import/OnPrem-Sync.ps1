@@ -67,6 +67,7 @@ param(
     [switch]$SkipTenantCatalogGeneration,
     [switch]$SkipPostImportCorrections,
     [switch]$SkipLookupPreflight,
+    [switch]$SkipMappingVerify,
     [switch]$IncludeFileWaves,
     [string]$SyncHostRoot = ""
 )
@@ -452,6 +453,36 @@ function Invoke-ImportWave {
     }
 
     Set-OnPremSyncRunWaveCompleted -Root $syncStatusRoot -WaveName $WaveName -ExitCode $exit -LogFile $logFile
+
+    if ($exit -eq 0 -and $Kind -eq 'Scalar' -and -not $DryRun -and -not $SkipMappingVerify -and ($WaveName -eq 'Application' -or $WaveName -eq 'ApplicationProgress')) {
+        Write-Host ">>> mappingVerify ($WaveName)" -ForegroundColor Green
+        $verifyLog = Join-Path $logRoot "$logPrefix-$WaveName-mapping-verify-$stamp.log"
+        $verifyArgs = @(
+            '--verify-visa2014-mapping',
+            '--entity', $WaveName,
+            '--legacy-source', $LegacySource,
+            '--tier', 'B',
+            '--sample', '50',
+            '--application-id-map', (Get-MapPath 'Application')
+        )
+        if ($WaveName -eq 'ApplicationProgress') {
+            $verifyArgs += @('--progress-id-map', (Get-MapPath 'ApplicationProgress'))
+        }
+        # Target CS via env (same as import waves) — avoid mangled --target-connection
+        $verifyExit = Invoke-DataImporterCli -CliArgs $verifyArgs -LogFile $verifyLog
+        if ($verifyExit -ne 0) {
+            Write-Host "ERR Mapping verify failed for $WaveName (exit $verifyExit). Log: $verifyLog" -ForegroundColor Red
+            if (-not $ContinueOnError) {
+                Complete-OnPremSyncRunStatus -Root $syncStatusRoot -OverallStatus Failed
+                Invoke-ArchiveCurrentImportRun -Reason "MappingVerifyFailed=$WaveName"
+                exit $verifyExit
+            }
+            $exit = $verifyExit
+        }
+        else {
+            Write-Host "INF Mapping verify passed for $WaveName." -ForegroundColor Green
+        }
+    }
 
     if ($exit -ne 0) {
         Write-Host "ERR Wave $WaveName failed (exit $exit). Log: $logFile" -ForegroundColor Red

@@ -35,6 +35,7 @@ internal static class Visa2014ApplicationProgressCompletionIndex
             FROM dbo.ApplicationResult ar
             WHERE ar.Application = a.Oid
               AND ar.GCRecord IS NULL
+              AND ar.Result = 0
               AND EXISTS (
                   SELECT 1
                   FROM dbo.PersonInInvitation pii

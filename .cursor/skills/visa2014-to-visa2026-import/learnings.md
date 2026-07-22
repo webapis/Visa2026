@@ -4,6 +4,167 @@
 
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
 
+
+
+
+### 2026-07-22 — Full scalar reimport .15 → local PG (finished)
+
+- **Phase**: full wipe + scalar chain result
+- **Overall**: Failed
+- **RunId**: 20260722-111047
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260722-111046.log`
+- **Steps**:
+```
+STEP_OK Person
+STEP_OK Passport
+STEP_OK Visa
+STEP_FAILED Education exit=1
+```
+
+### 2026-07-22 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: full wipe + scalar chain (`Run-LocalPgScalarChain.ps1`)
+- **Source**: `10.100.128.15` / `VISA2015` (calik-energi-local-pg)
+- **Target**: PostgreSQL `visa2026` (localhost)
+- **Prep**: `Wipe-LocalPostgresTransactional.sql`; cleared `id-maps/calik-energi-local-pg/*.json`
+- **Chain update**: added `Rejection` / `RejectionItem` after `ApplicationItem`
+- **Bugfix**: Person greenfield failed `Id-map not found` after wipe — `LoadOrEmpty` on Person id-map + expander no-ops if missing
+- **First attempt**: Person STEP_FAILED (missing id-map); **resume**: Person STEP_OK; Passport running
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260722-111046.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-22 — Rejection + RejectionItem importConfirmed and local PG import
+
+- **Phase**: Phase 1b confirm + Phase 3/4 import (calik-energi-local-pg → PostgreSQL `visa2026`)
+- **Confirm**: human `importConfirmed` in chat; updated `order.yaml`, discovery dossiers, entity-inventory
+- **Legacy**: localhost\SQLEXPRESS VISA2015 (Integrated Security); Application id-map 12247
+- **Dry-run Rejection**: prepared **207** / missing App map **0**
+- **Import Rejection**: Posted **207** / Failed **0** / id-map `id-maps/calik-energi-local-pg/Rejection.json`
+- **Import RejectionItem**: Posted **254** / Failed **0** / missing id-map **0** / id-map `RejectionItem.json`
+- **Logs**: `import-Rejection-localpg-20260722-110447.log`, `import-RejectionItem-localpg-20260722-110510.log`
+- **Note**: duplicate Numbers `178` / `AS-600159` imported with oid-tail suffixes (4 distinct headers)
+
+### 2026-07-22 — Rejection Excel preview + importer wired
+
+- **Phase**: Phase 1c preview + Phase 2 implementation (import gated on importConfirmed)
+- **CLI**: `--export-visa2014-preview --entity Rejection|RejectionItem`; `--import-visa2014 --entity Rejection|RejectionItem` (wired; do not POST until importConfirmed)
+- **Preview (local SQLEXPRESS VISA2015, Integrated Security)**: Rejection **207** import / **0** skipped; RejectionItem **254** / **0** skipped
+- **Files**: `legacy/visa2014/preview-export/Rejection-preview.calik-energi.xlsx`, `RejectionItem-preview.calik-energi.xlsx` (also under bin Debug output)
+- **Code**: `Visa2014RejectionTransform` / `RejectionItemTransform` / preview exporters / OData importers; Application FK required (skip if not in Application id-map)
+- **Next**: human review preview → set `importConfirmed` on Rejection + RejectionItem → dry-run then in-process import after ApplicationItem
+
+### 2026-07-22 — Rejection discovery + ApplicationResult Result split
+
+- **Phase**: discovery (Rejection / RejectionItem) + Invitation mapping correction
+- **Legacy**: `ApplicationResultEnum` — `0` Invitation, `1` Rejection (not cancel). Same `dbo.ApplicationResult` + `PersonInInvitation` (FK still named Invitation).
+- **Çalik VISA2015 counts**: Result=0 **2821** headers / **2776** referenced / **4984** items; Result=1 **207** headers (**185** with items, **22** orphans) / **254** items. Duplicate Rejection Numbers: **2** (`178`, `AS-600159`).
+- **Artifacts**: `discovery/Rejection.yaml`, `discovery/RejectionItem.yaml`, `field-maps/Rejection.yaml`, `field-maps/RejectionItem.yaml`, `table-mappings` `rejection-header`/`rejection-item`, `order.yaml` after ApplicationItem.
+- **Locked map**: Number→RejectedDocNumber; IssuedDate→Date; Application required; Reason allow_null; id-map ApplicationResult.Oid→Rejection.ID (separate from Invitation).
+- **Invitation fixes**: extract `Result = 0`; InvitationItem INNER JOIN Result=0; drop `Result==1→IsCancelled`; cancel index = PIA.Cancelled only; progress completion + ApplicationItem CurrentInvitationItem also Result=0.
+- **Gates**: Excel preview + `importConfirmed` before Rejection OData importer.
+- **Next**: `--export-visa2014-preview --entity Rejection` (after transform shell) → human confirm → implement importer mirroring Invitation.
+
+
+### 2026-07-22 — ApplicationProgress lineage sections were empty (fixed)
+
+- **Phase**: mapping-verify bugfix
+- **Symptom**: PASS report with empty **Property lineage** table + **No sample rows** (HTML had section shells only)
+- **Cause**: `ProgressVerifyReport` never assigned `PropertyLineage` / `SampleLineage`; transform did not emit `_lineage_*` / `_stepCode` on import rows
+- **Fix**: `BuildStaticPropertyLineage()` + sample build in `RunVerify`; transform wires `DateSource`/`DescriptionSource` per `SynthesisStep`
+- **Smoke**: exit **0**; `PropertyLineage` **7**; `SampleLineage` **20**; report `mapping-verify-ApplicationProgress-calik-energi-local-pg-20260722-051749.html`
+
+### 2026-07-22 — ApplicationProgress verify: property lineage in report
+
+- **Phase**: mapping-verify UX
+- **Change**: transform attaches `_lineage_Date` / `_lineage_Description` / … per synthetic step; verify HTML/JSON **Property lineage** + **Sample row lineage**
+- **Smoke**: exit **0**; report `mapping-verify-ApplicationProgress-calik-energi-local-pg-20260722-051330.html`
+### 2026-07-22 — ApplicationProgress reimport + mapping verify exit 0 (local PG)
+
+- **Phase**: partial-reimport + mapping-verify
+- **Prep**: `ImportedApplicationProgress.postgres.sql` (NULL LatestProgressId, DELETE 30703); clear ApplicationProgress id-map
+- **Import**: Posted **30704** / Failed **0** / Skipped no-App-map **66** / parent-skipped **167**; prepared **30770**; ~14 min
+- **Log**: `reimport-ApplicationProgress-localpg-20260722-094015.log`
+- **Verify fix**: resolve ministry-leg counts from target (same as import); treat no-Application-map as skip not missingIdMap
+- **Verify**: State histogram OK; mapped **30704**; missingIdMap **0**; parity sample 50 mismatches **0**; **exit 0**
+- **Report**: `mapping-verify-ApplicationProgress-calik-energi-local-pg-20260722-050004.json`
+### 2026-07-22 — Mapping verify ApplicationProgress shipped
+
+- **Phase**: mapping-verify
+- **CLI**: `--verify-visa2014-mapping --entity ApplicationProgress` (Tier A State histogram + Tier B sample; string id-map `{appOid}:{stepCode}`)
+- **Fields**: State (error), Application FK (error), Description (error if expected set), Date/Order (**warn**)
+- **Code**: `Visa2014ApplicationProgressMappingVerify.cs`; OnPrem-Sync runs verify after ApplicationProgress wave
+- **Smoke (local PG)**: State histogram **OK**; mapped **27966** / missingIdMap **597** (transform synthesizes steps not in current id-map) → exit **1**; sample mismatches were Order-only (warn)
+- **Follow-up**: reimport ApplicationProgress (or refresh id-map) when missingIdMap > 0 after transform changes; then re-verify for exit 0
+### 2026-07-22 — App_Visa_Ext VisaType inference → WP
+
+- **Phase**: mapping correction
+- **Change**: `App_Visa_Ext` VisaType LocalizationKey `EX` → `WP` (`Visa2014ApplicationVisaTypeInference` + UI default VisaType only)
+- **Unchanged**: `App_Exit_Visa` remains `EX`; App_Visa_Ext does not inherit Month6/Multiple defaults from WP invitation types
+- **Follow-up**: re-run Application VisaType correction if imported rows still have EX
+### 2026-07-22 — Silent reconciliation tracking (Application verify)
+
+- **Phase**: mapping-verify enhancement
+- **Code**: `Visa2014LookupOutcomeClassifier` + silent inventory in `Visa2014MappingVerifyCommand` (JSON/HTML **Silent / implicit outcomes**)
+- **Gate**: fail only on `actual_without_expected` (non-default actual when transform expected null); `default_applied` / `actual_default_tolerated` are info
+- **CLI**: `--verify-visa2014-mapping --entity Application --legacy-source calik-energi-local-pg --tier B --sample 50`
+- **Target**: local PostgreSQL `visa2026`
+- **Counts**: mapped **12247**; missingIdMap **1** (exit 1 from id-map gap, not silent)
+- **Histograms**: 4/4 OK; parity sample 50 mismatches **0**
+- **Silent**: unexpected **0**; default_applied **5**; tolerated_defaults **15866** (Month6/Multiple/NORM when expected null)
+- **Doc**: [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) silent buckets + gate policy
+- **Report**: `legacy/visa2014/import-logs/mapping-verify-Application-calik-energi-local-pg-20260722-034013.json`
+### 2026-07-21 — ApplicationProgress reimport (local PG, after agent interrupt)
+
+- **Phase**: partial-reimport (local PostgreSQL `visa2026`, `calik-energi-local-pg`)
+- **Prep**: `ImportedApplicationProgress.postgres.sql` (NULL `LatestProgressId`, DELETE manual-entry progress); clear `ApplicationProgress.json` id-map (source + bin).
+- **Run**: detached `dotnet run` background (~45 min) — **do not** use `Start-Process dotnet` with split args (startup seed failed); **do not** use multi-line `.ps1` without backticks after `--`.
+- **Result**: Posted **30703** / Failed **0** / Skipped **62** (30765 rows prepared). DB `"ApplicationProgresses"` = **30703**. Exit **0**.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-171015.log`
+- **Spot-check**: `7/-1229` (2026-07-07) → `App_Inv`, visa period `30 (otuz) gün`, **5** progress steps.
+
+### 2026-07-21 — Mapping verify Application (full local PG, tier B)
+
+- **Phase**: mapping-verify
+- **CLI**: `--verify-visa2014-mapping --entity Application --legacy-source calik-energi-local-pg --tier B --sample 50`
+- **Target**: local PostgreSQL `visa2026`
+- **Counts**: importable/mapped **12247**; missingIdMap **0**
+- **Histograms**: ApplicationType / Urgency / VisaPeriod / VisaCategory — **4/4 OK**
+- **Parity**: sampled **50**; mismatches **0**; missingTarget **0**
+- **Exit**: **0**
+- **Report**: `legacy/visa2014/import-logs/mapping-verify-Application-calik-energi-local-pg-20260721-114939.json`
+
+### 2026-07-21 — Shipped: --verify-visa2014-mapping (Application pilot)
+
+- **Phase**: implementation + local PG smoke
+- **CLI**: `--verify-visa2014-mapping --entity Application` (Tier A histograms + Tier B stratified sample; `--full` / `--tier C` for full parity)
+- **Expected**: `Visa2014ApplicationTransform.PrepareImportBatch` (same as import)
+- **Actual**: headless ObjectSpace load via id-map
+- **Fields**: ApplicationType, Urgency, VisaPeriod, VisaCategory, FullApplicationNumber, ApplicationDate, ProjectContract (parity only)
+- **Smoke**: local PG `visa2026`, `--max-rows 200 --sample 20` → histograms 4/4 OK, mismatches 0, exit 0
+- **Lessons**: histogram keys must use `CatalogMatchHelper.NormalizeKey`; optional VisaPeriod/VisaCategory rows with null expected must be skipped in Tier A (BO defaults Month6/Multiple inflate actuals)
+- **Orchestrator**: `OnPrem-Sync.ps1` verifies Application after successful wave; `-SkipMappingVerify` to bypass
+- **Wrapper**: `scripts/visa2014-migration/import/Verify-Mapping.ps1`
+- **Doc**: [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md)
+
+### 2026-07-21 — Design: post-import mapping verification (property + lookup)
+
+- **Phase**: strategy / design (no CLI yet)
+- **Decision**: After each scalar import/reimport wave, automate **expected vs actual** using the **same** transform pipeline as import (`field-maps` + `lookup-translations`), gated like FailedCount before the next `order.yaml` entity.
+- **Tiers**: A = lookup histograms; B = sampled field parity (default); C = full reconcile for critical BOs / after mapping changes.
+- **Pilot target**: Application (`ApplicationType` composite + Urgency/VisaPeriod/VisaCategory + key scalars).
+- **Artifact**: [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) — planned `--verify-visa2014-mapping`.
+- **Wiring**: skill scripts table + chain checklist; import-practices / VISA2014_MIGRATION reconciliation; scripts README; field-maps `_template.yaml` `verify:` stub.
+- **Next**: implement DataImporter command; opt-in `verify:` on Application.yaml; run after next Application reimport.
+
+### 2026-07-21 — Application partial reimport (local PG, Day30 VisaPeriod mapping)
+
+- **Phase**: partial-reimport (local PostgreSQL `visa2026`, `calik-energi-local-pg`)
+- **Prep**: `ImportedApplications.postgres.sql` (12241 deleted); cleared Application + downstream id-maps (source + bin); dropped stale `Applications.LatestIsCancelled` / `LatestIsRejected` (NOT NULL blocked first attempt).
+- **Result**: Posted **12247** / Failed **0** / Skipped **169** (E:33/E:55 etc.). DB `Applications` manual-entry = **12247**. Exit 0 (~1.8 min).
+- **Day30**: composite `30 (otuz) gün::30` → **43** apps (spot-check `7/-1229` = `day30` / `30 (otuz) gün`, `App_Inv`).
+- **Log**: `legacy/visa2014/import-logs/reimport-Application-localpg-20260721-161027.log`
+- **Next**: downstream chain required (cleanup wiped items/progress): WorkPermit → Invitation → ApplicationItem → ApplicationProgress.
+
 ### 2026-07-21 — ApplicationProgress partial reimport (raw ProcessNumber / InvitationNumber descriptions)
 
 - **Phase**: partial-reimport (local PG, after `FormatLegacyDescriptionValue` — no `ProcessNumber:` / `InvitationNumber:` labels)
@@ -1620,3 +1781,30 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Fix**: replace raw DELETE with EF `IgnoreQueryFilters()` + `RemoveRange`/`Remove` + `SaveChanges()` (provider-agnostic). Deploy Module DLL to DataImporter folder; restart `-StartAt ApplicationItem`.
 - **Resume**: RunId `20260714-013121` ? after deploy **inserted 1091+ / failed 0** within first ~1100 rows (0 err lines).
 - **Prevent**: any `ExecuteSqlRaw` with `[brackets]` breaks on Npgsql; prefer EF or quote/bracket translate like `Visa2026EFCoreDbContext.IndexFilter`. In-process import = DataImporter Module copy, not only `C:\inetpub\visa2026-demo`.
+
+### 2026-07-22 — Local PG wipe reimport: Education Failed=1 (slash-compound NameTm) then resume OK
+- **Context**: Full scalar chain .15 → local PG after wipe; Person/Passport/Visa OK; Education Posted 3189 / Failed 1 then chain stop.
+- **Failing oid**: `3e713db3-2a3e-4913-a154-15eefd0fc005` — Institution `Balıkesir uniwersiteti/Sakarya uniwersiteti`, Specialty `Gurluşyk inženeri/Gurluşyk mugallymy`.
+- **Cause**: Labels present in regenerated `education-institution.calik-energi.json` / `specialty.calik-energi.json`, but in-process import used **stale disk overlay** `DataImporter/bin/Debug/net8.0/LookupCatalogs/tenant/{education-institution,specialty}.json` (2026-07-15) — `LoadCatalogFile` prefers disk over embedded. `-SkipTenantCatalogGeneration` left overlay untouched; PG lacked both rows.
+- **Fix**: Regenerated calik catalogs from `10.100.128.15` DISTINCT Education labels; copied to bin overlay; bumped tenant `manifest.json` **40→41**; INSERT missing Institution/Specialty with `GCRecord=0`; resume `-StartAt Education -SkipTenantCatalogGeneration` → Education catch-up OK, continued EPH/Salary/…
+- **Practice**: After Education catalog regen, refresh **AppBase overlay** (or re-run tenant catalog generation from Person) and ensure rows exist in target DB before `-StartAt Education`. `GCRecord` NOT NULL on PG lookups.
+
+### 2026-07-22 — Local PG full scalar resume completed (Education fix → Overall OK)
+- **Resume**: `Run-LocalPgScalarChain.ps1 -StartAt Education -SkipTenantCatalogGeneration` after Education Institution/Specialty seed + overlay refresh.
+- **Waves**: Education catch-up Posted **1**; EPH 3070; Salary 2963; AoR 5175; Application 12248; WP 406 / WPI 3860; Invitation 2857 / InvItem 5106; ApplicationItem **21676**; **Rejection 207 / RejectionItem 254**; ApplicationProgress ~30k (Failed 0, small skip count for missing maps).
+- **Outcome**: chain finished with **EXIT=0** / Overall Completed (post-correction PIA address warnings for unmapped address keys remain; non-blocking).
+
+### 2026-07-22 — ApplicationProgress PROCESS_REJECTED from Rejection coverage OR legacy Rejected
+- **Rule**: `effectiveRejected = Application.Rejected=1 OR (ApplicationItemCount > 0 AND ApplicationItemCount == RejectionItemCount)`.
+- **Legacy proxy**: `PersonInApplication` vs `PersonInInvitation` under `ApplicationResult.Result=1` (same as imported Rejection/RejectionItem).
+- **Date**: prefer max Rejection `IssuedDate`; else `ProcessDate`; else prior step.
+- **Code**: `Visa2014ApplicationProgressRejectionIndex` + `SynthesizeSteps(..., rejection)`; partial coverage does not reject; blocks `PROCESS_ISSUED`.
+- **Docs**: discovery + field-maps ApplicationProgress terminal override notes updated.
+
+### 2026-07-22 — ApplicationProgress clean reimport (local PG, rejection coverage)
+- **Prep**: `ImportedApplicationProgress.postgres.sql` DELETE **30584**; clear ApplicationProgress id-map; build Debug.
+- **First attempt**: failed — rejection index SQL `STRING_AGG … WITHIN GROUP` not supported on legacy host (Incorrect syntax near '('). Fixed: plain `STRING_AGG`.
+- **Import**: Posted **30725** / Failed **0** / Skipped no-App-map **66** / Parent-skipped **169**; Prepared **30791**.
+- **Evidence**: `PROCESS_REJECTED` steps in PG = **141** (coverage OR legacy Rejected).
+- **Log**: `artifacts/local-pg-import/data/import-logs/reimport-ApplicationProgress-localpg-20260722-130503.log`
+- **Next**: optional `--verify-visa2014-mapping --entity ApplicationProgress`.

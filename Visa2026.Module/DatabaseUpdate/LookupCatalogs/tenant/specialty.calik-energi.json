@@ -166,6 +166,9 @@
                      "NameTm":  "aragatnaşyk elektronikasy"
                  },
                  {
+                     "NameTm":  "Aragatnaşyk we maglumat inženerçiligi"
+                 },
+                 {
                      "NameTm":  "Arhitektor"
                  },
                  {
@@ -443,6 +446,9 @@
                  },
                  {
                      "NameTm":  "Elektrik energiýasynyň önümçiligi, iberilmegi we paýlamagy maksatnamasy/Metal işler"
+                 },
+                 {
+                     "NameTm":  "Elektrik enjamlaryň önümçiligi we awtomatlaşdyryş"
                  },
                  {
                      "NameTm":  "Elektrik gurnawlary we şit gurnama"
@@ -823,6 +829,9 @@
                      "NameTm":  "Elektronika we elektrik aragatnaşyk inženerligi"
                  },
                  {
+                     "NameTm":  "Elektronika we elektrotehnika"
+                 },
+                 {
                      "NameTm":  "Elektronika we habarlaşma inženerligi"
                  },
                  {
@@ -962,6 +971,9 @@
                  },
                  {
                      "NameTm":  "Enjamlaryň aýlawy we galyplary ýasamak"
+                 },
+                 {
+                     "NameTm":  "Enjamlaryň poslamagyna garşy gözegçilik boýunça inženerçilik"
                  },
                  {
                      "NameTm":  "Ergonomika inženeri"
@@ -1121,6 +1133,9 @@
                  },
                  {
                      "NameTm":  "Gurluşyk inženeri,korroziýanyň öňüni almak,katod goragy we nazaryýetleri"
+                 },
+                 {
+                     "NameTm":  "Gurluşyk inženeri/Gurluşyk mugallymy"
                  },
                  {
                      "NameTm":  "gurluşyk işleri"
@@ -1537,10 +1552,10 @@
                      "NameTm":  "İş tejribeli kran operatory"
                  },
                  {
-                     "NameTm":  "İş tejribeli, Hünär şahadatnamaly-Tokar stanogynda işlemek boýunça mehanik"
+                     "NameTm":  "İş tejrıbelı, Nebit-himiýa senagatynda tehniki howpsuzlyk"
                  },
                  {
-                     "NameTm":  "İş tejrıbelı, Nebit-himiýa senagatynda tehniki howpsuzlyk"
+                     "NameTm":  "İş tejribeli, Tokar stanogynda işlemek boýunça mehanik,VCA goragy üçin esasy elementler"
                  },
                  {
                      "NameTm":  "İş tejribeli,himiki arassalaýyş ulgamlary"
@@ -1606,6 +1621,9 @@
                      "NameTm":  "Jemgyýet ylymlar we edebiýat"
                  },
                  {
+                     "NameTm":  "Jemgyýet ylymlary"
+                 },
+                 {
                      "NameTm":  "jemgyýet ylymlary,SAP programma üpjünçiligi"
                  },
                  {
@@ -1619,9 +1637,6 @@
                  },
                  {
                      "NameTm":  "jemgyýetçilik gatnaşyklary"
-                 },
-                 {
-                     "NameTm":  "Jemgyýetçilik ylymlary"
                  },
                  {
                      "NameTm":  "Jemgyýetçilik ylymlary we edebiýat"
@@ -3232,6 +3247,9 @@
                      "NameTm":  "zähmet ykdysadyýeti we senagat gatnaşyklary"
                  },
                  {
+                     "NameTm":  "Zähmeti goramak we howpsuzlyk"
+                 },
+                 {
                      "NameTm":  "zähmeti goramak we tehniki howpsuzluk, işewürlik"
                  },
                  {
@@ -3254,12 +3272,6 @@
                  },
                  {
                      "NameTm":  "Žurnalistika"
-                 },
-                 {
-                     "NameTm":  "Elektronika we elektrotehnika"
-                 },
-                 {
-                     "NameTm":  "Zähmeti goramak we howpsuzlyk"
                  }
              ]
 }

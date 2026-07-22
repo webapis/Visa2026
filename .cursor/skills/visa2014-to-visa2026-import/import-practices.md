@@ -169,7 +169,8 @@ Mirror [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md) scenario idem
 | Check | How |
 |-------|-----|
 | Row count | Legacy distinct keys (after dedupe) vs OData `$count` or SQL MCP on target |
-| Spot records | 5–10 random legacy IDs via id-map — field parity |
+| **Mapping verify** | Expected vs actual via same transform + id-map — [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) (Tier A/B + Application silent-outcome inventory; fail on `actual_without_expected`). CLI: `--verify-visa2014-mapping` / `import/Verify-Mapping.ps1` |
+| Spot records | Also sample manually if needed: 5–10 random legacy IDs via id-map — field parity (lookups = catalog key, not caption) |
 | Lookup coverage | Zero unmapped legacy values in batch log |
 | Duplicate groups | `dedupeMerged` matches discovery SQL duplicate count |
 | FK integrity | Sample child rows — parent resolves via id-map |

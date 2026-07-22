@@ -32,8 +32,8 @@ mapping:
   blockedReason: null
   notes: |
     HEADER SOURCE:
-      dbo.ApplicationResult rows referenced by PersonInInvitation.Invitation (~2961 distinct Oids on Çalik).
-      ~254 headers skipped when Number, IssuedDate, or DateOfExpire is null.
+      dbo.ApplicationResult WHERE Result = 0 (Invitation) referenced by PersonInInvitation (~2776 on Çalik 2026-07-22).
+      Result = 1 rows are Rejection headers (separate BO / id-map) — not skipped invitations.
 
     COLUMN MAP:
       Number → InvitationNumber
@@ -44,7 +44,7 @@ mapping:
     DEDUPE:
       13 duplicate InvitationNumber groups — suffix all with legacy oid tail (same pattern as WorkPermit).
 
-    id-map: ApplicationResult.Oid → Invitation.ID
+    id-map: ApplicationResult.Oid → Invitation.ID (Result=0 only; Rejection uses its own id-map file)
 
 checklist:
   target_bo_reviewed: true

@@ -15,8 +15,8 @@ internal static class Visa2014PersonIdMapExpander
     {
         if (!File.Exists(idMapPath))
         {
-            Console.Error.WriteLine($"ERR Id-map not found: {idMapPath}");
-            return 1;
+            Console.WriteLine($"INF Person id-map not found yet (fresh import): {idMapPath}");
+            return 0;
         }
 
         var idMap = JsonSerializer.Deserialize<Dictionary<string, string>>(

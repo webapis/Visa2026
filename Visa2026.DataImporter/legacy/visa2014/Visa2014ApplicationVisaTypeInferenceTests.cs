@@ -14,7 +14,7 @@ public class Visa2014ApplicationVisaTypeInferenceTests
     [InlineData("App_Inv_FM", "FM")]
     [InlineData("App_Visa_Ext_FM", "FM")]
     [InlineData("App_Visa_For_New_Born_FM", "FM")]
-    [InlineData("App_Visa_Ext", "EX")]
+    [InlineData("App_Visa_Ext", "WP")]
     [InlineData("App_Exit_Visa", "EX")]
     [InlineData("App_Sevice_Passport", "OF")]
     public void TryInferVisaType_KnownApplicationTypes_ReturnExpectedKey(string applicationType, string expectedKey)

@@ -1,0 +1,79 @@
+# Discovery dossier — RejectionItem (permits-and-visas line BO)
+
+targetODataEntity: RejectionItem
+discoveryStatus: complete
+
+legacy:
+  boClass: IPersonInResult
+  boPath: VISA2014.Module/DC/IPersonInResult.cs
+  tables:
+    - dbo.PersonInInvitation
+    - dbo.ApplicationResult
+  rowCount: 254
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/RejectionItem.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/RejectionItem.yaml
+  tableMappingId: rejection-item
+  cardinality: one_legacy_person_in_invitation_row_per_item
+  upsertKeys:
+    - Oid
+  lookupDependencies: []
+  duplicateGroups: 0
+  legacyOnlyCount: null
+  targetOnlyCount: 2
+  mismatchCount: 0
+  blockedReason: null
+  notes: |
+    ITEM SOURCE (locked 2026-07-22):
+      dbo.PersonInInvitation JOIN ApplicationResult WHERE Result = 1.
+      Çalik VISA2015: 254 active items; Person and Passport non-null on all rows.
+      FK column still named Invitation — parent is Rejection ApplicationResult.
+
+    COLUMN MAP:
+      COALESCE(Employee, FamilyMember) → Person
+      Passport → Passport
+      Invitation → Rejection (ApplicationResult.Oid via Rejection id-map)
+      Reason / RejectionItemName → target-only (null / OnSaving)
+
+    SIDE EFFECT:
+      RejectionItem.OnSaving sets ApplicationItem.RejectionIssued for matching person.
+      ApplicationItem import already maps pia.Rejected → RejectionIssued.
+
+    IMPORT ORDER:
+      1) Rejection headers
+      2) RejectionItem rows
+      id-map: PersonInInvitation.Oid → RejectionItem.ID
+
+    SPLIT FROM INVITATION:
+      InvitationItem extract must filter Result = 0; Result = 1 rows are RejectionItems only.
+      ApplicationResult.Result == 1 is NOT IsCancelled.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-07-22
+completedBy: agent
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-07-22
+  importConfirmedBy: developer
+  reviewNotes: |
+    Preview RejectionItem-preview.calik-energi.xlsx reviewed 2026-07-22 (254 import / 0 skipped).
+    Human importConfirmed in chat.

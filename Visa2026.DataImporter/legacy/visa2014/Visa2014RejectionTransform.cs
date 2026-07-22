@@ -1,36 +1,29 @@
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
-internal sealed record Visa2014InvitationRawRow(
+internal sealed record Visa2014RejectionRawRow(
     Guid LegacyOid,
-    string? InvitationNumber,
+    string? RejectedDocNumber,
     DateTime? IssuedDate,
-    DateTime? DateOfExpire,
     Guid? LegacyApplicationOid);
 
-internal static class Visa2014InvitationTransform
+internal static class Visa2014RejectionTransform
 {
     internal const string ExtractSql = """
-        SELECT DISTINCT
+        SELECT
             CAST(ar.Oid AS varchar(36)) AS Oid,
-            ar.Number AS InvitationNumber,
+            ar.Number AS RejectedDocNumber,
             CONVERT(varchar(10), ar.IssuedDate, 23) AS IssuedDate,
-            CONVERT(varchar(10), ar.DateOfExpire, 23) AS DateOfExpire,
             CAST(ar.Application AS varchar(36)) AS ApplicationOid
         FROM dbo.ApplicationResult ar
         WHERE ar.GCRecord IS NULL
-          AND ar.Result = 0
-          AND EXISTS (
-              SELECT 1
-              FROM dbo.PersonInInvitation pii
-              WHERE pii.Invitation = ar.Oid
-                AND pii.GCRecord IS NULL)
+          AND ar.Result = 1
         """;
 
-    internal static readonly string[] InvitationMainColumnOrder =
+    internal static readonly string[] RejectionMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
-        "InvitationNumber", "StartDate", "DateOfExpire", "ValidityDurationDays", "ValidityDurationKey",
-        "Application", "_legacy_ApplicationOid",
+        "RejectedDocNumber", "Date", "Application", "Reason",
+        "_legacy_ApplicationOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -45,7 +38,7 @@ internal static class Visa2014InvitationTransform
             : $"{ExtractSql} ORDER BY IssuedDate, Oid";
 
         var dictRows = Visa2014SqlCmdReader.Query(connectionString, sql, verbose);
-        var rawRows = new List<Visa2014InvitationRawRow>();
+        var rawRows = new List<Visa2014RejectionRawRow>();
         int parseSkipped = 0;
         foreach (var dict in dictRows)
         {
@@ -61,7 +54,7 @@ internal static class Visa2014InvitationTransform
         return TransformRows(rawRows, out var skipped, out var dedupeSummary);
     }
 
-    internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014InvitationRawRow parsed)
+    internal static bool TryParseRawRow(IReadOnlyDictionary<string, string?> row, out Visa2014RejectionRawRow parsed)
     {
         parsed = null!;
         if (!row.TryGetValue("Oid", out var oidText) ||
@@ -71,15 +64,11 @@ internal static class Visa2014InvitationTransform
         DateTime? issuedDate = DateTime.TryParse(row.GetValueOrDefault("IssuedDate"), out var issued)
             ? issued
             : null;
-        DateTime? dateOfExpire = DateTime.TryParse(row.GetValueOrDefault("DateOfExpire"), out var expire)
-            ? expire
-            : null;
 
-        parsed = new Visa2014InvitationRawRow(
+        parsed = new Visa2014RejectionRawRow(
             LegacyOid: legacyOid,
-            InvitationNumber: row.GetValueOrDefault("InvitationNumber"),
+            RejectedDocNumber: row.GetValueOrDefault("RejectedDocNumber"),
             IssuedDate: issuedDate,
-            DateOfExpire: dateOfExpire,
             LegacyApplicationOid: TryParseGuid(row.GetValueOrDefault("ApplicationOid")));
         return true;
     }
@@ -88,14 +77,14 @@ internal static class Visa2014InvitationTransform
         Guid.TryParse(text?.Trim(), out var oid) ? oid : null;
 
     private static Visa2014PersonImportBatch TransformRows(
-        IReadOnlyList<Visa2014InvitationRawRow> rawRows,
+        IReadOnlyList<Visa2014RejectionRawRow> rawRows,
         out List<Dictionary<string, object?>> skipped,
         out List<Dictionary<string, object?>> dedupeSummary)
     {
         skipped = [];
         dedupeSummary = [];
         var working = rawRows.Select(r => new WorkingRow(r)).ToList();
-        ApplyInvitationNumberSuffix(working, dedupeSummary);
+        ApplyRejectedDocNumberSuffix(working, dedupeSummary);
 
         var importRows = new List<Dictionary<string, object?>>();
         foreach (var row in working)
@@ -122,19 +111,19 @@ internal static class Visa2014InvitationTransform
         };
     }
 
-    private sealed class WorkingRow(Visa2014InvitationRawRow Raw)
+    private sealed class WorkingRow(Visa2014RejectionRawRow Raw)
     {
-        public Visa2014InvitationRawRow Raw { get; } = Raw;
+        public Visa2014RejectionRawRow Raw { get; } = Raw;
         public string? DedupeGroupId { get; set; }
-        public string? ResolvedInvitationNumber { get; set; }
+        public string? ResolvedRejectedDocNumber { get; set; }
     }
 
-    private static void ApplyInvitationNumberSuffix(
+    private static void ApplyRejectedDocNumberSuffix(
         List<WorkingRow> rows,
         List<Dictionary<string, object?>> dedupeSummary)
     {
         var groups = rows
-            .Select(r => new { Row = r, Norm = NormalizeInvitationNumber(r.Raw.InvitationNumber) })
+            .Select(r => new { Row = r, Norm = NormalizeDocNumber(r.Raw.RejectedDocNumber) })
             .Where(x => !string.IsNullOrWhiteSpace(x.Norm))
             .GroupBy(x => x.Norm.ToUpperInvariant(), StringComparer.Ordinal)
             .Where(g => g.Count() > 1);
@@ -142,11 +131,11 @@ internal static class Visa2014InvitationTransform
         foreach (var group in groups)
         {
             var members = group.ToList();
-            var groupId = $"INV:{group.Key}";
+            var groupId = $"REJ:{group.Key}";
             foreach (var member in members)
             {
                 member.Row.DedupeGroupId = groupId;
-                member.Row.ResolvedInvitationNumber = AppendLegacyOidTail(
+                member.Row.ResolvedRejectedDocNumber = AppendLegacyOidTail(
                     member.Norm,
                     member.Row.Raw.LegacyOid);
             }
@@ -154,7 +143,7 @@ internal static class Visa2014InvitationTransform
             dedupeSummary.Add(new Dictionary<string, object?>
             {
                 ["_dedupeGroupId"] = groupId,
-                ["key"] = "InvitationNumber",
+                ["key"] = "RejectedDocNumber",
                 ["normalizedValue"] = group.Key,
                 ["memberCount"] = members.Count,
                 ["canonicalRule"] = "suffix_all_with_legacy_oid_tail",
@@ -174,52 +163,46 @@ internal static class Visa2014InvitationTransform
             ["_dedupeGroupId"] = working.DedupeGroupId ?? "",
             ["_importAction"] = "import",
             ["_legacy_ApplicationOid"] = raw.LegacyApplicationOid?.ToString("D"),
+            ["Reason"] = null,
         };
 
-        if (string.IsNullOrWhiteSpace(raw.InvitationNumber))
+        if (string.IsNullOrWhiteSpace(raw.RejectedDocNumber))
         {
-            skipReason = "required_null:InvitationNumber";
-            row["InvitationNumber"] = null;
-            row["StartDate"] = null;
-            row["DateOfExpire"] = null;
+            skipReason = "required_null:RejectedDocNumber";
+            row["RejectedDocNumber"] = null;
+            row["Date"] = null;
+            row["Application"] = null;
             return row;
         }
 
         if (!raw.IssuedDate.HasValue)
         {
             skipReason = "required_null:IssuedDate";
-            row["InvitationNumber"] = raw.InvitationNumber;
-            row["StartDate"] = null;
-            row["DateOfExpire"] = null;
+            row["RejectedDocNumber"] = raw.RejectedDocNumber;
+            row["Date"] = null;
+            row["Application"] = null;
             return row;
         }
 
-        if (!raw.DateOfExpire.HasValue)
+        if (!raw.LegacyApplicationOid.HasValue)
         {
-            skipReason = "required_null:DateOfExpire";
-            row["InvitationNumber"] = raw.InvitationNumber;
-            row["StartDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
-            row["DateOfExpire"] = null;
+            skipReason = "required_null:Application";
+            row["RejectedDocNumber"] = raw.RejectedDocNumber;
+            row["Date"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
+            row["Application"] = null;
             return row;
         }
 
-        var invitationNumber = working.ResolvedInvitationNumber
-            ?? NormalizeInvitationNumber(raw.InvitationNumber);
-        var daySpan = Visa2014ValidityDurationHelper.ComputeDaySpan(raw.IssuedDate.Value, raw.DateOfExpire.Value);
-        var closestDays = Visa2014ValidityDurationHelper.ClosestCandidateDaySpan(daySpan);
-
-        row["InvitationNumber"] = invitationNumber;
-        row["StartDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
-        row["DateOfExpire"] = raw.DateOfExpire.Value.ToString("yyyy-MM-dd");
-        row["ValidityDurationDays"] = closestDays;
-        row["ValidityDurationKey"] = Visa2014ValidityDurationHelper.LocalizationKeyForDaySpan(closestDays);
-        row["Application"] = raw.LegacyApplicationOid?.ToString("D");
+        row["RejectedDocNumber"] = working.ResolvedRejectedDocNumber
+            ?? NormalizeDocNumber(raw.RejectedDocNumber);
+        row["Date"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
+        row["Application"] = raw.LegacyApplicationOid.Value.ToString("D");
         return row;
     }
 
-    private static string NormalizeInvitationNumber(string? raw) =>
+    private static string NormalizeDocNumber(string? raw) =>
         string.IsNullOrWhiteSpace(raw) ? "" : raw.Trim();
 
-    private static string AppendLegacyOidTail(string invitationNumber, Guid legacyOid) =>
-        invitationNumber + legacyOid.ToString("N")[^8..];
+    private static string AppendLegacyOidTail(string docNumber, Guid legacyOid) =>
+        docNumber + legacyOid.ToString("N")[^8..];
 }

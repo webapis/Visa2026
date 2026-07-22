@@ -25,6 +25,8 @@ disable-model-invocation: false
 
 **Intentional exclusions (approved skips only):** [import-exclusions.yaml](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml) — why, counts, approver; FailedCount ≠ exclusion
 
+**Post-import mapping verify:** [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) — expected vs actual after each scalar wave; Application also inventories silent/implicit lookup outcomes (fail only on `actual_without_expected`)
+
 **Three-layer mapping:** [table-mappings.yaml](../../../docs/VISA2014_MIGRATION/table-mappings.yaml) · [field-maps/](../../../Visa2026.DataImporter/legacy/visa2014/field-maps/) · [lookup-translations.yaml](../../../docs/VISA2014_MIGRATION/lookup-translations.yaml)
 
 **Per-BO dossiers:** [discovery/README.md](../../../docs/VISA2014_MIGRATION/discovery/README.md)
@@ -55,6 +57,7 @@ disable-model-invocation: false
 | Tenant JSON before Application | `import/Invoke-TenantCatalogGeneration.ps1` |
 | **Lookup resolution** (audit → translate → seed) | [LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md) · `lookup-translations.yaml` (+ company overlay) · `LookupCatalogs/` / tenant JSON |
 | **Lookup preflight** (gate before full Import) | `import/Preflight-LookupAudit.ps1` / `--preflight-visa2014-lookups` |
+| **Mapping verify** (after each scalar wave) | `--verify-visa2014-mapping` / `import/Verify-Mapping.ps1` · [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) (Application + ApplicationProgress) |
 | Dev: fix one BO after delete | `reimport/<Entity>.ps1` + `cleanup/*.sql` |
 | Same script, different scope | Add **parameters** (`-MaxRows`, `-DryRun`, `-TargetConnection`) — not a new file |
 
@@ -152,7 +155,7 @@ Confirm connection before Import: `Server=10.100.128.15;Database=VISA2015;…` i
 
 - [ ] Step list matches `order.yaml` (headers **and** items).
 - [ ] No `-ContinueOnError` / silent skip of failed waves.
-- [ ] After each wave: check exit code + Posted/Failed; only then start the next entity.
+- [ ] After each wave: check exit code + Posted/Failed; run mapping verify when available ([MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md)); only then start the next entity.
 
 ---
 
@@ -237,6 +240,7 @@ Full transactional import?
 
 Import run / upsert / reconciliation?
   → § Import best practices (import-practices.md)
+  → after each wave: mapping verify ([MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md))
 
 Need to run import / reimport / catalog step?
   → scripts/visa2014-migration/README.md (reuse existing script or CLI first — § Reuse scripts first)

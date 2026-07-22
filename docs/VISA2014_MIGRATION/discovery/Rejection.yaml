@@ -1,0 +1,77 @@
+# Discovery dossier — Rejection (permits-and-visas header BO)
+
+targetODataEntity: Rejection
+discoveryStatus: complete
+
+legacy:
+  boClass: IApplicationResult
+  boPath: VISA2014.Module/DC/IApplicationResult.cs
+  tables:
+    - dbo.ApplicationResult
+    - dbo.PersonInInvitation
+  rowCount: 207
+  primaryKey: Oid
+  softDeleteColumn: GCRecord
+
+visa2026:
+  boPath: Visa2026.Module/BusinessObjects/Rejection.cs
+  odataExposed: true
+
+mapping:
+  fieldMapFile: Visa2026.DataImporter/legacy/visa2014/field-maps/Rejection.yaml
+  tableMappingId: rejection-header
+  cardinality: one_application_result_rejection_per_header
+  upsertKeys:
+    - RejectedDocNumber
+    - Date
+  lookupDependencies: []
+  duplicateGroups: 2
+  legacyOnlyCount: null
+  targetOnlyCount: 1
+  mismatchCount: 0
+  blockedReason: null
+  notes: |
+    HEADER SOURCE (locked 2026-07-22):
+      dbo.ApplicationResult WHERE Result = 1 (ApplicationResultEnum.Rejection).
+      Çalik VISA2015: 207 active headers; 185 referenced by PersonInInvitation; 22 orphan headers (no items).
+      Import ALL Result=1 headers (including orphans) — Application FK always present.
+      Number / IssuedDate / Application non-null on all 207; DateOfExpire always null (legacy rule).
+
+    COLUMN MAP:
+      Number → RejectedDocNumber
+      IssuedDate → Date
+      Application → Application (required; fk_id_map)
+      Reason → allow_null (no legacy column on IApplicationResult)
+
+    DEDUPE:
+      2 duplicate Number groups (178, AS-600159) — suffix with legacy oid tail (Invitation pattern).
+
+    id-map: ApplicationResult.Oid → Rejection.ID (separate from Invitation id-map).
+
+    ORDER: after ApplicationItem; before RejectionItem / ApplicationProgress.
+
+    FILES (later): CopyOfResult / NetijeGocurme → RejectionDocument.
+
+checklist:
+  target_bo_reviewed: true
+  legacy_bo_located: true
+  legacy_schema_documented: true
+  table_mapping_registered: true
+  column_mapping_complete: true
+  lookup_values_mapped: true
+  property_gaps_documented: true
+  dedupe_rules_defined: true
+  excel_preview_exported: true
+  inventory_updated: true
+  learnings_appended: true
+
+completedAt: 2026-07-22
+completedBy: agent
+
+importConfirmation:
+  importConfirmed: true
+  importConfirmedAt: 2026-07-22
+  importConfirmedBy: developer
+  reviewNotes: |
+    Preview Rejection-preview.calik-energi.xlsx reviewed 2026-07-22 (207 import / 0 skipped;
+    2 RejectedDocNumber groups suffix oid-tail). Human importConfirmed in chat.

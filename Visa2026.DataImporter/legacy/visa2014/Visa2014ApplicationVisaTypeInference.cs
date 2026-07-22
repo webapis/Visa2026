@@ -16,6 +16,7 @@ internal static class Visa2014ApplicationVisaTypeInference
             ["App_Visa_and_WP_Ext"] = "WP",
             ["App_Inv_According_to_WP"] = "WP",
             ["App_Visa_Ext_According_to_WP"] = "WP",
+            ["App_Visa_Ext"] = "WP",
 
             // BS1-İşerwürlik
             ["App_Inv"] = "BS1",
@@ -25,8 +26,7 @@ internal static class Visa2014ApplicationVisaTypeInference
             ["App_Visa_Ext_FM"] = "FM",
             ["App_Visa_For_New_Born_FM"] = "FM",
 
-            // EX-Çykyş (confirmed 2026-07-17)
-            ["App_Visa_Ext"] = "EX",
+            // EX-Çykyş
             ["App_Exit_Visa"] = "EX",
 
             // OF-Gulluk — ShowVisaPeriod types adjacent to legacy invitation family

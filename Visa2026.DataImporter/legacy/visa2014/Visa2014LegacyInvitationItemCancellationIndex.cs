@@ -3,18 +3,12 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 /// <summary>
 /// Indexes legacy invitation-line cancellation onto <c>PersonInInvitation.Oid</c>
 /// for import-time <see cref="Bo.InvitationItem.IsCancelled"/> backfill.
+/// Evidence is <c>PersonInApplication.Cancelled</c> on cancel-invitation apps matched to
+/// <c>PersonInInvitation</c>. <c>ApplicationResult.Result = 1</c> means Rejection (separate BO), not cancel.
 /// </summary>
 internal sealed class Visa2014LegacyInvitationItemCancellationIndex
 {
     private readonly HashSet<Guid> _cancelledInvitationItemOids = [];
-
-    internal const string ApplicationResultCancelledSql = """
-        SELECT CAST(pii.Oid AS varchar(36)) AS InvitationItemOid
-        FROM dbo.PersonInInvitation pii
-        INNER JOIN dbo.ApplicationResult ar ON ar.Oid = pii.Invitation AND ar.GCRecord IS NULL
-        WHERE pii.GCRecord IS NULL
-          AND ar.Result = 1
-        """;
 
     internal const string PiaCancelledEvidenceSql = """
         SELECT
@@ -38,7 +32,7 @@ internal sealed class Visa2014LegacyInvitationItemCancellationIndex
         OUTER APPLY (
             SELECT TOP 1 CAST(pii.Oid AS varchar(36)) AS InvitationItemOid
             FROM dbo.PersonInInvitation pii
-            INNER JOIN dbo.ApplicationResult ar ON ar.Oid = pii.Invitation AND ar.GCRecord IS NULL
+            INNER JOIN dbo.ApplicationResult ar ON ar.Oid = pii.Invitation AND ar.GCRecord IS NULL AND ar.Result = 0
             WHERE pii.GCRecord IS NULL
               AND ar.Application = pia.Application
               AND (
@@ -60,12 +54,6 @@ internal sealed class Visa2014LegacyInvitationItemCancellationIndex
         var visibility = ApplicationTypeVisibilityCatalog.Load();
         var index = new Visa2014LegacyInvitationItemCancellationIndex();
 
-        foreach (var row in Visa2014SqlCmdReader.Query(connectionString, ApplicationResultCancelledSql, verbose))
-        {
-            if (TryParseGuid(row.GetValueOrDefault("InvitationItemOid"), out var invitationItemOid))
-                index._cancelledInvitationItemOids.Add(invitationItemOid);
-        }
-
         foreach (var row in Visa2014SqlCmdReader.Query(connectionString, PiaCancelledEvidenceSql, verbose))
             index.ApplyPiaCancelledRow(row, catalogs, visibility);
 
@@ -85,8 +73,11 @@ internal sealed class Visa2014LegacyInvitationItemCancellationIndex
     public static bool ResolveIsCancelled(
         int? applicationResultResult,
         Guid legacyPersonInInvitationOid,
-        Visa2014LegacyInvitationItemCancellationIndex index) =>
-        applicationResultResult == 1 || index.IsInvitationItemCancelled(legacyPersonInInvitationOid);
+        Visa2014LegacyInvitationItemCancellationIndex index)
+    {
+        _ = applicationResultResult; // Result=1 is Rejection (not cancel); kept for call-site compatibility
+        return index.IsInvitationItemCancelled(legacyPersonInInvitationOid);
+    }
 
     internal static Visa2014LegacyInvitationItemCancellationIndex FromLegacyOidsForTests(IEnumerable<Guid> legacyPersonInInvitationOids)
     {

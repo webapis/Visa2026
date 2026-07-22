@@ -30,17 +30,18 @@ mapping:
   blockedReason: null
   notes: |
     LEGACY ROW → ITEM (1:1):
-      Each active dbo.PersonInInvitation row becomes one InvitationItem (~5239 on Çalik).
+      PersonInInvitation under ApplicationResult.Result = 0 (~4984 on Çalik 2026-07-22).
+      Result = 1 parents → RejectionItem (not InvitationItem).
 
     COLUMN MAP:
       COALESCE(Employee, FamilyMember) → Person
       Passport → Passport
-      Invitation → Invitation header (ApplicationResult.Oid via id-map)
-      ApplicationResult.Result == 1 → IsCancelled (heuristic)
+      Invitation → Invitation header (ApplicationResult.Oid via Invitation id-map)
+      IsCancelled ← PersonInApplication.Cancelled on cancel-invitation apps (not Result=1)
 
     IMPORT ORDER:
-      1) Invitation headers (ApplicationResult)
-      2) InvitationItem rows (PersonInInvitation)
+      1) Invitation headers (ApplicationResult Result=0)
+      2) InvitationItem rows (PersonInInvitation under Result=0)
       id-map: PersonInInvitation.Oid → InvitationItem.ID
 
 checklist:

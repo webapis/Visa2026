@@ -19,7 +19,7 @@ internal static partial class LookupLocalizationKeys
     private static readonly HashSet<string> VisaPeriodSemanticKeys = new(StringComparer.OrdinalIgnoreCase)
     {
         "Month1", "Month2", "Month3", "Month4", "Month5", "Month6", "Month12", "Year1",
-        "Day7", "Day10", "Day15", "Day20", "PerWorkPermit", "PerVisa",
+        "Day7", "Day10", "Day15", "Day20", "Day30", "PerWorkPermit", "PerVisa",
     };
 
     private static readonly Dictionary<string, string> VisaTypeNameToKey =
@@ -69,6 +69,7 @@ internal static partial class LookupLocalizationKeys
             ["10 (on) gün"] = "Day10",
             ["15 (on bäş) gün"] = "Day15",
             ["20 (yigrimi) gün"] = "Day20",
+            ["30 (otuz) gün"] = "Day30",
             ["rugsatnama möhletine çenli"] = "PerWorkPermit",
             ["wiza möhletine çenli"] = "PerVisa",
         };

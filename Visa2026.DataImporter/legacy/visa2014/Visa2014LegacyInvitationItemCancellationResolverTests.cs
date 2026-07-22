@@ -8,12 +8,13 @@ public class Visa2014LegacyInvitationItemCancellationResolverTests
     private static readonly ApplicationTypeVisibilityCatalog Visibility = ApplicationTypeVisibilityCatalog.Load();
 
     [Fact]
-    public void ResolveIsCancelled_ApplicationResultOne_ReturnsTrue()
+    public void ResolveIsCancelled_ApplicationResultOne_IsNotCancelEvidence()
     {
         var index = Visa2014LegacyInvitationItemCancellationIndex.FromLegacyOidsForTests([]);
         var legacyOid = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
-        Assert.True(Visa2014LegacyInvitationItemCancellationIndex.ResolveIsCancelled(1, legacyOid, index));
+        // Result = 1 is ApplicationResultEnum.Rejection → Rejection BO, not InvitationItem.IsCancelled
+        Assert.False(Visa2014LegacyInvitationItemCancellationIndex.ResolveIsCancelled(1, legacyOid, index));
     }
 
     [Fact]

@@ -48,6 +48,10 @@ propertyGaps:
       notes: Terminal PROCESS_CANCELLED override
     - column: Rejected
       disposition: synthesize
+      notes: |
+        Terminal PROCESS_REJECTED when Application.Rejected=1 OR full Rejection coverage
+        (ApplicationItem count == RejectionItem count via PIA vs PII on Result=Rejection).
+        Date prefers max Rejection IssuedDate, else ProcessDate, else prior step.
   targetOnly:
     - property: MinistryLetterFile
       disposition: defer

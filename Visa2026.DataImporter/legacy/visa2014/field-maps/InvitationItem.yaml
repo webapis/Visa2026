@@ -6,13 +6,14 @@ tableMappingId: invitation-item
 source:
   table: PersonInInvitation
   schema: dbo
+  filter: parent ApplicationResult.Result = 0 (Invitation only; Result = 1 → RejectionItem)
 
 target:
   odataEntity: InvitationItem
 
 deduplication:
   enabled: false
-  notes: 1:1 legacy PersonInInvitation row per item
+  notes: 1:1 legacy PersonInInvitation row per Invitation parent
 
 fields:
   - source: Oid
@@ -39,12 +40,12 @@ fields:
     idMapLegacyTable: ApplicationResult
     missingBehavior: skip_row
 
-  - source: ApplicationResult.Result
+  - source: PersonInApplication.Cancelled
     target: IsCancelled
     transform: legacy_invitation_cancellation_index
-    join: PersonInInvitation.Invitation = ApplicationResult.Oid
+    join: PersonInInvitation matched to PersonInApplication on same Application + person
     missingBehavior: default_false
     notes: |
-      Visa2014LegacyInvitationItemCancellationIndex — ApplicationResult.Result == 1
-      plus PersonInApplication.Cancelled on cancel-invitation apps matched to PersonInInvitation
-      (same resolver as ApplicationItem.InvitationItemIsCancelled document path).
+      Visa2014LegacyInvitationItemCancellationIndex — PersonInApplication.Cancelled on
+      cancel-invitation apps matched to PersonInInvitation (same OUTER APPLY as ApplicationItem).
+      ApplicationResult.Result = 1 is Rejection (RejectionItem wave), not IsCancelled.

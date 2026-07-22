@@ -6,7 +6,7 @@ tableMappingId: invitation-header
 source:
   table: ApplicationResult
   schema: dbo
-  filter: referenced by PersonInInvitation.Invitation FK
+  filter: Result = 0 (Invitation) AND referenced by PersonInInvitation.Invitation FK
 
 target:
   odataEntity: Invitation

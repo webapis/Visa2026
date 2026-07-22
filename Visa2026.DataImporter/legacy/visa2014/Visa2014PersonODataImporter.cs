@@ -47,9 +47,7 @@ internal static class Visa2014PersonODataImporter
         if (supplementPermitReferencedOnly && verbose)
             Console.WriteLine("INF Mode: supplement permit-referenced soft-deleted Person rows (import as IsArchived).");
 
-        var existingIdMap = !string.IsNullOrWhiteSpace(idMapOutputPath)
-            ? Visa2014IdMapHelper.Load(idMapOutputPath)
-            : new Dictionary<Guid, Guid>();
+        var existingIdMap = Visa2014IdMapHelper.LoadOrEmpty(idMapOutputPath);
         if (supplementPermitReferencedOnly && verbose && existingIdMap.Count > 0)
             Console.WriteLine($"INF Existing Person id-map entries: {existingIdMap.Count}");
 

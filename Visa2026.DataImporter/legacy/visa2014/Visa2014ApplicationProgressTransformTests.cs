@@ -322,6 +322,61 @@ public class Visa2014ApplicationProgressTransformTests
             steps.Single(s => s.StateCode == "3_REVIEW_APPROVED").Description);
     }
 
+
+    [Fact]
+    public void SynthesizeSteps_FullRejectionCoverage_AddsProcessRejected_WithoutLegacyFlag()
+    {
+        var raw = BuildRaw(processDate: new DateTime(2017, 3, 1));
+        var rejection = new Visa2014ApplicationProgressRejectionEvidence(
+            ApplicationItemCount: 2,
+            RejectionItemCount: 2,
+            RejectionDate: new DateTime(2017, 3, 15),
+            RejectionNumbers: "R-100");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(
+            raw, ministryLegCount: 0, completion: null, rejection: rejection);
+
+        var rejected = Assert.Single(steps, s => s.StateCode == "PROCESS_REJECTED");
+        Assert.Equal(new DateTime(2017, 3, 15), rejected.Date);
+        Assert.Contains("Rejection coverage 2/2", rejected.Description);
+        Assert.Contains("R-100", rejected.Description!);
+        Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
+    }
+
+    [Fact]
+    public void SynthesizeSteps_LegacyRejectedOrCoverage_PrefersRejectionDate()
+    {
+        var raw = BuildRaw(processDate: new DateTime(2017, 3, 1)) with { Rejected = true };
+        var rejection = new Visa2014ApplicationProgressRejectionEvidence(
+            ApplicationItemCount: 1,
+            RejectionItemCount: 1,
+            RejectionDate: new DateTime(2017, 4, 1),
+            RejectionNumbers: "178");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(
+            raw, ministryLegCount: 0, completion: null, rejection: rejection);
+
+        var rejected = Assert.Single(steps, s => s.StateCode == "PROCESS_REJECTED");
+        Assert.Equal(new DateTime(2017, 4, 1), rejected.Date);
+        Assert.Contains("Legacy Rejected=1", rejected.Description);
+        Assert.Contains("Rejection coverage 1/1", rejected.Description);
+    }
+
+    [Fact]
+    public void SynthesizeSteps_PartialRejectionCoverage_DoesNotAddProcessRejected()
+    {
+        var raw = BuildRaw();
+        var rejection = new Visa2014ApplicationProgressRejectionEvidence(
+            ApplicationItemCount: 4,
+            RejectionItemCount: 1,
+            RejectionDate: new DateTime(2017, 3, 15),
+            RejectionNumbers: null);
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(
+            raw, ministryLegCount: 0, completion: null, rejection: rejection);
+
+        Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_REJECTED");
+    }
     private static Visa2014ApplicationProgressRawRow BuildRaw(
         DateTime? processDate = null,
         string? processNumber = null,
