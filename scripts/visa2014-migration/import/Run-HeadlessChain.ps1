@@ -93,7 +93,8 @@ $postCorrections = @(
     @{ Name = 'PersonSubcontractor'; Flag = '--correct-person-subcontractor' },
     @{ Name = 'PersonRelationship'; Flag = '--correct-person-relationship' },
     @{ Name = 'PersonAddressPia'; Flag = '--correct-person-address-of-residence' },
-    @{ Name = 'ApplicationItemPersonCurrent'; Flag = '--correct-application-item-person-current' }
+    @{ Name = 'ApplicationItemPersonCurrent'; Flag = '--correct-application-item-person-current' },
+    @{ Name = 'VisaIssuingApplicationItem'; Flag = '--correct-visa2014-issuing-application-item' }
 )
 Write-Host "==================== postImportCorrections ====================" -ForegroundColor Cyan
 foreach ($corr in $postCorrections) {

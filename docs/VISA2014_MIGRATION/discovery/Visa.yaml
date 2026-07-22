@@ -62,7 +62,9 @@ mapping:
     BorderZoneLocation: bit matrix → comma-separated NameTm; 5452+2 → Ýok; catalog expanded — see BorderZoneName.md.
     7 duplicate VisaNumber groups (2 sentinel × 8 + 5 real pairs) — see field-map dedupe rules.
     Scan blob: inline GöçürmeNusga varbinary (~5,976 rows) → VisaDocument file wave after scalar POST.
-    Defer InvitationItem + IssuingApplicationItem until ApplicationItem import.
+    Defer InvitationItem until a later wave.
+    IssuingApplicationItem: post-ApplicationItem correction --correct-visa2014-issuing-application-item
+    (ProcessNumber→PIA preferred; else next sibling after extension CurrentVisa).
 
 checklist:
   target_bo_reviewed: true

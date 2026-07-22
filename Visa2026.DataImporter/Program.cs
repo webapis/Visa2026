@@ -744,6 +744,16 @@ if (HasArg(args, "--correct-visa-type"))
     return;
 }
 
+if (HasArg(args, "--correct-visa2014-issuing-application-item"))
+{
+    Log.Phase("VISA2014 Visa IssuingApplicationItem correction");
+    bool isVerbose = HasArg(args, "--verbose") || HasArg(args, "-v");
+    int exitCode = await Visa2014VisaIssuingApplicationItemCorrection.RunCommandAsync(args, isVerbose);
+    Log.Close();
+    Environment.ExitCode = exitCode;
+    return;
+}
+
 if (HasArg(args, "--correct-application-visa-type"))
 {
     Log.Phase("VISA2014 Application VisaType inference correction");

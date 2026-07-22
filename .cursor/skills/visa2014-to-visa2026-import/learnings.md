@@ -1808,3 +1808,13 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Evidence**: `PROCESS_REJECTED` steps in PG = **141** (coverage OR legacy Rejected).
 - **Log**: `artifacts/local-pg-import/data/import-logs/reimport-ApplicationProgress-localpg-20260722-130503.log`
 - **Next**: optional `--verify-visa2014-mapping --entity ApplicationProgress`.
+
+### 2026-07-22 — Visa.IssuingApplicationItem post-pass (ProcessNumber + extension sibling)
+
+- **Rule**: (1) Prefer legacy `Visa.ProcessNumber` → `PersonInApplication` (FK exists). (2) Else: next passport sibling by issued date after a previous visa that sat on an **extension** PIA (employee/FM subtype **7**); tie-break latest App date then PIA oid. Null if neither matches.
+- **Why post-pass**: Visa wave runs before ApplicationItem; transform leaves `IssuingApplicationItem` null.
+- **Code**: `Visa2014VisaIssuingApplicationItemIndex` (+ unit tests), `Visa2014VisaIssuingApplicationItemCorrection`, CLI `--correct-visa2014-issuing-application-item`; wired in `OnPrem-Sync.ps1` / `Run-HeadlessChain.ps1` / `order.yaml` postImportCorrections.
+- **Local PG apply** (`calik-energi-local-pg` → `visa2026`): index **5923** links (processnumber=5887, extension_sibling=36); updated **5727**; no legacy link **243**; missing ApplicationItem map/target **132**; PG `Visas` linked **5727** / unlinked **375** / total **6102**.
+- **Idempotent**: re-run should report Already correct for the same links.
+- **Docs**: `field-maps/Visa.yaml`, `discovery/Visa.yaml` note the correction.
+- **Not in scope**: `InvitationItem` on Visa (legacy has no Invitation FK).

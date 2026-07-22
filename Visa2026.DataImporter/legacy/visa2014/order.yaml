@@ -422,3 +422,12 @@ postImportCorrections:
       notes: |
         Greenfield (after 2026-07-15): MapLookupDto copies LocalizationKey so Visa import resolves BS1/FM/OF/EX.
         This correction rematches Visa.VisaType from legacy TypeOfVisaL:mgCode on DBs imported when LocalizationKey was missing (all WP).
+    - id: visa-issuing-application-item
+      cliFlag: --correct-visa2014-issuing-application-item
+      dependsOn:
+        - Visa
+        - ApplicationItem
+      notes: |
+        Greenfield: Visa import leaves IssuingApplicationItem null (wave before ApplicationItem).
+        Prefer Visa.ProcessNumber → PersonInApplication; else next passport sibling after previous visa
+        linked on an extension PIA (subtype 7). Runs after ApplicationItem id-map exists.

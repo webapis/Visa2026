@@ -45,7 +45,11 @@ propertyGaps:
       disposition: derive
       notes: Inform BorderZoneLocation transform when BorderZone FK null
     - column: ProcessNumber
-      disposition: drop
+      disposition: synthesize
+      notes: |
+        FK to PersonInApplication — preferred source for Visa.IssuingApplicationItem
+        via --correct-visa2014-issuing-application-item (after ApplicationItem id-map).
+        Fallback: next passport sibling after an extension-line CurrentVisa.
     - column: ASNumber
       disposition: drop
     - column: AppConf
@@ -74,7 +78,10 @@ propertyGaps:
     - property: IssuingApplicationItem
       default: null
       missingBehavior: allow_null
-      notes: Defer until ApplicationItem import
+      notes: |
+        Null on first Visa POST. Post-ApplicationItem correction
+        --correct-visa2014-issuing-application-item: ProcessNumber→PIA first,
+        else extension sibling (previous visa on same passport was PIA.Visa for subtype 7).
     - property: Notes
       default: null
       missingBehavior: allow_null
