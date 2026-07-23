@@ -2,7 +2,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
 /// Legacy application completion evidence from issued invitation (ApplicationResult),
-/// work permit (PersonInApplication.WorkPermit), or full visa coverage on extension subtype 7.
+/// work permit (PersonInApplication.WorkPermit), or full visa coverage on extension subtype 7 (ProcessNumber or next sibling after PIA.Visa).
 /// Mirrors Visa2026 Application.Invitations / WorkPermits / Visa.IssuingApplicationItem after import.
 /// </summary>
 internal sealed record Visa2014ApplicationProgressCompletionEvidence(
@@ -67,7 +67,8 @@ internal static class Visa2014ApplicationProgressCompletionIndex
         """;
 
     /// <summary>
-    /// Extension apps (employee/FM subtype 7) where every PIA has a Visa via ProcessNumber.
+    /// Extension apps (employee/FM subtype 7) where every PIA is covered by a Visa via
+    /// ProcessNumber OR an immediate next passport sibling after PIA.Visa (sticky invitation FK).
     /// </summary>
     internal const string VisaExtensionLoadSql = """
         SELECT
@@ -90,27 +91,87 @@ internal static class Visa2014ApplicationProgressCompletionIndex
             FROM dbo.PersonInApplication pia2
             WHERE pia2.Application = a.Oid
               AND pia2.GCRecord IS NULL
-              AND EXISTS (
-                  SELECT 1
-                  FROM dbo.Visa v
-                  WHERE v.ProcessNumber = pia2.Oid
-                    AND v.GCRecord IS NULL)
+              AND (
+                  EXISTS (
+                      SELECT 1
+                      FROM dbo.Visa v
+                      WHERE v.ProcessNumber = pia2.Oid
+                        AND v.GCRecord IS NULL)
+                  OR (
+                      pia2.Visa IS NOT NULL
+                      AND EXISTS (
+                          SELECT 1
+                          FROM dbo.Visa prev
+                          INNER JOIN dbo.Visa nextv
+                              ON nextv.Passport = prev.Passport
+                             AND nextv.GCRecord IS NULL
+                             AND nextv.VisaIssuedDate > prev.VisaIssuedDate
+                          WHERE prev.Oid = pia2.Visa
+                            AND prev.GCRecord IS NULL
+                            AND NOT EXISTS (
+                                SELECT 1
+                                FROM dbo.Visa mid
+                                WHERE mid.Passport = prev.Passport
+                                  AND mid.GCRecord IS NULL
+                                  AND mid.VisaIssuedDate > prev.VisaIssuedDate
+                                  AND mid.VisaIssuedDate < nextv.VisaIssuedDate)))
+              )
         ) linked
         OUTER APPLY (
             SELECT
-                MAX(v.VisaIssuedDate) AS MaxVisaIssuedDate,
+                MAX(issued.VisaIssuedDate) AS MaxVisaIssuedDate,
                 (
-                    SELECT TOP 1 NULLIF(LTRIM(RTRIM(v2.VisaNumber)), '')
-                    FROM dbo.PersonInApplication pia3
-                    INNER JOIN dbo.Visa v2 ON v2.ProcessNumber = pia3.Oid AND v2.GCRecord IS NULL
-                    WHERE pia3.Application = a.Oid
-                      AND pia3.GCRecord IS NULL
-                    ORDER BY v2.VisaIssuedDate DESC, v2.Oid
+                    SELECT TOP 1 NULLIF(LTRIM(RTRIM(issued2.VisaNumber)), '')
+                    FROM (
+                        SELECT v.VisaNumber, v.VisaIssuedDate, v.Oid
+                        FROM dbo.PersonInApplication pia3
+                        INNER JOIN dbo.Visa v ON v.ProcessNumber = pia3.Oid AND v.GCRecord IS NULL
+                        WHERE pia3.Application = a.Oid AND pia3.GCRecord IS NULL
+                        UNION ALL
+                        SELECT nextv.VisaNumber, nextv.VisaIssuedDate, nextv.Oid
+                        FROM dbo.PersonInApplication pia3b
+                        INNER JOIN dbo.Visa prev ON prev.Oid = pia3b.Visa AND prev.GCRecord IS NULL
+                        INNER JOIN dbo.Visa nextv
+                            ON nextv.Passport = prev.Passport
+                           AND nextv.GCRecord IS NULL
+                           AND nextv.VisaIssuedDate > prev.VisaIssuedDate
+                        WHERE pia3b.Application = a.Oid
+                          AND pia3b.GCRecord IS NULL
+                          AND pia3b.Visa IS NOT NULL
+                          AND NOT EXISTS (
+                              SELECT 1
+                              FROM dbo.Visa mid
+                              WHERE mid.Passport = prev.Passport
+                                AND mid.GCRecord IS NULL
+                                AND mid.VisaIssuedDate > prev.VisaIssuedDate
+                                AND mid.VisaIssuedDate < nextv.VisaIssuedDate)
+                    ) issued2
+                    ORDER BY issued2.VisaIssuedDate DESC, issued2.Oid
                 ) AS SampleVisaNumber
-            FROM dbo.PersonInApplication pia4
-            INNER JOIN dbo.Visa v ON v.ProcessNumber = pia4.Oid AND v.GCRecord IS NULL
-            WHERE pia4.Application = a.Oid
-              AND pia4.GCRecord IS NULL
+            FROM (
+                SELECT v.VisaIssuedDate
+                FROM dbo.PersonInApplication pia4
+                INNER JOIN dbo.Visa v ON v.ProcessNumber = pia4.Oid AND v.GCRecord IS NULL
+                WHERE pia4.Application = a.Oid AND pia4.GCRecord IS NULL
+                UNION ALL
+                SELECT nextv.VisaIssuedDate
+                FROM dbo.PersonInApplication pia4b
+                INNER JOIN dbo.Visa prev ON prev.Oid = pia4b.Visa AND prev.GCRecord IS NULL
+                INNER JOIN dbo.Visa nextv
+                    ON nextv.Passport = prev.Passport
+                   AND nextv.GCRecord IS NULL
+                   AND nextv.VisaIssuedDate > prev.VisaIssuedDate
+                WHERE pia4b.Application = a.Oid
+                  AND pia4b.GCRecord IS NULL
+                  AND pia4b.Visa IS NOT NULL
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM dbo.Visa mid
+                      WHERE mid.Passport = prev.Passport
+                        AND mid.GCRecord IS NULL
+                        AND mid.VisaIssuedDate > prev.VisaIssuedDate
+                        AND mid.VisaIssuedDate < nextv.VisaIssuedDate)
+            ) issued
         ) sample
         WHERE a.GCRecord IS NULL
           AND (

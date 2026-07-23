@@ -44,8 +44,9 @@ propertyGaps:
       disposition: synthesize
       notes: |
         Description on PROCESS_STARTED; PROCESS_ISSUED from ApplicationResult (Invitation),
-        PersonInApplication.WorkPermit, or full Visa.ProcessNumber coverage on extension subtype 7
-        (Inv/WP preferred when both present).
+        PersonInApplication.WorkPermit, or full extension subtype-7 coverage
+        (Visa.ProcessNumber→PIA OR immediate next passport sibling after PIA.Visa;
+        Inv/WP preferred when both present).
     - column: Cancelled
       disposition: synthesize
       notes: Terminal PROCESS_CANCELLED override

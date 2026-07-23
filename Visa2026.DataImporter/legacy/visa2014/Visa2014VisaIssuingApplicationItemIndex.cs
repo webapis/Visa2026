@@ -2,7 +2,8 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 
 /// <summary>
 /// Resolves legacy Visa.Oid → PersonInApplication.Oid for Visa.IssuingApplicationItem.
-/// Prefer Visa.ProcessNumber FK; else immediate previous passport sibling was on an extension PIA.
+/// Prefer ProcessNumber when that PIA is on an extension app (subtype 7);
+/// else extension sibling; else other ProcessNumber (e.g. sticky invitation FK).
 /// </summary>
 internal sealed record Visa2014VisaIssuingApplicationItemLink(
     Guid LegacyVisaOid,
@@ -14,9 +15,17 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
     internal const string ProcessNumberSql = """
         SELECT
             CAST(v.Oid AS varchar(36)) AS VisaOid,
-            CAST(pia.Oid AS varchar(36)) AS PiaOid
+            CAST(pia.Oid AS varchar(36)) AS PiaOid,
+            CASE
+                WHEN ate.TypeOfApplicationForEmployee = 7
+                  OR atfm.TypeOfApplicationForFamilyMember = 7
+                THEN '1' ELSE '0'
+            END AS IsExtensionApp
         FROM dbo.Visa v
         INNER JOIN dbo.PersonInApplication pia ON pia.Oid = v.ProcessNumber AND pia.GCRecord IS NULL
+        INNER JOIN dbo.Application a ON a.Oid = pia.Application AND a.GCRecord IS NULL
+        LEFT JOIN dbo.ApplicationTypeForEmployee ate ON ate.Oid = a.ApplicationTypeForEmployee
+        LEFT JOIN dbo.ApplicationTypeForFamilyMember atfm ON atfm.Oid = a.ApplicationTypeForFamilyMember
         WHERE v.GCRecord IS NULL
           AND v.ProcessNumber IS NOT NULL
         """;
@@ -59,11 +68,11 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
         var visaRows = Visa2014SqlCmdReader.Query(connectionString, VisaRowsSql, verbose);
         var extRows = Visa2014SqlCmdReader.Query(connectionString, ExtensionPiaSql, verbose);
 
-        var processLinks = new List<(Guid VisaOid, Guid PiaOid)>();
+        var processLinks = new List<(Guid VisaOid, Guid PiaOid, bool IsExtensionApp)>();
         foreach (var row in processRows)
         {
             if (TryGuid(row, "VisaOid", out var visaOid) && TryGuid(row, "PiaOid", out var piaOid))
-                processLinks.Add((visaOid, piaOid));
+                processLinks.Add((visaOid, piaOid, row.GetValueOrDefault("IsExtensionApp") == "1"));
         }
 
         var visas = new List<(Guid VisaOid, Guid PassportOid, DateTime IssuedDate)>();
@@ -90,24 +99,32 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
         {
             var byProcess = map.Values.Count(v => v.Source == "processnumber");
             var bySibling = map.Values.Count(v => v.Source == "extension_sibling");
+            var processExt = processLinks.Count(x => x.IsExtensionApp);
+            var processOther = processLinks.Count(x => !x.IsExtensionApp);
             Console.WriteLine(
                 $"INF Visa IssuingApplicationItem index: {map.Count} visa(s) " +
-                $"(processnumber={byProcess}, extension_sibling={bySibling})");
+                $"(processnumber={byProcess}, extension_sibling={bySibling}; " +
+                $"legacy ProcessNumber extension={processExt}, other={processOther})");
         }
 
         return map;
     }
 
-    /// <summary>Pure merge for unit tests.</summary>
+    /// <summary>
+    /// Merge: extension ProcessNumber first, then sibling, then remaining ProcessNumber.
+    /// </summary>
     internal static Dictionary<Guid, Visa2014VisaIssuingApplicationItemLink> Build(
-        IEnumerable<(Guid VisaOid, Guid PiaOid)> processNumberLinks,
+        IEnumerable<(Guid VisaOid, Guid PiaOid, bool IsExtensionApp)> processNumberLinks,
         IEnumerable<(Guid VisaOid, Guid PassportOid, DateTime IssuedDate)> visas,
         IEnumerable<(Guid PiaOid, Guid PrevVisaOid, DateTime? AppDate)> extensionPias)
     {
         var map = new Dictionary<Guid, Visa2014VisaIssuingApplicationItemLink>();
+        var processList = processNumberLinks.ToList();
 
-        foreach (var (visaOid, piaOid) in processNumberLinks)
+        foreach (var (visaOid, piaOid, isExtension) in processList)
         {
+            if (!isExtension)
+                continue;
             map[visaOid] = new Visa2014VisaIssuingApplicationItemLink(visaOid, piaOid, "processnumber");
         }
 
@@ -155,6 +172,13 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
                     pia.PiaOid,
                     "extension_sibling");
             }
+        }
+
+        foreach (var (visaOid, piaOid, isExtension) in processList)
+        {
+            if (isExtension || map.ContainsKey(visaOid))
+                continue;
+            map[visaOid] = new Visa2014VisaIssuingApplicationItemLink(visaOid, piaOid, "processnumber");
         }
 
         return map;

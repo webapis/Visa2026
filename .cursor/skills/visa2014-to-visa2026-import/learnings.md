@@ -1846,3 +1846,16 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Rule**: `Person.IsFamilyMember=1 AND IsEmployee=0` → `VisaType` LocalizationKey **FM** (before TypeOfVisaL:mgCode map). Employees unchanged.
 - **Code**: `Visa2014VisaTransform.ResolveVisaTypeLocalizationKey`; `--correct-visa-type` reuses transform; wired in OnPrem-Sync / HeadlessChain postImportCorrections.
 - **Local PG correction**: Visas in scope **6143**; updated **652**; already correct **5450**; histogram WP=3422, BS1=1651, FM=1000, OF=55, EX=15. `A1733149` → FM; FM-person still-WP → **0**.
+
+### 2026-07-22 — IssuingApplicationItem: trust ProcessNumber only for extension subtype 7
+
+- **Bug**: `A1733547` linked to invitation `6/-820` because sticky `ProcessNumber` beat extension sibling `6/-930`.
+- **Rule**: (1) ProcessNumber→PIA when app is subtype **7**; (2) else extension sibling; (3) else remaining ProcessNumber (invitation etc.).
+- **Local PG**: index processnumber=4967 / extension_sibling=956; correction updated **911**; `A1733547` → `6/-930`.
+
+### 2026-07-23 — ApplicationProgress wipe + reimport (local PG)
+
+- **Wipe**: DELETE **31019**; cleared `ApplicationProgress` id-map.
+- **Import**: Posted **31019** / Failed **0** (log `reimport-ApplicationProgress-localpg-20260723-085454.log`).
+- **Shape**: `PROCESS_ISSUED` = **4500** (was ~4275 before sibling extension completion).
+- **Spot-check**: `6/-930` → `PROCESS_ISSUED` @ 2026-06-23 Description `A1733547`.

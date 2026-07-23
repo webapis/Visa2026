@@ -6,7 +6,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014.Tests;
 public class Visa2014VisaIssuingApplicationItemIndexTests
 {
     [Fact]
-    public void Build_PrefersProcessNumberOverSibling()
+    public void Build_ExtensionProcessNumber_WinsOverSibling()
     {
         var passport = Guid.NewGuid();
         var prevVisa = Guid.NewGuid();
@@ -15,7 +15,7 @@ public class Visa2014VisaIssuingApplicationItemIndexTests
         var siblingPia = Guid.NewGuid();
 
         var map = Visa2014VisaIssuingApplicationItemIndex.Build(
-            processNumberLinks: [(nextVisa, processPia)],
+            processNumberLinks: [(nextVisa, processPia, IsExtensionApp: true)],
             visas:
             [
                 (prevVisa, passport, new DateTime(2020, 1, 1)),
@@ -25,6 +25,44 @@ public class Visa2014VisaIssuingApplicationItemIndexTests
 
         Assert.Equal(processPia, map[nextVisa].LegacyApplicationItemOid);
         Assert.Equal("processnumber", map[nextVisa].Source);
+    }
+
+    [Fact]
+    public void Build_NonExtensionProcessNumber_YieldsToExtensionSibling()
+    {
+        var passport = Guid.NewGuid();
+        var prevVisa = Guid.NewGuid();
+        var nextVisa = Guid.NewGuid();
+        var invitationPia = Guid.NewGuid();
+        var extensionPia = Guid.NewGuid();
+
+        var map = Visa2014VisaIssuingApplicationItemIndex.Build(
+            processNumberLinks: [(nextVisa, invitationPia, IsExtensionApp: false)],
+            visas:
+            [
+                (prevVisa, passport, new DateTime(2020, 1, 1)),
+                (nextVisa, passport, new DateTime(2021, 1, 1)),
+            ],
+            extensionPias: [(extensionPia, prevVisa, new DateTime(2020, 6, 1))]);
+
+        Assert.Equal(extensionPia, map[nextVisa].LegacyApplicationItemOid);
+        Assert.Equal("extension_sibling", map[nextVisa].Source);
+    }
+
+    [Fact]
+    public void Build_NonExtensionProcessNumber_UsedWhenNoSibling()
+    {
+        var passport = Guid.NewGuid();
+        var visa = Guid.NewGuid();
+        var invitationPia = Guid.NewGuid();
+
+        var map = Visa2014VisaIssuingApplicationItemIndex.Build(
+            processNumberLinks: [(visa, invitationPia, IsExtensionApp: false)],
+            visas: [(visa, passport, new DateTime(2020, 1, 1))],
+            extensionPias: []);
+
+        Assert.Equal(invitationPia, map[visa].LegacyApplicationItemOid);
+        Assert.Equal("processnumber", map[visa].Source);
     }
 
     [Fact]

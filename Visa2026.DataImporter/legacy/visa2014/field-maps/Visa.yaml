@@ -80,8 +80,11 @@ propertyGaps:
       missingBehavior: allow_null
       notes: |
         Null on first Visa POST. Post-ApplicationItem correction
-        --correct-visa2014-issuing-application-item: ProcessNumber→PIA first,
-        else extension sibling (previous visa on same passport was PIA.Visa for subtype 7).
+        --correct-visa2014-issuing-application-item:
+        (1) ProcessNumber→PIA when that app is extension subtype 7;
+        (2) else extension sibling (previous passport visa was PIA.Visa on subtype 7);
+        (3) else other ProcessNumber (e.g. invitation) when still unset.
+        Sticky invitation ProcessNumber must not beat a real extension sibling.
     - property: Notes
       default: null
       missingBehavior: allow_null
