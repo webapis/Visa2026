@@ -5,25 +5,31 @@ using DevExpress.ExpressApp.Blazor.Components.Models;
 using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.Persistent.Base;
+using Visa2026.Blazor.Server.Localization;
 using Visa2026.Module.Localization;
 
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
 /// Shows the localized total item count as a caption-only, right-aligned toolbar action on every DxGrid ListView.
-/// XAF ribbon layout owns the visible toolbar row, so a toolbar action (RecordsNavigation, right aligned) is the
+/// When column filters / search are active, also shows a clickable Clear filters action and highlights
+/// filtered column headers. XAF ribbon layout owns the visible toolbar row, so toolbar actions are the
 /// reliable placement — the DxGrid's own ToolbarContainer/SearchBoxTemplate is not used by the XAF frame.
 /// </summary>
 public sealed class ListViewTotalCountController : ViewController<ListView>
 {
     private const string TotalCountActionId = "ListViewTotalCount";
+    private const string ClearFiltersActionId = "ListViewClearFilters";
+    private const string FilteredHeaderCssClass = "visa-grid-header-filtered";
 
     private readonly SimpleAction totalCountAction;
+    private readonly SimpleAction clearFiltersAction;
     private EventHandler<ComponentInstanceCapturedEventArgs<IGrid>>? gridCapturedHandler;
     private Action<GridCustomizeElementEventArgs>? customizeElementHandler;
     private Action<GridCustomizeElementEventArgs>? previousCustomizeElement;
     private CancellationTokenSource? deferredApplyCts;
     private int lastShownCount = -1;
+    private bool? lastShownFiltered;
 
     public ListViewTotalCountController()
     {
@@ -34,13 +40,24 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
 
         totalCountAction = new SimpleAction(this, TotalCountActionId, PredefinedCategory.RecordsNavigation)
         {
-            Caption = FormatCaption(0),
+            Caption = FormatTotalCaption(0),
             PaintStyle = ActionItemPaintStyle.Caption,
             ImageName = string.Empty,
             SelectionDependencyType = SelectionDependencyType.Independent,
             ConfirmationMessage = null,
         };
         totalCountAction.Execute += (_, _) => { };
+
+        clearFiltersAction = new SimpleAction(this, ClearFiltersActionId, PredefinedCategory.RecordsNavigation)
+        {
+            Caption = VisaLocalization.GetGridClearFiltersText(),
+            PaintStyle = ActionItemPaintStyle.Caption,
+            ImageName = string.Empty,
+            SelectionDependencyType = SelectionDependencyType.Independent,
+            ConfirmationMessage = null,
+        };
+        clearFiltersAction.Active["HasGridFilter"] = false;
+        clearFiltersAction.Execute += ClearFiltersAction_Execute;
     }
 
     protected override void OnActivated()
@@ -49,11 +66,13 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
         if (ShouldSkipListView())
         {
             totalCountAction.Active["NotSupportedView"] = false;
+            clearFiltersAction.Active["NotSupportedView"] = false;
             return;
         }
 
+        clearFiltersAction.Caption = VisaLocalization.GetGridClearFiltersText();
         View.CollectionSource.CollectionChanged += CollectionSource_Changed;
-        UpdateCaption();
+        UpdateToolbar();
     }
 
     protected override void OnViewControlsCreated()
@@ -96,10 +115,11 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
 
         ListViewGridTotalCountConfigurator.EnsureCountSummary(gridListEditor);
 
-        gridCapturedHandler ??= (_, _) => UpdateCaption();
+        gridCapturedHandler ??= (_, _) => UpdateToolbar();
         gridListEditor.GridModel.ComponentInstanceCaptured += gridCapturedHandler;
 
-        // Refresh the caption after client-side data shaping (search box, filter row, column filters).
+        // Refresh after client-side data shaping (search box, filter row, column filters)
+        // and mark filtered column headers.
         if (customizeElementHandler != null)
         {
             gridListEditor.GridModel.CustomizeElement = previousCustomizeElement;
@@ -111,13 +131,38 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
         customizeElementHandler = e =>
         {
             previousCustomizeElement?.Invoke(e);
-            if (e.ElementType == GridElementType.HeaderRow)
-                UpdateCaption();
+            ApplyFilteredHeaderHighlight(e);
+            if (e.ElementType == GridElementType.HeaderRow || e.ElementType == GridElementType.HeaderCell)
+                UpdateToolbar();
         };
         gridListEditor.GridModel.CustomizeElement = customizeElementHandler;
     }
 
-    private void CollectionSource_Changed(object sender, EventArgs e) => UpdateCaption();
+    private static void ApplyFilteredHeaderHighlight(GridCustomizeElementEventArgs e)
+    {
+        if (e.ElementType != GridElementType.HeaderCell)
+            return;
+
+        if (e.Column is not IGridDataColumn dataColumn || string.IsNullOrEmpty(dataColumn.FieldName))
+            return;
+
+        if (ReferenceEquals(e.Grid.GetFieldFilterCriteria(dataColumn.FieldName), null))
+            return;
+
+        e.CssClass = string.IsNullOrEmpty(e.CssClass)
+            ? FilteredHeaderCssClass
+            : $"{e.CssClass} {FilteredHeaderCssClass}";
+    }
+
+    private void CollectionSource_Changed(object sender, EventArgs e) => UpdateToolbar();
+
+    private void ClearFiltersAction_Execute(object sender, SimpleActionExecuteEventArgs e)
+    {
+        if (View?.Editor is DxGridListEditor { GridModel.ComponentInstance: { } grid })
+            ListViewGridFilterState.Clear(grid);
+
+        UpdateToolbar();
+    }
 
     private void ScheduleDeferredApply()
     {
@@ -140,20 +185,26 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
         }
 
         if (View is { IsDisposed: false })
-            UpdateCaption();
+            UpdateToolbar();
     }
 
-    private void UpdateCaption()
+    private void UpdateToolbar()
     {
         if (ShouldSkipListView())
             return;
 
         int count = ResolveCount();
-        if (count == lastShownCount)
+        bool filtered = HasActiveGridFilter();
+        if (count == lastShownCount && lastShownFiltered == filtered)
             return;
 
         lastShownCount = count;
-        totalCountAction.Caption = FormatCaption(count);
+        lastShownFiltered = filtered;
+
+        // Total stays a non-clickable count; Clear filters is the one-click affordance.
+        totalCountAction.Caption = FormatTotalCaption(count);
+        clearFiltersAction.Caption = VisaLocalization.GetGridClearFiltersText();
+        clearFiltersAction.Active["HasGridFilter"] = filtered;
     }
 
     private int ResolveCount()
@@ -164,7 +215,15 @@ public sealed class ListViewTotalCountController : ViewController<ListView>
         return View?.CollectionSource.GetCount() ?? 0;
     }
 
-    private static string FormatCaption(int count) => VisaUiMessages.Format("Grid.TotalCount", count);
+    private static string FormatTotalCaption(int count) => VisaUiMessages.Format("Grid.TotalCount", count);
+
+    private bool HasActiveGridFilter()
+    {
+        if (View?.Editor is not DxGridListEditor { GridModel.ComponentInstance: { } grid })
+            return false;
+
+        return ListViewGridFilterState.HasActiveFilter(grid);
+    }
 
     private bool ShouldSkipListView() =>
         View.Id.EndsWith("_LookupListView", StringComparison.Ordinal);

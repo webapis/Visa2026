@@ -1,8 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Logo="CalikLogo" Title="Visa Management">
   <ActionDesign>
     <Actions>
       <Action Id="ListViewTotalCount" CustomCSSClassName="visa-list-total-action" />
+      <Action Id="ListViewClearFilters" CustomCSSClassName="visa-list-clear-filters-action" />
       <Action Id="Logon" CustomCSSClassName="e2e-login-submit" />
     </Actions>
   </ActionDesign>
