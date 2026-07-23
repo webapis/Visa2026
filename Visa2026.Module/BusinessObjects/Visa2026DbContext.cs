@@ -128,6 +128,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkDuty> WorkDuties { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
+        public DbSet<ApplicationTypeGroup> ApplicationTypeGroups { get; set; }
+        public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
         public DbSet<ApplicationProgress> ApplicationProgresses { get; set; }
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }
@@ -172,6 +174,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
         public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
         public DbSet<UserReportTemplateApplicationType> UserReportTemplateApplicationTypes { get; set; }
+        public DbSet<UserReportTemplateApplicationTypeGroup> UserReportTemplateApplicationTypeGroups { get; set; }
         public DbSet<UserReportTemplateProjectContract> UserReportTemplateProjectContracts { get; set; }
         public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
@@ -360,6 +363,34 @@ namespace Visa2026.Module.BusinessObjects
                     .HasForeignKey(l => l.ApplicationTypeId)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeId })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
+            });
+
+            modelBuilder.Entity<ApplicationTypeGroupMember>(b => {
+                b.HasOne(l => l.ApplicationTypeGroup)
+                    .WithMany(g => g.Members)
+                    .HasForeignKey(l => l.ApplicationTypeGroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApplicationType)
+                    .WithMany()
+                    .HasForeignKey(l => l.ApplicationTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(l => new { l.ApplicationTypeGroupId, l.ApplicationTypeId })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
+            });
+
+            modelBuilder.Entity<UserReportTemplateApplicationTypeGroup>(b => {
+                b.HasOne(l => l.UserReportTemplate)
+                    .WithMany(t => t.ApplicableGroupLinks)
+                    .HasForeignKey(l => l.UserReportTemplateId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApplicationTypeGroup)
+                    .WithMany()
+                    .HasForeignKey(l => l.ApplicationTypeGroupId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeGroupId })
                     .IsUnique()
                     .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });

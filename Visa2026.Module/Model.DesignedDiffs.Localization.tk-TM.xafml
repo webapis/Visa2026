@@ -1957,10 +1957,30 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Arza görnüşi topary">
+      <OwnMembers>
+        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="Members" Caption="Arza görnüşleri" />
+        <Member Name="NameTm" Caption="Ady (Tm)" />
+        <Member Name="SortOrder" Caption="Tertip" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Arza görnüşi topary agzasy">
+      <OwnMembers>
+        <Member Name="ApplicationType" Caption="Arza görnüşi" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Hasabat şablony">
       <OwnMembers>
+        <Member Name="ApplicableGroupLinks" Caption="Degişli arza görnüşi toparlary" />
+        <Member Name="ApplicableTypeLinks" Caption="Degişli arza görnüşleri" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Hasabat şablony — arza görnüşi topary">
+      <OwnMembers>
+        <Member Name="ApplicationTypeGroup" Caption="Arza görnüşi topary" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Möhleti">

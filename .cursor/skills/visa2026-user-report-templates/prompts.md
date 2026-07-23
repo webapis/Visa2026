@@ -87,8 +87,9 @@ In Cursor you can also reference the skill explicitly: **`@visa2026-user-report-
 
 | Goal | Say in prompt |
 |------|----------------|
-| All application types | `applicable application types: null / empty` |
+| All application types | `applicable application types: null / empty` and `applicable application type groups: null / empty` |
 | Specific types only | `applicable application types: App_Inv_And_WP, App_WP_Ext` |
+| Registration group | `applicable application type groups: Registration` (eight `App_Reg_*`; see `ApplicationTypeGroupNames.Registration`) |
 | GT-15 contracts | `applicableProjectContractNameTmContains: GT-15` |
 | Extra rule | `visibility criteria: …` (criteria expression) |
 

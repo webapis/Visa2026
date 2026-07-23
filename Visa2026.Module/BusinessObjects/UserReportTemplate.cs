@@ -28,6 +28,7 @@ namespace Visa2026.Module.BusinessObjects
         public UserReportTemplate()
         {
             ApplicableTypeLinks = new ObservableCollection<UserReportTemplateApplicationType>();
+            ApplicableGroupLinks = new ObservableCollection<UserReportTemplateApplicationTypeGroup>();
             ApplicableProjectContractLinks = new ObservableCollection<UserReportTemplateProjectContract>();
             Placeholders = new ObservableCollection<UserReportPlaceholder>();
         }
@@ -64,7 +65,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
-        [Obsolete("No longer used. Visibility is determined by Applicable Application Types, Applicable Project Contracts, and Visibility Criteria.")]
+        [Obsolete("No longer used. Visibility is determined by Applicable Application Types, Applicable Application Type Groups, Applicable Project Contracts, and Visibility Criteria.")]
         public virtual ApplicabilityMode ApplicabilityMode { get; set; } = ApplicabilityMode.AllTypes;
 
         [FieldSize(FieldSizeAttribute.Unlimited)]
@@ -91,8 +92,15 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("Caption", "Applicable Application Types")]
         [VisibleInDetailView(true)]
         [VisibleInListView(false)]
-        [ToolTip("Optional. When empty, the template applies to all application types. When set, the current Application’s Application Type must match one of these rows.")]
+        [ToolTip("Optional individual types. Empty type links and empty group links = all application types. When either list has rows, the current Application’s type must match a linked type or a member of a linked group (union).")]
         public virtual IList<UserReportTemplateApplicationType> ApplicableTypeLinks { get; set; }
+
+        [Aggregated]
+        [ModelDefault("Caption", "Applicable Application Type Groups")]
+        [VisibleInDetailView(true)]
+        [VisibleInListView(false)]
+        [ToolTip("Optional groups (e.g. Registration). Combined with Applicable Application Types as a union. Empty type links and empty group links = all application types.")]
+        public virtual IList<UserReportTemplateApplicationTypeGroup> ApplicableGroupLinks { get; set; }
 
         [Aggregated]
         [ModelDefault("Caption", "Applicable Project Contracts")]

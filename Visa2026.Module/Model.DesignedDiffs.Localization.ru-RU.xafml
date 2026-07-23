@@ -1957,10 +1957,30 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Группа типов заявок">
+      <OwnMembers>
+        <Member Name="IsActive" Caption="Активна" />
+        <Member Name="Members" Caption="Типы заявок" />
+        <Member Name="NameTm" Caption="Название (Tm)" />
+        <Member Name="SortOrder" Caption="Порядок" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Участник группы типов заявок">
+      <OwnMembers>
+        <Member Name="ApplicationType" Caption="Тип заявки" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Шаблон отчёта">
       <OwnMembers>
+        <Member Name="ApplicableGroupLinks" Caption="Применимые группы типов заявок" />
+        <Member Name="ApplicableTypeLinks" Caption="Применимые типы заявок" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Шаблон отчёта — группа типов заявок">
+      <OwnMembers>
+        <Member Name="ApplicationTypeGroup" Caption="Группа типов заявок" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Срок действия">

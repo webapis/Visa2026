@@ -1957,10 +1957,30 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Başvuru Türü Grubu">
+      <OwnMembers>
+        <Member Name="IsActive" Caption="Aktif" />
+        <Member Name="Members" Caption="Başvuru Türleri" />
+        <Member Name="NameTm" Caption="Ad (Tm)" />
+        <Member Name="SortOrder" Caption="Sıra" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Başvuru Türü Grubu Üyesi">
+      <OwnMembers>
+        <Member Name="ApplicationType" Caption="Başvuru Türü" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Rapor Şablonu">
       <OwnMembers>
+        <Member Name="ApplicableGroupLinks" Caption="Uygulanabilir Başvuru Türü Grupları" />
+        <Member Name="ApplicableTypeLinks" Caption="Uygulanabilir Başvuru Türleri" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Rapor Şablonu — Başvuru Türü Grubu">
+      <OwnMembers>
+        <Member Name="ApplicationTypeGroup" Caption="Başvuru Türü Grubu" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Geçerlilik Süresi">

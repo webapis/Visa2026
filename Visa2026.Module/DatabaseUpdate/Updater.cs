@@ -281,7 +281,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // Extract placeholders replaces all rows — delete required (read/write/create alone is not enough).
         userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationType>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationTypeGroup>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportTemplateProjectContract>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationTypeGroup>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationTypeGroupMember>(SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
@@ -669,7 +672,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<UserReportTemplate>(role);
             EnsureReadOnlyPermission<UserReportPlaceholder>(role);
             EnsureReadOnlyPermission<UserReportTemplateApplicationType>(role);
+            EnsureReadOnlyPermission<UserReportTemplateApplicationTypeGroup>(role);
             EnsureReadOnlyPermission<UserReportTemplateProjectContract>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroup>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroupMember>(role);
             EnsureReadOnlyPermission<PdfGenerationBatch>(role);
             EnsureReadOnlyPermission<WordReportGenerationBatch>(role);
 
@@ -1022,7 +1028,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<UserReportTemplate>(role);
             EnsureFullAccessRecursivePermission<UserReportPlaceholder>(role);
             EnsureReadWriteCreatePermission<UserReportTemplateApplicationType>(role);
+            EnsureReadWriteCreatePermission<UserReportTemplateApplicationTypeGroup>(role);
             EnsureReadWriteCreatePermission<UserReportTemplateProjectContract>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroup>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroupMember>(role);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
         }

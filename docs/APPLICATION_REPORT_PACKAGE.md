@@ -390,6 +390,7 @@ Same XAF pattern as Document copies: **non-persistent host + custom Blazor prope
 - **Keep ZIP parity:** generator changes must affect both **Preview** and **Download package**.
 
 - **New user template:** seed under `Resources/Templates/` → `UserReportTemplateUpdater`; visibility via template record + `IUserReportVisibilityService`.
+- **Application type groups:** assign templates to an **`ApplicationTypeGroup`** (e.g. seeded **Registration** = eight `App_Reg_*` types) and/or individual **Applicable Application Types** (union). Empty type links **and** empty group links = all types. See [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../.cursor/skills/visa2026-user-report-templates/SKILL.md) (Resminamalar visibility).
 
 - **Empty template list after deploy:** ensure `UserReportTemplateSeedGate` runs (console log on success); DEBUG re-seeds every startup.
 - **Skill experience:** Resminamalar incidents → append [`.cursor/skills/visa2026-resminamalar/learnings.md`](../.cursor/skills/visa2026-resminamalar/learnings.md); promotion rules in [`.cursor/skills/visa2026-resminamalar/MATURITY.md`](../.cursor/skills/visa2026-resminamalar/MATURITY.md).

@@ -99,7 +99,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type |
 |------|
 | `ProjectContract`, `FileData` |
-| `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateProjectContract` |
+| `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateApplicationTypeGroup`, `UserReportTemplateProjectContract` |
 
 ### Full recursive (templates)
 
@@ -116,6 +116,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 |------|-------|
 | `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
 | `ApplicationType` | Link popup on migration SLA profile detail |
+| `ApplicationTypeGroup`, `ApplicationTypeGroupMember` | Report template group picker / membership (read) |
 
 ### Navigation (allow)
 
