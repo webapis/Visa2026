@@ -456,7 +456,8 @@ internal static class Visa2014ApplicationProgressODataImporter
         {
             ["Application"] = new { ID = applicationId },
             ["State"] = new { ID = stateId.Value },
-            ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
+            // Unspecified for PG timestamp without time zone (Utc Kind fails without legacy switch).
+            ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Unspecified),
         };
 
         if (TryParseOrder(row.GetValueOrDefault("Order"), out var order))
@@ -465,6 +466,10 @@ internal static class Visa2014ApplicationProgressODataImporter
         var description = row.GetValueOrDefault("Description") as string;
         if (!string.IsNullOrWhiteSpace(description))
             payload["Description"] = description.Trim();
+
+        var processNumber = row.GetValueOrDefault("ProcessNumber") as string;
+        if (!string.IsNullOrWhiteSpace(processNumber))
+            payload["ProcessNumber"] = processNumber.Trim();
 
         return payload;
     }

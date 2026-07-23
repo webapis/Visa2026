@@ -55,6 +55,14 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
+        /// <summary>
+        /// Migration-service processing number (legacy Işlenmäge başlanan belgi).
+        /// Canonical on <c>PROCESS_STARTED</c>; may also appear on direct-migration <c>PROCESS_ISSUED</c>.
+        /// </summary>
+        [XafDisplayName("Process number")]
+        [MaxLength(100)]
+        public virtual string? ProcessNumber { get; set; }
+
         [XafDisplayName("Ministrlik")]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]

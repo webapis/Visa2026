@@ -20,7 +20,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [XafDisplayName("Application")]
-    [DefaultProperty(nameof(ApplicationNumber))]
+    [DefaultProperty(nameof(DisplayCaption))]
     [Appearance(
         "ApplicationReadOnlyAfterOfficePreparation",
         AppearanceItemType = "ViewItem",
@@ -115,6 +115,28 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(100)]
         [Appearance("FullApplicationNumberReadOnly", Context = "DetailView", Criteria = "!IsManualEntry", Enabled = false)]
         public virtual string FullApplicationNumber { get; set; }
+
+        /// <summary>
+        /// Denormalized migration-service process number from <c>PROCESS_STARTED</c>
+        /// (see <see cref="ApplicationProcessNumberHelper"/>).
+        /// </summary>
+        [XafDisplayName("Process number")]
+        [ModelDefault("AllowEdit", "False")]
+        [MaxLength(100)]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        public virtual string? ProcessNumber { get; set; }
+
+        /// <summary>
+        /// Lookup / object caption: application number, plus process number when present
+        /// (e.g. <c>12/-7010 · AS538188</c>).
+        /// </summary>
+        [XafDisplayName("Application")]
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public string DisplayCaption => ApplicationProcessNumberHelper.FormatDisplayCaption(this);
 
         [ModelDefault("AllowEdit", "False")]
         public virtual int Year { get; set; }

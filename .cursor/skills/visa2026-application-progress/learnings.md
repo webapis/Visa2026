@@ -6,6 +6,23 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-23 — Postgres ProcessNumber column missing (42703)
+
+- **Symptom**: `Npgsql.PostgresException 42703: column a.ProcessNumber does not exist` on Application ListView (PostgreSQL Demo).
+- **Root cause**: ModuleUpdater SQL used `DO $$` blocks; XAF may skip updaters when ModuleInfo is current, and Postgres host-start `ApplyIfMissing` helpers were SQL Server–only.
+- **Fix**: Applied columns + backfill on local `visa2026`; switched ensure SQL to `ADD COLUMN IF NOT EXISTS`; added `ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing` and call it from Blazor `Startup` for **both** providers.
+- **Prevent**: New Postgres additive columns need host-start `ApplyIfMissing` (or `FORCE_XAF_DB_UPDATE` once), not ModuleUpdater alone; avoid DO-block SQL for simple ADD COLUMN.
+- **Cross-skill**: visa2026-lifecycle-docker | —
+
+### 2026-07-23 — Application DisplayCaption + ProcessNumber field
+
+- **Request**: Application DefaultProperty should include migration process number when present (not from "last" progress state).
+- **Decision**: Real `ApplicationProgress.ProcessNumber`; denormalized `Application.ProcessNumber` synced from `PROCESS_STARTED` (fallback: Description on that step for pre-field imports). `[DefaultProperty(DisplayCaption)]` → `FullApplicationNumber · ProcessNumber`.
+- **Schema**: `ApplicationProgressProcessNumberSchemaUpdater` (SQL Server + Postgres) + Description→ProcessNumber backfill on PROCESS_STARTED.
+- **Import**: synthesis writes ProcessNumber (not Description) for PROCESS_STARTED / direct-migration PROCESS_ISSUED.
+- **Prevent**: Do not resolve process number from latest progress alone (issued/cancelled often lack it).
+- **Cross-skill**: visa2014-to-visa2026-import
+
 ### 2026-07-21 — Import: ProcessDate/ProcessNumber on PROCESS_STARTED only
 
 ### 2026-07-21 — Import completion from Invitations / WorkPermits

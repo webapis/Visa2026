@@ -1,3 +1,60 @@
+
+### 2026-07-23 — ApplicationProgress PG reimport failed (DateTime Kind=UTC) then fixed
+
+- **Symptom**: Watch showed posted=0 fail=1100+; `Cannot write DateTime with Kind=UTC to PostgreSQL type 'timestamp without time zone'`.
+- **Cause**: Headless host uses `CreateHostBuilder` (skips `Program.Main` switch); payload used `SpecifyKind(..., Utc)`.
+- **Fix**: `AppContext.SetSwitch(Npgsql.EnableLegacyTimestampBehavior)` in `HeadlessMigrationHost.Start`; ApplicationProgress payload Date → `DateTimeKind.Unspecified`.
+- **Resume**: cleanup + reimport log `…processdate-issued-20260723-152159.log` — early progress posted>0 failed=0; prepared **38164** (ProcessDate⇒issued for direct migration).
+
+### 2026-07-23 — ApplicationProgress: direct-migration ProcessDate (sene) ⇒ PROCESS_ISSUED
+
+- **Correction**: source of truth is **Işlenmäge başlanan sene** (Application.ProcessDate), not belgi/ProcessNumber.
+- **Rule**: direct migration (ministryLegCount=0, Registration + other DirectMigration): ProcessDate set ⇒ PROCESS_STARTED + PROCESS_ISSUED. ProcessNumber optional on both steps. Bel alone does not issue.
+- **Reimport**: Posted/Failed from log above; state histogram from PG.
+- **Log**: `reimport-ApplicationProgress-localpg-processdate-issued-20260723-150530.log`
+
+### 2026-07-23 — ApplicationProgress.ProcessNumber field (not Description)
+
+- **Decision**: Legacy `Application.ProcessNumber` maps to `ApplicationProgress.ProcessNumber` on `PROCESS_STARTED` (and direct-migration `PROCESS_ISSUED`); Description no longer carries the process number.
+- **Target caption**: `Application.DisplayCaption` / denormalized `Application.ProcessNumber` (visa2026-application-progress).
+- **Verify**: transform unit tests updated; Module helper tests pass.
+- **Phase**: mapping/code (reimport optional for already-loaded Description-only rows — schema updater backfills PROCESS_STARTED Description → ProcessNumber).
+
+### 2026-07-23 — ApplicationProgress: direct-migration ProcessNumber ⇒ PROCESS_ISSUED
+
+- **Rule**: For apps that go straight to migration service (`ministryLegCount=0`, includes Registration + other DirectMigration): non-empty legacy `Application.ProcessNumber` (**Işlenmäge başlanan belgi**) synthesizes **PROCESS_STARTED** and **PROCESS_ISSUED**. ProcessDate alone does not issue. Ministry-routed apps unchanged (Inv/WP/extension completion only).
+- **Code**: `Visa2014ApplicationProgressTransform.SynthesizeSteps`; tests updated; discovery + field-map notes.
+- **Local PG reimport**: cleanup DELETE 31037; Posted **31128** / Failed **0** / Skipped no-App-map **95**; Prepared **31223**. `PROCESS_ISSUED` = **4599** (was ~4500).
+- **Log**: `reimport-ApplicationProgress-localpg-direct-issued-20260723-141320.log`
+- **Open**: confirm with user whether ProcessDate-only (sene, no belgi) should also issue when legacy status is Işlenen.
+
+
+### 2026-07-23 — Full scalar reimport .15 → local PG (Completed)
+
+- **Outcome**: Overall **Completed** / CHAIN_COMPLETE — RunId `20260723-120409` (resume after Education seed; Person–Visa from wipe run `20260723-115634`)
+- **Source**: `10.100.128.15` / `VISA2015` → PostgreSQL `visa2026`
+- **Waves (Failed=0)**: Person 3319; Passport 3667; Visa 6119; Education catch-up 4 (DB 3191); EPH 3070; Salary 2963; AoR 5176; Application **12261**; WP 406 / WPI 3860; Invitation 2864 / InvItem 5115; ApplicationItem **21707**; Rejection 207 / RejectionItem 254; ApplicationProgress (legacy ~31099; DB **31037**)
+- **Post-corrections**: PersonSubcontractor, PersonRelationship, PersonAddressPia, ApplicationItemPersonCurrent, VisaIssuingApplicationItem — ran after scalars
+- **Log**: `artifacts/local-pg-import/chain-console-from15-resume-education-20260723-120408.log`
+
+
+### 2026-07-23 — Full scalar reimport .15 → local PG (Education gap + resume)
+
+- **First chain** RunId `20260723-115634`: Person/Passport/Visa OK; **Education** Posted **3187** / Failed **4** (exit 1) — Institution `Stambul Arel uniwersiteti` missing (catalog had `… Uniwersitety` only).
+- **Seed**: INSERT Institution + related Specialties from live `.15` (`TitleOfIEducationInstitution` / `TitleOfSpeciality` via `Spcialty` FK); append calik-energi JSON; refresh DI bin overlay.
+- **Hung helper**: large-JSON regex append killed (exit -1); use LastIndexOf(`]`) append + labels from SqlClient, not Tee-Object log text (Turkmen mojibake).
+- **Resume** RunId `20260723-120409`: Education catch-up Posted **4** / Failed **0**; EPH/Salary/AoR OK; **Application** running (~12k). Watch: `Watch-OnPremImportLive.ps1 -Profile Local`.
+
+
+### 2026-07-23 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: full wipe + scalar chain (`Run-LocalPgScalarChain.ps1 -StartAt Person`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: PostgreSQL `visa2026` (localhost)
+- **Prep**: `Wipe-LocalPostgresTransactional.sql` (People/apps/progress → 0; kept EducationInstitutions 1503 / Specialties 1088 incl. slash-compound Balıkesir + Gurluşyk rows); cleared bin id-maps; refreshed DataImporter bin overlay education-institution.json / specialty.json from calik-energi JSON
+- **RunId**: 20260723-115634
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260723-115633.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
 # Learnings (append-only): visa2014-to-visa2026-import
 
 **Purpose:** Record verified discovery, strategy decisions, mapping corrections, and OData import outcomes so **each session builds on the last**.

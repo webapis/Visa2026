@@ -241,6 +241,8 @@
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullApplicationNumber" Caption="Doly arza belgisi" />
+        <Member Name="ProcessNumber" Caption="Işlenmäge başlanan belgi" />
+        <Member Name="DisplayCaption" Caption="Arza" />
         <Member Name="Invitations" Caption="Çakylyklar" />
         <Member Name="IsActive" Caption="Işjeň" />
         <Member Name="IsForFamily" Caption="Maşgala üçin" />
@@ -383,6 +385,7 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
         <Member Name="Description" Caption="Düşündiriş" />
+        <Member Name="ProcessNumber" Caption="Işlenmäge başlanan belgi" />
         <Member Name="Location" Caption="Ýer" />
         <Member Name="LocationWithMinistryLabel" Caption="Ýer" />
         <Member Name="MinistryLetterFile" Caption="Ministrlik hatynyň nusgasy" />

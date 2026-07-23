@@ -72,11 +72,12 @@ mapping:
         location: AT_MIGRATION_SERVICE
         dateSource: day_after_prepare_or_prior_migration_step
       - step: migration_issued
-        when: ProcessDate >= 2000-01-01 OR ProcessNumber non-empty
+        when: ProcessDate set (Işlenmäge başlanan sene) — source of truth for started + completed
         state: PROCESS_ISSUED
         location: AT_MIGRATION_SERVICE
-        dateSource: ProcessDate
+        dateSource: ProcessDate (else prior+1)
         descriptionFields: [ProcessNumber]
+        notes: Direct-to-migration only; ProcessNumber (belgi) is optional label, not the gate.
     longProcessSteps:
       - step: prepare
         when: always
@@ -107,11 +108,12 @@ mapping:
         location: AT_MIGRATION_SERVICE
         dateSource: day_after_last_ministry_step_or_prior_step
       - step: migration_issued
-        when: ProcessDate >= 2000-01-01 OR ProcessNumber non-empty
+        when: Invitation / WorkPermit / extension visa coverage (not ProcessNumber alone)
         state: PROCESS_ISSUED
         location: AT_MIGRATION_SERVICE
-        dateSource: ProcessDate
-        descriptionFields: [ProcessNumber]
+        dateSource: completion evidence IssuedDate
+        descriptionFields: [InvitationNumber, WorkPermitNumber, VisaNumber]
+        notes: Long/ministry route — ProcessNumber remains PROCESS_STARTED description only.
     terminalOverrides:
       - when: Cancelled = 1
         state: PROCESS_CANCELLED

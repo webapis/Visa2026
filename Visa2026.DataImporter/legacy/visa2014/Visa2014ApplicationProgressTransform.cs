@@ -33,7 +33,7 @@ internal static class Visa2014ApplicationProgressTransform
     internal static readonly string[] ApplicationProgressMainColumnOrder =
     [
         "_legacyRowId", "_legacyApplicationOid", "_syntheticStepKey", "_importAction", "_processKind",
-        "Application", "State", "Order", "Date", "Description",
+        "Application", "State", "Order", "Date", "ProcessNumber", "Description",
         "_legacy_ManualApplicationNumber", "_legacy_ApplicationTypeComposite",
         "_legacy_ProcessNumber", "_legacy_MinisteriesDocumentNumber",
     ];
@@ -221,9 +221,11 @@ internal static class Visa2014ApplicationProgressTransform
                     ["State"] = step.StateCode,
                     ["Order"] = stepIndex + 1,
                     ["Date"] = step.Date.ToString("yyyy-MM-dd"),
+                    ["ProcessNumber"] = step.ProcessNumber,
                     ["Description"] = step.Description,
                     ["_lineage_State"] = "synthesized step → ApplicationState.Code",
                     ["_lineage_Date"] = step.DateSource,
+                    ["_lineage_ProcessNumber"] = step.ProcessNumberSource,
                     ["_lineage_Description"] = step.DescriptionSource,
                     ["_lineage_Order"] = "1-based after workflow sort",
                     ["_lineage_Application"] = "dbo.Application.Oid → Application id-map",
@@ -246,7 +248,15 @@ internal static class Visa2014ApplicationProgressTransform
         };
     }
 
-    internal sealed record SynthesisStep(string StepCode, string StateCode, DateTime Date, string? Description, string? DateSource = null, string? DescriptionSource = null);
+    internal sealed record SynthesisStep(
+        string StepCode,
+        string StateCode,
+        DateTime Date,
+        string? Description,
+        string? DateSource = null,
+        string? DescriptionSource = null,
+        string? ProcessNumber = null,
+        string? ProcessNumberSource = null);
 
     internal static List<SynthesisStep> SynthesizeSteps(
         Visa2014ApplicationProgressRawRow raw,
@@ -307,11 +317,15 @@ internal static class Visa2014ApplicationProgressTransform
             }
         }
 
-        // Legacy ProcessDate / ProcessNumber mark migration-service processing start — not completion.
-        // PROCESS_ISSUED from invitation/work-permit evidence, or full extension subtype-7
-        // coverage (ProcessNumber→PIA or next sibling after PIA.Visa).
-        var hasProcessStart = IsLegacyDateSet(raw.ProcessDate)
-            || !string.IsNullOrWhiteSpace(raw.ProcessNumber);
+        // Legacy ProcessDate ("Işlenmäge başlanan sene") / ProcessNumber ("… belgi") mark
+        // migration-service processing start. Direct migration (no ministry legs): ProcessDate
+        // is source of truth for completed — also synthesizes PROCESS_ISSUED. ProcessNumber is
+        // optional description only. Ministry-routed apps still get PROCESS_ISSUED only from
+        // invitation/work-permit/extension completion evidence.
+        var hasProcessNumber = !string.IsNullOrWhiteSpace(raw.ProcessNumber);
+        var hasProcessDate = IsLegacyDateSet(raw.ProcessDate);
+        var hasProcessStart = hasProcessDate || hasProcessNumber;
+        var isDirectMigration = ministryLegCount == 0;
         var ministryRouteComplete = ministryLegCount > 0 && !raw.Cancelled && !effectiveRejected;
         if (hasProcessStart || ministryRouteComplete)
         {
@@ -332,9 +346,11 @@ internal static class Visa2014ApplicationProgressTransform
                 "migration_started",
                 "PROCESS_STARTED",
                 startedDate,
-                FormatLegacyDescriptionValue(raw.ProcessNumber),
+                null,
                 startedDateSource,
-                string.IsNullOrWhiteSpace(raw.ProcessNumber) ? null : "dbo.Application.ProcessNumber"));
+                null,
+                FormatLegacyDescriptionValue(raw.ProcessNumber),
+                hasProcessNumber ? "dbo.Application.ProcessNumber" : null));
         }
 
         if (!raw.Cancelled && !effectiveRejected && completion is { HasCompletion: true })
@@ -379,6 +395,32 @@ internal static class Visa2014ApplicationProgressTransform
                 string.IsNullOrWhiteSpace(completion.SourceValue)
                     ? null
                     : $"completion evidence value ({completion.SourceLabel})"));
+        }
+        else if (!raw.Cancelled
+            && !effectiveRejected
+            && isDirectMigration
+            && hasProcessDate
+            && !steps.Exists(s => s.StateCode == "PROCESS_ISSUED"))
+        {
+            // Direct-to-migration: "Işlenmäge başlanan sene" (ProcessDate) ⇒ started + issued.
+            var priorDate = steps.Count > 0 ? steps[^1].Date : appDate;
+            var issuedDate = raw.ProcessDate!.Value;
+            var issuedDateSource = "dbo.Application.ProcessDate (direct-migration ProcessDate ⇒ issued)";
+            if (issuedDate <= priorDate)
+            {
+                issuedDate = priorDate.AddDays(1);
+                issuedDateSource = "prior step Date + 1 day (ordering; direct-migration ProcessDate ⇒ issued)";
+            }
+
+            steps.Add(new SynthesisStep(
+                "migration_issued",
+                "PROCESS_ISSUED",
+                issuedDate,
+                null,
+                issuedDateSource,
+                null,
+                FormatLegacyDescriptionValue(raw.ProcessNumber),
+                hasProcessNumber ? "dbo.Application.ProcessNumber" : null));
         }
 
         if (raw.Cancelled)

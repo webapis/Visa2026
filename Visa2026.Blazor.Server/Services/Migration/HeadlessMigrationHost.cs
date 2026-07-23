@@ -39,6 +39,9 @@ public sealed class HeadlessMigrationHost : IDisposable
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new ArgumentException("Connection string is required.", nameof(connectionString));
 
+        // CreateHostBuilder skips Program.Main — set before any Npgsql type mapping.
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
         Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", connectionString);
         Environment.SetEnvironmentVariable("ConnectionStrings__ConnectionString", connectionString);
 

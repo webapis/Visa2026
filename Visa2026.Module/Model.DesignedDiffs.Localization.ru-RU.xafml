@@ -241,6 +241,8 @@
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullApplicationNumber" Caption="Полный номер" />
+        <Member Name="ProcessNumber" Caption="Номер обработки" />
+        <Member Name="DisplayCaption" Caption="Заявка" />
         <Member Name="Invitations" Caption="Приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsForFamily" Caption="Для семьи" />
@@ -383,6 +385,7 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Description" Caption="Описание" />
+        <Member Name="ProcessNumber" Caption="Номер обработки" />
         <Member Name="Location" Caption="Место" />
         <Member Name="LocationWithMinistryLabel" Caption="Место" />
         <Member Name="MinistryLetterFile" Caption="Копия письма министерства" />

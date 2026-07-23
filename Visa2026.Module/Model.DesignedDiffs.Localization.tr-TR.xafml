@@ -241,6 +241,8 @@
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="FullApplicationNumber" Caption="Tam Başvuru No" />
+        <Member Name="ProcessNumber" Caption="İşlem numarası" />
+        <Member Name="DisplayCaption" Caption="Başvuru" />
         <Member Name="Invitations" Caption="Davetler" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsForFamily" Caption="Aile İçin" />
@@ -383,6 +385,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Description" Caption="Açıklama" />
+        <Member Name="ProcessNumber" Caption="İşlem numarası" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="LocationWithMinistryLabel" Caption="Yer" />
         <Member Name="MinistryLetterFile" Caption="Bakanlık yazış kopyası" />

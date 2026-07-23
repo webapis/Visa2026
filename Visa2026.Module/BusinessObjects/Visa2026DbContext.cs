@@ -156,6 +156,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdEducation> VwRdEducation { get; set; }
         public DbSet<VwRdEducationByCountry> VwRdEducationByCountry { get; set; }
         public DbSet<VwRdPositionHistory> VwRdPositionHistory { get; set; }
+        public DbSet<VwRdRegistration> VwRdRegistration { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -351,6 +352,11 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdPositionHistory>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_position_history");
+            });
+
+            modelBuilder.Entity<VwRdRegistration>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_registration");
             });
 
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {

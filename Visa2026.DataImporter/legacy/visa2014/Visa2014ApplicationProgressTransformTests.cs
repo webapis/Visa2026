@@ -40,14 +40,15 @@ public class Visa2014ApplicationProgressTransformTests
         Assert.Equal("2_REVIEW_APPROVED", steps[2].StateCode);
         Assert.Equal("PROCESS_STARTED", steps[3].StateCode);
         Assert.Equal(new DateTime(2014, 6, 27), steps[3].Date);
-        Assert.Equal("AS455977", steps[3].Description);
+        Assert.Equal("AS455977", steps[3].ProcessNumber);
+        Assert.Null(steps[3].Description);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
         Assert.DoesNotContain(steps, s => s.StateCode == "IS_BEING_PREPARED");
         Assert.DoesNotContain(steps, s => s.StateCode is "2_REVIEW_STARTED" or "3_REVIEW_STARTED");
     }
 
     [Fact]
-    public void SynthesizeSteps_SimpleProcessWithProcessDate_InsertsOnlyMigrationStarted()
+    public void SynthesizeSteps_DirectMigrationWithProcessDate_InsertsStartedAndIssued()
     {
         var raw = new Visa2014ApplicationProgressRawRow(
             LegacyApplicationOid: Guid.NewGuid(),
@@ -75,10 +76,42 @@ public class Visa2014ApplicationProgressTransformTests
 
         var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
 
-        Assert.Single(steps);
+        Assert.Equal(2, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
         Assert.Equal(new DateTime(2014, 6, 15), steps[0].Date);
-        Assert.Equal("P-1", steps[0].Description);
+        Assert.Equal("P-1", steps[0].ProcessNumber);
+        Assert.Null(steps[0].Description);
+        Assert.Equal("PROCESS_ISSUED", steps[1].StateCode);
+        Assert.Equal("P-1", steps[1].ProcessNumber);
+        Assert.Null(steps[1].Description);
+        Assert.True(steps[1].Date > steps[0].Date);
+    }
+
+    [Fact]
+    public void SynthesizeSteps_DirectMigrationProcessDateOnly_InsertsStartedAndIssued()
+    {
+        var raw = BuildRaw(processDate: new DateTime(2014, 6, 15), processNumber: null);
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
+
+        Assert.Equal(2, steps.Count);
+        Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
+        Assert.Equal(new DateTime(2014, 6, 15), steps[0].Date);
+        Assert.Equal("PROCESS_ISSUED", steps[1].StateCode);
+        Assert.Null(steps[1].ProcessNumber);
+        Assert.True(steps[1].Date > steps[0].Date);
+    }
+
+    [Fact]
+    public void SynthesizeSteps_DirectMigrationProcessNumberOnly_InsertsOnlyMigrationStarted()
+    {
+        var raw = BuildRaw(processDate: null, processNumber: "BELGI-1");
+
+        var steps = Visa2014ApplicationProgressTransform.SynthesizeSteps(raw, ministryLegCount: 0);
+
+        Assert.Single(steps);
+        Assert.Equal("PROCESS_STARTED", steps[0].StateCode);
+        Assert.Equal("BELGI-1", steps[0].ProcessNumber);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
     }
 
@@ -192,7 +225,8 @@ public class Visa2014ApplicationProgressTransformTests
         Assert.Equal("1_REVIEW_APPROVED", steps[1].StateCode);
         Assert.Equal("PROCESS_STARTED", steps[2].StateCode);
         Assert.Equal(new DateTime(2015, 12, 24), steps[2].Date);
-        Assert.Equal("AS538188", steps[2].Description);
+        Assert.Equal("AS538188", steps[2].ProcessNumber);
+        Assert.Null(steps[2].Description);
         Assert.DoesNotContain(steps, s => s.StateCode == "PROCESS_ISSUED");
     }
 
@@ -210,7 +244,8 @@ public class Visa2014ApplicationProgressTransformTests
         Assert.Equal(4, steps.Count);
         Assert.Equal("PROCESS_STARTED", steps[2].StateCode);
         Assert.Equal(new DateTime(2015, 12, 24), steps[2].Date);
-        Assert.Equal("AS538188", steps[2].Description);
+        Assert.Equal("AS538188", steps[2].ProcessNumber);
+        Assert.Null(steps[2].Description);
         Assert.Equal("PROCESS_ISSUED", steps[3].StateCode);
         Assert.Equal(new DateTime(2016, 1, 14), steps[3].Date);
         Assert.Equal("01//77", steps[3].Description);
