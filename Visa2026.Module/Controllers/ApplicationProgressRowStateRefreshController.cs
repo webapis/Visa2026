@@ -61,11 +61,23 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
 
     private void RefreshAppearance()
     {
-        if (Frame.View is ListView { ObjectTypeInfo.Type: var type } listView
-            && type == typeof(Application))
+        if (Frame.View is ListView { ObjectTypeInfo.Type: var type } listView)
         {
-            foreach (var application in listView.CollectionSource.List.OfType<Application>())
-                application.InvalidateListViewDisplayCache();
+            if (type == typeof(Application))
+            {
+                foreach (var application in listView.CollectionSource.List.OfType<Application>())
+                    application.InvalidateListViewDisplayCache();
+            }
+            else if (type == typeof(ApplicationItem))
+            {
+                foreach (var application in listView.CollectionSource.List.OfType<ApplicationItem>()
+                             .Select(item => item.Application)
+                             .Where(application => application != null)
+                             .Distinct())
+                {
+                    application!.InvalidateListViewDisplayCache();
+                }
+            }
         }
 
         Frame.GetController<AppearanceController>()?.Refresh();
@@ -74,6 +86,11 @@ public sealed class ApplicationProgressRowStateRefreshController : ViewControlle
             && detailView.CurrentObject is BusinessObjects.Application)
         {
             detailView.Refresh();
+        }
+        else if (Frame.View is ListView { ObjectTypeInfo.Type: var itemListType }
+                 && itemListType == typeof(ApplicationItem))
+        {
+            Frame.View.Refresh();
         }
     }
 }

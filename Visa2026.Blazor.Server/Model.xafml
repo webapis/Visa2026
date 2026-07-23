@@ -56,13 +56,14 @@
         <ColumnInfo Id="ApplicationItemName" Index="0" />
         <ColumnInfo Id="Person" Index="1" />
         <ColumnInfo Id="IsLineCancelled" Index="2" />
-        <ColumnInfo Id="RegistrationDate" Index="3" />
-        <ColumnInfo Id="TravelDate" Index="4" />
-        <ColumnInfo Id="CheckPoint" Index="5" />
-        <ColumnInfo Id="CurrentPassport" Index="6" />
-        <ColumnInfo Id="CurrentVisa" Index="7" Caption="Visa" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
+        <ColumnInfo Id="LastApplicationState" Index="3" />
+        <ColumnInfo Id="RegistrationDate" Index="4" />
+        <ColumnInfo Id="TravelDate" Index="5" />
+        <ColumnInfo Id="CheckPoint" Index="6" />
+        <ColumnInfo Id="CurrentPassport" Index="7" />
+        <ColumnInfo Id="CurrentVisa" Index="8" Caption="Visa" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="9" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="10" />
       </Columns>
     </ListView>
     <DetailView Id="Application_DetailView">
@@ -337,17 +338,18 @@
         <ColumnInfo Id="Application" Width="81" />
         <ColumnInfo Id="Person" Index="1" Width="56" />
         <ColumnInfo Id="IsLineCancelled" Index="2" Width="80" />
-        <ColumnInfo Id="RegistrationDate" Index="3" Width="110" />
-        <ColumnInfo Id="TravelDate" Index="4" Width="78" />
+        <ColumnInfo Id="LastApplicationState" Index="3" Width="140" />
+        <ColumnInfo Id="RegistrationDate" Index="4" Width="110" />
+        <ColumnInfo Id="TravelDate" Index="5" Width="78" />
         <ColumnInfo Id="TravelType" Width="79" />
-        <ColumnInfo Id="CheckPoint" Index="5" Width="84" />
+        <ColumnInfo Id="CheckPoint" Index="6" Width="84" />
         <ColumnInfo Id="MovementType" Width="106" />
-        <ColumnInfo Id="CurrentPassport" Index="6" Width="108" />
-        <ColumnInfo Id="CurrentVisa" Index="7" Width="84" />
+        <ColumnInfo Id="CurrentPassport" Index="7" Width="108" />
+        <ColumnInfo Id="CurrentVisa" Index="8" Width="84" />
         <ColumnInfo Id="TravelNotes" Width="85" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" Width="147" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="9" Width="147" />
         <ColumnInfo Id="BusinessTripAddress" Width="133" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" Width="177" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="10" Width="177" />
         <ColumnInfo Id="PreviousPassport" Width="113" />
         <ColumnInfo Id="NextVisaId" Width="82" />
         <ColumnInfo Id="NextVisa" Width="69" />

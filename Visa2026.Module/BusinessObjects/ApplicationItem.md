@@ -88,6 +88,16 @@ Catalog flags are defined on [`ApplicationType`](LookupBusinessObjects.cs) and s
 | `VisaIsCancelled` | `ShowVisaIsCancelled` |
 | `VisaIsChanged` | `ShowVisaIsChanged` |
 
+### Last application state (calculated from parent)
+
+| Property | Type | Notes |
+|----------|------|--------|
+| `LastApplicationState` | `string` (`[NotMapped]`) | Localized latest parent progress (prefers `Application.LatestProgressDisplay`). List column only. |
+| `PrimaryStateCode` | `string` (`[NotMapped]`, `IBoListRowState`) | Parent `Application.PrimaryStateCode` for row color. |
+| `ListRowCssClass` | `string` (`[NotMapped]`) | Parent `Application.ListRowCssClass` (SLA-aware); empty when `IsLineCancelled` so cancel Appearance wins. |
+
+Row tint on item ListViews uses Blazor `ApplicationItemProgressRowAppearanceController` and the same `visa-progress-row--state-*` CSS as Application. No denormalized columns on the item.
+
 ### Soft delete
 
 `IsDeleted`, `DateDeleted`, `DeletedBy` — `ISoftDelete`.

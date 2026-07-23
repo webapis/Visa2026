@@ -32,7 +32,7 @@ namespace Visa2026.Module.BusinessObjects
         Context = "DetailView")]
     [Appearance("ApplicationItem_LineCancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsLineCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
-    public class ApplicationItem : BaseObject, IOptionalDetailFields
+    public class ApplicationItem : BaseObject, IOptionalDetailFields, IBoListRowState
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
 
@@ -1764,6 +1764,35 @@ namespace Visa2026.Module.BusinessObjects
         [Appearance("VisaIssuedColumnVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowVisaIssued", Context = "DetailView,ListView")]
          [ModelDefault("AllowEdit", "False")]
         public virtual bool VisaIssued { get; set; }
+
+        /// <summary>
+        /// Latest parent <see cref="Application"/> progress state/location code for ListView row color (<see cref="IBoListRowState"/>).
+        /// Reuses denormalized <see cref="Application.PrimaryStateCode"/> — no per-item progress history walk.
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string PrimaryStateCode => Application?.PrimaryStateCode ?? string.Empty;
+
+        /// <summary>
+        /// Localized latest application progress state (from parent denormalized display / computed fallback).
+        /// </summary>
+        [XafDisplayName("Last application state")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public string LastApplicationState =>
+            !string.IsNullOrEmpty(Application?.LatestProgressDisplay)
+                ? Application.LatestProgressDisplay
+                : Application?.LatestProgressState ?? string.Empty;
+
+        /// <summary>
+        /// Row CSS from parent <see cref="Application.ListRowCssClass"/> (includes SLA override). Empty when cancelled line wins.
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string ListRowCssClass =>
+            IsLineCancelled ? string.Empty : Application?.ListRowCssClass ?? string.Empty;
 
         /// <summary>
         /// Line or parent application is cancelled — type-specific flags or latest application <c>PROCESS_CANCELLED</c> progress.
