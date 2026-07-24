@@ -749,3 +749,115 @@ Pinned 3rd after To Be Checked In. Valid visa, `DaysRemaining < 7`, no `App_Reg_
 ## 2026-07-23 — Check in by City
 
 Pinned first. Same active reg types as Expiring State; city from last app `CurrentAddressOfResidence.City` (NameTm); one last visa/person; chart cities with data only. `vw_rd_registration.CityLabel`.
+
+## 2026-07-24 — Invitation category: replace Issued Invitations with 6 sub-reports
+
+**Ask:** Remove current Invitation validity-bucket states; add Ready (by project), In Process (Application Progress states), Rejected (by project), Used, Expired, By Visa Period and Category.
+
+**Change:**
+- Catalog: dropped `issued-inv`; added `ready-by-project`, `in-process`, `rejected-by-project`, `used`, `expired`, `by-period-category`
+- Mock: separate row sets; Ready/Rejected/Used/Expired chart Status = Project; In Process = Application Progress state; Period·Category combined label
+- Real `LoadInvitation`: EF dispatch matching those rules (RejectionItem preferred for rejected; ProcessRejected apps as fallback). Legacy `issued-inv` remaps to Ready
+- Default chart = bar for all Invitation tabs
+- Hybrid: Invitation still mock (not in `RealSubReports`)
+
+**Definitions used:**
+- Ready = InvitationItem not used/cancelled/changed, ExpirationDate ≥ today
+- In Process = `CanIssueInvitation` application, no linked Invitation, progress not issued/rejected/cancelled
+- Used = `IsUsed`; Expired = unused + ExpirationDate < today
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardMockQueryService.cs`, `ReportDashboardQueryService.cs`, `ReportDashboardPropertyEditor.cs`, `reference.md`, `IMPLEMENTATION_PLAN.md`
+## 2026-07-24 — Invitation Ready: vw_rd_invitation_ready
+
+**Ask:** SQL view for Ready Invitations sub-report (confirmed: InvitationItem grain; IsUsed/Cancelled/Changed = 0; ExpirationDate >= today; project = Application then Person then sponsor).
+
+**Change:**
+- `vw_rd_invitation_ready` (+ postgres) — StatusLabel = ProjectName (`(No project)` fallback)
+- EF `VwRdInvitationReady` + DbContext; SqlViewsUpdater + ReportDashboardPostgresViewsUpdater
+- `LoadInvitationReadyFromView`; Hybrid promote `(Invitation, ready-by-project)`; legacy EF fallback if view missing
+- IssuedDate filter uses `Invitations.StartDate` (IssuedDate column mapping)
+
+**Files:** SqlViews, VwRdInvitationReady.cs, Visa2026DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, ReportDashboardQueryService, ReportDashboardHybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Invitation In Process: vw_rd_invitation_in_process
+
+**Ask:** SQL view for Invitations In Process (confirmed: one row per Application; CanIssueInvitation + no linked Invitation; exclude PROCESS_ISSUED/REJECTED/CANCELLED; simple progress Status; ministry rejects stay in-process).
+
+**Change:**
+- `vw_rd_invitation_in_process` (+ postgres); EF `VwRdInvitationInProcess`; updaters; `LoadInvitationInProcessFromView`; Hybrid promote
+- Person-type filter uses any ApplicationItem role (not only first-person column)
+- Fallback to legacy EF `LoadInvitationInProcess` if view missing
+
+**Files:** SqlViews, VwRdInvitationInProcess.cs, DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Invitation Rejected: vw_rd_invitation_rejected
+
+**Ask:** SQL view for Invitations Rejected — union RejectionItems + PROCESS_REJECTED apps without Rejection header; Status = Project.
+
+**Change:**
+- `vw_rd_invitation_rejected` (+ postgres); composite key `(SourceKind, ID)`; EF `VwRdInvitationRejected`
+- Hybrid promote `(Invitation, rejected-by-project)`; legacy EF fallback also unions both sources
+- App-leg of union excludes apps that already have a `Rejections` row (no double-count)
+
+**Files:** SqlViews, VwRdInvitationRejected.cs, DbContext, updaters, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Invitation Used: vw_rd_invitation_used
+
+**Ask:** SQL view for Used Invitations (InvitationItem IsUsed = 1; Status = Project).
+
+**Change:** `vw_rd_invitation_used` (+ postgres); `VwRdInvitationUsed`; `LoadInvitationUsedFromView` (ColumnB = IssuedDate); Hybrid promote `(Invitation, used)`.
+
+**Files:** SqlViews, VwRdInvitationUsed.cs, DbContext, updaters, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Invitation Valid Until (rename Expired + view)
+
+**Ask:** Rename Expired Invitations → Invitation Valid Until; SQL view grouped by days/weeks/months remaining; valid unused only; show only buckets with rows.
+
+**Buckets:** `< 1 day` · `< 1 week` · `< 2 weeks` · `< 3 weeks` · `< 1 month` · `< 2 months` · `< 3 months` · `≥ 3 months`
+
+**Change:** Catalog key `valid-until` (legacy `expired` remaps); `vw_rd_invitation_valid_until`; `VwRdInvitationValidUntil`; `LoadInvitationValidUntilFromView`; Hybrid promote; mock updated.
+
+**Files:** Catalog, Mock, PropertyEditor, SqlViews, entity, DbContext, updaters, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Invitation Valid Until showed 0 while Ready had 281
+
+**Cause:** `vw_rd_invitation_valid_until` not created yet; loader fell back to `EmptyPanel` instead of EF. Ready had EF fallback so it still showed data.
+
+**Fix:** `LoadInvitationValidUntilLegacy` (same filters + remaining buckets); missing-view catch walks exception chain and uses legacy. Restart app; optional `FORCE_XAF_DB_UPDATE` to create the view.
+## 2026-07-24 — Ready By Project + Ready By VisaPeriod
+
+**Ask:** Rename Ready Invitations → Ready By Project; add Ready By VisaPeriod after it (same Ready population, chart by VisaPeriod).
+
+**Change:**
+- Catalog: eady-by-project label "Ready By Project"; new eady-by-period "Ready By VisaPeriod"
+- w_rd_invitation_ready adds `VisaPeriodLabel`; both sub-reports share the view
+- Loader groups by `StatusLabel` (project) or `VisaPeriodLabel` (period); legacy EF fallback for period
+- Hybrid promote `(Invitation, ready-by-period)`; bar chart default
+
+**Files:** Catalog, Mock, PropertyEditor, SqlViews (+ postgres), VwRdInvitationReady, updaters, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Ready By VisaCategory (drop Period+Category)
+
+**Ask:** Remove By Visa Period and Category; add Ready By VisaCategory after Ready By VisaPeriod (same Ready population).
+
+**Change:**
+- Removed catalog/mock/loader `by-period-category`
+- Added `ready-by-category`; `vw_rd_invitation_ready` adds `VisaCategoryLabel` (join VisaCategories)
+- Loader groups by category; Hybrid promote; bar default
+
+**Files:** Catalog, Mock, PropertyEditor, SqlViews (+ postgres), VwRdInvitationReady, updaters, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Merge Ready Period + Category into one tab
+
+**Ask:** Combine Ready By VisaPeriod and Ready By VisaCategory into one sub-report (combined Status).
+
+**Change:**
+- Removed tabs `ready-by-period` / `ready-by-category`
+- Added `ready-by-period-category` ("Ready By Period · Category"); Status = `VisaPeriod · VisaCategory`
+- Same Ready population / `vw_rd_invitation_ready` (uses both label columns); legacy keys remap
+- Hybrid promote; bar default
+
+**Files:** Catalog, Mock, PropertyEditor, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-24 — Ready By Period · Category · Type
+
+**Ask:** Add VisaType to Ready By Period · Category; prefer · over / in label.
+
+**Change:**
+- Tab/Status: `Ready By Period · Category · Type` / `period · category · type`
+- `VisaTypeLabel` from `Invitation.Application.VisaType` (standalone invitations → `(No type)`)
+- View/EF/updaters/loader/legacy/mock updated
+
+**Files:** SqlViews (+ postgres), VwRdInvitationReady, updaters, Catalog, QueryService, Mock, learnings

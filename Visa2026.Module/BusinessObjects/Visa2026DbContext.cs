@@ -144,6 +144,11 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ForeignWorkerMaglumat> ForeignWorkerMaglumat { get; set; }
         public DbSet<VwRdPassport> VwRdPassport { get; set; }
         public DbSet<VwRdWorkPermit> VwRdWorkPermit { get; set; }
+        public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
+        public DbSet<VwRdInvitationInProcess> VwRdInvitationInProcess { get; set; }
+        public DbSet<VwRdInvitationRejected> VwRdInvitationRejected { get; set; }
+        public DbSet<VwRdInvitationUsed> VwRdInvitationUsed { get; set; }
+        public DbSet<VwRdInvitationValidUntil> VwRdInvitationValidUntil { get; set; }
         public DbSet<VwRdVisaAppProgress> VwRdVisaAppProgress { get; set; }
         public DbSet<VwRdProject> VwRdProject { get; set; }
         public DbSet<VwRdPersonRole> VwRdPersonRole { get; set; }
@@ -294,6 +299,31 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdWorkPermit>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_work_permit");
+            });
+
+            modelBuilder.Entity<VwRdInvitationReady>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_ready");
+            });
+
+            modelBuilder.Entity<VwRdInvitationInProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_in_process");
+            });
+
+            modelBuilder.Entity<VwRdInvitationRejected>(b => {
+                b.HasKey(t => new { t.SourceKind, t.ID });
+                b.ToView("vw_rd_invitation_rejected");
+            });
+
+            modelBuilder.Entity<VwRdInvitationUsed>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_used");
+            });
+
+            modelBuilder.Entity<VwRdInvitationValidUntil>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_valid_until");
             });
 
             modelBuilder.Entity<VwRdVisaAppProgress>(b => {

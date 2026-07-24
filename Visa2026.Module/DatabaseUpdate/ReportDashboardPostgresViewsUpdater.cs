@@ -23,6 +23,11 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewVisaExtensionStatus();
         CreateViewRdPassport();
         CreateViewRdWorkPermit();
+        CreateViewRdInvitationReady();
+        CreateViewRdInvitationInProcess();
+        CreateViewRdInvitationRejected();
+        CreateViewRdInvitationUsed();
+        CreateViewRdInvitationValidUntil();
         CreateViewRdVisaAppProgress();
         CreateViewRdProjects();
         CreateViewRdPersonRoles();
@@ -224,6 +229,434 @@ WHERE COALESCE(wpi.""GCRecord"", 0) = 0
   AND wpi.""PersonID"" IS NOT NULL
   AND wpi.""ExpirationDate"" IS NOT NULL
   AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
+", true);
+    }
+    private void CreateViewRdInvitationReady()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_ready;", true);
+        ExecuteNonQueryCommand(@"
+CREATE VIEW vw_rd_invitation_ready AS
+SELECT
+    ii.""ID""                                                                 AS ""ID"",
+    p.""ID""                                                                  AS ""PersonOid"",
+    CONCAT_WS(' ',
+        NULLIF(BTRIM(p.""FirstName""), ''),
+        NULLIF(BTRIM(p.""MiddleName""), ''),
+        NULLIF(BTRIM(p.""LastName""), '')
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameRaw"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameTm"",
+    p.""PersonRole""                                                          AS ""PersonRoleCode"",
+    COALESCE(NULLIF(BTRIM(inv.""InvitationNumber""), ''), '')                 AS ""InvitationNumber"",
+    CASE WHEN (inv.""ExpirationDate"")::date > DATE '1900-01-01' THEN inv.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
+    CASE WHEN (inv.""StartDate"")::date > DATE '1900-01-01' THEN inv.""StartDate"" ELSE NULL END AS ""IssuedDate"",
+    COALESCE(
+        NULLIF(BTRIM(vp.""NameTm""), ''),
+        NULLIF(BTRIM(vp.""Name""), ''),
+        '(No period)'
+    )                                                                       AS ""VisaPeriodLabel"",
+    COALESCE(
+        NULLIF(BTRIM(vc.""NameTm""), ''),
+        NULLIF(BTRIM(vc.""Name""), ''),
+        '(No category)'
+    )                                                                       AS ""VisaCategoryLabel"",
+    COALESCE(
+        NULLIF(BTRIM(vt.""NameTm""), ''),
+        NULLIF(BTRIM(vt.""Name""), ''),
+        '(No type)'
+    )                                                                       AS ""VisaTypeLabel"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""StatusLabel"",
+    'st-cat-1'                                                              AS ""StatusCssClass"",
+    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+FROM ""InvitationItems"" ii
+INNER JOIN ""Invitations"" inv
+    ON inv.""ID"" = ii.""InvitationID"" AND COALESCE(inv.""GCRecord"", 0) = 0
+INNER JOIN ""People"" p
+    ON p.""ID"" = ii.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaPeriods"" vp
+    ON vp.""ID"" = inv.""VisaPeriodID"" AND COALESCE(vp.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaCategories"" vc
+    ON vc.""ID"" = inv.""VisaCategoryID"" AND COALESCE(vc.""GCRecord"", 0) = 0
+LEFT JOIN ""Applications"" a
+    ON a.""ID"" = inv.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaTypes"" vt
+    ON vt.""ID"" = a.""VisaTypeID"" AND COALESCE(vt.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" apc
+    ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+WHERE COALESCE(ii.""GCRecord"", 0) = 0
+  AND COALESCE(ii.""IsUsed"", FALSE) = FALSE
+  AND COALESCE(ii.""IsCancelled"", FALSE) = FALSE
+  AND COALESCE(ii.""IsChanged"", FALSE) = FALSE
+  AND ii.""PersonID"" IS NOT NULL
+  AND inv.""ExpirationDate"" IS NOT NULL
+  AND (inv.""ExpirationDate"")::date >= CURRENT_DATE;
+
+", true);
+    }
+    private void CreateViewRdInvitationInProcess()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_in_process;", true);
+        ExecuteNonQueryCommand(@"
+-- Report Dashboard: Invitations In Process (in-process) — PostgreSQL.
+CREATE VIEW vw_rd_invitation_in_process AS
+SELECT
+    a.""ID""                                                                  AS ""ID"",
+    first_p.""ID""                                                            AS ""PersonOid"",
+    COALESCE(
+        NULLIF(CONCAT_WS(' ',
+            NULLIF(BTRIM(first_p.""FirstName""), ''),
+            NULLIF(BTRIM(first_p.""MiddleName""), ''),
+            NULLIF(BTRIM(first_p.""LastName""), '')
+        ), ''),
+        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
+        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
+        ''
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(pc.""NameTm"", '')                                               AS ""ProjectNameRaw"",
+    COALESCE(pc.""NameTm"", '')                                               AS ""ProjectNameTm"",
+    COALESCE(first_p.""PersonRole"", 0)                                       AS ""PersonRoleCode"",
+    COALESCE(
+        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
+        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
+        ''
+    )                                                                       AS ""ApplicationNumber"",
+    a.""ApplicationDate""                                                     AS ""ApplicationDate"",
+    COALESCE(
+        NULLIF(BTRIM(ast.""NameTm""), ''),
+        NULLIF(BTRIM(ast.""Name""), ''),
+        'Being Prepared'
+    )                                                                       AS ""StatusLabel"",
+    CASE
+      WHEN ast.""Code"" IN ('PROCESS_ISSUED', '1_REVIEW_APPROVED', '2_REVIEW_APPROVED')
+                                                                              THEN 'st-approved'
+      WHEN ast.""Code"" IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED', '1_REVIEW_REJECTED', '2_REVIEW_REJECTED')
+                                                                              THEN 'st-expiring'
+      ELSE                                                                          'st-pending'
+    END                                                                     AS ""StatusCssClass"",
+    COALESCE(ast.""Code"", '')                                                AS ""ProgressStateCode"",
+    COALESCE(first_p.""IsArchived"", FALSE)                                   AS ""IsArchived""
+FROM ""Applications"" a
+INNER JOIN ""ApplicationTypes"" at
+    ON at.""ID"" = a.""ApplicationTypeID""
+   AND COALESCE(at.""GCRecord"", 0) = 0
+   AND COALESCE(at.""CanIssueInvitation"", FALSE) = TRUE
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = a.""ProjectContractID""
+   AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN LATERAL (
+    SELECT ap.""StateID""
+    FROM ""ApplicationProgresses"" ap
+    WHERE ap.""ApplicationID"" = a.""ID""
+      AND COALESCE(ap.""GCRecord"", 0) = 0
+    ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
+    LIMIT 1
+) latest_ap ON TRUE
+LEFT JOIN ""ApplicationStates"" ast
+    ON ast.""ID"" = latest_ap.""StateID""
+   AND COALESCE(ast.""GCRecord"", 0) = 0
+LEFT JOIN LATERAL (
+    SELECT ai.""PersonID""
+    FROM ""ApplicationItems"" ai
+    WHERE ai.""ApplicationID"" = a.""ID""
+      AND COALESCE(ai.""GCRecord"", 0) = 0
+    ORDER BY ai.""ID""
+    LIMIT 1
+) first_ai ON TRUE
+LEFT JOIN ""People"" first_p
+    ON first_p.""ID"" = first_ai.""PersonID""
+   AND COALESCE(first_p.""GCRecord"", 0) = 0
+WHERE COALESCE(a.""GCRecord"", 0) = 0
+  AND NOT EXISTS (
+        SELECT 1
+        FROM ""Invitations"" inv
+        WHERE inv.""ApplicationID"" = a.""ID""
+          AND COALESCE(inv.""GCRecord"", 0) = 0
+    )
+  AND (
+        ast.""Code"" IS NULL
+        OR ast.""Code"" NOT IN ('PROCESS_ISSUED', 'PROCESS_REJECTED', 'PROCESS_CANCELLED')
+      );
+", true);
+    }
+    private void CreateViewRdInvitationRejected()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_rejected;", true);
+        ExecuteNonQueryCommand(@"
+-- Report Dashboard: Invitations Rejected (rejected-by-project) — PostgreSQL.
+CREATE VIEW vw_rd_invitation_rejected AS
+SELECT
+    ri.""ID""                                                                 AS ""ID"",
+    'rejection-item'                                                        AS ""SourceKind"",
+    p.""ID""                                                                  AS ""PersonOid"",
+    CONCAT_WS(' ',
+        NULLIF(BTRIM(p.""FirstName""), ''),
+        NULLIF(BTRIM(p.""MiddleName""), ''),
+        NULLIF(BTRIM(p.""LastName""), '')
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameRaw"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameTm"",
+    p.""PersonRole""                                                          AS ""PersonRoleCode"",
+    COALESCE(NULLIF(BTRIM(r.""RejectedDocNumber""), ''), '')                  AS ""DocumentNumber"",
+    CASE WHEN (r.""Date"")::date > DATE '1900-01-01' THEN r.""Date"" ELSE NULL END AS ""RecordDate"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""StatusLabel"",
+    'st-cat-1'                                                              AS ""StatusCssClass"",
+    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+FROM ""RejectionItems"" ri
+INNER JOIN ""Rejections"" r
+    ON r.""ID"" = ri.""RejectionID"" AND COALESCE(r.""GCRecord"", 0) = 0
+INNER JOIN ""Applications"" a
+    ON a.""ID"" = r.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+INNER JOIN ""ApplicationTypes"" at
+    ON at.""ID"" = a.""ApplicationTypeID""
+   AND COALESCE(at.""GCRecord"", 0) = 0
+   AND COALESCE(at.""CanIssueInvitation"", FALSE) = TRUE
+INNER JOIN ""People"" p
+    ON p.""ID"" = ri.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" apc
+    ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+WHERE COALESCE(ri.""GCRecord"", 0) = 0
+  AND ri.""PersonID"" IS NOT NULL
+
+UNION ALL
+
+SELECT
+    a.""ID""                                                                  AS ""ID"",
+    'application'                                                           AS ""SourceKind"",
+    first_p.""ID""                                                            AS ""PersonOid"",
+    COALESCE(
+        NULLIF(CONCAT_WS(' ',
+            NULLIF(BTRIM(first_p.""FirstName""), ''),
+            NULLIF(BTRIM(first_p.""MiddleName""), ''),
+            NULLIF(BTRIM(first_p.""LastName""), '')
+        ), ''),
+        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
+        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
+        ''
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameRaw"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameTm"",
+    COALESCE(first_p.""PersonRole"", 0)                                       AS ""PersonRoleCode"",
+    COALESCE(
+        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
+        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
+        ''
+    )                                                                       AS ""DocumentNumber"",
+    a.""ApplicationDate""                                                     AS ""RecordDate"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""StatusLabel"",
+    'st-cat-1'                                                              AS ""StatusCssClass"",
+    COALESCE(first_p.""IsArchived"", FALSE)                                   AS ""IsArchived""
+FROM ""Applications"" a
+INNER JOIN ""ApplicationTypes"" at
+    ON at.""ID"" = a.""ApplicationTypeID""
+   AND COALESCE(at.""GCRecord"", 0) = 0
+   AND COALESCE(at.""CanIssueInvitation"", FALSE) = TRUE
+LEFT JOIN ""ProjectContracts"" apc
+    ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
+LEFT JOIN LATERAL (
+    SELECT ap.""StateID""
+    FROM ""ApplicationProgresses"" ap
+    WHERE ap.""ApplicationID"" = a.""ID""
+      AND COALESCE(ap.""GCRecord"", 0) = 0
+    ORDER BY ap.""Date"" DESC NULLS LAST, ap.""ID"" DESC
+    LIMIT 1
+) latest_ap ON TRUE
+INNER JOIN ""ApplicationStates"" ast
+    ON ast.""ID"" = latest_ap.""StateID""
+   AND COALESCE(ast.""GCRecord"", 0) = 0
+   AND ast.""Code"" = 'PROCESS_REJECTED'
+LEFT JOIN LATERAL (
+    SELECT ai.""PersonID""
+    FROM ""ApplicationItems"" ai
+    WHERE ai.""ApplicationID"" = a.""ID""
+      AND COALESCE(ai.""GCRecord"", 0) = 0
+    ORDER BY ai.""ID""
+    LIMIT 1
+) first_ai ON TRUE
+LEFT JOIN ""People"" first_p
+    ON first_p.""ID"" = first_ai.""PersonID"" AND COALESCE(first_p.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = first_p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = first_p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+WHERE COALESCE(a.""GCRecord"", 0) = 0
+  AND NOT EXISTS (
+        SELECT 1
+        FROM ""Rejections"" r
+        WHERE r.""ApplicationID"" = a.""ID""
+          AND COALESCE(r.""GCRecord"", 0) = 0
+    );
+", true);
+    }
+    private void CreateViewRdInvitationUsed()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_used;", true);
+        ExecuteNonQueryCommand(@"
+-- Report Dashboard: Used Invitations (used) — PostgreSQL.
+CREATE VIEW vw_rd_invitation_used AS
+SELECT
+    ii.""ID""                                                                 AS ""ID"",
+    p.""ID""                                                                  AS ""PersonOid"",
+    CONCAT_WS(' ',
+        NULLIF(BTRIM(p.""FirstName""), ''),
+        NULLIF(BTRIM(p.""MiddleName""), ''),
+        NULLIF(BTRIM(p.""LastName""), '')
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameRaw"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameTm"",
+    p.""PersonRole""                                                          AS ""PersonRoleCode"",
+    COALESCE(NULLIF(BTRIM(inv.""InvitationNumber""), ''), '')                 AS ""InvitationNumber"",
+    CASE WHEN (inv.""ExpirationDate"")::date > DATE '1900-01-01' THEN inv.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
+    CASE WHEN (inv.""StartDate"")::date > DATE '1900-01-01' THEN inv.""StartDate"" ELSE NULL END AS ""IssuedDate"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""StatusLabel"",
+    'st-cat-1'                                                              AS ""StatusCssClass"",
+    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+FROM ""InvitationItems"" ii
+INNER JOIN ""Invitations"" inv
+    ON inv.""ID"" = ii.""InvitationID"" AND COALESCE(inv.""GCRecord"", 0) = 0
+INNER JOIN ""People"" p
+    ON p.""ID"" = ii.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
+LEFT JOIN ""Applications"" a
+    ON a.""ID"" = inv.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" apc
+    ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+WHERE COALESCE(ii.""GCRecord"", 0) = 0
+  AND COALESCE(ii.""IsUsed"", FALSE) = TRUE
+  AND ii.""PersonID"" IS NOT NULL;
+", true);
+    }
+    private void CreateViewRdInvitationValidUntil()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_valid_until;", true);
+        ExecuteNonQueryCommand(@"
+-- Report Dashboard: Invitation Valid Until (valid-until) — PostgreSQL.
+CREATE VIEW vw_rd_invitation_valid_until AS
+SELECT
+    ii.""ID""                                                                 AS ""ID"",
+    p.""ID""                                                                  AS ""PersonOid"",
+    CONCAT_WS(' ',
+        NULLIF(BTRIM(p.""FirstName""), ''),
+        NULLIF(BTRIM(p.""MiddleName""), ''),
+        NULLIF(BTRIM(p.""LastName""), '')
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(apc.""NameTm""), ''),
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameRaw"",
+    COALESCE(apc.""NameTm"", pc.""NameTm"", spc.""NameTm"", '')                   AS ""ProjectNameTm"",
+    p.""PersonRole""                                                          AS ""PersonRoleCode"",
+    COALESCE(NULLIF(BTRIM(inv.""InvitationNumber""), ''), '')                 AS ""InvitationNumber"",
+    CASE WHEN (inv.""ExpirationDate"")::date > DATE '1900-01-01' THEN inv.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
+    CASE WHEN (inv.""StartDate"")::date > DATE '1900-01-01' THEN inv.""StartDate"" ELSE NULL END AS ""IssuedDate"",
+    (inv.""ExpirationDate"")::date - CURRENT_DATE                             AS ""DaysRemaining"",
+    CASE
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 1   THEN '< 1 day'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 7   THEN '< 1 week'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 14  THEN '< 2 weeks'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 21  THEN '< 3 weeks'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 60  THEN '< 2 months'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
+        ELSE '≥ 3 months'
+    END                                                                     AS ""ValidityLabel"",
+    CASE
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 7   THEN 'st-expiring'
+        WHEN (inv.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN 'st-pending'
+        ELSE 'st-approved'
+    END                                                                     AS ""ValidityCssClass"",
+    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+FROM ""InvitationItems"" ii
+INNER JOIN ""Invitations"" inv
+    ON inv.""ID"" = ii.""InvitationID"" AND COALESCE(inv.""GCRecord"", 0) = 0
+INNER JOIN ""People"" p
+    ON p.""ID"" = ii.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
+LEFT JOIN ""Applications"" a
+    ON a.""ID"" = inv.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" apc
+    ON apc.""ID"" = a.""ProjectContractID"" AND COALESCE(apc.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+WHERE COALESCE(ii.""GCRecord"", 0) = 0
+  AND COALESCE(ii.""IsUsed"", FALSE) = FALSE
+  AND COALESCE(ii.""IsCancelled"", FALSE) = FALSE
+  AND COALESCE(ii.""IsChanged"", FALSE) = FALSE
+  AND ii.""PersonID"" IS NOT NULL
+  AND inv.""ExpirationDate"" IS NOT NULL
+  AND (inv.""ExpirationDate"")::date >= CURRENT_DATE;
 ", true);
     }
     private void CreateViewRdVisaAppProgress()

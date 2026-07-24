@@ -21,6 +21,12 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.Passport, "by-type"),
         (ReportDashboardCategory.Passport, "by-citizenship"),
         (ReportDashboardCategory.WorkPermit, "by-days-remaining"),
+        (ReportDashboardCategory.Invitation, "ready-by-project"),
+        (ReportDashboardCategory.Invitation, "ready-by-period-category"),
+        (ReportDashboardCategory.Invitation, "in-process"),
+        (ReportDashboardCategory.Invitation, "rejected-by-project"),
+        (ReportDashboardCategory.Invitation, "used"),
+        (ReportDashboardCategory.Invitation, "valid-until"),
         (ReportDashboardCategory.VisaExtension, "visa-state"),
         (ReportDashboardCategory.VisaExtension, "by-category"),
         (ReportDashboardCategory.VisaExtension, "by-type"),
@@ -138,6 +144,8 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         if (category == ReportDashboardCategory.MedicalRecord
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
             key = (category, "by-validity");
+        if (category == ReportDashboardCategory.Invitation && subReport == "expired")
+            key = (category, "valid-until");
 
         IReportDashboardQueryService service = RealSubReports.Contains(key) ? _real : _mock;
         return service.LoadPanel(

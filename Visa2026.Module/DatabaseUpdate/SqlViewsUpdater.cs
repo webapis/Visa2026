@@ -24,6 +24,11 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewForeignWorkerMaglumat();
             CreateViewRdPassport();
             CreateViewRdWorkPermit();
+            CreateViewRdInvitationReady();
+            CreateViewRdInvitationInProcess();
+            CreateViewRdInvitationRejected();
+            CreateViewRdInvitationUsed();
+            CreateViewRdInvitationValidUntil();
             CreateViewRdVisaAppProgress();
             CreateViewRdProjects();
             CreateViewRdPersonRoles();
@@ -667,6 +672,449 @@ WHERE ISNULL(wpi.GCRecord, 0) = 0
 ", true);
         }
 
+        /// <summary>
+        /// Report Dashboard Ready Invitations (by project / period·category·type). See SqlViews/vw_rd_invitation_ready.sql.
+        /// </summary>
+        private void CreateViewRdInvitationReady()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Ready Invitations (ready-by-project / ready-by-period-category).
+-- One row per InvitationItem: valid (ExpirationDate >= today), not used/cancelled/changed.
+-- StatusLabel = Project; Period + Category + Type (from Application.VisaType) for Ready By Period · Category · Type.
+CREATE OR ALTER VIEW [dbo].[vw_rd_invitation_ready] AS
+SELECT
+    ii.ID                                                               AS ID,
+    p.ID                                                                AS PersonOid,
+    CONCAT_WS(N' ',
+        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameRaw,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameTm,
+    p.PersonRole                                                        AS PersonRoleCode,
+    COALESCE(NULLIF(LTRIM(RTRIM(inv.InvitationNumber)), N''), N'')      AS InvitationNumber,
+    CASE WHEN CAST(inv.ExpirationDate AS date) > '1900-01-01' THEN inv.ExpirationDate ELSE NULL END AS ExpirationDate,
+    CASE WHEN CAST(inv.StartDate AS date) > '1900-01-01' THEN inv.StartDate ELSE NULL END AS IssuedDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(vp.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(vp.Name)), N''),
+        N'(No period)'
+    )                                                                   AS VisaPeriodLabel,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(vc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(vc.Name)), N''),
+        N'(No category)'
+    )                                                                   AS VisaCategoryLabel,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(vt.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(vt.Name)), N''),
+        N'(No type)'
+    )                                                                   AS VisaTypeLabel,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS StatusLabel,
+    N'st-cat-1'                                                         AS StatusCssClass,
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
+FROM InvitationItems ii
+INNER JOIN Invitations inv
+    ON inv.ID = ii.InvitationID AND ISNULL(inv.GCRecord, 0) = 0
+INNER JOIN People p
+    ON p.ID = ii.PersonID AND ISNULL(p.GCRecord, 0) = 0
+LEFT JOIN VisaPeriods vp
+    ON vp.ID = inv.VisaPeriodID AND ISNULL(vp.GCRecord, 0) = 0
+LEFT JOIN VisaCategories vc
+    ON vc.ID = inv.VisaCategoryID AND ISNULL(vc.GCRecord, 0) = 0
+LEFT JOIN Applications a
+    ON a.ID = inv.ApplicationID AND ISNULL(a.GCRecord, 0) = 0
+LEFT JOIN VisaTypes vt
+    ON vt.ID = a.VisaTypeID AND ISNULL(vt.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts apc
+    ON apc.ID = a.ProjectContractID AND ISNULL(apc.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+WHERE ISNULL(ii.GCRecord, 0) = 0
+  AND ISNULL(ii.IsUsed, 0) = 0
+  AND ISNULL(ii.IsCancelled, 0) = 0
+  AND ISNULL(ii.IsChanged, 0) = 0
+  AND ii.PersonID IS NOT NULL
+  AND inv.ExpirationDate IS NOT NULL
+  AND CAST(inv.ExpirationDate AS date) >= CAST(GETDATE() AS date);
+
+", true);
+        }
+        private void CreateViewRdInvitationInProcess()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Invitations In Process (in-process).
+-- One row per Application: CanIssueInvitation, no linked Invitation, not issued/rejected/cancelled.
+-- StatusLabel = simple Application Progress state (Being Prepared when none).
+CREATE OR ALTER VIEW [dbo].[vw_rd_invitation_in_process] AS
+SELECT
+    a.ID                                                                AS ID,
+    first_p.ID                                                          AS PersonOid,
+    COALESCE(
+        NULLIF(CONCAT_WS(N' ',
+            NULLIF(LTRIM(RTRIM(first_p.FirstName)), N''),
+            NULLIF(LTRIM(RTRIM(first_p.MiddleName)), N''),
+            NULLIF(LTRIM(RTRIM(first_p.LastName)), N'')
+        ), N''),
+        NULLIF(LTRIM(RTRIM(a.FullApplicationNumber)), N''),
+        NULLIF(LTRIM(RTRIM(a.ApplicationNumber)), N''),
+        N''
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(pc.NameTm, N'')                                            AS ProjectNameRaw,
+    COALESCE(pc.NameTm, N'')                                            AS ProjectNameTm,
+    COALESCE(first_p.PersonRole, 0)                                     AS PersonRoleCode,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(a.FullApplicationNumber)), N''),
+        NULLIF(LTRIM(RTRIM(a.ApplicationNumber)), N''),
+        N''
+    )                                                                   AS ApplicationNumber,
+    a.ApplicationDate                                                   AS ApplicationDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(ast.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(ast.Name)), N''),
+        N'Being Prepared'
+    )                                                                   AS StatusLabel,
+    CASE
+      WHEN ast.Code IN (N'PROCESS_ISSUED', N'1_REVIEW_APPROVED', N'2_REVIEW_APPROVED')
+                                                                              THEN N'st-approved'
+      WHEN ast.Code IN (N'PROCESS_REJECTED', N'PROCESS_CANCELLED', N'1_REVIEW_REJECTED', N'2_REVIEW_REJECTED')
+                                                                              THEN N'st-expiring'
+      ELSE                                                                          N'st-pending'
+    END                                                                 AS StatusCssClass,
+    COALESCE(ast.Code, N'')                                             AS ProgressStateCode,
+    CAST(ISNULL(first_p.IsArchived, 0) AS bit)                          AS IsArchived
+FROM Applications a
+INNER JOIN ApplicationTypes at
+    ON at.ID = a.ApplicationTypeID
+   AND ISNULL(at.GCRecord, 0) = 0
+   AND ISNULL(at.CanIssueInvitation, 0) = 1
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = a.ProjectContractID
+   AND ISNULL(pc.GCRecord, 0) = 0
+OUTER APPLY (
+    SELECT TOP 1 ap.StateID
+    FROM ApplicationProgresses ap
+    WHERE ap.ApplicationID = a.ID
+      AND ISNULL(ap.GCRecord, 0) = 0
+    ORDER BY ap.[Date] DESC, ap.ID DESC
+) latest_ap
+LEFT JOIN ApplicationStates ast
+    ON ast.ID = latest_ap.StateID
+   AND ISNULL(ast.GCRecord, 0) = 0
+OUTER APPLY (
+    SELECT TOP 1 ai.PersonID
+    FROM ApplicationItems ai
+    WHERE ai.ApplicationID = a.ID
+      AND ISNULL(ai.GCRecord, 0) = 0
+    ORDER BY ai.ID
+) first_ai
+LEFT JOIN People first_p
+    ON first_p.ID = first_ai.PersonID
+   AND ISNULL(first_p.GCRecord, 0) = 0
+WHERE ISNULL(a.GCRecord, 0) = 0
+  AND NOT EXISTS (
+        SELECT 1
+        FROM Invitations inv
+        WHERE inv.ApplicationID = a.ID
+          AND ISNULL(inv.GCRecord, 0) = 0
+    )
+  AND (
+        ast.Code IS NULL
+        OR ast.Code NOT IN (N'PROCESS_ISSUED', N'PROCESS_REJECTED', N'PROCESS_CANCELLED')
+      );
+", true);
+        }
+        /// <summary>
+        /// Report Dashboard Invitations Rejected. See SqlViews/vw_rd_invitation_rejected.sql.
+        /// </summary>
+        private void CreateViewRdInvitationRejected()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Invitations Rejected (rejected-by-project).
+-- UNION: RejectionItems on CanIssueInvitation apps
+--      + PROCESS_REJECTED CanIssueInvitation apps with no Rejection header (no double-count).
+-- StatusLabel = Project (Application → Person → sponsor → (No project)).
+CREATE OR ALTER VIEW [dbo].[vw_rd_invitation_rejected] AS
+SELECT
+    ri.ID                                                               AS ID,
+    N'rejection-item'                                                   AS SourceKind,
+    p.ID                                                                AS PersonOid,
+    CONCAT_WS(N' ',
+        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameRaw,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameTm,
+    p.PersonRole                                                        AS PersonRoleCode,
+    COALESCE(NULLIF(LTRIM(RTRIM(r.RejectedDocNumber)), N''), N'')       AS DocumentNumber,
+    CASE WHEN CAST(r.[Date] AS date) > '1900-01-01' THEN r.[Date] ELSE NULL END AS RecordDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS StatusLabel,
+    N'st-cat-1'                                                         AS StatusCssClass,
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
+FROM RejectionItems ri
+INNER JOIN Rejections r
+    ON r.ID = ri.RejectionID AND ISNULL(r.GCRecord, 0) = 0
+INNER JOIN Applications a
+    ON a.ID = r.ApplicationID AND ISNULL(a.GCRecord, 0) = 0
+INNER JOIN ApplicationTypes at
+    ON at.ID = a.ApplicationTypeID
+   AND ISNULL(at.GCRecord, 0) = 0
+   AND ISNULL(at.CanIssueInvitation, 0) = 1
+INNER JOIN People p
+    ON p.ID = ri.PersonID AND ISNULL(p.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts apc
+    ON apc.ID = a.ProjectContractID AND ISNULL(apc.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+WHERE ISNULL(ri.GCRecord, 0) = 0
+  AND ri.PersonID IS NOT NULL
+
+UNION ALL
+
+SELECT
+    a.ID                                                                AS ID,
+    N'application'                                                      AS SourceKind,
+    first_p.ID                                                          AS PersonOid,
+    COALESCE(
+        NULLIF(CONCAT_WS(N' ',
+            NULLIF(LTRIM(RTRIM(first_p.FirstName)), N''),
+            NULLIF(LTRIM(RTRIM(first_p.MiddleName)), N''),
+            NULLIF(LTRIM(RTRIM(first_p.LastName)), N'')
+        ), N''),
+        NULLIF(LTRIM(RTRIM(a.FullApplicationNumber)), N''),
+        NULLIF(LTRIM(RTRIM(a.ApplicationNumber)), N''),
+        N''
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameRaw,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameTm,
+    COALESCE(first_p.PersonRole, 0)                                     AS PersonRoleCode,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(a.FullApplicationNumber)), N''),
+        NULLIF(LTRIM(RTRIM(a.ApplicationNumber)), N''),
+        N''
+    )                                                                   AS DocumentNumber,
+    a.ApplicationDate                                                   AS RecordDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS StatusLabel,
+    N'st-cat-1'                                                         AS StatusCssClass,
+    CAST(ISNULL(first_p.IsArchived, 0) AS bit)                          AS IsArchived
+FROM Applications a
+INNER JOIN ApplicationTypes at
+    ON at.ID = a.ApplicationTypeID
+   AND ISNULL(at.GCRecord, 0) = 0
+   AND ISNULL(at.CanIssueInvitation, 0) = 1
+LEFT JOIN ProjectContracts apc
+    ON apc.ID = a.ProjectContractID AND ISNULL(apc.GCRecord, 0) = 0
+OUTER APPLY (
+    SELECT TOP 1 ap.StateID
+    FROM ApplicationProgresses ap
+    WHERE ap.ApplicationID = a.ID
+      AND ISNULL(ap.GCRecord, 0) = 0
+    ORDER BY ap.[Date] DESC, ap.ID DESC
+) latest_ap
+INNER JOIN ApplicationStates ast
+    ON ast.ID = latest_ap.StateID
+   AND ISNULL(ast.GCRecord, 0) = 0
+   AND ast.Code = N'PROCESS_REJECTED'
+OUTER APPLY (
+    SELECT TOP 1 ai.PersonID
+    FROM ApplicationItems ai
+    WHERE ai.ApplicationID = a.ID
+      AND ISNULL(ai.GCRecord, 0) = 0
+    ORDER BY ai.ID
+) first_ai
+LEFT JOIN People first_p
+    ON first_p.ID = first_ai.PersonID AND ISNULL(first_p.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = first_p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = first_p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+WHERE ISNULL(a.GCRecord, 0) = 0
+  AND NOT EXISTS (
+        SELECT 1
+        FROM Rejections r
+        WHERE r.ApplicationID = a.ID
+          AND ISNULL(r.GCRecord, 0) = 0
+    );
+", true);
+        }
+        /// <summary>
+        /// Report Dashboard Used Invitations. See SqlViews/vw_rd_invitation_used.sql.
+        /// </summary>
+        private void CreateViewRdInvitationUsed()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Used Invitations (used).
+-- One row per InvitationItem with IsUsed = 1.
+-- StatusLabel = Project (Application.ProjectContract, else Person, else sponsor).
+CREATE OR ALTER VIEW [dbo].[vw_rd_invitation_used] AS
+SELECT
+    ii.ID                                                               AS ID,
+    p.ID                                                                AS PersonOid,
+    CONCAT_WS(N' ',
+        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameRaw,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameTm,
+    p.PersonRole                                                        AS PersonRoleCode,
+    COALESCE(NULLIF(LTRIM(RTRIM(inv.InvitationNumber)), N''), N'')      AS InvitationNumber,
+    CASE WHEN CAST(inv.ExpirationDate AS date) > '1900-01-01' THEN inv.ExpirationDate ELSE NULL END AS ExpirationDate,
+    CASE WHEN CAST(inv.StartDate AS date) > '1900-01-01' THEN inv.StartDate ELSE NULL END AS IssuedDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS StatusLabel,
+    N'st-cat-1'                                                         AS StatusCssClass,
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
+FROM InvitationItems ii
+INNER JOIN Invitations inv
+    ON inv.ID = ii.InvitationID AND ISNULL(inv.GCRecord, 0) = 0
+INNER JOIN People p
+    ON p.ID = ii.PersonID AND ISNULL(p.GCRecord, 0) = 0
+LEFT JOIN Applications a
+    ON a.ID = inv.ApplicationID AND ISNULL(a.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts apc
+    ON apc.ID = a.ProjectContractID AND ISNULL(apc.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+WHERE ISNULL(ii.GCRecord, 0) = 0
+  AND ISNULL(ii.IsUsed, 0) = 1
+  AND ii.PersonID IS NOT NULL;
+", true);
+        }
+        /// <summary>
+        /// Report Dashboard Invitation Valid Until. See SqlViews/vw_rd_invitation_valid_until.sql.
+        /// </summary>
+        private void CreateViewRdInvitationValidUntil()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Invitation Valid Until (valid-until).
+-- Unused / not cancelled / not changed InvitationItems with ExpirationDate >= today.
+-- StatusLabel = remaining-time bucket (days / weeks / months).
+CREATE OR ALTER VIEW [dbo].[vw_rd_invitation_valid_until] AS
+SELECT
+    ii.ID                                                               AS ID,
+    p.ID                                                                AS PersonOid,
+    CONCAT_WS(N' ',
+        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(apc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameRaw,
+    COALESCE(apc.NameTm, pc.NameTm, spc.NameTm, N'')                    AS ProjectNameTm,
+    p.PersonRole                                                        AS PersonRoleCode,
+    COALESCE(NULLIF(LTRIM(RTRIM(inv.InvitationNumber)), N''), N'')      AS InvitationNumber,
+    CASE WHEN CAST(inv.ExpirationDate AS date) > '1900-01-01' THEN inv.ExpirationDate ELSE NULL END AS ExpirationDate,
+    CASE WHEN CAST(inv.StartDate AS date) > '1900-01-01' THEN inv.StartDate ELSE NULL END AS IssuedDate,
+    DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) AS DaysRemaining,
+    CASE
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 1   THEN N'< 1 day'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 7   THEN N'< 1 week'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 14  THEN N'< 2 weeks'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 21  THEN N'< 3 weeks'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 30  THEN N'< 1 month'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 60  THEN N'< 2 months'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 90  THEN N'< 3 months'
+        ELSE N'≥ 3 months'
+    END                                                                 AS ValidityLabel,
+    CASE
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 7   THEN N'st-expiring'
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(inv.ExpirationDate AS date)) < 30  THEN N'st-pending'
+        ELSE N'st-approved'
+    END                                                                 AS ValidityCssClass,
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
+FROM InvitationItems ii
+INNER JOIN Invitations inv
+    ON inv.ID = ii.InvitationID AND ISNULL(inv.GCRecord, 0) = 0
+INNER JOIN People p
+    ON p.ID = ii.PersonID AND ISNULL(p.GCRecord, 0) = 0
+LEFT JOIN Applications a
+    ON a.ID = inv.ApplicationID AND ISNULL(a.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts apc
+    ON apc.ID = a.ProjectContractID AND ISNULL(apc.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+WHERE ISNULL(ii.GCRecord, 0) = 0
+  AND ISNULL(ii.IsUsed, 0) = 0
+  AND ISNULL(ii.IsCancelled, 0) = 0
+  AND ISNULL(ii.IsChanged, 0) = 0
+  AND ii.PersonID IS NOT NULL
+  AND inv.ExpirationDate IS NOT NULL
+  AND CAST(inv.ExpirationDate AS date) >= CAST(GETDATE() AS date);
+", true);
+        }
         /// <summary>
         /// Report Dashboard visa application progress. See SqlViews/vw_rd_visa_app_progress.sql.
         /// </summary>

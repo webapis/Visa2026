@@ -157,8 +157,14 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             (ReportDashboardCategory.VisaExtension, "by-period")         => Build(personType, category, subReport, VisaByPeriod(),         projectKey, oneLastValidVisaPerPerson: applyOneLastVisa),
             (ReportDashboardCategory.VisaExtension, "by-days-remaining") => Build(personType, category, subReport, VisaByDaysRemaining(), projectKey, oneLastValidVisaPerPerson: applyOneLastVisa),
             (ReportDashboardCategory.VisaExtension, _)                   => Build(personType, category, subReport, VisaByState(),        projectKey, excelConfigured: true),
-            // Invitation
-            (ReportDashboardCategory.Invitation, _)              => Build(personType, category, subReport, InvitationIssued(),        projectKey),
+            // Invitation (legacy issued-inv → Ready by Project)
+            (ReportDashboardCategory.Invitation, "ready-by-period-category") => Build(personType, category, subReport, InvitationReadyByPeriodCategory(), projectKey),
+            (ReportDashboardCategory.Invitation, "in-process") => Build(personType, category, subReport, InvitationInProcess(), projectKey),
+            (ReportDashboardCategory.Invitation, "rejected-by-project") => Build(personType, category, subReport, InvitationRejectedByProject(), projectKey),
+            (ReportDashboardCategory.Invitation, "used") => Build(personType, category, subReport, InvitationUsed(), projectKey),
+            (ReportDashboardCategory.Invitation, "valid-until") => Build(personType, category, subReport, InvitationValidUntil(), projectKey),
+            (ReportDashboardCategory.Invitation, "expired") => Build(personType, category, subReport, InvitationValidUntil(), projectKey),
+            (ReportDashboardCategory.Invitation, _) => Build(personType, category, subReport, InvitationReadyByProject(), projectKey),
             // Registration (ApplicationType tabs; Status = process state) — Hybrid uses real; mock kept as fallback
             (ReportDashboardCategory.Registration, _) => Build(personType, category, subReport, RegistrationByApplicationType(subReport), projectKey),
             // Work Permit
@@ -303,21 +309,78 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
 
     // ===== Invitation =====================================================
 
-    /// Issued Invitations: grouped by remaining validity (exclusive buckets)
-    private static List<ReportDashboardPreviewRow> InvitationIssued() =>
+    /// Ready: valid + not used; chart Status = Project.
+    private static List<ReportDashboardPreviewRow> InvitationReadyByProject() =>
     [
-        // ColumnA = invitation#, ColumnB = expiry, Status = validity bucket (drives chart buckets)
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "INV-2025-0041", "Jul 18, 2026", "Valid (<15 days)",  "st-expiring"),
-        R("John Smith",          "Seismiki Barlag",  "INV-2025-0062", "Jul 28, 2026", "Valid (<30 days)",  "st-expiring"),
-        R("Oleg Kovalev",        "Seismiki Barlag",  "INV-2025-0088", "Aug 05, 2026", "Valid (<30 days)",  "st-expiring"),
-        R("Hans Muller",         "Gaz Stansiasy",    "INV-2025-0053", "Aug 22, 2026", "Valid (<60 days)",  "st-pending"),
-        R("Serdar Geldiyew",     "Gurlusyk UZT",     "INV-2025-0097", "Sep 01, 2026", "Valid (<60 days)",  "st-pending"),
-        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "INV-2025-0071", "Sep 30, 2026", "Valid (<90 days)",  "st-pending"),
-        R("Viktor Petrov",       "Gurlusyk UZT",     "INV-2025-0058", "Oct 12, 2026", "Valid (<90 days)",  "st-pending"),
-        R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2025-0079", "Jun 05, 2026", "Expired",           "st-expiring"),
-        R("Alina Makarova",      "Gurlusyk UZT",     "INV-2025-0083", "May 15, 2026", "Expired",           "st-expiring"),
-        R("Leyli Annagur.",      "Elektrik Stansia", "INV-2025-0091", "Apr 30, 2026", "Used",              "st-approved"),
-        R("Cary Durdyyew",       "Gurlusyk UZT",     "INV-2025-0095", "Mar 20, 2026", "Used",              "st-approved"),
+        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "INV-2026-0071", "Sep 30, 2026", "Gurlusyk UZT",     "st-cat-1"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "INV-2026-0058", "Oct 12, 2026", "Gurlusyk UZT",     "st-cat-1"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "INV-2026-0097", "Sep 01, 2026", "Gurlusyk UZT",     "st-cat-1"),
+        R("Hans Muller",         "Gaz Stansiasy",    "INV-2026-0053", "Aug 22, 2026", "Gaz Stansiasy",    "st-cat-2"),
+        R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2026-0110", "Nov 05, 2026", "Gaz Stansiasy",    "st-cat-2"),
+        R("John Smith",          "Seismiki Barlag",  "INV-2026-0062", "Jul 28, 2026", "Seismiki Barlag",  "st-cat-3"),
+        R("Oleg Kovalev",        "Seismiki Barlag",  "INV-2026-0088", "Aug 05, 2026", "Seismiki Barlag",  "st-cat-3"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "INV-2026-0041", "Sep 18, 2026", "Elektrik Stansia", "st-cat-4"),
+    ];
+
+    /// Ready: valid + not used; chart Status = VisaPeriod · VisaCategory · VisaType.
+    private static List<ReportDashboardPreviewRow> InvitationReadyByPeriodCategory() =>
+    [
+        R("John Smith",          "Seismiki Barlag",  "INV-2026-0062", "Jul 28, 2026", "3 months · bir gezeklik · BS-1", "st-cat-1"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "INV-2026-0041", "Sep 18, 2026", "3 months · iki gezeklik · BS-1", "st-cat-2"),
+        R("Oleg Kovalev",        "Seismiki Barlag",  "INV-2026-0088", "Aug 05, 2026", "3 months · köp gezeklik · BS-1", "st-cat-3"),
+        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "INV-2026-0071", "Sep 30, 2026", "6 months · köp gezeklik · WP", "st-cat-4"),
+        R("Hans Muller",         "Gaz Stansiasy",    "INV-2026-0053", "Aug 22, 2026", "6 months · köp gezeklik · WP", "st-cat-4"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "INV-2026-0097", "Sep 01, 2026", "6 months · köp gezeklik · WP", "st-cat-4"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "INV-2026-0058", "Oct 12, 2026", "1 year · iki gezeklik · FM", "st-cat-5"),
+        R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2026-0110", "Nov 05, 2026", "1 year · köp gezeklik · BS-1", "st-cat-6"),
+    ];
+
+    /// In process: invitation-issuing application created, invitation not issued yet; Status = Application Progress state.
+    private static List<ReportDashboardPreviewRow> InvitationInProcess() =>
+    [
+        R("Leyli Annagurbanowa", "Elektrik Stansia", "APP-2026-0301", "Mar 02, 2026", "Being Prepared",        "st-pending"),
+        R("Cary Durdyyew",       "Gurlusyk UZT",     "APP-2026-0312", "Mar 08, 2026", "Being Prepared",        "st-pending"),
+        R("Alina Makarova",      "Gurlusyk UZT",     "APP-2026-0320", "Mar 14, 2026", "1st Review Started",    "st-pending"),
+        R("Marat Atayew",        "Gaz Stansiasy",    "APP-2026-0331", "Mar 20, 2026", "1st Review Approved",   "st-approved"),
+        R("Elena Volkova",       "Seismiki Barlag",  "APP-2026-0344", "Apr 01, 2026", "2nd Review Started",    "st-pending"),
+        R("Ahmet Demir",         "Gurlusyk UZT",     "APP-2026-0355", "Apr 10, 2026", "Process Started",       "st-pending"),
+        R("Nina Sokolova",       "Elektrik Stansia", "APP-2026-0366", "Apr 18, 2026", "Process Started",       "st-pending"),
+        R("Pavel Orlov",         "Gaz Stansiasy",    "APP-2026-0377", "May 02, 2026", "2nd Review Approved",   "st-approved"),
+    ];
+
+    /// Rejected invitation applications; chart Status = Project.
+    private static List<ReportDashboardPreviewRow> InvitationRejectedByProject() =>
+    [
+        R("Kemal Aydin",         "Gaz Stansiasy",    "REJ-2026-0012", "Feb 12, 2026", "Gaz Stansiasy",    "st-cat-2"),
+        R("Hans Muller",         "Gaz Stansiasy",    "REJ-2026-0018", "Feb 28, 2026", "Gaz Stansiasy",    "st-cat-2"),
+        R("John Smith",          "Seismiki Barlag",  "REJ-2026-0021", "Mar 05, 2026", "Seismiki Barlag",  "st-cat-3"),
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "REJ-2026-0029", "Mar 19, 2026", "Elektrik Stansia", "st-cat-4"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "REJ-2026-0034", "Apr 02, 2026", "Gurlusyk UZT",     "st-cat-1"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "REJ-2026-0040", "Apr 15, 2026", "Gurlusyk UZT",     "st-cat-1"),
+    ];
+
+    /// Used invitation items (visa issued from invitation line); Status = Project.
+    private static List<ReportDashboardPreviewRow> InvitationUsed() =>
+    [
+        R("Leyli Annagur.",      "Elektrik Stansia", "INV-2025-0091", "Jan 10, 2026", "Elektrik Stansia", "st-cat-4"),
+        R("Cary Durdyyew",       "Gurlusyk UZT",     "INV-2025-0095", "Jan 22, 2026", "Gurlusyk UZT",     "st-cat-1"),
+        R("Alina Makarova",      "Gurlusyk UZT",     "INV-2025-0102", "Feb 04, 2026", "Gurlusyk UZT",     "st-cat-1"),
+        R("Marat Atayew",        "Gaz Stansiasy",    "INV-2025-0111", "Feb 18, 2026", "Gaz Stansiasy",    "st-cat-2"),
+        R("Elena Volkova",       "Seismiki Barlag",  "INV-2025-0120", "Mar 01, 2026", "Seismiki Barlag",  "st-cat-3"),
+        R("Ahmet Demir",         "Gurlusyk UZT",     "INV-2025-0128", "Mar 12, 2026", "Gurlusyk UZT",     "st-cat-1"),
+    ];
+
+    /// Invitation Valid Until: remaining-time buckets (valid unused only).
+    private static List<ReportDashboardPreviewRow> InvitationValidUntil() =>
+    [
+        R("Bayrammyrat Rejepow", "Elektrik Stansia", "INV-2026-0041", "Jul 24, 2026", "< 1 day",    "st-expiring"),
+        R("John Smith",          "Seismiki Barlag",  "INV-2026-0062", "Jul 28, 2026", "< 1 week",   "st-expiring"),
+        R("Oleg Kovalev",        "Seismiki Barlag",  "INV-2026-0088", "Aug 02, 2026", "< 2 weeks",  "st-pending"),
+        R("Hans Muller",         "Gaz Stansiasy",    "INV-2026-0053", "Aug 10, 2026", "< 3 weeks",  "st-pending"),
+        R("Kemal Aydin",         "Gaz Stansiasy",    "INV-2026-0110", "Aug 18, 2026", "< 1 month",  "st-pending"),
+        R("Mehmet Yilmaz",       "Gurlusyk UZT",     "INV-2026-0071", "Sep 05, 2026", "< 2 months", "st-approved"),
+        R("Viktor Petrov",       "Gurlusyk UZT",     "INV-2026-0058", "Oct 01, 2026", "< 3 months", "st-approved"),
+        R("Serdar Geldiyew",     "Gurlusyk UZT",     "INV-2026-0097", "Nov 20, 2026", "≥ 3 months", "st-approved"),
     ];
 
     // ===== Registration ===================================================

@@ -15,7 +15,11 @@ Update the **Status** column and append to `learnings.md` as each view ships.
 | `vw_rd_work_permit` | WorkPermit | **by-validity** (live), by-status | 1 | EF Wired (by-validity) |
 | `vw_rd_border_zone` | BorderZone | default | 1 | Planned |
 | `vw_rd_travel` | Travel | default | 2 | Planned |
-| `vw_rd_invitation_issued` | Invitation | issued-inv | 2 | Planned |
+| `vw_rd_invitation_ready` | Invitation | **ready-by-project**, **ready-by-period-category** (live) | 2 | EF Wired |
+| `vw_rd_invitation_in_process` | Invitation | **in-process** (live) | 2 | EF Wired |
+| `vw_rd_invitation_rejected` | Invitation | **rejected-by-project** (live) | 2 | EF Wired |
+| `vw_rd_invitation_used` | Invitation | **used** (live) | 2 | EF Wired |
+| `vw_rd_invitation_valid_until` | Invitation | **valid-until** (live; was expired) | 2 | EF Wired |
 | `vw_rd_visa_state` | Visa | visa-state | 1 | EF Wired (Extension Started) |`n| `vw_rd_visa_by_category` | Visa | by-category | 1 | EF Wired |`n| `vw_rd_visa_by_type` | Visa | by-type | 1 | EF Wired |
 | `vw_rd_app_progress` | Visa + Invitation | app-progress (both) | 3 | Planned |
 | `vw_rd_education` | Education | by-level, by-country, by-specialty | 1 | EF Wired |

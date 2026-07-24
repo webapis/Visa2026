@@ -1065,32 +1065,911 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         ReportDashboardPersonType personType, string subReport,
         string? excelHint, bool excelConfigured, DateTime cutoff)
     {
-        var query = objectSpace.GetObjectsQuery<InvitationItem>()
-            .Where(i => i.Person != null && (role == null || i.Person.PersonRole == role)
-                        && (i.Invitation == null || i.Invitation.IssuedDate == default || i.Invitation.IssuedDate >= cutoff));
+        // Legacy issued-inv / default → Ready by Project (valid, unused).
+        if (subReport is "issued-inv" or "default" or "by-month" || string.IsNullOrWhiteSpace(subReport))
+            subReport = "ready-by-project";
+        // Legacy separate period/category tabs → combined Period · Category.
+        if (subReport is "ready-by-period" or "ready-by-category")
+            subReport = "ready-by-period-category";
 
-        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(i => i.Invitation != null && i.Invitation.Application != null
-                && i.Invitation.Application.ProjectContract != null
-                && (i.Invitation.Application.ProjectContract.Name == projectKey
-                    || i.Invitation.Application.ProjectContract.NameTm == projectKey));
-
-        var rows = query.Take(PreviewLimit).AsEnumerable().Select(i =>
+        return subReport switch
         {
-            var status = i.IsCancelled ? "Expiring Soon" : i.IsUsed ? "Approved" : "Pending";
-            return new ReportDashboardPreviewRow
+            "in-process" => LoadInvitationInProcessFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            "rejected-by-project" => LoadInvitationRejectedFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            "used" => LoadInvitationUsedFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            "valid-until" or "expired" => LoadInvitationValidUntilFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff),
+            "ready-by-period-category" => LoadInvitationReadyFromView(
+                objectSpace, role, projectKey, personType, "ready-by-period-category", excelHint, excelConfigured, cutoff),
+            _ => LoadInvitationReadyFromView(
+                objectSpace, role, projectKey, personType, "ready-by-project", excelHint, excelConfigured, cutoff),
+        };
+    }
+
+    private static ReportDashboardPanelData LoadInvitationReadyFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        var byPeriodCategory = string.Equals(subReport, "ready-by-period-category", StringComparison.OrdinalIgnoreCase);
+        if (!byPeriodCategory)
+            subReport = "ready-by-project";
+
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            if (byPeriodCategory)
+                return LoadInvitationReadyByPeriodCategoryLegacy(
+                    objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+            return LoadInvitationItemsByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                InvitationItemBucket.Ready);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationReady> query = db.VwRdInvitationReady.AsNoTracking();
+
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (cutoff > DateTime.MinValue)
+                query = query.Where(r => r.IssuedDate == null || r.IssuedDate >= cutoff);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
             {
-                RecordId = i.ID,
-                Name = i.Person?.FullName ?? string.Empty,
-                Project = ProjectLabel(i.Invitation?.Application?.ProjectContract),
-                ColumnA = i.Invitation?.InvitationNumber ?? string.Empty,
-                ColumnB = FormatDate(i.Invitation?.IssuedDate),
-                Status = status,
-                StatusCssClass = StatusCss(status, null)
-            };
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+
+            var labeled = list.Select(r =>
+            {
+                string status;
+                if (byPeriodCategory)
+                {
+                    var period = string.IsNullOrWhiteSpace(r.VisaPeriodLabel) ? "(No period)" : r.VisaPeriodLabel!.Trim();
+                    var category = string.IsNullOrWhiteSpace(r.VisaCategoryLabel) ? "(No category)" : r.VisaCategoryLabel!.Trim();
+                    var type = string.IsNullOrWhiteSpace(r.VisaTypeLabel) ? "(No type)" : r.VisaTypeLabel!.Trim();
+                    status = $"{period} · {category} · {type}";
+                }
+                else
+                {
+                    status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim();
+                }
+                return (Row: r, Status: status);
+            }).ToList();
+
+            var groups = labeled
+                .GroupBy(x => x.Status, StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            var rows = labeled
+                .OrderByDescending(x => x.Row.ExpirationDate)
+                .ThenBy(x => x.Row.PersonName)
+                .Take(PreviewLimit)
+                .Select(x =>
+                {
+                    var r = x.Row;
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.InvitationNumber ?? string.Empty,
+                        ColumnB = FormatDate(r.ExpirationDate),
+                        Status = x.Status,
+                        StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Invitation, subReport, rows,
+                excelHint, excelConfigured, buckets, labeled.Count);
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            if (byPeriodCategory)
+                return LoadInvitationReadyByPeriodCategoryLegacy(
+                    objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+            return LoadInvitationItemsByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                InvitationItemBucket.Ready);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadInvitationReadyByPeriodCategoryLegacy(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        var today = DateTime.Today;
+        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
+            .Where(i => !i.IsUsed && !i.IsCancelled && !i.IsChanged
+                        && i.Invitation != null
+                        && i.Invitation.ExpirationDate != null
+                        && i.Invitation.ExpirationDate >= today);
+
+        var labeled = query.AsEnumerable().Select(i =>
+        {
+            var period = i.Invitation?.VisaPeriod?.NameTm
+                ?? i.Invitation?.VisaPeriod?.Name;
+            var category = i.Invitation?.VisaCategory?.NameTm
+                ?? i.Invitation?.VisaCategory?.Name;
+            var type = i.Invitation?.Application?.VisaType?.NameTm
+                ?? i.Invitation?.Application?.VisaType?.Name;
+            var periodLabel = string.IsNullOrWhiteSpace(period) ? "(No period)" : period!.Trim();
+            var categoryLabel = string.IsNullOrWhiteSpace(category) ? "(No category)" : category!.Trim();
+            var typeLabel = string.IsNullOrWhiteSpace(type) ? "(No type)" : type!.Trim();
+            var status = $"{periodLabel} · {categoryLabel} · {typeLabel}";
+            return (Item: i, Status: status, Project: InvitationItemProjectLabel(i));
         }).ToList();
 
-        return BuildPanel(personType, ReportDashboardCategory.Invitation, subReport, rows, excelHint, excelConfigured);
+        var groups = labeled
+            .GroupBy(x => x.Status, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+        var rows = labeled
+            .OrderByDescending(x => x.Item.Invitation?.ExpirationDate)
+            .ThenBy(x => x.Item.Person?.FullName)
+            .Take(PreviewLimit)
+            .Select(x => new ReportDashboardPreviewRow
+            {
+                RecordId = x.Item.ID,
+                Name = x.Item.Person?.FullName ?? string.Empty,
+                Project = x.Project,
+                ColumnA = x.Item.Invitation?.InvitationNumber ?? string.Empty,
+                ColumnB = FormatDate(x.Item.Invitation?.ExpirationDate),
+                Status = x.Status,
+                StatusCssClass = cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-cat-1"
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.Invitation, subReport, rows,
+            excelHint, excelConfigured, buckets, labeled.Count);
+    }
+
+    private static ReportDashboardPanelData LoadInvitationValidUntilFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        if (subReport is "expired")
+            subReport = "valid-until";
+
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return LoadInvitationValidUntilLegacy(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationValidUntil> query = db.VwRdInvitationValidUntil.AsNoTracking();
+
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (cutoff > DateTime.MinValue)
+                query = query.Where(r => r.IssuedDate == null || r.IssuedDate >= cutoff);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey);
+            }
+
+            var list = query.ToList();
+            return BuildInvitationValidUntilPanel(
+                personType, subReport, excelHint, excelConfigured, list
+                    .Select(r => (
+                        Id: r.ID,
+                        Name: r.PersonName ?? string.Empty,
+                        Project: r.ProjectName ?? string.Empty,
+                        InvitationNumber: r.InvitationNumber ?? string.Empty,
+                        ExpirationDate: r.ExpirationDate,
+                        DaysRemaining: r.DaysRemaining,
+                        ValidityLabel: r.ValidityLabel ?? string.Empty,
+                        ValidityCssClass: r.ValidityCssClass ?? "st-pending"))
+                    .ToList());
+        }
+        catch (Exception ex) when (IsMissingReportDashboardView(ex))
+        {
+            // View not created yet (restart / FORCE_XAF_DB_UPDATE) — same population via EF.
+            return LoadInvitationValidUntilLegacy(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadInvitationValidUntilLegacy(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        var today = DateTime.Today;
+        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
+            .Where(i => !i.IsUsed && !i.IsCancelled && !i.IsChanged
+                        && i.Invitation != null
+                        && i.Invitation.ExpirationDate != null
+                        && i.Invitation.ExpirationDate >= today);
+
+        var list = query.AsEnumerable().Select(i =>
+        {
+            var days = (i.Invitation!.ExpirationDate!.Value.Date - today).Days;
+            var (label, css) = InvitationValidUntilBucket(days);
+            return (
+                Id: i.ID,
+                Name: i.Person?.FullName ?? string.Empty,
+                Project: InvitationItemProjectLabel(i),
+                InvitationNumber: i.Invitation?.InvitationNumber ?? string.Empty,
+                ExpirationDate: i.Invitation?.ExpirationDate,
+                DaysRemaining: days,
+                ValidityLabel: label,
+                ValidityCssClass: css);
+        }).ToList();
+
+        return BuildInvitationValidUntilPanel(
+            personType, subReport, excelHint, excelConfigured, list);
+    }
+
+    private static (string Label, string Css) InvitationValidUntilBucket(int daysRemaining) =>
+        daysRemaining switch
+        {
+            < 1 => ("< 1 day", "st-expiring"),
+            < 7 => ("< 1 week", "st-expiring"),
+            < 14 => ("< 2 weeks", "st-pending"),
+            < 21 => ("< 3 weeks", "st-pending"),
+            < 30 => ("< 1 month", "st-pending"),
+            < 60 => ("< 2 months", "st-approved"),
+            < 90 => ("< 3 months", "st-approved"),
+            _ => ("≥ 3 months", "st-approved")
+        };
+
+    private static int InvitationValidUntilSortKey(string? label) => label switch
+    {
+        "< 1 day" => 1,
+        "< 1 week" => 2,
+        "< 2 weeks" => 3,
+        "< 3 weeks" => 4,
+        "< 1 month" => 5,
+        "< 2 months" => 6,
+        "< 3 months" => 7,
+        "≥ 3 months" => 8,
+        _ => 99
+    };
+
+    private static ReportDashboardPanelData BuildInvitationValidUntilPanel(
+        ReportDashboardPersonType personType,
+        string subReport,
+        string? excelHint,
+        bool excelConfigured,
+        List<(Guid Id, string Name, string Project, string InvitationNumber, DateTime? ExpirationDate, int DaysRemaining, string ValidityLabel, string ValidityCssClass)> list)
+    {
+        var buckets = list
+            .GroupBy(r => new { r.ValidityLabel, r.ValidityCssClass })
+            .Select(g => new ReportDashboardStatusBucket
+            {
+                Label = g.Key.ValidityLabel,
+                CssClass = g.Key.ValidityCssClass,
+                Count = g.Count()
+            })
+            .OrderBy(b => InvitationValidUntilSortKey(b.Label))
+            .ToList();
+
+        var rows = list
+            .OrderBy(r => r.DaysRemaining)
+            .ThenBy(r => r.Name)
+            .Take(PreviewLimit)
+            .Select(r => new ReportDashboardPreviewRow
+            {
+                RecordId = r.Id,
+                Name = r.Name,
+                Project = r.Project,
+                ColumnA = r.InvitationNumber,
+                ColumnB = FormatDate(r.ExpirationDate),
+                Status = r.ValidityLabel,
+                StatusCssClass = r.ValidityCssClass
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.Invitation, subReport, rows,
+            excelHint, excelConfigured, buckets, list.Count);
+    }
+
+    private static bool IsMissingReportDashboardView(Exception ex)
+    {
+        for (var e = ex; e != null; e = e.InnerException!)
+        {
+            if (e is PostgresException pg
+                && (pg.SqlState == PostgresErrorCodes.UndefinedTable
+                    || pg.SqlState == PostgresErrorCodes.UndefinedColumn))
+                return true;
+
+            if (e is Microsoft.Data.SqlClient.SqlException sql
+                && (sql.Number == 208 || sql.Number == 207))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static ReportDashboardPanelData LoadInvitationUsedFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return LoadInvitationItemsByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                InvitationItemBucket.Used);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationUsed> query = db.VwRdInvitationUsed.AsNoTracking();
+
+            if (role.HasValue)
+                query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (cutoff > DateTime.MinValue)
+                query = query.Where(r => r.IssuedDate == null || r.IssuedDate >= cutoff);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+
+            var groups = list
+                .GroupBy(r => string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim(),
+                    StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            var rows = list
+                .OrderByDescending(r => r.IssuedDate)
+                .ThenBy(r => r.PersonName)
+                .Take(PreviewLimit)
+                .Select(r =>
+                {
+                    var status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim();
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = string.IsNullOrWhiteSpace(r.ProjectName) ? status : r.ProjectName,
+                        ColumnA = r.InvitationNumber ?? string.Empty,
+                        ColumnB = FormatDate(r.IssuedDate),
+                        Status = status,
+                        StatusCssClass = cssByLabel.TryGetValue(status, out var c) ? c : "st-cat-1"
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Invitation, subReport, rows,
+                excelHint, excelConfigured, buckets, list.Count);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable
+            || ex.SqlState == PostgresErrorCodes.UndefinedColumn)
+        {
+            return LoadInvitationItemsByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                InvitationItemBucket.Used);
+        }
+        catch (Exception ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx
+            && (sqlEx.Number == 208 || sqlEx.Number == 207))
+        {
+            return LoadInvitationItemsByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff,
+                InvitationItemBucket.Used);
+        }
+    }
+
+    private enum InvitationItemBucket
+    {
+        Ready,
+        Used,
+        Expired
+    }
+
+    private static ReportDashboardPanelData LoadInvitationItemsByProject(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        InvitationItemBucket bucket)
+    {
+        var today = DateTime.Today;
+        var query = FilterInvitationItems(objectSpace, role, projectKey, cutoff)
+            .Where(i => !i.IsCancelled && !i.IsChanged);
+
+        query = bucket switch
+        {
+            InvitationItemBucket.Used => query.Where(i => i.IsUsed),
+            InvitationItemBucket.Expired => query.Where(i =>
+                !i.IsUsed
+                && i.Invitation != null
+                && i.Invitation.ExpirationDate != null
+                && i.Invitation.ExpirationDate < today),
+            _ => query.Where(i =>
+                !i.IsUsed
+                && i.Invitation != null
+                && i.Invitation.ExpirationDate != null
+                && i.Invitation.ExpirationDate >= today),
+        };
+
+        var labeled = query.AsEnumerable().Select(i =>
+        {
+            var project = InvitationItemProjectLabel(i);
+            return (Item: i, Project: string.IsNullOrWhiteSpace(project) ? "(No project)" : project);
+        }).ToList();
+
+        var groups = labeled
+            .GroupBy(x => x.Project, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+        var rows = labeled
+            .OrderByDescending(x => x.Item.Invitation?.IssuedDate ?? DateTime.MinValue)
+            .Take(PreviewLimit)
+            .Select(x =>
+            {
+                var i = x.Item;
+                var colB = bucket == InvitationItemBucket.Used
+                    ? FormatDate(i.Invitation?.IssuedDate)
+                    : FormatDate(i.Invitation?.ExpirationDate);
+                return new ReportDashboardPreviewRow
+                {
+                    RecordId = i.ID,
+                    Name = i.Person?.FullName ?? string.Empty,
+                    Project = x.Project,
+                    ColumnA = i.Invitation?.InvitationNumber ?? string.Empty,
+                    ColumnB = colB,
+                    Status = x.Project,
+                    StatusCssClass = cssByLabel.TryGetValue(x.Project, out var c) ? c : "st-cat-1"
+                };
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.Invitation, subReport, rows,
+            excelHint, excelConfigured, buckets, labeled.Count);
+    }
+
+    private static ReportDashboardPanelData LoadInvitationInProcessFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return LoadInvitationInProcess(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationInProcess> query = db.VwRdInvitationInProcess.AsNoTracking();
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (cutoff > DateTime.MinValue)
+                query = query.Where(r => r.ApplicationDate == null || r.ApplicationDate >= cutoff);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey);
+            }
+
+            var list = query.ToList();
+
+            // Match EF: person-type filter = any ApplicationItem with that role (not only first person).
+            if (role.HasValue)
+            {
+                var roleValue = role.Value;
+                var appIdsWithRole = db.ApplicationItems
+                    .AsNoTracking()
+                    .Where(ai => ai.Application != null && ai.Person != null && ai.Person.PersonRole == roleValue)
+                    .Select(ai => ai.Application!.ID)
+                    .Distinct()
+                    .ToHashSet();
+                list = list.Where(r => appIdsWithRole.Contains(r.ID)).ToList();
+            }
+
+            var groups = list
+                .GroupBy(r => string.IsNullOrWhiteSpace(r.StatusLabel) ? "Being Prepared" : r.StatusLabel!.Trim(),
+                    StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            var rows = list
+                .OrderByDescending(r => r.ApplicationDate)
+                .ThenBy(r => r.PersonName)
+                .Take(PreviewLimit)
+                .Select(r =>
+                {
+                    var status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "Being Prepared" : r.StatusLabel!.Trim();
+                    var progressCss = StatusCss(status, null);
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.ApplicationNumber ?? string.Empty,
+                        ColumnB = FormatDate(r.ApplicationDate),
+                        Status = status,
+                        StatusCssClass = string.IsNullOrWhiteSpace(progressCss)
+                            ? (cssByLabel.TryGetValue(status, out var c) ? c : "st-pending")
+                            : progressCss
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Invitation, subReport, rows,
+                excelHint, excelConfigured, buckets, list.Count);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable
+            || ex.SqlState == PostgresErrorCodes.UndefinedColumn)
+        {
+            return LoadInvitationInProcess(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+        catch (Exception ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx
+            && (sqlEx.Number == 208 || sqlEx.Number == 207))
+        {
+            return LoadInvitationInProcess(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadInvitationInProcess(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        // Invitation-issuing applications still in progress (not issued / rejected / cancelled)
+        // and with no Invitation header linked yet.
+        var query = objectSpace.GetObjectsQuery<Application>()
+            .Where(a => a.ApplicationType != null
+                        && a.ApplicationType.CanIssueInvitation
+                        && (a.ApplicationDate == null || a.ApplicationDate >= cutoff)
+                        && !a.Invitations.Any()
+                        && (a.LatestProgress == null
+                            || a.LatestProgress.State == null
+                            || (a.LatestProgress.State.Code != ApplicationProgressStateCodes.ProcessIssued
+                                && a.LatestProgress.State.Code != ApplicationProgressStateCodes.ProcessRejected
+                                && a.LatestProgress.State.Code != ApplicationProgressStateCodes.ProcessCancelled)));
+
+        if (role.HasValue)
+        {
+            var roleValue = role.Value;
+            query = query.Where(a => a.ApplicationItems.Any(ai =>
+                ai.Person != null && ai.Person.PersonRole == roleValue));
+        }
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(a => a.ProjectContract != null
+                && (a.ProjectContract.Name == projectKey || a.ProjectContract.NameTm == projectKey));
+        }
+
+        var labeled = query.AsEnumerable().Select(a =>
+        {
+            var status = string.IsNullOrWhiteSpace(a.CurrentState) ? "Being Prepared" : a.CurrentState.Trim();
+            return (App: a, Status: status);
+        }).ToList();
+
+        var groups = labeled
+            .GroupBy(x => x.Status, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+        var rows = labeled
+            .OrderByDescending(x => x.App.ApplicationDate)
+            .Take(PreviewLimit)
+            .Select(x =>
+            {
+                var a = x.App;
+                var progressCss = StatusCss(x.Status, null);
+                return new ReportDashboardPreviewRow
+                {
+                    RecordId = a.ID,
+                    Name = FirstApplicationPersonName(a),
+                    Project = ProjectLabel(a.ProjectContract),
+                    ColumnA = a.FullApplicationNumber ?? a.ApplicationNumber ?? string.Empty,
+                    ColumnB = FormatDate(a.ApplicationDate),
+                    Status = x.Status,
+                    StatusCssClass = string.IsNullOrWhiteSpace(progressCss)
+                        ? (cssByLabel.TryGetValue(x.Status, out var c) ? c : "st-pending")
+                        : progressCss
+                };
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.Invitation, subReport, rows,
+            excelHint, excelConfigured, buckets, labeled.Count);
+    }
+
+    private static ReportDashboardPanelData LoadInvitationRejectedFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return LoadInvitationRejectedByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+
+        try
+        {
+            IQueryable<VwRdInvitationRejected> query = db.VwRdInvitationRejected.AsNoTracking();
+
+            query = query.Where(r => !r.IsArchived);
+
+            if (cutoff > DateTime.MinValue)
+                query = query.Where(r => r.RecordDate == null || r.RecordDate >= cutoff);
+
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+            {
+                query = query.Where(r =>
+                    r.ProjectNameTm == projectKey
+                    || r.ProjectName == projectKey
+                    || r.ProjectNameRaw == projectKey
+                    || r.StatusLabel == projectKey);
+            }
+
+            var list = query.ToList();
+            if (role.HasValue)
+            {
+                var roleValue = role.Value;
+                var roleCode = (int)roleValue;
+                var appIdsWithRole = db.ApplicationItems
+                    .AsNoTracking()
+                    .Where(ai => ai.Application != null && ai.Person != null && ai.Person.PersonRole == roleValue)
+                    .Select(ai => ai.Application!.ID)
+                    .Distinct()
+                    .ToHashSet();
+                list = list.Where(r =>
+                    string.Equals(r.SourceKind, "application", StringComparison.OrdinalIgnoreCase)
+                        ? appIdsWithRole.Contains(r.ID)
+                        : r.PersonRoleCode == roleCode).ToList();
+            }
+
+            var groups = list
+                .GroupBy(r => string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim(),
+                    StringComparer.Ordinal)
+                .Select(g => (Label: g.Key, Count: g.Count()))
+                .OrderByDescending(g => g.Count)
+                .ToList();
+            var buckets = AssignCategoricalCss(groups);
+            var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+            var rows = list
+                .OrderByDescending(r => r.RecordDate)
+                .ThenBy(r => r.PersonName)
+                .Take(PreviewLimit)
+                .Select(r =>
+                {
+                    var status = string.IsNullOrWhiteSpace(r.StatusLabel) ? "(No project)" : r.StatusLabel!.Trim();
+                    return new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = string.IsNullOrWhiteSpace(r.ProjectName) ? status : r.ProjectName,
+                        ColumnA = r.DocumentNumber ?? string.Empty,
+                        ColumnB = FormatDate(r.RecordDate),
+                        Status = status,
+                        StatusCssClass = cssByLabel.TryGetValue(status, out var c) ? c : "st-cat-1"
+                    };
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Invitation, subReport, rows,
+                excelHint, excelConfigured, buckets, list.Count);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable
+            || ex.SqlState == PostgresErrorCodes.UndefinedColumn)
+        {
+            return LoadInvitationRejectedByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+        catch (Exception ex) when (ex.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx
+            && (sqlEx.Number == 208 || sqlEx.Number == 207))
+        {
+            return LoadInvitationRejectedByProject(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff);
+        }
+    }
+
+    private static ReportDashboardPanelData LoadInvitationRejectedByProject(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff)
+    {
+        // UNION: RejectionItems + ProcessRejected apps with no Rejection header.
+        var rejectionQuery = objectSpace.GetObjectsQuery<RejectionItem>()
+            .Where(ri => ri.Person != null
+                         && (role == null || ri.Person.PersonRole == role)
+                         && ri.Rejection != null
+                         && ri.Rejection.Application != null
+                         && ri.Rejection.Application.ApplicationType != null
+                         && ri.Rejection.Application.ApplicationType.CanIssueInvitation
+                         && (ri.Rejection.Date == default || ri.Rejection.Date >= cutoff));
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            rejectionQuery = rejectionQuery.Where(ri =>
+                ri.Rejection!.Application!.ProjectContract != null
+                && (ri.Rejection.Application.ProjectContract.Name == projectKey
+                    || ri.Rejection.Application.ProjectContract.NameTm == projectKey));
+        }
+
+        var rejectionRows = rejectionQuery.AsEnumerable().Select(ri =>
+        {
+            var project = ProjectLabel(ri.Rejection?.Application?.ProjectContract);
+            if (string.IsNullOrWhiteSpace(project))
+                project = ProjectLabel(ri.Person?.ProjectContract);
+            if (string.IsNullOrWhiteSpace(project))
+                project = "(No project)";
+            return (
+                RecordId: (Guid?)ri.ID,
+                Name: ri.Person?.FullName ?? string.Empty,
+                Project: project,
+                ColumnA: ri.Rejection?.RejectedDocNumber ?? string.Empty,
+                ColumnB: FormatDate(ri.Rejection?.Date),
+                SortDate: ri.Rejection?.Date ?? DateTime.MinValue);
+        }).ToList();
+
+        var appQuery = objectSpace.GetObjectsQuery<Application>()
+            .Where(a => a.ApplicationType != null
+                        && a.ApplicationType.CanIssueInvitation
+                        && (a.ApplicationDate == default || a.ApplicationDate >= cutoff)
+                        && a.LatestProgress != null
+                        && a.LatestProgress.State != null
+                        && a.LatestProgress.State.Code == ApplicationProgressStateCodes.ProcessRejected
+                        && !a.Rejections.Any());
+
+        if (role.HasValue)
+        {
+            var roleValue = role.Value;
+            appQuery = appQuery.Where(a => a.ApplicationItems.Any(ai =>
+                ai.Person != null && ai.Person.PersonRole == roleValue));
+        }
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            appQuery = appQuery.Where(a => a.ProjectContract != null
+                && (a.ProjectContract.Name == projectKey || a.ProjectContract.NameTm == projectKey));
+        }
+
+        rejectionRows.AddRange(appQuery.AsEnumerable().Select(a =>
+        {
+            var project = ProjectLabel(a.ProjectContract);
+            if (string.IsNullOrWhiteSpace(project))
+                project = "(No project)";
+            return (
+                RecordId: (Guid?)a.ID,
+                Name: FirstApplicationPersonName(a),
+                Project: project,
+                ColumnA: a.FullApplicationNumber ?? a.ApplicationNumber ?? string.Empty,
+                ColumnB: FormatDate(a.ApplicationDate),
+                SortDate: a.ApplicationDate);
+        }));
+
+        var groups = rejectionRows
+            .GroupBy(x => x.Project, StringComparer.Ordinal)
+            .Select(g => (Label: g.Key, Count: g.Count()))
+            .OrderByDescending(g => g.Count)
+            .ToList();
+        var buckets = AssignCategoricalCss(groups);
+        var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
+
+        var rows = rejectionRows
+            .OrderByDescending(x => x.SortDate)
+            .Take(PreviewLimit)
+            .Select(x => new ReportDashboardPreviewRow
+            {
+                RecordId = x.RecordId,
+                Name = x.Name,
+                Project = x.Project,
+                ColumnA = x.ColumnA,
+                ColumnB = x.ColumnB,
+                Status = x.Project,
+                StatusCssClass = cssByLabel.TryGetValue(x.Project, out var c) ? c : "st-cat-1"
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.Invitation, subReport, rows,
+            excelHint, excelConfigured, buckets, rejectionRows.Count);
+    }
+
+
+    private static IQueryable<InvitationItem> FilterInvitationItems(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey, DateTime cutoff)
+    {
+        var query = objectSpace.GetObjectsQuery<InvitationItem>()
+            .Where(i => i.Person != null
+                        && (role == null || i.Person.PersonRole == role)
+                        && i.Invitation != null
+                        && (i.Invitation.IssuedDate == default || i.Invitation.IssuedDate >= cutoff));
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(i =>
+                (i.Invitation!.Application != null
+                    && i.Invitation.Application.ProjectContract != null
+                    && (i.Invitation.Application.ProjectContract.Name == projectKey
+                        || i.Invitation.Application.ProjectContract.NameTm == projectKey))
+                || (i.Person!.ProjectContract != null
+                    && (i.Person.ProjectContract.Name == projectKey
+                        || i.Person.ProjectContract.NameTm == projectKey)));
+        }
+
+        return query;
+    }
+
+    private static string InvitationItemProjectLabel(InvitationItem item)
+    {
+        var fromApp = ProjectLabel(item.Invitation?.Application?.ProjectContract);
+        if (!string.IsNullOrWhiteSpace(fromApp))
+            return fromApp;
+        return ProjectLabel(item.Person?.ProjectContract);
     }
 
     private static ReportDashboardPanelData LoadRegistration(

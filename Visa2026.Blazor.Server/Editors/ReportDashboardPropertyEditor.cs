@@ -138,6 +138,13 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             (ReportDashboardCategory.Registration, "expiring-state") => "bar",
             (ReportDashboardCategory.Registration, "to-be-checked-in") => "bar",
             (ReportDashboardCategory.Registration, "to-be-checked-out") => "bar",
+            (ReportDashboardCategory.Invitation, "ready-by-project") => "bar",
+            (ReportDashboardCategory.Invitation, "ready-by-period-category") => "bar",
+            (ReportDashboardCategory.Invitation, "in-process") => "bar",
+            (ReportDashboardCategory.Invitation, "rejected-by-project") => "bar",
+            (ReportDashboardCategory.Invitation, "used") => "bar",
+            (ReportDashboardCategory.Invitation, "valid-until") => "bar",
+            (ReportDashboardCategory.Invitation, "expired") => "bar",
             _ => "pie"
         };
     private void OnChartViewChanged(string chartView)
