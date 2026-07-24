@@ -221,6 +221,38 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>
+        /// Application linked on the parent <see cref="Invitation"/> (if any). Read-only ListView/Detail convenience.
+        /// </summary>
+        [NotMapped]
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(true)]
+        [VisibleInDetailView(true)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Application")]
+        [ToolTip("Application linked on the parent invitation (Invitation.Application).")]
+        public Application Application => Invitation?.Application;
+
+        /// <summary>
+        /// Visa issued using this invitation line (<see cref="Visa.InvitationItem"/>). Typically 0–1 when used.
+        /// Read-only; cell tint on ListView follows visa <see cref="Visa.StateSeverityLevel"/>.
+        /// </summary>
+        [ExcludeFromOptionalDetailFields]
+        [InverseProperty(nameof(Visa.InvitationItem))]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Issued Visa")]
+        [ToolTip("Visa issued using this invitation item (Visa.InvitationItem).")]
+        [Appearance("InvitationItem_IssuedVisa_Info", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
+            Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
+        [Appearance("InvitationItem_IssuedVisa_Warning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
+            Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+        [Appearance("InvitationItem_IssuedVisa_Critical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
+            Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+        public virtual Visa IssuedVisa { get; set; }
+
         /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]

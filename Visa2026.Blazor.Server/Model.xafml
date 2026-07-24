@@ -346,6 +346,7 @@
         <ColumnInfo Id="MovementType" Width="106" />
         <ColumnInfo Id="CurrentPassport" Index="7" Width="108" />
         <ColumnInfo Id="CurrentVisa" Index="8" Width="84" />
+        <ColumnInfo Id="IssuedVisa" Index="11" Width="120" />
         <ColumnInfo Id="TravelNotes" Width="85" />
         <ColumnInfo Id="CurrentPositionHistory" Index="9" Width="147" />
         <ColumnInfo Id="BusinessTripAddress" Width="133" />
@@ -643,8 +644,10 @@
         <ColumnInfo Id="Person" Index="2" Width="120" />
         <ColumnInfo Id="Passport" Index="3" Width="100" />
         <ColumnInfo Id="Invitation" Index="4" Width="120" />
-        <ColumnInfo Id="IsCancelled" Index="5" Width="80" />
-        <ColumnInfo Id="IsUsed" Index="6" Width="72" />
+        <ColumnInfo Id="Application" Index="5" Width="140" />
+        <ColumnInfo Id="IsCancelled" Index="6" Width="80" />
+        <ColumnInfo Id="IsUsed" Index="7" Width="72" />
+        <ColumnInfo Id="IssuedVisa" Index="8" Width="120" />
       </Columns>
     </ListView>
     <DetailView Id="Lodging_DetailView">
@@ -1275,18 +1278,19 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="64.12884333821377">
             <LayoutGroup Id="Visa" RelativeSize="100">
               <LayoutGroup Id="Visa_col1" RelativeSize="50.63636363636363">
-                <LayoutItem Id="VisaNumber" Index="0" RelativeSize="11.578947368421053" />
-                <LayoutItem Id="VisaType" Index="1" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="VisaCategory" Index="2" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="VisaIssuedPlace" Index="3" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="IssueDate" Index="4" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="StartDate" Index="5" RelativeSize="8.421052631578947" />
-                <LayoutGroup Id="Auto5a5e6445-249a-4f08-a695-2cf56f58371a" ShowCaption="False" Caption="" Direction="Horizontal" Index="6" RelativeSize="8.421052631578947" IsNewNode="True">
+                <LayoutItem Id="ProcessNumber" ViewItem="ProcessNumber" Index="0" RelativeSize="8.421052631578947" IsNewNode="True" />
+                <LayoutItem Id="VisaNumber" Index="1" RelativeSize="11.578947368421053" />
+                <LayoutItem Id="VisaType" Index="2" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="VisaCategory" Index="3" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="VisaIssuedPlace" Index="4" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="IssueDate" Index="5" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="StartDate" Index="6" RelativeSize="8.421052631578947" />
+                <LayoutGroup Id="Auto5a5e6445-249a-4f08-a695-2cf56f58371a" ShowCaption="False" Caption="" Direction="Horizontal" Index="7" RelativeSize="8.421052631578947" IsNewNode="True">
                   <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="0" RelativeSize="50.80789946140036" IsNewNode="True" />
                   <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="1" RelativeSize="49.19210053859964" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutItem Id="ExpirationDate" Index="6" RelativeSize="9.72644376899696" Removed="True" />
-                <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="7" RelativeSize="37.89473684210526" IsNewNode="True" />
+                <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="8" RelativeSize="37.89473684210526" IsNewNode="True" />
                 <LayoutItem Id="ShowOptionalFields" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="Visa_col2" RelativeSize="49.36363636363637">

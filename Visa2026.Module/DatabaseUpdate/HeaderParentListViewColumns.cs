@@ -29,12 +29,13 @@ internal static class HeaderParentListViewColumns
             [
                 nameof(BusinessObjects.Invitation.InvitationNumber),
                 nameof(BusinessObjects.Invitation.DocumentCopiesListLink),
-                nameof(BusinessObjects.Invitation.StartDate),
+                nameof(BusinessObjects.Invitation.IssuedDate),
+                nameof(BusinessObjects.Invitation.VisaCategory),
+                nameof(BusinessObjects.Invitation.VisaPeriod),
                 nameof(BusinessObjects.Invitation.ExpirationDate),
                 nameof(BusinessObjects.Invitation.DaysRemaining),
-                nameof(BusinessObjects.Invitation.ValidityDuration),
             ],
-            [110, 56, 100, 100, 72, 120]
+            [110, 56, 100, 100, 100, 100, 72]
         ),
         (
             "WorkPermit_ListView",
@@ -82,10 +83,12 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.InvitationItem.Person),
                 nameof(BusinessObjects.InvitationItem.Passport),
                 nameof(BusinessObjects.InvitationItem.Invitation),
+                nameof(BusinessObjects.InvitationItem.Application),
                 nameof(BusinessObjects.InvitationItem.IsCancelled),
                 nameof(BusinessObjects.InvitationItem.IsUsed),
+                nameof(BusinessObjects.InvitationItem.IssuedVisa),
             ],
-            [180, 56, 120, 100, 120, 80, 72]
+            [180, 56, 120, 100, 120, 140, 80, 72, 120]
         ),
         (
             "WorkPermitItem_ListView",

@@ -54,7 +54,7 @@ internal static class Visa2014InvitationODataImporter
         if (objectSpaceFactory == null)
         {
             throw new InvalidOperationException(
-                "Invitation import requires a live headless session (INonSecuredObjectSpaceFactory) for ValidityDuration resolution — use --inprocess.");
+                "Invitation import requires a live headless session (INonSecuredObjectSpaceFactory) for VisaPeriod/VisaCategory resolution — use --inprocess.");
         }
 
         var invitationIdMap = LoadOptionalIdMap(invitationIdMapOutputPath);
@@ -153,21 +153,25 @@ internal static class Visa2014InvitationODataImporter
         missingApplication = false;
         if (row["InvitationNumber"] is not string invitationNumber || string.IsNullOrWhiteSpace(invitationNumber))
             return null;
-        if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out var startDate))
+        if (!TryParseDate(row.GetValueOrDefault("IssuedDate") as string, out var issuedDate))
             return null;
-        if (!TryParseDate(row.GetValueOrDefault("DateOfExpire") as string, out var dateOfExpire))
+        if (!TryParseDate(row.GetValueOrDefault("ExpirationDate") as string, out var expirationDate))
             return null;
 
-        var validityDurationId = Visa2014ValidityDurationHelper.ResolveClosestValidityDurationId(
+        var visaPeriodId = Visa2014ValidityDurationHelper.ResolveClosestVisaPeriodId(
             objectSpaceFactory,
-            startDate,
-            dateOfExpire);
+            issuedDate,
+            expirationDate);
+        var visaCategoryId = Visa2014ValidityDurationHelper.ResolveDefaultVisaCategoryId(objectSpaceFactory);
 
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["InvitationNumber"] = invitationNumber.Trim(),
-            ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
-            ["ValidityDuration"] = new Dictionary<string, object?> { ["ID"] = validityDurationId },
+            ["IssuedDate"] = DateTime.SpecifyKind(issuedDate, DateTimeKind.Utc),
+            ["ExpirationDate"] = DateTime.SpecifyKind(expirationDate, DateTimeKind.Utc),
+            ["VisaPeriod"] = new Dictionary<string, object?> { ["ID"] = visaPeriodId },
+            ["VisaCategory"] = new Dictionary<string, object?> { ["ID"] = visaCategoryId },
+            ["IsVisaStartAndEndDateDefined"] = false,
         };
 
         if (TryResolveLegacyGuid(row, "Application", out var legacyApplicationOid))
@@ -196,10 +200,10 @@ internal static class Visa2014InvitationODataImporter
         var gaps = new List<string>();
         if (string.IsNullOrWhiteSpace(row.GetValueOrDefault("InvitationNumber") as string))
             gaps.Add("InvitationNumber");
-        if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out _))
-            gaps.Add($"StartDate={row.GetValueOrDefault("StartDate")}");
-        if (!TryParseDate(row.GetValueOrDefault("DateOfExpire") as string, out _))
-            gaps.Add($"DateOfExpire={row.GetValueOrDefault("DateOfExpire")}");
+        if (!TryParseDate(row.GetValueOrDefault("IssuedDate") as string, out _))
+            gaps.Add($"IssuedDate={row.GetValueOrDefault("IssuedDate")}");
+        if (!TryParseDate(row.GetValueOrDefault("ExpirationDate") as string, out _))
+            gaps.Add($"ExpirationDate={row.GetValueOrDefault("ExpirationDate")}");
         return gaps.Count > 0 ? string.Join("; ", gaps) : "required field";
     }
 

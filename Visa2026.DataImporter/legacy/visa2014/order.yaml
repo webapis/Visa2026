@@ -264,8 +264,9 @@ entities:
     importStatus: pending
     notes: |
       2026-07-03 / 2026-07-22: Header from dbo.ApplicationResult WHERE Result = 0 referenced by PersonInInvitation (~2776).
-      Result = 1 → Rejection wave (not Invitation). Number → InvitationNumber; IssuedDate → StartDate;
-      DateOfExpire → closest ValidityDuration (90/180/365). 13 duplicate InvitationNumber groups → oid-tail suffix.
+      Result = 1 → Rejection wave (not Invitation). Number → InvitationNumber; IssuedDate → IssuedDate;
+      DateOfExpire → ExpirationDate; VisaPeriod best-effort from span; VisaCategory default.
+      13 duplicate InvitationNumber groups → oid-tail suffix.
       Application FK optional via Application id-map.
 
   - targetODataEntity: InvitationItem
@@ -432,3 +433,13 @@ postImportCorrections:
         Greenfield: Visa import leaves IssuingApplicationItem null (wave before ApplicationItem).
         Prefer Visa.ProcessNumber → PersonInApplication; else next passport sibling after previous visa
         linked on an extension PIA (subtype 7). Runs after ApplicationItem id-map exists.
+    - id: visa-invitation-item
+      cliFlag: --correct-visa2014-invitation-item
+      dependsOn:
+        - Visa
+        - ApplicationItem
+        - InvitationItem
+      notes: |
+        Path B hybrid: after IssuingApplicationItem is set, closest-match InvitationItem under that
+        application (same person, unused/not cancelled, IssuedDate before Visa.IssueDate).
+        Sets InvitationItem.IsUsed. Skips when issuing type lacks CanIssueInvitation. Leave null on no match.

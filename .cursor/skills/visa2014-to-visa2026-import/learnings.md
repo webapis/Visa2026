@@ -1916,3 +1916,64 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Import**: Posted **31019** / Failed **0** (log `reimport-ApplicationProgress-localpg-20260723-085454.log`).
 - **Shape**: `PROCESS_ISSUED` = **4500** (was ~4275 before sibling extension completion).
 - **Spot-check**: `6/-930` → `PROCESS_ISSUED` @ 2026-06-23 Description `A1733547`.
+
+### 2026-07-24 — Path B hybrid: Visa.InvitationItem closest-match post-pass
+
+- **Rule (hybrid)**: Keep `--correct-visa2014-issuing-application-item` (ProcessNumber/sibling). New `--correct-visa2014-invitation-item` runs after it: when IssuingApplicationItem type has `CanIssueInvitation`, closest unused InvitationItem under that app (same person; prefer IssuedDate > ApplicationDate; IssuedDate < Visa.IssueDate smallest gap; set IsUsed). No match → null, do not fail. Never calls Module Path A.
+- **Code**: `Visa2014VisaInvitationItemLinkMatcher` (+ 5 unit tests), `Visa2014VisaInvitationItemCorrection`; wired in `Program.cs`, `order.yaml`, `OnPrem-Sync.ps1`, `Run-HeadlessChain.ps1`, `field-maps/Visa.yaml`. Doc §4.1 in `docs/VISA_ISSUING_APPLICATION_AND_INVITATION_LINK.md`.
+- **Path A polish**: Visa `IssuingApplicationItem` / `InvitationItem` `AllowEdit=False` again.
+- **Ops**: Dry-run after issuing-app correction, e.g. `dotnet run --project Visa2026.DataImporter --no-launch-profile -c Debug -- --correct-visa2014-invitation-item --legacy-source calik-energi-local-pg --target-connection "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=***;EFCoreProvider=Postgres" --dry-run --verbose`. Requires Visa id-map + `CanIssue*` flags true on ApplicationTypes.
+- **Build/tests**: DataImporter Debug build OK; matcher tests 5/5 passed. Full DB dry-run deferred until id-map present in this workspace.
+
+### 2026-07-24 — IssuingApplicationItem: predecessor visa orientation (extension)
+
+- **Rule**: When the new visa follows a prior visa on the same passport (extension/transfer), prefer the ApplicationItem that references that **predecessor** (`CurrentVisa` / legacy PIA.Visa).
+- **Path B**: existing `extension_sibling` unchanged; added target-side fallback `target_predecessor` in `Visa2014VisaIssuingApplicationItemCorrection` when ProcessNumber/sibling leave IssuingApplicationItem null.
+- **Path A**: `VisaIssuingLinkPathAMatcher` now prefers `ApplicationItem.CurrentVisa == predecessor` before unused-invitation / latest-app heuristics.
+- **Docs**: §3.5 + §4.1.2 in `VISA_ISSUING_APPLICATION_AND_INVITATION_LINK.md`; Visa field-map + discovery notes.
+
+### 2026-07-24 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: wipe + scalar chain (Run-LocalPgScalarChain.ps1 -StartAt Person)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: PostgreSQL `visa2026`
+- **Prep**: `Wipe-LocalPostgresTransactional.sql`; cleared `id-maps/calik-energi-local-pg/*.json` to `{}`; App_Inv CanIssue* still true
+- **Post-corrections**: includes VisaType + VisaIssuingApplicationItem + **VisaInvitationItem** (Path B)
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260724-113332.log`
+- **PID**: 28192
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-24 — Visa wave failed: stale bin id-maps after wipe
+
+- **Symptom**: Passport Posted **3** / Skipped already **3667**; Visa Posted **0** / Skipped already **6119** / Failed **1** (`FK Passport target ... not found`). DB Passports=3, Visas=0.
+- **Cause**: wipe cleared `legacy/.../id-maps/calik-energi-local-pg` to `{}`, but DataImporter reads **copied** maps under `bin/Debug/net8.0/legacy/visa2014/id-maps/...` which still held prior run.
+- **Fix**: reset bin (+ src) maps except current `Person.json`; truncate Passports; resume `Run-LocalPgScalarChain.ps1 -StartAt Passport -SkipTenantCatalogGeneration`.
+- **Resume PID**: 20416  Log: `artifacts/local-pg-import/chain-console-from15-resume-passport-20260724-113618.log`
+
+### 2026-07-24 — Education fail 1/3193: missing Palakkad institution (+ specialty)
+
+- **ERR**: incomplete OData payload `EducationInstitution=Palakkad döwlet politehniki ýörite orta hünärmen mekdebi`; `Specialty=Barlag-ölçeg enjamlarynyň tehnologiýasy`
+- **Fix**: INSERT both into local PG (`IsDefault=false`); append NameTm rows to `education-institution.calik-energi.json` / `specialty.calik-energi.json`
+- **Resume**: `Run-LocalPgScalarChain.ps1 -StartAt Education -SkipTenantCatalogGeneration` PID 27680
+
+### 2026-07-24 — Watch live table includes post-* Visa patch waves
+
+- **Ask**: show Visa IssuingApplicationItem / InvitationItem (and other) post-corrections in `Watch-OnPremImportLive`.
+- **Change**: `Run-LocalPgScalarChain.ps1` and `OnPrem-Sync.ps1` register `post-VisaType`, `post-VisaIssuingApplicationItem`, `post-VisaInvitationItem`, … in `sync-run-status.json` and call `Set-OnPremSyncRunWaveStarted/Completed` with teed logs.
+- **Stats**: `Get-OnPremWaveLogStats` parses `INF … updated:` and `Visas in id-map/scope`.
+- **Note**: already-running chain process still uses the old script body for posts — watch post rows apply on the **next** chain start.
+
+### 2026-07-24 — Visa.ProcessNumber (legacy PIA Oid) property + import
+
+- **Legacy**: `Visa.ProcessNumber` is `IPersonInApplication` (uniqueidentifier FK to PersonInApplication), not Application belgi string.
+- **Target**: `Visa.ProcessNumber` `Guid?` on Visa2026; schema updater `VisaProcessNumberSchemaUpdater`; read-only UI.
+- **Import**: scalar Visa transform/OData POST includes ProcessNumber; `--correct-visa2014-issuing-application-item` also backfills Guid for already-imported visas.
+- **Distinct**: `IssuingApplicationItem` remains domain ApplicationItem link; ProcessNumber keeps legacy PIA Oid for lineage.
+- **Next**: restart Blazor (schema), re-run issuing correction (or Visa reimport) to fill existing rows.
+
+### 2026-07-24 — Visa.ProcessNumber = legacy ASNumber (Işlenen belgisi), not PIA Guid
+
+- **UI**: Legacy Visa DetailView first field `Işlenen belgisi` is `ASNumber` (string e.g. C00138718) typed from stamp image.
+- **Correction**: `Visa.ProcessNumber` is now `string?` ← ASNumber; `LegacyPersonInApplicationOid` `Guid?` ← legacy ProcessNumber PIA FK.
+- **Schema**: rename mistaken uuid ProcessNumber → LegacyPersonInApplicationOid when present; add varchar ProcessNumber.
+- **Backfill**: issuing-application-item correction fills both ASNumber and PIA Oid for existing imports.

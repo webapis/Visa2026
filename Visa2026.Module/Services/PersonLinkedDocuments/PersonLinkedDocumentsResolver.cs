@@ -275,7 +275,7 @@ public static class PersonLinkedDocumentsResolver
         var current = PersonCurrentItems.GetCurrentInvitationItem(person);
         var records = (person.InvitationItems?
             .Where(i => i != null)
-            .OrderByDescending(i => i.Invitation?.StartDate ?? default)
+            .OrderByDescending(i => i.Invitation?.IssuedDate ?? default)
             .ThenByDescending(i => i.ID)
             .Select(item =>
             {

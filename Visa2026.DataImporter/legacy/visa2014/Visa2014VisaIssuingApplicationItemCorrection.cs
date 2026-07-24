@@ -14,6 +14,10 @@ internal sealed class Visa2014VisaIssuingApplicationItemCorrectionResult
     public int SkippedMissingVisaMap { get; init; }
     public int SkippedMissingApplicationItemMap { get; init; }
     public int SkippedMissingTarget { get; init; }
+    public int ProcessNumberUpdated { get; init; }
+    public int ProcessNumberAlreadyCorrect { get; init; }
+    public int AsNumberUpdated { get; init; }
+    public int AsNumberAlreadyCorrect { get; init; }
     public IReadOnlyList<string> Errors { get; init; } = [];
     public IReadOnlyDictionary<string, int> SourceHistogram { get; init; } =
         new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -89,6 +93,10 @@ internal static class Visa2014VisaIssuingApplicationItemCorrection
             Console.WriteLine($"INF Visas in id-map: {result.VisasInScope}");
             Console.WriteLine($"INF IssuingApplicationItem updated: {result.Updated}");
             Console.WriteLine($"INF Already correct: {result.AlreadyCorrect}");
+            Console.WriteLine($"INF LegacyPersonInApplicationOid updated: {result.ProcessNumberUpdated}");
+            Console.WriteLine($"INF LegacyPersonInApplicationOid already correct: {result.ProcessNumberAlreadyCorrect}");
+            Console.WriteLine($"INF ProcessNumber (ASNumber) updated: {result.AsNumberUpdated}");
+            Console.WriteLine($"INF ProcessNumber (ASNumber) already correct: {result.AsNumberAlreadyCorrect}");
             Console.WriteLine($"INF No legacy link: {result.SkippedNoLink}");
             Console.WriteLine($"INF Missing Visa target: {result.SkippedMissingVisaMap}");
             Console.WriteLine($"INF Missing ApplicationItem map/target: {result.SkippedMissingApplicationItemMap + result.SkippedMissingTarget}");
@@ -122,8 +130,12 @@ internal static class Visa2014VisaIssuingApplicationItemCorrection
         bool verbose)
     {
         var links = Visa2014VisaIssuingApplicationItemIndex.Load(legacyConnectionString, verbose);
+        var processNumbers = Visa2014VisaIssuingApplicationItemIndex.LoadProcessNumbers(legacyConnectionString, verbose);
+        var asNumbers = Visa2014VisaIssuingApplicationItemIndex.LoadAsNumbers(legacyConnectionString, verbose);
         var errors = new List<string>();
         int updated = 0, alreadyCorrect = 0, noLink = 0, missingVisa = 0, missingItemMap = 0, missingTarget = 0;
+        int processNumberUpdated = 0, processNumberAlreadyCorrect = 0;
+        int asNumberUpdated = 0, asNumberAlreadyCorrect = 0;
         var sourceHistogram = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(Bo.Visa));
@@ -135,6 +147,44 @@ internal static class Visa2014VisaIssuingApplicationItemCorrection
         var itemsById = objectSpace.GetObjectsQuery<Bo.ApplicationItem>()
             .Where(ai => ai.GCRecord == 0)
             .ToDictionary(ai => ai.ID);
+
+        // Backfill LegacyPersonInApplicationOid (legacy ProcessNumber PIA FK).
+        foreach (var (legacyVisaOid, targetVisaId) in visaIdMap)
+        {
+            if (!processNumbers.TryGetValue(legacyVisaOid, out var piaOid))
+                continue;
+            if (!visasById.TryGetValue(targetVisaId, out var visa))
+                continue;
+
+            if (visa.LegacyPersonInApplicationOid == piaOid)
+            {
+                processNumberAlreadyCorrect++;
+                continue;
+            }
+
+            if (!dryRun)
+                visa.LegacyPersonInApplicationOid = piaOid;
+            processNumberUpdated++;
+        }
+
+        // Backfill ProcessNumber string from legacy ASNumber (Işlenen belgisi).
+        foreach (var (legacyVisaOid, targetVisaId) in visaIdMap)
+        {
+            if (!asNumbers.TryGetValue(legacyVisaOid, out var asNumber))
+                continue;
+            if (!visasById.TryGetValue(targetVisaId, out var visa))
+                continue;
+
+            if (string.Equals(visa.ProcessNumber?.Trim(), asNumber, StringComparison.Ordinal))
+            {
+                asNumberAlreadyCorrect++;
+                continue;
+            }
+
+            if (!dryRun)
+                visa.ProcessNumber = asNumber;
+            asNumberUpdated++;
+        }
 
         foreach (var (legacyVisaOid, targetVisaId) in visaIdMap)
         {
@@ -184,7 +234,67 @@ internal static class Visa2014VisaIssuingApplicationItemCorrection
                 Console.WriteLine($"INF Progress: {updated} updated...");
         }
 
-        if (!dryRun && updated > 0)
+        // Target-side predecessor fallback: extension line via ApplicationItem.CurrentVisa = prior visa.
+        var linkedIssuingItemIds = visasById.Values
+            .Where(v => v.IssuingApplicationItem != null)
+            .Select(v => v.IssuingApplicationItem!.ID)
+            .ToHashSet();
+
+        foreach (var (_, targetVisaId) in visaIdMap)
+        {
+            if (!visasById.TryGetValue(targetVisaId, out var visa))
+                continue;
+            if (visa.IssuingApplicationItem != null)
+                continue;
+
+            var passport = visa.Passport;
+            if (passport == null)
+                continue;
+
+            var predecessor = visasById.Values
+                .Where(v => v.ID != visa.ID && v.Passport != null && v.Passport.ID == passport.ID)
+                .Where(v => visa.IssueDate == default
+                    || (v.IssueDate != default && v.IssueDate.Date < visa.IssueDate.Date))
+                .OrderByDescending(v => v.IssueDate)
+                .ThenByDescending(v => v.ID)
+                .FirstOrDefault();
+            if (predecessor == null)
+                continue;
+
+            var personId = passport.Person?.ID;
+            var item = itemsById.Values
+                .Where(ai => ai.CurrentVisa != null && ai.CurrentVisa.ID == predecessor.ID)
+                .Where(ai => personId == null || ai.Person == null || ai.Person.ID == personId)
+                .Where(ai => ai.Application?.ApplicationType != null
+                    && (ai.Application.ApplicationType.CanIssueVisa
+                        || ai.Application.ApplicationType.CanIssueInvitation))
+                .Where(ai => !linkedIssuingItemIds.Contains(ai.ID))
+                .OrderByDescending(ai => ai.Application!.ApplicationDate)
+                .ThenByDescending(ai => ai.Application!.ID)
+                .FirstOrDefault();
+            if (item == null)
+                continue;
+
+            const string source = "target_predecessor";
+            sourceHistogram[source] = sourceHistogram.TryGetValue(source, out var c) ? c + 1 : 1;
+
+            linkedIssuingItemIds.Add(item.ID);
+            if (dryRun)
+            {
+                updated++;
+                if (verbose && updated <= 20)
+                    Console.WriteLine(
+                        $"  DRY Visa {targetVisaId} <- ApplicationItem {item.ID} ({source}, pred={predecessor.VisaNumber})");
+                continue;
+            }
+
+            visa.IssuingApplicationItem = item;
+            updated++;
+            if (verbose && updated % 500 == 0)
+                Console.WriteLine($"INF Progress: {updated} updated...");
+        }
+
+        if (!dryRun && (updated > 0 || processNumberUpdated > 0 || asNumberUpdated > 0))
             objectSpace.CommitChanges();
 
         return Task.FromResult(new Visa2014VisaIssuingApplicationItemCorrectionResult
@@ -196,6 +306,10 @@ internal static class Visa2014VisaIssuingApplicationItemCorrection
             SkippedMissingVisaMap = missingVisa,
             SkippedMissingApplicationItemMap = missingItemMap,
             SkippedMissingTarget = missingTarget,
+            ProcessNumberUpdated = processNumberUpdated,
+            ProcessNumberAlreadyCorrect = processNumberAlreadyCorrect,
+            AsNumberUpdated = asNumberUpdated,
+            AsNumberAlreadyCorrect = asNumberAlreadyCorrect,
             Errors = errors,
             SourceHistogram = sourceHistogram,
         });

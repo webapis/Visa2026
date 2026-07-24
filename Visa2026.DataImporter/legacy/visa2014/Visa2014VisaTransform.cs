@@ -12,6 +12,8 @@ internal sealed record Visa2014VisaRawRow(
     DateTime? StartDate,
     DateTime? ExpirationDate,
     Guid LegacyPassportOid,
+    string? AsNumber,
+    Guid? LegacyPersonInApplicationOid,
     bool IsFamilyMemberPerson,
     bool BzDasoguz,
     bool BzTagtabazar,
@@ -63,6 +65,8 @@ internal static class Visa2014VisaTransform
             CONVERT(varchar(10), v.VisaStartDate, 23) AS VisaStartDate,
             CONVERT(varchar(10), v.VisaEndDate, 23) AS VisaEndDate,
             CAST(v.Passport AS varchar(36)) AS LegacyPassportOid,
+            v.ASNumber,
+            CAST(v.ProcessNumber AS varchar(36)) AS LegacyPersonInApplicationOid,
             CASE WHEN v.BorderZone IS NULL THEN '0' ELSE '1' END AS HasBorderZoneFk,
             CASE WHEN ISNULL(bz.[Daşoguz], 0) = 1 THEN '1' ELSE '0' END AS BzDasoguz,
             CASE WHEN ISNULL(bz.Tagtabazar, 0) = 1 THEN '1' ELSE '0' END AS BzTagtabazar,
@@ -92,10 +96,11 @@ internal static class Visa2014VisaTransform
         "_hasVisaDocument", "_visaDocumentByteLength",
         "VisaNumber", "VisaType", "VisaCategory", "VisaIssuedPlace",
         "IssueDate", "StartDate", "ExpirationDate", "BorderZoneLocation", "Passport",
+        "ProcessNumber", "LegacyPersonInApplicationOid",
         "ExtensionRequired", "IsCancelled", "IsChanged", "IsExtended", "ShowOptionalFields",
         "InvitationItem", "IssuingApplicationItem", "Notes",
         "_legacy_VisaTypeComposite", "_legacy_VisaTypePersonOverride", "_legacy_VisaCategoryComposite",
-        "_legacy_IssuedPlaceOfVisaL", "_legacy_PassportOid",
+        "_legacy_IssuedPlaceOfVisaL", "_legacy_PassportOid", "_legacy_ASNumber", "_legacy_PersonInApplicationOid",
     ];
 
     public static Visa2014PersonImportBatch PrepareImportBatch(
@@ -163,6 +168,13 @@ internal static class Visa2014VisaTransform
             StartDate: DateTime.TryParse(row.GetValueOrDefault("VisaStartDate"), out var start) ? start : null,
             ExpirationDate: DateTime.TryParse(row.GetValueOrDefault("VisaEndDate"), out var expires) ? expires : null,
             LegacyPassportOid: legacyPassportOid,
+            AsNumber: string.IsNullOrWhiteSpace(row.GetValueOrDefault("ASNumber"))
+                ? null
+                : row.GetValueOrDefault("ASNumber")!.Trim(),
+            LegacyPersonInApplicationOid: Guid.TryParse(
+                    row.GetValueOrDefault("LegacyPersonInApplicationOid")?.Trim(), out var piaOid)
+                ? piaOid
+                : null,
             IsFamilyMemberPerson: row.GetValueOrDefault("IsFamilyMemberPerson") == "1",
             BzDasoguz: row.GetValueOrDefault("BzDasoguz") == "1",
             BzTagtabazar: row.GetValueOrDefault("BzTagtabazar") == "1",
@@ -338,6 +350,10 @@ internal static class Visa2014VisaTransform
         row["StartDate"] = raw.StartDate;
         row["ExpirationDate"] = raw.ExpirationDate;
         row["Passport"] = raw.LegacyPassportOid.ToString("D");
+        row["ProcessNumber"] = raw.AsNumber;
+        row["LegacyPersonInApplicationOid"] = raw.LegacyPersonInApplicationOid;
+        row["_legacy_ASNumber"] = raw.AsNumber;
+        row["_legacy_PersonInApplicationOid"] = raw.LegacyPersonInApplicationOid?.ToString("D");
         row["ExtensionRequired"] = true;
         row["IsCancelled"] = cancellationIndex.IsVisaCancelled(raw.LegacyOid);
         row["IsChanged"] = false;

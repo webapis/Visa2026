@@ -209,7 +209,7 @@ internal static class Visa2014VisaODataImporter
         if (string.IsNullOrWhiteSpace(borderZone))
             borderZone = "Ýok";
 
-        return new Dictionary<string, object?>(StringComparer.Ordinal)
+        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["VisaNumber"] = visaNumber,
             ["IssueDate"] = DateTime.SpecifyKind(issueDate, DateTimeKind.Utc),
@@ -226,6 +226,18 @@ internal static class Visa2014VisaODataImporter
             ["VisaCategory"] = new { ID = visaCategoryId.Value },
             ["VisaIssuedPlace"] = new { ID = visaIssuedPlaceId.Value },
         };
+
+        if (row.GetValueOrDefault("ProcessNumber") is string processNumber
+            && !string.IsNullOrWhiteSpace(processNumber))
+            payload["ProcessNumber"] = processNumber.Trim();
+
+        if (row.GetValueOrDefault("LegacyPersonInApplicationOid") is Guid piaOid)
+            payload["LegacyPersonInApplicationOid"] = piaOid;
+        else if (row.GetValueOrDefault("LegacyPersonInApplicationOid") is string piaText
+                 && Guid.TryParse(piaText.Trim(), out var parsedPia))
+            payload["LegacyPersonInApplicationOid"] = parsedPia;
+
+        return payload;
     }
 
     private static Dictionary<Guid, Guid> LoadOptionalVisaIdMap(string? path)

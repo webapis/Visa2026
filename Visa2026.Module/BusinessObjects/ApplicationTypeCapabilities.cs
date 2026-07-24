@@ -14,4 +14,10 @@ public static class ApplicationTypeCapabilities
 
     public static bool CanIssueWorkPermit(ApplicationType? applicationType) =>
         applicationType?.CanIssueWorkPermit == true;
+
+    /// <summary>
+    /// Eligible parent type for <see cref="Visa.IssuingApplicationItem"/> (union of visa- and invitation-issuing).
+    /// </summary>
+    public static bool CanBeIssuingApplicationForVisa(ApplicationType? applicationType) =>
+        CanIssueVisa(applicationType) || CanIssueInvitation(applicationType);
 }

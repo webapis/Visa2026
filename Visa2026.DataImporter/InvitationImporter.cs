@@ -14,9 +14,6 @@ public class InvitationImporter
         _api = api;
     }
 
-    // ------------------------------------------------------------------
-    // READ — list all
-    // ------------------------------------------------------------------
     public async Task ListAllAsync()
     {
         Console.WriteLine($"=== GET all {Entity}s ===");
@@ -28,34 +25,32 @@ public class InvitationImporter
         foreach (var item in items)
         {
             var appNum = item.Application?.ApplicationNumber ?? "No App";
-            Console.WriteLine($"  [{item.Id}] Inv#: {item.InvitationNumber} (App: {appNum}) - Starts: {item.StartDate:d}");
+            Console.WriteLine($"  [{item.Id}] Inv#: {item.InvitationNumber} (App: {appNum}) - Issued: {item.IssuedDate:d}");
         }
         Console.WriteLine();
     }
 
-    // ------------------------------------------------------------------
-    // CREATE — single record
-    // ------------------------------------------------------------------
     public async Task<Invitation?> CreateOneAsync(
         string invitationNumber,
-        DateTime startDate,
-        Guid applicationId,
-        Guid validityDurationId)
+        DateTime issuedDate,
+        DateTime expirationDate,
+        Guid? applicationId,
+        Guid visaCategoryId,
+        Guid visaPeriodId)
     {
         Console.WriteLine($"=== POST {Entity}: {invitationNumber} ===");
 
-        var payload = new
+        var payload = new Dictionary<string, object?>
         {
-            InvitationNumber = invitationNumber,
-            StartDate = startDate,
-            
-            // Required Relationships
-            Application = new { ID = applicationId },
-            ValidityDuration = new { ID = validityDurationId },
-
-            // Defaults
-            IsCancelled = false
+            ["InvitationNumber"] = invitationNumber,
+            ["IssuedDate"] = issuedDate,
+            ["ExpirationDate"] = expirationDate,
+            ["VisaCategory"] = new { ID = visaCategoryId },
+            ["VisaPeriod"] = new { ID = visaPeriodId },
+            ["IsVisaStartAndEndDateDefined"] = false,
         };
+        if (applicationId.HasValue)
+            payload["Application"] = new { ID = applicationId.Value };
 
         try
         {
@@ -70,9 +65,6 @@ public class InvitationImporter
         }
     }
 
-    // ------------------------------------------------------------------
-    // CREATE — bulk import from a list
-    // ------------------------------------------------------------------
     public async Task BulkImportAsync(IEnumerable<Invitation> records)
     {
         Console.WriteLine($"=== Bulk import {Entity}s ===");
@@ -82,15 +74,17 @@ public class InvitationImporter
         {
             try
             {
-                var payload = new
+                var payload = new Dictionary<string, object?>
                 {
-                    InvitationNumber = record.InvitationNumber,
-                    StartDate = record.StartDate,
-                    IsCancelled = record.IsCancelled,
-                    IsChanged = record.IsChanged,
-
-                    Application = record.Application != null ? new { ID = record.Application.Id } : null,
-                    ValidityDuration = record.ValidityDuration != null ? new { ID = record.ValidityDuration.Id } : null
+                    ["InvitationNumber"] = record.InvitationNumber,
+                    ["IssuedDate"] = record.IssuedDate,
+                    ["ExpirationDate"] = record.ExpirationDate,
+                    ["IsVisaStartAndEndDateDefined"] = record.IsVisaStartAndEndDateDefined,
+                    ["VisaStartDate"] = record.VisaStartDate,
+                    ["VisaEndDate"] = record.VisaEndDate,
+                    ["Application"] = record.Application != null ? new { ID = record.Application.Id } : null,
+                    ["VisaCategory"] = record.VisaCategory != null ? new { ID = record.VisaCategory.Id } : null,
+                    ["VisaPeriod"] = record.VisaPeriod != null ? new { ID = record.VisaPeriod.Id } : null,
                 };
 
                 await _api.CreateAsync<Invitation>(Entity, payload);

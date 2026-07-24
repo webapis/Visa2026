@@ -355,12 +355,13 @@ function Invoke-PostImportCorrections {
     }
 
     $corrections = @(
-        @{ Name = "PersonSubcontractor"; Flag = "--correct-person-subcontractor" },
-        @{ Name = "PersonRelationship"; Flag = "--correct-person-relationship" },
-        @{ Name = "PersonAddressPia"; Flag = "--correct-person-address-of-residence" },
-        @{ Name = "ApplicationItemPersonCurrent"; Flag = "--correct-application-item-person-current" },
-        @{ Name = "VisaType"; Flag = "--correct-visa-type" },
-        @{ Name = "VisaIssuingApplicationItem"; Flag = "--correct-visa2014-issuing-application-item" }
+        @{ Name = "PersonSubcontractor"; Wave = "post-PersonSubcontractor"; Flag = "--correct-person-subcontractor" },
+        @{ Name = "PersonRelationship"; Wave = "post-PersonRelationship"; Flag = "--correct-person-relationship" },
+        @{ Name = "PersonAddressPia"; Wave = "post-PersonAddressPia"; Flag = "--correct-person-address-of-residence" },
+        @{ Name = "ApplicationItemPersonCurrent"; Wave = "post-ApplicationItemPersonCurrent"; Flag = "--correct-application-item-person-current" },
+        @{ Name = "VisaType"; Wave = "post-VisaType"; Flag = "--correct-visa-type" },
+        @{ Name = "VisaIssuingApplicationItem"; Wave = "post-VisaIssuingApplicationItem"; Flag = "--correct-visa2014-issuing-application-item" },
+        @{ Name = "VisaInvitationItem"; Wave = "post-VisaInvitationItem"; Flag = "--correct-visa2014-invitation-item" }
     )
 
     Write-Host ""
@@ -368,6 +369,7 @@ function Invoke-PostImportCorrections {
     foreach ($corr in $corrections) {
         $logFile = Join-Path $logRoot "$logPrefix-post-$($corr.Name)-$stamp.log"
         Write-Host ">>> $($corr.Name)  ->  $logFile" -ForegroundColor Green
+        Set-OnPremSyncRunWaveStarted -Root $syncStatusRoot -WaveName $corr.Wave -LogFile $logFile
         $corrArgs = @(
             $corr.Flag,
             "--legacy-source", $LegacySource,
@@ -375,6 +377,7 @@ function Invoke-PostImportCorrections {
             "--verbose"
         )
         $exit = Invoke-DataImporterCli -CliArgs $corrArgs -LogFile $logFile
+        Set-OnPremSyncRunWaveCompleted -Root $syncStatusRoot -WaveName $corr.Wave -ExitCode $exit -LogFile $logFile
         if ($exit -ne 0) {
             Write-Host "ERR postImportCorrection $($corr.Name) failed (exit $exit). Log: $logFile" -ForegroundColor Red
             if (-not $ContinueOnError) { exit $exit }
@@ -653,7 +656,16 @@ Write-Host "INF Mode: Import (--import-visa2014)" -ForegroundColor DarkGray
 if ($DryRun) { Write-Host "INF Dry-run" -ForegroundColor Yellow }
 if ($IncludeFileWaves) { Write-Host "INF File waves: DocumentCopies.ps1 after scalar chain" -ForegroundColor Yellow }
 
-$activeWaves = @($waves | ForEach-Object { $_.Name })
+$postWaves = @(
+    'post-PersonSubcontractor',
+    'post-PersonRelationship',
+    'post-PersonAddressPia',
+    'post-ApplicationItemPersonCurrent',
+    'post-VisaType',
+    'post-VisaIssuingApplicationItem',
+    'post-VisaInvitationItem'
+)
+$activeWaves = @($waves | ForEach-Object { $_.Name }) + $postWaves
 $previousFileWaveStatus = Join-Path $syncStatusRoot 'file-waves-status.json'
 if (Test-Path -LiteralPath $previousFileWaveStatus) { Remove-Item -LiteralPath $previousFileWaveStatus -Force }
 

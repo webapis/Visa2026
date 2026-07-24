@@ -29,7 +29,7 @@ internal static class Visa2014InvitationTransform
     internal static readonly string[] InvitationMainColumnOrder =
     [
         "_legacyRowId", "_legacyTable", "_dedupeGroupId", "_importAction",
-        "InvitationNumber", "StartDate", "DateOfExpire", "ValidityDurationDays", "ValidityDurationKey",
+        "InvitationNumber", "IssuedDate", "ExpirationDate", "VisaPeriodKey",
         "Application", "_legacy_ApplicationOid",
     ];
 
@@ -180,8 +180,8 @@ internal static class Visa2014InvitationTransform
         {
             skipReason = "required_null:InvitationNumber";
             row["InvitationNumber"] = null;
-            row["StartDate"] = null;
-            row["DateOfExpire"] = null;
+            row["IssuedDate"] = null;
+            row["ExpirationDate"] = null;
             return row;
         }
 
@@ -189,8 +189,8 @@ internal static class Visa2014InvitationTransform
         {
             skipReason = "required_null:IssuedDate";
             row["InvitationNumber"] = raw.InvitationNumber;
-            row["StartDate"] = null;
-            row["DateOfExpire"] = null;
+            row["IssuedDate"] = null;
+            row["ExpirationDate"] = null;
             return row;
         }
 
@@ -198,8 +198,8 @@ internal static class Visa2014InvitationTransform
         {
             skipReason = "required_null:DateOfExpire";
             row["InvitationNumber"] = raw.InvitationNumber;
-            row["StartDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
-            row["DateOfExpire"] = null;
+            row["IssuedDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
+            row["ExpirationDate"] = null;
             return row;
         }
 
@@ -209,10 +209,10 @@ internal static class Visa2014InvitationTransform
         var closestDays = Visa2014ValidityDurationHelper.ClosestCandidateDaySpan(daySpan);
 
         row["InvitationNumber"] = invitationNumber;
-        row["StartDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
-        row["DateOfExpire"] = raw.DateOfExpire.Value.ToString("yyyy-MM-dd");
-        row["ValidityDurationDays"] = closestDays;
-        row["ValidityDurationKey"] = Visa2014ValidityDurationHelper.LocalizationKeyForDaySpan(closestDays);
+        row["IssuedDate"] = raw.IssuedDate.Value.ToString("yyyy-MM-dd");
+        row["ExpirationDate"] = raw.DateOfExpire.Value.ToString("yyyy-MM-dd");
+        // Best-effort VisaPeriod from invitation letter span until legacy VisaPeriod column is mapped.
+        row["VisaPeriodKey"] = Visa2014ValidityDurationHelper.LocalizationKeyForDaySpan(closestDays);
         row["Application"] = raw.LegacyApplicationOid?.ToString("D");
         return row;
     }

@@ -66,7 +66,7 @@ foreach ($procName in $diProcessNames) {
             $isImporter = ($procName -eq 'Visa2026.DataImporter') -or ($cmd -match 'Visa2026\.DataImporter')
             if (-not $isImporter) { return }
             $matchesRoot = $path -like ("*\" + $rootLeaf + "\*") -or $cmd -like ("*" + $rootLeaf + "*")
-            $matchesLocal = $isLocalPgRoot -and ($cmd -match 'import-visa2014|calik-energi-local-pg')
+            $matchesLocal = $isLocalPgRoot -and ($cmd -match 'import-visa2014|calik-energi-local-pg|correct-visa2014-|correct-visa-type|correct-person-|correct-application-item')
             if (-not ($matchesRoot -or $matchesLocal)) { return }
 
             $entity = ''
@@ -77,6 +77,28 @@ foreach ($procName in $diProcessNames) {
             }
             elseif ($cmd -match '--import-visa2014-files') {
                 if ($entity) { $entity = "$entity (files)" } else { $entity = 'files' }
+            }
+            # Post-import Visa link / type corrections (no --entity)
+            elseif ($cmd -match '--correct-visa2014-issuing-application-item') {
+                $entity = 'post-VisaIssuingApplicationItem'
+            }
+            elseif ($cmd -match '--correct-visa2014-invitation-item') {
+                $entity = 'post-VisaInvitationItem'
+            }
+            elseif ($cmd -match '--correct-visa-type') {
+                $entity = 'post-VisaType'
+            }
+            elseif ($cmd -match '--correct-application-item-person-current') {
+                $entity = 'post-ApplicationItemPersonCurrent'
+            }
+            elseif ($cmd -match '--correct-person-address-of-residence') {
+                $entity = 'post-PersonAddressPia'
+            }
+            elseif ($cmd -match '--correct-person-relationship') {
+                $entity = 'post-PersonRelationship'
+            }
+            elseif ($cmd -match '--correct-person-subcontractor') {
+                $entity = 'post-PersonSubcontractor'
             }
             $diList += @{ Pid = $_.Id; Entity = $entity }
         } catch {}
@@ -215,6 +237,20 @@ if (-not $NoDbCounts) {
             foreach ($r in @($rows)) {
                 if ($r -and $r.Trim() -and $r -match '\|') { $dbLines += $r.Trim() }
             }
+            # Visa link fill (IssuingApplicationItem / InvitationItem FKs) — Path B post-corrections
+            $linkSqlFile = Join-Path $env:TEMP ("visa2026-visalink-{0}.sql" -f [guid]::NewGuid().ToString('N'))
+            @"
+SELECT 'VisaWithIssuing' AS bo, COUNT(*)::int AS c FROM public."Visas"
+WHERE ("GCRecord" IS NULL OR "GCRecord" = 0) AND "IssuingApplicationItemID" IS NOT NULL
+UNION ALL
+SELECT 'VisaWithInvitation' AS bo, COUNT(*)::int AS c FROM public."Visas"
+WHERE ("GCRecord" IS NULL OR "GCRecord" = 0) AND "InvitationItemID" IS NOT NULL;
+"@ | Set-Content -LiteralPath $linkSqlFile -Encoding UTF8
+            $linkRows = & $psql -h localhost -U $pgUser -d $pgDatabase -t -A -F '|' -f $linkSqlFile 2>$null
+            Remove-Item -LiteralPath $linkSqlFile -Force -ErrorAction SilentlyContinue
+            foreach ($r in @($linkRows)) {
+                if ($r -and $r.Trim() -and $r -match '\|') { $dbLines += $r.Trim() }
+            }
         }
     }
     else {
@@ -223,6 +259,8 @@ if (-not $NoDbCounts) {
             $t = $dbCountMap[$bo]
             $parts += "SELECT '$bo' AS BO, COUNT(*) AS C FROM [$t] WHERE GCRecord IS NULL OR GCRecord = 0"
         }
+        $parts += "SELECT 'VisaWithIssuing' AS BO, COUNT(*) AS C FROM [Visas] WHERE (GCRecord IS NULL OR GCRecord = 0) AND IssuingApplicationItemID IS NOT NULL"
+        $parts += "SELECT 'VisaWithInvitation' AS BO, COUNT(*) AS C FROM [Visas] WHERE (GCRecord IS NULL OR GCRecord = 0) AND InvitationItemID IS NOT NULL"
         $sql = "SET NOCOUNT ON; USE [$dbName]; " + ($parts -join ' UNION ALL ') + ';'
         $rows = sqlcmd -S 'localhost\SQLEXPRESS' -E -C -Q $sql -W -s '|' -h -1 2>$null
         foreach ($r in @($rows)) {

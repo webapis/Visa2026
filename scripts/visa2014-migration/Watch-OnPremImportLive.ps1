@@ -212,10 +212,11 @@ function Parse-DbCounts {
     if ([string]::IsNullOrWhiteSpace($Text)) { return $map }
     foreach ($line in ($Text -split "`r?`n")) {
         $trim = $line.Trim()
-        if ($trim -match '^(\w+)\|(\d+)$') {
+        # Allow dotted / camel tokens (VisaWithIssuing, etc.)
+        if ($trim -match '^([\w.]+)\|(\d+)$') {
             $map[$Matches[1]] = [int]$Matches[2]
         }
-        elseif ($trim -match '^(\w+)\s+(\d+)$') {
+        elseif ($trim -match '^([\w.]+)\s+(\d+)$') {
             $map[$Matches[1]] = [int]$Matches[2]
         }
     }
@@ -488,6 +489,11 @@ function Write-LiveDashboard {
 
     $diColor = if ($di.Count -gt 0) { 'Green' } else { 'Yellow' }
     Write-Host ("DataImporter: alive={0}  entity={1}  pid={2}" -f ($di.Count -gt 0), $diEntity, $diPids) -ForegroundColor $diColor
+    # When post-corrections run without status CurrentWave (older chain), surface DI entity as current.
+    $effectiveWave = if ($status -and $status.CurrentWave) { [string]$status.CurrentWave } elseif ($diEntity) { [string]$diEntity } else { '' }
+    if ($status -and -not $status.CurrentWave -and $diEntity -like 'post-*') {
+        Write-Host ("INF CurrentWave inferred from DataImporter: {0}" -f $diEntity) -ForegroundColor DarkYellow
+    }
     if ($Snap.TaskState) {
         $taskColor = if ($Snap.TaskState -eq 'Running') { 'Cyan' } else { 'DarkGray' }
         $taskLabel = if ($Snap.TaskName) { $Snap.TaskName } else { 'Task' }
@@ -518,7 +524,7 @@ function Write-LiveDashboard {
             $script:PrevWave[$w.Name] = @{ Ins = $ins; Upd = $upd; Fail = $fail }
 
             $marker = ''
-            if ($w.Status -eq 'Running' -or $w.Name -eq $status.CurrentWave) { $marker = '>' }
+            if ($w.Status -eq 'Running' -or $w.Name -eq $status.CurrentWave -or ($effectiveWave -and $w.Name -eq $effectiveWave)) { $marker = '>' }
             elseif ($w.Status -eq 'Failed') { $marker = '!' }
             elseif ($w.Status -eq 'Completed') { $marker = 'ok' }
 
@@ -580,17 +586,58 @@ function Write-LiveDashboard {
             Write-Host '(no DB counts — check sqlcmd / TrustServerCertificate)' -ForegroundColor Yellow
             if ($Snap.DbCounts) { Write-Host $Snap.DbCounts -ForegroundColor DarkYellow }
         }
+
+        # Visa Path B link fill (not a row count BO — FK coverage on Visas)
+        $visaTotal = if ($dbMap.ContainsKey('Visa')) { [int]$dbMap['Visa'] } else { $null }
+        $withIssuing = if ($dbMap.ContainsKey('VisaWithIssuing')) { [int]$dbMap['VisaWithIssuing'] } else { $null }
+        $withInv = if ($dbMap.ContainsKey('VisaWithInvitation')) { [int]$dbMap['VisaWithInvitation'] } else { $null }
+        if ($null -ne $withIssuing -or $null -ne $withInv) {
+            Write-Host '--- Visa link fill (FK coverage) ---' -ForegroundColor Cyan
+            foreach ($pair in @(
+                    @{ Key = 'VisaWithIssuing'; Label = 'IssuingApplicationItem'; Val = $withIssuing },
+                    @{ Key = 'VisaWithInvitation'; Label = 'InvitationItem'; Val = $withInv }
+                )) {
+                if ($null -eq $pair.Val) { continue }
+                $delta = $null
+                if ($script:PrevDb.ContainsKey($pair.Key)) {
+                    $delta = $pair.Val - $script:PrevDb[$pair.Key]
+                }
+                $script:PrevDb[$pair.Key] = $pair.Val
+                $pct = if ($null -ne $visaTotal -and $visaTotal -gt 0) {
+                    '{0:P1}' -f ($pair.Val / $visaTotal)
+                } else { '?' }
+                $deltaText = if ($null -ne $delta) { ("  Delta={0:+#;-#;0}" -f $delta) } else { '' }
+                $den = if ($null -ne $visaTotal) { $visaTotal } else { '?' }
+                Write-Host ("  {0}: {1} / {2} ({3}){4}" -f $pair.Label, $pair.Val, $den, $pct, $deltaText) -ForegroundColor White
+            }
+        }
     }
 
     # --- Progress / log hints ---
-    if (-not $NoTail -and $status -and $status.CurrentWave) {
-        $current = @($status.Waves) | Where-Object { $_.Name -eq $status.CurrentWave } | Select-Object -First 1
-        if ($current -and $current.LogFile) {
-            Write-Host ("--- progress / {0} ---" -f (Split-Path -Leaf $current.LogFile)) -ForegroundColor Cyan
-            Get-ProgressHint -LogFile $current.LogFile -Lines $TailLogLines | ForEach-Object {
+    if (-not $NoTail) {
+        $progressLog = $null
+        if ($status -and $status.CurrentWave) {
+            $current = @($status.Waves) | Where-Object { $_.Name -eq $status.CurrentWave } | Select-Object -First 1
+            if ($current -and $current.LogFile) { $progressLog = [string]$current.LogFile }
+        }
+        # Fallback: newest post-Visa* log or chain console while corrections run without status CurrentWave
+        if (-not $progressLog -and $effectiveWave -like 'post-*') {
+            $logDir = Join-Path $SyncHostRoot 'data\import-logs'
+            $cand = Get-ChildItem -Path $logDir -Filter ("{0}-*.log" -f $effectiveWave) -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($cand) { $progressLog = $cand.FullName }
+        }
+        if (-not $progressLog -and $diEntity -like 'post-*') {
+            $chainLogs = Get-ChildItem -Path $SyncHostRoot -Filter 'chain-console*.log' -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($chainLogs) { $progressLog = $chainLogs.FullName }
+        }
+        if ($progressLog) {
+            Write-Host ("--- progress / {0} ---" -f (Split-Path -Leaf $progressLog)) -ForegroundColor Cyan
+            Get-ProgressHint -LogFile $progressLog -Lines $TailLogLines | ForEach-Object {
                 $line = $_
                 if ($line -match 'ERR ') { Write-Host $line -ForegroundColor Red }
-                elseif ($line -match 'Progress:') { Write-Host $line -ForegroundColor Green }
+                elseif ($line -match 'Progress:|updated:|histogram|IssuingApplicationItem|InvitationItem') { Write-Host $line -ForegroundColor Green }
                 else { Write-Host $line -ForegroundColor Gray }
             }
         }

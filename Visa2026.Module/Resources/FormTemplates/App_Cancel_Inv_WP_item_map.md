@@ -75,5 +75,5 @@ BottomMargin    (60F)     — inherited from AppItemBaseReport
 | `WorkPermit_ASNumber` | `CurrentWorkPermitItem?.ASNumber` |
 | `WorkPermit_WorkPermittedLocations` | `CurrentWorkPermitItem?.WorkPermittedLocations` |
 | `Invitation_Number` | `CurrentInvitationItem?.Invitation?.InvitationNumber` |
-| `Invitation_StartDateText` | `CurrentInvitationItem?.Invitation?.StartDate` (dd.MM.yyyy) |
+| `Invitation_StartDateText` | `CurrentInvitationItem?.Invitation?.IssuedDate` (dd.MM.yyyy; formalization date) |
 | `Invitation_ExpirationDateText` | `CurrentInvitationItem?.Invitation?.ExpirationDate` (dd.MM.yyyy) |

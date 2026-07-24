@@ -157,6 +157,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdEducationByCountry> VwRdEducationByCountry { get; set; }
         public DbSet<VwRdPositionHistory> VwRdPositionHistory { get; set; }
         public DbSet<VwRdRegistration> VwRdRegistration { get; set; }
+        public DbSet<VwRdToBeCheckedIn> VwRdToBeCheckedIn { get; set; }
+        public DbSet<VwRdToBeCheckedOut> VwRdToBeCheckedOut { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -359,6 +361,16 @@ namespace Visa2026.Module.BusinessObjects
                 b.ToView("vw_rd_registration");
             });
 
+            modelBuilder.Entity<VwRdToBeCheckedIn>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_to_be_checked_in");
+            });
+
+            modelBuilder.Entity<VwRdToBeCheckedOut>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_to_be_checked_out");
+            });
+
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {
                 b.HasOne(l => l.UserReportTemplate)
                     .WithMany(t => t.ApplicableTypeLinks)
@@ -512,10 +524,21 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction).IsRequired(false);
+                // Single-use by validation (Visa_IssuingApplicationItemSingleUse / Visa_InvitationItemSingleUse).
+                b.HasOne(v => v.IssuingApplicationItem)
+                    .WithOne(ai => ai.IssuedVisa)
+                    .HasForeignKey<Visa>("IssuingApplicationItemID")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired(false);
+                b.HasOne(v => v.InvitationItem)
+                    .WithOne(ii => ii.IssuedVisa)
+                    .HasForeignKey<Visa>("InvitationItemID")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired(false);
                 b.Metadata.UseSqlOutputClause(false);
                 b.Property(v => v.ExtensionRequired).HasDefaultValue(true);
                 b.Property(v => v.BorderZoneLocation).HasMaxLength(500);
+                b.Property(v => v.ProcessNumber).HasMaxLength(100);
             });
 
             modelBuilder.Entity<Passport>(b =>

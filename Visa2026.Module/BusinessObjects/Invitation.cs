@@ -6,21 +6,34 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
-using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Editors;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    /// <summary>
+    /// Invitation letter header (legacy ApplicationResult Result=Invitation).
+    /// No Netije/Result property — Rejection is a separate BO.
+    /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Invitation")]
     [DefaultProperty(nameof(InvitationNumber))]
-    [RuleCriteria("Invitation_DateRange", DefaultContexts.Save, "ExpirationDate > StartDate", "Expiration Date must be later than Start Date.")]
+    [RuleCriteria("Invitation_ExpirationAfterIssued", DefaultContexts.Save,
+        "ExpirationDate > IssuedDate",
+        "Expiration Date must be later than Issued Date.")]
+    [RuleCriteria("Invitation_VisaWindowOrder", DefaultContexts.Save,
+        "Not IsVisaStartAndEndDateDefined Or VisaEndDate > VisaStartDate",
+        "Visa End Date must be later than Visa Start Date when the visa window is defined.")]
+    [Appearance("Invitation_VisaWindowHidden", Visibility = ViewItemVisibility.Hide,
+        Criteria = "!IsVisaStartAndEndDateDefined",
+        TargetItems = "VisaStartDate;VisaEndDate",
+        Context = "DetailView")]
     [SupportsOptionalDetailFields]
     public class Invitation : BaseObject, IExpirationLogic, IPersonLinkParent, IOptionalDetailFields
     {
@@ -33,30 +46,61 @@ namespace Visa2026.Module.BusinessObjects
 
         [MaxLength(50)]
         [RuleRequiredField]
+        [XafDisplayName("Number")]
         public virtual string InvitationNumber { get; set; }
 
-		private DateTime startDate;
-		[RuleRequiredField]
-		[ImmediatePostData]
-		[ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
-		[ModelDefault("EditMask", "dd.MM.yyyy")]
-		public virtual DateTime StartDate
-		{
-			get => startDate;
-			set
-			{
-				if(startDate != value)
-				{
-				startDate = value;
-					UpdateExpirationDate();
-				}
-			}
-		}
+        /// <summary>
+        /// Formalization / issued date (legacy Resmileşdirilen sene).
+        /// Stored in column <c>StartDate</c> for schema compatibility with existing databases.
+        /// </summary>
+        [RuleRequiredField]
+        [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [XafDisplayName("Issued Date")]
+        [Column("StartDate")]
+        public virtual DateTime IssuedDate { get; set; }
 
         [RuleRequiredField]
+        [ImmediatePostData]
+        [XafDisplayName("Visa Category")]
+        public virtual VisaCategory VisaCategory { get; set; }
+
+        /// <summary>Intended visa period on the invitation (legacy Wiza möhleti). Not used to compute invitation expiry.</summary>
+        [RuleRequiredField]
+        [ImmediatePostData]
+        [XafDisplayName("Visa Period")]
+        public virtual VisaPeriod VisaPeriod { get; set; }
+
+        /// <summary>When true, <see cref="VisaStartDate"/> and <see cref="VisaEndDate"/> apply (legacy Visa Start And End Date Defined).</summary>
+        [ImmediatePostData]
+        [VisibleInListView(false)]
+        [XafDisplayName("Visa Start And End Date Defined")]
+        public virtual bool IsVisaStartAndEndDateDefined { get; set; }
+
+        [RuleRequiredField(TargetCriteria = "IsVisaStartAndEndDateDefined")]
+        [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
-		[ModelDefault("EditMask", "dd.MM.yyyy")]
-		public virtual DateTime? ExpirationDate { get; protected set; }
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Visa Start Date")]
+        public virtual DateTime? VisaStartDate { get; set; }
+
+        [RuleRequiredField(TargetCriteria = "IsVisaStartAndEndDateDefined")]
+        [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [VisibleInListView(false)]
+        [XafDisplayName("Visa End Date")]
+        public virtual DateTime? VisaEndDate { get; set; }
+
+        /// <summary>Invitation letter expiry (legacy Möhleti tamamlanýan sene / DateOfExpire).</summary>
+        [RuleRequiredField]
+        [ImmediatePostData]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
+        [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [XafDisplayName("Expiration Date")]
+        public virtual DateTime? ExpirationDate { get; set; }
 
         [NotMapped]
         [ImmediatePostData]
@@ -131,10 +175,11 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<InvitationDocument> Documents { get; set; }
 
         [ModelDefault("AllowEdit", "False")]
+        [XafDisplayName("Days Remaining")]
         public int DaysRemaining => ExpirationLogicHelper.CalculateDaysRemaining(ExpirationDate);
 
         [Browsable(false)]
-		public ExpirationState ExpirationState
+        public ExpirationState ExpirationState
         {
             get
             {
@@ -173,44 +218,20 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-		private ValidityDuration validityDuration;
-		[RuleRequiredField]
-		[ImmediatePostData]
-		public virtual ValidityDuration ValidityDuration
-		{
-			get => validityDuration;
-			set
-			{
-				if(validityDuration != value)
-				{
-				validityDuration = value;
-					UpdateExpirationDate();
-				}
-			}
-		}
-
-		private void UpdateExpirationDate()
-		{
-			if (ValidityDuration != null && StartDate != default)
-			{
-				ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays);
-			}
-			else
-			{
-				ExpirationDate = null;
-			}
-		}
-
         public override void OnCreated()
         {
             base.OnCreated();
             var objectSpace = ObjectSpaceHelper.Get(this);
             if (objectSpace != null)
             {
-                ValidityDuration = objectSpace.GetObjectsQuery<ValidityDuration>().FirstOrDefault(v => v.IsDefault);
+                VisaCategory ??= objectSpace.GetObjectsQuery<VisaCategory>().FirstOrDefault(v => v.IsDefault);
+                VisaPeriod ??= objectSpace.GetObjectsQuery<VisaPeriod>().FirstOrDefault(v => v.IsDefault);
             }
 
-            UpdateExpirationDate();
+            if (IssuedDate == default)
+            {
+                IssuedDate = DateTime.Today;
+            }
         }
 
         /// <summary>ListView link column that opens header document copies in the preview slot.</summary>
@@ -220,6 +241,5 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public string DocumentCopiesListLink =>
             Visa2026.Module.Localization.VisaUiMessages.Get("InvitationDocumentCopies.List.ColumnLink");
-
     }
 }

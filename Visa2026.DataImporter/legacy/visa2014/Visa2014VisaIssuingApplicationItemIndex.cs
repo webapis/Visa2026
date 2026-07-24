@@ -60,6 +60,61 @@ internal static class Visa2014VisaIssuingApplicationItemIndex
           )
         """;
 
+    public static IReadOnlyDictionary<Guid, Guid> LoadProcessNumbers(
+        string connectionString,
+        bool verbose)
+    {
+        const string sql = """
+            SELECT
+                CAST(v.Oid AS varchar(36)) AS VisaOid,
+                CAST(v.ProcessNumber AS varchar(36)) AS PiaOid
+            FROM dbo.Visa v
+            WHERE v.GCRecord IS NULL
+              AND v.ProcessNumber IS NOT NULL
+            """;
+
+        var map = new Dictionary<Guid, Guid>();
+        foreach (var row in Visa2014SqlCmdReader.Query(connectionString, sql, verbose))
+        {
+            if (TryGuid(row, "VisaOid", out var visaOid) && TryGuid(row, "PiaOid", out var piaOid))
+                map[visaOid] = piaOid;
+        }
+
+        if (verbose)
+            Console.WriteLine($"INF Visa ProcessNumber (legacy PIA) rows: {map.Count}");
+        return map;
+    }
+
+    public static IReadOnlyDictionary<Guid, string> LoadAsNumbers(
+        string connectionString,
+        bool verbose)
+    {
+        const string sql = """
+            SELECT
+                CAST(v.Oid AS varchar(36)) AS VisaOid,
+                LTRIM(RTRIM(v.ASNumber)) AS ASNumber
+            FROM dbo.Visa v
+            WHERE v.GCRecord IS NULL
+              AND v.ASNumber IS NOT NULL
+              AND LTRIM(RTRIM(v.ASNumber)) <> ''
+            """;
+
+        var map = new Dictionary<Guid, string>();
+        foreach (var row in Visa2014SqlCmdReader.Query(connectionString, sql, verbose))
+        {
+            if (!TryGuid(row, "VisaOid", out var visaOid))
+                continue;
+            var asNumber = row.GetValueOrDefault("ASNumber")?.Trim();
+            if (string.IsNullOrWhiteSpace(asNumber))
+                continue;
+            map[visaOid] = asNumber;
+        }
+
+        if (verbose)
+            Console.WriteLine($"INF Visa ASNumber (Işlenen belgisi) rows: {map.Count}");
+        return map;
+    }
+
     public static IReadOnlyDictionary<Guid, Visa2014VisaIssuingApplicationItemLink> Load(
         string connectionString,
         bool verbose)

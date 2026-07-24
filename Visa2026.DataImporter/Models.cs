@@ -1239,23 +1239,29 @@ public class Invitation
     [JsonPropertyName("InvitationNumber")]
     public string InvitationNumber { get; set; } = "";
 
-    [JsonPropertyName("StartDate")]
-    public DateTime StartDate { get; set; }
+    [JsonPropertyName("IssuedDate")]
+    public DateTime IssuedDate { get; set; }
 
     [JsonPropertyName("ExpirationDate")]
     public DateTime? ExpirationDate { get; set; }
 
+    [JsonPropertyName("VisaCategory")]
+    public VisaCategory? VisaCategory { get; set; }
+
+    [JsonPropertyName("VisaPeriod")]
+    public VisaPeriod? VisaPeriod { get; set; }
+
+    [JsonPropertyName("IsVisaStartAndEndDateDefined")]
+    public bool IsVisaStartAndEndDateDefined { get; set; }
+
+    [JsonPropertyName("VisaStartDate")]
+    public DateTime? VisaStartDate { get; set; }
+
+    [JsonPropertyName("VisaEndDate")]
+    public DateTime? VisaEndDate { get; set; }
+
     [JsonPropertyName("Application")]
     public Application? Application { get; set; }
-
-    [JsonPropertyName("IsCancelled")]
-    public bool IsCancelled { get; set; }
-
-    [JsonPropertyName("IsChanged")]
-    public bool IsChanged { get; set; }
-
-    [JsonPropertyName("ValidityDuration")]
-    public ValidityDuration? ValidityDuration { get; set; }
 
     [JsonPropertyName("InvitationItems")]
     public List<InvitationItem> InvitationItems { get; set; } = new();

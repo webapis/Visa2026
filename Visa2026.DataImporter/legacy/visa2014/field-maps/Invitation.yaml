@@ -24,9 +24,15 @@ propertyGaps:
   targetOnly:
     - property: ShowOptionalFields
       disposition: omit_from_post
-    - property: ExpirationDate
+    - property: IsVisaStartAndEndDateDefined
+      disposition: default_false
+      notes: Legacy visa start/end window columns not mapped yet; leave false
+    - property: VisaStartDate
+      disposition: omit_from_post
+    - property: VisaEndDate
+      disposition: omit_from_post
+    - property: DaysRemaining
       disposition: derived_on_save
-      notes: Computed from StartDate + ValidityDuration.NumberOfDays
 
 fields:
   - source: ApplicationResult.Oid
@@ -40,17 +46,33 @@ fields:
     missingBehavior: skip_row
 
   - source: ApplicationResult.IssuedDate
-    target: StartDate
+    target: IssuedDate
     transform: date
     missingBehavior: skip_row
+    notes: Formalization date (Resmileşdirilen sene). Stored in DB column StartDate.
 
   - source: ApplicationResult.DateOfExpire
-    target: ValidityDuration
-    transform: closest_day_span
-    candidates: [90, 180, 365]
-    lookupCatalog: ValidityDuration
+    target: ExpirationDate
+    transform: date
     missingBehavior: skip_row
-    notes: Resolved at import via INonSecuredObjectSpaceFactory (Month3/Month6/Year1)
+    notes: Invitation letter expiry (Möhleti tamamlanýan sene)
+
+  - source: ApplicationResult.DateOfExpire
+    target: VisaPeriod
+    transform: closest_day_span_to_visa_period
+    candidates: [90, 180, 365]
+    lookupCatalog: VisaPeriod
+    missingBehavior: use_default
+    notes: >
+      Best-effort until legacy ApplicationResult VisaPeriod column is confirmed.
+      Maps invitation letter span (IssuedDate→DateOfExpire) to Month3/Month6/Year1.
+
+  - source: null
+    target: VisaCategory
+    transform: default_lookup
+    lookupCatalog: VisaCategory
+    missingBehavior: use_default
+    notes: Default VisaCategory until legacy category column is mapped (Netije not used)
 
   - source: ApplicationResult.Application
     target: Application
