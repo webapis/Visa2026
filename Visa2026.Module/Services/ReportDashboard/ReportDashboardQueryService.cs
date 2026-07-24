@@ -127,7 +127,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             ReportDashboardCategory.Invitation =>
                 objectSpace.GetObjectsQuery<InvitationItem>()
                     .Count(i => i.Person != null && (role == null || i.Person.PersonRole == role)
-                                && (i.Invitation == null || i.Invitation.StartDate == null || i.Invitation.StartDate >= cutoff)),
+                                && (i.Invitation == null || i.Invitation.IssuedDate == default || i.Invitation.IssuedDate >= cutoff)),
             ReportDashboardCategory.Registration =>
                 objectSpace.GetObjectsQuery<AddressOfResidence>()
                     .Count(a => a.Person != null && (role == null || a.Person.PersonRole == role)
@@ -1067,7 +1067,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     {
         var query = objectSpace.GetObjectsQuery<InvitationItem>()
             .Where(i => i.Person != null && (role == null || i.Person.PersonRole == role)
-                        && (i.Invitation == null || i.Invitation.StartDate == null || i.Invitation.StartDate >= cutoff));
+                        && (i.Invitation == null || i.Invitation.IssuedDate == default || i.Invitation.IssuedDate >= cutoff));
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
             query = query.Where(i => i.Invitation != null && i.Invitation.Application != null
@@ -1084,7 +1084,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                 Name = i.Person?.FullName ?? string.Empty,
                 Project = ProjectLabel(i.Invitation?.Application?.ProjectContract),
                 ColumnA = i.Invitation?.InvitationNumber ?? string.Empty,
-                ColumnB = FormatDate(i.Invitation?.StartDate),
+                ColumnB = FormatDate(i.Invitation?.IssuedDate),
                 Status = status,
                 StatusCssClass = StatusCss(status, null)
             };
@@ -1099,36 +1099,402 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff,
         HashSet<Guid>? validVisaPersonIds = null)
     {
-        var query = objectSpace.GetObjectsQuery<AddressOfResidence>()
-            .Where(a => a.Person != null && (role == null || a.Person.PersonRole == role)
-                        && (a.ExpirationDate == null || a.ExpirationDate >= cutoff));
-
-        if (validVisaPersonIds != null)
-            query = query.Where(a => validVisaPersonIds.Contains(a.Person!.ID));
-
-        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(a => a.Person!.ProjectContract != null
-                && (a.Person.ProjectContract.Name == projectKey || a.Person.ProjectContract.NameTm == projectKey));
-
-        var today = DateTime.Today;
-        var rows = query.Take(PreviewLimit).AsEnumerable().Select(a =>
+        if (ReportDashboardCatalog.IsRegistrationToBeCheckedInSubReport(subReport))
         {
-            var status = ExpirationBucket(a.ExpirationDate, today);
-            return new ReportDashboardPreviewRow
-            {
-                RecordId = a.ID,
-                Name = a.Person?.FullName ?? string.Empty,
-                Project = ProjectLabel(a.Person?.ProjectContract),
-                ColumnA = a.FullAddress ?? string.Empty,
-                ColumnB = FormatDate(a.ExpirationDate),
-                Status = status,
-                StatusCssClass = StatusCss(status, a.DaysRemaining)
-            };
-        }).ToList();
+            return LoadToBeCheckedInFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, validVisaPersonIds);
+        }
 
-        return BuildPanel(personType, ReportDashboardCategory.Registration, subReport, rows, excelHint, excelConfigured);
+        if (ReportDashboardCatalog.IsRegistrationToBeCheckedOutSubReport(subReport))
+        {
+            return LoadToBeCheckedOutFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, validVisaPersonIds);
+        }
+
+        if (string.IsNullOrWhiteSpace(subReport)
+            || subReport == "default"
+            || ReportDashboardCatalog.IsRegistrationExpiringStateSubReport(subReport)
+            || ReportDashboardCatalog.IsRegistrationCheckInByCitySubReport(subReport)
+            || ReportDashboardCatalog.IsRegistrationApplicationTypeSubReport(subReport))
+        {
+            return LoadRegistrationFromView(
+                objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, validVisaPersonIds);
+        }
+
+        return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
     }
 
+    /// <summary>
+    /// <c>vw_rd_to_be_checked_in</c>: valid visas with no registration CurrentVisa link;
+    /// chart = days since latest ExternalArrival (one last visa per person).
+    /// </summary>
+    private static ReportDashboardPanelData LoadToBeCheckedInFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured,
+        HashSet<Guid>? validVisaPersonIds = null)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+
+        IQueryable<VwRdToBeCheckedIn> query = db.VwRdToBeCheckedIn.AsNoTracking();
+
+        if (role.HasValue)
+            query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+        if (validVisaPersonIds != null)
+            query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(r =>
+                r.ProjectNameTm == projectKey
+                || r.ProjectName == projectKey
+                || r.ProjectNameRaw == projectKey);
+        }
+
+        try
+        {
+            var list = TakeOneLastValidVisaPerPerson(
+                query.ToList(), r => r.PersonOid, r => r.VisaExpirationDate, r => r.ID);
+
+            var countsByLabel = list
+                .GroupBy(r => r.EntryBucketLabel ?? string.Empty, StringComparer.Ordinal)
+                .ToDictionary(
+                    g => g.Key,
+                    g => (Count: g.Count(), Css: g.First().EntryBucketCssClass ?? "st-pending"),
+                    StringComparer.Ordinal);
+
+            var buckets = ReportDashboardCatalog.RegistrationToBeCheckedInBuckets
+                .Select(b =>
+                {
+                    var has = countsByLabel.TryGetValue(b.Label, out var hit);
+                    return new ReportDashboardStatusBucket
+                    {
+                        Label = b.Label,
+                        CssClass = has ? hit.Css : b.CssClass,
+                        Count = has ? hit.Count : 0
+                    };
+                })
+                .OrderBy(b => ReportDashboardCatalog.RegistrationToBeCheckedInBucketSortKey(b.Label))
+                .ToList();
+
+            var rows = list
+                .OrderBy(r => r.DaysSinceEntry ?? int.MaxValue)
+                .ThenBy(r => r.PersonName)
+                .Take(PreviewLimit)
+                .Select(r => new ReportDashboardPreviewRow
+                {
+                    RecordId = r.ID,
+                    Name = r.PersonName ?? string.Empty,
+                    Project = r.ProjectName ?? string.Empty,
+                    ColumnA = r.VisaNumber ?? string.Empty,
+                    ColumnB = FormatDate(r.EntryDate),
+                    Status = r.EntryBucketLabel ?? string.Empty,
+                    StatusCssClass = r.EntryBucketCssClass ?? "st-pending"
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Registration, subReport, rows,
+                excelHint, excelConfigured, buckets, list.Count);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable
+            || ex.SqlState == PostgresErrorCodes.UndefinedColumn)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    /// <summary>
+    /// <c>vw_rd_to_be_checked_out</c>: valid visas expiring within 1 week without Check-Out app;
+    /// chart = day buckets to expiry (one last visa per person).
+    /// </summary>
+    private static ReportDashboardPanelData LoadToBeCheckedOutFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured,
+        HashSet<Guid>? validVisaPersonIds = null)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+
+        IQueryable<VwRdToBeCheckedOut> query = db.VwRdToBeCheckedOut.AsNoTracking();
+
+        if (role.HasValue)
+            query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+        if (validVisaPersonIds != null)
+            query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(r =>
+                r.ProjectNameTm == projectKey
+                || r.ProjectName == projectKey
+                || r.ProjectNameRaw == projectKey);
+        }
+
+        try
+        {
+            var list = TakeOneLastValidVisaPerPerson(
+                query.ToList(), r => r.PersonOid, r => r.VisaExpirationDate, r => r.ID);
+
+            var countsByLabel = list
+                .GroupBy(r => r.ExpiryBucketLabel ?? string.Empty, StringComparer.Ordinal)
+                .ToDictionary(
+                    g => g.Key,
+                    g => (Count: g.Count(), Css: g.First().ExpiryBucketCssClass ?? "st-pending"),
+                    StringComparer.Ordinal);
+
+            var buckets = ReportDashboardCatalog.RegistrationToBeCheckedOutBuckets
+                .Select(b =>
+                {
+                    var has = countsByLabel.TryGetValue(b.Label, out var hit);
+                    return new ReportDashboardStatusBucket
+                    {
+                        Label = b.Label,
+                        CssClass = has ? hit.Css : b.CssClass,
+                        Count = has ? hit.Count : 0
+                    };
+                })
+                .OrderBy(b => ReportDashboardCatalog.RegistrationToBeCheckedOutBucketSortKey(b.Label))
+                .ToList();
+
+            var rows = list
+                .OrderBy(r => r.DaysRemaining)
+                .ThenBy(r => r.PersonName)
+                .Take(PreviewLimit)
+                .Select(r => new ReportDashboardPreviewRow
+                {
+                    RecordId = r.ID,
+                    Name = r.PersonName ?? string.Empty,
+                    Project = r.ProjectName ?? string.Empty,
+                    ColumnA = r.VisaNumber ?? string.Empty,
+                    ColumnB = FormatDate(r.VisaExpirationDate),
+                    Status = r.ExpiryBucketLabel ?? string.Empty,
+                    StatusCssClass = r.ExpiryBucketCssClass ?? "st-pending"
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Registration, subReport, rows,
+                excelHint, excelConfigured, buckets, list.Count);
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UndefinedTable
+            || ex.SqlState == PostgresErrorCodes.UndefinedColumn)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+    }
+
+    /// <summary>
+    /// <c>vw_rd_registration</c>: type tabs filter by ApplicationTypeName (Status = process state);
+    /// Expiring State = active registration types (no Check-Out), one last visa per person (Status = expiry bucket).
+    /// </summary>
+    private static ReportDashboardPanelData LoadRegistrationFromView(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, DateTime cutoff,
+        HashSet<Guid>? validVisaPersonIds = null)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+
+        if (string.IsNullOrWhiteSpace(subReport) || subReport == "default")
+            subReport = ReportDashboardCatalog.DefaultSubReport(ReportDashboardCategory.Registration);
+
+        var useExpiryBuckets = ReportDashboardCatalog.IsRegistrationExpiringStateSubReport(subReport);
+        var useCityBuckets = ReportDashboardCatalog.IsRegistrationCheckInByCitySubReport(subReport);
+
+        IQueryable<VwRdRegistration> query = db.VwRdRegistration.AsNoTracking();
+
+        if (useExpiryBuckets || useCityBuckets)
+        {
+            var types = ReportDashboardCatalog.RegistrationExpiringStateApplicationTypeNames;
+            query = query.Where(r => r.ApplicationTypeName != null && types.Contains(r.ApplicationTypeName));
+        }
+        else
+        {
+            query = query.Where(r => r.ApplicationTypeName == subReport);
+        }
+
+        if (role.HasValue)
+            query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+        if (validVisaPersonIds != null)
+            query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(r =>
+                r.ProjectNameTm == projectKey
+                || r.ProjectName == projectKey
+                || r.ProjectNameRaw == projectKey);
+        }
+
+        if (cutoff > DateTime.MinValue.AddYears(1))
+            query = query.Where(r => r.ApplicationDate != null && r.ApplicationDate >= cutoff);
+
+        try
+        {
+            var list = query.ToList();
+
+            if (useCityBuckets)
+            {
+                list = TakeOneLastValidVisaPerPerson(
+                    list, r => r.PersonOid, r => r.VisaExpirationDate, r => r.ID);
+
+                static string CityCss(int index) => (index % 5) switch
+                {
+                    0 => "st-cat-1",
+                    1 => "st-cat-2",
+                    2 => "st-cat-3",
+                    3 => "st-cat-4",
+                    _ => "st-cat-5"
+                };
+
+                var cityGroups = list
+                    .GroupBy(r => string.IsNullOrWhiteSpace(r.CityLabel) ? "Unknown city" : r.CityLabel.Trim(),
+                        StringComparer.OrdinalIgnoreCase)
+                    .OrderByDescending(g => g.Count())
+                    .ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var buckets = cityGroups
+                    .Select((g, i) => new ReportDashboardStatusBucket
+                    {
+                        Label = g.Key,
+                        CssClass = CityCss(i),
+                        Count = g.Count()
+                    })
+                    .ToList();
+
+                var cssByCity = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.OrdinalIgnoreCase);
+
+                var rows = list
+                    .OrderBy(r => r.CityLabel)
+                    .ThenBy(r => r.PersonName)
+                    .Take(PreviewLimit)
+                    .Select(r =>
+                    {
+                        var city = string.IsNullOrWhiteSpace(r.CityLabel) ? "Unknown city" : r.CityLabel.Trim();
+                        return new ReportDashboardPreviewRow
+                        {
+                            RecordId = r.ID,
+                            Name = r.PersonName ?? string.Empty,
+                            Project = r.ProjectName ?? string.Empty,
+                            ColumnA = r.VisaNumber ?? string.Empty,
+                            ColumnB = FormatDate(r.VisaExpirationDate),
+                            Status = city,
+                            StatusCssClass = cssByCity.TryGetValue(city, out var css) ? css : "st-pending"
+                        };
+                    })
+                    .ToList();
+
+                return BuildPanel(
+                    personType, ReportDashboardCategory.Registration, subReport, rows,
+                    excelHint, excelConfigured, buckets, list.Count);
+            }
+
+            if (useExpiryBuckets)
+            {
+                list = TakeOneLastValidVisaPerPerson(
+                    list, r => r.PersonOid, r => r.VisaExpirationDate, r => r.ID);
+
+                var countsByLabel = list
+                    .GroupBy(r => r.ExpiryBucketLabel ?? string.Empty, StringComparer.Ordinal)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => (Count: g.Count(), Css: g.First().ExpiryBucketCssClass ?? "st-pending"),
+                        StringComparer.Ordinal);
+
+                // Always include day + week buckets even when count is 0.
+                var buckets = ReportDashboardCatalog.RegistrationExpiringStateBuckets
+                    .Select(b =>
+                    {
+                        var has = countsByLabel.TryGetValue(b.Label, out var hit);
+                        return new ReportDashboardStatusBucket
+                        {
+                            Label = b.Label,
+                            CssClass = has ? hit.Css : b.CssClass,
+                            Count = has ? hit.Count : 0
+                        };
+                    })
+                    .OrderBy(b => ReportDashboardCatalog.RegistrationExpiringStateBucketSortKey(b.Label))
+                    .ToList();
+
+                var totalCount = list.Count;
+
+                var rows = list
+                    .OrderBy(r => r.DaysRemaining)
+                    .ThenBy(r => r.PersonName)
+                    .Take(PreviewLimit)
+                    .Select(r => new ReportDashboardPreviewRow
+                    {
+                        RecordId = r.ID,
+                        Name = r.PersonName ?? string.Empty,
+                        Project = r.ProjectName ?? string.Empty,
+                        ColumnA = r.VisaNumber ?? string.Empty,
+                        ColumnB = FormatDate(r.VisaExpirationDate),
+                        Status = r.ExpiryBucketLabel ?? string.Empty,
+                        StatusCssClass = r.ExpiryBucketCssClass ?? "st-pending"
+                    })
+                    .ToList();
+
+                return BuildPanel(
+                    personType, ReportDashboardCategory.Registration, subReport, rows,
+                    excelHint, excelConfigured, buckets, totalCount);
+            }
+
+            var processBuckets = list
+                .GroupBy(r => r.ProgressStateLabel ?? "OFISDE", StringComparer.OrdinalIgnoreCase)
+                .Select(g => new ReportDashboardStatusBucket
+                {
+                    Label = g.Key,
+                    CssClass = g.First().ProgressStateCssClass ?? "st-pending",
+                    Count = g.Count()
+                })
+                .OrderByDescending(b => b.Count)
+                .ThenBy(b => b.Label)
+                .ToList();
+
+            var processTotal = processBuckets.Sum(b => b.Count);
+
+            var processRows = list
+                .OrderByDescending(r => r.ApplicationDate)
+                .ThenBy(r => r.PersonName)
+                .Take(PreviewLimit)
+                .Select(r => new ReportDashboardPreviewRow
+                {
+                    RecordId = r.ID,
+                    Name = r.PersonName ?? string.Empty,
+                    Project = r.ProjectName ?? string.Empty,
+                    ColumnA = r.VisaNumber ?? string.Empty,
+                    ColumnB = FormatDate(r.VisaExpirationDate),
+                    Status = r.ProgressStateLabel ?? "OFISDE",
+                    StatusCssClass = r.ProgressStateCssClass ?? "st-pending"
+                })
+                .ToList();
+
+            return BuildPanel(
+                personType, ReportDashboardCategory.Registration, subReport, processRows,
+                excelHint, excelConfigured, processBuckets, processTotal);
+        }
+        catch (PostgresException ex) when (ex.SqlState is PostgresErrorCodes.UndefinedTable or PostgresErrorCodes.UndefinedColumn)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.Registration, subReport, excelHint, excelConfigured);
+        }
+    }
     private static ReportDashboardPanelData LoadWorkPermit(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
         ReportDashboardPersonType personType, string subReport,

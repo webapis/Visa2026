@@ -78,8 +78,8 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false)
     {
-        // Prefer Real for Application (and any future real-backed listings).
-        if (category == ReportDashboardCategory.Application)
+        if (category == ReportDashboardCategory.Application
+            || category == ReportDashboardCategory.Registration)
         {
             return _real.ListSubReports(
                 objectSpace, personType, category, projectKey, dateRangeMonths,
@@ -105,7 +105,8 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true)
     {
-        if (category == ReportDashboardCategory.Application)
+        if (category == ReportDashboardCategory.Application
+            || category == ReportDashboardCategory.Registration)
         {
             return _real.LoadPanel(
                 objectSpace, personType, category, projectKey, dateRangeMonths, subReport,

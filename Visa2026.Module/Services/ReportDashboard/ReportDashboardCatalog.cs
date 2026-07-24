@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
@@ -108,6 +109,156 @@ public static class ReportDashboardCatalog
 
     // ---- Sub-reports per category ----------------------------------------
 
+    public const string RegistrationExpiringStateSubReportKey = "expiring-state";
+    public const string RegistrationCheckInByCitySubReportKey = "check-in-by-city";
+    public const string RegistrationToBeCheckedInSubReportKey = "to-be-checked-in";
+    public const string RegistrationToBeCheckedOutSubReportKey = "to-be-checked-out";
+
+    /// <summary>
+    /// Last registration app types that count for Expiring State (not Check-Out).
+    /// </summary>
+    public static readonly string[] RegistrationExpiringStateApplicationTypeNames =
+    [
+        "App_Reg_Check_In",
+        "App_Reg_Check_In_Internal",
+        "App_Reg_ext",
+        "App_Reg_Info_Change_Address",
+        "App_Reg_Info_Change_Passport",
+        "App_Reg_Info_Change_Visa",
+    ];
+
+    /// <summary>
+    /// Registration category tabs = registration ApplicationType.Name keys with short labels.
+    /// </summary>
+    public static readonly IReadOnlyList<ReportDashboardSubReport> RegistrationApplicationTypeSubReports =
+    [
+        new() { Key = "App_Reg_Check_In",             Label = "Check-In" },
+        new() { Key = "App_Reg_Check_In_Internal",    Label = "Check-In (Internal)" },
+        new() { Key = "App_Reg_Check_Out",            Label = "Check-Out" },
+        new() { Key = "App_Reg_Check_Out_Internal",   Label = "Check-Out (Internal)" },
+        new() { Key = "App_Reg_ext",                  Label = "Extension" },
+        new() { Key = "App_Reg_Info_Change_Address",  Label = "Address Change" },
+        new() { Key = "App_Reg_Info_Change_Passport", Label = "Passport Change" },
+        new() { Key = "App_Reg_Info_Change_Visa",     Label = "Visa Change" },
+    ];
+
+    public static bool IsRegistrationApplicationTypeSubReport(string? subReport) =>
+        !string.IsNullOrWhiteSpace(subReport)
+        && RegistrationApplicationTypeSubReports.Any(s =>
+            string.Equals(s.Key, subReport, StringComparison.OrdinalIgnoreCase));
+
+    public static bool IsRegistrationExpiringStateSubReport(string? subReport) =>
+        string.Equals(subReport, RegistrationExpiringStateSubReportKey, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsRegistrationCheckInByCitySubReport(string? subReport) =>
+        string.Equals(subReport, RegistrationCheckInByCitySubReportKey, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsRegistrationToBeCheckedInSubReport(string? subReport) =>
+        string.Equals(subReport, RegistrationToBeCheckedInSubReportKey, StringComparison.OrdinalIgnoreCase);
+
+    public static bool IsRegistrationToBeCheckedOutSubReport(string? subReport) =>
+        string.Equals(subReport, RegistrationToBeCheckedOutSubReportKey, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsRegistrationPinnedSubReport(string? subReport) =>
+        IsRegistrationCheckInByCitySubReport(subReport)
+        || IsRegistrationExpiringStateSubReport(subReport)
+        || IsRegistrationToBeCheckedInSubReport(subReport)
+        || IsRegistrationToBeCheckedOutSubReport(subReport);
+
+    /// <summary>
+    /// Fixed Expiring State chart buckets (days + weeks + months). Always shown, including zero counts.
+    /// </summary>
+    public static readonly IReadOnlyList<(string Label, string CssClass)> RegistrationExpiringStateBuckets =
+    [
+        ("< 7 days", "st-expiring"),
+        ("< 14 days", "st-expiring"),
+        ("< 1 month", "st-pending"),
+        ("< 3 months", "st-pending"),
+        ("< 6 months", "st-approved"),
+        ("≥ 6 months", "st-approved"),
+    ];
+
+    public static int RegistrationExpiringStateBucketSortKey(string? label) => label switch
+    {
+        "< 7 days" => 1,
+        "< 14 days" => 2,
+        "< 1 month" => 3,
+        "< 3 months" => 4,
+        "< 6 months" => 5,
+        "≥ 6 months" => 6,
+        _ => 99
+    };
+
+    /// <summary>
+    /// Fixed To Be Checked In buckets (days since latest ExternalArrival). Always shown, including zeros.
+    /// </summary>
+    public static readonly IReadOnlyList<(string Label, string CssClass)> RegistrationToBeCheckedInBuckets =
+    [
+        ("< 1 week", "st-expiring"),
+        ("< 2 weeks", "st-expiring"),
+        ("< 3 weeks", "st-pending"),
+        ("< 4 weeks", "st-pending"),
+        ("< 1 month", "st-pending"),
+        ("≥ 1 month", "st-approved"),
+    ];
+
+    public static int RegistrationToBeCheckedInBucketSortKey(string? label) => label switch
+    {
+        "< 1 week" => 1,
+        "< 2 weeks" => 2,
+        "< 3 weeks" => 3,
+        "< 4 weeks" => 4,
+        "< 1 month" => 5,
+        "≥ 1 month" => 6,
+        _ => 99
+    };
+
+    /// <summary>
+    /// Fixed To Be Checked Out buckets (days until visa expiry within 1 week). Always shown, including zeros.
+    /// </summary>
+    public static readonly IReadOnlyList<(string Label, string CssClass)> RegistrationToBeCheckedOutBuckets =
+    [
+        ("< 1 day", "st-expiring"),
+        ("< 2 days", "st-expiring"),
+        ("< 3 days", "st-expiring"),
+        ("< 4 days", "st-pending"),
+        ("< 5 days", "st-pending"),
+        ("< 6 days", "st-pending"),
+        ("< 7 days", "st-approved"),
+    ];
+
+    public static int RegistrationToBeCheckedOutBucketSortKey(string? label) => label switch
+    {
+        "< 1 day" => 1,
+        "< 2 days" => 2,
+        "< 3 days" => 3,
+        "< 4 days" => 4,
+        "< 5 days" => 5,
+        "< 6 days" => 6,
+        "< 7 days" => 7,
+        _ => 99
+    };
+
+    /// <summary>
+    /// Sub-report tabs for UI. Registration pins Expiring State, To Be Checked In, To Be Checked Out; other tabs by count desc.
+    /// </summary>
+    public static IReadOnlyList<ReportDashboardSubReport> OrderedSubReports(
+        ReportDashboardCategory category,
+        IReadOnlyDictionary<string, int>? counts = null)
+    {
+        var list = SubReports(category);
+        if (category != ReportDashboardCategory.Registration || counts == null || counts.Count == 0)
+            return list;
+
+        var pinned = list.Where(s => IsRegistrationPinnedSubReport(s.Key)).ToList();
+        var rest = list
+            .Where(s => !IsRegistrationPinnedSubReport(s.Key))
+            .OrderByDescending(s => counts.TryGetValue(s.Key, out var n) ? n : 0)
+            .ThenBy(s => s.Label, StringComparer.OrdinalIgnoreCase);
+
+        return pinned.Concat(rest).ToList();
+    }
+
     public static IReadOnlyList<ReportDashboardSubReport> SubReports(ReportDashboardCategory category) => category switch
     {
         ReportDashboardCategory.Application => [
@@ -123,9 +274,13 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Invitation => [
             new() { Key = "issued-inv",   Label = "Issued Invitations"    },
         ],
-        ReportDashboardCategory.Registration => [
-            new() { Key = "by-validity", Label = "By Validity" },
-            new() { Key = "by-region",   Label = "By Region"   },
+        ReportDashboardCategory.Registration =>
+        [
+            new() { Key = RegistrationCheckInByCitySubReportKey, Label = "Check in by City" },
+            new() { Key = RegistrationExpiringStateSubReportKey, Label = "Expiring State" },
+            new() { Key = RegistrationToBeCheckedInSubReportKey, Label = "To Be Checked In" },
+            new() { Key = RegistrationToBeCheckedOutSubReportKey, Label = "To Be Checked Out" },
+            ..RegistrationApplicationTypeSubReports,
         ],
         ReportDashboardCategory.WorkPermit => [
             new() { Key = "by-days-remaining", Label = "By Days Remaining" },
@@ -242,7 +397,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Application   => "Application_ListView",
         ReportDashboardCategory.VisaExtension => "VisaExtensionStatus_ListView",
         ReportDashboardCategory.Invitation    => "InvitationItem_ListView",
-        ReportDashboardCategory.Registration  => "AddressOfResidence_ListView",
+        ReportDashboardCategory.Registration  => "ApplicationItem_ListView",
         ReportDashboardCategory.WorkPermit    => "WorkPermitItem_ListView",
         ReportDashboardCategory.Travel        => "ApplicationItem_ListView",
         ReportDashboardCategory.AddressOfResidence => "AddressOfResidence_ListView",
@@ -260,7 +415,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Application      => typeof(Application),
         ReportDashboardCategory.VisaExtension    => typeof(VisaExtensionStatus),
         ReportDashboardCategory.Invitation       => typeof(InvitationItem),
-        ReportDashboardCategory.Registration     => typeof(AddressOfResidence),
+        ReportDashboardCategory.Registration     => typeof(ApplicationItem),
         ReportDashboardCategory.WorkPermit       => typeof(WorkPermitItem),
         ReportDashboardCategory.Travel           => typeof(ApplicationItem),
         ReportDashboardCategory.AddressOfResidence => typeof(AddressOfResidence),
@@ -282,7 +437,11 @@ public static class ReportDashboardCatalog
             // Categorical: last column = grouping dimension; ColumnA = passport # or identifier
             (ReportDashboardCategory.Passport, "by-type")         => ["Name", "Project", "Passport #",  "Expiry", "Type"],
             (ReportDashboardCategory.Passport, "by-citizenship")   => ["Name", "Project", "Passport #",  "Expiry", "Citizenship"],
-            (ReportDashboardCategory.Registration, "by-region")    => ["Name", "Project", "Address",     "Expiry", "Region"],
+            (ReportDashboardCategory.Registration, "check-in-by-city") => ["Name", "Project", "Visa #", "Expiry", "City"],
+            (ReportDashboardCategory.Registration, "expiring-state") => ["Name", "Project", "Visa #", "Expiry", "Days Remaining"],
+            (ReportDashboardCategory.Registration, "to-be-checked-in") => ["Name", "Project", "Visa #", "Entry", "Days Since Entry"],
+            (ReportDashboardCategory.Registration, "to-be-checked-out") => ["Name", "Project", "Visa #", "Expiry", "Days Remaining"],
+            (ReportDashboardCategory.Registration, _) => ["Name", "Project", "Visa #", "Expiry", "Process State"],
             (ReportDashboardCategory.BorderZone, "by-zone")        => ["Name", "Project", "BZ Number",   "Valid Until", "Zone"],
             (ReportDashboardCategory.VisaExtension, "visa-state")   => ["Name", "Project", "Visa #",   "Expiry",      "Visa State"     ],
             (ReportDashboardCategory.VisaExtension, "by-category")  => ["Name", "Project", "Visa #",   "Expiry",      "Visa Category" ],
@@ -314,7 +473,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Application      => ["Name", "Project", "App #",           "App Date",        "State"],
         ReportDashboardCategory.VisaExtension    => ["Name", "Project", "Current Expiry",  "Requested Until", "Status"],
         ReportDashboardCategory.Invitation       => ["Name", "Project", "Invitation #",    "Issue Date",      "Status"],
-        ReportDashboardCategory.Registration     => ["Name", "Project", "Address",         "Expiry",          "Status"],
+        ReportDashboardCategory.Registration     => ["Name", "Project", "Visa #",          "Expiry",          "Process State"],
         ReportDashboardCategory.WorkPermit       => ["Name", "Project", "WP Number",       "Expiry",          "Status"],
         ReportDashboardCategory.Travel           => ["Name", "Project", "App #",           "Travel Date",     "Status"],
         ReportDashboardCategory.AddressOfResidence => ["Name", "Project", "Address",         "Expiry",          "Validity"],

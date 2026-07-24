@@ -222,7 +222,7 @@
                     {
                         <div class="rd-sub-tabs-row">
                             <div class="rd-sub-tabs" role="tablist">
-                                @foreach (var sub in ReportDashboardCatalog.SubReports(Category))
+                                @foreach (var sub in ReportDashboardCatalog.OrderedSubReports(Category, SubReportCounts))
                                 {
                                     var subCount = GetSubReportCount(sub.Key);
                                     <button type="button"

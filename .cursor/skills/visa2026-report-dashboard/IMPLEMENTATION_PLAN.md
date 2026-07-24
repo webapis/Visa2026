@@ -11,7 +11,7 @@ Update the **Status** column and append to `learnings.md` as each view ships.
 |------|----------|--------------------|-------|--------|
 | `vw_rd_application` | Application | **by-progress**, **by-type** (live) | 1 | EF Wired |
 | `vw_rd_passport` | Passport | by-type, by-citizenship, **by-validity** (live) | 1 | EF Wired (by-validity only) |
-| `vw_rd_registration` | Registration | default | 1 | Planned |
+| `vw_rd_registration` | Registration | **registered-visas**, by-region, by-city, **check-out**, check-out-by-region, check-out-by-city | 1 | EF Wired |
 | `vw_rd_work_permit` | WorkPermit | **by-validity** (live), by-status | 1 | EF Wired (by-validity) |
 | `vw_rd_border_zone` | BorderZone | default | 1 | Planned |
 | `vw_rd_travel` | Travel | default | 2 | Planned |

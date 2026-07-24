@@ -634,3 +634,118 @@ ull || >= cutoff), so Last N was not strict.
 - Dropped dynamic `ListSubReports` ApplicationType listing and UI `DynamicSubReports`
 - `LoadApplication` always groups by combined state label; remaps legacy by-progress/by-type/all/type:* → app-status
 - Single sub-report → no detail sub-tabs row (Count == 1)
+
+## 2026-07-23 — Registration: Registered Visas + rename By Region (mock)
+
+**Ask:** Drop By Validity; add Registered Visas; rename By Region → Registered By Region. Dummy data only.
+
+**Change:**
+- Catalog: keys `registered-visas` / `by-region` (labels Registered Visas / Registered By Region)
+- Mock: `RegistrationRegisteredVisas()` (Visa # + Registration State buckets); region mock unchanged
+- Default chart for Registered By Region → bar
+- Still mock-only (not in Hybrid `RealSubReports`)
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardMockQueryService.cs`, `ReportDashboardPropertyEditor.cs`, `reference.md`
+
+## 2026-07-23 — Registration: Registered By City (mock)
+
+**Ask:** Add Registered By City sub-report under Registration (dummy data).
+
+**Change:** Catalog key `by-city` / label Registered By City; mock `RegistrationByCity()` (Status = city); default chart bar. Still mock-only.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardMockQueryService.cs`, `ReportDashboardPropertyEditor.cs`, `reference.md`
+
+## 2026-07-23 — Registration: Registration Validation (mock)
+
+**Ask:** Add Registration Validation sub-report under Registration (dummy data).
+
+**Change:** Catalog key `registration-validation`; mock `RegistrationValidation()` with Valid / Expiring Soon / Expired / Pending / Not Registered buckets; columns Visa # / Expiry / Validation. Still mock-only.
+
+**Files:** `ReportDashboardCatalog.cs`, `ReportDashboardMockQueryService.cs`, `reference.md`
+
+## 2026-07-23 — Registration sub-report label rename
+
+**Ask:** Rename Registered Visas → Registration Processes; Registered By Region/City → Registration Processes By Region/City.
+
+**Change:** Catalog labels only (keys unchanged: `registered-visas`, `by-region`, `by-city`). Mock comments updated. Registration Validation label unchanged.
+
+## 2026-07-23 — Registration Processes SQL view + Check Out tabs
+
+**Ask:** One row per person; count when sent to migration service (PROCESS_STARTED+); hide anyone with any check-out from Registration Processes; add Check Out Process / By Region / By City.
+
+**Rules encoded in `vw_rd_registration`:**
+- ProcessFamily `registration`: Check-In / Ext / Info Change types; latest state in PROCESS_STARTED|ISSUED|REJECTED|CANCELLED; exclude persons with any Check-Out app
+- ProcessFamily `checkout`: Check-Out / Check-Out Internal; same sent-to-migration rule; one last app per person
+- Chart: progress state (or Region/City for geo sub-reports)
+
+**Also:** Catalog check-out tabs (mock + real via same view); Hybrid promotes all except `registration-validation`; ListView → ApplicationItem.
+
+**Files:** `vw_rd_registration.sql` (+ postgres), `VwRdRegistration.cs`, SqlViewsUpdater, Postgres updater, DbContext, QueryService, Catalog, Mock, Hybrid, PropertyEditor.
+
+## 2026-07-23 — Registration sub-reports = ApplicationType + Process State
+
+**Ask:** Replace Registration category tabs with registration ApplicationType names; chart/table Status = application process state (latest ApplicationProgress).
+
+**Rules:**
+- One row per not-expired visa; last registration app via `ApplicationItem.CurrentVisa`
+- Sub-report key = `ApplicationType.Name`; label = `NameTm`
+- Status = latest `ApplicationState` (NameTm)
+
+**Local PG verify:** App_Reg_ext 327, Check_In 87, Check_Out 67, Info_Change_Address 29, Info_Change_Passport 2, Check_In_Internal 1.
+
+**Files:** catalog, `vw_rd_registration`, `VwRdRegistration`, QueryService, Hybrid (whole Registration → real), Mock, updaters.
+
+## 2026-07-23 — Registration tabs: short labels + order by count
+
+**Ask:** Shorter sub-report tab names; order by total descending.
+
+**Change:** Labels Check-In / Extension / Address Change / …; `OrderedSubReports(category, SubReportCounts)` in Razor sorts Registration by count.
+
+## 2026-07-23 — Registration missing progress = OFISDE (At Office)
+
+**Ask:** Unknown process state means at-office.
+
+**Change:** `vw_rd_registration` fallback ProgressStateLabel `OFISDE`, ProgressStateCode `AT_OFFICE` when no ApplicationProgress/state (same NameTm as ApplicationLocations.AT_OFFICE).
+## 2026-07-23 — Expiring State (Registration)
+
+**Confirmed rules:**
+1. Count last registration app types: Check-In, Check-In (Internal), Extension, Address Change, Visa Change, Passport Change. Exclude Check-Out / Check-Out (Internal).
+2. Chart: days-to-expiry buckets `< 7 days` · `< 14 days` · `< 1 month` · `< 3 months` · `< 6 months` · `≥ 6 months`.
+3. Grain: one person → one last valid visa (longest `VisaExpirationDate` among active-type rows).
+
+**Local PG:** 318 persons; buckets `< 1 month` 5, `< 3 months` 36, `< 6 months` 149, `≥ 6 months` 128 (no `< 7` / `< 14` in current data).
+
+**Files:** catalog `expiring-state`, `vw_rd_registration` DaysRemaining/ExpiryBucket*, QueryService TakeOneLastValidVisaPerPerson, updaters synced.
+## 2026-07-23 — Expiring State: always show day/week buckets
+
+**Ask:** Chart was missing `< 7 days` / `< 14 days` (only month buckets visible).
+
+**Cause:** Buckets built from GroupBy — empty day/week buckets omitted. Current one-last-visa set often has min remaining ≥ 14 days.
+
+**Fix:** `RegistrationExpiringStateBuckets` fixed list; QueryService always emits all 6 buckets (0 allowed).
+## 2026-07-23 — Expiring State tab pinned first
+
+`OrderedSubReports`: Expiring State always first; remaining Registration tabs still by count desc.
+
+## 2026-07-23 — To Be Checked In sub-report
+
+**Rules:**
+- Label: To Be Checked In; tab pinned 2nd (after Expiring State)
+- Population: not-expired non-cancelled visa with no `ApplicationItem.CurrentVisa` to any `App_Reg_*`
+- Grain: one person → one last valid visa
+- Chart: days since latest `ExternalArrival.TravelDate` — `< 1 week` · `< 2 weeks` · `< 3 weeks` · `< 4 weeks` · `< 1 month` · `≥ 1 month` (+ `No entry date`); always show all
+
+**Local PG:** 4 persons, all `≥ 1 month`.
+
+**Files:** `vw_rd_to_be_checked_in` (+ postgres), `VwRdToBeCheckedIn`, Catalog, QueryService, PropertyEditor, updaters.
+## 2026-07-23 — To Be Checked In: in-country only
+
+Require latest `TravelHistory` (by TravelDate, ID) is `ExternalArrival`. Excludes no history and `ExternalDeparture` (not in country). Entry date = that arrival.
+
+## 2026-07-23 — To Be Checked Out sub-report
+
+Pinned 3rd after To Be Checked In. Valid visa, `DaysRemaining < 7`, no `App_Reg_Check_Out` / `App_Reg_Check_Out_Internal` on CurrentVisa; one last visa/person; chart `< 1 day`…`< 7 days` (always show). In-country not required. Local PG: buckets `< 1 day` 3, `< 6 days` 8, `< 7 days` 6.
+
+## 2026-07-23 — Check in by City
+
+Pinned first. Same active reg types as Expiring State; city from last app `CurrentAddressOfResidence.City` (NameTm); one last visa/person; chart cities with data only. `vw_rd_registration.CityLabel`.

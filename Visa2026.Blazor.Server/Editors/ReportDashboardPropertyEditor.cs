@@ -134,6 +134,10 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             (ReportDashboardCategory.AddressOfResidence, "by-city") => "bar",
             (ReportDashboardCategory.AddressOfResidence, "by-address-type") => "bar",
             (ReportDashboardCategory.AddressOfResidence, "by-address") => "bar",
+            (ReportDashboardCategory.Registration, "check-in-by-city") => "pie",
+            (ReportDashboardCategory.Registration, "expiring-state") => "bar",
+            (ReportDashboardCategory.Registration, "to-be-checked-in") => "bar",
+            (ReportDashboardCategory.Registration, "to-be-checked-out") => "bar",
             _ => "pie"
         };
     private void OnChartViewChanged(string chartView)

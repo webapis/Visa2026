@@ -159,9 +159,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             (ReportDashboardCategory.VisaExtension, _)                   => Build(personType, category, subReport, VisaByState(),        projectKey, excelConfigured: true),
             // Invitation
             (ReportDashboardCategory.Invitation, _)              => Build(personType, category, subReport, InvitationIssued(),        projectKey),
-            // Registration
-            (ReportDashboardCategory.Registration, "by-region")  => Build(personType, category, subReport, RegistrationByRegion(),   projectKey),
-            (ReportDashboardCategory.Registration, _)            => Build(personType, category, subReport, RegistrationByValidity(), projectKey),
+            // Registration (ApplicationType tabs; Status = process state) — Hybrid uses real; mock kept as fallback
+            (ReportDashboardCategory.Registration, _) => Build(personType, category, subReport, RegistrationByApplicationType(subReport), projectKey),
             // Work Permit
             (ReportDashboardCategory.WorkPermit, "by-status")    => Build(personType, category, subReport, WorkPermitByStatus(),   projectKey, excelConfigured: true),
             (ReportDashboardCategory.WorkPermit, _)              => Build(personType, category, subReport, WorkPermitByDaysRemaining(), projectKey, excelConfigured: true, oneLastValidVisaPerPerson: applyOneLastWp),
@@ -323,35 +322,16 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
 
     // ===== Registration ===================================================
 
-    private static List<ReportDashboardPreviewRow> RegistrationByValidity() =>
+    /// Registration ApplicationType tabs: ColumnA = visa #, ColumnB = expiry, Status = process state.
+    private static List<ReportDashboardPreviewRow> RegistrationByApplicationType(string? _) =>
     [
-        R("Mehmet Yilmaz",    "Gurlusyk UZT",     "Balkan welaýaty, Turkmenbasy", "Oct 15, 2026", "Approved",      "st-approved"),
-        R("Viktor Petrov",    "Gurlusyk UZT",     "Ahal welaýaty, Asgabat",       "Mar 01, 2026", "Approved",      "st-approved"),
-        R("John Smith",       "Seismiki Barlag",  "Ahal welaýaty, Asgabat",       "Jan 10, 2026", "Expiring Soon", "st-expiring"),
-        R("Kemal Aydin",      "Gaz Stansiasy",    "Balkan welaýaty, Turkmenbasy", "Dec 20, 2026", "Approved",      "st-approved"),
-        R("Hans Muller",      "Gaz Stansiasy",    "Balkan welaýaty, Turkmenbasy", "Sep 30, 2025", "Expiring Soon", "st-expiring"),
-        R("Alina Makarova",   "Gurlusyk UZT",     "Ahal welaýaty, Asgabat",       "Apr 12, 2026", "Approved",      "st-approved"),
-        R("Bayram Rejepow",   "Elektrik Stansia", "Mary welaýaty, Mary",           "Feb 08, 2026", "Pending",       "st-pending"),
-        R("Oleg Kovalev",     "Seismiki Barlag",  "Balkan welaýaty, Hazar",        "Nov 25, 2026", "Approved",      "st-approved"),
-        R("Leyli Annagur.",   "Elektrik Stansia", "Lebap welaýaty, Turkmenabat",  "Jul 05, 2026", "Approved",      "st-approved"),
-        R("Cary Durdyyew",    "Gurlusyk UZT",     "Balkan welaýaty, Turkmenbasy", "Aug 19, 2026", "Approved",      "st-approved"),
+        R("Mehmet Yilmaz",    "Gurlusyk UZT",     "V-2025-1012", "Oct 15, 2026", "Process Issued",   "st-approved"),
+        R("Viktor Petrov",    "Gurlusyk UZT",     "V-2025-1031", "Mar 01, 2027", "Process Issued",   "st-approved"),
+        R("John Smith",       "Seismiki Barlag",  "V-2025-0904", "Jan 10, 2026", "Process Started",  "st-pending"),
+        R("Kemal Aydin",      "Gaz Stansiasy",    "V-2025-1130", "Dec 20, 2026", "Being Prepared",   "st-pending"),
+        R("Hans Muller",      "Gaz Stansiasy",    "V-2025-0722", "Sep 30, 2026", "Process Rejected", "st-expiring"),
+        R("Alina Makarova",   "Gurlusyk UZT",     "V-2025-1018", "Apr 12, 2027", "Process Issued",   "st-approved"),
     ];
-
-    private static List<ReportDashboardPreviewRow> RegistrationByRegion() =>
-    [
-        // ColumnA = address, ColumnB = expiry, Status = region (drives chart buckets)
-        R("Mehmet Yilmaz",    "Gurlusyk UZT",     "Balkan welaýaty, Turkmenbasy", "Oct 15, 2026", "Balkan",  "st-cat-1"),
-        R("Viktor Petrov",    "Gurlusyk UZT",     "Ahal welaýaty, Asgabat",       "Mar 01, 2026", "Ahal",    "st-cat-2"),
-        R("John Smith",       "Seismiki Barlag",  "Ahal welaýaty, Asgabat",       "Jan 10, 2026", "Ahal",    "st-cat-2"),
-        R("Kemal Aydin",      "Gaz Stansiasy",    "Balkan welaýaty, Turkmenbasy", "Dec 20, 2026", "Balkan",  "st-cat-1"),
-        R("Hans Muller",      "Gaz Stansiasy",    "Balkan welaýaty, Hazar",       "Sep 30, 2025", "Balkan",  "st-cat-1"),
-        R("Alina Makarova",   "Gurlusyk UZT",     "Ahal welaýaty, Asgabat",       "Apr 12, 2026", "Ahal",    "st-cat-2"),
-        R("Bayram Rejepow",   "Elektrik Stansia", "Mary welaýaty, Mary",           "Feb 08, 2026", "Mary",    "st-cat-3"),
-        R("Oleg Kovalev",     "Seismiki Barlag",  "Balkan welaýaty, Hazar",        "Nov 25, 2026", "Balkan",  "st-cat-1"),
-        R("Leyli Annagur.",   "Elektrik Stansia", "Lebap welaýaty, Turkmenabat",  "Jul 05, 2026", "Lebap",   "st-cat-4"),
-        R("Cary Durdyyew",    "Gurlusyk UZT",     "Balkan welaýaty, Turkmenbasy", "Aug 19, 2026", "Balkan",  "st-cat-1"),
-    ];
-
     // ===== Work Permit ====================================================
 
     private static List<ReportDashboardPreviewRow> WorkPermitByDaysRemaining() =>
