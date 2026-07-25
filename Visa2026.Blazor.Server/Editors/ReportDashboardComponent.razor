@@ -1,10 +1,11 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.Services.ReportDashboard
+@using Visa2026.Module.Localization
 
 <div class="report-dashboard">
     <div class="rd-card">
         <div class="rd-project-filter-row">
-            <span class="rd-project-filter-label">Project</span>
+            <span class="rd-project-filter-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Project")</span>
             <div class="rd-project-filter">
                 @foreach (var chip in VisibleProjects)
                 {
@@ -12,7 +13,7 @@
                             class="rd-chip @(ProjectKey == chip.Key ? "active" : null)"
                             disabled="@ShowLoading"
                             @onclick="() => OnProject(chip.Key)">
-                        @chip.Label
+                        @(chip.Key == "All" ? ReportDashboardLocalization.Get("ReportDashboard.PersonType.All") : chip.Label)
                         @if (chip.Key != "All")
                         {
                             <span class="count">(@chip.Count)</span>
@@ -22,7 +23,7 @@
                 @if (HiddenProjectCount > 0)
                 {
                     <button type="button" class="rd-chip rd-chip-more" disabled="@ShowLoading" @onclick="ToggleProjectsExpanded">
-                        @(_projectsExpanded ? "Show less" : $"+{HiddenProjectCount} more")
+                        @(_projectsExpanded ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ShowLess") : ReportDashboardLocalization.Format("ReportDashboard.Chrome.MoreProjects", HiddenProjectCount))
                     </button>
                 }
             </div>
@@ -50,7 +51,7 @@
                         class="rd-cat-tab rd-cat-tab-overview @(ShowAllView ? "active" : null)"
                         disabled="@ShowLoading"
                         @onclick="OnShowAll">
-                    <span>Overview</span>
+                    <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Overview")</span>
                 </button>
                 @foreach (var category in ReportDashboardCatalog.Categories)
                 {
@@ -69,14 +70,14 @@
                     <div class="rd-loading-overlay" role="status" aria-live="polite" aria-busy="true">
                         <div class="rd-loading-panel">
                             <div class="rd-loading-label">
-                                @(string.IsNullOrWhiteSpace(EffectiveLoadingMessage) ? "Loading…" : EffectiveLoadingMessage)
+                                @(string.IsNullOrWhiteSpace(EffectiveLoadingMessage) ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Loading") : EffectiveLoadingMessage)
                             </div>
                             <div class="rd-loading-track"
                                  role="progressbar"
                                  aria-valuemin="0"
                                  aria-valuemax="100"
                                  aria-valuenow="@EffectiveLoadingPercent"
-                                 aria-label="Loading progress">
+                                 aria-label='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingProgress")'>
                                 <div class="rd-loading-fill"
                                      style="width:@(EffectiveLoadingPercent.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
                             </div>
@@ -88,8 +89,8 @@
                 {
                     <div class="rd-overview-toolbar">
                         <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Education: ApplicationItem.CurrentEducation with Application.ApplicationDate in range")">
-                            <span class="rd-period-label">Education · Last</span>
+                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Education"))">
+                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.EducationLast")</span>
                             <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
                                     @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.Education, e)">
                                 @foreach (var m in PeriodMonthOptions)
@@ -99,8 +100,8 @@
                             </select>
                         </div>
                         <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked (aligns with Visa By Category)" : "Passport: ApplicationItem.CurrentPassport with Application.ApplicationDate in range")">
-                            <span class="rd-period-label">Passport · Last</span>
+                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisaAlign") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Passport"))">
+                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.PassportLast")</span>
                             <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
                                     @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.Passport, e)">
                                 @foreach (var m in PeriodMonthOptions)
@@ -110,8 +111,8 @@
                             </select>
                         </div>
                         <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Position History: ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range")">
-                            <span class="rd-period-label">Position · Last</span>
+                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Position"))">
+                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.PositionLast")</span>
                             <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
                                     @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.PositionHistory, e)">
                                 @foreach (var m in PeriodMonthOptions)
@@ -121,8 +122,8 @@
                             </select>
                         </div>
                         <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Address of Residence: ApplicationItem.CurrentAddressOfResidence with Application.ApplicationDate in range")">
-                            <span class="rd-period-label">Address · Last</span>
+                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Address"))">
+                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.AddressLast")</span>
                             <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
                                     @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.AddressOfResidence, e)">
                                 @foreach (var m in PeriodMonthOptions)
@@ -132,8 +133,8 @@
                             </select>
                         </div>
                         <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? "Ignored while Valid visa only is checked" : "Medical Records: ApplicationItem.CurrentMedicalRecord with Application.ApplicationDate in range")">
-                            <span class="rd-period-label">Medical · Last</span>
+                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Medical"))">
+                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.MedicalLast")</span>
                             <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
                                     @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.MedicalRecord, e)">
                                 @foreach (var m in PeriodMonthOptions)
@@ -168,7 +169,7 @@
                                             {
                                                 var w = (int)Math.Round(100.0 * bucket.Count / maxCount);
                                                 <div class="rd-overview-mini-bar-row">
-                                                    <span class="rd-overview-mini-bar-label" title="@bucket.Label">@bucket.Label</span>
+                                                    <span class="rd-overview-mini-bar-label" title="@ReportDashboardLocalization.Status(bucket.Label)">@ReportDashboardLocalization.Status(bucket.Label)</span>
                                                     <span class="rd-overview-mini-bar-track">
                                                         <span class="rd-overview-mini-bar-fill @bucket.CssClass"
                                                               style="width:@(w.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span>
@@ -187,7 +188,7 @@
                                     }
                                 </div>
                                 <div class="rd-overview-card-footer">
-                                    View reports &rsaquo;
+                                    @ReportDashboardLocalization.Get("ReportDashboard.Chrome.ViewReports")
                                 </div>
                             </button>
                         }
@@ -203,17 +204,17 @@
                         <div class="rd-report-head-right">
                             <div class="rd-report-total">
                                 <span class="rd-report-total-num">@FilteredTotal</span>
-                                <span class="rd-report-total-label">total records</span>
+                                <span class="rd-report-total-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.TotalRecords")</span>
                             </div>
                             <button type="button"
                                     class="rd-excel-link @(Panel.ExcelConfigured ? null : "disabled")"
                                     disabled="@(!Panel.ExcelConfigured)"
-                                    title="@(Panel.ExcelConfigured ? "Download Excel template" : "Excel template not configured")"
+                                    title="@(Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
                                     @onclick="OnExcel">
-                                Open in Excel
+                                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
                             </button>
                             <button type="button" class="rd-list-link" @onclick="() => OnListView(null)">
-                                Open ListView
+                                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
                             </button>
                         </div>
                     </div>
@@ -244,9 +245,9 @@
                                 {
                                     <div class="rd-period-select"
                                          title="@(ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly
-                                             ? "Ignored while Valid visa only is checked"
-                                             : CategoryDateRangeTitle(Category))">
-                                        <span class="rd-period-label">Last</span>
+                                             ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa")
+                                             : ReportDashboardLocalization.CategoryDateRangeTitle(Category))">
+                                        <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Last")</span>
                                         <select class="rd-period-picker"
                                                 disabled="@(ShowLoading || (ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly))"
                                                 @onchange="e => OnCategoryPeriodChange(Category, e)">
@@ -260,60 +261,60 @@
                                 @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Include applications whose latest progress is Process Issued (PROCESS_ISSUED)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeCompleted")'>
                                         <input type="checkbox"
                                                checked="@IncludeCompletedApplicationProcesses"
                                                @onchange="OnIncludeCompletedApplicationChanged" />
-                                        <span>Include completed</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeCompleted")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Include applications whose latest progress is Process Cancelled (PROCESS_CANCELLED)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeCancelled")'>
                                         <input type="checkbox"
                                                checked="@IncludeCancelledApplicationProcesses"
                                                @onchange="OnIncludeCancelledApplicationChanged" />
-                                        <span>Include cancelled</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeCancelled")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Count each person once using their valid visa with the latest expiry (vs all valid visas)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.OneLastVisa")'>
                                         <input type="checkbox"
                                                checked="@OneLastValidVisaPerPerson"
                                                @onchange="OnOneLastValidVisaChanged" />
-                                        <span>One last valid visa per person</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OneLastValidVisa")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Count each person once using their valid work permit with the latest expiry (vs all valid work permits)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.OneLastWp")'>
                                         <input type="checkbox"
                                                checked="@OneLastValidWorkPermitPerPerson"
                                                @onchange="OnOneLastValidWorkPermitChanged" />
-                                        <span>One last valid work permit per person</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OneLastValidWorkPermit")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Include only persons with at least one valid visa (not cancelled, expiry on or after today)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.ValidVisaOnly")'>
                                         <input type="checkbox"
                                                checked="@ValidVisaPersonsOnly"
                                                @onchange="OnValidVisaPersonsOnlyChanged" />
-                                        <span>Valid visa only</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ValidVisaOnly")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
                                 {
-                                    <label class="rd-panel-filter" title="Include persons marked IsArchived">
+                                    <label class="rd-panel-filter" title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeArchived")'>
                                         <input type="checkbox"
                                                checked="@IncludeArchivedPersons"
                                                @onchange="OnIncludeArchivedChanged" />
-                                        <span>Include archived</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeArchived")</span>
                                     </label>
                                 }
                             </div>
@@ -333,9 +334,9 @@
                                 {
                                     <div class="rd-period-select"
                                          title="@(ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly
-                                             ? "Ignored while Valid visa only is checked"
-                                             : CategoryDateRangeTitle(Category))">
-                                        <span class="rd-period-label">Last</span>
+                                             ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa")
+                                             : ReportDashboardLocalization.CategoryDateRangeTitle(Category))">
+                                        <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Last")</span>
                                         <select class="rd-period-picker"
                                                 disabled="@(ShowLoading || (ReportDashboardCatalog.SupportsCategoryDateRange(Category) && ValidVisaPersonsOnly))"
                                                 @onchange="e => OnCategoryPeriodChange(Category, e)">
@@ -349,60 +350,60 @@
                                 @if (ReportDashboardCatalog.SupportsIncludeCompletedApplicationProcesses(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Include applications whose latest progress is Process Issued (PROCESS_ISSUED)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeCompleted")'>
                                         <input type="checkbox"
                                                checked="@IncludeCompletedApplicationProcesses"
                                                @onchange="OnIncludeCompletedApplicationChanged" />
-                                        <span>Include completed</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeCompleted")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeCancelledApplicationProcesses(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Include applications whose latest progress is Process Cancelled (PROCESS_CANCELLED)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeCancelled")'>
                                         <input type="checkbox"
                                                checked="@IncludeCancelledApplicationProcesses"
                                                @onchange="OnIncludeCancelledApplicationChanged" />
-                                        <span>Include cancelled</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeCancelled")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Count each person once using their valid visa with the latest expiry (vs all valid visas)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.OneLastVisa")'>
                                         <input type="checkbox"
                                                checked="@OneLastValidVisaPerPerson"
                                                @onchange="OnOneLastValidVisaChanged" />
-                                        <span>One last valid visa per person</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OneLastValidVisa")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Count each person once using their valid work permit with the latest expiry (vs all valid work permits)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.OneLastWp")'>
                                         <input type="checkbox"
                                                checked="@OneLastValidWorkPermitPerPerson"
                                                @onchange="OnOneLastValidWorkPermitChanged" />
-                                        <span>One last valid work permit per person</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.OneLastValidWorkPermit")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category))
                                 {
                                     <label class="rd-panel-filter"
-                                           title="Include only persons with at least one valid visa (not cancelled, expiry on or after today)">
+                                           title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.ValidVisaOnly")'>
                                         <input type="checkbox"
                                                checked="@ValidVisaPersonsOnly"
                                                @onchange="OnValidVisaPersonsOnlyChanged" />
-                                        <span>Valid visa only</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.ValidVisaOnly")</span>
                                     </label>
                                 }
                                 @if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category))
                                 {
-                                    <label class="rd-panel-filter" title="Include persons marked IsArchived">
+                                    <label class="rd-panel-filter" title='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IncludeArchived")'>
                                         <input type="checkbox"
                                                checked="@IncludeArchivedPersons"
                                                @onchange="OnIncludeArchivedChanged" />
-                                        <span>Include archived</span>
+                                        <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.IncludeArchived")</span>
                                     </label>
                                 }
                             </div>
@@ -411,17 +412,17 @@
 
                     <div class="rd-chart-block">
                         <div class="rd-chart-toolbar">
-                            <span class="rd-chart-toolbar-label">View</span>
+                            <span class="rd-chart-toolbar-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.View")</span>
                             <div class="rd-view-switch">
-                                <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>Pie Chart</button>
-                                <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>Bar Chart</button>
-                                <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>List</button>
+                                <button type="button" class="@(ChartView == "pie" ? "active" : null)"  @onclick='() => OnChartView("pie")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.PieChart")</button>
+                                <button type="button" class="@(ChartView == "bar" ? "active" : null)"  @onclick='() => OnChartView("bar")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.BarChart")</button>
+                                <button type="button" class="@(ChartView == "list" ? "active" : null)" @onclick='() => OnChartView("list")'>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.List")</button>
                             </div>
                         </div>
 
                         @if (FilteredBuckets.Count == 0 || FilteredTotal == 0)
                         {
-                            <div class="rd-chart-empty">No records for this selection.</div>
+                            <div class="rd-chart-empty">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.EmptySelection")</div>
                         }
                         else if (ChartView == "list")
                         {
@@ -431,7 +432,7 @@
                                     var pct = FilteredTotal > 0 ? (int)Math.Round(100.0 * bucket.Count / FilteredTotal) : 0;
                                     <button type="button" class="rd-stat-list-row" @onclick="() => OnListView(bucket.Label)">
                                         <span class="rd-stat-list-left">
-                                            <span class="rd-legend-dot @bucket.CssClass"></span>@bucket.Label
+                                            <span class="rd-legend-dot @bucket.CssClass"></span>@ReportDashboardLocalization.Status(bucket.Label)
                                         </span>
                                         <span class="rd-stat-list-right">
                                             <span>@pct%</span>
@@ -449,9 +450,9 @@
                                     @foreach (var bucket in FilteredBuckets)
                                     {
                                         var pct = FilteredTotal > 0 ? (int)Math.Round(100.0 * bucket.Count / FilteredTotal) : 0;
-                                        <button type="button" class="rd-legend-item" title="@bucket.Label" @onclick="() => OnListView(bucket.Label)">
+                                        <button type="button" class="rd-legend-item" title="@ReportDashboardLocalization.Status(bucket.Label)" @onclick="() => OnListView(bucket.Label)">
                                             <span class="rd-legend-dot @bucket.CssClass"></span>
-                                            <span class="rd-legend-label">@bucket.Label</span>
+                                            <span class="rd-legend-label">@ReportDashboardLocalization.Status(bucket.Label)</span>
                                             <span class="rd-legend-count">@bucket.Count</span>
                                             <span class="rd-legend-pct">@pct%</span>
                                         </button>
@@ -467,9 +468,9 @@
                                 {
                                     var width = maxCount > 0 ? (100.0 * bucket.Count / maxCount) : 0;
                                     <button type="button" class="rd-bar-row" @onclick="() => OnListView(bucket.Label)">
-                                        <span class="rd-bar-row-label" title="@bucket.Label">
+                                        <span class="rd-bar-row-label" title="@ReportDashboardLocalization.Status(bucket.Label)">
                                             <span class="rd-legend-dot @bucket.CssClass"></span>
-                                            <span class="rd-bar-row-label-text">@bucket.Label</span>
+                                            <span class="rd-bar-row-label-text">@ReportDashboardLocalization.Status(bucket.Label)</span>
                                         </span>
                                         <span class="rd-bar-row-track">
                                             <span class="rd-bar-row-fill @bucket.CssClass"
@@ -495,7 +496,7 @@
                             <tbody>
                                 @if (FilteredRows.Count == 0)
                                 {
-                                    <tr class="rd-empty-row"><td colspan="@Panel.TableHeaders.Count">No records for this project.</td></tr>
+                                    <tr class="rd-empty-row"><td colspan="@Panel.TableHeaders.Count">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.EmptyProject")</td></tr>
                                 }
                                 else
                                 {
@@ -506,7 +507,7 @@
                                             <td><span class="rd-project-tag">@row.Project</span></td>
                                             <td>@row.ColumnA</td>
                                             <td>@row.ColumnB</td>
-                                            <td><span class="rd-status-dot @row.StatusCssClass"></span>@row.Status</td>
+                                            <td><span class="rd-status-dot @row.StatusCssClass"></span>@ReportDashboardLocalization.Status(row.Status)</td>
                                         </tr>
                                     }
                                 }
@@ -569,7 +570,7 @@
     private bool _projectsExpanded;
     private bool _initialLoadStarted;
     private bool _localLoading;
-    private string _localLoadingMessage = "Loading…";
+    private string _localLoadingMessage = ReportDashboardLocalization.Get("ReportDashboard.Chrome.Loading");
     private const int VisibleProjectChipLimit = 5;
 
     private bool ShowLoading => IsLoading || _localLoading;
@@ -744,25 +745,25 @@
 
     private async Task OnPersonType(ReportDashboardPersonType personType)
     {
-        await BeginLocalLoadingAsync("Loading…");
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Loading"));
         await PersonTypeChanged.InvokeAsync(personType);
     }
 
     private async Task OnCategory(ReportDashboardCategory category)
     {
-        await BeginLocalLoadingAsync("Loading report…");
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingReport"));
         await CategoryChanged.InvokeAsync(category);
     }
 
     private async Task OnSubReport(string key)
     {
-        await BeginLocalLoadingAsync("Loading report…");
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingReport"));
         await SubReportChanged.InvokeAsync(key);
     }
 
     private async Task OnProject(string key)
     {
-        await BeginLocalLoadingAsync("Loading…");
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Loading"));
         await ProjectKeyChanged.InvokeAsync(key);
     }
 
@@ -772,7 +773,7 @@
 
     private async Task OnShowAll()
     {
-        await BeginLocalLoadingAsync("Loading overview…");
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview"));
         await ShowAllViewChanged.InvokeAsync(true);
     }
     private async Task OnIncludeArchivedChanged(ChangeEventArgs e)
@@ -852,27 +853,11 @@
         _ => DateRangeMonths
     };
 
-    private static string CategoryDateRangeTitle(ReportDashboardCategory category) => category switch
-    {
-        ReportDashboardCategory.Passport =>
-            "Passport: ApplicationItem.CurrentPassport with Application.ApplicationDate in range",
-        ReportDashboardCategory.PositionHistory =>
-            "Position History: ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range",
-        ReportDashboardCategory.AddressOfResidence =>
-            "Address of Residence: ApplicationItem.CurrentAddressOfResidence with Application.ApplicationDate in range",
-        ReportDashboardCategory.MedicalRecord =>
-            "Medical Records: ApplicationItem.CurrentMedicalRecord with Application.ApplicationDate in range",
-        _ =>
-            "Education: ApplicationItem.CurrentEducation with Application.ApplicationDate in range"
-    };
+    private static string CategoryDateRangeTitle(ReportDashboardCategory category) =>
+        ReportDashboardLocalization.CategoryDateRangeTitle(category);
 
-    private static string PeriodMonthLabel(int months) => months switch
-    {
-        12 => "1 year",
-        24 => "2 years",
-        36 => "3 years",
-        _ => $"{months} months"
-    };
+    private static string PeriodMonthLabel(int months) =>
+        ReportDashboardLocalization.PeriodMonthLabel(months);
 
     private async Task OnCategoryPeriodChange(ReportDashboardCategory category, ChangeEventArgs e)
     {

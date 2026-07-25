@@ -78,6 +78,11 @@
       <Item Id="Education" Caption="Eğitim" />
       <Item Id="Employee" Caption="Çalışan" />
       <Item Id="Geography" Caption="Coğrafya" />
+      <Item Id="Home" Caption="Ana Sayfa">
+        <Items>
+          <Item Id="ReportDashboard" Caption="Rapor Panosu" />
+        </Items>
+      </Item>
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />
@@ -154,9 +159,13 @@
       <Item Id="Operations" Caption="İşlemler" />
       <Item Id="Organization" Caption="Organizasyon" />
       <Item Id="Passport" Caption="Pasaport" />
-      <Item Id="Employees" Caption="Çalışanlar" />
-      <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
-      <Item Id="TemporaryVisitors" Caption="Geçici ziyaretçi" />
+      <Item Id="People" Caption="Kişiler">
+        <Items>
+          <Item Id="Employees" Caption="Çalışanlar" />
+          <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
+          <Item Id="TemporaryVisitors" Caption="Geçici ziyaretçi" />
+        </Items>
+      </Item>
       <Item Id="Person" Caption="Kişi" />
       <Item Id="Recycle Bin" Caption="Geri Dönüşüm" />
       <Item Id="Rejection" Caption="Ret" />
@@ -237,8 +246,6 @@
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="FullApplicationNumber" Caption="Tam Başvuru No" />
-        <Member Name="ProcessNumber" Caption="İşlem numarası" />
-        <Member Name="DisplayCaption" Caption="Başvuru" />
         <Member Name="Invitations" Caption="Davetler" />
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsForFamily" Caption="Aile İçin" />
@@ -381,7 +388,6 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
         <Member Name="Description" Caption="Açıklama" />
-        <Member Name="ProcessNumber" Caption="İşlem numarası" />
         <Member Name="Location" Caption="Yer" />
         <Member Name="LocationWithMinistryLabel" Caption="Yer" />
         <Member Name="MinistryLetterFile" Caption="Bakanlık yazış kopyası" />
@@ -484,9 +490,6 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="ApplicationProgressRoute" Caption="İlerleme süreci" />
         <Member Name="Category" Caption="Kategori" />
-        <Member Name="CanIssueVisa" Caption="Vize verebilir" />
-        <Member Name="CanIssueInvitation" Caption="Davetiye verebilir" />
-        <Member Name="CanIssueWorkPermit" Caption="Çalışma izni verebilir" />
         <Member Name="Code" Caption="Kod" />
         <Member Name="Company" Caption="Şirket" />
         <Member Name="CurrentState" Caption="Durum" />
@@ -574,6 +577,18 @@
         <Member Name="StartDate" Caption="Başlangıç Tarihi" />
         <Member Name="State" Caption="Durum" />
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Başvuru Türü Grubu">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Başvuru Türü Grubu Üyesi">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Kullanıcı">
@@ -1356,7 +1371,7 @@
         <Member Name="Exit" Caption="Çıkış" />
       </OwnMembers>
     </Class>
-        <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasaport">
+    <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasaport">
       <OwnMembers>
         <Member Name="Authority" Caption="Veren Makam" />
         <Member Name="CurrentVisa" Caption="Güncel Vize" />
@@ -1956,30 +1971,16 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Başvuru Türü Grubu">
-      <OwnMembers>
-        <Member Name="IsActive" Caption="Aktif" />
-        <Member Name="Members" Caption="Başvuru Türleri" />
-        <Member Name="NameTm" Caption="Ad (Tm)" />
-        <Member Name="SortOrder" Caption="Sıra" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Başvuru Türü Grubu Üyesi">
-      <OwnMembers>
-        <Member Name="ApplicationType" Caption="Başvuru Türü" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Rapor Şablonu">
       <OwnMembers>
-        <Member Name="ApplicableGroupLinks" Caption="Uygulanabilir Başvuru Türü Grupları" />
-        <Member Name="ApplicableTypeLinks" Caption="Uygulanabilir Başvuru Türleri" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Rapor Şablonu — Başvuru Türü Grubu">
       <OwnMembers>
-        <Member Name="ApplicationTypeGroup" Caption="Başvuru Türü Grubu" />
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Geçerlilik Süresi">
@@ -2373,11 +2374,7 @@
       </Layout>
     </DetailView>
     <ListView Id="AddressOfResidence_ListView" Caption="İkamet Adresleri" />
-    <ListView Id="Application_ApplicationItems_ListView" Caption="Başvuru Kalemleri">
-      <Columns>
-        <ColumnInfo Id="CurrentVisa" Caption="Vize" />
-      </Columns>
-    </ListView>
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Başvuru Kalemleri" />
     <DetailView Id="Application_DetailView" Caption="Başvuru">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2444,7 +2441,6 @@
     <ListView Id="Application_ListView_ViaMinistries" Caption="Bakanlık süreci başvuruları">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
-        <ColumnInfo Id="Urgency" Caption="Aciliyet" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Onay bakanlık profili" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
@@ -2455,6 +2451,7 @@
         <ColumnInfo Id="Month" Caption="Ay" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
         <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="Urgency" Caption="Aciliyet" />
         <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />
         <ColumnInfo Id="VisaType" Caption="Vize Türü" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
@@ -2511,6 +2508,9 @@
     <ListView Id="ApplicationType_ListView" Caption="Başvuru Türleri" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Başvuru Türü Filtresi" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Başvuru Türü Filtreleri" />
+    <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Başvuru Türü Grubu" />
+    <ListView Id="ApplicationTypeGroup_ListView" Caption="Başvuru Türü Grupları" />
+    <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Başvuru Türü Grubu Üyesi" />
     <DetailView Id="ApplicationUser_DetailView" Caption="Kullanıcı">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -3016,6 +3016,7 @@
     </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Rapor Şablonu" />
     <ListView Id="UserReportTemplate_ListView" Caption="Rapor Şablonları" />
+    <DetailView Id="UserReportTemplateApplicationTypeGroup_DetailView" Caption="Rapor Şablonu — Başvuru Türü Grubu" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Geçerlilik Süresi" />
     <ListView Id="ValidityDuration_ListView" Caption="Geçerlilik Süreleri" />
     <DetailView Id="Visa_DetailView" Caption="Vize">

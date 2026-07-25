@@ -14,6 +14,7 @@ using DevExpress.Persistent.Base;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
 using Visa2026.Module.Services.ReportDashboard;
@@ -73,7 +74,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             IncludeCompletedApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCompletedApplicationProcessesChanged),
             IncludeCancelledApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCancelledApplicationProcessesChanged),
             IsLoading               = true,
-            LoadingMessage          = "Loading overview…",
+            LoadingMessage          = ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview"),
             LoadingProgressPercent  = 0,
             OpenExcelRequested      = EventCallback.Factory.Create(this, OnOpenExcelAsync),
             OpenListViewRequested   = EventCallback.Factory.Create<string?>(this, OnOpenListView),
@@ -245,7 +246,9 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         var generation = ++_refreshGeneration;
         model.IsLoading = true;
         model.LoadingProgressPercent = 0;
-        model.LoadingMessage = model.ShowAllView ? "Loading overview…" : "Loading report…";
+        model.LoadingMessage = model.ShowAllView
+                ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview")
+                : ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingReport");
         // Let Blazor paint the overlay before synchronous DB work (Task.Yield is not enough).
         await Task.Delay(16);
         if (generation != _refreshGeneration) return;
@@ -268,7 +271,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     if (generation != _refreshGeneration) return;
 
                     var cat = categories[i];
-                    model.LoadingMessage = $"Loading {ReportDashboardCatalog.CategoryLabel(cat)}…";
+                    model.LoadingMessage = ReportDashboardLocalization.Format("ReportDashboard.Chrome.LoadingNamed", ReportDashboardCatalog.CategoryLabel(cat));
                     model.LoadingProgressPercent = (int)Math.Round(100.0 * i / Math.Max(1, categories.Count));
                     await Task.Delay(1);
                     if (generation != _refreshGeneration) return;
@@ -306,7 +309,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     if (generation != _refreshGeneration) return;
 
                     var sub = subReports[i];
-                    model.LoadingMessage = $"Loading {sub.Label}…";
+                    model.LoadingMessage = ReportDashboardLocalization.Format("ReportDashboard.Chrome.LoadingNamed", sub.Label);
                     model.LoadingProgressPercent = (int)Math.Round(100.0 * i / Math.Max(1, subReports.Count));
                     await Task.Delay(1);
                     if (generation != _refreshGeneration) return;

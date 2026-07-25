@@ -78,6 +78,11 @@
       <Item Id="Education" Caption="Образование" />
       <Item Id="Employee" Caption="Сотрудник" />
       <Item Id="Geography" Caption="География" />
+      <Item Id="Home" Caption="Главная">
+        <Items>
+          <Item Id="ReportDashboard" Caption="Панель отчётов" />
+        </Items>
+      </Item>
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />
@@ -154,9 +159,13 @@
       <Item Id="Operations" Caption="Операции" />
       <Item Id="Organization" Caption="Организация" />
       <Item Id="Passport" Caption="Паспорт" />
-      <Item Id="Employees" Caption="Сотрудники" />
-      <Item Id="FamilyMembers" Caption="Родственники" />
-      <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
+      <Item Id="People" Caption="Люди">
+        <Items>
+          <Item Id="Employees" Caption="Сотрудники" />
+          <Item Id="FamilyMembers" Caption="Родственники" />
+          <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
+        </Items>
+      </Item>
       <Item Id="Person" Caption="Лицо" />
       <Item Id="Recycle Bin" Caption="Корзина" />
       <Item Id="Rejection" Caption="Отказы" />
@@ -237,8 +246,6 @@
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullApplicationNumber" Caption="Полный номер" />
-        <Member Name="ProcessNumber" Caption="Номер обработки" />
-        <Member Name="DisplayCaption" Caption="Заявка" />
         <Member Name="Invitations" Caption="Приглашения" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsForFamily" Caption="Для семьи" />
@@ -381,7 +388,6 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Description" Caption="Описание" />
-        <Member Name="ProcessNumber" Caption="Номер обработки" />
         <Member Name="Location" Caption="Место" />
         <Member Name="LocationWithMinistryLabel" Caption="Место" />
         <Member Name="MinistryLetterFile" Caption="Копия письма министерства" />
@@ -484,9 +490,6 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="ApplicationProgressRoute" Caption="Маршрут прогресса" />
         <Member Name="Category" Caption="Категория" />
-        <Member Name="CanIssueVisa" Caption="Может выдать визу" />
-        <Member Name="CanIssueInvitation" Caption="Может выдать приглашение" />
-        <Member Name="CanIssueWorkPermit" Caption="Может выдать разрешение на работу" />
         <Member Name="Code" Caption="Код" />
         <Member Name="Company" Caption="Компания" />
         <Member Name="CurrentState" Caption="Состояние" />
@@ -574,6 +577,18 @@
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Группа типов заявок">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Участник группы типов заявок">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Пользователь">
@@ -1356,7 +1371,7 @@
         <Member Name="Exit" Caption="Выезд" />
       </OwnMembers>
     </Class>
-        <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
+    <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
       <OwnMembers>
         <Member Name="Authority" Caption="Орган выдачи" />
         <Member Name="CurrentVisa" Caption="Текущая виза" />
@@ -1956,30 +1971,16 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Группа типов заявок">
-      <OwnMembers>
-        <Member Name="IsActive" Caption="Активна" />
-        <Member Name="Members" Caption="Типы заявок" />
-        <Member Name="NameTm" Caption="Название (Tm)" />
-        <Member Name="SortOrder" Caption="Порядок" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Участник группы типов заявок">
-      <OwnMembers>
-        <Member Name="ApplicationType" Caption="Тип заявки" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Шаблон отчёта">
       <OwnMembers>
-        <Member Name="ApplicableGroupLinks" Caption="Применимые группы типов заявок" />
-        <Member Name="ApplicableTypeLinks" Caption="Применимые типы заявок" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Шаблон отчёта — группа типов заявок">
       <OwnMembers>
-        <Member Name="ApplicationTypeGroup" Caption="Группа типов заявок" />
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ValidityDuration" Caption="Срок действия">
@@ -2373,11 +2374,7 @@
       </Layout>
     </DetailView>
     <ListView Id="AddressOfResidence_ListView" Caption="Адреса проживания" />
-    <ListView Id="Application_ApplicationItems_ListView" Caption="Позиции заявки">
-      <Columns>
-        <ColumnInfo Id="CurrentVisa" Caption="Виза" />
-      </Columns>
-    </ListView>
+    <ListView Id="Application_ApplicationItems_ListView" Caption="Позиции заявки" />
     <DetailView Id="Application_DetailView" Caption="Заявка">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2444,7 +2441,6 @@
     <ListView Id="Application_ListView_ViaMinistries" Caption="Заявки через министерства">
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
-        <ColumnInfo Id="Urgency" Caption="Срочность" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
@@ -2455,6 +2451,7 @@
         <ColumnInfo Id="Month" Caption="Месяц" />
         <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
         <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="Urgency" Caption="Срочность" />
         <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
         <ColumnInfo Id="VisaType" Caption="Тип визы" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
@@ -2511,6 +2508,9 @@
     <ListView Id="ApplicationType_ListView" Caption="Типы заявки" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Фильтр типа заявки" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Фильтры типа" />
+    <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Группа типов заявок" />
+    <ListView Id="ApplicationTypeGroup_ListView" Caption="Группы типов заявок" />
+    <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Участник группы типов заявок" />
     <DetailView Id="ApplicationUser_DetailView" Caption="Пользователь">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -3016,6 +3016,7 @@
     </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта" />
     <ListView Id="UserReportTemplate_ListView" Caption="Шаблоны отчётов" />
+    <DetailView Id="UserReportTemplateApplicationTypeGroup_DetailView" Caption="Шаблон отчёта — группа типов заявок" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Срок действия" />
     <ListView Id="ValidityDuration_ListView" Caption="Сроки действия" />
     <DetailView Id="Visa_DetailView" Caption="Виза">

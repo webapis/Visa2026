@@ -29,6 +29,21 @@ After login, officers land on this dashboard to grasp process state (invitation,
 | Navigation | Top-level **Home** 뿯↽ Report Dashboard (startup item) |
 | Queries | `IReportDashboardQueryService` |
 
+
+## Localization (Layer A)
+
+Officer UI strings (chrome, category/sub-report/person-type/table headers, fixed validity/bucket labels, Home / Report Dashboard nav) use **`VisaUiMessages`** via **`ReportDashboardLocalization`**.
+
+| Source | Role |
+|--------|------|
+| `tools/GenerateModelLocalization/UiStrings.messages.json` (`ReportDashboard.*`) | Runtime message catalog |
+| `Visa2026.Module/Localization/UiStrings.json` (`navigation.Home`) | Model nav captions |
+| `ReportDashboardLocalization.cs` | Resolve labels; `Status(english)` for display-only bucket text |
+
+**Invariant:** SQL / loaders keep English status keys; Razor localizes at render so Open ListView criteria still match. Lookup/`NameTm` segments are not translated (Layer B).
+
+After editing message JSON, regenerate: `dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.csproj`.
+
 ## Relationship to other features
 
 | Feature | Relationship |

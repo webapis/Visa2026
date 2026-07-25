@@ -74,4 +74,4 @@ Rebuild the solution after regeneration.
 
 **Still out of scope:** technical PDF ZIP append notes (English) in `ApplicationItemPdfController`.
 
-
+**Report Dashboard:** runtime UI via ReportDashboard.* in UiStrings.messages.json + ReportDashboardLocalization (see docs/REPORT_DASHBOARD.md § Localization).

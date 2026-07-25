@@ -861,3 +861,21 @@ Pinned first. Same active reg types as Expiring State; city from last app `Curre
 - View/EF/updaters/loader/legacy/mock updated
 
 **Files:** SqlViews (+ postgres), VwRdInvitationReady, updaters, Catalog, QueryService, Mock, learnings
+
+## 2026-07-24 — Layer A localization (chrome + catalog + fixed status buckets)
+
+**Scope:** UI chrome, Catalog labels (categories / sub-reports / person types / table headers), Home → Report Dashboard nav, and fixed English status/bucket labels at display time. Lookup/`NameTm` chart segments unchanged.
+
+**Approach:**
+- `ReportDashboard.*` keys in `UiStrings.messages.json` (en / tr-TR / tk-TM / ru-RU) → `VisaUiMessageCatalog.g.cs`
+- Nav: `UiStrings.json` → `navigation.Home` + `ReportDashboard`
+- Helper: `ReportDashboardLocalization` (`Status` maps exact English keys; Application Status combined labels localize leading segment only)
+- Catalog: `CategoryLabel` / `PersonTypeLabel` / `SubReports` / `TableHeaders` resolve via helper; English keys remain in RawSubReports / EnglishTableHeaders / SQL
+- Razor + PropertyEditor: display localized; `OnListView(bucket.Label)` keeps English for criteria
+
+**Watch-outs:**
+- Do not localize Status at query time — breaks ListView filters
+- Prefer `title='@Get("key")'` (single-quoted attr) to avoid nested double quotes in Razor
+- Merge messages with Node/UTF-8; PowerShell string rewrite can wipe `UiStrings.messages.json`
+
+**Files:** UiStrings.messages.json, UiStrings.json, ReportDashboardLocalization.cs, ReportDashboardCatalog.cs, ReportDashboardComponent.razor, ReportDashboardPropertyEditor.cs, generated catalog/xafml, docs/REPORT_DASHBOARD.md

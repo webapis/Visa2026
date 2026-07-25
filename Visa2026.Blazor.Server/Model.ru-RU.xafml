@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Управление визами">
   <ActionDesign>
     <Actions>
@@ -52,8 +52,6 @@
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
       <Action Id="ViewApplicationItemWordReports" Caption="Документы" />
-
-      <Action Id="VisaCloseAllTabs" Caption="Закрыть все вкладки" />
     </Actions>
   </ActionDesign>
   <Localization>

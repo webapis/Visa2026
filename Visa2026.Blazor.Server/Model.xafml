@@ -9,7 +9,7 @@
   </ActionDesign>
   <NavigationItems NavigationStyle="Accordion">
     <Items>
-      <Item Id="VisaExt" Caption="Visa Extension" Index="10" IsNewNode="True">
+      <Item Id="VisaExt" Caption="Visa Extension" Index="0" IsNewNode="True">
         <Items IsNewNode="True">
           <Item Id="Ministry1" Caption="Submitted to Ministry 1" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '1_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
           <Item Id="Ministry2" Caption="Submitted to Ministry 2" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '2_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />

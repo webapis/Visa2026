@@ -307,20 +307,20 @@
                                       ]
                  },
                  {
-                     "NameTm":  "CS-1 Şatlık",
-                     "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
-                     "LocalizationKey":  "cs-1-atl-k-yl2-te-en",
-                     "Code":  "CS-1 Şatlık",
+                     "NameTm":  "GKT-28.10/2024",
+                     "Description":  "Türkmenistanyň Prezidentiniň 30.08.2024ý. seneli, 1099 belgili kararyna laýyklykda, “Türkmengaz” Döwlet konserni bilen Türkiýe Respublikasynyň “Çalyk Enerji Sanaýi we Tijaret A.Ş” kompaniýasynyň arasynda Mary welaýatynda “Şatlyk -1” gaz gysyjy desgasynyň taslamasyny düzmek, ony gurmak, zerur enjamlar bilen üpjün etmek we goýberiş-sazlaýyş işlerini ýerine ýetirmek”,",
+                     "LocalizationKey":  "gkt-28-10-2024-yl2-tg-gu",
+                     "Code":  "GKT-28.10/2024",
                      "IsActive":  true,
                      "MinistryLegs":  [
                                           {
-                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
+                                              "ApprovingMinistryShortNameTm":  "Türkmengaz",
                                               "WarningDaysBeforeMax":  8,
                                               "Sequence":  1,
                                               "MaxDaysInReview":  10
                                           },
                                           {
-                                              "ApprovingMinistryShortNameTm":  "Energetika",
+                                              "ApprovingMinistryShortNameTm":  "Gurluşyk",
                                               "WarningDaysBeforeMax":  8,
                                               "Sequence":  2,
                                               "MaxDaysInReview":  10
@@ -336,27 +336,6 @@
                      "MinistryLegs":  [
                                           {
                                               "ApprovingMinistryShortNameTm":  "TNGIZ",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  1,
-                                              "MaxDaysInReview":  10
-                                          },
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Gurluşyk",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  2,
-                                              "MaxDaysInReview":  10
-                                          }
-                                      ]
-                 },
-                 {
-                     "NameTm":  "GKT-28.10/2024",
-                     "Description":  "Türkmenistanyň Prezidentiniň 30.08.2024ý. seneli, 1099 belgili kararyna laýyklykda, “Türkmengaz” Döwlet konserni bilen Türkiýe Respublikasynyň “Çalyk Enerji Sanaýi we Tijaret A.Ş” kompaniýasynyň arasynda Mary welaýatynda “Şatlyk -1” gaz gysyjy desgasynyň taslamasyny düzmek, ony gurmak, zerur enjamlar bilen üpjün etmek we goýberiş-sazlaýyş işlerini ýerine ýetirmek”,",
-                     "LocalizationKey":  "gkt-28-10-2024-yl2-tg-gu",
-                     "Code":  "GKT-28.10/2024",
-                     "IsActive":  true,
-                     "MinistryLegs":  [
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Türkmengaz",
                                               "WarningDaysBeforeMax":  8,
                                               "Sequence":  1,
                                               "MaxDaysInReview":  10
@@ -395,6 +374,48 @@
                      "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
                      "LocalizationKey":  "trs-proje-yl2-te-en",
                      "Code":  "TRS proje",
+                     "IsActive":  true,
+                     "MinistryLegs":  [
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  1,
+                                              "MaxDaysInReview":  10
+                                          },
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Energetika",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  2,
+                                              "MaxDaysInReview":  10
+                                          }
+                                      ]
+                 },
+                 {
+                     "NameTm":  "CS-1 Shatlık",
+                     "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
+                     "LocalizationKey":  "cs-1-shatl-k-yl2-te-en",
+                     "Code":  "CS-1 Shatlık",
+                     "IsActive":  true,
+                     "MinistryLegs":  [
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  1,
+                                              "MaxDaysInReview":  10
+                                          },
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Energetika",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  2,
+                                              "MaxDaysInReview":  10
+                                          }
+                                      ]
+                 },
+                 {
+                     "NameTm":  "CS-1 Şatlık",
+                     "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
+                     "LocalizationKey":  "cs-1-atl-k-yl2-te-en",
+                     "Code":  "CS-1 Şatlık",
                      "IsActive":  true,
                      "MinistryLegs":  [
                                           {
@@ -571,27 +592,6 @@
                                       ]
                  },
                  {
-                     "NameTm":  "KYT (Kiyanlı iletim hatları ve şalt sahaları projesi)",
-                     "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
-                     "LocalizationKey":  "kyt-kiyanl-iletim-hatlar-ve-salt-sahalar-projesi-yl2-te-en",
-                     "Code":  "KYT (Kiyanlı iletim hatları ve şalt sahaları projesi)",
-                     "IsActive":  true,
-                     "MinistryLegs":  [
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  1,
-                                              "MaxDaysInReview":  10
-                                          },
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Energetika",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  2,
-                                              "MaxDaysInReview":  10
-                                          }
-                                      ]
-                 },
-                 {
                      "NameTm":  "HE-1820/L7",
                      "Description":  "Türkmenistanyň Prezidentiniň 2020-nji ýylyň ýanwar aýynyň 31-däki 1619 belgili karary esasynda “Ahal-Balkan” we Balkan-Daşoguz” ýokary woltly asma elektrik geçiriji ulgamynyň we beketleriniň taslamasy üçin telemehanika, aragatnaşyk we Scada ulgamlarynyň taslamasyny düzmek, üpjün etmek we gurnamak barada baglanyşylan şertnamanyň esasynda özüne degişli işleri ýerine ýetirmek.",
                      "LocalizationKey":  "he-1820-l7-yl2-te-en",
@@ -627,6 +627,27 @@
                                           },
                                           {
                                               "ApprovingMinistryShortNameTm":  "Gurluşyk",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  2,
+                                              "MaxDaysInReview":  10
+                                          }
+                                      ]
+                 },
+                 {
+                     "NameTm":  "KYT (Kiyanlı iletim hatları ve şalt sahaları projesi)",
+                     "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
+                     "LocalizationKey":  "kyt-kiyanl-iletim-hatlar-ve-salt-sahalar-projesi-yl2-te-en",
+                     "Code":  "KYT (Kiyanlı iletim hatları ve şalt sahaları projesi)",
+                     "IsActive":  true,
+                     "MinistryLegs":  [
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  1,
+                                              "MaxDaysInReview":  10
+                                          },
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Energetika",
                                               "WarningDaysBeforeMax":  8,
                                               "Sequence":  2,
                                               "MaxDaysInReview":  10
@@ -676,21 +697,6 @@
                                       ]
                  },
                  {
-                     "NameTm":  "CSK-1 Shatlık",
-                     "Description":  "Türkmenistanyň Prezidentiniň 30.08.2024ý. senede çykaran “Türkmengaz döwlet konsernine Mary welaýatynda “Şatlyk -1” gaz gysyjy desgasynyň taslamasyny düzmek, ony gurmak, zerur enjamlar bilen üpjün etmek we goýberiş sazlaýyş işlerini ýerine ýetirmek” hakyndaky 1099 belgili kararyna laýyklykda, “Türkmengaz” döwlet konserni bilen Türkiýe Respublikasynyň “Çalık Enerji Sanaýi ve Ticaret A.Ş” kompaniýasynyň arasynda şertnama",
-                     "LocalizationKey":  "csk-1-shatl-k-yl1-tg",
-                     "Code":  "CSK-1 Shatlık",
-                     "IsActive":  true,
-                     "MinistryLegs":  [
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Türkmengaz",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  1,
-                                              "MaxDaysInReview":  10
-                                          }
-                                      ]
-                 },
-                 {
                      "NameTm":  "Türkmen himiýa",
                      "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
                      "LocalizationKey":  "turkmen-himiya-yl2-te-en",
@@ -720,6 +726,21 @@
                      "MinistryLegs":  [
                                           {
                                               "ApprovingMinistryShortNameTm":  "TNGIZ",
+                                              "WarningDaysBeforeMax":  8,
+                                              "Sequence":  1,
+                                              "MaxDaysInReview":  10
+                                          }
+                                      ]
+                 },
+                 {
+                     "NameTm":  "CSK-1 Shatlık",
+                     "Description":  "Türkmenistanyň Prezidentiniň 30.08.2024ý. senede çykaran “Türkmengaz döwlet konsernine Mary welaýatynda “Şatlyk -1” gaz gysyjy desgasynyň taslamasyny düzmek, ony gurmak, zerur enjamlar bilen üpjün etmek we goýberiş sazlaýyş işlerini ýerine ýetirmek” hakyndaky 1099 belgili kararyna laýyklykda, “Türkmengaz” döwlet konserni bilen Türkiýe Respublikasynyň “Çalık Enerji Sanaýi ve Ticaret A.Ş” kompaniýasynyň arasynda şertnama",
+                     "LocalizationKey":  "csk-1-shatl-k-yl1-tg",
+                     "Code":  "CSK-1 Shatlık",
+                     "IsActive":  true,
+                     "MinistryLegs":  [
+                                          {
+                                              "ApprovingMinistryShortNameTm":  "Türkmengaz",
                                               "WarningDaysBeforeMax":  8,
                                               "Sequence":  1,
                                               "MaxDaysInReview":  10
@@ -773,27 +794,6 @@
                      "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
                      "LocalizationKey":  "merkez-ofis-yl2-te-en",
                      "Code":  "Merkez ofis",
-                     "IsActive":  true,
-                     "MinistryLegs":  [
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  1,
-                                              "MaxDaysInReview":  10
-                                          },
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Energetika",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  2,
-                                              "MaxDaysInReview":  10
-                                          }
-                                      ]
-                 },
-                 {
-                     "NameTm":  "CS-1 Shatlık",
-                     "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
-                     "LocalizationKey":  "cs-1-shatl-k-yl2-te-en",
-                     "Code":  "CS-1 Shatlık",
                      "IsActive":  true,
                      "MinistryLegs":  [
                                           {

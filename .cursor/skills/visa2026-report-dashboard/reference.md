@@ -203,3 +203,9 @@ public DbSet<VwRdMyCategory> VwRdMyCategory => Set<VwRdMyCategory>();
 | `Passport` | `by-type`, `by-citizenship`, `by-validity` | Mock only |
 
 Update this table in `learnings.md` as categories are promoted to real SQL views.
+## Localization
+
+- Helper: `Visa2026.Module/Localization/ReportDashboardLocalization.cs`
+- Messages: `ReportDashboard.*` in `tools/GenerateModelLocalization/UiStrings.messages.json`
+- Nav: `navigation.Home` / `ReportDashboard` in `Visa2026.Module/Localization/UiStrings.json`
+- Display-only status map: keep English keys for ListView; see `docs/REPORT_DASHBOARD.md` § Localization

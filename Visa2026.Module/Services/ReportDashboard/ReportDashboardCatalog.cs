@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Services.ReportDashboard;
 
@@ -259,7 +260,27 @@ public static class ReportDashboardCatalog
         return pinned.Concat(rest).ToList();
     }
 
-    public static IReadOnlyList<ReportDashboardSubReport> SubReports(ReportDashboardCategory category) => category switch
+    public static IReadOnlyList<ReportDashboardSubReport> SubReports(ReportDashboardCategory category) =>
+        LocalizeSubReportList(category, RawSubReports(category));
+
+    private static IReadOnlyList<ReportDashboardSubReport> LocalizeSubReportList(
+        ReportDashboardCategory category,
+        IReadOnlyList<ReportDashboardSubReport> source)
+    {
+        if (source.Count == 0) return source;
+        var list = new List<ReportDashboardSubReport>(source.Count);
+        foreach (var s in source)
+        {
+            list.Add(new ReportDashboardSubReport
+            {
+                Key = s.Key,
+                Label = ReportDashboardLocalization.SubReport(category, s.Key, s.Label)
+            });
+        }
+        return list;
+    }
+
+    private static IReadOnlyList<ReportDashboardSubReport> RawSubReports(ReportDashboardCategory category) => category switch
     {
         ReportDashboardCategory.Application => [
             new() { Key = ApplicationStatusSubReportKey, Label = "Application Status" },
@@ -334,32 +355,11 @@ public static class ReportDashboardCatalog
 
     // ---- Labels ----------------------------------------------------------
 
-    public static string CategoryLabel(ReportDashboardCategory category) => category switch
-    {
-        ReportDashboardCategory.Application   => "Application",
-        ReportDashboardCategory.VisaExtension => "Visa",
-        ReportDashboardCategory.Invitation    => "Invitation",
-        ReportDashboardCategory.Registration  => "Registration",
-        ReportDashboardCategory.WorkPermit    => "Work Permit",
-        ReportDashboardCategory.Travel        => "Travel",
-        ReportDashboardCategory.AddressOfResidence => "Address of Residence",
-        ReportDashboardCategory.BorderZone       => "Border Zone",
-        ReportDashboardCategory.Passport         => "Passport",
-        ReportDashboardCategory.Education        => "Education",
-        ReportDashboardCategory.PositionHistory  => "Position History",
-        ReportDashboardCategory.Subcontractor    => "Subcontractor",
-        ReportDashboardCategory.MedicalRecord   => "Medical Records",
-        _ => category.ToString()
-    };
+    public static string CategoryLabel(ReportDashboardCategory category) =>
+        ReportDashboardLocalization.Category(category);
 
-    public static string PersonTypeLabel(ReportDashboardPersonType personType) => personType switch
-    {
-        ReportDashboardPersonType.All              => "All",
-        ReportDashboardPersonType.Employees        => "Employees",
-        ReportDashboardPersonType.FamilyMembers    => "Family Members",
-        ReportDashboardPersonType.TemporaryVisitors=> "Temporary Visitors",
-        _ => personType.ToString()
-    };
+    public static string PersonTypeLabel(ReportDashboardPersonType personType) =>
+        ReportDashboardLocalization.PersonType(personType);
 
     /// <summary>True when the dashboard should not filter by a single <see cref="PersonRecordRole"/>.</summary>
     public static bool IsAllPersonTypes(ReportDashboardPersonType personType) =>
@@ -436,6 +436,9 @@ public static class ReportDashboardCatalog
     // ---- Table headers (sub-report-aware) --------------------------------
 
     public static string[] TableHeaders(ReportDashboardCategory category, string? subReport = null) =>
+        ReportDashboardLocalization.Headers(EnglishTableHeaders(category, subReport));
+
+    private static string[] EnglishTableHeaders(ReportDashboardCategory category, string? subReport = null) =>
         (category, subReport) switch
         {
             (ReportDashboardCategory.Application, _) => ["Name", "Project", "App #", "App Date", "State"],
