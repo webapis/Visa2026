@@ -71,8 +71,8 @@
         </Items>
       </Item>
       <Item Id="Auth" Caption="Howpsuzlyk" />
-      <Item Id="Config" Caption="Sazlama" />
-      <Item Id="Configuration" Caption="Sazlama" />
+      <Item Id="Config" Caption="Konfigurasiýa" />
+      <Item Id="Configuration" Caption="Konfigurasiýa" />
       <Item Id="Default" Caption="Bellenen" />
       <Item Id="Documents" Caption="Resminamalar" />
       <Item Id="Education" Caption="Bilim" />
@@ -85,14 +85,14 @@
         <Items>
           <Item Id="Application" Caption="Arza">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
           </Item>
           <Item Id="Education" Caption="Bilim">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
@@ -115,35 +115,35 @@
           </Item>
           <Item Id="Organization" Caption="Gurama">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
           </Item>
           <Item Id="Passport" Caption="Pasport">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
           </Item>
           <Item Id="Person" Caption="Adam">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
           </Item>
           <Item Id="Visa" Caption="Wiza">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
           </Item>
           <Item Id="WorkPermit" Caption="Iş rugsady">
             <Items>
-              <Item Id="Config" Caption="Sazlama">
+              <Item Id="Config" Caption="Konfigurasiýa">
                 <Items />
               </Item>
             </Items>
