@@ -29,22 +29,24 @@ internal static class HeaderParentListViewColumns
             [
                 nameof(BusinessObjects.Invitation.InvitationNumber),
                 nameof(BusinessObjects.Invitation.DocumentCopiesListLink),
+                nameof(BusinessObjects.Invitation.TotalPersonCount),
                 nameof(BusinessObjects.Invitation.IssuedDate),
                 nameof(BusinessObjects.Invitation.VisaCategory),
                 nameof(BusinessObjects.Invitation.VisaPeriod),
                 nameof(BusinessObjects.Invitation.ExpirationDate),
                 nameof(BusinessObjects.Invitation.DaysRemaining),
             ],
-            [110, 56, 100, 100, 100, 100, 72]
+            [110, 56, 56, 100, 100, 100, 100, 72]
         ),
         (
             "WorkPermit_ListView",
             [
                 nameof(BusinessObjects.WorkPermit.WorkPermitNumber),
                 nameof(BusinessObjects.WorkPermit.DocumentCopiesListLink),
+                nameof(BusinessObjects.WorkPermit.TotalPersonCount),
                 nameof(BusinessObjects.WorkPermit.IssuedDate),
             ],
-            [120, 56, 100]
+            [120, 56, 56, 100]
         ),
         (
             "Rejection_ListView",

@@ -93,6 +93,16 @@ namespace Visa2026.Module.BusinessObjects
         [Aggregated]
         public virtual IList<WorkPermitItem> WorkPermitItems { get; set; } = new ObservableCollection<WorkPermitItem>();
 
+        [XafDisplayName("Person count")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public int TotalPersonCount => listViewTotalPersonCount ?? WorkPermitItems?.Count ?? 0;
+
+        private int? listViewTotalPersonCount;
+
+        public void SetListViewTotalPersonCount(int count) => listViewTotalPersonCount = count;
+
         [Aggregated]
         public virtual IList<WorkPermitDocument> Documents { get; set; } = new ObservableCollection<WorkPermitDocument>();
 

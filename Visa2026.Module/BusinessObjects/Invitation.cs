@@ -164,6 +164,16 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(InvitationItem.Invitation))]
         public virtual IList<InvitationItem> InvitationItems { get; set; }
 
+        [XafDisplayName("Person count")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public int TotalPersonCount => listViewTotalPersonCount ?? InvitationItems?.Count ?? 0;
+
+        private int? listViewTotalPersonCount;
+
+        public void SetListViewTotalPersonCount(int count) => listViewTotalPersonCount = count;
+
         [Aggregated]
         [InverseProperty(nameof(InvitationImage.Invitation))]
         [VisibleInDetailView(false)]

@@ -1325,7 +1325,7 @@
         <PropertyEditor Id="WorkPermitNumber" PropertyName="WorkPermitNumber" IsNewNode="True" />
       </Items>
       <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="15.918367346938776">
             <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Horizontal" IsNewNode="True">
               <LayoutGroup Id="Autoe6448fae-8eb3-4e8a-b87a-4482d065038f" ShowCaption="False" Caption="Autoe6448fae-8eb3-4e8a-b87a-4482d065038f(4)" Index="0" RelativeSize="77.6601998824221" IsNewNode="True">
@@ -1341,12 +1341,12 @@
               <LayoutItem Id="WorkPermitNumber" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="84.08163265306122" CustomCSSClassName="xaf-fill-tabbed">
-            <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
-              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" VerticalAlign="NotSet" />
+          <TabbedGroup Id="Tabs" RelativeSize="84.08163265306122" CustomCSSClassName="xaf-show-all-rows-tabbed">
+            <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows">
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows" VerticalAlign="NotSet" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Work permit copies" RelativeSize="100">
-              <LayoutItem Id="Documents" RelativeSize="100" />
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Work permit copies" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows">
+              <LayoutItem Id="Documents" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows" />
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>
@@ -1359,7 +1359,7 @@
         <ColumnInfo Id="IssuedDate" Index="2" Width="100" />
       </Columns>
     </ListView>
-    <ListView Id="WorkPermit_WorkPermitItems_ListView">
+    <ListView Id="WorkPermit_WorkPermitItems_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True">
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
         <ColumnInfo Id="Passport" Index="-1" />
@@ -1414,7 +1414,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True">
+    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True">
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
         <ColumnInfo Id="Passport" Index="-1" />
