@@ -247,10 +247,10 @@
         <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
         <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
         <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
-        <ColumnInfo Id="ProgressSlaStatement" Index="7" Width="140" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
         <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
-        <ColumnInfo Id="MigrationSlaStatement" Index="8" Width="160" />
-        <ColumnInfo Id="ApplicationType" Index="9" Width="109" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="7" Width="109" />
       </Columns>
     </ListView>
     <ListView Id="Application_ListView_ViaMinistries">

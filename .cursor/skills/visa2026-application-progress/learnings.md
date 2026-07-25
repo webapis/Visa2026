@@ -6,6 +6,13 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-25 — Hide Approval/Migration deadline on Direct migration ListView
+
+- **Request**: Hide **Approval deadline** (`ProgressSlaStatement`) and **Migration deadline** (`MigrationSlaStatement`) on `Application_ListView_DirectMigration` only.
+- **Approach**: `Index="-1"` in Blazor `Model.xafml`; `CustomViewClonerUpdater.SetColumnVisibility(..., false)` after DirectMigration clone so cloned defaults from `Application_ListView` do not re-show them. Left Via ministries / default Application lists unchanged.
+- **Prevent**: Do not set `[VisibleInListView(false)]` on the BO properties — that would hide deadlines on Via ministries too.
+- **Cross-skill**: —
+
 ### 2026-07-23 — Postgres ProcessNumber column missing (42703)
 
 - **Symptom**: `Npgsql.PostgresException 42703: column a.ProcessNumber does not exist` on Application ListView (PostgreSQL Demo).

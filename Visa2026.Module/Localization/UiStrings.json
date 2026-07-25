@@ -66,10 +66,10 @@
     "System": { "tr-TR": "Sistem", "tk-TM": "Ulgam", "ru-RU": "Система" },
     "Auth": { "tr-TR": "Güvenlik", "tk-TM": "Howpsuzlyk", "ru-RU": "Безопасность" },
     "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },
-    "Configuration": { "tr-TR": "Yapılandırma", "tk-TM": "Sazlama", "ru-RU": "Конфигурация" },
+    "Configuration": { "tr-TR": "Yapılandırma", "tk-TM": "Konfigurasiýa", "ru-RU": "Конфигурация" },
     "Organization": { "tr-TR": "Organizasyon", "tk-TM": "Gurama", "ru-RU": "Организация" },
     "Geography": { "tr-TR": "Coğrafya", "tk-TM": "Geografiýa", "ru-RU": "География" },
-    "Config": { "tr-TR": "Yapılandırma", "tk-TM": "Sazlama", "ru-RU": "Настройка" },
+    "Config": { "tr-TR": "Yapılandırma", "tk-TM": "Konfigurasiýa", "ru-RU": "Настройка" },
     "VisaExt": { "tr-TR": "Vize Uzatma", "tk-TM": "Wizany uzaltmak", "ru-RU": "Продление визы" },
     "Ministry1": { "tr-TR": "Bakanlığa Gönderildi 1", "tk-TM": "Ministrlige iberildi 1", "ru-RU": "Отправлено в министерство 1" },
     "Ministry2": { "tr-TR": "Bakanlığa Gönderildi 2", "tk-TM": "Ministrlige iberildi 2", "ru-RU": "Отправлено в министерство 2" }

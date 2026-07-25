@@ -2,7 +2,7 @@
   "paths": {
     "Configuration": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Конфигурация"
     },
     "Lookup/Application": {
@@ -12,7 +12,7 @@
     },
     "Lookup/Application/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     },
     "Lookup/Education": {
@@ -22,7 +22,7 @@
     },
     "Lookup/Education/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     },
     "Lookup/General": {
@@ -57,7 +57,7 @@
     },
     "Lookup/Organization/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     },
     "Lookup/Passport": {
@@ -67,7 +67,7 @@
     },
     "Lookup/Passport/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     },
     "Lookup/Person": {
@@ -77,7 +77,7 @@
     },
     "Lookup/Person/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     },
     "Lookup/Visa": {
@@ -87,7 +87,7 @@
     },
     "Lookup/Visa/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     },
     "Lookup/WorkPermit": {
@@ -97,7 +97,7 @@
     },
     "Lookup/WorkPermit/Config": {
       "tr-TR": "Yapılandırma",
-      "tk-TM": "Sazlama",
+      "tk-TM": "Konfigurasiýa",
       "ru-RU": "Настройка"
     }
   }

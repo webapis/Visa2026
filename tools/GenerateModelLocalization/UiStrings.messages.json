@@ -1646,13 +1646,13 @@
   "ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric": {
     "en": "Configure maximum working days under Configuration → Ministry review SLA before activating this profile.",
     "tr-TR": "Profili etkinleştirmeden önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-    "tk-TM": "Profili işjeňleşdirmezden ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+    "tk-TM": "Profili işjeňleşdirmezden ozal Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
     "ru-RU": "Перед активацией профиля настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки."
   },
   "MinistryReviewSlaSettings.NotConfigured": {
     "en": "Configure maximum working days under Configuration → Ministry review SLA.",
     "tr-TR": "Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-    "tk-TM": "Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+    "tk-TM": "Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
     "ru-RU": "Настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки."
   },
   "MinistryReviewSlaSettings.WarningDaysInvalid": {
@@ -1664,7 +1664,7 @@
   "ApplicationProgress.MinistryReviewSlaRequired": {
     "en": "Configure maximum working days under Configuration → Ministry review SLA before starting ministry review.",
     "tr-TR": "Bakanlık incelemesine başlamadan önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-    "tk-TM": "Ministrlik barlagyna başlamazdan ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+    "tk-TM": "Ministrlik barlagyna başlamazdan ozal Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
     "ru-RU": "Перед началом министерской проверки настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки."
   },
   "ApprovalLegProfile.MinistryLegWarningDaysInvalid": {
