@@ -17,24 +17,26 @@ namespace Visa2026.Module.DatabaseUpdate
             var navigationItems = rootNode.Items;
             var modelViews = rootNode.Application.Views;
  
-            // Create a new "People" group directly at the root level
-            var peopleGroup = navigationItems["People"] ?? navigationItems.AddNode<IModelNavigationItem>("People");
-            peopleGroup.ImageName = "BO_User";
+            // Legacy-style top-level person lists (not nested under a People folder).
+            if (navigationItems["People"] is IModelNavigationItem legacyPeopleGroup)
+                legacyPeopleGroup.Remove();
 
             var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", PersonRoleHelper.EmployeeCriteria);
             if (employeeListView != null)
             {
-                var employeeItem = peopleGroup.Items["Employees"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("Employees");
+                var employeeItem = navigationItems["Employees"] ?? navigationItems.AddNode<IModelNavigationItem>("Employees");
                 employeeItem.View = employeeListView;
                 employeeItem.ImageName = "BO_Employee";
+                employeeItem.Index = 0;
             }
 
             var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", PersonRoleHelper.FamilyMemberCriteria);
             if (familyMemberListView != null)
             {
-                var familyMemberItem = peopleGroup.Items["FamilyMembers"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("FamilyMembers");
+                var familyMemberItem = navigationItems["FamilyMembers"] ?? navigationItems.AddNode<IModelNavigationItem>("FamilyMembers");
                 familyMemberItem.View = familyMemberListView;
                 familyMemberItem.ImageName = "BO_Contact";
+                familyMemberItem.Index = 1;
             }
 
             var temporaryVisitorListView = EnsureListView(
@@ -44,10 +46,11 @@ namespace Visa2026.Module.DatabaseUpdate
                 PersonRoleHelper.TemporaryVisitorCriteria);
             if (temporaryVisitorListView != null)
             {
-                var visitorItem = peopleGroup.Items["TemporaryVisitors"]
-                    ?? peopleGroup.Items.AddNode<IModelNavigationItem>("TemporaryVisitors");
+                var visitorItem = navigationItems["TemporaryVisitors"]
+                    ?? navigationItems.AddNode<IModelNavigationItem>("TemporaryVisitors");
                 visitorItem.View = temporaryVisitorListView;
                 visitorItem.ImageName = "BO_Person";
+                visitorItem.Index = 2;
             }
 
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
@@ -71,7 +74,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
         /// <summary>
         /// Person, Passport, Visa, etc. use <see cref="NavigationItemAttribute"/>(false); strip stale nodes if the generator re-added them.
-        /// Officers use <c>People</c> (Employees / Family Members / Temporary Visitors) instead of a flat Person list.
+        /// Officers use top-level Employees / Family Members / Temporary Visitors instead of a flat Person list.
         /// </summary>
         private static void RemoveLegacyLookupOperationalNavigation(IModelNavigationItems navigationItems)
         {
@@ -295,12 +298,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewDirectMigration,
                 ApplicationProgressRouteNavigation.CriteriaDirectMigration);
-            if (modelViews[ApplicationProgressRouteNavigation.ListViewDirectMigration] is IModelListView directMigrationListView)
-            {
-                // Direct migration has no ministry approval SLA; hide both SLA deadline columns.
-                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.Application.ProgressSlaStatement), false);
-                SetColumnVisibility(directMigrationListView, nameof(BusinessObjects.Application.MigrationSlaStatement), false);
-            }
             CloneApplicationItemListViewIfMissing(
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewItemsViaMinistries,

@@ -594,10 +594,11 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/ForeignWorkerMaglumat", SecurityPermissionState.Allow);
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+            // Top-level person lists (legacy-style; not under People).
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
@@ -1010,6 +1011,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Documents", SecurityPermissionState.Deny);

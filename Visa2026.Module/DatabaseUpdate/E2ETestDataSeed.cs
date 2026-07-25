@@ -71,5 +71,5 @@ public static class E2ETestLoginValues
     public const string EmployeeDetailViewPath = "Person_DetailView_Employee";
 
     /// <summary>EasyTest sidebar navigation item path (fallback only — prefer <see cref="EmployeesListViewPath"/> URL).</summary>
-    public const string EmployeesNavigationPath = "People.Employees";
+    public const string EmployeesNavigationPath = "Employees";
 }

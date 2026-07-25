@@ -37,7 +37,7 @@ There are two places to set permissions:
 ### `EnsureNavigationPermission`
 Grants or updates a navigation item permission for an existing role.
 ```csharp
-EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
+EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
 ```
 
 ### `EnsureTypePermission<T>`

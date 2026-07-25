@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Visa2026" PreferredLanguage="(User language)">
   <ActionDesign>
     <Actions>
@@ -26,13 +26,9 @@
   </ActionDesign>
   <NavigationItems>
     <Items>
-      <Item Id="People" Caption="People">
-        <Items>
-          <Item Id="Employees" Caption="Employees" />
-          <Item Id="FamilyMembers" Caption="Family Members" />
-          <Item Id="TemporaryVisitors" Caption="Temporary visitor" />
-        </Items>
-      </Item>
+      <Item Id="Employees" Caption="Employees" Index="0" />
+      <Item Id="FamilyMembers" Caption="Family Members" Index="1" />
+      <Item Id="TemporaryVisitors" Caption="Temporary visitor" Index="2" />
       <Item Id="Operations" Caption="Operations" ImageName="BO_Task" IsNewNode="True">
         <Items>
           <Item Id="StateNotifications" Caption="State notifications" ViewId="BoStateNotificationInboxHost_DetailView" ImageName="BO_Validation" IsNewNode="True" />
