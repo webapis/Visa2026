@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Title="Wiza dolandyryşy">
   <ActionDesign>
     <Actions>
@@ -52,6 +52,8 @@
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
       <Action Id="ViewApplicationItemWordReports" Caption="Resminamalar" />
+
+      <Action Id="VisaCloseAllTabs" Caption="Ähli tabular ýap" />
     </Actions>
   </ActionDesign>
   <Localization>
