@@ -159,13 +159,9 @@
       <Item Id="Operations" Caption="İşlemler" />
       <Item Id="Organization" Caption="Organizasyon" />
       <Item Id="Passport" Caption="Pasaport" />
-      <Item Id="People" Caption="Kişiler">
-        <Items>
-          <Item Id="Employees" Caption="Çalışanlar" />
-          <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
-          <Item Id="TemporaryVisitors" Caption="Geçici ziyaretçi" />
-        </Items>
-      </Item>
+      <Item Id="Employees" Caption="Çalışanlar" />
+      <Item Id="FamilyMembers" Caption="Aile Üyeleri" />
+      <Item Id="TemporaryVisitors" Caption="Geçici ziyaretçi" />
       <Item Id="Person" Caption="Kişi" />
       <Item Id="Recycle Bin" Caption="Geri Dönüşüm" />
       <Item Id="Rejection" Caption="Ret" />

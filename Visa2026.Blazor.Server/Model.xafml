@@ -9,7 +9,7 @@
   </ActionDesign>
   <NavigationItems NavigationStyle="Accordion">
     <Items>
-      <Item Id="VisaExt" Caption="Visa Extension" Index="0" IsNewNode="True">
+      <Item Id="VisaExt" Caption="Visa Extension" Index="10" IsNewNode="True">
         <Items IsNewNode="True">
           <Item Id="Ministry1" Caption="Submitted to Ministry 1" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '1_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
           <Item Id="Ministry2" Caption="Submitted to Ministry 2" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '2_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
@@ -1096,7 +1096,7 @@
         <ColumnInfo Id="MiddleName" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_Employee">
+    <ListView Id="Person_ListView_Employees" Caption="Employees" DetailViewID="Person_DetailView_Employee">
       <Columns>
         <ColumnInfo Id="FullName" Width="87" />
         <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
@@ -1126,7 +1126,7 @@
         <ColumnInfo Id="SponsoringEmployee" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMember">
+    <ListView Id="Person_ListView_FamilyMembers" Caption="Family Members" DetailViewID="Person_DetailView_FamilyMember">
       <Columns>
         <ColumnInfo Id="FullName" Width="87" />
         <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />

@@ -159,13 +159,9 @@
       <Item Id="Operations" Caption="Операции" />
       <Item Id="Organization" Caption="Организация" />
       <Item Id="Passport" Caption="Паспорт" />
-      <Item Id="People" Caption="Люди">
-        <Items>
-          <Item Id="Employees" Caption="Сотрудники" />
-          <Item Id="FamilyMembers" Caption="Родственники" />
-          <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
-        </Items>
-      </Item>
+      <Item Id="Employees" Caption="Сотрудники" />
+      <Item Id="FamilyMembers" Caption="Родственники" />
+      <Item Id="TemporaryVisitors" Caption="Временный посетитель" />
       <Item Id="Person" Caption="Лицо" />
       <Item Id="Recycle Bin" Caption="Корзина" />
       <Item Id="Rejection" Caption="Отказы" />

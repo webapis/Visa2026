@@ -17,42 +17,67 @@ namespace Visa2026.Module.DatabaseUpdate
             var navigationItems = rootNode.Items;
             var modelViews = rootNode.Application.Views;
  
-            // Create a new "People" group directly at the root level
-            var peopleGroup = navigationItems["People"] ?? navigationItems.AddNode<IModelNavigationItem>("People");
-            peopleGroup.ImageName = "BO_User";
+            // Legacy-style top-level person lists (not nested under People).
+            // Captions must be set explicitly — without them XAF falls back to the Person class caption.
+            if (navigationItems["People"] is IModelNavigationItem legacyPeopleGroup)
+                legacyPeopleGroup.Remove();
 
-            var employeeListView = EnsureListView(modelViews, "Person_ListView_Employees", "Person_ListView", PersonRoleHelper.EmployeeCriteria);
-            if (employeeListView != null)
-            {
-                var employeeItem = peopleGroup.Items["Employees"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("Employees");
-                employeeItem.View = employeeListView;
-                employeeItem.ImageName = "BO_Employee";
-            }
-
-            var familyMemberListView = EnsureListView(modelViews, "Person_ListView_FamilyMembers", "Person_ListView", PersonRoleHelper.FamilyMemberCriteria);
-            if (familyMemberListView != null)
-            {
-                var familyMemberItem = peopleGroup.Items["FamilyMembers"] ?? peopleGroup.Items.AddNode<IModelNavigationItem>("FamilyMembers");
-                familyMemberItem.View = familyMemberListView;
-                familyMemberItem.ImageName = "BO_Contact";
-            }
-
-            var temporaryVisitorListView = EnsureListView(
+            EnsureTopLevelPersonNavigation(
+                navigationItems,
                 modelViews,
-                "Person_ListView_TemporaryVisitors",
-                "Person_ListView",
-                PersonRoleHelper.TemporaryVisitorCriteria);
-            if (temporaryVisitorListView != null)
-            {
-                var visitorItem = peopleGroup.Items["TemporaryVisitors"]
-                    ?? peopleGroup.Items.AddNode<IModelNavigationItem>("TemporaryVisitors");
-                visitorItem.View = temporaryVisitorListView;
-                visitorItem.ImageName = "BO_Person";
-            }
+                navItemId: "Employees",
+                listViewId: "Person_ListView_Employees",
+                criteria: PersonRoleHelper.EmployeeCriteria,
+                caption: "Employees",
+                imageName: "BO_Employee",
+                index: 0);
+
+            EnsureTopLevelPersonNavigation(
+                navigationItems,
+                modelViews,
+                navItemId: "FamilyMembers",
+                listViewId: "Person_ListView_FamilyMembers",
+                criteria: PersonRoleHelper.FamilyMemberCriteria,
+                caption: "Family Members",
+                imageName: "BO_Contact",
+                index: 1);
+
+            EnsureTopLevelPersonNavigation(
+                navigationItems,
+                modelViews,
+                navItemId: "TemporaryVisitors",
+                listViewId: "Person_ListView_TemporaryVisitors",
+                criteria: PersonRoleHelper.TemporaryVisitorCriteria,
+                caption: "Temporary visitor",
+                imageName: "BO_Person",
+                index: 2);
 
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
             RemoveLegacyLookupOperationalNavigation(navigationItems);
             RemoveStaleInvitationBorderZoneNavigation(navigationItems);
+        }
+
+        private static void EnsureTopLevelPersonNavigation(
+            IModelNavigationItems navigationItems,
+            IModelViews modelViews,
+            string navItemId,
+            string listViewId,
+            string criteria,
+            string caption,
+            string imageName,
+            int index)
+        {
+            var listView = EnsureListView(modelViews, listViewId, "Person_ListView", criteria);
+            if (listView == null)
+                return;
+
+            listView.Caption = caption;
+
+            var navItem = navigationItems[navItemId] ?? navigationItems.AddNode<IModelNavigationItem>(navItemId);
+            navItem.View = listView;
+            navItem.Caption = caption;
+            navItem.ImageName = imageName;
+            navItem.Index = index;
         }
 
         /// <summary>
@@ -71,7 +96,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
         /// <summary>
         /// Person, Passport, Visa, etc. use <see cref="NavigationItemAttribute"/>(false); strip stale nodes if the generator re-added them.
-        /// Officers use <c>People</c> (Employees / Family Members / Temporary Visitors) instead of a flat Person list.
+        /// Officers use top-level Employees / Family Members / Temporary Visitors instead of a flat Person list.
         /// </summary>
         private static void RemoveLegacyLookupOperationalNavigation(IModelNavigationItems navigationItems)
         {
@@ -191,6 +216,9 @@ namespace Visa2026.Module.DatabaseUpdate
             }
             return view;
         }
+
+        private static void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
+            => ModelListViewColumnVisibility.Set(view, propertyName, visible);
     }
 
     public class CustomViewClonerUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator>
@@ -208,6 +236,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 employeeListView.Id = "Person_ListView_Employees";
                 employeeListView.ModelClass = originalListView.ModelClass;
                 employeeListView.Criteria = PersonRoleHelper.EmployeeCriteria;
+                employeeListView.Caption = "Employees";
 
                 CopyColumns(originalListView, employeeListView);
 
@@ -229,6 +258,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 familyMemberListView.Id = "Person_ListView_FamilyMembers";
                 familyMemberListView.ModelClass = originalListView.ModelClass;
                 familyMemberListView.Criteria = PersonRoleHelper.FamilyMemberCriteria;
+                familyMemberListView.Caption = "Family Members";
 
                 CopyColumns(originalListView, familyMemberListView);
 
@@ -247,15 +277,17 @@ namespace Visa2026.Module.DatabaseUpdate
             }
             else if (modelViews["Person_ListView_FamilyMembers"] is IModelListView existingFamilyMemberListView)
             {
+                existingFamilyMemberListView.Caption = "Family Members";
                 SetColumnVisibility(existingFamilyMemberListView, "Subcontractor", true);
                 if (modelViews[PersonDetailViewIds.FamilyMember] is IModelDetailView familyDetailView)
                     existingFamilyMemberListView.DetailView = familyDetailView;
             }
 
-            if (modelViews["Person_ListView_Employees"] is IModelListView existingEmployeeListView
-                && modelViews[PersonDetailViewIds.Employee] is IModelDetailView employeeDetailView)
+            if (modelViews["Person_ListView_Employees"] is IModelListView existingEmployeeListView)
             {
-                existingEmployeeListView.DetailView = employeeDetailView;
+                existingEmployeeListView.Caption = "Employees";
+                if (modelViews[PersonDetailViewIds.Employee] is IModelDetailView employeeDetailView)
+                    existingEmployeeListView.DetailView = employeeDetailView;
             }
 
             if (modelViews["Person_ListView_TemporaryVisitors"] == null)
@@ -264,6 +296,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 visitorListView.Id = "Person_ListView_TemporaryVisitors";
                 visitorListView.ModelClass = originalListView.ModelClass;
                 visitorListView.Criteria = PersonRoleHelper.TemporaryVisitorCriteria;
+                visitorListView.Caption = "Temporary visitor";
 
                 CopyColumns(originalListView, visitorListView);
 
@@ -282,6 +315,7 @@ namespace Visa2026.Module.DatabaseUpdate
             }
             else if (modelViews["Person_ListView_TemporaryVisitors"] is IModelListView existingVisitorListView)
             {
+                existingVisitorListView.Caption = "Temporary visitor";
                 if (modelViews[PersonDetailViewIds.TemporaryVisitor] is IModelDetailView visitorDetailViewForList)
                     existingVisitorListView.DetailView = visitorDetailViewForList;
             }
@@ -375,6 +409,15 @@ namespace Visa2026.Module.DatabaseUpdate
         }
 
         private static void SetColumnVisibility(IModelListView view, string propertyName, bool visible)
+            => ModelListViewColumnVisibility.Set(view, propertyName, visible);
+    }
+
+    /// <summary>
+    /// Shared ListView column Index hide/show helper for navigation and view-cloner updaters.
+    /// </summary>
+    file static class ModelListViewColumnVisibility
+    {
+        public static void Set(IModelListView view, string propertyName, bool visible)
         {
             var column = view.Columns.FirstOrDefault(c => c.PropertyName == propertyName);
             if (column == null && visible)

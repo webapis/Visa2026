@@ -159,13 +159,9 @@
       <Item Id="Operations" Caption="Amallar" />
       <Item Id="Organization" Caption="Gurama" />
       <Item Id="Passport" Caption="Pasport" />
-      <Item Id="People" Caption="Adamlar">
-        <Items>
-          <Item Id="Employees" Caption="Işgärler" />
-          <Item Id="FamilyMembers" Caption="Maşgalalar" />
-          <Item Id="TemporaryVisitors" Caption="Wagtlaýyn myhman" />
-        </Items>
-      </Item>
+      <Item Id="Employees" Caption="Işgärler" />
+      <Item Id="FamilyMembers" Caption="Maşgalalar" />
+      <Item Id="TemporaryVisitors" Caption="Wagtlaýyn myhman" />
       <Item Id="Person" Caption="Adam" />
       <Item Id="Recycle Bin" Caption="Geri gaýtaryş" />
       <Item Id="Rejection" Caption="Ret" />
