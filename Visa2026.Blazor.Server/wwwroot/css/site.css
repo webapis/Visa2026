@@ -406,7 +406,9 @@ dxd-license,
 }
 
 /* Nested ListViews with ShowAllRows: let the grid grow to fit all rows instead of
-   scrolling inside a fixed-height flex box (global VirtualScrollingEnabled + .dxbl-grid flex rules). */
+   scrolling inside a fixed-height flex box (global VirtualScrollingEnabled + .dxbl-grid flex rules).
+   Layout CustomCSSClassName (xaf-show-all-rows*) and/or NestedListViewShowAllRowsController
+   (xaf-nested-show-all-rows on the DxGrid) enable this. */
 .xaf-show-all-rows-tabbed,
 .xaf-show-all-rows {
     min-height: 0;
@@ -416,13 +418,17 @@ dxd-license,
 .xaf-show-all-rows-tabbed .dxbl-tabpage,
 .xaf-show-all-rows-tabbed .dxbl-tab-page,
 .xaf-show-all-rows-tabbed .dxbl-tabpage-content,
-.xaf-show-all-rows-tabbed .dxbl-tab-page-content {
+.xaf-show-all-rows-tabbed .dxbl-tab-page-content,
+.dxbl-tabpage:has(.xaf-nested-show-all-rows),
+.dxbl-tab-page:has(.xaf-nested-show-all-rows),
+.dxbl-tabpage-content:has(.xaf-nested-show-all-rows),
+.dxbl-tab-page-content:has(.xaf-nested-show-all-rows) {
     height: auto;
     min-height: 0;
 }
 
 .xaf-show-all-rows .dxbl-grid,
-.xaf-show-all-rows [class*="dxbl-grid"] {
+.dxbl-grid.xaf-nested-show-all-rows {
     flex: 0 0 auto;
     height: auto !important;
     min-height: unset;
@@ -430,12 +436,20 @@ dxd-license,
 
 .xaf-show-all-rows .dxbl-grid .dxbl-grid-content,
 .xaf-show-all-rows .dxbl-grid .dxbl-grid-container,
-.xaf-show-all-rows [class*="dxbl-grid"] .dxbl-grid-content,
-.xaf-show-all-rows [class*="dxbl-grid"] .dxbl-grid-container {
+.dxbl-grid.xaf-nested-show-all-rows .dxbl-grid-content,
+.dxbl-grid.xaf-nested-show-all-rows .dxbl-grid-container {
     height: auto !important;
     max-height: none !important;
     min-height: unset;
     overflow: visible !important;
+}
+
+/* Nested list property-editor wrappers must not keep a fixed flex height. */
+.dxbl-fl-ctrl:has(.xaf-nested-show-all-rows),
+.dxbl-fl-ctrl:has(.xaf-nested-show-all-rows) > * {
+    height: auto !important;
+    min-height: 0;
+    flex: 0 0 auto;
 }
 
 /* Application Progress tab — latest history row emphasis */

@@ -6,8 +6,9 @@ using Visa2026.Module.BusinessObjects;
 namespace Visa2026.Blazor.Server.Controllers;
 
 /// <summary>
-/// Nested Application Items list must show all rows (no inner scrollbar) over global virtual scrolling.
-/// Also applies <see cref="ApplicationType.ShowCurrentVisa"/> to the <c>CurrentVisa</c> column from the
+/// Nested Application Items: reinforces ShowAllRows (also applied globally by
+/// <see cref="NestedListViewShowAllRowsController"/>) and applies
+/// <see cref="ApplicationType.ShowCurrentVisa"/> to the <c>CurrentVisa</c> column from the
 /// parent <see cref="Application"/> (Appearance ListView rules cannot resolve nested ApplicationType).
 /// Column auto-fit for all ListViews (including Application Item) is handled by
 /// <see cref="ListViewGridColumnFitController"/>.

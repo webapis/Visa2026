@@ -8,7 +8,7 @@ namespace Visa2026.Blazor.Server.Controllers;
 /// <summary>
 /// Auto-fits DxGrid columns on ListView open (same as header "Best Fit (all columns)"),
 /// so officers do not need to re-apply fit after each deploy. Skips lookup pickers.
-/// Nested Application Items ShowAllRows remains in <see cref="ApplicationItemGridColumnFitController"/>.
+/// Nested ShowAllRows is handled by <see cref="NestedListViewShowAllRowsController"/>.
 /// </summary>
 public sealed class ListViewGridColumnFitController : ViewController<ListView>
 {
