@@ -722,7 +722,12 @@ public static class ReportDashboardCatalog
     public static string[] TableHeaders(ReportDashboardCategory category, string? subReport = null) =>
         ReportDashboardLocalization.Headers(EnglishTableHeaders(category, subReport));
 
-    private static string[] EnglishTableHeaders(ReportDashboardCategory category, string? subReport = null) =>
+    /// <summary>
+    /// Untranslated header keys in the same order as <see cref="TableHeaders"/>. The Preview
+    /// table uses these to decide per-column alignment, which cannot be derived from the
+    /// localized captions.
+    /// </summary>
+    public static string[] EnglishTableHeaders(ReportDashboardCategory category, string? subReport = null) =>
         (category, subReport) switch
         {
             (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtCompletedVKey) =>

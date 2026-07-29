@@ -154,7 +154,6 @@
                             var count    = GetOverviewTotal(category, buckets);
                             var subs     = ReportDashboardCatalog.SubReports(category);
                             var total    = buckets.Sum(b => b.Count);
-                            var maxCount = buckets.Count > 0 ? buckets.Max(b => b.Count) : 1;
                             <button type="button" class="rd-overview-card" @onclick="() => OnCategory(category)">
                                 <div class="rd-overview-card-header">
                                     <span class="rd-overview-card-name">@ReportDashboardCatalog.CategoryLabel(category)</span>
@@ -167,27 +166,47 @@
                                         <div class="rd-overview-mini-pie-wrap">
                                             <div class="rd-overview-mini-pie" style="@MiniPieStyle(buckets, total)"></div>
                                         </div>
-                                        <div class="rd-overview-mini-bars">
-                                            @foreach (var bucket in buckets.Take(5))
+                                        @* Card space fits one short line per bucket; the full compound
+                                           label always stays available in the row tooltip. *@
+                                        <div class="rd-overview-mini-legend">
+                                            @{
+                                                var topBuckets   = buckets.Take(4).ToList();
+                                                var bucketLabels = OverviewBucketLabels(topBuckets);
+                                            }
+                                            @for (var i = 0; i < topBuckets.Count; i++)
                                             {
-                                                var w = (int)Math.Round(100.0 * bucket.Count / maxCount);
-                                                <div class="rd-overview-mini-bar-row">
-                                                    <span class="rd-overview-mini-bar-label" title="@ReportDashboardLocalization.Status(bucket.Label)">@ReportDashboardLocalization.Status(bucket.Label)</span>
-                                                    <span class="rd-overview-mini-bar-track">
-                                                        <span class="rd-overview-mini-bar-fill @bucket.CssClass"
-                                                              style="width:@(w.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span>
-                                                    </span>
-                                                    <span class="rd-overview-mini-bar-count">@bucket.Count</span>
+                                                var bucket = topBuckets[i];
+                                                var pct = total > 0 ? (int)Math.Round(100.0 * bucket.Count / total) : 0;
+                                                <div class="rd-overview-mini-legend-row" title="@ReportDashboardLocalization.Status(bucket.Label)">
+                                                    <span class="rd-legend-dot @bucket.CssClass"></span>
+                                                    <span class="rd-overview-mini-legend-label">@bucketLabels[i]</span>
+                                                    <span class="rd-overview-mini-legend-count">@bucket.Count</span>
+                                                    <span class="rd-overview-mini-legend-pct">@pct%</span>
+                                                </div>
+                                            }
+                                            @if (buckets.Count > 4)
+                                            {
+                                                <div class="rd-overview-mini-legend-more">
+                                                    @ReportDashboardLocalization.Format("ReportDashboard.Chrome.MoreProjects", buckets.Count - 4)
                                                 </div>
                                             }
                                         </div>
                                     </div>
                                 }
 
+                                @* Capped so a category with ten sub-reports does not stretch its
+                                   card far taller than the rest of the grid row. *@
                                 <div class="rd-overview-card-subs">
-                                    @foreach (var sub in subs)
+                                    @foreach (var sub in subs.Take(OverviewSubChipLimit))
                                     {
                                         <span class="rd-overview-sub-chip" title="@sub.Label">@sub.Label</span>
+                                    }
+                                    @if (subs.Count > OverviewSubChipLimit)
+                                    {
+                                        <span class="rd-overview-sub-chip rd-overview-sub-chip-more"
+                                              title="@string.Join(", ", subs.Skip(OverviewSubChipLimit).Select(s => s.Label))">
+                                            @ReportDashboardLocalization.Format("ReportDashboard.Chrome.MoreProjects", subs.Count - OverviewSubChipLimit)
+                                        </span>
                                     }
                                 </div>
                                 <div class="rd-overview-card-footer">
@@ -420,36 +439,46 @@
                         else if (ChartView == "list")
                         {
                             <div class="rd-stat-list">
-                                @foreach (var bucket in FilteredBuckets)
+                                @foreach (var bucket in VisibleChartBuckets)
                                 {
                                     var pct = FilteredTotal > 0 ? (int)Math.Round(100.0 * bucket.Count / FilteredTotal) : 0;
                                     <button type="button" class="rd-stat-list-row" @onclick="() => OnListView(bucket.Label)">
                                         <span class="rd-stat-list-left">
-                                            <span class="rd-legend-dot @bucket.CssClass"></span>@ReportDashboardLocalization.Status(bucket.Label)
+                                            @StateLabel(bucket.Label, bucket.CssClass, false)
                                         </span>
                                         <span class="rd-stat-list-right">
-                                            <span>@pct%</span>
+                                            <span class="rd-stat-list-bar">
+                                                <span class="rd-stat-list-bar-fill @bucket.CssClass" style="width:@Pct(pct)"></span>
+                                            </span>
+                                            <span class="rd-stat-list-pct">@pct%</span>
                                             <span class="count">@bucket.Count</span>
                                         </span>
                                     </button>
                                 }
+                                @ChartBucketsExpander()
                             </div>
                         }
                         else if (ChartView == "pie")
                         {
                             <div class="rd-pie-wrap">
-                                <div class="rd-pie-circle" style="@PieGradientStyle"></div>
+                                <div class="rd-pie-figure">
+                                    <div class="rd-pie-circle" style="@PieGradientStyle"></div>
+                                    <div class="rd-pie-center">
+                                        <span class="rd-pie-center-num">@FilteredTotal</span>
+                                        <span class="rd-pie-center-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.TotalRecords")</span>
+                                    </div>
+                                </div>
                                 <div class="rd-pie-legend">
-                                    @foreach (var bucket in FilteredBuckets)
+                                    @foreach (var bucket in VisibleChartBuckets)
                                     {
                                         var pct = FilteredTotal > 0 ? (int)Math.Round(100.0 * bucket.Count / FilteredTotal) : 0;
                                         <button type="button" class="rd-legend-item" title="@ReportDashboardLocalization.Status(bucket.Label)" @onclick="() => OnListView(bucket.Label)">
-                                            <span class="rd-legend-dot @bucket.CssClass"></span>
-                                            <span class="rd-legend-label">@ReportDashboardLocalization.Status(bucket.Label)</span>
+                                            @StateLabel(bucket.Label, bucket.CssClass, false)
                                             <span class="rd-legend-count">@bucket.Count</span>
                                             <span class="rd-legend-pct">@pct%</span>
                                         </button>
                                     }
+                                    @ChartBucketsExpander()
                                 </div>
                             </div>
                         }
@@ -457,21 +486,34 @@
                         {
                             var maxCount = FilteredBuckets.Max(b => b.Count);
                             <div class="rd-bar-rows">
-                                @foreach (var bucket in FilteredBuckets)
+                                <div class="rd-bar-axis" aria-hidden="true">
+                                    <span></span>
+                                    <span class="rd-bar-axis-ticks">
+                                        @foreach (var tick in BarAxisTicks(maxCount))
+                                        {
+                                            <span class="rd-bar-axis-tick">@tick</span>
+                                        }
+                                    </span>
+                                    <span></span>
+                                </div>
+                                @foreach (var bucket in VisibleChartBuckets)
                                 {
                                     var width = maxCount > 0 ? (100.0 * bucket.Count / maxCount) : 0;
+                                    var pct = FilteredTotal > 0 ? (int)Math.Round(100.0 * bucket.Count / FilteredTotal) : 0;
                                     <button type="button" class="rd-bar-row" @onclick="() => OnListView(bucket.Label)">
-                                        <span class="rd-bar-row-label" title="@ReportDashboardLocalization.Status(bucket.Label)">
-                                            <span class="rd-legend-dot @bucket.CssClass"></span>
-                                            <span class="rd-bar-row-label-text">@ReportDashboardLocalization.Status(bucket.Label)</span>
+                                        <span class="rd-bar-row-label">
+                                            @StateLabel(bucket.Label, bucket.CssClass, false)
                                         </span>
                                         <span class="rd-bar-row-track">
-                                            <span class="rd-bar-row-fill @bucket.CssClass"
-                                                  style="width:@width.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"></span>
+                                            <span class="rd-bar-row-fill @bucket.CssClass" style="width:@Pct(width)"></span>
                                         </span>
-                                        <span class="rd-bar-row-count">@bucket.Count</span>
+                                        <span class="rd-bar-row-value">
+                                            <span class="rd-bar-row-count">@bucket.Count</span>
+                                            <span class="rd-bar-row-pct">@pct%</span>
+                                        </span>
                                     </button>
                                 }
+                                @ChartBucketsExpander()
                             </div>
                         }
                     </div>
@@ -496,9 +538,9 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        @foreach (var header in Panel.TableHeaders)
+                                        @for (var i = 0; i < Panel.TableHeaders.Count; i++)
                                         {
-                                            <th>@header</th>
+                                            <th class="@ColumnClass(i)">@Panel.TableHeaders[i]</th>
                                         }
                                     </tr>
                                 </thead>
@@ -512,35 +554,35 @@
                                         @foreach (var row in PagedRows)
                                         {
                                             <tr>
-                                                <td>@row.Name</td>
+                                                <td class="rd-cell-name">@row.Name</td>
                                                 <td><span class="rd-project-tag">@row.Project</span></td>
-                                                <td>@row.ColumnA</td>
-                                                <td>@row.ColumnB</td>
+                                                <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                <td class="@ColumnClass(3)">@row.ColumnB</td>
                                                 @if (Panel.TableHeaders.Count >= 6)
                                                 {
-                                                    <td>@row.ColumnC</td>
+                                                    <td class="@ColumnClass(4)">@row.ColumnC</td>
                                                 }
                                                 @if (Panel.TableHeaders.Count >= 7)
                                                 {
-                                                    <td>@row.ColumnD</td>
+                                                    <td class="@ColumnClass(5)">@row.ColumnD</td>
                                                 }
                                                 @if (Panel.TableHeaders.Count >= 8)
                                                 {
-                                                    <td>@row.ColumnE</td>
+                                                    <td class="@ColumnClass(6)">@row.ColumnE</td>
                                                 }
                                                 @if (Panel.TableHeaders.Count >= 9)
                                                 {
-                                                    <td>@row.ColumnF</td>
+                                                    <td class="@ColumnClass(7)">@row.ColumnF</td>
                                                 }
                                                 @if (Panel.TableHeaders.Count >= 10)
                                                 {
-                                                    <td>@row.ColumnG</td>
+                                                    <td class="@ColumnClass(8)">@row.ColumnG</td>
                                                 }
                                                 @if (Panel.TableHeaders.Count >= 11)
                                                 {
-                                                    <td>@row.ColumnH</td>
+                                                    <td class="@ColumnClass(9)">@row.ColumnH</td>
                                                 }
-                                                <td><span class="rd-status-dot @row.StatusCssClass"></span>@ReportDashboardLocalization.Status(row.Status)</td>
+                                                <td class="rd-cell-state">@StateLabel(row.Status, row.StatusCssClass, true)</td>
                                             </tr>
                                         }
                                     }
@@ -663,6 +705,8 @@
         {
             _previewContextKey = key;
             _previewPageIndex = 0;
+            _chartBucketsExpanded = false;
+            RebuildColumnClasses();
         }
 
         EnsurePreviewPageInRange();
@@ -696,6 +740,65 @@
                 .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
                 .OrderByDescending(b => b.Count)
                 .ToList();
+
+    /// <summary>
+    /// Project / type groupings can produce dozens of buckets. The donut still draws every
+    /// slice (so it stays 100% of the data), but the clickable legend / rows are capped until
+    /// the officer expands them.
+    /// </summary>
+    private const int ChartBucketLimit = 12;
+
+    private bool _chartBucketsExpanded;
+
+    private IReadOnlyList<ReportDashboardStatusBucket> VisibleChartBuckets =>
+        _chartBucketsExpanded || FilteredBuckets.Count <= ChartBucketLimit
+            ? FilteredBuckets
+            : FilteredBuckets.Take(ChartBucketLimit).ToList();
+
+    private int HiddenChartBucketCount => Math.Max(0, FilteredBuckets.Count - VisibleChartBuckets.Count);
+
+    private void ToggleChartBuckets() => _chartBucketsExpanded = !_chartBucketsExpanded;
+
+    /// <summary>
+    /// Alignment classes come from the English header keys (the rendered headers are already
+    /// localized, so they cannot be matched back to a column meaning).
+    /// </summary>
+    private static readonly HashSet<string> NumericHeaders =
+        new(StringComparer.Ordinal) { "Days Remaining", "Days Since Entry", "Grad Year" };
+
+    private static readonly HashSet<string> DateHeaders =
+        new(StringComparer.Ordinal)
+        {
+            "Expiry", "App Date", "Valid Until", "Travel Date", "Start", "Hire Date",
+            "Issue Date", "Current Expiry", "Requested Until", "Date", "Issued", "Entry", "Month"
+        };
+
+    private string?[] _columnClasses = [];
+
+    /// <summary>
+    /// Resolved once per panel — <c>ColumnClass</c> is called for every cell of every row.
+    /// Alignment is skipped when the panel's header count does not line up with the catalog
+    /// (a mock panel mid-promotion), so a mismatch cannot shift classes onto wrong columns.
+    /// </summary>
+    private void RebuildColumnClasses()
+    {
+        var headerCount = Panel?.TableHeaders?.Count ?? 0;
+        var english = ReportDashboardCatalog.EnglishTableHeaders(Category, Panel?.SubReport ?? SubReport);
+        if (headerCount == 0 || english.Length != headerCount)
+        {
+            _columnClasses = [];
+            return;
+        }
+
+        _columnClasses = english
+            .Select(header => NumericHeaders.Contains(header) ? "rd-col-num"
+                            : DateHeaders.Contains(header) ? "rd-col-date"
+                            : null)
+            .ToArray();
+    }
+
+    private string? ColumnClass(int index) =>
+        index >= 0 && index < _columnClasses.Length ? _columnClasses[index] : null;
 
     private static readonly int[] PreviewPageSizeOptions = [25, 50, 100, 200];
     private int _previewPageIndex;
@@ -806,6 +909,101 @@
             }
             return "background:conic-gradient(" + string.Join(", ", stops) + ")";
         }
+    }
+
+    private static string Pct(double value) =>
+        value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) + "%";
+
+    private static readonly string[] StateSegmentSeparators = [" · "];
+
+    /// <summary>
+    /// Compound status labels are built as "Segment · Segment · State" by the SQL views / loaders.
+    /// Rendering them as separate spans lets the trailing state carry the status colour while the
+    /// leading context segments stay muted, instead of one flat string.
+    /// </summary>
+    private static string[] SplitStateSegments(string localizedLabel) =>
+        localizedLabel
+            .Split(StateSegmentSeparators, StringSplitOptions.RemoveEmptyEntries)
+            .Select(segment => segment.Trim())
+            .Where(segment => segment.Length > 0)
+            .ToArray();
+
+    /// <summary>
+    /// Segments the loaders emit for "not set". <c>FormatApplicationCombinedStateLabel</c> pads
+    /// unset ministry legs, so a direct-migration status arrives as "Being Prepared · — · — · —".
+    /// </summary>
+    private static readonly string[] PlaceholderSegments = ["—", "–", "-"];
+
+    /// <summary>
+    /// Segments for display: placeholders dropped, but never down to nothing — a status that is
+    /// only placeholders keeps its raw segments so the cell does not render empty.
+    /// </summary>
+    private static string[] DisplayStateSegments(string localizedLabel)
+    {
+        var segments = SplitStateSegments(localizedLabel);
+        var meaningful = segments
+            .Where(segment => !PlaceholderSegments.Contains(segment, StringComparer.Ordinal))
+            .ToArray();
+        return meaningful.Length > 0 ? meaningful : segments;
+    }
+
+    private const int OverviewSubChipLimit = 6;
+
+    /// <summary>
+    /// One short line per bucket for the Overview cards. The trailing segment is preferred
+    /// because it is usually the state, but it is only used when it actually tells the visible
+    /// buckets apart: project-grouped subreports emit "Project · Processing" for every bucket.
+    /// In that case the full label wins.
+    /// </summary>
+    private static string[] OverviewBucketLabels(IReadOnlyList<ReportDashboardStatusBucket> buckets)
+    {
+        var segmented = buckets
+            .Select(b => DisplayStateSegments(ReportDashboardLocalization.Status(b.Label)))
+            .ToArray();
+
+        var tails = segmented.Select(s => s.Length > 0 ? s[^1] : string.Empty).ToArray();
+        var tailsAreDistinct = tails.All(t => t.Length > 0)
+            && tails.Distinct(StringComparer.Ordinal).Count() == tails.Length;
+
+        return tailsAreDistinct
+            ? tails
+            : segmented.Select(s => string.Join(" · ", s)).ToArray();
+    }
+
+    private RenderFragment StateLabel(string? rawLabel, string? cssClass, bool pill) => __builder =>
+    {
+        var full = ReportDashboardLocalization.Status(rawLabel);
+        var segments = DisplayStateSegments(full);
+        <span class="rd-state @(pill ? "rd-state--pill" : "rd-state--plain") @cssClass" title="@full">
+            <span class="rd-state-dot"></span>
+            @for (var i = 0; i < segments.Length; i++)
+            {
+                @if (i > 0)
+                {
+                    <span class="rd-state-sep" aria-hidden="true">·</span>
+                }
+                <span class="rd-state-seg @(i == segments.Length - 1 ? "rd-state-value" : null)">@segments[i]</span>
+            }
+        </span>
+    };
+
+    private RenderFragment ChartBucketsExpander() => __builder =>
+    {
+        @if (HiddenChartBucketCount > 0 || _chartBucketsExpanded)
+        {
+            <button type="button" class="rd-chart-more" @onclick="ToggleChartBuckets">
+                @(_chartBucketsExpanded
+                    ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ShowLess")
+                    : ReportDashboardLocalization.Format("ReportDashboard.Chrome.MoreProjects", HiddenChartBucketCount))
+            </button>
+        }
+    };
+
+    /// <summary>Four evenly spaced ticks (0 .. max) drawn under the bar tracks.</summary>
+    private static IReadOnlyList<int> BarAxisTicks(int maxCount)
+    {
+        if (maxCount <= 0) return [0];
+        return [0, (int)Math.Round(maxCount / 3.0), (int)Math.Round(maxCount * 2 / 3.0), maxCount];
     }
 
     private static string CssToHex(string css) => css switch

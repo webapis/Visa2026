@@ -18,20 +18,102 @@
   display: none !important;
 }
 
+/*
+  THEME
+  The DevExpress theme switcher swaps a whole stylesheet rather than setting a
+  class, so there is no dark-mode selector to hang a CSS override on. What every
+  theme does give us is a redefined `:root` — `--bs-body-bg` is #ffffff under
+  Fluent Light and #282828 under Fluent Dark / Blazing Dark.
+
+  So the palette is *derived* from that pair instead of hard-coded: neutrals are
+  the surface nudged toward the body text colour, and status tints are the hue
+  mixed into the surface. Both directions invert automatically, which is why
+  there is no dark override block anywhere in this file.
+
+  Rules: never put a raw hex in a rule — add a token here. Never mix a neutral
+  toward white or black directly; mix toward `--rd-text` / `--rd-surface` so it
+  keeps working when the surface is dark.
+*/
 .report-dashboard {
-  --rd-bg: #f2f4f7;
-  --rd-surface: #ffffff;
-  --rd-border: #e2e6ea;
-  --rd-text: #1e293b;
-  --rd-muted: #64748b;
-  --rd-accent: #2f5d8a;
-  --rd-accent-soft: #e8f0f8;
-  --rd-green: #2f8f4e;
-  --rd-green-soft: #e6f4ea;
-  --rd-amber: #c1841f;
-  --rd-red: #c05a3a;
+  --rd-surface: var(--bs-body-bg, #ffffff);
+  --rd-text: var(--bs-body-color, #1e293b);
+
+  /* Raw brand/status hues. These stay fixed across themes; the readable
+     variants below are what rules should normally use. */
+  --rd-hue-accent: #2f5d8a;
+  --rd-hue-green: #2f8f4e;
+  --rd-hue-amber: #c1841f;
+  --rd-hue-red: #c05a3a;
+  --rd-hue-blue: #3b7cc9;
+  --rd-hue-purple: #9b59b6;
+  --rd-hue-crimson: #e74c3c;
+  --rd-hue-neutral: #8896a8;
+
+  /* Neutrals: surface stepped toward the text colour. Gets darker on a light
+     theme and lighter on a dark one, from the same declaration. */
+  --rd-bg: color-mix(in srgb, var(--rd-surface) 96%, var(--rd-text));
+  /* one step off the surface: table head, zebra rows, chart block, chips */
+  --rd-surface-2: color-mix(in srgb, var(--rd-surface) 97%, var(--rd-text));
+  /* inset wells: bar tracks, view switch */
+  --rd-surface-3: color-mix(in srgb, var(--rd-surface) 90%, var(--rd-text));
+  --rd-hover: color-mix(in srgb, var(--rd-surface) 94%, var(--rd-text));
+  --rd-border: color-mix(in srgb, var(--rd-surface) 88%, var(--rd-text));
+  --rd-border-soft: color-mix(in srgb, var(--rd-surface) 93%, var(--rd-text));
+  --rd-border-strong: color-mix(in srgb, var(--rd-surface) 72%, var(--rd-text));
+  --rd-muted: color-mix(in srgb, var(--rd-text) 62%, var(--rd-surface));
+  --rd-muted-2: color-mix(in srgb, var(--rd-text) 45%, var(--rd-surface));
+  --rd-sep: color-mix(in srgb, var(--rd-text) 30%, var(--rd-surface));
+
+  /* Hue + text = higher contrast against the surface in either direction.
+     70% also lifts the light theme above the 4.5:1 line, which the raw hues
+     were only just missing. */
+  --rd-accent: color-mix(in srgb, var(--rd-hue-accent) 70%, var(--rd-text));
+  --rd-accent-lite: color-mix(in srgb, var(--rd-hue-accent) 72%, #ffffff);
+  --rd-accent-soft: color-mix(in srgb, var(--rd-hue-accent) 10%, var(--rd-surface));
+  --rd-accent-edge: color-mix(in srgb, var(--rd-hue-accent) 28%, var(--rd-surface));
+  /* Reads on the accent fill in both themes: white on dark blue, dark on light blue. */
+  --rd-on-accent: var(--rd-surface);
+  --rd-tag-bg: color-mix(in srgb, var(--rd-hue-accent) 8%, var(--rd-surface));
+  --rd-tag-fg: color-mix(in srgb, var(--rd-hue-accent) 55%, var(--rd-text));
+  --rd-tag-edge: color-mix(in srgb, var(--rd-hue-accent) 18%, var(--rd-surface));
+
+  --rd-overlay: color-mix(in srgb, var(--rd-surface) 78%, transparent);
+  --rd-gridline: color-mix(in srgb, var(--rd-text) 9%, transparent);
+  --rd-track-edge: color-mix(in srgb, var(--rd-text) 5%, transparent);
+  /* Shadows stay black-based — a shadow tinted toward the text colour would
+     glow white on a dark theme. */
+  --rd-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --rd-shadow-2: 0 6px 20px rgba(0, 0, 0, 0.18);
+  --rd-shadow-3: 0 10px 32px rgba(0, 0, 0, 0.22);
+
+  --rd-green: color-mix(in srgb, var(--rd-hue-green) 70%, var(--rd-text));
+  --rd-green-lite: color-mix(in srgb, var(--rd-hue-green) 72%, #ffffff);
+  --rd-green-soft: color-mix(in srgb, var(--rd-hue-green) 10%, var(--rd-surface));
+  --rd-amber: color-mix(in srgb, var(--rd-hue-amber) 70%, var(--rd-text));
+  --rd-amber-lite: color-mix(in srgb, var(--rd-hue-amber) 72%, #ffffff);
+  --rd-red: color-mix(in srgb, var(--rd-hue-red) 70%, var(--rd-text));
+  --rd-red-lite: color-mix(in srgb, var(--rd-hue-red) 72%, #ffffff);
   --rd-radius: 10px;
+
+  /* Status families: base colour + tinted surface + tinted edge, shared by
+     state labels, chart fills and legends so one token change restyles all. */
+  --rd-st-neutral: color-mix(in srgb, var(--rd-hue-neutral) 70%, var(--rd-text));
+  --rd-st-neutral-tint: color-mix(in srgb, var(--rd-text) 4%, var(--rd-surface));
+  --rd-st-neutral-edge: color-mix(in srgb, var(--rd-text) 13%, var(--rd-surface));
+  --rd-st-green-tint: color-mix(in srgb, var(--rd-hue-green) 10%, var(--rd-surface));
+  --rd-st-green-edge: color-mix(in srgb, var(--rd-hue-green) 30%, var(--rd-surface));
+  --rd-st-amber-tint: color-mix(in srgb, var(--rd-hue-amber) 10%, var(--rd-surface));
+  --rd-st-amber-edge: color-mix(in srgb, var(--rd-hue-amber) 30%, var(--rd-surface));
+  --rd-st-red-tint: color-mix(in srgb, var(--rd-hue-red) 10%, var(--rd-surface));
+  --rd-st-red-edge: color-mix(in srgb, var(--rd-hue-red) 30%, var(--rd-surface));
+  --rd-st-blue: color-mix(in srgb, var(--rd-hue-blue) 70%, var(--rd-text));
+  --rd-st-blue-lite: color-mix(in srgb, var(--rd-hue-blue) 72%, #ffffff);
+  --rd-st-purple: color-mix(in srgb, var(--rd-hue-purple) 70%, var(--rd-text));
+  --rd-st-purple-lite: color-mix(in srgb, var(--rd-hue-purple) 72%, #ffffff);
+  --rd-st-crimson: color-mix(in srgb, var(--rd-hue-crimson) 70%, var(--rd-text));
+  --rd-st-crimson-lite: color-mix(in srgb, var(--rd-hue-crimson) 72%, #ffffff);
   color: var(--rd-text);
+  background: var(--rd-bg);
   font-size: 14px;
   width: 100%;
   max-width: none;
@@ -56,7 +138,7 @@
   align-items: flex-start;
   gap: 12px;
   padding: 14px 20px;
-  background: #fbfbfc;
+  background: var(--rd-surface-2);
   border-bottom: 1px solid var(--rd-border);
   flex-wrap: wrap;
 }
@@ -85,7 +167,7 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%232f5d8a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 11px center;
-  border: 1px solid #c5d6e8;
+  border: 1px solid var(--rd-accent-edge);
   border-radius: 999px;
   padding: 5px 30px 5px 14px;
   font-family: inherit;
@@ -97,7 +179,7 @@
   transition: border-color 0.15s;
 }
 .rd-period-picker:hover  { border-color: var(--rd-accent); }
-.rd-period-picker:focus  { outline: none; border-color: var(--rd-accent); box-shadow: 0 0 0 3px rgba(47,93,138,0.12); }
+.rd-period-picker:focus  { outline: none; border-color: var(--rd-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rd-hue-accent) 22%, transparent); }
 
 .rd-project-filter-label {
   font-size: 11.5px;
@@ -125,7 +207,7 @@
 }
 .rd-chip .count { opacity: 0.65; font-weight: 600; margin-left: 3px; }
 .rd-chip:hover { border-color: var(--rd-accent); color: var(--rd-accent); }
-.rd-chip.active { background: var(--rd-accent); border-color: var(--rd-accent); color: #fff; }
+.rd-chip.active { background: var(--rd-accent); border-color: var(--rd-accent); color: var(--rd-on-accent); }
 .rd-chip-more { background: none; border-style: dashed; }
 
 .rd-tabs-underline {
@@ -162,7 +244,7 @@
   width: 210px;
   flex-shrink: 0;
   border-right: 1px solid var(--rd-border);
-  background: #fbfbfc;
+  background: var(--rd-surface-2);
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -187,7 +269,7 @@
   justify-content: space-between;
   gap: 8px;
 }
-.rd-cat-tab:hover { background: #f0f2f5; color: var(--rd-text); }
+.rd-cat-tab:hover { background: var(--rd-hover); color: var(--rd-text); }
 .rd-cat-tab.active {
   background: var(--rd-accent-soft);
   color: var(--rd-accent);
@@ -215,7 +297,7 @@
   align-items: flex-start;
   justify-content: center;
   padding: max(48px, 10vh) 16px 24px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--rd-overlay);
   backdrop-filter: blur(1px);
   pointer-events: all;
 }
@@ -225,26 +307,26 @@
   width: min(360px, 88%);
   padding: 18px 20px 16px;
   border-radius: 10px;
-  background: #fff;
-  border: 1px solid var(--rd-border, #e2e6eb);
-  box-shadow: 0 10px 32px rgba(20, 30, 45, 0.16);
+  background: var(--rd-surface);
+  border: 1px solid var(--rd-border);
+  box-shadow: var(--rd-shadow-3);
 }
 .rd-loading-label {
   font-size: 13px;
   font-weight: 600;
-  color: var(--rd-text, #1f2937);
+  color: var(--rd-text);
   margin-bottom: 10px;
 }
 .rd-loading-track {
   height: 8px;
   border-radius: 999px;
-  background: #e8edf3;
+  background: var(--rd-surface-3);
   overflow: hidden;
 }
 .rd-loading-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--rd-accent, #2f6fed), #5b8ff9);
+  background: linear-gradient(90deg, var(--rd-accent), var(--rd-accent-lite));
   transition: width 0.2s ease;
 }
 .rd-loading-fill--indeterminate {
@@ -259,7 +341,7 @@
 .rd-loading-pct {
   margin-top: 8px;
   font-size: 11px;
-  color: var(--rd-muted, #6b7280);
+  color: var(--rd-muted);
   text-align: right;
   letter-spacing: 0.02em;
 }
@@ -280,8 +362,24 @@
 .rd-report-head h2 { margin: 0 0 3px 0; font-size: 17px; font-weight: 700; }
 .rd-report-sub { margin: 0; font-size: 12.5px; color: var(--rd-muted); }
 .rd-report-head-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.rd-report-total { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; }
-.rd-report-total-num { font-size: 26px; font-weight: 700; }
+.rd-report-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  line-height: 1.1;
+  padding: 9px 16px;
+  border-radius: var(--rd-radius);
+  background: var(--rd-accent-soft);
+  border: 1px solid var(--rd-accent-edge);
+}
+.rd-report-total-num {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--rd-accent);
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
 .rd-report-total-label { font-size: 11px; color: var(--rd-muted); text-transform: uppercase; letter-spacing: 0.04em; }
 
 .rd-excel-link, .rd-list-link {
@@ -297,7 +395,7 @@
 .rd-excel-link {
   color: var(--rd-green);
   background: var(--rd-green-soft);
-  border-color: #cfe8d7;
+  border-color: var(--rd-st-green-edge);
 }
 .rd-excel-link.disabled, .rd-excel-link:disabled {
   opacity: 0.45;
@@ -310,7 +408,17 @@
 .rd-list-link {
   color: var(--rd-accent);
   background: var(--rd-accent-soft);
-  border-color: #c5d6e8;
+  border-color: var(--rd-accent-edge);
+}
+
+/* Chart sits on its own light surface so it reads as a distinct block from
+   the preview table below it. */
+.rd-chart-block {
+  background: var(--rd-surface-2);
+  border: 1px solid var(--rd-border);
+  border-radius: var(--rd-radius);
+  padding: 12px 16px 16px;
+  margin-top: 14px;
 }
 
 .rd-chart-toolbar {
@@ -329,7 +437,7 @@
 }
 .rd-view-switch {
   display: inline-flex;
-  background: #eef1f4;
+  background: var(--rd-surface-3);
   border-radius: 8px;
   padding: 3px;
   gap: 2px;
@@ -349,73 +457,256 @@
 .rd-view-switch button.active {
   background: var(--rd-surface);
   color: var(--rd-accent);
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+  box-shadow: var(--rd-shadow-1);
 }
 
-.rd-bar-rows { display: flex; flex-direction: column; gap: 10px; }
-.rd-bar-row {
-  /* Label and bar track share remaining width equally; count stays fixed. */
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 48px;
+/* ===== Compound state label ==============================================
+   Status strings arrive as "Context · Context · State". The trailing segment
+   carries the status colour; leading segments stay muted context. One token
+   set (--rd-state-*) drives dot, text and pill surface per status family. */
+
+.rd-state {
+  --rd-state-color: var(--rd-st-neutral);
+  --rd-state-tint: var(--rd-st-neutral-tint);
+  --rd-state-edge: var(--rd-st-neutral-edge);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+/* Validity families also tint the pill surface — colour is meaningful here. */
+.rd-state.st-approved { --rd-state-color: var(--rd-green); --rd-state-tint: var(--rd-st-green-tint); --rd-state-edge: var(--rd-st-green-edge); }
+.rd-state.st-pending  { --rd-state-color: var(--rd-amber); --rd-state-tint: var(--rd-st-amber-tint); --rd-state-edge: var(--rd-st-amber-edge); }
+.rd-state.st-expiring { --rd-state-color: var(--rd-red);   --rd-state-tint: var(--rd-st-red-tint);   --rd-state-edge: var(--rd-st-red-edge); }
+
+/* Categorical groupings (project, type, citizenship) colour only the dot and
+   trailing segment; a tinted surface per group would flood a dense table. */
+.rd-state.st-cat-1 { --rd-state-color: var(--rd-st-blue); }
+.rd-state.st-cat-2 { --rd-state-color: var(--rd-green); }
+.rd-state.st-cat-3 { --rd-state-color: var(--rd-amber); }
+.rd-state.st-cat-4 { --rd-state-color: var(--rd-st-purple); }
+.rd-state.st-cat-5 { --rd-state-color: var(--rd-st-crimson); }
+
+.rd-state--pill {
   align-items: center;
-  gap: 12px;
+  background: var(--rd-state-tint);
+  border: 1px solid var(--rd-state-edge);
+  border-radius: 999px;
+  padding: 3px 11px 3px 9px;
+}
+
+.rd-state-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  align-self: center;
+  background: var(--rd-state-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--rd-state-color) 18%, transparent);
+}
+.rd-state-seg {
+  min-width: 0;
+  /* Context segments give up width before the trailing state does. */
+  flex-shrink: 4;
+  color: var(--rd-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rd-state-sep {
+  flex: 0 0 auto;
+  color: var(--rd-sep);
+  font-weight: 700;
+  line-height: 1;
+}
+.rd-state-value {
+  color: var(--rd-state-color);
+  font-weight: 600;
+  flex-shrink: 1;
+}
+
+.rd-bar-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Shared by rows and the axis so ticks line up with the tracks. */
+  --rd-bar-grid: minmax(0, 1.15fr) minmax(0, 1fr) 86px;
+  --rd-bar-gap: 14px;
+}
+.rd-bar-axis {
+  display: grid;
+  grid-template-columns: var(--rd-bar-grid);
+  gap: var(--rd-bar-gap);
+  align-items: center;
+  padding: 0 8px 6px;
+}
+.rd-bar-axis-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--rd-muted-2);
+  font-variant-numeric: tabular-nums;
+}
+.rd-bar-axis-tick:first-child { margin-left: -2px; }
+.rd-bar-axis-tick:last-child { margin-right: -2px; }
+.rd-bar-row {
+  /* Label gets slightly more room than the track; value column stays fixed. */
+  display: grid;
+  grid-template-columns: var(--rd-bar-grid);
+  align-items: center;
+  gap: var(--rd-bar-gap);
   appearance: none;
   background: none;
   border: none;
-  padding: 0;
+  border-radius: 7px;
+  padding: 7px 8px;
   font: inherit;
   cursor: pointer;
   text-align: left;
   width: 100%;
+  transition: background 0.12s ease;
 }
-.rd-bar-row-label {
-  font-size: 12.5px;
-  color: var(--rd-muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-.rd-bar-row-label .rd-legend-dot { flex-shrink: 0; }
-.rd-bar-row-label-text {
-  min-width: 0;
+.rd-bar-row:hover { background: var(--rd-hover); }
+.rd-bar-row-label { display: flex; align-items: center; min-width: 0; }
+.rd-bar-row-track {
+  height: 10px;
+  border-radius: 999px;
+  /* Tick gridlines at thirds, matching .rd-bar-axis labels. */
+  background-color: var(--rd-surface-3);
+  background-image: linear-gradient(to right, var(--rd-gridline) 0 1px, transparent 1px);
+  background-size: 33.333% 100%;
+  background-repeat: repeat-x;
+  box-shadow: inset 0 0 0 1px var(--rd-track-edge);
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
 }
-.rd-bar-row-track { height: 12px; border-radius: 999px; background: #eef1f4; overflow: hidden; min-width: 0; }
-.rd-bar-row-fill { height: 100%; border-radius: 999px; display: block; }
-.rd-bar-row-fill.st-approved { background: var(--rd-green); }
-.rd-bar-row-fill.st-pending  { background: var(--rd-amber); }
-.rd-bar-row-fill.st-expiring { background: var(--rd-red); }
-.rd-bar-row-count { font-size: 12.5px; font-weight: 700; text-align: right; }
+.rd-bar-row-fill {
+  height: 100%;
+  border-radius: 999px;
+  display: block;
+  background: var(--rd-st-neutral);
+  transition: width 0.35s ease;
+}
+.rd-bar-row-fill.st-approved, .rd-bar-row-fill.st-cat-2 { background: linear-gradient(90deg, var(--rd-hue-green), var(--rd-green-lite)); }
+.rd-bar-row-fill.st-pending,  .rd-bar-row-fill.st-cat-3 { background: linear-gradient(90deg, var(--rd-hue-amber), var(--rd-amber-lite)); }
+.rd-bar-row-fill.st-expiring { background: linear-gradient(90deg, var(--rd-hue-red), var(--rd-red-lite)); }
+.rd-bar-row-fill.st-cat-1 { background: linear-gradient(90deg, var(--rd-hue-blue), var(--rd-st-blue-lite)); }
+.rd-bar-row-fill.st-cat-4 { background: linear-gradient(90deg, var(--rd-hue-purple), var(--rd-st-purple-lite)); }
+.rd-bar-row-fill.st-cat-5 { background: linear-gradient(90deg, var(--rd-hue-crimson), var(--rd-st-crimson-lite)); }
+.rd-bar-row-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 7px;
+  font-variant-numeric: tabular-nums;
+}
+.rd-bar-row-count { font-size: 13px; font-weight: 700; }
+.rd-bar-row-pct { font-size: 11.5px; color: var(--rd-muted); }
 
-.rd-stat-list { display: flex; flex-direction: column; gap: 8px; }
+.rd-stat-list { display: flex; flex-direction: column; gap: 6px; }
 .rd-stat-list-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 14px;
   padding: 9px 12px;
-  background: #fbfbfc;
+  background: var(--rd-surface);
   border: 1px solid var(--rd-border);
-  border-radius: 7px;
+  border-radius: 8px;
   font-size: 13px;
   appearance: none;
   width: 100%;
   cursor: pointer;
   font: inherit;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
-.rd-stat-list-left { display: flex; align-items: center; gap: 8px; }
-.rd-stat-list-right { display: flex; align-items: center; gap: 10px; color: var(--rd-muted); font-size: 12.5px; }
-.rd-stat-list-right .count { font-weight: 700; color: var(--rd-text); font-size: 13.5px; }
+.rd-stat-list-row:hover {
+  border-color: var(--rd-border-strong);
+  box-shadow: var(--rd-shadow-1);
+}
+.rd-stat-list-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rd-stat-list-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--rd-muted);
+  font-size: 12.5px;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.rd-stat-list-bar {
+  width: 92px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--rd-surface-3);
+  overflow: hidden;
+  display: none;
+}
+.rd-stat-list-bar-fill { display: block; height: 100%; border-radius: 999px; background: var(--rd-st-neutral); }
+.rd-stat-list-bar-fill.st-approved, .rd-stat-list-bar-fill.st-cat-2 { background: var(--rd-hue-green); }
+.rd-stat-list-bar-fill.st-pending,  .rd-stat-list-bar-fill.st-cat-3 { background: var(--rd-hue-amber); }
+.rd-stat-list-bar-fill.st-expiring { background: var(--rd-hue-red); }
+.rd-stat-list-bar-fill.st-cat-1 { background: var(--rd-hue-blue); }
+.rd-stat-list-bar-fill.st-cat-4 { background: var(--rd-hue-purple); }
+.rd-stat-list-bar-fill.st-cat-5 { background: var(--rd-hue-crimson); }
+.rd-stat-list-pct { min-width: 2.6rem; text-align: right; }
+.rd-stat-list-right .count { font-weight: 700; color: var(--rd-text); font-size: 13.5px; min-width: 2.5rem; text-align: right; }
+
+@media (min-width: 720px) {
+  .rd-stat-list-bar { display: block; }
+}
 
 .rd-pie-wrap {
   display: flex;
-  align-items: flex-start;
-  gap: 20px;
+  align-items: center;
+  gap: 26px;
   flex-wrap: wrap;
 }
-.rd-pie-circle { width: 108px; height: 108px; border-radius: 50%; flex-shrink: 0; }
+/* Donut: conic gradient masked to a ring so the total can sit in the centre. */
+.rd-pie-figure {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  flex-shrink: 0;
+}
+.rd-pie-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, transparent 57%, #000 58%);
+  mask: radial-gradient(circle, transparent 57%, #000 58%);
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.16));
+}
+.rd-pie-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  pointer-events: none;
+  text-align: center;
+  padding: 0 18px;
+}
+.rd-pie-center-num {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--rd-text);
+  font-variant-numeric: tabular-nums;
+}
+.rd-pie-center-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rd-muted);
+  line-height: 1.2;
+}
 .rd-pie-legend {
   display: flex;
   flex-direction: row;
@@ -428,45 +719,69 @@
 .rd-legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 12px;
   color: var(--rd-muted);
   appearance: none;
-  background: var(--rd-surface, #f4f6f8);
+  background: var(--rd-surface);
   border: 1px solid var(--rd-border);
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   cursor: pointer;
   font: inherit;
   text-align: left;
   white-space: nowrap;
   max-width: 100%;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  transition: background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
 }
 .rd-legend-item:hover {
-  background: #eef2f6;
-  border-color: #c5ced8;
+  background: var(--rd-hover);
+  border-color: var(--rd-border-strong);
+  box-shadow: var(--rd-shadow-1);
   color: var(--rd-text);
 }
+/* Legend pills size to their content and wrap to the next line; truncating
+   every segment inside a capped pill made compound labels unreadable. */
+.rd-legend-item .rd-state { max-width: 100%; }
 .rd-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .rd-legend-dot.st-approved, .rd-status-dot.st-approved { background: var(--rd-green); }
 .rd-legend-dot.st-pending,  .rd-status-dot.st-pending  { background: var(--rd-amber); }
 .rd-legend-dot.st-expiring, .rd-status-dot.st-expiring { background: var(--rd-red); }
 
-/* Categorical palette (used by By Type / By Citizenship / By Region / By Zone sub-reports) */
-.rd-legend-dot.st-cat-1, .rd-status-dot.st-cat-1, .rd-bar-row-fill.st-cat-1 { background: #3b7cc9; }
-.rd-legend-dot.st-cat-2, .rd-status-dot.st-cat-2, .rd-bar-row-fill.st-cat-2 { background: #2f8f4e; }
-.rd-legend-dot.st-cat-3, .rd-status-dot.st-cat-3, .rd-bar-row-fill.st-cat-3 { background: #c1841f; }
-.rd-legend-dot.st-cat-4, .rd-status-dot.st-cat-4, .rd-bar-row-fill.st-cat-4 { background: #9b59b6; }
-.rd-legend-dot.st-cat-5, .rd-status-dot.st-cat-5, .rd-bar-row-fill.st-cat-5 { background: #e74c3c; }
-.rd-legend-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 14rem;
+/* Categorical palette (used by By Type / By Citizenship / By Region / By Zone sub-reports).
+   Bar fills are not listed here — they carry gradients defined with .rd-bar-row-fill. */
+.rd-legend-dot.st-cat-1, .rd-status-dot.st-cat-1 { background: var(--rd-st-blue); }
+.rd-legend-dot.st-cat-2, .rd-status-dot.st-cat-2 { background: var(--rd-green); }
+.rd-legend-dot.st-cat-3, .rd-status-dot.st-cat-3 { background: var(--rd-amber); }
+.rd-legend-dot.st-cat-4, .rd-status-dot.st-cat-4 { background: var(--rd-st-purple); }
+.rd-legend-dot.st-cat-5, .rd-status-dot.st-cat-5 { background: var(--rd-st-crimson); }
+.rd-legend-count {
+  font-weight: 700;
+  color: var(--rd-text);
+  font-variant-numeric: tabular-nums;
+  padding-left: 8px;
+  border-left: 1px solid var(--rd-border);
 }
-.rd-legend-count { font-weight: 700; color: var(--rd-text); }
-.rd-legend-pct { color: var(--rd-muted); font-weight: 500; }
+.rd-legend-pct { color: var(--rd-muted); font-weight: 500; font-variant-numeric: tabular-nums; }
 .rd-chart-empty { font-size: 12.5px; color: var(--rd-muted); font-style: italic; }
+
+/* Expands the capped bucket legend / row list. The donut always draws every slice. */
+.rd-chart-more {
+  appearance: none;
+  align-self: flex-start;
+  margin-top: 6px;
+  background: none;
+  border: 1px dashed var(--rd-border-strong);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--rd-accent);
+  cursor: pointer;
+}
+.rd-chart-more:hover { background: var(--rd-accent-soft); border-color: var(--rd-accent); }
+.rd-pie-legend .rd-chart-more { margin-top: 0; align-self: center; }
 
 .rd-listview-block { margin-top: 22px; }
 .rd-preview-actions {
@@ -481,27 +796,48 @@
   max-height: min(52vh, 560px);
   overflow: auto;
   border: 1px solid var(--rd-border);
-  border-radius: 8px;
+  border-radius: 10px;
+  background: var(--rd-surface);
 }
-.rd-listview-block table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.rd-listview-block table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
 .rd-listview-block thead th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--rd-surface, #fff);
+  background: var(--rd-surface-2);
+  box-shadow: inset 0 -1px 0 var(--rd-border);
 }
 .rd-listview-block th {
   text-align: left;
   font-weight: 600;
   color: var(--rd-muted);
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--rd-border);
-  font-size: 11.5px;
+  padding: 10px 12px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
-.rd-listview-block td { padding: 10px; border-bottom: 1px solid var(--rd-border); }
-.rd-listview-block tr:last-child td { border-bottom: none; }
+.rd-listview-block td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--rd-border-soft);
+  vertical-align: middle;
+}
+.rd-listview-block tbody tr:nth-child(even) { background: var(--rd-surface-2); }
+.rd-listview-block tbody tr:hover { background: var(--rd-accent-soft); }
+.rd-listview-block tbody tr:last-child td { border-bottom: none; }
+.rd-listview-block td.rd-cell-name { font-weight: 600; color: var(--rd-text); white-space: nowrap; }
+.rd-listview-block td.rd-cell-state { max-width: 340px; }
+/* Counts read as quantities (right-aligned); dates stay left but never wrap. */
+.rd-listview-block th.rd-col-num,
+.rd-listview-block td.rd-col-num { text-align: right; white-space: nowrap; }
+.rd-listview-block th.rd-col-date,
+.rd-listview-block td.rd-col-date { white-space: nowrap; }
 .rd-preview-pager {
   display: flex;
   flex-wrap: wrap;
@@ -521,7 +857,7 @@
   border: 1px solid var(--rd-border);
   border-radius: 6px;
   padding: 4px 8px;
-  background: var(--rd-surface, #fff);
+  background: var(--rd-surface);
   color: inherit;
 }
 .rd-preview-pager-nav {
@@ -533,7 +869,7 @@
   border: 1px solid var(--rd-border);
   border-radius: 6px;
   padding: 4px 12px;
-  background: var(--rd-surface, #fff);
+  background: var(--rd-surface);
   cursor: pointer;
 }
 .rd-preview-pager-btn:disabled {
@@ -543,18 +879,30 @@
 .rd-preview-pager-page {
   min-width: 3.5rem;
   text-align: center;
-  color: var(--rd-text, #1f2933);
+  color: var(--rd-text);
 }
 .rd-project-tag {
   display: inline-block;
   font-size: 11.5px;
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #f0f2f4;
+  padding: 2px 9px;
+  border-radius: 5px;
+  color: var(--rd-tag-fg);
+  background: var(--rd-tag-bg);
+  border: 1px solid var(--rd-tag-edge);
+  white-space: nowrap;
 }
 .rd-status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 .rd-empty-row td { color: var(--rd-muted); font-style: italic; text-align: center; padding: 22px 10px; }
+.rd-listview-block tbody tr.rd-empty-row:hover { background: none; }
+
+/* Keyboard affordance for the clickable chart segments (all are <button>) */
+.rd-bar-row:focus-visible,
+.rd-stat-list-row:focus-visible,
+.rd-legend-item:focus-visible {
+  outline: 2px solid var(--rd-accent);
+  outline-offset: 2px;
+}
 
 /* Sub-report tab strip — appears between report head and chart when a category has multiple report types */
 .rd-sub-tabs-row {
@@ -592,7 +940,7 @@
 .rd-include-archived input,
 .rd-panel-filter input {
   margin: 0;
-  accent-color: var(--rd-accent, #1a6bb5);
+  accent-color: var(--rd-accent);
 }
 .rd-include-archived:hover,
 .rd-panel-filter:hover { color: var(--rd-text); }
@@ -716,10 +1064,10 @@ button.rd-overview-card {
   align-items: stretch !important;
   justify-content: flex-start !important;
   gap: 14px;
-  background: var(--rd-bg);
+  background: var(--rd-surface);
   border: 1px solid var(--rd-border);
   border-radius: var(--rd-radius);
-  padding: 22px 24px !important;
+  padding: 20px 22px !important;
   text-align: left !important;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
@@ -735,14 +1083,18 @@ button.rd-overview-card {
   box-sizing: border-box;
   /* Contain long sub-report chips; do not spill into neighboring cards */
   overflow: hidden !important;
-  box-shadow: none;
+  box-shadow: var(--rd-shadow-1);
   appearance: none;
   -webkit-appearance: none;
 }
 .rd-overview-card:hover {
   border-color: var(--rd-accent);
-  box-shadow: 0 4px 16px rgba(47, 93, 138, 0.14);
-  background: #fff;
+  box-shadow: var(--rd-shadow-2);
+  transform: translateY(-1px);
+}
+.rd-overview-card:focus-visible {
+  outline: 2px solid var(--rd-accent);
+  outline-offset: 2px;
 }
 
 .rd-overview-card-header {
@@ -750,6 +1102,8 @@ button.rd-overview-card {
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rd-border);
 }
 .rd-overview-card-name {
   font-size: 16px;
@@ -773,10 +1127,11 @@ button.rd-overview-card {
   width: 100%;
 }
 .rd-overview-sub-chip {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--rd-muted);
-  background: var(--rd-border);
+  background: var(--rd-surface-2);
+  border: 1px solid var(--rd-border);
   border-radius: 5px;
   padding: 3px 9px;
   max-width: 100%;
@@ -797,11 +1152,11 @@ button.rd-overview-card {
 .rd-overview-card:hover .rd-overview-card-footer { opacity: 1; }
 /* ===== Mini chart inside overview cards ================================= */
 
-/* Container: pie on left, bars on right */
+/* Container: donut on left, top-bucket legend on right */
 .rd-overview-mini-chart {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   padding: 4px 0 2px;
 }
 
@@ -810,73 +1165,68 @@ button.rd-overview-card {
   flex-shrink: 0;
 }
 .rd-overview-mini-pie {
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   /* donut hole */
-  -webkit-mask: radial-gradient(circle, transparent 38%, black 39%);
-  mask: radial-gradient(circle, transparent 38%, black 39%);
+  -webkit-mask: radial-gradient(circle, transparent 55%, black 56%);
+  mask: radial-gradient(circle, transparent 55%, black 56%);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.14));
 }
 
-/* Bars column */
-.rd-overview-mini-bars {
+/* Top buckets: dot + trailing state + count + share. Card width cannot fit a
+   compound label, so the leading context segments live in the row tooltip. */
+.rd-overview-mini-legend {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
-.rd-overview-mini-bar-row {
+.rd-overview-mini-legend-row {
   display: flex;
   align-items: center;
-  gap: 5px;
-}
-
-.rd-overview-mini-bar-label {
+  gap: 7px;
   font-size: 12px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+.rd-overview-mini-legend-row .rd-legend-dot { flex-shrink: 0; }
+
+.rd-overview-mini-legend-label {
+  flex: 1;
+  min-width: 0;
   color: var(--rd-muted);
-  width: 100px;
-  flex-shrink: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rd-overview-mini-bar-track {
-  flex: 1;
-  height: 7px;
-  background: var(--rd-bg);
-  border-radius: 4px;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.rd-overview-mini-bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
-
-/* Reuse main status colours for fill */
-.rd-overview-mini-bar-fill.st-approved { background: var(--rd-green); }
-.rd-overview-mini-bar-fill.st-expiring { background: var(--rd-red); }
-.rd-overview-mini-bar-fill.st-pending  { background: var(--rd-amber); }
-.rd-overview-mini-bar-fill.st-cat-1   { background: #3b7cc9; }
-.rd-overview-mini-bar-fill.st-cat-2   { background: var(--rd-green); }
-.rd-overview-mini-bar-fill.st-cat-3   { background: var(--rd-amber); }
-.rd-overview-mini-bar-fill.st-cat-4   { background: #9b59b6; }
-.rd-overview-mini-bar-fill.st-cat-5   { background: #e74c3c; }
-.rd-overview-mini-bar-fill            { background: #8896a8; } /* default */
-
-.rd-overview-mini-bar-count {
-  font-size: 12px;
+.rd-overview-mini-legend-count {
   font-weight: 700;
   color: var(--rd-text);
-  min-width: 24px;
-  text-align: right;
   flex-shrink: 0;
+}
+
+.rd-overview-mini-legend-pct {
+  color: var(--rd-muted-2);
+  flex-shrink: 0;
+  min-width: 2.1rem;
+  text-align: right;
+}
+
+.rd-overview-mini-legend-more {
+  font-size: 11.5px;
+  color: var(--rd-muted-2);
+  padding-left: 15px;
+}
+
+.rd-overview-sub-chip-more {
+  color: var(--rd-accent);
+  background: var(--rd-accent-soft);
+  border-color: var(--rd-accent-edge);
+  font-weight: 600;
 }
 
 /* Overview tab separator */

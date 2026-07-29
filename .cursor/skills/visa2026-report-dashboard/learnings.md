@@ -1620,3 +1620,82 @@ ejected-by-* remap); EF Application loader (not RejectionItem union); AssignExte
 
 **Action:** Applied visa-ext completed base + wrappers on Postgres `visa2026` so `VisaOnExtension*` / `IssuedVisa*` columns exist. Do not treat SQLEXPRESS verification as the app data source for this workstation.
 
+
+## 2026-07-29 - Preview/chart visual pass: segmented state label, donut, table polish
+
+**Ask:** Make subreport state labels, charts and Preview tables look more professional (reference: multi-segment status label separated by middle dots).
+
+**Shipped (presentation only - no data/parity change):**
+- `StateLabel(rawLabel, cssClass, pill)` RenderFragment in `ReportDashboardComponent.razor`: localizes, splits on ` . `, renders leading status dot + muted context segments + colour-weighted trailing segment (`.rd-state-value`). Used by bar / pie legend / list chart and the Preview Status cell.
+- CSS `.rd-state` token set (`--rd-state-color/-tint/-edge`): validity families (st-approved/pending/expiring) tint the pill; `st-cat-1..5` colour dot + trailing segment only, neutral pill (a tint per category floods dense tables).
+- Pie -> **donut** (`.rd-pie-figure` + radial mask) with total in the centre; bar rows get hover, gradient fills, `count + %`; list rows get a mini bar.
+- Preview table: sticky tinted header, zebra + hover rows, `tabular-nums`, bold `.rd-cell-name`, softer `.rd-project-tag`; chart wrapped in `.rd-chart-block` card.
+
+**Gotcha:** capping `.rd-legend-item .rd-state` width made **every** segment ellipsize at once (flex-shrink applies to all children on overflow). Legend pills must size to content and wrap; only `.rd-cell-state` caps width. Context segments use `flex-shrink: 4` vs `1` on the value so the state survives truncation.
+
+**Verified:** `dotnet build` OK; static markup rendered headlessly (Edge `--screenshot`) against the real CSS. Not yet confirmed in a running app session.
+
+**Files:** `ReportDashboardComponent.razor`, `report-dashboard.css`
+## 2026-07-29 - Visual pass part 2: overview cards, bucket cap, bar axis, column alignment
+
+**Ask:** Continue the presentation work - bring Overview cards up to the new look, align numeric columns, keep charts readable when a grouping produces many buckets, give bars an axis.
+
+**Shipped (presentation only - no data/parity change):**
+- **Overview cards:** mini pie -> wider-hole donut + top-4 legend rows (dot, `StateTail` trailing segment, count, share, `+N more`). Replaced `.rd-overview-mini-bars` (100px labels ellipsized every compound label to nothing). Card is now white with hover lift and a rule under the header.
+- **Bucket cap:** `ChartBucketLimit = 12`; `VisibleChartBuckets` caps the **legend / rows only** - the donut keeps drawing every slice so it still totals 100%. `ChartBucketsExpander()` reuses existing `Chrome.MoreProjects` / `Chrome.ShowLess` keys (no new localization). Resets with `_previewContextKey`.
+- **Bar axis:** `.rd-bar-axis` shares `--rd-bar-grid` / `--rd-bar-gap` with `.rd-bar-row` so ticks line up with tracks; gridlines are a `background-image` on the track at thirds (visible in the unfilled part).
+- **Column alignment:** `ReportDashboardCatalog.EnglishTableHeaders` made **public** - localized captions cannot be matched back to a column meaning. `rd-col-num` (right, nowrap) for Days Remaining / Days Since Entry / Grad Year, `rd-col-date` (nowrap) for date headers.
+
+**Gotchas:**
+- `ColumnClass` must be **cached** (`RebuildColumnClasses` in `OnParametersSet`): the switch expression allocates a new array, and it is called per cell (200 rows x 11 cols). Also skip alignment when catalog header count != panel header count.
+- Late `.rd-legend-dot.st-cat-N, .rd-status-dot.st-cat-N, .rd-bar-row-fill.st-cat-N { background: <hex> }` rules silently **overrode** the new categorical bar gradients (same specificity, later in file). Dropped `.rd-bar-row-fill` from those selectors; keep bar fill colours in the bar section only.
+
+**Verified:** `dotnet build` OK, no lints; markup rendered headlessly (Edge `--screenshot`) against the real CSS. Not yet confirmed in a running app session.
+
+**Files:** `ReportDashboardComponent.razor`, `report-dashboard.css`, `ReportDashboardCatalog.cs`
+## 2026-07-29 - Overview card labels: trailing segment is NOT the distinguishing part
+
+**Symptom (from a real Overview screenshot, after the part-2 visual pass):**
+- **Application (via ministry)** card listed four legend rows all reading **"Processing"** (68 / 14 / 2 / 1).
+- **Application (direct migration)** card listed rows labelled **"-"** (em dash).
+
+**Cause:** the card legend used `StateTail` (last ` . ` segment) to fit one short line per bucket.
+- Via-ministry (P) groups by `Project . StatusListLabel` -> every tail is the same state.
+- `FormatApplicationCombinedStateLabel` builds `State . depth . leg . migration` and pads unset legs with a literal `"-"` -> the tail is a placeholder.
+
+**Rule (do not reintroduce a blind tail):** `OverviewBucketLabels(buckets)` drops placeholder segments (`- / – / -`), then uses tails **only when they are non-empty and distinct across the visible buckets**; otherwise it falls back to the full (placeholder-stripped) label. Validity / single-segment cards keep the short form; project-grouped cards get the full label truncated with the whole string in the row `title`.
+
+**Also:** sub-report chips capped at `OverviewSubChipLimit = 6` + `+N more` chip - the via-ministry card's ten chips stretched it far taller than the rest of the grid row. Donut trimmed 68 -> 58px and gap 14 -> 12px to buy label width.
+
+**Note (not changed):** the Preview table / chart pills still render the raw `... . - . -` padding for direct migration. Stripping placeholders there is a display change beyond styling - confirm with the user before doing it.
+
+**Build note:** `dotnet build` fails with MSB3021/MSB3027 DLL copy locks while the Blazor host is running; `error CS` count is the signal that actually matters.
+
+**Files:** `ReportDashboardComponent.razor`, `report-dashboard.css`
+## 2026-07-29 - Theme-following palette (dark mode) + placeholder segments stripped
+
+**Ask:** strip the `-` padding segments from status labels everywhere; add dark-theme support.
+
+**Placeholders:** `DisplayStateSegments()` (used by `StateLabel` and `OverviewBucketLabels`) drops `- / – / -` segments, but falls back to the raw segments when a status is *only* placeholders so a cell never renders empty. Full untouched string stays in the `title`.
+
+**Dark theme - how the switch is detected (important):**
+DevExpress swaps a **whole stylesheet** per theme; there is **no** `dxbl-mode-dark` class and XAF does not reliably set `data-bs-theme` - verified against the 25.2.5 packages:
+- `themes.fluent/.../bootstrap/fluent-dark.bs5.min.css` -> `:root,[data-bs-theme=light]{--bs-body-bg:#282828;--bs-body-color:#fff}` (the dark file redefines **:root itself**)
+- `fluent-light.bs5.min.css` -> `#fff` / `#161616`; `blazing-dark.bs5.min.css` -> `#37353d` / `#fff`
+So **`var(--bs-body-bg)` / `var(--bs-body-color)` are the only trustworthy signals.** `--bs-secondary-bg` / `--bs-tertiary-bg` / `--bs-border-color` stay **light** in the dark themes - do **not** build on them.
+
+**Consequence - there is NO dark override block.** The whole palette is *derived* in `.report-dashboard`:
+- `--rd-surface: var(--bs-body-bg)` / `--rd-text: var(--bs-body-color)`
+- neutrals = `color-mix(in srgb, var(--rd-surface) N%, var(--rd-text))` (surface stepped toward text -> darker on light, lighter on dark, one declaration)
+- status **tints/edges** = `color-mix(hue N%, var(--rd-surface))`
+- status **text/dots** = `color-mix(hue 70%, var(--rd-text))` - pushes toward the foreground, so contrast rises in **both** themes (also lifted the light theme past 4.5:1, which the raw hues were just missing)
+- `--rd-on-accent: var(--rd-surface)` - white on dark-blue chip in light, dark on light-blue chip in dark
+
+**Gotchas:**
+- **Chart fills must use the raw `--rd-hue-*`, not the contrast-pushed token.** Pushing `--rd-amber` toward the dark text colour turned light-theme bars olive/muddy. Fills keep full saturation; only text and dots get the push.
+- **Shadows stay black rgba.** `color-mix(... var(--rd-text) ...)` for a shadow glows **white** on a dark theme.
+- Prerequisite: every rule had to be tokenized first (~40 hex literals removed). Only the donut `mask` `#000` and black drop-shadows remain literal, both theme-neutral by design.
+
+**Verified:** `dotnet build` clean (0 CS/RZ); rendered headlessly under `--bs-body-bg:#ffffff` and `#282828` - overview cards, donut, bar axis/gridlines, list rows, preview table and state pills all correct in both. Not yet confirmed in a running app session.
+
+**Files:** `ReportDashboardComponent.razor`, `report-dashboard.css`
