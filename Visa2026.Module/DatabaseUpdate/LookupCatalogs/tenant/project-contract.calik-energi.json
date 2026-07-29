@@ -55,10 +55,10 @@
                                       ]
                  },
                  {
-                     "NameTm":  "KYC (Kiyanlı Kobmine Elektrik Santrali projesi)",
+                     "NameTm":  "KYC (Kiyanlı Kombine Elektrik Santrali projesi)",
                      "Description":  "(1 ylalaşyk: türkmenenergo \u003e energetika)",
-                     "LocalizationKey":  "kyc-kiyanl-kobmine-elektrik-santrali-projesi-yl2-te-en",
-                     "Code":  "KYC (Kiyanlı Kobmine Elektrik Santrali projesi)",
+                     "LocalizationKey":  "kyc-kiyanl-kombine-elektrik-santrali-projesi-yl2-te-en",
+                     "Code":  "KYC (Kiyanlı Kombine Elektrik Santrali projesi)",
                      "IsActive":  true,
                      "MinistryLegs":  [
                                           {
@@ -194,27 +194,6 @@
                      "Description":  "Türkmenistanyň Energetika ministrligi Türkmenistanyň Prezdentiniň 2013-nji ýylyň 12-njy iýulynda 13110 belgili kararyna laýyklykda \u003c\u003cTürkmenenergo\u003e\u003e döwlet elektroenergetika korporasiýasyna Ahal welaýatynyň Ak bugdaý etrabynda kuwwatlylygy 252,2 MWt bolan gaz turbinaly elektrik stansiýasynyň we oňa barýan daşarky eltiji aragatnaşyk, elektrik, gaz, suw üpjinçilik ulgamlarynyň hem-de desgalarynyň taslamasyny düzmek we olary ýanaşyk ýerleri abadanlaşdyryp gurmak barada \u003c\u003cÇalik Enerji Sanaýi we Ticaret A.Ş.\u003e\u003e türk kompaniýasy bilen şertnamany baglaşmaga ygtyýar berildi.",
                      "LocalizationKey":  "13110-akbugday-yl2-te-en",
                      "Code":  "13110 Akbugday",
-                     "IsActive":  true,
-                     "MinistryLegs":  [
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Türkmenenergo",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  1,
-                                              "MaxDaysInReview":  10
-                                          },
-                                          {
-                                              "ApprovingMinistryShortNameTm":  "Energetika",
-                                              "WarningDaysBeforeMax":  8,
-                                              "Sequence":  2,
-                                              "MaxDaysInReview":  10
-                                          }
-                                      ]
-                 },
-                 {
-                     "NameTm":  "KYC (Kiyanlı Kombine Elektrik Santrali projesi)",
-                     "Description":  "KYC (Kiyanlı Kombine Elektrik Santrali projesi)",
-                     "LocalizationKey":  "kyc-kiyanl-kombine-elektrik-santrali-projesi-yl2-te-en",
-                     "Code":  "KYC (Kiyanlı Kombine Elektrik Santrali projesi)",
                      "IsActive":  true,
                      "MinistryLegs":  [
                                           {

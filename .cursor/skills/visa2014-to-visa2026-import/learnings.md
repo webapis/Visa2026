@@ -1,3 +1,52 @@
+### 2026-07-27 — Full scalar reimport .15 → local PG (scalars complete; posts running)
+
+- **RunId**: `20260727-150349` (resume after Education seed)
+- **Scalars**: all STEP_OK Failed=0 — Person 3333; Passport 3682; Visa 6132; Education 3202; EPH 3084; Salary 2977; AoR 5189; Application 12282; WP 407 / WPI 3875; Invitation 2868 / InvItem 5123; ApplicationItem 21752; Rejection 207 / RejectionItem 254; ApplicationProgress DB **38096** (legacy prepared ~38216)
+- **Posts**: PersonSubcontractor + PersonRelationship OK; **post-PersonAddressPia** running; Visa FK fill still 0% until post-VisaIssuingApplicationItem / post-VisaInvitationItem
+- **Watch**: Profile Local — Visa link fill expected to rise after remaining post waves
+
+### 2026-07-27 — Full scalar reimport .15 → local PG (Education gap + resume)
+
+- **First chain** RunId `20260727-145553`: Person/Passport/Visa OK; **Education** Posted **3198** / Failed **4** (exit 1).
+- **Gaps** (exact NameTm from `.15`): institutions `Orta mekdep/Hünär şahadatnamaly`, `Jawaharlal Nehru adyndaky tehnologiki uniwersiteti`, `Netcare 911 gyssagly tiz kömek mekdebi`; specialty `Tiz kömek kömekçisi` (+ related `Mehaniki inženerçiligi` / `Orta bilim` already present).
+- **Seed**: INSERT into PG `EducationInstitutions`/`Specialties` with `IsDefault=FALSE`, `GCRecord=0`; append calik-energi tenant JSON (LastIndexOf `]`); refresh DI bin overlays. SQL: `artifacts/local-pg-import/_seed-edu-gaps.sql`.
+- **Resume** RunId `20260727-150349` PID 24368: Education Posted **4** / Failed **0** (already imported 3198); EPH/Salary/AoR STEP_OK; **Application** running.
+- **Log**: `artifacts/local-pg-import/chain-console-from15-resume-education-20260727-150348.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-27 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: full wipe + scalar chain (`Run-LocalPgScalarChain.ps1 -StartAt Person`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`) — legacy people≈3333 confirmed
+- **Target**: PostgreSQL `visa2026` (localhost)
+- **Prep**: stopped Blazor; `Wipe-LocalPostgresTransactional.sql` (People/Apps/Items/Progress → 0; kept EducationInstitutions 1520 / Specialties 1096); cleared source+bin `id-maps/calik-energi-local-pg` to `{}`; refreshed DI bin `LookupCatalogs/tenant` education-institution + specialty JSON from Module tenant catalogs
+- **PID**: 31524
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260727-145553.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-27 — Merge KYC Kobmine → Kombine (local PG)
+
+- **Decision**: keeper = correct spelling **Kombine** (user chose option 1).
+- **Apply** (`visa2026`): repointed People 515 + Applications 72; soft-deleted Kobmine row; active visas now **one** bar `KYC (…Kombine…)` = **392**.
+- **SQL**: `scripts/visa2014-migration/cleanup/MergeProjectContract-KycKobmineToKombine.postgres.sql`
+- **Catalog**: removed Kobmine from `project-contract.calik-energi.json` / `project-contract.json` (regex edit — do not ConvertTo-Json round-trip Turkmen).
+- **Alias**: `lookup-translations.calik-energi.yaml` values[] Kobmine → Kombine; generate script normalizes Kobmine→Kombine + skip dup code.
+- **Still open**: CS-1 Şatlık/Shatlık, KYM space, Subcontractor Çalyk/Çalık.
+### 2026-07-27 — Local PG duplicate preview (ProjectContract / Subcontractor)
+
+- **Evidence**: Report Dashboard Active By Project + Subcontractor bars on localhost:5001 / `visa2026`.
+- **Finding**: Not exact NameTm clones — **legacy spelling variants**:
+  - Project: KYC Kobmine vs Kombine; CS-1 Şatlık vs Shatlık; KYM vs KYM(;
+  - Subcontractor: **Çalyk** (y, default, 2083) vs **Çalık** (ı, 365) vs Çalik (i, 5).
+- **Artifacts**: `Preview-DuplicateProjectContractSubcontractor.ps1 -Profile Local`; `cleanup/DuplicateProjectContractAndSubcontractor.postgres.sql`; `cleanup/DuplicateProjectContractSubcontractor.local-pg-preview.md`.
+- **Next**: user approves keeper per group, then implement Postgres merge -Apply (repoint FKs).
+### 2026-07-27 — Preview duplicate ProjectContract / Subcontractor lookups
+
+- **Ask**: Preview duplicate ProjectContract + Subcontractor before merge (post-import from `.15`).
+- **Seed check**: `project-contract.calik-energi.json` (74) and `subcontractor.calik-energi.json` (131) — **0** exact NameTm/Code/LocalizationKey duplicate groups in repo JSON.
+- **Tooling**: preview-only `scripts/visa2014-migration/Preview-DuplicateProjectContractSubcontractor.ps1` + `cleanup/DuplicateProjectContractAndSubcontractor.sql` (SameNameTm / SameLocalizationKey / SameCode / PrefixCandidate + Subcontractor NormalizedNameTm; Person/Application ref counts). No `-Apply` yet.
+- **Note**: DB-side duplicates usually come from older seed + ForceUpdate cycles (long NameTm vs short Code title), not from the current calik JSON. PrefixCandidate needs human review (do not auto-merge Satlik/Shatlik variants).
+- **Next**: run preview against Demo/Prod with SQL connection env; then decide merge groups.
 
 ### 2026-07-23 — ApplicationProgress PG reimport failed (DateTime Kind=UTC) then fixed
 

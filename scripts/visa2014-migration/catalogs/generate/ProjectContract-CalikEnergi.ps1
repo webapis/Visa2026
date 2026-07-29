@@ -255,6 +255,9 @@ ORDER BY ca.code;
 
         $code = $parts[0].Trim()
         if ($code.Length -gt 56) { $code = $code.Substring(0, 56) }
+        $rawCode = $code
+        # Legacy typo: Kobmine → Kombine (same project; one catalog row)
+        if ($code -like '*Kobmine*') { $code = $code -replace 'Kobmine', 'Kombine' }
 
         $content = $parts[3]
         $title = $parts[4]
@@ -263,7 +266,9 @@ ORDER BY ca.code;
         if ($title -eq 'NULL') { $title = $null }
         if ($titleL -eq 'NULL') { $titleL = $null }
 
-        $appLeg = if ($appLegs.ContainsKey($code)) { $appLegs[$code] } else { $null }
+        $appLeg = $null
+        if ($appLegs.ContainsKey($code)) { $appLeg = $appLegs[$code] }
+        elseif ($appLegs.ContainsKey($rawCode)) { $appLeg = $appLegs[$rawCode] }
 
         $isEnergoFlow = $false
         $hasLeg2 = $false
@@ -336,6 +341,18 @@ ORDER BY ca.code;
             $n++
         }
         $usedKeys[$locKey] = $true
+
+        $already = $false
+        foreach ($existing in $rows) {
+            if ([string]$existing.Code -eq $code -or [string]$existing.NameTm -eq $code) {
+                $already = $true
+                break
+            }
+        }
+        if ($already) {
+            Write-Host "INF Skip duplicate contract code after normalize: $code"
+            continue
+        }
 
         $rows.Add([ordered]@{
             NameTm = $code

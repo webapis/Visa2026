@@ -125,6 +125,8 @@ Do **not** use `reimport/` for staging or production cutover.
 | Lodging null CityID backfill from AOR plurality (on-prem prod) | `Backfill-LodgingCityFromAor.ps1` | `cleanup/BackfillLodgingCityFromAor.sql` (preview then `-Apply`) |
 | Duplicate employee Persons (bootstrap + supplement twins, on-prem prod) | `Repair-DuplicateEmployees.ps1` | `cleanup/DuplicateEmployeesByIdentity.sql` (default `-Scope BootstrapSupplement`; preview then `-Apply -UpdateIdMap -PersonIdMapPath …`) |
 | Duplicate City by NameTm (null vs set Region, on-prem prod) | `Repair-DuplicateCities.ps1` | `cleanup/DuplicateCitiesByNameTm.sql` (default `-Scope NullVsSetRegion`; preview `@Apply=0`, then `-Apply`) |
+| Preview duplicate ProjectContract / Subcontractor lookups | `Preview-DuplicateProjectContractSubcontractor.ps1` | `cleanup/DuplicateProjectContractAndSubcontractor.sql` (SQL Server) · `.postgres.sql` + `…local-pg-preview.md` (**preview only**; `-Profile Local\|Demo\|Staging\|Production`) |
+| Merge KYC Kobmine → Kombine (local PG) | *(sql)* `cleanup/MergeProjectContract-KycKobmineToKombine.postgres.sql` | Applied 2026-07-27; catalog + `lookup-translations.calik-energi.yaml` alias |
 
 ### Reconcile / live Import status / reimport history
 
