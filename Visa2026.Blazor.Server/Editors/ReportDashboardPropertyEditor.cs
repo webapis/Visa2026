@@ -398,7 +398,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         if (string.IsNullOrEmpty(hint))
         {
             _application.ShowViewStrategy.ShowMessage(
-                "No Excel template is configured for this report yet.",
+                ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredBody"),
                 InformationType.Info, 4000);
             return;
         }
@@ -414,7 +414,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         if (template?.TemplateFile == null)
         {
             _application.ShowViewStrategy.ShowMessage(
-                $"Excel template '{hint}' was not found. Seed or upload it under Reports.",
+                ReportDashboardLocalization.Format("ReportDashboard.Chrome.ExcelTemplateMissing", hint),
                 InformationType.Warning, 5000);
             return;
         }
@@ -459,6 +459,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             if (!string.IsNullOrWhiteSpace(criteria))
                 listView.CollectionSource.Criteria["ReportDashboard"] = CriteriaOperator.Parse(criteria);
 
+            ApplyLocalizedListViewChrome(listView, category, subReport);
+
             var window = _application.MainWindow;
             if (window == null) return;
 
@@ -472,6 +474,35 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             model.IsLoading = false;
             model.LoadingProgressPercent = 0;
             model.LoadingMessage = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Open ListView caption = localized catalog Label; column captions via Header() on English Model.xafml captions.
+    /// </summary>
+    private static void ApplyLocalizedListViewChrome(
+        ListView listView, ReportDashboardCategory category, string? subReport)
+    {
+        var label = ReportDashboardCatalog.SubReports(category)
+            .FirstOrDefault(s => string.Equals(s.Key, subReport, StringComparison.Ordinal))
+            ?.Label;
+        if (string.IsNullOrWhiteSpace(label))
+            label = ReportDashboardLocalization.SubReport(category, subReport);
+
+        if (!string.IsNullOrWhiteSpace(label))
+            listView.Caption = label;
+
+        if (listView.Model is not IModelListView modelListView)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(label))
+            modelListView.Caption = label;
+
+        foreach (IModelColumn column in modelListView.Columns)
+        {
+            if (string.IsNullOrWhiteSpace(column.Caption))
+                continue;
+            column.Caption = ReportDashboardLocalization.Header(column.Caption);
         }
     }
 }

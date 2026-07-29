@@ -555,8 +555,8 @@
                                         {
                                             <tr>
                                                 <td class="rd-cell-name">@row.Name</td>
-                                                <td><span class="rd-project-tag">@row.Project</span></td>
-                                                <td class="@ColumnClass(2)">@row.ColumnA</td>
+                                                <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
+                                                <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
                                                 <td class="@ColumnClass(3)">@row.ColumnB</td>
                                                 @if (Panel.TableHeaders.Count >= 6)
                                                 {

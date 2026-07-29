@@ -125,6 +125,9 @@
     "OpenTargetObject": { "tr-TR": "Hedef Nesneyi Aç", "tk-TM": "Maksat obýekti aç", "ru-RU": "Открыть целевой объект" }
   },
   "classes": {
+    "Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost": {
+      "caption": { "en-US": "Report Dashboard", "tr-TR": "Rapor Panosu", "tk-TM": "Hasabat paneli", "ru-RU": "Панель отчётов" }
+    },
     "Visa2026.Module.BusinessObjects.Application": {
       "caption": { "en-US": "Application", "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
       "members": {

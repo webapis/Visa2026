@@ -42,6 +42,10 @@ Officer UI strings (chrome, category/sub-report/person-type/table headers, fixed
 
 **Invariant:** SQL / loaders keep English status keys; Razor localizes at render so Open ListView criteria still match. Lookup/`NameTm` segments are not translated (Layer B).
 
+`ReportDashboardLocalization.Status` localizes exact fixed labels and each recognized ` · ` segment (placeholders such as `(No period)` / `(No type)`). Incomplete missing-area CSV lists are localized the same way. Do **not** run `Status` on arbitrary Project/ColumnA cells outside Incomplete persons — English keys like `Education` can collide with project names.
+
+Open ListView applies the localized catalog sub-report Label as the view caption and maps English column captions through `Header()`.
+
 After editing message JSON, regenerate: `dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.csproj`.
 
 ## Relationship to other features

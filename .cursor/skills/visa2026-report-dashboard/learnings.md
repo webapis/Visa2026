@@ -1855,3 +1855,19 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 **Fix:** Drop `IncompletePersons` from `SupportsValidVisaPersonsOnly` and `SupportsIncludeArchivedPersons`. `LoadIncompletePersons` no longer filters by visa person IDs or archived — shows all `IsDataIncomplete` rows (person type + project only).
 
 **Verify:** Rebuild/restart; Incomplete persons chrome has no those two checkboxes; Preview lists incomplete persons regardless of visa.
+
+## 2026-07-29 — Report Dashboard localization refresh (placeholders, Incomplete, Excel, ListView)
+
+**Ask:** Re-review Layer A localization after catalog/UI drift; implement gaps.
+
+**Shipped:**
+- Status placeholders `(No period)` / `(No type)` / `(No status)` + multi-segment `Status()` (localize every ` · ` part; comma lists for Incomplete missing areas when any segment is keyed)
+- Incomplete chart/preview: area labels + person-role English keys mapped; Preview Person type / Missing areas localize only for IncompletePersons
+- Excel toasts: `Chrome.ExcelNotConfiguredBody` / `Chrome.ExcelTemplateMissing`
+- Open ListView: caption = localized SubReport Label; column captions via `Header()` on English Model captions
+- `ReportDashboardHost` class caption in `UiStrings.json` → localization xafml
+- Registration sub-report EN `On Process` (casing)
+
+**Watch-outs:** Do not run `Status()` on Project/ColumnA for all categories — keys like `Education`/`Passport` collide with project names. Keep English status keys in loaders for ListView criteria.
+
+**Files:** UiStrings.messages.json, ReportDashboardLocalization, Catalog, PropertyEditor, Component.razor, UiStrings.json, generated VisaUiMessageCatalog + Model.*.xafml

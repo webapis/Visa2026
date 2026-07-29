@@ -426,7 +426,7 @@ public static class ReportDashboardCatalog
             new() { Key = RegistrationExpiringStateSubReportKey, Label = "Expiring State" },
             new() { Key = RegistrationToBeCheckedInSubReportKey, Label = "To Be Checked In" },
             new() { Key = RegistrationToBeCheckedOutSubReportKey, Label = "To Be Checked Out" },
-            new() { Key = RegistrationOnProcessSubReportKey, Label = "On process" },
+            new() { Key = RegistrationOnProcessSubReportKey, Label = "On Process" },
         ],
         ReportDashboardCategory.WorkPermit => [
             new() { Key = "active-by-project", Label = "Active WorkPermit (P)" },

@@ -3302,12 +3302,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Excel şablonyny göçür",
             ["ru-RU"] = "Скачать шаблон Excel",
         },
+        ["ReportDashboard.Chrome.ExcelNotConfiguredBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No Excel template is configured for this report yet.",
+            ["tr-TR"] = "Bu rapor için henüz Excel şablonu yapılandırılmadı.",
+            ["tk-TM"] = "Bu hasabat üçin heniz Excel şablony sazlanmady.",
+            ["ru-RU"] = "Для этого отчёта ещё не настроен шаблон Excel.",
+        },
         ["ReportDashboard.Chrome.ExcelNotConfiguredTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Excel template not configured",
             ["tr-TR"] = "Excel şablonu yapılandırılmadı",
             ["tk-TM"] = "Excel şablony sazlanmady",
             ["ru-RU"] = "Шаблон Excel не настроен",
+        },
+        ["ReportDashboard.Chrome.ExcelTemplateMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excel template '{0}' was not found. Seed or upload it under Reports.",
+            ["tr-TR"] = "Excel şablonu '{0}' bulunamadı. Raporlar altında ekleyin veya yükleyin.",
+            ["tk-TM"] = "Excel şablony '{0}' tapylmady. Hasabatlar bölümünde goşuň ýa-da ýükläň.",
+            ["ru-RU"] = "Шаблон Excel '{0}' не найден. Добавьте или загрузите его в разделе Отчёты.",
         },
         ["ReportDashboard.Chrome.IncludeArchived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4163,6 +4177,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wagtlaýyn myhman",
             ["ru-RU"] = "Временные посетители",
         },
+        ["ReportDashboard.Status.Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address",
+            ["tr-TR"] = "Adres",
+            ["tk-TM"] = "Salgy",
+            ["ru-RU"] = "Адрес",
+        },
         ["ReportDashboard.Status.BeingPrepared"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Being Prepared",
@@ -4176,6 +4197,27 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Güncel",
             ["tk-TM"] = "Häzirki",
             ["ru-RU"] = "Текущий",
+        },
+        ["ReportDashboard.Status.Cv"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "CV",
+            ["tr-TR"] = "Özgeçmiş",
+            ["tk-TM"] = "Ömürnama",
+            ["ru-RU"] = "Резюме",
+        },
+        ["ReportDashboard.Status.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["ReportDashboard.Status.Employee"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee",
+            ["tr-TR"] = "Çalışan",
+            ["tk-TM"] = "Işgär",
+            ["ru-RU"] = "Сотрудник",
         },
         ["ReportDashboard.Status.Ended"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4232,6 +4274,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Yakında sona eriyor",
             ["tk-TM"] = "Ýakyn wagtda gutarýar",
             ["ru-RU"] = "Скоро истекает",
+        },
+        ["ReportDashboard.Status.FamilyDocs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family docs",
+            ["tr-TR"] = "Aile belgeleri",
+            ["tk-TM"] = "Maşgala resminamalary",
+            ["ru-RU"] = "Семейные документы",
+        },
+        ["ReportDashboard.Status.FamilyMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family Member",
+            ["tr-TR"] = "Aile üyesi",
+            ["tk-TM"] = "Maşgala agzasy",
+            ["ru-RU"] = "Член семьи",
         },
         ["ReportDashboard.Status.Gte1Month"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4387,12 +4443,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "< 7 gün",
             ["ru-RU"] = "< 7 дн.",
         },
+        ["ReportDashboard.Status.Medical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical",
+            ["tr-TR"] = "Sağlık",
+            ["tk-TM"] = "Saglyk",
+            ["ru-RU"] = "Медицина",
+        },
         ["ReportDashboard.Status.NoCategory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "(No category)",
             ["tr-TR"] = "(Kategori yok)",
             ["tk-TM"] = "(Kategoriýa ýok)",
             ["ru-RU"] = "(Нет категории)",
+        },
+        ["ReportDashboard.Status.NoPeriod"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No period)",
+            ["tr-TR"] = "(Dönem yok)",
+            ["tk-TM"] = "(Döwür ýok)",
+            ["ru-RU"] = "(Нет периода)",
         },
         ["ReportDashboard.Status.NoProject"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4401,12 +4471,61 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "(Taslama ýok)",
             ["ru-RU"] = "(Нет проекта)",
         },
+        ["ReportDashboard.Status.NoStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No status)",
+            ["tr-TR"] = "(Durum yok)",
+            ["tk-TM"] = "(Ýagdaý ýok)",
+            ["ru-RU"] = "(Нет статуса)",
+        },
+        ["ReportDashboard.Status.NoType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No type)",
+            ["tr-TR"] = "(Tür yok)",
+            ["tk-TM"] = "(Görnüş ýok)",
+            ["ru-RU"] = "(Нет типа)",
+        },
+        ["ReportDashboard.Status.Other"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other",
+            ["tr-TR"] = "Diğer",
+            ["tk-TM"] = "Beýleki",
+            ["ru-RU"] = "Прочее",
+        },
+        ["ReportDashboard.Status.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
         ["ReportDashboard.Status.Pending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Pending",
             ["tr-TR"] = "Beklemede",
             ["tk-TM"] = "Garaşylýar",
             ["ru-RU"] = "Ожидание",
+        },
+        ["ReportDashboard.Status.PersonalData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Personal data",
+            ["tr-TR"] = "Kişisel veri",
+            ["tk-TM"] = "Şahsy maglumat",
+            ["ru-RU"] = "Личные данные",
+        },
+        ["ReportDashboard.Status.Photo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Photo",
+            ["tr-TR"] = "Fotoğraf",
+            ["tk-TM"] = "Surat",
+            ["ru-RU"] = "Фото",
+        },
+        ["ReportDashboard.Status.TemporaryVisitor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Temporary Visitor",
+            ["tr-TR"] = "Geçici ziyaretçi",
+            ["tk-TM"] = "Wagtlaýyn myhman",
+            ["ru-RU"] = "Временный посетитель",
         },
         ["ReportDashboard.Status.Unassigned"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4788,7 +4907,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.SubReport.on-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "On process",
+            ["en-US"] = "On Process",
             ["tr-TR"] = "Süreçte",
             ["tk-TM"] = "Prosesde",
             ["ru-RU"] = "В процессе",

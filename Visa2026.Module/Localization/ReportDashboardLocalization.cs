@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Visa2026.Module.Services.ReportDashboard;
 
 namespace Visa2026.Module.Localization;
@@ -28,6 +29,21 @@ public static class ReportDashboardLocalization
             ["Unknown city"] = "ReportDashboard.Status.UnknownCity",
             ["(No project)"] = "ReportDashboard.Status.NoProject",
             ["(No category)"] = "ReportDashboard.Status.NoCategory",
+            ["(No period)"] = "ReportDashboard.Status.NoPeriod",
+            ["(No type)"] = "ReportDashboard.Status.NoType",
+            ["(No status)"] = "ReportDashboard.Status.NoStatus",
+            ["Personal data"] = "ReportDashboard.Status.PersonalData",
+            ["Passport"] = "ReportDashboard.Status.Passport",
+            ["CV"] = "ReportDashboard.Status.Cv",
+            ["Photo"] = "ReportDashboard.Status.Photo",
+            ["Education"] = "ReportDashboard.Status.Education",
+            ["Medical"] = "ReportDashboard.Status.Medical",
+            ["Address"] = "ReportDashboard.Status.Address",
+            ["Family docs"] = "ReportDashboard.Status.FamilyDocs",
+            ["Other"] = "ReportDashboard.Status.Other",
+            ["Employee"] = "ReportDashboard.Status.Employee",
+            ["Family Member"] = "ReportDashboard.Status.FamilyMember",
+            ["Temporary Visitor"] = "ReportDashboard.Status.TemporaryVisitor",
             ["Unassigned"] = "ReportDashboard.Status.Unassigned",
             ["Being Prepared"] = "ReportDashboard.Status.BeingPrepared",
             ["Ended"] = "ReportDashboard.Status.Ended",
@@ -196,7 +212,8 @@ public static class ReportDashboardLocalization
 
     /// <summary>
     /// Localize a fixed English status/bucket label for display. Unknown labels pass through.
-    /// Combined Application Status labels localize only the leading segment when recognized.
+    /// Compound labels split on " · " localize each recognized segment (placeholders, validity buckets).
+    /// Comma-separated Incomplete missing-area lists localize when any segment is recognized.
     /// </summary>
     public static string Status(string? englishLabel)
     {
@@ -207,16 +224,41 @@ public static class ReportDashboardLocalization
         if (StatusExactKeys.TryGetValue(label, out var key))
             return Get(key);
 
-        const string sep = " · ";
-        var sepIndex = label.IndexOf(sep, StringComparison.Ordinal);
-        if (sepIndex > 0)
+        const string dotSep = " · ";
+        if (label.Contains(dotSep, StringComparison.Ordinal))
+            return LocalizeJoinedSegments(label, dotSep);
+
+        if (label.Contains(',', StringComparison.Ordinal))
         {
-            var head = label[..sepIndex];
-            if (StatusExactKeys.TryGetValue(head, out var headKey))
-                return Get(headKey) + label[sepIndex..];
+            var parts = label.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length > 1 && parts.Any(p => StatusExactKeys.ContainsKey(p)))
+            {
+                return string.Join(", ", parts.Select(p =>
+                    StatusExactKeys.TryGetValue(p, out var partKey) ? Get(partKey) : p));
+            }
         }
 
         return label;
+    }
+
+    private static string LocalizeJoinedSegments(string label, string sep)
+    {
+        var parts = label.Split(new[] { sep }, StringSplitOptions.None);
+        var any = false;
+        var localized = new string[parts.Length];
+        for (var i = 0; i < parts.Length; i++)
+        {
+            var trimmed = parts[i].Trim();
+            if (StatusExactKeys.TryGetValue(trimmed, out var partKey))
+            {
+                localized[i] = Get(partKey);
+                any = true;
+            }
+            else
+                localized[i] = trimmed;
+        }
+
+        return any ? string.Join(sep, localized) : label;
     }
 
     public static string PeriodMonthLabel(int months) => months switch

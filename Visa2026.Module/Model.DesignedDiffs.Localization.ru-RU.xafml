@@ -1775,6 +1775,12 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost" Caption="Панель отчётов">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Видимость отчёта">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />

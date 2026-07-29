@@ -1775,6 +1775,12 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost" Caption="Hasabat paneli">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Pozulan senesi" />
+        <Member Name="DeletedBy" Caption="Pozan" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Hasabat görnüşliligi">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Pozulan senesi" />

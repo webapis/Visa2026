@@ -4782,7 +4782,7 @@
     "ru-RU": "К снятию с учёта"
   },
   "ReportDashboard.SubReport.on-process": {
-    "en": "On process",
+    "en": "On Process",
     "tr-TR": "Süreçte",
     "tk-TM": "Prosesde",
     "ru-RU": "В процессе"
@@ -4978,7 +4978,8 @@
     "tr-TR": "Başvuru türü",
     "tk-TM": "Ýüztutma görnüşi",
     "ru-RU": "Тип заявки"
-  },  "ReportDashboard.Header.AppDate": {
+  },
+  "ReportDashboard.Header.AppDate": {
     "en": "App Date",
     "tr-TR": "Başvuru tarihi",
     "tk-TM": "Ýüztutma senesi",
@@ -5589,5 +5590,107 @@
     "tr-TR": "Başvuru türü · Süreç durumu",
     "tk-TM": "Arza görnüşi · Proses ýagdaýy",
     "ru-RU": "Тип заявки · Состояние процесса"
+  },
+  "ReportDashboard.Status.NoPeriod": {
+    "en": "(No period)",
+    "tr-TR": "(Dönem yok)",
+    "tk-TM": "(Döwür ýok)",
+    "ru-RU": "(Нет периода)"
+  },
+  "ReportDashboard.Status.NoType": {
+    "en": "(No type)",
+    "tr-TR": "(Tür yok)",
+    "tk-TM": "(Görnüş ýok)",
+    "ru-RU": "(Нет типа)"
+  },
+  "ReportDashboard.Status.NoStatus": {
+    "en": "(No status)",
+    "tr-TR": "(Durum yok)",
+    "tk-TM": "(Ýagdaý ýok)",
+    "ru-RU": "(Нет статуса)"
+  },
+  "ReportDashboard.Status.PersonalData": {
+    "en": "Personal data",
+    "tr-TR": "Kişisel veri",
+    "tk-TM": "Şahsy maglumat",
+    "ru-RU": "Личные данные"
+  },
+  "ReportDashboard.Status.Passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "ReportDashboard.Status.Cv": {
+    "en": "CV",
+    "tr-TR": "Özgeçmiş",
+    "tk-TM": "Ömürnama",
+    "ru-RU": "Резюме"
+  },
+  "ReportDashboard.Status.Photo": {
+    "en": "Photo",
+    "tr-TR": "Fotoğraf",
+    "tk-TM": "Surat",
+    "ru-RU": "Фото"
+  },
+  "ReportDashboard.Status.Education": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "ReportDashboard.Status.Medical": {
+    "en": "Medical",
+    "tr-TR": "Sağlık",
+    "tk-TM": "Saglyk",
+    "ru-RU": "Медицина"
+  },
+  "ReportDashboard.Status.Address": {
+    "en": "Address",
+    "tr-TR": "Adres",
+    "tk-TM": "Salgy",
+    "ru-RU": "Адрес"
+  },
+  "ReportDashboard.Status.FamilyDocs": {
+    "en": "Family docs",
+    "tr-TR": "Aile belgeleri",
+    "tk-TM": "Maşgala resminamalary",
+    "ru-RU": "Семейные документы"
+  },
+  "ReportDashboard.Status.Other": {
+    "en": "Other",
+    "tr-TR": "Diğer",
+    "tk-TM": "Beýleki",
+    "ru-RU": "Прочее"
+  },
+  "ReportDashboard.Status.Employee": {
+    "en": "Employee",
+    "tr-TR": "Çalışan",
+    "tk-TM": "Işgär",
+    "ru-RU": "Сотрудник"
+  },
+  "ReportDashboard.Status.FamilyMember": {
+    "en": "Family Member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
+  },
+  "ReportDashboard.Status.TemporaryVisitor": {
+    "en": "Temporary Visitor",
+    "tr-TR": "Geçici ziyaretçi",
+    "tk-TM": "Wagtlaýyn myhman",
+    "ru-RU": "Временный посетитель"
+  },
+  "ReportDashboard.Chrome.ExcelNotConfiguredBody": {
+    "en": "No Excel template is configured for this report yet.",
+    "tr-TR": "Bu rapor için henüz Excel şablonu yapılandırılmadı.",
+    "tk-TM": "Bu hasabat üçin heniz Excel şablony sazlanmady.",
+    "ru-RU": "Для этого отчёта ещё не настроен шаблон Excel."
+  },
+  "ReportDashboard.Chrome.ExcelTemplateMissing": {
+    "en": "Excel template '{0}' was not found. Seed or upload it under Reports.",
+    "tr-TR": "Excel şablonu '{0}' bulunamadı. Raporlar altında ekleyin veya yükleyin.",
+    "tk-TM": "Excel şablony '{0}' tapylmady. Hasabatlar bölümünde goşuň ýa-da ýükläň.",
+    "ru-RU": "Шаблон Excel '{0}' не найден. Добавьте или загрузите его в разделе Отчёты."
   }
 }
