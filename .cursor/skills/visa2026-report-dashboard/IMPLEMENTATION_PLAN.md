@@ -3,8 +3,17 @@
 Living tracker for promoting all dashboard categories from mock data to real SQL views.
 Update the **Status** column and append to `learnings.md` as each view ships.
 
----
+## ListView / Preview contract (supersedes shared-view ListView targets)
 
+See **`SKILL.md`** § Preview ↔ SQL view ↔ XAF ListView and **`reference.md`** § same.
+
+**Target for every category/subreport:** one dedicated `vw_rd_*` + one XAF ListView; Preview Total/columns and Excel population must match; caption = subreport Label.
+
+**Superseded for Open ListView:** reusing one view across multiple subreports (e.g. Active P+V → `vw_rd_visa_by_period`, Extension+Result → `vw_rd_visa_app_progress`) or opening editable BOs (`Visa`, `VisaExtensionStatus`). Shared population SQL via a **base** + thin public wrappers is still allowed when (P)/(V) Totals are identical.
+
+**Transitional:** existing shared Visa ListViews remain until those subreports are split; do not add new shared Open ListView targets.
+
+---
 ## Status tracker
 
 | View | Category | Sub-reports served | Phase | Status |
@@ -12,7 +21,9 @@ Update the **Status** column and append to `learnings.md` as each view ships.
 | `vw_rd_application` | Application | **by-progress**, **by-type** (live) | 1 | EF Wired |
 | `vw_rd_passport` | Passport | by-type, by-citizenship, **by-validity** (live) | 1 | EF Wired (by-validity only) |
 | `vw_rd_registration` | Registration | **registered-visas**, by-region, by-city, **check-out**, check-out-by-region, check-out-by-city | 1 | EF Wired |
-| `vw_rd_work_permit` | WorkPermit | **by-validity** (live), by-status | 1 | EF Wired (by-validity) |
+| `vw_rd_work_permit` | WorkPermit | **by-days-remaining** (live), by-status | 1 | EF Wired (validity) |
+| `vw_rd_work_permit_active` | WorkPermit | **active-by-project** (live) | 1 | EF Wired |
+| `vw_rd_work_permit_app_progress` | WorkPermit | **extension-result** (live); on-extension (mock) | 1 | EF Wired (result) |
 | `vw_rd_border_zone` | BorderZone | default | 1 | Planned |
 | `vw_rd_travel` | Travel | default | 2 | Planned |
 | `vw_rd_invitation_ready` | Invitation | **ready-by-project**, **ready-by-period-category** (live) | 2 | EF Wired |
@@ -21,7 +32,7 @@ Update the **Status** column and append to `learnings.md` as each view ships.
 | `vw_rd_invitation_used` | Invitation | **used** (live) | 2 | EF Wired |
 | `vw_rd_invitation_valid_until` | Invitation | **valid-until** (live; was expired) | 2 | EF Wired |
 | `vw_rd_visa_state` | Visa | visa-state | 1 | EF Wired (Extension Started) |`n| `vw_rd_visa_by_category` | Visa | by-category | 1 | EF Wired |`n| `vw_rd_visa_by_type` | Visa | by-type | 1 | EF Wired |
-| `vw_rd_app_progress` | Visa + Invitation | app-progress (both) | 3 | Planned |
+| `vw_rd_visa_app_progress` | Visa | **on-extension**, **on-extension-by-period-category-type**, **extension-result**, **extension-result-by-period-category-type** (live; shared Open ListView via `VwRdVisaAppProgress`) | 1 | EF Wired |
 | `vw_rd_education` | Education | by-level, by-country, by-specialty | 1 | EF Wired |
 | `vw_rd_position_history` | PositionHistory | by-status, by-position | 1 | EF Wired |
 | `vw_rd_snapshot_counts` | All (snapshot) | LoadSnapshot counts | 4 | Cancelled (sidebar totals removed) |
@@ -578,6 +589,8 @@ For each view, create a keyless entity class and register it. Files go in `Visa2
 | `vw_rd_passport` | `VwRdPassport` |
 | `VwRdRegistration` | `vw_rd_registration` | `VwRdRegistration` |
 | `VwRdWorkPermit` | `vw_rd_work_permit` | `VwRdWorkPermit` |
+| `VwRdWorkPermitActive` | `vw_rd_work_permit_active` | `VwRdWorkPermitActive` |
+| `VwRdWorkPermitAppProgress` | `vw_rd_work_permit_app_progress` | `VwRdWorkPermitAppProgress` |
 | `VwRdBorderZone` | `vw_rd_border_zone` | `VwRdBorderZone` |
 | `VwRdTravel` | `vw_rd_travel` | `VwRdTravel` |
 | `VwRdInvitationIssued` | `vw_rd_invitation_issued` | `VwRdInvitationIssued` |

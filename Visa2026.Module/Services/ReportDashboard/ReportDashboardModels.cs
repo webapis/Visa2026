@@ -68,6 +68,10 @@ public sealed class ReportDashboardPreviewRow
     public string Project       { get; init; } = string.Empty;
     public string ColumnA       { get; init; } = string.Empty;
     public string ColumnB       { get; init; } = string.Empty;
+    /// <summary>Optional 6th column (e.g. expiry / app date before Days Remaining or Status).</summary>
+    public string ColumnC       { get; init; } = string.Empty;
+    /// <summary>Optional 7th column (e.g. days remaining before Status on Visa previews).</summary>
+    public string ColumnD       { get; init; } = string.Empty;
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

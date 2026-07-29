@@ -144,7 +144,10 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
     }
-    /// <summary>0–100 determinate progress while <see cref="IsLoading"/>.</summary>
+    /// <summary>
+    /// Progress while <see cref="IsLoading"/>: 0–100 determinate, or negative for an indeterminate bar
+    /// (e.g. opening a ListView).
+    /// </summary>
     public int LoadingProgressPercent
     {
         get => GetPropertyValue<int>();

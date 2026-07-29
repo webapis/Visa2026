@@ -34,6 +34,7 @@ SELECT
     v."ExpirationDate" AS "VisaExpirationDate",
     ((v."ExpirationDate")::date - CURRENT_DATE) AS "DaysRemaining",
     CASE
+        WHEN (v."ExpirationDate")::date - CURRENT_DATE < 0 THEN 'Expired'
         WHEN (v."ExpirationDate")::date - CURRENT_DATE < 1 THEN '< 1 day'
         WHEN (v."ExpirationDate")::date - CURRENT_DATE < 2 THEN '< 2 days'
         WHEN (v."ExpirationDate")::date - CURRENT_DATE < 3 THEN '< 3 days'
@@ -43,6 +44,7 @@ SELECT
         ELSE '< 7 days'
     END AS "ExpiryBucketLabel",
     CASE
+        WHEN (v."ExpirationDate")::date - CURRENT_DATE < 0 THEN 'st-expiring'
         WHEN (v."ExpirationDate")::date - CURRENT_DATE < 3 THEN 'st-expiring'
         WHEN (v."ExpirationDate")::date - CURRENT_DATE < 5 THEN 'st-pending'
         ELSE 'st-approved'
@@ -60,8 +62,6 @@ LEFT JOIN "People" sp
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID" AND COALESCE(spc."GCRecord", 0) = 0
 WHERE COALESCE(v."GCRecord", 0) = 0
-  AND COALESCE(v."IsCancelled", FALSE) = FALSE
-  AND (v."ExpirationDate")::date >= CURRENT_DATE
   AND (v."ExpirationDate")::date - CURRENT_DATE < 7
   AND NOT EXISTS (
         SELECT 1 FROM checkout_linked cl WHERE cl."VisaId" = v."ID"

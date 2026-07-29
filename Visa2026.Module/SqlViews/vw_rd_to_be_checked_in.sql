@@ -85,8 +85,6 @@ LEFT JOIN People sp
 LEFT JOIN ProjectContracts spc
     ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
 WHERE ISNULL(v.GCRecord, 0) = 0
-  AND COALESCE(v.IsCancelled, 0) = 0
-  AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
   AND NOT EXISTS (
         SELECT 1 FROM reg_linked rl WHERE rl.VisaId = v.ID
   );

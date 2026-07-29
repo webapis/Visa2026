@@ -20,18 +20,26 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.Passport, "by-validity"),
         (ReportDashboardCategory.Passport, "by-type"),
         (ReportDashboardCategory.Passport, "by-citizenship"),
+        (ReportDashboardCategory.WorkPermit, "active-by-project"),
         (ReportDashboardCategory.WorkPermit, "by-days-remaining"),
+        (ReportDashboardCategory.WorkPermit, "extension-result"),
         (ReportDashboardCategory.Invitation, "ready-by-project"),
         (ReportDashboardCategory.Invitation, "ready-by-period-category"),
         (ReportDashboardCategory.Invitation, "in-process"),
-        (ReportDashboardCategory.Invitation, "rejected-by-project"),
+        (ReportDashboardCategory.Invitation, "in-process-by-period-category-type"),
+        (ReportDashboardCategory.Invitation, "process-result"),
+        (ReportDashboardCategory.Invitation, "process-result-by-period-category-type"),
         (ReportDashboardCategory.Invitation, "used"),
+        (ReportDashboardCategory.Invitation, "used-by-period-category-type"),
         (ReportDashboardCategory.Invitation, "valid-until"),
-        (ReportDashboardCategory.VisaExtension, "visa-state"),
-        (ReportDashboardCategory.VisaExtension, "by-category"),
-        (ReportDashboardCategory.VisaExtension, "by-type"),
-        (ReportDashboardCategory.VisaExtension, "by-period"),
+        (ReportDashboardCategory.VisaExtension, "active-by-project"),
+        (ReportDashboardCategory.VisaExtension, "by-period-category-type"),
+        (ReportDashboardCategory.VisaExtension, "extension-required"),
+        (ReportDashboardCategory.VisaExtension, "on-extension"),
+        (ReportDashboardCategory.VisaExtension, "on-extension-by-period-category-type"),
         (ReportDashboardCategory.VisaExtension, "by-days-remaining"),
+        (ReportDashboardCategory.VisaExtension, "extension-result"),
+        (ReportDashboardCategory.VisaExtension, "extension-result-by-period-category-type"),
         (ReportDashboardCategory.AddressOfResidence, "by-validity"),
         (ReportDashboardCategory.AddressOfResidence, "by-region"),
         (ReportDashboardCategory.AddressOfResidence, "by-city"),
@@ -127,11 +135,21 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
             key = (category, "by-validity");
         if (category == ReportDashboardCategory.WorkPermit
-            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport) || subReport == "by-validity"))
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+            key = (category, "active-by-project");
+        if (category == ReportDashboardCategory.WorkPermit
+            && subReport == "by-validity")
             key = (category, "by-days-remaining");
         if (category == ReportDashboardCategory.VisaExtension
-            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport) || subReport == "app-progress"))
-            key = (category, "visa-state");
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)
+                || subReport is "app-progress" or "visa-state"))
+            key = (category, "active-by-project");
+        if (category == ReportDashboardCategory.VisaExtension
+            && subReport is "by-category" or "by-type" or "by-period")
+            key = (category, "by-period-category-type");
+        if (category == ReportDashboardCategory.VisaExtension
+            && subReport == "extension-required-by-period-category-type")
+            key = (category, "extension-required");
         if (category == ReportDashboardCategory.Education
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
             key = (category, "by-level");
@@ -146,6 +164,10 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
             key = (category, "by-validity");
         if (category == ReportDashboardCategory.Invitation && subReport == "expired")
             key = (category, "valid-until");
+        if (category == ReportDashboardCategory.Invitation && subReport == "rejected-by-project")
+            key = (category, "process-result");
+        if (category == ReportDashboardCategory.Invitation && subReport == "rejected-by-period-category-type")
+            key = (category, "process-result-by-period-category-type");
 
         IReportDashboardQueryService service = RealSubReports.Contains(key) ? _real : _mock;
         return service.LoadPanel(

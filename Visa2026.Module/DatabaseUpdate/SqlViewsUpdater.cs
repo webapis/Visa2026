@@ -24,19 +24,28 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewForeignWorkerMaglumat();
             CreateViewRdPassport();
             CreateViewRdWorkPermit();
+            CreateViewRdWorkPermitActive();
+            CreateViewRdWorkPermitAppProgress();
             CreateViewRdInvitationReady();
             CreateViewRdInvitationInProcess();
             CreateViewRdInvitationRejected();
             CreateViewRdInvitationUsed();
             CreateViewRdInvitationValidUntil();
             CreateViewRdVisaAppProgress();
+            CreateViewRdVisaOnExtension();
+            CreateViewRdVisaOnExtensionByPeriodCategoryType();
+            CreateViewRdVisaExtensionResult();
+            CreateViewRdVisaExtensionResultByPeriodCategoryType();
             CreateViewRdProjects();
             CreateViewRdPersonRoles();
             CreateViewRdVisaState();
             CreateViewRdVisaByCategory();
             CreateViewRdVisaByType();
             CreateViewRdVisaByPeriod();
+            CreateViewRdVisaActiveByProject();
+            CreateViewRdVisaActiveByPeriodCategoryType();
             CreateViewRdVisaByDaysRemaining();
+            CreateViewRdVisaExtensionRequired();
             CreateViewRdApplication();
             CreateViewRdEducation();
             CreateViewRdEducationByCountry();
@@ -673,6 +682,149 @@ WHERE ISNULL(wpi.GCRecord, 0) = 0
         }
 
         /// <summary>
+        /// Report Dashboard Active WorkPermit (P). See SqlViews/vw_rd_work_permit_active.sql.
+        /// </summary>
+        private void CreateViewRdWorkPermitActive()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Active WorkPermit (P) — valid WorkPermitItems by project.
+-- One row per valid (non-cancelled, not expired) item; persons may appear more than once.
+-- StatusLabel = Project (Person.ProjectContract, else sponsor).
+CREATE OR ALTER VIEW [dbo].[vw_rd_work_permit_active] AS
+SELECT
+    wpi.ID                                                              AS ID,
+    p.ID                                                                AS PersonOid,
+    CONCAT_WS(N' ',
+        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS ProjectName,
+    COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameRaw,
+    COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameTm,
+    p.PersonRole                                                        AS PersonRoleCode,
+    COALESCE(NULLIF(LTRIM(RTRIM(wpi.WorkPermitNumber)), N''), NULLIF(LTRIM(RTRIM(wpi.ASNumber)), N''), N'') AS WorkPermitNumber,
+    CASE WHEN CAST(wpi.ExpirationDate AS date) > '1900-01-01' THEN wpi.ExpirationDate ELSE NULL END AS ExpirationDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N'(No project)'
+    )                                                                   AS StatusLabel,
+    N'st-cat-1'                                                         AS StatusCssClass,
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
+FROM WorkPermitItems wpi
+INNER JOIN People p
+    ON p.ID = wpi.PersonID
+   AND ISNULL(p.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+WHERE ISNULL(wpi.GCRecord, 0) = 0
+  AND ISNULL(wpi.IsCancelled, 0) = 0
+  AND wpi.PersonID IS NOT NULL
+  AND wpi.ExpirationDate IS NOT NULL
+  AND CAST(wpi.ExpirationDate AS date) >= CAST(GETDATE() AS date);
+", true);
+        }
+
+                /// <summary>
+        /// Report Dashboard WorkPermit Extension / Result. See SqlViews/vw_rd_work_permit_app_progress.sql.
+        /// </summary>
+        private void CreateViewRdWorkPermitAppProgress()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: WorkPermit Extension / Extension Result (app progress).
+-- One row per ApplicationItem on App_WP_Ext / App_Visa_and_WP_Ext with CurrentWorkPermitItem.
+-- Loader filters: Extension = unfinished; Result = Issued/Cancelled/Rejected + review rejects.
+-- Status = Project · ProcessState (resolved in C#).
+CREATE OR ALTER VIEW [dbo].[vw_rd_work_permit_app_progress] AS
+SELECT
+    ai.ID                                                               AS ID,
+    a.ID                                                                AS ApplicationOid,
+    p.ID                                                                AS PersonOid,
+    CONCAT_WS(N' ',
+        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+    )                                                                   AS PersonName,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
+        N''
+    )                                                                   AS ProjectName,
+    COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameRaw,
+    COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameTm,
+    p.PersonRole                                                        AS PersonRoleCode,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(a.FullApplicationNumber)), N''),
+        NULLIF(LTRIM(RTRIM(a.ApplicationNumber)), N''),
+        N''
+    )                                                                   AS ApplicationNumber,
+    a.ApplicationDate                                                   AS ApplicationDate,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(a.LatestPrimaryStateCode)), N''),
+        NULLIF(LTRIM(RTRIM(ast.Code)), N''),
+        N''
+    )                                                                   AS ProgressStateCode,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(a.LatestProgressDisplay)), N''),
+        NULLIF(LTRIM(RTRIM(ast.Name)), N''),
+        NULLIF(LTRIM(RTRIM(ast.NameTm)), N''),
+        N'Being Prepared'
+    )                                                                   AS ProgressStateLabel,
+    CASE
+      WHEN ast.Code IN (N'PROCESS_ISSUED', N'1_REVIEW_APPROVED', N'2_REVIEW_APPROVED')
+                                                                              THEN N'st-approved'
+      WHEN ast.Code IN (N'PROCESS_REJECTED', N'PROCESS_CANCELLED', N'1_REVIEW_REJECTED', N'2_REVIEW_REJECTED')
+                                                                              THEN N'st-expiring'
+      ELSE                                                                          N'st-pending'
+    END                                                                 AS ProgressStateCssClass,
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
+FROM ApplicationItems ai
+INNER JOIN Applications a
+    ON a.ID = ai.ApplicationID
+   AND ISNULL(a.GCRecord, 0) = 0
+INNER JOIN ApplicationTypes at
+    ON at.ID = a.ApplicationTypeID
+   AND ISNULL(at.GCRecord, 0) = 0
+INNER JOIN People p
+    ON p.ID = ai.PersonID
+   AND ISNULL(p.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = COALESCE(a.ProjectContractID, p.ProjectContractID)
+   AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID
+   AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID
+   AND ISNULL(spc.GCRecord, 0) = 0
+OUTER APPLY (
+    SELECT TOP 1 ap.StateID
+    FROM ApplicationProgresses ap
+    WHERE ap.ApplicationID = a.ID
+      AND ISNULL(ap.GCRecord, 0) = 0
+    ORDER BY ap.[Date] DESC, ap.ID DESC
+) latest_ap
+LEFT JOIN ApplicationStates ast
+    ON ast.ID = latest_ap.StateID
+   AND ISNULL(ast.GCRecord, 0) = 0
+WHERE ISNULL(ai.GCRecord, 0) = 0
+  AND ai.CurrentWorkPermitItemID IS NOT NULL
+  AND at.Name IN (
+        N'App_WP_Ext',
+        N'App_Visa_and_WP_Ext'
+    );
+", true);
+        }
+/// <summary>
         /// Report Dashboard Ready Invitations (by project / period·category·type). See SqlViews/vw_rd_invitation_ready.sql.
         /// </summary>
         private void CreateViewRdInvitationReady()
@@ -840,7 +992,15 @@ WHERE ISNULL(a.GCRecord, 0) = 0
     )
   AND (
         ast.Code IS NULL
-        OR ast.Code NOT IN (N'PROCESS_ISSUED', N'PROCESS_REJECTED', N'PROCESS_CANCELLED')
+        OR ast.Code NOT IN (
+            N'PROCESS_ISSUED',
+            N'PROCESS_REJECTED',
+            N'PROCESS_CANCELLED',
+            N'1_REVIEW_REJECTED',
+            N'2_REVIEW_REJECTED',
+            N'3_REVIEW_REJECTED',
+            N'4_REVIEW_REJECTED',
+            N'5_REVIEW_REJECTED')
       );
 ", true);
         }
@@ -1121,13 +1281,17 @@ WHERE ISNULL(ii.GCRecord, 0) = 0
         private void CreateViewRdVisaAppProgress()
         {
             ExecuteNonQueryCommand(@"
--- Report Dashboard: Visa — Application Progress (app-progress sub-report).
+-- Report Dashboard: Visa — Application Progress (shared preview + Open ListView).
 -- One row per ApplicationItem on visa-extension application types with CurrentVisa set.
--- Progress state = latest ApplicationProgress.State for the parent Application.
 CREATE OR ALTER VIEW [dbo].[vw_rd_visa_app_progress] AS
 SELECT
     ai.ID                                                               AS ID,
+    a.ID                                                                AS ApplicationOid,
     p.ID                                                                AS PersonOid,
+    ai.CurrentVisaID                                                    AS ExpiringVisaID,
+    ai.CurrentPassportID                                                AS PassportID,
+    COALESCE(NULLIF(LTRIM(RTRIM(pp.PassportNumber)), N''), N'') AS PassportNumber,
+    latest_ap.StateID                                                   AS CurrentStateID,
     CONCAT_WS(N' ',
         NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
         NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
@@ -1147,9 +1311,16 @@ SELECT
         N''
     )                                                                   AS ApplicationNumber,
     a.ApplicationDate                                                   AS ApplicationDate,
+    latest_ap.[Date]                                                    AS StatusDate,
     COALESCE(
-        NULLIF(LTRIM(RTRIM(ast.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(a.LatestPrimaryStateCode)), N''),
+        NULLIF(LTRIM(RTRIM(ast.Code)), N''),
+        N''
+    )                                                                   AS ProgressStateCode,
+    COALESCE(
+        NULLIF(LTRIM(RTRIM(a.LatestProgressDisplay)), N''),
         NULLIF(LTRIM(RTRIM(ast.Name)), N''),
+        NULLIF(LTRIM(RTRIM(ast.NameTm)), N''),
         N'Being Prepared'
     )                                                                   AS ProgressStateLabel,
     CASE
@@ -1159,6 +1330,12 @@ SELECT
                                                                               THEN N'st-expiring'
       ELSE                                                                          N'st-pending'
     END                                                                 AS ProgressStateCssClass,
+    CASE
+        WHEN v.IsCancelled = 1 THEN 0
+        WHEN v.ExpirationDate IS NULL THEN 0
+        WHEN DATEDIFF(day, GETDATE(), v.ExpirationDate) < 0 THEN 0
+        ELSE DATEDIFF(day, GETDATE(), v.ExpirationDate)
+    END                                                                 AS DaysRemainingOnVisa,
     CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
 FROM ApplicationItems ai
 INNER JOIN Applications a
@@ -1179,8 +1356,14 @@ LEFT JOIN People sp
 LEFT JOIN ProjectContracts spc
     ON spc.ID = sp.ProjectContractID
    AND ISNULL(spc.GCRecord, 0) = 0
+LEFT JOIN Visas v
+    ON v.ID = ai.CurrentVisaID
+   AND ISNULL(v.GCRecord, 0) = 0
+LEFT JOIN Passports pp
+    ON pp.ID = ai.CurrentPassportID
+   AND ISNULL(pp.GCRecord, 0) = 0
 OUTER APPLY (
-    SELECT TOP 1 ap.StateID
+    SELECT TOP 1 ap.StateID, ap.[Date]
     FROM ApplicationProgresses ap
     WHERE ap.ApplicationID = a.ID
       AND ISNULL(ap.GCRecord, 0) = 0
@@ -1458,11 +1641,13 @@ WHERE ISNULL(v.GCRecord, 0) = 0
         private void CreateViewRdVisaByPeriod()
         {
             ExecuteNonQueryCommand(@"
--- Report Dashboard: valid visas by nearest granted period (StartDate → ExpirationDate).
+-- Report Dashboard: valid visas by nearest granted period (shared preview + Open ListView).
 CREATE OR ALTER VIEW [dbo].[vw_rd_visa_by_period] AS
 SELECT
     x.ID,
     x.PersonOid,
+    x.PassportID,
+    x.PassportNumber,
     x.PersonName,
     x.ProjectName,
     x.ProjectNameRaw,
@@ -1479,11 +1664,19 @@ SELECT
         WHEN N'6 months' THEN N'st-cat-3'
         ELSE N'st-cat-4'
     END AS StatusCssClass,
+    CASE
+        WHEN x.ExpirationDate IS NULL THEN 0
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(x.ExpirationDate AS date)) < 0 THEN 0
+        ELSE DATEDIFF(day, CAST(GETDATE() AS date), CAST(x.ExpirationDate AS date))
+    END AS DaysRemaining,
+    CAST(CASE WHEN x.Rn = 1 THEN 1 ELSE 0 END AS bit) AS IsOneLastValidPerPerson,
     x.IsArchived
 FROM (
     SELECT
         v.ID AS ID,
         p.ID AS PersonOid,
+        v.PassportID AS PassportID,
+        COALESCE(NULLIF(LTRIM(RTRIM(pp.PassportNumber)), N''), N'') AS PassportNumber,
         CONCAT_WS(N' ',
             NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
             NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
@@ -1505,7 +1698,11 @@ FROM (
             WHEN ABS(d.PeriodDays - 180) <= ABS(d.PeriodDays - 365) THEN N'6 months'
             ELSE N'1 year'
         END AS PeriodLabel,
-        CAST(ISNULL(p.IsArchived, 0) AS bit) AS IsArchived
+        CAST(ISNULL(p.IsArchived, 0) AS bit) AS IsArchived,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.ID
+            ORDER BY v.ExpirationDate DESC, v.ID DESC
+        ) AS Rn
     FROM Visas v
     CROSS APPLY (
         SELECT CASE
@@ -1531,66 +1728,481 @@ FROM (
         /// <summary>
         /// Report Dashboard visas by days remaining. See SqlViews/vw_rd_visa_by_days_remaining.sql.
         /// </summary>
-        private void CreateViewRdVisaByDaysRemaining()
+        
+        private void CreateViewRdVisaActiveByProject()
         {
             ExecuteNonQueryCommand(@"
--- Report Dashboard: valid visas by days remaining until expiry (By Days Remaining).
+IF OBJECT_ID(N'[dbo].[vw_rd_visa_active_by_project]', N'V') IS NOT NULL
+    DROP VIEW [dbo].[vw_rd_visa_active_by_project];
+", true);
+            ExecuteNonQueryCommand(@"
+-- Active Visa (P): population from vw_rd_visa_by_period; StatusLabel = Project.
+CREATE VIEW [dbo].[vw_rd_visa_active_by_project] AS
+SELECT
+    b.ID,
+    b.PersonOid,
+    b.PassportID,
+    b.PassportNumber,
+    b.PersonName,
+    b.ProjectName,
+    b.ProjectNameRaw,
+    b.ProjectNameTm,
+    b.PersonRoleCode,
+    b.VisaNumber,
+    b.ExpirationDate,
+    b.PeriodDays,
+    b.PeriodLabel,
+    COALESCE(NULLIF(LTRIM(RTRIM(b.ProjectName)), N''), N'(No project)') AS StatusLabel,
+    b.StatusCssClass,
+    b.DaysRemaining,
+    b.IsOneLastValidPerPerson,
+    b.IsArchived
+FROM dbo.vw_rd_visa_by_period b;
+", true);
+        }
+
+        private void CreateViewRdVisaActiveByPeriodCategoryType()
+        {
+            ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'[dbo].[vw_rd_visa_active_by_period_category_type]', N'V') IS NOT NULL
+    DROP VIEW [dbo].[vw_rd_visa_active_by_period_category_type];
+", true);
+            ExecuteNonQueryCommand(@"
+-- Active Visa (V): same population; StatusLabel = Period · Category · Type.
+CREATE VIEW [dbo].[vw_rd_visa_active_by_period_category_type] AS
+SELECT
+    b.ID,
+    b.PersonOid,
+    b.PassportID,
+    b.PassportNumber,
+    b.PersonName,
+    b.ProjectName,
+    b.ProjectNameRaw,
+    b.ProjectNameTm,
+    b.PersonRoleCode,
+    b.VisaNumber,
+    b.ExpirationDate,
+    b.PeriodDays,
+    b.PeriodLabel,
+    CONCAT_WS(N' · ',
+        COALESCE(NULLIF(LTRIM(RTRIM(b.PeriodLabel)), N''), N'(No period)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(c.CategoryLabel)), N''), N'(No category)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(t.TypeLabel)), N''), N'(No type)')
+    ) AS StatusLabel,
+    b.StatusCssClass,
+    b.DaysRemaining,
+    b.IsOneLastValidPerPerson,
+    b.IsArchived
+FROM dbo.vw_rd_visa_by_period b
+LEFT JOIN dbo.vw_rd_visa_by_category c ON c.ID = b.ID
+LEFT JOIN dbo.vw_rd_visa_by_type t ON t.ID = b.ID;
+", true);
+        }
+
+        private void CreateViewRdVisaOnExtension()
+        {
+            ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'[dbo].[vw_rd_visa_on_extension]', N'V') IS NOT NULL
+    DROP VIEW [dbo].[vw_rd_visa_on_extension];
+", true);
+            ExecuteNonQueryCommand(@"
+-- Visa On Extension (P): in-flight extension apps; StatusLabel = Project · State.
+CREATE VIEW [dbo].[vw_rd_visa_on_extension] AS
+SELECT
+    b.ID,
+    b.ApplicationOid,
+    b.PersonOid,
+    b.ExpiringVisaID,
+    b.PassportID,
+    b.PassportNumber,
+    b.CurrentStateID,
+    b.PersonName,
+    b.ProjectName,
+    b.ProjectNameRaw,
+    b.ProjectNameTm,
+    b.PersonRoleCode,
+    b.ApplicationNumber,
+    b.ApplicationDate,
+    b.StatusDate,
+    b.ProgressStateCode,
+    b.ProgressStateLabel,
+    b.ProgressStateCssClass,
+    b.DaysRemainingOnVisa,
+    CONCAT(
+        COALESCE(NULLIF(LTRIM(RTRIM(b.ProjectName)), N''), N'(No project)'),
+        N' · ',
+        COALESCE(NULLIF(LTRIM(RTRIM(b.ProgressStateLabel)), N''), N'Being Prepared')
+    ) AS StatusLabel,
+    b.IsArchived
+FROM dbo.vw_rd_visa_app_progress b
+WHERE b.ProgressStateCode IS NULL
+   OR LTRIM(RTRIM(b.ProgressStateCode)) = N''
+   OR (
+        b.ProgressStateCode NOT IN (N'PROCESS_ISSUED', N'PROCESS_CANCELLED', N'PROCESS_REJECTED')
+        AND RIGHT(LTRIM(RTRIM(b.ProgressStateCode)), 16) <> N'_REVIEW_REJECTED'
+      );
+", true);
+        }
+
+        private void CreateViewRdVisaOnExtensionByPeriodCategoryType()
+        {
+            ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'[dbo].[vw_rd_visa_on_extension_by_period_category_type]', N'V') IS NOT NULL
+    DROP VIEW [dbo].[vw_rd_visa_on_extension_by_period_category_type];
+", true);
+            ExecuteNonQueryCommand(@"
+-- Visa On Extension (V): in-flight; StatusLabel = Period · Category · Type · State.
+CREATE VIEW [dbo].[vw_rd_visa_on_extension_by_period_category_type] AS
+SELECT
+    b.ID,
+    b.ApplicationOid,
+    b.PersonOid,
+    b.ExpiringVisaID,
+    b.PassportID,
+    b.PassportNumber,
+    b.CurrentStateID,
+    b.PersonName,
+    b.ProjectName,
+    b.ProjectNameRaw,
+    b.ProjectNameTm,
+    b.PersonRoleCode,
+    b.ApplicationNumber,
+    b.ApplicationDate,
+    b.StatusDate,
+    b.ProgressStateCode,
+    b.ProgressStateLabel,
+    b.ProgressStateCssClass,
+    b.DaysRemainingOnVisa,
+    CONCAT_WS(N' · ',
+        COALESCE(NULLIF(LTRIM(RTRIM(vp.NameTm)), N''), NULLIF(LTRIM(RTRIM(vp.Name)), N''), N'(No period)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(vc.NameTm)), N''), NULLIF(LTRIM(RTRIM(vc.Name)), N''), N'(No category)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(vt.NameTm)), N''), NULLIF(LTRIM(RTRIM(vt.Name)), N''), N'(No type)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(b.ProgressStateLabel)), N''), N'Being Prepared')
+    ) AS StatusLabel,
+    b.IsArchived
+FROM dbo.vw_rd_visa_app_progress b
+LEFT JOIN dbo.Applications a
+    ON a.ID = b.ApplicationOid AND ISNULL(a.GCRecord, 0) = 0
+LEFT JOIN dbo.VisaPeriods vp
+    ON vp.ID = a.VisaPeriodID AND ISNULL(vp.GCRecord, 0) = 0
+LEFT JOIN dbo.VisaCategories vc
+    ON vc.ID = a.VisaCategoryID AND ISNULL(vc.GCRecord, 0) = 0
+LEFT JOIN dbo.VisaTypes vt
+    ON vt.ID = a.VisaTypeID AND ISNULL(vt.GCRecord, 0) = 0
+WHERE b.ProgressStateCode IS NULL
+   OR LTRIM(RTRIM(b.ProgressStateCode)) = N''
+   OR (
+        b.ProgressStateCode NOT IN (N'PROCESS_ISSUED', N'PROCESS_CANCELLED', N'PROCESS_REJECTED')
+        AND RIGHT(LTRIM(RTRIM(b.ProgressStateCode)), 16) <> N'_REVIEW_REJECTED'
+      );
+", true);
+        }
+
+        private void CreateViewRdVisaExtensionResult()
+        {
+            ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'[dbo].[vw_rd_visa_extension_result]', N'V') IS NOT NULL
+    DROP VIEW [dbo].[vw_rd_visa_extension_result];
+", true);
+            ExecuteNonQueryCommand(@"
+-- Extension Result (P): terminal (Issued/Cancelled/Rejected/*_REVIEW_REJECTED); StatusLabel = Project · State.
+CREATE VIEW [dbo].[vw_rd_visa_extension_result] AS
+SELECT
+    b.ID,
+    b.ApplicationOid,
+    b.PersonOid,
+    b.ExpiringVisaID,
+    b.PassportID,
+    b.PassportNumber,
+    b.CurrentStateID,
+    b.PersonName,
+    b.ProjectName,
+    b.ProjectNameRaw,
+    b.ProjectNameTm,
+    b.PersonRoleCode,
+    b.ApplicationNumber,
+    b.ApplicationDate,
+    b.StatusDate,
+    b.ProgressStateCode,
+    b.ProgressStateLabel,
+    b.ProgressStateCssClass,
+    b.DaysRemainingOnVisa,
+    CONCAT(
+        COALESCE(NULLIF(LTRIM(RTRIM(b.ProjectName)), N''), N'(No project)'),
+        N' · ',
+        COALESCE(NULLIF(LTRIM(RTRIM(b.ProgressStateLabel)), N''), N'Being Prepared')
+    ) AS StatusLabel,
+    b.IsArchived
+FROM dbo.vw_rd_visa_app_progress b
+WHERE b.ProgressStateCode IN (N'PROCESS_ISSUED', N'PROCESS_CANCELLED', N'PROCESS_REJECTED')
+   OR RIGHT(LTRIM(RTRIM(b.ProgressStateCode)), 16) = N'_REVIEW_REJECTED';
+", true);
+        }
+
+        private void CreateViewRdVisaExtensionResultByPeriodCategoryType()
+        {
+            ExecuteNonQueryCommand(@"
+IF OBJECT_ID(N'[dbo].[vw_rd_visa_extension_result_by_period_category_type]', N'V') IS NOT NULL
+    DROP VIEW [dbo].[vw_rd_visa_extension_result_by_period_category_type];
+", true);
+            ExecuteNonQueryCommand(@"
+-- Extension Result (V): terminal (Issued/Cancelled/Rejected/*_REVIEW_REJECTED); StatusLabel = Period · Category · Type · State.
+CREATE VIEW [dbo].[vw_rd_visa_extension_result_by_period_category_type] AS
+SELECT
+    b.ID,
+    b.ApplicationOid,
+    b.PersonOid,
+    b.ExpiringVisaID,
+    b.PassportID,
+    b.PassportNumber,
+    b.CurrentStateID,
+    b.PersonName,
+    b.ProjectName,
+    b.ProjectNameRaw,
+    b.ProjectNameTm,
+    b.PersonRoleCode,
+    b.ApplicationNumber,
+    b.ApplicationDate,
+    b.StatusDate,
+    b.ProgressStateCode,
+    b.ProgressStateLabel,
+    b.ProgressStateCssClass,
+    b.DaysRemainingOnVisa,
+    CONCAT_WS(N' · ',
+        COALESCE(NULLIF(LTRIM(RTRIM(vp.NameTm)), N''), NULLIF(LTRIM(RTRIM(vp.Name)), N''), N'(No period)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(vc.NameTm)), N''), NULLIF(LTRIM(RTRIM(vc.Name)), N''), N'(No category)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(vt.NameTm)), N''), NULLIF(LTRIM(RTRIM(vt.Name)), N''), N'(No type)'),
+        COALESCE(NULLIF(LTRIM(RTRIM(b.ProgressStateLabel)), N''), N'Being Prepared')
+    ) AS StatusLabel,
+    b.IsArchived
+FROM dbo.vw_rd_visa_app_progress b
+LEFT JOIN dbo.Applications a
+    ON a.ID = b.ApplicationOid AND ISNULL(a.GCRecord, 0) = 0
+LEFT JOIN dbo.VisaPeriods vp
+    ON vp.ID = a.VisaPeriodID AND ISNULL(vp.GCRecord, 0) = 0
+LEFT JOIN dbo.VisaCategories vc
+    ON vc.ID = a.VisaCategoryID AND ISNULL(vc.GCRecord, 0) = 0
+LEFT JOIN dbo.VisaTypes vt
+    ON vt.ID = a.VisaTypeID AND ISNULL(vt.GCRecord, 0) = 0
+WHERE b.ProgressStateCode IN (N'PROCESS_ISSUED', N'PROCESS_CANCELLED', N'PROCESS_REJECTED')
+   OR RIGHT(LTRIM(RTRIM(b.ProgressStateCode)), 16) = N'_REVIEW_REJECTED';
+", true);
+        }
+private void CreateViewRdVisaByDaysRemaining()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: valid visas by days remaining until expiry (Visa Validity).
+-- IsOneLastValidPerPerson: latest ExpirationDate per person (ties: highest ID) — ListView/Preview toggle parity.
 CREATE OR ALTER VIEW [dbo].[vw_rd_visa_by_days_remaining] AS
 SELECT
-    v.ID AS ID,
-    p.ID AS PersonOid,
-    CONCAT_WS(N' ',
-        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
-        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
-        NULLIF(LTRIM(RTRIM(p.LastName)), N'')
-    ) AS PersonName,
-    COALESCE(NULLIF(LTRIM(RTRIM(pc.NameTm)), N''), NULLIF(LTRIM(RTRIM(spc.NameTm)), N''), N'') AS ProjectName,
-    COALESCE(pc.NameTm, spc.NameTm, N'') AS ProjectNameRaw,
-    COALESCE(pc.NameTm, spc.NameTm, N'') AS ProjectNameTm,
-    p.PersonRole AS PersonRoleCode,
-    COALESCE(NULLIF(LTRIM(RTRIM(v.VisaNumber)), N''), N'') AS VisaNumber,
-    CASE WHEN CAST(v.ExpirationDate AS date) > '1900-01-01' THEN v.ExpirationDate ELSE NULL END AS ExpirationDate,
-    DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) AS DaysRemaining,
-    CASE
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 10  THEN N'< 10 days'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'< 1 month'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'< 3 months'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 120 THEN N'< 4 months'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 150 THEN N'< 5 months'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 180 THEN N'< 6 months'
-        ELSE N'≥ 6 months'
-    END AS RemainingLabel,
-    CASE
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 10  THEN N'< 10 days'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'< 1 month'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'< 3 months'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 120 THEN N'< 4 months'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 150 THEN N'< 5 months'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 180 THEN N'< 6 months'
-        ELSE N'≥ 6 months'
-    END AS StatusLabel,
-    CASE
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'st-expiring'
-        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'st-pending'
-        ELSE N'st-approved'
-    END AS StatusCssClass,
-    CAST(ISNULL(p.IsArchived, 0) AS bit) AS IsArchived
-FROM Visas v
-INNER JOIN Passports pp ON pp.ID = v.PassportID AND ISNULL(pp.GCRecord, 0) = 0
-INNER JOIN People p ON p.ID = pp.PersonID AND ISNULL(p.GCRecord, 0) = 0
-LEFT JOIN ProjectContracts pc ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
-LEFT JOIN People sp ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
-LEFT JOIN ProjectContracts spc ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
-WHERE ISNULL(v.GCRecord, 0) = 0
-  AND ISNULL(v.IsCancelled, 0) = 0
-  AND v.ExpirationDate IS NOT NULL
-  AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date);
+    x.ID,
+    x.PersonOid,
+    x.PassportID,
+    x.PassportNumber,
+    x.PersonName,
+    x.ProjectName,
+    x.ProjectNameRaw,
+    x.ProjectNameTm,
+    x.PersonRoleCode,
+    x.VisaNumber,
+    x.ExpirationDate,
+    x.DaysRemaining,
+    x.RemainingLabel,
+    x.StatusLabel,
+    x.StatusCssClass,
+    CAST(CASE WHEN x.Rn = 1 THEN 1 ELSE 0 END AS bit) AS IsOneLastValidPerPerson,
+    x.IsArchived
+FROM (
+    SELECT
+        v.ID AS ID,
+        p.ID AS PersonOid,
+        v.PassportID AS PassportID,
+        COALESCE(NULLIF(LTRIM(RTRIM(pp.PassportNumber)), N''), N'') AS PassportNumber,
+        CONCAT_WS(N' ',
+            NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+            NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+            NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+        ) AS PersonName,
+        COALESCE(NULLIF(LTRIM(RTRIM(pc.NameTm)), N''), NULLIF(LTRIM(RTRIM(spc.NameTm)), N''), N'') AS ProjectName,
+        COALESCE(pc.NameTm, spc.NameTm, N'') AS ProjectNameRaw,
+        COALESCE(pc.NameTm, spc.NameTm, N'') AS ProjectNameTm,
+        p.PersonRole AS PersonRoleCode,
+        COALESCE(NULLIF(LTRIM(RTRIM(v.VisaNumber)), N''), N'') AS VisaNumber,
+        CASE WHEN CAST(v.ExpirationDate AS date) > '1900-01-01' THEN v.ExpirationDate ELSE NULL END AS ExpirationDate,
+        DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) AS DaysRemaining,
+        CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 10  THEN N'< 10 days'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'< 1 month'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'< 3 months'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 120 THEN N'< 4 months'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 150 THEN N'< 5 months'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 180 THEN N'< 6 months'
+            ELSE N'≥ 6 months'
+        END AS RemainingLabel,
+        CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 10  THEN N'< 10 days'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'< 1 month'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'< 3 months'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 120 THEN N'< 4 months'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 150 THEN N'< 5 months'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 180 THEN N'< 6 months'
+            ELSE N'≥ 6 months'
+        END AS StatusLabel,
+        CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'st-expiring'
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'st-pending'
+            ELSE N'st-approved'
+        END AS StatusCssClass,
+        CAST(ISNULL(p.IsArchived, 0) AS bit) AS IsArchived,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.ID
+            ORDER BY v.ExpirationDate DESC, v.ID DESC
+        ) AS Rn
+    FROM Visas v
+    INNER JOIN Passports pp ON pp.ID = v.PassportID AND ISNULL(pp.GCRecord, 0) = 0
+    INNER JOIN People p ON p.ID = pp.PersonID AND ISNULL(p.GCRecord, 0) = 0
+    LEFT JOIN ProjectContracts pc ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+    LEFT JOIN People sp ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+    LEFT JOIN ProjectContracts spc ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+    WHERE ISNULL(v.GCRecord, 0) = 0
+      AND ISNULL(v.IsCancelled, 0) = 0
+      AND v.ExpirationDate IS NOT NULL
+      AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
+) x;
 ", true);
         }
         /// <summary>
         /// Report Dashboard Application category. See SqlViews/vw_rd_application.sql.
         /// </summary>
-        private void CreateViewRdApplication()
+                /// <summary>
+        /// Report Dashboard Extension Required (P)/(V). See SqlViews/vw_rd_visa_extension_required.sql.
+        /// </summary>
+        private void CreateViewRdVisaExtensionRequired()
+        {
+            ExecuteNonQueryCommand(@"
+-- Report Dashboard: Extension Required (P)/(V).
+-- Last valid visa per person (ExpirationDate DESC, ID DESC), not cancelled / not expired.
+-- Excludes people with an unfinished Visa Extension app (types like vw_rd_visa_app_progress;
+-- unfinished = latest progress is not PROCESS_ISSUED).
+-- (P) Status = Project; (V) Status = Period · Category · Type (resolved in C#).
+CREATE OR ALTER VIEW [dbo].[vw_rd_visa_extension_required] AS
+WITH valid_visas AS (
+    SELECT
+        v.ID AS ID,
+        p.ID AS PersonOid,
+        v.PassportID AS PassportID,
+        COALESCE(NULLIF(LTRIM(RTRIM(pp.PassportNumber)), N''), N'') AS PassportNumber,
+        CONCAT_WS(N' ',
+            NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+            NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+            NULLIF(LTRIM(RTRIM(p.LastName)), N'')
+        ) AS PersonName,
+        COALESCE(NULLIF(LTRIM(RTRIM(pc.NameTm)), N''), NULLIF(LTRIM(RTRIM(spc.NameTm)), N''), N'') AS ProjectName,
+        COALESCE(pc.NameTm, spc.NameTm, N'') AS ProjectNameRaw,
+        COALESCE(pc.NameTm, spc.NameTm, N'') AS ProjectNameTm,
+        p.PersonRole AS PersonRoleCode,
+        COALESCE(NULLIF(LTRIM(RTRIM(v.VisaNumber)), N''), N'') AS VisaNumber,
+        CASE WHEN CAST(v.ExpirationDate AS date) > '1900-01-01' THEN v.ExpirationDate ELSE NULL END AS ExpirationDate,
+        CASE
+            WHEN DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) < 0 THEN 0
+            ELSE DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date))
+        END AS PeriodDays,
+        CASE
+            WHEN ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 30)
+                 <= ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 90)
+             AND ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 30)
+                 <= ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 180)
+             AND ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 30)
+                 <= ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 365) THEN N'1 month'
+            WHEN ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 90)
+                 <= ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 180)
+             AND ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 90)
+                 <= ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 365) THEN N'3 months'
+            WHEN ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 180)
+                 <= ABS(DATEDIFF(day, CAST(v.StartDate AS date), CAST(v.ExpirationDate AS date)) - 365) THEN N'6 months'
+            ELSE N'1 year'
+        END AS PeriodLabel,
+        COALESCE(NULLIF(LTRIM(RTRIM(vc.NameTm)), N''), NULLIF(LTRIM(RTRIM(vc.Name)), N''), N'(No category)') AS CategoryLabel,
+        COALESCE(NULLIF(LTRIM(RTRIM(vt.NameTm)), N''), NULLIF(LTRIM(RTRIM(vt.Name)), N''), N'(No type)') AS TypeLabel,
+        CAST(ISNULL(p.IsArchived, 0) AS bit) AS IsArchived,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.ID
+            ORDER BY v.ExpirationDate DESC, v.ID DESC
+        ) AS rn
+    FROM Visas v
+    INNER JOIN Passports pp ON pp.ID = v.PassportID AND ISNULL(pp.GCRecord, 0) = 0
+    INNER JOIN People p ON p.ID = pp.PersonID AND ISNULL(p.GCRecord, 0) = 0
+    LEFT JOIN VisaCategories vc ON vc.ID = v.VisaCategoryID AND ISNULL(vc.GCRecord, 0) = 0
+    LEFT JOIN VisaTypes vt ON vt.ID = v.VisaTypeID AND ISNULL(vt.GCRecord, 0) = 0
+    LEFT JOIN ProjectContracts pc ON pc.ID = p.ProjectContractID AND ISNULL(pc.GCRecord, 0) = 0
+    LEFT JOIN People sp ON sp.ID = p.SponsoringEmployeeID AND ISNULL(sp.GCRecord, 0) = 0
+    LEFT JOIN ProjectContracts spc ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
+    WHERE ISNULL(v.GCRecord, 0) = 0
+      AND ISNULL(v.IsCancelled, 0) = 0
+      AND v.ExpirationDate IS NOT NULL
+      AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
+      AND v.StartDate IS NOT NULL
+      AND CAST(v.StartDate AS date) > '1900-01-01'
+),
+unfinished_extension_people AS (
+    SELECT DISTINCT ai.PersonID
+    FROM dbo.ApplicationItems ai
+    INNER JOIN dbo.Applications a
+        ON a.ID = ai.ApplicationID AND ISNULL(a.GCRecord, 0) = 0
+    INNER JOIN dbo.ApplicationTypes at
+        ON at.ID = a.ApplicationTypeID AND ISNULL(at.GCRecord, 0) = 0
+    WHERE ISNULL(ai.GCRecord, 0) = 0
+      AND ai.CurrentVisaID IS NOT NULL
+      AND ai.PersonID IS NOT NULL
+      AND at.Name IN (
+            N'App_Visa_Ext',
+            N'App_Visa_Ext_According_to_WP',
+            N'App_Visa_Ext_FM',
+            N'App_Visa_and_WP_Ext'
+        )
+      AND (
+          a.LatestPrimaryStateCode IS NULL
+          OR LTRIM(RTRIM(a.LatestPrimaryStateCode)) = N''
+          OR (
+               a.LatestPrimaryStateCode NOT IN (N'PROCESS_ISSUED', N'PROCESS_CANCELLED', N'PROCESS_REJECTED')
+               AND RIGHT(LTRIM(RTRIM(a.LatestPrimaryStateCode)), 16) <> N'_REVIEW_REJECTED'
+             )
+      )
+)
+SELECT
+    v.ID,
+    v.PersonOid,
+    v.PassportID,
+    v.PassportNumber,
+    v.PersonName,
+    v.ProjectName,
+    v.ProjectNameRaw,
+    v.ProjectNameTm,
+    v.PersonRoleCode,
+    v.VisaNumber,
+    v.ExpirationDate,
+    v.PeriodDays,
+    v.PeriodLabel,
+    v.CategoryLabel,
+    v.TypeLabel,
+    CASE
+        WHEN v.ExpirationDate IS NULL THEN 0
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0 THEN 0
+        ELSE DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date))
+    END AS DaysRemaining,
+    COALESCE(NULLIF(LTRIM(RTRIM(v.ProjectName)), N''), N'(No project)') AS StatusLabel,
+    N'st-cat-1' AS StatusCssClass,
+    v.IsArchived
+FROM valid_visas v
+WHERE v.rn = 1
+  AND NOT EXISTS (
+        SELECT 1
+        FROM unfinished_extension_people u
+        WHERE u.PersonID = v.PersonOid
+    );
+", true);
+        }
+private void CreateViewRdApplication()
         {
             ExecuteNonQueryCommand(@"
 -- Report Dashboard: Application category (by-progress / by-type).
@@ -1935,14 +2547,16 @@ WITH ranked AS (
         COALESCE(ast.Code, N'AT_OFFICE') AS ProgressStateCode,
         DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) AS DaysRemaining,
         CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0   THEN N'Expired'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 7   THEN N'< 7 days'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 14  THEN N'< 14 days'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'< 1 month'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'< 3 months'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 180 THEN N'< 6 months'
-            ELSE N'â‰¥ 6 months'
+            ELSE N'≥ 6 months'
         END AS ExpiryBucketLabel,
         CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0   THEN N'st-expiring'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 14  THEN N'st-expiring'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'st-pending'
             ELSE N'st-approved'
@@ -1989,8 +2603,6 @@ WITH ranked AS (
     LEFT JOIN ApplicationStates ast
         ON ast.ID = latest_ap.StateID AND ISNULL(ast.GCRecord, 0) = 0
     WHERE ISNULL(v.GCRecord, 0) = 0
-      AND ISNULL(v.IsCancelled, 0) = 0
-      AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
       AND at.Name IN (
             N'App_Reg_Check_In',
             N'App_Reg_Check_In_Internal',
@@ -2118,8 +2730,6 @@ LEFT JOIN People sp
 LEFT JOIN ProjectContracts spc
     ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
 WHERE ISNULL(v.GCRecord, 0) = 0
-  AND COALESCE(v.IsCancelled, 0) = 0
-  AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
   AND NOT EXISTS (
         SELECT 1 FROM reg_linked rl WHERE rl.VisaId = v.ID
   );
@@ -2167,6 +2777,7 @@ SELECT
     v.ExpirationDate AS VisaExpirationDate,
     DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) AS DaysRemaining,
     CASE
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0 THEN N'Expired'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 1 THEN N'< 1 day'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 2 THEN N'< 2 days'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 3 THEN N'< 3 days'
@@ -2176,6 +2787,7 @@ SELECT
         ELSE N'< 7 days'
     END AS ExpiryBucketLabel,
     CASE
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0 THEN N'st-expiring'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 3 THEN N'st-expiring'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 5 THEN N'st-pending'
         ELSE N'st-approved'
@@ -2193,8 +2805,6 @@ LEFT JOIN People sp
 LEFT JOIN ProjectContracts spc
     ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
 WHERE ISNULL(v.GCRecord, 0) = 0
-  AND COALESCE(v.IsCancelled, 0) = 0
-  AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
   AND DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 7
   AND NOT EXISTS (
         SELECT 1 FROM checkout_linked cl WHERE cl.VisaId = v.ID

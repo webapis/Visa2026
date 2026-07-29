@@ -138,6 +138,7 @@ namespace Visa2026.Blazor.Server
                     if (!string.IsNullOrWhiteSpace(connectionString))
                     {
                         ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                        ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                         if (DatabaseProviderDetector.IsSqlServer(connectionString))
                         {
                             ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
@@ -272,6 +273,8 @@ namespace Visa2026.Blazor.Server
             {
                 // Additive ProcessNumber columns — also required on PostgreSQL Demo (ModuleUpdater may skip).
                 ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                // Report Dashboard vw_rd_* views — ModuleUpdater may skip when ModuleInfo is current.
+                ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
 
                 if (DatabaseProviderDetector.IsSqlServer(connectionString))
                 {

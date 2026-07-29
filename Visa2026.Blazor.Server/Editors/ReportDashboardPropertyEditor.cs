@@ -135,15 +135,33 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             (ReportDashboardCategory.AddressOfResidence, "by-city") => "bar",
             (ReportDashboardCategory.AddressOfResidence, "by-address-type") => "bar",
             (ReportDashboardCategory.AddressOfResidence, "by-address") => "bar",
-            (ReportDashboardCategory.Registration, "check-in-by-city") => "pie",
-            (ReportDashboardCategory.Registration, "expiring-state") => "bar",
-            (ReportDashboardCategory.Registration, "to-be-checked-in") => "bar",
-            (ReportDashboardCategory.Registration, "to-be-checked-out") => "bar",
+            (ReportDashboardCategory.Registration, _) => "bar",
             (ReportDashboardCategory.Invitation, "ready-by-project") => "bar",
             (ReportDashboardCategory.Invitation, "ready-by-period-category") => "bar",
+            (ReportDashboardCategory.VisaExtension, "on-extension") => "bar",
+            (ReportDashboardCategory.VisaExtension, "on-extension-by-period-category-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "app-progress") => "bar",
+            (ReportDashboardCategory.VisaExtension, "active-by-project") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-period-category-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "extension-required") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-days-remaining") => "bar",
+            (ReportDashboardCategory.WorkPermit, "active-by-project") => "bar",
+            (ReportDashboardCategory.WorkPermit, "on-extension") => "bar",
+            (ReportDashboardCategory.WorkPermit, "extension-result") => "bar",
+            (ReportDashboardCategory.WorkPermit, "by-days-remaining") => "bar",
+            (ReportDashboardCategory.VisaExtension, "extension-result") => "bar",
+            (ReportDashboardCategory.VisaExtension, "extension-result-by-period-category-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-category") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-period") => "bar",
             (ReportDashboardCategory.Invitation, "in-process") => "bar",
+            (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") => "bar",
+            (ReportDashboardCategory.Invitation, "process-result") => "bar",
+            (ReportDashboardCategory.Invitation, "process-result-by-period-category-type") => "bar",
             (ReportDashboardCategory.Invitation, "rejected-by-project") => "bar",
+            (ReportDashboardCategory.Invitation, "rejected-by-period-category-type") => "bar",
             (ReportDashboardCategory.Invitation, "used") => "bar",
+            (ReportDashboardCategory.Invitation, "used-by-period-category-type") => "bar",
             (ReportDashboardCategory.Invitation, "valid-until") => "bar",
             (ReportDashboardCategory.Invitation, "expired") => "bar",
             _ => "pie"
@@ -276,17 +294,9 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     await Task.Delay(1);
                     if (generation != _refreshGeneration) return;
 
+                    // Every Overview card = first sub-report snapshot (same LoadPanel args as category detail).
                     var defaultSub = ReportDashboardCatalog.DefaultSubReport(cat);
-                    allPanels[cat] = _queryService.LoadPanel(
-                        objectSpace, model.PersonType, cat, model.ProjectKey,
-                        ResolveDateRangeMonths(model, cat), defaultSub, includeArchivedPersons: false,
-                        oneLastValidVisaPerPerson: false,
-                        oneLastValidWorkPermitPerPerson: false,
-                        includeCompletedApplicationProcesses: false,
-                        includeCancelledApplicationProcesses: false,
-                        validVisaPersonsOnly: ReportDashboardCatalog.SupportsValidVisaPersonsOnly(cat)
-                            ? model.ValidVisaPersonsOnly
-                            : false);
+                    allPanels[cat] = LoadPanelFor(objectSpace, model, cat, defaultSub);
 
                     // Progressive fill so Overview cards appear as each category finishes.
                     model.AllPanels = new Dictionary<ReportDashboardCategory, ReportDashboardPanelData>(allPanels);
@@ -314,19 +324,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     await Task.Delay(1);
                     if (generation != _refreshGeneration) return;
 
-                    var panel = _queryService.LoadPanel(
-                        objectSpace,
-                        model.PersonType,
-                        model.Category,
-                        model.ProjectKey,
-                        ResolveDateRangeMonths(model, model.Category),
-                        sub.Key,
-                        model.IncludeArchivedPersons,
-                        model.OneLastValidVisaPerPerson,
-                        model.OneLastValidWorkPermitPerPerson,
-                        model.IncludeCompletedApplicationProcesses,
-                        model.IncludeCancelledApplicationProcesses,
-                        model.ValidVisaPersonsOnly);
+                    var panel = LoadPanelFor(objectSpace, model, model.Category, sub.Key);
                     counts[sub.Key] = panel.TotalCount;
                     if (string.Equals(sub.Key, model.SubReport, StringComparison.Ordinal)
                         || (activePanel == null && subReports.Count == 1))
@@ -344,14 +342,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
                     var fallbackKey = ReportDashboardCatalog.DefaultSubReport(model.Category);
                     if (counts.ContainsKey(fallbackKey))
                     {
-                        activePanel = _queryService.LoadPanel(
-                            objectSpace, model.PersonType, model.Category, model.ProjectKey,
-                            ResolveDateRangeMonths(model, model.Category), fallbackKey, model.IncludeArchivedPersons,
-                            model.OneLastValidVisaPerPerson,
-                            model.OneLastValidWorkPermitPerPerson,
-                            model.IncludeCompletedApplicationProcesses,
-                            model.IncludeCancelledApplicationProcesses,
-                            model.ValidVisaPersonsOnly);
+                        activePanel = LoadPanelFor(objectSpace, model, model.Category, fallbackKey);
                         counts[fallbackKey] = activePanel.TotalCount;
                     }
                 }
@@ -371,11 +362,36 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
         }
     }
 
+    /// <summary>
+    /// Shared LoadPanel args for Overview cards and category detail so totals stay aligned.
+    /// </summary>
+    private ReportDashboardPanelData LoadPanelFor(
+        IObjectSpace objectSpace,
+        ReportDashboardModel model,
+        ReportDashboardCategory category,
+        string subReport)
+    {
+        return _queryService!.LoadPanel(
+            objectSpace,
+            model.PersonType,
+            category,
+            model.ProjectKey,
+            ResolveDateRangeMonths(model, category),
+            subReport,
+            model.IncludeArchivedPersons,
+            model.OneLastValidVisaPerPerson,
+            model.OneLastValidWorkPermitPerPerson,
+            model.IncludeCompletedApplicationProcesses,
+            model.IncludeCancelledApplicationProcesses,
+            model.ValidVisaPersonsOnly);
+    }
+
     private async Task OnOpenExcelAsync()
     {
         if (_application == null) return;
 
-        var hint = ReportDashboardCatalog.ExcelTemplateNameHint(ComponentModel.Category);
+        var hint = ReportDashboardCatalog.ExcelTemplateNameHint(
+            ComponentModel.Category, ComponentModel.SubReport);
         if (string.IsNullOrEmpty(hint))
         {
             _application.ShowViewStrategy.ShowMessage(
@@ -414,30 +430,45 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
-    private Task OnOpenListView(string? statusLabel)
+    private async Task OnOpenListView(string? statusLabel)
     {
-        if (_application == null) return Task.CompletedTask;
+        if (_application == null) return;
 
-        var category   = ComponentModel.Category;
-        var type       = ReportDashboardCatalog.ListViewType(category);
-        var listViewId = ReportDashboardCatalog.ListViewId(category);
-        var includeArchived = ComponentModel.IncludeArchivedPersons;
-        var criteria   = ReportDashboardCatalog.BuildListCriteria(
-            ComponentModel.PersonType, category, ComponentModel.ProjectKey, statusLabel,
-            includeArchived);
+        var model = ComponentModel;
+        model.IsLoading = true;
+        model.LoadingProgressPercent = -1; // indeterminate bar while navigating away
+        model.LoadingMessage = ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpeningListView");
+        await Task.Delay(16);
 
-        var objectSpace      = _application.CreateObjectSpace(type);
-        var collectionSource = _application.CreateCollectionSource(objectSpace, type, listViewId);
-        var listView         = _application.CreateListView(listViewId, collectionSource, true);
-        if (!string.IsNullOrWhiteSpace(criteria))
-            listView.CollectionSource.Criteria["ReportDashboard"] = CriteriaOperator.Parse(criteria);
+        try
+        {
+            var category = model.Category;
+            var subReport = model.SubReport;
+            var (listViewId, type) = ReportDashboardCatalog.ResolveListViewTarget(category, subReport);
+            var includeArchived = model.IncludeArchivedPersons;
+            var criteria = ReportDashboardCatalog.BuildListCriteria(
+                model.PersonType, category, model.ProjectKey, statusLabel,
+                includeArchived, subReport, model.OneLastValidVisaPerPerson);
 
-        var window = _application.MainWindow;
-        if (window == null) return Task.CompletedTask;
+            var objectSpace = _application.CreateObjectSpace(type);
+            var collectionSource = _application.CreateCollectionSource(objectSpace, type, listViewId);
+            var listView = _application.CreateListView(listViewId, collectionSource, true);
+            if (!string.IsNullOrWhiteSpace(criteria))
+                listView.CollectionSource.Criteria["ReportDashboard"] = CriteriaOperator.Parse(criteria);
 
-        _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(listView) { TargetWindow = TargetWindow.Current },
-            new ShowViewSource(window, null));
-        return Task.CompletedTask;
+            var window = _application.MainWindow;
+            if (window == null) return;
+
+            _application.ShowViewStrategy.ShowView(
+                new ShowViewParameters(listView) { TargetWindow = TargetWindow.Current },
+                new ShowViewSource(window, null));
+        }
+        finally
+        {
+            // If ShowView replaced the dashboard, this model may already be disposed — still safe to clear flags.
+            model.IsLoading = false;
+            model.LoadingProgressPercent = 0;
+            model.LoadingMessage = string.Empty;
+        }
     }
 }

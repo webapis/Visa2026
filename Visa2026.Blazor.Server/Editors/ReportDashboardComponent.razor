@@ -76,12 +76,15 @@
                                  role="progressbar"
                                  aria-valuemin="0"
                                  aria-valuemax="100"
-                                 aria-valuenow="@EffectiveLoadingPercent"
+                                 aria-valuenow="@(ShowIndeterminateLoading ? null : EffectiveLoadingPercent)"
                                  aria-label='@ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingProgress")'>
-                                <div class="rd-loading-fill"
-                                     style="width:@(EffectiveLoadingPercent.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                                <div class="rd-loading-fill @(ShowIndeterminateLoading ? "rd-loading-fill--indeterminate" : null)"
+                                     style="@(ShowIndeterminateLoading ? null : $"width:{EffectiveLoadingPercent.ToString(System.Globalization.CultureInfo.InvariantCulture)}%")"></div>
                             </div>
-                            <div class="rd-loading-pct">@EffectiveLoadingPercent%</div>
+                            @if (!ShowIndeterminateLoading)
+                            {
+                                <div class="rd-loading-pct">@EffectiveLoadingPercent%</div>
+                            }
                         </div>
                     </div>
                 }
@@ -206,16 +209,6 @@
                                 <span class="rd-report-total-num">@FilteredTotal</span>
                                 <span class="rd-report-total-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.TotalRecords")</span>
                             </div>
-                            <button type="button"
-                                    class="rd-excel-link @(Panel.ExcelConfigured ? null : "disabled")"
-                                    disabled="@(!Panel.ExcelConfigured)"
-                                    title="@(Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
-                                    @onclick="OnExcel">
-                                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
-                            </button>
-                            <button type="button" class="rd-list-link" @onclick="() => OnListView(null)">
-                                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
-                            </button>
                         </div>
                     </div>
 
@@ -484,35 +477,90 @@
                     </div>
 
                     <div class="rd-listview-block">
-                        <table>
-                            <thead>
-                                <tr>
-                                    @foreach (var header in Panel.TableHeaders)
+                        <div class="rd-preview-actions">
+                            <button type="button"
+                                    class="rd-excel-link @(Panel.ExcelConfigured ? null : "disabled")"
+                                    disabled="@(!Panel.ExcelConfigured || ShowLoading)"
+                                    title="@(Panel.ExcelConfigured ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelDownloadTitle") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredTitle"))"
+                                    @onclick="OnExcel">
+                                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenInExcel")
+                            </button>
+                            <button type="button"
+                                    class="rd-list-link"
+                                    disabled="@ShowLoading"
+                                    @onclick="() => OnListView(null)">
+                                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenListView")
+                            </button>
+                        </div>
+                        <div class="rd-listview-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        @foreach (var header in Panel.TableHeaders)
+                                        {
+                                            <th>@header</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (FilteredRows.Count == 0)
                                     {
-                                        <th>@header</th>
+                                        <tr class="rd-empty-row"><td colspan="@Panel.TableHeaders.Count">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.EmptyProject")</td></tr>
                                     }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (FilteredRows.Count == 0)
-                                {
-                                    <tr class="rd-empty-row"><td colspan="@Panel.TableHeaders.Count">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.EmptyProject")</td></tr>
-                                }
-                                else
-                                {
-                                    @foreach (var row in FilteredRows)
+                                    else
                                     {
-                                        <tr>
-                                            <td>@row.Name</td>
-                                            <td><span class="rd-project-tag">@row.Project</span></td>
-                                            <td>@row.ColumnA</td>
-                                            <td>@row.ColumnB</td>
-                                            <td><span class="rd-status-dot @row.StatusCssClass"></span>@ReportDashboardLocalization.Status(row.Status)</td>
-                                        </tr>
+                                        @foreach (var row in PagedRows)
+                                        {
+                                            <tr>
+                                                <td>@row.Name</td>
+                                                <td><span class="rd-project-tag">@row.Project</span></td>
+                                                <td>@row.ColumnA</td>
+                                                <td>@row.ColumnB</td>
+                                                @if (Panel.TableHeaders.Count >= 6)
+                                                {
+                                                    <td>@row.ColumnC</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 7)
+                                                {
+                                                    <td>@row.ColumnD</td>
+                                                }
+                                                <td><span class="rd-status-dot @row.StatusCssClass"></span>@ReportDashboardLocalization.Status(row.Status)</td>
+                                            </tr>
+                                        }
                                     }
-                                }
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
+                        @if (FilteredRows.Count > 0)
+                        {
+                            <div class="rd-preview-pager">
+                                <span class="rd-preview-pager-range">@PreviewRangeLabel</span>
+                                <label class="rd-preview-pager-size">
+                                    <span>@ReportDashboardLocalization.Get("ReportDashboard.Chrome.PageSize")</span>
+                                    <select value="@_previewPageSize" @onchange="OnPreviewPageSizeChanged">
+                                        @foreach (var size in PreviewPageSizeOptions)
+                                        {
+                                            <option value="@size">@size</option>
+                                        }
+                                    </select>
+                                </label>
+                                <div class="rd-preview-pager-nav">
+                                    <button type="button"
+                                            class="rd-preview-pager-btn"
+                                            disabled="@(!CanPreviewPrev)"
+                                            @onclick="PreviewPrevPage">
+                                        @ReportDashboardLocalization.Get("ReportDashboard.Chrome.Prev")
+                                    </button>
+                                    <span class="rd-preview-pager-page">@_previewPageDisplay / @PreviewPageCount</span>
+                                    <button type="button"
+                                            class="rd-preview-pager-btn"
+                                            disabled="@(!CanPreviewNext)"
+                                            @onclick="PreviewNextPage">
+                                        @ReportDashboardLocalization.Get("ReportDashboard.Chrome.Next")
+                                    </button>
+                                </div>
+                            </div>
+                        }
                     </div>
                 }
             </div>
@@ -574,9 +622,10 @@
     private const int VisibleProjectChipLimit = 5;
 
     private bool ShowLoading => IsLoading || _localLoading;
+    private bool ShowIndeterminateLoading => IsLoading && LoadingProgressPercent < 0;
     private string EffectiveLoadingMessage =>
         IsLoading && !string.IsNullOrWhiteSpace(LoadingMessage) ? LoadingMessage : _localLoadingMessage;
-    private int EffectiveLoadingPercent => IsLoading ? LoadingProgressPercent : 0;
+    private int EffectiveLoadingPercent => IsLoading && LoadingProgressPercent >= 0 ? LoadingProgressPercent : 0;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -592,6 +641,15 @@
         // Parent owns the overlay once its IsLoading flag is set.
         if (IsLoading)
             _localLoading = false;
+
+        var key = $"{Category}|{SubReport}|{ProjectKey}|{PersonType}|{Panel?.SubReport}|{Panel?.TotalCount}|{FilteredRows.Count}";
+        if (!string.Equals(key, _previewContextKey, StringComparison.Ordinal))
+        {
+            _previewContextKey = key;
+            _previewPageIndex = 0;
+        }
+
+        EnsurePreviewPageInRange();
     }
 
     private IEnumerable<ReportDashboardProjectChip> VisibleProjects
@@ -622,6 +680,82 @@
                 .Select(g => new ReportDashboardStatusBucket { Label = g.Key, Count = g.Count(), CssClass = g.First().StatusCssClass })
                 .OrderByDescending(b => b.Count)
                 .ToList();
+
+    private static readonly int[] PreviewPageSizeOptions = [25, 50, 100, 200];
+    private int _previewPageIndex;
+    private int _previewPageSize = 50;
+    private string _previewContextKey = string.Empty;
+
+    private int PreviewPageCount =>
+        Math.Max(1, (int)Math.Ceiling(FilteredRows.Count / (double)Math.Max(1, _previewPageSize)));
+
+    private int _previewPageDisplay => Math.Min(_previewPageIndex + 1, PreviewPageCount);
+
+    private bool CanPreviewPrev => _previewPageIndex > 0;
+    private bool CanPreviewNext => _previewPageIndex < PreviewPageCount - 1;
+
+    private IReadOnlyList<ReportDashboardPreviewRow> PagedRows
+    {
+        get
+        {
+            EnsurePreviewPageInRange();
+            var size = Math.Max(1, _previewPageSize);
+            return FilteredRows.Skip(_previewPageIndex * size).Take(size).ToList();
+        }
+    }
+
+    private string PreviewRangeLabel
+    {
+        get
+        {
+            if (FilteredRows.Count == 0)
+                return string.Empty;
+            var size = Math.Max(1, _previewPageSize);
+            var from = _previewPageIndex * size + 1;
+            var to = Math.Min(FilteredRows.Count, (_previewPageIndex + 1) * size);
+            var loaded = FilteredRows.Count;
+            var total = FilteredTotal;
+            if (total > loaded)
+            {
+                return ReportDashboardLocalization.Format(
+                    "ReportDashboard.Chrome.PreviewRangeCapped",
+                    from, to, loaded, total);
+            }
+
+            return ReportDashboardLocalization.Format(
+                "ReportDashboard.Chrome.PreviewRange",
+                from, to, loaded);
+        }
+    }
+
+    private void EnsurePreviewPageInRange()
+    {
+        var maxIndex = PreviewPageCount - 1;
+        if (_previewPageIndex > maxIndex)
+            _previewPageIndex = Math.Max(0, maxIndex);
+        if (_previewPageIndex < 0)
+            _previewPageIndex = 0;
+    }
+
+    private void PreviewPrevPage()
+    {
+        if (!CanPreviewPrev) return;
+        _previewPageIndex--;
+    }
+
+    private void PreviewNextPage()
+    {
+        if (!CanPreviewNext) return;
+        _previewPageIndex++;
+    }
+
+    private void OnPreviewPageSizeChanged(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var size) || size <= 0)
+            return;
+        _previewPageSize = size;
+        _previewPageIndex = 0;
+    }
 
     private string MiniPieStyle(IReadOnlyList<ReportDashboardStatusBucket> buckets, int total)
     {
@@ -673,14 +807,9 @@
 
     private int GetCategoryCount(ReportDashboardCategory category)
     {
-        // Prefer real panel totals when Overview (or any AllPanels) already loaded them.
+        // Overview / AllPanels: always first-subreport TotalCount (including 0). No mock fallback.
         if (AllPanels != null && AllPanels.TryGetValue(category, out var panel))
-        {
-            if (panel.TotalCount > 0)
-                return panel.TotalCount;
-            if (panel.StatusBuckets is { Count: > 0 } buckets)
-                return buckets.Sum(b => b.Count);
-        }
+            return panel.TotalCount;
 
         if (Snapshot?.CategoryCounts == null) return 0;
         return Snapshot.CategoryCounts.TryGetValue((PersonType, category), out var count) ? count : 0;
@@ -690,7 +819,8 @@
         ReportDashboardCategory category,
         IReadOnlyList<ReportDashboardStatusBucket> buckets)
     {
-        if (AllPanels != null && AllPanels.TryGetValue(category, out var panel) && panel.TotalCount > 0)
+        // Card total = first sub-report snapshot TotalCount for every category.
+        if (AllPanels != null && AllPanels.TryGetValue(category, out var panel))
             return panel.TotalCount;
         var fromBuckets = buckets.Sum(b => b.Count);
         return fromBuckets > 0 ? fromBuckets : GetCategoryCount(category);
@@ -722,7 +852,7 @@
         if (AllPanels == null || !AllPanels.TryGetValue(category, out var panel))
             return Array.Empty<ReportDashboardStatusBucket>();
 
-        // Use full StatusBuckets (view/SQL totals) — never regroup PreviewRows (Take(50) skew).
+        // Use full StatusBuckets (view/SQL totals) — never regroup PreviewRows (paging skew).
         if (panel.StatusBuckets is { Count: > 0 } buckets)
             return buckets;
 
@@ -769,7 +899,12 @@
 
     private async Task OnChartView(string view)                            => await ChartViewChanged.InvokeAsync(view);
     private async Task OnExcel()                                           => await OpenExcelRequested.InvokeAsync();
-    private async Task OnListView(string? status)                          => await OpenListViewRequested.InvokeAsync(status);
+    private async Task OnListView(string? status)
+    {
+        if (ShowLoading || !OpenListViewRequested.HasDelegate)
+            return;
+        await OpenListViewRequested.InvokeAsync(status);
+    }
 
     private async Task OnShowAll()
     {

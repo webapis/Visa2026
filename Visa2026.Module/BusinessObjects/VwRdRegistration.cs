@@ -5,8 +5,9 @@ using System.ComponentModel.DataAnnotations;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Report Dashboard: last registration application per not-expired visa (vw_rd_registration).
-/// Type tabs use ProgressStateLabel; Expiring State uses ExpiryBucketLabel (one last visa per person in C#).
+/// Report Dashboard: last registration application per visa (vw_rd_registration).
+/// Visa.IsCancelled and expiry are ignored (still checked-in until Check-Out). Type tabs use ProgressStateLabel;
+/// Expiring State / Check in by City use expiry/city buckets (one last visa per person in C#).
 /// </summary>
 [Browsable(false)]
 public class VwRdRegistration

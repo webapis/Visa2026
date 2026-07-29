@@ -1,3 +1,4 @@
+using System;
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>Stable <see cref="ApplicationState.Code"/> values from <c>application-state.json</c>.</summary>
@@ -19,6 +20,23 @@ namespace Visa2026.Module.BusinessObjects
         public const string ProcessIssued = "PROCESS_ISSUED";
         public const string ProcessRejected = "PROCESS_REJECTED";
         public const string ProcessCancelled = "PROCESS_CANCELLED";
+
+        /// <summary>
+        /// Final application-process outcomes: Issued, Cancelled, Process Rejected, or any *_REVIEW_REJECTED.
+        /// </summary>
+        public static bool IsTerminalOutcome(string? code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                return false;
+
+            var trimmed = code.Trim();
+            if (string.Equals(trimmed, ProcessIssued, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trimmed, ProcessRejected, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(trimmed, ProcessCancelled, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return trimmed.EndsWith("_REVIEW_REJECTED", StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     /// <summary>Stable <see cref="ApplicationLocation.Code"/> values from <c>application-location.json</c>.</summary>

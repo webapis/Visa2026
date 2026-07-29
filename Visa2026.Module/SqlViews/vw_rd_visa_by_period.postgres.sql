@@ -1,10 +1,12 @@
--- Report Dashboard: valid visas by nearest granted period (StartDate → ExpirationDate).
--- Chart labels: 1 month / 3 months / 6 months / 1 year. Valid visas only. No start/end columns in UI.
-DROP VIEW IF EXISTS vw_rd_visa_by_period;
+-- Report Dashboard: valid visas by nearest granted period (PostgreSQL).
+-- Shared by Active Visa (P)/(V) preview and Open ListView (VwRdVisaByPeriod).
+DROP VIEW IF EXISTS vw_rd_visa_by_period CASCADE;
 CREATE VIEW vw_rd_visa_by_period AS
 SELECT
     x."ID",
     x."PersonOid",
+    x."PassportID",
+    x."PassportNumber",
     x."PersonName",
     x."ProjectName",
     x."ProjectNameRaw",
@@ -21,11 +23,15 @@ SELECT
         WHEN '6 months'  THEN 'st-cat-3'
         ELSE                  'st-cat-4'
     END                                                                 AS "StatusCssClass",
+    GREATEST(0, (x."ExpirationDate")::date - CURRENT_DATE)              AS "DaysRemaining",
+    (x."Rn" = 1)                                                        AS "IsOneLastValidPerPerson",
     x."IsArchived"
 FROM (
     SELECT
         v."ID"                                                          AS "ID",
         p."ID"                                                          AS "PersonOid",
+        v."PassportID"                                                  AS "PassportID",
+        COALESCE(NULLIF(BTRIM(pp."PassportNumber"), ''), '')           AS "PassportNumber",
         CONCAT_WS(' ',
             NULLIF(BTRIM(p."FirstName"), ''),
             NULLIF(BTRIM(p."MiddleName"), ''),
@@ -61,7 +67,11 @@ FROM (
                 THEN '6 months'
             ELSE '1 year'
         END                                                             AS "PeriodLabel",
-        COALESCE(p."IsArchived", FALSE)                                 AS "IsArchived"
+        COALESCE(p."IsArchived", FALSE)                                 AS "IsArchived",
+        ROW_NUMBER() OVER (
+            PARTITION BY p."ID"
+            ORDER BY v."ExpirationDate" DESC NULLS LAST, v."ID" DESC
+        )                                                               AS "Rn"
     FROM "Visas" v
     INNER JOIN "Passports" pp
         ON pp."ID" = v."PassportID"

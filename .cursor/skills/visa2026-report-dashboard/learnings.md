@@ -824,7 +824,9 @@ Pinned first. Same active reg types as Expiring State; city from last app `Curre
 **Ask:** Rename Ready Invitations → Ready By Project; add Ready By VisaPeriod after it (same Ready population, chart by VisaPeriod).
 
 **Change:**
-- Catalog: eady-by-project label "Ready By Project"; new eady-by-period "Ready By VisaPeriod"
+- Catalog: 
+eady-by-project label "Ready By Project"; new 
+eady-by-period "Ready By VisaPeriod"
 - w_rd_invitation_ready adds `VisaPeriodLabel`; both sub-reports share the view
 - Loader groups by `StatusLabel` (project) or `VisaPeriodLabel` (period); legacy EF fallback for period
 - Hybrid promote `(Invitation, ready-by-period)`; bar chart default
@@ -879,3 +881,592 @@ Pinned first. Same active reg types as Expiring State; city from last app `Curre
 - Merge messages with Node/UTF-8; PowerShell string rewrite can wipe `UiStrings.messages.json`
 
 **Files:** UiStrings.messages.json, UiStrings.json, ReportDashboardLocalization.cs, ReportDashboardCatalog.cs, ReportDashboardComponent.razor, ReportDashboardPropertyEditor.cs, generated catalog/xafml, docs/REPORT_DASHBOARD.md
+
+## 2026-07-25 — Visa: merge Category / Type / Period into one tab
+
+**Ask:** Replace By Visa Category, By Visa Type, By Visa Period with a single sub-report; label order Period · Category · Type (Invitation).
+
+**Change:**
+- Catalog: one tab `by-period-category-type` ("By Period · Category · Type"); keep Visa State + By Days Remaining
+- Status = `{Period} · {Category} · {Type}`; table header Period · Category · Type
+- Loader joins `vw_rd_visa_by_period` + category/type sibling views by visa ID (no new SQL view)
+- Legacy keys `by-category` / `by-type` / `by-period` remap; Hybrid promote; default chart bar
+- Localization: `ReportDashboard.SubReport.by-period-category-type`
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+
+## 2026-07-25 — Visa By Days Remaining default Bar Chart
+
+**Ask:** Make Bar Chart the default for Visa By Days Remaining.
+
+**Change:** `DefaultChartViewFor(VisaExtension, by-days-remaining)` → `bar` (was pie via fallback).
+
+**Files:** ReportDashboardPropertyEditor.cs
+
+## 2026-07-25 — Visa On Extension sub-report (first tab)
+
+**Ask:** First Visa tab ""On Extension""; Status = latest ApplicationProgress state; ApplicationItem on visa-ext types with CurrentVisa; include in-flight + completed/cancelled; default bar.
+
+**Change:**
+- Catalog key `on-extension` first; headers App # / App Date / Process State
+- Reuse `vw_rd_visa_app_progress` + `LoadVisaAppProgressFromView` (no PROCESS_* filter)
+- Hybrid promote; legacy `app-progress` / default → on-extension
+- Mock `VisaOnExtension`; localization `ReportDashboard.SubReport.on-extension`
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+
+## 2026-07-25 — On Extension process labels = ApplicationProgress StatusListLabel
+
+**Ask:** On Extension chart/table process names must match ApplicationProgress Progress Status (not ApplicationState.NameTm).
+
+**Cause:** `vw_rd_visa_app_progress` preferred `NameTm` (e.g. RESMİLEŞTİRİLDİ / İŞLEM MERKEZİ).
+
+**Fix:**
+- View adds `ApplicationOid` + `ProgressStateCode`; SQL fallback prefers `LatestProgressDisplay` then `Name`
+- Loader resolves Status via `LookupLocalization.GetDisplayName` + `ApplicationProgressListLabelHelper.FormatStatusLabel` + ministry short name (same as `ApplicationProgress.StatusListLabel`)
+
+**Deploy:** recreate view (SqlViewsUpdater / Postgres updater, or FORCE_XAF_DB_UPDATE once) then restart.
+
+**Files:** vw_rd_visa_app_progress (+ postgres), SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, VwRdVisaAppProgress, ReportDashboardQueryService
+
+## 2026-07-25 — Postgres 42703 ApplicationOid on On Extension
+
+**Symptom:** `column v.ApplicationOid does not exist` opening On Extension (local PG).
+
+**Cause:** EF entity/view SQL updated; DB still had old `vw_rd_visa_app_progress` (ModuleInfo current → updater skipped).
+
+**Fix:** Recreate view via `vw_rd_visa_app_progress.postgres.sql` (psql). Loader also catches `UndefinedColumn` → legacy fallback.
+
+## 2026-07-25 — On Extension chart = Project · Period · Category · Type · State
+
+**Ask:** Group On Extension by Project + Visa Period/Category/Type; Process State in chart label.
+
+**Change:** Status = `Project · Period · Category · Type · ProcessState`; Period/Category/Type from Application (`LookupLocalization`); ProcessState = `StatusListLabel`; categorical CSS; table header updated. No SQL view change (Include on Application).
+
+**Files:** ReportDashboardQueryService, Catalog, Mock, ReportDashboardLocalization, UiStrings.messages.json (+ regenerate)
+
+## 2026-07-25 — On Extension: Project · State; exclude Issued
+
+**Ask:** Drop Period · Category · Type from On Extension Status; exclude Issued processes.
+
+**Change:** Status = `Project · ProcessState`; filter out `PROCESS_ISSUED`; table header Project · State; mock updated.
+
+**Files:** ReportDashboardQueryService, Catalog, Mock, ReportDashboardLocalization, UiStrings.messages.json (+ regenerate)
+
+## 2026-07-25 — Visa Extension Result sub-report
+
+**Ask:** New Visa tab "Extension Result" after By Days Remaining; same On Extension population (visa-ext apps with CurrentVisa); only terminal PROCESS_ISSUED / PROCESS_CANCELLED / PROCESS_REJECTED; chart by result only (localized process-state labels, not forced "Issued (Complete)"); Project · Result not used.
+
+**Change:**
+- Catalog key `extension-result` last; headers App # / App Date / Process State
+- Reuse `vw_rd_visa_app_progress` via `LoadVisaAppProgressFromView` + `VisaAppProgressPanelMode.ExtensionResult`
+- Status = ProcessState (`StatusListLabel` pattern); fixed CSS st-approved / st-expiring
+- Hybrid promote; mock `VisaExtensionResult`; bar default; localization `ReportDashboard.SubReport.extension-result`
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+
+## 2026-07-25 — On Extension split: By Project + By Period · Category · Type
+
+**Ask:** Rename On Extension → On Extension By Project; add On Extension By Period · Category · Type after it; same population (exclude Issued); Period · Category · Type · State grouping; consistent Period · Category · Type order and tab casing.
+
+**Change:**
+- Catalog labels/keys: `on-extension` (By Project), `on-extension-by-period-category-type` (second tab)
+- Modes: `OnExtensionByProject` / `OnExtensionByPeriodCategoryType`; Status = Project · State vs Period · Category · Type · State (Application lookups)
+- Hybrid promote; bar default; header `Period · Category · Type · State`; localization updated
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, ReportDashboardLocalization, UiStrings.messages.json (+ regenerate), reference.md
+
+## 2026-07-25 — Active By Project + rename Active By Period · Category · Type
+
+**Ask:** Rename By Period · Category · Type → Active By Period · Category · Type; add Active By Project before it; same valid-visa population + one-last-valid toggle; chart by Project only.
+
+**Change:**
+- Catalog: `active-by-project` before `by-period-category-type`; labels updated
+- Loader `LoadVisaActiveByProjectFromView` (`vw_rd_visa_by_period`, Status = Project); Hybrid promote; bar default; SubReportCountsValidVisas includes active-by-project
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+
+## 2026-07-25 — Visa tabs: Active first; remove Visa State
+
+**Ask:** Move Active By Project + Active By Period · Category · Type to start; remove Visa State.
+
+**Change:** Catalog order Active → On Extension → By Days Remaining → Extension Result; drop `visa-state` tab; default/legacy `visa-state` / `app-progress` / empty → `active-by-project`.
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, reference.md
+
+## 2026-07-27 — Active Visa (P) / Active Visa (V) rename
+
+**Ask:** Rename Active By Project → Active Visa (P); Active By Period · Category · Type → Active Visa (V).
+
+**Change:** Catalog labels + `ReportDashboard.SubReport.*` localization; keys unchanged (`active-by-project`, `by-period-category-type`).
+
+**Files:** Catalog, UiStrings.messages.json (+ regenerate)
+
+## 2026-07-27 — Visa Extension (P) / Visa Extension (V) rename
+
+**Ask:** Rename On Extension By Project → Visa Extension (P); On Extension By Period · Category · Type → Visa Extension (V).
+
+**Change:** Catalog labels + localization; keys unchanged (`on-extension`, `on-extension-by-period-category-type`).
+
+**Files:** Catalog, UiStrings.messages.json (+ regenerate)
+
+## 2026-07-27 — Visa By Days Remaining → Visa Validity
+
+**Ask:** Rename Visa tab By Days Remaining → Visa Validity.
+
+**Change:** Visa catalog label; category-specific `ReportDashboard.SubReport.VisaExtension.by-days-remaining` so Work Permit keeps shared By Days Remaining.
+
+**Files:** Catalog, UiStrings.messages.json (+ regenerate)
+
+## 2026-07-27 — Overview card totals match first sub-report
+
+**Ask:** Visa Overview card (502) should match Active Visa (P) with one-last-valid (372).
+
+**Cause:** Overview `LoadPanel` hardcoded `oneLastValidVisaPerPerson: false` (and other toggles) while category default is true.
+
+**Fix:** Overview uses model toggle values when `Supports*` (same as category detail) for first `DefaultSubReport` panel.
+
+**Files:** ReportDashboardPropertyEditor.cs
+
+## 2026-07-27 — All Overview cards share first-subreport LoadPanel
+
+**Ask:** All category cards follow the same pattern as Visa (match first sub-report snapshot).
+
+**Change:**
+- Shared `LoadPanelFor` for Overview + category detail (identical filter args)
+- `GetOverviewTotal` / `GetCategoryCount` use `AllPanels[cat].TotalCount` whenever loaded (no mock when panel exists)
+
+**Files:** ReportDashboardPropertyEditor.cs, ReportDashboardComponent.razor
+
+## 2026-07-27 — Extension Result (P) / (V)
+
+**Ask:** Rename Extension Result → Extension Result (P) (Project · ProcessState); add Extension Result (V) (Period · Category · Type · ProcessState); same terminal population; after Visa Validity.
+
+**Change:** Modes `ExtensionResultByProject` / `ExtensionResultByPeriodCategoryType`; catalog + Hybrid + mock + localization; key `extension-result-by-period-category-type`.
+
+**Files:** Catalog, QueryService, Mock, HybridQueryService, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+
+## 2026-07-27 — Invitation Active Invitation (P) / (V) rename
+
+**Ask:** Rename Ready By Project → Active Invitation (P); Ready By Period · Category · Type → Active Invitation (V).
+
+**Change:** Catalog labels + localization; keys unchanged (`ready-by-project`, `ready-by-period-category`).
+
+**Files:** Catalog, UiStrings.messages.json (+ regenerate)
+
+## 2026-07-27 — Invitation Process / Rejected / Used (P)/(V) twins
+
+**Ask:** Rename Invitation tabs to short (P)/(V) pattern (like Visa); add Period·Category·Type twins for Process, Rejected, Used; Validity stays singular.
+
+**Change:**
+- Catalog: Invitation Process/Rejected/Used (P)/(V) + Invitation Validity; new keys *-by-period-category-type
+- Loaders: (P) Project [· ProcessState]; (V) Period · Category · Type [· ProcessState] via Application / Invitation includes after view load
+- Hybrid promote new keys; mock + PropertyEditor bar defaults; UiStrings (+ regenerate)
+
+**Files:** Catalog, QueryService, Mock, HybridQueryService, PropertyEditor, UiStrings.messages.json, reference.md
+## 2026-07-27 — Invitation Process excludes completed + review rejects
+
+**Ask:** Invitation Process only unfinished apps; Rejected is completed; also exclude 1st/2nd Review Rejected. Completed = Issued / Rejected / Cancelled (+ Issued duplicate).
+
+**Change:** View + EF exclude PROCESS_ISSUED, PROCESS_REJECTED, PROCESS_CANCELLED, 1_REVIEW_REJECTED, 2_REVIEW_REJECTED. Loader also filters by ProgressStateCode for stale views. Prior rule “ministry rejects stay in-process” superseded for Invitation Process.
+
+**Files:** vw_rd_invitation_in_process(.sql/.postgres.sql), SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, QueryService, VwRdInvitationInProcess.cs
+## 2026-07-27 — Invitation Process Result (rename Rejected)
+
+**Ask:** Rename Invitation Rejected → Process Result (P)/(V); population like Extension Result: CanIssueInvitation apps with terminal latest progress; include 1st/2nd Review Rejected; use same localized ProcessState labels as Extension Result; Status = Project · ProcessState / Period · Category · Type · ProcessState.
+
+**Change:** Keys process-result / process-result-by-period-category-type (legacy 
+ejected-by-* remap); EF Application loader (not RejectionItem union); AssignExtensionResultCss; Hybrid/mock/localization.
+
+**Files:** Catalog, QueryService, Mock, Hybrid, PropertyEditor, UiStrings (+ regenerate), reference.md
+## 2026-07-27 — Process Result 0 / Rejected still in Invitation Process
+
+**Symptom:** Process Result (P)/(V) = 0; Invitation Process still showed Project · Rejected.
+
+**Cause:** Loaders keyed off Application.LatestProgress FK (often null). Display/view use progress history + LatestPrimaryStateCode (PROCESS_REJECTED → en ""Rejected""), so Rejected stayed in Process and never entered Process Result.
+
+**Fix:** Filter/include via LatestPrimaryStateCode (fallback LatestProgress.State.Code); In Process also cross-checks Application scalars after view load; completed codes include 3–5_REVIEW_REJECTED.
+
+**Files:** ReportDashboardQueryService.cs, vw_rd_invitation_in_process (+ updaters)
+## 2026-07-27 — Registration: ignore Visa.IsCancelled
+
+**Ask:** Cancelling a visa must not drop someone from registration / checked-in. Until Check-Out, still considered checked in. Cancelled vs not does not matter.
+
+**Change:** Removed IsCancelled = 0 from w_rd_registration, w_rd_to_be_checked_in, w_rd_to_be_checked_out (SS + Postgres + updaters). Kept ExpirationDate >= today.
+
+**Files:** SqlViews + SqlViewsUpdater + ReportDashboardPostgresViewsUpdater, VwRdRegistration.cs
+## 2026-07-27 — Registration: keep expired visas until Check-Out
+
+**Ask:** Expired visas stay in registration / checked-in population until Check-Out (same as cancelled).
+
+**Change:** Removed ExpirationDate >= today from w_rd_registration, w_rd_to_be_checked_in, w_rd_to_be_checked_out. Expiring State / To Be Checked Out add **Expired** bucket when DaysRemaining < 0.
+
+**Files:** SqlViews + updaters, ReportDashboardCatalog.cs, VwRdRegistration.cs
+## 2026-07-27 — Check in by Project (P)/(V)
+
+**Ask:** Add Check in by Project as first Registration sub-report with (P)/(V) twin; same population as Check in by City; projects with data only; pin before City.
+
+**Change:** Keys check-in-by-project / check-in-by-period-category-type; Status = Project / Period · Category · Type (PCT from Application via ApplicationItem); shared check-in population path with City; DefaultSubReport becomes Project (P).
+
+**Files:** Catalog, QueryService, Mock, PropertyEditor, UiStrings (+ regenerate), reference.md
+## 2026-07-27 — Active Registered rename
+
+**Ask:** Rename Check in by Project (P)/(V) → Active Registered (P)/(V); City unchanged; keys unchanged.
+
+**Files:** Catalog, UiStrings (+ regenerate), Mock comments, reference.md
+## 2026-07-27 — Active Registered (C) first
+
+**Ask:** Rename Check in by City → Active Registered (C); place as first Registration tab (before P/V).
+
+**Files:** Catalog, UiStrings (+ regenerate), Mock comment, reference.md
+## 2026-07-27 — Remove Registration ApplicationType tabs
+
+**Ask:** Remove Check-In, Check-Out, Address Change, Passport Change, Check-In (Internal), Check-Out (Internal), Visa Change sub-reports.
+
+**Change:** Catalog keeps only App_Reg_ext (Extension) among ApplicationType tabs. Active Registered / Expiring / To Be Checked* unchanged (population still uses active-reg type names).
+
+**Files:** ReportDashboardCatalog.cs, reference.md
+## 2026-07-27 — Registration default chart = bar
+
+**Ask:** Bar chart default for all Registration sub-reports.
+
+**Change:** DefaultChartViewFor uses (Registration, _) => bar (was pie for Active Registered C/P/V).
+
+**Files:** ReportDashboardPropertyEditor.cs
+
+## 2026-07-27 — Active Registered (V) used Application.VisaType
+
+**Symptom:** All Active Registered (V) rows showed WP — Work visa (one chart bucket).
+
+**Cause:** Period · Category · Type was built from registration `Application.VisaPeriod/Category/Type`. Registration apps default/copy WP even when `CurrentVisa.VisaType` is FM (etc.).
+
+**Fix:** Keep Period from Application (Visa has no VisaPeriod); take Category + Type from `ApplicationItem.CurrentVisa`.
+
+**Verify:** Local PG — ~254 WP + ~58 FM in Valid visa only population (was 100% WP via Application).
+
+## 2026-07-27 — Remove Registration Extension sub-report
+
+**Ask:** Remove Extension tab from Registration category.
+
+**Change:** Dropped `RegistrationApplicationTypeSubReports` / `App_Reg_ext` from catalog tabs and loader dispatch. `App_Reg_ext` remains in Active Registered / Expiring State population type list. Removed `ReportDashboard.SubReport.App_Reg_ext` UI string.
+
+## 2026-07-27 — Registration On process sub-report
+
+**Ask:** New Registration tab "On process" (last): all App_Reg_* ApplicationItems whose Application is unfinished (same terminal excludes as Invitation Process); Status = ApplicationType · ProcessState; grain = ApplicationItem.
+
+**Change:** Catalog key `on-process`; EF loader `LoadRegistrationOnProcess` (LatestPrimaryStateCode; StatusListLabel via ResolveInvitationProcessResultStateLabel); mock + localization; pin after To Be Checked Out.
+
+## 2026-07-27 — Remove Valid visa only from Registration
+
+**Ask:** Drop Valid visa only checkbox/filter for Registration category.
+
+**Change:** Removed Registration from `SupportsValidVisaPersonsOnly` (hides chrome + skips `validVisaPersonIds` in loaders).
+
+## 2026-07-27 — Active WorkPermit (P)
+
+**Ask:** New WorkPermit first tab Active WorkPermit (P); rename By Days Remaining → WorkPermit Validity; only (P) twin; same population as Validity; Status = Project; extend one-last-valid toggle; mock-first then SQL.
+
+**Change:**
+- Catalog: `active-by-project` first, `by-days-remaining` = WorkPermit Validity, `by-status` kept
+- Mock `WorkPermitActiveByProject`; PropertyEditor bar default; localization `WorkPermit.active-by-project` / `WorkPermit.by-days-remaining`
+- Real: `LoadWorkPermitActiveByProjectFromView` reuses `vw_rd_work_permit` (Status = Project + AssignCategoricalCss); Hybrid promotes `(WorkPermit, active-by-project)`; Overview default remaps to active-by-project
+- `SubReportCountsValidWorkPermits` includes active-by-project
+
+**Files:** Catalog, Mock, QueryService, HybridQueryService, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-27 — vw_rd_work_permit_active for Active WorkPermit (P)
+
+**Ask:** Dedicated SQL view for Active WorkPermit sub-report (not reuse validity view).
+
+**Change:**
+- `vw_rd_work_permit_active` (+ postgres): same valid-item population as `vw_rd_work_permit`; `StatusLabel` = Project (Person then sponsor); `(No project)` fallback
+- EF `VwRdWorkPermitActive` + DbContext; SqlViewsUpdater + ReportDashboardPostgresViewsUpdater
+- `LoadWorkPermitActiveByProjectFromView` queries new view; Validity still uses `vw_rd_work_permit`
+
+**Files:** SqlViews, VwRdWorkPermitActive.cs, Visa2026DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, ReportDashboardQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-27 — Active WorkPermit (P) showed validity buckets
+
+**Symptom:** Chart/table Status = Valid (>90 days) / Valid (31-90 days) instead of Project.
+
+**Cause:** `vw_rd_work_permit_active` missing → catch fell through to `LoadWorkPermitLegacy`, which always buckets with `PassportValidityBucket`.
+
+**Fix:** Active loader always Status = Project: primary active view → fallback `vw_rd_work_permit` (Project status) → `LoadWorkPermitActiveByProjectLegacy`; use `IsMissingReportDashboardView` (PG + SQL Server).
+
+**Files:** ReportDashboardQueryService.cs, learnings.md
+## 2026-07-27 — WorkPermit Extension (P) mock
+
+**Ask:** WorkPermit Extension (P) like Visa Extension (P); only (P); mock first.
+
+**Agreed rules:**
+- Types: `App_WP_Ext` + `App_Visa_and_WP_Ext`; require `CurrentWorkPermitItem`
+- Exclude PROCESS_ISSUED / CANCELLED / REJECTED + 1st/2nd Review Rejected
+- Status = Project · ProcessState; tab after Active, before Validity
+
+**Change:** Catalog key `on-extension`; mock `WorkPermitOnExtensionByProject`; bar default; localization `WorkPermit.on-extension`; `WorkPermitExtensionApplicationTypeNames` for later SQL. Not in Hybrid RealSubReports yet.
+
+**Files:** Catalog, Mock, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+## 2026-07-27 — WorkPermit Extension Result (P) mock
+
+**Ask:** Extension Result (P) like Visa; only (P); mock first.
+
+**Agreed rules:**
+- Same types + `CurrentWorkPermitItem` as WorkPermit Extension
+- Outcomes: PROCESS_ISSUED / CANCELLED / REJECTED + 1_REVIEW_REJECTED / 2_REVIEW_REJECTED
+- Status = Project · ProcessState; tab after Extension, before Validity
+
+**Change:** Catalog key `extension-result`; mock `WorkPermitExtensionResultByProject`; `WorkPermitExtensionResultStateCodes`; bar default; localization. Not in Hybrid RealSubReports yet.
+
+**Files:** Catalog, Mock, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+## 2026-07-27 — vw_rd_work_permit_app_progress for Extension Result (P)
+
+**Ask:** SQL view for WorkPermit Extension Result (P).
+
+**Change:**
+- `vw_rd_work_permit_app_progress` (+ postgres): ApplicationItems on `App_WP_Ext` / `App_Visa_and_WP_Ext` with `CurrentWorkPermitItem`; latest progress state
+- EF `VwRdWorkPermitAppProgress`; updaters; `LoadWorkPermitExtensionResultFromView` filters Issued/Cancelled/Rejected + 1st/2nd Review Rejected; Status = Project · ProcessState; Hybrid promote `(WorkPermit, extension-result)`
+- Shared view ready for WorkPermit Extension (P) later (exclude those codes)
+
+**Files:** SqlViews, VwRdWorkPermitAppProgress.cs, DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, QueryService, HybridQueryService, reference.md, IMPLEMENTATION_PLAN.md
+## 2026-07-28 — Visa Extension Required (P)/(V) mock
+
+**Ask:** Extension Required (P)/(V) for Visa; mock only.
+
+**Agreed rules:**
+- Valid last visa per person not already on unfinished Visa Extension app
+- (P) Status = Project; (V) = Period · Category · Type; columns like Active Visa
+- Tab order: after Active, before Visa Extension
+
+**Change:** Catalog keys `extension-required` / `extension-required-by-period-category-type`; mock row sets; bar defaults; localization. Not in Hybrid RealSubReports.
+
+**Files:** Catalog, Mock, PropertyEditor, UiStrings.messages.json (+ regenerate), reference.md
+## 2026-07-28 — vw_rd_visa_extension_required for Extension Required (P)/(V)
+
+**Ask:** SQL view for Visa Extension Required (P)/(V).
+
+**Change:**
+- `vw_rd_visa_extension_required` (+ postgres): last valid visa per person (ExpirationDate DESC); exclude people with unfinished Visa Extension app (`App_Visa_Ext*` / `App_Visa_and_WP_Ext`, latest progress <> PROCESS_ISSUED); Period/Category/Type labels for (V)
+- EF `VwRdVisaExtensionRequired`; `LoadVisaExtensionRequiredFromView`; Hybrid promote both keys
+- (P) Status = Project; (V) = Period · Category · Type
+
+**Files:** SqlViews, VwRdVisaExtensionRequired.cs, DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, QueryService, HybridQueryService, reference.md
+## 2026-07-28 — Extension Required empty on Postgres (CurrentVisaId)
+
+**Symptom:** Extension Required (P)/(V) Total Records = 0; Active Visa ~340; local Postgres (`visa2026`).
+
+**Cause:** `vw_rd_visa_extension_required` never created. Postgres DDL used `"CurrentVisaID"` but the column is `"CurrentVisaId"` (same as `vw_rd_visa_app_progress`). Create failed / was skipped; loader fell through to `EmptyPanel`.
+
+**Fix:**
+- Correct `"CurrentVisaId"` in `.postgres.sql` + `ReportDashboardPostgresViewsUpdater`
+- Created view locally via psql → **342** rows (last valid visa minus unfinished extension people)
+- Loader fallback: if view missing, derive from `vw_rd_visa_by_period` + unfinished people from `vw_rd_visa_app_progress`
+
+**Watch-out:** On Postgres always use `ApplicationItems."CurrentVisaId"` (not `CurrentVisaID`). After adding views, create via psql immediately if ModuleInfo already current (updater may not re-run).
+## 2026-07-28 — Extension Required Status = exact days remaining
+
+**Ask:** Group Extension Required (P)/(V) by days left; no Project / Period grouping; every distinct day count is its own state; sort fewest days first.
+
+**Change:** Loader Status = `"N days"` from `ExpirationDate - today` (exact); buckets/list ordered by days ascending; table header "Days Remaining"; mock aligned. (P) and (V) share the same Status grain.
+
+**Files:** ReportDashboardQueryService.cs, Catalog, MockQueryService, reference.md
+## 2026-07-28 — Extension Required: drop (P)/(V) project tabs
+
+**Ask:** Remove project grouping / (P) for Extension Required; days-remaining status already in place.
+
+**Change:** Single tab `extension-required` labeled "Extension Required"; removed `Extension Required (V)` from catalog; localization without (P)/(V). Legacy V key still loads same panel.
+
+**Files:** Catalog, Hybrid, PropertyEditor, Mock, UiStrings + VisaUiMessageCatalog.g.cs, reference.md
+## 2026-07-28 — Extension Required nearest days milestone
+
+**Ask:** Exact day buckets too many; snap to closest match.
+
+**Change:** Status snaps to nearest of `0 · 7 · 14 · 30 · 60 · 90 · 180 · 365` (0 only when remaining is 0; else 7+; tie → lower/more urgent). Bars still urgent-first.
+
+**Files:** ReportDashboardQueryService.cs, MockQueryService, reference.md
+## 2026-07-28 — Extension Required preview: exact Days Remaining column
+
+**Ask:** Add DaysRemaining column to Extension Required list (preview table).
+
+**Change:** Headers `Name · Project · Visa # · Expiry · Days Remaining · Status`; `ColumnC` = exact day count; Status remains nearest milestone (chart grouping). Razor renders ColumnC when headers ≥ 6.
+
+**Files:** ReportDashboardModels, Catalog, QueryService, Mock, ReportDashboardComponent.razor
+## 2026-07-28 — Days Remaining column on more Visa subreports
+
+**Ask:** Same exact Days Remaining column as Extension Required for Active Visa (P)/(V), Visa Extension (P)/(V), Visa Validity.
+
+**Change:** Headers insert Days Remaining before Status; `ColumnC` from expiry (Active/Validity) or `CurrentVisa.ExpirationDate` (On Extension). Razor already renders ColumnC when headers ≥ 6.
+
+**Files:** Catalog, QueryService, MockQueryService
+## 2026-07-28 — Preview table pagination
+
+**Ask:** Paginate dashboard preview list (Prev/Next + page size); table lacked all rows / scroll.
+
+**Change:** `PreviewLimit` raised to 10_000; client-side pager (25/50/100/200) with range label; scrollable sticky-header table body. Page resets on category/sub-report/filter change.
+
+**Files:** ReportDashboardQueryService.cs, ReportDashboardComponent.razor, report-dashboard.css, UiStrings + VisaUiMessageCatalog.g.cs
+## 2026-07-28 — Preview actions toolbar + subreport-aware Open ListView/Excel
+
+**Ask:** Keep Total Records in report header; move Open in Excel / Open ListView above the preview table; make actions follow the active sub-report (Visa BO vs VisaExtensionStatus).
+
+**Change:**
+- Buttons relocated to `.rd-preview-actions` above the preview table (header keeps Total only).
+- `ResolveListViewTarget` / `UsesVisaBoListView`: Active Visa, Extension Required, Visa Validity → `Visa_ListView`; On Extension / Extension Result → `VisaExtensionStatus_ListView`.
+- `ExcelTemplateNameHint(category, subReport)` ready for per-subreport templates (Visa still `433_gurlusyk_uzt` until separate seeds).
+- `BuildListCriteria(..., subReport)`: Visa path via `Passport.Person`, valid-visa base filter, milestone/validity/project/category·type status windows; extension status parses `Project · State` composites.
+- PropertyEditor Excel/ListView handlers use `ComponentModel.SubReport`; panel `ListViewId` from `ResolveListViewTarget`.
+
+**Files:** ReportDashboardComponent.razor, report-dashboard.css, ReportDashboardCatalog.cs, ReportDashboardPropertyEditor.cs, QueryService + Mock BuildPanel, reference.md
+## 2026-07-28 — Unify On Extension preview + Open ListView on vw_rd_visa_app_progress
+
+**Ask:** Preview and Open ListView must share the same SQL view; source of truth is dashboard `vw_rd_*` (not View_VisaExtensionStatus).
+
+**Change:**
+- Enriched `vw_rd_visa_app_progress` with ExpiringVisaID, PassportID, CurrentStateID, StatusDate, DaysRemainingOnVisa (SQL Server + Postgres + updaters).
+- Promoted `VwRdVisaAppProgress` to XAF read-only BO (`NavigationItem(false)`) with FKs; ListView `VwRdVisaAppProgress_ListView` curated columns (hide GUID/raw fields).
+- `ResolveListViewTarget` / `BuildListCriteria` for on-extension / extension-result → `VwRdVisaAppProgress` + population filters matching loaders.
+- Preview still loads `VwRdVisaAppProgress`; Days Remaining from view column.
+- Users role: Read on `VwRdVisaAppProgress`. Nav Ministry1/2 stays on `VisaExtensionStatus`.
+
+**Files:** VwRdVisaAppProgress.cs, SqlViews, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater, DbContext, Catalog, QueryService, Model.xafml, Updater.cs, IMPLEMENTATION_PLAN.md
+## 2026-07-28 — Active Visa Open ListView uses vw_rd_visa_by_period (not Visa BO)
+
+**Symptom:** Open ListView from Active Visa (P) opened editable `Visa_ListView` (521 rows) while preview Total was 380 (`vw_rd_visa_by_period` + one-last-valid).
+
+**Change:** Promote `VwRdVisaByPeriod` / `VwRdVisaExtensionRequired` / `VwRdVisaByDaysRemaining` as dashboard ListView BOs. Enrich `vw_rd_visa_by_period` with PassportID, DaysRemaining, IsOneLastValidPerPerson. `ResolveListViewTarget` + `BuildListCriteria(..., oneLastValidVisaPerPerson)` align Open ListView with preview filters.
+
+**Files:** VwRdVisa*.cs, vw_rd_visa_by_period*.sql, updaters, Catalog, PropertyEditor, Model.xafml, Updater, DbContext
+## 2026-07-28 — Postgres 42703 DaysRemaining missing on vw_rd_visa_by_period
+
+**Symptom:** `PostgresException 42703: column v.DaysRemaining does not exist` in `LoadVisaActiveByProjectFromView` — EF mapped new columns but live Postgres view was stale (ModuleUpdater skipped while ModuleInfo current).
+
+**Fix:** Reapplied `vw_rd_visa_by_period.postgres.sql` + `vw_rd_visa_app_progress.postgres.sql` to local `visa2026`. Added host-start heal `ReportDashboardPostgresViewsHealSql.ApplyIfMissing` (sentinel column check → recreate from embedded `.postgres.sql`) wired in `Startup.cs` for Postgres.
+
+**Lesson:** After enriching `vw_rd_*` views, either bump ModuleInfo / FORCE_XAF_DB_UPDATE or keep a startup heal — otherwise Demo Postgres keeps the old view definition.
+## 2026-07-28 — Skill: Preview ↔ SQL view ↔ XAF ListView contract (all categories)
+
+**Rules:** SQL view = source of truth for Open ListView; one subreport → one `vw_rd_*` + one ListView; ListView columns/Total match Preview; caption = Label; Excel same population. Scope: all Report categories.
+
+**(P)/(V):** shared population via base + thin public wrappers (no hand-duplicated business SQL); still two public views + two ListViews.
+
+**Naming:** prefer key-aligned `vw_rd_{category}_{subreport_key}`.
+
+**Transitional debt:** existing shared Visa ListViews (e.g. Active P/V on `vw_rd_visa_by_period`) noted in SKILL; split when those tabs are reworked — skill update only this pass.
+
+**Files:** SKILL.md, reference.md, IMPLEMENTATION_PLAN.md
+
+---
+
+## 2026-07-28 — Visa per-subreport dedicated BOs wired
+
+**Change:** Wired six new Visa Report Dashboard BOs (Active P/V, On Extension P/V, Extension Result P/V) end-to-end:
+- DbContext `DbSet` + `ToView` + FKs (mirror ByPeriod / AppProgress)
+- `ResolveListViewTarget` maps each visa subreport key to its dedicated ListView (legacy by-category/by-type/by-period → Active V)
+- `BuildListCriteria`: Active* = IsArchived + role + optional IsOneLastValidPerPerson; OnExtension*/ExtensionResult* = IsArchived + role only (population in SQL wrappers); status clicks use `StatusLabel`
+- Query loaders read new dedicated views; Status = `StatusLabel` (no sibling joins / no ResolveVisaAppProgressStatusLabels on dedicated paths)
+- Officer + Users Read permissions on all 6 types
+- Postgres + SQL Server updaters create wrapper views after bases; HealSql recreates missing bases (sentinel) then wrappers (`to_regclass`); csproj embeds new `*.postgres.sql`
+- Model.xafml: 6 ListViews with captions = catalog Labels; Extension Required / Visa Validity captions updated; DaysRemaining on Extension Required
+
+**Kept:** Base `VwRdVisaByPeriod` / `VwRdVisaAppProgress` mapped (fallback / sibling heal / extension-required fallback).
+
+**Verify:** `dotnet build Visa2026.slnx -c Debug` — 0 errors. Runtime: restart app / FORCE_XAF_DB_UPDATE or rely on HealSql so wrappers exist before opening Active Visa (P)/(V) / Extension tabs.
+
+**Files:** `Visa2026DbContext.cs`, `ReportDashboardCatalog.cs`, `ReportDashboardQueryService.cs`, `Updater.cs`, `ReportDashboardPostgresViewsUpdater.cs`, `SqlViewsUpdater.cs`, `ReportDashboardPostgresViewsHealSql.cs`, `Visa2026.Module.csproj`, `Model.xafml`.
+
+## 2026-07-28 — Visa category: one subreport → one view → one ListView
+
+**Contract:** Per SKILL Preview ↔ `vw_rd_*` ↔ XAF ListView.
+
+**Change:**
+- Base population kept: `vw_rd_visa_by_period`, `vw_rd_visa_app_progress`.
+- Public wrappers + BOs + ListViews (caption = Label):
+  - Active Visa (P)/(V): `vw_rd_visa_active_by_project` / `…_by_period_category_type`
+  - Visa Extension (P)/(V): `vw_rd_visa_on_extension` / `…_by_period_category_type` (excludes PROCESS_ISSUED)
+  - Extension Result (P)/(V): `vw_rd_visa_extension_result` / `…_by_period_category_type` (terminal codes)
+- Extension Required / Visa Validity: dedicated ListViews already; captions fixed; `DaysRemaining` added to extension-required view.
+- Catalog `ResolveListViewTarget` + criteria; loaders read dedicated DbSets; Status from view `StatusLabel` where wired.
+- Postgres heal embeds wrappers; local Postgres views applied.
+
+**Verify:** Restart app; for each Visa sub-tab, Preview Total == Open ListView Total; captions match Labels.
+
+## 2026-07-28 — DxGridListEditor AddColumnCore NRE on dashboard ListViews
+
+**Symptom:** Opening Report Dashboard Visa Open ListView → `NullReferenceException` in `DxGridListEditorBase.AddColumnCore`.
+
+**Cause:** `Model.xafml` `ColumnInfo` nodes for members marked `[Browsable(false)]` (FK ids, navigations, StatusCssClass, etc.). XAF does not create `ModelMember` for those → `AddColumnCore` NREs. Same risk when a ListView column targets a navigation that was hidden with `[Browsable(false)]` while `ColumnInfo Id="Person"` remained.
+
+**Fix:**
+- Dedicated Visa ListViews: only browsable scalar columns (`PersonName` caption Person, Project, Visa # / App #, dates, Days Remaining, StatusLabel).
+- Do **not** emit `Index="-1"` ColumnInfo for non-browsable members.
+- ~~Keep Person/Passport/Application navigations `[Browsable(false)]`~~ **Superseded 2026-07-28:** use browsable navigations for DetailView links; hide Preview scalars instead (see later entry + `reference.md` Column contract). Temporary scalar-only columns avoided `AddColumnCore` NRE until navigations were made browsable.
+- Also slimmed legacy `VwRdVisaAppProgress_ListView` / `VwRdVisaByPeriod_ListView` (removed Index=-1 browsable-false columns).
+
+**Verify:** Restart F5 (Model.xafml), Open ListView on each Visa sub-tab — no NRE; Preview Total == ListView Total.
+
+**Files:** `Visa2026.Blazor.Server/Model.xafml`, `VwRdVisaActive*` / `OnExtension*` / `ExtensionResult*` / `ExtensionRequired` / `ByDaysRemaining` BOs.
+
+## 2026-07-28 — Visa On Extension rename + terminal population split
+
+**Ask:** Rename Visa Extension (P)/(V) → Visa On Extension (P)/(V). On Extension must not include final Application Process states; `*_REVIEW_REJECTED` counts as final and belongs in Extension Result.
+
+**Change:**
+- Catalog / localization / BO / ListView captions → **Visa On Extension (P)/(V)** (keys unchanged).
+- On Extension wrappers (`vw_rd_visa_on_extension*`) exclude `PROCESS_ISSUED` / `PROCESS_CANCELLED` / `PROCESS_REJECTED` / `*_REVIEW_REJECTED` (null/empty still in-flight).
+- Extension Result wrappers include those terminal codes (incl. `RIGHT(...,16) = '_REVIEW_REJECTED'`).
+- Extension Required “unfinished” exclusion uses the same terminal set (so cancelled/rejected people reappear).
+- `ApplicationProgressStateCodes.IsTerminalOutcome` + `BuildVisaAppProgressPopulationCriteria` aligned.
+
+**Verify (local PG):** `on_ext(151) + ext_result(2916) = base(3067)`; zero terminal rows in On Extension; zero non-terminal in Extension Result.
+
+**Files:** SqlViews `vw_rd_visa_on_extension*`, `vw_rd_visa_extension_result*`, `vw_rd_visa_extension_required*`; SqlViewsUpdater / PostgresViewsUpdater; Catalog; QueryService; Model.xafml; UiStrings + VisaUiMessageCatalog.g.cs.
+
+## 2026-07-28 — On Extension still showed Cancelled/Issued (LatestPrimaryStateCode)
+
+**Symptom:** After terminal-code filter, Visa On Extension chart still showed `Project · Cancelled` / `Issued`.
+
+**Cause:** `vw_rd_visa_app_progress.ProgressStateCode` used **latest ApplicationProgresses row** `ApplicationStates.Code`, which can lag (e.g. still `PROCESS_STARTED`) while `Applications.LatestPrimaryStateCode` / `LatestProgressDisplay` already say `PROCESS_CANCELLED` / Cancelled. StatusLabel preferred `LatestProgressDisplay`, so UI showed Cancelled while the WHERE on ProgressStateCode missed it.
+
+**Fix:** Prefer `COALESCE(LatestPrimaryStateCode, ast.Code)` for ProgressStateCode (+ CSS); Extension Required unfinished uses `LatestPrimaryStateCode`; heal recreates app-progress dependents when On Extension still has terminal primary codes.
+
+**Verify (local PG):** On Extension **91** all `PROCESS_STARTED`/`Processing`; Result **2976**; `91+2976=3067`; zero Cancelled/Issued labels in On Extension.
+
+## 2026-07-28 — Visa Validity Preview 380 ≠ Open ListView (one-last toggle)
+
+**Symptom:** Visa Validity Preview Total **380** (One last valid visa per person checked) did not match Open ListView.
+
+**Cause:** Preview applied one-last in C# (`TakeOneLastValidVisaPerPerson`). `vw_rd_visa_by_days_remaining` / `VwRdVisaByDaysRemaining` had **no** `IsOneLastValidPerPerson`, and `BuildListCriteria` only applied that flag for Active Visa views — ListView opened all valid visas (**512**).
+
+**Fix:** Add `IsOneLastValidPerPerson` to `vw_rd_visa_by_days_remaining` (same window as by-period); BO + heal sentinel; criteria `(usesVisaActive || usesByDays)`; loader filters `Where(IsOneLastValidPerPerson)`.
+
+**Verify (local PG):** all **512** / one-last **380**.
+## 2026-07-28 — Passport column on all Visa category Preview + ListViews
+
+- **Request:** Add Passport to every Visa category Preview table and Open ListView.
+- **Approach:** Scalar `PassportNumber` (caption Passport / header Passport #) — not browsable Passport navigation (avoids `AddColumnCore` NRE).
+- **SQL:** `PassportNumber` on `vw_rd_visa_by_period`, active wrappers, `by_days_remaining`, `extension_required`, `app_progress` (+ `LEFT JOIN Passports` on `CurrentPassportID`), on_extension / extension_result wrappers. `by_period` PG drop uses `CASCADE`.
+- **Preview:** Headers insert Passport # after Project; `ColumnD` for 7-col layouts (Active / Ext Required / Validity / On Extension). Extension Result stays 6-col (Passport # + App # + App Date + Status).
+- **ListView:** `PassportNumber` after `ProjectName` on all dedicated Visa `VwRd*` ListViews in `Model.xafml`.
+- **Heal:** Sentinel `PassportNumber`; `NeedsVisaPassportNumberHeal` recreates by_period + days + app_progress chains. Embedded `vw_rd_visa_by_days_remaining.postgres.sql`.
+- **Verified:** Local PG views reapplied; Active PassportNumber sample rows present; Module build 0 errors.
+## 2026-07-28 — Native XAF DetailView links on Visa dashboard ListViews
+
+- **Request:** Click Passport / Visa / Person (any linked object) on Open ListView to open domain DetailView.
+- **Approach:** Native reference columns — browsable navigations (`Person`, `Passport`, `Visa`, `Application`), not scalar strings. Preview keeps reading `PersonName` / `PassportNumber` / `VisaNumber` / `ApplicationNumber` (now `[Browsable(false)]`).
+- **Visa-row views** (Active, Validity, Extension Required, ByPeriod): added `Visa` nav with FK = row `ID` (view key is Visa.ID); EF `HasOne(...Visa).HasForeignKey(t => t.ID)`.
+- **App-progress views** (On Extension, Extension Result): browsable `Application` / `Person` / `Passport`; `ApplicationNumber` hidden.
+- **Model.xafml:** `PersonName`→`Person`, `PassportNumber`→`Passport`, `VisaNumber`→`Visa`, `ApplicationNumber`→`Application`. Never `ColumnInfo` on `[Browsable(false)]` (`AddColumnCore` NRE).
+- **Verified:** Module build 0 errors. Restart Blazor host to pick up DLL + model.
+
+## 2026-07-28 — Loading feedback: Open ListView + DetailView links
+
+- **Open ListView:** `OnOpenListView` sets `IsLoading` + `LoadingProgressPercent = -1` (indeterminate bar) + `OpeningListView` message, `await Task.Delay(16)` so overlay paints, then `ShowView`. Excel / Open ListView buttons disabled while `ShowLoading`.
+- **DetailView from Visa ListViews:** `ReportDashboardListViewOpenFeedbackController` on `VwRdVisa*_ListView` — toast via `ShowMessage` on `ListViewProcessCurrentObjectController.Executing` and on `Application.ViewShowing` (DetailView, SourceFrame = ListView frame) for reference-column navigations. `OpenObjectController` is not in ExpressApp 25.2; ViewShowing covers object links.
+- **Loc:** `ReportDashboard.Chrome.OpeningListView`, `OpeningDetail` in messages.json + catalog.
+- **Files:** PropertyEditor, Component.razor, report-dashboard.css, Model LoadingProgressPercent comment, new Module controller.
+## 2026-07-28 — Reference-column open toast needs Blazor NavigationManager
+
+- **Symptom:** Open ListView overlay worked; clicking Person/Passport/Visa/Application links showed no toast.
+- **Cause:** Blazor ListView reference cells are HTML `ShowLink` navigations (`LookupPropertyEditor`/`ObjectPropertyEditor`), not `OpenObjectController` / `ViewShowing` with SourceFrame. ExpressApp 25.2 has no OpenObjectController hook for this path.
+- **Fix:** Move feedback to Blazor `ReportDashboardListViewOpenFeedbackController` using `NavigationManager.RegisterLocationChangingHandler` when target path contains `_DetailView`. Keep ProcessCurrentObject.Executing for row activation. Removed Module ViewShowing controller.
+## 2026-07-28 — Removed reference DetailView Opening toast (defer)
+
+- Toast via `NavigationManager.LocationChanging` appeared **after** the DetailView was already visible — not useful as loading feedback.
+- Removed `Visa2026.Blazor.Server/Controllers/ReportDashboardListViewOpenFeedbackController.cs`. Open ListView overlay kept. Revisit reference-column busy UI later (likely needs earlier/client-side intercept).

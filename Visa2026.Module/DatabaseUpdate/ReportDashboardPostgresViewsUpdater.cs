@@ -23,19 +23,28 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewVisaExtensionStatus();
         CreateViewRdPassport();
         CreateViewRdWorkPermit();
+        CreateViewRdWorkPermitActive();
+        CreateViewRdWorkPermitAppProgress();
         CreateViewRdInvitationReady();
         CreateViewRdInvitationInProcess();
         CreateViewRdInvitationRejected();
         CreateViewRdInvitationUsed();
         CreateViewRdInvitationValidUntil();
         CreateViewRdVisaAppProgress();
+        CreateViewRdVisaOnExtension();
+        CreateViewRdVisaOnExtensionByPeriodCategoryType();
+        CreateViewRdVisaExtensionResult();
+        CreateViewRdVisaExtensionResultByPeriodCategoryType();
         CreateViewRdProjects();
         CreateViewRdPersonRoles();
         CreateViewRdVisaState();
         CreateViewRdVisaByCategory();
         CreateViewRdVisaByType();
         CreateViewRdVisaByPeriod();
+        CreateViewRdVisaActiveByProject();
+        CreateViewRdVisaActiveByPeriodCategoryType();
         CreateViewRdVisaByDaysRemaining();
+        CreateViewRdVisaExtensionRequired();
         CreateViewRdApplication();
         CreateViewRdEducation();
         CreateViewRdEducationByCountry();
@@ -231,7 +240,142 @@ WHERE COALESCE(wpi.""GCRecord"", 0) = 0
   AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
 ", true);
     }
-    private void CreateViewRdInvitationReady()
+
+    private void CreateViewRdWorkPermitActive()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_work_permit_active;", true);
+        ExecuteNonQueryCommand(@"
+CREATE VIEW vw_rd_work_permit_active AS
+SELECT
+    wpi.""ID""                                                                AS ""ID"",
+    p.""ID""                                                                  AS ""PersonOid"",
+    CONCAT_WS(' ',
+        NULLIF(BTRIM(p.""FirstName""), ''),
+        NULLIF(BTRIM(p.""MiddleName""), ''),
+        NULLIF(BTRIM(p.""LastName""), '')
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""ProjectName"",
+    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameRaw"",
+    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameTm"",
+    p.""PersonRole""                                                          AS ""PersonRoleCode"",
+    COALESCE(NULLIF(BTRIM(wpi.""WorkPermitNumber""), ''), NULLIF(BTRIM(wpi.""ASNumber""), ''), '') AS ""WorkPermitNumber"",
+    CASE WHEN (wpi.""ExpirationDate"")::date > DATE '1900-01-01' THEN wpi.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
+    COALESCE(
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        '(No project)'
+    )                                                                       AS ""StatusLabel"",
+    'st-cat-1'                                                              AS ""StatusCssClass"",
+    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+FROM ""WorkPermitItems"" wpi
+INNER JOIN ""People"" p
+    ON p.""ID"" = wpi.""PersonID""
+   AND COALESCE(p.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+WHERE COALESCE(wpi.""GCRecord"", 0) = 0
+  AND COALESCE(wpi.""IsCancelled"", FALSE) = FALSE
+  AND wpi.""PersonID"" IS NOT NULL
+  AND wpi.""ExpirationDate"" IS NOT NULL
+  AND (wpi.""ExpirationDate"")::date >= CURRENT_DATE;
+", true);
+    }
+
+        private void CreateViewRdWorkPermitAppProgress()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_work_permit_app_progress;", true);
+        ExecuteNonQueryCommand(@"
+-- Report Dashboard: WorkPermit Extension / Extension Result (PostgreSQL).
+CREATE VIEW vw_rd_work_permit_app_progress AS
+SELECT
+    ai.""ID""                                                                 AS ""ID"",
+    a.""ID""                                                                  AS ""ApplicationOid"",
+    p.""ID""                                                                  AS ""PersonOid"",
+    CONCAT_WS(' ',
+        NULLIF(BTRIM(p.""FirstName""), ''),
+        NULLIF(BTRIM(p.""MiddleName""), ''),
+        NULLIF(BTRIM(p.""LastName""), '')
+    )                                                                       AS ""PersonName"",
+    COALESCE(
+        NULLIF(BTRIM(pc.""NameTm""), ''),
+        NULLIF(BTRIM(spc.""NameTm""), ''),
+        ''
+    )                                                                       AS ""ProjectName"",
+    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameRaw"",
+    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                                 AS ""ProjectNameTm"",
+    p.""PersonRole""                                                          AS ""PersonRoleCode"",
+    COALESCE(
+        NULLIF(BTRIM(a.""FullApplicationNumber""), ''),
+        NULLIF(BTRIM(a.""ApplicationNumber""), ''),
+        ''
+    )                                                                       AS ""ApplicationNumber"",
+    a.""ApplicationDate""                                                     AS ""ApplicationDate"",
+    COALESCE(
+        NULLIF(BTRIM(a.""LatestPrimaryStateCode""), ''),
+        NULLIF(BTRIM(ast.""Code""), ''),
+        ''
+    )                                                                       AS ""ProgressStateCode"",
+    COALESCE(
+        NULLIF(BTRIM(a.""LatestProgressDisplay""), ''),
+        NULLIF(BTRIM(ast.""Name""), ''),
+        NULLIF(BTRIM(ast.""NameTm""), ''),
+        'Being Prepared'
+    )                                                                       AS ""ProgressStateLabel"",
+    CASE
+      WHEN ast.""Code"" IN ('PROCESS_ISSUED', '1_REVIEW_APPROVED', '2_REVIEW_APPROVED')
+                                                                             THEN 'st-approved'
+      WHEN ast.""Code"" IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED', '1_REVIEW_REJECTED', '2_REVIEW_REJECTED')
+                                                                             THEN 'st-expiring'
+      ELSE                                                                   'st-pending'
+    END                                                                     AS ""ProgressStateCssClass"",
+    COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
+FROM ""ApplicationItems"" ai
+INNER JOIN ""Applications"" a
+    ON a.""ID"" = ai.""ApplicationID""
+   AND COALESCE(a.""GCRecord"", 0) = 0
+INNER JOIN ""ApplicationTypes"" at
+    ON at.""ID"" = a.""ApplicationTypeID""
+   AND COALESCE(at.""GCRecord"", 0) = 0
+INNER JOIN ""People"" p
+    ON p.""ID"" = ai.""PersonID""
+   AND COALESCE(p.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" pc
+    ON pc.""ID"" = COALESCE(a.""ProjectContractID"", p.""ProjectContractID"")
+   AND COALESCE(pc.""GCRecord"", 0) = 0
+LEFT JOIN ""People"" sp
+    ON sp.""ID"" = p.""SponsoringEmployeeID""
+   AND COALESCE(sp.""GCRecord"", 0) = 0
+LEFT JOIN ""ProjectContracts"" spc
+    ON spc.""ID"" = sp.""ProjectContractID""
+   AND COALESCE(spc.""GCRecord"", 0) = 0
+LEFT JOIN LATERAL (
+    SELECT ap.""StateID""
+    FROM ""ApplicationProgresses"" ap
+    WHERE ap.""ApplicationID"" = a.""ID""
+      AND COALESCE(ap.""GCRecord"", 0) = 0
+    ORDER BY ap.""Date"" DESC, ap.""ID"" DESC
+    LIMIT 1
+) latest_ap ON TRUE
+LEFT JOIN ""ApplicationStates"" ast
+    ON ast.""ID"" = latest_ap.""StateID""
+   AND COALESCE(ast.""GCRecord"", 0) = 0
+WHERE COALESCE(ai.""GCRecord"", 0) = 0
+  AND ai.""CurrentWorkPermitItemID"" IS NOT NULL
+  AND at.""Name"" IN (
+        'App_WP_Ext',
+        'App_Visa_and_WP_Ext'
+    );
+", true);
+    }
+private void CreateViewRdInvitationReady()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_ready;", true);
         ExecuteNonQueryCommand(@"
@@ -395,7 +539,15 @@ WHERE COALESCE(a.""GCRecord"", 0) = 0
     )
   AND (
         ast.""Code"" IS NULL
-        OR ast.""Code"" NOT IN ('PROCESS_ISSUED', 'PROCESS_REJECTED', 'PROCESS_CANCELLED')
+        OR ast.""Code"" NOT IN (
+            'PROCESS_ISSUED',
+            'PROCESS_REJECTED',
+            'PROCESS_CANCELLED',
+            '1_REVIEW_REJECTED',
+            '2_REVIEW_REJECTED',
+            '3_REVIEW_REJECTED',
+            '4_REVIEW_REJECTED',
+            '5_REVIEW_REJECTED')
       );
 ", true);
     }
@@ -663,11 +815,16 @@ WHERE COALESCE(ii.""GCRecord"", 0) = 0
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_app_progress;", true);
         ExecuteNonQueryCommand(@"
--- Report Dashboard: Visa — Application Progress (PostgreSQL).
+-- Report Dashboard: Visa — Application Progress (PostgreSQL; shared preview + Open ListView).
 CREATE VIEW vw_rd_visa_app_progress AS
 SELECT
     ai.""ID""                                                                 AS ""ID"",
+    a.""ID""                                                                  AS ""ApplicationOid"",
     p.""ID""                                                                  AS ""PersonOid"",
+    ai.""CurrentVisaId""                                                      AS ""ExpiringVisaID"",
+    ai.""CurrentPassportID""                                                  AS ""PassportID"",
+    COALESCE(NULLIF(BTRIM(pp.""PassportNumber""), ''), '')                     AS ""PassportNumber"",
+    latest_ap.""StateID""                                                     AS ""CurrentStateID"",
     CONCAT_WS(' ',
         NULLIF(BTRIM(p.""FirstName""), ''),
         NULLIF(BTRIM(p.""MiddleName""), ''),
@@ -687,9 +844,16 @@ SELECT
         ''
     )                                                                       AS ""ApplicationNumber"",
     a.""ApplicationDate""                                                     AS ""ApplicationDate"",
+    latest_ap.""Date""                                                        AS ""StatusDate"",
     COALESCE(
-        NULLIF(BTRIM(ast.""NameTm""), ''),
+        NULLIF(BTRIM(a.""LatestPrimaryStateCode""), ''),
+        NULLIF(BTRIM(ast.""Code""), ''),
+        ''
+    )                                                                       AS ""ProgressStateCode"",
+    COALESCE(
+        NULLIF(BTRIM(a.""LatestProgressDisplay""), ''),
         NULLIF(BTRIM(ast.""Name""), ''),
+        NULLIF(BTRIM(ast.""NameTm""), ''),
         'Being Prepared'
     )                                                                       AS ""ProgressStateLabel"",
     CASE
@@ -699,6 +863,12 @@ SELECT
                                                                              THEN 'st-expiring'
       ELSE                                                                   'st-pending'
     END                                                                     AS ""ProgressStateCssClass"",
+    CASE
+        WHEN COALESCE(v.""IsCancelled"", FALSE) THEN 0
+        WHEN v.""ExpirationDate"" IS NULL THEN 0
+        WHEN (v.""ExpirationDate""::date - CURRENT_DATE) < 0 THEN 0
+        ELSE (v.""ExpirationDate""::date - CURRENT_DATE)
+    END                                                                     AS ""DaysRemainingOnVisa"",
     COALESCE(p.""IsArchived"", FALSE)                                         AS ""IsArchived""
 FROM ""ApplicationItems"" ai
 INNER JOIN ""Applications"" a
@@ -719,8 +889,14 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID""
    AND COALESCE(spc.""GCRecord"", 0) = 0
+LEFT JOIN ""Visas"" v
+    ON v.""ID"" = ai.""CurrentVisaId""
+   AND COALESCE(v.""GCRecord"", 0) = 0
+LEFT JOIN ""Passports"" pp
+    ON pp.""ID"" = ai.""CurrentPassportID""
+   AND COALESCE(pp.""GCRecord"", 0) = 0
 LEFT JOIN LATERAL (
-    SELECT ap.""StateID""
+    SELECT ap.""StateID"", ap.""Date""
     FROM ""ApplicationProgresses"" ap
     WHERE ap.""ApplicationID"" = a.""ID""
       AND COALESCE(ap.""GCRecord"", 0) = 0
@@ -1001,12 +1177,13 @@ WHERE COALESCE(v.""GCRecord"", 0) = 0
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_by_period;", true);
         ExecuteNonQueryCommand(@"
--- Report Dashboard: valid visas by nearest granted period (StartDate → ExpirationDate).
--- Chart labels: 1 month / 3 months / 6 months / 1 year. Valid visas only. No start/end columns in UI.
+-- Report Dashboard: valid visas by nearest granted period (PostgreSQL).
+-- Shared by Active Visa (P)/(V) preview and Open ListView (VwRdVisaByPeriod).
 CREATE VIEW vw_rd_visa_by_period AS
 SELECT
     x.""ID"",
     x.""PersonOid"",
+    x.""PassportID"",
     x.""PersonName"",
     x.""ProjectName"",
     x.""ProjectNameRaw"",
@@ -1023,11 +1200,15 @@ SELECT
         WHEN '6 months'  THEN 'st-cat-3'
         ELSE                  'st-cat-4'
     END                                                                 AS ""StatusCssClass"",
+    GREATEST(0, (x.""ExpirationDate"")::date - CURRENT_DATE)              AS ""DaysRemaining"",
+    (x.""Rn"" = 1)                                                        AS ""IsOneLastValidPerPerson"",
     x.""IsArchived""
 FROM (
     SELECT
         v.""ID""                                                          AS ""ID"",
         p.""ID""                                                          AS ""PersonOid"",
+        v.""PassportID""                                                  AS ""PassportID"",
+        COALESCE(NULLIF(BTRIM(pp.""PassportNumber""), ''), '')           AS ""PassportNumber"",
         CONCAT_WS(' ',
             NULLIF(BTRIM(p.""FirstName""), ''),
             NULLIF(BTRIM(p.""MiddleName""), ''),
@@ -1063,7 +1244,11 @@ FROM (
                 THEN '6 months'
             ELSE '1 year'
         END                                                             AS ""PeriodLabel"",
-        COALESCE(p.""IsArchived"", FALSE)                                 AS ""IsArchived""
+        COALESCE(p.""IsArchived"", FALSE)                                 AS ""IsArchived"",
+        ROW_NUMBER() OVER (
+            PARTITION BY p.""ID""
+            ORDER BY v.""ExpirationDate"" DESC NULLS LAST, v.""ID"" DESC
+        )                                                               AS ""Rn""
     FROM ""Visas"" v
     INNER JOIN ""Passports"" pp
         ON pp.""ID"" = v.""PassportID""
@@ -1087,81 +1272,470 @@ FROM (
       AND v.""StartDate"" IS NOT NULL
       AND (v.""StartDate"")::date > DATE '1900-01-01'
 ) x;
+
 ", true);
     }
+
     private void CreateViewRdVisaByDaysRemaining()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_by_days_remaining;", true);
         ExecuteNonQueryCommand(@"
--- Report Dashboard: valid visas by days remaining until expiry (By Days Remaining).
--- Buckets: < 10 days / < 1 month / < 3..6 months / ≥ 6 months. Valid visas only.
+-- Report Dashboard: valid visas by days remaining until expiry (Visa Validity).
+-- IsOneLastValidPerPerson: latest ExpirationDate per person (ties: highest ID) — ListView/Preview toggle parity.
+DROP VIEW IF EXISTS vw_rd_visa_by_days_remaining;
 CREATE VIEW vw_rd_visa_by_days_remaining AS
 SELECT
-    v.""ID""                                                              AS ""ID"",
-    p.""ID""                                                              AS ""PersonOid"",
-    CONCAT_WS(' ',
-        NULLIF(BTRIM(p.""FirstName""), ''),
-        NULLIF(BTRIM(p.""MiddleName""), ''),
-        NULLIF(BTRIM(p.""LastName""), '')
-    )                                                                   AS ""PersonName"",
-    COALESCE(
-        NULLIF(BTRIM(pc.""NameTm""), ''),
-        NULLIF(BTRIM(spc.""NameTm""), ''),
-        ''
-    )                                                                   AS ""ProjectName"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                             AS ""ProjectNameRaw"",
-    COALESCE(pc.""NameTm"", spc.""NameTm"", '')                             AS ""ProjectNameTm"",
-    p.""PersonRole""                                                      AS ""PersonRoleCode"",
-    COALESCE(NULLIF(BTRIM(v.""VisaNumber""), ''), '')                     AS ""VisaNumber"",
-    CASE WHEN (v.""ExpirationDate"")::date > DATE '1900-01-01' THEN v.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
-    (v.""ExpirationDate"")::date - CURRENT_DATE                           AS ""DaysRemaining"",
-    CASE
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 10  THEN '< 10 days'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 120 THEN '< 4 months'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 150 THEN '< 5 months'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 180 THEN '< 6 months'
-        ELSE '≥ 6 months'
-    END                                                                 AS ""RemainingLabel"",
-    CASE
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 10  THEN '< 10 days'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 120 THEN '< 4 months'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 150 THEN '< 5 months'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 180 THEN '< 6 months'
-        ELSE '≥ 6 months'
-    END                                                                 AS ""StatusLabel"",
-    CASE
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN 'st-expiring'
-        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN 'st-pending'
-        ELSE 'st-approved'
-    END                                                                 AS ""StatusCssClass"",
-    COALESCE(p.""IsArchived"", FALSE)                                     AS ""IsArchived""
-FROM ""Visas"" v
-INNER JOIN ""Passports"" pp
-    ON pp.""ID"" = v.""PassportID""
-   AND COALESCE(pp.""GCRecord"", 0) = 0
-INNER JOIN ""People"" p
-    ON p.""ID"" = pp.""PersonID""
-   AND COALESCE(p.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" pc
-    ON pc.""ID"" = p.""ProjectContractID""
-   AND COALESCE(pc.""GCRecord"", 0) = 0
-LEFT JOIN ""People"" sp
-    ON sp.""ID"" = p.""SponsoringEmployeeID""
-   AND COALESCE(sp.""GCRecord"", 0) = 0
-LEFT JOIN ""ProjectContracts"" spc
-    ON spc.""ID"" = sp.""ProjectContractID""
-   AND COALESCE(spc.""GCRecord"", 0) = 0
-WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
-  AND v.""ExpirationDate"" IS NOT NULL
-  AND (v.""ExpirationDate"")::date >= CURRENT_DATE;
+    x.""ID"",
+    x.""PersonOid"",
+    x.""PassportID"",
+    x.""PassportNumber"",
+    x.""PersonName"",
+    x.""ProjectName"",
+    x.""ProjectNameRaw"",
+    x.""ProjectNameTm"",
+    x.""PersonRoleCode"",
+    x.""VisaNumber"",
+    x.""ExpirationDate"",
+    x.""DaysRemaining"",
+    x.""RemainingLabel"",
+    x.""StatusLabel"",
+    x.""StatusCssClass"",
+    (x.""Rn"" = 1)                                                        AS ""IsOneLastValidPerPerson"",
+    x.""IsArchived""
+FROM (
+    SELECT
+        v.""ID""                                                          AS ""ID"",
+        p.""ID""                                                          AS ""PersonOid"",
+        v.""PassportID""                                                  AS ""PassportID"",
+        COALESCE(NULLIF(BTRIM(pp.""PassportNumber""), ''), '')           AS ""PassportNumber"",
+        CONCAT_WS(' ',
+            NULLIF(BTRIM(p.""FirstName""), ''),
+            NULLIF(BTRIM(p.""MiddleName""), ''),
+            NULLIF(BTRIM(p.""LastName""), '')
+        )                                                               AS ""PersonName"",
+        COALESCE(
+            NULLIF(BTRIM(pc.""NameTm""), ''),
+            NULLIF(BTRIM(spc.""NameTm""), ''),
+            ''
+        )                                                               AS ""ProjectName"",
+        COALESCE(pc.""NameTm"", spc.""NameTm"", '')                         AS ""ProjectNameRaw"",
+        COALESCE(pc.""NameTm"", spc.""NameTm"", '')                         AS ""ProjectNameTm"",
+        p.""PersonRole""                                                  AS ""PersonRoleCode"",
+        COALESCE(NULLIF(BTRIM(v.""VisaNumber""), ''), '')                 AS ""VisaNumber"",
+        CASE WHEN (v.""ExpirationDate"")::date > DATE '1900-01-01' THEN v.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
+        (v.""ExpirationDate"")::date - CURRENT_DATE                       AS ""DaysRemaining"",
+        CASE
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 10  THEN '< 10 days'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 120 THEN '< 4 months'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 150 THEN '< 5 months'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 180 THEN '< 6 months'
+            ELSE '≥ 6 months'
+        END                                                             AS ""RemainingLabel"",
+        CASE
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 10  THEN '< 10 days'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 120 THEN '< 4 months'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 150 THEN '< 5 months'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 180 THEN '< 6 months'
+            ELSE '≥ 6 months'
+        END                                                             AS ""StatusLabel"",
+        CASE
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN 'st-expiring'
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN 'st-pending'
+            ELSE 'st-approved'
+        END                                                             AS ""StatusCssClass"",
+        COALESCE(p.""IsArchived"", FALSE)                                 AS ""IsArchived"",
+        ROW_NUMBER() OVER (
+            PARTITION BY p.""ID""
+            ORDER BY v.""ExpirationDate"" DESC NULLS LAST, v.""ID"" DESC
+        )                                                               AS ""Rn""
+    FROM ""Visas"" v
+    INNER JOIN ""Passports"" pp
+        ON pp.""ID"" = v.""PassportID""
+       AND COALESCE(pp.""GCRecord"", 0) = 0
+    INNER JOIN ""People"" p
+        ON p.""ID"" = pp.""PersonID""
+       AND COALESCE(p.""GCRecord"", 0) = 0
+    LEFT JOIN ""ProjectContracts"" pc
+        ON pc.""ID"" = p.""ProjectContractID""
+       AND COALESCE(pc.""GCRecord"", 0) = 0
+    LEFT JOIN ""People"" sp
+        ON sp.""ID"" = p.""SponsoringEmployeeID""
+       AND COALESCE(sp.""GCRecord"", 0) = 0
+    LEFT JOIN ""ProjectContracts"" spc
+        ON spc.""ID"" = sp.""ProjectContractID""
+       AND COALESCE(spc.""GCRecord"", 0) = 0
+    WHERE COALESCE(v.""GCRecord"", 0) = 0
+      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND v.""ExpirationDate"" IS NOT NULL
+      AND (v.""ExpirationDate"")::date >= CURRENT_DATE
+) x;
 ", true);
     }
-    private void CreateViewRdApplication()
+        private void CreateViewRdVisaExtensionRequired()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_extension_required;", true);
+        ExecuteNonQueryCommand(@"
+-- Report Dashboard: Extension Required (P)/(V) (PostgreSQL).
+CREATE VIEW vw_rd_visa_extension_required AS
+WITH valid_visas AS (
+    SELECT
+        v.""ID"" AS ""ID"",
+        p.""ID"" AS ""PersonOid"",
+        v.""PassportID"" AS ""PassportID"",
+        COALESCE(NULLIF(BTRIM(pp.""PassportNumber""), ''), '') AS ""PassportNumber"",
+        CONCAT_WS(' ',
+            NULLIF(BTRIM(p.""FirstName""), ''),
+            NULLIF(BTRIM(p.""MiddleName""), ''),
+            NULLIF(BTRIM(p.""LastName""), '')
+        ) AS ""PersonName"",
+        COALESCE(NULLIF(BTRIM(pc.""NameTm""), ''), NULLIF(BTRIM(spc.""NameTm""), ''), '') AS ""ProjectName"",
+        COALESCE(pc.""NameTm"", spc.""NameTm"", '') AS ""ProjectNameRaw"",
+        COALESCE(pc.""NameTm"", spc.""NameTm"", '') AS ""ProjectNameTm"",
+        p.""PersonRole"" AS ""PersonRoleCode"",
+        COALESCE(NULLIF(BTRIM(v.""VisaNumber""), ''), '') AS ""VisaNumber"",
+        CASE WHEN (v.""ExpirationDate"")::date > DATE '1900-01-01' THEN v.""ExpirationDate"" ELSE NULL END AS ""ExpirationDate"",
+        CASE
+            WHEN ((v.""ExpirationDate"")::date - (v.""StartDate"")::date) < 0 THEN 0
+            ELSE ((v.""ExpirationDate"")::date - (v.""StartDate"")::date)
+        END AS ""PeriodDays"",
+        CASE
+            WHEN ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 30)
+                 <= ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 90)
+             AND ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 30)
+                 <= ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 180)
+             AND ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 30)
+                 <= ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 365) THEN '1 month'
+            WHEN ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 90)
+                 <= ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 180)
+             AND ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 90)
+                 <= ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 365) THEN '3 months'
+            WHEN ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 180)
+                 <= ABS(((v.""ExpirationDate"")::date - (v.""StartDate"")::date) - 365) THEN '6 months'
+            ELSE '1 year'
+        END AS ""PeriodLabel"",
+        COALESCE(NULLIF(BTRIM(vc.""NameTm""), ''), NULLIF(BTRIM(vc.""Name""), ''), '(No category)') AS ""CategoryLabel"",
+        COALESCE(NULLIF(BTRIM(vt.""NameTm""), ''), NULLIF(BTRIM(vt.""Name""), ''), '(No type)') AS ""TypeLabel"",
+        COALESCE(p.""IsArchived"", FALSE) AS ""IsArchived"",
+        ROW_NUMBER() OVER (
+            PARTITION BY p.""ID""
+            ORDER BY v.""ExpirationDate"" DESC, v.""ID"" DESC
+        ) AS rn
+    FROM ""Visas"" v
+    INNER JOIN ""Passports"" pp ON pp.""ID"" = v.""PassportID"" AND COALESCE(pp.""GCRecord"", 0) = 0
+    INNER JOIN ""People"" p ON p.""ID"" = pp.""PersonID"" AND COALESCE(p.""GCRecord"", 0) = 0
+    LEFT JOIN ""VisaCategories"" vc ON vc.""ID"" = v.""VisaCategoryID"" AND COALESCE(vc.""GCRecord"", 0) = 0
+    LEFT JOIN ""VisaTypes"" vt ON vt.""ID"" = v.""VisaTypeID"" AND COALESCE(vt.""GCRecord"", 0) = 0
+    LEFT JOIN ""ProjectContracts"" pc ON pc.""ID"" = p.""ProjectContractID"" AND COALESCE(pc.""GCRecord"", 0) = 0
+    LEFT JOIN ""People"" sp ON sp.""ID"" = p.""SponsoringEmployeeID"" AND COALESCE(sp.""GCRecord"", 0) = 0
+    LEFT JOIN ""ProjectContracts"" spc ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
+    WHERE COALESCE(v.""GCRecord"", 0) = 0
+      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
+      AND v.""ExpirationDate"" IS NOT NULL
+      AND (v.""ExpirationDate"")::date >= CURRENT_DATE
+      AND v.""StartDate"" IS NOT NULL
+      AND (v.""StartDate"")::date > DATE '1900-01-01'
+),
+unfinished_extension_people AS (
+    SELECT DISTINCT ai.""PersonID""
+    FROM ""ApplicationItems"" ai
+    INNER JOIN ""Applications"" a
+        ON a.""ID"" = ai.""ApplicationID"" AND COALESCE(a.""GCRecord"", 0) = 0
+    INNER JOIN ""ApplicationTypes"" at
+        ON at.""ID"" = a.""ApplicationTypeID"" AND COALESCE(at.""GCRecord"", 0) = 0
+    WHERE COALESCE(ai.""GCRecord"", 0) = 0
+      AND ai.""CurrentVisaId"" IS NOT NULL
+      AND ai.""PersonID"" IS NOT NULL
+      AND at.""Name"" IN (
+            'App_Visa_Ext',
+            'App_Visa_Ext_According_to_WP',
+            'App_Visa_Ext_FM',
+            'App_Visa_and_WP_Ext'
+        )
+      AND (
+          a.""LatestPrimaryStateCode"" IS NULL
+          OR BTRIM(a.""LatestPrimaryStateCode"") = ''
+          OR (
+               a.""LatestPrimaryStateCode"" NOT IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
+               AND RIGHT(BTRIM(a.""LatestPrimaryStateCode""), 16) <> '_REVIEW_REJECTED'
+             )
+      )
+)
+SELECT
+    v.""ID"",
+    v.""PersonOid"",
+    v.""PassportID"",
+    v.""PassportNumber"",
+    v.""PersonName"",
+    v.""ProjectName"",
+    v.""ProjectNameRaw"",
+    v.""ProjectNameTm"",
+    v.""PersonRoleCode"",
+    v.""VisaNumber"",
+    v.""ExpirationDate"",
+    v.""PeriodDays"",
+    v.""PeriodLabel"",
+    v.""CategoryLabel"",
+    v.""TypeLabel"",
+    GREATEST(0, (v.""ExpirationDate"")::date - CURRENT_DATE) AS ""DaysRemaining"",
+    COALESCE(NULLIF(BTRIM(v.""ProjectName""), ''), '(No project)') AS ""StatusLabel"",
+    'st-cat-1' AS ""StatusCssClass"",
+    v.""IsArchived""
+FROM valid_visas v
+WHERE v.rn = 1
+  AND NOT EXISTS (
+        SELECT 1
+        FROM unfinished_extension_people u
+        WHERE u.""PersonID"" = v.""PersonOid""
+    );
+", true);
+    }
+
+    private void CreateViewRdVisaActiveByProject()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_active_by_project;", true);
+        ExecuteNonQueryCommand(@"
+-- Active Visa (P): population from vw_rd_visa_by_period; StatusLabel = Project.
+CREATE VIEW vw_rd_visa_active_by_project AS
+SELECT
+    b.""ID"",
+    b.""PersonOid"",
+    b.""PassportID"",
+    b.""PassportNumber"",
+    b.""PersonName"",
+    b.""ProjectName"",
+    b.""ProjectNameRaw"",
+    b.""ProjectNameTm"",
+    b.""PersonRoleCode"",
+    b.""VisaNumber"",
+    b.""ExpirationDate"",
+    b.""PeriodDays"",
+    b.""PeriodLabel"",
+    COALESCE(NULLIF(BTRIM(b.""ProjectName""), ''), '(No project)') AS ""StatusLabel"",
+    b.""StatusCssClass"",
+    b.""DaysRemaining"",
+    b.""IsOneLastValidPerPerson"",
+    b.""IsArchived""
+FROM vw_rd_visa_by_period b;
+", true);
+    }
+
+    private void CreateViewRdVisaActiveByPeriodCategoryType()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_active_by_period_category_type;", true);
+        ExecuteNonQueryCommand(@"
+-- Active Visa (V): same population; StatusLabel = Period · Category · Type.
+CREATE VIEW vw_rd_visa_active_by_period_category_type AS
+SELECT
+    b.""ID"",
+    b.""PersonOid"",
+    b.""PassportID"",
+    b.""PassportNumber"",
+    b.""PersonName"",
+    b.""ProjectName"",
+    b.""ProjectNameRaw"",
+    b.""ProjectNameTm"",
+    b.""PersonRoleCode"",
+    b.""VisaNumber"",
+    b.""ExpirationDate"",
+    b.""PeriodDays"",
+    b.""PeriodLabel"",
+    CONCAT_WS(' · ',
+        COALESCE(NULLIF(BTRIM(b.""PeriodLabel""), ''), '(No period)'),
+        COALESCE(NULLIF(BTRIM(c.""CategoryLabel""), ''), '(No category)'),
+        COALESCE(NULLIF(BTRIM(t.""TypeLabel""), ''), '(No type)')
+    ) AS ""StatusLabel"",
+    b.""StatusCssClass"",
+    b.""DaysRemaining"",
+    b.""IsOneLastValidPerPerson"",
+    b.""IsArchived""
+FROM vw_rd_visa_by_period b
+LEFT JOIN vw_rd_visa_by_category c ON c.""ID"" = b.""ID""
+LEFT JOIN vw_rd_visa_by_type t ON t.""ID"" = b.""ID"";
+", true);
+    }
+
+    private void CreateViewRdVisaOnExtension()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_on_extension;", true);
+        ExecuteNonQueryCommand(@"
+-- Visa On Extension (P): in-flight extension apps; StatusLabel = Project · State.
+CREATE VIEW vw_rd_visa_on_extension AS
+SELECT
+    b.""ID"",
+    b.""ApplicationOid"",
+    b.""PersonOid"",
+    b.""ExpiringVisaID"",
+    b.""PassportID"",
+    b.""PassportNumber"",
+    b.""CurrentStateID"",
+    b.""PersonName"",
+    b.""ProjectName"",
+    b.""ProjectNameRaw"",
+    b.""ProjectNameTm"",
+    b.""PersonRoleCode"",
+    b.""ApplicationNumber"",
+    b.""ApplicationDate"",
+    b.""StatusDate"",
+    b.""ProgressStateCode"",
+    b.""ProgressStateLabel"",
+    b.""ProgressStateCssClass"",
+    b.""DaysRemainingOnVisa"",
+    CONCAT(
+        COALESCE(NULLIF(BTRIM(b.""ProjectName""), ''), '(No project)'),
+        ' · ',
+        COALESCE(NULLIF(BTRIM(b.""ProgressStateLabel""), ''), 'Being Prepared')
+    ) AS ""StatusLabel"",
+    b.""IsArchived""
+FROM vw_rd_visa_app_progress b
+WHERE b.""ProgressStateCode"" IS NULL
+   OR BTRIM(b.""ProgressStateCode"") = ''
+   OR (
+        b.""ProgressStateCode"" NOT IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
+        AND RIGHT(BTRIM(b.""ProgressStateCode""), 16) <> '_REVIEW_REJECTED'
+      );
+", true);
+    }
+
+    private void CreateViewRdVisaOnExtensionByPeriodCategoryType()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_on_extension_by_period_category_type;", true);
+        ExecuteNonQueryCommand(@"
+-- Visa On Extension (V): in-flight; StatusLabel = Period · Category · Type · State.
+CREATE VIEW vw_rd_visa_on_extension_by_period_category_type AS
+SELECT
+    b.""ID"",
+    b.""ApplicationOid"",
+    b.""PersonOid"",
+    b.""ExpiringVisaID"",
+    b.""PassportID"",
+    b.""PassportNumber"",
+    b.""CurrentStateID"",
+    b.""PersonName"",
+    b.""ProjectName"",
+    b.""ProjectNameRaw"",
+    b.""ProjectNameTm"",
+    b.""PersonRoleCode"",
+    b.""ApplicationNumber"",
+    b.""ApplicationDate"",
+    b.""StatusDate"",
+    b.""ProgressStateCode"",
+    b.""ProgressStateLabel"",
+    b.""ProgressStateCssClass"",
+    b.""DaysRemainingOnVisa"",
+    CONCAT_WS(' · ',
+        COALESCE(NULLIF(BTRIM(vp.""NameTm""), ''), NULLIF(BTRIM(vp.""Name""), ''), '(No period)'),
+        COALESCE(NULLIF(BTRIM(vc.""NameTm""), ''), NULLIF(BTRIM(vc.""Name""), ''), '(No category)'),
+        COALESCE(NULLIF(BTRIM(vt.""NameTm""), ''), NULLIF(BTRIM(vt.""Name""), ''), '(No type)'),
+        COALESCE(NULLIF(BTRIM(b.""ProgressStateLabel""), ''), 'Being Prepared')
+    ) AS ""StatusLabel"",
+    b.""IsArchived""
+FROM vw_rd_visa_app_progress b
+LEFT JOIN ""Applications"" a
+    ON a.""ID"" = b.""ApplicationOid"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaPeriods"" vp
+    ON vp.""ID"" = a.""VisaPeriodID"" AND COALESCE(vp.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaCategories"" vc
+    ON vc.""ID"" = a.""VisaCategoryID"" AND COALESCE(vc.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaTypes"" vt
+    ON vt.""ID"" = a.""VisaTypeID"" AND COALESCE(vt.""GCRecord"", 0) = 0
+WHERE b.""ProgressStateCode"" IS NULL
+   OR BTRIM(b.""ProgressStateCode"") = ''
+   OR (
+        b.""ProgressStateCode"" NOT IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
+        AND RIGHT(BTRIM(b.""ProgressStateCode""), 16) <> '_REVIEW_REJECTED'
+      );
+", true);
+    }
+
+    private void CreateViewRdVisaExtensionResult()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_extension_result;", true);
+        ExecuteNonQueryCommand(@"
+-- Extension Result (P): terminal (Issued/Cancelled/Rejected/*_REVIEW_REJECTED); StatusLabel = Project · State.
+CREATE VIEW vw_rd_visa_extension_result AS
+SELECT
+    b.""ID"",
+    b.""ApplicationOid"",
+    b.""PersonOid"",
+    b.""ExpiringVisaID"",
+    b.""PassportID"",
+    b.""PassportNumber"",
+    b.""CurrentStateID"",
+    b.""PersonName"",
+    b.""ProjectName"",
+    b.""ProjectNameRaw"",
+    b.""ProjectNameTm"",
+    b.""PersonRoleCode"",
+    b.""ApplicationNumber"",
+    b.""ApplicationDate"",
+    b.""StatusDate"",
+    b.""ProgressStateCode"",
+    b.""ProgressStateLabel"",
+    b.""ProgressStateCssClass"",
+    b.""DaysRemainingOnVisa"",
+    CONCAT(
+        COALESCE(NULLIF(BTRIM(b.""ProjectName""), ''), '(No project)'),
+        ' · ',
+        COALESCE(NULLIF(BTRIM(b.""ProgressStateLabel""), ''), 'Being Prepared')
+    ) AS ""StatusLabel"",
+    b.""IsArchived""
+FROM vw_rd_visa_app_progress b
+WHERE b.""ProgressStateCode"" IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
+   OR RIGHT(BTRIM(b.""ProgressStateCode""), 16) = '_REVIEW_REJECTED';
+", true);
+    }
+
+    private void CreateViewRdVisaExtensionResultByPeriodCategoryType()
+    {
+        ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_visa_extension_result_by_period_category_type;", true);
+        ExecuteNonQueryCommand(@"
+-- Extension Result (V): terminal (Issued/Cancelled/Rejected/*_REVIEW_REJECTED); StatusLabel = Period · Category · Type · State.
+CREATE VIEW vw_rd_visa_extension_result_by_period_category_type AS
+SELECT
+    b.""ID"",
+    b.""ApplicationOid"",
+    b.""PersonOid"",
+    b.""ExpiringVisaID"",
+    b.""PassportID"",
+    b.""PassportNumber"",
+    b.""CurrentStateID"",
+    b.""PersonName"",
+    b.""ProjectName"",
+    b.""ProjectNameRaw"",
+    b.""ProjectNameTm"",
+    b.""PersonRoleCode"",
+    b.""ApplicationNumber"",
+    b.""ApplicationDate"",
+    b.""StatusDate"",
+    b.""ProgressStateCode"",
+    b.""ProgressStateLabel"",
+    b.""ProgressStateCssClass"",
+    b.""DaysRemainingOnVisa"",
+    CONCAT_WS(' · ',
+        COALESCE(NULLIF(BTRIM(vp.""NameTm""), ''), NULLIF(BTRIM(vp.""Name""), ''), '(No period)'),
+        COALESCE(NULLIF(BTRIM(vc.""NameTm""), ''), NULLIF(BTRIM(vc.""Name""), ''), '(No category)'),
+        COALESCE(NULLIF(BTRIM(vt.""NameTm""), ''), NULLIF(BTRIM(vt.""Name""), ''), '(No type)'),
+        COALESCE(NULLIF(BTRIM(b.""ProgressStateLabel""), ''), 'Being Prepared')
+    ) AS ""StatusLabel"",
+    b.""IsArchived""
+FROM vw_rd_visa_app_progress b
+LEFT JOIN ""Applications"" a
+    ON a.""ID"" = b.""ApplicationOid"" AND COALESCE(a.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaPeriods"" vp
+    ON vp.""ID"" = a.""VisaPeriodID"" AND COALESCE(vp.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaCategories"" vc
+    ON vc.""ID"" = a.""VisaCategoryID"" AND COALESCE(vc.""GCRecord"", 0) = 0
+LEFT JOIN ""VisaTypes"" vt
+    ON vt.""ID"" = a.""VisaTypeID"" AND COALESCE(vt.""GCRecord"", 0) = 0
+WHERE b.""ProgressStateCode"" IN ('PROCESS_ISSUED', 'PROCESS_CANCELLED', 'PROCESS_REJECTED')
+   OR RIGHT(BTRIM(b.""ProgressStateCode""), 16) = '_REVIEW_REJECTED';
+", true);
+    }
+private void CreateViewRdApplication()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_application;", true);
         ExecuteNonQueryCommand(@"
@@ -1483,14 +2057,16 @@ WITH ranked AS (
         COALESCE(ast.""Code"", 'AT_OFFICE') AS ""ProgressStateCode"",
         ((v.""ExpirationDate"")::date - CURRENT_DATE) AS ""DaysRemaining"",
         CASE
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 0   THEN 'Expired'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 7   THEN '< 7 days'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 14  THEN '< 14 days'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 30  THEN '< 1 month'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN '< 3 months'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 180 THEN '< 6 months'
-            ELSE 'â‰¥ 6 months'
+            ELSE '≥ 6 months'
         END AS ""ExpiryBucketLabel"",
         CASE
+            WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 0   THEN 'st-expiring'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 14  THEN 'st-expiring'
             WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 90  THEN 'st-pending'
             ELSE 'st-approved'
@@ -1538,8 +2114,6 @@ WITH ranked AS (
     LEFT JOIN ""ApplicationStates"" ast
         ON ast.""ID"" = latest_ap.""StateID"" AND COALESCE(ast.""GCRecord"", 0) = 0
     WHERE COALESCE(v.""GCRecord"", 0) = 0
-      AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
-      AND (v.""ExpirationDate"")::date >= CURRENT_DATE
       AND at.""Name"" IN (
             'App_Reg_Check_In',
             'App_Reg_Check_In_Internal',
@@ -1664,8 +2238,6 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
-  AND (v.""ExpirationDate"")::date >= CURRENT_DATE
   AND NOT EXISTS (
         SELECT 1 FROM reg_linked rl WHERE rl.""VisaId"" = v.""ID""
   );
@@ -1711,6 +2283,7 @@ SELECT
     v.""ExpirationDate"" AS ""VisaExpirationDate"",
     ((v.""ExpirationDate"")::date - CURRENT_DATE) AS ""DaysRemaining"",
     CASE
+        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 0 THEN 'Expired'
         WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 1 THEN '< 1 day'
         WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 2 THEN '< 2 days'
         WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 3 THEN '< 3 days'
@@ -1720,6 +2293,7 @@ SELECT
         ELSE '< 7 days'
     END AS ""ExpiryBucketLabel"",
     CASE
+        WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 0 THEN 'st-expiring'
         WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 3 THEN 'st-expiring'
         WHEN (v.""ExpirationDate"")::date - CURRENT_DATE < 5 THEN 'st-pending'
         ELSE 'st-approved'
@@ -1737,8 +2311,6 @@ LEFT JOIN ""People"" sp
 LEFT JOIN ""ProjectContracts"" spc
     ON spc.""ID"" = sp.""ProjectContractID"" AND COALESCE(spc.""GCRecord"", 0) = 0
 WHERE COALESCE(v.""GCRecord"", 0) = 0
-  AND COALESCE(v.""IsCancelled"", FALSE) = FALSE
-  AND (v.""ExpirationDate"")::date >= CURRENT_DATE
   AND (v.""ExpirationDate"")::date - CURRENT_DATE < 7
   AND NOT EXISTS (
         SELECT 1 FROM checkout_linked cl WHERE cl.""VisaId"" = v.""ID""

@@ -80,5 +80,13 @@ WHERE COALESCE(a."GCRecord", 0) = 0
     )
   AND (
         ast."Code" IS NULL
-        OR ast."Code" NOT IN ('PROCESS_ISSUED', 'PROCESS_REJECTED', 'PROCESS_CANCELLED')
+        OR ast."Code" NOT IN (
+            'PROCESS_ISSUED',
+            'PROCESS_REJECTED',
+            'PROCESS_CANCELLED',
+            '1_REVIEW_REJECTED',
+            '2_REVIEW_REJECTED',
+            '3_REVIEW_REJECTED',
+            '4_REVIEW_REJECTED',
+            '5_REVIEW_REJECTED')
       );

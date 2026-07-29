@@ -3267,6 +3267,41 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu taslama üçin ýazgy ýok.",
             ["ru-RU"] = "Нет записей по этому проекту.",
         },
+        ["ReportDashboard.Chrome.PageSize"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Page size",
+            ["tr-TR"] = "Sayfa boyutu",
+            ["tk-TM"] = "Sahypa ölçegi",
+            ["ru-RU"] = "Размер страницы",
+        },
+        ["ReportDashboard.Chrome.Prev"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Prev",
+            ["tr-TR"] = "Önceki",
+            ["tk-TM"] = "Öňki",
+            ["ru-RU"] = "Назад",
+        },
+        ["ReportDashboard.Chrome.Next"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Next",
+            ["tr-TR"] = "Sonraki",
+            ["tk-TM"] = "Indiki",
+            ["ru-RU"] = "Далее",
+        },
+        ["ReportDashboard.Chrome.PreviewRange"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Showing {0}–{1} of {2}",
+            ["tr-TR"] = "{2} kayıttan {0}–{1} gösteriliyor",
+            ["tk-TM"] = "{2} ýazgydan {0}–{1} görkezilýär",
+            ["ru-RU"] = "Показаны {0}–{1} из {2}",
+        },
+        ["ReportDashboard.Chrome.PreviewRangeCapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Showing {0}–{1} of {2} loaded ({3} total)",
+            ["tr-TR"] = "{2} yüklenen kayıttan {0}–{1} gösteriliyor (toplam {3})",
+            ["tk-TM"] = "{2} ýüklän ýazgydan {0}–{1} görkezilýär (jemi {3})",
+            ["ru-RU"] = "Показаны {0}–{1} из {2} загруженных (всего {3})",
+        },
         ["ReportDashboard.Chrome.EmptySelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No records for this selection.",
@@ -3399,6 +3434,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Listeyi aç",
             ["tk-TM"] = "Sanawy aç",
             ["ru-RU"] = "Открыть список",
+        },
+        ["ReportDashboard.Chrome.OpeningListView"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening list…",
+            ["tr-TR"] = "Liste açılıyor…",
+            ["tk-TM"] = "Sanaw açylýar…",
+            ["ru-RU"] = "Открытие списка…",
+        },
+        ["ReportDashboard.Chrome.OpeningDetail"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening…",
+            ["tr-TR"] = "Açılıyor…",
+            ["tk-TM"] = "Açylýar…",
+            ["ru-RU"] = "Открытие…",
         },
         ["ReportDashboard.Chrome.Overview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3631,6 +3680,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýüztutma senesi",
             ["ru-RU"] = "Дата заявки",
         },
+        ["ReportDashboard.Header.ApplicationTypeProcessState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application Type · Process State",
+            ["tr-TR"] = "Başvuru türü · Süreç durumu",
+            ["tk-TM"] = "Arza görnüşi · Proses ýagdaýy",
+            ["ru-RU"] = "Тип заявки · Состояние процесса",
+        },
         ["ReportDashboard.Header.AppNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "App #",
@@ -3813,6 +3869,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Möhlet · Kategoriýa · Görnüş",
             ["ru-RU"] = "Период · Категория · Тип",
         },
+        ["ReportDashboard.Header.PeriodCategoryTypeState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Period · Category · Type · State",
+            ["tr-TR"] = "Dönem · Kategori · Tür · Durum",
+            ["tk-TM"] = "Möhlet · Kategoriýa · Görnüş · Ýagdaý",
+            ["ru-RU"] = "Период · Категория · Тип · Состояние",
+        },
         ["ReportDashboard.Header.Position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Position",
@@ -3833,6 +3896,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Proje",
             ["tk-TM"] = "Taslama",
             ["ru-RU"] = "Проект",
+        },
+        ["ReportDashboard.Header.ProjectPeriodCategoryTypeState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project · Period · Category · Type · State",
+            ["tr-TR"] = "Proje · Dönem · Kategori · Tür · Durum",
+            ["tk-TM"] = "Taslama · Möhlet · Kategoriýa · Görnüş · Ýagdaý",
+            ["ru-RU"] = "Проект · Период · Категория · Тип · Состояние",
+        },
+        ["ReportDashboard.Header.ProjectState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project · State",
+            ["tr-TR"] = "Proje · Durum",
+            ["tk-TM"] = "Taslama · Ýagdaý",
+            ["ru-RU"] = "Проект · Состояние",
         },
         ["ReportDashboard.Header.Region"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4289,6 +4366,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Güýjünde (>90 gün)",
             ["ru-RU"] = "Действует (>90 дн.)",
         },
+        ["ReportDashboard.SubReport.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Visa (P)",
+            ["tr-TR"] = "Aktif Vize (P)",
+            ["tk-TM"] = "Işjeň wiza (P)",
+            ["ru-RU"] = "Активная виза (P)",
+        },
         ["ReportDashboard.SubReport.App_Reg_Check_In"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Check-In",
@@ -4316,13 +4400,6 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Çıkış (iç)",
             ["tk-TM"] = "Çykyş (içki)",
             ["ru-RU"] = "Снятие (внутр.)",
-        },
-        ["ReportDashboard.SubReport.App_Reg_ext"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Extension",
-            ["tr-TR"] = "Uzatma",
-            ["tk-TM"] = "Uzatmak",
-            ["ru-RU"] = "Продление",
         },
         ["ReportDashboard.SubReport.App_Reg_Info_Change_Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4436,6 +4513,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Wiza möhleti boýunça",
             ["ru-RU"] = "По периоду визы",
         },
+        ["ReportDashboard.SubReport.by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Visa (V)",
+            ["tr-TR"] = "Aktif Vize (V)",
+            ["tk-TM"] = "Işjeň wiza (V)",
+            ["ru-RU"] = "Активная виза (V)",
+        },
         ["ReportDashboard.SubReport.by-position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Position (visa reports)",
@@ -4494,10 +4578,24 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.SubReport.check-in-by-city"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Check in by City",
-            ["tr-TR"] = "Şehre göre giriş",
-            ["tk-TM"] = "Şäher boýunça giriş",
-            ["ru-RU"] = "Регистрация по городу",
+            ["en-US"] = "Active Registered (C)",
+            ["tr-TR"] = "Aktif Kayıtlı (C)",
+            ["tk-TM"] = "Işjeň hasaba alnan (C)",
+            ["ru-RU"] = "Активная регистрация (C)",
+        },
+        ["ReportDashboard.SubReport.check-in-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Registered (V)",
+            ["tr-TR"] = "Aktif Kayıtlı (V)",
+            ["tk-TM"] = "Işjeň hasaba alnan (V)",
+            ["ru-RU"] = "Активная регистрация (V)",
+        },
+        ["ReportDashboard.SubReport.check-in-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Registered (P)",
+            ["tr-TR"] = "Aktif Kayıtlı (P)",
+            ["tk-TM"] = "Işjeň hasaba alnan (P)",
+            ["ru-RU"] = "Активная регистрация (P)",
         },
         ["ReportDashboard.SubReport.default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4513,12 +4611,68 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Möhleti gutarýan ýagdaý",
             ["ru-RU"] = "Истекающие",
         },
+        ["ReportDashboard.SubReport.extension-required"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Required",
+            ["tr-TR"] = "Uzatma Gerekli",
+            ["tk-TM"] = "Uzatma gerek",
+            ["ru-RU"] = "Требуется продление",
+        },
+        ["ReportDashboard.SubReport.extension-required-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Required",
+            ["tr-TR"] = "Uzatma Gerekli",
+            ["tk-TM"] = "Uzatma gerek",
+            ["ru-RU"] = "Требуется продление",
+        },
+        ["ReportDashboard.SubReport.extension-result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Result (P)",
+            ["tr-TR"] = "Uzatma Sonucu (P)",
+            ["tk-TM"] = "Uzatma Netijesi (P)",
+            ["ru-RU"] = "Результат продления (P)",
+        },
+        ["ReportDashboard.SubReport.extension-result-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Result (V)",
+            ["tr-TR"] = "Uzatma Sonucu (V)",
+            ["tk-TM"] = "Uzatma Netijesi (V)",
+            ["ru-RU"] = "Результат продления (V)",
+        },
         ["ReportDashboard.SubReport.in-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Invitations In Process",
-            ["tr-TR"] = "İşlemdeki davetler",
-            ["tk-TM"] = "Işlenýän çakylyklar",
-            ["ru-RU"] = "Приглашения в процессе",
+            ["en-US"] = "Invitation Process (P)",
+            ["tr-TR"] = "Davetiye Süreci (P)",
+            ["tk-TM"] = "Çakylyk prosesi (P)",
+            ["ru-RU"] = "Процесс приглашения (P)",
+        },
+        ["ReportDashboard.SubReport.in-process-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation Process (V)",
+            ["tr-TR"] = "Davetiye Süreci (V)",
+            ["tk-TM"] = "Çakylyk prosesi (V)",
+            ["ru-RU"] = "Процесс приглашения (V)",
+        },
+        ["ReportDashboard.SubReport.on-extension"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa On Extension (P)",
+            ["tr-TR"] = "Vize Uzatmada (P)",
+            ["tk-TM"] = "Wiza uzatmada (P)",
+            ["ru-RU"] = "Виза на продлении (P)",
+        },
+        ["ReportDashboard.SubReport.on-extension-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa On Extension (V)",
+            ["tr-TR"] = "Vize Uzatmada (V)",
+            ["tk-TM"] = "Wiza uzatmada (V)",
+            ["ru-RU"] = "Виза на продлении (V)",
+        },
+        ["ReportDashboard.SubReport.on-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "On process",
+            ["tr-TR"] = "Süreçte",
+            ["tk-TM"] = "Prosesde",
+            ["ru-RU"] = "В процессе",
         },
         ["ReportDashboard.SubReport.Passport.by-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4527,26 +4681,47 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Görnüş boýunça",
             ["ru-RU"] = "По типу",
         },
+        ["ReportDashboard.SubReport.process-result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (P)",
+            ["tr-TR"] = "Süreç Sonucu (P)",
+            ["tk-TM"] = "Proses netijesi (P)",
+            ["ru-RU"] = "Результат процесса (P)",
+        },
+        ["ReportDashboard.SubReport.process-result-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (V)",
+            ["tr-TR"] = "Süreç Sonucu (V)",
+            ["tk-TM"] = "Proses netijesi (V)",
+            ["ru-RU"] = "Результат процесса (V)",
+        },
         ["ReportDashboard.SubReport.ready-by-period-category"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Ready By Period · Category · Type",
-            ["tr-TR"] = "Dönem · Kategori · Tür",
-            ["tk-TM"] = "Möhlet · Kategoriýa · Görnüş",
-            ["ru-RU"] = "Период · Категория · Тип",
+            ["en-US"] = "Active Invitation (V)",
+            ["tr-TR"] = "Aktif Davetiye (V)",
+            ["tk-TM"] = "Işjeň çakylyk (V)",
+            ["ru-RU"] = "Активное приглашение (V)",
         },
         ["ReportDashboard.SubReport.ready-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Ready By Project",
-            ["tr-TR"] = "Projeye göre hazır",
-            ["tk-TM"] = "Taslama boýunça taýýar",
-            ["ru-RU"] = "Готовые по проекту",
+            ["en-US"] = "Active Invitation (P)",
+            ["tr-TR"] = "Aktif Davetiye (P)",
+            ["tk-TM"] = "Işjeň çakylyk (P)",
+            ["ru-RU"] = "Активное приглашение (P)",
+        },
+        ["ReportDashboard.SubReport.rejected-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (V)",
+            ["tr-TR"] = "Süreç Sonucu (V)",
+            ["tk-TM"] = "Proses netijesi (V)",
+            ["ru-RU"] = "Результат процесса (V)",
         },
         ["ReportDashboard.SubReport.rejected-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Invitations Rejected",
-            ["tr-TR"] = "Reddedilen davetler",
-            ["tk-TM"] = "Ret edilen çakylyklar",
-            ["ru-RU"] = "Отклонённые приглашения",
+            ["en-US"] = "Process Result (P)",
+            ["tr-TR"] = "Süreç Sonucu (P)",
+            ["tk-TM"] = "Proses netijesi (P)",
+            ["ru-RU"] = "Результат процесса (P)",
         },
         ["ReportDashboard.SubReport.to-be-checked-in"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4564,15 +4739,22 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.SubReport.used"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Used Invitations",
-            ["tr-TR"] = "Kullanılan davetler",
-            ["tk-TM"] = "Ulanylan çakylyklar",
-            ["ru-RU"] = "Использованные приглашения",
+            ["en-US"] = "Used (P)",
+            ["tr-TR"] = "Kullanılan (P)",
+            ["tk-TM"] = "Ulanylan (P)",
+            ["ru-RU"] = "Использованные (P)",
+        },
+        ["ReportDashboard.SubReport.used-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Used (V)",
+            ["tr-TR"] = "Kullanılan (V)",
+            ["tk-TM"] = "Ulanylan (V)",
+            ["ru-RU"] = "Использованные (V)",
         },
         ["ReportDashboard.SubReport.valid-until"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Invitation Valid Until",
-            ["tr-TR"] = "Davet geçerliliği",
+            ["en-US"] = "Invitation Validity",
+            ["tr-TR"] = "Davetiye Geçerliliği",
             ["tk-TM"] = "Çakylygyň möhleti",
             ["ru-RU"] = "Срок действия приглашения",
         },
@@ -4582,6 +4764,41 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Vize durumu",
             ["tk-TM"] = "Wiza ýagdaýy",
             ["ru-RU"] = "Состояние визы",
+        },
+        ["ReportDashboard.SubReport.VisaExtension.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Validity",
+            ["tr-TR"] = "Vize Geçerliliği",
+            ["tk-TM"] = "Wiza möhleti",
+            ["ru-RU"] = "Срок действия визы",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active WorkPermit (P)",
+            ["tr-TR"] = "Aktif Çalışma İzni (P)",
+            ["tk-TM"] = "Işjeň iş rugsady (P)",
+            ["ru-RU"] = "Активное РНТ (P)",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WorkPermit Validity",
+            ["tr-TR"] = "Çalışma İzni Geçerliliği",
+            ["tk-TM"] = "Iş rugsady möhleti",
+            ["ru-RU"] = "Срок действия РНТ",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.extension-result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Result (P)",
+            ["tr-TR"] = "Uzatma Sonucu (P)",
+            ["tk-TM"] = "Uzatma netijesi (P)",
+            ["ru-RU"] = "Результат продления (P)",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.on-extension"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WorkPermit Extension (P)",
+            ["tr-TR"] = "Çalışma İzni Uzatma (P)",
+            ["tk-TM"] = "Iş rugsady uzatma (P)",
+            ["ru-RU"] = "Продление РНТ (P)",
         },
         ["RuntimeLog.Action.MarkFixed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

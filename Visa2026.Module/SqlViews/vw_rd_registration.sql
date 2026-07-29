@@ -1,5 +1,6 @@
 -- Report Dashboard: Registration category.
--- One row per not-expired visa: latest registration Application linked via ApplicationItem.CurrentVisa.
+-- One row per visa with a registration Application linked via ApplicationItem.CurrentVisa.
+-- Visa.IsCancelled and visa expiry are ignored — still counted as checked-in until a Check-Out app links the visa.
 -- Sub-report filter = ApplicationTypeName; chart Status = ProgressStateLabel (latest ApplicationState).
 CREATE OR ALTER VIEW [dbo].[vw_rd_registration] AS
 WITH ranked AS (
@@ -47,14 +48,16 @@ WITH ranked AS (
         COALESCE(ast.Code, N'AT_OFFICE') AS ProgressStateCode,
         DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) AS DaysRemaining,
         CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0   THEN N'Expired'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 7   THEN N'< 7 days'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 14  THEN N'< 14 days'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 30  THEN N'< 1 month'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'< 3 months'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 180 THEN N'< 6 months'
-            ELSE N'â‰¥ 6 months'
+            ELSE N'≥ 6 months'
         END AS ExpiryBucketLabel,
         CASE
+            WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0   THEN N'st-expiring'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 14  THEN N'st-expiring'
             WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 90  THEN N'st-pending'
             ELSE N'st-approved'
@@ -101,8 +104,6 @@ WITH ranked AS (
     LEFT JOIN ApplicationStates ast
         ON ast.ID = latest_ap.StateID AND ISNULL(ast.GCRecord, 0) = 0
     WHERE ISNULL(v.GCRecord, 0) = 0
-      AND ISNULL(v.IsCancelled, 0) = 0
-      AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
       AND at.Name IN (
             N'App_Reg_Check_In',
             N'App_Reg_Check_In_Internal',

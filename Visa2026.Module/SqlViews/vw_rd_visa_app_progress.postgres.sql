@@ -1,9 +1,16 @@
--- Report Dashboard: Visa — Application Progress (PostgreSQL).
-DROP VIEW IF EXISTS vw_rd_visa_app_progress;
+-- Report Dashboard: Visa — On Extension (PostgreSQL).
+-- Shared by dashboard preview and Open ListView (VwRdVisaAppProgress).
+-- ProgressStateCode prefers Application.LatestPrimaryStateCode (authoritative terminal outcome; latest progress row can lag).
+DROP VIEW IF EXISTS vw_rd_visa_app_progress CASCADE;
 CREATE VIEW vw_rd_visa_app_progress AS
 SELECT
     ai."ID"                                                                 AS "ID",
+    a."ID"                                                                  AS "ApplicationOid",
     p."ID"                                                                  AS "PersonOid",
+    ai."CurrentVisaId"                                                      AS "ExpiringVisaID",
+    ai."CurrentPassportID"                                                  AS "PassportID",
+    COALESCE(NULLIF(BTRIM(pp."PassportNumber"), ''), '')                     AS "PassportNumber",
+    latest_ap."StateID"                                                     AS "CurrentStateID",
     CONCAT_WS(' ',
         NULLIF(BTRIM(p."FirstName"), ''),
         NULLIF(BTRIM(p."MiddleName"), ''),
@@ -23,18 +30,35 @@ SELECT
         ''
     )                                                                       AS "ApplicationNumber",
     a."ApplicationDate"                                                     AS "ApplicationDate",
+    latest_ap."Date"                                                        AS "StatusDate",
     COALESCE(
-        NULLIF(BTRIM(ast."NameTm"), ''),
+        NULLIF(BTRIM(a."LatestPrimaryStateCode"), ''),
+        NULLIF(BTRIM(ast."Code"), ''),
+        ''
+    )                                                                       AS "ProgressStateCode",
+    COALESCE(
+        NULLIF(BTRIM(a."LatestProgressDisplay"), ''),
         NULLIF(BTRIM(ast."Name"), ''),
+        NULLIF(BTRIM(ast."NameTm"), ''),
         'Being Prepared'
     )                                                                       AS "ProgressStateLabel",
     CASE
-      WHEN ast."Code" IN ('PROCESS_ISSUED', '1_REVIEW_APPROVED', '2_REVIEW_APPROVED')
+      WHEN COALESCE(NULLIF(BTRIM(a."LatestPrimaryStateCode"), ''), NULLIF(BTRIM(ast."Code"), ''), '')
+           IN ('PROCESS_ISSUED', '1_REVIEW_APPROVED', '2_REVIEW_APPROVED')
                                                                              THEN 'st-approved'
-      WHEN ast."Code" IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED', '1_REVIEW_REJECTED', '2_REVIEW_REJECTED')
+      WHEN COALESCE(NULLIF(BTRIM(a."LatestPrimaryStateCode"), ''), NULLIF(BTRIM(ast."Code"), ''), '')
+           IN ('PROCESS_REJECTED', 'PROCESS_CANCELLED', '1_REVIEW_REJECTED', '2_REVIEW_REJECTED')
+           OR RIGHT(COALESCE(NULLIF(BTRIM(a."LatestPrimaryStateCode"), ''), NULLIF(BTRIM(ast."Code"), ''), ''), 16)
+              = '_REVIEW_REJECTED'
                                                                              THEN 'st-expiring'
       ELSE                                                                   'st-pending'
     END                                                                     AS "ProgressStateCssClass",
+    CASE
+        WHEN COALESCE(v."IsCancelled", FALSE) THEN 0
+        WHEN v."ExpirationDate" IS NULL THEN 0
+        WHEN (v."ExpirationDate"::date - CURRENT_DATE) < 0 THEN 0
+        ELSE (v."ExpirationDate"::date - CURRENT_DATE)
+    END                                                                     AS "DaysRemainingOnVisa",
     COALESCE(p."IsArchived", FALSE)                                         AS "IsArchived"
 FROM "ApplicationItems" ai
 INNER JOIN "Applications" a
@@ -55,8 +79,14 @@ LEFT JOIN "People" sp
 LEFT JOIN "ProjectContracts" spc
     ON spc."ID" = sp."ProjectContractID"
    AND COALESCE(spc."GCRecord", 0) = 0
+LEFT JOIN "Visas" v
+    ON v."ID" = ai."CurrentVisaId"
+   AND COALESCE(v."GCRecord", 0) = 0
+LEFT JOIN "Passports" pp
+    ON pp."ID" = ai."CurrentPassportID"
+   AND COALESCE(pp."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
-    SELECT ap."StateID"
+    SELECT ap."StateID", ap."Date"
     FROM "ApplicationProgresses" ap
     WHERE ap."ApplicationID" = a."ID"
       AND COALESCE(ap."GCRecord", 0) = 0

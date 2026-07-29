@@ -1,6 +1,6 @@
 -- Report Dashboard: To Be Checked Out (Registration).
--- Valid visas expiring within 1 week (DaysRemaining < 7), no Check-Out / Check-Out Internal on CurrentVisa.
--- Chart: < 1 day · < 2 days · … · < 7 days.
+-- Visas with DaysRemaining < 7 (includes already expired), no Check-Out / Check-Out Internal on CurrentVisa.
+-- Chart: Expired · < 1 day · < 2 days · … · < 7 days.
 CREATE OR ALTER VIEW [dbo].[vw_rd_to_be_checked_out] AS
 WITH checkout_linked AS (
     SELECT DISTINCT ai.CurrentVisaId AS VisaId
@@ -33,6 +33,7 @@ SELECT
     v.ExpirationDate AS VisaExpirationDate,
     DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) AS DaysRemaining,
     CASE
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0 THEN N'Expired'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 1 THEN N'< 1 day'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 2 THEN N'< 2 days'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 3 THEN N'< 3 days'
@@ -42,6 +43,7 @@ SELECT
         ELSE N'< 7 days'
     END AS ExpiryBucketLabel,
     CASE
+        WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 0 THEN N'st-expiring'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 3 THEN N'st-expiring'
         WHEN DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 5 THEN N'st-pending'
         ELSE N'st-approved'
@@ -59,8 +61,6 @@ LEFT JOIN People sp
 LEFT JOIN ProjectContracts spc
     ON spc.ID = sp.ProjectContractID AND ISNULL(spc.GCRecord, 0) = 0
 WHERE ISNULL(v.GCRecord, 0) = 0
-  AND COALESCE(v.IsCancelled, 0) = 0
-  AND CAST(v.ExpirationDate AS date) >= CAST(GETDATE() AS date)
   AND DATEDIFF(day, CAST(GETDATE() AS date), CAST(v.ExpirationDate AS date)) < 7
   AND NOT EXISTS (
         SELECT 1 FROM checkout_linked cl WHERE cl.VisaId = v.ID

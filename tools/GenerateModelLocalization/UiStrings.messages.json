@@ -4085,6 +4085,18 @@
     "tk-TM": "Sanawy aç",
     "ru-RU": "Открыть список"
   },
+  "ReportDashboard.Chrome.OpeningListView": {
+    "en": "Opening list…",
+    "tr-TR": "Liste açılıyor…",
+    "tk-TM": "Sanaw açylýar…",
+    "ru-RU": "Открытие списка…"
+  },
+  "ReportDashboard.Chrome.OpeningDetail": {
+    "en": "Opening…",
+    "tr-TR": "Açılıyor…",
+    "tk-TM": "Açylýar…",
+    "ru-RU": "Открытие…"
+  },
   "ReportDashboard.Chrome.ExcelDownloadTitle": {
     "en": "Download Excel template",
     "tr-TR": "Excel şablonunu indir",
@@ -4132,6 +4144,36 @@
     "tr-TR": "Bu proje için kayıt yok.",
     "tk-TM": "Bu taslama üçin ýazgy ýok.",
     "ru-RU": "Нет записей по этому проекту."
+  },
+  "ReportDashboard.Chrome.PageSize": {
+    "en": "Page size",
+    "tr-TR": "Sayfa boyutu",
+    "tk-TM": "Sahypa ölçegi",
+    "ru-RU": "Размер страницы"
+  },
+  "ReportDashboard.Chrome.Prev": {
+    "en": "Prev",
+    "tr-TR": "Önceki",
+    "tk-TM": "Öňki",
+    "ru-RU": "Назад"
+  },
+  "ReportDashboard.Chrome.Next": {
+    "en": "Next",
+    "tr-TR": "Sonraki",
+    "tk-TM": "Indiki",
+    "ru-RU": "Далее"
+  },
+  "ReportDashboard.Chrome.PreviewRange": {
+    "en": "Showing {0}–{1} of {2}",
+    "tr-TR": "{2} kayıttan {0}–{1} gösteriliyor",
+    "tk-TM": "{2} ýazgydan {0}–{1} görkezilýär",
+    "ru-RU": "Показаны {0}–{1} из {2}"
+  },
+  "ReportDashboard.Chrome.PreviewRangeCapped": {
+    "en": "Showing {0}–{1} of {2} loaded ({3} total)",
+    "tr-TR": "{2} yüklenen kayıttan {0}–{1} gösteriliyor (toplam {3})",
+    "tk-TM": "{2} ýüklän ýazgydan {0}–{1} görkezilýär (jemi {3})",
+    "ru-RU": "Показаны {0}–{1} из {2} загруженных (всего {3})"
   },
   "ReportDashboard.Chrome.Loading": {
     "en": "Loading…",
@@ -4481,47 +4523,119 @@
     "tk-TM": "Galan gün boýunça",
     "ru-RU": "По оставшимся дням"
   },
+  "ReportDashboard.SubReport.VisaExtension.by-days-remaining": {
+    "en": "Visa Validity",
+    "tr-TR": "Vize Geçerliliği",
+    "tk-TM": "Wiza möhleti",
+    "ru-RU": "Срок действия визы"
+  },
+  "ReportDashboard.SubReport.WorkPermit.active-by-project": {
+    "en": "Active WorkPermit (P)",
+    "tr-TR": "Aktif Çalışma İzni (P)",
+    "tk-TM": "Işjeň iş rugsady (P)",
+    "ru-RU": "Активное РНТ (P)"
+  },
+  "ReportDashboard.SubReport.WorkPermit.on-extension": {
+    "en": "WorkPermit Extension (P)",
+    "tr-TR": "Çalışma İzni Uzatma (P)",
+    "tk-TM": "Iş rugsady uzatma (P)",
+    "ru-RU": "Продление РНТ (P)"
+  },
+  "ReportDashboard.SubReport.WorkPermit.extension-result": {
+    "en": "Extension Result (P)",
+    "tr-TR": "Uzatma Sonucu (P)",
+    "tk-TM": "Uzatma netijesi (P)",
+    "ru-RU": "Результат продления (P)"
+  },
+  "ReportDashboard.SubReport.WorkPermit.by-days-remaining": {
+    "en": "WorkPermit Validity",
+    "tr-TR": "Çalışma İzni Geçerliliği",
+    "tk-TM": "Iş rugsady möhleti",
+    "ru-RU": "Срок действия РНТ"
+  },
   "ReportDashboard.SubReport.ready-by-project": {
-    "en": "Ready By Project",
-    "tr-TR": "Projeye göre hazır",
-    "tk-TM": "Taslama boýunça taýýar",
-    "ru-RU": "Готовые по проекту"
+    "en": "Active Invitation (P)",
+    "tr-TR": "Aktif Davetiye (P)",
+    "tk-TM": "Işjeň çakylyk (P)",
+    "ru-RU": "Активное приглашение (P)"
   },
   "ReportDashboard.SubReport.ready-by-period-category": {
-    "en": "Ready By Period · Category · Type",
-    "tr-TR": "Dönem · Kategori · Tür",
-    "tk-TM": "Möhlet · Kategoriýa · Görnüş",
-    "ru-RU": "Период · Категория · Тип"
+    "en": "Active Invitation (V)",
+    "tr-TR": "Aktif Davetiye (V)",
+    "tk-TM": "Işjeň çakylyk (V)",
+    "ru-RU": "Активное приглашение (V)"
   },
   "ReportDashboard.SubReport.in-process": {
-    "en": "Invitations In Process",
-    "tr-TR": "İşlemdeki davetler",
-    "tk-TM": "Işlenýän çakylyklar",
-    "ru-RU": "Приглашения в процессе"
+    "en": "Invitation Process (P)",
+    "tr-TR": "Davetiye Süreci (P)",
+    "tk-TM": "Çakylyk prosesi (P)",
+    "ru-RU": "Процесс приглашения (P)"
+  },
+  "ReportDashboard.SubReport.in-process-by-period-category-type": {
+    "en": "Invitation Process (V)",
+    "tr-TR": "Davetiye Süreci (V)",
+    "tk-TM": "Çakylyk prosesi (V)",
+    "ru-RU": "Процесс приглашения (V)"
+  },
+  "ReportDashboard.SubReport.process-result": {
+    "en": "Process Result (P)",
+    "tr-TR": "Süreç Sonucu (P)",
+    "tk-TM": "Proses netijesi (P)",
+    "ru-RU": "Результат процесса (P)"
+  },
+  "ReportDashboard.SubReport.process-result-by-period-category-type": {
+    "en": "Process Result (V)",
+    "tr-TR": "Süreç Sonucu (V)",
+    "tk-TM": "Proses netijesi (V)",
+    "ru-RU": "Результат процесса (V)"
   },
   "ReportDashboard.SubReport.rejected-by-project": {
-    "en": "Invitations Rejected",
-    "tr-TR": "Reddedilen davetler",
-    "tk-TM": "Ret edilen çakylyklar",
-    "ru-RU": "Отклонённые приглашения"
+    "en": "Process Result (P)",
+    "tr-TR": "Süreç Sonucu (P)",
+    "tk-TM": "Proses netijesi (P)",
+    "ru-RU": "Результат процесса (P)"
+  },
+  "ReportDashboard.SubReport.rejected-by-period-category-type": {
+    "en": "Process Result (V)",
+    "tr-TR": "Süreç Sonucu (V)",
+    "tk-TM": "Proses netijesi (V)",
+    "ru-RU": "Результат процесса (V)"
   },
   "ReportDashboard.SubReport.used": {
-    "en": "Used Invitations",
-    "tr-TR": "Kullanılan davetler",
-    "tk-TM": "Ulanylan çakylyklar",
-    "ru-RU": "Использованные приглашения"
+    "en": "Used (P)",
+    "tr-TR": "Kullanılan (P)",
+    "tk-TM": "Ulanylan (P)",
+    "ru-RU": "Использованные (P)"
+  },
+  "ReportDashboard.SubReport.used-by-period-category-type": {
+    "en": "Used (V)",
+    "tr-TR": "Kullanılan (V)",
+    "tk-TM": "Ulanylan (V)",
+    "ru-RU": "Использованные (V)"
   },
   "ReportDashboard.SubReport.valid-until": {
-    "en": "Invitation Valid Until",
-    "tr-TR": "Davet geçerliliği",
+    "en": "Invitation Validity",
+    "tr-TR": "Davetiye Geçerliliği",
     "tk-TM": "Çakylygyň möhleti",
     "ru-RU": "Срок действия приглашения"
   },
+  "ReportDashboard.SubReport.check-in-by-project": {
+    "en": "Active Registered (P)",
+    "tr-TR": "Aktif Kayıtlı (P)",
+    "tk-TM": "Işjeň hasaba alnan (P)",
+    "ru-RU": "Активная регистрация (P)"
+  },
+  "ReportDashboard.SubReport.check-in-by-period-category-type": {
+    "en": "Active Registered (V)",
+    "tr-TR": "Aktif Kayıtlı (V)",
+    "tk-TM": "Işjeň hasaba alnan (V)",
+    "ru-RU": "Активная регистрация (V)"
+  },
   "ReportDashboard.SubReport.check-in-by-city": {
-    "en": "Check in by City",
-    "tr-TR": "Şehre göre giriş",
-    "tk-TM": "Şäher boýunça giriş",
-    "ru-RU": "Регистрация по городу"
+    "en": "Active Registered (C)",
+    "tr-TR": "Aktif Kayıtlı (C)",
+    "tk-TM": "Işjeň hasaba alnan (C)",
+    "ru-RU": "Активная регистрация (C)"
   },
   "ReportDashboard.SubReport.expiring-state": {
     "en": "Expiring State",
@@ -4540,6 +4654,12 @@
     "tr-TR": "Çıkış bekleyen",
     "tk-TM": "Çykyş etmeli",
     "ru-RU": "К снятию с учёта"
+  },
+  "ReportDashboard.SubReport.on-process": {
+    "en": "On process",
+    "tr-TR": "Süreçte",
+    "tk-TM": "Prosesde",
+    "ru-RU": "В процессе"
   },
   "ReportDashboard.SubReport.App_Reg_Check_In": {
     "en": "Check-In",
@@ -4564,12 +4684,6 @@
     "tr-TR": "Çıkış (iç)",
     "tk-TM": "Çykyş (içki)",
     "ru-RU": "Снятие (внутр.)"
-  },
-  "ReportDashboard.SubReport.App_Reg_ext": {
-    "en": "Extension",
-    "tr-TR": "Uzatma",
-    "tk-TM": "Uzatmak",
-    "ru-RU": "Продление"
   },
   "ReportDashboard.SubReport.App_Reg_Info_Change_Address": {
     "en": "Address Change",
@@ -5254,5 +5368,77 @@
     "tr-TR": "< 10 gün",
     "tk-TM": "< 10 gün",
     "ru-RU": "< 10 дн."
+  },
+  "ReportDashboard.SubReport.active-by-project": {
+    "en": "Active Visa (P)",
+    "tr-TR": "Aktif Vize (P)",
+    "tk-TM": "Işjeň wiza (P)",
+    "ru-RU": "Активная виза (P)"
+  },
+  "ReportDashboard.SubReport.by-period-category-type": {
+    "en": "Active Visa (V)",
+    "tr-TR": "Aktif Vize (V)",
+    "tk-TM": "Işjeň wiza (V)",
+    "ru-RU": "Активная виза (V)"
+  },
+  "ReportDashboard.SubReport.extension-required": {
+    "en": "Extension Required",
+    "tr-TR": "Uzatma Gerekli",
+    "tk-TM": "Uzatma gerek",
+    "ru-RU": "Требуется продление"
+  },
+  "ReportDashboard.SubReport.extension-required-by-period-category-type": {
+    "en": "Extension Required",
+    "tr-TR": "Uzatma Gerekli",
+    "tk-TM": "Uzatma gerek",
+    "ru-RU": "Требуется продление"
+  },
+  "ReportDashboard.SubReport.on-extension": {
+    "en": "Visa On Extension (P)",
+    "tr-TR": "Vize Uzatmada (P)",
+    "tk-TM": "Wiza uzatmada (P)",
+    "ru-RU": "Виза на продлении (P)"
+  },
+  "ReportDashboard.SubReport.on-extension-by-period-category-type": {
+    "en": "Visa On Extension (V)",
+    "tr-TR": "Vize Uzatmada (V)",
+    "tk-TM": "Wiza uzatmada (V)",
+    "ru-RU": "Виза на продлении (V)"
+  },
+  "ReportDashboard.SubReport.extension-result": {
+    "en": "Extension Result (P)",
+    "tr-TR": "Uzatma Sonucu (P)",
+    "tk-TM": "Uzatma Netijesi (P)",
+    "ru-RU": "Результат продления (P)"
+  },
+  "ReportDashboard.SubReport.extension-result-by-period-category-type": {
+    "en": "Extension Result (V)",
+    "tr-TR": "Uzatma Sonucu (V)",
+    "tk-TM": "Uzatma Netijesi (V)",
+    "ru-RU": "Результат продления (V)"
+  },
+  "ReportDashboard.Header.ProjectPeriodCategoryTypeState": {
+    "en": "Project · Period · Category · Type · State",
+    "tr-TR": "Proje · Dönem · Kategori · Tür · Durum",
+    "tk-TM": "Taslama · Möhlet · Kategoriýa · Görnüş · Ýagdaý",
+    "ru-RU": "Проект · Период · Категория · Тип · Состояние"
+  },
+  "ReportDashboard.Header.PeriodCategoryTypeState": {
+    "en": "Period · Category · Type · State",
+    "tr-TR": "Dönem · Kategori · Tür · Durum",
+    "tk-TM": "Möhlet · Kategoriýa · Görnüş · Ýagdaý",
+    "ru-RU": "Период · Категория · Тип · Состояние"
+  },
+  "ReportDashboard.Header.ProjectState": {
+    "en": "Project · State",
+    "tr-TR": "Proje · Durum",
+    "tk-TM": "Taslama · Ýagdaý",
+    "ru-RU": "Проект · Состояние"
+  },
+  "ReportDashboard.Header.ApplicationTypeProcessState": {
+    "en": "Application Type · Process State",
+    "tr-TR": "Başvuru türü · Süreç durumu",
+    "tk-TM": "Arza görnüşi · Proses ýagdaýy",
+    "ru-RU": "Тип заявки · Состояние процесса"
   }
 }

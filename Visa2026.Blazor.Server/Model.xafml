@@ -1430,5 +1430,117 @@
         <ColumnInfo Id="ASNumber" Index="9" Width="90" />
       </Columns>
     </ListView>
+    
+    <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="140" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaActiveByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByPeriodCategoryType" Caption="Active Visa (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="200" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaOnExtension_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaOnExtension" Caption="Visa On Extension (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="180" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaOnExtensionByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaOnExtensionByPeriodCategoryType" Caption="Visa On Extension (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="220" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaExtensionResult_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaExtensionResult" Caption="Extension Result (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="180" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaExtensionResultByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaExtensionResultByPeriodCategoryType" Caption="Extension Result (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="220" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaAppProgress_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaAppProgress" Caption="Visa Extension (Dashboard)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Application" Index="0" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="Person" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ExpiringVisa" Index="2" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="4" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="5" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="CurrentState" Index="6" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ProgressStateLabel" Index="7" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="StatusDate" Index="8" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="9" Width="90" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaByPeriod_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaByPeriod" Caption="Active Visa (Dashboard)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="PeriodLabel" Index="6" Width="90" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaExtensionRequired_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaExtensionRequired" Caption="Extension Required" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="140" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaByDaysRemaining_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaByDaysRemaining" Caption="Visa Validity" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="110" IsNewNode="True" />
+      </Columns>
+    </ListView>
   </Views>
 </Application>

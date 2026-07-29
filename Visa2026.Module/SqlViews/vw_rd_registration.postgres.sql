@@ -1,5 +1,5 @@
 -- Report Dashboard: Registration category (PostgreSQL).
--- One row per not-expired visa: latest registration Application via ApplicationItem.CurrentVisa.
+-- One row per visa with registration Application via ApplicationItem.CurrentVisa (cancel/expiry ignored until Check-Out).
 DROP VIEW IF EXISTS vw_rd_registration;
 CREATE VIEW vw_rd_registration AS
 WITH ranked AS (
@@ -47,14 +47,16 @@ WITH ranked AS (
         COALESCE(ast."Code", 'AT_OFFICE') AS "ProgressStateCode",
         ((v."ExpirationDate")::date - CURRENT_DATE) AS "DaysRemaining",
         CASE
+            WHEN (v."ExpirationDate")::date - CURRENT_DATE < 0   THEN 'Expired'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 7   THEN '< 7 days'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 14  THEN '< 14 days'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 30  THEN '< 1 month'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 90  THEN '< 3 months'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 180 THEN '< 6 months'
-            ELSE 'â‰¥ 6 months'
+            ELSE '≥ 6 months'
         END AS "ExpiryBucketLabel",
         CASE
+            WHEN (v."ExpirationDate")::date - CURRENT_DATE < 0   THEN 'st-expiring'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 14  THEN 'st-expiring'
             WHEN (v."ExpirationDate")::date - CURRENT_DATE < 90  THEN 'st-pending'
             ELSE 'st-approved'
@@ -102,8 +104,6 @@ WITH ranked AS (
     LEFT JOIN "ApplicationStates" ast
         ON ast."ID" = latest_ap."StateID" AND COALESCE(ast."GCRecord", 0) = 0
     WHERE COALESCE(v."GCRecord", 0) = 0
-      AND COALESCE(v."IsCancelled", FALSE) = FALSE
-      AND (v."ExpirationDate")::date >= CURRENT_DATE
       AND at."Name" IN (
             'App_Reg_Check_In',
             'App_Reg_Check_In_Internal',

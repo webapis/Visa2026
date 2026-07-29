@@ -7,7 +7,7 @@
 | File | Role |
 |------|------|
 | `Services/ReportDashboard/ReportDashboardModels.cs` | All DTOs and enums: `ReportDashboardCategory`, `ReportDashboardPersonType`, `ReportDashboardPreviewRow`, `ReportDashboardPanelData`, `ReportDashboardSnapshot`, `ReportDashboardSubReport`, `ReportDashboardStatusBucket`, `ReportDashboardProjectChip` |
-| `Services/ReportDashboard/ReportDashboardCatalog.cs` | Static catalog: `CategoryLabel`, `SubReports`, `DefaultSubReport`, `TableHeaders`, `ListViewId`, `ExcelTemplateNameHint`, `BuildListCriteria`, `ToPersonRole`, `Categories` list |
+| `Services/ReportDashboard/ReportDashboardCatalog.cs` | Static catalog: `CategoryLabel`, `SubReports`, `DefaultSubReport`, `TableHeaders`, `ResolveListViewTarget` / `UsesVisaAppProgressListView` / `UsesVisaBoListView`, `ExcelTemplateNameHint(category, subReport)`, `BuildListCriteria(..., subReport)`, `ToPersonRole`, `Categories` list |
 | `Services/ReportDashboard/IReportDashboardQueryService.cs` | Interface: `LoadSnapshot(objectSpace, months)` and `LoadPanel(objectSpace, personType, category, projectKey, months, subReport)` |
 | `Services/ReportDashboard/ReportDashboardMockQueryService.cs` | Prototype implementation with hardcoded rows. Add new category/sub-report mock data here first. |
 | `Services/ReportDashboard/ReportDashboardQueryService.cs` | Real EF implementation. One `Load[Category]()` private method per category. |
@@ -16,7 +16,7 @@
 | `DatabaseUpdate/ReportDashboardDetailViewUpdater.cs` | Hides the property label in the XAF DetailView. |
 | `DatabaseUpdate/ReportDashboardModelUpdater.cs` | Registers the Dashboard DetailView in the XAF model. |
 | `Editors/ReportDashboardEditorAliases.cs` | String constant `Dashboard` for the editor alias. |
-| `SqlViews/` | (planned) One `.sql` file per category view. |
+| `SqlViews/` | One `.sql` + `.postgres.sql` **per subreport** (`vw_rd_{category}_{subreport}`); shared base/wrapper allowed for (P)/(V). |
 
 ### Visa2026.Blazor.Server
 
@@ -29,6 +29,72 @@
 | `Startup.cs` | Service registration. Swap mock/real here. |
 
 ---
+
+
+---
+
+## Preview ↔ SQL view ↔ XAF ListView contract (all categories)
+
+Canonical short form: `SKILL.md` § Preview ↔ SQL view ↔ XAF ListView.
+
+### Rules (verbatim intent)
+
+- SQL view created for a subreport is the **source of truth** for that subreport’s XAF ListView.
+- Each subreport has its **own** SQL view and **own** XAF ListView.
+- ListView **columns** and **total returned items** must match that subreport’s Preview table (same filters).
+- ListView **caption** = subreport Label.
+- Open in Excel = **same population** as Preview / ListView.
+
+### Column contract
+
+`ReportDashboardCatalog.TableHeaders(category, subReport)` defines the officer-facing column set.
+
+- Preview table headers must match those labels (order matters for UX).
+- XAF ListView layout columns must match the same set (hide raw GUIDs / helper fields used only for criteria or FKs).
+- **DetailView links (native XAF):** Open ListView columns for domain objects must be **browsable navigations** (`Person`, `Passport`, `Visa`, `Application`, …), not scalar strings. XAF only renders clickable object links for reference properties.
+  - Preview loaders keep reading scalars (`PersonName`, `PassportNumber`, `VisaNumber`, `ApplicationNumber`) — mark those `[Browsable(false)]` so they do not appear as ListView columns.
+  - ListView `ColumnInfo` must point at the navigations (`Person` / `Passport` / `Visa` / `Application`), which **replace** the matching Preview text column (same meaning).
+  - Never put `ColumnInfo` on a `[Browsable(false)]` member (`DxGridListEditor.AddColumnCore` NRE — no `ModelMember`).
+  - When the view row key **is** the domain object (e.g. Active/Validity/Extension Required row `ID` = `Visa.ID`), expose `Visa` with FK = `ID` and wire EF `HasOne(...Visa).HasForeignKey(t => t.ID)`.
+  - Do **not** invent custom hyperlink editors for this; use navigations.
+
+### Population / Total parity
+
+Same inputs must yield the same Total:
+
+| Input | Must match |
+|-------|------------|
+| Person type tab | Yes |
+| Project chip | Yes |
+| Subreport key | Yes |
+| One last valid visa/permit (when shown) | Yes |
+| Include archived / process flags / valid-visa-only (when shown) | Yes |
+
+Charts may regroup rows via `Status` / `StatusCssClass`; they must **not** change Total relative to Preview/ListView.
+
+### (P)/(V) shared population
+
+When two subreports differ only by chart axis (Status) but share the same people/rows:
+
+1. Implement shared population once (base view or shared SQL fragment).
+2. Still create **two public** views with key-aligned names (thin wrappers / different `StatusLabel` expression as needed).
+3. Still create **two** ListViews (captions = each Label).
+
+### Forbidden Open ListView targets
+
+Do not use editable/domain ListViews as dashboard drill-down for a promoted subreport:
+
+- `Visa_ListView`, `VisaExtensionStatus_ListView`, `ApplicationItem_ListView`, etc. — unless the category is still mock and explicitly temporary.
+
+### Wiring
+
+- `ResolveListViewTarget(category, subReport)` → dedicated `*_ListView` + BO type for that subreport.
+- `BuildListCriteria(...)` must mirror the preview loader filters for that subreport (bake fixed population filters into the view when possible so ListView criteria cannot drift).
+- Permissions: Users/officer roles need **Read** on each dashboard BO.
+
+### Transitional debt
+
+Shared Visa surfaces (`vw_rd_visa_by_period` for Active P+V, `vw_rd_visa_app_progress` for Extension + Result, etc.) are **legacy sharing**. New work and any rework of those tabs must split to one view + one ListView per subreport.
 
 ## ReportDashboardPreviewRow fields
 
@@ -193,16 +259,15 @@ public DbSet<VwRdMyCategory> VwRdMyCategory => Set<VwRdMyCategory>();
 | Category | Sub-report keys | Status |
 |----------|----------------|--------|
 | `Application` | `by-progress`, `by-type` | Real: both via `vw_rd_application` (before Visa) |
-| `VisaExtension` (displayed as "Visa") | `visa-state`, `app-progress`, `by-category`, `by-type`, `by-period`, `by-days-remaining` | Real: visa-state, app-progress, by-category, by-type, by-period, by-days-remaining |
-| `Invitation` | `ready-by-project`, `ready-by-period-category`, `in-process`, `rejected-by-project`, `used`, `valid-until` (live) | Real: all invitation tabs |
-| `Registration` | registration ApplicationType.Name keys (8) | Real: `vw_rd_registration` (process state) |
-| `WorkPermit` | `by-days-remaining`, `by-status` | Real: by-days-remaining (`vw_rd_work_permit`); by-status mock/legacy |
-| `WorkPermit` | `by-status` | Mock only |
+| `VisaExtension` (displayed as "Visa") | `active-by-project`, `by-period-category-type`, `extension-required`, `on-extension`, `on-extension-by-period-category-type`, `by-days-remaining`, `extension-result`, `extension-result-by-period-category-type` | Real: active + validity (`vw_rd_visa_by_*`); Extension Required (single tab, Status = nearest days milestone 0/7/14/30/60/90/180/365); Visa On Extension + Extension Result (P)/(V) (`vw_rd_visa_app_progress`). Legacy `visa-state` → active-by-project. |
+| `Invitation` | `ready-by-project` (Active Invitation (P)), `ready-by-period-category` (Active Invitation (V)), `in-process` / `in-process-by-period-category-type` (Invitation Process (P)/(V)), `process-result` / `process-result-by-period-category-type` (Process Result (P)/(V); legacy `rejected-by-*`), `used` / `used-by-period-category-type` (Used (P)/(V)), `valid-until` (Invitation Validity) | Real: all invitation tabs. Process Result = CanIssueInvitation apps with terminal progress (Issued/Cancelled/Rejected + 1st/2nd Review Rejected); Status like Extension Result |
+| `Registration` | `check-in-by-city` (Active Registered (C)), `check-in-by-project` / `check-in-by-period-category-type` (Active Registered (P)/(V)), `expiring-state`, `to-be-checked-in` / `to-be-checked-out`, `on-process` (On process) | Real: `vw_rd_registration` (+ to-be-checked views); On process = App_Reg_* ApplicationItems not terminal (Issued/Cancelled/Rejected/review rejects), Status = ApplicationType · ProcessState. Cancel/expiry ignored until Check-Out for check-in population. ApplicationType tabs removed |
+| `WorkPermit` | `active-by-project` (Active WorkPermit (P)), `on-extension` (Extension (P) — mock), `extension-result` (Extension Result (P) — real), `by-days-remaining` (WorkPermit Validity), `by-status` | Real: active (`vw_rd_work_permit_active`); Result (`vw_rd_work_permit_app_progress`); validity (`vw_rd_work_permit`); Extension mock; by-status mock/legacy |
 | `Travel` | `default` | Mock only |
 | `BorderZone` | `default` | Mock only |
 | `Passport` | `by-type`, `by-citizenship`, `by-validity` | Mock only |
 
-Update this table in `learnings.md` as categories are promoted to real SQL views.
+Update this table in `learnings.md` as categories are promoted. Target: one `vw_rd_*` + ListView per subreport (see Preview `↔` ListView contract). Shared Visa views are transitional debt.
 ## Localization
 
 - Helper: `Visa2026.Module/Localization/ReportDashboardLocalization.cs`

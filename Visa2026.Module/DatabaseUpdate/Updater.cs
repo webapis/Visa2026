@@ -251,6 +251,17 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        // Dashboard Open ListView for Visa Extension / Extension Result (vw_rd_visa_app_progress).
+        userRole.AddTypePermissionsRecursively<VwRdVisaAppProgress>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaByPeriod>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaActiveByProject>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaActiveByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaOnExtension>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaOnExtensionByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaExtensionResult>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaExtensionResultByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaExtensionRequired>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaByDaysRemaining>(SecurityOperations.Read, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
@@ -541,6 +552,17 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             EnsureTypePermission<BusinessObjects.ReportDashboard.ReportDashboardHost>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            // Open ListView for Visa Extension / Extension Result (vw_rd_visa_app_progress).
+            EnsureTypePermission<VwRdVisaAppProgress>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByPeriod>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaActiveByProject>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaActiveByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaOnExtension>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaOnExtensionByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionResult>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionResultByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionRequired>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByDaysRemaining>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
                 role,

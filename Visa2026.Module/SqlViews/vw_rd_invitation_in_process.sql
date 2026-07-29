@@ -79,5 +79,13 @@ WHERE ISNULL(a.GCRecord, 0) = 0
     )
   AND (
         ast.Code IS NULL
-        OR ast.Code NOT IN (N'PROCESS_ISSUED', N'PROCESS_REJECTED', N'PROCESS_CANCELLED')
+        OR ast.Code NOT IN (
+            N'PROCESS_ISSUED',
+            N'PROCESS_REJECTED',
+            N'PROCESS_CANCELLED',
+            N'1_REVIEW_REJECTED',
+            N'2_REVIEW_REJECTED',
+            N'3_REVIEW_REJECTED',
+            N'4_REVIEW_REJECTED',
+            N'5_REVIEW_REJECTED')
       );
