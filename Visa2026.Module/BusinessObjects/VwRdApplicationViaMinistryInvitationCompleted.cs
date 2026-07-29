@@ -79,6 +79,20 @@ public class VwRdApplicationViaMinistryInvitationCompleted : IVwRdApplicationVia
     public virtual string VisaTypeLabel { get; set; }
 
     [Browsable(false)]
+    public virtual Guid? InvitationOid { get; set; }
+
+    /// <summary>
+    /// Invitation this application issued for <see cref="Person"/> — proof the application
+    /// process produced one. Empty for rejected / cancelled applications.
+    /// </summary>
+    [ForeignKey(nameof(InvitationOid))]
+    [ModelDefault("Caption", "Invitation")]
+    public virtual Invitation Invitation { get; set; }
+
+    [Browsable(false)]
+    public virtual string InvitationNumber { get; set; }
+
+    [Browsable(false)]
     public virtual string ApplicationNumber { get; set; }
 
     [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]

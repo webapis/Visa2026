@@ -40,6 +40,9 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType();
         CreateViewRdApplicationViaMinistryOtherOnProcess();
         CreateViewRdApplicationViaMinistryOtherCompleted();
+        CreateViewRdApplicationDirectMigrationOnProcessA();
+        CreateViewRdApplicationDirectMigrationProcessComplete();
+        CreateViewRdIncompletePersonsByMissingArea();
         CreateViewRdInvitationRejected();
         CreateViewRdInvitationUsed();
         CreateViewRdInvitationValidUntil();
@@ -618,6 +621,19 @@ WHERE COALESCE(a.""GCRecord"", 0) = 0
     private void CreateViewRdApplicationViaMinistryOtherCompleted() =>
         ExecuteEmbeddedPostgresView(
             "vw_rd_application_via_ministry_other_completed.postgres.sql");
+
+    private void CreateViewRdApplicationDirectMigrationOnProcessA() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_direct_migration_on_process_a.postgres.sql");
+
+    private void CreateViewRdApplicationDirectMigrationProcessComplete() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_direct_migration_process_complete.postgres.sql");
+
+    private void CreateViewRdIncompletePersonsByMissingArea() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_incomplete_persons_by_missing_area.postgres.sql");
+
     private void CreateViewRdInvitationRejected()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_rejected;", true);

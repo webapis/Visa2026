@@ -1,6 +1,7 @@
--- Invitation Completed base.
--- One row per ApplicationItem.
-CREATE OR ALTER VIEW [dbo].[vw_rd_application_via_ministry_invitation_completed_base] AS
+-- Application (direct migration) Process Complete.
+-- One row per ApplicationItem; route = DirectToMigrationService (1).
+-- Project from Person.ProjectContract (else sponsor) — not Application.ProjectContract.
+CREATE OR ALTER VIEW [dbo].[vw_rd_application_direct_migration_process_complete] AS
 SELECT
     ai.ID                                                               AS ID,
     a.ID                                                                AS ApplicationOid,
@@ -19,33 +20,17 @@ SELECT
     )                                                                   AS PersonName,
     COALESCE(
         NULLIF(LTRIM(RTRIM(pc.NameTm)), N''),
+        NULLIF(LTRIM(RTRIM(spc.NameTm)), N''),
         N'(No project)'
     )                                                                   AS ProjectName,
-    COALESCE(pc.NameTm, N'')                                            AS ProjectNameRaw,
-    COALESCE(pc.NameTm, N'')                                            AS ProjectNameTm,
+    COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameRaw,
+    COALESCE(pc.NameTm, spc.NameTm, N'')                                AS ProjectNameTm,
     COALESCE(p.PersonRole, 0)                                           AS PersonRoleCode,
-    COALESCE(
-        NULLIF(LTRIM(RTRIM(pos.NameTm)), N''),
-        NULLIF(LTRIM(RTRIM(pos.Name)), N''),
-        N''
-    )                                                                   AS PositionLabel,
     COALESCE(
         NULLIF(LTRIM(RTRIM(at.NameTm)), N''),
         NULLIF(LTRIM(RTRIM(at.Name)), N''),
         N''
     )                                                                   AS ApplicationTypeLabel,
-    COALESCE(
-        NULLIF(LTRIM(RTRIM(vp.NameTm)), N''),
-        NULLIF(LTRIM(RTRIM(vp.Name)), N''),
-        N''
-    )                                                                   AS VisaPeriodLabel,
-    COALESCE(
-        NULLIF(LTRIM(RTRIM(vt.NameTm)), N''),
-        NULLIF(LTRIM(RTRIM(vt.Name)), N''),
-        N''
-    )                                                                   AS VisaTypeLabel,
-    issued_inv.ID                                                           AS InvitationOid,
-    COALESCE(NULLIF(LTRIM(RTRIM(issued_inv.InvitationNumber)), N''), N'')   AS InvitationNumber,
     COALESCE(
         NULLIF(LTRIM(RTRIM(a.FullApplicationNumber)), N''),
         NULLIF(LTRIM(RTRIM(a.ApplicationNumber)), N''),
@@ -74,22 +59,7 @@ SELECT
                                                                               THEN N'st-expiring'
       ELSE                                                                          N'st-pending'
     END                                                                 AS StatusCssClass,
-    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived,
-    COALESCE(
-        NULLIF(LTRIM(RTRIM(vp.NameTm)), N''),
-        NULLIF(LTRIM(RTRIM(vp.Name)), N''),
-        N'(No period)'
-    )                                                                   AS PeriodLabel,
-    COALESCE(
-        NULLIF(LTRIM(RTRIM(vc.NameTm)), N''),
-        NULLIF(LTRIM(RTRIM(vc.Name)), N''),
-        N'(No category)'
-    )                                                                   AS CategoryLabel,
-    COALESCE(
-        NULLIF(LTRIM(RTRIM(vt.NameTm)), N''),
-        NULLIF(LTRIM(RTRIM(vt.Name)), N''),
-        N'(No type)'
-    )                                                                   AS TypeLabel
+    CAST(ISNULL(p.IsArchived, 0) AS bit)                                AS IsArchived
 FROM ApplicationItems ai
 INNER JOIN Applications a
     ON a.ID = ai.ApplicationID
@@ -97,20 +67,19 @@ INNER JOIN Applications a
 INNER JOIN ApplicationTypes at
     ON at.ID = a.ApplicationTypeID
    AND ISNULL(at.GCRecord, 0) = 0
-   AND ISNULL(at.CanIssueInvitation, 0) = 1
-   AND ISNULL(at.ApplicationProgressRoute, 0) = 0
-LEFT JOIN ProjectContracts pc
-    ON pc.ID = a.ProjectContractID
-   AND ISNULL(pc.GCRecord, 0) = 0
+   AND ISNULL(at.ApplicationProgressRoute, 0) = 1
 LEFT JOIN People p
     ON p.ID = ai.PersonID
    AND ISNULL(p.GCRecord, 0) = 0
-LEFT JOIN EmployeePositionHistories eph
-    ON eph.ID = ai.CurrentPositionHistoryID
-   AND ISNULL(eph.GCRecord, 0) = 0
-LEFT JOIN Positions pos
-    ON pos.ID = eph.PositionID
-   AND ISNULL(pos.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts pc
+    ON pc.ID = p.ProjectContractID
+   AND ISNULL(pc.GCRecord, 0) = 0
+LEFT JOIN People sp
+    ON sp.ID = p.SponsoringEmployeeID
+   AND ISNULL(sp.GCRecord, 0) = 0
+LEFT JOIN ProjectContracts spc
+    ON spc.ID = sp.ProjectContractID
+   AND ISNULL(spc.GCRecord, 0) = 0
 OUTER APPLY (
     SELECT TOP 1 ap.StateID
     FROM ApplicationProgresses ap
@@ -121,30 +90,7 @@ OUTER APPLY (
 LEFT JOIN ApplicationStates ast
     ON ast.ID = latest_ap.StateID
    AND ISNULL(ast.GCRecord, 0) = 0
-LEFT JOIN VisaPeriods vp
-    ON vp.ID = a.VisaPeriodID AND ISNULL(vp.GCRecord, 0) = 0
-LEFT JOIN VisaCategories vc
-    ON vc.ID = a.VisaCategoryID AND ISNULL(vc.GCRecord, 0) = 0
-LEFT JOIN VisaTypes vt
-    ON vt.ID = a.VisaTypeID AND ISNULL(vt.GCRecord, 0) = 0
--- Invitation this application issued for this row's person — proof of issue.
--- Application.Invitations -> InvitationItems.Person; not ApplicationItem.CurrentInvitationItem,
--- which is the person's pre-existing invitation fed into the application.
--- One invitation per ApplicationItem is a business rule, but TOP 1 keeps a data
--- anomaly from fanning out rows and breaking Preview/ListView total parity.
-OUTER APPLY (
-    SELECT TOP 1 inv.ID, inv.InvitationNumber
-    FROM Invitations inv
-    INNER JOIN InvitationItems ii
-        ON ii.InvitationID = inv.ID
-       AND ISNULL(ii.GCRecord, 0) = 0
-    WHERE inv.ApplicationID = a.ID
-      AND ii.PersonID = ai.PersonID
-      AND ISNULL(inv.GCRecord, 0) = 0
-    ORDER BY inv.StartDate DESC, inv.ID DESC
-) issued_inv
 WHERE ISNULL(ai.GCRecord, 0) = 0
-
   AND (
         COALESCE(NULLIF(LTRIM(RTRIM(a.LatestPrimaryStateCode)), N''), NULLIF(LTRIM(RTRIM(ast.Code)), N''), N'')
             IN (

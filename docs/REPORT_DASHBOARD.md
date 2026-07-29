@@ -18,7 +18,7 @@ After login, officers land on this dashboard to grasp process state (invitation,
 |-------|--------|
 | Project filter | `All` + `ProjectContract` chips (overflow “+N more”) |
 | Person type | Employees 뿯½ Family Members 뿯½ Temporary Visitors (`PersonRecordRole`) |
-| Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records |
+| Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records / Incomplete persons |
 
 ## Hosting
 
@@ -49,6 +49,7 @@ After editing message JSON, regenerate: `dotnet run --project tools/GenerateMode
 | Feature | Relationship |
 |---------|----------------|
 | **Bo State Notifications** (header bell) | Separate; kept |
+| **Person incomplete data** | Manual officer flag; category **Incomplete persons** — see [`PERSON_INCOMPLETE_DATA.md`](PERSON_INCOMPLETE_DATA.md) |
 | **State specifications / evaluators** | Still define BO state criteria for colors and notifications; **not** the home UI |
 | **Resminamalar / Document copies** | Unchanged; Excel action may reuse `UserReportTemplate` seeds |
 

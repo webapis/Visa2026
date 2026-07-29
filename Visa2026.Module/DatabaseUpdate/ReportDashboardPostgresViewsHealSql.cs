@@ -66,7 +66,20 @@ public static class ReportDashboardPostgresViewsHealSql
             "vw_rd_application_via_ministry_other_on_process.postgres.sql"),
         ("vw_rd_application_via_ministry_other_completed",
             "vw_rd_application_via_ministry_other_completed.postgres.sql"),
+        ("vw_rd_application_direct_migration_on_process_a",
+            "vw_rd_application_direct_migration_on_process_a.postgres.sql"),
+        ("vw_rd_application_direct_migration_process_complete",
+            "vw_rd_application_direct_migration_process_complete.postgres.sql"),
     };
+
+    /// <summary>
+    /// Requires <see cref="PersonIncompleteDataSchemaSql"/> columns on People first.
+    /// Kept out of <see cref="StandaloneViews"/> so a missing incomplete view does not
+    /// force a full via-ministry standalone re-heal.
+    /// </summary>
+    private const string IncompletePersonsViewName = "vw_rd_incomplete_persons_by_missing_area";
+    private const string IncompletePersonsResourceLeaf =
+        "vw_rd_incomplete_persons_by_missing_area.postgres.sql";
 
     private static readonly string[] VisaAppProgressDependentViews =
     {
@@ -142,8 +155,22 @@ public static class ReportDashboardPostgresViewsHealSql
                 ExecuteEmbeddedSql(connection, resourceLeaf);
             }
         }
+
+        HealIncompletePersonsViewIfReady(connection);
     }
 
+    private static void HealIncompletePersonsViewIfReady(NpgsqlConnection connection)
+    {
+        if (ViewExists(connection, IncompletePersonsViewName))
+            return;
+
+        // People columns must exist before CREATE VIEW (host schema heal runs first in Startup).
+        if (!ColumnExists(connection, "People", "IncompleteMissingPersonalData")
+            && !ColumnExists(connection, "People", "incompletemissingpersonaldata"))
+            return;
+
+        ExecuteEmbeddedSql(connection, IncompletePersonsResourceLeaf);
+    }
 
     private static bool NeedsViaMinistryStandaloneHeal(NpgsqlConnection connection)
     {
@@ -162,6 +189,12 @@ public static class ReportDashboardPostgresViewsHealSql
             return true;
         if (!ColumnExists(connection, "vw_rd_application_via_ministry_visa_extension_completed", "IssuedVisaNumber")
             && !ColumnExists(connection, "vw_rd_application_via_ministry_visa_extension_completed", "issuedvisanumber"))
+            return true;
+        if (!ColumnExists(connection, "vw_rd_application_via_ministry_invitation_completed", "InvitationNumber")
+            && !ColumnExists(connection, "vw_rd_application_via_ministry_invitation_completed", "invitationnumber"))
+            return true;
+        if (!ColumnExists(connection, "vw_rd_application_direct_migration_on_process_a", "ApplicationTypeLabel")
+            && !ColumnExists(connection, "vw_rd_application_direct_migration_on_process_a", "applicationtypelabel"))
             return true;
 
         return false;

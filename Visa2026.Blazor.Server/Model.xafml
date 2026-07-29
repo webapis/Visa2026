@@ -828,7 +828,7 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="Person" Removed="True" />
+<LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="24.794359576968272" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs e2e-person-employee-tabs" IsNewNode="True">
@@ -861,6 +861,22 @@
               </LayoutGroup>
               <LayoutGroup Id="Salaries" Index="9" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-salaries" IsNewNode="True">
                 <LayoutItem Id="Salaries" RelativeSize="100" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
+                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items, work permits, and invitations appear here after you process applications. Add passports, education, and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
@@ -927,7 +943,7 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="Person" Removed="True" />
+<LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="58.4985835694051" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs" IsNewNode="True">
@@ -960,6 +976,22 @@
               </LayoutGroup>
               <LayoutGroup Id="Educations" RelativeSize="100" Removed="True">
                 <LayoutItem Id="Educations" RelativeSize="100" />
+              </LayoutGroup>
+              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
+                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items, work permits, and invitations appear here after you process applications. Add passports and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
@@ -1018,7 +1050,7 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="Person" Removed="True" />
+<LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="24.794359576968272" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs" IsNewNode="True">
@@ -1045,6 +1077,22 @@
               </LayoutGroup>
               <LayoutGroup Id="Salaries" Index="7" RelativeSize="100" Removed="True">
                 <LayoutItem Id="Salaries" RelativeSize="100" />
+              </LayoutGroup>
+              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
+                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items and invitations appear here after you process applications. Add passports and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
@@ -1465,9 +1513,10 @@
         <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
         <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
         <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
-        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
-        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
-        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+        <ColumnInfo Id="Invitation" Index="6" Width="120" Caption="Invitation #" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="7" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="8" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="9" Width="180" Caption="State" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType" Caption="Invitation Completed (V)" IsNewNode="True">
@@ -1478,9 +1527,10 @@
         <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
         <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
         <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
-        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
-        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
-        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+        <ColumnInfo Id="Invitation" Index="6" Width="120" Caption="Invitation #" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="7" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="8" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="9" Width="180" Caption="State" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdApplicationViaMinistryVisaExtensionOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionOnProcess" Caption="Visa Extension on Process (P)" IsNewNode="True">
@@ -1561,7 +1611,27 @@
         <ColumnInfo Id="StatusLabel" Index="6" Width="180" Caption="State" IsNewNode="True" />
       </Columns>
     </ListView>
-        <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
+    <ListView Id="VwRdApplicationDirectMigrationOnProcessA_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationDirectMigrationOnProcessA" Caption="On Process (A)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="2" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationDirectMigrationProcessComplete_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationDirectMigrationProcessComplete" Caption="Process Complete" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="2" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
         <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
@@ -1570,6 +1640,15 @@
         <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
         <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
         <ColumnInfo Id="StatusLabel" Index="6" Width="140" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdIncompletePersonsByMissingArea_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdIncompletePersonsByMissingArea" Caption="By Missing Area" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="PersonTypeLabel" Index="1" Width="120" Caption="Person type" IsNewNode="True" />
+        <ColumnInfo Id="MissingAreasLabel" Index="2" Width="200" Caption="Missing areas" IsNewNode="True" />
+        <ColumnInfo Id="IncompleteNotes" Index="3" Width="220" Caption="Notes" IsNewNode="True" />
+        <ColumnInfo Id="MarkedLabel" Index="4" Width="160" Caption="Marked" IsNewNode="True" />
       </Columns>
     </ListView>
     <ListView Id="VwRdVisaActiveByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByPeriodCategoryType" Caption="Active Visa (V)" IsNewNode="True">

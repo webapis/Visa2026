@@ -20,6 +20,7 @@ This plan covers the **State notifications** feature (header bell + full inbox).
 | [`REPORT_DASHBOARD.md`](REPORT_DASHBOARD.md) | Officer **Report Dashboard** home (charts + Excel / ListView) |
 | [`STATE_SNAPSHOT_PATTERN.md`](STATE_SNAPSHOT_PATTERN.md) | Snapshot pattern for count ↔ list parity |
 | [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md) | BR-010–012, **BR-013** (invitation prerequisites → data completeness) |
+| [`PERSON_INCOMPLETE_DATA.md`](PERSON_INCOMPLETE_DATA.md) | **Manual** officer Incomplete flag on `Person` (checkboxes + notes) — not auto-resolved |
 
 **Distinction**
 
@@ -27,6 +28,7 @@ This plan covers the **State notifications** feature (header bell + full inbox).
 |---------|----------|
 | **Report Dashboard** | Aggregate BI by project / person type / category → Excel or ListView |
 | **State notifications** | “What needs my attention **now**?” → prioritized inbox → open person/document |
+| **Person incomplete data** | Officer **manually** holds a person with notes / missing-area checkboxes; clears by Mark complete |
 
 Inbox predicates should stay aligned with the same evaluators used for BO state colors.
 

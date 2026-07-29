@@ -18,6 +18,7 @@ See **`SKILL.md`** § Preview ↔ SQL view ↔ XAF ListView and **`reference.md`
 
 | View | Category | Sub-reports served | Phase | Status |
 |------|----------|--------------------|-------|--------|
+| `vw_rd_incomplete_persons_by_missing_area` | IncompletePersons | **by-missing-area** (live) | 1 | EF Wired |
 | `vw_rd_application` | Application | **by-progress**, **by-type** (live) | 1 | EF Wired |
 | `vw_rd_passport` | Passport | by-type, by-citizenship, **by-validity** (live) | 1 | EF Wired (by-validity only) |
 | `vw_rd_registration` | Registration | **registered-visas**, by-region, by-city, **check-out**, check-out-by-region, check-out-by-city | 1 | EF Wired |

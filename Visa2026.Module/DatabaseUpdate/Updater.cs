@@ -282,6 +282,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryOtherCompleted>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationDirectMigrationOnProcessA>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationDirectMigrationProcessComplete>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdIncompletePersonsByMissingArea>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
@@ -602,6 +608,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureTypePermission<VwRdApplicationViaMinistryOtherOnProcess>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdApplicationViaMinistryOtherCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationDirectMigrationOnProcessA>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationDirectMigrationProcessComplete>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdIncompletePersonsByMissingArea>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
             EnsureNavigationPermission(

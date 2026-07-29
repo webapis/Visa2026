@@ -41,6 +41,9 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType();
             CreateViewRdApplicationViaMinistryOtherOnProcess();
             CreateViewRdApplicationViaMinistryOtherCompleted();
+            CreateViewRdApplicationDirectMigrationOnProcessA();
+            CreateViewRdApplicationDirectMigrationProcessComplete();
+            CreateViewRdIncompletePersonsByMissingArea();
             CreateViewRdInvitationRejected();
             CreateViewRdInvitationUsed();
             CreateViewRdInvitationValidUntil();
@@ -1062,6 +1065,15 @@ WHERE ISNULL(a.GCRecord, 0) = 0
 
         private void CreateViewRdApplicationViaMinistryOtherCompleted() =>
             ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_other_completed.sql");
+
+        private void CreateViewRdApplicationDirectMigrationOnProcessA() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_direct_migration_on_process_a.sql");
+
+        private void CreateViewRdApplicationDirectMigrationProcessComplete() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_direct_migration_process_complete.sql");
+
+        private void CreateViewRdIncompletePersonsByMissingArea() =>
+            ExecuteEmbeddedSqlView("vw_rd_incomplete_persons_by_missing_area.sql");
 
         /// <summary>
         /// Report Dashboard Application (via ministry) Invitation on Process (P).

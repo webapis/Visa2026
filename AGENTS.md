@@ -89,6 +89,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/OPTIONAL_DETAIL_FIELDS.md`** — optional detail-field gear toggle (`IOptionalDetailFields`, `EmployeeSalary`, `Education`, `EmployeePositionHistory`).
+- **`docs/PERSON_INCOMPLETE_DATA.md`** — officer soft **Incomplete** flag on `Person` (checkboxes + notes, Mark incomplete / Mark complete); Report Dashboard **Incomplete persons** category (orthogonal to automatic State notifications completeness).
 - **`docs/PERSON_DETAIL_NESTED_COLLECTION_TABS.md`** — Person typed DetailView: editable vs issued nested collection tabs (`PersonRecordTabs` / `IssuedDocumentsTabs`, read-only nested ListViews, new-person hint). Cursor rule: `.cursor/rules/visa2026-person-detail-tabs.mdc`.
 - **`docs/DEPLOYMENT_LIFECYCLE_EXPERIENCE.md`** — deploy/DB incident log + **plan** (doc → skill funnel, one-skill-one-task, AI-assisted updates).
 - **`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`** — optional Agent **Skill**: IDE → Docker → logs/DB triage, MCP hooks (SQL reader, dxdocs, docker-docs, GitHub).

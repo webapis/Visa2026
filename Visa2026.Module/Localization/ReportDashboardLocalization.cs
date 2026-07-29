@@ -78,6 +78,7 @@ public static class ReportDashboardLocalization
         ReportDashboardCategory.PositionHistory => Get("ReportDashboard.Category.PositionHistory"),
         ReportDashboardCategory.Subcontractor => Get("ReportDashboard.Category.Subcontractor"),
         ReportDashboardCategory.MedicalRecord => Get("ReportDashboard.Category.MedicalRecords"),
+        ReportDashboardCategory.IncompletePersons => Get("ReportDashboard.Category.IncompletePersons"),
         _ => category.ToString()
     };
 
@@ -172,6 +173,11 @@ public static class ReportDashboardLocalization
         "Hire Date" => Get("ReportDashboard.Header.HireDate"),
         "Company" => Get("ReportDashboard.Header.Company"),
         "Document #" => Get("ReportDashboard.Header.DocumentNumber"),
+        "Person" => Get("ReportDashboard.Header.Person"),
+        "Person type" => Get("ReportDashboard.Header.PersonType"),
+        "Missing areas" => Get("ReportDashboard.Header.MissingAreas"),
+        "Notes" => Get("ReportDashboard.Header.Notes"),
+        "Marked" => Get("ReportDashboard.Header.Marked"),
         "Current Expiry" => Get("ReportDashboard.Header.CurrentExpiry"),
         "Requested Until" => Get("ReportDashboard.Header.RequestedUntil"),
         "Issue Date" => Get("ReportDashboard.Header.IssueDate"),

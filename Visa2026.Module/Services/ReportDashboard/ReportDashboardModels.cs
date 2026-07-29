@@ -29,7 +29,8 @@ public enum ReportDashboardCategory
     Education,
     PositionHistory,
     Subcontractor,
-    MedicalRecord
+    MedicalRecord,
+    IncompletePersons
 }
 
 /// <summary>A named report variant within a category (e.g. "By Type", "By Citizenship").</summary>

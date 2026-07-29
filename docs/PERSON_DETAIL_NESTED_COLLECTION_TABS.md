@@ -40,6 +40,7 @@ Legacy single `TabbedGroup Id="Tabs"` is **`Removed="True"`** on typed views.
 | Passports, Medical records, Addresses | Person record | Person record | Person record |
 | Family relation documents | — | Person record | — |
 | Position history, Salaries, Work duties, Travel histories | Person record (employee) | Mixed / employee-only hidden | Travel only |
+| Incomplete data (`IncompleteData`) | Person record (last tab; hidden when not incomplete) | Same | Same |
 | Application items, Work permit items, Invitations, Rejections | Issued | Issued | Application items + Invitations + Rejections |
 | Family members (linked) | Issued | Issued (tab hidden for non-employees) | — |
 

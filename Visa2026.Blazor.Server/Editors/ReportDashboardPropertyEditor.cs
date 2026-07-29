@@ -210,6 +210,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             ReportDashboardCategory.PositionHistory => model.PositionHistoryDateRangeMonths,
             ReportDashboardCategory.AddressOfResidence => model.AddressOfResidenceDateRangeMonths,
             ReportDashboardCategory.MedicalRecord => model.MedicalRecordDateRangeMonths,
+            // No Last-N UI; Open ListView criteria omit ApplicationDate — do not silently cut Preview.
+            _ when ReportDashboardCatalog.IsApplicationCategory(category) => 0,
             _ => ReportDashboardCatalog.DefaultCategoryDateRangeMonths
         };
 

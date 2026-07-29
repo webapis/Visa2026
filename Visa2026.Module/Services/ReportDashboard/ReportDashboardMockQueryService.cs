@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ReportDashboard;
 
@@ -36,6 +37,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.PositionHistory)]  = 85,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Subcontractor)]    = 85,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.MedicalRecord)]    = 78,
+        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.IncompletePersons)] = 12,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.ApplicationViaMinistry)] = 20,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.ApplicationDirectMigration)] = 8,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.VisaExtension)] = 31,
@@ -50,6 +52,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.PositionHistory)]  = 0,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Subcontractor)]    = 52,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.MedicalRecord)]    = 45,
+        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.IncompletePersons)] = 6,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.ApplicationViaMinistry)] = 7,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.ApplicationDirectMigration)] = 3,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.VisaExtension)] = 12,
@@ -64,6 +67,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.PositionHistory)]  = 0,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Subcontractor)]    = 8,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.MedicalRecord)]    = 4,
+        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.IncompletePersons)] = 2,
         // All = Employees + Family Members + Temporary Visitors
         [(ReportDashboardPersonType.All, ReportDashboardCategory.ApplicationViaMinistry)] = 97,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.ApplicationDirectMigration)] = 39,
@@ -79,6 +83,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.All, ReportDashboardCategory.PositionHistory)]  = 85,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Subcontractor)]    = 145,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.MedicalRecord)]    = 127,
+        [(ReportDashboardPersonType.All, ReportDashboardCategory.IncompletePersons)] = 20,
     };
 
     public ReportDashboardSnapshot LoadSnapshot(
@@ -186,9 +191,16 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
                 Build(personType, category, ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey,
                     AppViaMinistryInvitationOnProcessByProject(), projectKey,
                     subReportLabel: "Invitation on Process (P)"),
-            (ReportDashboardCategory.ApplicationDirectMigration, _) => Build(
-                personType, category, subReport, ApplicationByStatusDirectMigration(), projectKey,
-                subReportLabel: "Application Status"),
+            (ReportDashboardCategory.ApplicationDirectMigration, ReportDashboardCatalog.AppDirectOnProcessAKey) =>
+                Build(personType, category, subReport, AppDirectOnProcessByApplicationType(), projectKey,
+                    subReportLabel: "On Process (A)"),
+            (ReportDashboardCategory.ApplicationDirectMigration, ReportDashboardCatalog.AppDirectProcessCompleteKey) =>
+                Build(personType, category, subReport, AppDirectProcessCompleteByApplicationType(), projectKey,
+                    subReportLabel: "Process Complete"),
+            (ReportDashboardCategory.ApplicationDirectMigration, _) =>
+                Build(personType, category, ReportDashboardCatalog.AppDirectOnProcessAKey,
+                    AppDirectOnProcessByApplicationType(), projectKey,
+                    subReportLabel: "On Process (A)"),
             // Visa (formerly Visa Extension)
             (ReportDashboardCategory.VisaExtension, "on-extension") => Build(personType, category, subReport, VisaOnExtensionByProject(), projectKey),
             (ReportDashboardCategory.VisaExtension, "app-progress") => Build(personType, category, "on-extension", VisaOnExtensionByProject(), projectKey),
@@ -279,6 +291,7 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             (ReportDashboardCategory.Subcontractor, _) => Build(personType, category, subReport, SubcontractorByCompany(), projectKey),
             // Medical Records
             (ReportDashboardCategory.MedicalRecord, _) => Build(personType, category, subReport, MedicalRecordByValidity(), projectKey),
+            (ReportDashboardCategory.IncompletePersons, _) => IncompletePersonsByMissingArea(personType, category, subReport, projectKey),
             _ => Build(personType, category, subReport, [], projectKey)
         };
     }
@@ -427,27 +440,29 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             "Gurlusyk UZT · Processing", "st-pending"),
     ];
 
+    // Rejected / cancelled rows carry no invitation on purpose — the column is the proof
+    // that the process actually produced one.
     private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationCompletedByProject() =>
     [
-        R9("Kemal Aydin", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9012", "Nov 12, 2025",
+        R10("Kemal Aydin", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "INV-2025-0412", "APP-2025-9012", "Nov 12, 2025",
             "Gaz Stansiasy · Issued", "st-approved"),
-        R9("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9018", "Nov 28, 2025",
+        R10("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "", "APP-2025-9018", "Nov 28, 2025",
             "Gaz Stansiasy · Rejected", "st-expiring"),
-        R9("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9030", "Dec 10, 2025",
+        R10("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "", "APP-2025-9030", "Dec 10, 2025",
             "Elektrik Stansia · Cancelled", "st-expiring"),
-        R9("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9044", "Dec 22, 2025",
+        R10("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "", "APP-2025-9044", "Dec 22, 2025",
             "Gurlusyk UZT · Not received from ministry", "st-expiring"),
     ];
 
     private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationCompletedByPeriodCategoryType() =>
     [
-        R9("Kemal Aydin", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9012", "Nov 12, 2025",
+        R10("Kemal Aydin", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "INV-2025-0412", "APP-2025-9012", "Nov 12, 2025",
             "6 months · Multiple entry · WP — Work visa · Issued", "st-approved"),
-        R9("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9018", "Nov 28, 2025",
+        R10("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "", "APP-2025-9018", "Nov 28, 2025",
             "6 months · Multiple entry · WP — Work visa · Rejected", "st-expiring"),
-        R9("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9030", "Dec 10, 2025",
+        R10("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "", "APP-2025-9030", "Dec 10, 2025",
             "1 month · Double entry · BS1 — Business · Cancelled", "st-expiring"),
-        R9("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9044", "Dec 22, 2025",
+        R10("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "", "APP-2025-9044", "Dec 22, 2025",
             "6 months · Multiple entry · WP — Work visa · Not received from ministry", "st-expiring"),
     ];
 
@@ -481,17 +496,56 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             "Gurlusyk UZT · Rejected", "st-expiring"),
     ];
 
-    private static List<ReportDashboardPreviewRow> ApplicationByStatusDirectMigration() =>
+    /// <summary>
+    /// Direct migration On Process (A): one row per ApplicationItem; Status = App Type · StatusListLabel.
+    /// </summary>
+    private static List<ReportDashboardPreviewRow> AppDirectOnProcessByApplicationType() =>
     [
-        R("John Smith", "Seismiki Barlag", "APP-2026-0150", "Feb 14, 2026",
-            "Process Started · no ministry review · — · On track · 2/7", "st-pending"),
-        R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0173", "Mar 10, 2026",
-            "Process Rejected · no ministry review · — · —", "st-expiring"),
-        R("Cary Durdyyew", "Merkez ofis", "APP-2026-0210", "Apr 20, 2026",
-            "At office · no ministry review · — · —", "st-pending"),
-        R("Annaguly Hojayew", "Gurlusyk UZT", "APP-2026-0222", "May 02, 2026",
-            "Issued · no ministry review · — · —", "st-approved"),
+        RAppDirect("John Smith", "Seismiki Barlag", "Pasport üýtgetmek", "APP-2026-0150", "Feb 14, 2026",
+            "Pasport üýtgetmek · At office", "st-pending"),
+        RAppDirect("Cary Durdyyew", "Merkez ofis", "Pasport üýtgetmek", "APP-2026-0210", "Apr 20, 2026",
+            "Pasport üýtgetmek · Processing", "st-pending"),
+        RAppDirect("Bayrammyrat Rejepow", "Elektrik Stansia", "Wiza ýatyrmak", "APP-2026-0173", "Mar 10, 2026",
+            "Wiza ýatyrmak · At office", "st-pending"),
+        RAppDirect("Alina Makarova", "Gurlusyk UZT", "Çykyş wizasy", "APP-2026-0240", "May 08, 2026",
+            "Çykyş wizasy · Sent for agreement", "st-pending"),
+        RAppDirect("Oleg Kovalev", "Seismiki Barlag", "Çykyş wizasy", "APP-2026-0241", "May 09, 2026",
+            "Çykyş wizasy · Cleared agreement", "st-pending"),
+        RAppDirect("Serdar Geldiyew", "Gurlusyk UZT", "Wiza we RW ýatyrmak", "APP-2026-0255", "May 18, 2026",
+            "Wiza we RW ýatyrmak · At office", "st-pending"),
     ];
+
+    /// <summary>
+    /// Direct migration Process Complete: terminal StatusListLabel only; Status = App Type · state.
+    /// </summary>
+    private static List<ReportDashboardPreviewRow> AppDirectProcessCompleteByApplicationType() =>
+    [
+        RAppDirect("Annaguly Hojayew", "Gurlusyk UZT", "Pasport üýtgetmek", "APP-2026-0222", "May 02, 2026",
+            "Pasport üýtgetmek · Issued", "st-approved"),
+        RAppDirect("Leyli Annagurbanowa", "Elektrik Stansia", "Wiza ýatyrmak", "APP-2025-9100", "Oct 12, 2025",
+            "Wiza ýatyrmak · Rejected", "st-expiring"),
+        RAppDirect("Hans Muller", "Gaz Stansiasy", "Çykyş wizasy", "APP-2025-9088", "Sep 28, 2025",
+            "Çykyş wizasy · Cancelled", "st-expiring"),
+        RAppDirect("Kemal Aydin", "Gaz Stansiasy", "Pasport üýtgetmek", "APP-2025-9112", "Nov 03, 2025",
+            "Pasport üýtgetmek · Not received from ministry", "st-expiring"),
+        RAppDirect("Viktor Petrov", "Gurlusyk UZT", "Wiza we RW ýatyrmak", "APP-2025-9130", "Nov 20, 2025",
+            "Wiza we RW ýatyrmak · Issued", "st-approved"),
+        RAppDirect("Mehmet Yilmaz", "Gurlusyk UZT", "Çykyş wizasy", "APP-2025-9144", "Dec 05, 2025",
+            "Çykyş wizasy · Issued", "st-approved"),
+    ];
+
+    private static ReportDashboardPreviewRow RAppDirect(
+        string name, string project, string appType, string appNum, string appDate, string status, string css) =>
+        new()
+        {
+            Name = name,
+            Project = project,
+            ColumnA = appType,
+            ColumnB = appNum,
+            ColumnC = appDate,
+            Status = status,
+            StatusCssClass = css
+        };
 
     // ===== Visa ===========================================================
 
@@ -1076,6 +1130,94 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Serdar Geldiyew",     "Gurlusyk UZT",     "MR-2024-0614", "Jun 14, 2025", "Expired",            "st-expiring"),
     ];
 
+    // ===== Incomplete persons =============================================
+
+    private static ReportDashboardPanelData IncompletePersonsByMissingArea(
+        ReportDashboardPersonType personType,
+        ReportDashboardCategory category,
+        string subReport,
+        string projectKey)
+    {
+        var rows = new List<(ReportDashboardPreviewRow Row, string[] Areas)>
+        {
+            (new ReportDashboardPreviewRow
+            {
+                Name = "Orazov Meret",
+                Project = "Employee",
+                ColumnA = "Passport, Photo",
+                ColumnB = "Passport scan and photo missing",
+                Status = "20.07.2026 · admin",
+                StatusCssClass = "st-pending"
+            }, [PersonIncompleteDataLabels.Passport, PersonIncompleteDataLabels.Photo]),
+            (new ReportDashboardPreviewRow
+            {
+                Name = "Berdiyev Atamyrat",
+                Project = "Employee",
+                ColumnA = "CV, Education",
+                ColumnB = "Waiting for diploma and CV",
+                Status = "18.07.2026 · officer1",
+                StatusCssClass = "st-pending"
+            }, [PersonIncompleteDataLabels.Cv, PersonIncompleteDataLabels.Education]),
+            (new ReportDashboardPreviewRow
+            {
+                Name = "Gurbanova Ayna",
+                Project = "Family Member",
+                ColumnA = "Family docs, Other",
+                ColumnB = "Marriage certificate; clarify relationship",
+                Status = "15.07.2026 · officer1",
+                StatusCssClass = "st-pending"
+            }, [PersonIncompleteDataLabels.FamilyDocs, PersonIncompleteDataLabels.Other]),
+            (new ReportDashboardPreviewRow
+            {
+                Name = "Nuryyev Begli",
+                Project = "Temporary Visitor",
+                ColumnA = "Personal data, Address",
+                ColumnB = "Foreign address incomplete",
+                Status = "12.07.2026 · admin",
+                StatusCssClass = "st-pending"
+            }, [PersonIncompleteDataLabels.PersonalData, PersonIncompleteDataLabels.Address]),
+        };
+
+        var filtered = projectKey == "All"
+            ? rows
+            : rows.FindAll(r =>
+                r.Row.Project.Contains(projectKey, StringComparison.OrdinalIgnoreCase)
+                || r.Row.Name.Contains(projectKey, StringComparison.OrdinalIgnoreCase));
+
+        var preview = filtered.Select(t => t.Row).ToList();
+        var groups = PersonIncompleteDataLabels.ChartOrder
+            .Select(label => (Label: label, Count: filtered.Count(t => t.Areas.Contains(label))))
+            .Where(g => g.Count > 0)
+            .OrderByDescending(g => g.Count)
+            .ToList();
+
+        string[] palette = ["st-cat-1", "st-cat-2", "st-cat-3", "st-cat-4", "st-cat-5"];
+        var buckets = groups
+            .Select((g, i) => new ReportDashboardStatusBucket
+            {
+                Label = g.Label,
+                Count = g.Count,
+                CssClass = palette[i % palette.Length]
+            })
+            .ToList();
+
+        return new ReportDashboardPanelData
+        {
+            PersonType = personType,
+            Category = category,
+            SubReport = subReport,
+            Title = ReportDashboardCatalog.CategoryLabel(category),
+            Subtitle = $"{ReportDashboardCatalog.PersonTypeLabel(personType)} — {ReportDashboardCatalog.SubReports(category).FirstOrDefault(s => s.Key == subReport)?.Label ?? subReport}",
+            TableHeaders = ReportDashboardCatalog.TableHeaders(category, subReport),
+            StatusBuckets = buckets,
+            PreviewRows = preview,
+            TotalCount = preview.Count,
+            ExcelTemplateNameHint = ReportDashboardCatalog.ExcelTemplateNameHint(category, subReport),
+            ExcelConfigured = false,
+            ListViewId = ReportDashboardCatalog.ResolveListViewTarget(category, subReport).ListViewId
+        };
+    }
+
     // ===== helpers ========================================================
 
     private static ReportDashboardPreviewRow R11(
@@ -1093,6 +1235,25 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             ColumnF = issuedVisa,
             ColumnG = appNum,
             ColumnH = appDate,
+            Status = status,
+            StatusCssClass = css
+        };
+
+    /// <summary>Invitation Completed (P)/(V) — one issued-document column (the invitation).</summary>
+    private static ReportDashboardPreviewRow R10(
+        string name, string project, string position, string appType, string visaPeriod, string visaType,
+        string invitation, string appNum, string appDate, string status, string css) =>
+        new()
+        {
+            Name = name,
+            Project = project,
+            ColumnA = position,
+            ColumnB = appType,
+            ColumnC = visaPeriod,
+            ColumnD = visaType,
+            ColumnE = invitation,
+            ColumnF = appNum,
+            ColumnG = appDate,
             Status = status,
             StatusCssClass = css
         };

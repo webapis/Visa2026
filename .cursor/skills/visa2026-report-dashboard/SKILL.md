@@ -11,6 +11,7 @@ description: >-
 # Visa2026 Report Dashboard
 
 Canonical doc: `docs/REPORT_DASHBOARD.md`
+Incomplete persons (Person soft flag + this category): `docs/PERSON_INCOMPLETE_DATA.md`
 Experience log: `learnings.md` (read before starting, append after every verified change).
 File map, ListView/Preview contract detail: `reference.md`.
 SQL view implementation plan and status tracker: `IMPLEMENTATION_PLAN.md`.

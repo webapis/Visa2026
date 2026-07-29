@@ -158,6 +158,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType> VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType { get; set; }
         public DbSet<VwRdApplicationViaMinistryOtherOnProcess> VwRdApplicationViaMinistryOtherOnProcess { get; set; }
         public DbSet<VwRdApplicationViaMinistryOtherCompleted> VwRdApplicationViaMinistryOtherCompleted { get; set; }
+        public DbSet<VwRdApplicationDirectMigrationOnProcessA> VwRdApplicationDirectMigrationOnProcessA { get; set; }
+        public DbSet<VwRdApplicationDirectMigrationProcessComplete> VwRdApplicationDirectMigrationProcessComplete { get; set; }
         public DbSet<VwRdInvitationRejected> VwRdInvitationRejected { get; set; }
         public DbSet<VwRdInvitationUsed> VwRdInvitationUsed { get; set; }
         public DbSet<VwRdInvitationValidUntil> VwRdInvitationValidUntil { get; set; }
@@ -179,6 +181,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdApplication> VwRdApplication { get; set; }
         public DbSet<VwRdEducation> VwRdEducation { get; set; }
         public DbSet<VwRdEducationByCountry> VwRdEducationByCountry { get; set; }
+        public DbSet<VwRdIncompletePersonsByMissingArea> VwRdIncompletePersonsByMissingArea { get; set; }
         public DbSet<VwRdPositionHistory> VwRdPositionHistory { get; set; }
         public DbSet<VwRdRegistration> VwRdRegistration { get; set; }
         public DbSet<VwRdToBeCheckedIn> VwRdToBeCheckedIn { get; set; }
@@ -381,6 +384,15 @@ namespace Visa2026.Module.BusinessObjects
                 b.ToView("vw_rd_application_via_ministry_other_completed");
             });
 
+            modelBuilder.Entity<VwRdApplicationDirectMigrationOnProcessA>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_direct_migration_on_process_a");
+            });
+            modelBuilder.Entity<VwRdApplicationDirectMigrationProcessComplete>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_direct_migration_process_complete");
+            });
+
             modelBuilder.Entity<VwRdInvitationRejected>(b => {
                 b.HasKey(t => new { t.SourceKind, t.ID });
                 b.ToView("vw_rd_invitation_rejected");
@@ -524,6 +536,12 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdEducationByCountry>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_education_by_country");
+            });
+
+            modelBuilder.Entity<VwRdIncompletePersonsByMissingArea>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_incomplete_persons_by_missing_area");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<VwRdPositionHistory>(b => {

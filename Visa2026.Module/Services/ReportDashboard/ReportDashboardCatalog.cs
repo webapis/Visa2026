@@ -24,7 +24,8 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Education,
         ReportDashboardCategory.PositionHistory,
         ReportDashboardCategory.Subcontractor,
-        ReportDashboardCategory.MedicalRecord
+        ReportDashboardCategory.MedicalRecord,
+        ReportDashboardCategory.IncompletePersons
     ];
 
     /// <summary>
@@ -40,6 +41,7 @@ public static class ReportDashboardCatalog
     /// <summary>
     /// When checked (default), include only persons with at least one valid visa
     /// (not cancelled, ExpirationDate on or after today).
+    /// Incomplete persons: no visa filter (soft flag inventory includes people without visas).
     /// </summary>
     public static bool SupportsValidVisaPersonsOnly(ReportDashboardCategory category) =>
         category is ReportDashboardCategory.WorkPermit
@@ -111,10 +113,21 @@ public static class ReportDashboardCatalog
         };
 
     /// <summary>
-    /// Application Status sub-report: chart buckets use combined
-    /// <c>State · Ministry depth · Approval leg · Migration SLA</c>.
+    /// Legacy Application Status key (replaced by On Process (A) / Process Complete).
     /// </summary>
     public const string ApplicationStatusSubReportKey = "app-status";
+
+    /// <summary>Application (direct migration) — On Process (A); chart = Application Type · StatusListLabel.</summary>
+    public const string AppDirectOnProcessAKey = "on-process-a";
+
+    /// <summary>Application (direct migration) — Process Complete; chart = Application Type · StatusListLabel (terminal).</summary>
+    public const string AppDirectProcessCompleteKey = "process-complete";
+
+    public static bool UsesApplicationDirectMigrationRdListView(string? subReport) =>
+        subReport is AppDirectOnProcessAKey or AppDirectProcessCompleteKey;
+
+    public static bool UsesApplicationDirectMigrationRdCompletedListView(string? subReport) =>
+        subReport is AppDirectProcessCompleteKey;
 
     /// <summary>
     /// Categories that show a local "Last N months" filter (not a global top-bar control).
@@ -381,7 +394,8 @@ public static class ReportDashboardCatalog
             new() { Key = AppViaMinistryOtherCompletedKey, Label = "Other Process Completed (P)" },
         ],
         ReportDashboardCategory.ApplicationDirectMigration => [
-            new() { Key = ApplicationStatusSubReportKey, Label = "Application Status" },
+            new() { Key = AppDirectOnProcessAKey, Label = "On Process (A)" },
+            new() { Key = AppDirectProcessCompleteKey, Label = "Process Complete" },
         ],
         ReportDashboardCategory.VisaExtension => [
             new() { Key = "active-by-project", Label = "Active Visa (P)" },
@@ -455,6 +469,9 @@ public static class ReportDashboardCatalog
         ],
         ReportDashboardCategory.MedicalRecord => [
             new() { Key = "by-validity", Label = "By Validity" },
+        ],
+        ReportDashboardCategory.IncompletePersons => [
+            new() { Key = "by-missing-area", Label = "By Missing Area" },
         ],
         _ => [new() { Key = "default", Label = "Overview" }]
     };
@@ -599,6 +616,14 @@ public static class ReportDashboardCatalog
         subReport is AppViaMinistryVisaExtCompletedKey
             or AppViaMinistryVisaExtCompletedVKey;
 
+    /// <summary>
+    /// Invitation Completed (P)/(V) only — Preview/ListView include the Invitation the
+    /// application issued, as proof the process produced one.
+    /// </summary>
+    public static bool UsesApplicationViaMinistryInvitationCompletedInvitationColumn(string? subReport) =>
+        subReport is AppViaMinistryInvitationCompletedKey
+            or AppViaMinistryInvitationCompletedVKey;
+
     public static bool UsesApplicationViaMinistryRdByPeriodCategoryType(string? subReport) =>
         subReport is AppViaMinistryInvitationOnProcessVKey
             or AppViaMinistryVisaExtOnProcessVKey
@@ -609,6 +634,12 @@ public static class ReportDashboardCatalog
     public static (string ListViewId, Type ListViewType) ResolveListViewTarget(
         ReportDashboardCategory category, string? subReport = null)
     {
+        if (category == ReportDashboardCategory.IncompletePersons)
+        {
+            return ("VwRdIncompletePersonsByMissingArea_ListView",
+                typeof(VwRdIncompletePersonsByMissingArea));
+        }
+
         if (category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport))
         {
@@ -644,6 +675,21 @@ public static class ReportDashboardCatalog
                 AppViaMinistryOtherCompletedKey =>
                     ("VwRdApplicationViaMinistryOtherCompleted_ListView",
                         typeof(VwRdApplicationViaMinistryOtherCompleted)),
+                _ => (ListViewId(category), ListViewType(category))
+            };
+        }
+
+        if (category == ReportDashboardCategory.ApplicationDirectMigration
+            && UsesApplicationDirectMigrationRdListView(subReport))
+        {
+            return subReport switch
+            {
+                AppDirectOnProcessAKey =>
+                    ("VwRdApplicationDirectMigrationOnProcessA_ListView",
+                        typeof(VwRdApplicationDirectMigrationOnProcessA)),
+                AppDirectProcessCompleteKey =>
+                    ("VwRdApplicationDirectMigrationProcessComplete_ListView",
+                        typeof(VwRdApplicationDirectMigrationProcessComplete)),
                 _ => (ListViewId(category), ListViewType(category))
             };
         }
@@ -695,6 +741,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.PositionHistory  => "EmployeePositionHistory_ListView",
         ReportDashboardCategory.Subcontractor    => "Person_ListView",
         ReportDashboardCategory.MedicalRecord   => "MedicalRecord_ListView",
+        ReportDashboardCategory.IncompletePersons => "VwRdIncompletePersonsByMissingArea_ListView",
         _ => "Person_ListView"
     };
 
@@ -714,6 +761,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.PositionHistory  => typeof(EmployeePositionHistory),
         ReportDashboardCategory.Subcontractor    => typeof(Person),
         ReportDashboardCategory.MedicalRecord   => typeof(MedicalRecord),
+        ReportDashboardCategory.IncompletePersons => typeof(VwRdIncompletePersonsByMissingArea),
         _ => typeof(Person)
     };
 
@@ -734,18 +782,24 @@ public static class ReportDashboardCatalog
                 ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "Visa on extension", "Issued Visa", "App #", "App Date", "Period · Category · Type · State"],
             (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtCompletedKey) =>
                 ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "Visa on extension", "Issued Visa", "App #", "App Date", "Project · State"],
+            // "Invitation #" reuses the existing localized header key; the column carries the
+            // invitation this application issued, so "Completed" already implies issued.
+            (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationCompletedVKey) =>
+                ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "Invitation #", "App #", "App Date", "Period · Category · Type · State"],
+            (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationCompletedKey) =>
+                ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "Invitation #", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationOnProcessVKey)
-                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtOnProcessVKey)
-                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationCompletedVKey) =>
+                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtOnProcessVKey) =>
                 ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "App #", "App Date", "Period · Category · Type · State"],
             (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationOnProcessKey)
-                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtOnProcessKey)
-                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationCompletedKey) =>
+                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtOnProcessKey) =>
                 ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "App #", "App Date", "Project · State"],
             (ReportDashboardCategory.ApplicationViaMinistry, _) =>
                 ["Name", "Project", "Position", "App Type", "App #", "App Date", "Project · State"],
-            (ReportDashboardCategory.ApplicationDirectMigration, _) =>
-                ["Name", "Project", "App #", "App Date", "State"],
+            (ReportDashboardCategory.ApplicationDirectMigration, AppDirectOnProcessAKey)
+                or (ReportDashboardCategory.ApplicationDirectMigration, AppDirectProcessCompleteKey)
+                or (ReportDashboardCategory.ApplicationDirectMigration, _) =>
+                ["Name", "Project", "App Type", "App #", "App Date", "Application Type · Process State"],
             // Categorical: last column = grouping dimension; ColumnA = passport # or identifier
             (ReportDashboardCategory.Passport, "by-type")         => ["Name", "Project", "Passport #",  "Expiry", "Type"],
             (ReportDashboardCategory.Passport, "by-citizenship")   => ["Name", "Project", "Passport #",  "Expiry", "Citizenship"],
@@ -813,6 +867,8 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.PositionHistory, "by-actual-position") => ["Name", "Project", "Visa Position", "Start", "Actual Position"],
             (ReportDashboardCategory.Subcontractor, "by-company")    => ["Name", "Project", "Role", "Hire Date", "Company"],
             (ReportDashboardCategory.MedicalRecord, "by-validity")   => ["Name", "Project", "Document #", "Expiry", "Validity"],
+            (ReportDashboardCategory.IncompletePersons, "by-missing-area") =>
+                ["Person", "Person type", "Missing areas", "Notes", "Marked"],
             _ => DefaultTableHeaders(category)
         };
 
@@ -833,6 +889,8 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.PositionHistory  => ["Name", "Project", "Position",        "Start",           "Status"],
         ReportDashboardCategory.Subcontractor    => ["Name", "Project", "Role",            "Hire Date",       "Company"],
         ReportDashboardCategory.MedicalRecord   => ["Name", "Project", "Document #",      "Expiry",          "Validity"],
+        ReportDashboardCategory.IncompletePersons =>
+            ["Person", "Person type", "Missing areas", "Notes", "Marked"],
         _ => ["Name", "Project", "Info", "Date", "Status"]
     };
 
@@ -858,11 +916,21 @@ public static class ReportDashboardCatalog
         var usesAppViaMinistryRd =
             category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport);
+        var usesAppDirectMigrationRd =
+            category == ReportDashboardCategory.ApplicationDirectMigration
+            && UsesApplicationDirectMigrationRdListView(subReport);
         var usesRdVisaRow = usesVisaActive || usesExtRequired || usesByDays;
-        var usesRdAppRow = usesAppViaMinistryRd;
+        var usesRdAppRow = usesAppViaMinistryRd || usesAppDirectMigrationRd;
+        var usesIncompletePersonsRd = category == ReportDashboardCategory.IncompletePersons;
 
         string roleCriteria;
-        if (usesAppProgressDedicated || usesRdAppRow)
+        if (usesIncompletePersonsRd)
+        {
+            roleCriteria = IsAllPersonTypes(personType)
+                ? "True"
+                : $"[PersonRoleCode] = {(int)ToPersonRole(personType)}";
+        }
+        else if (usesAppProgressDedicated || usesRdAppRow)
         {
             // Population baked into dedicated SQL views.
             roleCriteria = IsAllPersonTypes(personType)
@@ -926,7 +994,7 @@ public static class ReportDashboardCatalog
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
         {
-            var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
+            var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow || usesIncompletePersonsRd
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -997,6 +1065,31 @@ public static class ReportDashboardCatalog
                     roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
                 }
             }
+            else if (UsesApplicationDirectMigrationRdListView(subReport)
+                && category == ReportDashboardCategory.ApplicationDirectMigration)
+            {
+                // Chart Status = Application Type · StatusListLabel; view StatusLabel is process alone.
+                var parts = statusLabel.Split(" · ", StringSplitOptions.None);
+                if (parts.Length >= 2)
+                {
+                    var typePart = parts[0].Trim();
+                    var statePart = string.Join(" · ", parts.Skip(1)).Trim();
+                    var stateCore = statePart;
+                    var dash = statePart.IndexOf(" - ", StringComparison.Ordinal);
+                    if (dash >= 0)
+                        stateCore = statePart[..dash].Trim();
+                    var stateCrit =
+                        $"[StatusLabel] = '{Escape(statePart)}' Or [StatusLabel] = '{Escape(stateCore)}' Or StartsWith([StatusLabel], '{Escape(stateCore)}') Or [CurrentState.Name] = '{Escape(stateCore)}'";
+                    var typeCrit = string.Equals(typePart, "(No type)", StringComparison.OrdinalIgnoreCase)
+                        ? "([ApplicationTypeLabel] = '' Or [ApplicationTypeLabel] Is Null Or [ApplicationTypeLabel] = '(No type)')"
+                        : $"[ApplicationTypeLabel] = '{Escape(typePart)}'";
+                    roleCriteria = $"({roleCriteria}) And ({typeCrit}) And ({stateCrit})";
+                }
+                else
+                {
+                    roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
+                }
+            }
             else if (usesAppProgressDedicated || usesVisaActive)
             {
                 // Dedicated Active / OnExtension / ExtensionResult views expose StatusLabel.
@@ -1024,6 +1117,23 @@ public static class ReportDashboardCatalog
                     ? "[Subcontractor] is null"
                     : $"[Subcontractor.NameTm] = '{Escape(statusLabel)}' Or [Subcontractor.Name] = '{Escape(statusLabel)}'";
                 roleCriteria = $"({roleCriteria}) And ({companyCriteria})";
+            }
+            else if (usesIncompletePersonsRd)
+            {
+                var flagCriteria = statusLabel switch
+                {
+                    PersonIncompleteDataLabels.PersonalData => "[MissingPersonalData] = True",
+                    PersonIncompleteDataLabels.Passport => "[MissingPassport] = True",
+                    PersonIncompleteDataLabels.Cv => "[MissingCv] = True",
+                    PersonIncompleteDataLabels.Photo => "[MissingPhoto] = True",
+                    PersonIncompleteDataLabels.Education => "[MissingEducation] = True",
+                    PersonIncompleteDataLabels.Medical => "[MissingMedical] = True",
+                    PersonIncompleteDataLabels.Address => "[MissingAddress] = True",
+                    PersonIncompleteDataLabels.FamilyDocs => "[MissingFamilyDocs] = True",
+                    PersonIncompleteDataLabels.Other => "[MissingOther] = True",
+                    _ => "True"
+                };
+                roleCriteria = $"({roleCriteria}) And ({flagCriteria})";
             }
         }
 

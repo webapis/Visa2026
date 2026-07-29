@@ -4463,6 +4463,48 @@
     "tk-TM": "Subpodrýadçy",
     "ru-RU": "Субподрядчик"
   },
+  "ReportDashboard.Category.IncompletePersons": {
+    "en": "Incomplete persons",
+    "tr-TR": "Eksik kişiler",
+    "tk-TM": "Doly däl şahslar",
+    "ru-RU": "Неполные данные"
+  },
+  "ReportDashboard.SubReport.IncompletePersons.by-missing-area": {
+    "en": "By Missing Area",
+    "tr-TR": "Eksik alana göre",
+    "tk-TM": "Ýetmezçilik ugry boýunça",
+    "ru-RU": "По отсутствующим данным"
+  },
+  "ReportDashboard.Header.Person": {
+    "en": "Person",
+    "tr-TR": "Kişi",
+    "tk-TM": "Şahs",
+    "ru-RU": "Лицо"
+  },
+  "ReportDashboard.Header.PersonType": {
+    "en": "Person type",
+    "tr-TR": "Kişi türü",
+    "tk-TM": "Şahs görnüşi",
+    "ru-RU": "Тип лица"
+  },
+  "ReportDashboard.Header.MissingAreas": {
+    "en": "Missing areas",
+    "tr-TR": "Eksik alanlar",
+    "tk-TM": "Ýetmezçilik ugurlary",
+    "ru-RU": "Недостающие области"
+  },
+  "ReportDashboard.Header.Notes": {
+    "en": "Notes",
+    "tr-TR": "Notlar",
+    "tk-TM": "Bellikler",
+    "ru-RU": "Заметки"
+  },
+  "ReportDashboard.Header.Marked": {
+    "en": "Marked",
+    "tr-TR": "İşaretlendi",
+    "tk-TM": "Bellenildi",
+    "ru-RU": "Отмечено"
+  },
   "ReportDashboard.Category.MedicalRecords": {
     "en": "Medical Records",
     "tr-TR": "Sağlık Kayıtları",
@@ -4552,7 +4594,20 @@
     "tr-TR": "Diğer başvuru süreci tamamlandı (P)",
     "tk-TM": "Beýleki ýüztutma prosesi tamamlandy (P)",
     "ru-RU": "Прочий процесс заявки завершён (P)"
-  },  "ReportDashboard.SubReport.app-status": {
+  },
+  "ReportDashboard.SubReport.on-process-a": {
+    "en": "On Process (A)",
+    "tr-TR": "Süreçte (A)",
+    "tk-TM": "Prosesde (A)",
+    "ru-RU": "В процессе (A)"
+  },
+  "ReportDashboard.SubReport.process-complete": {
+    "en": "Process Complete",
+    "tr-TR": "Süreç tamamlandı",
+    "tk-TM": "Proses tamamlandy",
+    "ru-RU": "Процесс завершён"
+  },
+  "ReportDashboard.SubReport.app-status": {
     "en": "Application Status",
     "tr-TR": "Başvuru durumu",
     "tk-TM": "Ýüztutma ýagdaýy",
@@ -5018,12 +5073,6 @@
     "tr-TR": "Vize kategorisi",
     "tk-TM": "Wiza kategoriýasy",
     "ru-RU": "Категория визы"
-  },
-  "ReportDashboard.Header.VisaType": {
-    "en": "Visa Type",
-    "tr-TR": "Vize türü",
-    "tk-TM": "Wiza görnüşi",
-    "ru-RU": "Тип визы"
   },
   "ReportDashboard.Header.Period": {
     "en": "Period",

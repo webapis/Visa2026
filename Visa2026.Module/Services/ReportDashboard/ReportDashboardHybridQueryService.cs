@@ -13,7 +13,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     /// <summary>
     /// Sub-reports that load from SQL views / real EF queries.
     /// Add entries one at a time after verifying each view.
-    /// Application (direct migration) stays real (Application Status).
+    /// Application (direct migration) On Process (A) / Process Complete promote via <see cref="RealSubReports"/>.
     /// Application (via ministry) promotes one sub-report at a time via <see cref="RealSubReports"/>.
     /// </summary>
     private static readonly HashSet<(ReportDashboardCategory Category, string SubReport)> RealSubReports =
@@ -38,6 +38,10 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
             ReportDashboardCatalog.AppViaMinistryVisaExtCompletedVKey),
         (ReportDashboardCategory.ApplicationViaMinistry,
             ReportDashboardCatalog.AppViaMinistryOtherCompletedKey),
+        (ReportDashboardCategory.ApplicationDirectMigration,
+            ReportDashboardCatalog.AppDirectOnProcessAKey),
+        (ReportDashboardCategory.ApplicationDirectMigration,
+            ReportDashboardCatalog.AppDirectProcessCompleteKey),
         (ReportDashboardCategory.Passport, "by-validity"),
         (ReportDashboardCategory.Passport, "by-type"),
         (ReportDashboardCategory.Passport, "by-citizenship"),
@@ -73,6 +77,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         (ReportDashboardCategory.PositionHistory, "by-actual-position"),
         (ReportDashboardCategory.Subcontractor, "by-company"),
         (ReportDashboardCategory.MedicalRecord, "by-validity"),
+        (ReportDashboardCategory.IncompletePersons, "by-missing-area"),
     ];
 
     private readonly ReportDashboardQueryService _real;
@@ -113,8 +118,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false)
     {
-        if (category == ReportDashboardCategory.ApplicationDirectMigration
-            || category == ReportDashboardCategory.Registration)
+        if (category == ReportDashboardCategory.Registration)
         {
             return _real.ListSubReports(
                 objectSpace, personType, category, projectKey, dateRangeMonths,
@@ -140,8 +144,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true)
     {
-        if (category == ReportDashboardCategory.ApplicationDirectMigration
-            || category == ReportDashboardCategory.Registration)
+        if (category == ReportDashboardCategory.Registration)
         {
             return _real.LoadPanel(
                 objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
@@ -154,6 +157,13 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
         {
             subReport = ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey;
+        }
+
+        if (category == ReportDashboardCategory.ApplicationDirectMigration
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)
+                || subReport == ReportDashboardCatalog.ApplicationStatusSubReportKey))
+        {
+            subReport = ReportDashboardCatalog.AppDirectOnProcessAKey;
         }
 
         var key = (category, subReport);

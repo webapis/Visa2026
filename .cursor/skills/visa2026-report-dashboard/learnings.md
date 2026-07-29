@@ -1699,3 +1699,159 @@ So **`var(--bs-body-bg)` / `var(--bs-body-color)` are the only trustworthy signa
 **Verified:** `dotnet build` clean (0 CS/RZ); rendered headlessly under `--bs-body-bg:#ffffff` and `#282828` - overview cards, donut, bar axis/gridlines, list rows, preview table and state pills all correct in both. Not yet confirmed in a running app session.
 
 **Files:** `ReportDashboardComponent.razor`, `report-dashboard.css`
+---
+
+## Invitation Completed (P)/(V) - "Invitation #" proof-of-issue column (2026-07-29)
+
+**Ask:** show, on each Invitation Completed row, the invitation that the application process actually produced.
+
+**The relationship is `Application.Invitations` -> `InvitationItems.Person` - NOT `ApplicationItem.CurrentInvitationItem`.**
+`CurrentInvitationItem` is *input* data (the person's pre-existing invitation fed into the application); the issued
+invitation hangs off the parent `Application` via `Invitation.Application` (optional FK, inverse `Application.Invitations`).
+Physical: `Invitations.ApplicationID` / `InvitationItems.InvitationID` / `InvitationItems.PersonID`.
+`Invitation.IssuedDate` is stored in column **`StartDate`** (`[Column("StartDate")]`) - order by that, not `IssuedDate`.
+
+**Person-precise match matters - measured, not assumed.** A preview row is one `ApplicationItem` (one person), so the
+join is filtered by `ii.PersonID = ai.PersonID`. On the local dev DB (5661 rows) this left **179 PROCESS_ISSUED rows blank
+where the application *does* have an invitation the person is simply not on** - invitations routinely cover a subset
+(sampled applications: 50 people -> 32 invited, 27 -> 17, 16 -> 12). An application-level join would have falsely told
+the officer those 179 people had an invitation. Blank is the correct answer and is the point of a proof column.
+
+**"Completed" does not imply "issued".** Unlike `..._invitation_on_process` (defined by
+`NOT EXISTS (SELECT 1 FROM Invitations WHERE ApplicationID = a.ID)`), the completed base view has **no** invitation join
+at all - it is "type CanIssueInvitation + terminal progress state", which includes `PROCESS_REJECTED` / `PROCESS_CANCELLED`.
+Measured: REJECTED 169 rows / 0 invitations, CANCELLED 319 / 9, ISSUED 5173 / 4994. Blanks are expected, not a bug.
+
+**Row fan-out guard.** Business rule is one invitation per ApplicationItem, but the join still uses `OUTER APPLY ... TOP 1`
+(SS) / `LEFT JOIN LATERAL ... LIMIT 1` (PG). A plain join would multiply rows on any data anomaly and silently break the
+Preview/ListView total parity gate. Verified after the change: 5661 rows / 5661 distinct `ApplicationItemOid`.
+
+**Postgres heal is the easy step to miss.** `invitation_completed*` lives in `StandaloneViews`, which only heals when the
+relation is **missing** - on an existing DB the stale view would survive and EF would throw "column InvitationNumber does
+not exist". Fix mirrors the `IssuedVisaNumber` precedent: add a sentinel check to `NeedsViaMinistryStandaloneHeal`, which
+re-runs the whole ordered list (bases before wrappers). Use the **(P)** wrapper name for the sentinel - Postgres truncates
+identifiers at 63 chars and the (V) name becomes `..._invitation_completed_by_period_c`.
+
+**Header reuse over a new key.** `"Invitation #"` already exists in `ReportDashboardLocalization.Header()`; adding a new
+`"Invitation"` key would have shipped an untranslated header in tk/ru/tr. "Completed" already implies issued, so the
+`"Issued Visa"`-style naming was unnecessary.
+
+**Column plumbing (the full chain, all of it required):**
+base view x2 (SS + PG; the four wrappers are `SELECT *` and need no edit) -> `InvitationOid` / `Invitation` nav /
+`InvitationNumber` on both read-only BOs (Oid + scalar `[Browsable(false)]`, nav is the ListView column) ->
+`AppViaMinistryRow` gains a slot (positional record: all 10 call sites updated, 8 pass `null`) -> `showInvitationCol`
+in the preview mapping -> catalog headers split out of the shared on-process arms -> `R10` mock helper ->
+both `Model.xafml` ListViews (Index 6, shift App #/Date/State to 7/8/9). Preview renderer is header-count driven
+(`TableHeaders.Count >= 10` renders `ColumnG`), so 10 headers map cleanly onto Name..ColumnG + Status. Excel needs no
+work - "Open in Excel" exports the ListView.
+
+**Verified:** `dotnet build` clean (0 CS/RZ, 0 lint); all three PG views applied to local `visa2026` and queried;
+column at ordinal 16 between `VisaTypeLabel` and `ApplicationNumber`; counts above. SQL Server view updated for parity
+but not executed (repo is Postgres-only at runtime). Not yet confirmed in a running app session.
+
+**Files:** `vw_rd_application_via_ministry_invitation_completed_base.sql` (+ `.postgres.sql`),
+`VwRdApplicationViaMinistryInvitationCompleted.cs` (+ `...ByPeriodCategoryType.cs`), `ReportDashboardQueryService.cs`,
+`ReportDashboardCatalog.cs`, `ReportDashboardMockQueryService.cs`, `ReportDashboardPostgresViewsHealSql.cs`, `Model.xafml`
+
+## 2026-07-29 — Application (direct migration): On Process (A) + Process Complete (mock)
+
+**Ask:** Replace Application Status with On Process (A) and Process Complete. Chart Status = Application Type · ApplicationProgress StatusListLabel. Preview adds App Type column. Grain = ApplicationItem. Process Complete = terminal states only.
+
+**Keys:** `on-process-a`, `process-complete` (legacy `app-status` remaps to On Process (A)).
+
+**Hybrid:** Direct migration panels/sub-report list now use mock (Registration stays real).
+
+**Files:** Catalog, MockQueryService, HybridQueryService, UiStrings.messages.json, VisaUiMessageCatalog.g.cs, reference.md
+
+## 2026-07-29 — Application (direct migration): SQL views On Process (A) / Process Complete
+
+**Ask:** Wire real SQL views for the two mock tabs.
+
+**Views:** `vw_rd_application_direct_migration_on_process_a`, `vw_rd_application_direct_migration_process_complete` (SS + PG). Filter `ApplicationProgressRoute = 1`; grain ApplicationItem; On Process = non-terminal; Complete = terminal.
+
+**Local PG counts:** on-process ~99, complete ~11669.
+
+**Shipped:** BOs + ListViews + QueryService loader + Hybrid RealSubReports + permissions + Postgres heal/updater + csproj embeds.
+
+**Files:** SqlViews, BOs, DbContext, Catalog, QueryService, Hybrid, Updater, SqlViewsUpdater, Postgres updater/heal, Model.xafml, Module.csproj, reference.md
+
+## 2026-07-29 — Direct migration Project from Person.ProjectContract
+
+**Symptom:** On Process (A) / Process Complete showed `(No project)` for every row.
+
+**Cause:** Views joined `Application.ProjectContract`; direct-migration apps typically leave that unset.
+
+**Fix:** Resolve project from `Person.ProjectContract`, else sponsoring employee`s project (same as other person-grain RD views).
+
+**Verify:** on-process 99/99 with project (was 0).
+
+
+## 2026-07-29 — Direct migration ListView: hide Application Item
+
+**Symptom:** Open ListView showed an extra **Application Item** column (`Person - App#`) between Project and App Type; Preview did not.
+
+**Cause:** `ApplicationItem` navigation was browsable; XAF auto-added it despite Model column list.
+
+**Fix:** `[Browsable(false)]` on both Direct Migration RD BOs; Model `ColumnInfo Id=""ApplicationItem"" Index=""-1""`.
+
+## 2026-07-29 — Direct migration ListView NRE from Index=-1 ColumnInfo
+
+**Symptom:** Open ListView NullReferenceException in `DxGridListEditorBase.AddColumnCore`.
+
+**Cause:** Model ColumnInfo for `ApplicationItem` after property was `[Browsable(false)]` — member unresolved.
+
+**Fix:** Remove ApplicationItem ColumnInfo nodes; keep Browsable(false) only.
+## 2026-07-29 — Direct migration On Process (A): Preview Total vs Open ListView
+
+**Symptom:** On Process (A) badge/chart Total **97** did not match Open ListView Total (e.g. **33**).
+
+**Cause:** Preview applied a silent **9-month** `ApplicationDate` cutoff (`ResolveDateRangeMonths` default) while Application categories have **no Last-N UI** and `BuildListCriteria` has **no** `ApplicationDate` clause. Local PG: view 99; within 9mo 97. ListView **33** matched Employees + `ApplicationDate <= today` (person-type / date filter skew on drill-down).
+
+**Fix:** `IsApplicationCategory` → `ResolveDateRangeMonths` returns **0**; `LoadPanel` treats `dateRangeMonths <= 0` as `cutoff = DateTime.MinValue` so Preview population matches ListView (`IsArchived` + person/project only).
+
+**Verify:** Restart; All + On Process (A): Preview Total == Open ListView Total (~99 non-archived). Same person-type tab when opening ListView.
+
+## 2026-07-29 — Incomplete persons category + Person Mark incomplete
+
+**Ask:** Soft incomplete flag on Person (notes + missing-area checkboxes); DetailView Mark incomplete / Mark complete; Report Dashboard category Incomplete persons with one sub-report grouped by missing-area (chart counts each flag; Preview one row per person).
+
+**Shipped:**
+- Person fields: `IsDataIncomplete`, nine `IncompleteMissing*` flags, Notes, MarkedOn/By; read-only on DetailView (Appearance when complete); actions via `PersonIncompleteDataController` + `PersonIncompleteMarkOptions` popup
+- Dashboard: `IncompletePersons` / `by-missing-area` → `vw_rd_incomplete_persons_by_missing_area` + `VwRdIncompletePersonsByMissingArea` + ListView; Hybrid Real; chart buckets from flags (Total = person count)
+- Soft flag only (no application gate); Mark complete clears all
+
+**Verify:** Module + Blazor.Server Debug build 0 errors. Runtime: restart app so EF adds People columns + SQL view updater/heal runs.
+
+**Files:** Person*.cs, PersonIncomplete*, ReportDashboard* Catalog/Mock/Query/Hybrid/Models, SqlViews/vw_rd_incomplete_persons_by_missing_area*.sql, Updater permissions, Model.xafml ListView + Employee IncompleteData layout, UiStrings
+
+## 2026-07-29 — Incomplete persons PG heal: pc.Name missing
+
+**Symptom:** Startup heal `42703: column pc.Name does not exist` on `vw_rd_incomplete_persons_by_missing_area`.
+
+**Cause:** `ProjectContracts` has `NameTm` only (no `Name`); view copied wrong COALESCE pattern.
+
+**Fix:** Use `NameTm` only in `.sql` and `.postgres.sql`.
+
+## 2026-07-29 — Incomplete persons heal blocked on missing People columns
+
+**Symptom:** `42703: column p.IncompleteMissingPersonalData does not exist` during Startup view heal.
+
+**Cause:** ModuleInfo current → EF skips schema add; heal CREATE VIEW ran before People incomplete columns existed.
+
+**Fix:** `PersonIncompleteDataSchemaSql.ApplyIfMissing` in Startup before heal; ModuleUpdater; incomplete view healed separately only when People columns exist.
+
+## 2026-07-29 — Person Incomplete data DetailView tab
+
+**Ask:** Show incomplete fields on Person DetailView in a separate tab (not main form / not ListView).
+
+**Shipped:** `IncompleteData` LayoutGroup as last tab in `PersonRecordTabs` on Employee / FamilyMember / TemporaryVisitor typed DetailViews. Appearance `PersonIncompleteTab_HideWhenComplete` hides tab when `IsDataIncomplete = False`. Fields remain read-only; set via Mark incomplete actions.
+
+**Verify:** Model.xafml has three `Id="IncompleteData"` groups under typed Person DetailViews.
+
+## 2026-07-29 — Incomplete persons: remove Valid visa / Include archived toggles
+
+**Ask:** Remove "Valid visa only" and "Include archived" checkboxes from Incomplete persons (they hid flagged people without a valid visa).
+
+**Fix:** Drop `IncompletePersons` from `SupportsValidVisaPersonsOnly` and `SupportsIncludeArchivedPersons`. `LoadIncompletePersons` no longer filters by visa person IDs or archived — shows all `IsDataIncomplete` rows (person type + project only).
+
+**Verify:** Rebuild/restart; Incomplete persons chrome has no those two checkboxes; Preview lists incomplete persons regardless of visa.

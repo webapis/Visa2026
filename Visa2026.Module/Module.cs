@@ -64,6 +64,7 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeRule));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PersonIncompleteMarkOptions));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemDocumentCopiesListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemReportPackageListHost));
@@ -92,6 +93,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeCapabilityFlagsSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonIncompleteDataSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaProcessNumberSchemaUpdater(objectSpace, versionFromDB),

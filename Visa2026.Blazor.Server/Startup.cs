@@ -264,9 +264,10 @@ namespace Visa2026.Blazor.Server
                 ?? Configuration.GetConnectionString("ConnectionString");
             if (!string.IsNullOrWhiteSpace(connectionString))
             {
-                // Additive ProcessNumber / capability columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
+                // Additive ProcessNumber / capability / Person incomplete columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
                 ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
+                PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
 
