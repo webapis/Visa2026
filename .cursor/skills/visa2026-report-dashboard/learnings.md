@@ -13,6 +13,67 @@ Date format: `YYYY-MM-DD`
 **Files:** `ReportDashboardPropertyEditor.cs`, `report-dashboard.css`, `ReportDashboardComponent.razor`.
 
 ---
+
+
+
+
+
+## 2026-07-29 — Application subreport process labels = StatusListLabel
+
+**Ask:** Process names in Application (via ministry) subreports must match `ApplicationProgress` (Progress history Status), not legacy "1st Review Started / Process Started".
+
+**Source of truth:** `LookupCatalogStrings` `application-state` (At office, Sent for agreement, Cleared agreement, Processing, Issued, Rejected, Cancelled, Not received from ministry) + `ApplicationProgressListLabelHelper.FormatStatusLabel` → `"State - Ministry"` when a ministry leg applies.
+
+**Change:** Updated via-ministry mock Status segments accordingly. Real loaders later should use latest `StatusListLabel` (not bare `Application.CurrentState`, which omits ministry).
+
+**Files:** `ReportDashboardMockQueryService.cs`
+
+## 2026-07-29 — Overview grid responsive columns
+
+**Ask:** Cap / scale Overview card columns by viewport (CSS responsive best practice).
+
+**Cause:** `repeat(auto-fit, minmax(260px, 1fr))` packed many skinny cards on wide screens; chips cramped.
+
+**Fix:** `container-type` on `.rd-report-area` + `@container rd-report` breakpoints (2→3→4→5 cols). Viewport `@media` fallbacks. Cap at 5. `minmax(0, 1fr)` so chips stay inside cards.
+
+**Files:** `report-dashboard.css`
+
+## 2026-07-29 — Overview card: long Application (via ministry) sub-chips spill
+
+**Symptom:** Sub-report chips overflow neighboring Overview cards (`white-space: nowrap` + `overflow: visible` on `.rd-overview-card`).
+
+**Fix:** Card `overflow: hidden`; chips `white-space: normal` + `overflow-wrap` + `max-width: 100%`; `title` on chip. Shorten via-ministry Labels (drop redundant "Application for…") to match Invitation/Visa chip length.
+
+**Files:** `report-dashboard.css`, `ReportDashboardComponent.razor`, `ReportDashboardCatalog.cs`, locale/mock labels.
+
+## 2026-07-29 — Application (via ministry): 10 mock On Process / Completed sub-reports
+
+**Ask:** Replace Application Status under Application (via ministry) with Invitation / Visa Extension / Other × On Process / Completed; (P)/(V) like Invitation Process (Other = P only). Mock first. Remove Include completed/cancelled toggles.
+
+**Catalog keys:** `invitation-on-process`, `invitation-on-process-by-period-category-type`, `visa-extension-on-process`, `visa-extension-on-process-by-period-category-type`, `other-on-process`, `invitation-completed`, `invitation-completed-by-period-category-type`, `visa-extension-completed`, `visa-extension-completed-by-period-category-type`, `other-completed`.
+
+**Rules (for later real wiring):** CanIssueInvitation / visa-ext types / other; On Process = non-terminal; Completed = terminal; grain = Application header; chart (P)=Project·State, (V)=Period·Category·Type·State.
+
+**Hybrid:** Via ministry → mock; Direct migration Application Status stays real. `SupportsIncludeCompleted/CancelledApplicationProcesses` → always false.
+
+**Files:** ReportDashboardCatalog, MockQueryService, HybridQueryService, UiStrings.messages.json, VisaUiMessageCatalog.g.cs, reference.md
+
+## 2026-07-29 — Split Application category into via-ministry / direct-migration
+
+**Ask:** Replace single Report Dashboard **Application** category with two top-level categories (same order): Application (via ministry), Application (direct migration). Same Application Status UX + Include completed/cancelled; two Overview cards.
+
+**Nav split (answer):** XAF Applications nav is **not** filtered by MinistryReviewDepth string. `CustomNavigationUpdater` / `ApplicationProgressRouteNavigation` clone ListViews with criteria on `ApplicationType.ApplicationProgressRoute`:
+- `ViaMinistries` → Applications (via ministry)
+- `DirectToMigrationService` → Applications (direct migration)
+Dashboard uses the **same** route enum (direct migration typically shows as “no ministry review” in combined Status).
+
+**Change:**
+- Enum: `Application` → `ApplicationViaMinistry` + `ApplicationDirectMigration`
+- Catalog helpers `IsApplicationCategory` / `ApplicationProgressRouteFor`; Open ListView → `Application_ListView_ViaMinistries` / `_DirectMigration` + route criteria
+- Loaders/Hybrid/Mock filter by route; localization keys + Overview cards follow Categories[]
+
+**Files:** ReportDashboardModels/Catalog/Query/Hybrid/Mock, ReportDashboardLocalization, VisaUiMessageCatalog.g.cs, UiStrings.messages.json, PropertyEditor, docs/REPORT_DASHBOARD.md
+
 ## 2026-07-14 — Initial dashboard implementation
 
 **What was built:**
@@ -1470,3 +1531,92 @@ ejected-by-* remap); EF Application loader (not RejectionItem union); AssignExte
 
 - Toast via `NavigationManager.LocationChanging` appeared **after** the DetailView was already visible — not useful as loading feedback.
 - Removed `Visa2026.Blazor.Server/Controllers/ReportDashboardListViewOpenFeedbackController.cs`. Open ListView overlay kept. Revisit reference-column busy UI later (likely needs earlier/client-side intercept).
+
+## 2026-07-29 — Application (via ministry) Invitation on Process (P) real wire-up
+
+**Ask / population (A):** Same as Invitation Process: `CanIssueInvitation` + `ViaMinistries` + non-terminal + no linked Invitation. Grain = Application header. Chart Status = `Project · StatusListLabel` (ministry-aware in C#). View `StatusLabel` = process alone for ListView.
+
+**Shipped:**
+- View `vw_rd_application_via_ministry_invitation_on_process` (SS + PG) + EF `VwRdApplicationViaMinistryInvitationOnProcess`
+- Loader + EF fallback; Hybrid `RealSubReports` promote for `invitation-on-process`
+- ListView `VwRdApplicationViaMinistryInvitationOnProcess_ListView`; Read permissions; Postgres heal StandaloneViews
+- `BuildListCriteria`: skip Application route criteria on dedicated view; split chart Status into ProjectName + StatusLabel (tolerate ministry ` - ` suffix)
+
+**Files:** SqlViews + updaters/heal, BO/DbContext, QueryService/Catalog/Hybrid, Updater, Model.xafml, csproj embed
+
+## 2026-07-29 — Application (via ministry) remaining SQL views (phase 1)
+
+**Ask:** SQL views for the nine remaining via-ministry subreports (not EF/Hybrid yet).
+
+**Design:** Bases + thin `SELECT *` (P)/(V) wrappers; invitation on-process (V) wraps existing (P) and adds Period/Category/Type labels. StatusLabel = process alone. Terminal/non-terminal match invitation-on-process. Visa-ext types: `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`. Other = ViaMinistries + not CanIssueInvitation + not those types. Invitation completed = CanIssueInvitation + ViaMinistries + terminal (no “no Invitation” filter).
+
+**Views:** `vw_rd_application_via_ministry_{invitation_on_process_by_period_category_type|invitation_completed[_base|_by_period…]|visa_extension_on_process[_base|_by_period…]|visa_extension_completed[_base|_by_period…]|other_on_process|other_completed}` (SS + PG).
+
+**Register:** SqlViewsUpdater + PostgresViewsUpdater via `ReportDashboardSqlViewResource`; heal `StandaloneViews` (bases before wrappers); csproj embeds `.sql` + `.postgres.sql`.
+
+**Next:** EF BO → loader → ListView → Hybrid promote per subreport.
+
+## 2026-07-29 — Application (via ministry) full wire-up (remaining 9)
+
+**Ask:** Proceed after SQL phase — EF BO → loader → ListView → Hybrid for all via-ministry subreports.
+
+**Shipped:**
+- 9 BOs + `IVwRdApplicationViaMinistryRow`; DbContext `ToView`; Read permissions; 9 ListViews in Model.xafml
+- Unified `LoadApplicationViaMinistryFromView` (chart P=`Project · StatusListLabel`, V=`Period · Category · Type · StatusListLabel`; completed uses extension-result CSS)
+- Catalog `UsesApplicationViaMinistryRdListView` + ResolveListViewTarget + BuildListCriteria (P/V status split)
+- Hybrid `RealSubReports` promotes all 10 via-ministry keys
+
+**Files:** BusinessObjects/VwRdApplicationViaMinistry*, QueryService, Catalog, Hybrid, Updater, Model.xafml, learnings/reference
+
+## 2026-07-29 — Application (via ministry): ApplicationItem grain + Position / App Type
+
+**Ask:** Switch all via-ministry subreports from one row per Application (first person) to **one row per ApplicationItem** (every person). Add Employee Position (CurrentPositionHistory → Position NameTm) and Application type (NameTm) to Preview + Excel + ListView.
+
+**Shipped:**
+- SQL w_rd_application_via_ministry_* (SS + PG): ID = ApplicationItemOid; columns PositionLabel, ApplicationTypeLabel
+- BOs / IVwRdApplicationViaMinistryRow + ListView columns Person · Project · Position · App Type · App # · App Date · State
+- Preview/Excel headers: Name, Project, Position, App Type, App #, App Date, Status (chart P=Project · State, V=Period · Category · Type · State)
+- Role filter uses row PersonRoleCode; chart ministry lookup uses ApplicationOid
+- Legacy invitation-on-process expands ApplicationItems
+
+**Files:** SqlViews, BusinessObjects/VwRdApplicationViaMinistry*, QueryService, Catalog, Mock, Model.xafml, ReportDashboardLocalization + UiStrings / VisaUiMessageCatalog
+
+## 2026-07-29 — Via-ministry Invitation/Visa Extension: Visa Period + Visa Type
+
+**Ask:** Add Application VisaPeriod / VisaType (NameTm) to Invitation + Visa Extension via-ministry subreports (P/V, On Process/Completed) with Preview + Excel + ListView parity. Not Other, not Direct Migration.
+
+**Shipped:**
+- SQL VisaPeriodLabel / VisaTypeLabel on invitation + visa-ext views (Other also has columns for unified EF mapping; not shown in UI)
+- Preview columns A-F: Position, App Type, Visa Period, Visa Type, App #, App Date (+ Status)
+- ListViews: same order; Catalog headers for 8 invitation/visa-ext keys
+- UsesApplicationViaMinistryInvitationOrVisaExtListView; ColumnE/F on ReportDashboardPreviewRow
+
+**Files:** SqlViews, BOs, QueryService, Catalog, Mock, Model.xafml, ReportDashboardComponent, localization
+
+## 2026-07-29 — Via-ministry empty tabs: views missing on SQLEXPRESS
+
+**Symptom:** Only Invitation on Process (P) had a Total; other via-ministry subreports showed 0.
+
+**Cause:** App DB `localhost\SQLEXPRESS` / `Visa2026` had no `vw_rd_application_via_ministry_*` views (ModuleInfo current → SqlViewsUpdater skipped). P alone had an EF legacy fallback. Also missing `ApplicationTypes.CanIssue*` columns required by the views.
+
+**Fix:** Created views + `CanIssue*` on SQLEXPRESS. Added `ReportDashboardSqlServerViewsHealSql` + `ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing` at host start; Postgres standalone heal recreates when item-grain sentinels missing.
+
+## 2026-07-29 — Visa Extension Completed: Visa on extension + Issued Visa
+
+**Ask:** On Visa Extension Completed (P)/(V) only, add Visa on extension (`ApplicationItem.CurrentVisa`) and Issued Visa (`Visa.IssuingApplicationItem`) with Preview + Excel + ListView parity (numbers in Preview; navigable Visa objects in ListView).
+
+**Shipped:**
+- SQL `VisaOnExtensionOid/Number` + `IssuedVisaOid/Number` on visa-ext completed base (SS joins fixed; PG already had LATERAL)
+- BOs + ListViews for Completed P/V only; Catalog 11-column headers; Preview `ColumnE`–`H`; loader maps numbers → App #/Date into G/H
+- Localization `Visa on extension` / `Issued Visa`; Postgres heal sentinel `IssuedVisaNumber`
+
+**Note:** Local SQLEXPRESS has ~2978 Visa-on-extension numbers; Issued Visa count is 0 until visas have `IssuingApplicationItemID` populated.
+
+**Files:** SqlViews base SS/PG, completed BOs, QueryService, Catalog, Mock R11, Models ColumnG/H, ReportDashboardComponent, Model.xafml, localization, Postgres heal
+
+## 2026-07-29 — Local app DB is PostgreSQL (not SQLEXPRESS)
+
+**Fact:** Blazor host (`appsettings` / launch profile "Visa2026 - PostgreSQL") uses `Host=localhost;Database=visa2026;EFCoreProvider=Postgres`. Report Dashboard heal at startup is Postgres-only (`ReportDashboardPostgresViewsHealSql`).
+
+**Action:** Applied visa-ext completed base + wrappers on Postgres `visa2026` so `VisaOnExtension*` / `IssuedVisa*` columns exist. Do not treat SQLEXPRESS verification as the app data source for this workstation.
+

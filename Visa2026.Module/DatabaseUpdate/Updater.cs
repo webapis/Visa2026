@@ -262,6 +262,26 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<VwRdVisaExtensionResultByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VwRdVisaExtensionRequired>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VwRdVisaByDaysRemaining>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationOnProcess>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationCompleted>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionOnProcess>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionCompleted>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryOtherOnProcess>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryOtherCompleted>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
@@ -563,6 +583,26 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureTypePermission<VwRdVisaExtensionResultByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdVisaExtensionRequired>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdVisaByDaysRemaining>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationOnProcess>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionOnProcess>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryOtherOnProcess>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryOtherCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
                 role,

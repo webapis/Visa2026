@@ -28,6 +28,19 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewRdWorkPermitAppProgress();
             CreateViewRdInvitationReady();
             CreateViewRdInvitationInProcess();
+            CreateViewRdApplicationViaMinistryInvitationOnProcess();
+            CreateViewRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType();
+            CreateViewRdApplicationViaMinistryInvitationCompletedBase();
+            CreateViewRdApplicationViaMinistryInvitationCompleted();
+            CreateViewRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType();
+            CreateViewRdApplicationViaMinistryVisaExtensionOnProcessBase();
+            CreateViewRdApplicationViaMinistryVisaExtensionOnProcess();
+            CreateViewRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType();
+            CreateViewRdApplicationViaMinistryVisaExtensionCompletedBase();
+            CreateViewRdApplicationViaMinistryVisaExtensionCompleted();
+            CreateViewRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType();
+            CreateViewRdApplicationViaMinistryOtherOnProcess();
+            CreateViewRdApplicationViaMinistryOtherCompleted();
             CreateViewRdInvitationRejected();
             CreateViewRdInvitationUsed();
             CreateViewRdInvitationValidUntil();
@@ -1004,6 +1017,59 @@ WHERE ISNULL(a.GCRecord, 0) = 0
       );
 ", true);
         }
+
+        private void ExecuteEmbeddedSqlView(string resourceLeaf) =>
+            ExecuteNonQueryCommand(ReportDashboardSqlViewResource.Load(resourceLeaf), true);
+
+        private void CreateViewRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType() =>
+            ExecuteEmbeddedSqlView(
+                "vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.sql");
+
+        private void CreateViewRdApplicationViaMinistryInvitationCompletedBase() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_invitation_completed_base.sql");
+
+        private void CreateViewRdApplicationViaMinistryInvitationCompleted() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_invitation_completed.sql");
+
+        private void CreateViewRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType() =>
+            ExecuteEmbeddedSqlView(
+                "vw_rd_application_via_ministry_invitation_completed_by_period_category_type.sql");
+
+        private void CreateViewRdApplicationViaMinistryVisaExtensionOnProcessBase() =>
+            ExecuteEmbeddedSqlView(
+                "vw_rd_application_via_ministry_visa_extension_on_process_base.sql");
+
+        private void CreateViewRdApplicationViaMinistryVisaExtensionOnProcess() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_visa_extension_on_process.sql");
+
+        private void CreateViewRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType() =>
+            ExecuteEmbeddedSqlView(
+                "vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.sql");
+
+        private void CreateViewRdApplicationViaMinistryVisaExtensionCompletedBase() =>
+            ExecuteEmbeddedSqlView(
+                "vw_rd_application_via_ministry_visa_extension_completed_base.sql");
+
+        private void CreateViewRdApplicationViaMinistryVisaExtensionCompleted() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_visa_extension_completed.sql");
+
+        private void CreateViewRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType() =>
+            ExecuteEmbeddedSqlView(
+                "vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.sql");
+
+        private void CreateViewRdApplicationViaMinistryOtherOnProcess() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_other_on_process.sql");
+
+        private void CreateViewRdApplicationViaMinistryOtherCompleted() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_other_completed.sql");
+
+        /// <summary>
+        /// Report Dashboard Application (via ministry) Invitation on Process (P).
+        /// See SqlViews/vw_rd_application_via_ministry_invitation_on_process.sql.
+        /// </summary>
+        private void CreateViewRdApplicationViaMinistryInvitationOnProcess() =>
+            ExecuteEmbeddedSqlView("vw_rd_application_via_ministry_invitation_on_process.sql");
+
         /// <summary>
         /// Report Dashboard Invitations Rejected. See SqlViews/vw_rd_invitation_rejected.sql.
         /// </summary>

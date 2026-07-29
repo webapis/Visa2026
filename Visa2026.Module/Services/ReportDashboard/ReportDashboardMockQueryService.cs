@@ -22,7 +22,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
 
     private static readonly Dictionary<(ReportDashboardPersonType, ReportDashboardCategory), int> Counts = new()
     {
-        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Application)]   = 98,
+        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.ApplicationViaMinistry)] = 70,
+        [(ReportDashboardPersonType.Employees, ReportDashboardCategory.ApplicationDirectMigration)] = 28,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.VisaExtension)] = 63,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Invitation)]    = 45,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Registration)]  = 89,
@@ -35,7 +36,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.PositionHistory)]  = 85,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.Subcontractor)]    = 85,
         [(ReportDashboardPersonType.Employees, ReportDashboardCategory.MedicalRecord)]    = 78,
-        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Application)]   = 28,
+        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.ApplicationViaMinistry)] = 20,
+        [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.ApplicationDirectMigration)] = 8,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.VisaExtension)] = 31,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Invitation)]    = 22,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Registration)]  = 52,
@@ -48,7 +50,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.PositionHistory)]  = 0,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.Subcontractor)]    = 52,
         [(ReportDashboardPersonType.FamilyMembers, ReportDashboardCategory.MedicalRecord)]    = 45,
-        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Application)]   = 10,
+        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.ApplicationViaMinistry)] = 7,
+        [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.ApplicationDirectMigration)] = 3,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.VisaExtension)] = 12,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Invitation)]    = 8,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Registration)]  = 4,
@@ -62,7 +65,8 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.Subcontractor)]    = 8,
         [(ReportDashboardPersonType.TemporaryVisitors, ReportDashboardCategory.MedicalRecord)]    = 4,
         // All = Employees + Family Members + Temporary Visitors
-        [(ReportDashboardPersonType.All, ReportDashboardCategory.Application)]      = 136,
+        [(ReportDashboardPersonType.All, ReportDashboardCategory.ApplicationViaMinistry)] = 97,
+        [(ReportDashboardPersonType.All, ReportDashboardCategory.ApplicationDirectMigration)] = 39,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.VisaExtension)]    = 106,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Invitation)]       = 75,
         [(ReportDashboardPersonType.All, ReportDashboardCategory.Registration)]     = 145,
@@ -147,9 +151,43 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
             && ReportDashboardCatalog.SubReportCountsValidWorkPermits(subReport);
         return (category, subReport) switch
         {
-            // Application — Application Status (combined state label)
-            (ReportDashboardCategory.Application, _) => Build(
-                personType, category, subReport, ApplicationByStatus(), projectKey,
+            // Application (via ministry) — On Process / Completed by Invitation / Visa Extension / Other
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey) =>
+                Build(personType, category, subReport, AppViaMinistryInvitationOnProcessByProject(), projectKey,
+                    subReportLabel: "Invitation on Process (P)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryInvitationOnProcessVKey) =>
+                Build(personType, category, subReport, AppViaMinistryInvitationOnProcessByPeriodCategoryType(), projectKey,
+                    subReportLabel: "Invitation on Process (V)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryVisaExtOnProcessKey) =>
+                Build(personType, category, subReport, AppViaMinistryVisaExtOnProcessByProject(), projectKey,
+                    subReportLabel: "Visa Extension on Process (P)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryVisaExtOnProcessVKey) =>
+                Build(personType, category, subReport, AppViaMinistryVisaExtOnProcessByPeriodCategoryType(), projectKey,
+                    subReportLabel: "Visa Extension on Process (V)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryOtherOnProcessKey) =>
+                Build(personType, category, subReport, AppViaMinistryOtherOnProcessByProject(), projectKey,
+                    subReportLabel: "Other on Process (P)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryInvitationCompletedKey) =>
+                Build(personType, category, subReport, AppViaMinistryInvitationCompletedByProject(), projectKey,
+                    subReportLabel: "Invitation Completed (P)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryInvitationCompletedVKey) =>
+                Build(personType, category, subReport, AppViaMinistryInvitationCompletedByPeriodCategoryType(), projectKey,
+                    subReportLabel: "Invitation Completed (V)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryVisaExtCompletedKey) =>
+                Build(personType, category, subReport, AppViaMinistryVisaExtCompletedByProject(), projectKey,
+                    subReportLabel: "Visa Extension Completed (P)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryVisaExtCompletedVKey) =>
+                Build(personType, category, subReport, AppViaMinistryVisaExtCompletedByPeriodCategoryType(), projectKey,
+                    subReportLabel: "Visa Extension Completed (V)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, ReportDashboardCatalog.AppViaMinistryOtherCompletedKey) =>
+                Build(personType, category, subReport, AppViaMinistryOtherCompletedByProject(), projectKey,
+                    subReportLabel: "Other Process Completed (P)"),
+            (ReportDashboardCategory.ApplicationViaMinistry, _) =>
+                Build(personType, category, ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey,
+                    AppViaMinistryInvitationOnProcessByProject(), projectKey,
+                    subReportLabel: "Invitation on Process (P)"),
+            (ReportDashboardCategory.ApplicationDirectMigration, _) => Build(
+                personType, category, subReport, ApplicationByStatusDirectMigration(), projectKey,
                 subReportLabel: "Application Status"),
             // Visa (formerly Visa Extension)
             (ReportDashboardCategory.VisaExtension, "on-extension") => Build(personType, category, subReport, VisaOnExtensionByProject(), projectKey),
@@ -323,30 +361,136 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         R("Serdar Geldiyew",     "Gurlusyk UZT",     "V-2025-0614", "Jun 14, 2026", "Extension Cancelled",    "st-expiring"),
     ];
 
-    // ===== Application ====================================================
+    // ===== Application (via ministry) =====================================
+    // Process segment = ApplicationProgress.StatusListLabel style
+    // (LookupCatalogStrings application-state + " - {ministry}" when applicable).
 
-    private static List<ReportDashboardPreviewRow> ApplicationByStatus() =>
+    private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationOnProcessByProject() =>
     [
-        R("Mehmet Yilmaz", "Gurlusyk UZT", "APP-2026-0101", "Jan 08, 2026",
-            "Being Prepared · 1 ministry · Energetika · —", "st-pending"),
-        R("Viktor Petrov", "Gurlusyk UZT", "APP-2026-0112", "Jan 12, 2026",
-            "1st Review Started · 1 ministry · Energetika · On track · 3/10", "st-pending"),
-        R("Kemal Aydin", "Gaz Stansiasy", "APP-2026-0125", "Jan 20, 2026",
-            "1st Review Approved · 1 ministry · — · —", "st-approved"),
-        R("Hans Muller", "Gaz Stansiasy", "APP-2026-0138", "Feb 02, 2026",
-            "2nd Review Started · 2 ministries · Gurluşyk · —", "st-pending"),
+        R9("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0301", "Mar 02, 2026",
+            "Elektrik Stansia · At office", "st-pending"),
+        R9("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0312", "Mar 08, 2026",
+            "Gurlusyk UZT · Sent for agreement - Türkmenergo", "st-pending"),
+        R9("Mehmet Yilmaz", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0320", "Mar 15, 2026",
+            "Gurlusyk UZT · Cleared agreement - Energetika", "st-approved"),
+        R9("Viktor Petrov", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0334", "Mar 22, 2026",
+            "Gaz Stansiasy · Sent for agreement - Gurluşyk", "st-pending"),
+        R9("Kemal Aydin", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0341", "Apr 01, 2026",
+            "Seismiki Barlag · Processing", "st-pending"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationOnProcessByPeriodCategoryType() =>
+    [
+        R9("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0301", "Mar 02, 2026",
+            "1 month · Double entry · BS1 — Business · At office", "st-pending"),
+        R9("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0312", "Mar 08, 2026",
+            "6 months · Multiple entry · WP — Work visa · Sent for agreement - Türkmenergo", "st-pending"),
+        R9("Mehmet Yilmaz", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0320", "Mar 15, 2026",
+            "6 months · Multiple entry · WP — Work visa · Cleared agreement - Energetika", "st-approved"),
+        R9("Viktor Petrov", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0334", "Mar 22, 2026",
+            "3 months · Multiple entry · WP — Work visa · Sent for agreement - Gurluşyk", "st-pending"),
+        R9("Kemal Aydin", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0341", "Apr 01, 2026",
+            "1 month · Single entry · BS1 — Business · Processing", "st-pending"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryVisaExtOnProcessByProject() =>
+    [
+        R9("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0402", "Feb 10, 2026",
+            "Gaz Stansiasy · At office", "st-pending"),
+        R9("Alina Makarova", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0415", "Feb 18, 2026",
+            "Gurlusyk UZT · Sent for agreement - Türkmenergo", "st-pending"),
+        R9("Oleg Kovalev", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0428", "Mar 05, 2026",
+            "Seismiki Barlag · Cleared agreement - Energetika", "st-approved"),
+        R9("Serdar Geldiyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0439", "Mar 19, 2026",
+            "Gurlusyk UZT · Processing", "st-pending"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryVisaExtOnProcessByPeriodCategoryType() =>
+    [
+        R9("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0402", "Feb 10, 2026",
+            "6 months · Multiple entry · WP — Work visa · At office", "st-pending"),
+        R9("Alina Makarova", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0415", "Feb 18, 2026",
+            "1 year · Double entry · FM — Family · Sent for agreement - Türkmenergo", "st-pending"),
+        R9("Oleg Kovalev", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0428", "Mar 05, 2026",
+            "3 months · Multiple entry · BS1 — Business · Cleared agreement - Energetika", "st-approved"),
+        R9("Serdar Geldiyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2026-0439", "Mar 19, 2026",
+            "6 months · Multiple entry · WP — Work visa · Processing", "st-pending"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryOtherOnProcessByProject() =>
+    [
+        R7("John Smith", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "APP-2026-0501", "Jan 20, 2026",
+            "Seismiki Barlag · At office", "st-pending"),
+        R7("Bayrammyrat Rejepow", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "APP-2026-0514", "Feb 03, 2026",
+            "Elektrik Stansia · Sent for agreement - Türkmengaz", "st-pending"),
+        R7("Annaguly Hojayew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "APP-2026-0527", "Feb 25, 2026",
+            "Gurlusyk UZT · Processing", "st-pending"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationCompletedByProject() =>
+    [
+        R9("Kemal Aydin", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9012", "Nov 12, 2025",
+            "Gaz Stansiasy · Issued", "st-approved"),
+        R9("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9018", "Nov 28, 2025",
+            "Gaz Stansiasy · Rejected", "st-expiring"),
+        R9("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9030", "Dec 10, 2025",
+            "Elektrik Stansia · Cancelled", "st-expiring"),
+        R9("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9044", "Dec 22, 2025",
+            "Gurlusyk UZT · Not received from ministry", "st-expiring"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryInvitationCompletedByPeriodCategoryType() =>
+    [
+        R9("Kemal Aydin", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9012", "Nov 12, 2025",
+            "6 months · Multiple entry · WP — Work visa · Issued", "st-approved"),
+        R9("Hans Muller", "Gaz Stansiasy", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9018", "Nov 28, 2025",
+            "6 months · Multiple entry · WP — Work visa · Rejected", "st-expiring"),
+        R9("Leyli Annagurbanowa", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9030", "Dec 10, 2025",
+            "1 month · Double entry · BS1 — Business · Cancelled", "st-expiring"),
+        R9("Cary Durdyyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "APP-2025-9044", "Dec 22, 2025",
+            "6 months · Multiple entry · WP — Work visa · Not received from ministry", "st-expiring"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryVisaExtCompletedByProject() =>
+    [
+        R11("Alina Makarova", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "A1711001", "A1802001", "APP-2025-9101", "Oct 05, 2025",
+            "Gurlusyk UZT · Issued", "st-approved"),
+        R11("Oleg Kovalev", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "6 months", "WP", "A1711002", "", "APP-2025-9115", "Oct 18, 2025",
+            "Seismiki Barlag · Rejected", "st-expiring"),
+        R11("Serdar Geldiyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "A1711003", "A1802003", "APP-2025-9128", "Nov 02, 2025",
+            "Gurlusyk UZT · Not received from ministry", "st-expiring"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryVisaExtCompletedByPeriodCategoryType() =>
+    [
+        R11("Alina Makarova", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "A1711001", "A1802001", "APP-2025-9101", "Oct 05, 2025",
+            "1 year · Double entry · FM — Family · Issued", "st-approved"),
+        R11("Oleg Kovalev", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "6 months", "WP", "A1711002", "", "APP-2025-9115", "Oct 18, 2025",
+            "3 months · Multiple entry · BS1 — Business · Rejected", "st-expiring"),
+        R11("Serdar Geldiyew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "6 months", "WP", "A1711003", "A1802003", "APP-2025-9128", "Nov 02, 2025",
+            "6 months · Multiple entry · WP — Work visa · Not received from ministry", "st-expiring"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> AppViaMinistryOtherCompletedByProject() =>
+    [
+        R7("John Smith", "Seismiki Barlag", "Inžener", "Çakylyk we RW", "APP-2025-9201", "Sep 14, 2025",
+            "Seismiki Barlag · Issued", "st-approved"),
+        R7("Bayrammyrat Rejepow", "Elektrik Stansia", "Inžener", "Çakylyk we RW", "APP-2025-9216", "Sep 30, 2025",
+            "Elektrik Stansia · Cancelled", "st-expiring"),
+        R7("Annaguly Hojayew", "Gurlusyk UZT", "Inžener", "Çakylyk we RW", "APP-2025-9230", "Oct 20, 2025",
+            "Gurlusyk UZT · Rejected", "st-expiring"),
+    ];
+
+    private static List<ReportDashboardPreviewRow> ApplicationByStatusDirectMigration() =>
+    [
         R("John Smith", "Seismiki Barlag", "APP-2026-0150", "Feb 14, 2026",
-            "Process Started · None · — · On track · 2/7", "st-pending"),
-        R("Alina Makarova", "Gurlusyk UZT", "APP-2026-0161", "Feb 28, 2026",
-            "Process Issued · 1 ministry · Energetika · —", "st-approved"),
+            "Process Started · no ministry review · — · On track · 2/7", "st-pending"),
         R("Bayrammyrat Rejepow", "Elektrik Stansia", "APP-2026-0173", "Mar 10, 2026",
-            "Process Rejected · None · — · —", "st-expiring"),
-        R("Leyli Annagur.", "Elektrik Stansia", "APP-2026-0184", "Mar 22, 2026",
-            "Being Prepared · 1 ministry · — · —", "st-pending"),
-        R("Oleg Kovalev", "Seismiki Barlag", "APP-2026-0196", "Apr 05, 2026",
-            "1st Review Started · 1 ministry · — · —", "st-pending"),
-        R("Serdar Geldiyew", "Gurlusyk UZT", "APP-2026-0208", "Apr 18, 2026",
-            "2nd Review Approved · 2 ministries · Gurluşyk · —", "st-approved"),
+            "Process Rejected · no ministry review · — · —", "st-expiring"),
+        R("Cary Durdyyew", "Merkez ofis", "APP-2026-0210", "Apr 20, 2026",
+            "At office · no ministry review · — · —", "st-pending"),
+        R("Annaguly Hojayew", "Gurlusyk UZT", "APP-2026-0222", "May 02, 2026",
+            "Issued · no ministry review · — · —", "st-approved"),
     ];
 
     // ===== Visa ===========================================================
@@ -934,6 +1078,54 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
 
     // ===== helpers ========================================================
 
+    private static ReportDashboardPreviewRow R11(
+        string name, string project, string position, string appType, string visaPeriod, string visaType,
+        string visaOnExt, string issuedVisa, string appNum, string appDate, string status, string css) =>
+        new()
+        {
+            Name = name,
+            Project = project,
+            ColumnA = position,
+            ColumnB = appType,
+            ColumnC = visaPeriod,
+            ColumnD = visaType,
+            ColumnE = visaOnExt,
+            ColumnF = issuedVisa,
+            ColumnG = appNum,
+            ColumnH = appDate,
+            Status = status,
+            StatusCssClass = css
+        };
+
+    private static ReportDashboardPreviewRow R9(
+        string name, string project, string position, string appType, string visaPeriod, string visaType,
+        string appNum, string appDate, string status, string css) =>
+        new()
+        {
+            Name = name,
+            Project = project,
+            ColumnA = position,
+            ColumnB = appType,
+            ColumnC = visaPeriod,
+            ColumnD = visaType,
+            ColumnE = appNum,
+            ColumnF = appDate,
+            Status = status,
+            StatusCssClass = css
+        };
+    private static ReportDashboardPreviewRow R7(
+        string name, string project, string position, string appType, string appNum, string appDate, string status, string css) =>
+        new()
+        {
+            Name = name,
+            Project = project,
+            ColumnA = position,
+            ColumnB = appType,
+            ColumnC = appNum,
+            ColumnD = appDate,
+            Status = status,
+            StatusCssClass = css
+        };
     private static ReportDashboardPreviewRow R(
         string name, string project, string colA, string colB, string status, string css) =>
         new() { Name = name, Project = project, ColumnA = colA, ColumnB = colB, Status = status, StatusCssClass = css };

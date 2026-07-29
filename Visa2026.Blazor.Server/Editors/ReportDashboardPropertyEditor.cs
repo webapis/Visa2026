@@ -124,7 +124,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     private static string DefaultChartViewFor(ReportDashboardCategory category, string subReport) =>
         (category, subReport) switch
         {
-            (ReportDashboardCategory.Application, _) => "bar",
+            (ReportDashboardCategory.ApplicationViaMinistry, _) => "bar",
+            (ReportDashboardCategory.ApplicationDirectMigration, _) => "bar",
             (ReportDashboardCategory.Passport, "by-citizenship") => "bar",
             (ReportDashboardCategory.Education, "by-country") => "bar",
             (ReportDashboardCategory.Education, "by-specialty") => "bar",

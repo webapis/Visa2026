@@ -1,0 +1,4 @@
+-- Visa Extension Completed (V) — PostgreSQL.
+DROP VIEW IF EXISTS vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type;
+CREATE VIEW vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type AS
+SELECT * FROM vw_rd_application_via_ministry_visa_extension_completed_base;

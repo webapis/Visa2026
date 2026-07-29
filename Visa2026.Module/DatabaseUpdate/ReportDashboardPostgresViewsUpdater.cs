@@ -27,6 +27,19 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdWorkPermitAppProgress();
         CreateViewRdInvitationReady();
         CreateViewRdInvitationInProcess();
+        CreateViewRdApplicationViaMinistryInvitationOnProcess();
+        CreateViewRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType();
+        CreateViewRdApplicationViaMinistryInvitationCompletedBase();
+        CreateViewRdApplicationViaMinistryInvitationCompleted();
+        CreateViewRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType();
+        CreateViewRdApplicationViaMinistryVisaExtensionOnProcessBase();
+        CreateViewRdApplicationViaMinistryVisaExtensionOnProcess();
+        CreateViewRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType();
+        CreateViewRdApplicationViaMinistryVisaExtensionCompletedBase();
+        CreateViewRdApplicationViaMinistryVisaExtensionCompleted();
+        CreateViewRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType();
+        CreateViewRdApplicationViaMinistryOtherOnProcess();
+        CreateViewRdApplicationViaMinistryOtherCompleted();
         CreateViewRdInvitationRejected();
         CreateViewRdInvitationUsed();
         CreateViewRdInvitationValidUntil();
@@ -551,6 +564,60 @@ WHERE COALESCE(a.""GCRecord"", 0) = 0
       );
 ", true);
     }
+    private void ExecuteEmbeddedPostgresView(string resourceLeaf) =>
+        ExecuteNonQueryCommand(ReportDashboardSqlViewResource.Load(resourceLeaf), true);
+
+    private void CreateViewRdApplicationViaMinistryInvitationOnProcess() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_invitation_on_process.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryInvitationCompletedBase() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_invitation_completed_base.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryInvitationCompleted() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_invitation_completed.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_invitation_completed_by_period_category_type.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryVisaExtensionOnProcessBase() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_visa_extension_on_process_base.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryVisaExtensionOnProcess() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_visa_extension_on_process.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryVisaExtensionCompletedBase() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_visa_extension_completed_base.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryVisaExtensionCompleted() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_visa_extension_completed.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryOtherOnProcess() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_other_on_process.postgres.sql");
+
+    private void CreateViewRdApplicationViaMinistryOtherCompleted() =>
+        ExecuteEmbeddedPostgresView(
+            "vw_rd_application_via_ministry_other_completed.postgres.sql");
     private void CreateViewRdInvitationRejected()
     {
         ExecuteNonQueryCommand(@"DROP VIEW IF EXISTS vw_rd_invitation_rejected;", true);

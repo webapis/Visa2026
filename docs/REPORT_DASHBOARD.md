@@ -18,7 +18,7 @@ After login, officers land on this dashboard to grasp process state (invitation,
 |-------|--------|
 | Project filter | `All` + `ProjectContract` chips (overflow “+N more”) |
 | Person type | Employees 뿯½ Family Members 뿯½ Temporary Visitors (`PersonRecordRole`) |
-| Category | Application / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records |
+| Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records |
 
 ## Hosting
 

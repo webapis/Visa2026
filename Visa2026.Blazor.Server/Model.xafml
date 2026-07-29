@@ -1431,7 +1431,137 @@
       </Columns>
     </ListView>
     
-    <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
+    <ListView Id="VwRdApplicationViaMinistryInvitationOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationOnProcess" Caption="Invitation on Process (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType" Caption="Invitation on Process (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryInvitationCompleted_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationCompleted" Caption="Invitation Completed (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType" Caption="Invitation Completed (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionOnProcess" Caption="Visa Extension on Process (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType" Caption="Visa Extension on Process (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionCompleted_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionCompleted" Caption="Visa Extension Completed (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaOnExtension" Index="6" Width="120" Caption="Visa on extension" IsNewNode="True" />
+        <ColumnInfo Id="IssuedVisa" Index="7" Width="120" Caption="Issued Visa" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="8" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="9" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="10" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType" Caption="Visa Extension Completed (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaOnExtension" Index="6" Width="120" Caption="Visa on extension" IsNewNode="True" />
+        <ColumnInfo Id="IssuedVisa" Index="7" Width="120" Caption="Issued Visa" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="8" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="9" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="10" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryOtherOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryOtherOnProcess" Caption="Other on Process (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="4" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="5" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryOtherCompleted_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryOtherCompleted" Caption="Other Process Completed (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="4" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="5" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+        <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
         <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />

@@ -14,7 +14,10 @@ public enum ReportDashboardPersonType
 
 public enum ReportDashboardCategory
 {
-    Application,
+    /// <summary>Applications on the ministry-review route (ApplicationProgressRouteKind.ViaMinistries).</summary>
+    ApplicationViaMinistry,
+    /// <summary>Applications that go directly to migration (ApplicationProgressRouteKind.DirectToMigrationService).</summary>
+    ApplicationDirectMigration,
     VisaExtension,
     Invitation,
     Registration,
@@ -72,6 +75,14 @@ public sealed class ReportDashboardPreviewRow
     public string ColumnC       { get; init; } = string.Empty;
     /// <summary>Optional 7th column (e.g. days remaining before Status on Visa previews).</summary>
     public string ColumnD       { get; init; } = string.Empty;
+    /// <summary>Optional 8th column (e.g. App # when Visa Period/Type occupy C/D).</summary>
+    public string ColumnE       { get; init; } = string.Empty;
+    /// <summary>Optional 9th column (e.g. App Date when Visa Period/Type occupy C/D).</summary>
+    public string ColumnF       { get; init; } = string.Empty;
+    /// <summary>Optional 10th column (e.g. App # when Visa-on-extension / Issued Visa occupy E/F).</summary>
+    public string ColumnG       { get; init; } = string.Empty;
+    /// <summary>Optional 11th column (e.g. App Date when Visa-on-extension / Issued Visa occupy E/F).</summary>
+    public string ColumnH       { get; init; } = string.Empty;
     public string Status        { get; init; } = string.Empty;
     public string StatusCssClass{ get; init; } = "st-pending";
 }

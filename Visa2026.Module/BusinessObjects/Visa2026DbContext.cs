@@ -148,6 +148,16 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
         public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
         public DbSet<VwRdInvitationInProcess> VwRdInvitationInProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationOnProcess> VwRdApplicationViaMinistryInvitationOnProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType> VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationCompleted> VwRdApplicationViaMinistryInvitationCompleted { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType> VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionOnProcess> VwRdApplicationViaMinistryVisaExtensionOnProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType> VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionCompleted> VwRdApplicationViaMinistryVisaExtensionCompleted { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType> VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryOtherOnProcess> VwRdApplicationViaMinistryOtherOnProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryOtherCompleted> VwRdApplicationViaMinistryOtherCompleted { get; set; }
         public DbSet<VwRdInvitationRejected> VwRdInvitationRejected { get; set; }
         public DbSet<VwRdInvitationUsed> VwRdInvitationUsed { get; set; }
         public DbSet<VwRdInvitationValidUntil> VwRdInvitationValidUntil { get; set; }
@@ -328,6 +338,47 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<VwRdInvitationInProcess>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_invitation_in_process");
+            });
+
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationOnProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_on_process");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_on_process_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationCompleted>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_completed");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_completed_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionOnProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_on_process");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionCompleted>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_completed");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryOtherOnProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_other_on_process");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryOtherCompleted>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_other_completed");
             });
 
             modelBuilder.Entity<VwRdInvitationRejected>(b => {

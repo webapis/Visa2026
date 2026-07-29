@@ -194,7 +194,15 @@
   border-left-color: var(--rd-accent);
   font-weight: 600;
 }
-.rd-report-area { flex: 1; padding: 24px 26px 30px; min-width: 0; position: relative; }
+.rd-report-area {
+  flex: 1;
+  padding: 24px 26px 30px;
+  min-width: 0;
+  position: relative;
+  /* Overview column count tracks this pane (not full viewport / cat-nav) */
+  container-type: inline-size;
+  container-name: rd-report;
+}
 .rd-report-area--loading { min-height: 280px; }
 
 /* Dim full content; keep the progress panel near the top so it stays in view
@@ -663,12 +671,41 @@
 
 .rd-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* Default: 1 column; wider breakpoints / @container below raise the count */
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
-  padding: 24px;
+  padding: 8px 0 0;
   align-content: start;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Viewport fallbacks (full window). Cat-nav (~210px) means these fire slightly early. */
+@media (min-width: 900px) {
+  .rd-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px) {
+  .rd-overview-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1600px) {
+  .rd-overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 2000px) {
+  .rd-overview-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+/* Preferred: columns from report-area width (accounts for category sidebar). */
+@container rd-report (min-width: 520px) {
+  .rd-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container rd-report (min-width: 800px) {
+  .rd-overview-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@container rd-report (min-width: 1100px) {
+  .rd-overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container rd-report (min-width: 1480px) {
+  .rd-overview-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 /* Cards are <button> elements — reset XAF / Fluent button chrome that collapses layout */
@@ -696,7 +733,8 @@ button.rd-overview-card {
   max-width: none;
   width: 100%;
   box-sizing: border-box;
-  overflow: visible !important;
+  /* Contain long sub-report chips; do not spill into neighboring cards */
+  overflow: hidden !important;
   box-shadow: none;
   appearance: none;
   -webkit-appearance: none;
@@ -731,6 +769,8 @@ button.rd-overview-card {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
+  width: 100%;
 }
 .rd-overview-sub-chip {
   font-size: 12px;
@@ -739,7 +779,11 @@ button.rd-overview-card {
   background: var(--rd-border);
   border-radius: 5px;
   padding: 3px 9px;
-  white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
 }
 
 .rd-overview-card-footer {

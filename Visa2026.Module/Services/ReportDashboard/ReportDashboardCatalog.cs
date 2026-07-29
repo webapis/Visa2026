@@ -11,7 +11,8 @@ public static class ReportDashboardCatalog
 {
     public static readonly ReportDashboardCategory[] Categories =
     [
-        ReportDashboardCategory.Application,
+        ReportDashboardCategory.ApplicationViaMinistry,
+        ReportDashboardCategory.ApplicationDirectMigration,
         ReportDashboardCategory.VisaExtension,
         ReportDashboardCategory.Invitation,
         ReportDashboardCategory.Registration,
@@ -66,14 +67,48 @@ public static class ReportDashboardCatalog
         category is ReportDashboardCategory.WorkPermit;
 
     /// <summary>
-    /// Application: toggles to include PROCESS_ISSUED / PROCESS_CANCELLED (latest progress).
-    /// Shared on Application Status; default exclude both.
+    /// Include completed/cancelled toggles removed — On Process / Completed tabs fix population.
     /// </summary>
     public static bool SupportsIncludeCompletedApplicationProcesses(ReportDashboardCategory category) =>
-        category is ReportDashboardCategory.Application;
+        false;
 
     public static bool SupportsIncludeCancelledApplicationProcesses(ReportDashboardCategory category) =>
-        category is ReportDashboardCategory.Application;
+        false;
+
+    // Application (via ministry) sub-report keys
+    public const string AppViaMinistryInvitationOnProcessKey = "invitation-on-process";
+    public const string AppViaMinistryInvitationOnProcessVKey = "invitation-on-process-by-period-category-type";
+    public const string AppViaMinistryVisaExtOnProcessKey = "visa-extension-on-process";
+    public const string AppViaMinistryVisaExtOnProcessVKey = "visa-extension-on-process-by-period-category-type";
+    public const string AppViaMinistryOtherOnProcessKey = "other-on-process";
+    public const string AppViaMinistryInvitationCompletedKey = "invitation-completed";
+    public const string AppViaMinistryInvitationCompletedVKey = "invitation-completed-by-period-category-type";
+    public const string AppViaMinistryVisaExtCompletedKey = "visa-extension-completed";
+    public const string AppViaMinistryVisaExtCompletedVKey = "visa-extension-completed-by-period-category-type";
+    public const string AppViaMinistryOtherCompletedKey = "other-completed";
+
+    /// <summary>
+    /// Report Dashboard categories that mirror the Application nav split
+    /// (<see cref="ApplicationProgressRouteKind"/>).
+    /// </summary>
+    public static bool IsApplicationCategory(ReportDashboardCategory category) =>
+        category is ReportDashboardCategory.ApplicationViaMinistry
+            or ReportDashboardCategory.ApplicationDirectMigration;
+
+    /// <summary>
+    /// Route filter matching XAF nav ListViews
+    /// (<see cref="ApplicationProgressRouteNavigation"/>).
+    /// </summary>
+    public static ApplicationProgressRouteKind? ApplicationProgressRouteFor(
+        ReportDashboardCategory category) =>
+        category switch
+        {
+            ReportDashboardCategory.ApplicationViaMinistry =>
+                ApplicationProgressRouteKind.ViaMinistries,
+            ReportDashboardCategory.ApplicationDirectMigration =>
+                ApplicationProgressRouteKind.DirectToMigrationService,
+            _ => null
+        };
 
     /// <summary>
     /// Application Status sub-report: chart buckets use combined
@@ -332,7 +367,20 @@ public static class ReportDashboardCatalog
 
     private static IReadOnlyList<ReportDashboardSubReport> RawSubReports(ReportDashboardCategory category) => category switch
     {
-        ReportDashboardCategory.Application => [
+        ReportDashboardCategory.ApplicationViaMinistry => [
+            // Short labels (card is already "Application (via ministry)") — match Invitation/Visa chip length
+            new() { Key = AppViaMinistryInvitationOnProcessKey, Label = "Invitation on Process (P)" },
+            new() { Key = AppViaMinistryInvitationOnProcessVKey, Label = "Invitation on Process (V)" },
+            new() { Key = AppViaMinistryVisaExtOnProcessKey, Label = "Visa Extension on Process (P)" },
+            new() { Key = AppViaMinistryVisaExtOnProcessVKey, Label = "Visa Extension on Process (V)" },
+            new() { Key = AppViaMinistryOtherOnProcessKey, Label = "Other on Process (P)" },
+            new() { Key = AppViaMinistryInvitationCompletedKey, Label = "Invitation Completed (P)" },
+            new() { Key = AppViaMinistryInvitationCompletedVKey, Label = "Invitation Completed (V)" },
+            new() { Key = AppViaMinistryVisaExtCompletedKey, Label = "Visa Extension Completed (P)" },
+            new() { Key = AppViaMinistryVisaExtCompletedVKey, Label = "Visa Extension Completed (V)" },
+            new() { Key = AppViaMinistryOtherCompletedKey, Label = "Other Process Completed (P)" },
+        ],
+        ReportDashboardCategory.ApplicationDirectMigration => [
             new() { Key = ApplicationStatusSubReportKey, Label = "Application Status" },
         ],
         ReportDashboardCategory.VisaExtension => [
@@ -512,10 +560,94 @@ public static class ReportDashboardCatalog
             or "extension-result-by-period-category-type"
             or "app-progress";
 
+    public static bool UsesApplicationViaMinistryInvitationOnProcessListView(string? subReport) =>
+        string.Equals(subReport, AppViaMinistryInvitationOnProcessKey, StringComparison.Ordinal);
+
+    /// <summary>Any Application (via ministry) dedicated vw_rd_* ListView / loader.</summary>
+    public static bool UsesApplicationViaMinistryRdListView(string? subReport) =>
+        subReport is AppViaMinistryInvitationOnProcessKey
+            or AppViaMinistryInvitationOnProcessVKey
+            or AppViaMinistryVisaExtOnProcessKey
+            or AppViaMinistryVisaExtOnProcessVKey
+            or AppViaMinistryOtherOnProcessKey
+            or AppViaMinistryInvitationCompletedKey
+            or AppViaMinistryInvitationCompletedVKey
+            or AppViaMinistryVisaExtCompletedKey
+            or AppViaMinistryVisaExtCompletedVKey
+            or AppViaMinistryOtherCompletedKey;
+
+
+    /// <summary>Invitation + Visa Extension via-ministry tabs (Preview/ListView show Visa Period / Visa Type).</summary>
+    public static bool UsesApplicationViaMinistryInvitationOrVisaExtListView(string? subReport) =>
+        subReport is AppViaMinistryInvitationOnProcessKey
+            or AppViaMinistryInvitationOnProcessVKey
+            or AppViaMinistryInvitationCompletedKey
+            or AppViaMinistryInvitationCompletedVKey
+            or AppViaMinistryVisaExtOnProcessKey
+            or AppViaMinistryVisaExtOnProcessVKey
+            or AppViaMinistryVisaExtCompletedKey
+            or AppViaMinistryVisaExtCompletedVKey;
+    public static bool UsesApplicationViaMinistryRdCompletedListView(string? subReport) =>
+        subReport is AppViaMinistryInvitationCompletedKey
+            or AppViaMinistryInvitationCompletedVKey
+            or AppViaMinistryVisaExtCompletedKey
+            or AppViaMinistryVisaExtCompletedVKey
+            or AppViaMinistryOtherCompletedKey;
+
+    /// <summary>Visa Extension Completed (P)/(V) only — Preview/ListView include Visa on extension + Issued Visa.</summary>
+    public static bool UsesApplicationViaMinistryVisaExtCompletedVisaColumns(string? subReport) =>
+        subReport is AppViaMinistryVisaExtCompletedKey
+            or AppViaMinistryVisaExtCompletedVKey;
+
+    public static bool UsesApplicationViaMinistryRdByPeriodCategoryType(string? subReport) =>
+        subReport is AppViaMinistryInvitationOnProcessVKey
+            or AppViaMinistryVisaExtOnProcessVKey
+            or AppViaMinistryInvitationCompletedVKey
+            or AppViaMinistryVisaExtCompletedVKey;
+
     /// <summary>Resolve ListView id + type for the active category / sub-report.</summary>
     public static (string ListViewId, Type ListViewType) ResolveListViewTarget(
         ReportDashboardCategory category, string? subReport = null)
     {
+        if (category == ReportDashboardCategory.ApplicationViaMinistry
+            && UsesApplicationViaMinistryRdListView(subReport))
+        {
+            return subReport switch
+            {
+                AppViaMinistryInvitationOnProcessKey =>
+                    ("VwRdApplicationViaMinistryInvitationOnProcess_ListView",
+                        typeof(VwRdApplicationViaMinistryInvitationOnProcess)),
+                AppViaMinistryInvitationOnProcessVKey =>
+                    ("VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType_ListView",
+                        typeof(VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType)),
+                AppViaMinistryInvitationCompletedKey =>
+                    ("VwRdApplicationViaMinistryInvitationCompleted_ListView",
+                        typeof(VwRdApplicationViaMinistryInvitationCompleted)),
+                AppViaMinistryInvitationCompletedVKey =>
+                    ("VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType_ListView",
+                        typeof(VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType)),
+                AppViaMinistryVisaExtOnProcessKey =>
+                    ("VwRdApplicationViaMinistryVisaExtensionOnProcess_ListView",
+                        typeof(VwRdApplicationViaMinistryVisaExtensionOnProcess)),
+                AppViaMinistryVisaExtOnProcessVKey =>
+                    ("VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType_ListView",
+                        typeof(VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType)),
+                AppViaMinistryVisaExtCompletedKey =>
+                    ("VwRdApplicationViaMinistryVisaExtensionCompleted_ListView",
+                        typeof(VwRdApplicationViaMinistryVisaExtensionCompleted)),
+                AppViaMinistryVisaExtCompletedVKey =>
+                    ("VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType_ListView",
+                        typeof(VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType)),
+                AppViaMinistryOtherOnProcessKey =>
+                    ("VwRdApplicationViaMinistryOtherOnProcess_ListView",
+                        typeof(VwRdApplicationViaMinistryOtherOnProcess)),
+                AppViaMinistryOtherCompletedKey =>
+                    ("VwRdApplicationViaMinistryOtherCompleted_ListView",
+                        typeof(VwRdApplicationViaMinistryOtherCompleted)),
+                _ => (ListViewId(category), ListViewType(category))
+            };
+        }
+
         if (category == ReportDashboardCategory.VisaExtension)
         {
             if (UsesVisaActiveByProjectListView(subReport))
@@ -547,7 +679,10 @@ public static class ReportDashboardCatalog
 
     public static string ListViewId(ReportDashboardCategory category) => category switch
     {
-        ReportDashboardCategory.Application   => "Application_ListView",
+        ReportDashboardCategory.ApplicationViaMinistry =>
+            ApplicationProgressRouteNavigation.ListViewViaMinistries,
+        ReportDashboardCategory.ApplicationDirectMigration =>
+            ApplicationProgressRouteNavigation.ListViewDirectMigration,
         ReportDashboardCategory.VisaExtension => "VisaExtensionStatus_ListView",
         ReportDashboardCategory.Invitation    => "InvitationItem_ListView",
         ReportDashboardCategory.Registration  => "ApplicationItem_ListView",
@@ -565,7 +700,8 @@ public static class ReportDashboardCatalog
 
     public static Type ListViewType(ReportDashboardCategory category) => category switch
     {
-        ReportDashboardCategory.Application      => typeof(Application),
+        ReportDashboardCategory.ApplicationViaMinistry
+            or ReportDashboardCategory.ApplicationDirectMigration => typeof(Application),
         ReportDashboardCategory.VisaExtension    => typeof(VisaExtensionStatus),
         ReportDashboardCategory.Invitation       => typeof(InvitationItem),
         ReportDashboardCategory.Registration     => typeof(ApplicationItem),
@@ -589,7 +725,22 @@ public static class ReportDashboardCatalog
     private static string[] EnglishTableHeaders(ReportDashboardCategory category, string? subReport = null) =>
         (category, subReport) switch
         {
-            (ReportDashboardCategory.Application, _) => ["Name", "Project", "App #", "App Date", "State"],
+            (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtCompletedVKey) =>
+                ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "Visa on extension", "Issued Visa", "App #", "App Date", "Period · Category · Type · State"],
+            (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtCompletedKey) =>
+                ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "Visa on extension", "Issued Visa", "App #", "App Date", "Project · State"],
+            (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationOnProcessVKey)
+                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtOnProcessVKey)
+                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationCompletedVKey) =>
+                ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "App #", "App Date", "Period · Category · Type · State"],
+            (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationOnProcessKey)
+                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryVisaExtOnProcessKey)
+                or (ReportDashboardCategory.ApplicationViaMinistry, AppViaMinistryInvitationCompletedKey) =>
+                ["Name", "Project", "Position", "App Type", "Visa Period", "Visa Type", "App #", "App Date", "Project · State"],
+            (ReportDashboardCategory.ApplicationViaMinistry, _) =>
+                ["Name", "Project", "Position", "App Type", "App #", "App Date", "Project · State"],
+            (ReportDashboardCategory.ApplicationDirectMigration, _) =>
+                ["Name", "Project", "App #", "App Date", "State"],
             // Categorical: last column = grouping dimension; ColumnA = passport # or identifier
             (ReportDashboardCategory.Passport, "by-type")         => ["Name", "Project", "Passport #",  "Expiry", "Type"],
             (ReportDashboardCategory.Passport, "by-citizenship")   => ["Name", "Project", "Passport #",  "Expiry", "Citizenship"],
@@ -662,7 +813,9 @@ public static class ReportDashboardCatalog
 
     private static string[] DefaultTableHeaders(ReportDashboardCategory category) => category switch
     {
-        ReportDashboardCategory.Application      => ["Name", "Project", "App #",           "App Date",        "State"],
+        ReportDashboardCategory.ApplicationViaMinistry
+            or ReportDashboardCategory.ApplicationDirectMigration =>
+            ["Name", "Project", "App #", "App Date", "State"],
         ReportDashboardCategory.VisaExtension    => ["Name", "Project", "Current Expiry",  "Requested Until", "Status"],
         ReportDashboardCategory.Invitation       => ["Name", "Project", "Invitation #",    "Issue Date",      "Status"],
         ReportDashboardCategory.Registration     => ["Name", "Project", "Visa #",          "Expiry",          "Process State"],
@@ -697,12 +850,16 @@ public static class ReportDashboardCatalog
             && UsesVisaByDaysRemainingListView(subReport);
         var usesAppProgressDedicated = category == ReportDashboardCategory.VisaExtension
             && UsesVisaAppProgressDedicatedListView(subReport);
+        var usesAppViaMinistryRd =
+            category == ReportDashboardCategory.ApplicationViaMinistry
+            && UsesApplicationViaMinistryRdListView(subReport);
         var usesRdVisaRow = usesVisaActive || usesExtRequired || usesByDays;
+        var usesRdAppRow = usesAppViaMinistryRd;
 
         string roleCriteria;
-        if (usesAppProgressDedicated)
+        if (usesAppProgressDedicated || usesRdAppRow)
         {
-            // Population (on-extension vs extension-result) is baked into dedicated SQL views.
+            // Population baked into dedicated SQL views.
             roleCriteria = IsAllPersonTypes(personType)
                 ? "[IsArchived] = False"
                 : $"[IsArchived] = False And [PersonRoleCode] = {(int)ToPersonRole(personType)}";
@@ -729,7 +886,7 @@ public static class ReportDashboardCatalog
                 or ReportDashboardCategory.PositionHistory
                 or ReportDashboardCategory.MedicalRecord
                 ? "Person is not null"
-                : category is ReportDashboardCategory.Application
+                : IsApplicationCategory(category)
                 ? "True"
                 : PersonRoleCriteria(personType);
         }
@@ -748,18 +905,28 @@ public static class ReportDashboardCatalog
                         || category == ReportDashboardCategory.BorderZone
                         || category == ReportDashboardCategory.Travel
                         ? $"Person is not null And [Person.PersonRole] = ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,{ToPersonRole(personType)}#"
-                        : category == ReportDashboardCategory.Application
+                        : IsApplicationCategory(category)
                         ? "True"
                         : PersonRoleCriteria(personType);
         }
 
+        // Domain Application ListViews only (not dedicated vw_rd_* Application rows).
+        if (IsApplicationCategory(category) && !usesRdAppRow)
+        {
+            var routeCriteria = category == ReportDashboardCategory.ApplicationViaMinistry
+                ? ApplicationProgressRouteNavigation.CriteriaViaMinistries
+                : ApplicationProgressRouteNavigation.CriteriaDirectMigration;
+            roleCriteria = $"({roleCriteria}) And ({routeCriteria})";
+        }
+
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
         {
-            var projectCriteria = usesAppProgressDedicated || usesRdVisaRow
+            var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
-                    ReportDashboardCategory.Application =>
+                    ReportDashboardCategory.ApplicationViaMinistry
+                        or ReportDashboardCategory.ApplicationDirectMigration =>
                         $"[ProjectContract.Name] = '{Escape(projectKey)}' Or [ProjectContract.NameTm] = '{Escape(projectKey)}'",
                     ReportDashboardCategory.Subcontractor =>
                         $"[ProjectContract.Name] = '{Escape(projectKey)}' Or [ProjectContract.NameTm] = '{Escape(projectKey)}'",
@@ -787,7 +954,45 @@ public static class ReportDashboardCatalog
 
         if (!string.IsNullOrWhiteSpace(statusLabel))
         {
-            if (usesAppProgressDedicated || usesVisaActive)
+            if (UsesApplicationViaMinistryRdListView(subReport)
+                && category == ReportDashboardCategory.ApplicationViaMinistry)
+            {
+                // Chart Status = Project · State or Period · Category · Type · State;
+                // view StatusLabel is process alone (ministry suffix may be chart-only).
+                var parts = statusLabel.Split(" · ", StringSplitOptions.None);
+                if (parts.Length >= 4 && UsesApplicationViaMinistryRdByPeriodCategoryType(subReport))
+                {
+                    var statePart = parts[^1].Trim();
+                    var stateCore = statePart;
+                    var dash = statePart.IndexOf(" - ", StringComparison.Ordinal);
+                    if (dash >= 0)
+                        stateCore = statePart[..dash].Trim();
+                    var stateCrit =
+                        $"[StatusLabel] = '{Escape(statePart)}' Or [StatusLabel] = '{Escape(stateCore)}' Or StartsWith([StatusLabel], '{Escape(stateCore)}') Or [CurrentState.Name] = '{Escape(stateCore)}'";
+                    roleCriteria =
+                        $"({roleCriteria}) And [PeriodLabel] = '{Escape(parts[0].Trim())}' And [CategoryLabel] = '{Escape(parts[1].Trim())}' And [TypeLabel] = '{Escape(parts[2].Trim())}' And ({stateCrit})";
+                }
+                else if (parts.Length >= 2)
+                {
+                    var projectPart = parts[0].Trim();
+                    var statePart = string.Join(" · ", parts.Skip(1)).Trim();
+                    var stateCore = statePart;
+                    var dash = statePart.IndexOf(" - ", StringComparison.Ordinal);
+                    if (dash >= 0)
+                        stateCore = statePart[..dash].Trim();
+                    var stateCrit =
+                        $"[StatusLabel] = '{Escape(statePart)}' Or [StatusLabel] = '{Escape(stateCore)}' Or StartsWith([StatusLabel], '{Escape(stateCore)}') Or [CurrentState.Name] = '{Escape(stateCore)}'";
+                    var projectCrit = string.Equals(projectPart, "(No project)", StringComparison.OrdinalIgnoreCase)
+                        ? "([ProjectName] = '' Or [ProjectName] Is Null Or [ProjectName] = '(No project)')"
+                        : $"[ProjectName] = '{Escape(projectPart)}'";
+                    roleCriteria = $"({roleCriteria}) And ({projectCrit}) And ({stateCrit})";
+                }
+                else
+                {
+                    roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";
+                }
+            }
+            else if (usesAppProgressDedicated || usesVisaActive)
             {
                 // Dedicated Active / OnExtension / ExtensionResult views expose StatusLabel.
                 roleCriteria = $"({roleCriteria}) And [StatusLabel] = '{Escape(statusLabel)}'";

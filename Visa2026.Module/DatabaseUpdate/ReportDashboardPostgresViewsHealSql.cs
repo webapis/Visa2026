@@ -36,6 +36,38 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_visa_extension_result_by_period_category_type", "vw_rd_visa_extension_result_by_period_category_type.postgres.sql"),
     };
 
+    /// <summary>Standalone dashboard views (no PassportNumber): heal when the relation is missing.
+    /// Order: bases before wrappers; invitation on-process (P) before its (V) wrapper.</summary>
+    private static readonly (string ViewName, string ResourceLeaf)[] StandaloneViews =
+    {
+        ("vw_rd_application_via_ministry_invitation_on_process",
+            "vw_rd_application_via_ministry_invitation_on_process.postgres.sql"),
+        ("vw_rd_application_via_ministry_invitation_on_process_by_period_category_type",
+            "vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.postgres.sql"),
+        ("vw_rd_application_via_ministry_invitation_completed_base",
+            "vw_rd_application_via_ministry_invitation_completed_base.postgres.sql"),
+        ("vw_rd_application_via_ministry_invitation_completed",
+            "vw_rd_application_via_ministry_invitation_completed.postgres.sql"),
+        ("vw_rd_application_via_ministry_invitation_completed_by_period_category_type",
+            "vw_rd_application_via_ministry_invitation_completed_by_period_category_type.postgres.sql"),
+        ("vw_rd_application_via_ministry_visa_extension_on_process_base",
+            "vw_rd_application_via_ministry_visa_extension_on_process_base.postgres.sql"),
+        ("vw_rd_application_via_ministry_visa_extension_on_process",
+            "vw_rd_application_via_ministry_visa_extension_on_process.postgres.sql"),
+        ("vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type",
+            "vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.postgres.sql"),
+        ("vw_rd_application_via_ministry_visa_extension_completed_base",
+            "vw_rd_application_via_ministry_visa_extension_completed_base.postgres.sql"),
+        ("vw_rd_application_via_ministry_visa_extension_completed",
+            "vw_rd_application_via_ministry_visa_extension_completed.postgres.sql"),
+        ("vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type",
+            "vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.postgres.sql"),
+        ("vw_rd_application_via_ministry_other_on_process",
+            "vw_rd_application_via_ministry_other_on_process.postgres.sql"),
+        ("vw_rd_application_via_ministry_other_completed",
+            "vw_rd_application_via_ministry_other_completed.postgres.sql"),
+    };
+
     private static readonly string[] VisaAppProgressDependentViews =
     {
         "vw_rd_visa_app_progress.postgres.sql",
@@ -94,8 +126,46 @@ public static class ReportDashboardPostgresViewsHealSql
 
             ExecuteEmbeddedSql(connection, resourceLeaf);
         }
+
+        if (NeedsViaMinistryStandaloneHeal(connection))
+        {
+            foreach (var (_, resourceLeaf) in StandaloneViews)
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+        }
+        else
+        {
+            foreach (var (viewName, resourceLeaf) in StandaloneViews)
+            {
+                if (ViewExists(connection, viewName))
+                    continue;
+
+                ExecuteEmbeddedSql(connection, resourceLeaf);
+            }
+        }
     }
 
+
+    private static bool NeedsViaMinistryStandaloneHeal(NpgsqlConnection connection)
+    {
+        foreach (var (viewName, _) in StandaloneViews)
+        {
+            if (!ViewExists(connection, viewName))
+                return true;
+        }
+
+        // Postgres information_schema column names are lowercased unless quoted identifiers preserved.
+        if (!ColumnExists(connection, "vw_rd_application_via_ministry_invitation_on_process", "ApplicationItemOid")
+            && !ColumnExists(connection, "vw_rd_application_via_ministry_invitation_on_process", "applicationitemoid"))
+            return true;
+        if (!ColumnExists(connection, "vw_rd_application_via_ministry_invitation_on_process", "VisaPeriodLabel")
+            && !ColumnExists(connection, "vw_rd_application_via_ministry_invitation_on_process", "visaperiodlabel"))
+            return true;
+        if (!ColumnExists(connection, "vw_rd_application_via_ministry_visa_extension_completed", "IssuedVisaNumber")
+            && !ColumnExists(connection, "vw_rd_application_via_ministry_visa_extension_completed", "issuedvisanumber"))
+            return true;
+
+        return false;
+    }
     /// <summary>
     /// True when On Extension still contains apps whose LatestPrimaryStateCode is terminal
     /// (ProgressStateCode was taken from a lagging latest progress row).

@@ -62,7 +62,10 @@ public static class ReportDashboardLocalization
 
     public static string Category(ReportDashboardCategory category) => category switch
     {
-        ReportDashboardCategory.Application => Get("ReportDashboard.Category.Application"),
+        ReportDashboardCategory.ApplicationViaMinistry =>
+            Get("ReportDashboard.Category.ApplicationViaMinistry"),
+        ReportDashboardCategory.ApplicationDirectMigration =>
+            Get("ReportDashboard.Category.ApplicationDirectMigration"),
         ReportDashboardCategory.VisaExtension => Get("ReportDashboard.Category.Visa"),
         ReportDashboardCategory.Invitation => Get("ReportDashboard.Category.Invitation"),
         ReportDashboardCategory.Registration => Get("ReportDashboard.Category.Registration"),
@@ -116,6 +119,8 @@ public static class ReportDashboardLocalization
         "Name" => Get("ReportDashboard.Header.Name"),
         "Project" => Get("ReportDashboard.Header.Project"),
         "App #" => Get("ReportDashboard.Header.AppNumber"),
+        "App Type" => Get("ReportDashboard.Header.AppType"),
+        "Visa Period" => Get("ReportDashboard.Header.VisaPeriod"),
         "App Date" => Get("ReportDashboard.Header.AppDate"),
         "State" => Get("ReportDashboard.Header.State"),
         "Passport #" => Get("ReportDashboard.Header.PassportNumber"),
@@ -133,6 +138,8 @@ public static class ReportDashboardLocalization
         "Visa State" => Get("ReportDashboard.Header.VisaState"),
         "Visa Category" => Get("ReportDashboard.Header.VisaCategory"),
         "Visa Type" => Get("ReportDashboard.Header.VisaType"),
+        "Visa on extension" => Get("ReportDashboard.Header.VisaOnExtension"),
+        "Issued Visa" => Get("ReportDashboard.Header.IssuedVisa"),
         "Period" => Get("ReportDashboard.Header.Period"),
         "Travel Date" => Get("ReportDashboard.Header.TravelDate"),
         "Month" => Get("ReportDashboard.Header.Month"),

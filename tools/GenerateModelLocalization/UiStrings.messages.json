@@ -4385,6 +4385,18 @@
     "tk-TM": "Ýüztutma",
     "ru-RU": "Заявка"
   },
+  "ReportDashboard.Category.ApplicationViaMinistry": {
+    "en": "Application (via ministry)",
+    "tr-TR": "Başvuru (bakanlık süreci)",
+    "tk-TM": "Ýüztutma (ministrlik arkaly)",
+    "ru-RU": "Заявка (через министерства)"
+  },
+  "ReportDashboard.Category.ApplicationDirectMigration": {
+    "en": "Application (direct migration)",
+    "tr-TR": "Başvuru (doğrudan migrasyon)",
+    "tk-TM": "Ýüztutma (gönümel migrasiýa)",
+    "ru-RU": "Заявка (напрямую в миграцию)"
+  },
   "ReportDashboard.Category.Visa": {
     "en": "Visa",
     "tr-TR": "Vize",
@@ -4481,7 +4493,66 @@
     "tk-TM": "Wagtlaýyn myhman",
     "ru-RU": "Временные посетители"
   },
-  "ReportDashboard.SubReport.app-status": {
+  "ReportDashboard.SubReport.invitation-on-process": {
+    "en": "Invitation on Process (P)",
+    "tr-TR": "Davet başvurusu süreçte (P)",
+    "tk-TM": "Çakylyk ýüztutmasy prosesde (P)",
+    "ru-RU": "Заявка на приглашение в процессе (P)"
+  },
+  "ReportDashboard.SubReport.invitation-on-process-by-period-category-type": {
+    "en": "Invitation on Process (V)",
+    "tr-TR": "Davet başvurusu süreçte (V)",
+    "tk-TM": "Çakylyk ýüztutmasy prosesde (V)",
+    "ru-RU": "Заявка на приглашение в процессе (V)"
+  },
+  "ReportDashboard.SubReport.visa-extension-on-process": {
+    "en": "Visa Extension on Process (P)",
+    "tr-TR": "Vize uzatma başvurusu süreçte (P)",
+    "tk-TM": "Wiza uzaltmak ýüztutmasy prosesde (P)",
+    "ru-RU": "Заявка на продление визы в процессе (P)"
+  },
+  "ReportDashboard.SubReport.visa-extension-on-process-by-period-category-type": {
+    "en": "Visa Extension on Process (V)",
+    "tr-TR": "Vize uzatma başvurusu süreçte (V)",
+    "tk-TM": "Wiza uzaltmak ýüztutmasy prosesde (V)",
+    "ru-RU": "Заявка на продление визы в процессе (V)"
+  },
+  "ReportDashboard.SubReport.other-on-process": {
+    "en": "Other on Process (P)",
+    "tr-TR": "Diğer başvuru süreçte (P)",
+    "tk-TM": "Beýleki ýüztutma prosesde (P)",
+    "ru-RU": "Прочая заявка в процессе (P)"
+  },
+  "ReportDashboard.SubReport.invitation-completed": {
+    "en": "Invitation Completed (P)",
+    "tr-TR": "Davet başvurusu tamamlandı (P)",
+    "tk-TM": "Çakylyk ýüztutmasy tamamlandy (P)",
+    "ru-RU": "Заявка на приглашение завершена (P)"
+  },
+  "ReportDashboard.SubReport.invitation-completed-by-period-category-type": {
+    "en": "Invitation Completed (V)",
+    "tr-TR": "Davet başvurusu tamamlandı (V)",
+    "tk-TM": "Çakylyk ýüztutmasy tamamlandy (V)",
+    "ru-RU": "Заявка на приглашение завершена (V)"
+  },
+  "ReportDashboard.SubReport.visa-extension-completed": {
+    "en": "Visa Extension Completed (P)",
+    "tr-TR": "Vize uzatma başvurusu tamamlandı (P)",
+    "tk-TM": "Wiza uzaltmak ýüztutmasy tamamlandy (P)",
+    "ru-RU": "Заявка на продление визы завершена (P)"
+  },
+  "ReportDashboard.SubReport.visa-extension-completed-by-period-category-type": {
+    "en": "Visa Extension Completed (V)",
+    "tr-TR": "Vize uzatma başvurusu tamamlandı (V)",
+    "tk-TM": "Wiza uzaltmak ýüztutmasy tamamlandy (V)",
+    "ru-RU": "Заявка на продление визы завершена (V)"
+  },
+  "ReportDashboard.SubReport.other-completed": {
+    "en": "Other Process Completed (P)",
+    "tr-TR": "Diğer başvuru süreci tamamlandı (P)",
+    "tk-TM": "Beýleki ýüztutma prosesi tamamlandy (P)",
+    "ru-RU": "Прочий процесс заявки завершён (P)"
+  },  "ReportDashboard.SubReport.app-status": {
     "en": "Application Status",
     "tr-TR": "Başvuru durumu",
     "tk-TM": "Ýüztutma ýagdaýy",
@@ -4823,7 +4894,36 @@
     "tk-TM": "Ýüztutma no",
     "ru-RU": "№ заявки"
   },
-  "ReportDashboard.Header.AppDate": {
+  "ReportDashboard.Header.VisaPeriod": {
+    "en": "Visa Period",
+    "tr-TR": "Vize dönemi",
+    "tk-TM": "Wiza möhleti",
+    "ru-RU": "Период визы"
+  },
+  "ReportDashboard.Header.VisaType": {
+    "en": "Visa Type",
+    "tr-TR": "Vize türü",
+    "tk-TM": "Wiza görnüşi",
+    "ru-RU": "Тип визы"
+  },
+  "ReportDashboard.Header.VisaOnExtension": {
+    "en": "Visa on extension",
+    "tr-TR": "Uzatılan vize",
+    "tk-TM": "Uzatylýan wiza",
+    "ru-RU": "Виза на продлении"
+  },
+  "ReportDashboard.Header.IssuedVisa": {
+    "en": "Issued Visa",
+    "tr-TR": "Düzenlenen vize",
+    "tk-TM": "Berilen wiza",
+    "ru-RU": "Выданная виза"
+  },
+  "ReportDashboard.Header.AppType": {
+    "en": "App Type",
+    "tr-TR": "Başvuru türü",
+    "tk-TM": "Ýüztutma görnüşi",
+    "ru-RU": "Тип заявки"
+  },  "ReportDashboard.Header.AppDate": {
     "en": "App Date",
     "tr-TR": "Başvuru tarihi",
     "tk-TM": "Ýüztutma senesi",

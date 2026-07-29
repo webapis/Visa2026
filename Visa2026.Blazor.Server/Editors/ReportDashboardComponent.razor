@@ -187,7 +187,7 @@
                                 <div class="rd-overview-card-subs">
                                     @foreach (var sub in subs)
                                     {
-                                        <span class="rd-overview-sub-chip">@sub.Label</span>
+                                        <span class="rd-overview-sub-chip" title="@sub.Label">@sub.Label</span>
                                     }
                                 </div>
                                 <div class="rd-overview-card-footer">
@@ -523,6 +523,22 @@
                                                 @if (Panel.TableHeaders.Count >= 7)
                                                 {
                                                     <td>@row.ColumnD</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 8)
+                                                {
+                                                    <td>@row.ColumnE</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 9)
+                                                {
+                                                    <td>@row.ColumnF</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 10)
+                                                {
+                                                    <td>@row.ColumnG</td>
+                                                }
+                                                @if (Panel.TableHeaders.Count >= 11)
+                                                {
+                                                    <td>@row.ColumnH</td>
                                                 }
                                                 <td><span class="rd-status-dot @row.StatusCssClass"></span>@ReportDashboardLocalization.Status(row.Status)</td>
                                             </tr>

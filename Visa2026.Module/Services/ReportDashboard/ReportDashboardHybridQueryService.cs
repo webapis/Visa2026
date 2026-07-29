@@ -13,10 +13,31 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
     /// <summary>
     /// Sub-reports that load from SQL views / real EF queries.
     /// Add entries one at a time after verifying each view.
-    /// Application category is always real (Application Status combined label).
+    /// Application (direct migration) stays real (Application Status).
+    /// Application (via ministry) promotes one sub-report at a time via <see cref="RealSubReports"/>.
     /// </summary>
     private static readonly HashSet<(ReportDashboardCategory Category, string SubReport)> RealSubReports =
     [
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryInvitationOnProcessVKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryVisaExtOnProcessKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryVisaExtOnProcessVKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryOtherOnProcessKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryInvitationCompletedKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryInvitationCompletedVKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryVisaExtCompletedKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryVisaExtCompletedVKey),
+        (ReportDashboardCategory.ApplicationViaMinistry,
+            ReportDashboardCatalog.AppViaMinistryOtherCompletedKey),
         (ReportDashboardCategory.Passport, "by-validity"),
         (ReportDashboardCategory.Passport, "by-type"),
         (ReportDashboardCategory.Passport, "by-citizenship"),
@@ -92,7 +113,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false)
     {
-        if (category == ReportDashboardCategory.Application
+        if (category == ReportDashboardCategory.ApplicationDirectMigration
             || category == ReportDashboardCategory.Registration)
         {
             return _real.ListSubReports(
@@ -119,7 +140,7 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
         bool includeCancelledApplicationProcesses = false,
         bool validVisaPersonsOnly = true)
     {
-        if (category == ReportDashboardCategory.Application
+        if (category == ReportDashboardCategory.ApplicationDirectMigration
             || category == ReportDashboardCategory.Registration)
         {
             return _real.LoadPanel(
@@ -129,7 +150,21 @@ public sealed class ReportDashboardHybridQueryService : IReportDashboardQuerySer
                 validVisaPersonsOnly);
         }
 
+        if (category == ReportDashboardCategory.ApplicationViaMinistry
+            && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
+        {
+            subReport = ReportDashboardCatalog.AppViaMinistryInvitationOnProcessKey;
+        }
+
         var key = (category, subReport);
+        if (RealSubReports.Contains(key))
+        {
+            return _real.LoadPanel(
+                objectSpace, personType, category, projectKey, dateRangeMonths, subReport,
+                includeArchivedPersons, oneLastValidVisaPerPerson, oneLastValidWorkPermitPerPerson,
+                includeCompletedApplicationProcesses, includeCancelledApplicationProcesses,
+                validVisaPersonsOnly);
+        }
         // Default sub-report key for Passport is "by-validity"
         if (category == ReportDashboardCategory.Passport
             && (subReport == "default" || string.IsNullOrWhiteSpace(subReport)))
