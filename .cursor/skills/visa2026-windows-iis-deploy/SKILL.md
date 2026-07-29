@@ -1,11 +1,13 @@
 ---
 name: visa2026-windows-iis-deploy
 description: >-
-  Deploy and update Visa2026 on company Windows Server with IIS + native SQL Server Express (no Docker/WSL).
-  Three HTTPS slots on one host — Production :443, Staging :8080, Demo :8081 (HTTP bindings optional redirect only)
-  — each with its own DB, publish folder, app pool, and env file. Enable-Visa2026IisHttps.ps1 + HTTPS_ENABLED=true
-  required (Resminamalar local sandbox). Publish, SSH copy, -Profile deploy, DB update, .bak restore per pool.
-  Use for on-prem IIS, localhost\SQLEXPRESS, scripts/windows-iis, visa2026-onprem, Login failed for user sa.
+  Deploy and update Visa2026 on company Windows Server with IIS + native
+  PostgreSQL (no Docker/WSL). Three HTTPS slots on one host — Production :443,
+  Staging :8080, Demo :8081 (HTTP bindings optional redirect only) — each with
+  its own Postgres DB, publish folder, app pool, and env file.
+  Enable-Visa2026IisHttps.ps1 + HTTPS_ENABLED=true required (Resminamalar local
+  sandbox). Publish, SSH copy, -Profile deploy, DB update. Use for on-prem IIS,
+  scripts/windows-iis, visa2026-onprem, EFCORE_PROVIDER=Postgres.
 disable-model-invocation: false
 ---
 
@@ -13,19 +15,19 @@ disable-model-invocation: false
 
 ## Goal
 
-Deploy or update Visa2026 on **Windows Server** using **IIS** and **SQL Server Express** on the same host — **no Docker**, **no WSL**.
+Deploy or update Visa2026 on **Windows Server** using **IIS** and **PostgreSQL** on the same host — **no Docker**, **no WSL**.
 
 One server runs **three independent slots** (separate site, app pool, publish folder, database, data-protection keys).
 
-**Provider switch:** one publish binary. Default is SQL Express. Demo may use **PostgreSQL** via `EFCORE_PROVIDER=Postgres` in `demo.env` ([Dual EF providers](../../../docs/ON_PREM_WINDOWS_IIS.md#dual-ef-providers-sql-server--postgresql); [reference.md](./reference.md)). **Install/config Postgres first:** [visa2026-postgresql](../visa2026-postgresql/SKILL.md). Prod/Staging stay on SQL Express until an explicit cutover.
+**PostgreSQL only:** every slot uses `EFCORE_PROVIDER=Postgres` + `PG_*` ([docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md); [reference.md](./reference.md)). **Install/config Postgres first:** [visa2026-postgresql](../visa2026-postgresql/SKILL.md). Load data via empty PG + `--import-visa2014` (not SQL `.bak`).
 
 **Officers browse HTTPS only** (required for Resminamalar **Edit template** / File System Access API). HTTP bindings on the same ports may remain for **redirect to HTTPS** (`-RedirectHttpToHttps`).
 
 | Slot | HTTPS (officers) | `HTTPS_PORT` in env | HTTP (optional redirect) | Site / pool | Publish path | Env file | Database |
 |------|------------------|---------------------|--------------------------|-------------|--------------|----------|----------|
-| **Production** | `https://<server>/LoginPage` | **443** | :80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
-| **Staging** | `https://<server>:8080/LoginPage` | **8080** | :8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
-| **Demo** | `https://<server>:8081/LoginPage` | **8081** | :8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+| **Production** | `https://<server>/LoginPage` | **443** | :80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `visa2026_prod` |
+| **Staging** | `https://<server>:8080/LoginPage` | **8080** | :8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `visa2026_staging` |
+| **Demo** | `https://<server>:8081/LoginPage` | **8081** | :8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `visa2026_demo` |
 
 Example host `10.100.128.25`: production `https://10.100.128.25/LoginPage`, staging `https://10.100.128.25:8080/LoginPage`, demo `https://10.100.128.25:8081/LoginPage`.
 

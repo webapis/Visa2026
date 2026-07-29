@@ -1,4 +1,4 @@
-# Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + LocalDB + Edge (headed on GHA).
+# Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + PostgreSQL + Edge (headed on GHA).
 # Single officer journey E2E-001 (login → employee → passport); see docs/TESTING_PLAN.md.
 
 name: EasyTest E2E
@@ -11,6 +11,10 @@ on:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PG_PASSWORD: Visa2026Local
+  PG_USER: postgres
+  PG_HOST: localhost
+  PG_PORT: "5432"
 
 jobs:
   easytest-e2e:
@@ -41,12 +45,20 @@ jobs:
           }
           Set-Content -Path DevExpress.Key/DevExpress_License.txt -Value $license.Trim() -Encoding utf8 -NoNewline
 
-      - name: Start SQL Server LocalDB
+      - name: Install and start PostgreSQL 16
         shell: pwsh
         run: |
-          sqllocaldb info mssqllocaldb
-          sqllocaldb start mssqllocaldb
-          sqllocaldb info mssqllocaldb
+          choco install postgresql16 --params "/Password:$env:PG_PASSWORD" -y --no-progress
+          $pgRoot = Get-ChildItem 'C:\Program Files\PostgreSQL' -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $pgRoot) { throw "PostgreSQL install directory not found." }
+          $env:Path = "$($pgRoot.FullName)\bin;$env:Path"
+          Write-Host "Using PostgreSQL at $($pgRoot.FullName)"
+          $svc = Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($svc -and $svc.Status -ne 'Running') { Start-Service $svc.Name }
+          $env:PGPASSWORD = $env:PG_PASSWORD
+          & psql -h localhost -U postgres -d postgres -c "SELECT version();"
+          & psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_roles WHERE rolname='postgres';"
 
       - name: Install Microsoft Edge WebDriver
         shell: pwsh
@@ -109,6 +121,10 @@ jobs:
         shell: pwsh
         env:
           CI: true
+          PG_PASSWORD: Visa2026Local
+          PG_USER: postgres
+          PG_HOST: localhost
+          PG_PORT: "5432"
         run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=e2e-results.trx"
 
       - name: Stop screen recording

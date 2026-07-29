@@ -37,9 +37,9 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 | Runner | xUnit |
 | UI driver | DevExpress **EasyTest** Blazor adapter + **Selenium** (Edge) |
 | App under test | [`Visa2026.Blazor.Server`](../Visa2026.Blazor.Server/) |
-| Launch profile | **`Visa2026 - EasyTest (LocalDB)`** |
+| Launch profile | **`Visa2026 - PostgreSQL`** (EasyTest host uses env CS, not a separate launch profile) |
 | URL | **`http://localhost:5050`** |
-| DB | **`Visa2026EasyTest`** on `(localdb)\mssqllocaldb` |
+| DB | **`visa2026_easytest`** on local PostgreSQL (`localhost:5432`) |
 | Build config | **EasyTest** |
 | Platform | **Windows** (`[SupportedOSPlatform("windows")]`) |
 | Selectors | **English model captions** + EasyTest actions (not Playwright hook ids) |
@@ -115,11 +115,11 @@ dotnet build Visa2026.slnx -c EasyTest
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 ```
 
-**Prerequisites:** Windows, SQL Server LocalDB, `msedgedriver.exe` matching Edge ([E2E README](../Visa2026.E2E.Tests/README.md)).
+**Prerequisites:** Windows, PostgreSQL (`localhost:5432`), `msedgedriver.exe` matching Edge ([E2E README](../Visa2026.E2E.Tests/README.md)).
 
 **Browser:** headed Edge locally (default); headless on CI via `EasyTestBrowserMode` (`CI=true` or `VISA2026_E2E_HEADLESS=true`). Override locally: `$env:VISA2026_E2E_HEADLESS='true'` before `dotnet test`.
 
-**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, LocalDB, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headless).
+**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, PostgreSQL 16, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headless).
 
 **CI policy (recommended):**
 

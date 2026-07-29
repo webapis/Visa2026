@@ -1,19 +1,13 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Build appsettings.Production.json from C:\visa2026\.env.prod (on server).
+  Build appsettings.Production.json from slot env file (PostgreSQL only).
 
 .PARAMETER PublishPath
-  IIS site folder (default C:\inetpub\visa2026).
+  IIS site folder.
 
 .PARAMETER EnvFile
-  Source env file (default C:\visa2026\.env.prod).
-
-.PARAMETER SqlServer
-  SQL Server host or host\instance (default localhost\SQLEXPRESS for native Express).
-
-.PARAMETER SqlPort
-  Optional port when not using a named instance (default: omit; use instance name).
+  Source env file (must set EFCORE_PROVIDER=Postgres and PG_*).
 #>
 param(
     [ValidateSet("Production", "Staging", "Demo", "Legacy", "")]
@@ -21,12 +15,18 @@ param(
 
     [string]$PublishPath = "",
     [string]$EnvFile = "",
-    [string]$SqlServer = "localhost\SQLEXPRESS",
+
+    # Obsolete: Visa2026 is PostgreSQL-only. Kept so older callers do not fail on unknown params.
+    [string]$SqlServer = "",
     [int]$SqlPort = 0
 )
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+if (-not [string]::IsNullOrWhiteSpace($SqlServer) -or $SqlPort -gt 0) {
+    Write-Warning "SqlServer/SqlPort parameters are ignored — Visa2026 uses PostgreSQL only."
+}
 
 $ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath -EnvFile $EnvFile
 $PublishPath = $ctx.PublishPath
@@ -42,41 +42,30 @@ function Read-DotEnvMap([string]$Path) {
 }
 
 $envMap = Read-DotEnvMap $EnvFile
-$saPassword = $envMap["SA_PASSWORD"]
 $devexpressKey = $envMap["DEVEXPRESS_LICENSEKEY"]
-$dbName = if ($envMap.ContainsKey("DB_NAME")) { $envMap["DB_NAME"] } else { $defaultDbName }
+$dbName = if ($envMap.ContainsKey("DB_NAME") -and -not [string]::IsNullOrWhiteSpace($envMap["DB_NAME"])) { $envMap["DB_NAME"] } else { $defaultDbName }
 $efCoreProvider = if ($envMap.ContainsKey("EFCORE_PROVIDER")) { $envMap["EFCORE_PROVIDER"].Trim() } else { "" }
 
 if ([string]::IsNullOrWhiteSpace($devexpressKey)) { throw "DEVEXPRESS_LICENSEKEY missing in $EnvFile" }
 
 $isPostgres = $efCoreProvider -match '^(?i)Postgres(ql)?$'
-if ($isPostgres) {
-    $pgHost = if ($envMap.ContainsKey("PG_HOST") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_HOST"])) { $envMap["PG_HOST"].Trim() } else { "localhost" }
-    $pgPort = if ($envMap.ContainsKey("PG_PORT") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_PORT"])) { $envMap["PG_PORT"].Trim() } else { "5432" }
-    $pgUser = if ($envMap.ContainsKey("PG_USER") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_USER"])) { $envMap["PG_USER"].Trim() } else { "postgres" }
-    $pgPassword = if ($envMap.ContainsKey("PG_PASSWORD") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_PASSWORD"])) {
-        $envMap["PG_PASSWORD"]
-    } elseif (-not [string]::IsNullOrWhiteSpace($saPassword)) {
-        $saPassword
-    } else {
-        throw "PG_PASSWORD (or SA_PASSWORD fallback) missing in $EnvFile for PostgreSQL"
-    }
-    if ([string]::IsNullOrWhiteSpace($dbName)) { throw "DB_NAME missing in $EnvFile" }
-    # Persist Security Info=True required for XAF + Npgsql (DX doc 404290).
-    $connectionString = "Host=$pgHost;Port=$pgPort;Database=$dbName;Username=$pgUser;Password=$pgPassword;Persist Security Info=True;EFCoreProvider=Postgres"
-    Write-Host "Provider: PostgreSQL ($pgHost`:$pgPort / $dbName)" -ForegroundColor Cyan
+if (-not $isPostgres) {
+    throw "Visa2026 requires EFCORE_PROVIDER=Postgres in $EnvFile (SQL Server Express is not supported)."
 }
-else {
-    if ([string]::IsNullOrWhiteSpace($saPassword)) { throw "SA_PASSWORD missing in $EnvFile" }
-    if ($SqlPort -gt 0) {
-        $serverPart = if ($SqlServer -match '\\') { "$SqlServer,$SqlPort" } else { "$SqlServer,$SqlPort" }
-    }
-    else {
-        $serverPart = $SqlServer
-    }
-    $connectionString = "Server=$serverPart;Database=$dbName;User Id=sa;Password=$saPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=False"
-    Write-Host "Provider: SQL Server ($serverPart / $dbName)" -ForegroundColor Cyan
+
+$pgHost = if ($envMap.ContainsKey("PG_HOST") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_HOST"])) { $envMap["PG_HOST"].Trim() } else { "localhost" }
+$pgPort = if ($envMap.ContainsKey("PG_PORT") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_PORT"])) { $envMap["PG_PORT"].Trim() } else { "5432" }
+$pgUser = if ($envMap.ContainsKey("PG_USER") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_USER"])) { $envMap["PG_USER"].Trim() } else { "postgres" }
+$pgPassword = if ($envMap.ContainsKey("PG_PASSWORD") -and -not [string]::IsNullOrWhiteSpace($envMap["PG_PASSWORD"])) {
+    $envMap["PG_PASSWORD"]
+} else {
+    throw "PG_PASSWORD missing in $EnvFile"
 }
+if ([string]::IsNullOrWhiteSpace($dbName)) { throw "DB_NAME missing in $EnvFile" }
+
+# Persist Security Info=True required for XAF + Npgsql (DX doc 404290).
+$connectionString = "Host=$pgHost;Port=$pgPort;Database=$dbName;Username=$pgUser;Password=$pgPassword;Persist Security Info=True;EFCoreProvider=Postgres"
+Write-Host "Provider: PostgreSQL ($pgHost`:$pgPort / $dbName)" -ForegroundColor Cyan
 
 $jwtSecret = [guid]::NewGuid().ToString("N") + [guid]::NewGuid().ToString("N")
 
@@ -138,7 +127,6 @@ $config = @{
         ShowOnLoginPage = $true
     }
     ImportHistory = @{
-        # App pool identity must be able to read this folder (sync-host history archives).
         RootPath = switch ($ctx.Profile) {
             'Demo' { 'C:\visa2026-sync-demo\history' }
             'Staging' { 'C:\visa2026-sync-staging\history' }
@@ -165,15 +153,13 @@ else {
 }
 
 if ($templateStagingEnabled) {
-    $stagingBlock = @{
+    $config["TemplateEditStaging"] = @{
         Enabled = $true
         LocalFolderSubfolderName = "Visa2026\TemplateEdit"
         FileNamePattern = "{safeName}{extension}"
         AutoExtractValidateOnImport = $true
         MaxFileSizeBytes = 52428800
     }
-
-    $config["TemplateEditStaging"] = $stagingBlock
 }
 else {
     $config["TemplateEditStaging"] = @{
@@ -188,7 +174,6 @@ else {
 $outPath = Join-Path $PublishPath "appsettings.Production.json"
 $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $outPath -Encoding UTF8
 
-# App pool environment (DevExpress + data protection; connection string in json)
 New-Item -ItemType Directory -Force -Path $dataProtectionKeysPath | Out-Null
 
 $poolEnv = @{
@@ -198,7 +183,7 @@ $poolEnv = @{
 }
 
 Write-Host "Wrote $outPath" -ForegroundColor Green
-Write-Host "Slot: $($ctx.Profile)  Database: $dbName on $serverPart (sa)"
+Write-Host "Slot: $($ctx.Profile)  Database: $dbName on ${pgHost}:$pgPort (PostgreSQL)"
 if ($templateStagingEnabled) {
     Write-Host "Template staging: enabled (local sandbox)" -ForegroundColor Green
     if (-not $httpsEnabled) {
@@ -208,8 +193,8 @@ if ($templateStagingEnabled) {
 else {
     Write-Host "Template staging: disabled (set TEMPLATE_EDIT_STAGING_ENABLED=true in $EnvFile)" -ForegroundColor Yellow
 }
+
 Write-Host "Set app pool environment variables:" -ForegroundColor Yellow
 $poolEnv.GetEnumerator() | ForEach-Object { Write-Host "  $($_.Key)=***" }
 
-# Export for caller / manual appcmd
 $poolEnv | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PublishPath "iis-apppool-env.json") -Encoding UTF8

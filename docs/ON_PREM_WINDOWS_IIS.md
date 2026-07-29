@@ -1,10 +1,10 @@
 # Visa2026 on company Windows Server (IIS, no Docker)
 
-Runbook for deploying Visa2026 on **Windows Server** using **IIS**, the **ASP.NET Core Module**, and **SQL Server on Windows** — **no containers**, **no WSL**, **no Docker Engine**.
+Runbook for deploying Visa2026 on **Windows Server** using **IIS**, the **ASP.NET Core Module**, and **PostgreSQL on Windows** — **no containers**, **no WSL**, **no Docker Engine**.
 
 **Status:** Pilot / optional path. Prefer [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) (Ubuntu + Docker) when Linux VMs are allowed.
 
-**Agent skill:** [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) (deploy, update, restore, triage — read [learnings.md](../.cursor/skills/visa2026-windows-iis-deploy/learnings.md) before work on a host).
+**Agent skill:** [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) (deploy, update, triage — read [learnings.md](../.cursor/skills/visa2026-windows-iis-deploy/learnings.md) before work on a host). PostgreSQL install: [visa2026-postgresql](../.cursor/skills/visa2026-postgresql/SKILL.md).
 
 **Scripts:** [scripts/windows-iis/README.md](../scripts/windows-iis/README.md)
 
@@ -20,22 +20,22 @@ Runbook for deploying Visa2026 on **Windows Server** using **IIS**, the **ASP.NE
 
 ```text
 LAN clients
-  --> :80   Production  (Visa2026-Prod)     --> Visa2026DbProd
-  --> :8080 Staging     (Visa2026-Staging)  --> Visa2026DbStaging
-  --> :8081 Demo        (Visa2026-Demo)     --> Visa2026DbDemo
+  --> :80   Production  (Visa2026-Prod)     --> visa2026_prod
+  --> :8080 Staging     (Visa2026-Staging)  --> visa2026_staging
+  --> :8081 Demo        (Visa2026-Demo)     --> visa2026_demo
               |
         IIS + ASP.NET Core Module (ANCM) — three sites / app pools
               |
         Kestrel (Visa2026.Blazor.Server.exe per slot)
               |
-        SQL Server Express localhost\SQLEXPRESS (one instance, three databases)
+        PostgreSQL (one instance, three databases)
 ```
 
 | Slot | Port | IIS site | Publish path | Database |
 |------|------|----------|--------------|----------|
-| Production | 80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `Visa2026DbProd` |
-| Staging | 8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `Visa2026DbStaging` |
-| Demo | 8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `Visa2026DbDemo` |
+| Production | 80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `visa2026_prod` |
+| Staging | 8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `visa2026_staging` |
+| Demo | 8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `visa2026_demo` |
 
 Slot manifest and scripts: [scripts/windows-iis/Visa2026-IisSlots.ps1](../scripts/windows-iis/Visa2026-IisSlots.ps1), [scripts/windows-iis/README.md](../scripts/windows-iis/README.md).
 
@@ -43,35 +43,35 @@ Slot manifest and scripts: [scripts/windows-iis/Visa2026-IisSlots.ps1](../script
 |-----------|------------|
 | Web host | Three IIS sites (one publish folder per slot) |
 | App | .NET 8 **Visa2026.Blazor.Server** (same build copied to each slot) |
-| Database | **SQL Server** Express on Windows for Prod/Staging (`Visa2026DbProd` / `Visa2026DbStaging`). **Demo** can use SQL Server (`Visa2026DbDemo`) **or** PostgreSQL (`visa2026_demo`) — see [Dual EF providers](#dual-ef-providers-sql-server--postgresql) below. |
+| Database | **PostgreSQL only** (`visa2026_prod` / `visa2026_staging` / `visa2026_demo`). SQL Server Express is **not** a supported Visa2026 app database. |
 | Secrets | Per-slot env: `C:\visa2026\env\prod.env`, `staging.env`, `demo.env` |
 | Reports / PDF | Windows fonts (Times New Roman, etc.) — no Linux font stack |
 
-### Dual EF providers (SQL Server + PostgreSQL)
+### PostgreSQL (only supported EF provider)
 
-One publish binary supports both providers. Choose per **slot** via env + connection string (never mix providers in the same database).
+Every slot must use Npgsql. Configure via env + connection string written by `Configure-Visa2026Production.ps1`:
 
-| Mode | Env (`C:\visa2026\env\<slot>.env`) | Connection (written by `Configure-Visa2026Production.ps1`) |
-|------|-------------------------------------|------------------------------------------------------------|
-| **SQL Server** (default) | Omit `EFCORE_PROVIDER` (or leave unset). `DB_NAME=Visa2026Db…`, `SA_PASSWORD=…` | `Server=localhost\SQLEXPRESS;Database=…;User Id=sa;…` |
-| **PostgreSQL** | `EFCORE_PROVIDER=Postgres`, `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASSWORD`, `DB_NAME=visa2026_demo` | `Host=…;Port=…;Database=…;Username=…;Password=…;Persist Security Info=True;EFCoreProvider=Postgres` |
+| Env (`C:\visa2026\env\<slot>.env`) | Connection |
+|-------------------------------------|------------|
+| `EFCORE_PROVIDER=Postgres`, `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASSWORD`, `DB_NAME=visa2026_…` | `Host=…;Port=…;Database=…;Username=…;Password=…;Persist Security Info=True;EFCoreProvider=Postgres` |
 
 **App behavior** (`DatabaseProviderDetector`):
 
-- `UseSqlServer` vs `UseNpgsql` from the connection string.
-- SQL Server–only ModuleUpdaters / T-SQL schema helpers are **skipped** on PostgreSQL (slim updater allowlist for greenfield/Demo).
+- **`UseNpgsql` only** — SQL Server connection strings fail at startup.
+- ModuleUpdaters use the Postgres allowlist (greenfield-safe seeds + dual schema helpers + `ReportDashboardPostgresViewsUpdater`).
 - Filtered unique indexes use provider-aware SQL (`IndexFilter`).
 - `Npgsql.EnableLegacyTimestampBehavior` is enabled for Unspecified `DateTime` seed values.
 
-**Demo pilot (verified on `10.100.128.25`):**
+**Slot setup (verified pattern on `10.100.128.25` Demo):**
 
 1. Install PostgreSQL (binaries + service `postgresql-x64-16`) — Agent skill [visa2026-postgresql](../.cursor/skills/visa2026-postgresql/SKILL.md); script `Install-PostgreSqlForVisa2026.ps1`.
 2. Create empty DB matching `DB_NAME` (e.g. `visa2026_demo`).
-3. Set Demo env as in [demo.env.example](../scripts/windows-iis/env/demo.env.example).
-4. Deploy: `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate -EnableForceXafDbUpdate`.
-5. Smoke: `http://<server>:8081/LoginPage` → HTTP 200. Then `Remove-Visa2026ForceXafDbUpdate.ps1 -Profile Demo`.
+3. Set slot env as in [demo.env.example](../scripts/windows-iis/env/demo.env.example) / [prod.env.example](../scripts/windows-iis/env/prod.env.example) / [staging.env.example](../scripts/windows-iis/env/staging.env.example).
+4. Deploy: `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate -EnableForceXafDbUpdate` (same for Staging/Production with the matching profile).
+5. Smoke: login page HTTP 200. Then `Remove-Visa2026ForceXafDbUpdate.ps1 -Profile …`.
+6. Load data via **`--import-visa2014`** from legacy VISA2015 (not SQL `.bak` restore into Postgres).
 
-**Prod / Staging:** stay on SQL Express until an explicit Postgres cutover. Feature parity on Postgres (PDF mappings, SQL views, Maglumat raw SQL, full ModuleUpdater set) is **not** claimed yet — expand the allowlist as updaters are made provider-safe.
+**Cutover from a former SQL Express slot:** create empty Postgres DB → configure env → publish + force XAF update → import from VISA2015 → validate → stop using SQL Express for Visa2026.
 
 ---
 
@@ -80,7 +80,7 @@ One publish binary supports both providers. Choose per **slot** via env + connec
 | | IIS (this doc) | Ubuntu + Docker |
 |--|----------------|-----------------|
 | CI artifact | **You publish** (`Publish-Visa2026ForIis.ps1`) | Hub image `webapia/visa2026` |
-| SQL | Native SQL Server | SQL in Linux container |
+| SQL | Native PostgreSQL | Postgres in Linux container |
 | Updates | Replace files + recycle app pool | `docker compose pull` |
 | Repo automation | Scripts in `scripts/windows-iis/` | `scripts/linux/`, skills |
 
@@ -91,13 +91,13 @@ One publish binary supports both providers. Choose per **slot** via env + connec
 | Item | Detail |
 |------|--------|
 | OS | Windows Server **2019** or **2022** (x64) |
-| RAM | **8 GB** minimum, **16 GB** recommended (app + SQL on one box) |
+| RAM | **8 GB** minimum, **16 GB** recommended (app + PostgreSQL on one box) |
 | Disk | **100+ GB** free on system drive |
 | IIS | Web Server role; **WebSockets** enabled |
 | Runtime | [.NET 8 Hosting Bundle](https://dotnet.microsoft.com/download/dotnet/8.0) (includes ANCM) |
-| SQL | SQL Server Express or higher; database e.g. `Visa2026DbProd` |
+| Database | PostgreSQL 16+; databases e.g. `visa2026_prod` / `visa2026_staging` / `visa2026_demo` |
 | Network | Inbound **TCP 80** (and **443** if HTTPS); outbound not required for runtime (build machine needs NuGet) |
-| Secrets | `DEVEXPRESS_LICENSEKEY`, SQL password, JWT `IssuerSigningKey` — **never commit** |
+| Secrets | `DEVEXPRESS_LICENSEKEY`, `PG_PASSWORD`, JWT `IssuerSigningKey` — **never commit** |
 
 Optional: [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) Win32 scripts under `scripts/legacy/on-prem-windows/` for remote admin.
 

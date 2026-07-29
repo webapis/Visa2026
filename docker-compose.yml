@@ -1,18 +1,18 @@
 services:
   app:
-    image: webapia/visa2026:latest # <-- Pulls the image from Docker Hub instead of building
+    image: webapia/visa2026:latest
     ports:
       - "80:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
-      - DEVEXPRESS_LICENSEKEY=LCXv1TmMzVVAxQ205eDRHRU1Ca0paYmRGSVc3SEl2RDBaQzR2RUZXZ1VTZzdNNGlrSVpLR2hHekw1aU1TdkZoTGsra2ZnbWdobDA3NEo0VnJURkx2Vk1MYmRYaDRBUklnQlpKM3REMEpndWYwMkhtVXF2SzFvUWpQWXhqNVVnWUVTVjBCOWFYQWc9PUs4blYrU25CZCpLdE55SmZbRHJbJE5YZkw5Qjhnb2ZicjJHMiRpZFtZWHkjLWlidj46REI0QiRHPkM7ckU/aUBwOnJHI2pMN1pAZjp5Tnk+IzcsKERjakpAPG5yRGo/Wzo2QDxbYy00LThbZSVkZDMpeTxhQChbW2Q2bVEkITgsJENGO21ybGwkbg0KV11VbzFUSF9PLkohK3UwaXo+cit1IXlacitPYS5KSEpIMWE4YnUuLjhvYmFfOEVIYl84Yl9fYWFVXVUxMG8xbUQNCixbciEuICFyY0pJI0o4ODg4ODg4ODg4ODg4ODg4ODg4OmFUYU9fYWFiYlVhR2JdSFRvVVVUSEdVT0dPYjFUVGJVSF9VVF9fX19fX19fX09iMVRUYlVIX1VUX19fX19fX19f
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${DB_NAME:-visa2026};Username=${PG_USER:-postgres};Password=${PG_PASSWORD};Persist Security Info=True;EFCoreProvider=Postgres
+      - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
       - ASPNETCORE_ENVIRONMENT=Production
       - Logging__LogLevel__Default=Information
       - Logging__LogLevel__Microsoft=Warning
       - Logging__LogLevel__DevExpress=Information
     depends_on:
-      sqlserver:
-        condition: service_started # The app now waits only for the database
+      postgres:
+        condition: service_healthy
     logging:
       driver: "json-file"
       options:
@@ -24,24 +24,29 @@ services:
       - tools
     image: webapia/visa2026-importer:latest
     environment:
-      - SA_PASSWORD=${SA_PASSWORD}
+      - PG_PASSWORD=${PG_PASSWORD}
       - ASPNETCORE_ENVIRONMENT=Production
       - API_BASE_URL=http://app:8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${DB_NAME:-visa2026};Username=${PG_USER:-postgres};Password=${PG_PASSWORD};Persist Security Info=True;EFCoreProvider=Postgres
       - TargetUrl=http://app:8080
     depends_on:
       - app
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2025-latest
+  postgres:
+    image: postgres:16
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_PID=Express
-      - SA_PASSWORD=${SA_PASSWORD}
+      - POSTGRES_USER=${PG_USER:-postgres}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-visa2026}
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-postgres} -d ${DB_NAME:-visa2026}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     logging:
       driver: "json-file"
       options:
@@ -49,4 +54,4 @@ services:
         max-file: "3"
 
 volumes:
-  sqlserver_data:
+  postgres_data:

@@ -1194,7 +1194,7 @@ internal static class Visa2014ImportCommand
 
     private static string GetTargetConnection(IReadOnlyList<string> args) =>
         ResolveTargetConnectionForCleanup(args)
-        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
+        ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
     private static int ResolveBatchSize(IReadOnlyList<string> args)
     {

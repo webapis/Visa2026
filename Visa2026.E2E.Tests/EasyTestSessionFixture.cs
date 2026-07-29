@@ -10,7 +10,7 @@ namespace Visa2026.E2E.Tests;
 public sealed class EasyTestSessionFixture : IAsyncLifetime
 {
     internal const string BlazorAppName = "Visa2026Blazor";
-    internal const string AppDBName = "Visa2026EasyTest";
+    internal const string AppDBName = "visa2026_easytest";
 
     internal EasyTestFixtureContext FixtureContext { get; }
     internal IApplicationContext AppContext { get; }
@@ -39,13 +39,7 @@ public sealed class EasyTestSessionFixture : IAsyncLifetime
                 runHeadless: EasyTestBrowserMode.RunHeadless)
         );
 
-        FixtureContext.RegisterDatabases(
-            new DatabaseOptions(
-                AppDBName,
-                EasyTestHostEnvironment.DatabaseName,
-                server: EasyTestHostEnvironment.LocalDbServer)
-        );
-
+        // EasyTest DropDB only supports SQL Server/Access. Postgres drop/create is handled in EasyTestPreflight.
         AppContext = FixtureContext.CreateApplicationContext(BlazorAppName);
     }
 

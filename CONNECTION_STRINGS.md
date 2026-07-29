@@ -1,99 +1,70 @@
 # Connection String Management
 
-This document explains how the database connection string is managed in different environments: local development and Docker-based deployment.
+Visa2026 uses **PostgreSQL only** for the application database (EF Core + Npgsql). Legacy **VISA2015** (SQL Server) remains the read-only import source — it is not a Visa2026 database.
 
-The application is designed to be flexible, using a fallback mechanism in `Startup.cs` to read the connection string from the configuration.
+The application reads **`DefaultConnection`** from configuration (`Startup.cs`), with an older `ConnectionString` key as a fallback for local overrides.
 
-## Key Naming Convention
+## Canonical connection string shape
 
-The standard and primary key used for the application's database connection is **`DefaultConnection`**.
+```text
+Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=…;Persist Security Info=True;EFCoreProvider=Postgres
+```
 
-While the application has fallback logic to support an older `ConnectionString` key for backward compatibility during local development, all new configurations, including Docker environments and local `appsettings.json` files, should use `DefaultConnection`.
+- Include **`EFCoreProvider=Postgres`** (or use a native Npgsql `Host=` string without `Server=` / `Data Source=`).
+- SQL Server / LocalDB connection strings are **rejected** at startup (`DatabaseProviderDetector.ConfigureEfCore`).
 
-## 1. Local Development Environment
+## 1. Local development (F5)
 
-For local development, the connection string is defined in the `appsettings.json` or `appsettings.Development.json` file located within the `Visa2026.Blazor.Server` project.
+Defaults live in:
 
-The startup code is configured to look for the connection string under two possible keys in order:
-1.  `DefaultConnection` (Primary)
-2.  `ConnectionString` (Fallback)
+- `Visa2026.Blazor.Server/appsettings.json`
+- `Visa2026.Blazor.Server/appsettings.Development.json`
 
-This provides flexibility during local development.
+Launch profile **`Visa2026 - PostgreSQL`** in `Properties/launchSettings.json` overrides `DefaultConnection` the same way (local DB `visa2026`).
 
-## 2. Switching Databases via Launch Profiles (Visual Studio)
+Prerequisites: PostgreSQL listening on `localhost:5432`, empty or existing DB `visa2026`, credentials matching appsettings (local default password in repo is for workstation use only — never use it in prod).
 
-The easiest way to switch between different database targets while developing in Visual Studio is to use the **Launch Profiles** dropdown located next to the green "Start" button.
+### Visual Studio
 
-Two specific profiles are configured in `launchSettings.json`:
+1. Select **Visa2026 - PostgreSQL** (or **IIS Express**, which uses appsettings defaults).
+2. Press **F5**.
 
-*   **Visa2026 - LocalDB**: 
-    *   **Target**: The lightweight SQL instance installed with Visual Studio (`(localdb)\mssqllocaldb`).
-    *   **Usage**: Best for quick development without needing Docker running.
-    *   **Configuration**: Overrides `DefaultConnection` via environment variables to point to the local instance.
+Optional: store a non-default password via user-secrets:
 
-*   **Visa2026 - Docker SQL**:
-    *   **Target**: The SQL Server container defined in your `docker-compose.yml` (usually `127.0.0.1,1433`).
-    *   **Usage**: Best for testing against a "production-like" SQL Server environment or when working with Docker tools.
-    *   **Security Note**: This profile is designed to work with **User Secrets**. To securely store your Docker SQL credentials locally without committing them to the repository, run the following command from the `Visa2026.Blazor.Server` project directory:
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=YOUR_PASSWORD;Persist Security Info=True;EFCoreProvider=Postgres"
+```
 
-      ```bash
-      dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=127.0.0.1,1433;Database=Visa2026DbDev;User Id=sa;Password=YOUR_ACTUAL_SECURE_PASSWORD;TrustServerCertificate=True;MultipleActiveResultSets=true"
-      ```
+## 2. Docker
 
-      *Replace `YOUR_ACTUAL_SECURE_PASSWORD` with the password from your `.env.dev` file.*
-
-### How to use:
-1.  In Visual Studio, click the small arrow next to the **Start** button.
-2.  Select your desired profile from the list.
-3.  Press **F5** to run.
-
----
-
-## 3. Docker (Release) Environment
-
-When the application is deployed as a production or staging container using the root `docker-compose.yml` file, the connection string is injected as an environment variable. This value overrides any setting present in the `appsettings.json` file inside the container.
-
-### `docker-compose.yml` Configuration
-
-The `docker-compose.yml` file defines the connection string for the `app` service:
+Compose stacks inject `ConnectionStrings__DefaultConnection` pointing at the **`postgres`** service (not SQL Server). Example shape:
 
 ```yaml
-services:
-  app:
-    # ...
-    environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Visa2026Db;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
-    # ...
+environment:
+  - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${DB_NAME};Username=${PG_USER};Password=${PG_PASSWORD};Persist Security Info=True;EFCoreProvider=Postgres
 ```
 
-### How it Works
+See `docker-compose.dev.yml` / `docker-compose.prod.yml` and `.env.dev.example`. Secrets come from the env file (`PG_PASSWORD`, etc.).
 
-*   **`ConnectionStrings__DefaultConnection`**: The double underscore (`__`) is the standard .NET convention for mapping an environment variable to a nested JSON configuration key (`ConnectionStrings:DefaultConnection`).
-*   **`Server=sqlserver`**: The server name `sqlserver` directly corresponds to the name of the SQL Server service defined in the same `docker-compose.yml` file. Docker's internal networking resolves this service name to the correct container's IP address.
-*   **`${SA_PASSWORD}`**: The database password is not hard-coded. It is dynamically loaded from the `.env` file at the root of the project, keeping secrets separate from the configuration.
+## 3. EasyTest (E2E)
 
-This setup ensures that the application container can communicate with the database container within the isolated Docker network without requiring code changes.
+Isolated catalog **`visa2026_easytest`** on the same Postgres instance:
 
-## 4. E2E Testing (EasyTest) Environment
+- `Visa2026.Blazor.Server/appsettings.EasyTest.json`
+- EasyTest host env from `Visa2026.E2E.Tests` (`EasyTestHostEnvironment`)
 
-For running automated end-to-end (E2E) UI tests with DevExpress EasyTest, a separate connection string named `EasyTestConnectionString` is used.
+Do not point EasyTest at the F5 `visa2026` database.
 
-### Purpose
+## 4. IIS on-prem slots
 
-The primary reason for a dedicated test connection string is to **isolate the test environment**. Automated tests often create, modify, and delete data. Using a separate database (e.g., `Visa2026EasyTest`) ensures that test runs do not corrupt or interfere with the local development database.
+Each slot env file (`C:\visa2026\env\prod.env`, `staging.env`, `demo.env`) must set:
 
-### Configuration
+- `EFCORE_PROVIDER=Postgres`
+- `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASSWORD`, `DB_NAME` (`visa2026_prod` / `visa2026_staging` / `visa2026_demo`)
 
-This connection string is also configured in the `appsettings.json` file.
+`Configure-Visa2026Production.ps1` writes the Npgsql connection string into `appsettings.Production.json`. See [docs/ON_PREM_WINDOWS_IIS.md](docs/ON_PREM_WINDOWS_IIS.md).
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "...",
-    "EasyTestConnectionString": "Server=(localdb)\\mssqllocaldb;Database=Visa2026EasyTest;Trusted_Connection=True;MultipleActiveResultSets=true"
-  },
-  // ...
-}
-```
+## 5. What is not supported
 
-When you run the E2E tests, the EasyTest framework is configured to look for and use this specific connection string to set up and interact with the test database.
+- SQL Server Express / LocalDB as a Visa2026 app database
+- Restoring a SQL `.bak` into Postgres (use empty PG + `--import-visa2014` from VISA2015)

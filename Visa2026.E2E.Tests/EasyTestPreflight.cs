@@ -1,16 +1,12 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using System.Net.NetworkInformation;
-using System.Threading;
 using DevExpress.EasyTest.Framework;
-using Microsoft.Data.SqlClient;
 
 namespace Visa2026.E2E.Tests;
 
 /// <summary>
-/// Logs EasyTest DB + port state, clears stale hosts, then drops the test database before each session.
+/// Logs EasyTest DB + port state, clears stale hosts, then drops/recreates the Postgres test database.
 /// </summary>
 internal static class EasyTestPreflight
 {
@@ -19,6 +15,8 @@ internal static class EasyTestPreflight
         string databaseAlias,
         string blazorServerProjectPath)
     {
+        _ = databaseAlias;
+
         LogSessionBanner();
         LogDatabaseState();
         LogPortState(EasyTestHostEnvironment.EasyTestPort, "EasyTest host");
@@ -28,7 +26,7 @@ internal static class EasyTestPreflight
 
         EnsurePortFree(
             EasyTestHostEnvironment.EasyTestPort,
-            "Stop Visual Studio F5 on Visa2026 - EasyTest (LocalDB), other dotnet hosts, or stale msedgedriver.");
+            "Stop Visual Studio F5 on Visa2026 - PostgreSQL / EasyTest host, other dotnet hosts, or stale msedgedriver.");
 
         if (IsPortListening(EasyTestHostEnvironment.LegacyUiScenarioPort))
         {
@@ -37,8 +35,8 @@ internal static class EasyTestPreflight
                 "(old UI-scenario profile). EasyTest uses :5050 only; stop the :5052 host to avoid confusion.");
         }
 
-        Trace.WriteLine($"[EasyTest] Dropping database alias '{databaseAlias}' ({EasyTestHostEnvironment.DatabaseName}) for a clean session.");
-        fixture.DropDB(databaseAlias);
+        Trace.WriteLine($"[EasyTest] Dropping PostgreSQL database '{EasyTestHostEnvironment.DatabaseName}' for a clean session.");
+        EasyTestDatabaseProvisioner.DropDatabase();
         LogDatabaseState();
 
         EasyTestDatabaseProvisioner.EnsureCreated(blazorServerProjectPath);
@@ -46,7 +44,7 @@ internal static class EasyTestPreflight
     }
 
     private static void LogSessionBanner() =>
-        Trace.WriteLine($"[EasyTest] Preflight — target {EasyTestHostEnvironment.BaseUrl}, DB {EasyTestHostEnvironment.DatabaseName} on {EasyTestHostEnvironment.LocalDbServer}");
+        Trace.WriteLine($"[EasyTest] Preflight — target {EasyTestHostEnvironment.BaseUrl}, DB {EasyTestHostEnvironment.DatabaseName} on {EasyTestHostEnvironment.PgHost}:{EasyTestHostEnvironment.PgPort}");
 
     private static void LogDatabaseState()
     {

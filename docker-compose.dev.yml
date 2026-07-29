@@ -6,7 +6,7 @@ services:
     volumes:
       - app_dataprotection_keys_dev:/home/app/.aspnet/DataProtection-Keys
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbDev};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=True
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${DB_NAME:-visa2026_dev};Username=${PG_USER:-postgres};Password=${PG_PASSWORD};Persist Security Info=True;EFCoreProvider=Postgres
       - DEVEXPRESS_LICENSEKEY=${DEVEXPRESS_LICENSEKEY}
       - FORCE_XAF_DB_UPDATE=${FORCE_XAF_DB_UPDATE:-}
       - ASPNETCORE_ENVIRONMENT=Development
@@ -14,8 +14,8 @@ services:
       - Logging__LogLevel__Microsoft=Information
       - Logging__LogLevel__DevExpress=Information
     depends_on:
-      sqlserver:
-        condition: service_started
+      postgres:
+        condition: service_healthy
     logging:
       driver: "json-file"
       options:
@@ -27,24 +27,29 @@ services:
       - tools
     image: webapia/visa2026-importer:${IMPORTER_IMAGE_TAG:-latest}
     environment:
-      - SA_PASSWORD=${SA_PASSWORD}
+      - PG_PASSWORD=${PG_PASSWORD}
       - ASPNETCORE_ENVIRONMENT=Development
       - API_BASE_URL=http://app:8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=${DB_NAME:-Visa2026DbDev};User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${DB_NAME:-visa2026_dev};Username=${PG_USER:-postgres};Password=${PG_PASSWORD};Persist Security Info=True;EFCoreProvider=Postgres
       - TargetUrl=http://app:8080
     depends_on:
       - app
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2025-latest
+  postgres:
+    image: postgres:16
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_PID=Express
-      - SA_PASSWORD=${SA_PASSWORD}
+      - POSTGRES_USER=${PG_USER:-postgres}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${DB_NAME:-visa2026_dev}
     ports:
-      - "127.0.0.1:${MSSQL_HOST_PORT:-1433}:1433"
+      - "127.0.0.1:${PG_HOST_PORT:-5432}:5432"
     volumes:
-      - sqlserver_data_dev:/var/opt/mssql
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-postgres} -d ${DB_NAME:-visa2026_dev}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     logging:
       driver: "json-file"
       options:
@@ -52,5 +57,5 @@ services:
         max-file: "3"
 
 volumes:
-  sqlserver_data_dev:
+  postgres_data_dev:
   app_dataprotection_keys_dev:

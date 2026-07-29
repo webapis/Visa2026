@@ -131,21 +131,14 @@ namespace Visa2026.Blazor.Server
                         throw;
                     }
 
-                    // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal salary columns idempotently.
-                    // SQL Server T-SQL helpers below; ProcessNumber also runs on PostgreSQL (Demo pilot).
+                    // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal PG schema idempotently.
                     var connectionString = Configuration.GetConnectionString("DefaultConnection")
                         ?? Configuration.GetConnectionString("ConnectionString");
                     if (!string.IsNullOrWhiteSpace(connectionString))
                     {
                         ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
-                        if (DatabaseProviderDetector.IsSqlServer(connectionString))
-                        {
-                            ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
-                            ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
-                            ApplicationProgressOrderSchemaSql.ApplyIfMissing(connectionString);
-                            ProjectContractApprovalLegProfileSchemaSql.ApplyIfMissing(connectionString);
-                        }
                     }
                 });
                 builder.ObjectSpaceProviders
@@ -271,19 +264,10 @@ namespace Visa2026.Blazor.Server
                 ?? Configuration.GetConnectionString("ConnectionString");
             if (!string.IsNullOrWhiteSpace(connectionString))
             {
-                // Additive ProcessNumber columns — also required on PostgreSQL Demo (ModuleUpdater may skip).
+                // Additive ProcessNumber / capability columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
                 ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
-                // Report Dashboard vw_rd_* views — ModuleUpdater may skip when ModuleInfo is current.
+                ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
-
-                if (DatabaseProviderDetector.IsSqlServer(connectionString))
-                {
-                    ApplicationRuntimeLogSchemaSql.ApplyIfMissing(connectionString);
-                    MinistryReviewSlaSettingsSchemaSql.ApplyIfMissing(connectionString);
-                    BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
-                        app.ApplicationServices,
-                        app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
-                }
             }
 
             UserReportTemplateSeedGate.EnsureSeeded(

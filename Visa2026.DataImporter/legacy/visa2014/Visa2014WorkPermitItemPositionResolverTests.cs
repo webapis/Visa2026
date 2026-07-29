@@ -241,7 +241,7 @@ public class Visa2014WorkPermitItemPositionResolverTests
         }
 
         var migratedByType = new Dictionary<string, int>(StringComparer.Ordinal);
-        var targetCs = "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
+        var targetCs = "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
         using (var conn = new Microsoft.Data.SqlClient.SqlConnection(targetCs))
         {
             conn.Open();

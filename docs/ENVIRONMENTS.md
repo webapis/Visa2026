@@ -25,7 +25,7 @@ cp .env.prod.example .env.prod
 cp .env.dev.example .env.dev
 ```
 
-Set strong values for `SA_PASSWORD` and `DEVEXPRESS_LICENSEKEY` in both files.
+Set strong values for `PG_PASSWORD` (and related `PG_*` / `DB_NAME`) and `DEVEXPRESS_LICENSEKEY` in both files. Visa2026 application databases are **PostgreSQL only**.
 
 ---
 
@@ -55,9 +55,9 @@ Default ports:
 - Prod app: `80`
 - Dev app: `8081`
 
-Each stack has its own SQL data volume:
-- `visa2026-prod_sqlserver_data_prod`
-- `visa2026-dev_sqlserver_data_dev`
+Each stack has its own Postgres data volume:
+- `visa2026-prod_postgres_data_prod`
+- `visa2026-dev_postgres_data_dev`
 
 ---
 

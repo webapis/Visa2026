@@ -6,7 +6,7 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 
 - **.NET** 8 (`net8.0`)
 - **DevExpress / XAF** 25.2.6 (ExpressApp **EF Core**, **Blazor** UI, Security, Reports V2, Validation, Office, Audit Trail, Web API + OData, EasyTest adapter for E2E)
-- **Database:** SQL Server (EF Core + `Microsoft.Data.SqlClient`)
+- **Database:** PostgreSQL only (EF Core + Npgsql). Legacy VISA2015 SQL Server is the import source only — not a Visa2026 app DB.
 - **PDF:** Spire.PDF (form filling / document workflows)
 - **Tests:** xUnit, Selenium WebDriver; Blazor EasyTest adapter in E2E project
 
@@ -97,7 +97,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`.cursor/skills/legacy-on-prem-windows-setup/SKILL.md`** — **legacy** Windows Server + WSL bootstrap only (`scripts/legacy/on-prem-windows/`).
 - **`.cursor/skills/setup-openssh-server/SKILL.md`** — optional Agent **Skill**: **OpenSSH** on company **Ubuntu** on-prem (`scripts/linux/ensure-openssh-server.sh`, pubkey/`ssh-copy-id`). Legacy Windows: `scripts/legacy/on-prem-windows/` Win32 OpenSSH scripts.
 - **`.cursor/skills/visa2026-windows-iis-deploy/SKILL.md`** (+ **`user-prompts.md`**, **`reference.md`**, **`learnings.md`**) — optional Agent **Skill**: **Windows Server IIS** three-slot deploy/update (no Docker); `scripts/windows-iis/`, SQL Express, `.bak` restore; runbook **`docs/ON_PREM_WINDOWS_IIS.md`**. Not Ubuntu compose or droplet.
-- **`.cursor/skills/visa2026-postgresql/SKILL.md`** (+ **`reference.md`**, **`prompts.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **PostgreSQL** download/install/config on Windows Server for Demo (`visa2026_demo`, `EFCORE_PROVIDER=Postgres`); binaries zip preferred under SSH; script `Install-PostgreSqlForVisa2026.ps1`. Not IIS publish (**visa2026-windows-iis-deploy**) or import.
+- **`.cursor/skills/visa2026-postgresql/SKILL.md`** (+ **`reference.md`**, **`prompts.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **PostgreSQL** download/install/config on Windows Server for all IIS slots (`visa2026_demo` / `_staging` / `_prod`, `EFCORE_PROVIDER=Postgres`); binaries zip preferred under SSH; script `Install-PostgreSqlForVisa2026.ps1`. Not IIS publish (**visa2026-windows-iis-deploy**) or import.
 - **[`docs/VISA2014_MIGRATION.md`](docs/VISA2014_MIGRATION.md)** — **VISA2014 → Visa2026** prod data migration plan (MCP air gap, mapping YAML, OData import).
 - **`.cursor/skills/visa2014-to-visa2026-import/SKILL.md`** (+ **`MATURITY.md`**, **`reference.md`**, **`import-practices.md`**, **`user-prompts.md`**, append-only **`learnings.md`**) — **sole** Agent **Skill** for data migration: lookup resolution → preflight → Import (`--import-visa2014`); Calik **source always** legacy **`10.100.128.15` / `VISA2015`** (never Demo/Prod Visa2026 DBs); targets Demo/Prod on `.25` (`OnPrem-Sync.ps1` Import-only); Excel preview; `importConfirmed`; OData / in-process. **No delta Sync** (`--sync-visa2014` removed). Runbook **`docs/VISA2014_MIGRATION/ON_PREM_IIS_MIGRATION_RUNBOOK.md`**. IIS publish remains **visa2026-windows-iis-deploy**.
 - **On-prem skill maturity** — **setup-docker-engine**, **setup-openssh-server**, **legacy-on-prem-windows-setup**, **visa2026-windows-iis-deploy**, and **visa2026-postgresql** **accumulate experience** in each folder’s **`learnings.md`**. Migration experience: **visa2014-to-visa2026-import/learnings.md**. Shared on-prem deploy loop: **`.cursor/skills/on-prem-deploy/MATURITY.md`**.

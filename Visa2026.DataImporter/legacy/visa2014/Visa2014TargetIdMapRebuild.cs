@@ -661,7 +661,7 @@ internal static class Visa2014TargetIdMapRebuild
     private static string GetTargetConnection(IReadOnlyList<string> args) =>
         GetOptionValue(args, "--target-connection")
         ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
+        ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
     {

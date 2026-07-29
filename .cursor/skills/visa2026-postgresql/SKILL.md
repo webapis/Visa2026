@@ -2,20 +2,20 @@
 name: visa2026-postgresql
 description: >-
   Download, install, and configure PostgreSQL on Windows Server for Visa2026
-  (Demo pilot DB visa2026_demo, EFCORE_PROVIDER=Postgres, Npgsql). Covers EDB
-  unattended installer vs binaries zip+initdb (preferred under SSH), service
-  postgresql-x64-16, psql at C:\PostgreSQL\16\bin, demo.env PG_* keys, and
-  empty-DB create. Use for PostgreSQL install, PG download, initdb, psql,
-  Demo Postgres, dual EF provider. Not IIS publish (visa2026-windows-iis-deploy)
-  or VISA2014 import (visa2014-to-visa2026-import).
+  (all IIS slots: visa2026_demo / _staging / _prod, EFCORE_PROVIDER=Postgres,
+  Npgsql). Covers EDB unattended installer vs binaries zip+initdb (preferred
+  under SSH), service postgresql-x64-16, psql at C:\PostgreSQL\16\bin, slot
+  env PG_* keys, and empty-DB create. Use for PostgreSQL install, PG download,
+  initdb, psql. Not IIS publish (visa2026-windows-iis-deploy) or VISA2014
+  import (visa2014-to-visa2026-import).
 disable-model-invocation: false
 ---
 
 # Visa2026: PostgreSQL on Windows Server
 
-**Scope:** **download → install → configure → create empty DB** for Visa2026 on a **Windows Server** IIS host. Primary target today: **Demo** slot (`visa2026_demo`).
+**Scope:** **download → install → configure → create empty DB** for Visa2026 on a **Windows Server** IIS host. Required for **all** slots (`visa2026_demo`, `visa2026_staging`, `visa2026_prod`).
 
-**Canonical dual-provider notes:** [docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md#dual-ef-providers-sql-server--postgresql)
+**Canonical Postgres-only IIS notes:** [docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md#postgresql-only-supported-ef-provider)
 
 **App deploy after PG is ready:** [visa2026-windows-iis-deploy](../visa2026-windows-iis-deploy/SKILL.md)
 
@@ -35,8 +35,8 @@ disable-model-invocation: false
 ## Hard rules
 
 - **Never commit** `PG_PASSWORD` / real connection strings.
-- **Prod / Staging** stay on **SQL Express** until an explicit Postgres cutover.
-- **One provider per database** — never point the same DB at both SQL Server and Postgres.
+- Visa2026 application databases are **PostgreSQL only** (SQL Express is not supported).
+- Legacy **VISA2015** remains SQL Server for import only.
 - Prefer **binaries zip + `initdb`** when installing over **SSH** (EDB GUI/exe often fails — see scenarios).
 - After install, wire Demo via **`EFCORE_PROVIDER=Postgres`** + **`PG_*`** in `C:\visa2026\env\demo.env`, then `Configure-Visa2026Production.ps1 -Profile Demo`.
 

@@ -4,7 +4,7 @@
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <Deterministic>false</Deterministic>
     <!-- Change wildcard to specific version to control DB migrations / ModuleInfo (triggers ReportsUpdater etc. on existing DBs) -->
-    <AssemblyVersion>1.0.0.621</AssemblyVersion>
+    <AssemblyVersion>1.0.0.622</AssemblyVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -53,6 +53,32 @@
     <EmbeddedResource Include="SqlViews\vw_rd_visa_on_extension_by_period_category_type.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_visa_on_extension_by_period_category_type.postgres.sql" />
     <EmbeddedResource Include="SqlViews\vw_rd_visa_extension_result.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_visa_extension_result.postgres.sql" />
     <EmbeddedResource Include="SqlViews\vw_rd_visa_extension_result_by_period_category_type.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_visa_extension_result_by_period_category_type.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_on_process.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_on_process.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_on_process.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_on_process.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_on_process_by_period_category_type.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_completed_base.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_completed_base.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_completed_base.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_completed_base.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_completed.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_completed.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_completed.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_completed.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_completed_by_period_category_type.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_completed_by_period_category_type.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_invitation_completed_by_period_category_type.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_invitation_completed_by_period_category_type.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_on_process_base.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_on_process_base.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_on_process_base.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_on_process_base.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_on_process.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_on_process.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_on_process.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_on_process.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_completed_base.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_completed_base.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_completed_base.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_completed_base.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_completed.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_completed.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_completed.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_completed.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_other_on_process.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_other_on_process.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_other_on_process.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_other_on_process.postgres.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_other_completed.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_other_completed.sql" />
+    <EmbeddedResource Include="SqlViews\vw_rd_application_via_ministry_other_completed.postgres.sql" LogicalName="Visa2026.Module.SqlViews.vw_rd_application_via_ministry_other_completed.postgres.sql" />
     <EmbeddedResource Include="Localization\LookupStrings.json" />
     <EmbeddedResource Include="Localization\ApplicationTypeLookupStrings.json" />
     <EmbeddedResource Include="Localization\VisaLookupStrings.json" />

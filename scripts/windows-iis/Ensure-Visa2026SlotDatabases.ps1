@@ -2,23 +2,22 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Create empty Visa2026 slot databases on SQL Server Express if missing.
+  Create empty Visa2026 slot databases on PostgreSQL if missing.
 
 .PARAMETER Profile
   Production, Staging, Demo, or All (default All).
 
 .PARAMETER EnvFile
-  Env file with SA_PASSWORD. Default: prod slot env, or legacy C:\visa2026\.env.prod.
+  Optional env file with PG_PASSWORD (used as fallback). Prefer each slot's own env file.
 
 .NOTES
-  Runbook: docs/ON_PREM_WINDOWS_IIS.md
+  Runbook: docs/ON_PREM_WINDOWS_IIS.md — Visa2026 is PostgreSQL-only.
 #>
 param(
     [ValidateSet("Production", "Staging", "Demo", "All")]
     [string]$Profile = "All",
 
-    [string]$EnvFile = "",
-    [string]$InstanceName = "SQLEXPRESS"
+    [string]$EnvFile = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,70 +27,64 @@ function Read-DotEnvMap([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Env file not found: $Path"
     }
-    $map = @{}
-    Get-Content -LiteralPath $Path | ForEach-Object {
-        $line = $_.Trim()
-        if ($line -match '^\s*#' -or $line -eq "") { return }
-        if ($line -match '^\s*([^#=]+)=(.*)$') {
-            $k = $matches[1].Trim()
-            $v = $matches[2].Trim()
-            if ($v.Length -ge 2 -and $v.StartsWith('"') -and $v.EndsWith('"')) {
-                $v = $v.Substring(1, $v.Length - 2)
-            }
-            $map[$k] = $v
-        }
-    }
-    $map
+    Read-Visa2026DotEnvMap -Path $Path
 }
 
-function Get-SqlCmdPath {
+function Get-PsqlPath {
     $candidates = @(
-        "${env:ProgramFiles}\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\sqlcmd.exe",
-        "${env:ProgramFiles(x86)}\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn\sqlcmd.exe",
-        "${env:ProgramFiles}\Microsoft SQL Server\160\Tools\Binn\sqlcmd.exe"
+        "C:\PostgreSQL\16\bin\psql.exe",
+        "${env:ProgramFiles}\PostgreSQL\16\bin\psql.exe",
+        "${env:ProgramFiles}\PostgreSQL\15\bin\psql.exe"
     )
     foreach ($p in $candidates) {
         if (Test-Path -LiteralPath $p) { return $p }
     }
-    $found = Get-Command sqlcmd -ErrorAction SilentlyContinue
+    $found = Get-Command psql -ErrorAction SilentlyContinue
     if ($found) { return $found.Source }
     return $null
 }
 
-if ([string]::IsNullOrWhiteSpace($EnvFile)) {
-    $prodEnv = (Resolve-Visa2026IisSlotContext -Profile Production).EnvFile
-    $legacyEnv = "C:\visa2026\.env.prod"
-    if (Test-Path -LiteralPath $prodEnv) { $EnvFile = $prodEnv }
-    elseif (Test-Path -LiteralPath $legacyEnv) { $EnvFile = $legacyEnv }
-    else { $EnvFile = $prodEnv }
+$psql = Get-PsqlPath
+if (-not $psql) {
+    throw "psql not found. Install PostgreSQL 16 (Install-PostgreSqlForVisa2026.ps1) and ensure bin is on PATH."
 }
 
-$envMap = Read-DotEnvMap $EnvFile
-$saPassword = $envMap["SA_PASSWORD"]
-if ([string]::IsNullOrWhiteSpace($saPassword)) {
-    throw "SA_PASSWORD missing in $EnvFile"
-}
-
-$sqlcmd = Get-SqlCmdPath
-if (-not $sqlcmd) {
-    throw "sqlcmd not found. Install SQL Server client tools or SQL Express."
-}
-
-$server = "localhost\$InstanceName"
 $profiles = if ($Profile -eq "All") { Get-Visa2026IisSlotProfiles } else { @($Profile) }
+$fallbackMap = $null
+if (-not [string]::IsNullOrWhiteSpace($EnvFile) -and (Test-Path -LiteralPath $EnvFile)) {
+    $fallbackMap = Read-DotEnvMap $EnvFile
+}
 
 foreach ($name in $profiles) {
     $ctx = Resolve-Visa2026IisSlotContext -Profile $name
-    $db = $ctx.DbName
-    $query = @"
-IF NOT EXISTS (SELECT 1 FROM sys.databases WHERE name = N'$db')
-    CREATE DATABASE [$db];
-"@
-    Write-Host "==> Ensure database $db ($name)" -ForegroundColor Cyan
-    & $sqlcmd -S $server -U sa -P $saPassword -C -Q $query
+    $map = if (Test-Path -LiteralPath $ctx.EnvFile) { Read-DotEnvMap $ctx.EnvFile } elseif ($fallbackMap) { $fallbackMap } else {
+        throw "Env file missing for $name ($($ctx.EnvFile)). Create it with PG_PASSWORD and DB_NAME."
+    }
+
+    $db = if ($map.ContainsKey("DB_NAME") -and -not [string]::IsNullOrWhiteSpace($map["DB_NAME"])) { $map["DB_NAME"] } else { $ctx.DbName }
+    $pgHost = if ($map.ContainsKey("PG_HOST") -and -not [string]::IsNullOrWhiteSpace($map["PG_HOST"])) { $map["PG_HOST"].Trim() } else { "localhost" }
+    $pgPort = if ($map.ContainsKey("PG_PORT") -and -not [string]::IsNullOrWhiteSpace($map["PG_PORT"])) { $map["PG_PORT"].Trim() } else { "5432" }
+    $pgUser = if ($map.ContainsKey("PG_USER") -and -not [string]::IsNullOrWhiteSpace($map["PG_USER"])) { $map["PG_USER"].Trim() } else { "postgres" }
+    $pgPassword = if ($map.ContainsKey("PG_PASSWORD") -and -not [string]::IsNullOrWhiteSpace($map["PG_PASSWORD"])) { $map["PG_PASSWORD"] } else {
+        throw "PG_PASSWORD missing in $($ctx.EnvFile) (or fallback EnvFile) for $name"
+    }
+
+    Write-Host "==> Ensure PostgreSQL database $db ($name) on ${pgHost}:$pgPort" -ForegroundColor Cyan
+    $env:PGPASSWORD = $pgPassword
+    $exists = & $psql -h $pgHost -p $pgPort -U $pgUser -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$db'"
     if ($LASTEXITCODE -ne 0) {
-        throw "sqlcmd failed creating $db (exit $LASTEXITCODE)"
+        throw "psql failed checking $db (exit $LASTEXITCODE)"
+    }
+    if ([string]::IsNullOrWhiteSpace($exists)) {
+        & $psql -h $pgHost -p $pgPort -U $pgUser -d postgres -c "CREATE DATABASE `"$db`";"
+        if ($LASTEXITCODE -ne 0) {
+            throw "psql failed creating $db (exit $LASTEXITCODE)"
+        }
+        Write-Host "Created $db" -ForegroundColor Green
+    }
+    else {
+        Write-Host "Already exists: $db" -ForegroundColor DarkGray
     }
 }
 
-Write-Host "Slot databases ready." -ForegroundColor Green
+Write-Host "Slot databases ready (PostgreSQL)." -ForegroundColor Green

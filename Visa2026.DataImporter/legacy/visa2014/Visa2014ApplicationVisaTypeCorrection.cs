@@ -39,7 +39,7 @@ internal static class Visa2014ApplicationVisaTypeCorrection
         var dryRun = HasArg(args, "--dry-run");
         var targetConnection = GetOptionValue(args, "--target-connection")
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;";
+            ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
         Console.WriteLine("=== VISA2014 Application VisaType inference correction");
         Console.WriteLine($"INF Legacy source: {source.Id}");

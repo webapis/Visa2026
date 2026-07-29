@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Visa2026.Module.DatabaseUpdate;
 
 /// <summary>
-/// Detects SQL Server vs PostgreSQL for connection-string / ObjectSpace branching.
-/// Demo PostgreSQL pilot skips T-SQL ModuleUpdaters; Prod/Staging stay on SQL Server.
+/// PostgreSQL connection-string detection and EF Core Npgsql wiring.
+/// Visa2026 application databases are PostgreSQL only (legacy VISA2015 SQL Server is import-only).
 /// </summary>
 public static class DatabaseProviderDetector
 {
@@ -45,11 +45,13 @@ public static class DatabaseProviderDetector
         return false;
     }
 
+    /// <summary>Always false for configured Visa2026 app DBs (Postgres-only). Kept for transitional call sites.</summary>
     public static bool IsSqlServer(string? connectionString) => !IsPostgreSql(connectionString);
 
+    /// <summary>Always false when ObjectSpace is on Npgsql. Kept for transitional call sites.</summary>
     public static bool IsSqlServer(IObjectSpace objectSpace) => !IsPostgreSql(objectSpace);
 
-    /// <summary>Removes XAF EFCoreProvider= token so Npgsql/SqlClient builders accept the string.</summary>
+    /// <summary>Removes XAF EFCoreProvider= token so Npgsql builders accept the string.</summary>
     public static string StripEfCoreProvider(string connectionString)
     {
         if (string.IsNullOrWhiteSpace(connectionString))
@@ -72,24 +74,21 @@ public static class DatabaseProviderDetector
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        if (IsPostgreSql(connectionString))
+        if (!IsPostgreSql(connectionString))
         {
-            // XAF / legacy seeders often use DateTime.Kind=Unspecified; Npgsql 6+ rejects that by default.
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
-            var cleaned = StripEfCoreProvider(connectionString);
-            options.UseNpgsql(cleaned, npgsql =>
-            {
-                npgsql.CommandTimeout(commandTimeoutSeconds);
-            });
-            return;
+            throw new InvalidOperationException(
+                "Visa2026 supports PostgreSQL only. Set DefaultConnection to an Npgsql connection string " +
+                "(Host=...;Database=...;Username=...;Password=...;EFCoreProvider=Postgres). " +
+                "SQL Server / LocalDB is not supported. Legacy VISA2015 remains SQL Server for import only.");
         }
 
-        var sqlCs = StripEfCoreProvider(connectionString);
-        options.UseSqlServer(sqlCs, sql =>
+        // XAF / legacy seeders often use DateTime.Kind=Unspecified; Npgsql 6+ rejects that by default.
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+        var cleaned = StripEfCoreProvider(connectionString);
+        options.UseNpgsql(cleaned, npgsql =>
         {
-            sql.CommandTimeout(commandTimeoutSeconds);
-            sql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            npgsql.CommandTimeout(commandTimeoutSeconds);
         });
     }
 

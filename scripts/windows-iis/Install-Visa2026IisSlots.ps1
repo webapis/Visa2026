@@ -8,7 +8,7 @@
   Production, Staging, Demo, or All (default All).
 
 .PARAMETER SourceEnvFile
-  Copy SA_PASSWORD / DEVEXPRESS_LICENSEKEY into missing slot env files (e.g. C:\visa2026\.env.prod).
+  Copy DEVEXPRESS_LICENSEKEY / PG_* into missing slot env files (e.g. C:\visa2026\env\prod.env).
 
 .PARAMETER SkipConfigure
   Only create folders, sites, and app pools; do not run Configure-Visa2026Production.ps1.
@@ -16,24 +16,27 @@
 .PARAMETER SkipAutoStart
   Do not run Set-Visa2026IisSlotsAutoStart.ps1 at the end.
 
-.PARAMETER SqlServer
-  Default localhost\SQLEXPRESS.
-
 .NOTES
-  Runbook: docs/ON_PREM_WINDOWS_IIS.md
+  Runbook: docs/ON_PREM_WINDOWS_IIS.md — PostgreSQL only (Install-PostgreSqlForVisa2026.ps1 first).
 #>
 param(
     [ValidateSet("Production", "Staging", "Demo", "All")]
     [string]$Profile = "All",
 
-    [string]$SourceEnvFile = "C:\visa2026\.env.prod",
+    [string]$SourceEnvFile = "C:\visa2026\env\prod.env",
     [switch]$SkipConfigure,
     [switch]$SkipAutoStart,
-    [string]$SqlServer = "localhost\SQLEXPRESS"
+
+    # Obsolete: ignored. Kept for older callers.
+    [string]$SqlServer = ""
 )
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
+
+if (-not [string]::IsNullOrWhiteSpace($SqlServer)) {
+    Write-Warning "SqlServer parameter is ignored — Visa2026 uses PostgreSQL only."
+}
 
 Initialize-Visa2026IisServerFolders | Out-Null
 
@@ -77,7 +80,7 @@ foreach ($name in $profiles) {
     Grant-Visa2026IisAppPoolDataProtectionAcl -AppPoolName $ctx.AppPoolName -DataProtectionKeysPath $ctx.DataProtectionKeysPath
 
     if (-not $SkipConfigure) {
-        & $configure -Profile $name -SqlServer $SqlServer
+        & $configure -Profile $name
         & $setPoolEnv -Profile $name
     }
 
