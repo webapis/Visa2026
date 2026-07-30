@@ -94,6 +94,7 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeCapabilityFlagsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.PersonIncompleteDataSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaProcessNumberSchemaUpdater(objectSpace, versionFromDB),
@@ -128,6 +129,7 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.ImportReimportHistoryDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ReportDashboardModelUpdater());
             updaters.Add(new DatabaseUpdate.ReportDashboardDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.PersonDossierDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackModelUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackViewsUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackDetailViewUpdater());

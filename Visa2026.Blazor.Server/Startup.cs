@@ -18,6 +18,7 @@ using Visa2026.Module.Services.StateNotifications;
 using Visa2026.Module.Services.Feedback;
 using Visa2026.Module.Services.WordReports;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.PersonLinkedDocuments;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Blazor.Server.Localization;
@@ -217,6 +218,7 @@ namespace Visa2026.Blazor.Server
             services.AddHostedService<TempFileCleanupService>();
             services.AddHostedService<PdfGenerationBatchWorkerService>();
             services.AddHostedService<WordReportGenerationBatchWorkerService>();
+            services.AddHostedService<PersonExportBatchWorkerService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
@@ -235,6 +237,10 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IReportDashboardQueryService, ReportDashboardHybridQueryService>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<PersonDocumentCopyPdfMerger>();
+            services.AddScoped<PersonDossierPdfBuilder>();
+            services.AddScoped<PersonExportPacker>();
+            services.AddScoped<PersonExportBatchEnqueueService>();
+            services.AddSingleton<IPersonExportBatchTrackNotifier, PersonExportBatchTrackNotifier>();
             services.AddScoped<HeaderDocumentCopyPdfMerger>();
             services.AddScoped<ApplicationItemDocumentBatchSummaryPdfBuilder>();
             services.AddScoped<ApplicationItemDocumentFileAccess>();
@@ -268,6 +274,7 @@ namespace Visa2026.Blazor.Server
                 ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
+                PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
 

@@ -253,6 +253,26 @@
                                 }
                             </div>
                             <div class="rd-sub-tab-filters">
+                                @if (ReportDashboardCatalog.SupportsPersonSearch(Category))
+                                {
+                                    <div class="rd-search-box">
+                                        <input type="search"
+                                               class="rd-search-input"
+                                               placeholder="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchPlaceholder")"
+                                               title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.PersonSearch")"
+                                               disabled="@ShowLoading"
+                                               value="@SearchTerm"
+                                               @onchange="OnSearchTermChange" />
+                                        @if (!string.IsNullOrWhiteSpace(SearchTerm))
+                                        {
+                                            <button type="button"
+                                                    class="rd-search-clear"
+                                                    disabled="@ShowLoading"
+                                                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchClear")"
+                                                    @onclick="OnClearSearch">&times;</button>
+                                        }
+                                    </div>
+                                }
                                 @if (ReportDashboardCatalog.SupportsCategoryDateRange(Category))
                                 {
                                     <div class="rd-period-select"
@@ -332,7 +352,8 @@
                             </div>
                         </div>
                     }
-                    else if (ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category)
+                    else if (ReportDashboardCatalog.SupportsPersonSearch(Category)
+                          || ReportDashboardCatalog.SupportsIncludeArchivedPersons(Category)
                           || ReportDashboardCatalog.SupportsOneLastValidVisaPerPerson(Category)
                           || ReportDashboardCatalog.SupportsOneLastValidWorkPermitPerPerson(Category)
                           || ReportDashboardCatalog.SupportsValidVisaPersonsOnly(Category)
@@ -342,6 +363,26 @@
                     {
                         <div class="rd-sub-tabs-row">
                             <div class="rd-sub-tab-filters">
+                                @if (ReportDashboardCatalog.SupportsPersonSearch(Category))
+                                {
+                                    <div class="rd-search-box">
+                                        <input type="search"
+                                               class="rd-search-input"
+                                               placeholder="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchPlaceholder")"
+                                               title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.PersonSearch")"
+                                               disabled="@ShowLoading"
+                                               value="@SearchTerm"
+                                               @onchange="OnSearchTermChange" />
+                                        @if (!string.IsNullOrWhiteSpace(SearchTerm))
+                                        {
+                                            <button type="button"
+                                                    class="rd-search-clear"
+                                                    disabled="@ShowLoading"
+                                                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.SearchClear")"
+                                                    @onclick="OnClearSearch">&times;</button>
+                                        }
+                                    </div>
+                                }
                                 @if (ReportDashboardCatalog.SupportsCategoryDateRange(Category))
                                 {
                                     <div class="rd-period-select"
@@ -553,7 +594,10 @@
                                     {
                                         @foreach (var row in PagedRows)
                                         {
-                                            <tr>
+                                            var opensDossier = CanOpenDossier(row);
+                                            <tr class="@(opensDossier ? "rd-row-clickable" : null)"
+                                                title="@(opensDossier ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpenDossierTitle") : null)"
+                                                @onclick="() => OnRowSelected(row)">
                                                 <td class="rd-cell-name">@row.Name</td>
                                                 <td><span class="rd-project-tag">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.Project) : row.Project)</span></td>
                                                 <td class="@ColumnClass(2)">@(Category == ReportDashboardCategory.IncompletePersons ? ReportDashboardLocalization.Status(row.ColumnA) : row.ColumnA)</td>
@@ -651,6 +695,7 @@
     [Parameter] public bool                      IncludeCompletedApplicationProcesses { get; set; }
     [Parameter] public bool                      IncludeCancelledApplicationProcesses { get; set; }
     [Parameter] public bool                      ValidVisaPersonsOnly { get; set; } = true;
+    [Parameter] public string                    SearchTerm      { get; set; } = string.Empty;
 
     [Parameter] public EventCallback<ReportDashboardPersonType> PersonTypeChanged   { get; set; }
     [Parameter] public EventCallback<ReportDashboardCategory>   CategoryChanged     { get; set; }
@@ -672,6 +717,8 @@
     [Parameter] public EventCallback<int>                       PositionHistoryDateRangeChanged { get; set; }
     [Parameter] public EventCallback<int>                       AddressOfResidenceDateRangeChanged { get; set; }
     [Parameter] public EventCallback<int>                       MedicalRecordDateRangeChanged { get; set; }
+    [Parameter] public EventCallback<string>                    SearchTermChanged   { get; set; }
+    [Parameter] public EventCallback<Guid>                      PersonSelected      { get; set; }
 
     private bool _projectsExpanded;
     private bool _initialLoadStarted;
@@ -1124,6 +1171,43 @@
     {
         await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview"));
         await ShowAllViewChanged.InvokeAsync(true);
+    }
+
+    /// <summary>
+    /// Search runs on Enter or blur rather than per keystroke — each term is a database round trip.
+    /// </summary>
+    private async Task OnSearchTermChange(ChangeEventArgs e)
+    {
+        var term = e.Value as string ?? string.Empty;
+        if (string.Equals(term, SearchTerm, StringComparison.Ordinal) || !SearchTermChanged.HasDelegate)
+            return;
+
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Searching"));
+        await SearchTermChanged.InvokeAsync(term);
+    }
+
+    private async Task OnClearSearch()
+    {
+        if (ShowLoading || !SearchTermChanged.HasDelegate)
+            return;
+
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Searching"));
+        await SearchTermChanged.InvokeAsync(string.Empty);
+    }
+
+    private bool CanOpenDossier(ReportDashboardPreviewRow row) =>
+        ReportDashboardCatalog.SupportsPersonSearch(Category)
+        && row.RecordId is { } id
+        && id != Guid.Empty
+        && PersonSelected.HasDelegate;
+
+    private async Task OnRowSelected(ReportDashboardPreviewRow row)
+    {
+        if (ShowLoading || !CanOpenDossier(row))
+            return;
+
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpeningDossier"));
+        await PersonSelected.InvokeAsync(row.RecordId!.Value);
     }
     private async Task OnIncludeArchivedChanged(ChangeEventArgs e)
     {

@@ -141,8 +141,11 @@ public sealed class ReportDashboardMockQueryService : IReportDashboardQueryServi
         bool oneLastValidWorkPermitPerPerson = false,
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
-        bool validVisaPersonsOnly = true)
+        bool validVisaPersonsOnly = true,
+        string? searchTerm = null)
     {
+        // Person search has no mock rows — it is real-view only (Hybrid).
+        if (searchTerm != null) { /* no-op */ }
         // Include-archived toggle is for WP/Education/etc.
         if (includeArchivedPersons) { /* no-op */ }
         if (validVisaPersonsOnly) { /* no-op */ }

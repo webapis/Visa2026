@@ -44,6 +44,7 @@ namespace Visa2026.Module.DatabaseUpdate
             CreateViewRdApplicationDirectMigrationOnProcessA();
             CreateViewRdApplicationDirectMigrationProcessComplete();
             CreateViewRdIncompletePersonsByMissingArea();
+            CreateViewRdPersonSearch();
             CreateViewRdInvitationRejected();
             CreateViewRdInvitationUsed();
             CreateViewRdInvitationValidUntil();
@@ -1074,6 +1075,9 @@ WHERE ISNULL(a.GCRecord, 0) = 0
 
         private void CreateViewRdIncompletePersonsByMissingArea() =>
             ExecuteEmbeddedSqlView("vw_rd_incomplete_persons_by_missing_area.sql");
+
+        private void CreateViewRdPersonSearch() =>
+            ExecuteEmbeddedSqlView("vw_rd_person_search.sql");
 
         /// <summary>
         /// Report Dashboard Application (via ministry) Invitation on Process (P).

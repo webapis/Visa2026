@@ -30,7 +30,9 @@ public enum ReportDashboardCategory
     PositionHistory,
     Subcontractor,
     MedicalRecord,
-    IncompletePersons
+    IncompletePersons,
+    /// <summary>Free-text person lookup; a result row opens that person's dossier.</summary>
+    PersonSearch
 }
 
 /// <summary>A named report variant within a category (e.g. "By Type", "By Citizenship").</summary>

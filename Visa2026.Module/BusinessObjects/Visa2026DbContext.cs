@@ -182,6 +182,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VwRdEducation> VwRdEducation { get; set; }
         public DbSet<VwRdEducationByCountry> VwRdEducationByCountry { get; set; }
         public DbSet<VwRdIncompletePersonsByMissingArea> VwRdIncompletePersonsByMissingArea { get; set; }
+        public DbSet<VwRdPersonSearch> VwRdPersonSearch { get; set; }
         public DbSet<VwRdPositionHistory> VwRdPositionHistory { get; set; }
         public DbSet<VwRdRegistration> VwRdRegistration { get; set; }
         public DbSet<VwRdToBeCheckedIn> VwRdToBeCheckedIn { get; set; }
@@ -209,6 +210,7 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
         public DbSet<WordReportGenerationBatch> WordReportGenerationBatches { get; set; }
+        public DbSet<PersonExportBatch> PersonExportBatches { get; set; }
         public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
@@ -544,6 +546,12 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<VwRdPersonSearch>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_person_search");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<VwRdPositionHistory>(b => {
                 b.HasKey(t => t.ID);
                 b.ToView("vw_rd_position_history");
@@ -800,6 +808,14 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(x => x.Application)
                     .WithMany()
                     .HasForeignKey(x => x.ApplicationID)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<PersonExportBatch>(b =>
+            {
+                b.HasOne(x => x.Person)
+                    .WithMany()
+                    .HasForeignKey(x => x.PersonID)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 

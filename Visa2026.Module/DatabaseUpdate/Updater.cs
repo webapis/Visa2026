@@ -288,6 +288,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VwRdIncompletePersonsByMissingArea>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdPersonSearch>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
@@ -397,6 +399,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
         // Rejection group (separate from Application)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
@@ -615,6 +618,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdIncompletePersonsByMissingArea>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdPersonSearch>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
                 role,
@@ -650,6 +655,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
@@ -753,6 +759,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationTypeGroupMember>(role);
             EnsureReadOnlyPermission<PdfGenerationBatch>(role);
             EnsureReadOnlyPermission<WordReportGenerationBatch>(role);
+            EnsureReadOnlyPermission<PersonExportBatch>(role);
 
             EnsureReadOnlyPermission<ApplicationTypeFilter>(role);
             EnsureReadOnlyPermission<ApplicationType>(role);

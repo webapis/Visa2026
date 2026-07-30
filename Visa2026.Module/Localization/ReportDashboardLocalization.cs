@@ -24,6 +24,7 @@ public static class ReportDashboardLocalization
             ["Expiring (<60 days)"] = "ReportDashboard.Status.ExpiringLt60",
             ["Expiring (<90 days)"] = "ReportDashboard.Status.ExpiringLt90",
             ["Expired"] = "ReportDashboard.Status.Expired",
+            ["No visa"] = "ReportDashboard.Status.NoVisa",
             ["Pending"] = "ReportDashboard.Status.Pending",
             ["Unknown"] = "ReportDashboard.Status.Unknown",
             ["Unknown city"] = "ReportDashboard.Status.UnknownCity",
@@ -95,6 +96,7 @@ public static class ReportDashboardLocalization
         ReportDashboardCategory.Subcontractor => Get("ReportDashboard.Category.Subcontractor"),
         ReportDashboardCategory.MedicalRecord => Get("ReportDashboard.Category.MedicalRecords"),
         ReportDashboardCategory.IncompletePersons => Get("ReportDashboard.Category.IncompletePersons"),
+        ReportDashboardCategory.PersonSearch => Get("ReportDashboard.Category.PersonSearch"),
         _ => category.ToString()
     };
 

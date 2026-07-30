@@ -43,6 +43,7 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         CreateViewRdApplicationDirectMigrationOnProcessA();
         CreateViewRdApplicationDirectMigrationProcessComplete();
         CreateViewRdIncompletePersonsByMissingArea();
+        CreateViewRdPersonSearch();
         CreateViewRdInvitationRejected();
         CreateViewRdInvitationUsed();
         CreateViewRdInvitationValidUntil();
@@ -633,6 +634,9 @@ WHERE COALESCE(a.""GCRecord"", 0) = 0
     private void CreateViewRdIncompletePersonsByMissingArea() =>
         ExecuteEmbeddedPostgresView(
             "vw_rd_incomplete_persons_by_missing_area.postgres.sql");
+
+    private void CreateViewRdPersonSearch() =>
+        ExecuteEmbeddedPostgresView("vw_rd_person_search.postgres.sql");
 
     private void CreateViewRdInvitationRejected()
     {

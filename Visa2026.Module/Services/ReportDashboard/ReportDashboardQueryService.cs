@@ -185,6 +185,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             ReportDashboardCategory.IncompletePersons =>
                 objectSpace.GetObjectsQuery<Person>()
                     .Count(p => p.IsDataIncomplete && (role == null || p.PersonRole == role) && !p.IsArchived),
+            // Person search with no term lists everyone, so the Overview count is the person count.
+            ReportDashboardCategory.PersonSearch =>
+                objectSpace.GetObjectsQuery<Person>()
+                    .Count(p => role == null || p.PersonRole == role),
             _ => 0
         };
     }
@@ -201,7 +205,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         bool oneLastValidWorkPermitPerPerson = false,
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
-        bool validVisaPersonsOnly = true)
+        bool validVisaPersonsOnly = true,
+        string? searchTerm = null)
     {
         // Categories without a Last-N UI must not silently filter Preview by ApplicationDate —
         // Open ListView BuildListCriteria has no date clause (Preview ↔ ListView Total parity).
@@ -244,6 +249,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             ReportDashboardCategory.Subcontractor    => LoadSubcontractor(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, includeArchivedPersons, validVisaPersonIds),
             ReportDashboardCategory.MedicalRecord   => LoadMedicalRecord(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, cutoff, includeArchivedPersons, validVisaPersonIds),
             ReportDashboardCategory.IncompletePersons => LoadIncompletePersons(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured),
+            ReportDashboardCategory.PersonSearch     => LoadPersonSearch(objectSpace, role, projectKey, personType, subReport, excelHint, excelConfigured, searchTerm),
             _                                        => EmptyPanel(personType, category, subReport, excelHint, excelConfigured)
         };
     }
@@ -6096,6 +6102,99 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             personType, ReportDashboardCategory.IncompletePersons, subReport, rows,
             excelHint, excelConfigured, buckets, totalCount);
     }
+
+    /// <summary>
+    /// Person search: one Preview row per Person, narrowed by the officer's term.
+    /// An empty term lists everyone under the current person-type tab and project chip.
+    /// Chart buckets follow the person's current visa status.
+    /// </summary>
+    private static ReportDashboardPanelData LoadPersonSearch(
+        IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
+        ReportDashboardPersonType personType, string subReport,
+        string? excelHint, bool excelConfigured, string? searchTerm)
+    {
+        if (objectSpace is not EFCoreObjectSpace efOs
+            || efOs.DbContext is not Visa2026EFCoreDbContext db)
+        {
+            return EmptyPanel(personType, ReportDashboardCategory.PersonSearch, subReport, excelHint, excelConfigured);
+        }
+
+        IQueryable<VwRdPersonSearch> query = db.VwRdPersonSearch.AsNoTracking();
+
+        if (role != null)
+            query = query.Where(r => r.PersonRoleCode == (int)role.Value);
+
+        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+        {
+            query = query.Where(r =>
+                r.ProjectName == projectKey
+                || r.ProjectNameTm == projectKey
+                || r.ProjectNameRaw == projectKey);
+        }
+
+        // Every token must match, same rule as BuildListCriteria so the drill-down Total agrees.
+        foreach (var token in ReportDashboardCatalog.PersonSearchTokens(searchTerm))
+        {
+            var needle = token;
+            query = query.Where(r => r.SearchText != null && r.SearchText.Contains(needle));
+        }
+
+        var totalCount = query.Count();
+
+        var counts = query
+            .GroupBy(r => r.StatusLabel)
+            .Select(g => new { Label = g.Key, Count = g.Count() })
+            .ToList()
+            .ToDictionary(x => x.Label ?? string.Empty, x => x.Count, StringComparer.Ordinal);
+
+        var buckets = PersonSearchStatusOrder
+            .Where(counts.ContainsKey)
+            .Select(label => new ReportDashboardStatusBucket
+            {
+                Label = label,
+                Count = counts[label],
+                CssClass = PersonSearchStatusCss(label)
+            })
+            .ToList();
+
+        var rows = query
+            .OrderBy(r => r.PersonName)
+            .Take(PreviewLimit)
+            .ToList()
+            .Select(r => new ReportDashboardPreviewRow
+            {
+                RecordId = r.PersonOid ?? r.ID,
+                Name = r.PersonName ?? string.Empty,
+                Project = r.ProjectName ?? string.Empty,
+                ColumnA = r.PersonalNumber ?? string.Empty,
+                ColumnB = r.PassportNumber ?? string.Empty,
+                ColumnC = r.VisaExpiryLabel ?? string.Empty,
+                Status = r.StatusLabel ?? string.Empty,
+                StatusCssClass = r.StatusCssClass ?? string.Empty
+            })
+            .ToList();
+
+        return BuildPanel(
+            personType, ReportDashboardCategory.PersonSearch, subReport, rows,
+            excelHint, excelConfigured, buckets, totalCount);
+    }
+
+    /// <summary>Status ladder for Person search chart buckets (best to worst).</summary>
+    private static readonly string[] PersonSearchStatusOrder =
+    [
+        "Valid",
+        "Expiring (<30 days)",
+        "Expired",
+        ReportDashboardCatalog.PersonSearchNoVisaLabel
+    ];
+
+    private static string PersonSearchStatusCss(string label) => label switch
+    {
+        "Valid" => "st-approved",
+        "Expiring (<30 days)" => "st-pending",
+        "Expired" => "st-expiring",
+        _ => string.Empty
+    };
 
     /// <summary>
     /// Medical records by validity. Last-N uses ApplicationItem.CurrentMedicalRecord;

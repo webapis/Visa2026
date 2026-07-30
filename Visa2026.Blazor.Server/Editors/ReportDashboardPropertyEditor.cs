@@ -17,6 +17,7 @@ using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.ReportDashboard;
 
 namespace Visa2026.Blazor.Server.Editors;
@@ -61,6 +62,9 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             ValidVisaPersonsOnly = true,
             IncludeCompletedApplicationProcesses = false,
             IncludeCancelledApplicationProcesses = false,
+            SearchTerm = string.Empty,
+            SearchTermChanged = EventCallback.Factory.Create<string>(this, OnSearchTermChanged),
+            PersonSelected = EventCallback.Factory.Create<Guid>(this, OnPersonSelected),
             PersonTypeChanged   = EventCallback.Factory.Create<ReportDashboardPersonType>(this, OnPersonTypeChanged),
             CategoryChanged     = EventCallback.Factory.Create<ReportDashboardCategory>(this, OnCategoryChanged),
             SubReportChanged    = EventCallback.Factory.Create<string>(this, OnSubReportChanged),
@@ -118,6 +122,33 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
     {
         ComponentModel.ProjectKey = projectKey;
         return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnSearchTermChanged(string searchTerm)
+    {
+        ComponentModel.SearchTerm = searchTerm ?? string.Empty;
+        return RefreshAsync(ComponentModel);
+    }
+
+    /// <summary>
+    /// A Person search result row hands over to the read-only dossier page.
+    /// </summary>
+    private void OnPersonSelected(Guid personId)
+    {
+        if (_application == null || personId == Guid.Empty)
+            return;
+
+        var detailView = PersonDossierOpenHelper.CreateDossierView(_application, personId);
+        if (detailView == null)
+            return;
+
+        var window = _application.MainWindow;
+        if (window == null)
+            return;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(window, null));
     }
 
 
@@ -386,7 +417,8 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             model.OneLastValidWorkPermitPerPerson,
             model.IncludeCompletedApplicationProcesses,
             model.IncludeCancelledApplicationProcesses,
-            model.ValidVisaPersonsOnly);
+            model.ValidVisaPersonsOnly,
+            model.SearchTerm);
     }
 
     private async Task OnOpenExcelAsync()
@@ -451,7 +483,7 @@ public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexV
             var includeArchived = model.IncludeArchivedPersons;
             var criteria = ReportDashboardCatalog.BuildListCriteria(
                 model.PersonType, category, model.ProjectKey, statusLabel,
-                includeArchived, subReport, model.OneLastValidVisaPerPerson);
+                includeArchived, subReport, model.OneLastValidVisaPerPerson, model.SearchTerm);
 
             var objectSpace = _application.CreateObjectSpace(type);
             var collectionSource = _application.CreateCollectionSource(objectSpace, type, listViewId);

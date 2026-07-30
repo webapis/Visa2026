@@ -31,6 +31,7 @@
     <link href="_content/DevExpress.Blazor.Viewer/css/dx-blazor-viewer-components.bs5.min.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/site.css" asp-append-version="true" rel="stylesheet" />
     <link href="css/report-dashboard.css" asp-append-version="true" rel="stylesheet" />
+    <link href="css/person-dossier.css" asp-append-version="true" rel="stylesheet" />
 </head>
 <body>
     <component type="typeof(SplashScreen)" render-mode="Static" param-Caption='""' param-ImagePath='"images/CalikLogo.png"' param-ContentType="@calikSplashContentType" />
@@ -280,6 +281,7 @@
     <component type="typeof(AlertsHandler)" render-mode="Server" />
     <component type="typeof(Visa2026.Blazor.Server.Components.PdfBatchToastHost)" render-mode="Server" />
     <component type="typeof(Visa2026.Blazor.Server.Components.WordReportBatchToastHost)" render-mode="Server" />
+    <component type="typeof(Visa2026.Blazor.Server.Components.PersonExportBatchToastHost)" render-mode="Server" />
     @* Hidden header widgets: state notifications, runtime-error badge, user feedback *@
     @* <component type="typeof(Visa2026.Blazor.Server.Components.StateNotificationHeaderBadge)" render-mode="Server" /> *@
     @* <component type="typeof(Visa2026.Blazor.Server.Components.RuntimeErrorAlertHost)" render-mode="Server" /> *@
@@ -347,6 +349,40 @@
                 try { localStorage.removeItem(KEY); } catch { }
             };
             window.visaWordBatchToast.fetchJson = async function (url) {
+                try {
+                    var resp = await fetch(url, { credentials: "include" });
+                    var contentType = (resp.headers.get("content-type") || "").toLowerCase();
+                    var data = null;
+                    var textSnippet = "";
+                    if (contentType.indexOf("application/json") !== -1) {
+                        try { data = await resp.json(); } catch { }
+                    } else {
+                        try {
+                            var text = await resp.text();
+                            textSnippet = (text || "").substring(0, 200);
+                        } catch { }
+                    }
+                    return { ok: resp.ok, status: resp.status, data: data, contentType: contentType, textSnippet: textSnippet };
+                } catch (e) {
+                    return { ok: false, status: 0, data: null, contentType: "", textSnippet: "" };
+                }
+            };
+        })();
+
+        // Person dossier hand-over export toast — same fetch pattern as the PDF and Word jobs.
+        (function () {
+            var KEY = "visa.personExport.currentId";
+            window.visaPersonExportToast = window.visaPersonExportToast || {};
+            window.visaPersonExportToast.setCurrentBatchId = function (id) {
+                try { localStorage.setItem(KEY, id || ""); } catch { }
+            };
+            window.visaPersonExportToast.getCurrentBatchId = function () {
+                try { return localStorage.getItem(KEY) || ""; } catch { return ""; }
+            };
+            window.visaPersonExportToast.clearCurrentBatchId = function () {
+                try { localStorage.removeItem(KEY); } catch { }
+            };
+            window.visaPersonExportToast.fetchJson = async function (url) {
                 try {
                     var resp = await fetch(url, { credentials: "include" });
                     var contentType = (resp.headers.get("content-type") || "").toLowerCase();

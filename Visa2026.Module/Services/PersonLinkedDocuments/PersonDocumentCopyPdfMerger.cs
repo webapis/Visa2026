@@ -43,6 +43,27 @@ public sealed class PersonDocumentCopyPdfMerger
             return false;
 
         var snapshot = PersonLinkedDocumentsResolver.Resolve(objectSpace, person);
+        return TryBuildMergedPdf(objectSpace, snapshot, recordKey, recordLabel, out content, out fileName);
+    }
+
+    /// <summary>
+    /// Merges one record against an already-resolved snapshot. Bulk callers (the person export
+    /// packer) use this so a person with many records does not re-resolve the whole catalog per row.
+    /// </summary>
+    public bool TryBuildMergedPdf(
+        IObjectSpace objectSpace,
+        PersonLinkedDocumentsSnapshot snapshot,
+        string recordKey,
+        string recordLabel,
+        out byte[]? content,
+        out string? fileName)
+    {
+        content = null;
+        fileName = null;
+
+        if (objectSpace == null || snapshot == null || string.IsNullOrWhiteSpace(recordKey))
+            return false;
+
         var record = snapshot.FindRecord(recordKey);
         if (record == null)
             return false;

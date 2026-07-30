@@ -117,6 +117,14 @@ public sealed class ReportDashboardModel : ComponentModelBase
         get => GetPropertyValue<bool>();
         set => SetPropertyValue(value);
     }
+    /// <summary>
+    /// Person search term. Empty lists everyone under the current person-type tab and project chip.
+    /// </summary>
+    public string SearchTerm
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value ?? string.Empty);
+    }
     public ReportDashboardPanelData? Panel
     {
         get => GetPropertyValue<ReportDashboardPanelData?>();
@@ -257,6 +265,17 @@ public sealed class ReportDashboardModel : ComponentModelBase
     public EventCallback<bool> IncludeCancelledApplicationProcessesChanged
     {
         get => GetPropertyValue<EventCallback<bool>>();
+        set => SetPropertyValue(value);
+    }
+    public EventCallback<string> SearchTermChanged
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+    /// <summary>Person search result row picked by the officer; opens that person's dossier.</summary>
+    public EventCallback<Guid> PersonSelected
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
         set => SetPropertyValue(value);
     }
 }

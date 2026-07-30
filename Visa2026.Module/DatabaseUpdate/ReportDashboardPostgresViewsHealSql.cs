@@ -81,6 +81,13 @@ public static class ReportDashboardPostgresViewsHealSql
     private const string IncompletePersonsResourceLeaf =
         "vw_rd_incomplete_persons_by_missing_area.postgres.sql";
 
+    /// <summary>
+    /// Person search reads only base tables, so it heals on relation existence alone.
+    /// Kept out of <see cref="StandaloneViews"/> so it does not trigger a via-ministry re-heal.
+    /// </summary>
+    private const string PersonSearchViewName = "vw_rd_person_search";
+    private const string PersonSearchResourceLeaf = "vw_rd_person_search.postgres.sql";
+
     private static readonly string[] VisaAppProgressDependentViews =
     {
         "vw_rd_visa_app_progress.postgres.sql",
@@ -157,6 +164,9 @@ public static class ReportDashboardPostgresViewsHealSql
         }
 
         HealIncompletePersonsViewIfReady(connection);
+
+        if (!ViewExists(connection, PersonSearchViewName))
+            ExecuteEmbeddedSql(connection, PersonSearchResourceLeaf);
     }
 
     private static void HealIncompletePersonsViewIfReady(NpgsqlConnection connection)

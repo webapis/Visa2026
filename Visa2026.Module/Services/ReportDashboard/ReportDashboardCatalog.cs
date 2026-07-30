@@ -25,8 +25,44 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.PositionHistory,
         ReportDashboardCategory.Subcontractor,
         ReportDashboardCategory.MedicalRecord,
-        ReportDashboardCategory.IncompletePersons
+        ReportDashboardCategory.IncompletePersons,
+        ReportDashboardCategory.PersonSearch
     ];
+
+    /// <summary>
+    /// Categories driven by a free-text term typed by the officer rather than by aggregation.
+    /// An empty term lists every person under the current person-type tab and project chip.
+    /// </summary>
+    public static bool SupportsPersonSearch(ReportDashboardCategory category) =>
+        category is ReportDashboardCategory.PersonSearch;
+
+    /// <summary>Person search sub-report key.</summary>
+    public const string PersonSearchByNameKey = "by-name";
+
+    /// <summary>Chart bucket for persons with no visa on record.</summary>
+    public const string PersonSearchNoVisaLabel = "No visa";
+
+    /// <summary>
+    /// Whitespace-separated terms, lowercased. Every token must match (AND), mirroring
+    /// the token handling in PersonListViewPassportFullTextSearchController.
+    /// </summary>
+    public static string[] PersonSearchTokens(string? searchTerm) =>
+        string.IsNullOrWhiteSpace(searchTerm)
+            ? []
+            : searchTerm.ToLowerInvariant()
+                .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    /// Criteria over the view's SearchText haystack (name + personal number + passport numbers).
+    /// </summary>
+    private static string BuildPersonSearchCriteria(string? searchTerm)
+    {
+        var tokens = PersonSearchTokens(searchTerm);
+        if (tokens.Length == 0)
+            return string.Empty;
+
+        return string.Join(" And ", tokens.Select(t => $"Contains([SearchText], '{Escape(t)}')"));
+    }
 
     /// <summary>
     /// Categories that expose an Include archived toggle (Person.IsArchived on the SQL view / loader).
@@ -473,6 +509,9 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.IncompletePersons => [
             new() { Key = "by-missing-area", Label = "By Missing Area" },
         ],
+        ReportDashboardCategory.PersonSearch => [
+            new() { Key = PersonSearchByNameKey, Label = "Person search" },
+        ],
         _ => [new() { Key = "default", Label = "Overview" }]
     };
 
@@ -640,6 +679,9 @@ public static class ReportDashboardCatalog
                 typeof(VwRdIncompletePersonsByMissingArea));
         }
 
+        if (category == ReportDashboardCategory.PersonSearch)
+            return ("VwRdPersonSearch_ListView", typeof(VwRdPersonSearch));
+
         if (category == ReportDashboardCategory.ApplicationViaMinistry
             && UsesApplicationViaMinistryRdListView(subReport))
         {
@@ -742,6 +784,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Subcontractor    => "Person_ListView",
         ReportDashboardCategory.MedicalRecord   => "MedicalRecord_ListView",
         ReportDashboardCategory.IncompletePersons => "VwRdIncompletePersonsByMissingArea_ListView",
+        ReportDashboardCategory.PersonSearch     => "VwRdPersonSearch_ListView",
         _ => "Person_ListView"
     };
 
@@ -762,6 +805,7 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.Subcontractor    => typeof(Person),
         ReportDashboardCategory.MedicalRecord   => typeof(MedicalRecord),
         ReportDashboardCategory.IncompletePersons => typeof(VwRdIncompletePersonsByMissingArea),
+        ReportDashboardCategory.PersonSearch     => typeof(VwRdPersonSearch),
         _ => typeof(Person)
     };
 
@@ -869,6 +913,8 @@ public static class ReportDashboardCatalog
             (ReportDashboardCategory.MedicalRecord, "by-validity")   => ["Name", "Project", "Document #", "Expiry", "Validity"],
             (ReportDashboardCategory.IncompletePersons, "by-missing-area") =>
                 ["Person", "Person type", "Missing areas", "Notes", "Marked"],
+            (ReportDashboardCategory.PersonSearch, _) =>
+                ["Name", "Project", "Personal number", "Passport #", "Visa expiry", "Status"],
             _ => DefaultTableHeaders(category)
         };
 
@@ -891,6 +937,8 @@ public static class ReportDashboardCatalog
         ReportDashboardCategory.MedicalRecord   => ["Name", "Project", "Document #",      "Expiry",          "Validity"],
         ReportDashboardCategory.IncompletePersons =>
             ["Person", "Person type", "Missing areas", "Notes", "Marked"],
+        ReportDashboardCategory.PersonSearch =>
+            ["Name", "Project", "Personal number", "Passport #", "Visa expiry", "Status"],
         _ => ["Name", "Project", "Info", "Date", "Status"]
     };
 
@@ -903,7 +951,8 @@ public static class ReportDashboardCatalog
         string? statusLabel,
         bool includeArchivedPersons = false,
         string? subReport = null,
-        bool oneLastValidVisaPerPerson = false)
+        bool oneLastValidVisaPerPerson = false,
+        string? searchTerm = null)
     {
         var usesVisaActive = category == ReportDashboardCategory.VisaExtension
             && UsesVisaActiveListView(subReport);
@@ -922,9 +971,20 @@ public static class ReportDashboardCatalog
         var usesRdVisaRow = usesVisaActive || usesExtRequired || usesByDays;
         var usesRdAppRow = usesAppViaMinistryRd || usesAppDirectMigrationRd;
         var usesIncompletePersonsRd = category == ReportDashboardCategory.IncompletePersons;
+        var usesPersonSearchRd = category == ReportDashboardCategory.PersonSearch;
 
         string roleCriteria;
-        if (usesIncompletePersonsRd)
+        if (usesPersonSearchRd)
+        {
+            roleCriteria = IsAllPersonTypes(personType)
+                ? "True"
+                : $"[PersonRoleCode] = {(int)ToPersonRole(personType)}";
+
+            var searchCriteria = BuildPersonSearchCriteria(searchTerm);
+            if (!string.IsNullOrEmpty(searchCriteria))
+                roleCriteria = $"({roleCriteria}) And ({searchCriteria})";
+        }
+        else if (usesIncompletePersonsRd)
         {
             roleCriteria = IsAllPersonTypes(personType)
                 ? "True"
@@ -994,7 +1054,8 @@ public static class ReportDashboardCatalog
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
         {
-            var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow || usesIncompletePersonsRd
+            var projectCriteria = usesAppProgressDedicated || usesRdVisaRow || usesRdAppRow
+                    || usesIncompletePersonsRd || usesPersonSearchRd
                 ? $"[ProjectName] = '{Escape(projectKey)}' Or [ProjectNameTm] = '{Escape(projectKey)}' Or [ProjectNameRaw] = '{Escape(projectKey)}'"
                 : category switch
                 {
@@ -1134,6 +1195,13 @@ public static class ReportDashboardCatalog
                     _ => "True"
                 };
                 roleCriteria = $"({roleCriteria}) And ({flagCriteria})";
+            }
+            else if (usesPersonSearchRd)
+            {
+                var statusCriteria = string.Equals(statusLabel, PersonSearchNoVisaLabel, StringComparison.OrdinalIgnoreCase)
+                    ? "[StatusLabel] = '' Or [StatusLabel] Is Null Or [StatusLabel] = '" + Escape(PersonSearchNoVisaLabel) + "'"
+                    : $"[StatusLabel] = '{Escape(statusLabel)}'";
+                roleCriteria = $"({roleCriteria}) And ({statusCriteria})";
             }
         }
 

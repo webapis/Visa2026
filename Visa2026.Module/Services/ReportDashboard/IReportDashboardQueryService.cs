@@ -33,5 +33,6 @@ public interface IReportDashboardQueryService
         bool oneLastValidWorkPermitPerPerson = false,
         bool includeCompletedApplicationProcesses = false,
         bool includeCancelledApplicationProcesses = false,
-        bool validVisaPersonsOnly = true);
+        bool validVisaPersonsOnly = true,
+        string? searchTerm = null);
 }

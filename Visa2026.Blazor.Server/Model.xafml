@@ -1651,6 +1651,16 @@
         <ColumnInfo Id="MarkedLabel" Index="4" Width="160" Caption="Marked" IsNewNode="True" />
       </Columns>
     </ListView>
+    <ListView Id="VwRdPersonSearch_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdPersonSearch" Caption="Person search" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="180" Caption="Name" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="180" Caption="Project" IsNewNode="True" />
+        <ColumnInfo Id="PersonalNumber" Index="2" Width="130" Caption="Personal number" IsNewNode="True" />
+        <ColumnInfo Id="PassportNumber" Index="3" Width="120" Caption="Passport #" IsNewNode="True" />
+        <ColumnInfo Id="VisaExpirationDate" Index="4" Width="110" Caption="Visa expiry" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="140" Caption="Status" IsNewNode="True" />
+      </Columns>
+    </ListView>
     <ListView Id="VwRdVisaActiveByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByPeriodCategoryType" Caption="Active Visa (V)" IsNewNode="True">
       <Columns IsNewNode="True">
         <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />

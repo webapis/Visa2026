@@ -1879,3 +1879,28 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 **Change:** Replaced `işjeň`/`Işjeň` (and `işjeňleşdir` → `aktiwleşdir`) across Layer A JSON sources; regenerated message catalog + tk-TM xafml.
 
 **Files:** UiStrings*.json (messages, entities, security, person-detail, documents-views, lookup-enums), Module UiStrings.json, generated outputs
+
+## 2026-07-30 - Person search category (free-text) + row click opens dossier
+
+**Ask:** Officers search a person (name / personal number / passport #), pick a result row, and land on the read-only person dossier for company directors.
+
+**Shipped:**
+- `vw_rd_person_search` (`.sql` + `.postgres.sql`) - one row per Person; current passport/visa via `OUTER APPLY` / `LEFT JOIN LATERAL` over non-cancelled rows; `SearchText` = lowercased name parts + personal number + **all** passport numbers
+- `VwRdPersonSearch` BO + `ToView` + `Updater` read permission + PG updater/heal + csproj embed
+- Catalog: `PersonSearch` category, single sub-report `by-name`, headers Name/Project/Personal number/Passport #/Visa expiry/Status, `PersonSearchTokens` + `BuildPersonSearchCriteria`
+- `searchTerm` plumbed through `IReportDashboardQueryService` + all three implementers; Hybrid promoted to Real
+- UI: `.rd-search-box` in the filter chrome (gated by `SupportsPersonSearch`), `.rd-row-clickable` rows -> `PersonSelected` -> `PersonDossierOpenHelper`
+
+**Key decisions:**
+- **Empty term lists everything** (person-type + project filters only) so the Overview card shows a real count instead of 0
+- **Chart buckets = current visa status** (Valid / Expiring <30 / Expired / No visa) - a search still owes the dashboard a chart, and this reuses existing status CSS
+- Rows open the **dossier**, not `Person_DetailView` - the category exists for the director hand-over story
+
+**Parity gate (verified):** term `akku` -> Preview total 7, chart 5 Valid + 2 Expired, ListView `Total: 7`, identical six columns. Empty term -> 3333 / 332 Valid / 54 Expiring / 1579 Expired / 1368 No visa. Same tokenizer feeds Preview and ListView criteria - do not let the two drift.
+
+**Watch-outs:**
+- `ProjectContracts` has **`NameTm` only** (no `Name`) - same trap as the Incomplete persons view
+- Selenium: `Close all tabs` also closes the dashboard; re-click the **Report Dashboard** nav item before asserting on dashboard DOM
+- New/Delete stay visible on the drill-down ListView despite `AllowNew/AllowDelete=False` - pre-existing on every `vw_rd_*` ListView, not specific to this one
+
+**Files:** SqlViews/vw_rd_person_search*.sql, VwRdPersonSearch.cs, Visa2026DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater/HealSql, Updater.cs, ReportDashboardCatalog/Models/Query/Hybrid/Mock, ReportDashboardPropertyEditor/Model/Component.razor, report-dashboard.css, Model.xafml, UiStrings.messages.json

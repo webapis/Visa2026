@@ -1,4 +1,646 @@
 {
+  "PersonDossier.Title": {
+    "en": "Person dossier",
+    "tr-TR": "Kişi dosyası",
+    "tk-TM": "Adam dosýesi",
+    "ru-RU": "Досье лица"
+  },
+  "PersonDossier.Action.Open": {
+    "en": "Open dossier",
+    "tr-TR": "Dosyayı aç",
+    "tk-TM": "Dosýäni aç",
+    "ru-RU": "Открыть досье"
+  },
+  "PersonDossier.Action.Copies": {
+    "en": "Document copies",
+    "tr-TR": "Belge kopyaları",
+    "tk-TM": "Resminama nusgalary",
+    "ru-RU": "Копии документов"
+  },
+  "PersonDossier.Action.Export": {
+    "en": "Export for director",
+    "tr-TR": "Yönetici için dışa aktar",
+    "tk-TM": "Ýolbaşçy üçin eksport",
+    "ru-RU": "Выгрузить для руководителя"
+  },
+  "PersonDossier.Export.GeneratedOn": {
+    "en": "Generated on {0}",
+    "tr-TR": "Oluşturulma: {0}",
+    "tk-TM": "Döredilen senesi: {0}",
+    "ru-RU": "Сформировано: {0}"
+  },
+  "PersonDossier.Export.Queued": {
+    "en": "Preparing the hand-over package...",
+    "tr-TR": "Teslim paketi hazırlanıyor...",
+    "tk-TM": "Tabşyryş paketi taýýarlanýar...",
+    "ru-RU": "Готовится пакет для передачи..."
+  },
+  "PersonDossier.Export.ErrorNoPerson": {
+    "en": "Select a person before exporting.",
+    "tr-TR": "Dışa aktarmadan önce bir kişi seçin.",
+    "tk-TM": "Eksport etmezden öň adam saýlaň.",
+    "ru-RU": "Перед выгрузкой выберите лицо."
+  },
+  "PersonDossier.Export.ErrorNotSignedIn": {
+    "en": "Sign in again to export.",
+    "tr-TR": "Dışa aktarmak için tekrar oturum açın.",
+    "tk-TM": "Eksport etmek üçin ulgama täzeden giriň.",
+    "ru-RU": "Войдите снова, чтобы выполнить выгрузку."
+  },
+  "PersonDossier.Export.ErrorFailed": {
+    "en": "The export could not be started.",
+    "tr-TR": "Dışa aktarma başlatılamadı.",
+    "tk-TM": "Eksporty başlap bolmady.",
+    "ru-RU": "Не удалось запустить выгрузку."
+  },
+  "PersonDossier.Export.Notes.Title": {
+    "en": "Person dossier export notes",
+    "tr-TR": "Kişi dosyası dışa aktarma notları",
+    "tk-TM": "Adam dosýesiniň eksport bellikleri",
+    "ru-RU": "Примечания к выгрузке досье"
+  },
+  "PersonDossier.Export.Notes.NoGaps": {
+    "en": "All records with attachments were exported.",
+    "tr-TR": "Ek içeren tüm kayıtlar dışa aktarıldı.",
+    "tk-TM": "Goşundysy bolan ähli ýazgylar eksport edildi.",
+    "ru-RU": "Все записи с вложениями выгружены."
+  },
+  "PersonDossier.Export.Notes.GapsHeader": {
+    "en": "No readable copy could be produced for:",
+    "tr-TR": "Şunlar için okunabilir kopya oluşturulamadı:",
+    "tk-TM": "Şular üçin okalýan nusga döredip bolmady:",
+    "ru-RU": "Не удалось получить читаемую копию для:"
+  },
+  "PersonDossier.Export.Notes.DossierFailed": {
+    "en": "The dossier document itself could not be generated.",
+    "tr-TR": "Dosya belgesinin kendisi oluşturulamadı.",
+    "tk-TM": "Dosýe resminamasynyň özüni döredip bolmady.",
+    "ru-RU": "Не удалось сформировать сам документ досье."
+  },
+  "PersonDossier.Export.Toast.Title": {
+    "en": "Person dossier export",
+    "tr-TR": "Kişi dosyası dışa aktarma",
+    "tk-TM": "Adam dosýesiniň eksporty",
+    "ru-RU": "Выгрузка досье лица"
+  },
+  "PersonDossier.Export.Toast.Running": {
+    "en": "Building package",
+    "tr-TR": "Paket oluşturuluyor",
+    "tk-TM": "Paket döredilýär",
+    "ru-RU": "Формирование пакета"
+  },
+  "PersonDossier.Export.Toast.Ready": {
+    "en": "Package ready",
+    "tr-TR": "Paket hazır",
+    "tk-TM": "Paket taýýar",
+    "ru-RU": "Пакет готов"
+  },
+  "PersonDossier.Export.Toast.Failed": {
+    "en": "Export failed",
+    "tr-TR": "Dışa aktarma başarısız",
+    "tk-TM": "Eksport şowsuz",
+    "ru-RU": "Выгрузка не выполнена"
+  },
+  "PersonDossier.Export.Toast.Download": {
+    "en": "Download",
+    "tr-TR": "İndir",
+    "tk-TM": "Göçür",
+    "ru-RU": "Скачать"
+  },
+  "PersonDossier.Export.Toast.Dismiss": {
+    "en": "Dismiss",
+    "tr-TR": "Kapat",
+    "tk-TM": "Ýap",
+    "ru-RU": "Закрыть"
+  },
+  "PersonDossier.Export.Toast.Gaps": {
+    "en": "Some records had no readable copy - see EXPORT_NOTES.txt in the package.",
+    "tr-TR": "Bazı kayıtların okunabilir kopyası yoktu - paketteki EXPORT_NOTES.txt dosyasına bakın.",
+    "tk-TM": "Käbir ýazgylaryň okalýan nusgasy ýokdy - paketdäki EXPORT_NOTES.txt faýlyna serediň.",
+    "ru-RU": "Для некоторых записей нет читаемой копии - см. EXPORT_NOTES.txt в пакете."
+  },
+  "PersonDossier.List.SelectOne": {
+    "en": "Select exactly one person to open a dossier.",
+    "tr-TR": "Dosya açmak için tam olarak bir kişi seçin.",
+    "tk-TM": "Dosýe açmak üçin diňe bir adam saýlaň.",
+    "ru-RU": "Чтобы открыть досье, выберите ровно одно лицо."
+  },
+  "PersonDossier.Chrome.Loading": {
+    "en": "Loading dossier...",
+    "tr-TR": "Dosya yükleniyor...",
+    "tk-TM": "Dosýe ýüklenýär...",
+    "ru-RU": "Загрузка досье..."
+  },
+  "PersonDossier.Chrome.NoPerson": {
+    "en": "No person selected.",
+    "tr-TR": "Kişi seçilmedi.",
+    "tk-TM": "Adam saýlanmady.",
+    "ru-RU": "Лицо не выбрано."
+  },
+  "PersonDossier.Chrome.NoPhoto": {
+    "en": "No photo",
+    "tr-TR": "Fotoğraf yok",
+    "tk-TM": "Surat ýok",
+    "ru-RU": "Нет фото"
+  },
+  "PersonDossier.Status.Current": {
+    "en": "Current",
+    "tr-TR": "Güncel",
+    "tk-TM": "Häzirki",
+    "ru-RU": "Текущий"
+  },
+  "PersonDossier.Status.Archived": {
+    "en": "Archived",
+    "tr-TR": "Arşivlenmiş",
+    "tk-TM": "Arhiwde",
+    "ru-RU": "В архиве"
+  },
+  "PersonDossier.Status.Missing": {
+    "en": "Not on file",
+    "tr-TR": "Kayıtlı değil",
+    "tk-TM": "Hasapda ýok",
+    "ru-RU": "Нет в деле"
+  },
+  "PersonDossier.Status.None": {
+    "en": "-",
+    "tr-TR": "-",
+    "tk-TM": "-",
+    "ru-RU": "-"
+  },
+  "PersonDossier.Status.Cancelled": {
+    "en": "Cancelled",
+    "tr-TR": "İptal edildi",
+    "tk-TM": "Ýatyryldy",
+    "ru-RU": "Аннулирован"
+  },
+  "PersonDossier.Status.Expired": {
+    "en": "Expired",
+    "tr-TR": "Süresi dolmuş",
+    "tk-TM": "Möhleti geçen",
+    "ru-RU": "Истёк"
+  },
+  "PersonDossier.Status.Used": {
+    "en": "Used",
+    "tr-TR": "Kullanıldı",
+    "tk-TM": "Ulanyldy",
+    "ru-RU": "Использовано"
+  },
+  "PersonDossier.Status.Present": {
+    "en": "Present",
+    "tr-TR": "Mevcut",
+    "tk-TM": "Bar",
+    "ru-RU": "Есть"
+  },
+  "PersonDossier.Status.ExpiresInDays": {
+    "en": "Expires in {0} days",
+    "tr-TR": "{0} gün içinde doluyor",
+    "tk-TM": "{0} günden möhleti gutarýar",
+    "ru-RU": "Истекает через {0} дн."
+  },
+  "PersonDossier.Status.ValidTo": {
+    "en": "Valid to {0}",
+    "tr-TR": "{0} tarihine kadar geçerli",
+    "tk-TM": "{0} çenli hereket edýär",
+    "ru-RU": "Действует до {0}"
+  },
+  "PersonDossier.Role.Employee": {
+    "en": "Employee",
+    "tr-TR": "Çalışan",
+    "tk-TM": "Işgär",
+    "ru-RU": "Сотрудник"
+  },
+  "PersonDossier.Role.FamilyMember": {
+    "en": "Family member",
+    "tr-TR": "Aile üyesi",
+    "tk-TM": "Maşgala agzasy",
+    "ru-RU": "Член семьи"
+  },
+  "PersonDossier.Role.TemporaryVisitor": {
+    "en": "Temporary visitor",
+    "tr-TR": "Geçici ziyaretçi",
+    "tk-TM": "Wagtlaýyn myhman",
+    "ru-RU": "Временный посетитель"
+  },
+  "PersonDossier.Tile.passport": {
+    "en": "Passport",
+    "tr-TR": "Pasaport",
+    "tk-TM": "Pasport",
+    "ru-RU": "Паспорт"
+  },
+  "PersonDossier.Tile.visa": {
+    "en": "Visa",
+    "tr-TR": "Vize",
+    "tk-TM": "Wiza",
+    "ru-RU": "Виза"
+  },
+  "PersonDossier.Tile.workPermit": {
+    "en": "Work permit",
+    "tr-TR": "Çalışma izni",
+    "tk-TM": "Iş rugsady",
+    "ru-RU": "Разрешение на работу"
+  },
+  "PersonDossier.Tile.registration": {
+    "en": "Registration",
+    "tr-TR": "Kayıt",
+    "tk-TM": "Hasaba alyş",
+    "ru-RU": "Регистрация"
+  },
+  "PersonDossier.Field.PersonalNumber": {
+    "en": "Personal number",
+    "tr-TR": "Kişisel numara",
+    "tk-TM": "Şahsy belgisi",
+    "ru-RU": "Личный номер"
+  },
+  "PersonDossier.Field.DateOfBirth": {
+    "en": "Date of birth",
+    "tr-TR": "Doğum tarihi",
+    "tk-TM": "Doglan senesi",
+    "ru-RU": "Дата рождения"
+  },
+  "PersonDossier.Field.Gender": {
+    "en": "Gender",
+    "tr-TR": "Cinsiyet",
+    "tk-TM": "Jynsy",
+    "ru-RU": "Пол"
+  },
+  "PersonDossier.Field.Citizenship": {
+    "en": "Citizenship",
+    "tr-TR": "Vatandaşlık",
+    "tk-TM": "Raýatlyk",
+    "ru-RU": "Гражданство"
+  },
+  "PersonDossier.Field.CountryOfBirth": {
+    "en": "Country of birth",
+    "tr-TR": "Doğum ülkesi",
+    "tk-TM": "Doglan ýurdy",
+    "ru-RU": "Страна рождения"
+  },
+  "PersonDossier.Field.BirthPlace": {
+    "en": "Birth place",
+    "tr-TR": "Doğum yeri",
+    "tk-TM": "Doglan ýeri",
+    "ru-RU": "Место рождения"
+  },
+  "PersonDossier.Field.MaritalStatus": {
+    "en": "Marital status",
+    "tr-TR": "Medeni hali",
+    "tk-TM": "Maşgala ýagdaýy",
+    "ru-RU": "Семейное положение"
+  },
+  "PersonDossier.Field.HireDate": {
+    "en": "Hire date",
+    "tr-TR": "İşe giriş tarihi",
+    "tk-TM": "Işe kabul edilen senesi",
+    "ru-RU": "Дата приёма на работу"
+  },
+  "PersonDossier.Field.Email": {
+    "en": "Email",
+    "tr-TR": "E-posta",
+    "tk-TM": "E-poçta",
+    "ru-RU": "Эл. почта"
+  },
+  "PersonDossier.Field.Subcontractor": {
+    "en": "Subcontractor",
+    "tr-TR": "Taşeron",
+    "tk-TM": "Subpodrýadçy",
+    "ru-RU": "Субподрядчик"
+  },
+  "PersonDossier.Field.Relationship": {
+    "en": "Relationship",
+    "tr-TR": "Yakınlık",
+    "tk-TM": "Gatnaşyk",
+    "ru-RU": "Степень родства"
+  },
+  "PersonDossier.Field.SponsoringEmployee": {
+    "en": "Sponsoring employee",
+    "tr-TR": "Bağlı olduğu çalışan",
+    "tk-TM": "Çagyryjy işgär",
+    "ru-RU": "Приглашающий сотрудник"
+  },
+  "PersonDossier.Section.passports": {
+    "en": "Passports",
+    "tr-TR": "Pasaportlar",
+    "tk-TM": "Pasportlar",
+    "ru-RU": "Паспорта"
+  },
+  "PersonDossier.Section.visas": {
+    "en": "Visas",
+    "tr-TR": "Vizeler",
+    "tk-TM": "Wizalar",
+    "ru-RU": "Визы"
+  },
+  "PersonDossier.Section.workPermits": {
+    "en": "Work permits",
+    "tr-TR": "Çalışma izinleri",
+    "tk-TM": "Iş rugsatlary",
+    "ru-RU": "Разрешения на работу"
+  },
+  "PersonDossier.Section.education": {
+    "en": "Education",
+    "tr-TR": "Eğitim",
+    "tk-TM": "Bilim",
+    "ru-RU": "Образование"
+  },
+  "PersonDossier.Section.positionHistory": {
+    "en": "Position history",
+    "tr-TR": "Pozisyon geçmişi",
+    "tk-TM": "Wezipe taryhy",
+    "ru-RU": "История должностей"
+  },
+  "PersonDossier.Section.addresses": {
+    "en": "Addresses of residence",
+    "tr-TR": "İkamet adresleri",
+    "tk-TM": "Ýaşaýyş salgylary",
+    "ru-RU": "Адреса проживания"
+  },
+  "PersonDossier.Section.travel": {
+    "en": "Travel history",
+    "tr-TR": "Seyahat geçmişi",
+    "tk-TM": "Syýahat taryhy",
+    "ru-RU": "История поездок"
+  },
+  "PersonDossier.Section.medical": {
+    "en": "Medical records",
+    "tr-TR": "Sağlık kayıtları",
+    "tk-TM": "Saglyk ýazgylary",
+    "ru-RU": "Медицинские записи"
+  },
+  "PersonDossier.Section.familyMembers": {
+    "en": "Family members",
+    "tr-TR": "Aile üyeleri",
+    "tk-TM": "Maşgala agzalary",
+    "ru-RU": "Члены семьи"
+  },
+  "PersonDossier.Section.applications": {
+    "en": "Applications",
+    "tr-TR": "Başvurular",
+    "tk-TM": "Arzalar",
+    "ru-RU": "Заявления"
+  },
+  "PersonDossier.Section.invitations": {
+    "en": "Invitations",
+    "tr-TR": "Davetler",
+    "tk-TM": "Çakylyklar",
+    "ru-RU": "Приглашения"
+  },
+  "PersonDossier.Section.rejections": {
+    "en": "Rejections",
+    "tr-TR": "Retler",
+    "tk-TM": "Retler",
+    "ru-RU": "Отказы"
+  },
+  "PersonDossier.Column.Status": {
+    "en": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Ýagdaý",
+    "ru-RU": "Статус"
+  },
+  "PersonDossier.Column.Number": {
+    "en": "Number",
+    "tr-TR": "Numara",
+    "tk-TM": "Belgisi",
+    "ru-RU": "Номер"
+  },
+  "PersonDossier.Column.Type": {
+    "en": "Type",
+    "tr-TR": "Tür",
+    "tk-TM": "Görnüş",
+    "ru-RU": "Тип"
+  },
+  "PersonDossier.Column.IssuedBy": {
+    "en": "Issued by",
+    "tr-TR": "Veren makam",
+    "tk-TM": "Beren edarasy",
+    "ru-RU": "Кем выдан"
+  },
+  "PersonDossier.Column.IssueDate": {
+    "en": "Issue date",
+    "tr-TR": "Veriliş tarihi",
+    "tk-TM": "Berlen senesi",
+    "ru-RU": "Дата выдачи"
+  },
+  "PersonDossier.Column.Expiry": {
+    "en": "Expiry",
+    "tr-TR": "Bitiş",
+    "tk-TM": "Möhleti",
+    "ru-RU": "Срок действия"
+  },
+  "PersonDossier.Column.Category": {
+    "en": "Category",
+    "tr-TR": "Kategori",
+    "tk-TM": "Kategoriýa",
+    "ru-RU": "Категория"
+  },
+  "PersonDossier.Column.ValidFrom": {
+    "en": "Valid from",
+    "tr-TR": "Başlangıç",
+    "tk-TM": "Başlanýan senesi",
+    "ru-RU": "Действует с"
+  },
+  "PersonDossier.Column.ASNumber": {
+    "en": "AS number",
+    "tr-TR": "AS numarası",
+    "tk-TM": "AS belgisi",
+    "ru-RU": "Номер AS"
+  },
+  "PersonDossier.Column.Level": {
+    "en": "Level",
+    "tr-TR": "Seviye",
+    "tk-TM": "Dereje",
+    "ru-RU": "Уровень"
+  },
+  "PersonDossier.Column.Institution": {
+    "en": "Institution",
+    "tr-TR": "Kurum",
+    "tk-TM": "Edara",
+    "ru-RU": "Учреждение"
+  },
+  "PersonDossier.Column.Specialty": {
+    "en": "Specialty",
+    "tr-TR": "Uzmanlık",
+    "tk-TM": "Hünäri",
+    "ru-RU": "Специальность"
+  },
+  "PersonDossier.Column.Country": {
+    "en": "Country",
+    "tr-TR": "Ülke",
+    "tk-TM": "Ýurt",
+    "ru-RU": "Страна"
+  },
+  "PersonDossier.Column.GraduationYear": {
+    "en": "Graduation year",
+    "tr-TR": "Mezuniyet yılı",
+    "tk-TM": "Gutaran ýyly",
+    "ru-RU": "Год окончания"
+  },
+  "PersonDossier.Column.Position": {
+    "en": "Position",
+    "tr-TR": "Pozisyon",
+    "tk-TM": "Wezipe",
+    "ru-RU": "Должность"
+  },
+  "PersonDossier.Column.Department": {
+    "en": "Department",
+    "tr-TR": "Departman",
+    "tk-TM": "Bölüm",
+    "ru-RU": "Отдел"
+  },
+  "PersonDossier.Column.From": {
+    "en": "From",
+    "tr-TR": "Başlangıç",
+    "tk-TM": "Başy",
+    "ru-RU": "С"
+  },
+  "PersonDossier.Column.To": {
+    "en": "To",
+    "tr-TR": "Bitiş",
+    "tk-TM": "Soňy",
+    "ru-RU": "По"
+  },
+  "PersonDossier.Column.City": {
+    "en": "City",
+    "tr-TR": "Şehir",
+    "tk-TM": "Şäher",
+    "ru-RU": "Город"
+  },
+  "PersonDossier.Column.Address": {
+    "en": "Address",
+    "tr-TR": "Adres",
+    "tk-TM": "Salgy",
+    "ru-RU": "Адрес"
+  },
+  "PersonDossier.Column.Date": {
+    "en": "Date",
+    "tr-TR": "Tarih",
+    "tk-TM": "Senesi",
+    "ru-RU": "Дата"
+  },
+  "PersonDossier.Column.Movement": {
+    "en": "Movement",
+    "tr-TR": "Hareket",
+    "tk-TM": "Hereket",
+    "ru-RU": "Движение"
+  },
+  "PersonDossier.Column.Place": {
+    "en": "Place",
+    "tr-TR": "Yer",
+    "tk-TM": "Ýeri",
+    "ru-RU": "Место"
+  },
+  "PersonDossier.Column.Name": {
+    "en": "Name",
+    "tr-TR": "Ad",
+    "tk-TM": "Ad",
+    "ru-RU": "Имя"
+  },
+  "PersonDossier.Column.Relationship": {
+    "en": "Relationship",
+    "tr-TR": "Yakınlık",
+    "tk-TM": "Gatnaşyk",
+    "ru-RU": "Степень родства"
+  },
+  "PersonDossier.Column.DateOfBirth": {
+    "en": "Date of birth",
+    "tr-TR": "Doğum tarihi",
+    "tk-TM": "Doglan senesi",
+    "ru-RU": "Дата рождения"
+  },
+  "PersonDossier.Column.Citizenship": {
+    "en": "Citizenship",
+    "tr-TR": "Vatandaşlık",
+    "tk-TM": "Raýatlyk",
+    "ru-RU": "Гражданство"
+  },
+  "PersonDossier.Column.ApplicationNumber": {
+    "en": "Application #",
+    "tr-TR": "Başvuru No",
+    "tk-TM": "Arza belgisi",
+    "ru-RU": "№ заявления"
+  },
+  "PersonDossier.Column.ApplicationType": {
+    "en": "Application type",
+    "tr-TR": "Başvuru türü",
+    "tk-TM": "Arza görnüşi",
+    "ru-RU": "Тип заявления"
+  },
+  "PersonDossier.Column.ApplicationDate": {
+    "en": "Application date",
+    "tr-TR": "Başvuru tarihi",
+    "tk-TM": "Arza senesi",
+    "ru-RU": "Дата заявления"
+  },
+  "PersonDossier.Column.Issued": {
+    "en": "Issued",
+    "tr-TR": "Veriliş",
+    "tk-TM": "Berilen",
+    "ru-RU": "Выдано"
+  },
+  "PersonDossier.Column.Document": {
+    "en": "Document",
+    "tr-TR": "Belge",
+    "tk-TM": "Resminama",
+    "ru-RU": "Документ"
+  },
+  "PersonDossier.Column.Reason": {
+    "en": "Reason",
+    "tr-TR": "Neden",
+    "tk-TM": "Sebäbi",
+    "ru-RU": "Причина"
+  },
+  "PersonDossier.ResidenceType.Lodging": {
+    "en": "Lodging",
+    "tr-TR": "Konaklama",
+    "tk-TM": "Umumy ýaşaýyş jaýy",
+    "ru-RU": "Проживание"
+  },
+  "PersonDossier.ResidenceType.Hotel": {
+    "en": "Hotel",
+    "tr-TR": "Otel",
+    "tk-TM": "Myhmanhana",
+    "ru-RU": "Гостиница"
+  },
+  "PersonDossier.ResidenceType.PrivateHouse": {
+    "en": "Private house",
+    "tr-TR": "Özel konut",
+    "tk-TM": "Şahsy jaý",
+    "ru-RU": "Частный дом"
+  },
+  "PersonDossier.ResidenceType.Hospital": {
+    "en": "Hospital",
+    "tr-TR": "Hastane",
+    "tk-TM": "Hassahana",
+    "ru-RU": "Больница"
+  },
+  "PersonDossier.ResidenceType.Other": {
+    "en": "Other",
+    "tr-TR": "Diğer",
+    "tk-TM": "Beýleki",
+    "ru-RU": "Прочее"
+  },
+  "PersonDossier.MovementType.Entry": {
+    "en": "Entry",
+    "tr-TR": "Giriş",
+    "tk-TM": "Giriş",
+    "ru-RU": "Въезд"
+  },
+  "PersonDossier.MovementType.Exit": {
+    "en": "Exit",
+    "tr-TR": "Çıkış",
+    "tk-TM": "Çykyş",
+    "ru-RU": "Выезд"
+  },
+  "PersonDossier.TravelType.Internal": {
+    "en": "Internal",
+    "tr-TR": "İç",
+    "tk-TM": "Içeri",
+    "ru-RU": "Внутренний"
+  },
+  "PersonDossier.TravelType.External": {
+    "en": "External",
+    "tr-TR": "Dış",
+    "tk-TM": "Daşarky",
+    "ru-RU": "Внешний"
+  },
   "Confirm.SoftDelete": {
     "en": "Are you sure you want to remove the selected record(s)?",
     "tr-TR": "Seçili kayıt(lar)ı kaldırmak istediğinize emin misiniz?",
@@ -3767,6 +4409,12 @@
     "tk-TM": "Pasportlar",
     "ru-RU": "Паспорта"
   },
+  "PersonDocumentCopies.Section.Visas": {
+    "en": "Visas",
+    "tr-TR": "Vizeler",
+    "tk-TM": "Wizalar",
+    "ru-RU": "Визы"
+  },
   "PersonDocumentCopies.Section.Education": {
     "en": "Education",
     "tr-TR": "Eğitim",
@@ -4462,6 +5110,60 @@
     "tr-TR": "Taşeron",
     "tk-TM": "Subpodrýadçy",
     "ru-RU": "Субподрядчик"
+  },
+  "ReportDashboard.Category.PersonSearch": {
+    "en": "Person search",
+    "tr-TR": "Kişi arama",
+    "tk-TM": "Şahs gözlegi",
+    "ru-RU": "Поиск персон"
+  },
+  "ReportDashboard.SubReport.PersonSearch.by-name": {
+    "en": "Person search",
+    "tr-TR": "Kişi arama",
+    "tk-TM": "Şahs gözlegi",
+    "ru-RU": "Поиск персон"
+  },
+  "ReportDashboard.Chrome.SearchPlaceholder": {
+    "en": "Name, personal number or passport #",
+    "tr-TR": "Ad, kimlik no veya pasaport no",
+    "tk-TM": "At, şahsy belgi ýa-da pasport belgisi",
+    "ru-RU": "Имя, личный номер или номер паспорта"
+  },
+  "ReportDashboard.Chrome.SearchClear": {
+    "en": "Clear search",
+    "tr-TR": "Aramayı temizle",
+    "tk-TM": "Gözlegi arassala",
+    "ru-RU": "Очистить поиск"
+  },
+  "ReportDashboard.Chrome.Searching": {
+    "en": "Searching…",
+    "tr-TR": "Aranıyor…",
+    "tk-TM": "Gözlenýär…",
+    "ru-RU": "Поиск…"
+  },
+  "ReportDashboard.Chrome.OpeningDossier": {
+    "en": "Opening dossier…",
+    "tr-TR": "Dosya açılıyor…",
+    "tk-TM": "Şahsy iş açylýar…",
+    "ru-RU": "Открытие досье…"
+  },
+  "ReportDashboard.Chrome.OpenDossierTitle": {
+    "en": "Open this person's dossier",
+    "tr-TR": "Bu kişinin dosyasını aç",
+    "tk-TM": "Bu şahsyň işini aç",
+    "ru-RU": "Открыть досье этого человека"
+  },
+  "ReportDashboard.Chrome.Title.PersonSearch": {
+    "en": "Search by name, personal number or passport number",
+    "tr-TR": "Ada, kimlik numarasına veya pasaport numarasına göre ara",
+    "tk-TM": "At, şahsy belgi ýa-da pasport belgisi boýunça gözle",
+    "ru-RU": "Поиск по имени, личному номеру или номеру паспорта"
+  },
+  "ReportDashboard.Status.NoVisa": {
+    "en": "No visa",
+    "tr-TR": "Vize yok",
+    "tk-TM": "Wiza ýok",
+    "ru-RU": "Нет визы"
   },
   "ReportDashboard.Category.IncompletePersons": {
     "en": "Incomplete persons",

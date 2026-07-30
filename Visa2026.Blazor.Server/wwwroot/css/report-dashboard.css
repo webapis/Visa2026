@@ -1013,6 +1013,54 @@
 .rd-sub-tab-filters .rd-period-select {
   margin: 0;
 }
+
+/* Person search box */
+.rd-search-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.rd-search-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--rd-surface);
+  border: 1px solid var(--rd-accent-edge);
+  border-radius: 999px;
+  padding: 5px 30px 5px 14px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--rd-text);
+  min-width: 240px;
+  transition: border-color 0.15s;
+}
+.rd-search-input::-webkit-search-cancel-button { display: none; }
+.rd-search-input:hover { border-color: var(--rd-accent); }
+.rd-search-input:focus {
+  outline: none;
+  border-color: var(--rd-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rd-hue-accent) 22%, transparent);
+}
+.rd-search-input:disabled { opacity: 0.6; cursor: default; }
+.rd-search-clear {
+  position: absolute;
+  right: 8px;
+  appearance: none;
+  background: none;
+  border: none;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  color: var(--rd-muted);
+  cursor: pointer;
+}
+.rd-search-clear:hover { color: var(--rd-text); }
+
+/* Person search result row hands over to the dossier */
+.rd-listview-scroll tr.rd-row-clickable { cursor: pointer; }
+.rd-listview-scroll tr.rd-row-clickable:hover {
+  background: var(--rd-accent-soft);
+}
 .rd-period-select .rd-period-label {
   white-space: nowrap;
 }

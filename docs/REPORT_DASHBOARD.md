@@ -18,7 +18,7 @@ After login, officers land on this dashboard to grasp process state (invitation,
 |-------|--------|
 | Project filter | `All` + `ProjectContract` chips (overflow “+N more”) |
 | Person type | Employees 뿯½ Family Members 뿯½ Temporary Visitors (`PersonRecordRole`) |
-| Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records / Incomplete persons |
+| Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records / Incomplete persons / Person search |
 
 ## Hosting
 
@@ -48,12 +48,28 @@ Open ListView applies the localized catalog sub-report Label as the view caption
 
 After editing message JSON, regenerate: `dotnet run --project tools/GenerateModelLocalization/GenerateModelLocalization.csproj`.
 
+## Person search category
+
+The only category that takes free text. It answers "find this person, then show me everything about them".
+
+| Aspect | Behaviour |
+|--------|-----------|
+| Chrome | Search box (`.rd-search-box`) rendered next to the filter chips when `ReportDashboardCatalog.SupportsPersonSearch(Category)`; clear `×` resets the term |
+| Empty term | Lists **all** persons under the current person-type / project filters, so the Overview card still shows a real count |
+| Haystack | `SearchText` column on the view — lowercased first/middle/last name + personal number + **every** passport number |
+| Chart buckets | Current visa status: `Valid` / `Expiring (<30 days)` / `Expired` / `No visa` (reuses the green-amber-red status CSS) |
+| Row click | Opens the **person dossier** (`PersonDossierOpenHelper`), not the Person DetailView — see [`PERSON_DOSSIER.md`](PERSON_DOSSIER.md) |
+| Source | `vw_rd_person_search` → `VwRdPersonSearch` → `VwRdPersonSearch_ListView` |
+
+**Parity invariant:** the term is tokenized once by `ReportDashboardCatalog.PersonSearchTokens` and consumed by both the Preview loader (`LoadPersonSearch`) and the drill-down criteria (`BuildPersonSearchCriteria`), so Preview total always equals **Open ListView** total.
+
 ## Relationship to other features
 
 | Feature | Relationship |
 |---------|----------------|
 | **Bo State Notifications** (header bell) | Separate; kept |
 | **Person incomplete data** | Manual officer flag; category **Incomplete persons** — see [`PERSON_INCOMPLETE_DATA.md`](PERSON_INCOMPLETE_DATA.md) |
+| **Person dossier** | Category **Person search** is the dashboard entry point; rows open the read-only dossier — see [`PERSON_DOSSIER.md`](PERSON_DOSSIER.md) |
 | **State specifications / evaluators** | Still define BO state criteria for colors and notifications; **not** the home UI |
 | **Resminamalar / Document copies** | Unchanged; Excel action may reuse `UserReportTemplate` seeds |
 

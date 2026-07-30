@@ -23,6 +23,16 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-07-30 - New surface must live in main area, not as an occupant; OwnerViewId from a PropertyEditor
+
+- **Symptom (design-time)**: A person dossier page that also opens document copies would fight the slot: `Open*` is last-wins with **one occupant at a time**, so hosting the dossier as an occupant means opening copies evicts the dossier the officer is reading.
+- **Fix**: Dossier renders in the **main content area** (`#visa-app-shell` grid `1fr` + slot width), so data and scans are visible side by side. Slot stays reserved for files.
+- **Second trap**: `VisaPreviewSlotCloseController` closes the slot when the **owning View** deactivates. Navigating search -> dossier would therefore close a slot opened from the previous view.
+- **Fix**: Pass the dossier view id explicitly. A `BlazorPropertyEditorBase` has no `View`, so `VisaPreviewSlotViewHelper.ResolveOwnerViewId(view)` is unavailable - added the constant `PersonDossierViewIds.DetailView` (`"PersonDossierHost_DetailView"`) and passed it as `ownerViewId`.
+- **Prevent**: When opening the slot from a property editor / component rather than a `ViewController`, use a view-id constant; do not pass `null` (that makes the slot owner-less and closes unpredictably).
+- **Not verified in a running app session**: build only.
+- **Cross-skill**: person-document-copies
+
 ### 2026-06-06 — Catalog card UX polish (Resminamalar + Document copies)
 
 - **Symptom**: Inline catalog cramped, duplicate report names, centered card floating in empty space; preview viewer incorrectly narrowed when catalog CSS applied globally.
