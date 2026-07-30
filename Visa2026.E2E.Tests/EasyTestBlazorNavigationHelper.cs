@@ -11,6 +11,15 @@ namespace Visa2026.E2E.Tests;
 /// </summary>
 internal static class EasyTestBlazorNavigationHelper
 {
+    public static void GoToAbsoluteUrl(IApplicationContext appContext, string absoluteUrl)
+    {
+        IWebDriver driver = ResolveWebDriver(appContext)
+            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+
+        driver.Navigate().GoToUrl(absoluteUrl);
+        WaitForDocumentReady(driver, TimeSpan.FromSeconds(45));
+    }
+
     public static void GoToRelativeUrl(IApplicationContext appContext, string baseUrl, string relativePath)
     {
         IWebDriver driver = ResolveWebDriver(appContext)

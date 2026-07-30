@@ -20,6 +20,9 @@ namespace Visa2026.E2E.Tests
 
         protected IApplicationContext AppContext { get; }
 
+        /// <summary>Absolute or path URL of the employee detail created in this journey (TabbedMDI-safe reopen).</summary>
+        protected string? SavedEmployeeDetailUrl { get; private set; }
+
         protected E2ETestBase(EasyTestSessionFixture session)
         {
             AppContext = session.AppContext;
@@ -300,15 +303,57 @@ namespace Visa2026.E2E.Tests
 
                 // Successful Save typically remains on employee detail with the Personal Number.
                 if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                {
+                    CaptureSavedEmployeeDetailUrl();
                     return;
+                }
 
                 if (TryConfirmEmployeeInList(personalNumber))
+                {
+                    CaptureSavedEmployeeDetailUrl();
                     return;
+                }
             }
 
             throw new InvalidOperationException(
                 $"Employee with Personal Number '{personalNumber}' was not confirmed after Save " +
                 $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private void CaptureSavedEmployeeDetailUrl()
+        {
+            string url = EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext);
+            if (url.Contains(E2ETestLoginValues.EmployeeDetailViewPath, StringComparison.OrdinalIgnoreCase))
+                SavedEmployeeDetailUrl = url;
+        }
+
+        /// <summary>
+        /// Returns to the employee created in this journey. Prefers the captured detail URL
+        /// (avoids list ProcessRow targeting nested grids after Passport/Visa), with list fallback.
+        /// </summary>
+        protected void ReturnToSavedEmployeeDetail(
+            string personalNumber = E2ETestEmployeeCreateValues.PersonalNumber)
+        {
+            if (!string.IsNullOrEmpty(SavedEmployeeDetailUrl))
+            {
+                for (var attempt = 0; attempt < 8; attempt++)
+                {
+                    try
+                    {
+                        EasyTestBlazorNavigationHelper.GoToAbsoluteUrl(AppContext, SavedEmployeeDetailUrl);
+                        Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+                        if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                            return;
+                    }
+                    catch (Exception) when (attempt < 7)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                    }
+                }
+            }
+
+            OpenEmployeeInListByPersonalNumber(personalNumber);
+            CaptureSavedEmployeeDetailUrl();
         }
 
         private bool TryConfirmEmployeeInList(string personalNumber)
@@ -347,6 +392,7 @@ namespace Visa2026.E2E.Tests
                     AppContext.GetGrid().ProcessRow(
                         new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber));
                     AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                    CaptureSavedEmployeeDetailUrl();
                     return;
                 }
                 catch (AdapterOperationException)
@@ -356,6 +402,7 @@ namespace Visa2026.E2E.Tests
                         AppContext.GetGrid().ProcessRow(
                             new EasyTestParameter("Full Name", fullNameFallback));
                         AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                        CaptureSavedEmployeeDetailUrl();
                         return;
                     }
                     catch (AdapterOperationException)
@@ -368,6 +415,7 @@ namespace Visa2026.E2E.Tests
 
             EasyTestBlazorNavigationHelper.ClickListRowContaining(AppContext, personalNumber);
             AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+            CaptureSavedEmployeeDetailUrl();
         }
 
         /// <summary>
@@ -640,10 +688,27 @@ namespace Visa2026.E2E.Tests
 
         private void AssertEmployeeDetailShowsPersonalNumber(string personalNumber)
         {
-            Assert.True(
-                EmployeeDetailShowsPersonalNumber(personalNumber),
+            for (var attempt = 0; attempt < 20; attempt++)
+            {
+                if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                    return;
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            }
+
+            string actual = "(unreadable)";
+            try
+            {
+                actual = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.PersonalNumber) ?? "(null)";
+            }
+            catch (Exception ex)
+            {
+                actual = $"({ex.GetType().Name}: {ex.Message})";
+            }
+
+            throw new InvalidOperationException(
                 $"Employee detail with Personal Number '{personalNumber}' was not detected " +
-                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+                $"(actual='{actual}', URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
         private bool EmployeeDetailShowsPersonalNumber(string personalNumber)

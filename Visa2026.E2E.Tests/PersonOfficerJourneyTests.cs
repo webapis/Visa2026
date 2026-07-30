@@ -45,21 +45,21 @@ public class PersonOfficerJourneyTests : E2ETestBase
         AssertVisaDetailShowsNumber(E2ETestVisaCreateValues.VisaNumber);
 
         // Education
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonEducationsNestedNew();
         FillEducationRequiredFields();
         SaveEducationDetail();
         AssertEducationShowsInstitution(E2ETestEducationCreateValues.InstitutionDisplay);
 
         // Address of residence (Private house)
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonAddressesNestedNew();
         FillAddressPrivateHouseRequiredFields();
         SaveAddressDetail();
         AssertAddressShowsFullAddress(E2ETestAddressCreateValues.FullAddress);
 
         // Medical record — create, update, delete
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonMedicalRecordsNestedNew();
         FillMedicalRecordRequiredFields();
         SaveMedicalRecordDetail();
@@ -69,24 +69,24 @@ public class PersonOfficerJourneyTests : E2ETestBase
         _ = TryDeleteMedicalRecord();
 
         // Phase B — employee-only tabs
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonPositionHistoryNestedNew();
         FillPositionHistoryRequiredFields();
         SavePositionHistoryDetail();
 
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonWorkDutiesNestedNew();
         FillWorkDutyRequiredFields();
         SaveWorkDutyDetail();
         AssertWorkDutyShowsDescription(E2ETestWorkDutyCreateValues.Description);
 
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonSalariesNestedNew();
         FillSalaryRequiredFields();
         SaveSalaryDetail();
         AssertSalaryShowsAmount(E2ETestSalaryCreateValues.Amount);
 
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ExecutePersonTravelExternalArrivalNestedNew();
         SaveTravelHistoryDetail();
     }

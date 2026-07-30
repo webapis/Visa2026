@@ -180,3 +180,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: First Save succeeded; list-row confirm failed; retry created New with same `E2E-EMP-010` → uniqueness validation; list still looked empty to the helper.
 - **Fix / reuse**: On success stay on detail with PN (no forced New retry). On "already uses this personal number", treat as saved and locate list row — never recreate the same PN.
 - **Reuse**: Employee create confirm = detail PN present without validation banner; uniqueness error means prior Save worked.
+
+### 2026-07-30 — Return via captured employee detail URL after Passport/Visa
+
+- **Outcome**: negative → fix
+- **Context**: after Visa Save, `OpenEmployeeInListByPersonalNumber` opened employee URL but PN assert failed
+- **Symptom**: URL `Person_DetailView_Employee/{oid}` yet Personal Number not detected; list ProcessRow unreliable after nested Passport/Visa.
+- **Fix / reuse**: Capture `SavedEmployeeDetailUrl` after create/open; `ReturnToSavedEmployeeDetail()` uses Selenium `GoToAbsoluteUrl` before falling back to list.
+- **Reuse**: After deep nested child detail (Visa), reopen parent via oid URL — not Employees list ProcessRow.

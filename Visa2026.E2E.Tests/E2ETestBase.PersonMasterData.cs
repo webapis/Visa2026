@@ -276,7 +276,7 @@ public abstract partial class E2ETestBase
     protected void UpdateEducationInstitution(
         string newInstitution = E2ETestEducationCreateValues.UpdatedInstitutionDisplay)
     {
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ActivatePersonNestedTab(E2ETestPersonNestedUi.EducationsTab);
         EasyTestBlazorNavigationHelper.ClickListRowContaining(
             AppContext, E2ETestEducationCreateValues.InstitutionDisplay);
@@ -356,7 +356,7 @@ public abstract partial class E2ETestBase
         string fromNumber = E2ETestMedicalRecordCreateValues.DocumentNumber,
         string toNumber = E2ETestMedicalRecordCreateValues.UpdatedDocumentNumber)
     {
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+        ReturnToSavedEmployeeDetail();
         ActivatePersonNestedTab(
             E2ETestPersonNestedUi.MedicalRecordsTab,
             E2ETestPersonNestedUi.MedicalRecordsTabAlt,
