@@ -380,7 +380,7 @@ public abstract partial class E2ETestBase
     {
         try
         {
-            OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
+            ReturnToSavedEmployeeDetail();
             ActivatePersonNestedTab(
                 E2ETestPersonNestedUi.MedicalRecordsTab,
                 E2ETestPersonNestedUi.MedicalRecordsTabAlt,
