@@ -2735,6 +2735,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Häzirki",
             ["ru-RU"] = "Текущий",
         },
+        ["PersonDocumentCopies.Column.Files"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Files",
+            ["tr-TR"] = "Dosyalar",
+            ["tk-TM"] = "Faýllar",
+            ["ru-RU"] = "Файлы",
+        },
+        ["PersonDocumentCopies.Column.Record"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Record",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Ýazgy",
+            ["ru-RU"] = "Запись",
+        },
+        ["PersonDocumentCopies.Column.Status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Status",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Status",
+            ["ru-RU"] = "Статус",
+        },
         ["PersonDocumentCopies.Empty.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No person selected.",
@@ -2748,6 +2769,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu kişi için belge kaydı bulunamadı.",
             ["tk-TM"] = "Bu adam üçin resminama ýazgysy tapylmady.",
             ["ru-RU"] = "Записи документов для этого лица не найдены.",
+        },
+        ["PersonDocumentCopies.Header.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}",
+            ["tr-TR"] = "{0}",
+            ["tk-TM"] = "{0}",
+            ["ru-RU"] = "{0}",
+        },
+        ["PersonDocumentCopies.Header.PersonWithNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} ({1})",
+            ["tr-TR"] = "{0} ({1})",
+            ["tk-TM"] = "{0} ({1})",
+            ["ru-RU"] = "{0} ({1})",
         },
         ["PersonDocumentCopies.Hint.NoCurrentShowingRecent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2882,12 +2917,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýaşaýyş salgylary",
             ["ru-RU"] = "Адреса проживания",
         },
+        ["PersonDocumentCopies.Section.Collapse"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Collapse section",
+            ["tr-TR"] = "Bölümü daralt",
+            ["tk-TM"] = "Bölümi daralt",
+            ["ru-RU"] = "Свернуть раздел",
+        },
         ["PersonDocumentCopies.Section.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Education",
             ["tr-TR"] = "Eğitim",
             ["tk-TM"] = "Bilim",
             ["ru-RU"] = "Образование",
+        },
+        ["PersonDocumentCopies.Section.Expand"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expand section",
+            ["tr-TR"] = "Bölümü genişlet",
+            ["tk-TM"] = "Bölümi giňelt",
+            ["ru-RU"] = "Развернуть раздел",
         },
         ["PersonDocumentCopies.Section.FamilyRelationDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2931,6 +2980,34 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Retler",
             ["ru-RU"] = "Отказы",
         },
+        ["PersonDocumentCopies.Section.Summary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} records · {1} with files",
+            ["tr-TR"] = "{0} kayıt · {1} dosyalı",
+            ["tk-TM"] = "{0} ýazgy · {1} faýly bar",
+            ["ru-RU"] = "{0} записей · {1} с файлами",
+        },
+        ["PersonDocumentCopies.Section.SummaryNone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} records · none scanned",
+            ["tr-TR"] = "{0} kayıt · taranmış dosya yok",
+            ["tk-TM"] = "{0} ýazgy · skan faýl ýok",
+            ["ru-RU"] = "{0} записей · сканов нет",
+        },
+        ["PersonDocumentCopies.Section.SummaryOneNone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "1 record · none scanned",
+            ["tr-TR"] = "1 kayıt · taranmış dosya yok",
+            ["tk-TM"] = "1 ýazgy · skan faýl ýok",
+            ["ru-RU"] = "1 запись · сканов нет",
+        },
+        ["PersonDocumentCopies.Section.SummaryOneWithFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "1 record · {0} with files",
+            ["tr-TR"] = "1 kayıt · {0} dosyalı",
+            ["tk-TM"] = "1 ýazgy · {0} faýly bar",
+            ["ru-RU"] = "1 запись · {0} с файлами",
+        },
         ["PersonDocumentCopies.Section.Visas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Visas",
@@ -2944,6 +3021,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Çalışma izinleri",
             ["tk-TM"] = "Iş rugsatlary",
             ["ru-RU"] = "РНТ",
+        },
+        ["PersonDocumentCopies.Status.Missing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing",
+            ["tr-TR"] = "Eksik",
+            ["tk-TM"] = "Ýok",
+            ["ru-RU"] = "Отсутствует",
+        },
+        ["PersonDocumentCopies.Status.Ready"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ready",
+            ["tr-TR"] = "Hazır",
+            ["tk-TM"] = "Taýýar",
+            ["ru-RU"] = "Готово",
         },
         ["PersonDocumentCopies.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

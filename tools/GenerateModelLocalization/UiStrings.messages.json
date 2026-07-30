@@ -4409,6 +4409,84 @@
     "tk-TM": "Bu bölümdä häzirki ýazgy ýok; iň soňky ýazgy görkezilýär.",
     "ru-RU": "В этом разделе нет текущей записи; показана последняя."
   },
+  "PersonDocumentCopies.Header.Person": {
+    "en": "{0}",
+    "tr-TR": "{0}",
+    "tk-TM": "{0}",
+    "ru-RU": "{0}"
+  },
+  "PersonDocumentCopies.Header.PersonWithNumber": {
+    "en": "{0} ({1})",
+    "tr-TR": "{0} ({1})",
+    "tk-TM": "{0} ({1})",
+    "ru-RU": "{0} ({1})"
+  },
+  "PersonDocumentCopies.Column.Record": {
+    "en": "Record",
+    "tr-TR": "Kayıt",
+    "tk-TM": "Ýazgy",
+    "ru-RU": "Запись"
+  },
+  "PersonDocumentCopies.Column.Files": {
+    "en": "Files",
+    "tr-TR": "Dosyalar",
+    "tk-TM": "Faýllar",
+    "ru-RU": "Файлы"
+  },
+  "PersonDocumentCopies.Column.Status": {
+    "en": "Status",
+    "tr-TR": "Durum",
+    "tk-TM": "Status",
+    "ru-RU": "Статус"
+  },
+  "PersonDocumentCopies.Status.Missing": {
+    "en": "Missing",
+    "tr-TR": "Eksik",
+    "tk-TM": "Ýok",
+    "ru-RU": "Отсутствует"
+  },
+  "PersonDocumentCopies.Status.Ready": {
+    "en": "Ready",
+    "tr-TR": "Hazır",
+    "tk-TM": "Taýýar",
+    "ru-RU": "Готово"
+  },
+  "PersonDocumentCopies.Section.Summary": {
+    "en": "{0} records · {1} with files",
+    "tr-TR": "{0} kayıt · {1} dosyalı",
+    "tk-TM": "{0} ýazgy · {1} faýly bar",
+    "ru-RU": "{0} записей · {1} с файлами"
+  },
+  "PersonDocumentCopies.Section.SummaryNone": {
+    "en": "{0} records · none scanned",
+    "tr-TR": "{0} kayıt · taranmış dosya yok",
+    "tk-TM": "{0} ýazgy · skan faýl ýok",
+    "ru-RU": "{0} записей · сканов нет"
+  },
+  "PersonDocumentCopies.Section.SummaryOneWithFiles": {
+    "en": "1 record · {0} with files",
+    "tr-TR": "1 kayıt · {0} dosyalı",
+    "tk-TM": "1 ýazgy · {0} faýly bar",
+    "ru-RU": "1 запись · {0} с файлами"
+  },
+  "PersonDocumentCopies.Section.SummaryOneNone": {
+    "en": "1 record · none scanned",
+    "tr-TR": "1 kayıt · taranmış dosya yok",
+    "tk-TM": "1 ýazgy · skan faýl ýok",
+    "ru-RU": "1 запись · сканов нет"
+  },
+  "PersonDocumentCopies.Section.Expand": {
+    "en": "Expand section",
+    "tr-TR": "Bölümü genişlet",
+    "tk-TM": "Bölümi giňelt",
+    "ru-RU": "Развернуть раздел"
+  },
+  "PersonDocumentCopies.Section.Collapse": {
+    "en": "Collapse section",
+    "tr-TR": "Bölümü daralt",
+    "tk-TM": "Bölümi daralt",
+    "ru-RU": "Свернуть раздел"
+  },
   "PersonDocumentCopies.Preview.Title": {
     "en": "Document preview",
     "tr-TR": "Belge önizleme",

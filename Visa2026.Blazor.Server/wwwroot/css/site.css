@@ -3365,20 +3365,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     border-color: var(--resminamalar-slot-border);
 }
 
-.app-person-doc-copies__subtitle {
-    margin: 0 0.65rem 0.5rem;
-}
+/* Person document copies catalog layout: person-document-copies.css */
 
-.app-person-doc-copies__section-hint {
-    margin: 0 0.65rem 0.5rem;
-    font-size: 0.8125rem;
-}
-
-.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-person-doc-copies__section:not(:last-child) {
-    border-bottom: 1px solid var(--resminamalar-slot-border);
-}
-
-/* Placeholder manual — searchable catalog in preview slot */
 .placeholder-manual-slot-panel__toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -3454,44 +3442,6 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .placeholder-manual-slot-panel__copy-cell {
     white-space: nowrap;
-}
-
-.app-person-doc-copies__section-more {
-    display: flex;
-    justify-content: flex-start;
-    padding: 0.35rem 0.65rem 0.75rem;
-}
-
-.app-person-doc-copies__section-title {
-    margin: 0.75rem 0.65rem 0.35rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    opacity: 0.72;
-}
-
-.app-person-doc-copies__section:first-child .app-person-doc-copies__section-title {
-    margin-top: 0.35rem;
-}
-
-.app-person-doc-copies__record--nested {
-    margin-left: 1rem;
-    border-left: 2px solid var(--resminamalar-slot-border);
-}
-
-.app-person-doc-copies__badge {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 0.5rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-    background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
 .progress-letters-catalog__date {
