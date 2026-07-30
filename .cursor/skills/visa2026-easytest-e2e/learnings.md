@@ -188,3 +188,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: URL `Person_DetailView_Employee/{oid}` yet Personal Number not detected; list ProcessRow unreliable after nested Passport/Visa.
 - **Fix / reuse**: Capture `SavedEmployeeDetailUrl` after create/open; `ReturnToSavedEmployeeDetail()` uses Selenium `GoToAbsoluteUrl` before falling back to list.
 - **Reuse**: After deep nested child detail (Visa), reopen parent via oid URL — not Employees list ProcessRow.
+
+### 2026-07-30 — Address E2E: prefer Lodging over Private house
+
+- **Outcome**: negative → fix
+- **Context**: `FillAddressPrivateHouseRequiredFields` on GHA after Education passed
+- **Symptom**: Could not fill `Full Address` (Type=Private house ImmediatePostData hide/show flaky; URL stayed `/`).
+- **Fix / reuse**: Keep OnCreated **Lodging**; fill Region → City → Lodging (`1932 (A.Garlyýew) köç. 70/1 UÝJ` in catalog).
+- **Reuse**: Avoid Private-house Full Address in EasyTest unless Type change + field visibility is proven stable.
