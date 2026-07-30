@@ -1,0 +1,85 @@
+# Fast gate: solution build + unit tests (Visa2026.Module.Tests, Visa2026.DataImporter).
+# No database, no browser - target is under ~10 minutes so it can block every push and PR.
+# Long-running browser coverage lives in e2e-tests.yml; see docs/TESTING_PLAN.md.
+
+name: Build & unit tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-and-test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  unit-tests:
+    name: Build + unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      # Forks do not receive secrets; DX1000/DX1001 stay warnings there thanks to NoWarn below.
+      - name: Write DevExpress license
+        shell: bash
+        env:
+          DEVEXPRESS_LICENSE: ${{ secrets.DEVEXPRESS_LICENSE }}
+          DEVEXPRESS_KEY: ${{ secrets.DEVEXPRESS_KEY }}
+        run: |
+          license="${DEVEXPRESS_LICENSE:-$DEVEXPRESS_KEY}"
+          if [ -z "$license" ]; then
+            echo "::warning::No DevExpress license secret available (fork PR?); building with NoWarn."
+            exit 0
+          fi
+          mkdir -p DevExpress.Key
+          printf '%s' "$license" > DevExpress.Key/DevExpress_License.txt
+
+      - name: Restore
+        run: dotnet restore Visa2026.slnx
+
+      - name: Build (Debug)
+        run: dotnet build Visa2026.slnx -c Debug --no-restore "/p:NoWarn=DX1000%3BDX1001"
+
+      - name: Unit tests - Visa2026.Module.Tests
+        run: >-
+          dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug --no-build
+          --logger "console;verbosity=normal"
+          --logger "trx;LogFileName=module-tests.trx"
+
+      # Audit_* facts in Visa2014WorkPermitItemPositionResolverTests connect to legacy
+      # SQL (VISA2015) and a local visa2026 Postgres; they are developer harnesses and
+      # cannot run on a clean runner. Everything else here is pure transform logic.
+      - name: Unit tests - Visa2026.DataImporter
+        run: >-
+          dotnet test Visa2026.DataImporter/Visa2026.DataImporter.csproj -c Debug --no-build
+          --filter "FullyQualifiedName!~Audit_"
+          --logger "console;verbosity=normal"
+          --logger "trx;LogFileName=dataimporter-tests.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: "**/TestResults/*.trx"
+          if-no-files-found: ignore

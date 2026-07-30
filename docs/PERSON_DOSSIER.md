@@ -11,6 +11,8 @@ the denormalized `ApplicationItem.LastApplicationState` column rather than a UI 
 Single-person 360 page: identity, current status, and every visa/permit/travel record for one
 `Person`, in one read-only screen, with the existing document-copies catalog beside it.
 
+**Loading:** staged progress panel (message + percent + skeleton) while the snapshot resolves — same pattern as Report Dashboard chrome. Dashboard row hand-off uses an indeterminate **Opening dossier…** overlay.
+
 **Views:** toolbar **Screen** | **Paper**. Screen is the officer dashboard layout. Paper renders the
 same HTML fragment the export PDF uses (`PersonDossierDocumentHtmlBuilder.BuildFragment`) inside an
 A4 sheet chrome — preview of the director hand-over without opening the preview slot (so Document

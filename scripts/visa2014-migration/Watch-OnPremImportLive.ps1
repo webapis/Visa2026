@@ -56,6 +56,7 @@ $ErrorActionPreference = 'Stop'
 $scriptDir = $PSScriptRoot
 . (Join-Path $scriptDir '_lib\Get-OnPremSyncHostRoot.ps1')
 . (Join-Path $scriptDir '_lib\OnPremSyncRunStatus.ps1')
+. (Join-Path $scriptDir '_lib\FileWaveLogMetrics.ps1')
 
 if ($Profile -eq 'Local' -and $ViaSsh) {
     throw "Profile Local is this PC only - do not use -ViaSsh (Demo/Staging/Production use -ViaSsh for .25)."
@@ -96,6 +97,7 @@ $script:DbCountMap = [ordered]@{
 }
 
 $script:PrevWave = @{}   # Name -> @{ Ins; Upd; Fail }
+$script:PrevFileWave = @{}   # Key -> @{ Ins; Upd; Fail }
 $script:PrevDb   = @{}   # BO -> count
 $script:SampleIndex = 0
 
@@ -385,8 +387,49 @@ function Format-FileWaveElapsed([object]$Seconds) {
     } catch { return '' }
 }
 
+function Write-FileWaveProgress {
+    param(
+        [object]$FileWaves,
+        [string]$SyncHostRoot
+    )
+
+    if (-not $FileWaves -or -not $FileWaves.Steps) { return }
+
+    $running = @($FileWaves.Steps | Where-Object { [string]$_.Status -eq 'Running' } | Select-Object -First 1)
+    if ($running.Count -eq 0) { return }
+
+    $step = $running[0]
+    $logDir = if ($FileWaves.LogDir) { [string]$FileWaves.LogDir } else { '' }
+    $logPath = Get-FileWaveStepLogPath -SyncHostRoot $SyncHostRoot -LogDir $logDir -StepKey ([string]$step.Key)
+    $live = Parse-FileWaveLogMetrics -LogPath $logPath -TailLines 80
+
+    $ins = if ($null -ne $live.Inserted) { [int]$live.Inserted } elseif ($null -ne $step.Inserted) { [int]$step.Inserted } else { 0 }
+    $upd = if ($null -ne $live.Updated) { [int]$live.Updated } elseif ($null -ne $step.Updated) { [int]$step.Updated } else { 0 }
+    $fail = if ($null -ne $live.Failed) { [int]$live.Failed } elseif ($null -ne $step.Failed) { [int]$step.Failed } else { 0 }
+    $legacy = if ($null -ne $live.LegacyRows) { [int]$live.LegacyRows } elseif ($null -ne $step.LegacyRows) { [int]$step.LegacyRows } else { 0 }
+    $posted = $ins + $upd
+    $total = $legacy
+    $pct = if ($total -gt 0) { 100.0 * $posted / $total } else { 0 }
+    $bar = Format-ProgressBar -Percent $pct
+
+    Write-Host -NoNewline 'File-wave progress: ' -ForegroundColor White
+    Write-Host -NoNewline ("{0}  " -f [string]$step.Name) -ForegroundColor Cyan
+    if ($total -gt 0) {
+        Write-Host -NoNewline ("{0} {1}/{2} ({3:0.#}%)" -f $bar, $posted, $total, $pct) -ForegroundColor Cyan
+    } else {
+        Write-Host -NoNewline ("posted={0}" -f $posted) -ForegroundColor Cyan
+    }
+    if ($ins -gt 0) { Write-Host -NoNewline ("  ins={0}" -f $ins) -ForegroundColor Green }
+    if ($upd -gt 0) { Write-Host -NoNewline ("  upd={0}" -f $upd) -ForegroundColor Green }
+    if ($fail -gt 0) { Write-Host -NoNewline ("  fail={0}" -f $fail) -ForegroundColor Red }
+    Write-Host ''
+}
+
 function Write-FileWaveTable {
-    param([string]$FileWavesJson)
+    param(
+        [string]$FileWavesJson,
+        [string]$SyncHostRoot
+    )
 
     if ([string]::IsNullOrWhiteSpace($FileWavesJson)) {
         Write-Host '--- File waves ---' -ForegroundColor Cyan
@@ -412,42 +455,67 @@ function Write-FileWaveTable {
         Write-Host ' ---' -ForegroundColor Cyan
     }
 
-    $fmt = '{0,-4} {1,-22} {2,-28} {3,-12} {4,5} {5,8} {6,-40}'
-    Write-Host ($fmt -f 'Mark', 'Key', 'Name', 'Status', 'Exit', 'Elapsed', 'Posted/Prepared') -ForegroundColor DarkGray
-    Write-Host ($fmt -f '----', '---', '----', '------', '----', '-------', '---------------') -ForegroundColor DarkGray
+    Write-FileWaveProgress -FileWaves $fw -SyncHostRoot $SyncHostRoot
 
-    $anyActive = $false
+    $logDir = if ($fw.LogDir) { [string]$fw.LogDir } else { '' }
+    $waveRows = @()
     foreach ($step in @($fw.Steps)) {
         $st = [string]$step.Status
-        if ($st -eq 'Running') { $anyActive = $true }
+        $ins = if ($null -ne $step.Inserted) { [int]$step.Inserted } else { $null }
+        $upd = if ($null -ne $step.Updated) { [int]$step.Updated } else { $null }
+        $fail = if ($null -ne $step.Failed) { [int]$step.Failed } else { $null }
+        $legacy = if ($null -ne $step.LegacyRows) { [int]$step.LegacyRows } else { $null }
+
+        if ($st -eq 'Running') {
+            $logPath = Get-FileWaveStepLogPath -SyncHostRoot $SyncHostRoot -LogDir $logDir -StepKey ([string]$step.Key)
+            $live = Parse-FileWaveLogMetrics -LogPath $logPath -TailLines 80
+            if ($null -ne $live.Inserted) { $ins = [int]$live.Inserted }
+            if ($null -ne $live.Updated) { $upd = [int]$live.Updated }
+            if ($null -ne $live.Failed) { $fail = [int]$live.Failed }
+            if ($null -ne $live.LegacyRows) { $legacy = [int]$live.LegacyRows }
+        }
+
+        $dIns = $null; $dUpd = $null
+        $key = [string]$step.Key
+        if ($script:PrevFileWave.ContainsKey($key)) {
+            $prev = $script:PrevFileWave[$key]
+            if ($null -ne $ins -and $null -ne $prev.Ins) { $dIns = $ins - $prev.Ins }
+            if ($null -ne $upd -and $null -ne $prev.Upd) { $dUpd = $upd - $prev.Upd }
+        }
+        $script:PrevFileWave[$key] = @{ Ins = $ins; Upd = $upd; Fail = $fail }
+
         $marker = switch ($st) {
             'Running' { '>' }
             'Failed' { '!' }
             'Completed' { 'ok' }
             default { '' }
         }
-        $statusColor = Get-StatusColor -Status $st
-        $rowColor = switch ($marker) {
-            '>' { 'Cyan' }
-            '!' { 'Red' }
-            'ok' { 'Green' }
-            default { 'Gray' }
-        }
-        $hint = ''
-        if ($step.Posted) { $hint = [string]$step.Posted }
-        elseif ($step.Prepared) { $hint = [string]$step.Prepared }
-        if ($hint.Length -gt 40) { $hint = $hint.Substring(0, 37) + '...' }
 
-        Write-Host -NoNewline (('{0,-4}' -f $marker)) -ForegroundColor $rowColor
-        Write-Host -NoNewline ((' {0,-22}' -f [string]$step.Key)) -ForegroundColor $rowColor
-        Write-Host -NoNewline ((' {0,-28}' -f [string]$step.Name)) -ForegroundColor $rowColor
-        Write-Host -NoNewline ((' {0,-12}' -f $st)) -ForegroundColor $statusColor
-        Write-Host -NoNewline ((' {0,5}' -f $(if ($null -eq $step.ExitCode) { '' } else { [string]$step.ExitCode }))) -ForegroundColor Gray
-        Write-Host -NoNewline ((' {0,8}' -f (Format-FileWaveElapsed $step.ElapsedSeconds))) -ForegroundColor Gray
-        Write-Host ((' {0,-40}' -f $hint)) -ForegroundColor DarkGray
+        $elapsedStep = if ($null -ne $step.ElapsedSeconds) {
+            Format-FileWaveElapsed $step.ElapsedSeconds
+        } elseif ($step.StartedUtc) {
+            Format-Elapsed -StartedUtc ([string]$step.StartedUtc) -CompletedUtc ([string]$step.CompletedUtc)
+        } else { '' }
+
+        $waveRows += [pscustomobject]@{
+            Mark     = $marker
+            Wave     = $key
+            Status   = $st
+            Ins      = $ins
+            Upd      = $upd
+            Fail     = $fail
+            Legacy   = $legacy
+            DeltaIns = $dIns
+            DeltaUpd = $dUpd
+            Elapsed  = $elapsedStep
+            Exit     = $(if ($null -eq $step.ExitCode) { '' } else { [string]$step.ExitCode })
+        }
     }
 
-    return ($anyActive -or $overall -eq 'Running')
+    Write-Host '--- File waves (Delta* = change since last sample) ---' -ForegroundColor Cyan
+    Write-ColoredWaveTable -Rows $waveRows
+
+    return ($waveRows | Where-Object { $_.Status -eq 'Running' }).Count -gt 0 -or $overall -eq 'Running'
 }
 
 function Write-LiveDashboard {
@@ -552,7 +620,7 @@ function Write-LiveDashboard {
     }
 
     Write-Host ''
-    $fileWavesActive = Write-FileWaveTable -FileWavesJson ([string]$Snap.FileWavesJson)
+    $fileWavesActive = Write-FileWaveTable -FileWavesJson ([string]$Snap.FileWavesJson) -SyncHostRoot $SyncHostRoot
 
     # --- DB counts with deltas ---
     if (-not $NoDbCounts) {

@@ -34,33 +34,57 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
     protected override IComponentModel CreateComponentModel() => new PersonDossierModel
     {
         IsLoading = true,
+        LoadingProgressPercent = 0,
+        LoadingMessage = VisaUiMessages.Get("PersonDossier.Chrome.LoadingPreparing"),
         InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
         OpenCopiesRequested = EventCallback.Factory.Create(this, OpenCopies),
         ExportRequested = EventCallback.Factory.Create(this, QueueExport),
     };
 
-    private Task LoadAsync()
+    private async Task LoadAsync()
     {
         var model = ComponentModel;
+        model.IsLoading = true;
+        SetLoadStage(model, 5, "PersonDossier.Chrome.LoadingPreparing");
+        // Let Blazor paint the progress panel before synchronous DB work (Yield alone is not enough).
+        await Task.Delay(16);
 
         try
         {
+            SetLoadStage(model, 20, "PersonDossier.Chrome.LoadingPerson");
+            await Task.Delay(1);
+
             // The snapshot holds only scalars, so the object space can be released immediately.
             using var objectSpace = _application?.CreateObjectSpace(typeof(Person));
             var person = objectSpace == null || CurrentPersonId == Guid.Empty
                 ? null
                 : objectSpace.GetObjectByKey<Person>(CurrentPersonId);
 
+            SetLoadStage(model, 45, "PersonDossier.Chrome.LoadingIdentity");
+            await Task.Delay(1);
+
+            SetLoadStage(model, 70, "PersonDossier.Chrome.LoadingSections");
+            await Task.Yield();
+
             model.Snapshot = objectSpace == null
                 ? new PersonDossierSnapshot()
                 : PersonDossierResolver.Resolve(objectSpace, person);
+
+            SetLoadStage(model, 95, "PersonDossier.Chrome.LoadingFinishing");
+            await Task.Yield();
         }
         finally
         {
+            model.LoadingProgressPercent = 100;
+            model.LoadingMessage = string.Empty;
             model.IsLoading = false;
         }
+    }
 
-        return Task.CompletedTask;
+    private static void SetLoadStage(PersonDossierModel model, int percent, string messageKey)
+    {
+        model.LoadingProgressPercent = percent;
+        model.LoadingMessage = VisaUiMessages.Get(messageKey);
     }
 
     private void OpenCopies()

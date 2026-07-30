@@ -1,8 +1,8 @@
 /*
   Person document copies catalog — preview slot occupant.
-  Table + accordion sections aligned with person-dossier.css status pills.
+  Flex rows: record label left, Files/Status/Preview grouped on the right.
   Canonical doc: docs/PERSON_DOCUMENT_COPIES.md
-*/
+ */
 
 .app-person-doc-copies {
   --pdc-text: var(--bs-body-color, #1e293b);
@@ -12,6 +12,7 @@
   --pdc-muted: color-mix(in srgb, var(--pdc-text) 58%, var(--pdc-surface));
   --pdc-hover: color-mix(in srgb, var(--pdc-surface) 94%, var(--pdc-text));
   --pdc-radius: 10px;
+  --pdc-link: var(--dxbl-link-color, var(--bs-link-color, #0d6efd));
 }
 
 .app-person-doc-copies__person-line {
@@ -24,6 +25,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .app-person-doc-copies__section {
@@ -31,6 +33,7 @@
   border-radius: var(--pdc-radius);
   background: color-mix(in srgb, var(--pdc-surface) 99%, var(--pdc-text));
   overflow: hidden;
+  min-width: 0;
 }
 
 .resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-person-doc-copies__section {
@@ -40,11 +43,12 @@
 
 .app-person-doc-copies__section-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   padding: 8px 10px;
   border-bottom: 1px solid var(--pdc-border-soft);
   background: color-mix(in srgb, var(--pdc-surface) 96%, var(--pdc-text));
+  min-width: 0;
 }
 
 .app-person-doc-copies__section--collapsed .app-person-doc-copies__section-head {
@@ -86,7 +90,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 10px;
+  gap: 4px 8px;
 }
 
 .app-person-doc-copies__section-title {
@@ -104,11 +108,15 @@
 .app-person-doc-copies__section-head-actions {
   flex: 0 0 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  max-width: 11rem;
 }
 
 .app-person-doc-copies__section-more-btn {
-  white-space: nowrap;
+  white-space: normal;
+  text-align: right;
+  line-height: 1.25;
+  font-size: 12px;
 }
 
 .app-person-doc-copies__section-hint,
@@ -119,50 +127,65 @@
   color: var(--pdc-muted);
 }
 
-.app-person-doc-copies__table-scroll {
-  overflow-x: auto;
+.app-person-doc-copies__rows {
+  min-width: 0;
+  overflow-x: hidden;
 }
 
-.app-person-doc-copies__table {
-  font-size: 13px;
-  table-layout: fixed;
-  width: 100%;
+.app-person-doc-copies__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--pdc-border-soft);
+  min-width: 0;
 }
 
-.app-person-doc-copies__table th:first-child,
-.app-person-doc-copies__table td.app-person-doc-copies__col-record {
-  white-space: normal;
-  width: auto;
+.app-person-doc-copies__row:last-child,
+.app-person-doc-copies__rows > .app-person-doc-copies__file-row:last-child {
+  border-bottom: none;
 }
 
-.app-person-doc-copies__table th.app-person-doc-copies__col-files,
-.app-person-doc-copies__table td.app-person-doc-copies__col-files {
-  width: 2.75rem;
-  text-align: center;
-  padding-left: 0.35rem;
-  padding-right: 0.35rem;
-}
-
-.app-person-doc-copies__table th.person-dossier__col-status,
-.app-person-doc-copies__table td.person-dossier__col-status {
-  width: 5.5rem;
-  text-align: right;
-  padding-left: 0.35rem;
-  padding-right: 0.5rem;
-}
-
-.app-person-doc-copies__col-action {
-  width: 4.75rem;
-  text-align: right;
-  white-space: nowrap;
-  padding-left: 0.25rem;
-  padding-right: 0.5rem;
+.app-person-doc-copies__row--head {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pdc-muted);
 }
 
 .app-person-doc-copies__col-record {
+  flex: 1 1 auto;
   min-width: 0;
-  max-width: none;
-  vertical-align: top;
+}
+
+.app-person-doc-copies__row-meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+}
+
+.app-person-doc-copies__col-files {
+  flex: 0 0 1.35rem;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.app-person-doc-copies__col-status {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.app-person-doc-copies__col-action {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .app-person-doc-copies__record-label {
@@ -171,14 +194,45 @@
   word-break: break-word;
   line-height: 1.35;
   white-space: normal;
+  font-size: 13px;
 }
 
 .app-person-doc-copies__current-pill {
   margin-top: 4px;
 }
 
+.app-person-doc-copies__pill {
+  font-size: 10px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+
+.app-person-doc-copies__preview-link {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--pdc-link);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.app-person-doc-copies__preview-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.app-person-doc-copies__preview-link:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .app-person-doc-copies__row--nested .app-person-doc-copies__record-label {
-  padding-left: 12px;
+  padding-left: 10px;
   border-left: 2px solid var(--pdc-border);
 }
 
@@ -186,35 +240,46 @@
   cursor: pointer;
 }
 
-.app-person-doc-copies__row--clickable:hover td {
+.app-person-doc-copies__row--clickable:hover {
   background: var(--pdc-hover);
 }
 
-.app-person-doc-copies__row--empty td {
+.app-person-doc-copies__row--current .app-person-doc-copies__record-label {
+  font-weight: 600;
+}
+
+.app-person-doc-copies__row--empty .app-person-doc-copies__record-label {
   color: color-mix(in srgb, var(--pdc-text) 72%, var(--pdc-surface));
 }
 
-.app-person-doc-copies__progress-row td {
-  padding-top: 0;
-  padding-bottom: 8px;
-  border-bottom: none;
-}
-
-.app-person-doc-copies__file-row td {
-  font-size: 11px;
-  color: var(--pdc-muted);
+.app-person-doc-copies__progress-row {
+  padding: 0 10px 6px;
   border-bottom: 1px solid var(--pdc-border-soft);
 }
 
+.app-person-doc-copies__file-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 3px 10px 3px 18px;
+  font-size: 11px;
+  color: var(--pdc-muted);
+  border-bottom: 1px solid var(--pdc-border-soft);
+  min-width: 0;
+}
+
 .app-person-doc-copies__file-name {
-  padding-left: 20px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .app-person-doc-copies__file-size {
-  font-size: 11px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* Inline slot: sections inside elevated card body */
@@ -225,6 +290,11 @@
 
 .resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-person-doc-copies__section-head {
   background: var(--resminamalar-slot-surface-muted, color-mix(in srgb, var(--pdc-surface) 96%, var(--pdc-text)));
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__body {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 /* Slot header: title + person line */

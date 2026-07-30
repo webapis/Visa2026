@@ -145,6 +145,9 @@ internal static class Visa2014PassportCopyImporter
                 await target.FlushAsync();
                 newCopyMap[legacyCopyOid] = createdId.Value;
                 posted++;
+                if (posted % 100 == 0)
+                    Console.WriteLine(
+                        $"INF Progress: {posted} posted, {failed} failed, {skippedNoPassportMap} no passport map...");
                 if (verbose)
                     Console.WriteLine($"  POST PassportDocument {createdId} ← copy {legacyCopyOid}");
             }

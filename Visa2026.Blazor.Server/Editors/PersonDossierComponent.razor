@@ -7,11 +7,39 @@
 <div class="person-dossier @(_viewMode == DossierViewMode.Paper ? "person-dossier--paper" : null)">
     @if (IsLoading || Snapshot == null)
     {
-        <div class="person-dossier__loading">@Msg("PersonDossier.Chrome.Loading")</div>
+        <div class="person-dossier__loading" role="status" aria-live="polite" aria-busy="true">
+            <div class="person-dossier__loading-panel">
+                <div class="person-dossier__loading-kicker">@Msg("PersonDossier.Title")</div>
+                <div class="person-dossier__loading-label">
+                    @(string.IsNullOrWhiteSpace(LoadingMessage) ? Msg("PersonDossier.Chrome.Loading") : LoadingMessage)
+                </div>
+                <div class="person-dossier__loading-track"
+                     role="progressbar"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-valuenow="@(ShowIndeterminateLoading ? null : EffectiveLoadingPercent)"
+                     aria-label="@Msg("PersonDossier.Chrome.LoadingProgress")">
+                    <div class="person-dossier__loading-fill @(ShowIndeterminateLoading ? "person-dossier__loading-fill--indeterminate" : null)"
+                         style="@(ShowIndeterminateLoading ? null : $"width:{EffectiveLoadingPercent.ToString(System.Globalization.CultureInfo.InvariantCulture)}%")"></div>
+                </div>
+                @if (!ShowIndeterminateLoading)
+                {
+                    <div class="person-dossier__loading-pct">@EffectiveLoadingPercent%</div>
+                }
+                <div class="person-dossier__skeleton" aria-hidden="true">
+                    <div class="person-dossier__skeleton-photo"></div>
+                    <div class="person-dossier__skeleton-lines">
+                        <div class="person-dossier__skeleton-line person-dossier__skeleton-line--lg"></div>
+                        <div class="person-dossier__skeleton-line"></div>
+                        <div class="person-dossier__skeleton-line person-dossier__skeleton-line--sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
     else if (Snapshot.PersonId == Guid.Empty)
     {
-        <div class="person-dossier__loading">@Msg("PersonDossier.Chrome.NoPerson")</div>
+        <div class="person-dossier__loading person-dossier__loading--empty">@Msg("PersonDossier.Chrome.NoPerson")</div>
     }
     else
     {
@@ -170,11 +198,16 @@
 
     [Parameter] public PersonDossierSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public int LoadingProgressPercent { get; set; }
+    [Parameter] public string LoadingMessage { get; set; } = string.Empty;
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback OpenCopiesRequested { get; set; }
     [Parameter] public EventCallback ExportRequested { get; set; }
     [Parameter] public string? ExportMessage { get; set; }
     [Parameter] public bool IsExportQueued { get; set; }
+
+    private bool ShowIndeterminateLoading => IsLoading && LoadingProgressPercent < 0;
+    private int EffectiveLoadingPercent => IsLoading && LoadingProgressPercent >= 0 ? LoadingProgressPercent : 0;
 
     private bool _initialLoadStarted;
     private DossierViewMode _viewMode = DossierViewMode.Screen;

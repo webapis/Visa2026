@@ -684,7 +684,7 @@
     private const int VisibleProjectChipLimit = 5;
 
     private bool ShowLoading => IsLoading || _localLoading;
-    private bool ShowIndeterminateLoading => IsLoading && LoadingProgressPercent < 0;
+    private bool ShowIndeterminateLoading => _localLoading || (IsLoading && LoadingProgressPercent < 0);
     private string EffectiveLoadingMessage =>
         IsLoading && !string.IsNullOrWhiteSpace(LoadingMessage) ? LoadingMessage : _localLoadingMessage;
     private int EffectiveLoadingPercent => IsLoading && LoadingProgressPercent >= 0 ? LoadingProgressPercent : 0;

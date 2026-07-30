@@ -1,3 +1,14 @@
+### 2026-07-30 — File waves .15 → local PG (DocumentCopies.ps1)
+
+- **Phase**: file-wave (`DocumentCopies.ps1`, `calik-energi-local-pg` → PostgreSQL `visa2026`)
+- **Pilot** (MaxRows 10): all 7 steps Failed=0 — Person.Photo 10/10; Passport/Visa/Education/WP/Invitation docs; FamilyProof 9+1 no parent map
+- **Person.Photo (full)**: Processed **3333** / Patched **3262** / No blob **71** / Failed **0** — STEP_OK
+- **PassportDocument**: first full run OOM/crash ~3.2 GB WS after ~11 min; **PassportCopy id-map ~3663** entries persisted; resume with `-StartAt PassportDocument`
+- **CLI**: `.\scripts\visa2014-migration\import\DocumentCopies.ps1 -LegacySource calik-energi-local-pg -TargetConnection 'Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres' -StartAt Person-Photo`
+- **Logs**: `artifacts/document-copies-import/*.log` (per-step `Person-Photo.log`, `PassportDocument.log`, …)
+- **Prevent**: do not start second DocumentCopies while DataImporter locks DLLs; parent shell kill leaves child import running — check `Get-Process Visa2026.DataImporter` before resume
+- **Resume order**: PassportDocument → VisaDocument → EducationDocument → WorkPermitDocument → InvitationDocument → FamilyProofDocument
+
 ### 2026-07-27 — Full scalar reimport .15 → local PG (scalars complete; posts running)
 
 - **RunId**: `20260727-150349` (resume after Education seed)
@@ -2026,3 +2037,20 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Correction**: `Visa.ProcessNumber` is now `string?` ← ASNumber; `LegacyPersonInApplicationOid` `Guid?` ← legacy ProcessNumber PIA FK.
 - **Schema**: rename mistaken uuid ProcessNumber → LegacyPersonInApplicationOid when present; add varchar ProcessNumber.
 - **Backfill**: issuing-application-item correction fills both ASNumber and PIA Oid for existing imports.
+
+### 2026-07-30 — Local PG file waves resumed (VisaDocument → FamilyProof)
+
+- **Profile**: `calik-energi-local-pg` → local PG `visa2026`; legacy read `10.100.128.15` / `VISA2015`.
+- **Resume**: `DocumentCopies.ps1 -StartAt VisaDocument` (port `5012` via `VISA2026_MIGRATION_IMPORT_URLS`).
+- **Outcome (this session)**:
+  - **VisaDocument**: 5932 already imported; 154 oversize (>5MB) skipped; 0 new posted.
+  - **EducationDocument**: 4312 posted; 40 oversize; 34 no blob.
+  - **WorkPermitDocument**: 1004 posted; 2 no blob.
+  - **InvitationDocument**: 2960 posted; 209 no parent map; 4 no blob.
+  - **FamilyProofDocument**: 436 posted (9 PersonDocument + 427 PersonFamilyRelationDocument); 1 oversize; 3 duplicate blob.
+- **Id-map counts (bin)**: PassportCopy 3663, VisaDocument 5932, EducationDocument 4322, WorkPermitDocument 1014, InvitationDocument 2969, FamilyProofDocument 446.
+- **Failures / workarounds**:
+  - **WorkPermit start**: `DevExtreme.AspNet.Data` missing in DataImporter `bin` — copy from `Visa2026.Blazor.Server\bin\Debug\net8.0\` (DocumentCopies build uses `/p:BuildProjectReferences=false`).
+  - **Invitation / FamilyProof after prior step**: `dotnet run --no-build` → `hostpolicy.dll` not found; `Visa2026.DataImporter.runtimeconfig.json` absent after each step. **Fix**: rebuild DataImporter before next step, or invoke `Visa2026.DataImporter.exe` directly for single wave.
+  - **Full solution build** blocked when F5 **Visa2026.Blazor.Server** holds DLL locks — use DataImporter-only build or stop F5 first.
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Local` reads `artifacts/local-pg-import/file-waves-status.json`.

@@ -99,102 +99,86 @@
                             }
                             else
                             {
-                                <div class="app-person-doc-copies__table-scroll">
-                                    <table class="person-dossier__table app-person-doc-copies__table">
-                                        <thead>
-                                            <tr>
-                                                <th>@ColumnRecord</th>
-                                                <th class="app-person-doc-copies__col-files">@ColumnFiles</th>
-                                                <th class="person-dossier__col-status">@ColumnStatus</th>
-                                                <th class="app-person-doc-copies__col-action" aria-hidden="true"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var record in visibleRecords)
-                                            {
-                                                var fileCount = CountFiles(record);
-                                                var hasFiles = fileCount > 0;
-                                                var rowLoading = IsPreviewLoading(record.RecordKey);
+                                <div class="app-person-doc-copies__rows" role="table">
+                                    <div class="app-person-doc-copies__row app-person-doc-copies__row--head" role="row">
+                                        <div class="app-person-doc-copies__col-record" role="columnheader">@ColumnRecord</div>
+                                        <div class="app-person-doc-copies__row-meta">
+                                            <div class="app-person-doc-copies__col-files" role="columnheader">@ColumnFiles</div>
+                                            <div class="app-person-doc-copies__col-status" role="columnheader">@ColumnStatus</div>
+                                            <div class="app-person-doc-copies__col-action" role="columnheader" aria-hidden="true"></div>
+                                        </div>
+                                    </div>
 
-                                                <tr class="@GetRowCssClass(record, hasFiles, rowLoading)"
-                                                    @onclick="@(() => OnRowClickAsync(record))">
-                                                    <td class="app-person-doc-copies__col-record">
-                                                        <span class="app-person-doc-copies__record-label" title="@record.RecordLabel">
-                                                            @record.RecordLabel
-                                                        </span>
-                                                        @if (ShouldShowCurrentBadge(record, sectionExpanded))
-                                                        {
-                                                            <span class="person-dossier__pill st-approved app-person-doc-copies__current-pill">@CurrentBadge</span>
-                                                        }
-                                                    </td>
-                                                    <td class="app-person-doc-copies__col-files">
-                                                        @(hasFiles ? fileCount.ToString() : "—")
-                                                    </td>
-                                                    <td class="person-dossier__col-status">
-                                                        @if (hasFiles)
-                                                        {
-                                                            <span class="person-dossier__pill st-approved">@StatusReady</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="person-dossier__pill st-expiring">@StatusMissing</span>
-                                                        }
-                                                    </td>
-                                                    <td class="app-person-doc-copies__col-action" @onclick:stopPropagation="true">
-                                                        @if (hasFiles)
-                                                        {
-                                                            @if (rowLoading)
-                                                            {
-                                                                <span class="app-report-package__preview-busy-label" role="status">
-                                                                    @_previewStatusMessage
-                                                                </span>
-                                                            }
-                                                            else
-                                                            {
-                                                                <DxButton Text="@ActionPreview"
-                                                                          RenderStyle="ButtonRenderStyle.Link"
-                                                                          SizeMode="SizeMode.Small"
-                                                                          CssClass="app-item-doc-copies__action-btn"
-                                                                          Enabled="@(!IsAnyPreviewLoading)"
-                                                                          Click="@(() => PreviewRecordAsync(record))" />
-                                                            }
-                                                        }
-                                                    </td>
-                                                </tr>
+                                    @foreach (var record in visibleRecords)
+                                    {
+                                        var fileCount = CountFiles(record);
+                                        var hasFiles = fileCount > 0;
+                                        var rowLoading = IsPreviewLoading(record.RecordKey);
 
-                                                @if (rowLoading)
+                                        <div class="@GetRowCssClass(record, hasFiles, rowLoading)"
+                                             role="row"
+                                             @onclick="@(() => OnRowClickAsync(record))">
+                                            <div class="app-person-doc-copies__col-record" role="cell">
+                                                <span class="app-person-doc-copies__record-label" title="@record.RecordLabel">
+                                                    @record.RecordLabel
+                                                </span>
+                                                @if (ShouldShowCurrentBadge(record, sectionExpanded))
                                                 {
-                                                    <tr class="app-person-doc-copies__progress-row">
-                                                        <td colspan="4">
-                                                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                                                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", record.RecordLabel)">
-                                                                <div class="app-report-package__preview-progress-track">
-                                                                    <div class="app-report-package__preview-progress-indeterminate"></div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                    <span class="person-dossier__pill st-approved app-person-doc-copies__current-pill">@CurrentBadge</span>
                                                 }
-
-                                                @if (ShowDetails && hasFiles)
-                                                {
-                                                    @foreach (var file in record.Files.Where(f => f.HasContent))
+                                            </div>
+                                            <div class="app-person-doc-copies__row-meta">
+                                                <div class="app-person-doc-copies__col-files" role="cell">
+                                                    @(hasFiles ? fileCount.ToString() : "—")
+                                                </div>
+                                                <div class="app-person-doc-copies__col-status" role="cell">
+                                                    @if (hasFiles)
                                                     {
-                                                        <tr class="app-person-doc-copies__file-row">
-                                                            <td class="app-person-doc-copies__file-name" title="@file.FileName">
-                                                                @file.FileName
-                                                            </td>
-                                                            <td></td>
-                                                            <td class="person-dossier__col-status app-person-doc-copies__file-size">
-                                                                @FormatSize(file.SizeBytes)
-                                                            </td>
-                                                            <td></td>
-                                                        </tr>
+                                                        <span class="person-dossier__pill st-approved app-person-doc-copies__pill">@StatusReady</span>
                                                     }
-                                                }
+                                                    else
+                                                    {
+                                                        <span class="person-dossier__pill st-expiring app-person-doc-copies__pill">@StatusMissing</span>
+                                                    }
+                                                </div>
+                                                <div class="app-person-doc-copies__col-action" role="cell" @onclick:stopPropagation="true">
+                                                    @if (hasFiles && !rowLoading)
+                                                    {
+                                                        <button type="button"
+                                                                class="app-person-doc-copies__preview-link"
+                                                                disabled="@IsAnyPreviewLoading"
+                                                                aria-label="@ActionPreview"
+                                                                @onclick="@(() => PreviewRecordAsync(record))">
+                                                            @ActionPreview
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (rowLoading)
+                                        {
+                                            <div class="app-person-doc-copies__progress-row">
+                                                <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                                     aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", record.RecordLabel)">
+                                                    <div class="app-report-package__preview-progress-track">
+                                                        <div class="app-report-package__preview-progress-indeterminate"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @if (ShowDetails && hasFiles)
+                                        {
+                                            @foreach (var file in record.Files.Where(f => f.HasContent))
+                                            {
+                                                <div class="app-person-doc-copies__file-row">
+                                                    <span class="app-person-doc-copies__file-name" title="@file.FileName">@file.FileName</span>
+                                                    <span class="app-person-doc-copies__file-size">@FormatSize(file.SizeBytes)</span>
+                                                </div>
                                             }
-                                        </tbody>
-                                    </table>
+                                        }
+                                    }
                                 </div>
                             }
                         }
@@ -366,7 +350,7 @@
     {
         var classes = new List<string> { "app-person-doc-copies__row" };
         if (record.IsCurrent)
-            classes.Add("person-dossier__row--current");
+            classes.Add("app-person-doc-copies__row--current");
         if (record.IsNested)
             classes.Add("app-person-doc-copies__row--nested");
         if (!hasFiles)

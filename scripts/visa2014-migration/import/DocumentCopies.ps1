@@ -20,6 +20,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot '..\_lib\FileWaveLogMetrics.ps1')
 if ($SyncHostRoot) {
     if (-not (Test-Path -LiteralPath $SyncHostRoot)) { throw "SyncHostRoot not found: $SyncHostRoot" }
     $SyncHostRoot = (Resolve-Path -LiteralPath $SyncHostRoot).Path
@@ -74,10 +75,19 @@ $steps = @(
     @{ Key='InvitationDocument'; Name='Invitation.InvitationDocument'; Extra=(New-FileWaveExtra -Base @('--import-visa2014-files','--entity','Invitation','--property','InvitationDocument') -Flag '--invitation-id-map' -Entity 'Invitation') },
     @{ Key='FamilyProofDocument'; Name='Person.FamilyProofDocument'; Extra=(New-FileWaveExtra -Base @('--import-visa2014-files','--entity','Person','--property','FamilyProofDocument') -Flag '--person-id-map' -Entity 'Person') }
 )
-$statusPath = if ($SyncHostRoot) { Join-Path $SyncHostRoot 'file-waves-status.json' } else { '' }
+$statusPath = if ($SyncHostRoot) {
+    Join-Path $SyncHostRoot 'file-waves-status.json'
+} else {
+    Join-Path (Join-Path $repo 'artifacts\local-pg-import') 'file-waves-status.json'
+}
 $fileWaveStatus = [ordered]@{
-    Included=$true; StartedUtc=(Get-Date).ToUniversalTime().ToString('o'); CompletedUtc=$null; OverallStatus='Running'
-    Steps=@($steps | ForEach-Object { [ordered]@{ Key=$_.Key; Name=$_.Name; Status='Pending'; ExitCode=$null; Prepared=''; Posted=''; ElapsedSeconds=$null } })
+    Included=$true; LogDir=$logDir; StartedUtc=(Get-Date).ToUniversalTime().ToString('o'); CompletedUtc=$null; OverallStatus='Running'
+    Steps=@($steps | ForEach-Object { [ordered]@{
+        Key=$_.Key; Name=$_.Name; Status='Pending'; ExitCode=$null
+        StartedUtc=$null; CompletedUtc=$null
+        Inserted=$null; Updated=$null; Failed=$null; LegacyRows=$null
+        Prepared=''; Posted=''; ElapsedSeconds=$null
+    } })
 }
 function Write-FileWaveStatus {
     if (-not $statusPath) { return }
@@ -132,7 +142,9 @@ try {
         if (-not $started) { if ($step.Key -eq $StartAt) { $started=$true } else { continue } }
         $log = Join-Path $logDir "$($step.Key).log"
         $stepStarted = Get-Date
-        $stepStatus.Status = 'Running'; Write-FileWaveStatus
+        $stepStatus.Status = 'Running'
+        $stepStatus.StartedUtc = $stepStarted.ToUniversalTime().ToString('o')
+        Write-FileWaveStatus
         Write-Host "==================== $($step.Name) ====================" -ForegroundColor Cyan
         if ($SyncHostRoot) {
             & $dataImporterExe @($step.Extra + $commonArgs) *>&1 | Tee-Object -FilePath $log
@@ -145,8 +157,16 @@ try {
         $postedMatch = Select-String -Path $log -Pattern 'Posted:|Patched:' | Select-Object -Last 1
         $preparedLine = if ($preparedMatch) { $preparedMatch.Line.Trim() } else { '' }
         $postedLine = if ($postedMatch) { $postedMatch.Line.Trim() } else { '' }
-        $stepStatus.ExitCode=$code; $stepStatus.Prepared=$preparedLine; $stepStatus.Posted=$postedLine
+        $metrics = Parse-FileWaveLogMetrics -LogPath $log
+        $stepStatus.ExitCode=$code
+        $stepStatus.Prepared=$preparedLine
+        $stepStatus.Posted=$postedLine
+        if ($null -ne $metrics.Inserted) { $stepStatus.Inserted = $metrics.Inserted }
+        if ($null -ne $metrics.Updated) { $stepStatus.Updated = $metrics.Updated }
+        if ($null -ne $metrics.Failed) { $stepStatus.Failed = $metrics.Failed }
+        if ($null -ne $metrics.LegacyRows) { $stepStatus.LegacyRows = $metrics.LegacyRows }
         $stepStatus.ElapsedSeconds=[int]((Get-Date)-$stepStarted).TotalSeconds
+        $stepStatus.CompletedUtc = (Get-Date).ToUniversalTime().ToString('o')
         $stepStatus.Status=if($code -eq 0){'Completed'}else{'Failed'}
         Write-FileWaveStatus
         $summary += "  $($step.Key) -> exit=$code  |  $preparedLine  |  $postedLine"

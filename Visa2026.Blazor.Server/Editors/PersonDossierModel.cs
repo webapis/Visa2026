@@ -22,6 +22,19 @@ public sealed class PersonDossierModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
+    /// <summary>0-100 while loading; negative means indeterminate bar.</summary>
+    public int LoadingProgressPercent
+    {
+        get => GetPropertyValue<int>();
+        set => SetPropertyValue(value);
+    }
+
+    public string LoadingMessage
+    {
+        get => GetPropertyValue<string>() ?? string.Empty;
+        set => SetPropertyValue(value ?? string.Empty);
+    }
+
     public EventCallback InitialLoadRequested
     {
         get => GetPropertyValue<EventCallback>();
