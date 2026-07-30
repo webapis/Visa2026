@@ -164,3 +164,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: `"Project Contract" must not be empty` on Save; `OpenEmployeeInListByPersonalNumber` then sees Empty table.
 - **Fix / reuse**: `EnsureEmployeeRequiredLookupsBound` before Save; `SaveEmployeeDetailAndConfirm` retries on validation banner and verifies list row via Selenium; `OpenEmployee…` always falls through to `ClickListRowContaining`.
 - **Reuse**: Combo FillForm success ≠ bound lookup — re-read property values before Save; confirm persistence via Employees list row, not detail form alone.
+
+### 2026-07-30 — E2E ProjectContractDisplay GT-15 removed from catalog
+
+- **Outcome**: negative → fix
+- **Context**: `E2ETestEmployeeCreateValues.ProjectContractDisplay`, tenant `project-contract.json`
+- **Symptom**: EasyTest FillForm("Project Contract", "GT-15") appears to run but Save fails `"Project Contract" must not be empty` — **GT-15 is not in the seeded catalog** (file is Çalik 73-row set; README still mentions greenfield GT-15 demo).
+- **Fix / reuse**: Use **`14306 Mary`** (Code/NameTm present in embedded `project-contract.json`). Subcontractor `Çalyk Enerji` still valid.
+- **Reuse**: Before relying on E2E lookup display strings, confirm the value exists in the **currently embedded** LookupCatalogs JSON — not historical docs.

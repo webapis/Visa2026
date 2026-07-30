@@ -12,7 +12,7 @@ public static class E2ETestEmployeeCreateValues
     public const string GenderDisplay = "Male";
     public const string MaritalStatusDisplay = "Single";
     public const string ForeignAddress = "E2E employee create foreign address";
-    public const string ProjectContractDisplay = "GT-15";
+    public const string ProjectContractDisplay = "14306 Mary";
     public const string SubcontractorDisplay = "Çalyk Enerji";
 
     public static string FullName => $"{FirstName} {LastName}";
