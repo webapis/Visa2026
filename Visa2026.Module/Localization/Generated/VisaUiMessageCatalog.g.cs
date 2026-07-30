@@ -3087,10 +3087,52 @@ public static partial class VisaUiMessageCatalog
         },
         ["PersonDossier.Chrome.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Loading dossier...",
-            ["tr-TR"] = "Dosya yükleniyor...",
-            ["tk-TM"] = "Dosýe ýüklenýär...",
-            ["ru-RU"] = "Загрузка досье...",
+            ["en-US"] = "Preparing person dossier…",
+            ["tr-TR"] = "Kişi dosyası hazırlanıyor…",
+            ["tk-TM"] = "Adam dosýesi taýýarlanýar…",
+            ["ru-RU"] = "Подготовка досье…",
+        },
+        ["PersonDossier.Chrome.LoadingFinishing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Almost ready…",
+            ["tr-TR"] = "Neredeyse hazır…",
+            ["tk-TM"] = "Taýýar bolmagyna az galdy…",
+            ["ru-RU"] = "Почти готово…",
+        },
+        ["PersonDossier.Chrome.LoadingIdentity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Building identity and status…",
+            ["tr-TR"] = "Kimlik ve durum hazırlanıyor…",
+            ["tk-TM"] = "Şahsyýet we ýagdaý taýýarlanýar…",
+            ["ru-RU"] = "Сборка личности и статуса…",
+        },
+        ["PersonDossier.Chrome.LoadingPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading person record…",
+            ["tr-TR"] = "Kişi kaydı yükleniyor…",
+            ["tk-TM"] = "Adam ýazgysy ýüklenýär…",
+            ["ru-RU"] = "Загрузка записи лица…",
+        },
+        ["PersonDossier.Chrome.LoadingPreparing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening dossier…",
+            ["tr-TR"] = "Dosya açılıyor…",
+            ["tk-TM"] = "Dosýe açylýar…",
+            ["ru-RU"] = "Открытие досье…",
+        },
+        ["PersonDossier.Chrome.LoadingProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dossier load progress",
+            ["tr-TR"] = "Dosya yükleme ilerlemesi",
+            ["tk-TM"] = "Dosýe ýüklemek ösüşi",
+            ["ru-RU"] = "Прогресс загрузки досье",
+        },
+        ["PersonDossier.Chrome.LoadingSections"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Collecting documents and history…",
+            ["tr-TR"] = "Belgeler ve geçmiş toplanıyor…",
+            ["tk-TM"] = "Resminamalar we taryh ýygnalýar…",
+            ["ru-RU"] = "Сбор документов и истории…",
         },
         ["PersonDossier.Chrome.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -4074,10 +4116,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ReportDashboard.Category.IncompletePersons"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Incomplete persons",
-            ["tr-TR"] = "Eksik kişiler",
-            ["tk-TM"] = "Doly däl şahslar",
-            ["ru-RU"] = "Неполные данные",
+            ["en-US"] = "Persons with incomplete data",
+            ["tr-TR"] = "Verileri eksik kişiler",
+            ["tk-TM"] = "Maglumary doly däl şahslar",
+            ["ru-RU"] = "Лица с неполными данными",
         },
         ["ReportDashboard.Category.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

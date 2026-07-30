@@ -1935,3 +1935,27 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 - Heal previously only created the person-search view when missing — existing DBs need `NeedsPersonSearchFoldHeal` (`pg_get_viewdef` lacks `translate(`) to recreate.
 
 **Files:** PersonSearchTextNormalizer.cs, ReportDashboardCatalog.cs, vw_rd_person_search*.sql, ReportDashboardPostgresViewsHealSql.cs, REPORT_DASHBOARD.md, PersonSearchTextNormalizerTests.cs
+
+## 2026-07-30 — Incomplete persons tk-TM category label
+
+**Ask:** Rename Turkmen Report Dashboard category from "Doly däl şahslar" to "Maglumary doly däl şahslar".
+
+**Fix:** `ReportDashboard.Category.IncompletePersons` `tk-TM` in `UiStrings.messages.json`; regenerate `VisaUiMessageCatalog.g.cs`. Sidebar + overview card use `ReportDashboardLocalization.Category`.
+
+## 2026-07-30 — Work-permit dashboard views missing on Postgres (heal gap)
+
+**Symptom:** `42P01: relation "vw_rd_work_permit_active" does not exist` when opening Work Permit dashboard; EF logs `fail` even though loader has fallback.
+
+**Cause:** View created only in `ReportDashboardPostgresViewsUpdater` (ModuleUpdater). Startup heal (`ReportDashboardPostgresViewsHealSql`) had no work-permit entries; `.postgres.sql` files were not embedded resources.
+
+**Fix:** Embed `vw_rd_work_permit*.postgres.sql`; `HealWorkPermitViewsIfNeeded` recreates missing `vw_rd_work_permit`, `vw_rd_work_permit_active`, `vw_rd_work_permit_app_progress` at host start.
+
+**Verify:** Restart app (Postgres); `\dv vw_rd_work_permit*` shows three views; Work Permit → Active (P) loads without 42P01.
+
+**Files:** Visa2026.Module.csproj, ReportDashboardPostgresViewsHealSql.cs
+
+## 2026-07-30 — Incomplete persons category labels (tr/en/ru)
+
+**Ask:** Align category wording with tk-TM “data incomplete persons”: tr `Verileri eksik kişiler`; update en/ru too.
+
+**Fix:** `ReportDashboard.Category.IncompletePersons` → en `Persons with incomplete data`, tr `Verileri eksik kişiler`, ru `Лица с неполными данными`; regenerate catalog.

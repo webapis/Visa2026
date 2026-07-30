@@ -144,10 +144,46 @@
     "ru-RU": "Чтобы открыть досье, выберите ровно одно лицо."
   },
   "PersonDossier.Chrome.Loading": {
-    "en": "Loading dossier...",
-    "tr-TR": "Dosya yükleniyor...",
-    "tk-TM": "Dosýe ýüklenýär...",
-    "ru-RU": "Загрузка досье..."
+    "en": "Preparing person dossier…",
+    "tr-TR": "Kişi dosyası hazırlanıyor…",
+    "tk-TM": "Adam dosýesi taýýarlanýar…",
+    "ru-RU": "Подготовка досье…"
+  },
+  "PersonDossier.Chrome.LoadingPreparing": {
+    "en": "Opening dossier…",
+    "tr-TR": "Dosya açılıyor…",
+    "tk-TM": "Dosýe açylýar…",
+    "ru-RU": "Открытие досье…"
+  },
+  "PersonDossier.Chrome.LoadingPerson": {
+    "en": "Loading person record…",
+    "tr-TR": "Kişi kaydı yükleniyor…",
+    "tk-TM": "Adam ýazgysy ýüklenýär…",
+    "ru-RU": "Загрузка записи лица…"
+  },
+  "PersonDossier.Chrome.LoadingIdentity": {
+    "en": "Building identity and status…",
+    "tr-TR": "Kimlik ve durum hazırlanıyor…",
+    "tk-TM": "Şahsyýet we ýagdaý taýýarlanýar…",
+    "ru-RU": "Сборка личности и статуса…"
+  },
+  "PersonDossier.Chrome.LoadingSections": {
+    "en": "Collecting documents and history…",
+    "tr-TR": "Belgeler ve geçmiş toplanıyor…",
+    "tk-TM": "Resminamalar we taryh ýygnalýar…",
+    "ru-RU": "Сбор документов и истории…"
+  },
+  "PersonDossier.Chrome.LoadingFinishing": {
+    "en": "Almost ready…",
+    "tr-TR": "Neredeyse hazır…",
+    "tk-TM": "Taýýar bolmagyna az galdy…",
+    "ru-RU": "Почти готово…"
+  },
+  "PersonDossier.Chrome.LoadingProgress": {
+    "en": "Dossier load progress",
+    "tr-TR": "Dosya yükleme ilerlemesi",
+    "tk-TM": "Dosýe ýüklemek ösüşi",
+    "ru-RU": "Прогресс загрузки досье"
   },
   "PersonDossier.Chrome.NoPerson": {
     "en": "No person selected.",
@@ -5280,10 +5316,10 @@
     "ru-RU": "Нет визы"
   },
   "ReportDashboard.Category.IncompletePersons": {
-    "en": "Incomplete persons",
-    "tr-TR": "Eksik kişiler",
-    "tk-TM": "Doly däl şahslar",
-    "ru-RU": "Неполные данные"
+    "en": "Persons with incomplete data",
+    "tr-TR": "Verileri eksik kişiler",
+    "tk-TM": "Maglumary doly däl şahslar",
+    "ru-RU": "Лица с неполными данными"
   },
   "ReportDashboard.SubReport.IncompletePersons.by-missing-area": {
     "en": "By Missing Area",

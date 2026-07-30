@@ -88,6 +88,17 @@ public static class ReportDashboardPostgresViewsHealSql
     private const string PersonSearchViewName = "vw_rd_person_search";
     private const string PersonSearchResourceLeaf = "vw_rd_person_search.postgres.sql";
 
+    /// <summary>
+    /// Work-permit dashboard views: heal when missing (ModuleUpdater may be skipped).
+    /// Kept separate from <see cref="StandaloneViews"/> to avoid via-ministry bulk re-heal.
+    /// </summary>
+    private static readonly (string ViewName, string ResourceLeaf)[] WorkPermitViews =
+    {
+        ("vw_rd_work_permit", "vw_rd_work_permit.postgres.sql"),
+        ("vw_rd_work_permit_active", "vw_rd_work_permit_active.postgres.sql"),
+        ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
+    };
+
     private static readonly string[] VisaAppProgressDependentViews =
     {
         "vw_rd_visa_app_progress.postgres.sql",
@@ -164,7 +175,19 @@ public static class ReportDashboardPostgresViewsHealSql
         }
 
         HealIncompletePersonsViewIfReady(connection);
+        HealWorkPermitViewsIfNeeded(connection);
         HealPersonSearchViewIfNeeded(connection);
+    }
+
+    private static void HealWorkPermitViewsIfNeeded(NpgsqlConnection connection)
+    {
+        foreach (var (viewName, resourceLeaf) in WorkPermitViews)
+        {
+            if (ViewExists(connection, viewName))
+                continue;
+
+            ExecuteEmbeddedSql(connection, resourceLeaf);
+        }
     }
 
     private static void HealPersonSearchViewIfNeeded(NpgsqlConnection connection)
