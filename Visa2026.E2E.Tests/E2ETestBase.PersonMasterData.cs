@@ -175,23 +175,30 @@ public abstract partial class E2ETestBase
     }
 
     /// <summary>
-    /// Lookup FillForm can report success without binding. Re-read the property until it contains the expected text.
+    /// Lookup FillForm can leave filter text in the editor without selecting a row.
+    /// Type the value, then commit with Tab/Enter and click a matching dropdown item when present.
     /// </summary>
     private void FillLookupUntilBound(string caption, string displayValue, int maxAttempts = 6)
     {
         for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
             FillSingleDetailFieldWithRetry(new EasyTestParameter(caption, displayValue));
+            EasyTestBlazorNavigationHelper.TryCommitLookupSelection(AppContext, displayValue);
             Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
 
             try
             {
                 string actual = AppContext.GetForm().GetPropertyValue(caption) ?? string.Empty;
-                if (actual.Contains(displayValue, StringComparison.OrdinalIgnoreCase)
-                    || displayValue.Contains(actual, StringComparison.OrdinalIgnoreCase)
-                       && !string.IsNullOrWhiteSpace(actual))
+                if (!string.IsNullOrWhiteSpace(actual)
+                    && (actual.Contains(displayValue, StringComparison.OrdinalIgnoreCase)
+                        || displayValue.Contains(actual, StringComparison.OrdinalIgnoreCase)))
                 {
-                    return;
+                    // Prefer DOM selected-item confirmation when available.
+                    if (EasyTestBlazorNavigationHelper.HasDropdownOptionSelected(AppContext, displayValue)
+                        || attempt >= 2)
+                    {
+                        return;
+                    }
                 }
             }
             catch (AdapterOperationException)

@@ -11,13 +11,64 @@ namespace Visa2026.E2E.Tests;
 /// </summary>
 internal static class EasyTestBlazorNavigationHelper
 {
-    public static void GoToAbsoluteUrl(IApplicationContext appContext, string absoluteUrl)
+    public static void TryCommitLookupSelection(IApplicationContext appContext, string optionText)
     {
-        IWebDriver driver = ResolveWebDriver(appContext)
-            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return;
 
-        driver.Navigate().GoToUrl(absoluteUrl);
-        WaitForDocumentReady(driver, TimeSpan.FromSeconds(45));
+        try
+        {
+            if (driver is IJavaScriptExecutor js)
+            {
+                js.ExecuteScript(
+                    "var a=document.activeElement; if(a){ a.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); a.blur(); }");
+            }
+
+            // Click a visible dropdown/list item that contains the option text.
+            string literal = optionText.Replace("'", "\\'");
+            string xpath =
+                $"//*[contains(@class,'dxbl-list') or contains(@class,'dxbl-dropdown') or contains(@class,'dxbl-popup')]//*[contains(normalize-space(.), '{literal}')]";
+
+            foreach (IWebElement el in driver.FindElements(By.XPath(xpath)))
+            {
+                if (!el.Displayed)
+                    continue;
+                ScrollIntoView(driver, el);
+                el.Click();
+                return;
+            }
+
+            // Fallback: Tab to commit typed lookup text.
+            if (driver is IJavaScriptExecutor js2)
+            {
+                js2.ExecuteScript(
+                    "var a=document.activeElement; if(a){ a.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true})); a.blur(); }");
+            }
+        }
+        catch (WebDriverException)
+        {
+            // Best-effort commit.
+        }
+    }
+
+    public static bool HasDropdownOptionSelected(IApplicationContext appContext, string optionText)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        try
+        {
+            string literal = optionText.Replace("'", "\\'");
+            string xpath =
+                $"//*[contains(@class,'dxbl-text-edit') or contains(@class,'dxbl-combobox')][contains(., '{literal}')]";
+            return driver.FindElements(By.XPath(xpath)).Any(e => e.Displayed);
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
     }
 
     public static void GoToRelativeUrl(IApplicationContext appContext, string baseUrl, string relativePath)
