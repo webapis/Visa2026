@@ -76,10 +76,11 @@ public static class E2ETestVisaFieldCaptions
     public const string ExpirationDate = "Expiration Date";
 }
 
-/// <summary>Stable values for Education nested create (E2E-002). Institution NameTm from tenant catalog.</summary>
+/// <summary>Stable values for Education nested create (E2E-002). Institution/Specialty NameTm from tenant catalog.</summary>
 public static class E2ETestEducationCreateValues
 {
     public const string InstitutionDisplay = "Adana liseýi";
+    public const string SpecialtyDisplay = "Arhitektor";
     public const string UpdatedInstitutionDisplay = "Afşin Senagat hünärment okuwy";
 }
 
@@ -87,6 +88,7 @@ public static class E2ETestEducationCreateValues
 public static class E2ETestEducationFieldCaptions
 {
     public const string EducationInstitution = "Education Institution";
+    public const string Specialty = "Specialty";
 }
 
 /// <summary>Stable values for AddressOfResidence Lodging create (E2E-004). Default Type is Lodging.</summary>

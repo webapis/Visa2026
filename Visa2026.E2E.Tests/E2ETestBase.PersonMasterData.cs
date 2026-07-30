@@ -174,6 +174,37 @@ public abstract partial class E2ETestBase
             FillSingleDetailFieldWithRetry(field);
     }
 
+    /// <summary>
+    /// Lookup FillForm can report success without binding. Re-read the property until it contains the expected text.
+    /// </summary>
+    private void FillLookupUntilBound(string caption, string displayValue, int maxAttempts = 6)
+    {
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            FillSingleDetailFieldWithRetry(new EasyTestParameter(caption, displayValue));
+            Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+
+            try
+            {
+                string actual = AppContext.GetForm().GetPropertyValue(caption) ?? string.Empty;
+                if (actual.Contains(displayValue, StringComparison.OrdinalIgnoreCase)
+                    || displayValue.Contains(actual, StringComparison.OrdinalIgnoreCase)
+                       && !string.IsNullOrWhiteSpace(actual))
+                {
+                    return;
+                }
+            }
+            catch (AdapterOperationException)
+            {
+                // Retry fill.
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Lookup '{caption}' did not bind to '{displayValue}' " +
+            $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+    }
+
     private void FillSingleDetailFieldWithRetry(EasyTestParameter field)
     {
         int maxAttempts = EasyTestCITuning.FormFieldMaxAttempts;
@@ -258,14 +289,16 @@ public abstract partial class E2ETestBase
     }
 
     protected void FillEducationRequiredFields(
-        string institutionDisplay = E2ETestEducationCreateValues.InstitutionDisplay)
+        string institutionDisplay = E2ETestEducationCreateValues.InstitutionDisplay,
+        string specialtyDisplay = E2ETestEducationCreateValues.SpecialtyDisplay)
     {
         WaitForDetailReady(
             "Education_DetailView",
             E2ETestEducationFieldCaptions.EducationInstitution,
             "Education");
-        FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestEducationFieldCaptions.EducationInstitution, institutionDisplay));
+        // Specialty has no IsDefault in tenant catalog — must fill explicitly.
+        FillLookupUntilBound(E2ETestEducationFieldCaptions.EducationInstitution, institutionDisplay);
+        FillLookupUntilBound(E2ETestEducationFieldCaptions.Specialty, specialtyDisplay);
     }
 
     protected void SaveEducationDetail() => ExecuteActionWithRetry("Save");
@@ -310,21 +343,24 @@ public abstract partial class E2ETestBase
             E2ETestAddressFieldCaptions.Region,
             "AddressOfResidence");
 
-        FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestAddressFieldCaptions.Region, E2ETestAddressCreateValues.RegionDisplay));
-        Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
-        FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestAddressFieldCaptions.City, E2ETestAddressCreateValues.CityDisplay));
-        Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
-        FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestAddressFieldCaptions.Lodging, E2ETestAddressCreateValues.LodgingDisplay));
+        FillLookupUntilBound(E2ETestAddressFieldCaptions.Region, E2ETestAddressCreateValues.RegionDisplay);
+        FillLookupUntilBound(E2ETestAddressFieldCaptions.City, E2ETestAddressCreateValues.CityDisplay);
+        FillLookupUntilBound(E2ETestAddressFieldCaptions.Lodging, E2ETestAddressCreateValues.LodgingDisplay);
     }
 
     protected void SaveAddressDetail() => ExecuteActionWithRetry("Save");
 
     protected void AssertAddressSaved()
     {
-        // Lodging lookup GetPropertyValue is often empty after Save in EasyTest; Region stays readable.
+        if (EasyTestBlazorNavigationHelper.PageContainsText(AppContext, "Data Validation Error")
+            || EasyTestBlazorNavigationHelper.PageContainsText(AppContext, "must not be empty"))
+        {
+            throw new InvalidOperationException(
+                "Address Save left a validation error " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        // Lodging lookup GetPropertyValue is often empty after Save; Region stays readable when bound.
         AssertDetailPropertyEquals(
             E2ETestAddressFieldCaptions.Region,
             E2ETestAddressCreateValues.RegionDisplay);
