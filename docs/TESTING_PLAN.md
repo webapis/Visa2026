@@ -92,7 +92,7 @@ Target: **~12–20** stable E2E tests. One **ApplicationType** per scenario clas
 | E2E-001 | Officer journey: login → create employee → add passport | Done (folded into master-data Fact) |
 | E2E-002 | Add Education on same employee | Done |
 | E2E-003 | Add Visa under Passport | Done |
-| E2E-004 | Add Address of residence (Private house) | Done |
+| E2E-004 | Add Address of residence (Lodging) | Deferred (cascade lookup bind flaky on EasyTest) |
 | E2E-005 | Medical record create / update / delete | Done (delete best-effort) |
 | E2E-006 | Position history | Done |
 | E2E-007 | Work duty | Done |

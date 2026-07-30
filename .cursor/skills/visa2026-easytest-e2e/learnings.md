@@ -196,3 +196,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Could not fill `Full Address` (Type=Private house ImmediatePostData hide/show flaky; URL stayed `/`).
 - **Fix / reuse**: Keep OnCreated **Lodging**; fill Region → City → Lodging (`1932 (A.Garlyýew) köç. 70/1 UÝJ` in catalog).
 - **Reuse**: Avoid Private-house Full Address in EasyTest unless Type change + field visibility is proven stable.
+
+### 2026-07-30 — Address Lodging cascade deferred on EasyTest CI
+
+- **Outcome**: negative → deferred
+- **Context**: Region → City → Lodging FillForm / FillLookupUntilBound / dropdown commit
+- **Symptom**: Host ValidationException Region/City/Lodging empty after Save; GetPropertyValue can show typed filter text without FK bind. Also briefly broke build by overwriting `GoToAbsoluteUrl`.
+- **Fix / reuse**: Keep helpers; skip Address step in journey until a proven DOM lookup-select helper exists. Rest of CRUD (medical string fields, work duty, salary) continues.
+- **Reuse**: Cascading lookups need real dropdown item selection, not FillForm alone; never delete `GoToAbsoluteUrl` when editing navigation helpers.
