@@ -5,8 +5,15 @@ alwaysApply: true
 
 # Visa2026 — core
 
-- **Stack:** .NET 8, DevExpress XAF **25.2.6** (EF Core, Blazor, Security, Reports V2, Web API/OData), **PostgreSQL only** (Npgsql), Spire.PDF, xUnit + Selenium (E2E uses EasyTest Blazor adapter). Legacy VISA2015 SQL Server is import-only.
+- **Stack:** .NET 8, DevExpress XAF **25.2.6** (EF Core, Blazor, Security, Reports V2, Web API/OData), **PostgreSQL only** (Npgsql), Spire.PDF, xUnit + Selenium (E2E uses EasyTest Blazor adapter).
 - **Solution:** `Visa2026.slnx` — **Visa2026.Module** (domain + EF + XAF logic), **Visa2026.Blazor.Server** (host), **Visa2026.DataImporter**, **Visa2026.E2E.Tests**.
+
+**Database — PostgreSQL only (Visa2026 app):**
+
+- **Supported:** PostgreSQL via **Npgsql** (`EFCoreProvider=Postgres` / `EFCORE_PROVIDER=Postgres`). Local dev: Docker compose (`docs/ENVIRONMENTS.md`) or installed Postgres; F5 profile **`Visa2026 - PostgreSQL`** in `launchSettings.json`.
+- **Do not use** for Visa2026 runtime: **LocalDB**, **SQL Server Express**, full **SQL Server**, **SQLite**, in-memory SQL providers, or adding **`Microsoft.EntityFrameworkCore.SqlServer`** / dual-provider switches for new app work.
+- **Do not** add launch profiles, connection strings, compose services, or IIS slot config that point the **Visa2026 app** at LocalDB/SQL Express.
+- **SQL Express — import only (exception):** on the on-prem import host **`10.100.128.25`**, **`localhost\SQLEXPRESS`** may be used **only** for **VISA2014 → Visa2026 migration** (read legacy **`VISA2015`**, migration scripts under `scripts/visa2014-migration/`, `Visa2026.DataImporter --import-visa2014`). Not for Visa2026 Blazor/IIS slots or local F5. Live Calik legacy source on the network: **`10.100.128.15`** / `VISA2015` (read-only). See **`docs/VISA2014_MIGRATION.md`**, **`visa2014-legacy-mcp`**, **`visa2014-to-visa2026-import`** skill.
 
 **Where logic belongs:** business rules, BOs, controllers, DB updaters, PDF mapping → **Module**. Blazor Server stays a **thin** shell unless the task is explicitly host-only.
 

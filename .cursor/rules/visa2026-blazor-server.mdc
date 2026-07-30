@@ -7,6 +7,7 @@ alwaysApply: false
 # Visa2026.Blazor.Server
 
 - **Role:** XAF Blazor application host, `Model.xafml` (copied to output), Web API / Swagger as already wired.
+- **Database:** connection strings and launch profiles must target **PostgreSQL** only (`Visa2026 - PostgreSQL`). Do not add LocalDB or SqlServer connection strings or F5 profiles. SQL Express on **`10.100.128.25`** is reserved for legacy import scripts only.
 - **Avoid:** moving domain or persistence rules here when the rest of the codebase keeps them in **Visa2026.Module**. Host-only changes (middleware, `Program.cs`, Blazor-specific registration) belong here.
 
 ## Nested ListViews in DetailView (expand rows + total count)
