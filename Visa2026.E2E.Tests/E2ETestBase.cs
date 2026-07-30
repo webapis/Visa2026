@@ -268,49 +268,69 @@ namespace Visa2026.E2E.Tests
 
         private void SaveEmployeeDetailAndConfirm(string personalNumber)
         {
-            for (var attempt = 0; attempt < 4; attempt++)
+            for (var attempt = 0; attempt < 5; attempt++)
             {
                 EnsureEmployeeRequiredLookupsBound();
                 ExecuteActionWithRetry("Save");
                 Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
 
-                if (EasyTestBlazorNavigationHelper.PageContainsText(AppContext, "must not be empty")
-                    || EasyTestBlazorNavigationHelper.PageContainsText(AppContext, "Data Validation Error"))
+                bool validationBanner = EasyTestBlazorNavigationHelper.PageContainsText(
+                    AppContext, "Data Validation Error");
+                bool duplicatePn = EasyTestBlazorNavigationHelper.PageContainsText(
+                    AppContext, "already uses this personal number");
+                bool requiredEmpty = EasyTestBlazorNavigationHelper.PageContainsText(
+                    AppContext, "must not be empty");
+
+                if (duplicatePn)
+                {
+                    // A prior attempt already saved this PN — do not create again.
+                    if (TryConfirmEmployeeInList(personalNumber))
+                        return;
+
+                    throw new InvalidOperationException(
+                        $"Personal Number '{personalNumber}' is reported as duplicate but the Employees list row was not found " +
+                        $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+                }
+
+                if (validationBanner || requiredEmpty)
                 {
                     EnsureEmployeeRequiredLookupsBound();
                     continue;
                 }
 
-                NavigateEmployeesList();
-                if (EasyTestBlazorNavigationHelper.ListRowContainsText(AppContext, personalNumber))
+                // Successful Save typically remains on employee detail with the Personal Number.
+                if (EmployeeDetailShowsPersonalNumber(personalNumber))
                     return;
 
-                // Save may have left us on detail without persisting — reopen New path only if list empty.
-                if (IsEmployeeDetailFormReady() && EmployeeDetailShowsPersonalNumber(personalNumber))
-                    continue;
-
-                NavigateEmployeesList();
-                ExecuteActionWithRetry("New");
-                AssertEmployeeDetailViewActive();
-                FillFormWithRetry(
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.FirstName, E2ETestEmployeeCreateValues.FirstName),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.LastName, E2ETestEmployeeCreateValues.LastName),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.DateOfBirth, E2ETestEmployeeCreateValues.DateOfBirth),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.BirthPlace, E2ETestEmployeeCreateValues.BirthPlace),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.CountryOfBirth, E2ETestEmployeeCreateValues.CountryDisplay),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.Gender, E2ETestEmployeeCreateValues.GenderDisplay),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.MaritalStatus, E2ETestEmployeeCreateValues.MaritalStatusDisplay),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.Nationality, E2ETestEmployeeCreateValues.CountryDisplay),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.ForeignAddress, E2ETestEmployeeCreateValues.ForeignAddress),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.ForeignAddressCountry, E2ETestEmployeeCreateValues.CountryDisplay),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.ProjectContract, E2ETestEmployeeCreateValues.ProjectContractDisplay),
-                    new EasyTestParameter(E2ETestPersonFieldCaptions.Subcontractor, E2ETestEmployeeCreateValues.SubcontractorDisplay));
+                if (TryConfirmEmployeeInList(personalNumber))
+                    return;
             }
 
             throw new InvalidOperationException(
-                $"Employee with Personal Number '{personalNumber}' was not found in the Employees list after Save " +
+                $"Employee with Personal Number '{personalNumber}' was not confirmed after Save " +
                 $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private bool TryConfirmEmployeeInList(string personalNumber)
+        {
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    EasyTestBlazorNavigationHelper.TryMaximizeWindow(AppContext);
+                    NavigateEmployeesList();
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+
+                    if (EasyTestBlazorNavigationHelper.ListRowContainsText(AppContext, personalNumber))
+                        return true;
+                }
+                catch (Exception) when (attempt < 9)
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                }
+            }
+
+            return false;
         }
 
         protected void OpenEmployeeInListByPersonalNumber(

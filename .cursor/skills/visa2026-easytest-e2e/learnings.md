@@ -172,3 +172,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: EasyTest FillForm("Project Contract", "GT-15") appears to run but Save fails `"Project Contract" must not be empty` — **GT-15 is not in the seeded catalog** (file is Çalik 73-row set; README still mentions greenfield GT-15 demo).
 - **Fix / reuse**: Use **`14306 Mary`** (Code/NameTm present in embedded `project-contract.json`). Subcontractor `Çalyk Enerji` still valid.
 - **Reuse**: Before relying on E2E lookup display strings, confirm the value exists in the **currently embedded** LookupCatalogs JSON — not historical docs.
+
+### 2026-07-30 — Save confirm must not New again with same Personal Number
+
+- **Outcome**: negative → fix
+- **Context**: `SaveEmployeeDetailAndConfirm` after ProjectContract fix
+- **Symptom**: First Save succeeded; list-row confirm failed; retry created New with same `E2E-EMP-010` → uniqueness validation; list still looked empty to the helper.
+- **Fix / reuse**: On success stay on detail with PN (no forced New retry). On "already uses this personal number", treat as saved and locate list row — never recreate the same PN.
+- **Reuse**: Employee create confirm = detail PN present without validation banner; uniqueness error means prior Save worked.
