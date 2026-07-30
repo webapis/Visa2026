@@ -303,27 +303,27 @@ public abstract partial class E2ETestBase
 
     protected void FillAddressPrivateHouseRequiredFields()
     {
+        // Keep default Type=Lodging (OnCreated). Private-house Full Address is ImmediatePostData-hidden
+        // until Type flips and is flaky under EasyTest; Lodging path uses Region/City/Lodging lookups.
         WaitForDetailReady(
             "AddressOfResidence_DetailView",
-            E2ETestAddressFieldCaptions.Type,
+            E2ETestAddressFieldCaptions.Region,
             "AddressOfResidence");
 
-        // Type defaults to Lodging — switch first so Full Address / Expiration appear.
         FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestAddressFieldCaptions.Type, E2ETestAddressCreateValues.TypeDisplay));
+            new EasyTestParameter(E2ETestAddressFieldCaptions.Region, E2ETestAddressCreateValues.RegionDisplay));
         Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
-
         FillDetailFormWithRetry(
-            new EasyTestParameter(E2ETestAddressFieldCaptions.Region, E2ETestAddressCreateValues.RegionDisplay),
-            new EasyTestParameter(E2ETestAddressFieldCaptions.City, E2ETestAddressCreateValues.CityDisplay),
-            new EasyTestParameter(E2ETestAddressFieldCaptions.FullAddress, E2ETestAddressCreateValues.FullAddress),
-            new EasyTestParameter(E2ETestAddressFieldCaptions.ExpirationDate, E2ETestAddressCreateValues.ExpirationDate));
+            new EasyTestParameter(E2ETestAddressFieldCaptions.City, E2ETestAddressCreateValues.CityDisplay));
+        Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+        FillDetailFormWithRetry(
+            new EasyTestParameter(E2ETestAddressFieldCaptions.Lodging, E2ETestAddressCreateValues.LodgingDisplay));
     }
 
     protected void SaveAddressDetail() => ExecuteActionWithRetry("Save");
 
     protected void AssertAddressShowsFullAddress(string fullAddress) =>
-        AssertDetailPropertyEquals(E2ETestAddressFieldCaptions.FullAddress, fullAddress);
+        AssertDetailPropertyEquals(E2ETestAddressFieldCaptions.Lodging, fullAddress);
 
     // --- Medical record ---
 

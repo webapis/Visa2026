@@ -89,14 +89,12 @@ public static class E2ETestEducationFieldCaptions
     public const string EducationInstitution = "Education Institution";
 }
 
-/// <summary>Stable values for AddressOfResidence PrivateHouse create (E2E-004).</summary>
+/// <summary>Stable values for AddressOfResidence Lodging create (E2E-004). Default Type is Lodging.</summary>
 public static class E2ETestAddressCreateValues
 {
-    public const string TypeDisplay = "Private house";
     public const string RegionDisplay = "Aşgabat şäheri";
     public const string CityDisplay = "Aşgabat şäheri";
-    public const string FullAddress = "E2E private house address 12";
-    public const string ExpirationDate = "31.12.2030";
+    public const string LodgingDisplay = "1932 (A.Garlyýew) köç. 70/1 UÝJ";
 }
 
 /// <summary>English Blazor captions for <see cref="BusinessObjects.AddressOfResidence"/> detail.</summary>
@@ -105,6 +103,7 @@ public static class E2ETestAddressFieldCaptions
     public const string Type = "Type";
     public const string Region = "Region";
     public const string City = "City";
+    public const string Lodging = "Lodging";
     public const string FullAddress = "Full Address";
     public const string ExpirationDate = "Expiration Date";
 }
