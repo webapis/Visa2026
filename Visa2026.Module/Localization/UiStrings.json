@@ -151,7 +151,7 @@
         "ExpirationDate": { "en-US": "Expiration date", "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
         "Year": { "en-US": "Year", "tr-TR": "Yıl", "tk-TM": "Ýyl", "ru-RU": "Год" },
         "Month": { "en-US": "Month", "tr-TR": "Ay", "tk-TM": "Aý", "ru-RU": "Месяц" },
-        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "DaysRemaining": { "en-US": "Days remaining", "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "en-US": "Expiration status", "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
         "CurrentState": {
@@ -321,7 +321,7 @@
       "caption": { "tr-TR": "Kullanıcı", "tk-TM": "Ulanyjy", "ru-RU": "Пользователь" },
       "members": {
         "UserName": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" },
-        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" }
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" }
       }
     },
     "DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyRole": {
@@ -391,7 +391,7 @@
         "IsManualEntry": { "en-US": "Manual entry", "tr-TR": "Manuel Giriş", "tk-TM": "El bilen giriş", "ru-RU": "Ручной ввод" },
         "Category": { "en-US": "Category", "tr-TR": "Kategori", "tk-TM": "Kategoriýa", "ru-RU": "Категория" },
         "ExpirationDate": { "en-US": "Expiration date", "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
-        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "DaysRemaining": { "en-US": "Days remaining", "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "en-US": "Expiration status", "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
         "Company": { "en-US": "Company", "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" }

@@ -5,7 +5,7 @@
     "Code": { "en-US": "Code", "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
     "IsDefault": { "en-US": "Default", "tr-TR": "Varsayılan", "tk-TM": "Bellenen", "ru-RU": "По умолчанию" },
     "Notes": { "tr-TR": "Notlar", "tk-TM": "Bellikler", "ru-RU": "Примечания" },
-    "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+    "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
     "FullAddress": { "tr-TR": "Tam Adres", "tk-TM": "Doly salgy", "ru-RU": "Полный адрес" },
     "StartDate": { "tr-TR": "Başlangıç Tarihi", "tk-TM": "Başlanýan senesi", "ru-RU": "Дата начала" },
     "EndDate": { "tr-TR": "Bitiş Tarihi", "tk-TM": "Gutarýan senesi", "ru-RU": "Дата окончания" },
@@ -90,7 +90,7 @@
         "Notes": { "tr-TR": "Notlar", "tk-TM": "Bellikler", "ru-RU": "Примечания" },
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ExpirationState": { "tr-TR": "Süre Durumu", "tk-TM": "Möhlet ýagdaýy", "ru-RU": "Статус срока" },
-        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "ExtensionRequired": { "tr-TR": "Uzatma Gerekli", "tk-TM": "Uzadylmagy gerek", "ru-RU": "Требуется продление" },
         "RegistrationState": { "tr-TR": "Kayıt Durumu", "tk-TM": "Hasaba alnyş ýagdaýy", "ru-RU": "Статус регистрации" },
         "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
@@ -173,7 +173,7 @@
       "lookup": true,
       "members": {
         "Description": { "en-US": "Note", "tr-TR": "Not", "tk-TM": "Bellik", "ru-RU": "Примечание" },
-        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "MinistryLegs": {
           "en-US": "Ministry steps",
           "tr-TR": "Bakanlık adımları",
@@ -196,7 +196,7 @@
       "lookup": true,
       "members": {
         "Code": { "en-US": "Code", "tr-TR": "Kod", "tk-TM": "Kod", "ru-RU": "Код" },
-        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "en-US": "Active", "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "MinistriesLabel": {
           "en-US": "Ministries",
           "tr-TR": "Bakanlıklar",

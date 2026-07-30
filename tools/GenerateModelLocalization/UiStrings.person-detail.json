@@ -5,7 +5,7 @@
   },
   "enums": {
     "Visa2026.Module.BusinessObjects.ExpirationState": {
-      "Active": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+      "Active": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
       "ExpiringSoon": { "tr-TR": "Yakında Sona Eriyor", "tk-TM": "Ýakynda gutarýar", "ru-RU": "Скоро истекает" },
       "Expired": { "tr-TR": "Süresi Doldu", "tk-TM": "Gutardy", "ru-RU": "Истёк" },
       "Archived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }

@@ -1871,3 +1871,11 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 **Watch-outs:** Do not run `Status()` on Project/ColumnA for all categories — keys like `Education`/`Passport` collide with project names. Keep English status keys in loaders for ListView criteria.
 
 **Files:** UiStrings.messages.json, ReportDashboardLocalization, Catalog, PropertyEditor, Component.razor, UiStrings.json, generated VisaUiMessageCatalog + Model.*.xafml
+
+## 2026-07-29 — Turkmen: işjeň → aktiw
+
+**Ask:** Prefer Turkmen "aktiw" instead of "işjeň" in localization.
+
+**Change:** Replaced `işjeň`/`Işjeň` (and `işjeňleşdir` → `aktiwleşdir`) across Layer A JSON sources; regenerated message catalog + tk-TM xafml.
+
+**Files:** UiStrings*.json (messages, entities, security, person-detail, documents-views, lookup-enums), Module UiStrings.json, generated outputs

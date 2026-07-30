@@ -863,7 +863,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "There are no active items to generate a PDF for.",
             ["tr-TR"] = "PDF oluşturulacak aktif kalem yok.",
-            ["tk-TM"] = "PDF döretmek üçin işjeň element ýok.",
+            ["tk-TM"] = "PDF döretmek üçin aktiw element ýok.",
             ["ru-RU"] = "Нет активных позиций для генерации PDF.",
         },
         ["ApplicationPdf.TemplateNotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1738,14 +1738,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Leg {0}: enter the maximum working days in review before this profile can be active.",
             ["tr-TR"] = "Adım {0}: profil aktif olmadan önce incelemedeki azami iş günlerini girin.",
-            ["tk-TM"] = "Ädim {0}: profil işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini girižiň.",
+            ["tk-TM"] = "Ädim {0}: profil aktiw bolmazdan ozal barlagdaky iň ýokary iş günlerini girižiň.",
             ["ru-RU"] = "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать профиль.",
         },
         ["ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA before activating this profile.",
             ["tr-TR"] = "Profili etkinleştirmeden önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-            ["tk-TM"] = "Profili işjeňleşdirmezden ozal Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["tk-TM"] = "Profili aktiwleşdirmezden ozal Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
             ["ru-RU"] = "Перед активацией профиля настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
         },
         ["ApprovalLegProfile.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -2284,7 +2284,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "[{0}] Diplomas: no active Education rows for this application line (all-educations scope).",
             ["tr-TR"] = "[{0}] Diplomalar: bu başvuru satırı için aktif Eğitim kaydı yok (tüm eğitimler kapsamı).",
-            ["tk-TM"] = "[{0}] Diplomalar: bu arza setiri üçin işjeň Bilim ýazgysy ýok (ähli bilimler çägi).",
+            ["tk-TM"] = "[{0}] Diplomalar: bu arza setiri üçin aktiw Bilim ýazgysy ýok (ähli bilimler çägi).",
             ["ru-RU"] = "[{0}] Дипломы: нет активных записей об образовании для этой позиции (все образования).",
         },
         ["Pdf.Packaging.Gap.Diplomas.NoEduDocs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -3068,14 +3068,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Leg {0}: enter the maximum working days in review before this contract can be active.",
             ["tr-TR"] = "Adım {0}: sözleşme aktif olmadan önce incelemedeki azami iş günlerini girin.",
-            ["tk-TM"] = "Ädim {0}: şertnama işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini giriziň.",
+            ["tk-TM"] = "Ädim {0}: şertnama aktiw bolmazdan ozal barlagdaky iň ýokary iş günlerini giriziň.",
             ["ru-RU"] = "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать контракт.",
         },
         ["ProjectContract.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Every ministry leg needs maximum working days in review before this contract can be active.",
             ["tr-TR"] = "Sözleşme aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
-            ["tk-TM"] = "Şertnama işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
+            ["tk-TM"] = "Şertnama aktiw bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
             ["ru-RU"] = "Перед активацией контракта для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении.",
         },
         ["ProjectContract.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -4573,7 +4573,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Active Visa (P)",
             ["tr-TR"] = "Aktif Vize (P)",
-            ["tk-TM"] = "Işjeň wiza (P)",
+            ["tk-TM"] = "Aktiw wiza (P)",
             ["ru-RU"] = "Активная виза (P)",
         },
         ["ReportDashboard.SubReport.App_Reg_Check_In"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -4720,7 +4720,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Active Visa (V)",
             ["tr-TR"] = "Aktif Vize (V)",
-            ["tk-TM"] = "Işjeň wiza (V)",
+            ["tk-TM"] = "Aktiw wiza (V)",
             ["ru-RU"] = "Активная виза (V)",
         },
         ["ReportDashboard.SubReport.by-position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -4783,21 +4783,21 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Active Registered (C)",
             ["tr-TR"] = "Aktif Kayıtlı (C)",
-            ["tk-TM"] = "Işjeň hasaba alnan (C)",
+            ["tk-TM"] = "Aktiw hasaba alnan (C)",
             ["ru-RU"] = "Активная регистрация (C)",
         },
         ["ReportDashboard.SubReport.check-in-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Active Registered (V)",
             ["tr-TR"] = "Aktif Kayıtlı (V)",
-            ["tk-TM"] = "Işjeň hasaba alnan (V)",
+            ["tk-TM"] = "Aktiw hasaba alnan (V)",
             ["ru-RU"] = "Активная регистрация (V)",
         },
         ["ReportDashboard.SubReport.check-in-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Active Registered (P)",
             ["tr-TR"] = "Aktif Kayıtlı (P)",
-            ["tk-TM"] = "Işjeň hasaba alnan (P)",
+            ["tk-TM"] = "Aktiw hasaba alnan (P)",
             ["ru-RU"] = "Активная регистрация (P)",
         },
         ["ReportDashboard.SubReport.default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -4965,14 +4965,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Active Invitation (V)",
             ["tr-TR"] = "Aktif Davetiye (V)",
-            ["tk-TM"] = "Işjeň çakylyk (V)",
+            ["tk-TM"] = "Aktiw çakylyk (V)",
             ["ru-RU"] = "Активное приглашение (V)",
         },
         ["ReportDashboard.SubReport.ready-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Active Invitation (P)",
             ["tr-TR"] = "Aktif Davetiye (P)",
-            ["tk-TM"] = "Işjeň çakylyk (P)",
+            ["tk-TM"] = "Aktiw çakylyk (P)",
             ["ru-RU"] = "Активное приглашение (P)",
         },
         ["ReportDashboard.SubReport.rejected-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5070,7 +5070,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Active WorkPermit (P)",
             ["tr-TR"] = "Aktif Çalışma İzni (P)",
-            ["tk-TM"] = "Işjeň iş rugsady (P)",
+            ["tk-TM"] = "Aktiw iş rugsady (P)",
             ["ru-RU"] = "Активное РНТ (P)",
         },
         ["ReportDashboard.SubReport.WorkPermit.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5749,7 +5749,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No active passport on file for this employee. Add passport data before starting invitation, visa, or work-permit applications.",
             ["tr-TR"] = "Bu çalışan için aktif pasaport kaydı yok. Davet, vize veya çalışma izni başvurularından önce pasaport verilerini ekleyin.",
-            ["tk-TM"] = "Bu işgär üçin işjeň pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady arzalaryndan ozal pasport maglumatyny goşuň.",
+            ["tk-TM"] = "Bu işgär üçin aktiw pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady arzalaryndan ozal pasport maglumatyny goşuň.",
             ["ru-RU"] = "У сотрудника нет действующего паспорта в системе. Добавьте паспорт до заявлений на приглашение, визу или РНТ.",
         },
         ["StateNotification.Sample.missing-passport.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -5903,7 +5903,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Work permit is inside the 90-day extension window and no active extension application was found.",
             ["tr-TR"] = "Çalışma izni 90 günlük uzatma penceresinde ve aktif uzatma başvurusu bulunamadı.",
-            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we işjeň uzaltmak arzasy tapylmady.",
+            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we aktiw uzaltmak arzasy tapylmady.",
             ["ru-RU"] = "РНТ в 90-дневном окне продления, активное заявление на продление не найдено.",
         },
         ["StateNotification.Sample.work-permit-extension-required.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

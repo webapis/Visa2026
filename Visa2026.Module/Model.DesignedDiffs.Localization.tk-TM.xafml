@@ -202,7 +202,7 @@
     <Class Name="DevExpress.Persistent.BaseImpl.EF.PermissionPolicy.PermissionPolicyUser" Caption="Ulanyjy">
       <OwnMembers>
         <Member Name="ChangePasswordOnFirstLogon" Caption="Ilkinji gireşde paroly üýtget" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="Roles" Caption="Rollar" />
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
@@ -217,7 +217,7 @@
         <Member Name="ExpirationDate" Caption="Gutarýan senesi" />
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullAddress" Caption="Doly salgy" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="Lodging" Caption="Ýaşaýyş jaýy" />
         <Member Name="LodgingDocuments" Caption="Ýaşaýyş ýeri nusgalary" />
         <Member Name="Person" Caption="Adam" />
@@ -247,7 +247,7 @@
         <Member Name="ExpirationState" Caption="Möhlet ýagdaýy" />
         <Member Name="FullApplicationNumber" Caption="Doly arza belgisi" />
         <Member Name="Invitations" Caption="Çakylyklar" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsForFamily" Caption="Maşgala üçin" />
         <Member Name="IsManualEntry" Caption="El bilen giriş" />
         <Member Name="LatestProgressDate" Caption="Ýagdaý senesi" />
@@ -342,7 +342,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -424,7 +424,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -465,7 +465,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -508,7 +508,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -559,7 +559,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -596,7 +596,7 @@
         <Member Name="ChangePasswordOnFirstLogon" Caption="Ilkinji gireşde paroly üýtget" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="Roles" Caption="Rollar" />
         <Member Name="UserName" Caption="Ulanyjy ady" />
       </OwnMembers>
@@ -622,7 +622,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -673,7 +673,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -783,7 +783,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -860,7 +860,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -901,7 +901,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -955,7 +955,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -996,7 +996,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1051,7 +1051,7 @@
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ExpirationState" Caption="Visa2026.Module.BusinessObjects.ExpirationState">
       <OwnMembers>
-        <Member Name="Active" Caption="Işjeň" />
+        <Member Name="Active" Caption="Aktiw" />
         <Member Name="Archived" Caption="Arhiwlendi" />
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
@@ -1137,7 +1137,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1235,7 +1235,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1289,7 +1289,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1345,7 +1345,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1409,7 +1409,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1557,7 +1557,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1599,7 +1599,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1649,7 +1649,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1690,7 +1690,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1755,7 +1755,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1821,7 +1821,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1874,7 +1874,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -1957,7 +1957,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2010,7 +2010,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2044,7 +2044,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsExtended" Caption="Uzaldy" />
@@ -2094,7 +2094,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2155,7 +2155,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2196,7 +2196,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2243,7 +2243,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2347,7 +2347,7 @@
         <Member Name="HasInvitation" Caption="Çakylyk bar" />
         <Member Name="HistoricalImport" Caption="Taryhy ýazgy (berýän arza ýok)" />
         <Member Name="InvitationItem" Caption="Çakylyk elementi" />
-        <Member Name="IsActive" Caption="Işjeň" />
+        <Member Name="IsActive" Caption="Aktiw" />
         <Member Name="IsCancelled" Caption="Ýatyryldy" />
         <Member Name="IsChanged" Caption="Üýtgedildi" />
         <Member Name="IsDefault" Caption="Bellenen" />
@@ -2414,7 +2414,7 @@
         <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
         <ColumnInfo Id="ExpirationState" Caption="Möhlet ýagdaýy" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Ýüztutmanyň belgisi" />
-        <ColumnInfo Id="IsActive" Caption="Işjeň" />
+        <ColumnInfo Id="IsActive" Caption="Aktiw" />
         <ColumnInfo Id="IsManualEntry" Caption="El bilen giriş" />
         <ColumnInfo Id="LatestProgressDate" Caption="Ýagdaý senesi" />
         <ColumnInfo Id="LatestProgressState" Caption="Ýagdaý" />
@@ -2525,7 +2525,7 @@
       </Layout>
       <Items>
         <PropertyEditor Id="ChangePasswordOnFirstLogon" Caption="Ilkinji gireşde paroly üýtget" />
-        <PropertyEditor Id="IsActive" Caption="Işjeň" />
+        <PropertyEditor Id="IsActive" Caption="Aktiw" />
         <PropertyEditor Id="UserName" Caption="Ulanyjy ady" />
       </Items>
     </DetailView>
@@ -3040,7 +3040,7 @@
         <ColumnInfo Id="Application" Caption="Arza" />
         <ColumnInfo Id="DaysRemaining" Caption="Galan gün" />
         <ColumnInfo Id="ExpirationDate" Caption="Gutarýan senesi" />
-        <ColumnInfo Id="IsActive" Caption="Işjeň" />
+        <ColumnInfo Id="IsActive" Caption="Aktiw" />
         <ColumnInfo Id="IsCancelled" Caption="Ýatyryldy" />
         <ColumnInfo Id="IsChanged" Caption="Üýtgedildi" />
         <ColumnInfo Id="StartDate" Caption="Başlanýan senesi" />
@@ -3207,7 +3207,7 @@
         <LocalizationItem Name="FamilyMember" Value="Maşgala agzy" />
       </LocalizationGroup>
       <LocalizationGroup Name="Visa2026.Module.BusinessObjects.ExpirationState">
-        <LocalizationItem Name="Active" Value="Işjeň" />
+        <LocalizationItem Name="Active" Value="Aktiw" />
         <LocalizationItem Name="Archived" Value="Arhiwlendi" />
         <LocalizationItem Name="Expired" Value="Gutardy" />
         <LocalizationItem Name="ExpiringSoon" Value="Ýakynda gutarýar" />
