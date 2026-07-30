@@ -3,8 +3,10 @@
 -- the person dossier.
 -- Status buckets follow the person's current visa (latest non-cancelled visa across all
 -- of the person's passports).
--- SearchText is a lowercased haystack (name parts + personal number + every passport
--- number) so Preview loader and XAF ListView criteria can filter identically.
+-- SearchText is a lowercased + diacritic-folded haystack (name parts + personal number +
+-- every passport number) so typing ASCII letters matches accented names. Keep the
+-- TRANSLATE map in sync with PersonSearchTextNormalizer (SqlFoldFrom / SqlFoldTo).
+-- Preview loader and XAF ListView criteria filter identically via PersonSearchTokens.
 -- ProjectContracts uses NameTm (Name may be absent depending on schema).
 CREATE OR ALTER VIEW [dbo].[vw_rd_person_search] AS
 SELECT
@@ -51,13 +53,23 @@ SELECT
                                                                         THEN N'st-pending'
         ELSE                                                            N'st-approved'
     END                                                                 AS StatusCssClass,
-    LOWER(CONCAT_WS(N' ',
-        NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
-        NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
-        NULLIF(LTRIM(RTRIM(p.LastName)), N''),
-        NULLIF(LTRIM(RTRIM(p.PersonalNumber)), N''),
-        allp.PassportNumbers
-    ))                                                                  AS SearchText,
+    TRANSLATE(
+        LOWER(CONCAT_WS(N' ',
+            NULLIF(LTRIM(RTRIM(p.FirstName)), N''),
+            NULLIF(LTRIM(RTRIM(p.MiddleName)), N''),
+            NULLIF(LTRIM(RTRIM(p.LastName)), N''),
+            NULLIF(LTRIM(RTRIM(p.PersonalNumber)), N''),
+            allp.PassportNumbers
+        )),
+        NCHAR(0x00E0)+NCHAR(0x00E1)+NCHAR(0x00E2)+NCHAR(0x00E3)+NCHAR(0x00E4)+NCHAR(0x00E5)
+        +NCHAR(0x00E8)+NCHAR(0x00E9)+NCHAR(0x00EA)+NCHAR(0x00EB)
+        +NCHAR(0x00EC)+NCHAR(0x00ED)+NCHAR(0x00EE)+NCHAR(0x00EF)
+        +NCHAR(0x00F2)+NCHAR(0x00F3)+NCHAR(0x00F4)+NCHAR(0x00F5)+NCHAR(0x00F6)
+        +NCHAR(0x00F9)+NCHAR(0x00FA)+NCHAR(0x00FB)+NCHAR(0x00FC)
+        +NCHAR(0x00FD)+NCHAR(0x00FF)+NCHAR(0x00F1)+NCHAR(0x00E7)
+        +NCHAR(0x011F)+NCHAR(0x0131)+NCHAR(0x015F),
+        N'aaaaaaeeeeiiiiooooouuuuyyncgis'
+    )                                                                   AS SearchText,
     COALESCE(p.IsArchived, 0)                                           AS IsArchived
 FROM People p
 LEFT JOIN ProjectContracts pc

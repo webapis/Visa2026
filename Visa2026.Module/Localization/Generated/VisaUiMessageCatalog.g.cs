@@ -3722,6 +3722,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Içeri",
             ["ru-RU"] = "Внутренний",
         },
+        ["PersonDossier.View.Paper"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Paper",
+            ["tr-TR"] = "Kağıt",
+            ["tk-TM"] = "Kagyz",
+            ["ru-RU"] = "Бумага",
+        },
+        ["PersonDossier.View.Screen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Screen",
+            ["tr-TR"] = "Ekran",
+            ["tk-TM"] = "Ekran",
+            ["ru-RU"] = "Экран",
+        },
+        ["PersonDossier.View.SwitchLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dossier view",
+            ["tr-TR"] = "Dosya görünümü",
+            ["tk-TM"] = "Dosýe görnüşi",
+            ["ru-RU"] = "Вид досье",
+        },
         ["PlaceholderManual.Column.Canonical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Full name",
@@ -4316,6 +4337,27 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Proje",
             ["tk-TM"] = "Taslama",
             ["ru-RU"] = "Проект",
+        },
+        ["ReportDashboard.Chrome.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refresh",
+            ["tr-TR"] = "Yenile",
+            ["tk-TM"] = "Täzele",
+            ["ru-RU"] = "Обновить",
+        },
+        ["ReportDashboard.Chrome.Refreshing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refreshing…",
+            ["tr-TR"] = "Yenileniyor…",
+            ["tk-TM"] = "Täzelenýär…",
+            ["ru-RU"] = "Обновление…",
+        },
+        ["ReportDashboard.Chrome.RefreshTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reload the dashboard with the latest data",
+            ["tr-TR"] = "Gösterge panelini en son verilerle yeniden yükle",
+            ["tk-TM"] = "Dolandyryş paneli iň soňky maglumatlar bilen täzeden ýükle",
+            ["ru-RU"] = "Обновить панель актуальными данными",
         },
         ["ReportDashboard.Chrome.SearchClear"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

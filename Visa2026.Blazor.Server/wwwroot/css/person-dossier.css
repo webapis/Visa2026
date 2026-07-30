@@ -62,9 +62,90 @@
   margin-right: auto;
 }
 
+.person-dossier__view-switch {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--pd-border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--pd-card);
+  flex: 0 0 auto;
+}
+
+.person-dossier__view-btn {
+  border: 0;
+  background: transparent;
+  color: var(--pd-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.person-dossier__view-btn + .person-dossier__view-btn {
+  border-left: 1px solid var(--pd-border);
+}
+
+.person-dossier__view-btn:hover {
+  background: var(--pd-hover);
+  color: var(--pd-text);
+}
+
+.person-dossier__view-btn.is-active {
+  background: var(--pd-accent-soft);
+  color: var(--pd-accent);
+}
+
 .person-dossier__export-msg {
   font-size: 12px;
   color: var(--pd-muted);
+}
+
+/* -------------------------------------------------------------- paper preview
+   A4 chrome around PersonDossierDocumentHtmlBuilder.BuildFragment — same markup
+   the export PDF uses. Fixed light ink on white so it matches the hand-over
+   document even when the app is in dark theme. */
+
+.person-dossier--paper {
+  background: color-mix(in srgb, var(--pd-surface) 88%, var(--pd-text));
+}
+
+.person-dossier__paper-stage {
+  display: flex;
+  justify-content: center;
+  padding: 8px 4px 24px;
+  overflow: auto;
+}
+
+.person-dossier__paper-sheet {
+  width: 210mm;
+  max-width: 100%;
+  min-height: 297mm;
+  box-sizing: border-box;
+  padding: 18mm 16mm;
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid color-mix(in srgb, #ffffff 70%, #000000);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 9pt;
+  line-height: 1.35;
+}
+
+.person-dossier__paper-sheet img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 900px) {
+  .person-dossier__paper-sheet {
+    width: 100%;
+    min-height: 0;
+    padding: 14px 12px;
+  }
 }
 
 .person-dossier__copies-btn {

@@ -23,6 +23,24 @@
     "tk-TM": "Ýolbaşçy üçin eksport",
     "ru-RU": "Выгрузить для руководителя"
   },
+  "PersonDossier.View.SwitchLabel": {
+    "en": "Dossier view",
+    "tr-TR": "Dosya görünümü",
+    "tk-TM": "Dosýe görnüşi",
+    "ru-RU": "Вид досье"
+  },
+  "PersonDossier.View.Screen": {
+    "en": "Screen",
+    "tr-TR": "Ekran",
+    "tk-TM": "Ekran",
+    "ru-RU": "Экран"
+  },
+  "PersonDossier.View.Paper": {
+    "en": "Paper",
+    "tr-TR": "Kağıt",
+    "tk-TM": "Kagyz",
+    "ru-RU": "Бумага"
+  },
   "PersonDossier.Export.GeneratedOn": {
     "en": "Generated on {0}",
     "tr-TR": "Oluşturulma: {0}",
@@ -4708,6 +4726,24 @@
     "tr-TR": "Genel bakış",
     "tk-TM": "Umumy görnüş",
     "ru-RU": "Обзор"
+  },
+  "ReportDashboard.Chrome.Refresh": {
+    "en": "Refresh",
+    "tr-TR": "Yenile",
+    "tk-TM": "Täzele",
+    "ru-RU": "Обновить"
+  },
+  "ReportDashboard.Chrome.RefreshTitle": {
+    "en": "Reload the dashboard with the latest data",
+    "tr-TR": "Gösterge panelini en son verilerle yeniden yükle",
+    "tk-TM": "Dolandyryş paneli iň soňky maglumatlar bilen täzeden ýükle",
+    "ru-RU": "Обновить панель актуальными данными"
+  },
+  "ReportDashboard.Chrome.Refreshing": {
+    "en": "Refreshing…",
+    "tr-TR": "Yenileniyor…",
+    "tk-TM": "Täzelenýär…",
+    "ru-RU": "Обновление…"
   },
   "ReportDashboard.Chrome.ViewReports": {
     "en": "View reports ›",

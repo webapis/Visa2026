@@ -9,6 +9,14 @@ namespace Visa2026.Module.Services.ReportDashboard;
 
 public static class ReportDashboardCatalog
 {
+    /// <summary>
+    /// When <c>false</c>, the PROJECT chip row and the All / Employees / Family / Temporary
+    /// person-type tab strip are hidden. Filters stay locked to All / All. Deprecated for now
+    /// to simplify the officer UI — flip back to <c>true</c> to restore. See
+    /// <c>docs/DEPRECATED.md</c> and <c>docs/REPORT_DASHBOARD.md</c>.
+    /// </summary>
+    public const bool ShowProjectAndPersonTypeFilters = false;
+
     public static readonly ReportDashboardCategory[] Categories =
     [
         ReportDashboardCategory.ApplicationViaMinistry,
@@ -43,13 +51,13 @@ public static class ReportDashboardCatalog
     public const string PersonSearchNoVisaLabel = "No visa";
 
     /// <summary>
-    /// Whitespace-separated terms, lowercased. Every token must match (AND), mirroring
-    /// the token handling in PersonListViewPassportFullTextSearchController.
+    /// Whitespace-separated terms, lowercased and diacritic-folded. Every token must match
+    /// (AND). Folding keeps Preview and ListView in sync with <c>SearchText</c> on the view.
     /// </summary>
     public static string[] PersonSearchTokens(string? searchTerm) =>
         string.IsNullOrWhiteSpace(searchTerm)
             ? []
-            : searchTerm.ToLowerInvariant()
+            : PersonSearchTextNormalizer.Fold(searchTerm)
                 .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>

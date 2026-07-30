@@ -4,45 +4,59 @@
 
 <div class="report-dashboard">
     <div class="rd-card">
-        <div class="rd-project-filter-row">
-            <span class="rd-project-filter-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Project")</span>
-            <div class="rd-project-filter">
-                @foreach (var chip in VisibleProjects)
-                {
-                    <button type="button"
-                            class="rd-chip @(ProjectKey == chip.Key ? "active" : null)"
-                            disabled="@ShowLoading"
-                            @onclick="() => OnProject(chip.Key)">
-                        @(chip.Key == "All" ? ReportDashboardLocalization.Get("ReportDashboard.PersonType.All") : chip.Label)
-                        @if (chip.Key != "All")
-                        {
-                            <span class="count">(@chip.Count)</span>
-                        }
-                    </button>
-                }
-                @if (HiddenProjectCount > 0)
-                {
-                    <button type="button" class="rd-chip rd-chip-more" disabled="@ShowLoading" @onclick="ToggleProjectsExpanded">
-                        @(_projectsExpanded ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ShowLess") : ReportDashboardLocalization.Format("ReportDashboard.Chrome.MoreProjects", HiddenProjectCount))
-                    </button>
-                }
+        @if (ReportDashboardCatalog.ShowProjectAndPersonTypeFilters)
+        {
+            <div class="rd-project-filter-row">
+                <span class="rd-project-filter-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Project")</span>
+                <div class="rd-project-filter">
+                    @foreach (var chip in VisibleProjects)
+                    {
+                        <button type="button"
+                                class="rd-chip @(ProjectKey == chip.Key ? "active" : null)"
+                                disabled="@ShowLoading"
+                                @onclick="() => OnProject(chip.Key)">
+                            @(chip.Key == "All" ? ReportDashboardLocalization.Get("ReportDashboard.PersonType.All") : chip.Label)
+                            @if (chip.Key != "All")
+                            {
+                                <span class="count">(@chip.Count)</span>
+                            }
+                        </button>
+                    }
+                    @if (HiddenProjectCount > 0)
+                    {
+                        <button type="button" class="rd-chip rd-chip-more" disabled="@ShowLoading" @onclick="ToggleProjectsExpanded">
+                            @(_projectsExpanded ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.ShowLess") : ReportDashboardLocalization.Format("ReportDashboard.Chrome.MoreProjects", HiddenProjectCount))
+                        </button>
+                    }
+                </div>
+                @* Last-N months moved to Education (and Overview Education filter) — not global. *@
             </div>
-            @* Last-N months moved to Education (and Overview Education filter) — not global. *@
-        </div>
 
-        <div class="rd-tabs-underline" role="tablist">
-            <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.All ? "active" : null)"
+            <div class="rd-tabs-underline" role="tablist">
+                <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.All ? "active" : null)"
+                        disabled="@ShowLoading"
+                        @onclick="() => OnPersonType(ReportDashboardPersonType.All)">@PersonTypeTabLabel(ReportDashboardPersonType.All)</button>
+                <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.Employees ? "active" : null)"
+                        disabled="@ShowLoading"
+                        @onclick="() => OnPersonType(ReportDashboardPersonType.Employees)">@PersonTypeTabLabel(ReportDashboardPersonType.Employees)</button>
+                <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.FamilyMembers ? "active" : null)"
+                        disabled="@ShowLoading"
+                        @onclick="() => OnPersonType(ReportDashboardPersonType.FamilyMembers)">@PersonTypeTabLabel(ReportDashboardPersonType.FamilyMembers)</button>
+                <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.TemporaryVisitors ? "active" : null)"
+                        disabled="@ShowLoading"
+                        @onclick="() => OnPersonType(ReportDashboardPersonType.TemporaryVisitors)">@PersonTypeTabLabel(ReportDashboardPersonType.TemporaryVisitors)</button>
+            </div>
+        }
+
+        <div class="rd-top-actions">
+            <button type="button"
+                    class="rd-refresh-btn"
                     disabled="@ShowLoading"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.All)">@PersonTypeTabLabel(ReportDashboardPersonType.All)</button>
-            <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.Employees ? "active" : null)"
-                    disabled="@ShowLoading"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.Employees)">@PersonTypeTabLabel(ReportDashboardPersonType.Employees)</button>
-            <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.FamilyMembers ? "active" : null)"
-                    disabled="@ShowLoading"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.FamilyMembers)">@PersonTypeTabLabel(ReportDashboardPersonType.FamilyMembers)</button>
-            <button type="button" class="rd-tab-underline @(PersonType == ReportDashboardPersonType.TemporaryVisitors ? "active" : null)"
-                    disabled="@ShowLoading"
-                    @onclick="() => OnPersonType(ReportDashboardPersonType.TemporaryVisitors)">@PersonTypeTabLabel(ReportDashboardPersonType.TemporaryVisitors)</button>
+                    title="@ReportDashboardLocalization.Get("ReportDashboard.Chrome.RefreshTitle")"
+                    @onclick="OnRefresh">
+                <span class="rd-refresh-icon" aria-hidden="true">&#8635;</span>
+                @ReportDashboardLocalization.Get("ReportDashboard.Chrome.Refresh")
+            </button>
         </div>
 
         <div class="rd-body">
@@ -90,63 +104,6 @@
                 }
                 @if (ShowAllView)
                 {
-                    <div class="rd-overview-toolbar">
-                        <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Education"))">
-                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.EducationLast")</span>
-                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
-                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.Education, e)">
-                                @foreach (var m in PeriodMonthOptions)
-                                {
-                                    <option value="@m" selected="@(DateRangeMonths == m)">@PeriodMonthLabel(m)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisaAlign") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Passport"))">
-                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.PassportLast")</span>
-                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
-                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.Passport, e)">
-                                @foreach (var m in PeriodMonthOptions)
-                                {
-                                    <option value="@m" selected="@(PassportDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Position"))">
-                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.PositionLast")</span>
-                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
-                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.PositionHistory, e)">
-                                @foreach (var m in PeriodMonthOptions)
-                                {
-                                    <option value="@m" selected="@(PositionHistoryDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Address"))">
-                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.AddressLast")</span>
-                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
-                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.AddressOfResidence, e)">
-                                @foreach (var m in PeriodMonthOptions)
-                                {
-                                    <option value="@m" selected="@(AddressOfResidenceDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="rd-period-select"
-                             title="@(ValidVisaPersonsOnly ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.IgnoredValidVisa") : ReportDashboardLocalization.Get("ReportDashboard.Chrome.Title.Date.Medical"))">
-                            <span class="rd-period-label">@ReportDashboardLocalization.Get("ReportDashboard.Chrome.Period.MedicalLast")</span>
-                            <select class="rd-period-picker" disabled="@(ShowLoading || ValidVisaPersonsOnly)"
-                                    @onchange="e => OnCategoryPeriodChange(ReportDashboardCategory.MedicalRecord, e)">
-                                @foreach (var m in PeriodMonthOptions)
-                                {
-                                    <option value="@m" selected="@(MedicalRecordDateRangeMonths == m)">@PeriodMonthLabel(m)</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
                     <div class="rd-overview-grid">
                         @foreach (var category in ReportDashboardCatalog.Categories)
                         {
@@ -675,7 +632,7 @@
     [Parameter] public ReportDashboardPanelData? Panel       { get; set; }
     [Parameter] public IReadOnlyDictionary<string, int>? SubReportCounts { get; set; }
     [Parameter] public IReadOnlyDictionary<ReportDashboardCategory, ReportDashboardPanelData>? AllPanels { get; set; }
-    [Parameter] public ReportDashboardPersonType PersonType      { get; set; } = ReportDashboardPersonType.Employees;
+    [Parameter] public ReportDashboardPersonType PersonType      { get; set; } = ReportDashboardPersonType.All;
     [Parameter] public ReportDashboardCategory   Category        { get; set; } = ReportDashboardCategory.VisaExtension;
     [Parameter] public string                    SubReport       { get; set; } = "default";
     [Parameter] public string                    ProjectKey      { get; set; } = "All";
@@ -1173,6 +1130,15 @@
         await ShowAllViewChanged.InvokeAsync(true);
     }
 
+    private async Task OnRefresh()
+    {
+        if (ShowLoading || !InitialLoadRequested.HasDelegate)
+            return;
+
+        await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.Refreshing"));
+        await InitialLoadRequested.InvokeAsync();
+    }
+
     /// <summary>
     /// Search runs on Enter or blur rather than per keystroke — each term is a database round trip.
     /// </summary>
@@ -1206,8 +1172,19 @@
         if (ShowLoading || !CanOpenDossier(row))
             return;
 
+        // Show a brief overlay while ShowView opens the dossier tab. Must clear in finally:
+        // unlike Category/Search, PersonSelected does not flip the parent's IsLoading, so
+        // OnParametersSet never clears _localLoading — closing the dossier then reveals a
+        // stuck "Opening dossier… 0%" overlay on the still-alive dashboard tab.
         await BeginLocalLoadingAsync(ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpeningDossier"));
-        await PersonSelected.InvokeAsync(row.RecordId!.Value);
+        try
+        {
+            await PersonSelected.InvokeAsync(row.RecordId!.Value);
+        }
+        finally
+        {
+            _localLoading = false;
+        }
     }
     private async Task OnIncludeArchivedChanged(ChangeEventArgs e)
     {

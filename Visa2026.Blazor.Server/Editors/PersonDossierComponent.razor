@@ -1,8 +1,10 @@
+@using System.Globalization
 @using System.Threading.Tasks
+@using Microsoft.AspNetCore.Components
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.PersonDossier
 
-<div class="person-dossier">
+<div class="person-dossier @(_viewMode == DossierViewMode.Paper ? "person-dossier--paper" : null)">
     @if (IsLoading || Snapshot == null)
     {
         <div class="person-dossier__loading">@Msg("PersonDossier.Chrome.Loading")</div>
@@ -15,6 +17,20 @@
     {
         <div class="person-dossier__toolbar">
             <div class="person-dossier__toolbar-title">@Msg("PersonDossier.Title")</div>
+
+            <div class="person-dossier__view-switch" role="group" aria-label="@Msg("PersonDossier.View.SwitchLabel")">
+                <button type="button"
+                        class="person-dossier__view-btn @(_viewMode == DossierViewMode.Screen ? "is-active" : null)"
+                        @onclick="ShowScreen">
+                    @Msg("PersonDossier.View.Screen")
+                </button>
+                <button type="button"
+                        class="person-dossier__view-btn @(_viewMode == DossierViewMode.Paper ? "is-active" : null)"
+                        @onclick="ShowPaper">
+                    @Msg("PersonDossier.View.Paper")
+                </button>
+            </div>
+
             @if (!string.IsNullOrWhiteSpace(ExportMessage))
             {
                 <div class="person-dossier__export-msg">@ExportMessage</div>
@@ -29,112 +45,129 @@
             </button>
         </div>
 
-        <div class="person-dossier__identity">
-            <div class="person-dossier__photo">
-                @if (!string.IsNullOrEmpty(Snapshot.PhotoDataUri))
-                {
-                    <img src="@Snapshot.PhotoDataUri" alt="@Snapshot.PersonDisplayName" />
-                }
-                else
-                {
-                    <div class="person-dossier__photo-empty">@Msg("PersonDossier.Chrome.NoPhoto")</div>
-                }
+        @if (_viewMode == DossierViewMode.Paper)
+        {
+            <div class="person-dossier__paper-stage">
+                <div class="person-dossier__paper-sheet">
+                    @((MarkupString)_paperHtml)
+                </div>
             </div>
-
-            <div class="person-dossier__identity-body">
-                <div class="person-dossier__name">@Snapshot.PersonDisplayName</div>
-
-                <div class="person-dossier__badges">
-                    <span class="person-dossier__badge person-dossier__badge--role">@Snapshot.PersonRoleLabel</span>
-                    @if (!string.IsNullOrWhiteSpace(Snapshot.ProjectContractName))
+        }
+        else
+        {
+            <div class="person-dossier__identity">
+                <div class="person-dossier__photo">
+                    @if (!string.IsNullOrEmpty(Snapshot.PhotoDataUri))
                     {
-                        <span class="person-dossier__badge">@Snapshot.ProjectContractName</span>
+                        <img src="@Snapshot.PhotoDataUri" alt="@Snapshot.PersonDisplayName" />
                     }
-                    @if (Snapshot.IsArchived)
+                    else
                     {
-                        <span class="person-dossier__badge person-dossier__badge--archived">@Msg("PersonDossier.Status.Archived")</span>
+                        <div class="person-dossier__photo-empty">@Msg("PersonDossier.Chrome.NoPhoto")</div>
                     }
                 </div>
 
-                <div class="person-dossier__fields">
-                    @foreach (var field in Snapshot.IdentityFields)
+                <div class="person-dossier__identity-body">
+                    <div class="person-dossier__name">@Snapshot.PersonDisplayName</div>
+
+                    <div class="person-dossier__badges">
+                        <span class="person-dossier__badge person-dossier__badge--role">@Snapshot.PersonRoleLabel</span>
+                        @if (!string.IsNullOrWhiteSpace(Snapshot.ProjectContractName))
+                        {
+                            <span class="person-dossier__badge">@Snapshot.ProjectContractName</span>
+                        }
+                        @if (Snapshot.IsArchived)
+                        {
+                            <span class="person-dossier__badge person-dossier__badge--archived">@Msg("PersonDossier.Status.Archived")</span>
+                        }
+                    </div>
+
+                    <div class="person-dossier__fields">
+                        @foreach (var field in Snapshot.IdentityFields)
+                        {
+                            <div class="person-dossier__field">
+                                <span class="person-dossier__field-label">@field.Label</span>
+                                <span class="person-dossier__field-value">@field.Value</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (Snapshot.StatusTiles.Count > 0)
+            {
+                <div class="person-dossier__tiles">
+                    @foreach (var tile in Snapshot.StatusTiles)
                     {
-                        <div class="person-dossier__field">
-                            <span class="person-dossier__field-label">@field.Label</span>
-                            <span class="person-dossier__field-value">@field.Value</span>
+                        <div class="person-dossier__tile">
+                            <div class="person-dossier__tile-label">@tile.Label</div>
+                            <div class="person-dossier__tile-value">@tile.Value</div>
+                            @if (!string.IsNullOrWhiteSpace(tile.StatusLabel))
+                            {
+                                <div class="person-dossier__pill @tile.StatusCssClass">@tile.StatusLabel</div>
+                            }
                         </div>
                     }
                 </div>
-            </div>
-        </div>
+            }
 
-        @if (Snapshot.StatusTiles.Count > 0)
-        {
-            <div class="person-dossier__tiles">
-                @foreach (var tile in Snapshot.StatusTiles)
+            <div class="person-dossier__sections">
+                @foreach (var section in Snapshot.Sections)
                 {
-                    <div class="person-dossier__tile">
-                        <div class="person-dossier__tile-label">@tile.Label</div>
-                        <div class="person-dossier__tile-value">@tile.Value</div>
-                        @if (!string.IsNullOrWhiteSpace(tile.StatusLabel))
-                        {
-                            <div class="person-dossier__pill @tile.StatusCssClass">@tile.StatusLabel</div>
-                        }
-                    </div>
+                    <section class="person-dossier__section">
+                        <header class="person-dossier__section-head">
+                            <span class="person-dossier__section-title">@section.SectionLabel</span>
+                            <span class="person-dossier__section-count">@section.Records.Count</span>
+                        </header>
+
+                        <div class="person-dossier__table-scroll">
+                            <table class="person-dossier__table">
+                                <thead>
+                                    <tr>
+                                        @foreach (var header in section.ColumnHeaders)
+                                        {
+                                            <th>@header</th>
+                                        }
+                                        <th class="person-dossier__col-status">@Msg("PersonDossier.Column.Status")</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var record in section.Records)
+                                    {
+                                        <tr class="@(record.IsCurrent ? "person-dossier__row--current" : null)">
+                                            @foreach (var cell in record.Cells)
+                                            {
+                                                <td>@cell</td>
+                                            }
+                                            <td class="person-dossier__col-status">
+                                                @if (record.IsCurrent)
+                                                {
+                                                    <span class="person-dossier__pill st-approved">@Msg("PersonDossier.Status.Current")</span>
+                                                }
+                                                @if (!string.IsNullOrWhiteSpace(record.StatusLabel))
+                                                {
+                                                    <span class="person-dossier__pill @record.StatusCssClass">@record.StatusLabel</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                 }
             </div>
         }
-
-        <div class="person-dossier__sections">
-            @foreach (var section in Snapshot.Sections)
-            {
-                <section class="person-dossier__section">
-                    <header class="person-dossier__section-head">
-                        <span class="person-dossier__section-title">@section.SectionLabel</span>
-                        <span class="person-dossier__section-count">@section.Records.Count</span>
-                    </header>
-
-                    <div class="person-dossier__table-scroll">
-                        <table class="person-dossier__table">
-                            <thead>
-                                <tr>
-                                    @foreach (var header in section.ColumnHeaders)
-                                    {
-                                        <th>@header</th>
-                                    }
-                                    <th class="person-dossier__col-status">@Msg("PersonDossier.Column.Status")</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var record in section.Records)
-                                {
-                                    <tr class="@(record.IsCurrent ? "person-dossier__row--current" : null)">
-                                        @foreach (var cell in record.Cells)
-                                        {
-                                            <td>@cell</td>
-                                        }
-                                        <td class="person-dossier__col-status">
-                                            @if (record.IsCurrent)
-                                            {
-                                                <span class="person-dossier__pill st-approved">@Msg("PersonDossier.Status.Current")</span>
-                                            }
-                                            @if (!string.IsNullOrWhiteSpace(record.StatusLabel))
-                                            {
-                                                <span class="person-dossier__pill @record.StatusCssClass">@record.StatusLabel</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            }
-        </div>
     }
 </div>
 
 @code {
+    private enum DossierViewMode
+    {
+        Screen,
+        Paper
+    }
+
     [Parameter] public PersonDossierSnapshot? Snapshot { get; set; }
     [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
@@ -144,6 +177,17 @@
     [Parameter] public bool IsExportQueued { get; set; }
 
     private bool _initialLoadStarted;
+    private DossierViewMode _viewMode = DossierViewMode.Screen;
+    private string _paperHtml = string.Empty;
+    private PersonDossierSnapshot? _paperSnapshotRef;
+    private string? _paperCulture;
+
+    protected override void OnParametersSet()
+    {
+        // Snapshot arrives after InitialLoadRequested — refresh Paper if that mode is already open.
+        if (_viewMode == DossierViewMode.Paper)
+            RebuildPaperHtmlIfNeeded();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -152,6 +196,37 @@
 
         _initialLoadStarted = true;
         await InitialLoadRequested.InvokeAsync();
+    }
+
+    private void ShowScreen() => _viewMode = DossierViewMode.Screen;
+
+    private void ShowPaper()
+    {
+        RebuildPaperHtmlIfNeeded();
+        _viewMode = DossierViewMode.Paper;
+    }
+
+    private void RebuildPaperHtmlIfNeeded()
+    {
+        if (Snapshot == null || Snapshot.PersonId == Guid.Empty)
+        {
+            _paperHtml = string.Empty;
+            _paperSnapshotRef = null;
+            _paperCulture = null;
+            return;
+        }
+
+        var culture = CultureInfo.CurrentUICulture.Name;
+        if (ReferenceEquals(Snapshot, _paperSnapshotRef)
+            && string.Equals(culture, _paperCulture, StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrEmpty(_paperHtml))
+        {
+            return;
+        }
+
+        _paperHtml = PersonDossierDocumentHtmlBuilder.BuildFragment(Snapshot, culture);
+        _paperSnapshotRef = Snapshot;
+        _paperCulture = culture;
     }
 
     private async Task OnOpenCopies()

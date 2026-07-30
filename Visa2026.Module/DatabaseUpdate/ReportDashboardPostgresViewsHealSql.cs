@@ -164,9 +164,32 @@ public static class ReportDashboardPostgresViewsHealSql
         }
 
         HealIncompletePersonsViewIfReady(connection);
+        HealPersonSearchViewIfNeeded(connection);
+    }
 
-        if (!ViewExists(connection, PersonSearchViewName))
+    private static void HealPersonSearchViewIfNeeded(NpgsqlConnection connection)
+    {
+        if (!ViewExists(connection, PersonSearchViewName)
+            || NeedsPersonSearchFoldHeal(connection))
+        {
             ExecuteEmbeddedSql(connection, PersonSearchResourceLeaf);
+        }
+    }
+
+    /// <summary>
+    /// Recreate when SearchText is not diacritic-folded (pre-fold view body has no translate).
+    /// </summary>
+    private static bool NeedsPersonSearchFoldHeal(NpgsqlConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT pg_get_viewdef('public.vw_rd_person_search'::regclass, true);
+            """;
+        var def = command.ExecuteScalar() as string;
+        if (string.IsNullOrEmpty(def))
+            return true;
+
+        return def.IndexOf("translate(", StringComparison.OrdinalIgnoreCase) < 0;
     }
 
     private static void HealIncompletePersonsViewIfReady(NpgsqlConnection connection)

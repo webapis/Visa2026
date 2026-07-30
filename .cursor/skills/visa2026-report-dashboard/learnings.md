@@ -1904,3 +1904,34 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 - New/Delete stay visible on the drill-down ListView despite `AllowNew/AllowDelete=False` - pre-existing on every `vw_rd_*` ListView, not specific to this one
 
 **Files:** SqlViews/vw_rd_person_search*.sql, VwRdPersonSearch.cs, Visa2026DbContext, SqlViewsUpdater, ReportDashboardPostgresViewsUpdater/HealSql, Updater.cs, ReportDashboardCatalog/Models/Query/Hybrid/Mock, ReportDashboardPropertyEditor/Model/Component.razor, report-dashboard.css, Model.xafml, UiStrings.messages.json
+## 2026-07-30 - Person search: stuck "Opening dossier… 0%" after closing dossier
+
+**Symptom:** Click a Person search row → dossier opens → close dossier tab → Report Dashboard shows a permanent overlay "Opening dossier…" at 0%.
+
+**Root cause:** `OnRowSelected` called `BeginLocalLoadingAsync` but never cleared `_localLoading`. Category/Search clear it indirectly when the parent sets `IsLoading` (see `OnParametersSet`). `PersonSelected` only calls `ShowView` and never flips parent `IsLoading`, so the MDI-kept dashboard tab woke up still loading.
+
+**Fix:** `try` / `finally { _localLoading = false; }` around `PersonSelected.InvokeAsync`.
+
+**Prevent:** Any `BeginLocalLoadingAsync` whose callback does **not** drive parent `IsLoading` must clear `_localLoading` itself.
+
+**Files:** `ReportDashboardComponent.razor`
+## 2026-07-30 - Hide PROJECT chips + person-type tabs (deprecated)
+
+**Ask:** Simplify Report Dashboard UI; hide the two filter rows (PROJECT chips and All/Employees/Family/Temporary tabs); mark deprecated.
+
+**Fix:** ReportDashboardCatalog.ShowProjectAndPersonTypeFilters = false gates both rows in ReportDashboardComponent.razor. Filters stay locked to All/All. Documented in docs/DEPRECATED.md + docs/REPORT_DASHBOARD.md. Flip the const to true to restore.
+
+**Files:** ReportDashboardCatalog.cs, ReportDashboardComponent.razor, DEPRECATED.md, REPORT_DASHBOARD.md
+
+## 2026-07-30 - Person search diacritic fold
+
+**Ask:** Less restrictive search so ASCII typed letters match accented names (e.g. `u` matches `ü`, `gul` matches `Gül`).
+
+**Approach:** Fold both sides — `PersonSearchTextNormalizer.Fold` on query tokens (`PersonSearchTokens`) and SQL `translate` on `vw_rd_person_search.SearchText` after `lower`. Keep AND + Preview/ListView parity.
+
+**Pitfalls:**
+- Postgres `E'\u00e0...'` does **not** decode Unicode escapes — use `U&'\00E0...'` (or literal UTF-8).
+- `SqlFoldFrom` / `SqlFoldTo` lengths must match; `ýÿñç` maps to `yync` (four chars), not `ync`.
+- Heal previously only created the person-search view when missing — existing DBs need `NeedsPersonSearchFoldHeal` (`pg_get_viewdef` lacks `translate(`) to recreate.
+
+**Files:** PersonSearchTextNormalizer.cs, ReportDashboardCatalog.cs, vw_rd_person_search*.sql, ReportDashboardPostgresViewsHealSql.cs, REPORT_DASHBOARD.md, PersonSearchTextNormalizerTests.cs

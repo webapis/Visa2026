@@ -240,6 +240,48 @@
 
 .rd-body { display: flex; align-items: stretch; min-height: 520px; }
 
+.rd-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rd-border);
+  background: var(--rd-surface);
+}
+
+.rd-refresh-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--rd-border);
+  border-radius: 999px;
+  background: var(--rd-surface-2);
+  color: var(--rd-text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rd-refresh-btn:hover:not(:disabled) {
+  background: var(--rd-hover);
+  border-color: var(--rd-accent-edge, var(--rd-border));
+  color: var(--rd-accent);
+}
+
+.rd-refresh-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.rd-refresh-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
 .rd-cat-nav {
   width: 210px;
   flex-shrink: 0;

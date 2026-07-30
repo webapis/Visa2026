@@ -3,8 +3,10 @@
 -- result row, and open the person dossier.
 -- Status buckets follow the person's current visa (latest non-cancelled visa across all
 -- of the person's passports).
--- SearchText is a lowercased haystack (name parts + personal number + every passport
--- number) so Preview loader and XAF ListView criteria can filter identically.
+-- SearchText is a lowercased + diacritic-folded haystack (name parts + personal number +
+-- every passport number) so typing "u" matches "u with diaeresis", etc. Keep the translate
+-- map in sync with PersonSearchTextNormalizer (SqlFoldFrom / SqlFoldTo).
+-- Preview loader and XAF ListView criteria filter identically via PersonSearchTokens.
 -- ProjectContracts exposes NameTm only (no Name column).
 DROP VIEW IF EXISTS vw_rd_person_search;
 CREATE VIEW vw_rd_person_search AS
@@ -52,13 +54,17 @@ SELECT
                                                                              THEN 'st-pending'
         ELSE                                                                 'st-approved'
     END                                                                     AS "StatusCssClass",
-    LOWER(CONCAT_WS(' ',
-        NULLIF(BTRIM(p."FirstName"), ''),
-        NULLIF(BTRIM(p."MiddleName"), ''),
-        NULLIF(BTRIM(p."LastName"), ''),
-        NULLIF(BTRIM(p."PersonalNumber"), ''),
-        allp."PassportNumbers"
-    ))                                                                      AS "SearchText",
+    translate(
+        LOWER(CONCAT_WS(' ',
+            NULLIF(BTRIM(p."FirstName"), ''),
+            NULLIF(BTRIM(p."MiddleName"), ''),
+            NULLIF(BTRIM(p."LastName"), ''),
+            NULLIF(BTRIM(p."PersonalNumber"), ''),
+            allp."PassportNumbers"
+        )),
+        U&'\00E0\00E1\00E2\00E3\00E4\00E5\00E8\00E9\00EA\00EB\00EC\00ED\00EE\00EF\00F2\00F3\00F4\00F5\00F6\00F9\00FA\00FB\00FC\00FD\00FF\00F1\00E7\011F\0131\015F',
+        'aaaaaaeeeeiiiiooooouuuuyyncgis'
+    )                                                                       AS "SearchText",
     COALESCE(p."IsArchived", FALSE)                                         AS "IsArchived"
 FROM "People" p
 LEFT JOIN "ProjectContracts" pc

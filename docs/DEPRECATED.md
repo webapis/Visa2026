@@ -116,6 +116,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Item | Status | Replacement |
 |------|--------|-------------|
+| Report Dashboard **PROJECT** chip row + **person-type** tab strip (All / Employees / Family / Temporary) | Deprecated (hidden) | Category nav alone; filters locked to **All** / **All**. Re-enable: set `ReportDashboardCatalog.ShowProjectAndPersonTypeFilters = true`. See [`docs/REPORT_DASHBOARD.md`](REPORT_DASHBOARD.md). |
 | `Visa2026.DataImporter --seed-lookups-only` | **Removed** | App startup `LookupCatalogSyncUpdater` |
 | `Visa2026.DataImporter --sync-positions` / `--delete-missing` | **Removed** | Tenant/global JSON via `LookupCatalogSyncUpdater` |
 | `LookupSeeder.cs` (OData POST from `lookup.xlsm`) | **Removed** | Module JSON + `--export-lookup-catalogs` dev tool |

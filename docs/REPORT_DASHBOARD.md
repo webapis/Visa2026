@@ -6,7 +6,7 @@
 
 ## Purpose
 
-After login, officers land on this dashboard to grasp process state (invitation, visa extension, work permit, registration, travel, border zone, passport) by **project** and **person type**, then act via:
+After login, officers land on this dashboard to grasp process state (invitation, visa extension, work permit, registration, travel, border zone, passport), then act via:
 
 - **Charts** (list / pie / bar) of status buckets
 - **Open in Excel** — mapped `UserReportTemplate` (when configured)
@@ -16,8 +16,10 @@ After login, officers land on this dashboard to grasp process state (invitation,
 
 | Layer | Values |
 |-------|--------|
-| Project filter | `All` + `ProjectContract` chips (overflow “+N more”) |
-| Person type | Employees 뿯½ Family Members 뿯½ Temporary Visitors (`PersonRecordRole`) |
+| Project filter | **Deprecated (hidden):** `All` + `ProjectContract` chips. Locked to `All` while `ReportDashboardCatalog.ShowProjectAndPersonTypeFilters` is `false`. |
+| Person type | **Deprecated (hidden):** All / Employees / Family Members / Temporary Visitors. Locked to `All` while the same flag is `false`. |
+| Overview period pickers | **Removed** from Overview (Education / Passport / Position / Address / Medical · Last). Defaults remain for queries; per-category **Last** pickers on Education/Passport/etc. detail views are unchanged. |
+| Refresh | Top-right **Refresh** on the dashboard card — always visible for **Overview and every category**; reloads snapshot / panels from the database. |
 | Category | Application (via ministry) / Application (direct migration) / Visa / Invitation / Registration / WorkPermit / Travel / Address of Residence / BorderZone / Passport / Education / Position History / Subcontractor / Medical Records / Incomplete persons / Person search |
 
 ## Hosting
@@ -55,13 +57,13 @@ The only category that takes free text. It answers "find this person, then show 
 | Aspect | Behaviour |
 |--------|-----------|
 | Chrome | Search box (`.rd-search-box`) rendered next to the filter chips when `ReportDashboardCatalog.SupportsPersonSearch(Category)`; clear `×` resets the term |
-| Empty term | Lists **all** persons under the current person-type / project filters, so the Overview card still shows a real count |
-| Haystack | `SearchText` column on the view — lowercased first/middle/last name + personal number + **every** passport number |
+| Empty term | Lists **all** persons (person-type / project filters are currently locked to All while those chrome rows are deprecated/hidden) |
+| Haystack | `SearchText` on the view — lowercased + **diacritic-folded** first/middle/last name + personal number + **every** passport number (`PersonSearchTextNormalizer` / SQL `translate`; typing `u` matches `ü`) |
 | Chart buckets | Current visa status: `Valid` / `Expiring (<30 days)` / `Expired` / `No visa` (reuses the green-amber-red status CSS) |
 | Row click | Opens the **person dossier** (`PersonDossierOpenHelper`), not the Person DetailView — see [`PERSON_DOSSIER.md`](PERSON_DOSSIER.md) |
 | Source | `vw_rd_person_search` → `VwRdPersonSearch` → `VwRdPersonSearch_ListView` |
 
-**Parity invariant:** the term is tokenized once by `ReportDashboardCatalog.PersonSearchTokens` and consumed by both the Preview loader (`LoadPersonSearch`) and the drill-down criteria (`BuildPersonSearchCriteria`), so Preview total always equals **Open ListView** total.
+**Parity invariant:** the term is tokenized once by `ReportDashboardCatalog.PersonSearchTokens` (whitespace split after diacritic fold) and consumed by both the Preview loader (`LoadPersonSearch`) and the drill-down criteria (`BuildPersonSearchCriteria`), so Preview total always equals **Open ListView** total. Keep SQL `translate` maps in sync with `PersonSearchTextNormalizer.SqlFoldFrom` / `SqlFoldTo`.
 
 ## Relationship to other features
 

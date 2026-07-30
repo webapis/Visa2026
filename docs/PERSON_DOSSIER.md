@@ -1,15 +1,20 @@
 # Person dossier ("dosye")
 
-**Status:** **Phase 1 verified** against real data on the local PostgreSQL dev database (employee and
-family member, headless Edge). Phase 2 partial - the dossier opens document copies from its toolbar;
-per-section deep-linking is still open. Phases 3-4 planned.
+**Status:** Phases **1, 3, and 4 verified** against real data on the local PostgreSQL dev database
+(headless Edge). Phase 2 is **partial** - the dossier opens document copies from its toolbar, but
+per-section deep-linking from a row to its own copies record is still open.
 
-**Localization:** `PersonDossier.*` keys are seeded **English only**. The generated catalog falls
-back to `en-US`, so tr-TR / tk-TM / ru-RU render English until translations are added to
-`tools/GenerateModelLocalization/UiStrings.messages.json`.
+**Localization:** all `PersonDossier.*` keys carry **en / tr-TR / tk-TM / ru-RU**, verified on screen
+and in the exported PDF. One value still renders English - the Applications status, which comes from
+the denormalized `ApplicationItem.LastApplicationState` column rather than a UI string.
 
 Single-person 360 page: identity, current status, and every visa/permit/travel record for one
 `Person`, in one read-only screen, with the existing document-copies catalog beside it.
+
+**Views:** toolbar **Screen** | **Paper**. Screen is the officer dashboard layout. Paper renders the
+same HTML fragment the export PDF uses (`PersonDossierDocumentHtmlBuilder.BuildFragment`) inside an
+A4 sheet chrome — preview of the director hand-over without opening the preview slot (so Document
+copies can stay open on the right).
 
 **Primary audience:** company directors asking about a foreign employee. Officers produce it;
 directors consume it as an export. That split drives most of the design decisions below.

@@ -24,6 +24,10 @@ public static class PersonDossierDocumentHtmlBuilder
     private const string RuleColor = "#cccccc";
     private const string HeadBackground = "#f2f4f7";
 
+    /// <summary>
+    /// Full HTML document for RichEdit PDF conversion. Prefer
+    /// <see cref="BuildFragment"/> for the on-screen Paper preview (no nested html/body).
+    /// </summary>
     public static string Build(PersonDossierSnapshot snapshot, string? cultureName)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
@@ -31,14 +35,25 @@ public static class PersonDossierDocumentHtmlBuilder
         var html = new StringBuilder(16 * 1024);
         html.Append("<html><head><meta charset=\"utf-8\" /></head>");
         html.Append(CultureInfo.InvariantCulture, $"<body style=\"font-family:'Segoe UI',Arial,sans-serif;font-size:9pt;color:{InkColor};\">");
+        html.Append(BuildFragment(snapshot, cultureName));
+        html.Append("</body></html>");
+        return html.ToString();
+    }
 
+    /// <summary>
+    /// Inner print markup only — same content as the PDF, safe to host inside the dossier's
+    /// A4 paper chrome via <c>MarkupString</c>.
+    /// </summary>
+    public static string BuildFragment(PersonDossierSnapshot snapshot, string? cultureName)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+
+        var html = new StringBuilder(16 * 1024);
         AppendTitle(html, snapshot, cultureName);
         AppendIdentity(html, snapshot, cultureName);
         AppendStatusTiles(html, snapshot);
         AppendSections(html, snapshot, cultureName);
         AppendFooter(html, cultureName);
-
-        html.Append("</body></html>");
         return html.ToString();
     }
 
