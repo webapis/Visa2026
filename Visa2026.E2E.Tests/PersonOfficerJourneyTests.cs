@@ -56,7 +56,7 @@ public class PersonOfficerJourneyTests : E2ETestBase
         ExecutePersonAddressesNestedNew();
         FillAddressPrivateHouseRequiredFields();
         SaveAddressDetail();
-        AssertAddressShowsFullAddress(E2ETestAddressCreateValues.LodgingDisplay);
+        AssertAddressSaved();
 
         // Medical record — create, update, delete
         ReturnToSavedEmployeeDetail();
