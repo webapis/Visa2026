@@ -295,6 +295,42 @@ internal static class EasyTestBlazorNavigationHelper
         }
     }
 
+    public static bool PageContainsText(IApplicationContext appContext, string text)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null || string.IsNullOrEmpty(text))
+            return false;
+
+        try
+        {
+            return driver.PageSource?.Contains(text, StringComparison.OrdinalIgnoreCase) == true;
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
+    public static bool ListRowContainsText(IApplicationContext appContext, string cellText)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        string literal = cellText.Replace("'", "\\'");
+        string xpath =
+            $"//table[contains(@class,'dxbl-grid')]//tr[contains(@class,'dxbl-grid-data-row') and contains(., '{literal}')]";
+
+        try
+        {
+            return driver.FindElements(By.XPath(xpath)).Any(e => e.Displayed);
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
     public static void ClickListRowContaining(IApplicationContext appContext, string cellText)
     {
         IWebDriver driver = ResolveWebDriver(appContext)

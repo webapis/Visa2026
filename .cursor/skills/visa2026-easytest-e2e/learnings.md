@@ -156,3 +156,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Only passport covered; need officer-like create of Person record children on GitHub Actions.
 - **Fix / reuse**: One long Fact: employee → Passport → **Visa under Passport** → Education → Address (Private house) → Medical (update + best-effort delete) → PositionHistory → WorkDuty → Salary → External Arrival. Generic `ExecutePersonNestedNew` + tab/New title aliases. **ActualPosition** seeded only when connection string contains `Visa2026EasyTest` (`Updater.EnsureEasyTestActualPositionSeed`). PersonDocument file upload deferred. Issued tabs excluded.
 - **Reuse**: Visa is never a Person tab; Address Type must switch to Private house before Full Address; WorkDuty field/tab captions may be TM (`Gelmeginiň Maksady`); promote `person-master-data-crud` map to `ready/` after GHA green.
+
+### 2026-07-30 — GHA: employee Save empty Project Contract → empty Employees list
+
+- **Outcome**: negative → fix
+- **Context**: `CreateEmployeeWithRequiredFields`, host-out.log ValidationException
+- **Symptom**: `"Project Contract" must not be empty` on Save; `OpenEmployeeInListByPersonalNumber` then sees Empty table.
+- **Fix / reuse**: `EnsureEmployeeRequiredLookupsBound` before Save; `SaveEmployeeDetailAndConfirm` retries on validation banner and verifies list row via Selenium; `OpenEmployee…` always falls through to `ClickListRowContaining`.
+- **Reuse**: Combo FillForm success ≠ bound lookup — re-read property values before Save; confirm persistence via Employees list row, not detail form alone.

@@ -223,7 +223,94 @@ namespace Visa2026.E2E.Tests
                 new EasyTestParameter(E2ETestPersonFieldCaptions.ProjectContract, E2ETestEmployeeCreateValues.ProjectContractDisplay),
                 new EasyTestParameter(E2ETestPersonFieldCaptions.Subcontractor, E2ETestEmployeeCreateValues.SubcontractorDisplay));
 
-            ExecuteActionWithRetry("Save");
+            EnsureEmployeeRequiredLookupsBound();
+            SaveEmployeeDetailAndConfirm(personalNumber);
+        }
+
+        /// <summary>
+        /// Re-fills Project Contract / Subcontractor when EasyTest combo FillForm reports success but the bound value is empty (CI flake).
+        /// </summary>
+        private void EnsureEmployeeRequiredLookupsBound()
+        {
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                try
+                {
+                    string project = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.ProjectContract) ?? string.Empty;
+                    string subcontractor = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.Subcontractor) ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(project) && !string.IsNullOrWhiteSpace(subcontractor))
+                        return;
+
+                    if (string.IsNullOrWhiteSpace(project))
+                    {
+                        FillFormWithRetry(new EasyTestParameter(
+                            E2ETestPersonFieldCaptions.ProjectContract,
+                            E2ETestEmployeeCreateValues.ProjectContractDisplay));
+                    }
+
+                    if (string.IsNullOrWhiteSpace(subcontractor))
+                    {
+                        FillFormWithRetry(new EasyTestParameter(
+                            E2ETestPersonFieldCaptions.Subcontractor,
+                            E2ETestEmployeeCreateValues.SubcontractorDisplay));
+                    }
+                }
+                catch (AdapterOperationException) when (attempt < 4)
+                {
+                    Thread.Sleep(EasyTestCITuning.FormFieldRetryDelay);
+                }
+            }
+
+            throw new InvalidOperationException(
+                "Employee Project Contract / Subcontractor were not bound before Save " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private void SaveEmployeeDetailAndConfirm(string personalNumber)
+        {
+            for (var attempt = 0; attempt < 4; attempt++)
+            {
+                EnsureEmployeeRequiredLookupsBound();
+                ExecuteActionWithRetry("Save");
+                Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+
+                if (EasyTestBlazorNavigationHelper.PageContainsText(AppContext, "must not be empty")
+                    || EasyTestBlazorNavigationHelper.PageContainsText(AppContext, "Data Validation Error"))
+                {
+                    EnsureEmployeeRequiredLookupsBound();
+                    continue;
+                }
+
+                NavigateEmployeesList();
+                if (EasyTestBlazorNavigationHelper.ListRowContainsText(AppContext, personalNumber))
+                    return;
+
+                // Save may have left us on detail without persisting — reopen New path only if list empty.
+                if (IsEmployeeDetailFormReady() && EmployeeDetailShowsPersonalNumber(personalNumber))
+                    continue;
+
+                NavigateEmployeesList();
+                ExecuteActionWithRetry("New");
+                AssertEmployeeDetailViewActive();
+                FillFormWithRetry(
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.FirstName, E2ETestEmployeeCreateValues.FirstName),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.LastName, E2ETestEmployeeCreateValues.LastName),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.DateOfBirth, E2ETestEmployeeCreateValues.DateOfBirth),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.BirthPlace, E2ETestEmployeeCreateValues.BirthPlace),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.CountryOfBirth, E2ETestEmployeeCreateValues.CountryDisplay),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.Gender, E2ETestEmployeeCreateValues.GenderDisplay),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.MaritalStatus, E2ETestEmployeeCreateValues.MaritalStatusDisplay),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.Nationality, E2ETestEmployeeCreateValues.CountryDisplay),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.ForeignAddress, E2ETestEmployeeCreateValues.ForeignAddress),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.ForeignAddressCountry, E2ETestEmployeeCreateValues.CountryDisplay),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.ProjectContract, E2ETestEmployeeCreateValues.ProjectContractDisplay),
+                    new EasyTestParameter(E2ETestPersonFieldCaptions.Subcontractor, E2ETestEmployeeCreateValues.SubcontractorDisplay));
+            }
+
+            throw new InvalidOperationException(
+                $"Employee with Personal Number '{personalNumber}' was not found in the Employees list after Save " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
         protected void OpenEmployeeInListByPersonalNumber(
@@ -233,7 +320,7 @@ namespace Visa2026.E2E.Tests
             fullNameFallback ??= E2ETestEmployeeCreateValues.FullName;
             NavigateEmployeesList();
 
-            for (var attempt = 0; attempt < 5; attempt++)
+            for (var attempt = 0; attempt < 8; attempt++)
             {
                 try
                 {
@@ -251,9 +338,10 @@ namespace Visa2026.E2E.Tests
                         AssertEmployeeDetailShowsPersonalNumber(personalNumber);
                         return;
                     }
-                    catch (AdapterOperationException) when (attempt < 4)
+                    catch (AdapterOperationException)
                     {
                         Thread.Sleep(TimeSpan.FromSeconds(1));
+                        NavigateEmployeesList();
                     }
                 }
             }
