@@ -18,7 +18,7 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 ## 3. Project Structure
 
 - **`Visa2026.E2E.Tests.csproj`**: The project file, containing all dependencies and configurations. It references the `Visa2026.Module` project to ensure it has context of the application's business objects.
-- **`PersonOfficerJourneyTests.cs`**: Single officer journey (`E2E-001`) — login, create employee, add passport; inherits `E2ETestBase`.
+- **`PersonOfficerJourneyTests.cs`**: Officer Person master-data CRUD journey (`E2E-001`…`E2E-008`) — login, create employee, passport→visa, education, address, medical CRUD, position, work duty, salary, travel; inherits `E2ETestBase` (+ `E2ETestBase.PersonMasterData.cs`).
 - **`scenarios/`**: Scenario maps (`*_map.md`) and yaml **specs** (Option A — C# executes steps; see [scenarios/README.md](./scenarios/README.md)).
 - **`Config.xml`**: The configuration file for EasyTest, defining application aliases, database connections, and other settings. The browser for testing is also specified here.
 - **`*.ets` files**: These are the EasyTest script files. They contain a sequence of commands that represent user actions (e.g., navigating to a view, filling a form, clicking a button) and assertions to verify outcomes.

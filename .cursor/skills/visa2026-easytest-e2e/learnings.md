@@ -148,3 +148,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Seeded `E2E-TEST-001` missing from Employees list; person exists as **Family Member** (`PersonRole` default). Setting `IsEmployee = true` alone is undone by `Person.OnSaving` → `PersonRoleHelper.SyncIsEmployee`.
 - **Fix / reuse**: Use **`PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee)`** on create; on existing seed row correct role before return. Employees list filters **`PersonRole`**, not `IsEmployee`. EF seed queries: avoid `string.Contains(..., StringComparison)` — not SQL-translatable.
 - **Reuse**: E2E parent Person seed → always `ApplyRole(Employee)`; idempotent role correction for `PersonPersonalNumber`.
+
+### 2026-07-30 — Person master-data CRUD journey (E2E-001…008) for GHA
+
+- **Outcome**: positive (compiled; GHA run validates captions)
+- **Context**: `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud`, `E2ETestBase.PersonMasterData`, `E2ETestDataSeed`
+- **Symptom**: Only passport covered; need officer-like create of Person record children on GitHub Actions.
+- **Fix / reuse**: One long Fact: employee → Passport → **Visa under Passport** → Education → Address (Private house) → Medical (update + best-effort delete) → PositionHistory → WorkDuty → Salary → External Arrival. Generic `ExecutePersonNestedNew` + tab/New title aliases. **ActualPosition** seeded only when connection string contains `Visa2026EasyTest` (`Updater.EnsureEasyTestActualPositionSeed`). PersonDocument file upload deferred. Issued tabs excluded.
+- **Reuse**: Visa is never a Person tab; Address Type must switch to Private house before Full Address; WorkDuty field/tab captions may be TM (`Gelmeginiň Maksady`); promote `person-master-data-crud` map to `ready/` after GHA green.

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EF;
+using DevExpress.ExpressApp.EFCore;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Updating;
@@ -10,6 +11,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.Persistent.BaseImpl.EFCore.AuditTrail;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.Feedback;
@@ -101,7 +103,43 @@ namespace Visa2026.Module.DatabaseUpdate
 
             TenantUserCatalogSync.Sync(ObjectSpace, userManager);
 
+            EnsureEasyTestActualPositionSeed();
+
             ObjectSpace.CommitChanges();
+        }
+
+        /// <summary>
+        /// <see cref="ActualPosition"/> has no lookup catalog seed. EasyTest PositionHistory needs one stable row
+        /// on the <c>Visa2026EasyTest</c> database only.
+        /// </summary>
+        private void EnsureEasyTestActualPositionSeed()
+        {
+            if (!IsEasyTestDatabase())
+                return;
+
+            const string name = E2ETestPositionHistoryCreateValues.ActualPositionDisplay;
+            if (ObjectSpace.GetObjectsQuery<ActualPosition>().Any(p => p.Name == name))
+                return;
+
+            var actualPosition = ObjectSpace.CreateObject<ActualPosition>();
+            actualPosition.Name = name;
+        }
+
+        private bool IsEasyTestDatabase()
+        {
+            try
+            {
+                if (ObjectSpace is not EFCoreObjectSpace efObjectSpace)
+                    return false;
+
+                var connectionString = efObjectSpace.DbContext.Database.GetConnectionString();
+                return !string.IsNullOrEmpty(connectionString)
+                       && connectionString.Contains("Visa2026EasyTest", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public override void UpdateDatabaseBeforeUpdateSchema()

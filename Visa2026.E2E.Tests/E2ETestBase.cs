@@ -13,7 +13,7 @@ namespace Visa2026.E2E.Tests
 {
     [SupportedOSPlatform("windows")]
     [Collection(EasyTestCollection.Name)]
-    public abstract class E2ETestBase
+    public abstract partial class E2ETestBase
     {
         protected const string BlazorAppName = EasyTestSessionFixture.BlazorAppName;
         protected const string AppDBName = EasyTestSessionFixture.AppDBName;

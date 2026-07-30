@@ -1,7 +1,7 @@
 # Visa2026 — Testing Plan
 
 Status: **Active**  
-Last updated: 2026-06-11
+Last updated: 2026-07-30
 
 ---
 
@@ -25,6 +25,7 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 | [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) | Dashboard tiles; E2E drill-down parity |
 | [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md) | Lookup seeding (not Blazor E2E scope) |
 | [`LOCALIZATION_PLAN.md`](LOCALIZATION_PLAN.md) | E2E scripts stay **English** |
+| [`PERSON_DETAIL_NESTED_COLLECTION_TABS.md`](PERSON_DETAIL_NESTED_COLLECTION_TABS.md) | Editable Person record tabs vs issued browse-only |
 | Feature plans | Per-feature E2E notes when shipped |
 
 ---
@@ -45,7 +46,7 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 | Selectors | **English model captions** + EasyTest actions (not Playwright hook ids) |
 | Style | **C# EasyTest API** (yaml in `scenarios/` is metadata only — Option A) |
 
-**Base fixture:** [`E2ETestBase.cs`](../Visa2026.E2E.Tests/E2ETestBase.cs) — drops DB once per run, launches app, `Login()`, shared helpers.
+**Base fixture:** [`E2ETestBase.cs`](../Visa2026.E2E.Tests/E2ETestBase.cs) (+ [`E2ETestBase.PersonMasterData.cs`](../Visa2026.E2E.Tests/E2ETestBase.PersonMasterData.cs)) — drops DB once per run, launches app, `Login()`, shared helpers.
 
 **Scenario maps:** [`Visa2026.E2E.Tests/scenarios/README.md`](../Visa2026.E2E.Tests/scenarios/README.md)
 
@@ -53,19 +54,24 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 
 ## 4. Current E2E inventory
 
-### Ready (promoted scenarios)
+### Ready / implemented scenarios
 
 | Scenario id | E2E id | C# test |
 |-------------|--------|---------|
-| `person-officer-journey` | E2E-001 | `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeAddPassport` |
+| `person-officer-journey` (legacy map) | E2E-001 | superseded by master-data journey |
+| `person-master-data-crud` | E2E-001…E2E-008 | `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud` |
+
+Map + yaml draft: [`scenarios/examples/person-master-data-crud_map.md`](../Visa2026.E2E.Tests/scenarios/examples/person-master-data-crud_map.md) — promote to `ready/` after GHA green.
 
 ### All implemented `[Fact]` tests
 
 | Test class | Tests | Backlog |
 |------------|-------|---------|
-| `PersonOfficerJourneyTests` | 1 | E2E-001 (login + employee create + passport) |
+| `PersonOfficerJourneyTests` | 1 | E2E-001…008 Person master-data CRUD |
 
-**Count:** 1 fact — single sequential officer journey (login → employee → passport).
+**Journey covers:** login → create employee → **Passport** → nested **Visa** → **Education** → **Address of residence** (Private house) → **Medical record** (create/update/delete) → **Position history** → **Work duty** → **Salary** → **External arrival** travel.
+
+**Not in journey:** issued-document tabs (Application items / Work permits / …); PersonDocument file upload.
 
 **Full suite:**
 
@@ -77,21 +83,28 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 ## 5. E2E backlog
 
-Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **ApplicationType** per scenario class.
+Target: **~12–20** stable E2E tests. One **ApplicationType** per scenario class for app workflows.
 
 ### Tier 0 — CI gate
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-001 | Officer journey: login → create employee → add passport | Done |
+| E2E-001 | Officer journey: login → create employee → add passport | Done (folded into master-data Fact) |
+| E2E-002 | Add Education on same employee | Done |
+| E2E-003 | Add Visa under Passport | Done |
+| E2E-004 | Add Address of residence (Private house) | Done |
+| E2E-005 | Medical record create / update / delete | Done (delete best-effort) |
+| E2E-006 | Position history | Done |
+| E2E-007 | Work duty | Done |
+| E2E-008 | Salary + External arrival travel | Done |
 
-### Tier 1 — Extend same journey
+### Tier 1 — Remaining Person / nav
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-002 | Add Education on same employee (nested Educations tab) | Planned |
 | E2E-011 | Create/link Person for employee | Planned |
 | E2E-012 | ApplicationType selection changes visible tabs | Planned |
+| E2E-009 | PersonDocument (CV file upload) | Deferred (file dialog) |
 
 ### Tier 2 — Core operational value
 
@@ -119,12 +132,12 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 **Browser:** headed Edge locally (default); headless on CI via `EasyTestBrowserMode` (`CI=true` or `VISA2026_E2E_HEADLESS=true`). Override locally: `$env:VISA2026_E2E_HEADLESS='true'` before `dotnet test`.
 
-**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, LocalDB, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headless).
+**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, LocalDB, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headed on Windows). Job timeout **90** minutes for the longer master-data journey.
 
 **CI policy (recommended):**
 
-- **PR to `main`:** Tier 0 E2E + `dotnet build -c EasyTest` (workflow runs all current facts)
-- **Nightly / pre-release:** Full E2E suite (tier 0–2)
+- **PR to `main`:** Tier 0 Person master-data Fact + `dotnet build -c EasyTest`
+- **Nightly / pre-release:** Full E2E suite (when Tier 2+ Facts exist)
 
 ---
 
@@ -138,6 +151,8 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 6. Use unique `PersonalNumber` / codes per test to avoid collisions.
 7. One scenario per `[Fact]`; shared arrange via `E2ETestBase` helpers.
 8. Update §4 inventory when adding or removing tests.
+9. **Visa** is created under **Passport → Visas**, not on Person tabs.
+10. Do **not** create rows on issued-document nested lists.
 
 ---
 
@@ -149,6 +164,7 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 - **Word/Excel template layout** QA
 - **DataImporter** CLI bulk import
 - **Production** Docker/IIS deploy verification
+- **PersonDocument** binary file upload (deferred)
 
 ---
 

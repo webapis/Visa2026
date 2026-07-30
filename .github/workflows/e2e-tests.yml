@@ -1,5 +1,5 @@
 # Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + LocalDB + Edge (headed on GHA).
-# Single officer journey E2E-001 (login → employee → passport); see docs/TESTING_PLAN.md.
+# Person master-data CRUD journey E2E-001…008; see docs/TESTING_PLAN.md.
 
 name: EasyTest E2E
 
@@ -16,7 +16,7 @@ jobs:
   easytest-e2e:
     name: EasyTest E2E (Windows)
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository

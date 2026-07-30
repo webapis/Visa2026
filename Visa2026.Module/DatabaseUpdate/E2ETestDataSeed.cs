@@ -58,6 +58,143 @@ public static class E2ETestPassportFieldCaptions
     public const string IssuedCountry = "Issued Country";
 }
 
+/// <summary>Stable values for nested Visa under Passport (E2E-003).</summary>
+public static class E2ETestVisaCreateValues
+{
+    public const string VisaNumber = "E2E-VISA-030";
+    public const string IssueDate = "15.01.2024";
+    public const string StartDate = "15.01.2024";
+    public const string ExpirationDate = "15.01.2025";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.Visa"/> detail (required visible fields).</summary>
+public static class E2ETestVisaFieldCaptions
+{
+    public const string VisaNumber = "Visa Number";
+    public const string IssueDate = "Issue Date";
+    public const string StartDate = "Start Date";
+    public const string ExpirationDate = "Expiration Date";
+}
+
+/// <summary>Stable values for Education nested create (E2E-002). Institution NameTm from tenant catalog.</summary>
+public static class E2ETestEducationCreateValues
+{
+    public const string InstitutionDisplay = "Adana liseýi";
+    public const string UpdatedInstitutionDisplay = "Afşin Senagat hünärment okuwy";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.Education"/> detail.</summary>
+public static class E2ETestEducationFieldCaptions
+{
+    public const string EducationInstitution = "Education Institution";
+}
+
+/// <summary>Stable values for AddressOfResidence PrivateHouse create (E2E-004).</summary>
+public static class E2ETestAddressCreateValues
+{
+    public const string TypeDisplay = "Private house";
+    public const string RegionDisplay = "Aşgabat şäheri";
+    public const string CityDisplay = "Aşgabat şäheri";
+    public const string FullAddress = "E2E private house address 12";
+    public const string ExpirationDate = "31.12.2030";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.AddressOfResidence"/> detail.</summary>
+public static class E2ETestAddressFieldCaptions
+{
+    public const string Type = "Type";
+    public const string Region = "Region";
+    public const string City = "City";
+    public const string FullAddress = "Full Address";
+    public const string ExpirationDate = "Expiration Date";
+}
+
+/// <summary>Stable values for MedicalRecord create / update / delete (E2E-005).</summary>
+public static class E2ETestMedicalRecordCreateValues
+{
+    public const string DocumentNumber = "E2E-MED-040";
+    public const string UpdatedDocumentNumber = "E2E-MED-041";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.MedicalRecord"/> detail.</summary>
+public static class E2ETestMedicalRecordFieldCaptions
+{
+    public const string DocumentNumber = "Document Number";
+}
+
+/// <summary>Stable values for EmployeePositionHistory (E2E-006). ActualPosition is EasyTest-DB seeded.</summary>
+public static class E2ETestPositionHistoryCreateValues
+{
+    public const string PositionDisplay = "24 okly kran - mehanik";
+    public const string ActualPositionDisplay = "E2E Actual Position";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.EmployeePositionHistory"/> detail.</summary>
+public static class E2ETestPositionHistoryFieldCaptions
+{
+    public const string Position = "Position (visa reports)";
+    public const string ActualPosition = "Position (actual / company)";
+}
+
+/// <summary>Stable values for WorkDuty (E2E-007).</summary>
+public static class E2ETestWorkDutyCreateValues
+{
+    public const string Description = "E2E work duty purpose text";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.WorkDuty"/> detail.</summary>
+public static class E2ETestWorkDutyFieldCaptions
+{
+    public const string Description = "Gelmeginiň Maksady";
+}
+
+/// <summary>Stable values for EmployeeSalary (E2E-008).</summary>
+public static class E2ETestSalaryCreateValues
+{
+    public const string Amount = "5000";
+    public const string CurrencyDisplay = "TMT";
+}
+
+/// <summary>English Blazor captions for <see cref="BusinessObjects.EmployeeSalary"/> detail.</summary>
+public static class E2ETestSalaryFieldCaptions
+{
+    public const string Amount = "Amount";
+    public const string Currency = "Currency";
+}
+
+/// <summary>Person detail layout tab captions / New toolbar title prefixes for nested lists.</summary>
+public static class E2ETestPersonNestedUi
+{
+    public const string PassportsTab = "Passports";
+    public const string PassportsNewTitle = "New Passport";
+    public const string VisasTab = "Visas";
+    public const string VisasNewTitle = "New Visa";
+    public const string EducationsTab = "Educations";
+    public const string EducationsNewTitle = "New Education";
+    public const string AddressesTab = "Addresses Of Residence";
+    public const string AddressesTabAlt = "AddressesOfResidence";
+    public const string AddressesTabAlt2 = "Addresses of residence";
+    public const string AddressesNewTitle = "New Address Of Residence";
+    public const string MedicalRecordsTab = "Medical Records";
+    public const string MedicalRecordsTabAlt = "MedicalRecords";
+    public const string MedicalRecordsTabAlt2 = "Medical records";
+    public const string MedicalRecordsNewTitle = "New Medical Record";
+    public const string PositionHistoryTab = "Position History";
+    public const string PositionHistoryTabAlt = "PositionHistory";
+    public const string PositionHistoryNewTitle = "New Employee Position History";
+    public const string WorkDutiesTab = "Work Duties";
+    public const string WorkDutiesTabAlt = "WorkDuties";
+    public const string WorkDutiesTabTm = "Gelmeginiň Maksady";
+    public const string WorkDutiesNewTitle = "New Gelmeginiň Maksady";
+    public const string WorkDutiesNewTitleAlt = "New Work Duty";
+    public const string SalariesTab = "Salaries";
+    public const string SalariesNewTitle = "New Employee Salary";
+    public const string TravelHistoriesTab = "Travel Histories";
+    public const string TravelHistoriesTabAlt = "TravelHistories";
+    public const string TravelHistoriesTabAlt2 = "Travel histories";
+    public const string TravelExternalArrivalNewTitle = "New External Arrival";
+}
+
 /// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {

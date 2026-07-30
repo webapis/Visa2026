@@ -189,6 +189,54 @@ internal static class EasyTestBlazorNavigationHelper
     }
 
     /// <summary>
+    /// Tries each tab caption in order (English Id vs Title Case vs localized BO caption).
+    /// </summary>
+    public static bool TryClickTabByAnyText(IApplicationContext appContext, TimeSpan timeout, params string[] tabTexts)
+    {
+        foreach (string tabText in tabTexts)
+        {
+            if (string.IsNullOrWhiteSpace(tabText))
+                continue;
+            if (TryClickTabByText(appContext, tabText, timeout))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Tries each toolbar title prefix until a displayed action is clicked.
+    /// </summary>
+    public static bool TryClickToolbarActionByAnyTitle(
+        IApplicationContext appContext,
+        TimeSpan timeout,
+        params string[] titlePrefixes)
+    {
+        foreach (string title in titlePrefixes)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                continue;
+            if (TryClickToolbarActionByTitle(appContext, title, timeout))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static bool HasToolbarActionByAnyTitle(IApplicationContext appContext, params string[] titlePrefixes)
+    {
+        foreach (string title in titlePrefixes)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                continue;
+            if (HasToolbarActionByTitle(appContext, title))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Fast DOM check for a real (non-virtual), displayed DevExpress toolbar action
     /// button by its rendered <c>title</c> prefix — avoids EasyTest's slow
     /// <c>GetAction</c> resolution when probing whether a nested list is ready.
