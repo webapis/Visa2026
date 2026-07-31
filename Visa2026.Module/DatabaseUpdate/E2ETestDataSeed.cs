@@ -196,6 +196,16 @@ public static class E2ETestPersonNestedUi
     public const string TravelExternalArrivalNewTitle = "New External Arrival";
 }
 
+/// <summary>External Arrival create — defaults usually apply; fallback display strings from catalogs.</summary>
+public static class E2ETestTravelCreateValues
+{
+    /// <summary>IsDefault CheckPoint in checkpoint.json.</summary>
+    public const string CheckPointDisplay = "Aşgabat şäher howa menzilindäki MGP";
+
+    /// <summary>Same default country used elsewhere in E2E.</summary>
+    public const string CountryDisplay = E2ETestEmployeeCreateValues.CountryDisplay;
+}
+
 /// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {

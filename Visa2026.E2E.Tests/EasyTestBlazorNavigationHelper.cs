@@ -178,6 +178,12 @@ internal static class EasyTestBlazorNavigationHelper
     /// grids and can no-op. Clicking the real, displayed button is deterministic.
     /// Mirrors the existing <see cref="ClickListRowContaining"/> DOM helper.
     /// </summary>
+    /// <remarks>
+    /// Polymorphic New (e.g. TravelHistory subtypes) is a <c>dxbl-btn-split</c>: the
+    /// <c>data-action-name</c> + <c>title</c> live on the outer div; the primary
+    /// <c>button</c> has <c>title</c> only. Plain <c>button[@data-action-name]</c>
+    /// misses those — also match split primary / titled buttons without the attribute.
+    /// </remarks>
     public static bool TryClickToolbarActionByTitle(IApplicationContext appContext, string titlePrefix, TimeSpan timeout)
     {
         IWebDriver? driver = ResolveWebDriver(appContext);
@@ -185,22 +191,31 @@ internal static class EasyTestBlazorNavigationHelper
             return false;
 
         string literal = titlePrefix.Replace("'", "\\'");
-        string xpath =
-            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]";
+        // Prefer action-tagged buttons; then split primary; then any titled non-virtual button.
+        string[] xpaths =
+        {
+            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//div[contains(@class,'dxbl-btn-split') and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]" +
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+        };
 
         DateTime deadline = DateTime.UtcNow + timeout;
         do
         {
             try
             {
-                foreach (IWebElement button in driver.FindElements(By.XPath(xpath)))
+                foreach (string xpath in xpaths)
                 {
-                    if (!button.Displayed || !button.Enabled)
-                        continue;
+                    foreach (IWebElement button in driver.FindElements(By.XPath(xpath)))
+                    {
+                        if (!button.Displayed || !button.Enabled)
+                            continue;
 
-                    ScrollIntoView(driver, button);
-                    button.Click();
-                    return true;
+                        ScrollIntoView(driver, button);
+                        button.Click();
+                        return true;
+                    }
                 }
             }
             catch (WebDriverException)
@@ -317,12 +332,18 @@ internal static class EasyTestBlazorNavigationHelper
             return false;
 
         string literal = titlePrefix.Replace("'", "\\'");
-        string xpath =
-            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]";
+        string[] xpaths =
+        {
+            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//div[contains(@class,'dxbl-btn-split') and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]" +
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+        };
 
         try
         {
-            return driver.FindElements(By.XPath(xpath)).Any(b => b.Displayed);
+            return xpaths.Any(xpath =>
+                driver.FindElements(By.XPath(xpath)).Any(b => b.Displayed));
         }
         catch (WebDriverException)
         {

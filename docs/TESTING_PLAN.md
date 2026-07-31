@@ -97,7 +97,7 @@ Target: **~12–20** stable E2E tests. One **ApplicationType** per scenario clas
 | E2E-006 | Position history | Deferred (lookup bind flaky) |
 | E2E-007 | Work duty | Done |
 | E2E-008 | Salary | Done |
-| E2E-008b | External arrival travel | Deferred (subtype New menu) |
+| E2E-008b | External arrival travel | Done (split New button click; manual CRUD) |
 
 ### Tier 1 — Remaining Person / nav
 

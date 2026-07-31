@@ -560,6 +560,7 @@ public abstract partial class E2ETestBase
 
     protected void ExecutePersonTravelExternalArrivalNestedNew()
     {
+        EasyTestBlazorNavigationHelper.TryMaximizeWindow(AppContext);
         ExecutePersonNestedNew(
             new[] { E2ETestPersonNestedUi.TravelHistoriesTab, E2ETestPersonNestedUi.TravelHistoriesTabAlt, E2ETestPersonNestedUi.TravelHistoriesTabAlt2 },
             new[] { E2ETestPersonNestedUi.TravelExternalArrivalNewTitle, "External Arrival" },
@@ -568,5 +569,47 @@ public abstract partial class E2ETestBase
             "travel-external-arrival");
     }
 
+    /// <summary>
+    /// External Arrival OnCreated sets TravelType/MovementType/TravelDate and default CheckPoint/Country.
+    /// Confirm required lookups are bound before Save.
+    /// </summary>
+    protected void FillTravelExternalArrivalRequiredFields()
+    {
+        WaitForDetailReady("ExternalArrival_DetailView", "Travel Date", "ExternalArrival");
+        // Defaults usually suffice; if CheckPoint empty, bind IsDefault display via FillForm retry.
+        try
+        {
+            string checkPoint = AppContext.GetForm().GetPropertyValue("Check Point") ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(checkPoint))
+                FillLookupUntilBound("Check Point", E2ETestTravelCreateValues.CheckPointDisplay);
+        }
+        catch (AdapterOperationException)
+        {
+            FillLookupUntilBound("Check Point", E2ETestTravelCreateValues.CheckPointDisplay);
+        }
+
+        try
+        {
+            string country = AppContext.GetForm().GetPropertyValue("Country") ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(country))
+                FillLookupUntilBound("Country", E2ETestTravelCreateValues.CountryDisplay);
+        }
+        catch (AdapterOperationException)
+        {
+            FillLookupUntilBound("Country", E2ETestTravelCreateValues.CountryDisplay);
+        }
+    }
+
     protected void SaveTravelHistoryDetail() => ExecuteActionWithRetry("Save");
+
+    protected void AssertTravelExternalArrivalSaved()
+    {
+        Assert.True(
+            IsDetailFormReady("ExternalArrival_DetailView", "Travel Date")
+            || IsDetailFormReady("TravelHistory_DetailView", "Travel Date"),
+            "External Arrival detail should remain open after Save.");
+
+        string travelDate = AppContext.GetForm().GetPropertyValue("Travel Date") ?? string.Empty;
+        Assert.False(string.IsNullOrWhiteSpace(travelDate), "Travel Date should be set after External Arrival Save.");
+    }
 }

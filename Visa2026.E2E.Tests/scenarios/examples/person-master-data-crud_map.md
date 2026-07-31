@@ -60,7 +60,7 @@ Officer session: **log on** → create **Employee** → **Passport** → nested 
 | `Work Duties` / `Gelmeginiň Maksady` | Person tab | activate | pending CI | TM caption alias |
 | `Gelmeginiň Maksady` (field) | WorkDuty detail | fill | pending CI | |
 | `Salaries` / `New Employee Salary` | Person tab | create | pending CI | Amount + Currency |
-| `Travel Histories` / `New External Arrival` | Person tab | create | pending CI | subtype New |
+| `Travel Histories` / `New External Arrival` | Person tab | create | pending CI | split New (`dxbl-btn-split`); manual CRUD |
 
 **Ready for YAML:** ☐ promote after GHA green
 
@@ -85,4 +85,5 @@ See `person-master-data-crud.yaml`.
 
 | Date | Change |
 |------|--------|
+| 2026-07-31 | Re-enable External Arrival after TravelHistory decoupling; fix split New toolbar click |
 | 2026-07-30 | Initial Phase A+B master-data CRUD map |

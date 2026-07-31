@@ -74,6 +74,11 @@ public class PersonOfficerJourneyTests : E2ETestBase
         SaveSalaryDetail();
         AssertSalaryShowsAmount(E2ETestSalaryCreateValues.Amount);
 
-        // Travel Histories New External Arrival deferred — subtype New menu not stable under EasyTest.
+        // Travel — manual External Arrival (ApplicationItem sync removed; split New button)
+        ReturnToSavedEmployeeDetail();
+        ExecutePersonTravelExternalArrivalNestedNew();
+        FillTravelExternalArrivalRequiredFields();
+        SaveTravelHistoryDetail();
+        AssertTravelExternalArrivalSaved();
     }
 }
