@@ -978,13 +978,6 @@ namespace Visa2026.Module.BusinessObjects
                 FullApplicationNumber = ApplicationNumber;
         }
 
-        public virtual void OnDeleting()
-        {
-            var objectSpace = ObjectSpaceHelper.Get(this);
-            if (objectSpace != null)
-                RegistrationTravelHistorySyncService.DeleteAllLinkedTravelHistoryForApplication(this, objectSpace);
-        }
-
         private (string Prefix, string Format, int Seed, int Padding) GetNumberingConfiguration()
         {
             var profile = OrganizationReportHelper.GetApplicationNumbering(ObjectSpaceHelper.Get(this));

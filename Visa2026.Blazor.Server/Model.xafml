@@ -1175,12 +1175,10 @@
     <ListView Id="Person_TravelHistories_ListView">
       <Columns>
         <ColumnInfo Id="TravelDate" Index="0" SortIndex="0" SortOrder="Descending" />
-        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Index="1" Width="100" />
-        <ColumnInfo Id="SourceApplication_ApplicationDate" Index="2" Width="90" />
-        <ColumnInfo Id="TravelType" Index="3" />
-        <ColumnInfo Id="MovementType" Index="4" />
-        <ColumnInfo Id="CheckPoint" Index="5" />
-        <ColumnInfo Id="Notes" Index="6" />
+        <ColumnInfo Id="TravelType" Index="1" />
+        <ColumnInfo Id="MovementType" Index="2" />
+        <ColumnInfo Id="CheckPoint" Index="3" />
+        <ColumnInfo Id="Notes" Index="4" />
         <ColumnInfo Id="Person" Removed="True" />
       </Columns>
     </ListView>

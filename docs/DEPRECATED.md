@@ -74,7 +74,9 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **WorkPermit** | `IsApplicationNotRequired`, `IsCancelled` | Removed | Optional `Application` via gear toggle (same as `Invitation`) | Dropped by `WorkPermitApplicationNotRequiredColumnCleanupUpdater` |
 | **Visa** | `HasInvitation`, `HistoricalImport` | Removed | Optional `InvitationItem` / `IssuingApplicationItem` via gear toggle | Dropped by `VisaVisibilityToggleColumnsCleanupUpdater` |
 | **ApplicationItem** | `PurposeOfTravel` | Removed | `CurrentPositionHistory` (registration travel purpose / Forma 16) | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
-| **TravelHistory** | `PurposeOfTravel` | Removed | `Notes` (`Travel Notes`); synced from `ApplicationItem.TravelNotes` when linked | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
+| **TravelHistory** | `PurposeOfTravel` | Removed | `Notes` (`Travel Notes`) | `PurposeOfTravelID` dropped by `ApplicationItemPurposeOfTravelColumnsCleanupUpdater` |
+| **TravelHistory** | `SourceApplicationItem` / `SourceApplicationItemID` | Removed | Manual officer CRUD on `Person.TravelHistories` | Cleared + dropped by `TravelHistorySourceApplicationItemCleanupUpdater`; sync service removed |
+| **TravelHistory** | `SourceApplication_FullApplicationNumber`, `SourceApplication_ApplicationDate` | Removed | — (were NotMapped display of parent application) | Removed with sync decoupling |
 | **AddressOfResidence** | `StartDate` | Removed | `ExpirationDate` only (`DaysRemaining` vs today) | `StartDate` dropped by `AddressOfResidenceStartDateColumnCleanupUpdater` |
 | **ApplicationItem** | `Address_StartDate`, `Address_StartDateText` | Removed | `Address_ExpirationDate` / `Address_ExpirationDateText` | Not mapped aliases removed from BO |
 
@@ -97,6 +99,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | `ApplicationItem.WorkPermitItemIsChanged`; item `IsCancelled` only |
 | `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 | `Visas.HasInvitation`, `Visas.HistoricalImport` | `VisaVisibilityToggleColumnsCleanupUpdater` | Optional `IssuingApplicationItem` / `InvitationItem` + gear on detail view |
+| `TravelHistories.SourceApplicationItemID` | `TravelHistorySourceApplicationItemCleanupUpdater` | Manual `TravelHistory` CRUD; registration apps no longer auto-link |
 | **Ministry** lookup BO + `Ministries` table | `MinistrySchemaCleanupUpdater` | **`ApprovingMinistry`** tenant lookup + approval profile legs |
 | `tenant/ministry.json` lookup catalog | Ministry BO removal | **`tenant/approving-ministry.json`** |
 | `ProjectContract.MinistryReviewDepth` | Hidden / obsolete (2026-06) | **`ProjectContract.MinistryLegs`** + **`ProjectContractMinistryLeg`** (1…5 ministries per contract row) |
@@ -135,6 +138,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Date | Change |
 |------|--------|
+| 2026-07-31 | Registration→TravelHistory auto-sync removed; `SourceApplicationItemID` cleared/dropped; manual TravelHistory CRUD only. |
 | 2026-05-26 | On-prem Windows/WSL scripts and docs moved under `scripts/legacy/` and `docs/legacy/`; Ubuntu path is canonical. |
 | 2026-05-24 | Initial registry; ApplicationLocation JSON seed called out vs BorderZoneLocation UI catalog. |
 | 2026-05-24 | Phase 5: legacy org BOs/tables and org FK columns removed; moved to **Removed schema**. |
