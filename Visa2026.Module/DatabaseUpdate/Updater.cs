@@ -620,10 +620,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdPersonSearch>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
                 role,
-                @"Application/NavigationItems/Items/Home/Items/ReportDashboard",
+                @"Application/NavigationItems/Items/ReportDashboard",
                 SecurityPermissionState.Allow);
         }
 
@@ -633,10 +632,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             if (role == null)
                 return;
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Home", SecurityPermissionState.Allow);
             EnsureNavigationPermission(
                 role,
-                @"Application/NavigationItems/Items/Home/Items/ReportDashboard",
+                @"Application/NavigationItems/Items/ReportDashboard",
                 SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);

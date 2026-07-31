@@ -78,11 +78,7 @@
       <Item Id="Education" Caption="Bilim" />
       <Item Id="Employee" Caption="Işgär" />
       <Item Id="Geography" Caption="Geografiýa" />
-      <Item Id="Home" Caption="Baş sahypa">
-        <Items>
-          <Item Id="ReportDashboard" Caption="Hasabat paneli" />
-        </Items>
-      </Item>
+      <Item Id="ReportDashboard" Caption="Hasabat paneli" />
       <Item Id="Housing" Caption="Ýaşaýyş" />
       <Item Id="Invitation" Caption="Çakylyk" />
       <Item Id="InvitationItem" Caption="Çakylyk elementleri" />

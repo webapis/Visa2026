@@ -28,18 +28,18 @@ After login, officers land on this dashboard to grasp process state (invitation,
 |-------|----------|
 | Host BO | `ReportDashboardHost` (non-persistent) |
 | Blazor UI | `ReportDashboardComponent` + property editor |
-| Navigation | Top-level **Home** 뿯↽ Report Dashboard (startup item) |
+| Navigation | Top-level **Report Dashboard** (startup item; not under Home) |
 | Queries | `IReportDashboardQueryService` |
 
 
 ## Localization (Layer A)
 
-Officer UI strings (chrome, category/sub-report/person-type/table headers, fixed validity/bucket labels, Home / Report Dashboard nav) use **`VisaUiMessages`** via **`ReportDashboardLocalization`**.
+Officer UI strings (chrome, category/sub-report/person-type/table headers, fixed validity/bucket labels, Report Dashboard nav) use **`VisaUiMessages`** via **`ReportDashboardLocalization`**.
 
 | Source | Role |
 |--------|------|
 | `tools/GenerateModelLocalization/UiStrings.messages.json` (`ReportDashboard.*`) | Runtime message catalog |
-| `Visa2026.Module/Localization/UiStrings.json` (`navigation.Home`) | Model nav captions |
+| `Visa2026.Module/Localization/UiStrings.json` (`navigation.ReportDashboard`) | Model nav captions |
 | `ReportDashboardLocalization.cs` | Resolve labels; `Status(english)` for display-only bucket text |
 
 **Invariant:** SQL / loaders keep English status keys; Razor localizes at render so Open ListView criteria still match. Lookup/`NameTm` segments are not translated (Layer B).

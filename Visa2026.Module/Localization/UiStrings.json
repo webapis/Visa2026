@@ -6,12 +6,7 @@
     "ru-RU": "Управление визами"
   },
   "navigation": {
-    "Home": {
-      "caption": { "tr-TR": "Ana Sayfa", "tk-TM": "Baş sahypa", "ru-RU": "Главная" },
-      "children": {
-        "ReportDashboard": { "tr-TR": "Rapor Panosu", "tk-TM": "Hasabat paneli", "ru-RU": "Панель отчётов" }
-      }
-    },
+    "ReportDashboard": { "tr-TR": "Rapor Panosu", "tk-TM": "Hasabat paneli", "ru-RU": "Панель отчётов" },
     "People": {
       "caption": { "tr-TR": "Kişiler", "tk-TM": "Adamlar", "ru-RU": "Люди" },
       "children": {

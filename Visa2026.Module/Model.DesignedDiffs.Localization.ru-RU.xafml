@@ -78,11 +78,7 @@
       <Item Id="Education" Caption="Образование" />
       <Item Id="Employee" Caption="Сотрудник" />
       <Item Id="Geography" Caption="География" />
-      <Item Id="Home" Caption="Главная">
-        <Items>
-          <Item Id="ReportDashboard" Caption="Панель отчётов" />
-        </Items>
-      </Item>
+      <Item Id="ReportDashboard" Caption="Панель отчётов" />
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />

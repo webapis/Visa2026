@@ -78,11 +78,7 @@
       <Item Id="Education" Caption="Eğitim" />
       <Item Id="Employee" Caption="Çalışan" />
       <Item Id="Geography" Caption="Coğrafya" />
-      <Item Id="Home" Caption="Ana Sayfa">
-        <Items>
-          <Item Id="ReportDashboard" Caption="Rapor Panosu" />
-        </Items>
-      </Item>
+      <Item Id="ReportDashboard" Caption="Rapor Panosu" />
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />

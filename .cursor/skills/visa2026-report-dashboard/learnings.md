@@ -1959,3 +1959,15 @@ but not executed (repo is Postgres-only at runtime). Not yet confirmed in a runn
 **Ask:** Align category wording with tk-TM “data incomplete persons”: tr `Verileri eksik kişiler`; update en/ru too.
 
 **Fix:** `ReportDashboard.Category.IncompletePersons` → en `Persons with incomplete data`, tr `Verileri eksik kişiler`, ru `Лица с неполными данными`; regenerate catalog.
+
+## 2026-07-31 — Report Dashboard nav is top-level (not under Home)
+
+**Ask:** Place Report Dashboard navigation item as top-level, not nested under Home.
+
+**Change:**
+- `ReportDashboardModelUpdater` adds `ReportDashboard` on root `NavigationItems` (Index -100, startup item); removes legacy `Home/ReportDashboard` and empty `Home`
+- Role nav permissions: `Application/NavigationItems/Items/ReportDashboard` (dropped `Items/Home` + nested path)
+- Loc: `UiStrings.json` `navigation.ReportDashboard`; DesignedDiffs localization xafml leaf at root
+- Docs: `REPORT_DASHBOARD.md`, `reference.md`, baseline note
+
+**Files:** `ReportDashboardModelUpdater.cs`, `Updater.cs`, `UiStrings.json`, `Model.DesignedDiffs.Localization.*.xafml`, `docs/REPORT_DASHBOARD.md`, `reference.md`
