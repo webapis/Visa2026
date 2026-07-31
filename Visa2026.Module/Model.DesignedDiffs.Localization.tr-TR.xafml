@@ -28,7 +28,7 @@
       <Action Id="ShowInDocument" Caption="Belgede Göster" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Belge kopyaları" />
-      <Action Id="ViewApplicationItemWordReports" Caption="Belgeler" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Şablonlar" />
       <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
       <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
@@ -41,7 +41,7 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Başvuruyu Aç" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Başvuruyu Aç" />
       <Action Id="CloneSyncRule" Caption="Kuralı Kopyala" />
-      <Action Id="GenerateWordReports" Caption="Belgeler" />
+      <Action Id="GenerateWordReports" Caption="Şablonlar" />
       <Action Id="OpenSourceObject" Caption="Kaynak Nesneyi Aç" />
       <Action Id="OpenTargetObject" Caption="Hedef Nesneyi Aç" />
       <Action Id="DialogOK" Caption="Tamam" />
@@ -78,7 +78,6 @@
       <Item Id="Education" Caption="Eğitim" />
       <Item Id="Employee" Caption="Çalışan" />
       <Item Id="Geography" Caption="Coğrafya" />
-      <Item Id="ReportDashboard" Caption="Rapor Panosu" />
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />
@@ -166,6 +165,7 @@
       <Item Id="Recycle Bin" Caption="Geri Dönüşüm" />
       <Item Id="Rejection" Caption="Ret" />
       <Item Id="RejectionItem" Caption="Ret Kalemleri" />
+      <Item Id="ReportDashboard" Caption="Rapor Panosu" />
       <Item Id="Reports" Caption="Raporlar" />
       <Item Id="StateNotifications" Caption="Durum bildirimleri" />
       <Item Id="System" Caption="Sistem" />
@@ -2487,7 +2487,7 @@
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Başvuru kalemleri (doğrudan migrasyon)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Başvuru kalemleri (bakanlık süreci)" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Belge kopyaları" />
-    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Belgeler" />
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
     <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Göç SLA profili" />
@@ -2505,7 +2505,7 @@
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
     <ListView Id="ApplicationReason_ListView" Caption="Başvuru Nedenleri" />
-    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Belgeler" />
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationState_DetailView" Caption="Başvuru Durumu" />
     <ListView Id="ApplicationState_ListView" Caption="Başvuru Durumları" />
     <DetailView Id="ApplicationType_DetailView" Caption="Başvuru Türü" />

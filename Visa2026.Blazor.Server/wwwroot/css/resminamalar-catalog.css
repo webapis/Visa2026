@@ -1,0 +1,246 @@
+/*
+  Resminamalar catalog chrome — flat selectable cards aligned with Document Copies
+  Prototype A visual language (colored format icon + title + summary + actions).
+  Interaction stays checkbox + Preview + Download package (no section Open/expand).
+  Tokens reuse --dcc-* from document-copies-catalog.css when present.
+ */
+
+.resminamalar-catalog {
+  --rmc-text: var(--dcc-text, var(--bs-body-color, #1e293b));
+  --rmc-surface: var(--dcc-surface, var(--bs-body-bg, #ffffff));
+  --rmc-border: var(--dcc-border, color-mix(in srgb, var(--rmc-surface) 88%, var(--rmc-text)));
+  --rmc-border-soft: var(--dcc-border-soft, color-mix(in srgb, var(--rmc-surface) 93%, var(--rmc-text)));
+  --rmc-muted: var(--dcc-muted, color-mix(in srgb, var(--rmc-text) 58%, var(--rmc-surface)));
+  --rmc-hover: var(--dcc-hover, color-mix(in srgb, var(--rmc-surface) 94%, var(--rmc-text)));
+  --rmc-radius: var(--dcc-radius, 10px);
+  --rmc-link: var(--dcc-link, var(--dxbl-link-color, var(--bs-link-color, #0d6efd)));
+  min-width: 0;
+}
+
+.resminamalar-catalog__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 0.35rem 0;
+}
+
+.resminamalar-catalog__card {
+  border: 1px solid var(--rmc-border);
+  border-radius: var(--rmc-radius);
+  background: color-mix(in srgb, var(--rmc-surface) 99%, var(--rmc-text));
+  overflow: hidden;
+  min-width: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.resminamalar-catalog__card:hover {
+  background: var(--rmc-hover);
+}
+
+.resminamalar-catalog__card.app-report-package__entry--unchecked {
+  opacity: 0.78;
+}
+
+.resminamalar-catalog__card.app-report-package__entry--warning {
+  border-color: color-mix(in srgb, #d97706 40%, var(--rmc-border));
+  background: color-mix(in srgb, #d97706 6%, var(--rmc-surface));
+}
+
+.resminamalar-catalog__card.app-report-package__entry--previewing {
+  border-color: color-mix(in srgb, var(--rmc-link) 45%, var(--rmc-border));
+  background: color-mix(in srgb, var(--rmc-link) 8%, var(--rmc-surface));
+  outline: none;
+}
+
+.resminamalar-catalog__card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.resminamalar-catalog__include {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.resminamalar-catalog__include input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--rmc-link);
+}
+
+.resminamalar-catalog__nav-icon {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.resminamalar-catalog__nav-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.resminamalar-catalog__nav-icon--word {
+  background: #2f6fed;
+}
+
+.resminamalar-catalog__nav-icon--excel {
+  background: #16a34a;
+}
+
+.resminamalar-catalog__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.resminamalar-catalog__title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rmc-text);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.resminamalar-catalog__summary {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--rmc-muted);
+}
+
+.resminamalar-catalog__actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+  max-width: 14rem;
+}
+
+.resminamalar-catalog__actions .app-report-package__readiness {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.resminamalar-catalog__actions .app-report-package__readiness--ready {
+  color: #15803d;
+  background: color-mix(in srgb, #16a34a 20%, transparent);
+}
+
+.resminamalar-catalog__actions .app-report-package__readiness--warning {
+  color: #b45309;
+  background: color-mix(in srgb, #d97706 22%, transparent);
+}
+
+.resminamalar-catalog__actions .dxbl-btn-link.app-item-doc-copies__action-btn {
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.3rem;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.resminamalar-catalog__actions .dxbl-btn-link.app-item-doc-copies__action-btn:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  text-decoration: none;
+}
+
+.resminamalar-catalog__card-body {
+  padding: 0 12px 10px;
+  min-width: 0;
+}
+
+.resminamalar-catalog__card-body:empty {
+  display: none;
+}
+
+.resminamalar-catalog__card-body .app-report-package__entry-progress {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+}
+
+.resminamalar-catalog__card-body .app-item-doc-copies__status {
+  margin: 0;
+}
+
+.resminamalar-catalog__card-body .app-item-doc-copies__status:not(:has(.app-item-doc-copies__hint, .app-report-package__hints, .app-item-doc-copies__summary)) {
+  display: none;
+}
+
+/* Inline slot: share elevated panel tokens */
+.resminamalar-slot-panel .app-report-package--inline-slot .resminamalar-catalog__cards {
+  gap: 10px;
+  padding: 0.35rem 0;
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .resminamalar-catalog__card {
+  border-color: var(--resminamalar-slot-border, var(--rmc-border));
+  border-radius: var(--resminamalar-slot-radius, var(--rmc-radius));
+  background: var(--resminamalar-slot-surface, var(--rmc-surface));
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .resminamalar-catalog__card:hover {
+  background: var(--resminamalar-slot-surface-muted, var(--rmc-hover));
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .app-item-doc-copies__body {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.resminamalar-slot-panel .app-report-package--inline-slot .app-report-package__top-selection {
+  border-bottom-color: var(--resminamalar-slot-border, var(--rmc-border-soft));
+  padding: 0.35rem 0.5rem 0.65rem;
+}
+
+@media (max-width: 22rem) {
+  .resminamalar-catalog__card-head {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .resminamalar-catalog__actions {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    justify-content: flex-start;
+    padding-left: calc(1.05rem + 12px + 44px + 12px);
+  }
+}

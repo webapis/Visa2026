@@ -1610,10 +1610,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Resminamalar",
-            ["tr-TR"] = "Resminamalar",
-            ["tk-TM"] = "Resminamalar",
-            ["ru-RU"] = "Resminamalar",
+            ["en-US"] = "Templates",
+            ["tr-TR"] = "Şablonlar",
+            ["tk-TM"] = "Şablonlar",
+            ["ru-RU"] = "Шаблоны",
         },
         ["ApplicationType.MigrationSlaProfileMissingWarning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

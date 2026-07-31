@@ -102,7 +102,7 @@
     "ShowInDocument": { "tr-TR": "Belgede Göster", "tk-TM": "Resminamada görkez", "ru-RU": "Показать в документе" },
     "GenerateApplicationPdfBatch": { "tr-TR": "PDF Oluştur", "tk-TM": "PDF döret", "ru-RU": "Создать PDF" },
     "ViewApplicationItemDocumentCopies": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" },
-    "ViewApplicationItemWordReports": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+    "ViewApplicationItemWordReports": { "en-US": "Templates", "tr-TR": "Şablonlar", "tk-TM": "Şablonlar", "ru-RU": "Шаблоны" },
     "ShowMyPdfBatches": { "tr-TR": "PDF İşlerim", "tk-TM": "PDF işlerim", "ru-RU": "Мои PDF-задачи" },
     "ResetSyncRules": { "tr-TR": "Kuralları Sıfırla", "tk-TM": "Düzgünleri täzeden goý", "ru-RU": "Сбросить правила" },
     "ValidateSyncRules": { "tr-TR": "Kuralları Doğrula", "tk-TM": "Düzgünleri barla", "ru-RU": "Проверить правила" },
@@ -115,7 +115,7 @@
     "OpenApplicationFromVisaStatus": { "en-US": "Open application", "tr-TR": "Başvuruyu Aç", "tk-TM": "Arzany aç", "ru-RU": "Открыть заявку" },
     "OpenApplicationFromTransferStatus": { "en-US": "Open application", "tr-TR": "Başvuruyu Aç", "tk-TM": "Arzany aç", "ru-RU": "Открыть заявку" },
     "CloneSyncRule": { "tr-TR": "Kuralı Kopyala", "tk-TM": "Düzgüni göçür", "ru-RU": "Клонировать правило" },
-    "GenerateWordReports": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+    "GenerateWordReports": { "en-US": "Templates", "tr-TR": "Şablonlar", "tk-TM": "Şablonlar", "ru-RU": "Шаблоны" },
     "OpenSourceObject": { "tr-TR": "Kaynak Nesneyi Aç", "tk-TM": "Çeşme obýekti aç", "ru-RU": "Открыть исходный объект" },
     "OpenTargetObject": { "tr-TR": "Hedef Nesneyi Aç", "tk-TM": "Maksat obýekti aç", "ru-RU": "Открыть целевой объект" }
   },

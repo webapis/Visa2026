@@ -23,7 +23,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
         TargetObjectType = typeof(ApplicationItem);
 
         resminamalarAction = new SimpleAction(this, "ViewApplicationItemWordReports", "View");
-        resminamalarAction.ImageName = "BO_FileAttachment";
+        resminamalarAction.ImageName = "Templates";
         resminamalarAction.SelectionDependencyType = SelectionDependencyType.Independent;
         resminamalarAction.Execute += ResminamalarAction_Execute;
     }

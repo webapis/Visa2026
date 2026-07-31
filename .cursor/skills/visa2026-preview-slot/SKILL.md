@@ -79,6 +79,7 @@ disable-model-invocation: false
 5. **Shared shell class** — `resminamalar-slot-panel` + optional `document-copies-slot-panel`; feature flag via component class (`--inline-slot`).
 6. **Parity** — inline preview must call same generate/download APIs as modal/dialog path (owned by feature skills).
 7. **Document-copies catalog chrome** — Person / ApplicationItem / Header copies use shared `.doc-copies-catalog*` ([`document-copies-catalog.css`](../../../Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css)); see [`PREVIEW_SLOT.md`](../../../docs/PREVIEW_SLOT.md) § Document-copies catalog chrome contract. Do not reintroduce flat `__group` cards for copies.
+8. **Resminamalar catalog chrome** — flat selectable cards via `.resminamalar-catalog*` ([`resminamalar-catalog.css`](../../../Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css)); same Prototype A **surface** as Document Copies, but keep checkboxes / no section Open — see [`PREVIEW_SLOT.md`](../../../docs/PREVIEW_SLOT.md) § Resminamalar catalog chrome.
 
 ---
 

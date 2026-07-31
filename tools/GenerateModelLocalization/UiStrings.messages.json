@@ -1200,10 +1200,10 @@
     "ru-RU": "Заявка не выбрана."
   },
   "ApplicationReportPackage.Title": {
-    "en": "Resminamalar",
-    "tr-TR": "Resminamalar",
-    "tk-TM": "Resminamalar",
-    "ru-RU": "Resminamalar"
+    "en": "Templates",
+    "tr-TR": "Şablonlar",
+    "tk-TM": "Şablonlar",
+    "ru-RU": "Шаблоны"
   },
   "ApplicationItemReportPackage.ErrorNoSelection": {
     "en": "Select at least one application line.",

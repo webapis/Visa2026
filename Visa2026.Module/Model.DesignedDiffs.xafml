@@ -19,7 +19,7 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Open Application" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Open Application" />
       <Action Id="CloneSyncRule" Caption="Clone Rule" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Templates" ImageName="Templates" />
       <Action Id="OpenSourceObject" Caption="Open Source Object" />
       <Action Id="OpenTargetObject" Caption="Open Target Object" />
     </Actions>
@@ -87,7 +87,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="ApplicationItemReportPackageListHost_DetailView" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="app-report-package-list-detail">
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Templates" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="app-report-package-list-detail">
       <Items>
         <PropertyEditor Id="ListUi" PropertyName="ListUi" ShowCaption="False" IsNewNode="True" />
       </Items>
@@ -101,7 +101,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Resminamalar" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="app-report-package-list-detail">
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Templates" AllowDelete="False" AllowNew="False" AllowEdit="True" CustomCSSClassName="app-report-package-list-detail">
       <Items>
         <PropertyEditor Id="ListUi" PropertyName="ListUi" ShowCaption="False" IsNewNode="True" />
       </Items>

@@ -71,6 +71,24 @@ All **document-copies** occupants (Person, ApplicationItem, Header / Invitation�
 
 **Visual source of truth:** Person document copies sectioned catalog ([`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md)). **All** copies UIs (Person, ApplicationItem, Header) use Prototype A nav cards (`.doc-copies-catalog__section-head--nav`) + shared icons (`DocumentCopiesCatalogNavIcons`).
 
+## Templates brand mark
+
+Officer caption for the report package occupant is **Templates** (not Document Copies’ paperclip). Assets: `Templates.svg` (XAF ImageName), `templates-mark.svg` / `templates-mark-mask.svg`, `templates-brand.css`, `TemplatesBrandMark`. Use for Application / ApplicationItem toolbar actions and slot title (`.templates-brand-title`). Do not reuse `BO_FileAttachment` or DocumentCopies mark.
+
+## Resminamalar catalog chrome contract
+
+**Templates** (code/skills still say Resminamalar in places) shares the **same visual language** (elevated cards, colored icon circle, uppercase title, muted summary, action links) but **not** Document Copies section expand / Open.
+
+| Layer | Rule |
+|-------|------|
+| **Shell** | Still `resminamalar-slot-panel` + `.app-report-package--inline-slot` |
+| **Catalog chrome** | `.resminamalar-catalog` in [`resminamalar-catalog.css`](../Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css): **flat selectable cards** (checkbox + Word/Excel icon + title + format summary + READY/CHECK + Preview) |
+| **Interaction** | Multi-select checkboxes, Select all / Clear, Download package, Sync, gear / Edit template — unchanged |
+| **Icons** | `ResminamalarCatalogFormatIcons` (Word blue / Excel green); do not reuse DocumentCopies brand mark |
+| **Not Document Copies** | No exclusive Open/expand sections; each template row is already a ZIP leaf |
+
+**Visual source of truth for Resminamalar cards:** Document Copies Prototype A **surface** ([`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md) / `document-copies-catalog.css` tokens), adapted for selection. Domain behaviour: [`APPLICATION_REPORT_PACKAGE.md`](APPLICATION_REPORT_PACKAGE.md).
+
 ## File map (shell only)
 
 | Area | Path |
@@ -83,6 +101,8 @@ All **document-copies** occupants (Person, ApplicationItem, Header / Invitation�
 | Close policy | `Visa2026.Blazor.Server/Controllers/VisaPreviewSlotCloseController.cs` |
 | Shell markup | `Visa2026.Blazor.Server/Pages/_Host.cshtml` (`#visa-preview-slot`, `visaPreviewDrawer.*` JS) |
 | Shell CSS | `Visa2026.Blazor.Server/wwwroot/css/site.css` (`.visa-preview-slot*`, `.resminamalar-slot-panel*`) |
+| Resminamalar catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/resminamalar-catalog.css` |
+| Document-copies catalog CSS | `Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css` |
 | Wiring | `Startup.cs` — register `IVisaPreviewSlotService` |
 
 Feature-specific catalog logic stays in feature components and Module services — see domain docs above.

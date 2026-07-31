@@ -10,12 +10,12 @@ using Visa2026.Module.Editors;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Non-persistent shell for the Resminamalar report package dialog on an <see cref="Application"/>.
+/// Non-persistent shell for the Templates report package dialog on an <see cref="Application"/>.
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]
-[XafDisplayName("Resminamalar")]
-[ImageName("BO_FileAttachment")]
+[XafDisplayName("Templates")]
+[ImageName("Templates")]
 public class ApplicationReportPackageListHost : NonPersistentBaseObject
 {
     [Browsable(false)]

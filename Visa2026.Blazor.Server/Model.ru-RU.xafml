@@ -19,7 +19,7 @@
       <Action Id="ExtractPlaceholders" Caption="Извлечь заполнители" />
       <Action Id="FullTextSearch" Caption="Поиск" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
-      <Action Id="GenerateWordReports" Caption="Документы" />
+      <Action Id="GenerateWordReports" Caption="Шаблоны" />
       <Action Id="Link" Caption="Связать" />
       <Action Id="Logoff" Caption="Выход" />
       <Action Id="Logon" Caption="Вход" />
@@ -51,7 +51,7 @@
       <Action Id="ValidatePlaceholders" Caption="Проверить заполнители" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
-      <Action Id="ViewApplicationItemWordReports" Caption="Документы" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Шаблоны" />
     </Actions>
   </ActionDesign>
   <Localization>

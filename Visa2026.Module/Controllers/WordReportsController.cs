@@ -22,7 +22,7 @@ public class WordReportsController : ViewController<DetailView>
         TargetViewType = ViewType.DetailView;
 
         resminamalarAction = new SimpleAction(this, "GenerateWordReports", "Reports");
-        resminamalarAction.ImageName = "BO_FileAttachment";
+        resminamalarAction.ImageName = "Templates";
         resminamalarAction.Execute += ResminamalarAction_Execute;
     }
 

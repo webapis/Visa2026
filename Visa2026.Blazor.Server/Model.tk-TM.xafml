@@ -19,7 +19,7 @@
       <Action Id="ExtractPlaceholders" Caption="Ýer tutujylary çykar" />
       <Action Id="FullTextSearch" Caption="Gözle" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Şablonlar" />
       <Action Id="Link" Caption="Bagla" />
       <Action Id="Logoff" Caption="Çykmak" />
       <Action Id="Logon" Caption="Girmek" />
@@ -51,7 +51,7 @@
       <Action Id="ValidatePlaceholders" Caption="Ýer tutujylary barla" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
-      <Action Id="ViewApplicationItemWordReports" Caption="Resminamalar" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Şablonlar" />
     </Actions>
   </ActionDesign>
   <Localization>

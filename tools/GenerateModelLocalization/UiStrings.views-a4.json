@@ -66,10 +66,10 @@
       "caption": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" }
     },
     "ApplicationReportPackageListHost_DetailView": {
-      "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      "caption": { "en-US": "Templates", "tr-TR": "Şablonlar", "tk-TM": "Şablonlar", "ru-RU": "Шаблоны" }
     },
     "ApplicationItemReportPackageListHost_DetailView": {
-      "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      "caption": { "en-US": "Templates", "tr-TR": "Şablonlar", "tk-TM": "Şablonlar", "ru-RU": "Шаблоны" }
     },
     "CompanyProfile_DetailView": {
       "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },

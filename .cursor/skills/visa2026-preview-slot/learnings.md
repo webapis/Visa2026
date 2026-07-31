@@ -23,6 +23,20 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 
 ## Entries
 
+### 2026-07-31 — Templates brand mark for report package slot
+
+- **Ask**: Dedicated Resminamalar/Templates brand; officer name Templates.
+- **Fix**: Slot title `.templates-brand-title`; CSS linked in `_Host.cshtml`; contract in `PREVIEW_SLOT.md` § Templates brand mark.
+- **Prevent**: Do not reuse DocumentCopies brand classes for Templates.
+- **Cross-skill**: resminamalar | preview-slot
+
+### 2026-07-31 — Resminamalar catalog chrome (flat cards, shared tokens)
+
+- **Ask**: Update Resminamalar slot catalog look to match Document Copies cards.
+- **Fix**: Added `resminamalar-catalog.css` (reuses `--dcc-*` tokens); contract in `docs/PREVIEW_SLOT.md` § Resminamalar catalog chrome; linked from `_Host.cshtml`.
+- **Prevent**: Catalog card CSS stays out of preview mode; do not force Document Copies section Open onto Resminamalar.
+- **Cross-skill**: resminamalar | preview-slot
+
 ### 2026-07-30 - New surface must live in main area, not as an occupant; OwnerViewId from a PropertyEditor
 
 - **Symptom (design-time)**: A person dossier page that also opens document copies would fight the slot: `Open*` is last-wins with **one occupant at a time**, so hosting the dossier as an occupant means opening copies evicts the dossier the officer is reading.
