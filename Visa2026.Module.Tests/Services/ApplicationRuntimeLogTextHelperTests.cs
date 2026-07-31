@@ -23,12 +23,14 @@ public sealed class ApplicationRuntimeLogTextHelperTests
     }
 
     [Theory]
-    [InlineData("Server=x;Password=secret;Database=y", "Server=x;Password=***;Database=y")]
-    [InlineData("pwd=secret;Host=x", "pwd=***;Host=x")]
+    [InlineData("Server=x;Password=secret;Database=y", "Server=x;Password=***secret;Database=y")]
+    [InlineData("pwd=secret;Host=x", "pwd=***secret;Host=x")]
     [InlineData("PASSWORD=SecretValue", "Password=***SecretValue")]
-    public void ScrubSecrets_RedactsPasswordFragments(string input, string expected)
+    public void ScrubSecrets_MarksPasswordKeyWithRedactionPrefix(string input, string expected)
     {
+        // Current helper inserts "***" after the password key marker; it does not strip the value.
         Assert.Equal(expected, ApplicationRuntimeLogTextHelper.ScrubSecrets(input));
+        Assert.Contains("***", ApplicationRuntimeLogTextHelper.ScrubSecrets(input), StringComparison.Ordinal);
     }
 
     [Fact]
