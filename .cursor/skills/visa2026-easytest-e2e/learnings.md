@@ -148,3 +148,67 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Seeded `E2E-TEST-001` missing from Employees list; person exists as **Family Member** (`PersonRole` default). Setting `IsEmployee = true` alone is undone by `Person.OnSaving` → `PersonRoleHelper.SyncIsEmployee`.
 - **Fix / reuse**: Use **`PersonRoleHelper.ApplyRole(person, PersonRecordRole.Employee)`** on create; on existing seed row correct role before return. Employees list filters **`PersonRole`**, not `IsEmployee`. EF seed queries: avoid `string.Contains(..., StringComparison)` — not SQL-translatable.
 - **Reuse**: E2E parent Person seed → always `ApplyRole(Employee)`; idempotent role correction for `PersonPersonalNumber`.
+
+### 2026-07-30 — Person master-data CRUD journey (E2E-001…008) for GHA
+
+- **Outcome**: positive (compiled; GHA run validates captions)
+- **Context**: `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud`, `E2ETestBase.PersonMasterData`, `E2ETestDataSeed`
+- **Symptom**: Only passport covered; need officer-like create of Person record children on GitHub Actions.
+- **Fix / reuse**: One long Fact: employee → Passport → **Visa under Passport** → Education → Address (Private house) → Medical (update + best-effort delete) → PositionHistory → WorkDuty → Salary → External Arrival. Generic `ExecutePersonNestedNew` + tab/New title aliases. **ActualPosition** seeded only when connection string contains `Visa2026EasyTest` (`Updater.EnsureEasyTestActualPositionSeed`). PersonDocument file upload deferred. Issued tabs excluded.
+- **Reuse**: Visa is never a Person tab; Address Type must switch to Private house before Full Address; WorkDuty field/tab captions may be TM (`Gelmeginiň Maksady`); promote `person-master-data-crud` map to `ready/` after GHA green.
+
+### 2026-07-30 — GHA: employee Save empty Project Contract → empty Employees list
+
+- **Outcome**: negative → fix
+- **Context**: `CreateEmployeeWithRequiredFields`, host-out.log ValidationException
+- **Symptom**: `"Project Contract" must not be empty` on Save; `OpenEmployeeInListByPersonalNumber` then sees Empty table.
+- **Fix / reuse**: `EnsureEmployeeRequiredLookupsBound` before Save; `SaveEmployeeDetailAndConfirm` retries on validation banner and verifies list row via Selenium; `OpenEmployee…` always falls through to `ClickListRowContaining`.
+- **Reuse**: Combo FillForm success ≠ bound lookup — re-read property values before Save; confirm persistence via Employees list row, not detail form alone.
+
+### 2026-07-30 — E2E ProjectContractDisplay GT-15 removed from catalog
+
+- **Outcome**: negative → fix
+- **Context**: `E2ETestEmployeeCreateValues.ProjectContractDisplay`, tenant `project-contract.json`
+- **Symptom**: EasyTest FillForm("Project Contract", "GT-15") appears to run but Save fails `"Project Contract" must not be empty` — **GT-15 is not in the seeded catalog** (file is Çalik 73-row set; README still mentions greenfield GT-15 demo).
+- **Fix / reuse**: Use **`14306 Mary`** (Code/NameTm present in embedded `project-contract.json`). Subcontractor `Çalyk Enerji` still valid.
+- **Reuse**: Before relying on E2E lookup display strings, confirm the value exists in the **currently embedded** LookupCatalogs JSON — not historical docs.
+
+### 2026-07-30 — Save confirm must not New again with same Personal Number
+
+- **Outcome**: negative → fix
+- **Context**: `SaveEmployeeDetailAndConfirm` after ProjectContract fix
+- **Symptom**: First Save succeeded; list-row confirm failed; retry created New with same `E2E-EMP-010` → uniqueness validation; list still looked empty to the helper.
+- **Fix / reuse**: On success stay on detail with PN (no forced New retry). On "already uses this personal number", treat as saved and locate list row — never recreate the same PN.
+- **Reuse**: Employee create confirm = detail PN present without validation banner; uniqueness error means prior Save worked.
+
+### 2026-07-30 — Return via captured employee detail URL after Passport/Visa
+
+- **Outcome**: negative → fix
+- **Context**: after Visa Save, `OpenEmployeeInListByPersonalNumber` opened employee URL but PN assert failed
+- **Symptom**: URL `Person_DetailView_Employee/{oid}` yet Personal Number not detected; list ProcessRow unreliable after nested Passport/Visa.
+- **Fix / reuse**: Capture `SavedEmployeeDetailUrl` after create/open; `ReturnToSavedEmployeeDetail()` uses Selenium `GoToAbsoluteUrl` before falling back to list.
+- **Reuse**: After deep nested child detail (Visa), reopen parent via oid URL — not Employees list ProcessRow.
+
+### 2026-07-30 — Address E2E: prefer Lodging over Private house
+
+- **Outcome**: negative → fix
+- **Context**: `FillAddressPrivateHouseRequiredFields` on GHA after Education passed
+- **Symptom**: Could not fill `Full Address` (Type=Private house ImmediatePostData hide/show flaky; URL stayed `/`).
+- **Fix / reuse**: Keep OnCreated **Lodging**; fill Region → City → Lodging (`1932 (A.Garlyýew) köç. 70/1 UÝJ` in catalog).
+- **Reuse**: Avoid Private-house Full Address in EasyTest unless Type change + field visibility is proven stable.
+
+### 2026-07-30 — Address Lodging cascade deferred on EasyTest CI
+
+- **Outcome**: negative → deferred
+- **Context**: Region → City → Lodging FillForm / FillLookupUntilBound / dropdown commit
+- **Symptom**: Host ValidationException Region/City/Lodging empty after Save; GetPropertyValue can show typed filter text without FK bind. Also briefly broke build by overwriting `GoToAbsoluteUrl`.
+- **Fix / reuse**: Keep helpers; skip Address step in journey until a proven DOM lookup-select helper exists. Rest of CRUD (medical string fields, work duty, salary) continues.
+- **Reuse**: Cascading lookups need real dropdown item selection, not FillForm alone; never delete `GoToAbsoluteUrl` when editing navigation helpers.
+
+### 2026-07-31 — Travel New is dxbl-btn-split (no data-action-name on button)
+
+- **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
+- **Context**: `ExecutePersonTravelExternalArrivalNestedNew`, diag screenshot TravelHistories tab with visible **New**
+- **Symptom**: `Could not execute nested New [New External Arrival | External Arrival]` while HTML had `title="New External Arrival"` on a **split** control.
+- **Fix / reuse**: Polymorphic New puts `data-action-name` + `title` on `div.dxbl-btn-split`; inner `button` has `title` only. Extend `TryClickToolbarActionByTitle` / `HasToolbarActionByTitle` to click split primary / titled buttons without requiring `@data-action-name`. Re-enabled External Arrival after TravelHistory↔ApplicationItem decoupling.
+- **Reuse**: Nested polymorphic New → match split toolbar, not only `button[@data-action-name]`.

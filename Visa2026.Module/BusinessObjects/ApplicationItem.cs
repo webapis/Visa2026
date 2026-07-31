@@ -1835,18 +1835,10 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        public virtual void OnDeleting()
-        {
-            var objectSpace = ObjectSpaceHelper.Get(this);
-            if (objectSpace != null)
-                RegistrationTravelHistorySyncService.DeleteLinkedTravelHistory(this, objectSpace);
-        }
-
         public override void OnSaving()
         {
             base.OnSaving();
             UpdateApplicationItemName();
-            RegistrationTravelHistorySyncService.SyncFromApplicationItem(this);
         }
 
         private void UpdateApplicationItemName()

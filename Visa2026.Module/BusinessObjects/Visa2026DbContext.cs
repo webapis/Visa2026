@@ -174,16 +174,6 @@ namespace Visa2026.Module.BusinessObjects
                     .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
                     .HasValue<InternalArrival>(nameof(InternalArrival))
                     .HasValue<InternalDeparture>(nameof(InternalDeparture));
-
-                b.HasOne(t => t.SourceApplicationItem)
-                    .WithMany()
-                    .HasForeignKey(t => t.SourceApplicationItemID)
-                    .IsRequired(false)
-                    .OnDelete(DeleteBehavior.SetNull);
-
-                b.HasIndex(t => t.SourceApplicationItemID)
-                    .IsUnique()
-                    .HasFilter("[SourceApplicationItemID] IS NOT NULL AND [GCRecord] IS NULL");
             });
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {

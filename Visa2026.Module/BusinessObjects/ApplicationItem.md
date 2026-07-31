@@ -29,7 +29,7 @@ Former `Registration` child data lives on `ApplicationItem` when `ApplicationTyp
 | `TravelType` | `TravelType?` | `ShowRegistrations` |
 | `MovementType` | `MovementType?` | `ShowRegistrations` |
 | `CheckPoint` | `CheckPoint` | `ShowRegistrations` + external travel |
-| `TravelNotes` | `string` | `ShowRegistrations` (optional; synced to `TravelHistory.Notes`) |
+| `TravelNotes` | `string` | `ShowRegistrations` (optional; application-line notes only) |
 | `RegistrationDate` | `DateTime?` | `ShowRegistrations` |
 
 `ApplyRegistrationMovementDefaults` sets travel type/movement and defaults for `App_Reg_*` types (check-in/out, internal/external).
@@ -165,7 +165,7 @@ Document links on the main tab follow the opposite pattern for many application 
 - **Education on registration:** `CurrentEducation` is hidden and not required on all registration application lines (`RegistrationApplicationItemContextCriteria`), including employees — `ShowCurrentEducation` in the catalog does not apply there.
 - **Business trip:** when `ShowBusinessTrips`, `IsBusinessTripAddressValid` requires `BusinessTripAddress.City` and non-empty `FullAddress`.
 - **Unique person per application:** `IsPersonUniqueInApplication`.
-- **`OnSaving`:** updates `ApplicationItemName`; border zone default `Ýok` on create when empty; syncs linked **`TravelHistory`** for check-in/out registration types (see **`docs/REGISTRATION_TRAVEL_HISTORY_SYNC.md`**).
+- **`OnSaving`:** updates `ApplicationItemName`; border zone default `Ýok` on create when empty. Does **not** create or update `TravelHistory` (officer-maintained on the person — see **`docs/REGISTRATION_TRAVEL_HISTORY_SYNC.md`**).
 - **`CrossObjectSyncHelper`:** property-change sync for visa, invitation, work permit links (where configured).
 
 ---

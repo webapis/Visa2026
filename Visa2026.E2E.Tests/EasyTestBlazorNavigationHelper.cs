@@ -11,6 +11,75 @@ namespace Visa2026.E2E.Tests;
 /// </summary>
 internal static class EasyTestBlazorNavigationHelper
 {
+    public static void TryCommitLookupSelection(IApplicationContext appContext, string optionText)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return;
+
+        try
+        {
+            if (driver is IJavaScriptExecutor js)
+            {
+                js.ExecuteScript(
+                    "var a=document.activeElement; if(a){ a.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})); a.blur(); }");
+            }
+
+            // Click a visible dropdown/list item that contains the option text.
+            string literal = optionText.Replace("'", "\\'");
+            string xpath =
+                $"//*[contains(@class,'dxbl-list') or contains(@class,'dxbl-dropdown') or contains(@class,'dxbl-popup')]//*[contains(normalize-space(.), '{literal}')]";
+
+            foreach (IWebElement el in driver.FindElements(By.XPath(xpath)))
+            {
+                if (!el.Displayed)
+                    continue;
+                ScrollIntoView(driver, el);
+                el.Click();
+                return;
+            }
+
+            // Fallback: Tab to commit typed lookup text.
+            if (driver is IJavaScriptExecutor js2)
+            {
+                js2.ExecuteScript(
+                    "var a=document.activeElement; if(a){ a.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true})); a.blur(); }");
+            }
+        }
+        catch (WebDriverException)
+        {
+            // Best-effort commit.
+        }
+    }
+
+    public static bool HasDropdownOptionSelected(IApplicationContext appContext, string optionText)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        try
+        {
+            string literal = optionText.Replace("'", "\\'");
+            string xpath =
+                $"//*[contains(@class,'dxbl-text-edit') or contains(@class,'dxbl-combobox')][contains(., '{literal}')]";
+            return driver.FindElements(By.XPath(xpath)).Any(e => e.Displayed);
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
+    public static void GoToAbsoluteUrl(IApplicationContext appContext, string absoluteUrl)
+    {
+        IWebDriver driver = ResolveWebDriver(appContext)
+            ?? throw new InvalidOperationException("Could not resolve Selenium IWebDriver from EasyTest context.");
+
+        driver.Navigate().GoToUrl(absoluteUrl);
+        WaitForDocumentReady(driver, TimeSpan.FromSeconds(45));
+    }
+
     public static void GoToRelativeUrl(IApplicationContext appContext, string baseUrl, string relativePath)
     {
         IWebDriver driver = ResolveWebDriver(appContext)
@@ -109,6 +178,12 @@ internal static class EasyTestBlazorNavigationHelper
     /// grids and can no-op. Clicking the real, displayed button is deterministic.
     /// Mirrors the existing <see cref="ClickListRowContaining"/> DOM helper.
     /// </summary>
+    /// <remarks>
+    /// Polymorphic New (e.g. TravelHistory subtypes) is a <c>dxbl-btn-split</c>: the
+    /// <c>data-action-name</c> + <c>title</c> live on the outer div; the primary
+    /// <c>button</c> has <c>title</c> only. Plain <c>button[@data-action-name]</c>
+    /// misses those — also match split primary / titled buttons without the attribute.
+    /// </remarks>
     public static bool TryClickToolbarActionByTitle(IApplicationContext appContext, string titlePrefix, TimeSpan timeout)
     {
         IWebDriver? driver = ResolveWebDriver(appContext);
@@ -116,22 +191,31 @@ internal static class EasyTestBlazorNavigationHelper
             return false;
 
         string literal = titlePrefix.Replace("'", "\\'");
-        string xpath =
-            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]";
+        // Prefer action-tagged buttons; then split primary; then any titled non-virtual button.
+        string[] xpaths =
+        {
+            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//div[contains(@class,'dxbl-btn-split') and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]" +
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+        };
 
         DateTime deadline = DateTime.UtcNow + timeout;
         do
         {
             try
             {
-                foreach (IWebElement button in driver.FindElements(By.XPath(xpath)))
+                foreach (string xpath in xpaths)
                 {
-                    if (!button.Displayed || !button.Enabled)
-                        continue;
+                    foreach (IWebElement button in driver.FindElements(By.XPath(xpath)))
+                    {
+                        if (!button.Displayed || !button.Enabled)
+                            continue;
 
-                    ScrollIntoView(driver, button);
-                    button.Click();
-                    return true;
+                        ScrollIntoView(driver, button);
+                        button.Click();
+                        return true;
+                    }
                 }
             }
             catch (WebDriverException)
@@ -189,6 +273,54 @@ internal static class EasyTestBlazorNavigationHelper
     }
 
     /// <summary>
+    /// Tries each tab caption in order (English Id vs Title Case vs localized BO caption).
+    /// </summary>
+    public static bool TryClickTabByAnyText(IApplicationContext appContext, TimeSpan timeout, params string[] tabTexts)
+    {
+        foreach (string tabText in tabTexts)
+        {
+            if (string.IsNullOrWhiteSpace(tabText))
+                continue;
+            if (TryClickTabByText(appContext, tabText, timeout))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Tries each toolbar title prefix until a displayed action is clicked.
+    /// </summary>
+    public static bool TryClickToolbarActionByAnyTitle(
+        IApplicationContext appContext,
+        TimeSpan timeout,
+        params string[] titlePrefixes)
+    {
+        foreach (string title in titlePrefixes)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                continue;
+            if (TryClickToolbarActionByTitle(appContext, title, timeout))
+                return true;
+        }
+
+        return false;
+    }
+
+    public static bool HasToolbarActionByAnyTitle(IApplicationContext appContext, params string[] titlePrefixes)
+    {
+        foreach (string title in titlePrefixes)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                continue;
+            if (HasToolbarActionByTitle(appContext, title))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Fast DOM check for a real (non-virtual), displayed DevExpress toolbar action
     /// button by its rendered <c>title</c> prefix — avoids EasyTest's slow
     /// <c>GetAction</c> resolution when probing whether a nested list is ready.
@@ -200,12 +332,18 @@ internal static class EasyTestBlazorNavigationHelper
             return false;
 
         string literal = titlePrefix.Replace("'", "\\'");
-        string xpath =
-            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]";
+        string[] xpaths =
+        {
+            $"//button[@data-action-name and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//div[contains(@class,'dxbl-btn-split') and starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]" +
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+            $"//button[starts-with(@title, '{literal}') and not(@dxbl-virtual-el)]",
+        };
 
         try
         {
-            return driver.FindElements(By.XPath(xpath)).Any(b => b.Displayed);
+            return xpaths.Any(xpath =>
+                driver.FindElements(By.XPath(xpath)).Any(b => b.Displayed));
         }
         catch (WebDriverException)
         {
@@ -244,6 +382,42 @@ internal static class EasyTestBlazorNavigationHelper
         catch (WebDriverException)
         {
             // Non-fatal — Click still attempts its own scroll.
+        }
+    }
+
+    public static bool PageContainsText(IApplicationContext appContext, string text)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null || string.IsNullOrEmpty(text))
+            return false;
+
+        try
+        {
+            return driver.PageSource?.Contains(text, StringComparison.OrdinalIgnoreCase) == true;
+        }
+        catch (WebDriverException)
+        {
+            return false;
+        }
+    }
+
+    public static bool ListRowContainsText(IApplicationContext appContext, string cellText)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver == null)
+            return false;
+
+        string literal = cellText.Replace("'", "\\'");
+        string xpath =
+            $"//table[contains(@class,'dxbl-grid')]//tr[contains(@class,'dxbl-grid-data-row') and contains(., '{literal}')]";
+
+        try
+        {
+            return driver.FindElements(By.XPath(xpath)).Any(e => e.Displayed);
+        }
+        catch (WebDriverException)
+        {
+            return false;
         }
     }
 

@@ -13,12 +13,15 @@ namespace Visa2026.E2E.Tests
 {
     [SupportedOSPlatform("windows")]
     [Collection(EasyTestCollection.Name)]
-    public abstract class E2ETestBase
+    public abstract partial class E2ETestBase
     {
         protected const string BlazorAppName = EasyTestSessionFixture.BlazorAppName;
         protected const string AppDBName = EasyTestSessionFixture.AppDBName;
 
         protected IApplicationContext AppContext { get; }
+
+        /// <summary>Absolute or path URL of the employee detail created in this journey (TabbedMDI-safe reopen).</summary>
+        protected string? SavedEmployeeDetailUrl { get; private set; }
 
         protected E2ETestBase(EasyTestSessionFixture session)
         {
@@ -223,7 +226,156 @@ namespace Visa2026.E2E.Tests
                 new EasyTestParameter(E2ETestPersonFieldCaptions.ProjectContract, E2ETestEmployeeCreateValues.ProjectContractDisplay),
                 new EasyTestParameter(E2ETestPersonFieldCaptions.Subcontractor, E2ETestEmployeeCreateValues.SubcontractorDisplay));
 
-            ExecuteActionWithRetry("Save");
+            EnsureEmployeeRequiredLookupsBound();
+            SaveEmployeeDetailAndConfirm(personalNumber);
+        }
+
+        /// <summary>
+        /// Re-fills Project Contract / Subcontractor when EasyTest combo FillForm reports success but the bound value is empty (CI flake).
+        /// </summary>
+        private void EnsureEmployeeRequiredLookupsBound()
+        {
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                try
+                {
+                    string project = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.ProjectContract) ?? string.Empty;
+                    string subcontractor = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.Subcontractor) ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(project) && !string.IsNullOrWhiteSpace(subcontractor))
+                        return;
+
+                    if (string.IsNullOrWhiteSpace(project))
+                    {
+                        FillFormWithRetry(new EasyTestParameter(
+                            E2ETestPersonFieldCaptions.ProjectContract,
+                            E2ETestEmployeeCreateValues.ProjectContractDisplay));
+                    }
+
+                    if (string.IsNullOrWhiteSpace(subcontractor))
+                    {
+                        FillFormWithRetry(new EasyTestParameter(
+                            E2ETestPersonFieldCaptions.Subcontractor,
+                            E2ETestEmployeeCreateValues.SubcontractorDisplay));
+                    }
+                }
+                catch (AdapterOperationException) when (attempt < 4)
+                {
+                    Thread.Sleep(EasyTestCITuning.FormFieldRetryDelay);
+                }
+            }
+
+            throw new InvalidOperationException(
+                "Employee Project Contract / Subcontractor were not bound before Save " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private void SaveEmployeeDetailAndConfirm(string personalNumber)
+        {
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                EnsureEmployeeRequiredLookupsBound();
+                ExecuteActionWithRetry("Save");
+                Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+
+                bool validationBanner = EasyTestBlazorNavigationHelper.PageContainsText(
+                    AppContext, "Data Validation Error");
+                bool duplicatePn = EasyTestBlazorNavigationHelper.PageContainsText(
+                    AppContext, "already uses this personal number");
+                bool requiredEmpty = EasyTestBlazorNavigationHelper.PageContainsText(
+                    AppContext, "must not be empty");
+
+                if (duplicatePn)
+                {
+                    // A prior attempt already saved this PN — do not create again.
+                    if (TryConfirmEmployeeInList(personalNumber))
+                        return;
+
+                    throw new InvalidOperationException(
+                        $"Personal Number '{personalNumber}' is reported as duplicate but the Employees list row was not found " +
+                        $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+                }
+
+                if (validationBanner || requiredEmpty)
+                {
+                    EnsureEmployeeRequiredLookupsBound();
+                    continue;
+                }
+
+                // Successful Save typically remains on employee detail with the Personal Number.
+                if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                {
+                    CaptureSavedEmployeeDetailUrl();
+                    return;
+                }
+
+                if (TryConfirmEmployeeInList(personalNumber))
+                {
+                    CaptureSavedEmployeeDetailUrl();
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException(
+                $"Employee with Personal Number '{personalNumber}' was not confirmed after Save " +
+                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+        }
+
+        private void CaptureSavedEmployeeDetailUrl()
+        {
+            string url = EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext);
+            if (url.Contains(E2ETestLoginValues.EmployeeDetailViewPath, StringComparison.OrdinalIgnoreCase))
+                SavedEmployeeDetailUrl = url;
+        }
+
+        /// <summary>
+        /// Returns to the employee created in this journey. Prefers the captured detail URL
+        /// (avoids list ProcessRow targeting nested grids after Passport/Visa), with list fallback.
+        /// </summary>
+        protected void ReturnToSavedEmployeeDetail(
+            string personalNumber = E2ETestEmployeeCreateValues.PersonalNumber)
+        {
+            if (!string.IsNullOrEmpty(SavedEmployeeDetailUrl))
+            {
+                for (var attempt = 0; attempt < 8; attempt++)
+                {
+                    try
+                    {
+                        EasyTestBlazorNavigationHelper.GoToAbsoluteUrl(AppContext, SavedEmployeeDetailUrl);
+                        Thread.Sleep(EasyTestCITuning.LayoutTabSettleDelay);
+                        if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                            return;
+                    }
+                    catch (Exception) when (attempt < 7)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                    }
+                }
+            }
+
+            OpenEmployeeInListByPersonalNumber(personalNumber);
+            CaptureSavedEmployeeDetailUrl();
+        }
+
+        private bool TryConfirmEmployeeInList(string personalNumber)
+        {
+            for (var attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    EasyTestBlazorNavigationHelper.TryMaximizeWindow(AppContext);
+                    NavigateEmployeesList();
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+
+                    if (EasyTestBlazorNavigationHelper.ListRowContainsText(AppContext, personalNumber))
+                        return true;
+                }
+                catch (Exception) when (attempt < 9)
+                {
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                }
+            }
+
+            return false;
         }
 
         protected void OpenEmployeeInListByPersonalNumber(
@@ -233,13 +385,14 @@ namespace Visa2026.E2E.Tests
             fullNameFallback ??= E2ETestEmployeeCreateValues.FullName;
             NavigateEmployeesList();
 
-            for (var attempt = 0; attempt < 5; attempt++)
+            for (var attempt = 0; attempt < 8; attempt++)
             {
                 try
                 {
                     AppContext.GetGrid().ProcessRow(
                         new EasyTestParameter(E2ETestPersonFieldCaptions.PersonalNumber, personalNumber));
                     AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                    CaptureSavedEmployeeDetailUrl();
                     return;
                 }
                 catch (AdapterOperationException)
@@ -249,17 +402,20 @@ namespace Visa2026.E2E.Tests
                         AppContext.GetGrid().ProcessRow(
                             new EasyTestParameter("Full Name", fullNameFallback));
                         AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+                        CaptureSavedEmployeeDetailUrl();
                         return;
                     }
-                    catch (AdapterOperationException) when (attempt < 4)
+                    catch (AdapterOperationException)
                     {
                         Thread.Sleep(TimeSpan.FromSeconds(1));
+                        NavigateEmployeesList();
                     }
                 }
             }
 
             EasyTestBlazorNavigationHelper.ClickListRowContaining(AppContext, personalNumber);
             AssertEmployeeDetailShowsPersonalNumber(personalNumber);
+            CaptureSavedEmployeeDetailUrl();
         }
 
         /// <summary>
@@ -532,10 +688,27 @@ namespace Visa2026.E2E.Tests
 
         private void AssertEmployeeDetailShowsPersonalNumber(string personalNumber)
         {
-            Assert.True(
-                EmployeeDetailShowsPersonalNumber(personalNumber),
+            for (var attempt = 0; attempt < 20; attempt++)
+            {
+                if (EmployeeDetailShowsPersonalNumber(personalNumber))
+                    return;
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(500));
+            }
+
+            string actual = "(unreadable)";
+            try
+            {
+                actual = AppContext.GetForm().GetPropertyValue(E2ETestPersonFieldCaptions.PersonalNumber) ?? "(null)";
+            }
+            catch (Exception ex)
+            {
+                actual = $"({ex.GetType().Name}: {ex.Message})";
+            }
+
+            throw new InvalidOperationException(
                 $"Employee detail with Personal Number '{personalNumber}' was not detected " +
-                $"(URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
+                $"(actual='{actual}', URL: '{EasyTestBlazorNavigationHelper.GetCurrentUrl(AppContext)}').");
         }
 
         private bool EmployeeDetailShowsPersonalNumber(string personalNumber)

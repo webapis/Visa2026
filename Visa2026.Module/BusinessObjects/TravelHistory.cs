@@ -1,25 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
-using DevExpress.ExpressApp.Model;
-using System.Linq;
 
 namespace Visa2026.Module.BusinessObjects
 {
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(Title))]
-    [Appearance("TravelHistoryManagedByApplicationItem", Enabled = false,
-        Criteria = "SourceApplicationItem is not null", Context = "DetailView", TargetItems = "*")]
     public abstract class TravelHistory : BaseObject
     {
         [RuleRequiredField]
@@ -91,32 +87,6 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Travel Notes")]
         public virtual string Notes { get; set; }
-
-        /// <summary>
-        /// When set, this row is maintained from a registration <see cref="ApplicationItem"/> (check-in/out types).
-        /// Manual edits on the person travel list are disabled in the UI.
-        /// </summary>
-        [Browsable(false)]
-        public virtual Guid? SourceApplicationItemID { get; set; }
-
-        [ForeignKey(nameof(SourceApplicationItemID))]
-        [Browsable(false)]
-        public virtual ApplicationItem SourceApplicationItem { get; set; }
-
-        /// <summary>Parent application number when this row is synced from a registration <see cref="ApplicationItem"/>.</summary>
-        [NotMapped]
-        [VisibleInDetailView(false)]
-        [XafDisplayName("Application Number")]
-        public string SourceApplication_FullApplicationNumber =>
-            SourceApplicationItem?.Application?.FullApplicationNumber;
-
-        /// <summary>Parent application date when this row is synced from a registration <see cref="ApplicationItem"/>.</summary>
-        [NotMapped]
-        [VisibleInDetailView(false)]
-        [XafDisplayName("Application Date")]
-        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
-        public DateTime? SourceApplication_ApplicationDate =>
-            SourceApplicationItem?.Application?.ApplicationDate;
 
         [NotMapped]
         public string Title => $"{Person?.FullName} - {MovementType} on {TravelDate:d}";

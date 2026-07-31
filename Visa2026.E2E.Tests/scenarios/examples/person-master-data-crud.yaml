@@ -1,0 +1,66 @@
+# Draft scenario — map: person-master-data-crud_map.md
+# Promote to scenarios/ready/ after GHA green.
+
+id: person-master-data-crud
+e2eId: E2E-001-008
+description: >-
+  Log in, create employee, passport+visa, education, address, medical (CRUD),
+  position history, work duty, salary, external arrival travel
+user: standarduser
+password: ""
+
+env:
+  personalNumber: E2E-EMP-010
+  passportNumber: E2E-PASS-020
+  visaNumber: E2E-VISA-030
+  educationInstitution: Adana liseýi
+  addressFull: E2E private house address 12
+  medicalNumber: E2E-MED-040
+  medicalNumberUpdated: E2E-MED-041
+  position: 24 okly kran - mehanik
+  actualPosition: E2E Actual Position
+  workDuty: E2E work duty purpose text
+  salaryAmount: "5000"
+  salaryCurrency: TMT
+
+steps:
+  - login: { user: standarduser, password: "" }
+  - assert-shell: true
+  - goto: Person_ListView_Employees
+  - create-employee-required: env
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Passports, new: New Passport }
+  - fill-passport-required: env
+  - action: Save
+  - nested-new: { tab: Visas, new: New Visa }
+  - fill-visa-required: env
+  - action: Save
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Educations, new: New Education }
+  - fill: { "Education Institution": Adana liseýi }
+  - action: Save
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Addresses Of Residence, new: New Address Of Residence }
+  - fill-address-private-house: env
+  - action: Save
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Medical Records, new: New Medical Record }
+  - fill: { "Document Number": E2E-MED-040 }
+  - action: Save
+  - update-medical-number: E2E-MED-041
+  - delete-medical: E2E-MED-041
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Position History, new: New Employee Position History }
+  - fill-position-history: env
+  - action: Save
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Work Duties, new: New Gelmeginiň Maksady }
+  - fill: { "Gelmeginiň Maksady": E2E work duty purpose text }
+  - action: Save
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Salaries, new: New Employee Salary }
+  - fill: { Amount: "5000", Currency: TMT }
+  - action: Save
+  - open-employee: E2E-EMP-010
+  - nested-new: { tab: Travel Histories, new: New External Arrival }
+  - action: Save
