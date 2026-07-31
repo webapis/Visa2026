@@ -127,6 +127,18 @@ public static class ReportDashboardPostgresViewsHealSql
         using var connection = new NpgsqlConnection(cleaned);
         connection.Open();
 
+        // Greenfield / early host start: Startup.Configure and AddBuildStep can run this
+        // heal before XAF creates base tables (empty EasyTest --updateDatabase). CREATE VIEW
+        // would throw 42P01 (e.g. relation "Visas" does not exist). No-op until ready;
+        // ReportDashboardPostgresViewsUpdater / a later host start recreates views.
+        if (!RelationExists(connection, "Visas")
+            || !RelationExists(connection, "Applications")
+            || !RelationExists(connection, "People")
+            || !RelationExists(connection, "ApplicationItems"))
+        {
+            return;
+        }
+
         if (NeedsVisaAppProgressPrimaryCodeHeal(connection))
         {
             foreach (var resourceLeaf in VisaAppProgressDependentViews)
@@ -319,6 +331,20 @@ public static class ReportDashboardPostgresViewsHealSql
             SELECT to_regclass(@qualified) IS NOT NULL;
             """;
         command.Parameters.AddWithValue("qualified", "public." + viewName);
+        var result = command.ExecuteScalar();
+        return result is true || (result is bool b && b);
+    }
+
+    /// <summary>
+    /// XAF EF tables use quoted PascalCase names (<c>"Visas"</c>); unquoted <c>to_regclass</c> would miss them.
+    /// </summary>
+    private static bool RelationExists(NpgsqlConnection connection, string tableName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT to_regclass(@qualified) IS NOT NULL;
+            """;
+        command.Parameters.AddWithValue("qualified", "public.\"" + tableName + "\"");
         var result = command.ExecuteScalar();
         return result is true || (result is bool b && b);
     }

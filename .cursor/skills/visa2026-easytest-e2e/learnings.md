@@ -213,6 +213,15 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: Guard Postgres schema ensures/backfills with `to_regclass(...)` inside a single `DO` block (`ApplicationProgressProcessNumberSchemaSql`, `VisaProcessNumberSchemaSql`, `InvitationLegacyShapeSchemaSql`).
 - **Reuse**: BeforeUpdateSchema Postgres ALTER must no-op when the target table is missing (empty EasyTest DB).
 
+### 2026-07-31 — GHA EasyTest: HealSql CREATE VIEW fails when Visas missing
+
+- **Outcome**: negative → fix (pending GHA verify)
+- **Context**: After ProcessNumber greenfield guard; PR EasyTest still failed at `ReportDashboardPostgresViewsHealSql.ApplyIfMissing`
+- **Symptom**: `42P01: relation "Visas" does not exist` while recreating `vw_rd_visa_by_period` — Startup heals run before/without base tables on empty `--updateDatabase`.
+- **Fix / reuse**: `ReportDashboardPostgresViewsHealSql` and `ReportDashboardPostgresViewsUpdater` no-op until `"Visas"` / `"Applications"` / `"People"` / `"ApplicationItems"` exist (`to_regclass`). EasyTest provisioner uses `--forceUpdate`.
+- **Reuse**: Host-start view heals must gate on base tables like incomplete-persons already gates on People columns.
+
+### 2026-07-30 — Nested Travel New: click split-button primary, not only data-action-name
 
 - **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
 - **Context**: `ExecutePersonTravelExternalArrivalNestedNew`, diag screenshot TravelHistories tab with visible **New**
