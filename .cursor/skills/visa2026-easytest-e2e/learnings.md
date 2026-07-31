@@ -207,7 +207,7 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ### 2026-07-31 — Travel New is dxbl-btn-split (no data-action-name on button)
 
-- **Outcome**: negative → fix (pending GHA verify)
+- **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
 - **Context**: `ExecutePersonTravelExternalArrivalNestedNew`, diag screenshot TravelHistories tab with visible **New**
 - **Symptom**: `Could not execute nested New [New External Arrival | External Arrival]` while HTML had `title="New External Arrival"` on a **split** control.
 - **Fix / reuse**: Polymorphic New puts `data-action-name` + `title` on `div.dxbl-btn-split`; inner `button` has `title` only. Extend `TryClickToolbarActionByTitle` / `HasToolbarActionByTitle` to click split primary / titled buttons without requiring `@data-action-name`. Re-enabled External Arrival after TravelHistory↔ApplicationItem decoupling.
