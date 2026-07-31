@@ -1,4 +1,4 @@
-# Reports V2 Module Implementation Plan
+# Reports V2 Module Implementation Plan.
 
 This document outlines the plan for integrating the **DevExpress Reports V2 Module** into the Visa2026 project. The primary goal is to enable users to create, design, and store reports at **runtime**. These reports will be saved directly to the application's database.
 
