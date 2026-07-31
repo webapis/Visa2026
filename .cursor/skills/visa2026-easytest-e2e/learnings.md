@@ -205,7 +205,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: Keep helpers; skip Address step in journey until a proven DOM lookup-select helper exists. Rest of CRUD (medical string fields, work duty, salary) continues.
 - **Reuse**: Cascading lookups need real dropdown item selection, not FillForm alone; never delete `GoToAbsoluteUrl` when editing navigation helpers.
 
-### 2026-07-31 — Travel New is dxbl-btn-split (no data-action-name on button)
+### 2026-07-31 — GHA EasyTest: Postgres greenfield ALTER fails (ApplicationProgresses)
+
+- **Outcome**: negative → fix (pending GHA verify)
+- **Context**: `EasyTestDatabaseProvisioner.EnsureCreated` / `--updateDatabase` on empty `visa2026_easytest`
+- **Symptom**: `42P01: relation "ApplicationProgresses" does not exist` — `ADD COLUMN IF NOT EXISTS` still requires the table.
+- **Fix / reuse**: Guard Postgres schema ensures/backfills with `to_regclass(...)` inside a single `DO` block (`ApplicationProgressProcessNumberSchemaSql`, `VisaProcessNumberSchemaSql`, `InvitationLegacyShapeSchemaSql`).
+- **Reuse**: BeforeUpdateSchema Postgres ALTER must no-op when the target table is missing (empty EasyTest DB).
+
 
 - **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
 - **Context**: `ExecutePersonTravelExternalArrivalNestedNew`, diag screenshot TravelHistories tab with visible **New**

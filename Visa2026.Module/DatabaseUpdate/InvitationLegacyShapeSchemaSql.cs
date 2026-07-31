@@ -84,24 +84,60 @@ public static class InvitationLegacyShapeSchemaSql
         ALTER TABLE dbo.Invitations DROP COLUMN ValidityDurationID;
         """;
 
-    // Prefer ADD COLUMN IF NOT EXISTS (no DO $$ early-return) so ModuleUpdater execution cannot skip alters.
-    internal const string EnsureIsVisaStartAndEndDateDefinedPostgres =
-        """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "IsVisaStartAndEndDateDefined" boolean NOT NULL DEFAULT false;""";
+    // Greenfield-safe: no-op when Invitations does not exist yet (empty EasyTest DB).
+    internal const string EnsureIsVisaStartAndEndDateDefinedPostgres = """
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."Invitations"') IS NULL THEN RETURN; END IF;
+          ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "IsVisaStartAndEndDateDefined" boolean NOT NULL DEFAULT false;
+        END
+        $ensure$;
+        """;
 
-    internal const string EnsureVisaStartDatePostgres =
-        """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaStartDate" timestamp without time zone NULL;""";
+    internal const string EnsureVisaStartDatePostgres = """
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."Invitations"') IS NULL THEN RETURN; END IF;
+          ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaStartDate" timestamp without time zone NULL;
+        END
+        $ensure$;
+        """;
 
-    internal const string EnsureVisaEndDatePostgres =
-        """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaEndDate" timestamp without time zone NULL;""";
+    internal const string EnsureVisaEndDatePostgres = """
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."Invitations"') IS NULL THEN RETURN; END IF;
+          ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaEndDate" timestamp without time zone NULL;
+        END
+        $ensure$;
+        """;
 
-    internal const string EnsureVisaCategoryIdPostgres =
-        """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaCategoryID" uuid NULL;""";
+    internal const string EnsureVisaCategoryIdPostgres = """
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."Invitations"') IS NULL THEN RETURN; END IF;
+          ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaCategoryID" uuid NULL;
+        END
+        $ensure$;
+        """;
 
-    internal const string EnsureVisaPeriodIdPostgres =
-        """ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaPeriodID" uuid NULL;""";
+    internal const string EnsureVisaPeriodIdPostgres = """
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."Invitations"') IS NULL THEN RETURN; END IF;
+          ALTER TABLE "Invitations" ADD COLUMN IF NOT EXISTS "VisaPeriodID" uuid NULL;
+        END
+        $ensure$;
+        """;
 
-    internal const string DropValidityDurationPostgres =
-        """ALTER TABLE "Invitations" DROP COLUMN IF EXISTS "ValidityDurationID";""";
+    internal const string DropValidityDurationPostgres = """
+        DO $drop$
+        BEGIN
+          IF to_regclass('public."Invitations"') IS NULL THEN RETURN; END IF;
+          ALTER TABLE "Invitations" DROP COLUMN IF EXISTS "ValidityDurationID";
+        END
+        $drop$;
+        """;
 
     internal static readonly string[] EnsureColumnsPostgresStatements =
     [
