@@ -18,7 +18,7 @@ internal static class EasyTestHostLaunch
     /// </summary>
     public const string HostArguments = "--urls http://localhost:5050 --environment Development";
 
-    public const string UpdateDatabaseArguments = "--updateDatabase --silent --environment Development";
+    public const string UpdateDatabaseArguments = "--updateDatabase --forceUpdate --silent --environment Development";
 
     internal static void ApplyHostEnvironment(ProcessStartInfo startInfo)
     {

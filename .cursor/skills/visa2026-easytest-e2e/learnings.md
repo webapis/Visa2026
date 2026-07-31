@@ -205,7 +205,39 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: Keep helpers; skip Address step in journey until a proven DOM lookup-select helper exists. Rest of CRUD (medical string fields, work duty, salary) continues.
 - **Reuse**: Cascading lookups need real dropdown item selection, not FillForm alone; never delete `GoToAbsoluteUrl` when editing navigation helpers.
 
-### 2026-07-31 — Travel New is dxbl-btn-split (no data-action-name on button)
+### 2026-07-31 — GHA EasyTest: Postgres greenfield ALTER fails (ApplicationProgresses)
+
+- **Outcome**: negative → fix (GHA green: `30630126558`)
+- **Context**: `EasyTestDatabaseProvisioner.EnsureCreated` / `--updateDatabase` on empty `visa2026_easytest`
+- **Symptom**: `42P01: relation "ApplicationProgresses" does not exist` — `ADD COLUMN IF NOT EXISTS` still requires the table.
+- **Fix / reuse**: Guard Postgres schema ensures/backfills with `to_regclass(...)` inside a single `DO` block (`ApplicationProgressProcessNumberSchemaSql`, `VisaProcessNumberSchemaSql`, `InvitationLegacyShapeSchemaSql`).
+- **Reuse**: BeforeUpdateSchema Postgres ALTER must no-op when the target table is missing (empty EasyTest DB).
+
+### 2026-07-31 — GHA EasyTest: HealSql CREATE VIEW fails when Visas missing
+
+- **Outcome**: negative → fix (GHA green: `30630126558`)
+- **Context**: After ProcessNumber greenfield guard; PR EasyTest still failed at `ReportDashboardPostgresViewsHealSql.ApplyIfMissing`
+- **Symptom**: `42P01: relation "Visas" does not exist` while recreating `vw_rd_visa_by_period` — Startup heals run before/without base tables on empty `--updateDatabase`.
+- **Fix / reuse**: `ReportDashboardPostgresViewsHealSql` and `ReportDashboardPostgresViewsUpdater` no-op until `"Visas"` / `"Applications"` / `"People"` / `"ApplicationItems"` exist (`to_regclass`). EasyTest provisioner uses `--forceUpdate`.
+- **Reuse**: Host-start view heals must gate on base tables like incomplete-persons already gates on People columns.
+
+### 2026-07-31 — GHA EasyTest: Postgres login case — standarduser vs StandardUser
+
+- **Outcome**: negative → fix (GHA green: `30630126558`)
+- **Context**: After greenfield `--updateDatabase` succeeded; host log `Login failed for 'standarduser'`
+- **Symptom**: Stuck on `/LoginPage` — Updater seeds **`StandardUser`**; E2E used lowercase **`standarduser`** (LocalDB was case-insensitive). Also ActualPosition EasyTest seed looked for DB name `Visa2026EasyTest` only.
+- **Fix / reuse**: `E2ETestLoginValues.StandardUserName = "StandardUser"`; `IsEasyTestDatabase` / `EasyTestHostMode` recognize **`visa2026_easytest`**.
+- **Reuse**: On PostgreSQL EasyTest, login user name must match seeded casing exactly.
+
+### 2026-07-31 — GHA EasyTest: AssertAuthenticatedAppShell Navigate(Application) fails for Users
+
+- **Outcome**: negative → fix (GHA green: `30630126558`)
+- **Context**: After StandardUser login; URL `/` (not LoginPage); assert timed out ~4.5 min
+- **Symptom**: Users role **Denies** untyped Application list; EasyTest `Navigate("Application")` never exposes New.
+- **Fix / reuse**: `AssertAuthenticatedAppShell` opens **`/Person_ListView_Employees`** and requires list New (same as journey).
+- **Reuse**: Officer shell probe → Employees URL, not Navigate("Application").
+
+### 2026-07-30 — Nested Travel New: click split-button primary, not only data-action-name
 
 - **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
 - **Context**: `ExecutePersonTravelExternalArrivalNestedNew`, diag screenshot TravelHistories tab with visible **New**

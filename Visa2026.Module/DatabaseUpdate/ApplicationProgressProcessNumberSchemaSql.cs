@@ -11,12 +11,22 @@ namespace Visa2026.Module.DatabaseUpdate;
 public static class ApplicationProgressProcessNumberSchemaSql
 {
     /// <summary>
-    /// Prefer <c>ADD COLUMN IF NOT EXISTS</c> (no DO block) so XAF <c>ExecuteNonQueryCommand</c>
-    /// statement splitting cannot break Postgres schema ensure.
+    /// Greenfield-safe: skip when tables do not exist yet (empty EasyTest / first --updateDatabase).
+    /// Single DO block so XAF <c>ExecuteNonQueryCommand</c> does not split mid-script.
     /// </summary>
     internal const string EnsureColumnsPostgres = """
-        ALTER TABLE "ApplicationProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
-        ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."ApplicationProgresses"') IS NOT NULL THEN
+            ALTER TABLE "ApplicationProgresses"
+              ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          END IF;
+          IF to_regclass('public."Applications"') IS NOT NULL THEN
+            ALTER TABLE "Applications"
+              ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          END IF;
+        END
+        $ensure$;
         """;
 
     internal const string EnsureColumnsSqlServer = """
@@ -51,14 +61,23 @@ public static class ApplicationProgressProcessNumberSchemaSql
         """;
 
     internal const string BackfillProgressFromDescriptionPostgres = """
-        UPDATE "ApplicationProgresses" ap
-        SET "ProcessNumber" = LEFT(TRIM(ap."Description"), 100)
-        FROM "ApplicationStates" st
-        WHERE st."ID" = ap."StateID"
-          AND st."Code" = 'PROCESS_STARTED'
-          AND ap."ProcessNumber" IS NULL
-          AND ap."Description" IS NOT NULL
-          AND TRIM(ap."Description") <> '';
+        DO $bf$
+        BEGIN
+          IF to_regclass('public."ApplicationProgresses"') IS NULL
+             OR to_regclass('public."ApplicationStates"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          UPDATE "ApplicationProgresses" ap
+          SET "ProcessNumber" = LEFT(TRIM(ap."Description"), 100)
+          FROM "ApplicationStates" st
+          WHERE st."ID" = ap."StateID"
+            AND st."Code" = 'PROCESS_STARTED'
+            AND ap."ProcessNumber" IS NULL
+            AND ap."Description" IS NOT NULL
+            AND TRIM(ap."Description") <> '';
+        END
+        $bf$;
         """;
 
     internal const string BackfillApplicationFromProgressSqlServer = """
@@ -89,22 +108,32 @@ public static class ApplicationProgressProcessNumberSchemaSql
         """;
 
     internal const string BackfillApplicationFromProgressPostgres = """
-        UPDATE "Applications" a
-        SET "ProcessNumber" = src."ProcessNumber"
-        FROM (
-            SELECT ap."ApplicationID", ap."ProcessNumber",
-                   ROW_NUMBER() OVER (
-                       PARTITION BY ap."ApplicationID"
-                       ORDER BY ap."ProgressOrder" ASC, ap."Date" ASC, ap."ID" ASC) AS rn
-            FROM "ApplicationProgresses" ap
-            INNER JOIN "ApplicationStates" st ON st."ID" = ap."StateID"
-            WHERE st."Code" = 'PROCESS_STARTED'
-              AND ap."ProcessNumber" IS NOT NULL
-              AND TRIM(ap."ProcessNumber") <> ''
-        ) src
-        WHERE src."ApplicationID" = a."ID"
-          AND src.rn = 1
-          AND a."ProcessNumber" IS NULL;
+        DO $bf$
+        BEGIN
+          IF to_regclass('public."Applications"') IS NULL
+             OR to_regclass('public."ApplicationProgresses"') IS NULL
+             OR to_regclass('public."ApplicationStates"') IS NULL THEN
+            RETURN;
+          END IF;
+
+          UPDATE "Applications" a
+          SET "ProcessNumber" = src."ProcessNumber"
+          FROM (
+              SELECT ap."ApplicationID", ap."ProcessNumber",
+                     ROW_NUMBER() OVER (
+                         PARTITION BY ap."ApplicationID"
+                         ORDER BY ap."ProgressOrder" ASC, ap."Date" ASC, ap."ID" ASC) AS rn
+              FROM "ApplicationProgresses" ap
+              INNER JOIN "ApplicationStates" st ON st."ID" = ap."StateID"
+              WHERE st."Code" = 'PROCESS_STARTED'
+                AND ap."ProcessNumber" IS NOT NULL
+                AND TRIM(ap."ProcessNumber") <> ''
+          ) src
+          WHERE src."ApplicationID" = a."ID"
+            AND src.rn = 1
+            AND a."ProcessNumber" IS NULL;
+        END
+        $bf$;
         """;
 
     /// <summary>

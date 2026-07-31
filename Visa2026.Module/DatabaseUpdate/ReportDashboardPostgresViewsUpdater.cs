@@ -20,6 +20,14 @@ public sealed class ReportDashboardPostgresViewsUpdater : ModuleUpdater
         if (!DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
             return;
 
+        // Greenfield race: if EF has not committed base tables yet, skip (HealSql / next start).
+        // CREATE VIEW with silent=true would otherwise swallow 42P01 and leave dashboards empty.
+        if (!PostgresRelationExists("Visas")
+            || !PostgresRelationExists("Applications")
+            || !PostgresRelationExists("People")
+            || !PostgresRelationExists("ApplicationItems"))
+            return;
+
         CreateViewVisaExtensionStatus();
         CreateViewRdPassport();
         CreateViewRdWorkPermit();
@@ -2403,5 +2411,13 @@ WHERE COALESCE(v.""GCRecord"", 0) = 0
         SELECT 1 FROM checkout_linked cl WHERE cl.""VisaId"" = v.""ID""
   );
 ", true);
+    }
+
+    private bool PostgresRelationExists(string tableName)
+    {
+        var result = ExecuteScalarCommand(
+            $"""SELECT to_regclass('public."{tableName}"') IS NOT NULL;""",
+            false);
+        return result is true || (result is bool b && b);
     }
 }
