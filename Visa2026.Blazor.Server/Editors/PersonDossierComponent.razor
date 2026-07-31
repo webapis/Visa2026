@@ -44,40 +44,37 @@
     }
     else
     {
-        <div class="person-dossier__toolbar">
-            <div class="person-dossier__toolbar-title">@Msg("PersonDossier.Title")</div>
-
-            <div class="person-dossier__view-switch" role="group" aria-label="@Msg("PersonDossier.View.SwitchLabel")">
-                <button type="button"
-                        class="person-dossier__view-btn @(_viewMode == DossierViewMode.Screen ? "is-active" : null)"
-                        @onclick="ShowScreen">
-                    @Msg("PersonDossier.View.Screen")
-                </button>
-                <button type="button"
-                        class="person-dossier__view-btn @(_viewMode == DossierViewMode.Paper ? "is-active" : null)"
-                        @onclick="ShowPaper">
-                    @Msg("PersonDossier.View.Paper")
-                </button>
-            </div>
-
-            @if (!string.IsNullOrWhiteSpace(ExportMessage))
-            {
-                <div class="person-dossier__export-msg">@ExportMessage</div>
-            }
-            <button type="button" class="person-dossier__copies-btn" @onclick="OnExport" disabled="@IsExportQueued">
-                <span class="person-dossier__clip">&#11015;</span>
-                @Msg("PersonDossier.Action.Export")
-            </button>
-            <button type="button" class="doc-copies-brand" @onclick="OnOpenCopies">
-                <span class="doc-copies-brand__icon doc-copies-brand__icon--svg" aria-hidden="true">
-                    @((MarkupString)DocumentCopiesBrandMark.SvgMarkup)
-                </span>
-                @Msg("PersonDossier.Action.Copies")
-            </button>
-        </div>
-
         @if (_viewMode == DossierViewMode.Paper)
         {
+            <div class="person-dossier__toolbar">
+                <div class="person-dossier__toolbar-title">@Msg("PersonDossier.Title")</div>
+                <div class="person-dossier__view-switch" role="group" aria-label="@Msg("PersonDossier.View.SwitchLabel")">
+                    <button type="button"
+                            class="person-dossier__view-btn @(_viewMode == DossierViewMode.Screen ? "is-active" : null)"
+                            @onclick="ShowScreen">
+                        @Msg("PersonDossier.View.Screen")
+                    </button>
+                    <button type="button"
+                            class="person-dossier__view-btn is-active"
+                            @onclick="ShowPaper">
+                        @Msg("PersonDossier.View.Paper")
+                    </button>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(ExportMessage))
+                {
+                    <div class="person-dossier__export-msg">@ExportMessage</div>
+                }
+                <button type="button" class="person-dossier__copies-btn" @onclick="OnExport" disabled="@IsExportQueued">
+                    <span class="person-dossier__clip">&#11015;</span>
+                    @Msg("PersonDossier.Action.Export")
+                </button>
+                <button type="button" class="doc-copies-brand" @onclick="OnOpenCopies">
+                    <span class="doc-copies-brand__icon doc-copies-brand__icon--svg" aria-hidden="true">
+                        @((MarkupString)DocumentCopiesBrandMark.SvgMarkup)
+                    </span>
+                    @Msg("PersonDossier.Action.Copies")
+                </button>
+            </div>
             <div class="person-dossier__paper-stage">
                 <div class="person-dossier__paper-sheet">
                     @((MarkupString)_paperHtml)
@@ -86,6 +83,39 @@
         }
         else
         {
+            @* Centered column with side gutters (Word-like padding), wider than A4 so tables fit. *@
+            <div class="person-dossier__screen-stage">
+                <div class="person-dossier__screen-column">
+                    <div class="person-dossier__toolbar">
+                        <div class="person-dossier__toolbar-title">@Msg("PersonDossier.Title")</div>
+                        <div class="person-dossier__view-switch" role="group" aria-label="@Msg("PersonDossier.View.SwitchLabel")">
+                            <button type="button"
+                                    class="person-dossier__view-btn is-active"
+                                    @onclick="ShowScreen">
+                                @Msg("PersonDossier.View.Screen")
+                            </button>
+                            <button type="button"
+                                    class="person-dossier__view-btn"
+                                    @onclick="ShowPaper">
+                                @Msg("PersonDossier.View.Paper")
+                            </button>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(ExportMessage))
+                        {
+                            <div class="person-dossier__export-msg">@ExportMessage</div>
+                        }
+                        <button type="button" class="person-dossier__copies-btn" @onclick="OnExport" disabled="@IsExportQueued">
+                            <span class="person-dossier__clip">&#11015;</span>
+                            @Msg("PersonDossier.Action.Export")
+                        </button>
+                        <button type="button" class="doc-copies-brand" @onclick="OnOpenCopies">
+                            <span class="doc-copies-brand__icon doc-copies-brand__icon--svg" aria-hidden="true">
+                                @((MarkupString)DocumentCopiesBrandMark.SvgMarkup)
+                            </span>
+                            @Msg("PersonDossier.Action.Copies")
+                        </button>
+                    </div>
+
             <div class="person-dossier__identity">
                 <div class="person-dossier__photo">
                     @if (!string.IsNullOrEmpty(Snapshot.PhotoDataUri))
@@ -187,6 +217,8 @@
                         </div>
                     </section>
                 }
+            </div>
+                </div>
             </div>
         }
     }

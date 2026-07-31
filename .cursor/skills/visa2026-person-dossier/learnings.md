@@ -89,3 +89,15 @@ Newest entries at the **bottom**. Read before dossier work; append after verifie
 
 - **Symptom**: ListView dossier icon replaced the Employees (etc.) tab with Person Dossier.
 - **Fix**: ListView open uses `TargetWindow.NewWindow` (DetailView toolbar can stay `Current`).
+
+### 2026-07-31 — Screen dossier Word-like A4 page chrome
+
+- **Symptom**: Screen mode stretched full viewport; sparse fields on ultrawide.
+- **Try**: Grey desk + centered `210mm` screen sheet (Word print layout).
+- **Outcome**: Rejected — horizontal table scroll, felt too paper-like.
+- **Fix**: Revert Screen to flexible full-width app layout; keep A4 chrome for Paper only; table cells wrap (`white-space: normal`) so Screen has no horizontal scroll.
+
+### 2026-07-31 — Screen centered column with Word-like side padding
+
+- **Request**: Side gutters like Word workspace, without rigid A4 / table scroll.
+- **Fix**: `.person-dossier__screen-stage` + `.person-dossier__screen-column` (`max-width: 1120px`, `padding: clamp(20px, 5vw, 72px)` gutters); Paper stays `210mm`.

@@ -32,12 +32,16 @@
   --pd-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   color: var(--pd-text);
-  background: var(--pd-bg);
-  padding: 14px;
+  /* Soft desk behind centered Screen column (Word-like side gutters). */
+  background: color-mix(in srgb, var(--pd-surface) 90%, var(--pd-text));
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
   font-size: 13px;
+  min-height: 100%;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .person-dossier__loading {
@@ -162,6 +166,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -212,13 +217,49 @@
   color: var(--pd-muted);
 }
 
+/* -------------------------------------------------------------- screen column
+   Centered reading column with side gutters (like Word workspace padding).
+   Wider than A4 (~1120px) so section tables fit without horizontal scroll. */
+
+.person-dossier__screen-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px clamp(20px, 5vw, 72px) 28px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.person-dossier__screen-column {
+  width: 100%;
+  max-width: 1120px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 18px;
+  background: var(--pd-bg);
+  border: 1px solid var(--pd-border-soft);
+  border-radius: var(--pd-radius);
+  box-shadow: var(--pd-shadow);
+}
+
+@media (max-width: 900px) {
+  .person-dossier__screen-stage {
+    padding: 10px 8px 20px;
+  }
+
+  .person-dossier__screen-column {
+    padding: 12px;
+  }
+}
+
 /* -------------------------------------------------------------- paper preview
-   A4 chrome around PersonDossierDocumentHtmlBuilder.BuildFragment — same markup
-   the export PDF uses. Fixed light ink on white so it matches the hand-over
-   document even when the app is in dark theme. */
+   A4 chrome around PersonDossierDocumentHtmlBuilder.BuildFragment — export hand-over. */
 
 .person-dossier--paper {
   background: color-mix(in srgb, var(--pd-surface) 88%, var(--pd-text));
+  padding: 14px;
 }
 
 .person-dossier__paper-stage {
@@ -465,19 +506,23 @@
 }
 
 .person-dossier__table-scroll {
-  overflow-x: auto;
+  overflow-x: visible;
+  width: 100%;
 }
 
 .person-dossier__table {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
 }
 
 .person-dossier__table th,
 .person-dossier__table td {
-  padding: 6px 12px;
+  padding: 6px 10px;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
   border-bottom: 1px solid var(--pd-border-soft);
 }
 
