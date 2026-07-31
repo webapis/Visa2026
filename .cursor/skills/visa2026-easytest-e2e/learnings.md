@@ -207,7 +207,7 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ### 2026-07-31 — GHA EasyTest: Postgres greenfield ALTER fails (ApplicationProgresses)
 
-- **Outcome**: negative → fix (pending GHA verify)
+- **Outcome**: negative → fix (GHA green: `30630126558`)
 - **Context**: `EasyTestDatabaseProvisioner.EnsureCreated` / `--updateDatabase` on empty `visa2026_easytest`
 - **Symptom**: `42P01: relation "ApplicationProgresses" does not exist` — `ADD COLUMN IF NOT EXISTS` still requires the table.
 - **Fix / reuse**: Guard Postgres schema ensures/backfills with `to_regclass(...)` inside a single `DO` block (`ApplicationProgressProcessNumberSchemaSql`, `VisaProcessNumberSchemaSql`, `InvitationLegacyShapeSchemaSql`).
@@ -215,7 +215,7 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ### 2026-07-31 — GHA EasyTest: HealSql CREATE VIEW fails when Visas missing
 
-- **Outcome**: negative → fix (pending GHA verify)
+- **Outcome**: negative → fix (GHA green: `30630126558`)
 - **Context**: After ProcessNumber greenfield guard; PR EasyTest still failed at `ReportDashboardPostgresViewsHealSql.ApplyIfMissing`
 - **Symptom**: `42P01: relation "Visas" does not exist` while recreating `vw_rd_visa_by_period` — Startup heals run before/without base tables on empty `--updateDatabase`.
 - **Fix / reuse**: `ReportDashboardPostgresViewsHealSql` and `ReportDashboardPostgresViewsUpdater` no-op until `"Visas"` / `"Applications"` / `"People"` / `"ApplicationItems"` exist (`to_regclass`). EasyTest provisioner uses `--forceUpdate`.
@@ -223,7 +223,7 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ### 2026-07-31 — GHA EasyTest: Postgres login case — standarduser vs StandardUser
 
-- **Outcome**: negative → fix (pending GHA verify)
+- **Outcome**: negative → fix (GHA green: `30630126558`)
 - **Context**: After greenfield `--updateDatabase` succeeded; host log `Login failed for 'standarduser'`
 - **Symptom**: Stuck on `/LoginPage` — Updater seeds **`StandardUser`**; E2E used lowercase **`standarduser`** (LocalDB was case-insensitive). Also ActualPosition EasyTest seed looked for DB name `Visa2026EasyTest` only.
 - **Fix / reuse**: `E2ETestLoginValues.StandardUserName = "StandardUser"`; `IsEasyTestDatabase` / `EasyTestHostMode` recognize **`visa2026_easytest`**.
@@ -231,7 +231,7 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ### 2026-07-31 — GHA EasyTest: AssertAuthenticatedAppShell Navigate(Application) fails for Users
 
-- **Outcome**: negative → fix (pending GHA verify)
+- **Outcome**: negative → fix (GHA green: `30630126558`)
 - **Context**: After StandardUser login; URL `/` (not LoginPage); assert timed out ~4.5 min
 - **Symptom**: Users role **Denies** untyped Application list; EasyTest `Navigate("Application")` never exposes New.
 - **Fix / reuse**: `AssertAuthenticatedAppShell` opens **`/Person_ListView_Employees`** and requires list New (same as journey).
