@@ -57,6 +57,20 @@ CSS lives under `.resminamalar-slot-panel` (also used by `document-copies-slot-p
 - Inline catalog classes: `.app-report-package--inline-slot` (Resminamalar), `.app-item-doc-copies--inline-slot` (document copies).
 - Footer band: Download package / Refresh / gear — sticky inside card, not slot bottom float.
 
+## Document-copies catalog chrome contract
+
+All **document-copies** occupants (Person, ApplicationItem, Header / Invitation–WP–Rejection–BorderZone) share one **sectioned catalog** look — the Person / dossier-adjacent language — not bordered flat `__group` cards.
+
+| Layer | Rule |
+|-------|------|
+| **Shell** | Still `resminamalar-slot-panel` + `.app-item-doc-copies--inline-slot` |
+| **Catalog chrome** | `.doc-copies-catalog` in [`document-copies-catalog.css`](../Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css): **Prototype A** vertical nav cards (colored icon circle + title + summary + Open/Close) → expand exclusive section → table-like rows (Record / Files / Status / Preview), nested indent, status pills (`person-dossier__pill`), gear file rows |
+| **Data** | Resolvers stay feature-owned (Person ≠ ApplicationItem ≠ Header). Do not merge indexing rules. |
+| **AppItem-only** | Package options, gap confirm, Download package footer stay below the shared catalog |
+| **Not the dossier page** | Do not reuse `person-dossier__table` domain columns; dossier identity/tiles stay on the main DetailView ([`PERSON_DOSSIER.md`](PERSON_DOSSIER.md)) |
+
+**Visual source of truth:** Person document copies sectioned catalog ([`PERSON_DOCUMENT_COPIES.md`](PERSON_DOCUMENT_COPIES.md)). **All** copies UIs (Person, ApplicationItem, Header) use Prototype A nav cards (`.doc-copies-catalog__section-head--nav`) + shared icons (`DocumentCopiesCatalogNavIcons`).
+
 ## File map (shell only)
 
 | Area | Path |

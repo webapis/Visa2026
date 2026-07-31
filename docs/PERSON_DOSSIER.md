@@ -21,9 +21,7 @@ copies can stay open on the right).
 **Primary audience:** company directors asking about a foreign employee. Officers produce it;
 directors consume it as an export. That split drives most of the design decisions below.
 
-**Agent skills:** [`visa2026-report-dashboard`](../.cursor/skills/visa2026-report-dashboard/SKILL.md)
-(search entry) - [`visa2026-person-document-copies`](../.cursor/skills/visa2026-person-document-copies/SKILL.md)
-(files) - [`visa2026-preview-slot`](../.cursor/skills/visa2026-preview-slot/SKILL.md) (slot shell).
+**Agent skill:** [`visa2026-person-dossier`](../.cursor/skills/visa2026-person-dossier/SKILL.md) (page, export, loading). Related: [`visa2026-report-dashboard`](../.cursor/skills/visa2026-report-dashboard/SKILL.md) (search entry) · [`visa2026-person-document-copies`](../.cursor/skills/visa2026-person-document-copies/SKILL.md) (files) · [`visa2026-preview-slot`](../.cursor/skills/visa2026-preview-slot/SKILL.md) (slot shell).
 
 ---
 
@@ -59,7 +57,7 @@ slot the officer just opened.
 
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
-| **1** | Read model + dossier page + `Open dossier` action on Person DetailView / ListView | **Done, verified against real data** |
+| **1** | Read model + dossier page + `Open dossier` on Person DetailView + ListView row column | **Done, verified against real data** |
 | **2** | Copies affordance -> `OpenPersonDocumentCopiesAsync` with dossier `OwnerViewId` | **Toolbar button built**; per-section deep-link open |
 | **3** | `Person` search category in Report Dashboard (`vw_rd_person_search` + result rows) | **Done, verified against real data** |
 | **4** | Director hand-over export: dossier document + person-scoped ZIP of copies | **Done, verified against real data** |
@@ -116,7 +114,7 @@ Reuse the dashboard status vocabulary so colours stay consistent across the app:
 | `Visa2026.Module/Services/PersonDossier/PersonDossierOpenHelper.cs` | Opens the dossier view for a person |
 | `Visa2026.Module/BusinessObjects/PersonDossier/PersonDossierHost.cs` | Non-persistent host (`PersonId` + `DossierUi`) |
 | `Visa2026.Module/Editors/PersonDossierEditorAliases.cs` | Editor alias constant |
-| `Visa2026.Module/Controllers/PersonDossierController.cs` | `OpenPersonDossier` action (DetailView + ListView) |
+| `Visa2026.Module/Controllers/PersonDossierController.cs` | `OpenPersonDossier` DetailView toolbar (ListView = row `DossierListLink`) |
 | `Visa2026.Module/Controllers/PersonDossierChromeController.cs` | Hides Save / Delete / Refresh on the read-only view |
 | `Visa2026.Module/DatabaseUpdate/PersonDossierDetailViewUpdater.cs` | Suppresses the generated `DossierUi` layout caption |
 | `Visa2026.Blazor.Server/Editors/PersonDossierModel.cs` | `ComponentModelBase` state |

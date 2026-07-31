@@ -24,8 +24,18 @@ internal static class ListViewGridFilterState
         if (grid is null)
             return;
 
-        grid.ClearFilter();
-        if (!string.IsNullOrWhiteSpace(grid.SearchText))
-            grid.SearchText = string.Empty;
+        // DxGrid parameter properties (e.g. SearchText) must be changed between BeginUpdate/EndUpdate
+        // when set outside component markup; otherwise DevExpress throws InvalidOperationException.
+        grid.BeginUpdate();
+        try
+        {
+            grid.ClearFilter();
+            if (!string.IsNullOrWhiteSpace(grid.SearchText))
+                grid.SearchText = string.Empty;
+        }
+        finally
+        {
+            grid.EndUpdate();
+        }
     }
 }

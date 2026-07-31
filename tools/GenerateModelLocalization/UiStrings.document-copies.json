@@ -71,7 +71,9 @@
         "tr-TR": "Aile ilişkisi kanıt kopyaları",
         "tk-TM": "Maşgala gatnaşygy subutnamalary",
         "ru-RU": "Копии доказательств родства"
-      }
+      },
+      "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+      "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
     },
     "Visa2026.Module.BusinessObjects.BorderZone": {
       "Documents": {

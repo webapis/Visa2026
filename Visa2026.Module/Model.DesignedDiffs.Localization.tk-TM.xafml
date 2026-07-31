@@ -1493,7 +1493,9 @@
         <Member Name="DateDeleted" Caption="Pozulan senesi" />
         <Member Name="DateOfBirth" Caption="Doglan senesi" />
         <Member Name="DeletedBy" Caption="Pozan" />
+        <Member Name="DocumentCopiesListLink" Caption="Nusgalar" />
         <Member Name="Documents" Caption="CV we şahsy faýllar" />
+        <Member Name="DossierListLink" Caption="Dosýe" />
         <Member Name="Educations" Caption="Bilimler" />
         <Member Name="Email" Caption="E-poçta" />
         <Member Name="EmployeeContracts" Caption="Işgär şertnamalary" />
@@ -2869,6 +2871,8 @@
         <ColumnInfo Id="CurrentVisa" Caption="Wiza" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="Iş rugsady elementi" />
         <ColumnInfo Id="DateOfBirth" Caption="Doglan senesi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Nusgalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosýe" />
         <ColumnInfo Id="FullName" Caption="Doly ady" />
         <ColumnInfo Id="Gender" Caption="Jynsy" />
         <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />
@@ -2891,6 +2895,8 @@
         <ColumnInfo Id="CurrentRejectionItem" Caption="Ret elementi" />
         <ColumnInfo Id="CurrentVisa" Caption="Wiza" />
         <ColumnInfo Id="DateOfBirth" Caption="Doglan senesi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Nusgalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosýe" />
         <ColumnInfo Id="FirstName" Caption="Ady" />
         <ColumnInfo Id="ForeignAddress" Caption="Daşary ýurt salgysy" />
         <ColumnInfo Id="ForeignAddressCountry" Caption="Daşary ýurt salgysynyň ýurdy" />
@@ -2911,6 +2917,8 @@
       <Columns>
         <ColumnInfo Id="Age" Caption="Ýaşy" />
         <ColumnInfo Id="DateOfBirth" Caption="Doglan senesi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Nusgalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosýe" />
         <ColumnInfo Id="FullName" Caption="Doly ady" />
         <ColumnInfo Id="Gender" Caption="Jynsy" />
         <ColumnInfo Id="IsArchived" Caption="Arhiwlendi" />

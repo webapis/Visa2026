@@ -1,0 +1,408 @@
+/*
+  Shared document-copies catalog chrome (Person / Header / ApplicationItem).
+  Flex rows: record label left, Files/Status/Preview grouped on the right.
+  Contract: docs/PREVIEW_SLOT.md (catalog chrome). Visual source: Person sectioned catalog.
+ */
+
+.doc-copies-catalog {
+  --dcc-text: var(--bs-body-color, #1e293b);
+  --dcc-surface: var(--bs-body-bg, #ffffff);
+  --dcc-border: color-mix(in srgb, var(--dcc-surface) 88%, var(--dcc-text));
+  --dcc-border-soft: color-mix(in srgb, var(--dcc-surface) 93%, var(--dcc-text));
+  --dcc-muted: color-mix(in srgb, var(--dcc-text) 58%, var(--dcc-surface));
+  --dcc-hover: color-mix(in srgb, var(--dcc-surface) 94%, var(--dcc-text));
+  --dcc-radius: 10px;
+  --dcc-link: var(--dxbl-link-color, var(--bs-link-color, #0d6efd));
+}
+
+.doc-copies-catalog__context-line {
+  margin: 0 0.65rem 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--dcc-muted);
+}
+
+.doc-copies-catalog__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.doc-copies-catalog__section {
+  border: 1px solid var(--dcc-border);
+  border-radius: var(--dcc-radius);
+  background: color-mix(in srgb, var(--dcc-surface) 99%, var(--dcc-text));
+  overflow: hidden;
+  min-width: 0;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .doc-copies-catalog__section {
+  border-color: var(--resminamalar-slot-border, var(--dcc-border));
+  border-radius: var(--resminamalar-slot-radius, var(--dcc-radius));
+}
+
+.doc-copies-catalog__section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--dcc-border-soft);
+  background: color-mix(in srgb, var(--dcc-surface) 96%, var(--dcc-text));
+  min-width: 0;
+}
+
+.doc-copies-catalog__section--collapsed .doc-copies-catalog__section-head {
+  border-bottom: none;
+}
+
+.doc-copies-catalog__section-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.doc-copies-catalog__section-toggle:hover {
+  background: var(--dcc-hover);
+}
+
+.doc-copies-catalog__chevron {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.15s ease;
+}
+
+.doc-copies-catalog__section--collapsed .doc-copies-catalog__chevron {
+  transform: rotate(-90deg);
+}
+
+.doc-copies-catalog__section-head-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.doc-copies-catalog__section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.doc-copies-catalog__section-summary {
+  font-size: 11px;
+  color: var(--dcc-muted);
+}
+
+.doc-copies-catalog__section-head-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  max-width: 11rem;
+}
+
+.doc-copies-catalog__section-more-btn {
+  white-space: normal;
+  text-align: right;
+  line-height: 1.25;
+  font-size: 12px;
+}
+
+.doc-copies-catalog__section-hint,
+.doc-copies-catalog__section-empty {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  color: var(--dcc-muted);
+}
+
+.doc-copies-catalog__rows {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.doc-copies-catalog__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--dcc-border-soft);
+  min-width: 0;
+}
+
+.doc-copies-catalog__row:last-child,
+.doc-copies-catalog__rows > .doc-copies-catalog__file-row:last-child {
+  border-bottom: none;
+}
+
+.doc-copies-catalog__row--head {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dcc-muted);
+}
+
+.doc-copies-catalog__col-record {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.doc-copies-catalog__row-meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+}
+
+.doc-copies-catalog__col-files {
+  flex: 0 0 1.35rem;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.doc-copies-catalog__col-status {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.doc-copies-catalog__col-action {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.doc-copies-catalog__record-label {
+  display: block;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  white-space: normal;
+  font-size: 13px;
+}
+
+.doc-copies-catalog__current-pill {
+  margin-top: 4px;
+}
+
+.doc-copies-catalog__pill {
+  font-size: 10px;
+  padding: 1px 7px;
+  white-space: nowrap;
+}
+
+.doc-copies-catalog__preview-link {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--dcc-link);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.doc-copies-catalog__preview-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.doc-copies-catalog__preview-link:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.doc-copies-catalog__row--nested .doc-copies-catalog__record-label {
+  padding-left: 10px;
+  border-left: 2px solid var(--dcc-border);
+}
+
+.doc-copies-catalog__row--clickable {
+  cursor: pointer;
+}
+
+.doc-copies-catalog__row--clickable:hover {
+  background: var(--dcc-hover);
+}
+
+.doc-copies-catalog__row--current .doc-copies-catalog__record-label {
+  font-weight: 600;
+}
+
+.doc-copies-catalog__row--empty .doc-copies-catalog__record-label {
+  color: color-mix(in srgb, var(--dcc-text) 72%, var(--dcc-surface));
+}
+
+.doc-copies-catalog__progress-row {
+  padding: 0 10px 6px;
+  border-bottom: 1px solid var(--dcc-border-soft);
+}
+
+.doc-copies-catalog__file-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 3px 10px 3px 18px;
+  font-size: 11px;
+  color: var(--dcc-muted);
+  border-bottom: 1px solid var(--dcc-border-soft);
+  min-width: 0;
+}
+
+.doc-copies-catalog__file-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.doc-copies-catalog__file-size {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Inline slot: sections inside elevated card body */
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .doc-copies-catalog__sections {
+  gap: 6px;
+  padding: 0.35rem 0;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .doc-copies-catalog__section-head {
+  background: var(--resminamalar-slot-surface-muted, color-mix(in srgb, var(--dcc-surface) 96%, var(--dcc-text)));
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-item-doc-copies__body {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ Prototype A: Foxit-style vertical nav cards */
+
+.doc-copies-catalog__sections {
+  gap: 10px;
+}
+
+.doc-copies-catalog__section-head--nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  background: var(--dcc-surface);
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+}
+
+.doc-copies-catalog__section-head--nav:hover {
+  background: var(--dcc-hover);
+}
+
+.doc-copies-catalog__section:not(.doc-copies-catalog__section--collapsed) > .doc-copies-catalog__section-head--nav {
+  border-bottom-color: var(--dcc-border-soft);
+  background: color-mix(in srgb, var(--dcc-surface) 96%, var(--dcc-text));
+}
+
+.doc-copies-catalog__nav-icon {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.doc-copies-catalog__nav-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.doc-copies-catalog__nav-icon--passports { background: #2f6fed; }
+.doc-copies-catalog__nav-icon--education { background: #0d9488; }
+.doc-copies-catalog__nav-icon--addresses { background: #16a34a; }
+.doc-copies-catalog__nav-icon--workpermits { background: #ea580c; }
+.doc-copies-catalog__nav-icon--invitations { background: #db2777; }
+.doc-copies-catalog__nav-icon--rejections { background: #b45309; }
+.doc-copies-catalog__nav-icon--medicalrecords { background: #7c3aed; }
+.doc-copies-catalog__nav-icon--persondocuments { background: #475569; }
+.doc-copies-catalog__nav-icon--familyrelationdocuments { background: #0891b2; }
+.doc-copies-catalog__nav-icon--default { background: #64748b; }
+.doc-copies-catalog__nav-icon--linkeddocuments { background: #2563eb; }
+.doc-copies-catalog__nav-icon--applicationform { background: #0f766e; }
+.doc-copies-catalog__nav-icon--documents { background: #4f46e5; }
+
+.doc-copies-catalog__section-head--nav .doc-copies-catalog__section-head-main {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.doc-copies-catalog__section-head--nav .doc-copies-catalog__section-title {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--dcc-text);
+}
+
+.doc-copies-catalog__section-head--nav .doc-copies-catalog__section-summary {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.doc-copies-catalog__section-head--nav .doc-copies-catalog__section-head-actions {
+  margin-left: auto;
+  max-width: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-copies-catalog__nav-open {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dcc-link);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.doc-copies-catalog__nav-open:hover {
+  text-decoration: underline;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .doc-copies-catalog__section-head--nav {
+  background: transparent;
+}
+
+.resminamalar-slot-panel .app-item-doc-copies--inline-slot .doc-copies-catalog__section:not(.doc-copies-catalog__section--collapsed) > .doc-copies-catalog__section-head--nav {
+  background: var(--resminamalar-slot-surface-muted, color-mix(in srgb, var(--dcc-surface) 96%, var(--dcc-text)));
+}

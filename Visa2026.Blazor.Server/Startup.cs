@@ -230,6 +230,8 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<IBoStateNotificationSummaryService, BoStateNotificationPrototypeSummaryService>();
             services.AddScoped<IUserFeedbackSubmitService, UserFeedbackSubmitService>();
             services.AddSingleton<BoStateNotificationNavigationHelper>();
+            services.AddSingleton<PersonDossierNavigationHelper>();
+            services.AddScoped<IPersonDossierPendingOpen, PersonDossierPendingOpen>();
             services.Configure<ImportHistoryOptions>(Configuration.GetSection(ImportHistoryOptions.SectionName));
             services.AddSingleton<IImportReimportHistoryReader, ImportReimportHistoryReader>();
             services.AddScoped<ReportDashboardQueryService>();

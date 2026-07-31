@@ -63,7 +63,7 @@ Visa officers often work **by employee line**, not by header number:
 | **Border zone → items** | `BorderZoneItem` | Person + `BorderZone.BorderZoneNumber` | Person on border-zone permit line |
 | **Header ListViews** | `WorkPermit`, `Invitation`, `Rejection`, `BorderZone` | Number / `RejectionTitle` / dates | Header-centric lookup |
 
-**Product rule:** support **both** entry families in v1 for each family that has (or will have) parent documents. Treat **`*Item` ListView + DetailView as primary** (toolbar + **Copies** column priority).
+**Product rule:** support **both** entry families in v1 for each family that has (or will have) parent documents. Treat **`*Item` ListView + DetailView as primary** (ListView **Copies** column; DetailView toolbar).
 
 **Data rule unchanged:** files load from `parent.Documents` only. Item entry resolves the parent (`item.WorkPermit`, `item.Invitation`, `item.Rejection`, `item.BorderZone`) and passes optional **context item** metadata for the slot header — not a separate file index.
 
@@ -332,7 +332,7 @@ Prefer **one** `HeaderDocumentCopiesSlotPanel.razor` + `HeaderDocumentCopiesComp
 |-------|--------|--------|
 | **0** | `BorderZoneDocument` + `BorderZone.Documents` + DetailView tab (**same release**, before Border zone slot) | **Done** |
 | **1** | All four families: resolvers, item + parent DetailView, slot API, Preview, Refresh (Border zone after step 0 in same release) | **Done** |
-| **2** | All families: item ListView toolbar + **Copies** column (priority); parent ListViews; gear | **Done** |
+| **2** | All families: item/parent ListView **Copies** column (no ListView toolbar); DetailView toolbar; gear | **Done** |
 | **3** | Footer cross-link to Person / ApplicationItem | **Deferred** |
 | **4** | `*Image` preview; optional parent ZIP | **Deferred** |
 
@@ -365,7 +365,7 @@ Run `tools/GenerateModelLocalization` after adding `UiStrings.messages.json` ent
 |-------|--------|
 | Module | Resolver from parent id; item open helper resolves parent; context header fields |
 | Blazor | **Item** DetailView → slot → Preview; parent DetailView; context header updates on re-open |
-| ListView | `RejectionItem_ListView`, `BorderZoneItem_ListView`, and other item ListViews — Copies column + toolbar |
+| ListView | `RejectionItem_ListView`, `BorderZoneItem_ListView`, and other item ListViews — Copies column only |
 | Border zone | Phase 0 + preview in one release; attach file on Documents tab → Preview in slot |
 | Regression | Person / ApplicationItem occupants unchanged |
 

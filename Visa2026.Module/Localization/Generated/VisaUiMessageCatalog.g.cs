@@ -614,6 +614,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} taýýar",
             ["ru-RU"] = "{0} готово",
         },
+        ["ApplicationItemDocumentCopies.Section.LinkedDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Linked documents",
+            ["tr-TR"] = "Bağlı belgeler",
+            ["tk-TM"] = "Baglanan resminamalar",
+            ["ru-RU"] = "Связанные документы",
+        },
         ["ApplicationItemDocumentCopies.Slot.Address.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Address of residence",
@@ -711,6 +718,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Önceki çalışma izni",
             ["tk-TM"] = "Öňki iş rugsady",
             ["ru-RU"] = "Предыдущее РНТ",
+        },
+        ["ApplicationItemDocumentCopies.Status.Partial"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Partial",
+            ["tr-TR"] = "Kısmi",
+            ["tk-TM"] = "Bölekleýin",
+            ["ru-RU"] = "Частично",
         },
         ["ApplicationItemDocumentCopies.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1785,10 +1799,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["BorderZoneDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["BorderZoneDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2133,6 +2147,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminama",
             ["ru-RU"] = "Документ",
         },
+        ["HeaderDocumentCopies.Section.Documents"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Documents",
+            ["tr-TR"] = "Belgeler",
+            ["tk-TM"] = "Resminamalar",
+            ["ru-RU"] = "Документы",
+        },
         ["HeaderDocumentCopies.Subtitle.Application"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application {0}",
@@ -2149,10 +2170,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["InvitationDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["InvitationDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2679,6 +2700,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Göçür",
             ["ru-RU"] = "Скачать",
         },
+        ["PersonDocumentCopies.Action.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open",
+            ["tr-TR"] = "Aç",
+            ["tk-TM"] = "Aç",
+            ["ru-RU"] = "Открыть",
+        },
         ["PersonDocumentCopies.Action.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Preview",
@@ -2807,10 +2835,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["PersonDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["PersonDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3575,6 +3603,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Subpodrýadçy",
             ["ru-RU"] = "Субподрядчик",
         },
+        ["PersonDossier.List.ColumnCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dossier",
+            ["tr-TR"] = "Dosye",
+            ["tk-TM"] = "Dosýe",
+            ["ru-RU"] = "Досье",
+        },
+        ["PersonDossier.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
+        },
         ["PersonDossier.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select exactly one person to open a dossier.",
@@ -4046,10 +4088,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["RejectionDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["RejectionDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -7616,10 +7658,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["WorkPermitDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["WorkPermitDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

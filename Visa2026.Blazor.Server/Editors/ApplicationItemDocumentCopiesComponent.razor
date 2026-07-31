@@ -1,6 +1,7 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using System.IO
 @using Microsoft.AspNetCore.Http
@@ -14,7 +15,7 @@
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.RuntimeLogging
-<div class="app-item-doc-copies @(UseInlinePreview ? "app-item-doc-copies--inline-slot" : string.Empty)">
+<div class="app-item-doc-copies doc-copies-catalog @(UseInlinePreview ? "app-item-doc-copies--inline-slot" : string.Empty)">
     <div class="app-item-doc-copies__body">
         @if (ApplicationItemIds.Count == 0)
         {
@@ -31,141 +32,226 @@
         }
         else
         {
-            <div class="app-item-doc-copies__groups">
-                @foreach (var group in MergedGroups)
-                {
-                    <section class="@GetGroupCssClass(group)" aria-label="@SlotLabel(group.SlotKey)">
-                        <div class="app-item-doc-copies__group-head">
-                            <div class="app-item-doc-copies__group-title">
-                                <span class="app-item-doc-copies__group-label">@SlotLabel(group.SlotKey)</span>
-                            </div>
-                            @if (group.Files.Count > 0)
-                            {
-                                <div class="app-item-doc-copies__group-actions">
-                                    @if (IsPreviewLoading(group.SlotKey))
-                                    {
-                                        <span class="app-report-package__preview-busy-label" role="status">
-                                            @_previewStatusMessage
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <DxButton Text="@ActionPreview"
-                                                  RenderStyle="ButtonRenderStyle.Link"
-                                                  SizeMode="SizeMode.Small"
-                                                  CssClass="app-item-doc-copies__action-btn"
-                                                  Enabled="@(!IsAnyPreviewLoading)"
-                                                  Click="@(() => PreviewMergedAsync(group))" />
-                                    }
-                                </div>
-                            }
-                        </div>
-
-                        @if (IsPreviewLoading(group.SlotKey))
-                        {
-                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", SlotLabel(group.SlotKey))">
-                                <div class="app-report-package__preview-progress-track">
-                                    <div class="app-report-package__preview-progress-indeterminate"></div>
-                                </div>
-                            </div>
-                        }
-
-                        <div class="app-item-doc-copies__status">
-                            @if (group.LinkMissing)
-                            {
-                                <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@HintLinkMissing</p>
-                            }
-                            else if (group.Files.Count == 0)
-                            {
-                                <p class="app-item-doc-copies__hint">@HintNoFiles</p>
-                            }
-                            else
-                            {
-                                <p class="app-item-doc-copies__summary">@GetGroupSummary(group)</p>
-                                @if (!ShowDetails && group.MissingLines.Count > 0)
-                                {
-                                    <p class="app-item-doc-copies__missing-callout">@GetMissingLinesSummary(group)</p>
-                                }
-                            }
-                        </div>
-
-                        @if (ShowDetails && (group.Files.Count > 0 || group.MissingLines.Count > 0))
-                        {
-                            @if (group.Files.Count > 0)
-                            {
-                                <ul class="app-item-doc-copies__files">
-                                    @foreach (var entry in group.Files)
-                                    {
-                                        <li class="app-item-doc-copies__file-row app-item-doc-copies__file-row--summary">
-                                            @if (ShowSourceLines)
-                                            {
-                                                <span class="app-item-doc-copies__file-source" title="@entry.LineLabel">@entry.LineLabel</span>
-                                            }
-                                            <span class="app-item-doc-copies__file-name" title="@entry.File.FileName">@entry.File.FileName</span>
-                                            <span class="app-item-doc-copies__file-size">@FormatSize(entry.File.SizeBytes)</span>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-
-                            @if (group.MissingLines.Count > 0)
-                            {
-                                <ul class="app-item-doc-copies__missing-lines">
-                                    @foreach (var missing in group.MissingLines)
-                                    {
-                                        <li class="app-item-doc-copies__missing-line">
-                                            <span class="app-item-doc-copies__file-source" title="@missing.LineLabel">@missing.LineLabel</span>
-                                            <span class="app-item-doc-copies__missing-line-reason">
-                                                @(missing.LinkMissing ? DetailMissingLink : DetailMissingNoFiles)
-                                            </span>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                        }
-
-                    </section>
+            <div class="doc-copies-catalog__sections">
+                @{
+                    var linkedId = DocumentCopiesCatalogNavIcons.LinkedDocuments;
+                    var linkedCollapsed = IsSectionCollapsed(linkedId);
+                    var formId = DocumentCopiesCatalogNavIcons.ApplicationForm;
+                    var formCollapsed = IsSectionCollapsed(formId);
                 }
+                <section class="doc-copies-catalog__section @(linkedCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
+                         aria-label="@LinkedDocumentsSectionLabel">
+                    <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="@(!linkedCollapsed)"
+                            aria-label="@(linkedCollapsed ? SectionExpandLabel : SectionCollapseLabel)"
+                            @onclick="@(() => ToggleSectionNavAsync(linkedId))"
+                            @onkeydown="@(e => OnSectionNavKeyDownAsync(e, linkedId))">
+                        <span class="doc-copies-catalog__nav-icon @DocumentCopiesCatalogNavIcons.CssClass(linkedId)" aria-hidden="true">
+                            @((MarkupString)DocumentCopiesCatalogNavIcons.Svg(linkedId))
+                        </span>
 
-                <section class="@GetApplicationFormGroupCssClass()"
-                         aria-label="@FormSlotLabel">
-                    <div class="app-item-doc-copies__group-head">
-                        <div class="app-item-doc-copies__group-title">
-                            <span class="app-item-doc-copies__group-label">@FormSlotLabel</span>
+                        <div class="doc-copies-catalog__section-head-main">
+                            <span class="doc-copies-catalog__section-title">@LinkedDocumentsSectionLabel</span>
+                            <span class="doc-copies-catalog__section-summary">@GetLinkedSectionSummary()</span>
                         </div>
-                        <div class="app-item-doc-copies__group-actions">
-                            @if (IsPreviewLoading(ApplicationFormPreviewKey))
-                            {
-                                <span class="app-report-package__preview-busy-label" role="status">
-                                    @_previewStatusMessage
-                                </span>
-                            }
-                            else
-                            {
-                                <DxButton Text="@ActionPreview"
-                                          RenderStyle="ButtonRenderStyle.Link"
-                                          SizeMode="SizeMode.Small"
-                                          CssClass="app-item-doc-copies__action-btn"
-                                          Enabled="@(!IsAnyPreviewLoading)"
-                                          Click="@PreviewApplicationFormAsync" />
-                            }
-                        </div>
-                    </div>
 
-                    @if (IsPreviewLoading(ApplicationFormPreviewKey))
+                        <div class="doc-copies-catalog__section-head-actions" @onclick:stopPropagation="true">
+                            <button type="button"
+                                    class="doc-copies-catalog__nav-open"
+                                    aria-expanded="@(!linkedCollapsed)"
+                                    @onclick="@(() => ToggleSectionNavAsync(linkedId))">
+                                @(linkedCollapsed ? ActionOpen : ActionClose)
+                            </button>
+                        </div>
+                    </header>
+
+                    @if (!linkedCollapsed)
                     {
-                        <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                             aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel)">
-                            <div class="app-report-package__preview-progress-track">
-                                <div class="app-report-package__preview-progress-indeterminate"></div>
+                        @if (MergedGroups.Count == 0)
+                        {
+                            <p class="doc-copies-catalog__section-empty" role="status">@HintNoFiles</p>
+                        }
+                        else
+                        {
+                            <div class="doc-copies-catalog__rows" role="table">
+                                <div class="doc-copies-catalog__row doc-copies-catalog__row--head" role="row">
+                                    <div class="doc-copies-catalog__col-record" role="columnheader">@ColumnRecord</div>
+                                    <div class="doc-copies-catalog__row-meta">
+                                        <div class="doc-copies-catalog__col-files" role="columnheader">@ColumnFiles</div>
+                                        <div class="doc-copies-catalog__col-status" role="columnheader">@ColumnStatus</div>
+                                        <div class="doc-copies-catalog__col-action" role="columnheader" aria-hidden="true"></div>
+                                    </div>
+                                </div>
+
+                                @foreach (var group in MergedGroups)
+                                {
+                                    var fileCount = group.Files.Count;
+                                    var hasFiles = fileCount > 0;
+                                    var rowLoading = IsPreviewLoading(group.SlotKey);
+                                    var canPreview = hasFiles && !rowLoading;
+
+                                    <div class="@GetGroupRowCssClass(group, canPreview, rowLoading)"
+                                         role="row"
+                                         @onclick="@(() => OnGroupRowClickAsync(group))">
+                                        <div class="doc-copies-catalog__col-record" role="cell">
+                                            <span class="doc-copies-catalog__record-label" title="@SlotLabel(group.SlotKey)">
+                                                @SlotLabel(group.SlotKey)
+                                            </span>
+                                            @if (!ShowDetails && group.MissingLines.Count > 0)
+                                            {
+                                                <span class="doc-copies-catalog__section-summary" title="@GetMissingLinesSummary(group)">
+                                                    @GetMissingLinesSummary(group)
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="doc-copies-catalog__row-meta">
+                                            <div class="doc-copies-catalog__col-files" role="cell">
+                                                @(hasFiles ? fileCount.ToString() : "—")
+                                            </div>
+                                            <div class="doc-copies-catalog__col-status" role="cell">
+                                                <span class="@GetGroupStatusPillCss(group)">@GetGroupStatusLabel(group)</span>
+                                            </div>
+                                            <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
+                                                @if (canPreview)
+                                                {
+                                                    <button type="button"
+                                                            class="doc-copies-catalog__preview-link"
+                                                            disabled="@IsAnyPreviewLoading"
+                                                            aria-label="@ActionPreview"
+                                                            @onclick="@(() => PreviewMergedAsync(group))">
+                                                        @ActionPreview
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @if (rowLoading)
+                                    {
+                                        <div class="doc-copies-catalog__progress-row">
+                                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", SlotLabel(group.SlotKey))">
+                                                <div class="app-report-package__preview-progress-track">
+                                                    <div class="app-report-package__preview-progress-indeterminate"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (ShowDetails && (group.Files.Count > 0 || group.MissingLines.Count > 0))
+                                    {
+                                        @foreach (var entry in group.Files)
+                                        {
+                                            <div class="doc-copies-catalog__file-row">
+                                                @if (ShowSourceLines)
+                                                {
+                                                    <span class="app-item-doc-copies__file-source" title="@entry.LineLabel">@entry.LineLabel</span>
+                                                }
+                                                <span class="doc-copies-catalog__file-name" title="@entry.File.FileName">@entry.File.FileName</span>
+                                                <span class="doc-copies-catalog__file-size">@FormatSize(entry.File.SizeBytes)</span>
+                                            </div>
+                                        }
+
+                                        @foreach (var missing in group.MissingLines)
+                                        {
+                                            <div class="doc-copies-catalog__file-row">
+                                                <span class="app-item-doc-copies__file-source" title="@missing.LineLabel">@missing.LineLabel</span>
+                                                <span class="app-item-doc-copies__missing-line-reason">
+                                                    @(missing.LinkMissing ? DetailMissingLink : DetailMissingNoFiles)
+                                                </span>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        }
+                    }
+                </section>
+
+                <section class="doc-copies-catalog__section @(formCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
+                         aria-label="@FormSlotLabel">
+                    <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="@(!formCollapsed)"
+                            aria-label="@(formCollapsed ? SectionExpandLabel : SectionCollapseLabel)"
+                            @onclick="@(() => ToggleSectionNavAsync(formId))"
+                            @onkeydown="@(e => OnSectionNavKeyDownAsync(e, formId))">
+                        <span class="doc-copies-catalog__nav-icon @DocumentCopiesCatalogNavIcons.CssClass(formId)" aria-hidden="true">
+                            @((MarkupString)DocumentCopiesCatalogNavIcons.Svg(formId))
+                        </span>
+
+                        <div class="doc-copies-catalog__section-head-main">
+                            <span class="doc-copies-catalog__section-title">@FormSlotLabel</span>
+                            <span class="doc-copies-catalog__section-summary">@GetApplicationFormSummary()</span>
+                        </div>
+
+                        <div class="doc-copies-catalog__section-head-actions" @onclick:stopPropagation="true">
+                            <button type="button"
+                                    class="doc-copies-catalog__nav-open"
+                                    aria-expanded="@(!formCollapsed)"
+                                    @onclick="@(() => ToggleSectionNavAsync(formId))">
+                                @(formCollapsed ? ActionOpen : ActionClose)
+                            </button>
+                        </div>
+                    </header>
+
+                    @if (!formCollapsed)
+                    {
+                    <div class="doc-copies-catalog__rows" role="table">
+                        <div class="doc-copies-catalog__row doc-copies-catalog__row--head" role="row">
+                            <div class="doc-copies-catalog__col-record" role="columnheader">@ColumnRecord</div>
+                            <div class="doc-copies-catalog__row-meta">
+                                <div class="doc-copies-catalog__col-files" role="columnheader">@ColumnFiles</div>
+                                <div class="doc-copies-catalog__col-status" role="columnheader">@ColumnStatus</div>
+                                <div class="doc-copies-catalog__col-action" role="columnheader" aria-hidden="true"></div>
                             </div>
                         </div>
-                    }
 
-                    <div class="app-item-doc-copies__status">
-                        <p class="app-item-doc-copies__summary">@GetApplicationFormSummary()</p>
+                        @{
+                            var formLoading = IsPreviewLoading(ApplicationFormPreviewKey);
+                        }
+                        <div class="@GetFormRowCssClass(formLoading)"
+                             role="row"
+                             @onclick="@OnFormRowClickAsync">
+                            <div class="doc-copies-catalog__col-record" role="cell">
+                                <span class="doc-copies-catalog__record-label">@FormSlotLabel</span>
+                            </div>
+                            <div class="doc-copies-catalog__row-meta">
+                                <div class="doc-copies-catalog__col-files" role="cell">—</div>
+                                <div class="doc-copies-catalog__col-status" role="cell">
+                                    <span class="person-dossier__pill st-approved doc-copies-catalog__pill">@StatusReady</span>
+                                </div>
+                                <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
+                                    @if (!formLoading)
+                                    {
+                                        <button type="button"
+                                                class="doc-copies-catalog__preview-link"
+                                                disabled="@IsAnyPreviewLoading"
+                                                aria-label="@ActionPreview"
+                                                @onclick="@PreviewApplicationFormAsync">
+                                            @ActionPreview
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (formLoading)
+                        {
+                            <div class="doc-copies-catalog__progress-row">
+                                <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                     aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", FormSlotLabel)">
+                                    <div class="app-report-package__preview-progress-track">
+                                        <div class="app-report-package__preview-progress-indeterminate"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
+                    }
                 </section>
             </div>
         }
@@ -358,11 +444,31 @@
     private ApplicationItemDocumentPackageOptions _packageOptions = ApplicationItemDocumentPackageOptions.CreateDefaults();
     private string? _previewLoadingKey;
     private string _previewStatusMessage = string.Empty;
+    private readonly HashSet<string> _collapsedSections = new(StringComparer.Ordinal)
+    {
+        DocumentCopiesCatalogNavIcons.LinkedDocuments,
+        DocumentCopiesCatalogNavIcons.ApplicationForm,
+    };
+    private string _catalogSelectionKey = string.Empty;
 
     private const string ApplicationFormPreviewKey = "__application-form__";
     private static readonly TimeSpan MinimumPreviewProgressDuration = TimeSpan.FromSeconds(1.5);
 
+    protected override void OnParametersSet()
+    {
+        var selectionKey = string.Join(",", ApplicationItemIds.OrderBy(id => id));
+        if (!string.Equals(selectionKey, _catalogSelectionKey, StringComparison.Ordinal))
+        {
+            _catalogSelectionKey = selectionKey;
+            _collapsedSections.Clear();
+            _collapsedSections.Add(DocumentCopiesCatalogNavIcons.LinkedDocuments);
+            _collapsedSections.Add(DocumentCopiesCatalogNavIcons.ApplicationForm);
+        }
+    }
+
     private bool IsAnyPreviewLoading => !string.IsNullOrEmpty(_previewLoadingKey);
+
+    private bool IsSectionCollapsed(string sectionId) => _collapsedSections.Contains(sectionId);
 
     private bool IsPreviewLoading(string slotKey) =>
         string.Equals(_previewLoadingKey, slotKey, StringComparison.Ordinal);
@@ -387,6 +493,10 @@
     private string HintLinkMissing => Msg("ApplicationItemDocumentCopies.Hint.LinkMissing");
     private string HintNoFiles => Msg("ApplicationItemDocumentCopies.Hint.NoFiles");
     private string ActionPreview => Msg("ApplicationItemDocumentCopies.Action.Preview");
+    private string ActionOpen => Msg("PersonDocumentCopies.Action.Open");
+    private string ActionClose => Msg("ApplicationItemDocumentCopies.Action.Close");
+    private string SectionExpandLabel => Msg("PersonDocumentCopies.Section.Expand");
+    private string SectionCollapseLabel => Msg("PersonDocumentCopies.Section.Collapse");
     private string ActionRefresh => Msg("ApplicationItemDocumentCopies.Action.Refresh");
     private string ActionDownloadPackage => Msg("ApplicationItemDocumentCopies.Action.DownloadPackage");
     private string ActionPackageOptions => Msg("ApplicationItemDocumentCopies.Action.PackageOptions");
@@ -416,6 +526,13 @@
     private string PackageConfirmDownload => Msg("ApplicationItemDocumentCopies.Package.ConfirmDownload");
     private string PackageCancelConfirm => Msg("ApplicationItemDocumentCopies.Package.CancelConfirm");
     private string FormSlotLabel => Msg("ApplicationItemDocumentCopies.Slot.ApplicationForm");
+    private string LinkedDocumentsSectionLabel => Msg("ApplicationItemDocumentCopies.Section.LinkedDocuments");
+    private string ColumnRecord => Msg("PersonDocumentCopies.Column.Record");
+    private string ColumnFiles => Msg("PersonDocumentCopies.Column.Files");
+    private string ColumnStatus => Msg("PersonDocumentCopies.Column.Status");
+    private string StatusMissing => Msg("PersonDocumentCopies.Status.Missing");
+    private string StatusReady => Msg("PersonDocumentCopies.Status.Ready");
+    private string StatusPartial => Msg("ApplicationItemDocumentCopies.Status.Partial");
     private string DetailMissingLink => Msg("ApplicationItemDocumentCopies.Details.MissingLine.LinkMissing");
     private string DetailMissingNoFiles => Msg("ApplicationItemDocumentCopies.Details.MissingLine.NoFiles");
     private string GearToolTip => ShowDetails
@@ -444,27 +561,85 @@
             ApplicationItemIds.Count);
     }
 
-    private string GetGroupCssClass(ApplicationItemLinkedDocumentMergedGroup group)
+    private string GetLinkedSectionSummary()
     {
-        var css = group.Files.Count == 0
-            ? "app-item-doc-copies__group app-item-doc-copies__group--empty"
-            : group.MissingLines.Count > 0
-                ? "app-item-doc-copies__group app-item-doc-copies__group--partial"
-                : "app-item-doc-copies__group app-item-doc-copies__group--ready";
+        var total = MergedGroups.Count;
+        var withFiles = MergedGroups.Count(g => g.Files.Count > 0);
+        if (total == 0)
+            return Msg("PersonDocumentCopies.Section.SummaryOneNone");
 
-        if (IsPreviewLoading(group.SlotKey))
-            css += " app-report-package__entry--previewing";
+        if (total == 1)
+        {
+            if (withFiles > 0)
+                return FormatMsg("PersonDocumentCopies.Section.SummaryOneWithFiles", withFiles);
+            return Msg("PersonDocumentCopies.Section.SummaryOneNone");
+        }
 
-        return css;
+        if (withFiles > 0)
+            return FormatMsg("PersonDocumentCopies.Section.Summary", total, withFiles);
+
+        return FormatMsg("PersonDocumentCopies.Section.SummaryNone", total);
     }
 
-    private string GetApplicationFormGroupCssClass()
+    private string GetGroupStatusLabel(ApplicationItemLinkedDocumentMergedGroup group)
     {
-        var css = "app-item-doc-copies__group app-item-doc-copies__group--ready";
-        if (IsPreviewLoading(ApplicationFormPreviewKey))
-            css += " app-report-package__entry--previewing";
+        if (group.LinkMissing || group.Files.Count == 0)
+            return StatusMissing;
 
-        return css;
+        if (group.MissingLines.Count > 0)
+            return StatusPartial;
+
+        return StatusReady;
+    }
+
+    private static string GetGroupStatusPillCss(ApplicationItemLinkedDocumentMergedGroup group)
+    {
+        if (group.LinkMissing || group.Files.Count == 0)
+            return "person-dossier__pill st-expiring doc-copies-catalog__pill";
+
+        if (group.MissingLines.Count > 0)
+            return "person-dossier__pill st-pending doc-copies-catalog__pill";
+
+        return "person-dossier__pill st-approved doc-copies-catalog__pill";
+    }
+
+    private static string GetGroupRowCssClass(
+        ApplicationItemLinkedDocumentMergedGroup group,
+        bool canPreview,
+        bool rowLoading)
+    {
+        var classes = new List<string> { "doc-copies-catalog__row" };
+        if (group.Files.Count == 0)
+            classes.Add("doc-copies-catalog__row--empty");
+        if (canPreview)
+            classes.Add("doc-copies-catalog__row--clickable");
+        if (rowLoading)
+            classes.Add("doc-copies-catalog__row--loading");
+        return string.Join(' ', classes);
+    }
+
+    private static string GetFormRowCssClass(bool formLoading)
+    {
+        var classes = new List<string> { "doc-copies-catalog__row", "doc-copies-catalog__row--clickable" };
+        if (formLoading)
+            classes.Add("doc-copies-catalog__row--loading");
+        return string.Join(' ', classes);
+    }
+
+    private async Task OnGroupRowClickAsync(ApplicationItemLinkedDocumentMergedGroup group)
+    {
+        if (group.Files.Count == 0 || IsAnyPreviewLoading)
+            return;
+
+        await PreviewMergedAsync(group);
+    }
+
+    private async Task OnFormRowClickAsync()
+    {
+        if (IsAnyPreviewLoading)
+            return;
+
+        await PreviewApplicationFormAsync();
     }
 
     private string GetGroupSummary(ApplicationItemLinkedDocumentMergedGroup group)
@@ -616,6 +791,32 @@
     private Task ToggleDetailsAsync()
     {
         ShowDetails = !ShowDetails;
+        return Task.CompletedTask;
+    }
+
+    private Task ToggleSectionNavAsync(string sectionId)
+    {
+        if (_collapsedSections.Contains(sectionId))
+        {
+            _collapsedSections.Clear();
+            if (!string.Equals(sectionId, DocumentCopiesCatalogNavIcons.LinkedDocuments, StringComparison.Ordinal))
+                _collapsedSections.Add(DocumentCopiesCatalogNavIcons.LinkedDocuments);
+            if (!string.Equals(sectionId, DocumentCopiesCatalogNavIcons.ApplicationForm, StringComparison.Ordinal))
+                _collapsedSections.Add(DocumentCopiesCatalogNavIcons.ApplicationForm);
+        }
+        else
+        {
+            _collapsedSections.Add(sectionId);
+        }
+
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnSectionNavKeyDownAsync(KeyboardEventArgs e, string sectionId)
+    {
+        if (e.Key is "Enter" or " ")
+            return ToggleSectionNavAsync(sectionId);
+
         return Task.CompletedTask;
     }
 

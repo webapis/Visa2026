@@ -1,6 +1,7 @@
 @using System.Globalization
 @using System.Threading.Tasks
 @using Microsoft.AspNetCore.Components
+@using Visa2026.Blazor.Server.Editors
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.PersonDossier
 
@@ -67,8 +68,10 @@
                 <span class="person-dossier__clip">&#11015;</span>
                 @Msg("PersonDossier.Action.Export")
             </button>
-            <button type="button" class="person-dossier__copies-btn" @onclick="OnOpenCopies">
-                <span class="person-dossier__clip">&#128206;</span>
+            <button type="button" class="doc-copies-brand" @onclick="OnOpenCopies">
+                <span class="doc-copies-brand__icon doc-copies-brand__icon--svg" aria-hidden="true">
+                    @((MarkupString)DocumentCopiesBrandMark.SvgMarkup)
+                </span>
                 @Msg("PersonDossier.Action.Copies")
             </button>
         </div>

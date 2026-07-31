@@ -40,7 +40,7 @@ public sealed class HeaderDocumentCopiesListViewColumnUpdater : ModelNodesGenera
         const string columnId = nameof(Invitation.DocumentCopiesListLink);
         var column = listView.Columns[columnId] ?? listView.Columns.AddNode<IModelColumn>(columnId);
         column.PropertyName = columnId;
-        column.Width = 56;
+        column.Width = 48;
         column.Index = 1;
         column.Caption = " ";
     }

@@ -15,6 +15,7 @@ Incomplete persons (Person soft flag + this category): `docs/PERSON_INCOMPLETE_D
 Experience log: `learnings.md` (read before starting, append after every verified change).
 File map, ListView/Preview contract detail: `reference.md`.
 SQL view implementation plan and status tracker: `IMPLEMENTATION_PLAN.md`.
+Person search row → dossier page / export: [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) (not a dashboard panel).
 
 ---
 

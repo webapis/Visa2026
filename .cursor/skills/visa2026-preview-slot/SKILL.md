@@ -34,6 +34,7 @@ disable-model-invocation: false
 | Resminamalar catalog, readiness, Word ZIP batch | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |
 | Document copies slots, scan merge, PDF ZIP | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Person document copies (planned — master Person catalog) | [visa2026-person-document-copies](../visa2026-person-document-copies/SKILL.md) |
+| Person dossier (main area; not a slot occupant) | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 | ApplicationProgress ministry letters domain | [visa2026-application-progress](../visa2026-application-progress/SKILL.md) |
 | User template merge / placeholders | [visa2026-user-report-templates](../visa2026-user-report-templates/SKILL.md) |
 | Docker / deploy | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
@@ -77,6 +78,7 @@ disable-model-invocation: false
 4. **Preview** — full slot width; never inherit catalog `max-width` or centering.
 5. **Shared shell class** — `resminamalar-slot-panel` + optional `document-copies-slot-panel`; feature flag via component class (`--inline-slot`).
 6. **Parity** — inline preview must call same generate/download APIs as modal/dialog path (owned by feature skills).
+7. **Document-copies catalog chrome** — Person / ApplicationItem / Header copies use shared `.doc-copies-catalog*` ([`document-copies-catalog.css`](../../../Visa2026.Blazor.Server/wwwroot/css/document-copies-catalog.css)); see [`PREVIEW_SLOT.md`](../../../docs/PREVIEW_SLOT.md) § Document-copies catalog chrome contract. Do not reintroduce flat `__group` cards for copies.
 
 ---
 

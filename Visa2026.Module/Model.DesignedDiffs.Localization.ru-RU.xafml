@@ -1493,7 +1493,9 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DateOfBirth" Caption="Дата рождения" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="DocumentCopiesListLink" Caption="Копии" />
         <Member Name="Documents" Caption="Резюме и личные файлы" />
+        <Member Name="DossierListLink" Caption="Досье" />
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
@@ -2869,6 +2871,8 @@
         <ColumnInfo Id="CurrentVisa" Caption="Виза" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="Позиция РНТ" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Копии" />
+        <ColumnInfo Id="DossierListLink" Caption="Досье" />
         <ColumnInfo Id="FullName" Caption="ФИО" />
         <ColumnInfo Id="Gender" Caption="Пол" />
         <ColumnInfo Id="IsArchived" Caption="В архиве" />
@@ -2891,6 +2895,8 @@
         <ColumnInfo Id="CurrentRejectionItem" Caption="Позиция отказа" />
         <ColumnInfo Id="CurrentVisa" Caption="Виза" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Копии" />
+        <ColumnInfo Id="DossierListLink" Caption="Досье" />
         <ColumnInfo Id="FirstName" Caption="Имя" />
         <ColumnInfo Id="ForeignAddress" Caption="Иностранный адрес" />
         <ColumnInfo Id="ForeignAddressCountry" Caption="Страна иностр. адреса" />
@@ -2911,6 +2917,8 @@
       <Columns>
         <ColumnInfo Id="Age" Caption="Возраст" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Копии" />
+        <ColumnInfo Id="DossierListLink" Caption="Досье" />
         <ColumnInfo Id="FullName" Caption="ФИО" />
         <ColumnInfo Id="Gender" Caption="Пол" />
         <ColumnInfo Id="IsArchived" Caption="В архиве" />

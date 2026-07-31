@@ -172,10 +172,9 @@ The action is enabled only when at least one line is selected. Content opens in 
 
 ### Panel layout (top → bottom)
 
-1. **Document slot list** — scrollable cards with spacing between rows (`gap` on `.app-item-doc-copies__groups`).
-   - Scan slots from linked documents (passport, visa, work permit, education, address, lodging, medical record, family relationship, …) in resolver/merger order.
-   - **Application form** is always **last** (after medical record and other slots).
-   - Each row with files shows **Preview** only (no row-level Download / Batch summary — those live in the preview header).
+1. **Document catalog** — shared sectioned chrome (`.doc-copies-catalog`, same look as Person copies; see [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Document-copies catalog chrome).
+   - **Linked documents** section — one table row per scan slot (passport, visa, work permit, …) with Files / Status / Preview.
+   - **Application form** section — always after linked slots; Preview downloads the form (no row-level Download / Batch summary — those live in the preview header).
 2. **Package options panel** (optional) — expands above the footer when **Package options** is toggled.
 3. **Footer**
    - Subtitle: *Scanned files for N selected application line(s) (same scope as PDF packaging).*

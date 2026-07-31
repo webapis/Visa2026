@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.PersonDossier;
 
@@ -26,6 +27,8 @@ public static class PersonDossierOpenHelper
     {
         if (application == null || personId == Guid.Empty)
             return null;
+
+        PersonDossierPendingOpenGate.Set(application, personId);
 
         var objectSpace = application.CreateObjectSpace(typeof(PersonDossierHost));
         var host = objectSpace.CreateObject<PersonDossierHost>();

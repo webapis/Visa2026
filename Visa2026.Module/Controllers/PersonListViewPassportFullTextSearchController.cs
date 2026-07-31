@@ -1,18 +1,17 @@
-using System;
-using System.Collections.Generic;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Filtering;
 using DevExpress.ExpressApp.SystemModule;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services;
 
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Extends Person ListView FullTextSearch so officers can find people by related
-/// <see cref="Passport.PassportNumber"/> (any passport on the person).
-/// Collection paths are not supported via CustomGetFullTextSearchProperties alone,
-/// so criteria are built explicitly and OR-ed with the default FullTextSearch criteria.
+/// Extends Person ListView FullTextSearch so officers can find people by name parts,
+/// personal number, and related <see cref="Passport.PassportNumber"/> (any passport).
+/// Typed list views show <see cref="Person.FullName"/> (non-persistent), which XAF
+/// excludes from server-mode search, so identity criteria are built explicitly.
 /// </summary>
 public sealed class PersonListViewPassportFullTextSearchController : ObjectViewController<ListView, Person>
 {
@@ -51,40 +50,17 @@ public sealed class PersonListViewPassportFullTextSearchController : ObjectViewC
             includeNonPersistentMembers: false,
             filterController.FullTextSearchMode).BuildCriteria();
 
-        var passportCriteria = BuildPassportNumberCriteria(e.SearchText);
+        var identityCriteria = PersonListViewFullTextSearchCriteriaBuilder.BuildPersonIdentityCriteria(e.SearchText);
+        var passportCriteria = PersonListViewFullTextSearchCriteriaBuilder.BuildPassportNumberCriteria(e.SearchText);
+        var combinedCriteria = PersonListViewFullTextSearchCriteriaBuilder.CombineOr(
+            defaultCriteria,
+            identityCriteria,
+            passportCriteria);
 
-        if (ReferenceEquals(defaultCriteria, null) && ReferenceEquals(passportCriteria, null))
+        if (ReferenceEquals(combinedCriteria, null))
             return;
 
-        if (ReferenceEquals(defaultCriteria, null))
-            e.Criteria = passportCriteria;
-        else if (ReferenceEquals(passportCriteria, null))
-            e.Criteria = defaultCriteria;
-        else
-            e.Criteria = GroupOperator.Combine(GroupOperatorType.Or, defaultCriteria, passportCriteria);
-
+        e.Criteria = combinedCriteria;
         e.Handled = true;
-    }
-
-    private static CriteriaOperator BuildPassportNumberCriteria(string searchText)
-    {
-        CriteriaOperator result = null;
-        foreach (var token in SplitSearchTokens(searchText))
-        {
-            // Exists related passport whose number contains the token (EF translates to EXISTS).
-            var tokenCriteria = CriteriaOperator.Parse(
-                "[Passports][Contains([PassportNumber], ?)]",
-                token);
-            result = result == null
-                ? tokenCriteria
-                : GroupOperator.Combine(GroupOperatorType.And, result, tokenCriteria);
-        }
-
-        return result;
-    }
-
-    private static IEnumerable<string> SplitSearchTokens(string searchText)
-    {
-        return searchText.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
     }
 }

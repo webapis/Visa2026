@@ -64,3 +64,25 @@ Purpose: **dialog UX, scan preview, package enqueue, readiness, toast** — not 
 - **Fix**: `ApplicationItemPdfBatchEnqueueService` uses `typeof(Guid)`; worker `ResolveKeyType` treats legacy rows.
 - **Prevent**: Never store BO type when keys are serialized GUID strings.
 - **Cross-skill**: lifecycle-docker (if worker still fails after fix)
+
+## 2026-07-31 - AppItem catalog uses shared sectioned chrome
+
+**Ask:** Unify document-copies look with Person/dossier-adjacent catalog.
+
+**Fix:** `ApplicationItemDocumentCopiesComponent` Linked documents + Application Form sections use `.doc-copies-catalog` rows; package options / Download package footer unchanged.
+
+**Prevent:** Keep ministry ZIP semantics in this skill; catalog presentation follows PREVIEW_SLOT chrome contract.
+
+### 2026-07-31 — Prototype A nav across all document-copies catalogs
+
+- **Ask**: Apply Foxit-style vertical nav layout across all document copies in the project.
+- **Fix**: Shared `DocumentCopiesCatalogNavIcons`; Person/Header/ApplicationItem section heads use `__section-head--nav` + Open/Close; exclusive expand (AppItem/Person multi-section); Header single Documents card collapsed by default.
+- **Prevent**: Do not keep flat always-open section heads on Header/AppItem while Person has nav cards.
+- **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot
+
+### 2026-07-31 — Dedicated Document copies brand mark (smiling paperclip)
+
+- **Ask**: Use a dedicated icon/label for Document copies across the project (pill + smiling paperclip).
+- **Fix**: `DocumentCopies.svg` (XAF ImageName), `document-copies-clip.svg` + `document-copies-brand.css`, `DocumentCopiesBrandMark`; wired toolbar actions (Person/Header/AppItem), ListView Copies pills, dossier button, slot titles.
+- **Prevent**: Do not reuse `BO_FileAttachment` for document-copies entry points; use `DocumentCopies` / `.doc-copies-brand*`.
+- **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot | person-dossier

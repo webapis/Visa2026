@@ -41,9 +41,31 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
         ExportRequested = EventCallback.Factory.Create(this, QueueExport),
     };
 
+    protected override void OnCurrentObjectChanged()
+    {
+        base.OnCurrentObjectChanged();
+        ApplyPersonIdFromContext();
+
+        var personId = ResolvePersonId();
+        if (personId == Guid.Empty)
+            return;
+
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        if (model.IsLoading)
+            return;
+
+        if (model.Snapshot == null || model.Snapshot.PersonId != personId)
+            _ = LoadAsync();
+    }
+
     private async Task LoadAsync()
     {
         var model = ComponentModel;
+        if (model == null)
+            return;
         model.IsLoading = true;
         SetLoadStage(model, 5, "PersonDossier.Chrome.LoadingPreparing");
         // Let Blazor paint the progress panel before synchronous DB work (Yield alone is not enough).
@@ -56,9 +78,10 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
 
             // The snapshot holds only scalars, so the object space can be released immediately.
             using var objectSpace = _application?.CreateObjectSpace(typeof(Person));
-            var person = objectSpace == null || CurrentPersonId == Guid.Empty
+            var personId = ResolvePersonId();
+            var person = objectSpace == null || personId == Guid.Empty
                 ? null
-                : objectSpace.GetObjectByKey<Person>(CurrentPersonId);
+                : objectSpace.GetObjectByKey<Person>(personId);
 
             SetLoadStage(model, 45, "PersonDossier.Chrome.LoadingIdentity");
             await Task.Delay(1);
@@ -89,7 +112,7 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
 
     private void OpenCopies()
     {
-        var personId = CurrentPersonId;
+        var personId = ResolvePersonId();
         if (personId == Guid.Empty)
             return;
 
@@ -106,9 +129,12 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
     private void QueueExport()
     {
         var model = ComponentModel;
+        if (model == null)
+            return;
+
         model.ExportMessage = null;
 
-        var personId = CurrentPersonId;
+        var personId = ResolvePersonId();
         var services = _application?.ServiceProvider;
         if (personId == Guid.Empty || services == null)
         {
@@ -147,6 +173,26 @@ public class PersonDossierPropertyEditor : BlazorPropertyEditorBase, IComplexVie
         model.ExportMessage = VisaUiMessages.Get("PersonDossier.Export.Queued");
     }
 
-    private Guid CurrentPersonId =>
-        CurrentObject is PersonDossierHost host ? host.PersonId : Guid.Empty;
+    private void ApplyPersonIdFromContext()
+    {
+        if (CurrentObject is not PersonDossierHost host || host.PersonId != Guid.Empty)
+            return;
+
+        var pending = _application != null
+            ? PersonDossierPendingOpenGate.Get(_application)
+            : Guid.Empty;
+        if (pending != Guid.Empty)
+            host.PersonId = pending;
+    }
+
+    private Guid ResolvePersonId()
+    {
+        ApplyPersonIdFromContext();
+        if (CurrentObject is PersonDossierHost host && host.PersonId != Guid.Empty)
+            return host.PersonId;
+
+        return _application != null
+            ? PersonDossierPendingOpenGate.Get(_application)
+            : Guid.Empty;
+    }
 }

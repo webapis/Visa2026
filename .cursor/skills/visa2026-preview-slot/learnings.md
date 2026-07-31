@@ -50,3 +50,25 @@ Purpose: **shell, layout, occupants, catalog card UX, JS/CSS** — not Resminama
 - **Fix**: `OccupantKey`, `Version`, `@key`, owner-aware close — see [resminamalar/learnings.md](../visa2026-resminamalar/learnings.md) same date.
 - **Prevent**: Any new occupant must bump `Version` and reset local preview flags.
 - **Cross-skill**: resminamalar
+
+## 2026-07-31 - Document-copies catalog chrome shared
+
+**Ask:** Person / AppItem / Header document copies should look the same (dossier-adjacent sectioned tables).
+
+**Fix:** Extracted `.doc-copies-catalog*` to `wwwroot/css/document-copies-catalog.css`; Person/Header/AppItem retargeted. Shell remains `resminamalar-slot-panel`. Contract documented in `docs/PREVIEW_SLOT.md`.
+
+**Prevent:** Do not reintroduce `app-item-doc-copies__group` cards for copies catalogs.
+
+### 2026-07-31 — Prototype A nav across all document-copies catalogs
+
+- **Ask**: Apply Foxit-style vertical nav layout across all document copies in the project.
+- **Fix**: Shared `DocumentCopiesCatalogNavIcons`; Person/Header/ApplicationItem section heads use `__section-head--nav` + Open/Close; exclusive expand (AppItem/Person multi-section); Header single Documents card collapsed by default.
+- **Prevent**: Do not keep flat always-open section heads on Header/AppItem while Person has nav cards.
+- **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot
+
+### 2026-07-31 — Dedicated Document copies brand mark (smiling paperclip)
+
+- **Ask**: Use a dedicated icon/label for Document copies across the project (pill + smiling paperclip).
+- **Fix**: `DocumentCopies.svg` (XAF ImageName), `document-copies-clip.svg` + `document-copies-brand.css`, `DocumentCopiesBrandMark`; wired toolbar actions (Person/Header/AppItem), ListView Copies pills, dossier button, slot titles.
+- **Prevent**: Do not reuse `BO_FileAttachment` for document-copies entry points; use `DocumentCopies` / `.doc-copies-brand*`.
+- **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot | person-dossier

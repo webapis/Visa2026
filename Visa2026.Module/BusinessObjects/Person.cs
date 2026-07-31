@@ -208,12 +208,19 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>ListView link column that opens the person dossier DetailView.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DossierListLink => string.Empty;
+
         /// <summary>ListView link column that opens person document copies in the preview slot.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]
         [VisibleInLookupListView(false)]
         [ModelDefault("AllowEdit", "False")]
-        public string DocumentCopiesListLink => VisaUiMessages.Get("PersonDocumentCopies.List.ColumnLink");
+        public string DocumentCopiesListLink => string.Empty;
 
         /// <summary>Latest rejection line for this person (replaces removed <c>CurrentRejectionItemID</c> FK).</summary>
         [NotMapped]

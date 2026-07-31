@@ -80,3 +80,46 @@ side by side - the `OwnerViewId` = `PersonDossierHost_DetailView` keeps the slot
 - **Also (real finding)**: `PersonDossierResolver.LOr` silently falls back to the raw enum name, so a missing key is invisible until someone reads the output in a non-English culture. The dossier duplicates the XAF enum captions into the message catalog deliberately - `CaptionHelper` has no XAF application context inside the export worker.
 - **psql on Windows**: PowerShell strips the doubled quotes in `psql -c "... \"Table\" ..."`, which surfaces as `relation "people" does not exist` for a table that plainly exists. Put the SQL in a file and use `-f`.
 - **Cross-skill**: person-document-copies, lookup-data (`ApplicationItem.LastApplicationState` still renders English)
+
+### 2026-07-31 — Shared doc-copies-catalog chrome (phase 2+)
+
+- **Symptom**: Person copies sectioned table looked different from AppItem/Header flat group cards.
+- **Fix**: Person classes renamed to `.doc-copies-catalog*`; shared CSS extracted; Person remains visual source of truth.
+- **Prevent**: New Person catalog markup must use `doc-copies-catalog` classes, not resurrect `app-person-doc-copies`.
+- **Cross-skill**: person-document-copies | preview-slot | document-copies
+
+### 2026-07-31 — Prototype A Foxit-style vertical nav (Person catalog)
+
+- **Ask**: Redesign document-copies navigation like Foxit Editor tool cards (user chose Prototype A).
+- **Try**: Person multi-section catalog: colored circle icons, uppercase titles, record/file summary, blue Open/Close; all collapsed by default; exclusive expand on Open.
+- **Fix**: `PersonDocumentCopiesComponent` nav headers + `document-copies-catalog.css` `__nav-*` / `__section-head--nav`; `PersonDocumentCopies.Action.Open` l10n.
+- **Prevent**: Keep row table under expanded section; do not flatten Person into single Documents card. Header/AppItem can adopt same head chrome later for parity.
+- **Cross-skill**: person-document-copies | preview-slot
+
+### 2026-07-31 — Prototype A nav across all document-copies catalogs
+
+- **Ask**: Apply Foxit-style vertical nav layout across all document copies in the project.
+- **Fix**: Shared `DocumentCopiesCatalogNavIcons`; Person/Header/ApplicationItem section heads use `__section-head--nav` + Open/Close; exclusive expand (AppItem/Person multi-section); Header single Documents card collapsed by default.
+- **Prevent**: Do not keep flat always-open section heads on Header/AppItem while Person has nav cards.
+- **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot
+
+### 2026-07-31 — Dedicated Document copies brand mark (smiling paperclip)
+
+- **Ask**: Use a dedicated icon/label for Document copies across the project (pill + smiling paperclip).
+- **Fix**: `DocumentCopies.svg` (XAF ImageName), `document-copies-clip.svg` + `document-copies-brand.css`, `DocumentCopiesBrandMark`; wired toolbar actions (Person/Header/AppItem), ListView Copies pills, dossier button, slot titles.
+- **Prevent**: Do not reuse `BO_FileAttachment` for document-copies entry points; use `DocumentCopies` / `.doc-copies-brand*`.
+- **Cross-skill**: person-document-copies | document-copies | invitation-work-permit-document-copies | preview-slot | person-dossier
+
+### 2026-07-31 — Prototype C icon-only ListView cells
+
+- **Ask**: Compact Document copies column (text took too much space); user chose Prototype C (stacked pages + paperclip).
+- **Fix**: Replaced brand SVG with C; ListView cells are icon-only pills (`font-size: 0` + mask icon); full title in `title`/`aria-label`; column width 48.
+- **Prevent**: Do not put "Document copies" text in every grid row; keep label on dossier button / slot header / toolbar.
+- **Cross-skill**: person-document-copies | preview-slot
+
+### 2026-07-31 — Remove Document copies ListView toolbar (Person + Header)
+
+- **Ask**: Drop "Person document copies" from Employees toolbar; row icon is enough. Same for header BOs.
+- **Fix**: `PersonDocumentCopiesController` and `HeaderDocumentCopiesController` are `ViewController<DetailView>` only. ApplicationItem keeps ListView toolbar (multi-select package; no row link).
+- **Prevent**: Do not re-add ListView toolbar copies when a Copies column already opens the slot.
+- **Cross-skill**: person-document-copies | invitation-work-permit-document-copies | document-copies

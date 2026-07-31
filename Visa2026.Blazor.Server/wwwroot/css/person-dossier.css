@@ -542,3 +542,46 @@
   border-color: color-mix(in srgb, var(--pd-hue-red) 30%, var(--pd-surface));
   color: color-mix(in srgb, var(--pd-hue-red) 70%, var(--pd-text));
 }
+
+/* Person ListView dossier column — centered pill */
+.app-person-dossier-link {
+  --dcb-text: #1e3a5f;
+  --dcb-bg: #e8eef8;
+  --dcb-border: #c5d0e4;
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding: 4px 2px !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.app-person-dossier-link > *,
+.app-person-dossier-link img {
+  display: none !important;
+}
+
+.app-person-dossier-link::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--dcb-border);
+  border-radius: 999px;
+  background-color: var(--dcb-bg);
+  background-image: url('../images/person-dossier-mark.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.15rem 1.15rem;
+  box-sizing: border-box;
+}
+
+.app-person-dossier-link:hover {
+  filter: brightness(0.97);
+  text-decoration: none !important;
+}

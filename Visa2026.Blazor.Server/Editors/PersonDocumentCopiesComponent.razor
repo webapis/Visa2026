@@ -1,6 +1,7 @@
 @namespace Visa2026.Blazor.Server.Editors
 @using DevExpress.Blazor
 @using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Http
 @using DevExpress.ExpressApp.Blazor.Services
 @using Visa2026.Blazor.Server.Localization
@@ -8,7 +9,7 @@
 @using Visa2026.Module.Services.PersonLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 
-<div class="app-item-doc-copies app-person-doc-copies @(UseInlinePreview ? "app-item-doc-copies--inline-slot" : string.Empty)">
+<div class="app-item-doc-copies doc-copies-catalog @(UseInlinePreview ? "app-item-doc-copies--inline-slot" : string.Empty)">
     <div class="app-item-doc-copies__body">
         @if (PersonId == Guid.Empty)
         {
@@ -30,10 +31,10 @@
         {
             @if (!UseInlinePreview && !string.IsNullOrWhiteSpace(PersonSubtitle))
             {
-                <p class="app-person-doc-copies__person-line">@PersonSubtitle</p>
+                <p class="doc-copies-catalog__context-line">@PersonSubtitle</p>
             }
 
-            <div class="app-person-doc-copies__sections">
+            <div class="doc-copies-catalog__sections">
                 @foreach (var section in Snapshot.Sections)
                 {
                     var sectionCollapsed = IsSectionCollapsed(section.SectionId);
@@ -46,41 +47,51 @@
                         section, _showAllDocuments, sectionExpanded);
                     var withFilesCount = CountRecordsWithFiles(section);
 
-                    <section class="app-person-doc-copies__section @(sectionCollapsed ? "app-person-doc-copies__section--collapsed" : null)"
+                    <section class="doc-copies-catalog__section @(sectionCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
                              aria-label="@section.SectionLabel">
-                        <header class="app-person-doc-copies__section-head">
-                            <button type="button"
-                                    class="app-person-doc-copies__section-toggle"
-                                    aria-expanded="@(!sectionCollapsed)"
-                                    aria-label="@(sectionCollapsed ? SectionExpandLabel : SectionCollapseLabel)"
-                                    @onclick="@(() => ToggleSectionCollapseAsync(section.SectionId))">
-                                <svg class="app-person-doc-copies__chevron" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                                    <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </button>
+                        <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
+                                role="button"
+                                tabindex="0"
+                                aria-expanded="@(!sectionCollapsed)"
+                                aria-label="@(sectionCollapsed ? SectionExpandLabel : SectionCollapseLabel)"
+                                @onclick="@(() => ToggleSectionNavAsync(section.SectionId))"
+                                @onkeydown="@(e => OnSectionNavKeyDownAsync(e, section.SectionId))">
+                            <span class="doc-copies-catalog__nav-icon @DocumentCopiesCatalogNavIcons.CssClass(section.SectionId)" aria-hidden="true">
+                                @((MarkupString)DocumentCopiesCatalogNavIcons.Svg(section.SectionId))
+                            </span>
 
-                            <div class="app-person-doc-copies__section-head-main">
-                                <span class="app-person-doc-copies__section-title">@section.SectionLabel</span>
-                                <span class="app-person-doc-copies__section-summary">@GetSectionSummary(section, withFilesCount)</span>
+                            <div class="doc-copies-catalog__section-head-main">
+                                <span class="doc-copies-catalog__section-title">@section.SectionLabel</span>
+                                <span class="doc-copies-catalog__section-summary">@GetSectionSummary(section, withFilesCount)</span>
                             </div>
 
-                            <div class="app-person-doc-copies__section-head-actions">
-                                @if (!_showAllDocuments && hiddenCount > 0)
+                            <div class="doc-copies-catalog__section-head-actions" @onclick:stopPropagation="true">
+                                @if (!sectionCollapsed)
                                 {
-                                    <DxButton Text="@GetShowMoreLabel(section, hiddenCount)"
-                                              RenderStyle="ButtonRenderStyle.Link"
-                                              SizeMode="SizeMode.Small"
-                                              CssClass="app-item-doc-copies__action-btn app-person-doc-copies__section-more-btn"
-                                              Click="@(() => ExpandSectionAsync(section.SectionId))" />
+                                    @if (!_showAllDocuments && hiddenCount > 0)
+                                    {
+                                        <DxButton Text="@GetShowMoreLabel(section, hiddenCount)"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn doc-copies-catalog__section-more-btn"
+                                                  Click="@(() => ExpandSectionAsync(section.SectionId))" />
+                                    }
+                                    else if (!_showAllDocuments && sectionExpanded)
+                                    {
+                                        <DxButton Text="@ActionShowLess"
+                                                  RenderStyle="ButtonRenderStyle.Link"
+                                                  SizeMode="SizeMode.Small"
+                                                  CssClass="app-item-doc-copies__action-btn doc-copies-catalog__section-more-btn"
+                                                  Click="@(() => CollapseSectionAsync(section.SectionId))" />
+                                    }
                                 }
-                                else if (!_showAllDocuments && sectionExpanded)
-                                {
-                                    <DxButton Text="@ActionShowLess"
-                                              RenderStyle="ButtonRenderStyle.Link"
-                                              SizeMode="SizeMode.Small"
-                                              CssClass="app-item-doc-copies__action-btn app-person-doc-copies__section-more-btn"
-                                              Click="@(() => CollapseSectionAsync(section.SectionId))" />
-                                }
+
+                                <button type="button"
+                                        class="doc-copies-catalog__nav-open"
+                                        aria-expanded="@(!sectionCollapsed)"
+                                        @onclick="@(() => ToggleSectionNavAsync(section.SectionId))">
+                                    @(sectionCollapsed ? ActionOpen : ActionClose)
+                                </button>
                             </div>
                         </header>
 
@@ -88,24 +99,24 @@
                         {
                             @if (showsRecentFallback)
                             {
-                                <p class="app-person-doc-copies__section-hint" role="status">
+                                <p class="doc-copies-catalog__section-hint" role="status">
                                     @HintNoCurrentShowingRecent
                                 </p>
                             }
 
                             @if (visibleRecords.Count == 0)
                             {
-                                <p class="app-person-doc-copies__section-empty" role="status">@HintNoFiles</p>
+                                <p class="doc-copies-catalog__section-empty" role="status">@HintNoFiles</p>
                             }
                             else
                             {
-                                <div class="app-person-doc-copies__rows" role="table">
-                                    <div class="app-person-doc-copies__row app-person-doc-copies__row--head" role="row">
-                                        <div class="app-person-doc-copies__col-record" role="columnheader">@ColumnRecord</div>
-                                        <div class="app-person-doc-copies__row-meta">
-                                            <div class="app-person-doc-copies__col-files" role="columnheader">@ColumnFiles</div>
-                                            <div class="app-person-doc-copies__col-status" role="columnheader">@ColumnStatus</div>
-                                            <div class="app-person-doc-copies__col-action" role="columnheader" aria-hidden="true"></div>
+                                <div class="doc-copies-catalog__rows" role="table">
+                                    <div class="doc-copies-catalog__row doc-copies-catalog__row--head" role="row">
+                                        <div class="doc-copies-catalog__col-record" role="columnheader">@ColumnRecord</div>
+                                        <div class="doc-copies-catalog__row-meta">
+                                            <div class="doc-copies-catalog__col-files" role="columnheader">@ColumnFiles</div>
+                                            <div class="doc-copies-catalog__col-status" role="columnheader">@ColumnStatus</div>
+                                            <div class="doc-copies-catalog__col-action" role="columnheader" aria-hidden="true"></div>
                                         </div>
                                     </div>
 
@@ -118,34 +129,34 @@
                                         <div class="@GetRowCssClass(record, hasFiles, rowLoading)"
                                              role="row"
                                              @onclick="@(() => OnRowClickAsync(record))">
-                                            <div class="app-person-doc-copies__col-record" role="cell">
-                                                <span class="app-person-doc-copies__record-label" title="@record.RecordLabel">
+                                            <div class="doc-copies-catalog__col-record" role="cell">
+                                                <span class="doc-copies-catalog__record-label" title="@record.RecordLabel">
                                                     @record.RecordLabel
                                                 </span>
                                                 @if (ShouldShowCurrentBadge(record, sectionExpanded))
                                                 {
-                                                    <span class="person-dossier__pill st-approved app-person-doc-copies__current-pill">@CurrentBadge</span>
+                                                    <span class="person-dossier__pill st-approved doc-copies-catalog__current-pill">@CurrentBadge</span>
                                                 }
                                             </div>
-                                            <div class="app-person-doc-copies__row-meta">
-                                                <div class="app-person-doc-copies__col-files" role="cell">
+                                            <div class="doc-copies-catalog__row-meta">
+                                                <div class="doc-copies-catalog__col-files" role="cell">
                                                     @(hasFiles ? fileCount.ToString() : "—")
                                                 </div>
-                                                <div class="app-person-doc-copies__col-status" role="cell">
+                                                <div class="doc-copies-catalog__col-status" role="cell">
                                                     @if (hasFiles)
                                                     {
-                                                        <span class="person-dossier__pill st-approved app-person-doc-copies__pill">@StatusReady</span>
+                                                        <span class="person-dossier__pill st-approved doc-copies-catalog__pill">@StatusReady</span>
                                                     }
                                                     else
                                                     {
-                                                        <span class="person-dossier__pill st-expiring app-person-doc-copies__pill">@StatusMissing</span>
+                                                        <span class="person-dossier__pill st-expiring doc-copies-catalog__pill">@StatusMissing</span>
                                                     }
                                                 </div>
-                                                <div class="app-person-doc-copies__col-action" role="cell" @onclick:stopPropagation="true">
+                                                <div class="doc-copies-catalog__col-action" role="cell" @onclick:stopPropagation="true">
                                                     @if (hasFiles && !rowLoading)
                                                     {
                                                         <button type="button"
-                                                                class="app-person-doc-copies__preview-link"
+                                                                class="doc-copies-catalog__preview-link"
                                                                 disabled="@IsAnyPreviewLoading"
                                                                 aria-label="@ActionPreview"
                                                                 @onclick="@(() => PreviewRecordAsync(record))">
@@ -158,7 +169,7 @@
 
                                         @if (rowLoading)
                                         {
-                                            <div class="app-person-doc-copies__progress-row">
+                                            <div class="doc-copies-catalog__progress-row">
                                                 <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
                                                      aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", record.RecordLabel)">
                                                     <div class="app-report-package__preview-progress-track">
@@ -172,9 +183,9 @@
                                         {
                                             @foreach (var file in record.Files.Where(f => f.HasContent))
                                             {
-                                                <div class="app-person-doc-copies__file-row">
-                                                    <span class="app-person-doc-copies__file-name" title="@file.FileName">@file.FileName</span>
-                                                    <span class="app-person-doc-copies__file-size">@FormatSize(file.SizeBytes)</span>
+                                                <div class="doc-copies-catalog__file-row">
+                                                    <span class="doc-copies-catalog__file-name" title="@file.FileName">@file.FileName</span>
+                                                    <span class="doc-copies-catalog__file-size">@FormatSize(file.SizeBytes)</span>
                                                 </div>
                                             }
                                         }
@@ -281,6 +292,8 @@
     private string EmptyNoRecords => Msg("PersonDocumentCopies.Empty.NoRecords");
     private string HintNoFiles => Msg("PersonDocumentCopies.Hint.NoFiles");
     private string ActionPreview => Msg("PersonDocumentCopies.Action.Preview");
+    private string ActionOpen => Msg("PersonDocumentCopies.Action.Open");
+    private string ActionClose => Msg("PersonDocumentCopies.Action.Close");
     private string ActionRefresh => Msg("PersonDocumentCopies.Action.Refresh");
     private string ActionShowAll => Msg("PersonDocumentCopies.Action.ShowAll");
     private string ActionShowCurrentOnly => Msg("PersonDocumentCopies.Action.ShowCurrentOnly");
@@ -312,12 +325,10 @@
 
     private void ApplyDefaultSectionCollapse()
     {
+        // Prototype A: vertical nav — all categories collapsed until Open.
         _collapsedSections.Clear();
         foreach (var section in Snapshot.Sections)
-        {
-            if (CountRecordsWithFiles(section) == 0)
-                _collapsedSections.Add(section.SectionId);
-        }
+            _collapsedSections.Add(section.SectionId);
     }
 
     private static int CountRecordsWithFiles(PersonLinkedDocumentSection section) =>
@@ -348,17 +359,17 @@
 
     private string GetRowCssClass(PersonLinkedDocumentRecord record, bool hasFiles, bool rowLoading)
     {
-        var classes = new List<string> { "app-person-doc-copies__row" };
+        var classes = new List<string> { "doc-copies-catalog__row" };
         if (record.IsCurrent)
-            classes.Add("app-person-doc-copies__row--current");
+            classes.Add("doc-copies-catalog__row--current");
         if (record.IsNested)
-            classes.Add("app-person-doc-copies__row--nested");
+            classes.Add("doc-copies-catalog__row--nested");
         if (!hasFiles)
-            classes.Add("app-person-doc-copies__row--empty");
+            classes.Add("doc-copies-catalog__row--empty");
         if (hasFiles && !rowLoading)
-            classes.Add("app-person-doc-copies__row--clickable");
+            classes.Add("doc-copies-catalog__row--clickable");
         if (rowLoading)
-            classes.Add("app-person-doc-copies__row--loading");
+            classes.Add("doc-copies-catalog__row--loading");
 
         return string.Join(' ', classes);
     }
@@ -452,14 +463,39 @@
         return InvokeAsync(StateHasChanged);
     }
 
-    private Task ToggleSectionCollapseAsync(string sectionId)
+    private Task ToggleSectionNavAsync(string sectionId)
     {
         if (_collapsedSections.Contains(sectionId))
-            _collapsedSections.Remove(sectionId);
-        else
-            _collapsedSections.Add(sectionId);
+            return OpenSectionNavAsync(sectionId);
+
+        return CloseSectionNavAsync(sectionId);
+    }
+
+    private Task OpenSectionNavAsync(string sectionId)
+    {
+        // Exclusive expand: one open category at a time.
+        _collapsedSections.Clear();
+        foreach (var section in Snapshot.Sections)
+        {
+            if (!string.Equals(section.SectionId, sectionId, StringComparison.Ordinal))
+                _collapsedSections.Add(section.SectionId);
+        }
 
         return InvokeAsync(StateHasChanged);
+    }
+
+    private Task CloseSectionNavAsync(string sectionId)
+    {
+        _collapsedSections.Add(sectionId);
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private Task OnSectionNavKeyDownAsync(KeyboardEventArgs e, string sectionId)
+    {
+        if (e.Key is "Enter" or " ")
+            return ToggleSectionNavAsync(sectionId);
+
+        return Task.CompletedTask;
     }
 
     private Task ToggleShowAllDocumentsAsync()

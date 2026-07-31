@@ -3624,18 +3624,7 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     text-decoration: underline;
 }
 
-.app-person-document-copies-link {
-    color: var(--dxbl-link-color, #0d6efd);
-    cursor: pointer;
-    font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.app-person-document-copies-link:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
-}
+/* Person/Header document-copies ListView cells: styles in document-copies-brand.css */
 
 /* Import reimport history (Operations — Administrators) */
 .import-history-detail .xaf-detail-view,

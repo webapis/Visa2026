@@ -1493,7 +1493,9 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DateOfBirth" Caption="Doğum Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="DocumentCopiesListLink" Caption="Kopyalar" />
         <Member Name="Documents" Caption="CV ve kişisel dosyalar" />
+        <Member Name="DossierListLink" Caption="Dosye" />
         <Member Name="Educations" Caption="Eğitimler" />
         <Member Name="Email" Caption="E-posta" />
         <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
@@ -2869,6 +2871,8 @@
         <ColumnInfo Id="CurrentVisa" Caption="Vize" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Kopyalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosye" />
         <ColumnInfo Id="FullName" Caption="Tam Ad" />
         <ColumnInfo Id="Gender" Caption="Cinsiyet" />
         <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
@@ -2891,6 +2895,8 @@
         <ColumnInfo Id="CurrentRejectionItem" Caption="Ret Kalemi" />
         <ColumnInfo Id="CurrentVisa" Caption="Vize" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Kopyalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosye" />
         <ColumnInfo Id="FirstName" Caption="Ad" />
         <ColumnInfo Id="ForeignAddress" Caption="Yurt Dışı Adres" />
         <ColumnInfo Id="ForeignAddressCountry" Caption="Yurt Dışı Adres Ülkesi" />
@@ -2911,6 +2917,8 @@
       <Columns>
         <ColumnInfo Id="Age" Caption="Yaş" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Kopyalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosye" />
         <ColumnInfo Id="FullName" Caption="Tam Ad" />
         <ColumnInfo Id="Gender" Caption="Cinsiyet" />
         <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />

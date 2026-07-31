@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Visa2026.Module.BusinessObjects;
@@ -10,9 +8,10 @@ using Visa2026.Module.Services.PersonLinkedDocuments;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens person-scoped document copies from <see cref="Person"/> DetailView or typed ListViews.
+/// Opens person-scoped document copies from <see cref="Person"/> DetailView.
+/// ListViews use the per-row Copies column instead (no toolbar action).
 /// </summary>
-public sealed class PersonDocumentCopiesController : ViewController
+public sealed class PersonDocumentCopiesController : ViewController<DetailView>
 {
     private SimpleAction viewDocumentCopiesAction = null!;
 
@@ -21,7 +20,7 @@ public sealed class PersonDocumentCopiesController : ViewController
         TargetObjectType = typeof(Person);
 
         viewDocumentCopiesAction = new SimpleAction(this, "ViewPersonDocumentCopies", "View");
-        viewDocumentCopiesAction.ImageName = "BO_FileAttachment";
+        viewDocumentCopiesAction.ImageName = "DocumentCopies";
         viewDocumentCopiesAction.SelectionDependencyType = SelectionDependencyType.Independent;
         viewDocumentCopiesAction.Execute += ViewDocumentCopiesAction_Execute;
     }
@@ -30,93 +29,26 @@ public sealed class PersonDocumentCopiesController : ViewController
     {
         base.OnActivated();
         viewDocumentCopiesAction.Caption = VisaUiMessages.Get("PersonDocumentCopies.Title");
-
-        if (View is DetailView)
-        {
-            View.CurrentObjectChanged += View_CurrentObjectChanged;
-        }
-        else if (View is ListView)
-        {
-            View.SelectionChanged += View_SelectionChanged;
-        }
-
+        View.CurrentObjectChanged += View_CurrentObjectChanged;
         UpdateActionState();
     }
 
     protected override void OnDeactivated()
     {
-        if (View is DetailView)
-        {
-            View.CurrentObjectChanged -= View_CurrentObjectChanged;
-        }
-        else if (View is ListView)
-        {
-            View.SelectionChanged -= View_SelectionChanged;
-        }
-
+        View.CurrentObjectChanged -= View_CurrentObjectChanged;
         base.OnDeactivated();
     }
 
-    private void View_CurrentObjectChanged(object sender, EventArgs e) => UpdateActionState();
+    private void View_CurrentObjectChanged(object? sender, EventArgs e) => UpdateActionState();
 
-    private void View_SelectionChanged(object sender, EventArgs e) => UpdateActionState();
-
-    private void UpdateActionState()
-    {
-        if (View is DetailView detailView)
-        {
-            viewDocumentCopiesAction.Enabled["Person"] = detailView.CurrentObject is Person;
-            return;
-        }
-
-        if (View is ListView)
-        {
-            viewDocumentCopiesAction.Enabled["Selection"] = GetSelectedPeople().Count == 1;
-        }
-    }
+    private void UpdateActionState() =>
+        viewDocumentCopiesAction.Enabled["Person"] = View.CurrentObject is Person;
 
     private void ViewDocumentCopiesAction_Execute(object sender, SimpleActionExecuteEventArgs e)
     {
-        if (View is DetailView detailView)
-        {
-            if (detailView.CurrentObject is not Person person)
-                return;
-
-            PersonDocumentCopiesOpenHelper.TryOpenForPerson(Application, View, person);
-            return;
-        }
-
-        if (View is not ListView)
+        if (View.CurrentObject is not Person person)
             return;
 
-        var selected = GetSelectedPeople();
-        if (selected.Count != 1)
-        {
-            Application.ShowViewStrategy.ShowMessage(
-                VisaUiMessages.Get("PersonDocumentCopies.List.SelectOne"),
-                InformationType.Warning);
-            return;
-        }
-
-        PersonDocumentCopiesOpenHelper.TryOpenForPerson(Application, View, selected[0]);
-    }
-
-    private List<Person> GetSelectedPeople()
-    {
-        if (View is not ListView listView)
-            return new List<Person>();
-
-        var selected = listView.SelectedObjects?
-            .OfType<Person>()
-            .Where(person => person != null)
-            .ToList();
-
-        if (selected is { Count: > 0 })
-            return selected;
-
-        if (listView.CurrentObject is Person current)
-            return new List<Person> { current };
-
-        return new List<Person>();
+        PersonDocumentCopiesOpenHelper.TryOpenForPerson(Application, View, person);
     }
 }

@@ -5,6 +5,18 @@
     "tk-TM": "Adam dosýesi",
     "ru-RU": "Досье лица"
   },
+  "PersonDossier.List.ColumnCaption": {
+    "en": "Dossier",
+    "tr-TR": "Dosye",
+    "tk-TM": "Dosýe",
+    "ru-RU": "Досье"
+  },
+  "PersonDossier.List.ColumnLink": {
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
+  },
   "PersonDossier.Action.Open": {
     "en": "Open dossier",
     "tr-TR": "Dosyayı aç",
@@ -3719,6 +3731,18 @@
     "tk-TM": "Arza elementleri we çakylyklar arzalary işläniňizden soň şu ýerde peýda bolýar. Pasport we beýleki maglumatlary ýokardaky goýmaklardan goşuň.",
     "ru-RU": "Позиции заявок и приглашения появятся здесь после обработки заявок. Паспорта и другие данные добавляйте на вкладках выше."
   },
+  "ApplicationItemDocumentCopies.Section.LinkedDocuments": {
+    "en": "Linked documents",
+    "tr-TR": "Bağlı belgeler",
+    "tk-TM": "Baglanan resminamalar",
+    "ru-RU": "Связанные документы"
+  },
+  "ApplicationItemDocumentCopies.Status.Partial": {
+    "en": "Partial",
+    "tr-TR": "Kısmi",
+    "tk-TM": "Bölekleýin",
+    "ru-RU": "Частично"
+  },
   "ApplicationItemDocumentCopies.Title": {
     "en": "Document copies",
     "tr-TR": "Belge kopyaları",
@@ -4385,6 +4409,12 @@
     "tk-TM": "Häzirki",
     "ru-RU": "Текущий"
   },
+  "PersonDocumentCopies.Action.Open": {
+    "en": "Open",
+    "tr-TR": "Aç",
+    "tk-TM": "Aç",
+    "ru-RU": "Открыть"
+  },
   "PersonDocumentCopies.Action.Preview": {
     "en": "Preview",
     "tr-TR": "Önizle",
@@ -4668,10 +4698,10 @@
     "ru-RU": "Выберите ровно одно лицо для просмотра копий документов."
   },
   "PersonDocumentCopies.List.ColumnLink": {
-    "en": "Copies",
-    "tr-TR": "Kopyalar",
-    "tk-TM": "Nusgalar",
-    "ru-RU": "Копии"
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
   },
   "PersonDocumentCopies.List.ColumnCaption": {
     "en": " ",
@@ -4739,6 +4769,12 @@
     "tk-TM": "Skan nusgalar bu ýazgydaky ähli işgärler üçin umumy.",
     "ru-RU": "Скан-копии общие для всех сотрудников в этой записи."
   },
+  "HeaderDocumentCopies.Section.Documents": {
+    "en": "Documents",
+    "tr-TR": "Belgeler",
+    "tk-TM": "Resminamalar",
+    "ru-RU": "Документы"
+  },
   "HeaderDocumentCopies.Empty.NoParent": {
     "en": "No record selected.",
     "tr-TR": "Kayıt seçilmedi.",
@@ -4794,28 +4830,28 @@
     "ru-RU": "Выберите ровно одну строку пограничной зоны для просмотра копий документов."
   },
   "WorkPermitDocumentCopies.List.ColumnLink": {
-    "en": "Copies",
-    "tr-TR": "Kopyalar",
-    "tk-TM": "Nusgalar",
-    "ru-RU": "Копии"
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
   },
   "InvitationDocumentCopies.List.ColumnLink": {
-    "en": "Copies",
-    "tr-TR": "Kopyalar",
-    "tk-TM": "Nusgalar",
-    "ru-RU": "Копии"
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
   },
   "RejectionDocumentCopies.List.ColumnLink": {
-    "en": "Copies",
-    "tr-TR": "Kopyalar",
-    "tk-TM": "Nusgalar",
-    "ru-RU": "Копии"
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
   },
   "BorderZoneDocumentCopies.List.ColumnLink": {
-    "en": "Copies",
-    "tr-TR": "Kopyalar",
-    "tk-TM": "Nusgalar",
-    "ru-RU": "Копии"
+    "en": "•",
+    "tr-TR": "•",
+    "tk-TM": "•",
+    "ru-RU": "•"
   },
   "ReportDashboard.Chrome.Project": {
     "en": "Project",
