@@ -229,6 +229,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: `E2ETestLoginValues.StandardUserName = "StandardUser"`; `IsEasyTestDatabase` / `EasyTestHostMode` recognize **`visa2026_easytest`**.
 - **Reuse**: On PostgreSQL EasyTest, login user name must match seeded casing exactly.
 
+### 2026-07-31 — GHA EasyTest: AssertAuthenticatedAppShell Navigate(Application) fails for Users
+
+- **Outcome**: negative → fix (pending GHA verify)
+- **Context**: After StandardUser login; URL `/` (not LoginPage); assert timed out ~4.5 min
+- **Symptom**: Users role **Denies** untyped Application list; EasyTest `Navigate("Application")` never exposes New.
+- **Fix / reuse**: `AssertAuthenticatedAppShell` opens **`/Person_ListView_Employees`** and requires list New (same as journey).
+- **Reuse**: Officer shell probe → Employees URL, not Navigate("Application").
+
 ### 2026-07-30 — Nested Travel New: click split-button primary, not only data-action-name
 
 - **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
