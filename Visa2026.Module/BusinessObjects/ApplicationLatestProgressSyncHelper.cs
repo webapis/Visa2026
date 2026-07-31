@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
@@ -47,8 +49,7 @@ public static class ApplicationLatestProgressSyncHelper
             application.LatestProgress = null;
             application.LatestPrimaryStateCode = null;
             application.LatestProgressDisplay = null;
-            application.LatestIsCancelled = false;
-            application.LatestIsRejected = false;
+            SyncProcessNumber(application, objectSpace);
             return;
         }
 
@@ -56,14 +57,7 @@ public static class ApplicationLatestProgressSyncHelper
         application.LatestPrimaryStateCode = primaryCode;
         application.LatestProgressDisplay =
             ApplicationProgressPrimaryStateCodeResolver.ResolveDisplayNameFromLatest(latest) ?? string.Empty;
-        application.LatestIsCancelled = string.Equals(
-            primaryCode,
-            ApplicationProgressStateCodes.ProcessCancelled,
-            StringComparison.OrdinalIgnoreCase);
-        application.LatestIsRejected = string.Equals(
-            primaryCode,
-            ApplicationProgressStateCodes.ProcessRejected,
-            StringComparison.OrdinalIgnoreCase);
+        SyncProcessNumber(application, objectSpace);
 
         if (CanLinkLatestProgress(latest, objectSpace))
         {
@@ -74,6 +68,21 @@ public static class ApplicationLatestProgressSyncHelper
 
         application.LatestProgressId = null;
         application.LatestProgress = null;
+    }
+
+    /// <summary>
+    /// Keeps denormalized <see cref="Application.ProcessNumber"/> aligned with progress history.
+    /// </summary>
+    public static void SyncProcessNumber(Application? application, IObjectSpace? objectSpace = null)
+    {
+        if (application == null)
+            return;
+
+        IEnumerable<ApplicationProgress>? history = application.ProgressHistory;
+        if (objectSpace != null && history != null)
+            history = history.Where(p => !objectSpace.IsObjectToDelete(p));
+
+        application.ProcessNumber = ApplicationProcessNumberHelper.ResolveFromHistory(history);
     }
 
     /// <summary>

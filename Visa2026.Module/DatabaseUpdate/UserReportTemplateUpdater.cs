@@ -25,19 +25,6 @@ namespace Visa2026.Module.DatabaseUpdate
         /// <summary>Links all <see cref="ProjectContract"/> rows whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</summary>
         private const string Gt15ProjectContractNameTmSubstring = "GT-15";
 
-        /// <summary>Same set as <see cref="Forma_16"/> / Registration List Report (<c>ShowRegistrations</c> application types).</summary>
-        private static readonly string[] RegistrationApplicationTypeNames =
-        {
-            "App_Reg_Check_In",
-            "App_Reg_Check_In_Internal",
-            "App_Reg_Check_Out",
-            "App_Reg_Check_Out_Internal",
-            "App_Reg_ext",
-            "App_Reg_Info_Change_Address",
-            "App_Reg_Info_Change_Passport",
-            "App_Reg_Info_Change_Visa",
-        };
-
         private static readonly (string OldName, string NewName)[] SeedTemplateNameMigrations =
         {
             ("Contract (seed)", "Contract"),
@@ -68,6 +55,7 @@ namespace Visa2026.Module.DatabaseUpdate
                 return;
             }
 
+            ApplicationTypeGroupSeed.EnsureRegistrationGroup(ObjectSpace);
             EnsureFilteredUniqueLinkIndexes();
             MigrateSeedTemplateNames();
             ObjectSpace.CommitChanges();
@@ -85,6 +73,7 @@ namespace Visa2026.Module.DatabaseUpdate
             if (rootServiceProvider == null)
                 throw new ArgumentNullException(nameof(rootServiceProvider));
 
+            ApplicationTypeGroupSeed.EnsureRegistrationGroup(ObjectSpace);
             EnsureFilteredUniqueLinkIndexes();
             MigrateSeedTemplateNames();
             SeedEmbeddedTemplates(rootServiceProvider);
@@ -230,12 +219,13 @@ namespace Visa2026.Module.DatabaseUpdate
                     wordExtractor,
                     wordValidator,
                     templateName: "Forma 16",
-                    description: "Seeded from Resources/Templates/Forma_16.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); registration application types; {{IMAGE:Person_Photo}}.",
+                    description: "Seeded from Resources/Templates/Forma_16.docx; ApplicationItem root; Word layout ItemRows ({{#ds.rows}}); ApplicationTypeGroup Registration; {{IMAGE:Person_Photo}}.",
                     resourceName: "Visa2026.Module.Resources.Templates.Forma_16.docx",
                     boType: UserReportBoType.ApplicationItem,
-                    applicableApplicationTypeNames: RegistrationApplicationTypeNames,
+                    applicableApplicationTypeNames: null,
                     visibilityCriteria: null,
-                    sortOrder: 57)
+                    sortOrder: 57,
+                    applicableApplicationTypeGroupNames: new[] { ApplicationTypeGroupNames.Registration })
                 .GetAwaiter()
                 .GetResult();
 
@@ -362,18 +352,19 @@ namespace Visa2026.Module.DatabaseUpdate
                 .GetAwaiter()
                 .GetResult();
 
-            // Sanaw_hasaba_alys.xlsx — Hasaba almak Daşary ýurt raýatlarynyň sanawy (Excel); registration application types; RegistrationListReport parity.
+            // Sanaw_hasaba_alys.xlsx — Hasaba almak Daşary ýurt raýatlarynyň sanawy (Excel); Registration group; RegistrationListReport parity.
             EnsureExcelTemplateExists(
                     excelExtractor,
                     excelValidator,
                     templateName: "Hasaba almak sanawy (Excel)",
-                    description: "Seeded from Resources/Templates/Excel/Sanaw_hasaba_alys.xlsx; 11-column ApplicationItem list; ItemList merge; registration application types; Registration_GelmeginMaksadyTm per Sanaw_hasaba_alys_map.md.",
+                    description: "Seeded from Resources/Templates/Excel/Sanaw_hasaba_alys.xlsx; 11-column ApplicationItem list; ItemList merge; ApplicationTypeGroup Registration; Registration_GelmeginMaksadyTm per Sanaw_hasaba_alys_map.md.",
                     resourceName: "Visa2026.Module.Resources.Templates.Excel.Sanaw_hasaba_alys.xlsx",
                     boType: UserReportBoType.ApplicationItem,
                     excelMergeMode: ExcelMergeMode.ItemList,
-                    applicableApplicationTypeNames: RegistrationApplicationTypeNames,
+                    applicableApplicationTypeNames: null,
                     visibilityCriteria: null,
-                    sortOrder: 70)
+                    sortOrder: 70,
+                    applicableApplicationTypeGroupNames: new[] { ApplicationTypeGroupNames.Registration })
                 .GetAwaiter()
                 .GetResult();
 
@@ -451,7 +442,8 @@ namespace Visa2026.Module.DatabaseUpdate
         /// In DEBUG: Always overwrites template file content to pick up changes.
         /// In Production: Only creates if missing (preserves user edits to metadata).
         /// </summary>
-        /// <param name="applicableApplicationTypeNames">When non-empty, links <see cref="ApplicationType"/> rows by <c>Name</c> (e.g. <c>App_Inv_And_WP</c>). Pass <c>null</c> or empty for all application types.</param>
+        /// <param name="applicableApplicationTypeNames">When non-empty, links <see cref="ApplicationType"/> rows by <c>Name</c> (e.g. <c>App_Inv_And_WP</c>). Pass <c>null</c> or empty to clear individual type links.</param>
+        /// <param name="applicableApplicationTypeGroupNames">When non-empty, links <see cref="ApplicationTypeGroup"/> rows by <c>Name</c> (e.g. <c>Registration</c>). Combined with type links as a union for visibility.</param>
         /// <param name="applicableProjectContractNames">Optional <see cref="LookupBase.NameTm"/> values for exact-match filtering; <c>null</c> clears links.</param>
         /// <param name="applicableProjectContractNameTmContains">When set, links every <see cref="ProjectContract"/> whose <see cref="LookupBase.NameTm"/> contains this substring (case-insensitive).</param>
         private Task EnsureExcelTemplateExists(
@@ -466,7 +458,8 @@ namespace Visa2026.Module.DatabaseUpdate
             string visibilityCriteria,
             int sortOrder,
             IReadOnlyList<string> applicableProjectContractNames = null,
-            string applicableProjectContractNameTmContains = null) =>
+            string applicableProjectContractNameTmContains = null,
+            IReadOnlyList<string> applicableApplicationTypeGroupNames = null) =>
             EnsureTemplateExists(
                 extractor,
                 validator,
@@ -480,7 +473,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 TemplateOutputFormat.Excel,
                 excelMergeMode,
                 applicableProjectContractNames,
-                applicableProjectContractNameTmContains);
+                applicableProjectContractNameTmContains,
+                applicableApplicationTypeGroupNames);
 
         private async Task EnsureTemplateExists(
             IUserReportPlaceholderExtractor extractor,
@@ -495,7 +489,8 @@ namespace Visa2026.Module.DatabaseUpdate
             TemplateOutputFormat outputFormat = TemplateOutputFormat.Word,
             ExcelMergeMode excelMergeMode = ExcelMergeMode.ItemList,
             IReadOnlyList<string> applicableProjectContractNames = null,
-            string applicableProjectContractNameTmContains = null) =>
+            string applicableProjectContractNameTmContains = null,
+            IReadOnlyList<string> applicableApplicationTypeGroupNames = null) =>
             EnsureTemplateExistsCore(
                 async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
                 async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo).ConfigureAwait(false),
@@ -509,7 +504,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 outputFormat,
                 excelMergeMode,
                 applicableProjectContractNames,
-                applicableProjectContractNameTmContains);
+                applicableProjectContractNameTmContains,
+                applicableApplicationTypeGroupNames);
 
         private async Task EnsureTemplateExists(
             IExcelTemplatePlaceholderExtractor extractor,
@@ -524,7 +520,8 @@ namespace Visa2026.Module.DatabaseUpdate
             TemplateOutputFormat outputFormat,
             ExcelMergeMode excelMergeMode,
             IReadOnlyList<string> applicableProjectContractNames = null,
-            string applicableProjectContractNameTmContains = null) =>
+            string applicableProjectContractNameTmContains = null,
+            IReadOnlyList<string> applicableApplicationTypeGroupNames = null) =>
             EnsureTemplateExistsCore(
                 async stream => (await extractor.ExtractPlaceholdersAsync(stream).ConfigureAwait(false)).ToList(),
                 async (keys, bo) => await validator.ValidatePlaceholdersAsync(keys, bo, excelMergeMode).ConfigureAwait(false),
@@ -538,7 +535,8 @@ namespace Visa2026.Module.DatabaseUpdate
                 outputFormat,
                 excelMergeMode,
                 applicableProjectContractNames,
-                applicableProjectContractNameTmContains);
+                applicableProjectContractNameTmContains,
+                applicableApplicationTypeGroupNames);
 
         private async Task EnsureTemplateExistsCore(
             Func<Stream, Task<List<string>>> extractAsync,
@@ -553,7 +551,8 @@ namespace Visa2026.Module.DatabaseUpdate
             TemplateOutputFormat outputFormat,
             ExcelMergeMode excelMergeMode,
             IReadOnlyList<string> applicableProjectContractNames,
-            string applicableProjectContractNameTmContains)
+            string applicableProjectContractNameTmContains,
+            IReadOnlyList<string> applicableApplicationTypeGroupNames)
         {
             var template = ObjectSpace.FirstOrDefault<UserReportTemplate>(
                 t => t.TemplateName == templateName);
@@ -624,6 +623,7 @@ namespace Visa2026.Module.DatabaseUpdate
                     description,
                     boType,
                     applicableApplicationTypeNames,
+                    applicableApplicationTypeGroupNames,
                     applicableProjectContractNames,
                     applicableProjectContractNameTmContains,
                     visibilityCriteria,
@@ -638,6 +638,7 @@ namespace Visa2026.Module.DatabaseUpdate
             string description,
             UserReportBoType boType,
             IReadOnlyList<string> applicableApplicationTypeNames,
+            IReadOnlyList<string> applicableApplicationTypeGroupNames,
             IReadOnlyList<string> applicableProjectContractNames,
             string applicableProjectContractNameTmContains,
             string visibilityCriteria,
@@ -658,12 +659,14 @@ namespace Visa2026.Module.DatabaseUpdate
                 template,
                 applicableProjectContractNames,
                 applicableProjectContractNameTmContains);
+            // After project-contract clear/reload so uncommitted group links are not wiped.
+            SetApplicableApplicationTypeGroups(template, applicableApplicationTypeGroupNames);
             ObjectSpace.SetModified(template);
         }
 
         /// <summary>
         /// Links application types via <see cref="UserReportTemplate.ApplicableTypeLinks"/>.
-        /// Pass <c>null</c> or empty to clear links (all application types).
+        /// Pass <c>null</c> or empty to clear individual type links.
         /// </summary>
         private void SetApplicableApplicationTypes(
             UserReportTemplate template,
@@ -705,6 +708,66 @@ namespace Visa2026.Module.DatabaseUpdate
             }
         }
 
+        /// <summary>
+        /// Links application type groups via <see cref="UserReportTemplate.ApplicableGroupLinks"/>.
+        /// Pass <c>null</c> or empty to clear group links.
+        /// </summary>
+        private void SetApplicableApplicationTypeGroups(
+            UserReportTemplate template,
+            IReadOnlyList<string> applicableApplicationTypeGroupNames)
+        {
+            ClearApplicableGroupLinks(template);
+
+            if (applicableApplicationTypeGroupNames == null || applicableApplicationTypeGroupNames.Count == 0)
+                return;
+
+            var groupsByName = ObjectSpace.GetObjectsQuery<ApplicationTypeGroup>()
+                .AsEnumerable()
+                .Where(g => !string.IsNullOrWhiteSpace(g.Name))
+                .GroupBy(g => g.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var linkedGroupIds = new HashSet<Guid>();
+
+            foreach (var groupName in applicableApplicationTypeGroupNames)
+            {
+                if (string.IsNullOrWhiteSpace(groupName))
+                    continue;
+
+                if (!groupsByName.TryGetValue(groupName.Trim(), out var group))
+                {
+                    System.Diagnostics.Debug.WriteLine(
+                        $"UserReportTemplateUpdater: ApplicationTypeGroup '{groupName}' not found — '{template.TemplateName}' has no group link for that name.");
+                    continue;
+                }
+
+                group = ObjectSpace.GetObject(group);
+                if (!linkedGroupIds.Add(group.ID))
+                    continue;
+
+                var link = ObjectSpace.CreateObject<UserReportTemplateApplicationTypeGroup>();
+                link.UserReportTemplate = template;
+                link.ApplicationTypeGroup = group;
+                template.ApplicableGroupLinks.Add(link);
+            }
+        }
+
+        private void ClearApplicableGroupLinks(UserReportTemplate template)
+        {
+            if (!ObjectSpace.IsNewObject(template))
+            {
+                ExecuteNonQueryCommand(
+                    BuildDeleteLinksSql("UserReportTemplateApplicationTypeGroups", "UserReportTemplateId", template.ID),
+                    silent: true);
+            }
+
+            foreach (var link in template.ApplicableGroupLinks.ToList())
+            {
+                ObjectSpace.Delete(link);
+                template.ApplicableGroupLinks.Remove(link);
+            }
+        }
+
         /// <summary>Renames legacy seed rows so <see cref="EnsureTemplateExists"/> updates in place instead of orphaning.</summary>
         private void MigrateSeedTemplateNames()
         {
@@ -735,7 +798,7 @@ namespace Visa2026.Module.DatabaseUpdate
             {
                 // Physical delete: soft-deleted (GCRecord) rows still occupy the unique index.
                 ExecuteNonQueryCommand(
-                    $"DELETE FROM dbo.UserReportTemplateApplicationTypes WHERE UserReportTemplateId = '{template.ID:D}'",
+                    BuildDeleteLinksSql("UserReportTemplateApplicationTypes", "UserReportTemplateId", template.ID),
                     silent: true);
                 ObjectSpace.ReloadObject(template);
                 return;
@@ -746,6 +809,22 @@ namespace Visa2026.Module.DatabaseUpdate
                 ObjectSpace.Delete(link);
                 template.ApplicableTypeLinks.Remove(link);
             }
+        }
+
+        private string BuildDeleteLinksSql(string tableName, string templateIdColumn, Guid templateId)
+        {
+            if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+            {
+                return $"""
+                    DELETE FROM "{tableName}"
+                    WHERE "{templateIdColumn}" = '{templateId:D}'
+                    """;
+            }
+
+            return $"""
+                DELETE FROM dbo.[{tableName}]
+                WHERE [{templateIdColumn}] = '{templateId:D}'
+                """;
         }
 
         /// <summary>
@@ -819,7 +898,7 @@ namespace Visa2026.Module.DatabaseUpdate
             if (!ObjectSpace.IsNewObject(template))
             {
                 ExecuteNonQueryCommand(
-                    $"DELETE FROM dbo.UserReportTemplateProjectContracts WHERE UserReportTemplateId = '{template.ID:D}'",
+                    BuildDeleteLinksSql("UserReportTemplateProjectContracts", "UserReportTemplateId", template.ID),
                     silent: true);
                 ObjectSpace.ReloadObject(template);
                 return;
@@ -873,6 +952,25 @@ BEGIN
           AND name = N'IX_UserReportTemplateProjectContracts_UserReportTemplateId_ProjectContractId')
         CREATE UNIQUE INDEX [IX_UserReportTemplateProjectContracts_UserReportTemplateId_ProjectContractId]
             ON [dbo].[UserReportTemplateProjectContracts] ([UserReportTemplateId], [ProjectContractId])
+            WHERE [GCRecord] IS NULL;
+END
+
+IF OBJECT_ID(N'dbo.UserReportTemplateApplicationTypeGroups', N'U') IS NOT NULL
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM sys.indexes
+        WHERE object_id = OBJECT_ID(N'dbo.UserReportTemplateApplicationTypeGroups')
+          AND name = N'IX_UserReportTemplateApplicationTypeGroups_UserReportTemplateId_ApplicationTypeGroupId'
+          AND has_filter = 0)
+        DROP INDEX [IX_UserReportTemplateApplicationTypeGroups_UserReportTemplateId_ApplicationTypeGroupId]
+            ON [dbo].[UserReportTemplateApplicationTypeGroups];
+
+    IF NOT EXISTS (
+        SELECT 1 FROM sys.indexes
+        WHERE object_id = OBJECT_ID(N'dbo.UserReportTemplateApplicationTypeGroups')
+          AND name = N'IX_UserReportTemplateApplicationTypeGroups_UserReportTemplateId_ApplicationTypeGroupId')
+        CREATE UNIQUE INDEX [IX_UserReportTemplateApplicationTypeGroups_UserReportTemplateId_ApplicationTypeGroupId]
+            ON [dbo].[UserReportTemplateApplicationTypeGroups] ([UserReportTemplateId], [ApplicationTypeGroupId])
             WHERE [GCRecord] IS NULL;
 END
 ", silent: true);

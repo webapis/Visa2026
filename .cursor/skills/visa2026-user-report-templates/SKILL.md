@@ -213,7 +213,7 @@ If a token is not in the reference or fails validation, see **Adding a missing p
 All must pass (AND):
 
 - **Is Active**
-- **Applicable application types** (empty = all types)
+- **Applicable application types** and/or **Applicable application type groups** (both empty = all types; either set → union match)
 - Optional **project contracts** / **Visibility criteria**
 
 Configure on the template record (UI) or via **`EnsureTemplateExists`** arguments (seeds). See **Resminamalar visibility** below.
@@ -396,7 +396,8 @@ Applies to **new** seeds and **editing** an existing block. Locate by **`templat
 | **`resourceName`** | **`Visa2026.Module.Resources.Templates.<file>.docx`** or **`...Templates.Excel.<file>.xlsx`**. Rename file → sync **`csproj`** + on-disk path. |
 | **`boType`** | **`Application`** vs **`ApplicationItem`** (etc.). Changing **`boType`** invalidates validation — user re-validates in UI. |
 | **`excelMergeMode`** | **Excel only.** v1 production: **`ItemList`** (Resminamalar on Application). **`SingleItem`** reserved (generator may throw if used). |
-| **`applicableApplicationTypeNames`** | **`null`** or empty → all application types. Non-empty → link rows by **`ApplicationType.Name`** (e.g. `App_Inv_And_WP`). Typos skip linking (Debug log only). |
+| **`applicableApplicationTypeNames`** | **`null`** or empty → clear individual type links. Non-empty → link rows by **`ApplicationType.Name`** (e.g. `App_Inv_And_WP`). Typos skip linking (Debug log only). |
+| **`applicableApplicationTypeGroupNames`** | **`null`** or empty → clear group links. Non-empty → link **`ApplicationTypeGroup.Name`** (e.g. `Registration`). Combined with type links as a **union**. |
 | **`applicableProjectContractNames`** / **`applicableProjectContractNameTmContains`** | Optional project-contract filter (exact names and/or `NameTm` substring such as `GT-15`). |
 | **`visibilityCriteria`** | Optional criteria string or **`null`**. |
 | **`sortOrder`** | Resminamalar ordering vs other seeds. |
@@ -442,18 +443,19 @@ Applies to **new** seeds and **editing** an existing block. Locate by **`templat
 
 ## Resminamalar visibility (property-based)
 
-Visibility is the **AND** of three optional filters (empty = no filter on that axis):
+Visibility is the **AND** of optional filters (empty = no filter on that axis):
 
 | UI / seed parameter | When empty | When set |
 |---------------------|------------|----------|
-| **Applicable Application Types** | All application types | Current app type must match a linked row |
+| **Applicable Application Types** + **Applicable Application Type Groups** | Both empty → all application types | Current app type must match a linked type **or** a member of a linked group (union) |
 | **Applicable Project Contracts** | All project contracts | Current contract must match a linked row |
 | **Visibility Criteria** | No extra rule | Criteria must pass |
 
 **`ApplicabilityMode`** is obsolete (hidden in UI); do not use it in new seeds.
 
-- All types: **`applicableApplicationTypeNames: null`** (and no contract/criteria filters unless needed).
+- All types: **`applicableApplicationTypeNames: null`**, **`applicableApplicationTypeGroupNames: null`** (and no contract/criteria filters unless needed).
 - Specific types: **`applicableApplicationTypeNames: new[] { "App_Inv_And_WP", ... }`**.
+- Registration group (eight `App_Reg_*`): **`applicableApplicationTypeGroupNames: new[] { ApplicationTypeGroupNames.Registration }`** (seeded by **`ApplicationTypeGroupSeed`**).
 - GT-15 ministry letters: **`applicableProjectContractNameTmContains: "GT-15"`** (and usually **`App_Visa_and_WP_Ext`** in type names).
 
 ## Updater behavior and DB updates

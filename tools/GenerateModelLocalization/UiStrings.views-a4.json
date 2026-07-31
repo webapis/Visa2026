@@ -9,7 +9,6 @@
     "Recycle Bin": { "tr-TR": "Geri Dönüşüm", "tk-TM": "Geri gaýtaryş", "ru-RU": "Корзина" },
     "Operations": { "tr-TR": "İşlemler", "tk-TM": "Amallar", "ru-RU": "Операции" },
     "StateNotifications": { "tr-TR": "Durum bildirimleri", "tk-TM": "Ýagdaý habarnamalary", "ru-RU": "Уведомления о состоянии" },
-    "LegacySyncDashboard": { "tr-TR": "Eski sistem senkronizasyonu", "tk-TM": "Köne ulgam sinhronizasiýasy", "ru-RU": "Синхронизация с устаревшей системой" },
     "UserFeedback": { "tr-TR": "Kullanıcı geri bildirimi", "tk-TM": "Ulanyjy pikirleri", "ru-RU": "Отзывы пользователей" }
   },
   "actions": {
@@ -67,10 +66,10 @@
       "caption": { "tr-TR": "Belge kopyaları", "tk-TM": "Resminama nusgalary", "ru-RU": "Копии документов" }
     },
     "ApplicationReportPackageListHost_DetailView": {
-      "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      "caption": { "en-US": "Templates", "tr-TR": "Şablonlar", "tk-TM": "Şablonlar", "ru-RU": "Шаблоны" }
     },
     "ApplicationItemReportPackageListHost_DetailView": {
-      "caption": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+      "caption": { "en-US": "Templates", "tr-TR": "Şablonlar", "tk-TM": "Şablonlar", "ru-RU": "Шаблоны" }
     },
     "CompanyProfile_DetailView": {
       "caption": { "tr-TR": "Şirket", "tk-TM": "Kompaniýa", "ru-RU": "Компания" },
@@ -88,7 +87,7 @@
         "Item7": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
         "TravelHistories": { "tr-TR": "Seyahat Geçmişi", "tk-TM": "Syýahat taryhy", "ru-RU": "История поездок" },
         "EmployeeContracts": { "tr-TR": "Çalışan Sözleşmeleri", "tk-TM": "Işgär şertnamalary", "ru-RU": "Трудовые договоры" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+        "Documents": { "tr-TR": "CV ve kişisel dosyalar", "tk-TM": "CV we şahsy faýllar", "ru-RU": "Резюме и личные файлы" },
         "Educations": { "tr-TR": "Eğitim", "tk-TM": "Bilim", "ru-RU": "Образование" },
         "Passports": { "tr-TR": "Pasaportlar", "tk-TM": "Pasportlar", "ru-RU": "Паспорта" },
         "PositionHistory": { "tr-TR": "Pozisyon Geçmişi", "tk-TM": "Wezipe taryhy", "ru-RU": "История должностей" },
@@ -113,7 +112,7 @@
       "layoutGroups": {
         "Visa": { "tr-TR": "Vize", "tk-TM": "Wiza", "ru-RU": "Виза" },
         "Item2": { "tr-TR": "Ek Bilgiler", "tk-TM": "Goşmaça maglumat", "ru-RU": "Доп. сведения" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+        "Documents": { "tr-TR": "Vize kopyaları", "tk-TM": "Wiza nusgalary", "ru-RU": "Копии визы" }
       }
     },
     "WorkPermit_DetailView": {
@@ -126,8 +125,8 @@
       "caption": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
       "layoutGroups": {
         "AddressOfResidence": { "tr-TR": "İkamet Adresi", "tk-TM": "Ýaşaýyş salgysy", "ru-RU": "Адрес проживания" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
-        "LodgingDocuments": { "tr-TR": "Konaklama Belgeleri", "tk-TM": "Ýaşaýyş resminamalary", "ru-RU": "Документы проживания" }
+        "Documents": { "tr-TR": "Adres kopyaları", "tk-TM": "Salgy nusgalary", "ru-RU": "Копии адреса" },
+        "LodgingDocuments": { "tr-TR": "Konaklama kopyaları", "tk-TM": "Ýaşaýyş ýeri nusgalary", "ru-RU": "Копии жилья" }
       }
     },
     "LocalEmployee_DetailView": {

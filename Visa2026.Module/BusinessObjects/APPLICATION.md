@@ -44,9 +44,7 @@ Individual people and their documents are modeled on [`ApplicationItem`](Applica
 | `FromCity` | `City` | | `ShowFromCity` |
 | `ToCity` | `City` | | `ShowToCity` |
 
-| `CurrentState` | `string` | `[NotMapped]` Latest progress state + location (localized). | List + detail; row color via `PrimaryStateCode`. |
-| `IsCancelled` | `bool` | `[NotMapped]` `PrimaryStateCode == PROCESS_CANCELLED` (legacy `Application.Cancelled`). | Read-only; set by progress only. |
-| `IsRejected` | `bool` | `[NotMapped]` `PrimaryStateCode == PROCESS_REJECTED` (legacy `Application.Rejected`). | Read-only; set by progress only. |
+| `CurrentState` | `string` | `[NotMapped]` Latest progress state (localized). | List + detail; row color via `PrimaryStateCode`. |
 | `IsWorkflowTerminal` | `bool` | `[NotMapped]` Issued, rejected, or cancelled at migration service. | Locks header + child collections on detail. |
 
 **Removed / not on `Application` today:** persisted `Company`, `CompanyHead`, `Representative`, `ApplicationReason`, `ExpirationDate`, `CurrentState` FK. Company letterhead uses **singletons** (`CompanyProfile`, signatory/representative) via `[NotMapped]` aliases (`Application_Company_*`, `Application_CompanyHead_*`). See [`docs/DEPRECATED.md`](../../docs/DEPRECATED.md).

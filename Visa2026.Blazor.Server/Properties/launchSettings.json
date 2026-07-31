@@ -15,41 +15,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Visa2026 - LocalDB": {
+    "Visa2026 - PostgreSQL": {
       "commandName": "Project",
       "launchBrowser": true,
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "FORCE_XAF_DB_UPDATE": "true",
-        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;MultipleActiveResultSets=true"
-      }
-    },
-    "Visa2026 - Docker SQL": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "applicationUrl": "https://localhost:5001;http://localhost:5000",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "Visa2026 - EasyTest (LocalDB)": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5050",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026EasyTest;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True",
-        "VISA2026_EASYTEST": "true"
-      }
-    },
-    "Visa2026 - Migration import (LocalDB)": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5002",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ConnectionStrings__DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;MultipleActiveResultSets=true"
+        "ConnectionStrings__DefaultConnection": "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres"
       }
     }
   }

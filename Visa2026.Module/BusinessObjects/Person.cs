@@ -35,6 +35,7 @@ namespace Visa2026.Module.BusinessObjects
     [Appearance("FamilyRelationDocumentsFamilyMemberOnly_Layout", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "PersonRole != ##Enum#Visa2026.Module.BusinessObjects.PersonRecordRole,FamilyMember#", Context = "DetailView", TargetItems = "FamilyRelationDocuments")]
     [Appearance("VisaFamilyManualTextEmployeeOnly", AppearanceItemType = "ViewItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView", TargetItems = "VisaApplicationFamilyMembersText")]
     [Appearance("VisaFamilyManualTextEmployeeOnly_Layout", AppearanceItemType = "LayoutItem", TargetItems = "VisaApplicationFamilyMembersText", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = PersonRoleHelper.NotEmployeeCriteria, Context = "DetailView")]
+    [Appearance("PersonIncompleteTab_HideWhenComplete", AppearanceItemType = "LayoutItem", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "IsDataIncomplete = False", Context = "DetailView", TargetItems = "IncompleteData")]
     [SupportsOptionalDetailFields]
     public class Person : BaseObject, IOptionalDetailFields
     {
@@ -207,12 +208,19 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
+        /// <summary>ListView link column that opens the person dossier DetailView.</summary>
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("AllowEdit", "False")]
+        public string DossierListLink => string.Empty;
+
         /// <summary>ListView link column that opens person document copies in the preview slot.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]
         [VisibleInLookupListView(false)]
         [ModelDefault("AllowEdit", "False")]
-        public string DocumentCopiesListLink => VisaUiMessages.Get("PersonDocumentCopies.List.ColumnLink");
+        public string DocumentCopiesListLink => string.Empty;
 
         /// <summary>Latest rejection line for this person (replaces removed <c>CurrentRejectionItemID</c> FK).</summary>
         [NotMapped]
@@ -255,6 +263,125 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>Optional; hidden behind detail-view gear when empty.</summary>
         public virtual bool IsArchived { get; set; }
+
+        /// <summary>
+        /// Officer soft flag: person master data is incomplete for migration work.
+        /// Does not block applications; set/cleared only via Mark incomplete / Mark complete.
+        /// Not shown on ListView; DetailView Incomplete data tab when flagged.
+        /// </summary>
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Incomplete")]
+        public virtual bool IsDataIncomplete { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Personal data")]
+        public virtual bool IncompleteMissingPersonalData { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Passport")]
+        public virtual bool IncompleteMissingPassport { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: CV")]
+        public virtual bool IncompleteMissingCv { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Photo")]
+        public virtual bool IncompleteMissingPhoto { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Education")]
+        public virtual bool IncompleteMissingEducation { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Medical")]
+        public virtual bool IncompleteMissingMedical { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Address")]
+        public virtual bool IncompleteMissingAddress { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Family docs")]
+        public virtual bool IncompleteMissingFamilyDocs { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing: Other")]
+        public virtual bool IncompleteMissingOther { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Incomplete notes")]
+        [FieldSize(FieldSizeAttribute.Unlimited)]
+        public virtual string IncompleteNotes { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy HH:mm}")]
+        [XafDisplayName("Incomplete marked on")]
+        public virtual DateTime? IncompleteMarkedOn { get; set; }
+
+        [ExcludeFromOptionalDetailFields]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [MaxLength(255)]
+        [XafDisplayName("Incomplete marked by")]
+        public virtual string IncompleteMarkedBy { get; set; }
+
+        /// <summary>Read-only summary of checked missing areas (Incomplete data tab).</summary>
+        [ExcludeFromOptionalDetailFields]
+        [NotMapped]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Missing areas")]
+        public string IncompleteMissingAreasDisplay =>
+            PersonIncompleteDataLabels.FormatMissingAreas(
+                IncompleteMissingPersonalData,
+                IncompleteMissingPassport,
+                IncompleteMissingCv,
+                IncompleteMissingPhoto,
+                IncompleteMissingEducation,
+                IncompleteMissingMedical,
+                IncompleteMissingAddress,
+                IncompleteMissingFamilyDocs,
+                IncompleteMissingOther);
+
 		[ImageEditor(ListViewImageEditorCustomHeight = 75, DetailViewImageEditorFixedHeight = 150)]
 		public virtual byte[] Photo { get; set; }
 

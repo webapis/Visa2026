@@ -155,10 +155,9 @@ Typical when contract has one `MinistryLeg` (e.g. GT-15 or Şatlyk‑1 gysga).
 
 ```mermaid
 flowchart LR
-  A["IS_BEING_PREPARED @ AT_OFFICE"] --> B["1_REVIEW_STARTED @ AT_THE_MINISTERY_1"]
-  B --> C["1_REVIEW_APPROVED @ AT_THE_MINISTERY_1"]
-  C --> D["PROCESS_STARTED @ AT_MIGRATION_SERVICE"]
-  D --> E["PROCESS_ISSUED"]
+  A["IS_BEING_PREPARED @ AT_OFFICE"] --> B["1_REVIEW_APPROVED @ AT_THE_MINISTERY_1"]
+  B --> C["PROCESS_STARTED @ AT_MIGRATION_SERVICE"]
+  C --> D["PROCESS_ISSUED"]
 ```
 
 After first ministry approval, the file goes **straight to migration** (no `2_REVIEW_*`).
@@ -169,12 +168,10 @@ Typical for Şatlyk‑1 (2 ministrlik) or legacy `FirstAndSecondMinistry`.
 
 ```mermaid
 flowchart LR
-  A["IS_BEING_PREPARED @ AT_OFFICE"] --> B["1_REVIEW_STARTED @ AT_THE_MINISTERY_1"]
-  B --> C["1_REVIEW_APPROVED @ AT_THE_MINISTERY_1"]
-  C --> D["2_REVIEW_STARTED @ AT_THE_MINISTERY_2"]
-  D --> E["2_REVIEW_APPROVED @ AT_THE_MINISTERY_2"]
-  E --> F["PROCESS_STARTED @ AT_MIGRATION_SERVICE"]
-  F --> G["PROCESS_ISSUED"]
+  A["IS_BEING_PREPARED @ AT_OFFICE"] --> B["1_REVIEW_APPROVED @ AT_THE_MINISTERY_1"]
+  B --> C["2_REVIEW_APPROVED @ AT_THE_MINISTERY_2"]
+  C --> D["PROCESS_STARTED @ AT_MIGRATION_SERVICE"]
+  D --> E["PROCESS_ISSUED"]
 ```
 
 Three or more legs follow the same pattern through `ApplicationProgressLegCodes` (legs 3–5).

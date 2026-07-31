@@ -28,7 +28,7 @@
       <Action Id="ShowInDocument" Caption="Показать в документе" />
       <Action Id="GenerateApplicationPdfBatch" Caption="Создать PDF" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Копии документов" />
-      <Action Id="ViewApplicationItemWordReports" Caption="Документы" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Шаблоны" />
       <Action Id="ShowMyPdfBatches" Caption="Мои PDF-задачи" />
       <Action Id="ResetSyncRules" Caption="Сбросить правила" />
       <Action Id="ValidateSyncRules" Caption="Проверить правила" />
@@ -41,7 +41,7 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Открыть заявку" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Открыть заявку" />
       <Action Id="CloneSyncRule" Caption="Клонировать правило" />
-      <Action Id="GenerateWordReports" Caption="Документы" />
+      <Action Id="GenerateWordReports" Caption="Шаблоны" />
       <Action Id="OpenSourceObject" Caption="Открыть исходный объект" />
       <Action Id="OpenTargetObject" Caption="Открыть целевой объект" />
       <Action Id="DialogOK" Caption="ОК" />
@@ -81,7 +81,6 @@
       <Item Id="Housing" Caption="Проживание" />
       <Item Id="Invitation" Caption="Приглашения" />
       <Item Id="InvitationItem" Caption="Позиции приглашения" />
-      <Item Id="LegacySyncDashboard" Caption="Синхронизация с устаревшей системой" />
       <Item Id="Lookup" Caption="Справочники">
         <Items>
           <Item Id="Application" Caption="Заявка">
@@ -166,6 +165,7 @@
       <Item Id="Recycle Bin" Caption="Корзина" />
       <Item Id="Rejection" Caption="Отказы" />
       <Item Id="RejectionItem" Caption="Позиции отказа" />
+      <Item Id="ReportDashboard" Caption="Панель отчётов" />
       <Item Id="Reports" Caption="Отчёты" />
       <Item Id="StateNotifications" Caption="Уведомления о состоянии" />
       <Item Id="System" Caption="Система" />
@@ -209,13 +209,13 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии адреса проживания" />
+        <Member Name="Documents" Caption="Копии адреса" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="FullAddress" Caption="Полный адрес" />
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="Lodging" Caption="Проживание" />
-        <Member Name="LodgingDocuments" Caption="Копии проживания" />
+        <Member Name="LodgingDocuments" Caption="Копии жилья" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Region" Caption="Регион" />
         <Member Name="StartDate" Caption="Дата начала" />
@@ -246,16 +246,23 @@
         <Member Name="IsActive" Caption="Активен" />
         <Member Name="IsForFamily" Caption="Для семьи" />
         <Member Name="IsManualEntry" Caption="Ручной ввод" />
+        <Member Name="LatestProgressDate" Caption="Дата прогресса" />
+        <Member Name="LatestProgressState" Caption="Состояние" />
         <Member Name="MigrationService" Caption="Миграционная служба" />
+        <Member Name="MigrationSlaStatement" Caption="Срок миграции" />
         <Member Name="Month" Caption="Месяц" />
         <Member Name="MovementPermitLocation" Caption="Место разрешения на перемещение" />
+        <Member Name="ProgressSlaStatement" Caption="Срок согласования" />
         <Member Name="ProjectContract" Caption="Контракт проекта" />
         <Member Name="Rejections" Caption="Отказы" />
         <Member Name="Representative" Caption="Представитель" />
+        <Member Name="TotalPersonCount" Caption="Количество лиц" />
         <Member Name="Urgency" Caption="Срочность" />
         <Member Name="VisaCategory" Caption="Категория визы" />
         <Member Name="VisaPeriod" Caption="Срок визы" />
         <Member Name="VisaType" Caption="Тип визы" />
+        <Member Name="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <Member Name="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <Member Name="WorkPermits" Caption="РНТ" />
         <Member Name="Year" Caption="Год" />
       </OwnMembers>
@@ -568,6 +575,18 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Группа типов заявок">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Участник группы типов заявок">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Пользователь">
       <OwnMembers>
         <Member Name="ChangePasswordOnFirstLogon" Caption="Сменить пароль при первом входе" />
@@ -700,6 +719,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
+        <Member Name="Documents" Caption="Копии приграничной зоны" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Элемент погран. зоны">
@@ -901,7 +921,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии дипломов" />
+        <Member Name="Documents" Caption="Копии диплома" />
         <Member Name="EducationCountry" Caption="Страна обучения" />
         <Member Name="EducationDescription" Caption="Описание образования" />
         <Member Name="EducationInstitution" Caption="Учебное заведение" />
@@ -1181,7 +1201,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии проживания" />
+        <Member Name="Documents" Caption="Копии жилья" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.MailMergeVisibility" Caption="Видимость Mail Merge">
@@ -1237,7 +1257,7 @@
         <Member Name="DaysRemaining" Caption="Осталось дней" />
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="DocumentNumber" Caption="Номер документа" />
-        <Member Name="Documents" Caption="Копии мед. записи" />
+        <Member Name="Documents" Caption="Копии медицинской записи" />
         <Member Name="ExpirationDate" Caption="Дата окончания" />
         <Member Name="ExpirationState" Caption="Статус срока" />
         <Member Name="IssueDate" Caption="Дата выдачи" />
@@ -1345,47 +1365,6 @@
       <OwnMembers>
         <Member Name="Entry" Caption="Въезд" />
         <Member Name="Exit" Caption="Выезд" />
-      </OwnMembers>
-    </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Тип организации">
-      <OwnMembers>
-        <Member Name="Application" Caption="Заявка" />
-        <Member Name="Code" Caption="Код" />
-        <Member Name="Company" Caption="Компания" />
-        <Member Name="CurrentState" Caption="Состояние" />
-        <Member Name="Date" Caption="Дата" />
-        <Member Name="DateDeleted" Caption="Дата удаления" />
-        <Member Name="DaysRemaining" Caption="Осталось дней" />
-        <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Department" Caption="Отдел" />
-        <Member Name="Description" Caption="Описание" />
-        <Member Name="EndDate" Caption="Дата окончания" />
-        <Member Name="ExpirationDate" Caption="Срок действия" />
-        <Member Name="ExpirationState" Caption="Статус срока" />
-        <Member Name="ExtensionRequired" Caption="Требуется продление" />
-        <Member Name="File" Caption="Файл" />
-        <Member Name="FullAddress" Caption="Полный адрес" />
-        <Member Name="HasInvitation" Caption="Есть приглашение" />
-        <Member Name="HistoricalImport" Caption="Историческая запись (без заявки)" />
-        <Member Name="InvitationItem" Caption="Позиция приглашения" />
-        <Member Name="IsActive" Caption="Активен" />
-        <Member Name="IsCancelled" Caption="Отменено" />
-        <Member Name="IsChanged" Caption="Изменено" />
-        <Member Name="IsDefault" Caption="По умолчанию" />
-        <Member Name="IsExtended" Caption="Продлено" />
-        <Member Name="IssueDate" Caption="Дата выдачи" />
-        <Member Name="IssuingApplicationItem" Caption="Позиция заявки на выдачу" />
-        <Member Name="Location" Caption="Место" />
-        <Member Name="Name" Caption="Имя" />
-        <Member Name="NameTm" Caption="Название (Tm)" />
-        <Member Name="Notes" Caption="Примечания" />
-        <Member Name="Passport" Caption="Паспорт" />
-        <Member Name="Person" Caption="Лицо" />
-        <Member Name="Position" Caption="Должность" />
-        <Member Name="RegistrationState" Caption="Статус регистрации" />
-        <Member Name="StartDate" Caption="Дата начала" />
-        <Member Name="State" Caption="Состояние" />
-        <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Паспорт">
@@ -1510,7 +1489,9 @@
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DateOfBirth" Caption="Дата рождения" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии файлов лица" />
+        <Member Name="DocumentCopiesListLink" Caption="Копии" />
+        <Member Name="Documents" Caption="Резюме и личные файлы" />
+        <Member Name="DossierListLink" Caption="Досье" />
         <Member Name="Educations" Caption="Образование" />
         <Member Name="Email" Caption="Эл. почта" />
         <Member Name="EmployeeContracts" Caption="Трудовые договоры" />
@@ -1606,7 +1587,7 @@
         <Member Name="DeletedBy" Caption="Удалил" />
         <Member Name="Department" Caption="Отдел" />
         <Member Name="Description" Caption="Примечание" />
-        <Member Name="Documents" Caption="Копии контракта проекта" />
+        <Member Name="Documents" Caption="Копии проектного договора" />
         <Member Name="EndDate" Caption="Дата окончания" />
         <Member Name="ExpirationDate" Caption="Срок действия" />
         <Member Name="ExpirationState" Caption="Статус срока" />
@@ -1790,6 +1771,12 @@
         <Member Name="StartDate" Caption="Дата начала" />
         <Member Name="State" Caption="Состояние" />
         <Member Name="ValidityDuration" Caption="Срок действия" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost" Caption="Панель отчётов">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Видимость отчёта">
@@ -1987,6 +1974,12 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Шаблон отчёта">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Дата удаления" />
+        <Member Name="DeletedBy" Caption="Удалил" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Шаблон отчёта — группа типов заявок">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
@@ -2283,7 +2276,7 @@
         <Member Name="Application" Caption="Заявка" />
         <Member Name="DateDeleted" Caption="Дата удаления" />
         <Member Name="DeletedBy" Caption="Удалил" />
-        <Member Name="Documents" Caption="Копии РНТ" />
+        <Member Name="Documents" Caption="Копии разрешения на работу" />
         <Member Name="IsApplicationNotRequired" Caption="Заявка не требуется" />
         <Member Name="IsCancelled" Caption="Отменено" />
         <Member Name="IssuedDate" Caption="Дата выдачи" />
@@ -2376,9 +2369,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Адрес проживания" />
-          <LayoutGroup Id="Documents" Caption="Копии адреса проживания" />
-          <LayoutGroup Id="Documents_Group" Caption="Копии адреса проживания" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Копии проживания" />
+          <LayoutGroup Id="Documents" Caption="Копии адреса" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии адреса" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Копии жилья" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2419,7 +2412,14 @@
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
         <ColumnInfo Id="IsActive" Caption="Активен" />
         <ColumnInfo Id="IsManualEntry" Caption="Ручной ввод" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
+        <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
@@ -2429,7 +2429,14 @@
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
+        <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
@@ -2437,9 +2444,20 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Дата" />
         <ColumnInfo Id="ApplicationType" Caption="Тип" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Профиль согласования" />
         <ColumnInfo Id="CurrentState" Caption="Текущее состояние" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Номер" />
+        <ColumnInfo Id="LatestProgressDate" Caption="Дата прогресса" />
+        <ColumnInfo Id="LatestProgressState" Caption="Состояние" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Срок миграции" />
         <ColumnInfo Id="Month" Caption="Месяц" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Срок согласования" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Количество лиц" />
+        <ColumnInfo Id="Urgency" Caption="Срочность" />
+        <ColumnInfo Id="VisaPeriod" Caption="Срок визы" />
+        <ColumnInfo Id="VisaType" Caption="Тип визы" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="Рабочие дни" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Рабочие дни миграции" />
         <ColumnInfo Id="Year" Caption="Год" />
       </Columns>
     </ListView>
@@ -2467,7 +2485,7 @@
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Позиции заявки (напрямую в миграцию)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Позиции заявки (через министерства)" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Копии документов" />
-    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Документы" />
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Шаблоны" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Место заявки" />
     <ListView Id="ApplicationLocation_ListView" Caption="Места заявки" />
     <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Профиль SLA миграции" />
@@ -2485,13 +2503,16 @@
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Причина заявки" />
     <ListView Id="ApplicationReason_ListView" Caption="Причины заявки" />
-    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Документы" />
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Шаблоны" />
     <DetailView Id="ApplicationState_DetailView" Caption="Статус заявки" />
     <ListView Id="ApplicationState_ListView" Caption="Статусы заявки" />
     <DetailView Id="ApplicationType_DetailView" Caption="Тип заявки" />
     <ListView Id="ApplicationType_ListView" Caption="Типы заявки" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Фильтр типа заявки" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Фильтры типа" />
+    <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Группа типов заявок" />
+    <ListView Id="ApplicationTypeGroup_ListView" Caption="Группы типов заявок" />
+    <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Участник группы типов заявок" />
     <DetailView Id="ApplicationUser_DetailView" Caption="Пользователь">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2540,7 +2561,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Копии пограничной зоны" />
+            <LayoutGroup Id="Documents" Caption="Копии приграничной зоны" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>
@@ -2591,7 +2612,7 @@
     <DetailView Id="Education_DetailView" Caption="Образование">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents_Group" Caption="Копии дипломов" />
+          <LayoutGroup Id="Documents_Group" Caption="Копии диплома" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -2680,13 +2701,25 @@
     </ListView>
     <DetailView Id="LocalEmployee_DetailView" Caption="Местный сотрудник" />
     <ListView Id="LocalEmployee_ListView" Caption="Местные сотрудники" />
-    <DetailView Id="Lodging_DetailView" Caption="Проживание" />
+    <DetailView Id="Lodging_DetailView" Caption="Проживание">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии жилья" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Lodging_ListView" Caption="Проживание" />
     <DetailView Id="MailMergeVisibility_DetailView" Caption="Видимость Mail Merge" />
     <ListView Id="MailMergeVisibility_ListView" Caption="Видимость Mail Merge" />
     <DetailView Id="MaritalStatus_DetailView" Caption="Семейное положение" />
     <ListView Id="MaritalStatus_ListView" Caption="Семейное положение" />
-    <DetailView Id="MedicalRecord_DetailView" Caption="Мед. запись" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Мед. запись">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии медицинской записи" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="MedicalRecord_ListView" Caption="Мед. записи">
       <Columns>
         <ColumnInfo Id="DaysRemaining" Caption="Осталось дней" />
@@ -2703,8 +2736,6 @@
     <ListView Id="MinistryReviewSlaSettings_ListView" Caption="SLA министерской проверки" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Место разрешения на перемещение" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Места разрешения" />
-    <DetailView Id="OrganizationType_DetailView" Caption="Тип организации" />
-    <ListView Id="OrganizationType_ListView" Caption="Типы организации" />
     <DetailView Id="Passport_DetailView" Caption="Паспорт">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2745,7 +2776,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Адреса проживания" />
           <LayoutGroup Id="ApplicationItems" Caption="Позиции заявки" />
-          <LayoutGroup Id="Documents" Caption="Копии файлов лица" />
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
           <LayoutGroup Id="Educations" Caption="Образование" />
           <LayoutGroup Id="EmployeeContracts" Caption="Трудовые договоры" />
           <LayoutGroup Id="FamilyMembers" Caption="Родственники" />
@@ -2775,6 +2806,7 @@
     <ListView Id="Person_DetailView_Employee" Caption="Сотрудник">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Резюме и личные файлы" />
           <LayoutGroup Id="Person" Caption="Сотрудник" />
         </LayoutGroup>
       </Layout>
@@ -2833,6 +2865,8 @@
         <ColumnInfo Id="CurrentVisa" Caption="Виза" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="Позиция РНТ" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Копии" />
+        <ColumnInfo Id="DossierListLink" Caption="Досье" />
         <ColumnInfo Id="FullName" Caption="ФИО" />
         <ColumnInfo Id="Gender" Caption="Пол" />
         <ColumnInfo Id="IsArchived" Caption="В архиве" />
@@ -2855,6 +2889,8 @@
         <ColumnInfo Id="CurrentRejectionItem" Caption="Позиция отказа" />
         <ColumnInfo Id="CurrentVisa" Caption="Виза" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Копии" />
+        <ColumnInfo Id="DossierListLink" Caption="Досье" />
         <ColumnInfo Id="FirstName" Caption="Имя" />
         <ColumnInfo Id="ForeignAddress" Caption="Иностранный адрес" />
         <ColumnInfo Id="ForeignAddressCountry" Caption="Страна иностр. адреса" />
@@ -2875,6 +2911,8 @@
       <Columns>
         <ColumnInfo Id="Age" Caption="Возраст" />
         <ColumnInfo Id="DateOfBirth" Caption="Дата рождения" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Копии" />
+        <ColumnInfo Id="DossierListLink" Caption="Досье" />
         <ColumnInfo Id="FullName" Caption="ФИО" />
         <ColumnInfo Id="Gender" Caption="Пол" />
         <ColumnInfo Id="IsArchived" Caption="В архиве" />
@@ -2895,7 +2933,13 @@
     </ListView>
     <DetailView Id="Position_DetailView" Caption="Должность" />
     <ListView Id="Position_ListView" Caption="Должности" />
-    <DetailView Id="ProjectContract_DetailView" Caption="Контракт проекта" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Контракт проекта">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Копии проектного договора" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="ProjectContract_ListView" Caption="Контракты проекта" />
     <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Этап министерства" />
     <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Этапы министерств" />
@@ -2978,6 +3022,7 @@
     </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Шаблон отчёта" />
     <ListView Id="UserReportTemplate_ListView" Caption="Шаблоны отчётов" />
+    <DetailView Id="UserReportTemplateApplicationTypeGroup_DetailView" Caption="Шаблон отчёта — группа типов заявок" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Срок действия" />
     <ListView Id="ValidityDuration_ListView" Caption="Сроки действия" />
     <DetailView Id="Visa_DetailView" Caption="Виза">
@@ -3040,7 +3085,7 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <TabbedGroup Id="Tabs">
-            <LayoutGroup Id="Documents" Caption="Копии РНТ" />
+            <LayoutGroup Id="Documents" Caption="Копии разрешения на работу" />
           </TabbedGroup>
         </LayoutGroup>
       </Layout>

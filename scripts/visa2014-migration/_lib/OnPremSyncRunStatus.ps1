@@ -1,18 +1,8 @@
-# Live sync-run status JSON for on-prem legacy sync (sync-run-status.json).
+# Live Import-run status JSON for on-prem legacy Import (sync-run-status.json).
 
 function Get-OnPremSyncRunStatusPath {
     param([string]$Root)
     Join-Path $Root 'sync-run-status.json'
-}
-
-function Get-OnPremSyncDashboardJsonPath {
-    param([string]$Root)
-    Join-Path $Root 'sync-dashboard.json'
-}
-
-function Get-OnPremSyncDashboardHtmlPath {
-    param([string]$Root)
-    Join-Path $Root 'sync-dashboard.html'
 }
 
 function Resolve-OnPremSyncStatusRoot {
@@ -59,8 +49,6 @@ function Initialize-OnPremSyncRunStatus {
     param(
         [string]$Root,
         [string]$RunId,
-        [string]$Mode,
-        [bool]$SyncFull,
         [string]$LegacySource,
         [string]$Profile,
         [string[]]$WaveNames,
@@ -89,8 +77,8 @@ function Initialize-OnPremSyncRunStatus {
         RunId         = $RunId
         StartedUtc    = $startedUtc
         UpdatedUtc    = $startedUtc
-        Mode          = $Mode
-        SyncFull      = $SyncFull
+        CompletedUtc  = $null
+        Mode          = 'Import'
         LegacySource  = $LegacySource
         Profile       = $Profile
         OverallStatus = 'Running'
@@ -117,13 +105,32 @@ function Set-OnPremSyncRunWaveStarted {
 
     $status.CurrentWave = $WaveName
     $status.OverallStatus = 'Running'
+    $found = $false
     foreach ($wave in @($status.Waves)) {
         if ($wave.Name -eq $WaveName) {
             $wave | Add-Member -NotePropertyName Status -NotePropertyValue 'Running' -Force
             $wave | Add-Member -NotePropertyName StartedUtc -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
             $wave | Add-Member -NotePropertyName LogFile -NotePropertyValue $LogFile -Force
+            $found = $true
             break
         }
+    }
+    # Resume / older status JSON may omit post-* waves — still show them in the live watch.
+    if (-not $found) {
+        $appended = [pscustomobject]@{
+            Name         = $WaveName
+            Status       = 'Running'
+            StartedUtc   = (Get-Date).ToUniversalTime().ToString('o')
+            CompletedUtc = $null
+            ExitCode     = $null
+            LogFile      = $LogFile
+            Inserted     = $null
+            Updated      = $null
+            SoftDeleted  = $null
+            Failed       = $null
+            LegacyRows   = $null
+        }
+        $status.Waves = @(@($status.Waves) + $appended)
     }
     Write-OnPremSyncRunStatus -Path $path -Status $status
 }
@@ -147,6 +154,13 @@ function Get-OnPremWaveLogStats {
         $stats.Inserted = [int]$Matches[1]
         $stats.Updated = [int]$Matches[2]
     }
+    # Headless --import-visa2014 reports Posted (not Inserted/Updated).
+    if ($null -eq $stats.Inserted -and $text -match 'INF Posted:\s*(\d+)') {
+        $stats.Inserted = [int]$Matches[1]
+    }
+    if ($null -eq $stats.Updated -and $text -match 'INF Patched:\s*(\d+)') {
+        $stats.Updated = [int]$Matches[1]
+    }
     if ($text -match 'Soft-deleted:\s*(\d+)') {
         $stats.SoftDeleted = [int]$Matches[1]
     }
@@ -155,6 +169,22 @@ function Get-OnPremWaveLogStats {
     }
     if ($text -match 'INF (\S+) legacy rows:\s*(\d+)') {
         $stats.LegacyRows = [int]$Matches[2]
+    }
+    elseif ($text -match 'INF Legacy SQL rows:\s*(\d+)') {
+        $stats.LegacyRows = [int]$Matches[1]
+    }
+    elseif ($null -eq $stats.LegacyRows -and $text -match 'INF Prepared:\s*(\d+)') {
+        $stats.LegacyRows = [int]$Matches[1]
+    }
+    # Post-import corrections (Visa IssuingApplicationItem / InvitationItem / VisaType, etc.)
+    if ($null -eq $stats.Updated -and $text -match 'INF \S+ updated:\s*(\d+)') {
+        $stats.Updated = [int]$Matches[1]
+    }
+    if ($null -eq $stats.Inserted -and $null -ne $stats.Updated) {
+        $stats.Inserted = $stats.Updated
+    }
+    if ($null -eq $stats.LegacyRows -and $text -match 'INF Visas in (?:id-map|scope):\s*(\d+)') {
+        $stats.LegacyRows = [int]$Matches[1]
     }
     return $stats
 }
@@ -175,6 +205,7 @@ function Set-OnPremSyncRunWaveCompleted {
     $stats = Get-OnPremWaveLogStats -LogFile $logPath
     $waveStatus = if ($ExitCode -eq 0) { 'Completed' } else { 'Failed' }
 
+    $found = $false
     foreach ($wave in @($status.Waves)) {
         if ($wave.Name -eq $WaveName) {
             $wave | Add-Member -NotePropertyName Status -NotePropertyValue $waveStatus -Force
@@ -186,8 +217,25 @@ function Set-OnPremSyncRunWaveCompleted {
                     $wave | Add-Member -NotePropertyName $key -NotePropertyValue $stats[$key] -Force
                 }
             }
+            $found = $true
             break
         }
+    }
+    if (-not $found) {
+        $appended = [pscustomobject]@{
+            Name         = $WaveName
+            Status       = $waveStatus
+            StartedUtc   = $null
+            CompletedUtc = (Get-Date).ToUniversalTime().ToString('o')
+            ExitCode     = $ExitCode
+            LogFile      = $logPath
+            Inserted     = $stats.Inserted
+            Updated      = $stats.Updated
+            SoftDeleted  = $stats.SoftDeleted
+            Failed       = $stats.Failed
+            LegacyRows   = $stats.LegacyRows
+        }
+        $status.Waves = @(@($status.Waves) + $appended)
     }
 
     if ($status.CurrentWave -eq $WaveName) {
@@ -207,9 +255,9 @@ function Complete-OnPremSyncRunStatus {
     $status = Read-OnPremSyncRunStatus -Path $path
     if (-not $status) { return }
 
-    $status.OverallStatus = $OverallStatus
-    $status.CurrentWave = $null
-    $status.CompletedUtc = (Get-Date).ToUniversalTime().ToString('o')
+    $status | Add-Member -NotePropertyName OverallStatus -NotePropertyValue $OverallStatus -Force
+    $status | Add-Member -NotePropertyName CurrentWave -NotePropertyValue $null -Force
+    $status | Add-Member -NotePropertyName CompletedUtc -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
     Write-OnPremSyncRunStatus -Path $path -Status $status
 }
 
@@ -233,4 +281,41 @@ function Get-OnPremSyncWaveSummary {
         }
     }
     return $summary
+}
+
+
+function Append-OnPremSyncRunWaves {
+    param(
+        [string]$Root,
+        [string[]]$WaveNames
+    )
+    if (-not $WaveNames -or $WaveNames.Count -eq 0) { return }
+    $path = Get-OnPremSyncRunStatusPath -Root $Root
+    $status = Read-OnPremSyncRunStatus -Path $path
+    if (-not $status) { return }
+
+    $existing = @{}
+    foreach ($w in @($status.Waves)) {
+        if ($w.Name) { $existing[[string]$w.Name] = $true }
+    }
+    $list = New-Object System.Collections.Generic.List[object]
+    foreach ($w in @($status.Waves)) { [void]$list.Add($w) }
+    foreach ($name in $WaveNames) {
+        if ($existing.ContainsKey($name)) { continue }
+        [void]$list.Add([pscustomobject][ordered]@{
+            Name         = $name
+            Status       = 'Pending'
+            StartedUtc   = $null
+            CompletedUtc = $null
+            ExitCode     = $null
+            LogFile      = $null
+            Inserted     = $null
+            Updated      = $null
+            SoftDeleted  = $null
+            Failed       = $null
+            LegacyRows   = $null
+        })
+    }
+    $status | Add-Member -NotePropertyName Waves -NotePropertyValue $list.ToArray() -Force
+    Write-OnPremSyncRunStatus -Path $path -Status $status
 }

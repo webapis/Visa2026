@@ -46,88 +46,104 @@
         }
         else
         {
-            <div class="app-item-doc-copies__groups">
-                @foreach (var entry in CatalogEntries)
-                {
-                    <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
-                        <div class="app-item-doc-copies__group-head">
-                            <label class="app-report-package__include">
-                                <input type="checkbox"
-                                       checked="@IsSelected(entry)"
-                                       @onchange="e => OnIncludeChanged(entry, e)" />
-                                <span class="app-item-doc-copies__group-label">@entry.DisplayName</span>
-                                <span class="app-report-package__format-badge">@FormatKind(entry.Kind)</span>
-                            </label>
-                            <div class="app-report-package__entry-actions">
-                                <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
-                                    @ReadinessLabel(entry)
+            <div class="resminamalar-catalog">
+                <div class="resminamalar-catalog__cards">
+                    @foreach (var entry in CatalogEntries)
+                    {
+                        <section class="@GetEntryCssClass(entry, IsSelected(entry))" aria-label="@entry.DisplayName">
+                            <div class="resminamalar-catalog__card-head">
+                                <label class="resminamalar-catalog__include" title="@entry.DisplayName">
+                                    <input type="checkbox"
+                                           checked="@IsSelected(entry)"
+                                           @onchange="e => OnIncludeChanged(entry, e)" />
+                                </label>
+                                <span class="resminamalar-catalog__nav-icon @ResminamalarCatalogFormatIcons.CssClass(entry.Kind)"
+                                      aria-hidden="true">
+                                    @((MarkupString)ResminamalarCatalogFormatIcons.Svg(entry.Kind))
                                 </span>
-                                @if (IsPreviewingEntry(entry))
-                                {
-                                    <span class="app-report-package__preview-busy-label" role="status">
-                                        @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
+                                <div class="resminamalar-catalog__main">
+                                    <span class="resminamalar-catalog__title">@entry.DisplayName</span>
+                                    <span class="resminamalar-catalog__summary">@FormatKindSummary(entry)</span>
+                                </div>
+                                <div class="resminamalar-catalog__actions">
+                                    <span class="app-report-package__readiness @GetReadinessCssClass(entry)">
+                                        @ReadinessLabel(entry)
                                     </span>
-                                }
-                                else
-                                {
-                                    @if (ShowDetails && CanEditTemplate(entry))
+                                    @if (IsPreviewingEntry(entry))
                                     {
-                                        <DxButton Text="@Msg("ApplicationReportPackage.EditTemplate")"
+                                        <span class="app-report-package__preview-busy-label" role="status">
+                                            @FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @if (ShowDetails && CanEditTemplate(entry))
+                                        {
+                                            <DxButton Text="@Msg("ApplicationReportPackage.EditTemplate")"
+                                                      RenderStyle="ButtonRenderStyle.Link"
+                                                      SizeMode="SizeMode.Small"
+                                                      CssClass="app-item-doc-copies__action-btn"
+                                                      title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")"
+                                                      Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null)"
+                                                      Click="@(() => EditTemplateAsync(entry))" />
+                                            @if (IsDownloadedForEdit(entry))
+                                            {
+                                                <span class="app-report-package__staging-badge" role="status">
+                                                    @Msg("ApplicationReportPackage.EditTemplate.OnDownloaded")
+                                                </span>
+                                            }
+                                        }
+                                        <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
                                                   RenderStyle="ButtonRenderStyle.Link"
                                                   SizeMode="SizeMode.Small"
                                                   CssClass="app-item-doc-copies__action-btn"
-                                                  title="@Msg("ApplicationReportPackage.EditTemplate.Tooltip")"
-                                                  Enabled="@(!_packageBusy && !_previewBusy && !_refreshBusy && !_syncBusy && _editTemplateId == null)"
-                                                  Click="@(() => EditTemplateAsync(entry))" />
-                                        @if (IsDownloadedForEdit(entry))
-                                        {
-                                            <span class="app-report-package__staging-badge" role="status">
-                                                @Msg("ApplicationReportPackage.EditTemplate.OnDownloaded")
-                                            </span>
-                                        }
+                                                  Enabled="@(!_packageBusy && !_previewBusy)"
+                                                  Click="@(() => PreviewEntryAsync(entry))" />
                                     }
-                                    <DxButton Text="@Msg("ApplicationReportPackage.Preview")"
-                                              RenderStyle="ButtonRenderStyle.Link"
-                                              SizeMode="SizeMode.Small"
-                                              CssClass="app-item-doc-copies__action-btn"
-                                              Enabled="@(!_packageBusy && !_previewBusy)"
-                                              Click="@(() => PreviewEntryAsync(entry))" />
-                                }
-                            </div>
-                        </div>
-                        @if (IsPreviewingEntry(entry))
-                        {
-                            <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
-                                 aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)">
-                                <div class="app-report-package__preview-progress-track">
-                                    <div class="app-report-package__preview-progress-indeterminate"></div>
                                 </div>
                             </div>
-                        }
-                        <div class="app-item-doc-copies__status">
-                            @if (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))
+                            @if (IsPreviewingEntry(entry) || HasCardDetails(entry))
                             {
-                                <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
+                                <div class="resminamalar-catalog__card-body">
+                                    @if (IsPreviewingEntry(entry))
+                                    {
+                                        <div class="app-report-package__entry-progress" role="progressbar" aria-busy="true"
+                                             aria-label="@FormatMsg("ApplicationReportPackage.Preview.Downloading", entry.DisplayName)">
+                                            <div class="app-report-package__preview-progress-track">
+                                                <div class="app-report-package__preview-progress-indeterminate"></div>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (HasCardDetails(entry))
+                                    {
+                                        <div class="app-item-doc-copies__status">
+                                            @if (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))
+                                            {
+                                                <p class="app-item-doc-copies__summary">@entry.OutputFileName</p>
+                                            }
+                                            @if (ShowDetails)
+                                            {
+                                                @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
+                                                {
+                                                    <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
+                                                }
+                                                @if (entry.ReadinessHints.Count > 0)
+                                                {
+                                                    <ul class="app-report-package__hints">
+                                                        @foreach (var hint in entry.ReadinessHints)
+                                                        {
+                                                            <li class="app-report-package__hint">@FormatHint(hint)</li>
+                                                        }
+                                                    </ul>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                </div>
                             }
-                            @if (ShowDetails)
-                            {
-                                @if (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey))
-                                {
-                                    <p class="app-item-doc-copies__hint app-item-doc-copies__hint--warning">@Msg(entry.ReadinessMessageKey)</p>
-                                }
-                                @if (entry.ReadinessHints.Count > 0)
-                                {
-                                    <ul class="app-report-package__hints">
-                                        @foreach (var hint in entry.ReadinessHints)
-                                        {
-                                            <li class="app-report-package__hint">@FormatHint(hint)</li>
-                                        }
-                                    </ul>
-                                }
-                            }
-                        </div>
-                    </section>
-                }
+                        </section>
+                    }
+                </div>
             </div>
         }
     </div>
@@ -447,6 +463,16 @@
             _ => ".docx"
         };
 
+    private static string FormatKindSummary(ApplicationWordReportPackageCatalogEntry entry) =>
+        entry.Kind == ApplicationWordReportPackageEntryKind.UserExcel
+            ? $"Excel · {FormatKind(entry.Kind)}"
+            : $"Word · {FormatKind(entry.Kind)}";
+
+    private bool HasCardDetails(ApplicationWordReportPackageCatalogEntry entry) =>
+        (!UseInlinePreview && !string.IsNullOrWhiteSpace(entry.OutputFileName))
+        || (ShowDetails
+            && (!string.IsNullOrWhiteSpace(entry.ReadinessMessageKey) || entry.ReadinessHints.Count > 0));
+
     private bool CanEditTemplate(ApplicationWordReportPackageCatalogEntry entry) =>
         _canEditUserTemplates
         && entry.UserReportTemplateId is Guid templateId
@@ -618,7 +644,7 @@
             : entry.Readiness == ApplicationWordReportPackageReadinessLevel.Warning
                 ? "app-report-package__entry--warning"
                 : "app-report-package__entry--ready";
-        return $"app-item-doc-copies__group app-report-package__entry {stateClass}";
+        return $"resminamalar-catalog__card app-report-package__entry {stateClass}";
     }
 
     private static string GetReadinessCssClass(ApplicationWordReportPackageCatalogEntry entry) =>

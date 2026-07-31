@@ -18,6 +18,14 @@ internal static class Visa2014IdMapHelper
         return map;
     }
 
+    /// <summary>Like <see cref="Load"/> but returns empty map when the file is missing (fresh reimport).</summary>
+    public static Dictionary<Guid, Guid> LoadOrEmpty(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return new Dictionary<Guid, Guid>();
+        return Load(path);
+    }
+
     public static Dictionary<string, Guid> LoadStringKeyMap(string path)
     {
         if (!File.Exists(path))

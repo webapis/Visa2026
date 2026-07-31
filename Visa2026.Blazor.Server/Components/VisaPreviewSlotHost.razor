@@ -5,7 +5,7 @@
 @using Visa2026.Module.Services.HeaderLinkedDocuments
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
-@using Visa2026.Blazor.Server.Services
+@using Visa2026.Blazor.Server.Controllers
 @implements IAsyncDisposable
 
 @if (_state.Mode == VisaPreviewSlotMode.File)
@@ -56,6 +56,7 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
     [Inject] private IJSRuntime JS { get; set; } = null!;
     [Inject] private ApplicationProgressMinistryLetterFileAccess FileAccess { get; set; } = null!;
+    [Inject] private PersonDossierNavigationHelper DossierNavigation { get; set; } = null!;
 
     private VisaPreviewSlotState _state = new();
     private VisaFilePreviewDrawer? _fileDrawer;
@@ -202,6 +203,25 @@ else if (_state.Mode == VisaPreviewSlotMode.PlaceholderManual)
 
     [JSInvokable]
     public void MarkPersonDocumentCopiesLinkClickPending() => PersonDocumentCopiesLinkClickGate.MarkPending();
+
+    [JSInvokable]
+    public Task OpenPersonDossierFromJsAsync(string personIdText)
+    {
+        if (!Guid.TryParse(personIdText, out var personId) || personId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return InvokeAsync(() =>
+        {
+            if (PersonListViewDossierOpenBridge.TryOpenDossier(personId))
+                return;
+
+            PersonDossierLinkClickGate.MarkPending();
+            DossierNavigation.OpenDossier(personId);
+        });
+    }
+
+    [JSInvokable]
+    public void MarkPersonDossierLinkClickPending() => PersonDossierLinkClickGate.MarkPending();
 
     [JSInvokable]
     public Task OpenHeaderDocumentCopiesFromJsAsync(string familyText, string parentIdText, string contextItemIdText)

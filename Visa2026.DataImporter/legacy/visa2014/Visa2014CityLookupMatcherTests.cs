@@ -18,9 +18,26 @@ public sealed class Visa2014CityLookupMatcherTests
     }
 
     [Fact]
-    public void Resolve_WithRegion_DoesNotFallBackToOrphan()
+    public void Resolve_WithWrongRegion_FallsBackToUniqueRegionLinkedCity()
     {
         var cities = SampleCities();
+
+        var id = Visa2014CityLookupMatcher.Resolve(cities, "Turkmenbasy etraby", "Wrong welayaty");
+
+        Assert.Equal(CanonicalId, id);
+    }
+
+    [Fact]
+    public void Resolve_WithWrongRegion_DoesNotGuessWhenMultipleRegionLinked()
+    {
+        var cities = SampleCities();
+        cities.Add(new City
+        {
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+            NameTm = "Turkmenbasy etraby",
+            Region = new Region { NameTm = "Mary welayaty" },
+            RegionName = "Mary welayaty",
+        });
 
         var id = Visa2014CityLookupMatcher.Resolve(cities, "Turkmenbasy etraby", "Wrong welayaty");
 
@@ -35,6 +52,20 @@ public sealed class Visa2014CityLookupMatcherTests
         var id = Visa2014CityLookupMatcher.Resolve(cities, "Turkmenbasy etraby");
 
         Assert.Equal(CanonicalId, id);
+    }
+
+    [Fact]
+    public void Resolve_WithRegion_FallsBackToNameOnly_WhenNoCityHasRegionMetadata()
+    {
+        var cities = new List<City>
+        {
+            new() { Id = OrphanId, NameTm = "Mary etraby" },
+            new() { Id = CanonicalId, NameTm = "Mary etraby" },
+        };
+
+        var id = Visa2014CityLookupMatcher.Resolve(cities, "Mary etraby", "Mary welayaty");
+
+        Assert.Equal(OrphanId, id);
     }
 
     private static List<City> SampleCities() =>

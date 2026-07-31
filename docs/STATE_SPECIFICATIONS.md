@@ -1,8 +1,8 @@
-# State Dashboard — State Specifications
+# State specifications (evaluators / SQL)
 
-> **Purpose:** Single source of truth for every state shown on the State Dashboard.  
-> All dashboard UI, BO evaluators, and SQL views must conform to the definitions here.  
-> AI assistants and developers should read this file before implementing or modifying any state logic.
+> **Superseded UI:** The old **State Dashboard** home (`StateDashboardComponent`) was **removed**. Officer BI home is now the **[Report Dashboard](REPORT_DASHBOARD.md)**.  
+> **Purpose of this file:** criteria and status codes for BO evaluators, SQL views, ListView colors, and notifications — **not** home-page tile wiring.  
+> References to `StateDashboardComponent.razor` below are historical; do not reintroduce that UI.
 >
 > **This is a living document.** States are created, updated, and deleted throughout the life of the project.
 > Every change — add, modify, remove — must use the same design, patterns, and file structure as every other state.
@@ -442,14 +442,14 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 | Severity | Info |
 | Source | SQL |
 | Status | **Implemented** |
-| ApplicationState code | `1_REVIEW_STARTED` |
+| ApplicationState code | `1_REVIEW_APPROVED` (legacy: was `1_REVIEW_STARTED`) |
 | ApplicationTypes | `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext` |
-| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 1_REVIEW_STARTED` |
+| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 1_REVIEW_APPROVED` |
 
 **Criteria**
 - `Application.ApplicationType.Code` IN (`App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`)
 - `Application.IsDeleted = false`
-- Latest `ApplicationProgress.State.Code = 1_REVIEW_STARTED`
+- Latest `ApplicationProgress.State.Code = 1_REVIEW_APPROVED`
 
 **Action required:** Monitor — await 1st ministry response.
 
@@ -463,14 +463,14 @@ Evaluator: `VisaStateEvaluator` (BO states) | SQL View: `vw_VisaProcessStates` (
 | Severity | Info |
 | Source | SQL |
 | Status | **Implemented** |
-| ApplicationState code | `2_REVIEW_STARTED` |
+| ApplicationState code | `2_REVIEW_APPROVED` (legacy: was `2_REVIEW_STARTED`) |
 | ApplicationTypes | `App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext` |
-| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 2_REVIEW_STARTED` |
+| Dashboard link | Opens `VisaExtensionStatus_ListView` filtered by `CurrentState.Code = 2_REVIEW_APPROVED` |
 
 **Criteria**
 - `Application.ApplicationType.Code` IN (`App_Visa_Ext`, `App_Visa_Ext_According_to_WP`, `App_Visa_Ext_FM`, `App_Visa_and_WP_Ext`)
 - `Application.IsDeleted = false`
-- Latest `ApplicationProgress.State.Code = 2_REVIEW_STARTED`
+- Latest `ApplicationProgress.State.Code = 2_REVIEW_APPROVED`
 
 **Action required:** Monitor — await 2nd ministry response.
 

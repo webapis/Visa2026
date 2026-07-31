@@ -30,21 +30,37 @@ propertyGaps:
       disposition: synthesize
     - column: MinisteriesDocumentNumber
       disposition: synthesize
-      notes: Appended to Description on ministry_return step
+      notes: Description on leg 2 REVIEW_APPROVED (Energetika); leg 1 ministry implied from ApprovalLegProfile
     - column: DateForwardedToMinConstruction
       disposition: synthesize
       notes: Leg 2 when contract has ≥2 MinistryLegs (273 Çalik rows)
     - column: DocNumberForwardedToMinConstruction
       disposition: synthesize
+      notes: Description on leg 3 REVIEW_APPROVED (construction ministry) when profile has ≥3 legs
     - column: ProcessDate
       disposition: synthesize
+      notes: |
+        Işlenmäge başlanan sene — source of truth for migration-service processing.
+        → PROCESS_STARTED. Direct migration (ministryLegCount=0): also ⇒ PROCESS_ISSUED
+        (processing + completed). Ministry-routed: start only; issued from Inv/WP/extension.
     - column: ProcessNumber
       disposition: synthesize
+      notes: |
+        Işlenmäge başlanan belgi — optional ApplicationProgress.ProcessNumber on started/issued.
+        Does not alone imply PROCESS_ISSUED. Ministry-routed PROCESS_ISSUED from
+        ApplicationResult (Invitation), PersonInApplication.WorkPermit, or full extension
+        subtype-7 coverage (Visa.ProcessNumber→PIA OR immediate next passport sibling after
+        PIA.Visa; Inv/WP preferred when both present).
+        Application.ProcessNumber is denormalized from PROCESS_STARTED for captions.
     - column: Cancelled
       disposition: synthesize
       notes: Terminal PROCESS_CANCELLED override
     - column: Rejected
       disposition: synthesize
+      notes: |
+        Terminal PROCESS_REJECTED when Application.Rejected=1 OR full Rejection coverage
+        (ApplicationItem count == RejectionItem count via PIA vs PII on Result=Rejection).
+        Date prefers max Rejection IssuedDate, else ProcessDate, else prior step.
   targetOnly:
     - property: MinistryLetterFile
       disposition: defer
@@ -103,6 +119,12 @@ fields:
     transform: int
     missingBehavior: allow_null
     notes: 1-based workflow sequence within parent Application; set during legacy synthesis
+
+  - source: synthesis.processNumber
+    target: ProcessNumber
+    transform: string_trim
+    missingBehavior: allow_null
+    notes: Legacy Application.ProcessNumber on PROCESS_STARTED (and direct-migration PROCESS_ISSUED)
 
   - source: synthesis.description
     target: Description

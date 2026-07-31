@@ -45,6 +45,15 @@ internal static class Visa2014LookupTranslator
                     continue;
 
                 var map = new Dictionary<string, string>(StringComparer.Ordinal);
+                // Later YAML files (tenant overlays) merge into the same catalog: keep base
+                // values[] and let overlay keys override. Replacing wholesale wiped Person-wave
+                // Country aliases (e.g. UAE→ARE) when calik-energi set identityPassThrough + values:[].
+                if (result.TryGetValue(catalog.TargetCatalog, out var existing))
+                {
+                    foreach (var (legacy, target) in existing.LegacyToTarget)
+                        map[legacy] = target;
+                }
+
                 foreach (var row in catalog.Values ?? [])
                 {
                     if (string.IsNullOrWhiteSpace(row.Legacy) || string.IsNullOrWhiteSpace(row.Target))
@@ -55,15 +64,47 @@ internal static class Visa2014LookupTranslator
                 result[catalog.TargetCatalog] = new Visa2014LookupCatalog
                 {
                     TargetCatalog = catalog.TargetCatalog,
-                    TargetMatchProperty = catalog.TargetMatchProperty ?? "Name",
-                    UnmappedPolicy = catalog.UnmappedPolicy ?? "block_row",
-                    IdentityPassThrough = catalog.IdentityPassThrough,
+                    TargetMatchProperty = catalog.TargetMatchProperty
+                        ?? existing?.TargetMatchProperty
+                        ?? "Name",
+                    UnmappedPolicy = catalog.UnmappedPolicy
+                        ?? existing?.UnmappedPolicy
+                        ?? "block_row",
+                    // Overlay may enable identityPassThrough; once true in any file, keep it
+                    // unless this node explicitly sets false after a prior true (rare).
+                    IdentityPassThrough = catalog.IdentityPassThrough || (existing?.IdentityPassThrough ?? false),
                     LegacyToTarget = map,
                 };
             }
         }
 
+        TryEnrichCityByNameFromSeed(result);
         return result;
+    }
+
+    private static void TryEnrichCityByNameFromSeed(Dictionary<string, Visa2014LookupCatalog> catalogs)
+    {
+        foreach (var candidate in EnumerateCityJsonCandidates())
+        {
+            if (!File.Exists(candidate))
+                continue;
+            EnrichIdentityFromNameTmJson(catalogs, "CityByName", candidate);
+            return;
+        }
+    }
+
+    private static IEnumerable<string> EnumerateCityJsonCandidates()
+    {
+        // Published sync-host layout + local repo / F5 layouts.
+        yield return Path.Combine(AppContext.BaseDirectory, "LookupCatalogs", "city.json");
+        yield return Path.Combine(AppContext.BaseDirectory, "DatabaseUpdate", "LookupCatalogs", "city.json");
+
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        for (var i = 0; i < 8 && dir != null; i++, dir = dir.Parent)
+        {
+            yield return Path.Combine(dir.FullName, "Visa2026.Module", "DatabaseUpdate", "LookupCatalogs", "city.json");
+            yield return Path.Combine(dir.FullName, "LookupCatalogs", "city.json");
+        }
     }
 
     public static bool TryTranslate(
@@ -101,6 +142,16 @@ internal static class Visa2014LookupTranslator
             }
         }
 
+        // Fold-match against known target labels (CityByName identity maps, etc.)
+        foreach (var target in catalog.LegacyToTarget.Values.Distinct(StringComparer.Ordinal))
+        {
+            if (Visa2014CatalogMatchHelper.KeysEqual(target, trimmed))
+            {
+                targetValue = target;
+                return true;
+            }
+        }
+
         if (catalog.IdentityPassThrough)
         {
             targetValue = trimmed;
@@ -109,6 +160,60 @@ internal static class Visa2014LookupTranslator
 
         unmappedReason = $"unmapped_lookup:{catalogName}:{trimmed}";
         return catalog.UnmappedPolicy is "allow_null" or "skip_row";
+    }
+
+    public static IReadOnlyDictionary<string, Visa2014LookupCatalog> WithNameTmIdentityEnrich(
+        IReadOnlyDictionary<string, Visa2014LookupCatalog> catalogs,
+        string catalogName,
+        string jsonPath)
+    {
+        var mutable = new Dictionary<string, Visa2014LookupCatalog>(catalogs, StringComparer.Ordinal);
+        EnrichIdentityFromNameTmJson(mutable, catalogName, jsonPath);
+        return mutable;
+    }
+
+    /// <summary>
+    /// Adds identity legacy→target entries from a NameTm JSON catalog (e.g. city.json)
+    /// so CityByName fold-matching can resolve Application city labels.
+    /// </summary>
+    public static void EnrichIdentityFromNameTmJson(
+        IDictionary<string, Visa2014LookupCatalog> catalogs,
+        string catalogName,
+        string jsonPath)
+    {
+        if (!File.Exists(jsonPath) || !catalogs.TryGetValue(catalogName, out var catalog))
+            return;
+
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(jsonPath));
+            if (doc.RootElement.ValueKind != System.Text.Json.JsonValueKind.Array)
+                return;
+
+            var map = new Dictionary<string, string>(catalog.LegacyToTarget, StringComparer.Ordinal);
+            foreach (var row in doc.RootElement.EnumerateArray())
+            {
+                if (!row.TryGetProperty("NameTm", out var nameEl))
+                    continue;
+                var name = nameEl.GetString()?.Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+                map.TryAdd(name, name);
+            }
+
+            catalogs[catalogName] = new Visa2014LookupCatalog
+            {
+                TargetCatalog = catalog.TargetCatalog,
+                TargetMatchProperty = catalog.TargetMatchProperty,
+                UnmappedPolicy = catalog.UnmappedPolicy,
+                IdentityPassThrough = catalog.IdentityPassThrough,
+                LegacyToTarget = map,
+            };
+        }
+        catch
+        {
+            // Best-effort enrich; never fail Load for a missing/partial city seed.
+        }
     }
 
     private sealed class LookupRoot

@@ -744,7 +744,8 @@ After each import batch:
 | Check | How |
 |-------|-----|
 | Row counts | Source SQL count vs Visa2026 OData `$count` or SQL MCP on target |
-| Spot records | Compare key fields for N random legacy IDs via id-map |
+| **Mapping verify** | Property + lookup value expected vs actual — [MAPPING_VERIFICATION.md](VISA2014_MIGRATION/MAPPING_VERIFICATION.md) (`--verify-visa2014-mapping`; Application pilot) |
+| Spot records | Compare key fields for N random legacy IDs via id-map  |
 | Lookup integrity | No unresolved `lookup` transforms in import log |
 | OData errors | Log 400 responses; fix mapping or Web API exposure |
 | Files | Attachment count and file size checksums where applicable |

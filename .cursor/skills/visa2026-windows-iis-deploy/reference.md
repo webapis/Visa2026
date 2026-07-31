@@ -14,8 +14,24 @@ Officers use **HTTPS** on every slot. HTTP on the same port may redirect via URL
 |------|----------------------|--------------|-----------------|------|----------|---------|-----|-----|
 | **Production** | `https://<server>/LoginPage` | 443 | :80 | `Visa2026-Prod` | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
 | **Staging** | `https://<server>:8080/LoginPage` | 8080 | :8080 | `Visa2026-Staging` | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
-| **Demo** | `https://<server>:8081/LoginPage` | 8081 | :8081 | `Visa2026-Demo` | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+| **Demo** | `https://<server>:8081/LoginPage` | 8081 | :8081 | `Visa2026-Demo` | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | SQL: `Visa2026DbDemo` **or** Postgres: `visa2026_demo` |
 
+**SQL (default):** `localhost\SQLEXPRESS` — Prod/Staging databases on one instance.
+
+**PostgreSQL (Demo pilot):** set `EFCORE_PROVIDER=Postgres` + `PG_*` in `demo.env` (see [demo.env.example](../../../scripts/windows-iis/env/demo.env.example)). Same publish binary; `Configure-Visa2026Production.ps1` writes Npgsql connection (`Persist Security Info=True;EFCoreProvider=Postgres`). Details: [ON_PREM_WINDOWS_IIS.md — Dual EF providers](../../../docs/ON_PREM_WINDOWS_IIS.md#dual-ef-providers-sql-server--postgresql).
+
+### Demo PostgreSQL deploy (after PG install + empty DB)
+
+```powershell
+.\scripts\windows-iis\Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate -EnableForceXafDbUpdate
+# Smoke: http://10.100.128.25:8081/LoginPage
+# Then on server:
+C:\visa2026-deploy\iis\Remove-Visa2026ForceXafDbUpdate.ps1 -Profile Demo
+```
+
+---
+
+## Dev PC — publish
 **Per-slot env (required):**
 
 ```ini

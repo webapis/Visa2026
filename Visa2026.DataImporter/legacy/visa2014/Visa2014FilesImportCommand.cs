@@ -638,7 +638,7 @@ internal static class Visa2014FilesImportCommand
         GetOptionValue(args, "--target-connection")
         ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
         ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
-        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
+        ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
     private static string MaskConnectionForLog(string connectionString)
     {

@@ -1,14 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application Logo="CalikLogo" Title="Visa Management">
   <ActionDesign>
     <Actions>
       <Action Id="ListViewTotalCount" CustomCSSClassName="visa-list-total-action" />
+      <Action Id="ListViewClearFilters" CustomCSSClassName="visa-list-clear-filters-action" />
       <Action Id="Logon" CustomCSSClassName="e2e-login-submit" />
     </Actions>
   </ActionDesign>
   <NavigationItems NavigationStyle="Accordion">
     <Items>
-      <Item Id="VisaExt" Caption="Visa Extension" Index="0" IsNewNode="True">
+      <Item Id="VisaExt" Caption="Visa Extension" Index="10" IsNewNode="True">
         <Items IsNewNode="True">
           <Item Id="Ministry1" Caption="Submitted to Ministry 1" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '1_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
           <Item Id="Ministry2" Caption="Submitted to Ministry 2" ViewId="VisaExtensionStatus_ListView" Criteria="CurrentState.Code = '2_REVIEW_STARTED'" ObjectKey="" IsNewNode="True" />
@@ -41,7 +42,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="81.92148760330579" Index="1">
+          <LayoutGroup Id="Documents_Group" ShowCaption="True" Caption="Address copies" Direction="Vertical" RelativeSize="81.92148760330579" Index="1">
             <LayoutItem Id="Documents" RelativeSize="100" />
           </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" Caption=" " RelativeSize="38.01652892561984" Removed="True">
@@ -55,13 +56,14 @@
         <ColumnInfo Id="ApplicationItemName" Index="0" />
         <ColumnInfo Id="Person" Index="1" />
         <ColumnInfo Id="IsLineCancelled" Index="2" />
-        <ColumnInfo Id="RegistrationDate" Index="3" />
-        <ColumnInfo Id="TravelDate" Index="4" />
-        <ColumnInfo Id="CheckPoint" Index="5" />
-        <ColumnInfo Id="CurrentPassport" Index="6" />
-        <ColumnInfo Id="CurrentVisa" Index="7" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" />
+        <ColumnInfo Id="LastApplicationState" Index="3" />
+        <ColumnInfo Id="RegistrationDate" Index="4" />
+        <ColumnInfo Id="TravelDate" Index="5" />
+        <ColumnInfo Id="CheckPoint" Index="6" />
+        <ColumnInfo Id="CurrentPassport" Index="7" />
+        <ColumnInfo Id="CurrentVisa" Index="8" Caption="Visa" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="9" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="10" />
       </Columns>
     </ListView>
     <DetailView Id="Application_DetailView">
@@ -73,7 +75,6 @@
                 <LayoutGroup Id="Application" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
                   <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="55.926860025220684" IsNewNode="True">
                     <LayoutItem Id="IsForFamily" Index="0" RelativeSize="1.7361111111111112" IsNewNode="True" />
-                    <LayoutItem Id="OrganizationType" Index="1" RelativeSize="1.7361111111111112" IsNewNode="True" />
                     <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="5.555555555555555" IsNewNode="True" />
                     <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="5.555555555555555" IsNewNode="True" />
                     <LayoutItem Id="ApplicationReason" Index="4" RelativeSize="1.7361111111111112" IsNewNode="True" />
@@ -99,14 +100,7 @@
                   </LayoutGroup>
                 </LayoutGroup>
                 <LayoutGroup Id="Item2" ShowCaption="True" Caption="Progress" CaptionLocation="Top" Index="1" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows-tabbed" IsNewNode="True">
-                  <LayoutGroup Id="ProgressCurrentStatus" ShowCaption="False" CustomCSSClassName="visa-progress-current-status" Direction="Horizontal" Index="0" RelativeSize="8.333333333333334" IsNewNode="True">
-                    <LayoutItem Id="CurrentState" ViewItem="CurrentState" Index="0" RelativeSize="22.82471626733922" IsNewNode="True" />
-                    <LayoutItem Id="IsCancelled" ViewItem="IsCancelled" Index="1" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="IsRejected" ViewItem="IsRejected" Index="2" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="WorkingDaysInCurrentStep" ViewItem="WorkingDaysInCurrentStep" Index="3" RelativeSize="19.167717528373267" IsNewNode="True" />
-                    <LayoutItem Id="ProgressSlaStatement" ViewItem="ProgressSlaStatement" Index="4" RelativeSize="19.672131147540984" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="1" RelativeSize="91.66666666666667" IsNewNode="True">
+                  <LayoutGroup Id="ProgressHistory" ShowCaption="False" Caption="Progress History" Index="0" RelativeSize="100" IsNewNode="True">
                     <LayoutItem Id="ProgressHistory" CustomCSSClassName="xaf-show-all-rows" ViewItem="ProgressHistory" Index="0" RelativeSize="100" IsNewNode="True" />
                   </LayoutGroup>
                 </LayoutGroup>
@@ -136,7 +130,6 @@
                   <LayoutGroup Id="Application" ShowCaption="True" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
                     <LayoutGroup Id="Application_col1" ShowCaption="False" Index="0" RelativeSize="56.20384047267356" IsNewNode="True">
                       <LayoutItem Id="IsForFamily" Index="0" RelativeSize="2.0408163265306123" IsNewNode="True" />
-                      <LayoutItem Id="OrganizationType" Index="1" RelativeSize="2.0408163265306123" IsNewNode="True" />
                       <LayoutItem Id="ApplicationTypeQuickCode" ViewItem="ApplicationTypeQuickCode" Index="2" RelativeSize="6.530612244897959" IsNewNode="True" />
                       <LayoutItem Id="ApplicationType" ViewItem="ApplicationType" Index="3" RelativeSize="6.530612244897959" IsNewNode="True" />
                       <LayoutItem Id="ApplicationReason" Index="4" RelativeSize="2.0408163265306123" IsNewNode="True" />
@@ -198,7 +191,6 @@
                 <LayoutItem Id="CurrentState" RelativeSize="6.387225548902196" Removed="True" />
                 <LayoutItem Id="FullApplicationNumber" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="IsForFamily" RelativeSize="5.788423153692615" />
-                <LayoutItem Id="OrganizationType" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="ProjectContract" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="Representative" RelativeSize="6.387225548902196" />
                 <LayoutItem Id="Urgency" RelativeSize="8.782435129740518" />
@@ -231,38 +223,54 @@
     </DetailView>
     <ListView Id="Application_ListView">
       <Columns>
-        <ColumnInfo Id="FullApplicationNumber" Width="150" />
-        <ColumnInfo Id="Year" Width="43" />
-        <ColumnInfo Id="Month" Width="56" />
-        <ColumnInfo Id="ApplicationDate" Width="108" />
-        <ColumnInfo Id="CurrentState" Width="89" />
-        <ColumnInfo Id="IsCancelled" Width="70" />
-        <ColumnInfo Id="IsRejected" Width="70" />
-        <ColumnInfo Id="ApplicationType" Width="109" />
+        <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
+        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Month" Index="2" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
+        <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="7" Width="140" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="8" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="9" Width="109" />
       </Columns>
     </ListView>
     <ListView Id="Application_ListView_DirectMigration">
       <Columns>
-        <ColumnInfo Id="FullApplicationNumber" Width="150" />
-        <ColumnInfo Id="Year" Width="43" />
-        <ColumnInfo Id="Month" Width="56" />
-        <ColumnInfo Id="ApplicationDate" Width="108" />
-        <ColumnInfo Id="CurrentState" Width="89" />
-        <ColumnInfo Id="IsCancelled" Width="70" />
-        <ColumnInfo Id="IsRejected" Width="70" />
-        <ColumnInfo Id="ApplicationType" Width="109" />
+        <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
+        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Month" Index="2" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
+        <ColumnInfo Id="TotalPersonCount" Index="4" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="5" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="6" Width="108" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="-1" Width="140" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="-1" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="7" Width="109" />
       </Columns>
     </ListView>
     <ListView Id="Application_ListView_ViaMinistries">
       <Columns>
-        <ColumnInfo Id="FullApplicationNumber" Width="150" />
-        <ColumnInfo Id="Year" Width="43" />
-        <ColumnInfo Id="Month" Width="56" />
-        <ColumnInfo Id="ApplicationDate" Width="108" />
-        <ColumnInfo Id="CurrentState" Width="89" />
-        <ColumnInfo Id="IsCancelled" Width="70" />
-        <ColumnInfo Id="IsRejected" Width="70" />
-        <ColumnInfo Id="ApplicationType" Width="109" />
+        <ColumnInfo Id="FullApplicationNumber" Index="0" Width="150" />
+        <ColumnInfo Id="Year" Index="1" Width="43" />
+        <ColumnInfo Id="Month" Index="2" Width="56" />
+        <ColumnInfo Id="ApplicationDate" Index="3" Width="108" />
+        <ColumnInfo Id="Urgency" Index="4" Width="110" />
+        <ColumnInfo Id="TotalPersonCount" Index="5" Width="56" />
+        <ColumnInfo Id="LatestProgressState" Index="6" Width="100" />
+        <ColumnInfo Id="LatestProgressDate" Index="7" Width="108" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Index="-1" Width="72" />
+        <ColumnInfo Id="ProgressSlaStatement" Index="8" Width="140" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Index="-1" Width="96" />
+        <ColumnInfo Id="ApprovalLegProfile" Index="9" Width="180" />
+        <ColumnInfo Id="MigrationSlaStatement" Index="10" Width="160" />
+        <ColumnInfo Id="ApplicationType" Index="11" Width="109" />
+        <ColumnInfo Id="VisaPeriod" Index="12" Width="110" />
+        <ColumnInfo Id="VisaType" Index="13" Width="110" />
       </Columns>
     </ListView>
     <ListView Id="Application_ProgressHistory_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True" />
@@ -330,17 +338,19 @@
         <ColumnInfo Id="Application" Width="81" />
         <ColumnInfo Id="Person" Index="1" Width="56" />
         <ColumnInfo Id="IsLineCancelled" Index="2" Width="80" />
-        <ColumnInfo Id="RegistrationDate" Index="3" Width="110" />
-        <ColumnInfo Id="TravelDate" Index="4" Width="78" />
+        <ColumnInfo Id="LastApplicationState" Index="3" Width="140" />
+        <ColumnInfo Id="RegistrationDate" Index="4" Width="110" />
+        <ColumnInfo Id="TravelDate" Index="5" Width="78" />
         <ColumnInfo Id="TravelType" Width="79" />
-        <ColumnInfo Id="CheckPoint" Index="5" Width="84" />
+        <ColumnInfo Id="CheckPoint" Index="6" Width="84" />
         <ColumnInfo Id="MovementType" Width="106" />
-        <ColumnInfo Id="CurrentPassport" Index="6" Width="108" />
-        <ColumnInfo Id="CurrentVisa" Index="7" Width="84" />
+        <ColumnInfo Id="CurrentPassport" Index="7" Width="108" />
+        <ColumnInfo Id="CurrentVisa" Index="8" Width="84" />
+        <ColumnInfo Id="IssuedVisa" Index="11" Width="120" />
         <ColumnInfo Id="TravelNotes" Width="85" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="8" Width="147" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="9" Width="147" />
         <ColumnInfo Id="BusinessTripAddress" Width="133" />
-        <ColumnInfo Id="CurrentAddressOfResidence" Index="9" Width="177" />
+        <ColumnInfo Id="CurrentAddressOfResidence" Index="10" Width="177" />
         <ColumnInfo Id="PreviousPassport" Width="113" />
         <ColumnInfo Id="NextVisaId" Width="82" />
         <ColumnInfo Id="NextVisa" Width="69" />
@@ -394,7 +404,7 @@
             <LayoutGroup Id="BorderZoneItems" RelativeSize="100">
               <LayoutItem Id="BorderZoneItems" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Border zone copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
@@ -445,7 +455,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="53.24232081911263">
+          <LayoutGroup Id="Documents_Group" ShowCaption="True" Caption="Diploma copies" Direction="Vertical" RelativeSize="53.24232081911263">
             <LayoutItem Id="Documents" RelativeSize="100" />
           </LayoutGroup>
         </LayoutGroup>
@@ -581,7 +591,7 @@
             <LayoutGroup Id="InvitationItems" RelativeSize="100">
               <LayoutItem Id="InvitationItems" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Invitation copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
           </TabbedGroup>
@@ -634,8 +644,10 @@
         <ColumnInfo Id="Person" Index="2" Width="120" />
         <ColumnInfo Id="Passport" Index="3" Width="100" />
         <ColumnInfo Id="Invitation" Index="4" Width="120" />
-        <ColumnInfo Id="IsCancelled" Index="5" Width="80" />
-        <ColumnInfo Id="IsUsed" Index="6" Width="72" />
+        <ColumnInfo Id="Application" Index="5" Width="140" />
+        <ColumnInfo Id="IsCancelled" Index="6" Width="80" />
+        <ColumnInfo Id="IsUsed" Index="7" Width="72" />
+        <ColumnInfo Id="IssuedVisa" Index="8" Width="120" />
       </Columns>
     </ListView>
     <DetailView Id="Lodging_DetailView">
@@ -681,7 +693,7 @@
             </LayoutGroup>
           </LayoutGroup>
           <TabbedGroup Id="Tabs" RelativeSize="77.86206896551724">
-            <LayoutGroup Id="Documents" RelativeSize="100">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Passport copies" RelativeSize="100">
               <LayoutItem Id="Documents" RelativeSize="100" />
             </LayoutGroup>
             <LayoutGroup Id="Visas" RelativeSize="100">
@@ -744,7 +756,7 @@
             <LayoutGroup Id="AddressesOfResidence" RelativeSize="100" Index="4">
               <LayoutItem Id="AddressesOfResidence" RelativeSize="100" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" ShowCaption="True" Index="5" RelativeSize="100" IsNewNode="True">
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="CV &amp; personal files" Index="5" RelativeSize="100" IsNewNode="True">
               <LayoutItem Id="Documents" Index="0" RelativeSize="100" ViewItem="Documents" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="FamilyRelationDocuments" ShowCaption="True" Index="6" RelativeSize="100" IsNewNode="True">
@@ -816,7 +828,7 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="Person" Removed="True" />
+<LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="24.794359576968272" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs e2e-person-employee-tabs" IsNewNode="True">
@@ -849,6 +861,22 @@
               </LayoutGroup>
               <LayoutGroup Id="Salaries" Index="9" RelativeSize="100" CustomCSSClassName="e2e-person-employee-tab-salaries" IsNewNode="True">
                 <LayoutItem Id="Salaries" RelativeSize="100" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
+                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items, work permits, and invitations appear here after you process applications. Add passports, education, and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
@@ -915,7 +943,7 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="Person" Removed="True" />
+<LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="58.4985835694051" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs" IsNewNode="True">
@@ -948,6 +976,22 @@
               </LayoutGroup>
               <LayoutGroup Id="Educations" RelativeSize="100" Removed="True">
                 <LayoutItem Id="Educations" RelativeSize="100" />
+              </LayoutGroup>
+              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
+                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items, work permits, and invitations appear here after you process applications. Add passports and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
@@ -1006,7 +1050,7 @@
                 </LayoutGroup>
               </LayoutGroup>
             </TabbedGroup>
-            <LayoutGroup Id="Person" Removed="True" />
+<LayoutGroup Id="Person" Removed="True" />
           </LayoutGroup>
           <LayoutGroup Id="PersonCollectionSections" ShowCaption="False" Direction="Vertical" RelativeSize="24.794359576968272" Index="1" IsNewNode="True">
             <TabbedGroup Id="PersonRecordTabs" ShowCaption="True" Caption="Person record data" CaptionLocation="Top" Index="0" RelativeSize="62" CustomCSSClassName="visa-person-record-tabs" IsNewNode="True">
@@ -1033,6 +1077,22 @@
               </LayoutGroup>
               <LayoutGroup Id="Salaries" Index="7" RelativeSize="100" Removed="True">
                 <LayoutItem Id="Salaries" RelativeSize="100" />
+              </LayoutGroup>
+              <LayoutGroup Id="IncompleteData" ShowCaption="True" Caption="Incomplete data" Index="10" RelativeSize="100" CustomCSSClassName="e2e-person-incomplete-data-tab" IsNewNode="True">
+                <LayoutItem Id="IsDataIncomplete" ViewItem="IsDataIncomplete" Index="0" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAreasDisplay" ViewItem="IncompleteMissingAreasDisplay" Index="1" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteNotes" ViewItem="IncompleteNotes" Index="2" RelativeSize="18" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPersonalData" ViewItem="IncompleteMissingPersonalData" Index="3" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPassport" ViewItem="IncompleteMissingPassport" Index="4" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingCv" ViewItem="IncompleteMissingCv" Index="5" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingPhoto" ViewItem="IncompleteMissingPhoto" Index="6" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingEducation" ViewItem="IncompleteMissingEducation" Index="7" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingMedical" ViewItem="IncompleteMissingMedical" Index="8" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingAddress" ViewItem="IncompleteMissingAddress" Index="9" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingFamilyDocs" ViewItem="IncompleteMissingFamilyDocs" Index="10" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMissingOther" ViewItem="IncompleteMissingOther" Index="11" RelativeSize="5" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedOn" ViewItem="IncompleteMarkedOn" Index="12" RelativeSize="8" IsNewNode="True" />
+                <LayoutItem Id="IncompleteMarkedBy" ViewItem="IncompleteMarkedBy" Index="13" RelativeSize="8" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items and invitations appear here after you process applications. Add passports and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
@@ -1084,20 +1144,21 @@
         <ColumnInfo Id="MiddleName" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_Employees" DetailViewID="Person_DetailView_Employee">
+    <ListView Id="Person_ListView_Employees" Caption="Employees" DetailViewID="Person_DetailView_Employee">
       <Columns>
-        <ColumnInfo Id="FullName" Width="87" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="PersonalNumber" Index="2" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="3" Width="88" />
-        <ColumnInfo Id="Age" Index="4" Width="41" />
-        <ColumnInfo Id="Gender" Index="5" Width="58" />
-        <ColumnInfo Id="MaritalStatus" Index="6" Width="92" />
-        <ColumnInfo Id="Nationality" Index="7" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
-        <ColumnInfo Id="Subcontractor" Index="9" Width="158" />
-        <ColumnInfo Id="CurrentPositionHistory" Index="10" Removed="True" />
-        <ColumnInfo Id="IsArchived" Index="18" Width="78" />
+        <ColumnInfo Id="FullName" Index="2" Width="140" />
+        <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" Caption="Copies" />
+        <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="4" Width="88" />
+        <ColumnInfo Id="Age" Index="5" Width="41" />
+        <ColumnInfo Id="Gender" Index="6" Width="58" />
+        <ColumnInfo Id="MaritalStatus" Index="7" Width="92" />
+        <ColumnInfo Id="Nationality" Index="8" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="9" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="10" Width="158" />
+        <ColumnInfo Id="CurrentPositionHistory" Index="11" Removed="True" />
+        <ColumnInfo Id="IsArchived" Index="19" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
@@ -1114,20 +1175,21 @@
         <ColumnInfo Id="SponsoringEmployee" Removed="True" />
       </Columns>
     </ListView>
-    <ListView Id="Person_ListView_FamilyMembers" DetailViewID="Person_DetailView_FamilyMember">
+    <ListView Id="Person_ListView_FamilyMembers" Caption="Family Members" DetailViewID="Person_DetailView_FamilyMember">
       <Columns>
-        <ColumnInfo Id="FullName" Width="87" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="PersonalNumber" Index="2" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="3" Width="88" />
-        <ColumnInfo Id="Age" Index="4" Width="41" />
-        <ColumnInfo Id="Gender" Index="5" Width="58" />
-        <ColumnInfo Id="Nationality" Index="6" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="7" Width="106" />
-        <ColumnInfo Id="Subcontractor" Index="8" Width="158" />
-        <ColumnInfo Id="Relationship" Index="9" Width="85" />
-        <ColumnInfo Id="SponsoringEmployee" Index="10" Width="120" />
-        <ColumnInfo Id="IsArchived" Index="11" Width="78" />
+        <ColumnInfo Id="FullName" Index="2" Width="140" />
+        <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" Caption="Copies" />
+        <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="4" Width="88" />
+        <ColumnInfo Id="Age" Index="5" Width="41" />
+        <ColumnInfo Id="Gender" Index="6" Width="58" />
+        <ColumnInfo Id="Nationality" Index="7" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="9" Width="158" />
+        <ColumnInfo Id="Relationship" Index="10" Width="85" />
+        <ColumnInfo Id="SponsoringEmployee" Index="11" Width="120" />
+        <ColumnInfo Id="IsArchived" Index="12" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
@@ -1145,16 +1207,17 @@
     </ListView>
     <ListView Id="Person_ListView_TemporaryVisitors" Caption="Temporary visitor" DetailViewID="Person_DetailView_TemporaryVisitor">
       <Columns>
-        <ColumnInfo Id="FullName" Width="87" />
-        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" />
-        <ColumnInfo Id="PersonalNumber" Index="2" Width="112" />
-        <ColumnInfo Id="DateOfBirth" Index="3" Width="88" />
-        <ColumnInfo Id="Age" Index="4" Width="41" />
-        <ColumnInfo Id="Gender" Index="5" Width="58" />
-        <ColumnInfo Id="Nationality" Index="6" Width="78" />
-        <ColumnInfo Id="ProjectContract" Index="7" Width="106" />
-        <ColumnInfo Id="Subcontractor" Index="8" Width="158" />
-        <ColumnInfo Id="IsArchived" Index="9" Width="78" />
+        <ColumnInfo Id="FullName" Index="2" Width="140" />
+        <ColumnInfo Id="DossierListLink" Index="0" Width="56" Caption="Dossier" />
+        <ColumnInfo Id="DocumentCopiesListLink" Index="1" Width="56" Caption="Copies" />
+        <ColumnInfo Id="PersonalNumber" Index="3" Width="112" />
+        <ColumnInfo Id="DateOfBirth" Index="4" Width="88" />
+        <ColumnInfo Id="Age" Index="5" Width="41" />
+        <ColumnInfo Id="Gender" Index="6" Width="58" />
+        <ColumnInfo Id="Nationality" Index="7" Width="78" />
+        <ColumnInfo Id="ProjectContract" Index="8" Width="106" />
+        <ColumnInfo Id="Subcontractor" Index="9" Width="158" />
+        <ColumnInfo Id="IsArchived" Index="10" Width="78" />
         <ColumnInfo Id="BirthPlace" Removed="True" />
         <ColumnInfo Id="CountryOfBirth" Removed="True" />
         <ColumnInfo Id="CurrentRejectionItem" Removed="True" />
@@ -1264,18 +1327,19 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="64.12884333821377">
             <LayoutGroup Id="Visa" RelativeSize="100">
               <LayoutGroup Id="Visa_col1" RelativeSize="50.63636363636363">
-                <LayoutItem Id="VisaNumber" Index="0" RelativeSize="11.578947368421053" />
-                <LayoutItem Id="VisaType" Index="1" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="VisaCategory" Index="2" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="VisaIssuedPlace" Index="3" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="IssueDate" Index="4" RelativeSize="8.421052631578947" />
-                <LayoutItem Id="StartDate" Index="5" RelativeSize="8.421052631578947" />
-                <LayoutGroup Id="Auto5a5e6445-249a-4f08-a695-2cf56f58371a" ShowCaption="False" Caption="" Direction="Horizontal" Index="6" RelativeSize="8.421052631578947" IsNewNode="True">
+                <LayoutItem Id="ProcessNumber" ViewItem="ProcessNumber" Index="0" RelativeSize="8.421052631578947" IsNewNode="True" />
+                <LayoutItem Id="VisaNumber" Index="1" RelativeSize="11.578947368421053" />
+                <LayoutItem Id="VisaType" Index="2" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="VisaCategory" Index="3" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="VisaIssuedPlace" Index="4" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="IssueDate" Index="5" RelativeSize="8.421052631578947" />
+                <LayoutItem Id="StartDate" Index="6" RelativeSize="8.421052631578947" />
+                <LayoutGroup Id="Auto5a5e6445-249a-4f08-a695-2cf56f58371a" ShowCaption="False" Caption="" Direction="Horizontal" Index="7" RelativeSize="8.421052631578947" IsNewNode="True">
                   <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="0" RelativeSize="50.80789946140036" IsNewNode="True" />
                   <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="1" RelativeSize="49.19210053859964" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutItem Id="ExpirationDate" Index="6" RelativeSize="9.72644376899696" Removed="True" />
-                <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="7" RelativeSize="37.89473684210526" IsNewNode="True" />
+                <LayoutItem Id="BorderZoneLocation" ViewItem="BorderZoneLocation" Index="8" RelativeSize="37.89473684210526" IsNewNode="True" />
                 <LayoutItem Id="ShowOptionalFields" Removed="True" />
               </LayoutGroup>
               <LayoutGroup Id="Visa_col2" RelativeSize="49.36363636363637">
@@ -1292,7 +1356,7 @@
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Documents_Group" Direction="Vertical" RelativeSize="35.87115666178624" Index="1">
+          <LayoutGroup Id="Documents_Group" ShowCaption="True" Caption="Visa copies" Direction="Vertical" RelativeSize="35.87115666178624" Index="1">
             <LayoutItem Id="Documents" RelativeSize="100" />
           </LayoutGroup>
           <LayoutGroup Id="SizeableEditors" RelativeSize="2.342606149341142" Caption="SizeableEditors" Removed="True">
@@ -1310,7 +1374,7 @@
         <PropertyEditor Id="WorkPermitNumber" PropertyName="WorkPermitNumber" IsNewNode="True" />
       </Items>
       <Layout>
-        <LayoutGroup Id="Main" RelativeSize="100" CustomCSSClassName="xaf-fill-root">
+        <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="15.918367346938776">
             <LayoutGroup Id="WorkPermit" RelativeSize="100" Direction="Horizontal" IsNewNode="True">
               <LayoutGroup Id="Autoe6448fae-8eb3-4e8a-b87a-4482d065038f" ShowCaption="False" Caption="Autoe6448fae-8eb3-4e8a-b87a-4482d065038f(4)" Index="0" RelativeSize="77.6601998824221" IsNewNode="True">
@@ -1326,12 +1390,12 @@
               <LayoutItem Id="WorkPermitNumber" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" RelativeSize="84.08163265306122" CustomCSSClassName="xaf-fill-tabbed">
-            <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available">
-              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-fill-available" VerticalAlign="NotSet" />
+          <TabbedGroup Id="Tabs" RelativeSize="84.08163265306122" CustomCSSClassName="xaf-show-all-rows-tabbed">
+            <LayoutGroup Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows">
+              <LayoutItem Id="WorkPermitItems" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows" VerticalAlign="NotSet" />
             </LayoutGroup>
-            <LayoutGroup Id="Documents" RelativeSize="100">
-              <LayoutItem Id="Documents" RelativeSize="100" />
+            <LayoutGroup Id="Documents" ShowCaption="True" Caption="Work permit copies" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows">
+              <LayoutItem Id="Documents" RelativeSize="100" CustomCSSClassName="xaf-show-all-rows" />
             </LayoutGroup>
           </TabbedGroup>
         </LayoutGroup>
@@ -1344,7 +1408,7 @@
         <ColumnInfo Id="IssuedDate" Index="2" Width="100" />
       </Columns>
     </ListView>
-    <ListView Id="WorkPermit_WorkPermitItems_ListView">
+    <ListView Id="WorkPermit_WorkPermitItems_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" IsFooterVisible="True">
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
         <ColumnInfo Id="Passport" Index="-1" />
@@ -1399,7 +1463,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True">
+    <ListView Id="WorkPermitItem_ListView" ShowAllRows="True" VirtualScrollingEnabled="False" ShowFindPanel="True" IsFooterVisible="True" IsGroupPanelVisible="True">
       <Columns>
         <ColumnInfo Id="CurrentPositionHistory" Index="-1" />
         <ColumnInfo Id="Passport" Index="-1" />
@@ -1413,6 +1477,289 @@
         <ColumnInfo Id="DaysRemaining" Index="7" Width="72" />
         <ColumnInfo Id="WorkPermittedLocations" Index="8" Width="240" />
         <ColumnInfo Id="ASNumber" Index="9" Width="90" />
+      </Columns>
+    </ListView>
+    
+    <ListView Id="VwRdApplicationViaMinistryInvitationOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationOnProcess" Caption="Invitation on Process (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType" Caption="Invitation on Process (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryInvitationCompleted_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationCompleted" Caption="Invitation Completed (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Invitation" Index="6" Width="120" Caption="Invitation #" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="7" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="8" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="9" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType" Caption="Invitation Completed (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Invitation" Index="6" Width="120" Caption="Invitation #" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="7" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="8" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="9" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionOnProcess" Caption="Visa Extension on Process (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType" Caption="Visa Extension on Process (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="6" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="7" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="8" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionCompleted_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionCompleted" Caption="Visa Extension Completed (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaOnExtension" Index="6" Width="120" Caption="Visa on extension" IsNewNode="True" />
+        <ColumnInfo Id="IssuedVisa" Index="7" Width="120" Caption="Issued Visa" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="8" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="9" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="10" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType" Caption="Visa Extension Completed (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="VisaPeriodLabel" Index="4" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaTypeLabel" Index="5" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="VisaOnExtension" Index="6" Width="120" Caption="Visa on extension" IsNewNode="True" />
+        <ColumnInfo Id="IssuedVisa" Index="7" Width="120" Caption="Issued Visa" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="8" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="9" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="10" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryOtherOnProcess_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryOtherOnProcess" Caption="Other on Process (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="4" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="5" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationViaMinistryOtherCompleted_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationViaMinistryOtherCompleted" Caption="Other Process Completed (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="PositionLabel" Index="2" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="3" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="4" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="5" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationDirectMigrationOnProcessA_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationDirectMigrationOnProcessA" Caption="On Process (A)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="2" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdApplicationDirectMigrationProcessComplete_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdApplicationDirectMigrationProcessComplete" Caption="Process Complete" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationTypeLabel" Index="2" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" Caption="App #" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="180" Caption="State" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaActiveByProject_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByProject" Caption="Active Visa (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="140" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdIncompletePersonsByMissingArea_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdIncompletePersonsByMissingArea" Caption="By Missing Area" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="PersonTypeLabel" Index="1" Width="120" Caption="Person type" IsNewNode="True" />
+        <ColumnInfo Id="MissingAreasLabel" Index="2" Width="200" Caption="Missing areas" IsNewNode="True" />
+        <ColumnInfo Id="IncompleteNotes" Index="3" Width="220" Caption="Notes" IsNewNode="True" />
+        <ColumnInfo Id="MarkedLabel" Index="4" Width="160" Caption="Marked" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdPersonSearch_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdPersonSearch" Caption="Person search" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="180" Caption="Name" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="180" Caption="Project" IsNewNode="True" />
+        <ColumnInfo Id="PersonalNumber" Index="2" Width="130" Caption="Personal number" IsNewNode="True" />
+        <ColumnInfo Id="PassportNumber" Index="3" Width="120" Caption="Passport #" IsNewNode="True" />
+        <ColumnInfo Id="VisaExpirationDate" Index="4" Width="110" Caption="Visa expiry" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="140" Caption="Status" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaActiveByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaActiveByPeriodCategoryType" Caption="Active Visa (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="200" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaOnExtension_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaOnExtension" Caption="Visa On Extension (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="180" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaOnExtensionByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaOnExtensionByPeriodCategoryType" Caption="Visa On Extension (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="220" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaExtensionResult_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaExtensionResult" Caption="Extension Result (P)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="180" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaExtensionResultByPeriodCategoryType_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaExtensionResultByPeriodCategoryType" Caption="Extension Result (V)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Application" Index="3" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="5" Width="220" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaAppProgress_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaAppProgress" Caption="Visa Extension (Dashboard)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Application" Index="0" Width="120" IsNewNode="True" />
+        <ColumnInfo Id="Person" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ExpiringVisa" Index="2" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="4" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ApplicationDate" Index="5" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="CurrentState" Index="6" Width="140" IsNewNode="True" />
+        <ColumnInfo Id="ProgressStateLabel" Index="7" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="StatusDate" Index="8" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemainingOnVisa" Index="9" Width="90" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaByPeriod_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaByPeriod" Caption="Active Visa (Dashboard)" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="PeriodLabel" Index="6" Width="90" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaExtensionRequired_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaExtensionRequired" Caption="Extension Required" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="140" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="VwRdVisaByDaysRemaining_ListView" ClassName="Visa2026.Module.BusinessObjects.VwRdVisaByDaysRemaining" Caption="Visa Validity" IsNewNode="True">
+      <Columns IsNewNode="True">
+        <ColumnInfo Id="Person" Index="0" Width="160" Caption="Person" IsNewNode="True" />
+        <ColumnInfo Id="ProjectName" Index="1" Width="160" IsNewNode="True" />
+        <ColumnInfo Id="Passport" Index="2" Width="110" Caption="Passport" IsNewNode="True" />
+        <ColumnInfo Id="Visa" Index="3" Width="110" IsNewNode="True" />
+        <ColumnInfo Id="ExpirationDate" Index="4" Width="100" IsNewNode="True" />
+        <ColumnInfo Id="DaysRemaining" Index="5" Width="90" IsNewNode="True" />
+        <ColumnInfo Id="StatusLabel" Index="6" Width="110" IsNewNode="True" />
       </Columns>
     </ListView>
   </Views>

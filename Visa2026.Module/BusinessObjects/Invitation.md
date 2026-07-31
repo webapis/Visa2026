@@ -2,7 +2,9 @@
 
 ## 1. Purpose
 
-The `Invitation` business object represents an official invitation letter. This document is a key outcome of an `Application` and is required for a foreign employee or family member to obtain a visa. It tracks the validity period of the invitation and the people included in it.
+The `Invitation` business object represents an official invitation letter (legacy `ApplicationResult` with Result = Invitation). It tracks formalization date, intended visa category/period, invitation expiry, optional visa start/end window, and the people included.
+
+**No Netije/Result property** — Rejection is a separate BO.
 
 **Cancelled / changed / used** workflow state is stored only on **`InvitationItem`** (one row per person), not on the invitation header.
 
@@ -20,14 +22,16 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 
 | Property Name | Data Type | Description | Constraints / Validation Rules |
 |---------------|-----------|-------------|--------------------------------|
-| `InvitationNumber` | `string` | The official reference number of the invitation letter. | Required; Max 50 chars. |
-| `StartDate` | `DateTime` | The date the invitation becomes valid. | Required. |
-| `ExpirationDate` | `DateTime?` | Expiry (from `StartDate` + `ValidityDuration`). | Required; always visible on detail view. |
-| `Application` | `Application` | Optional link to a visa application. | Optional (gear); when set, limits `InvitationItem.Person` to application lines. |
-| `ValidityDuration` | `ValidityDuration` | Validity length (e.g. 3 months). | Required. |
-| `DaysRemaining` | `int` | Days until `ExpirationDate`. | Read-only; always visible on detail view. |
+| `InvitationNumber` | `string` | Official reference number (Belgi). | Required; Max 50 chars. |
+| `IssuedDate` | `DateTime` | Formalization date (Resmileşdirilen sene). DB column `StartDate`. | Required. |
+| `VisaCategory` | `VisaCategory` | Visa category on the invitation (Wiza kategoriýasy). | Required. |
+| `VisaPeriod` | `VisaPeriod` | Intended visa period (Wiza möhleti). Not used to compute invitation expiry. | Required. |
+| `IsVisaStartAndEndDateDefined` | `bool` | When true, visa start/end dates apply. | Optional (gear). |
+| `VisaStartDate` / `VisaEndDate` | `DateTime?` | Visa window when defined. | Required when flag is true; hidden otherwise. |
+| `ExpirationDate` | `DateTime?` | Invitation letter expiry (Möhleti tamamlanýan sene). | Required; must be after `IssuedDate`. |
+| `Application` | `Application` | Optional link; lookup limited to `CanIssueInvitation`. | Optional (gear). |
+| `DaysRemaining` | `int` | Days until `ExpirationDate`. | Read-only; always visible. |
 | `ExpirationState` | `ExpirationState` | Active / expiring / expired. | Read-only. |
-| `AvailablePeople` | `IList<Person>` | Person lookup for new items: application lines when `Application` is set; otherwise all active people. | Not mapped; not browsable. |
 
 ---
 
@@ -35,15 +39,18 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 
 | Collection Name | Item Type | Description | Aggregation | Inverse Property |
 |-----------------|-----------|-------------|-------------|------------------|
-| `InvitationItems` | `InvitationItem` | People on this invitation (status flags per row). | Aggregated | `InvitationItem.Invitation` |
+| `InvitationItems` | `InvitationItem` | People on this invitation (Person In Result Letter). | Aggregated | `InvitationItem.Invitation` |
+| `Documents` | `InvitationDocument` | Header documents. | Aggregated | `InvitationDocument.Invitation` |
+| `Images` | `InvitationImage` | Header images. | Aggregated | `InvitationImage.Invitation` |
 
 ---
 
 ## 5. Business Rules & Logic
 
-- **`UpdateExpirationDate`**: `ExpirationDate = StartDate.AddDays(ValidityDuration.NumberOfDays)` when both are set.
 - **`IExpirationLogic`**: `ExpirationDate`, `DaysRemaining`, `ExpirationState`.
 - **`IPersonLinkParent`**: `Application` and `AvailablePeople` for `InvitationItem` data sources and validation.
+- **`IsApplicationTypeAllowed`**: when `Application` is set, requires `ApplicationType.CanIssueInvitation`.
+- Visa window criteria: when `IsVisaStartAndEndDateDefined`, `VisaEndDate > VisaStartDate`.
 
 ---
 
@@ -51,6 +58,6 @@ This object inherits from `BaseObject` and implements the `IExpirationLogic` and
 
 - **Navigation**: "Invitation" group.
 - **Default Property**: `InvitationNumber`.
-- **Optional application link**: Use the **gear** to set or change `Application` when you have one; existing invitations with a linked application open with the field visible.
-- **Standalone use**: Create from **Invitation** menu without an application; add **Invitation Items** with any active person, then link an application later if needed.
-- **Status**: Edit **Cancelled**, **Changed**, and **Used** on each **Invitation Item** (nested list or item detail), not on this header.
+- **Always visible**: Number, Issued Date, Visa Category, Visa Period, Expiration Date, Days Remaining.
+- **Gear**: Application, visa start/end flag and dates.
+- **Status**: Edit **Cancelled**, **Changed**, and **Used** on each **Invitation Item**, not on this header.

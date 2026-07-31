@@ -2,7 +2,7 @@
 name: visa2026-person-document-copies
 description: >-
   Person-scoped document copies in the global preview slot: sectioned catalog of
-  child BO attachments, DetailView and ListView entry, per-record Preview.
+  child BO attachments, DetailView toolbar + ListView row column, per-record Preview.
   Phases 1-2 shipped; phases 3-4 deferred. Not ministry PdfGenerationBatch —
   use visa2026-document-copies for ApplicationItem ZIP. Shell UX via visa2026-preview-slot.
 disable-model-invocation: false
@@ -34,6 +34,7 @@ disable-model-invocation: false
 | `#visa-preview-slot` shell, catalog card CSS, new occupant | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
 | Person BO collections, `IsEmployee` / family member | [`Person.md`](../../../Visa2026.Module/BusinessObjects/Person.md) |
 | `*Document` types in ministry ZIP | [`APPLICATION_DIPLOMA_PACKAGE_PLAN.md`](../../../docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md) |
+| Person dossier page / director export ZIP | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
 
 **Reference (planned file map):** [reference.md](./reference.md)
 
@@ -46,7 +47,7 @@ disable-model-invocation: false
 | `PersonLinkedDocumentsResolver` + sectioned catalog | `ApplicationItemLinkedDocumentsResolver` changes |
 | `PersonDocumentCopiesComponent` + slot panel | Resminamalar / Word reports |
 | Per-record Preview (reuse merge helpers) | `PdfGenerationBatch` / application form (v1) |
-| `PersonDocumentCopiesController` DetailView + ListView | XFA field mapping ([pdf-form-mapping](../visa2026-pdf-form-mapping/SKILL.md)) |
+| `PersonDocumentCopiesController` DetailView toolbar (ListView = row column only) | XFA field mapping ([pdf-form-mapping](../visa2026-pdf-form-mapping/SKILL.md)) |
 | Role-based section visibility (employee vs family) | `FamilyMemberImage` byte[] preview unless product adds |
 
 ---
@@ -58,6 +59,8 @@ disable-model-invocation: false
 3. **Preview-first v1** — no ministry package enqueue in first release.
 4. **Catalog vs preview** — catalog card CSS only in catalog mode; viewer full slot width ([preview-slot](../visa2026-preview-slot/SKILL.md)).
 5. **Reuse merge, not merger** — share PDF preview builder; do not use `ApplicationItemLinkedDocumentsMerger` for Person rows.
+6. **Shared catalog chrome** — .doc-copies-catalog* is the visual source of truth for all document-copies occupants ([PREVIEW_SLOT.md](../../../docs/PREVIEW_SLOT.md) § Document-copies catalog chrome). Person catalog defines the look; AppItem/Header must match.
+7. **Dedicated brand mark** — smiling paperclip + pill (.doc-copies-brand, DocumentCopies ImageName, DocumentCopiesBrandMark). Use for toolbar actions, ListView Copies cells, dossier button, and slot titles — not generic BO_FileAttachment.
 
 ---
 
@@ -66,7 +69,7 @@ disable-model-invocation: false
 | Phase | Focus | Status |
 |-------|--------|--------|
 | **1** | Resolver, DetailView action, slot panel, catalog, Preview, Refresh | **Shipped** |
-| **2** | ListView toolbar + **Copies** column, gear details, current badges | **Shipped** |
+| **2** | ListView **Copies** column (no toolbar), gear details, current badges | **Shipped** |
 | **3** | Cross-link to ApplicationItem document copies | **Deferred** |
 | **4** | Optional person ZIP export (new service, not `PdfGenerationBatch`) | **Deferred** |
 

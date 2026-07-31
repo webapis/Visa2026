@@ -9,12 +9,12 @@ using Visa2026.Module.Editors;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Non-persistent shell for item-scoped Resminamalar on one or more selected application lines.
+/// Non-persistent shell for item-scoped Templates on one or more selected application lines.
 /// </summary>
 [DomainComponent]
 [DefaultClassOptions]
-[XafDisplayName("Resminamalar")]
-[ImageName("BO_FileAttachment")]
+[XafDisplayName("Templates")]
+[ImageName("Templates")]
 public class ApplicationItemReportPackageListHost : NonPersistentBaseObject
 {
     [Browsable(false)]

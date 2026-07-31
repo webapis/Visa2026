@@ -25,6 +25,20 @@ Purpose: **catalog, seed gate, batch worker, preview, permissions, dialog UX** �
 
 ## Entries
 
+### 2026-07-31 — Officer caption Templates + dedicated brand mark
+
+- **Ask**: Dedicated brand like Document Copies; rename Resminamalar to Templates (catalog shows template previews).
+- **Fix**: `Templates` ImageName + `TemplatesBrandMark` / `templates-brand.css`; slot title brand; `ApplicationReportPackage.Title` + action/view captions → Templates / Şablonlar / Шаблоны.
+- **Prevent**: Do not use `BO_FileAttachment` or DocumentCopies paperclip for this occupant; keep internal code names (`ResminamalarSlot*`) unless a full rename is requested.
+- **Cross-skill**: preview-slot
+
+### 2026-07-31 — Catalog card chrome aligned with Document Copies (Application | ApplicationItem)
+
+- **Ask**: Match Resminamalar preview-slot catalog look to Person Document Copies Prototype A cards.
+- **Fix**: Flat selectable cards via `.resminamalar-catalog` + `ResminamalarCatalogFormatIcons` (Word/Excel circles); keep checkbox + READY/CHECK + Preview + Download package (no Open/expand sections).
+- **Prevent**: Do not reuse `.doc-copies-catalog` exclusive expand for Resminamalar — templates are ZIP leaf rows; share visual tokens only.
+- **Cross-skill**: preview-slot | person-document-copies
+
 ### 2026-06-06 — Application Resminamalar not replaced by ApplicationItem Resminamalar
 
 - **Symptom**: Application DetailView Resminamalar open (catalog or PDF); nested ApplicationItem ListView Resminamalar left previous preview visible.

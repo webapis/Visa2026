@@ -1,12 +1,13 @@
 # Application ListView — row background by current progress state
 
-> **Status:** **Implemented.** `Application.PrimaryStateCode` (latest progress), `BoStateAppearanceColors`, `BoStateRowAppearanceRegistration`, `ApplicationProgressRowStateRefreshController`, Blazor `ApplicationProgressRowAppearanceController` + `site.css` row classes.
+> **Status:** **Implemented.** `Application.PrimaryStateCode` (latest progress), `BoStateAppearanceColors`, `BoStateRowAppearanceRegistration`, `ApplicationProgressRowStateRefreshController`, Blazor `ApplicationProgressRowAppearanceController` + `site.css` row classes. **`ApplicationItem`** reuses the same codes via `[NotMapped]` `LastApplicationState` / `ListRowCssClass` (parent denormalized fields) and Blazor `ApplicationItemProgressRowAppearanceController` (cancelled lines keep coral Appearance).
 >
 > **Related:**
 > - [`BO_STATE_COLORS.md`](BO_STATE_COLORS.md) — color registry per `ApplicationState.Code`
 > - [`APPLICATION_PROGRESS_DOMAIN_NOTES.md`](APPLICATION_PROGRESS_DOMAIN_NOTES.md) — Progress History UI and happy-path example
 > - [`APPLICATION_PROGRESS_STATE_VALIDATION.md`](APPLICATION_PROGRESS_STATE_VALIDATION.md) — progress timeline rules (separate concern)
 > - [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md) — BR-037, BR-038
+> - [`ApplicationItem.md`](../Visa2026.Module/BusinessObjects/ApplicationItem.md) — item last-state column + row CSS
 
 ---
 
@@ -20,6 +21,7 @@ That “current processing position” is **`CurrentState`**: the **`Application
 |---------|-----------|
 | **Application ListView** | Row `BackColor` (and optional `FontColor`) from **current** progress **state** |
 | **Application DetailView** | No change required for this requirement (optional: show same color on header / current state field) |
+| **ApplicationItem ListViews** | Same progress codes via parent denormalized fields; Blazor CSS; `IsLineCancelled` keeps coral |
 | **ApplicationProgress nested ListView** | **Out of scope here** — each **history** row may use **its own** `State.Code` color later (see [`BO_STATE_COLORS.md`](BO_STATE_COLORS.md) § Application progress display) |
 
 ---

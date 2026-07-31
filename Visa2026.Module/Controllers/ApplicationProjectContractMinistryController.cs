@@ -66,7 +66,7 @@ public sealed class ApplicationProjectContractMinistryController : ObjectViewCon
 
             && ReferenceEquals(progress.Application, ViewCurrentObject)
 
-            && e.PropertyName is nameof(ApplicationProgress.State) or nameof(ApplicationProgress.Location))
+            && e.PropertyName is nameof(ApplicationProgress.State))
 
         {
 

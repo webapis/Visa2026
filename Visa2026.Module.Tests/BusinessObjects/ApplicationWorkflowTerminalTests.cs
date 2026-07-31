@@ -6,21 +6,17 @@ namespace Visa2026.Module.Tests.BusinessObjects;
 public class ApplicationWorkflowTerminalTests
 {
     [Theory]
-    [InlineData(ApplicationProgressStateCodes.ProcessCancelled, true, false, true)]
-    [InlineData(ApplicationProgressStateCodes.ProcessRejected, false, true, true)]
-    [InlineData(ApplicationProgressStateCodes.ProcessIssued, false, false, true)]
-    [InlineData(ApplicationProgressStateCodes.ProcessStarted, false, false, false)]
-    [InlineData(ApplicationProgressStateCodes.Review1Rejected, false, false, false)]
+    [InlineData(ApplicationProgressStateCodes.ProcessCancelled, true)]
+    [InlineData(ApplicationProgressStateCodes.ProcessRejected, true)]
+    [InlineData(ApplicationProgressStateCodes.ProcessIssued, true)]
+    [InlineData(ApplicationProgressStateCodes.ProcessStarted, false)]
+    [InlineData(ApplicationProgressStateCodes.Review1Rejected, false)]
     public void WorkflowTerminalFlags_ReflectLatestProgressState(
         string stateCode,
-        bool expectedCancelled,
-        bool expectedRejected,
         bool expectedTerminal)
     {
         var app = BuildApplication(stateCode);
 
-        Assert.Equal(expectedCancelled, app.IsCancelled);
-        Assert.Equal(expectedRejected, app.IsRejected);
         Assert.Equal(expectedTerminal, app.IsWorkflowTerminal);
         Assert.Equal(expectedTerminal, ApplicationProgressProfileResolver.IsWorkflowTerminal(app));
     }
@@ -47,7 +43,6 @@ public class ApplicationWorkflowTerminalTests
                 {
                     Date = new DateTime(2024, 6, 1),
                     State = new ApplicationState { Code = stateCode },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
                 }
             ]
         };

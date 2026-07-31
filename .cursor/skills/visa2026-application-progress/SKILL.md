@@ -50,7 +50,7 @@ disable-model-invocation: false
 
 | In scope | Out of scope |
 |----------|----------------|
-| `ApplicationProgress` rows (`State`, `Location`, `Date`, `MinistryLetterFile`) | Resminamalar / Word reports |
+| `ApplicationProgress` rows (`State`, `Date`, `MinistryLetterFile`) — no Location | Resminamalar / Word reports |
 | `ApplicationProgressTransitionHelper` legal next steps | PDF form mapping |
 | `ProjectContract` + `ProjectContractMinistryLeg` + `ApprovingMinistry` | `ApplicationStatus` enum (deprecated) |
 | `ApplicationApprovalLegSnapshot` on save | Non-progress BO state evaluators |
@@ -74,9 +74,9 @@ disable-model-invocation: false
 | Symptom | First step | Likely fix area |
 |---------|------------|-----------------|
 | `Invalid column name 'MinistryLetterFileID'` | [learnings.md](./learnings.md); confirm `ApplicationProgressMinistryLetterFileSchemaUpdater` in `Module.cs` | Pre-schema SQL updater |
-| Illegal next state/location on save | Trace `ApplicationProgressTransitionHelper.TryValidateProgressStep` | Leg count vs transition graph |
+| Illegal next state on save | Trace `ApplicationProgressTransitionHelper.TryValidateProgressStep` | Leg count vs transition graph (leg1 STARTED only) |
 | Contract required / legs required message | `ApplicationProgressProfileResolver.TryValidate*` | `ProjectContract` + `MinistryLegs` |
-| Ministry column empty on progress | `ApprovalLegSnapshots` + `ProjectContractMinistryHelper.GetMinistryShortNameForProgressStep` | Snapshot not applied on contract pick |
+| Ministry column empty on progress | `ApprovalLegSnapshots` + `ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep` (falls back to live profile legs) | Snapshot missing on import; heal via `EnsureSnapshots` on Application save |
 | Letter upload hidden when it should show | `IsMinistryDecisionStateCode` + `[Appearance]` on `MinistryLetterFile` | State code or criteria |
 | Application list row color wrong | **`visa2026-bo-state-colors`** — `PrimaryStateCode`, `BoStateAppearanceColors` | Not transition helper |
 | Cannot edit contract legs | `ProjectContractMinistryController` — duplicate contract row instead | Structural immutability |

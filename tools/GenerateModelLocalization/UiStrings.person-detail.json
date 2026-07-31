@@ -5,7 +5,7 @@
   },
   "enums": {
     "Visa2026.Module.BusinessObjects.ExpirationState": {
-      "Active": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+      "Active": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
       "ExpiringSoon": { "tr-TR": "Yakında Sona Eriyor", "tk-TM": "Ýakynda gutarýar", "ru-RU": "Скоро истекает" },
       "Expired": { "tr-TR": "Süresi Doldu", "tk-TM": "Gutardy", "ru-RU": "Истёк" },
       "Archived": { "tr-TR": "Arşivlendi", "tk-TM": "Arhiwlendi", "ru-RU": "В архиве" }
@@ -88,6 +88,24 @@
     }
   },
   "views": {
+    "Person_ListView_Employees": {
+      "columns": {
+        "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+        "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+      }
+    },
+    "Person_ListView_FamilyMembers": {
+      "columns": {
+        "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+        "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+      }
+    },
+    "Person_ListView_TemporaryVisitors": {
+      "columns": {
+        "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+        "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+      }
+    },
     "Person_DetailView": {
       "layoutGroups": {
         "Person": { "tr-TR": "Kişi", "tk-TM": "Adam", "ru-RU": "Лицо" },

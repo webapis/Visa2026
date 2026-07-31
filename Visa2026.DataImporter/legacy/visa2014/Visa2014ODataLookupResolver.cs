@@ -347,7 +347,8 @@ internal sealed partial class Visa2014ODataLookupResolver
                 return row.Id;
         }
 
-        return ResolveDefaultPassportType();
+        // Do not silently fall back to default when a key was provided but not matched.
+        return null;
     }
 
     public Guid? ResolveVisaType(string? localizationKey)
@@ -361,7 +362,8 @@ internal sealed partial class Visa2014ODataLookupResolver
                 return row.Id;
         }
 
-        return ResolveDefaultVisaType();
+        // Do not silently fall back to WP — that masked missing LocalizationKey on in-process DTOs.
+        return null;
     }
 
     public Guid? ResolveVisaCategory(string? localizationKey)
@@ -375,7 +377,34 @@ internal sealed partial class Visa2014ODataLookupResolver
                 return row.Id;
         }
 
-        return ResolveDefaultVisaCategory();
+        return null;
+    }
+
+    /// <summary>
+    /// Fails fast when in-process lookup DTOs lack LocalizationKey (MapLookupDto regression).
+    /// Call after <see cref="LoadFromObjectSpace"/> / <see cref="LoadAsync"/> before Visa import.
+    /// </summary>
+    public void EnsureVisaTypeLookupKeysLoaded()
+    {
+        if (_visaTypes.Count == 0)
+            throw new InvalidOperationException("VisaType catalog is empty — load lookups before Visa import.");
+
+        var withKey = _visaTypes.Count(v => !string.IsNullOrWhiteSpace(v.LocalizationKey));
+        if (withKey == 0)
+        {
+            throw new InvalidOperationException(
+                "VisaType LocalizationKey is empty on all resolver rows. " +
+                "In-process MapLookupDto must copy LookupBase.LocalizationKey (otherwise every visa becomes default WP).");
+        }
+
+        foreach (var required in new[] { "WP", "BS1", "FM", "OF", "EX" })
+        {
+            if (ResolveVisaType(required) == null)
+            {
+                throw new InvalidOperationException(
+                    $"VisaType LocalizationKey '{required}' is seeded but ResolveVisaType cannot match it.");
+            }
+        }
     }
 
     public Guid? ResolveVisaIssuedPlace(string? nameTm) =>
@@ -535,6 +564,31 @@ internal sealed partial class Visa2014ODataLookupResolver
 
     public Guid? ResolveCity(string? nameTm, string? regionNameTm = null) =>
         Visa2014CityLookupMatcher.Resolve(_cities, nameTm, regionNameTm);
+
+    /// <summary>Region FK from the resolved City catalog row (Wikipedia/OSM-aligned when catalogs are correct).</summary>
+    public Guid? ResolveRegionForCity(Guid cityId)
+    {
+        var city = _cities.FirstOrDefault(c => c.Id == cityId);
+        if (city == null)
+            return null;
+        if (city.Region != null)
+            return city.Region.Id;
+        if (!string.IsNullOrWhiteSpace(city.RegionName))
+            return ResolveRegion(city.RegionName);
+        return null;
+    }
+
+    public string? GetCityRegionNameTm(Guid cityId)
+    {
+        var city = _cities.FirstOrDefault(c => c.Id == cityId);
+        if (city == null)
+            return null;
+        if (!string.IsNullOrWhiteSpace(city.Region?.NameTm))
+            return city.Region.NameTm;
+        if (!string.IsNullOrWhiteSpace(city.RegionName))
+            return city.RegionName;
+        return null;
+    }
 
     public Guid? ResolveLodging(string? cityNameTm, string? regionNameTm, string? fullAddress)
     {

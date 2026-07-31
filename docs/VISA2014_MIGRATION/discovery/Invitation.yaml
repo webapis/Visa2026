@@ -24,7 +24,8 @@ mapping:
     - InvitationNumber
     - StartDate
   lookupDependencies:
-    - ValidityDuration
+    - VisaPeriod
+    - VisaCategory
   duplicateGroups: 13
   legacyOnlyCount: null
   targetOnlyCount: null
@@ -32,19 +33,23 @@ mapping:
   blockedReason: null
   notes: |
     HEADER SOURCE:
-      dbo.ApplicationResult rows referenced by PersonInInvitation.Invitation (~2961 distinct Oids on Çalik).
-      ~254 headers skipped when Number, IssuedDate, or DateOfExpire is null.
+      dbo.ApplicationResult WHERE Result = 0 (Invitation) referenced by PersonInInvitation (~2776 on Çalik 2026-07-22).
+      Result = 1 rows are Rejection headers (separate BO / id-map) — not skipped invitations.
+      Do NOT import Netije/Result — Visa2026 uses separate Invitation vs Rejection BOs.
 
     COLUMN MAP:
       Number → InvitationNumber
-      IssuedDate → StartDate
-      DateOfExpire → ValidityDuration (closest of 90/180/365 days at import)
+      IssuedDate → IssuedDate (DB column StartDate; formalization / Resmileşdirilen sene)
+      DateOfExpire → ExpirationDate (invitation letter expiry)
+      DateOfExpire span → VisaPeriod best-effort (Month3/Month6/Year1) until legacy VisaPeriod column mapped
+      VisaCategory → default catalog until legacy category column mapped
       Application → optional Application FK via id-map
+      IsVisaStartAndEndDateDefined / VisaStartDate / VisaEndDate → not mapped yet (default false)
 
     DEDUPE:
       13 duplicate InvitationNumber groups — suffix all with legacy oid tail (same pattern as WorkPermit).
 
-    id-map: ApplicationResult.Oid → Invitation.ID
+    id-map: ApplicationResult.Oid → Invitation.ID (Result=0 only; Rejection uses its own id-map file)
 
 checklist:
   target_bo_reviewed: true

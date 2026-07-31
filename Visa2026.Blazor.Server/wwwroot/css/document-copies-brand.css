@@ -1,0 +1,177 @@
+/* Dedicated Document copies brand mark (Prototype C: stacked pages + paperclip) */
+
+.doc-copies-brand {
+  --dcb-text: #1e3a5f;
+  --dcb-bg: #e8eef8;
+  --dcb-border: #c5d0e4;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 10px;
+  border: 1px solid var(--dcb-border);
+  border-radius: 999px;
+  background: var(--dcb-bg);
+  color: var(--dcb-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.doc-copies-brand__icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-color: var(--dcb-text);
+  -webkit-mask: url('../images/document-copies-clip-mask.svg') center / contain no-repeat;
+  mask: url('../images/document-copies-clip-mask.svg') center / contain no-repeat;
+}
+
+.doc-copies-brand__icon--svg {
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+  width: 18px;
+  height: 18px;
+}
+
+.doc-copies-brand__icon--svg svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+button.doc-copies-brand,
+a.doc-copies-brand {
+  cursor: pointer;
+  appearance: none;
+  font: inherit;
+  text-decoration: none;
+}
+
+button.doc-copies-brand:hover,
+a.doc-copies-brand:hover,
+.doc-copies-brand:hover {
+  filter: brightness(0.97);
+}
+
+button.doc-copies-brand:disabled {
+  opacity: 0.55;
+  cursor: default;
+  filter: none;
+}
+
+/* ListView column: centered pill; keep table-cell layout (flex breaks header/body alignment) */
+.app-person-document-copies-link,
+.app-header-document-copies-link {
+  --dcb-text: #1e3a5f;
+  --dcb-bg: #e8eef8;
+  --dcb-border: #c5d0e4;
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding: 4px 2px !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.app-person-document-copies-link > *,
+.app-header-document-copies-link > *,
+.app-person-document-copies-link img,
+.app-header-document-copies-link img {
+  display: none !important;
+}
+
+.app-person-document-copies-link::before,
+.app-header-document-copies-link::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--dcb-border);
+  border-radius: 999px;
+  background-color: var(--dcb-bg);
+  background-image: url('../images/document-copies-clip.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.15rem 1.15rem;
+  box-sizing: border-box;
+}
+
+.app-person-document-copies-link:hover,
+.app-header-document-copies-link:hover {
+  filter: brightness(0.97);
+  text-decoration: none !important;
+}
+
+/* Slot panel title with brand icon */
+.visa-preview-drawer__title.doc-copies-brand-title,
+.doc-copies-brand-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-copies-brand-title__icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  background-color: var(--dcb-text, #1e3a5f);
+  -webkit-mask: url('../images/document-copies-clip-mask.svg') center / contain no-repeat;
+  mask: url('../images/document-copies-clip-mask.svg') center / contain no-repeat;
+}
+
+.person-dossier__toolbar .doc-copies-brand {
+  font-size: 12px;
+}
+
+/* Person ListView dossier column — centered pill */
+.app-person-dossier-link {
+  --dcb-text: #1e3a5f;
+  --dcb-bg: #e8eef8;
+  --dcb-border: #c5d0e4;
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding: 4px 2px !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.app-person-dossier-link > *,
+.app-person-dossier-link img {
+  display: none !important;
+}
+
+.app-person-dossier-link::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--dcb-border);
+  border-radius: 999px;
+  background-color: var(--dcb-bg);
+  background-image: url('../images/person-dossier-mark.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.15rem 1.15rem;
+  box-sizing: border-box;
+}
+
+.app-person-dossier-link:hover {
+  filter: brightness(0.97);
+  text-decoration: none !important;
+}

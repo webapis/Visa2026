@@ -27,8 +27,10 @@ data:
   Invitations:
   - Invitation Number: INV-2026-060
     Application: 4/-060
-    Start Date: 2026-05-15
-    Validity Duration: 3 aý
+    Issued Date: 2026-05-15
+    Expiration Date: 2026-08-13
+    Visa Category: Köp gezeklik
+    Visa Period: 3 (üç) aý
   InvitationItems:
   - Invitation Number: INV-2026-060
     Person: Emily Doe

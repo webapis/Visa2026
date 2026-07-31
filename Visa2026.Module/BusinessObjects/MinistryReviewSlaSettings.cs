@@ -9,7 +9,7 @@ using Visa2026.Module.Services;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Tenant singleton: working-day SLA for all ministry review legs (<c>{n}_REVIEW_STARTED</c>).
+/// Tenant singleton: working-day SLA for ministry review legs (elapsed from prior step until <c>{n}_REVIEW_APPROVED</c>).
 /// Copied to <see cref="ApplicationApprovalLegSnapshot"/> when an application selects an
 /// <see cref="ApprovalLegProfile"/>.
 /// </summary>
@@ -26,7 +26,7 @@ public class MinistryReviewSlaSettings : BaseObject
     public const int DefaultMaxDaysInReview = 4;
     public const int DefaultWarningDaysBeforeMax = 1;
 
-    /// <summary>Max working days allowed in <c>{n}_REVIEW_STARTED</c> for every ministry leg.</summary>
+    /// <summary>Max working days allowed per ministry leg (from prior step until approval).</summary>
     [XafDisplayName("Max working days")]
     [RuleValueComparison(DefaultContexts.Save, ValueComparisonType.GreaterThan, 0)]
     public virtual int MaxDaysInReview { get; set; }

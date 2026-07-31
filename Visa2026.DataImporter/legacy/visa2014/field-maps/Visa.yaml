@@ -44,10 +44,9 @@ propertyGaps:
     - column: HasBorderZonePermit
       disposition: derive
       notes: Inform BorderZoneLocation transform when BorderZone FK null
-    - column: ProcessNumber
-      disposition: drop
     - column: ASNumber
-      disposition: drop
+      disposition: map
+      notes: Officer Işlenen belgisi string → Visa.ProcessNumber
     - column: AppConf
       disposition: drop
     - column: ImpVisaType
@@ -70,11 +69,22 @@ propertyGaps:
     - property: InvitationItem
       default: null
       missingBehavior: allow_null
-      notes: Defer until ApplicationItem import + id-map
+      notes: |
+        Null on first Visa POST. Path B post-pass after IssuingApplicationItem:
+        --correct-visa2014-invitation-item (order.yaml visa-invitation-item).
+        Closest unused InvitationItem under issuing app when CanIssueInvitation; sets IsUsed.
     - property: IssuingApplicationItem
       default: null
       missingBehavior: allow_null
-      notes: Defer until ApplicationItem import
+      notes: |
+        Null on first Visa POST. Post-ApplicationItem correction
+        --correct-visa2014-issuing-application-item:
+        (1) ProcessNumber→PIA when that app is extension subtype 7;
+        (2) else extension sibling / predecessor (previous passport visa was PIA.Visa on subtype 7);
+        (3) else other ProcessNumber (e.g. invitation) when still unset;
+        (4) else target-side predecessor: ApplicationItem.CurrentVisa = prior visa on same passport.
+        Sticky invitation ProcessNumber must not beat a real extension sibling.
+        Same correction also backfills Visa.ProcessNumber (ASNumber) and LegacyPersonInApplicationOid.
     - property: Notes
       default: null
       missingBehavior: allow_null
@@ -103,6 +113,16 @@ propertyGaps:
       notes: |
         Legacy FK → dbo.BorderZoneForVisa bit matrix (Dasoguz, Tagtabazar, …).
         Target: comma-separated BorderZoneName catalog; default Ýok when no flags.
+    - property: ProcessNumber
+      legacyColumn: ASNumber
+      notes: |
+        Officer Işlenen belgisi (string on stamp). Legacy property name ASNumber;
+        Visa2026 property name ProcessNumber. Editable for manual create/fix.
+    - property: LegacyPersonInApplicationOid
+      legacyColumn: ProcessNumber
+      notes: |
+        Legacy Visa.ProcessNumber PersonInApplication FK Guid (import lineage).
+        Domain ApplicationItem link remains IssuingApplicationItem.
 
 fields:
   - source: Oid
@@ -115,6 +135,20 @@ fields:
     transform: string_trim
     missingBehavior: skip_row
 
+  - source: ASNumber
+    target: ProcessNumber
+    transform: string_trim
+    missingBehavior: allow_null
+    notes: |
+      Işlenen belgisi from visa stamp. Also backfilled by --correct-visa2014-issuing-application-item.
+
+  - source: ProcessNumber
+    target: LegacyPersonInApplicationOid
+    transform: guid
+    missingBehavior: allow_null
+    notes: |
+      Legacy PIA Oid. Also backfilled by --correct-visa2014-issuing-application-item.
+
   - source: VisaType
     target: VisaType
     transform: lookup_composite
@@ -124,6 +158,10 @@ fields:
       - IVisaType_Data.TypeOfVisaL
       - IVisaType_Data.mgCode
     missingBehavior: skip_row
+    notes: |
+      Override: Person.IsFamilyMember=1 AND IsEmployee=0 → LocalizationKey FM
+      (legacy often stores WP:11 on family visas). Else TypeOfVisaL:mgCode map;
+      unmappedDefault WP. Re-apply with --correct-visa-type on existing DBs.
 
   - source: VisaCategory
     target: VisaCategory

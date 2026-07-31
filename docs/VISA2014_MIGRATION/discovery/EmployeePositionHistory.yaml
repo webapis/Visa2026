@@ -52,7 +52,7 @@ mapping:
   blockedReason: null
   notes: |
     Legacy table WorkHistoryOfEmployee; FK column Employee → Visa2026 Person (not a separate Employee BO).
-    Position.TitleOfPosition → Position.NameTm (visa-report title). ActualPosition.Name ← Position.Code when non-empty; else literal "-" (required field placeholder on Çalik import).
+    Position.TitleOfPosition → Position.NameTm (visa-report title). ActualPosition: MiddleName (current row) or Position.Code; no-letter values (numeric codes, punctuation) normalize to "-" (Visa2014ActualPositionNormalizer). Existing catalog cleanup: --apply-visa2014-actual-positions --auto-no-letters.
     Department.TitleOfDepartment → Department.NameTm (required on BO; legacy always has Department FK on Çalik data).
     StartDate ← StartDateOnThisPosition. No legacy EndDate — derive EndDate = next row StartDate per Person (ordered); last row null.
     hasPositionStartDate bit is legacy UI flag only (528 true / 2465 false); StartDate populated on all active rows.

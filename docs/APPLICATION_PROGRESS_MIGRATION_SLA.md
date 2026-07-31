@@ -54,7 +54,7 @@ ListView columns on `Application` (mirror ministry):
 - `WorkingDaysInMigrationStep`
 - `MigrationSlaStatement`
 
-Row color: **`ProgressSlaAppearanceCode`** — ministry SLA (`{n}_REVIEW_STARTED`) or migration SLA wins when active; same `APP_PROGRESS_SLA_WARNING` / `APP_PROGRESS_SLA_OVERDUE` registry keys as ministry (only one SLA active at a time).
+Row color: **`ProgressSlaAppearanceCode`** — ministry SLA (`{n}_REVIEW_APPROVED`) or migration SLA wins when active; same `APP_PROGRESS_SLA_WARNING` / `APP_PROGRESS_SLA_OVERDUE` registry keys as ministry (only one SLA active at a time).
 
 ## Validation
 

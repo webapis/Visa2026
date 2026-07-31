@@ -18,38 +18,38 @@
       "Documents": {
         "tr-TR": "Çalışma izni kopyaları",
         "tk-TM": "Iş rugsady nusgalary",
-        "ru-RU": "Копии РНТ"
+        "ru-RU": "Копии разрешения на работу"
       }
     },
     "Visa2026.Module.BusinessObjects.Education": {
       "Documents": {
         "tr-TR": "Diploma kopyaları",
-        "tk-TM": "Diploma nusgalary",
-        "ru-RU": "Копии дипломов"
+        "tk-TM": "Diplom nusgalary",
+        "ru-RU": "Копии диплома"
       }
     },
     "Visa2026.Module.BusinessObjects.MedicalRecord": {
       "Documents": {
         "tr-TR": "Sağlık kaydı kopyaları",
-        "tk-TM": "Saglyk ýazgysy nusgalary",
-        "ru-RU": "Копии мед. записи"
+        "tk-TM": "Lukmançylyk ýazgysy nusgalary",
+        "ru-RU": "Копии медицинской записи"
       }
     },
     "Visa2026.Module.BusinessObjects.AddressOfResidence": {
       "Documents": {
-        "tr-TR": "İkamet kopyaları",
-        "tk-TM": "Ýaşaýyş salgysy nusgalary",
-        "ru-RU": "Копии адреса проживания"
+        "tr-TR": "Adres kopyaları",
+        "tk-TM": "Salgy nusgalary",
+        "ru-RU": "Копии адреса"
       },
       "LodgingDocuments": {
         "tr-TR": "Konaklama kopyaları",
-        "tk-TM": "Ýaşaýyş nusgalary",
-        "ru-RU": "Копии проживания"
+        "tk-TM": "Ýaşaýyş ýeri nusgalary",
+        "ru-RU": "Копии жилья"
       }
     },
     "Visa2026.Module.BusinessObjects.Invitation": {
       "Documents": {
-        "tr-TR": "Davet kopyaları",
+        "tr-TR": "Davetiye kopyaları",
         "tk-TM": "Çakylyk nusgalary",
         "ru-RU": "Копии приглашения"
       }
@@ -63,14 +63,23 @@
     },
     "Visa2026.Module.BusinessObjects.Person": {
       "Documents": {
-        "tr-TR": "Kişi dosya kopyaları",
-        "tk-TM": "Adam faýl nusgalary",
-        "ru-RU": "Копии файлов лица"
+        "tr-TR": "CV ve kişisel dosyalar",
+        "tk-TM": "CV we şahsy faýllar",
+        "ru-RU": "Резюме и личные файлы"
       },
       "FamilyRelationDocuments": {
         "tr-TR": "Aile ilişkisi kanıt kopyaları",
         "tk-TM": "Maşgala gatnaşygy subutnamalary",
         "ru-RU": "Копии доказательств родства"
+      },
+      "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+      "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+    },
+    "Visa2026.Module.BusinessObjects.BorderZone": {
+      "Documents": {
+        "tr-TR": "Sınır bölgesi kopyaları",
+        "tk-TM": "Serhet zolagy nusgalary",
+        "ru-RU": "Копии приграничной зоны"
       }
     },
     "Visa2026.Module.BusinessObjects.EmployeeContract": {
@@ -83,15 +92,15 @@
     "Visa2026.Module.BusinessObjects.Lodging": {
       "Documents": {
         "tr-TR": "Konaklama kopyaları",
-        "tk-TM": "Ýaşaýyş nusgalary",
-        "ru-RU": "Копии проживания"
+        "tk-TM": "Ýaşaýyş ýeri nusgalary",
+        "ru-RU": "Копии жилья"
       }
     },
     "Visa2026.Module.BusinessObjects.ProjectContract": {
       "Documents": {
         "tr-TR": "Proje sözleşmesi kopyaları",
         "tk-TM": "Taslama şertnamasy nusgalary",
-        "ru-RU": "Копии контракта проекта"
+        "ru-RU": "Копии проектного договора"
       }
     }
   },
@@ -123,15 +132,15 @@
       "layoutGroups": {
         "Documents_Group": {
           "tr-TR": "Diploma kopyaları",
-          "tk-TM": "Diploma nusgalary",
-          "ru-RU": "Копии дипломов"
+          "tk-TM": "Diplom nusgalary",
+          "ru-RU": "Копии диплома"
         }
       }
     },
     "Invitation_DetailView": {
       "layoutGroups": {
         "Documents": {
-          "tr-TR": "Davet kopyaları",
+          "tr-TR": "Davetiye kopyaları",
           "tk-TM": "Çakylyk nusgalary",
           "ru-RU": "Копии приглашения"
         }
@@ -153,8 +162,8 @@
           "groups": {
             "Documents": {
               "tr-TR": "Sınır bölgesi kopyaları",
-              "tk-TM": "Serhet sebiti nusgalary",
-              "ru-RU": "Копии пограничной зоны"
+              "tk-TM": "Serhet zolagy nusgalary",
+              "ru-RU": "Копии приграничной зоны"
             }
           }
         }
@@ -168,18 +177,45 @@
             "Documents": {
               "tr-TR": "Çalışma izni kopyaları",
               "tk-TM": "Iş rugsady nusgalary",
-              "ru-RU": "Копии РНТ"
+              "ru-RU": "Копии разрешения на работу"
             }
           }
         }
       ]
     },
+    "MedicalRecord_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Sağlık kaydı kopyaları",
+          "tk-TM": "Lukmançylyk ýazgysy nusgalary",
+          "ru-RU": "Копии медицинской записи"
+        }
+      }
+    },
+    "Lodging_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Konaklama kopyaları",
+          "tk-TM": "Ýaşaýyş ýeri nusgalary",
+          "ru-RU": "Копии жилья"
+        }
+      }
+    },
+    "ProjectContract_DetailView": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "Proje sözleşmesi kopyaları",
+          "tk-TM": "Taslama şertnamasy nusgalary",
+          "ru-RU": "Копии проектного договора"
+        }
+      }
+    },
     "Person_DetailView": {
       "layoutGroups": {
         "Documents": {
-          "tr-TR": "Kişi dosya kopyaları",
-          "tk-TM": "Adam faýl nusgalary",
-          "ru-RU": "Копии файлов лица"
+          "tr-TR": "CV ve kişisel dosyalar",
+          "tk-TM": "CV we şahsy faýllar",
+          "ru-RU": "Резюме и личные файлы"
         },
         "FamilyRelationDocuments": {
           "tr-TR": "Aile ilişkisi kanıt kopyaları",
@@ -188,22 +224,31 @@
         }
       }
     },
+    "Person_DetailView_Employee": {
+      "layoutGroups": {
+        "Documents": {
+          "tr-TR": "CV ve kişisel dosyalar",
+          "tk-TM": "CV we şahsy faýllar",
+          "ru-RU": "Резюме и личные файлы"
+        }
+      }
+    },
     "AddressOfResidence_DetailView": {
       "layoutGroups": {
         "Documents": {
-          "tr-TR": "İkamet kopyaları",
-          "tk-TM": "Ýaşaýyş salgysy nusgalary",
-          "ru-RU": "Копии адреса проживания"
+          "tr-TR": "Adres kopyaları",
+          "tk-TM": "Salgy nusgalary",
+          "ru-RU": "Копии адреса"
         },
         "Documents_Group": {
-          "tr-TR": "İkamet kopyaları",
-          "tk-TM": "Ýaşaýyş salgysy nusgalary",
-          "ru-RU": "Копии адреса проживания"
+          "tr-TR": "Adres kopyaları",
+          "tk-TM": "Salgy nusgalary",
+          "ru-RU": "Копии адреса"
         },
         "LodgingDocuments": {
           "tr-TR": "Konaklama kopyaları",
-          "tk-TM": "Ýaşaýyş nusgalary",
-          "ru-RU": "Копии проживания"
+          "tk-TM": "Ýaşaýyş ýeri nusgalary",
+          "ru-RU": "Копии жилья"
         }
       }
     }

@@ -47,6 +47,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalar saýlanan Ýaşaýyş jaýy ýazgysynda saklanýar ({0} faýl). Faýl goşmak ýa-da üýtgetmek üçin Maglumat → Öý-jaý → Ýaşaýyş jaýy ýazgysyny açyň.",
             ["ru-RU"] = "Файлы хранятся в выбранной записи проживания ({0} файл(ов)). Чтобы добавить или изменить файлы, откройте Справочники → Жильё → Проживание (Lodging).",
         },
+        ["AddressOfResidence.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address copies",
+            ["tr-TR"] = "Adres kopyaları",
+            ["tk-TM"] = "Salgy nusgalary",
+            ["ru-RU"] = "Копии адреса",
+        },
         ["Application.ApprovalLegProfileChangedAfterProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Progress history already exists. Changing the approval leg profile may change which ministry steps apply to new progress rows. Review existing steps.",
@@ -607,6 +614,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} taýýar",
             ["ru-RU"] = "{0} готово",
         },
+        ["ApplicationItemDocumentCopies.Section.LinkedDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Linked documents",
+            ["tr-TR"] = "Bağlı belgeler",
+            ["tk-TM"] = "Baglanan resminamalar",
+            ["ru-RU"] = "Связанные документы",
+        },
         ["ApplicationItemDocumentCopies.Slot.Address.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Address of residence",
@@ -705,6 +719,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Öňki iş rugsady",
             ["ru-RU"] = "Предыдущее РНТ",
         },
+        ["ApplicationItemDocumentCopies.Status.Partial"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Partial",
+            ["tr-TR"] = "Kısmi",
+            ["tk-TM"] = "Bölekleýin",
+            ["ru-RU"] = "Частично",
+        },
         ["ApplicationItemDocumentCopies.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Scanned files linked to this application line (same scope as PDF packaging).",
@@ -775,6 +796,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Azyndan bir arza setiri saýlaň.",
             ["ru-RU"] = "Выберите хотя бы одну строку заявки.",
         },
+        ["ApplicationMigration.Sla.DefaultLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Migration service",
+            ["tr-TR"] = "Göç dairesi",
+            ["tk-TM"] = "Migrasiýa gullugy",
+            ["ru-RU"] = "Миграционная служба",
+        },
         ["ApplicationMigration.Sla.Ok"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0}: day {1} of {2}",
@@ -788,6 +816,41 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "{0}: {1}. gün / {2} (süre aşımı)",
             ["tk-TM"] = "{0}: {1}-nji gün / {2} (möhlet geçdi)",
             ["ru-RU"] = "{0}: день {1} из {2} (просрочено)",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-3-DAYS"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 3 days",
+            ["tr-TR"] = "3 güne kadar",
+            ["tk-TM"] = "3 güne çenli",
+            ["ru-RU"] = "До 3 дней",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-45-DAYS"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 45 days",
+            ["tr-TR"] = "45 güne kadar",
+            ["tk-TM"] = "45 güne çenli",
+            ["ru-RU"] = "До 45 дней",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-ONE-MONTH"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 1 month",
+            ["tr-TR"] = "1 aya kadar",
+            ["tk-TM"] = "1 aýa çenli",
+            ["ru-RU"] = "До 1 месяца",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-ONE-WEEK"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 1 week",
+            ["tr-TR"] = "1 haftaya kadar",
+            ["tk-TM"] = "1 hepdä çenli",
+            ["ru-RU"] = "До 1 недели",
+        },
+        ["ApplicationMigration.Sla.Profile.UP-TO-TWO-WEEKS"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Up to 2 weeks",
+            ["tr-TR"] = "2 haftaya kadar",
+            ["tk-TM"] = "2 hepdä çenli",
+            ["ru-RU"] = "До 2 недель",
         },
         ["ApplicationMigration.Sla.Warning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -814,7 +877,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "There are no active items to generate a PDF for.",
             ["tr-TR"] = "PDF oluşturulacak aktif kalem yok.",
-            ["tk-TM"] = "PDF döretmek üçin işjeň element ýok.",
+            ["tk-TM"] = "PDF döretmek üçin aktiw element ýok.",
             ["ru-RU"] = "Нет активных позиций для генерации PDF.",
         },
         ["ApplicationPdf.TemplateNotFound"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -854,7 +917,7 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationProgress.FirstStepMustBeOfficePreparation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "The first progress step must be office preparation (in preparation at office).",
+            ["en-US"] = "The first progress step must be sent for agreement (Ylalaşyga Iberildi) or processing (direct route).",
             ["tr-TR"] = "İlk ilerleme adımı ofis hazırlığı olmalıdır (hazırlanıyor @ ofiste).",
             ["tk-TM"] = "Ilkinji ösüş ädimi ofis taýýarlygy bolmaly (taýýarlykda @ ofisde).",
             ["ru-RU"] = "Первый шаг прогресса — подготовка в офисе.",
@@ -947,7 +1010,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA before starting ministry review.",
             ["tr-TR"] = "Bakanlık incelemesine başlamadan önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-            ["tk-TM"] = "Ministrlik barlagyna başlamazdan ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["tk-TM"] = "Ministrlik barlagyna başlamazdan ozal Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
             ["ru-RU"] = "Перед началом министерской проверки настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
         },
         ["ApplicationProgress.OnlyLastStepDeletable"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1547,10 +1610,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["ApplicationReportPackage.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Resminamalar",
-            ["tr-TR"] = "Resminamalar",
-            ["tk-TM"] = "Resminamalar",
-            ["ru-RU"] = "Resminamalar",
+            ["en-US"] = "Templates",
+            ["tr-TR"] = "Şablonlar",
+            ["tk-TM"] = "Şablonlar",
+            ["ru-RU"] = "Шаблоны",
         },
         ["ApplicationType.MigrationSlaProfileMissingWarning"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -1689,14 +1752,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Leg {0}: enter the maximum working days in review before this profile can be active.",
             ["tr-TR"] = "Adım {0}: profil aktif olmadan önce incelemedeki azami iş günlerini girin.",
-            ["tk-TM"] = "Ädim {0}: profil işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini girižiň.",
+            ["tk-TM"] = "Ädim {0}: profil aktiw bolmazdan ozal barlagdaky iň ýokary iş günlerini girižiň.",
             ["ru-RU"] = "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать профиль.",
         },
         ["ApprovalLegProfile.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA before activating this profile.",
             ["tr-TR"] = "Profili etkinleştirmeden önce Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-            ["tk-TM"] = "Profili işjeňleşdirmezden ozal Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["tk-TM"] = "Profili aktiwleşdirmezden ozal Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
             ["ru-RU"] = "Перед активацией профиля настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
         },
         ["ApprovalLegProfile.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -1727,12 +1790,19 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal ministrlik ylalaşyk ädimleri profilini ýazdyryň.",
             ["ru-RU"] = "Сохраните профиль этапов перед сохранением этого этапа министерства.",
         },
+        ["BorderZone.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border zone copies",
+            ["tr-TR"] = "Sınır bölgesi kopyaları",
+            ["tk-TM"] = "Serhet zolagy nusgalary",
+            ["ru-RU"] = "Копии приграничной зоны",
+        },
         ["BorderZoneDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["BorderZoneDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2007,6 +2077,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Taryh",
             ["ru-RU"] = "История",
         },
+        ["Education.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Diploma copies",
+            ["tr-TR"] = "Diploma kopyaları",
+            ["tk-TM"] = "Diplom nusgalary",
+            ["ru-RU"] = "Копии диплома",
+        },
         ["EmployeeSalary.DisplayTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "{0}",
@@ -2070,6 +2147,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminama",
             ["ru-RU"] = "Документ",
         },
+        ["HeaderDocumentCopies.Section.Documents"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Documents",
+            ["tr-TR"] = "Belgeler",
+            ["tk-TM"] = "Resminamalar",
+            ["ru-RU"] = "Документы",
+        },
         ["HeaderDocumentCopies.Subtitle.Application"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Application {0}",
@@ -2077,12 +2161,19 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Arza {0}",
             ["ru-RU"] = "Заявка {0}",
         },
+        ["Invitation.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation copies",
+            ["tr-TR"] = "Davetiye kopyaları",
+            ["tk-TM"] = "Çakylyk nusgalary",
+            ["ru-RU"] = "Копии приглашения",
+        },
         ["InvitationDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["InvitationDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2105,53 +2196,25 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Çakylyk resminama nusgalary",
             ["ru-RU"] = "Копии документов приглашения",
         },
-        ["LegacySync.OpenInNewTab"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["Lodging.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Open in new tab",
-            ["tr-TR"] = "Yeni sekmede aç",
-            ["tk-TM"] = "Täze goýmada aç",
-            ["ru-RU"] = "Открыть в новой вкладке",
+            ["en-US"] = "Lodging copies",
+            ["tr-TR"] = "Konaklama kopyaları",
+            ["tk-TM"] = "Ýaşaýyş ýeri nusgalary",
+            ["ru-RU"] = "Копии жилья",
         },
-        ["LegacySync.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        ["MedicalRecord.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Refresh",
-            ["tr-TR"] = "Yenile",
-            ["tk-TM"] = "Täzele",
-            ["ru-RU"] = "Обновить",
-        },
-        ["LegacySync.Refreshing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Refreshing…",
-            ["tr-TR"] = "Yenileniyor…",
-            ["tk-TM"] = "Täzelenýär…",
-            ["ru-RU"] = "Обновление…",
-        },
-        ["LegacySync.ReportFrameTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Legacy sync report",
-            ["tr-TR"] = "Eski sistem senkronizasyon raporu",
-            ["tk-TM"] = "Köne ulgam sinhronizasiýa hasabaty",
-            ["ru-RU"] = "Отчёт синхронизации с устаревшей системой",
-        },
-        ["LegacySync.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "VISA2015 → Visa2026 on-prem reconcile (HTML report).",
-            ["tr-TR"] = "VISA2015 → Visa2026 yerinde mutabakat (HTML raporu).",
-            ["tk-TM"] = "VISA2015 → Visa2026 ýerli deňeşdirme (HTML hasabaty).",
-            ["ru-RU"] = "Сверка VISA2015 → Visa2026 на площадке (HTML-отчёт).",
-        },
-        ["LegacySync.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["en-US"] = "Legacy sync",
-            ["tr-TR"] = "Eski sistem senkronizasyonu",
-            ["tk-TM"] = "Köne ulgam sinhronizasiýasy",
-            ["ru-RU"] = "Синхронизация с устаревшей системой",
+            ["en-US"] = "Medical record copies",
+            ["tr-TR"] = "Sağlık kaydı kopyaları",
+            ["tk-TM"] = "Lukmançylyk ýazgysy nusgalary",
+            ["ru-RU"] = "Копии медицинской записи",
         },
         ["MinistryReviewSlaSettings.NotConfigured"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Configure maximum working days under Configuration → Ministry review SLA.",
             ["tr-TR"] = "Yapılandırma → Bakanlık inceleme SLA altında azami iş günlerini ayarlayın.",
-            ["tk-TM"] = "Sazlama → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
+            ["tk-TM"] = "Konfigurasiýa → Ministrlik barlagy SLA boýunça iň ýokary iş günlerini sazlaň.",
             ["ru-RU"] = "Настройте максимальное число рабочих дней в разделе Конфигурация → SLA министерской проверки.",
         },
         ["MinistryReviewSlaSettings.WarningDaysInvalid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -2160,6 +2223,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Uyarı (iş günleri), azami iş günlerinden küçük olmalıdır.",
             ["tk-TM"] = "Duýduryş (iş günleri) iň ýokary iş günlerinden az bolmaly.",
             ["ru-RU"] = "Порог предупреждения (рабочие дни) должен быть меньше максимального числа рабочих дней.",
+        },
+        ["Passport.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport copies",
+            ["tr-TR"] = "Pasaport kopyaları",
+            ["tk-TM"] = "Pasport nusgalary",
+            ["ru-RU"] = "Копии паспорта",
         },
         ["Pdf.Packaging.ApplicationId"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2235,7 +2305,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "[{0}] Diplomas: no active Education rows for this application line (all-educations scope).",
             ["tr-TR"] = "[{0}] Diplomalar: bu başvuru satırı için aktif Eğitim kaydı yok (tüm eğitimler kapsamı).",
-            ["tk-TM"] = "[{0}] Diplomalar: bu arza setiri üçin işjeň Bilim ýazgysy ýok (ähli bilimler çägi).",
+            ["tk-TM"] = "[{0}] Diplomalar: bu arza setiri üçin aktiw Bilim ýazgysy ýok (ähli bilimler çägi).",
             ["ru-RU"] = "[{0}] Дипломы: нет активных записей об образовании для этой позиции (все образования).",
         },
         ["Pdf.Packaging.Gap.Diplomas.NoEduDocs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -2630,6 +2700,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Göçür",
             ["ru-RU"] = "Скачать",
         },
+        ["PersonDocumentCopies.Action.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open",
+            ["tr-TR"] = "Aç",
+            ["tk-TM"] = "Aç",
+            ["ru-RU"] = "Открыть",
+        },
         ["PersonDocumentCopies.Action.Preview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Preview",
@@ -2686,6 +2763,27 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Häzirki",
             ["ru-RU"] = "Текущий",
         },
+        ["PersonDocumentCopies.Column.Files"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Files",
+            ["tr-TR"] = "Dosyalar",
+            ["tk-TM"] = "Faýllar",
+            ["ru-RU"] = "Файлы",
+        },
+        ["PersonDocumentCopies.Column.Record"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Record",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Ýazgy",
+            ["ru-RU"] = "Запись",
+        },
+        ["PersonDocumentCopies.Column.Status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Status",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Status",
+            ["ru-RU"] = "Статус",
+        },
         ["PersonDocumentCopies.Empty.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "No person selected.",
@@ -2699,6 +2797,20 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Bu kişi için belge kaydı bulunamadı.",
             ["tk-TM"] = "Bu adam üçin resminama ýazgysy tapylmady.",
             ["ru-RU"] = "Записи документов для этого лица не найдены.",
+        },
+        ["PersonDocumentCopies.Header.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0}",
+            ["tr-TR"] = "{0}",
+            ["tk-TM"] = "{0}",
+            ["ru-RU"] = "{0}",
+        },
+        ["PersonDocumentCopies.Header.PersonWithNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} ({1})",
+            ["tr-TR"] = "{0} ({1})",
+            ["tk-TM"] = "{0} ({1})",
+            ["ru-RU"] = "{0} ({1})",
         },
         ["PersonDocumentCopies.Hint.NoCurrentShowingRecent"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2723,10 +2835,10 @@ public static partial class VisaUiMessageCatalog
         },
         ["PersonDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["PersonDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2833,12 +2945,26 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýaşaýyş salgylary",
             ["ru-RU"] = "Адреса проживания",
         },
+        ["PersonDocumentCopies.Section.Collapse"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Collapse section",
+            ["tr-TR"] = "Bölümü daralt",
+            ["tk-TM"] = "Bölümi daralt",
+            ["ru-RU"] = "Свернуть раздел",
+        },
         ["PersonDocumentCopies.Section.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Education",
             ["tr-TR"] = "Eğitim",
             ["tk-TM"] = "Bilim",
             ["ru-RU"] = "Образование",
+        },
+        ["PersonDocumentCopies.Section.Expand"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expand section",
+            ["tr-TR"] = "Bölümü genişlet",
+            ["tk-TM"] = "Bölümi giňelt",
+            ["ru-RU"] = "Развернуть раздел",
         },
         ["PersonDocumentCopies.Section.FamilyRelationDocuments"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2882,12 +3008,61 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Retler",
             ["ru-RU"] = "Отказы",
         },
+        ["PersonDocumentCopies.Section.Summary"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} records · {1} with files",
+            ["tr-TR"] = "{0} kayıt · {1} dosyalı",
+            ["tk-TM"] = "{0} ýazgy · {1} faýly bar",
+            ["ru-RU"] = "{0} записей · {1} с файлами",
+        },
+        ["PersonDocumentCopies.Section.SummaryNone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} records · none scanned",
+            ["tr-TR"] = "{0} kayıt · taranmış dosya yok",
+            ["tk-TM"] = "{0} ýazgy · skan faýl ýok",
+            ["ru-RU"] = "{0} записей · сканов нет",
+        },
+        ["PersonDocumentCopies.Section.SummaryOneNone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "1 record · none scanned",
+            ["tr-TR"] = "1 kayıt · taranmış dosya yok",
+            ["tk-TM"] = "1 ýazgy · skan faýl ýok",
+            ["ru-RU"] = "1 запись · сканов нет",
+        },
+        ["PersonDocumentCopies.Section.SummaryOneWithFiles"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "1 record · {0} with files",
+            ["tr-TR"] = "1 kayıt · {0} dosyalı",
+            ["tk-TM"] = "1 ýazgy · {0} faýly bar",
+            ["ru-RU"] = "1 запись · {0} с файлами",
+        },
+        ["PersonDocumentCopies.Section.Visas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visas",
+            ["tr-TR"] = "Vizeler",
+            ["tk-TM"] = "Wizalar",
+            ["ru-RU"] = "Визы",
+        },
         ["PersonDocumentCopies.Section.WorkPermits"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Work permits",
             ["tr-TR"] = "Çalışma izinleri",
             ["tk-TM"] = "Iş rugsatlary",
             ["ru-RU"] = "РНТ",
+        },
+        ["PersonDocumentCopies.Status.Missing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing",
+            ["tr-TR"] = "Eksik",
+            ["tk-TM"] = "Ýok",
+            ["ru-RU"] = "Отсутствует",
+        },
+        ["PersonDocumentCopies.Status.Ready"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ready",
+            ["tr-TR"] = "Hazır",
+            ["tk-TM"] = "Taýýar",
+            ["ru-RU"] = "Готово",
         },
         ["PersonDocumentCopies.Subtitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -2916,6 +3091,832 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Kişi belge kopyaları",
             ["tk-TM"] = "Adam resminama nusgalary",
             ["ru-RU"] = "Копии документов лица",
+        },
+        ["PersonDossier.Action.Copies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document copies",
+            ["tr-TR"] = "Belge kopyaları",
+            ["tk-TM"] = "Resminama nusgalary",
+            ["ru-RU"] = "Копии документов",
+        },
+        ["PersonDossier.Action.Export"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Export for director",
+            ["tr-TR"] = "Yönetici için dışa aktar",
+            ["tk-TM"] = "Ýolbaşçy üçin eksport",
+            ["ru-RU"] = "Выгрузить для руководителя",
+        },
+        ["PersonDossier.Action.Open"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open dossier",
+            ["tr-TR"] = "Dosyayı aç",
+            ["tk-TM"] = "Dosýäni aç",
+            ["ru-RU"] = "Открыть досье",
+        },
+        ["PersonDossier.Chrome.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preparing person dossier…",
+            ["tr-TR"] = "Kişi dosyası hazırlanıyor…",
+            ["tk-TM"] = "Adam dosýesi taýýarlanýar…",
+            ["ru-RU"] = "Подготовка досье…",
+        },
+        ["PersonDossier.Chrome.LoadingFinishing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Almost ready…",
+            ["tr-TR"] = "Neredeyse hazır…",
+            ["tk-TM"] = "Taýýar bolmagyna az galdy…",
+            ["ru-RU"] = "Почти готово…",
+        },
+        ["PersonDossier.Chrome.LoadingIdentity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Building identity and status…",
+            ["tr-TR"] = "Kimlik ve durum hazırlanıyor…",
+            ["tk-TM"] = "Şahsyýet we ýagdaý taýýarlanýar…",
+            ["ru-RU"] = "Сборка личности и статуса…",
+        },
+        ["PersonDossier.Chrome.LoadingPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading person record…",
+            ["tr-TR"] = "Kişi kaydı yükleniyor…",
+            ["tk-TM"] = "Adam ýazgysy ýüklenýär…",
+            ["ru-RU"] = "Загрузка записи лица…",
+        },
+        ["PersonDossier.Chrome.LoadingPreparing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening dossier…",
+            ["tr-TR"] = "Dosya açılıyor…",
+            ["tk-TM"] = "Dosýe açylýar…",
+            ["ru-RU"] = "Открытие досье…",
+        },
+        ["PersonDossier.Chrome.LoadingProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dossier load progress",
+            ["tr-TR"] = "Dosya yükleme ilerlemesi",
+            ["tk-TM"] = "Dosýe ýüklemek ösüşi",
+            ["ru-RU"] = "Прогресс загрузки досье",
+        },
+        ["PersonDossier.Chrome.LoadingSections"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Collecting documents and history…",
+            ["tr-TR"] = "Belgeler ve geçmiş toplanıyor…",
+            ["tk-TM"] = "Resminamalar we taryh ýygnalýar…",
+            ["ru-RU"] = "Сбор документов и истории…",
+        },
+        ["PersonDossier.Chrome.NoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No person selected.",
+            ["tr-TR"] = "Kişi seçilmedi.",
+            ["tk-TM"] = "Adam saýlanmady.",
+            ["ru-RU"] = "Лицо не выбрано.",
+        },
+        ["PersonDossier.Chrome.NoPhoto"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No photo",
+            ["tr-TR"] = "Fotoğraf yok",
+            ["tk-TM"] = "Surat ýok",
+            ["ru-RU"] = "Нет фото",
+        },
+        ["PersonDossier.Column.Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address",
+            ["tr-TR"] = "Adres",
+            ["tk-TM"] = "Salgy",
+            ["ru-RU"] = "Адрес",
+        },
+        ["PersonDossier.Column.ApplicationDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application date",
+            ["tr-TR"] = "Başvuru tarihi",
+            ["tk-TM"] = "Arza senesi",
+            ["ru-RU"] = "Дата заявления",
+        },
+        ["PersonDossier.Column.ApplicationNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application #",
+            ["tr-TR"] = "Başvuru No",
+            ["tk-TM"] = "Arza belgisi",
+            ["ru-RU"] = "№ заявления",
+        },
+        ["PersonDossier.Column.ApplicationType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application type",
+            ["tr-TR"] = "Başvuru türü",
+            ["tk-TM"] = "Arza görnüşi",
+            ["ru-RU"] = "Тип заявления",
+        },
+        ["PersonDossier.Column.ASNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "AS number",
+            ["tr-TR"] = "AS numarası",
+            ["tk-TM"] = "AS belgisi",
+            ["ru-RU"] = "Номер AS",
+        },
+        ["PersonDossier.Column.Category"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Category",
+            ["tr-TR"] = "Kategori",
+            ["tk-TM"] = "Kategoriýa",
+            ["ru-RU"] = "Категория",
+        },
+        ["PersonDossier.Column.Citizenship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Citizenship",
+            ["tr-TR"] = "Vatandaşlık",
+            ["tk-TM"] = "Raýatlyk",
+            ["ru-RU"] = "Гражданство",
+        },
+        ["PersonDossier.Column.City"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "City",
+            ["tr-TR"] = "Şehir",
+            ["tk-TM"] = "Şäher",
+            ["ru-RU"] = "Город",
+        },
+        ["PersonDossier.Column.Country"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Country",
+            ["tr-TR"] = "Ülke",
+            ["tk-TM"] = "Ýurt",
+            ["ru-RU"] = "Страна",
+        },
+        ["PersonDossier.Column.Date"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date",
+            ["tr-TR"] = "Tarih",
+            ["tk-TM"] = "Senesi",
+            ["ru-RU"] = "Дата",
+        },
+        ["PersonDossier.Column.DateOfBirth"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date of birth",
+            ["tr-TR"] = "Doğum tarihi",
+            ["tk-TM"] = "Doglan senesi",
+            ["ru-RU"] = "Дата рождения",
+        },
+        ["PersonDossier.Column.Department"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Department",
+            ["tr-TR"] = "Departman",
+            ["tk-TM"] = "Bölüm",
+            ["ru-RU"] = "Отдел",
+        },
+        ["PersonDossier.Column.Document"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document",
+            ["tr-TR"] = "Belge",
+            ["tk-TM"] = "Resminama",
+            ["ru-RU"] = "Документ",
+        },
+        ["PersonDossier.Column.Expiry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiry",
+            ["tr-TR"] = "Bitiş",
+            ["tk-TM"] = "Möhleti",
+            ["ru-RU"] = "Срок действия",
+        },
+        ["PersonDossier.Column.From"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "From",
+            ["tr-TR"] = "Başlangıç",
+            ["tk-TM"] = "Başy",
+            ["ru-RU"] = "С",
+        },
+        ["PersonDossier.Column.GraduationYear"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Graduation year",
+            ["tr-TR"] = "Mezuniyet yılı",
+            ["tk-TM"] = "Gutaran ýyly",
+            ["ru-RU"] = "Год окончания",
+        },
+        ["PersonDossier.Column.Institution"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Institution",
+            ["tr-TR"] = "Kurum",
+            ["tk-TM"] = "Edara",
+            ["ru-RU"] = "Учреждение",
+        },
+        ["PersonDossier.Column.Issued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued",
+            ["tr-TR"] = "Veriliş",
+            ["tk-TM"] = "Berilen",
+            ["ru-RU"] = "Выдано",
+        },
+        ["PersonDossier.Column.IssueDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issue date",
+            ["tr-TR"] = "Veriliş tarihi",
+            ["tk-TM"] = "Berlen senesi",
+            ["ru-RU"] = "Дата выдачи",
+        },
+        ["PersonDossier.Column.IssuedBy"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued by",
+            ["tr-TR"] = "Veren makam",
+            ["tk-TM"] = "Beren edarasy",
+            ["ru-RU"] = "Кем выдан",
+        },
+        ["PersonDossier.Column.Level"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Level",
+            ["tr-TR"] = "Seviye",
+            ["tk-TM"] = "Dereje",
+            ["ru-RU"] = "Уровень",
+        },
+        ["PersonDossier.Column.Movement"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Movement",
+            ["tr-TR"] = "Hareket",
+            ["tk-TM"] = "Hereket",
+            ["ru-RU"] = "Движение",
+        },
+        ["PersonDossier.Column.Name"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name",
+            ["tr-TR"] = "Ad",
+            ["tk-TM"] = "Ad",
+            ["ru-RU"] = "Имя",
+        },
+        ["PersonDossier.Column.Number"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Number",
+            ["tr-TR"] = "Numara",
+            ["tk-TM"] = "Belgisi",
+            ["ru-RU"] = "Номер",
+        },
+        ["PersonDossier.Column.Place"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Place",
+            ["tr-TR"] = "Yer",
+            ["tk-TM"] = "Ýeri",
+            ["ru-RU"] = "Место",
+        },
+        ["PersonDossier.Column.Position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position",
+            ["tr-TR"] = "Pozisyon",
+            ["tk-TM"] = "Wezipe",
+            ["ru-RU"] = "Должность",
+        },
+        ["PersonDossier.Column.Reason"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reason",
+            ["tr-TR"] = "Neden",
+            ["tk-TM"] = "Sebäbi",
+            ["ru-RU"] = "Причина",
+        },
+        ["PersonDossier.Column.Relationship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Relationship",
+            ["tr-TR"] = "Yakınlık",
+            ["tk-TM"] = "Gatnaşyk",
+            ["ru-RU"] = "Степень родства",
+        },
+        ["PersonDossier.Column.Specialty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Specialty",
+            ["tr-TR"] = "Uzmanlık",
+            ["tk-TM"] = "Hünäri",
+            ["ru-RU"] = "Специальность",
+        },
+        ["PersonDossier.Column.Status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Status",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaý",
+            ["ru-RU"] = "Статус",
+        },
+        ["PersonDossier.Column.To"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "To",
+            ["tr-TR"] = "Bitiş",
+            ["tk-TM"] = "Soňy",
+            ["ru-RU"] = "По",
+        },
+        ["PersonDossier.Column.Type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Type",
+            ["tr-TR"] = "Tür",
+            ["tk-TM"] = "Görnüş",
+            ["ru-RU"] = "Тип",
+        },
+        ["PersonDossier.Column.ValidFrom"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid from",
+            ["tr-TR"] = "Başlangıç",
+            ["tk-TM"] = "Başlanýan senesi",
+            ["ru-RU"] = "Действует с",
+        },
+        ["PersonDossier.Export.ErrorFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The export could not be started.",
+            ["tr-TR"] = "Dışa aktarma başlatılamadı.",
+            ["tk-TM"] = "Eksporty başlap bolmady.",
+            ["ru-RU"] = "Не удалось запустить выгрузку.",
+        },
+        ["PersonDossier.Export.ErrorNoPerson"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select a person before exporting.",
+            ["tr-TR"] = "Dışa aktarmadan önce bir kişi seçin.",
+            ["tk-TM"] = "Eksport etmezden öň adam saýlaň.",
+            ["ru-RU"] = "Перед выгрузкой выберите лицо.",
+        },
+        ["PersonDossier.Export.ErrorNotSignedIn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sign in again to export.",
+            ["tr-TR"] = "Dışa aktarmak için tekrar oturum açın.",
+            ["tk-TM"] = "Eksport etmek üçin ulgama täzeden giriň.",
+            ["ru-RU"] = "Войдите снова, чтобы выполнить выгрузку.",
+        },
+        ["PersonDossier.Export.GeneratedOn"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Generated on {0}",
+            ["tr-TR"] = "Oluşturulma: {0}",
+            ["tk-TM"] = "Döredilen senesi: {0}",
+            ["ru-RU"] = "Сформировано: {0}",
+        },
+        ["PersonDossier.Export.Notes.DossierFailed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "The dossier document itself could not be generated.",
+            ["tr-TR"] = "Dosya belgesinin kendisi oluşturulamadı.",
+            ["tk-TM"] = "Dosýe resminamasynyň özüni döredip bolmady.",
+            ["ru-RU"] = "Не удалось сформировать сам документ досье.",
+        },
+        ["PersonDossier.Export.Notes.GapsHeader"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No readable copy could be produced for:",
+            ["tr-TR"] = "Şunlar için okunabilir kopya oluşturulamadı:",
+            ["tk-TM"] = "Şular üçin okalýan nusga döredip bolmady:",
+            ["ru-RU"] = "Не удалось получить читаемую копию для:",
+        },
+        ["PersonDossier.Export.Notes.NoGaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All records with attachments were exported.",
+            ["tr-TR"] = "Ek içeren tüm kayıtlar dışa aktarıldı.",
+            ["tk-TM"] = "Goşundysy bolan ähli ýazgylar eksport edildi.",
+            ["ru-RU"] = "Все записи с вложениями выгружены.",
+        },
+        ["PersonDossier.Export.Notes.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person dossier export notes",
+            ["tr-TR"] = "Kişi dosyası dışa aktarma notları",
+            ["tk-TM"] = "Adam dosýesiniň eksport bellikleri",
+            ["ru-RU"] = "Примечания к выгрузке досье",
+        },
+        ["PersonDossier.Export.Queued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Preparing the hand-over package...",
+            ["tr-TR"] = "Teslim paketi hazırlanıyor...",
+            ["tk-TM"] = "Tabşyryş paketi taýýarlanýar...",
+            ["ru-RU"] = "Готовится пакет для передачи...",
+        },
+        ["PersonDossier.Export.Toast.Dismiss"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dismiss",
+            ["tr-TR"] = "Kapat",
+            ["tk-TM"] = "Ýap",
+            ["ru-RU"] = "Закрыть",
+        },
+        ["PersonDossier.Export.Toast.Download"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download",
+            ["tr-TR"] = "İndir",
+            ["tk-TM"] = "Göçür",
+            ["ru-RU"] = "Скачать",
+        },
+        ["PersonDossier.Export.Toast.Failed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Export failed",
+            ["tr-TR"] = "Dışa aktarma başarısız",
+            ["tk-TM"] = "Eksport şowsuz",
+            ["ru-RU"] = "Выгрузка не выполнена",
+        },
+        ["PersonDossier.Export.Toast.Gaps"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Some records had no readable copy - see EXPORT_NOTES.txt in the package.",
+            ["tr-TR"] = "Bazı kayıtların okunabilir kopyası yoktu - paketteki EXPORT_NOTES.txt dosyasına bakın.",
+            ["tk-TM"] = "Käbir ýazgylaryň okalýan nusgasy ýokdy - paketdäki EXPORT_NOTES.txt faýlyna serediň.",
+            ["ru-RU"] = "Для некоторых записей нет читаемой копии - см. EXPORT_NOTES.txt в пакете.",
+        },
+        ["PersonDossier.Export.Toast.Ready"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Package ready",
+            ["tr-TR"] = "Paket hazır",
+            ["tk-TM"] = "Paket taýýar",
+            ["ru-RU"] = "Пакет готов",
+        },
+        ["PersonDossier.Export.Toast.Running"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Building package",
+            ["tr-TR"] = "Paket oluşturuluyor",
+            ["tk-TM"] = "Paket döredilýär",
+            ["ru-RU"] = "Формирование пакета",
+        },
+        ["PersonDossier.Export.Toast.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person dossier export",
+            ["tr-TR"] = "Kişi dosyası dışa aktarma",
+            ["tk-TM"] = "Adam dosýesiniň eksporty",
+            ["ru-RU"] = "Выгрузка досье лица",
+        },
+        ["PersonDossier.Field.BirthPlace"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Birth place",
+            ["tr-TR"] = "Doğum yeri",
+            ["tk-TM"] = "Doglan ýeri",
+            ["ru-RU"] = "Место рождения",
+        },
+        ["PersonDossier.Field.Citizenship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Citizenship",
+            ["tr-TR"] = "Vatandaşlık",
+            ["tk-TM"] = "Raýatlyk",
+            ["ru-RU"] = "Гражданство",
+        },
+        ["PersonDossier.Field.CountryOfBirth"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Country of birth",
+            ["tr-TR"] = "Doğum ülkesi",
+            ["tk-TM"] = "Doglan ýurdy",
+            ["ru-RU"] = "Страна рождения",
+        },
+        ["PersonDossier.Field.DateOfBirth"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date of birth",
+            ["tr-TR"] = "Doğum tarihi",
+            ["tk-TM"] = "Doglan senesi",
+            ["ru-RU"] = "Дата рождения",
+        },
+        ["PersonDossier.Field.Email"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Email",
+            ["tr-TR"] = "E-posta",
+            ["tk-TM"] = "E-poçta",
+            ["ru-RU"] = "Эл. почта",
+        },
+        ["PersonDossier.Field.Gender"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Gender",
+            ["tr-TR"] = "Cinsiyet",
+            ["tk-TM"] = "Jynsy",
+            ["ru-RU"] = "Пол",
+        },
+        ["PersonDossier.Field.HireDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hire date",
+            ["tr-TR"] = "İşe giriş tarihi",
+            ["tk-TM"] = "Işe kabul edilen senesi",
+            ["ru-RU"] = "Дата приёма на работу",
+        },
+        ["PersonDossier.Field.MaritalStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Marital status",
+            ["tr-TR"] = "Medeni hali",
+            ["tk-TM"] = "Maşgala ýagdaýy",
+            ["ru-RU"] = "Семейное положение",
+        },
+        ["PersonDossier.Field.PersonalNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Personal number",
+            ["tr-TR"] = "Kişisel numara",
+            ["tk-TM"] = "Şahsy belgisi",
+            ["ru-RU"] = "Личный номер",
+        },
+        ["PersonDossier.Field.Relationship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Relationship",
+            ["tr-TR"] = "Yakınlık",
+            ["tk-TM"] = "Gatnaşyk",
+            ["ru-RU"] = "Степень родства",
+        },
+        ["PersonDossier.Field.SponsoringEmployee"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Sponsoring employee",
+            ["tr-TR"] = "Bağlı olduğu çalışan",
+            ["tk-TM"] = "Çagyryjy işgär",
+            ["ru-RU"] = "Приглашающий сотрудник",
+        },
+        ["PersonDossier.Field.Subcontractor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Subcontractor",
+            ["tr-TR"] = "Taşeron",
+            ["tk-TM"] = "Subpodrýadçy",
+            ["ru-RU"] = "Субподрядчик",
+        },
+        ["PersonDossier.List.ColumnCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dossier",
+            ["tr-TR"] = "Dosye",
+            ["tk-TM"] = "Dosýe",
+            ["ru-RU"] = "Досье",
+        },
+        ["PersonDossier.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
+        },
+        ["PersonDossier.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select exactly one person to open a dossier.",
+            ["tr-TR"] = "Dosya açmak için tam olarak bir kişi seçin.",
+            ["tk-TM"] = "Dosýe açmak üçin diňe bir adam saýlaň.",
+            ["ru-RU"] = "Чтобы открыть досье, выберите ровно одно лицо.",
+        },
+        ["PersonDossier.MovementType.Entry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Entry",
+            ["tr-TR"] = "Giriş",
+            ["tk-TM"] = "Giriş",
+            ["ru-RU"] = "Въезд",
+        },
+        ["PersonDossier.MovementType.Exit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Exit",
+            ["tr-TR"] = "Çıkış",
+            ["tk-TM"] = "Çykyş",
+            ["ru-RU"] = "Выезд",
+        },
+        ["PersonDossier.ResidenceType.Hospital"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hospital",
+            ["tr-TR"] = "Hastane",
+            ["tk-TM"] = "Hassahana",
+            ["ru-RU"] = "Больница",
+        },
+        ["PersonDossier.ResidenceType.Hotel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hotel",
+            ["tr-TR"] = "Otel",
+            ["tk-TM"] = "Myhmanhana",
+            ["ru-RU"] = "Гостиница",
+        },
+        ["PersonDossier.ResidenceType.Lodging"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Lodging",
+            ["tr-TR"] = "Konaklama",
+            ["tk-TM"] = "Umumy ýaşaýyş jaýy",
+            ["ru-RU"] = "Проживание",
+        },
+        ["PersonDossier.ResidenceType.Other"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other",
+            ["tr-TR"] = "Diğer",
+            ["tk-TM"] = "Beýleki",
+            ["ru-RU"] = "Прочее",
+        },
+        ["PersonDossier.ResidenceType.PrivateHouse"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Private house",
+            ["tr-TR"] = "Özel konut",
+            ["tk-TM"] = "Şahsy jaý",
+            ["ru-RU"] = "Частный дом",
+        },
+        ["PersonDossier.Role.Employee"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee",
+            ["tr-TR"] = "Çalışan",
+            ["tk-TM"] = "Işgär",
+            ["ru-RU"] = "Сотрудник",
+        },
+        ["PersonDossier.Role.FamilyMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family member",
+            ["tr-TR"] = "Aile üyesi",
+            ["tk-TM"] = "Maşgala agzasy",
+            ["ru-RU"] = "Член семьи",
+        },
+        ["PersonDossier.Role.TemporaryVisitor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Temporary visitor",
+            ["tr-TR"] = "Geçici ziyaretçi",
+            ["tk-TM"] = "Wagtlaýyn myhman",
+            ["ru-RU"] = "Временный посетитель",
+        },
+        ["PersonDossier.Section.addresses"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Addresses of residence",
+            ["tr-TR"] = "İkamet adresleri",
+            ["tk-TM"] = "Ýaşaýyş salgylary",
+            ["ru-RU"] = "Адреса проживания",
+        },
+        ["PersonDossier.Section.applications"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Applications",
+            ["tr-TR"] = "Başvurular",
+            ["tk-TM"] = "Arzalar",
+            ["ru-RU"] = "Заявления",
+        },
+        ["PersonDossier.Section.education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["PersonDossier.Section.familyMembers"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family members",
+            ["tr-TR"] = "Aile üyeleri",
+            ["tk-TM"] = "Maşgala agzalary",
+            ["ru-RU"] = "Члены семьи",
+        },
+        ["PersonDossier.Section.invitations"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitations",
+            ["tr-TR"] = "Davetler",
+            ["tk-TM"] = "Çakylyklar",
+            ["ru-RU"] = "Приглашения",
+        },
+        ["PersonDossier.Section.medical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical records",
+            ["tr-TR"] = "Sağlık kayıtları",
+            ["tk-TM"] = "Saglyk ýazgylary",
+            ["ru-RU"] = "Медицинские записи",
+        },
+        ["PersonDossier.Section.passports"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passports",
+            ["tr-TR"] = "Pasaportlar",
+            ["tk-TM"] = "Pasportlar",
+            ["ru-RU"] = "Паспорта",
+        },
+        ["PersonDossier.Section.positionHistory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position history",
+            ["tr-TR"] = "Pozisyon geçmişi",
+            ["tk-TM"] = "Wezipe taryhy",
+            ["ru-RU"] = "История должностей",
+        },
+        ["PersonDossier.Section.rejections"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejections",
+            ["tr-TR"] = "Retler",
+            ["tk-TM"] = "Retler",
+            ["ru-RU"] = "Отказы",
+        },
+        ["PersonDossier.Section.travel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Travel history",
+            ["tr-TR"] = "Seyahat geçmişi",
+            ["tk-TM"] = "Syýahat taryhy",
+            ["ru-RU"] = "История поездок",
+        },
+        ["PersonDossier.Section.visas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visas",
+            ["tr-TR"] = "Vizeler",
+            ["tk-TM"] = "Wizalar",
+            ["ru-RU"] = "Визы",
+        },
+        ["PersonDossier.Section.workPermits"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permits",
+            ["tr-TR"] = "Çalışma izinleri",
+            ["tk-TM"] = "Iş rugsatlary",
+            ["ru-RU"] = "Разрешения на работу",
+        },
+        ["PersonDossier.Status.Archived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Archived",
+            ["tr-TR"] = "Arşivlenmiş",
+            ["tk-TM"] = "Arhiwde",
+            ["ru-RU"] = "В архиве",
+        },
+        ["PersonDossier.Status.Cancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Cancelled",
+            ["tr-TR"] = "İptal edildi",
+            ["tk-TM"] = "Ýatyryldy",
+            ["ru-RU"] = "Аннулирован",
+        },
+        ["PersonDossier.Status.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current",
+            ["tr-TR"] = "Güncel",
+            ["tk-TM"] = "Häzirki",
+            ["ru-RU"] = "Текущий",
+        },
+        ["PersonDossier.Status.Expired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired",
+            ["tr-TR"] = "Süresi dolmuş",
+            ["tk-TM"] = "Möhleti geçen",
+            ["ru-RU"] = "Истёк",
+        },
+        ["PersonDossier.Status.ExpiresInDays"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expires in {0} days",
+            ["tr-TR"] = "{0} gün içinde doluyor",
+            ["tk-TM"] = "{0} günden möhleti gutarýar",
+            ["ru-RU"] = "Истекает через {0} дн.",
+        },
+        ["PersonDossier.Status.Missing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Not on file",
+            ["tr-TR"] = "Kayıtlı değil",
+            ["tk-TM"] = "Hasapda ýok",
+            ["ru-RU"] = "Нет в деле",
+        },
+        ["PersonDossier.Status.None"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "-",
+            ["tr-TR"] = "-",
+            ["tk-TM"] = "-",
+            ["ru-RU"] = "-",
+        },
+        ["PersonDossier.Status.Present"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Present",
+            ["tr-TR"] = "Mevcut",
+            ["tk-TM"] = "Bar",
+            ["ru-RU"] = "Есть",
+        },
+        ["PersonDossier.Status.Used"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Used",
+            ["tr-TR"] = "Kullanıldı",
+            ["tk-TM"] = "Ulanyldy",
+            ["ru-RU"] = "Использовано",
+        },
+        ["PersonDossier.Status.ValidTo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid to {0}",
+            ["tr-TR"] = "{0} tarihine kadar geçerli",
+            ["tk-TM"] = "{0} çenli hereket edýär",
+            ["ru-RU"] = "Действует до {0}",
+        },
+        ["PersonDossier.Tile.passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["PersonDossier.Tile.registration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Hasaba alyş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["PersonDossier.Tile.visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["PersonDossier.Tile.workPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit",
+            ["tr-TR"] = "Çalışma izni",
+            ["tk-TM"] = "Iş rugsady",
+            ["ru-RU"] = "Разрешение на работу",
+        },
+        ["PersonDossier.Title"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person dossier",
+            ["tr-TR"] = "Kişi dosyası",
+            ["tk-TM"] = "Adam dosýesi",
+            ["ru-RU"] = "Досье лица",
+        },
+        ["PersonDossier.TravelType.External"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "External",
+            ["tr-TR"] = "Dış",
+            ["tk-TM"] = "Daşarky",
+            ["ru-RU"] = "Внешний",
+        },
+        ["PersonDossier.TravelType.Internal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Internal",
+            ["tr-TR"] = "İç",
+            ["tk-TM"] = "Içeri",
+            ["ru-RU"] = "Внутренний",
+        },
+        ["PersonDossier.View.Paper"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Paper",
+            ["tr-TR"] = "Kağıt",
+            ["tk-TM"] = "Kagyz",
+            ["ru-RU"] = "Бумага",
+        },
+        ["PersonDossier.View.Screen"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Screen",
+            ["tr-TR"] = "Ekran",
+            ["tk-TM"] = "Ekran",
+            ["ru-RU"] = "Экран",
+        },
+        ["PersonDossier.View.SwitchLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Dossier view",
+            ["tr-TR"] = "Dosya görünümü",
+            ["tk-TM"] = "Dosýe görnüşi",
+            ["ru-RU"] = "Вид досье",
         },
         ["PlaceholderManual.Column.Canonical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3019,14 +4020,14 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Leg {0}: enter the maximum working days in review before this contract can be active.",
             ["tr-TR"] = "Adım {0}: sözleşme aktif olmadan önce incelemedeki azami iş günlerini girin.",
-            ["tk-TM"] = "Ädim {0}: şertnama işjeň bolmazdan ozal barlagdaky iň ýokary iş günlerini giriziň.",
+            ["tk-TM"] = "Ädim {0}: şertnama aktiw bolmazdan ozal barlagdaky iň ýokary iş günlerini giriziň.",
             ["ru-RU"] = "Этап {0}: укажите максимальное число рабочих дней на рассмотрении, прежде чем активировать контракт.",
         },
         ["ProjectContract.MinistryLegMaxDaysRequiredGeneric"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Every ministry leg needs maximum working days in review before this contract can be active.",
             ["tr-TR"] = "Sözleşme aktif olmadan önce her bakanlık adımında azami inceleme iş günleri gerekir.",
-            ["tk-TM"] = "Şertnama işjeň bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
+            ["tk-TM"] = "Şertnama aktiw bolmazdan ozal her ministrlik ädiminde iň ýokary barlag iş günleri gerek.",
             ["ru-RU"] = "Перед активацией контракта для каждого этапа министерства нужно указать максимальное число рабочих дней на рассмотрении.",
         },
         ["ProjectContract.MinistryLegsRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -3057,6 +4058,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Bu ministrlik ädimini ýazdyrmazdan ozal taslama şertnamasyny ýazdyryň.",
             ["ru-RU"] = "Сохраните контракт проекта перед сохранением этого этапа министерства.",
         },
+        ["ProjectContract.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project contract copies",
+            ["tr-TR"] = "Proje sözleşmesi kopyaları",
+            ["tk-TM"] = "Taslama şertnamasy nusgalary",
+            ["ru-RU"] = "Копии проектного договора",
+        },
         ["RecycleBin.ViewCaption"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Recycle Bin ({0})",
@@ -3071,12 +4079,19 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "{0} belgili ret — {1}",
             ["ru-RU"] = "Отказ {0} от {1}",
         },
+        ["Rejection.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection copies",
+            ["tr-TR"] = "Ret kopyaları",
+            ["tk-TM"] = "Ret nusgalary",
+            ["ru-RU"] = "Копии отказа",
+        },
         ["RejectionDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["RejectionDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3098,6 +4113,2022 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Ret belge kopyaları",
             ["tk-TM"] = "Ret resminama nusgalary",
             ["ru-RU"] = "Копии документов отказа",
+        },
+        ["ReportDashboard.Category.AddressOfResidence"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address of Residence",
+            ["tr-TR"] = "İkamet Adresi",
+            ["tk-TM"] = "Ýaşaýyş salgysy",
+            ["ru-RU"] = "Адрес проживания",
+        },
+        ["ReportDashboard.Category.Application"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application",
+            ["tr-TR"] = "Başvuru",
+            ["tk-TM"] = "Ýüztutma",
+            ["ru-RU"] = "Заявка",
+        },
+        ["ReportDashboard.Category.ApplicationDirectMigration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application (direct migration)",
+            ["tr-TR"] = "Başvuru (doğrudan migrasyon)",
+            ["tk-TM"] = "Ýüztutma (gönümel migrasiýa)",
+            ["ru-RU"] = "Заявка (напрямую в миграцию)",
+        },
+        ["ReportDashboard.Category.ApplicationViaMinistry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application (via ministry)",
+            ["tr-TR"] = "Başvuru (bakanlık süreci)",
+            ["tk-TM"] = "Ýüztutma (ministrlik arkaly)",
+            ["ru-RU"] = "Заявка (через министерства)",
+        },
+        ["ReportDashboard.Category.BorderZone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Border Zone",
+            ["tr-TR"] = "Sınır Bölgesi",
+            ["tk-TM"] = "Serhet sebiti",
+            ["ru-RU"] = "Пограничная зона",
+        },
+        ["ReportDashboard.Category.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["ReportDashboard.Category.IncompletePersons"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Persons with incomplete data",
+            ["tr-TR"] = "Verileri eksik kişiler",
+            ["tk-TM"] = "Maglumary doly däl şahslar",
+            ["ru-RU"] = "Лица с неполными данными",
+        },
+        ["ReportDashboard.Category.Invitation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation",
+            ["tr-TR"] = "Davet",
+            ["tk-TM"] = "Çakylyk",
+            ["ru-RU"] = "Приглашение",
+        },
+        ["ReportDashboard.Category.MedicalRecords"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical Records",
+            ["tr-TR"] = "Sağlık Kayıtları",
+            ["tk-TM"] = "Saglyk ýazgylary",
+            ["ru-RU"] = "Медкарты",
+        },
+        ["ReportDashboard.Category.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["ReportDashboard.Category.PersonSearch"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person search",
+            ["tr-TR"] = "Kişi arama",
+            ["tk-TM"] = "Şahs gözlegi",
+            ["ru-RU"] = "Поиск персон",
+        },
+        ["ReportDashboard.Category.PositionHistory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position History",
+            ["tr-TR"] = "Pozisyon Geçmişi",
+            ["tk-TM"] = "Wezipe taryhy",
+            ["ru-RU"] = "История должностей",
+        },
+        ["ReportDashboard.Category.Registration"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Registration",
+            ["tr-TR"] = "Kayıt",
+            ["tk-TM"] = "Hasaba alyş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["ReportDashboard.Category.Subcontractor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Subcontractor",
+            ["tr-TR"] = "Taşeron",
+            ["tk-TM"] = "Subpodrýadçy",
+            ["ru-RU"] = "Субподрядчик",
+        },
+        ["ReportDashboard.Category.Travel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Travel",
+            ["tr-TR"] = "Seyahat",
+            ["tk-TM"] = "Syýahat",
+            ["ru-RU"] = "Поездка",
+        },
+        ["ReportDashboard.Category.Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa",
+            ["tr-TR"] = "Vize",
+            ["tk-TM"] = "Wiza",
+            ["ru-RU"] = "Виза",
+        },
+        ["ReportDashboard.Category.WorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work Permit",
+            ["tr-TR"] = "Çalışma İzni",
+            ["tk-TM"] = "Iş rugsady",
+            ["ru-RU"] = "Разрешение на работу",
+        },
+        ["ReportDashboard.Chrome.BarChart"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Bar Chart",
+            ["tr-TR"] = "Çubuk grafik",
+            ["tk-TM"] = "Sütün diagramma",
+            ["ru-RU"] = "Столбчатая",
+        },
+        ["ReportDashboard.Chrome.EmptyProject"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No records for this project.",
+            ["tr-TR"] = "Bu proje için kayıt yok.",
+            ["tk-TM"] = "Bu taslama üçin ýazgy ýok.",
+            ["ru-RU"] = "Нет записей по этому проекту.",
+        },
+        ["ReportDashboard.Chrome.EmptySelection"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No records for this selection.",
+            ["tr-TR"] = "Bu seçim için kayıt yok.",
+            ["tk-TM"] = "Bu saýlaw üçin ýazgy ýok.",
+            ["ru-RU"] = "Нет записей для этого выбора.",
+        },
+        ["ReportDashboard.Chrome.ExcelDownloadTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Download Excel template",
+            ["tr-TR"] = "Excel şablonunu indir",
+            ["tk-TM"] = "Excel şablonyny göçür",
+            ["ru-RU"] = "Скачать шаблон Excel",
+        },
+        ["ReportDashboard.Chrome.ExcelNotConfiguredBody"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No Excel template is configured for this report yet.",
+            ["tr-TR"] = "Bu rapor için henüz Excel şablonu yapılandırılmadı.",
+            ["tk-TM"] = "Bu hasabat üçin heniz Excel şablony sazlanmady.",
+            ["ru-RU"] = "Для этого отчёта ещё не настроен шаблон Excel.",
+        },
+        ["ReportDashboard.Chrome.ExcelNotConfiguredTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excel template not configured",
+            ["tr-TR"] = "Excel şablonu yapılandırılmadı",
+            ["tk-TM"] = "Excel şablony sazlanmady",
+            ["ru-RU"] = "Шаблон Excel не настроен",
+        },
+        ["ReportDashboard.Chrome.ExcelTemplateMissing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Excel template '{0}' was not found. Seed or upload it under Reports.",
+            ["tr-TR"] = "Excel şablonu '{0}' bulunamadı. Raporlar altında ekleyin veya yükleyin.",
+            ["tk-TM"] = "Excel şablony '{0}' tapylmady. Hasabatlar bölümünde goşuň ýa-da ýükläň.",
+            ["ru-RU"] = "Шаблон Excel '{0}' не найден. Добавьте или загрузите его в разделе Отчёты.",
+        },
+        ["ReportDashboard.Chrome.IncludeArchived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include archived",
+            ["tr-TR"] = "Arşivlenenleri dahil et",
+            ["tk-TM"] = "Arhiwlänleri goş",
+            ["ru-RU"] = "Включать архивные",
+        },
+        ["ReportDashboard.Chrome.IncludeCancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include cancelled",
+            ["tr-TR"] = "İptal edilenleri dahil et",
+            ["tk-TM"] = "Ýatyrylanlary goş",
+            ["ru-RU"] = "Включать отменённые",
+        },
+        ["ReportDashboard.Chrome.IncludeCompleted"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include completed",
+            ["tr-TR"] = "Tamamlananları dahil et",
+            ["tk-TM"] = "Tamamlananlary goş",
+            ["ru-RU"] = "Включать завершённые",
+        },
+        ["ReportDashboard.Chrome.Last"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Last",
+            ["tr-TR"] = "Son",
+            ["tk-TM"] = "Soňky",
+            ["ru-RU"] = "Последние",
+        },
+        ["ReportDashboard.Chrome.List"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "List",
+            ["tr-TR"] = "Liste",
+            ["tk-TM"] = "Sanaw",
+            ["ru-RU"] = "Список",
+        },
+        ["ReportDashboard.Chrome.Loading"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading…",
+            ["tr-TR"] = "Yükleniyor…",
+            ["tk-TM"] = "Ýüklenýär…",
+            ["ru-RU"] = "Загрузка…",
+        },
+        ["ReportDashboard.Chrome.LoadingNamed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading {0}…",
+            ["tr-TR"] = "{0} yükleniyor…",
+            ["tk-TM"] = "{0} ýüklenýär…",
+            ["ru-RU"] = "Загрузка: {0}…",
+        },
+        ["ReportDashboard.Chrome.LoadingOverview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading overview…",
+            ["tr-TR"] = "Genel bakış yükleniyor…",
+            ["tk-TM"] = "Umumy görnüş ýüklenýär…",
+            ["ru-RU"] = "Загрузка обзора…",
+        },
+        ["ReportDashboard.Chrome.LoadingProgress"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading progress",
+            ["tr-TR"] = "Yükleme ilerlemesi",
+            ["tk-TM"] = "Ýükleme ösüşi",
+            ["ru-RU"] = "Ход загрузки",
+        },
+        ["ReportDashboard.Chrome.LoadingReport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Loading report…",
+            ["tr-TR"] = "Rapor yükleniyor…",
+            ["tk-TM"] = "Hasabat ýüklenýär…",
+            ["ru-RU"] = "Загрузка отчёта…",
+        },
+        ["ReportDashboard.Chrome.Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "{0} months",
+            ["tr-TR"] = "{0} ay",
+            ["tk-TM"] = "{0} aý",
+            ["ru-RU"] = "{0} мес.",
+        },
+        ["ReportDashboard.Chrome.MoreProjects"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "+{0} more",
+            ["tr-TR"] = "+{0} daha",
+            ["tk-TM"] = "+{0} has",
+            ["ru-RU"] = "+ещё {0}",
+        },
+        ["ReportDashboard.Chrome.Next"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Next",
+            ["tr-TR"] = "Sonraki",
+            ["tk-TM"] = "Indiki",
+            ["ru-RU"] = "Далее",
+        },
+        ["ReportDashboard.Chrome.OneLastValidVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "One last valid visa per person",
+            ["tr-TR"] = "Kişi başına bir son geçerli vize",
+            ["tk-TM"] = "Adam başyna bir soňky güýjündäki wiza",
+            ["ru-RU"] = "Одна последняя действующая виза на лицо",
+        },
+        ["ReportDashboard.Chrome.OneLastValidWorkPermit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "One last valid work permit per person",
+            ["tr-TR"] = "Kişi başına bir son geçerli çalışma izni",
+            ["tk-TM"] = "Adam başyna bir soňky güýjündäki iş rugsady",
+            ["ru-RU"] = "Одно последнее действующее РНТ на лицо",
+        },
+        ["ReportDashboard.Chrome.OpenDossierTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open this person's dossier",
+            ["tr-TR"] = "Bu kişinin dosyasını aç",
+            ["tk-TM"] = "Bu şahsyň işini aç",
+            ["ru-RU"] = "Открыть досье этого человека",
+        },
+        ["ReportDashboard.Chrome.OpenInExcel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open in Excel",
+            ["tr-TR"] = "Excel'de aç",
+            ["tk-TM"] = "Excel-de aç",
+            ["ru-RU"] = "Открыть в Excel",
+        },
+        ["ReportDashboard.Chrome.OpeningDetail"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening…",
+            ["tr-TR"] = "Açılıyor…",
+            ["tk-TM"] = "Açylýar…",
+            ["ru-RU"] = "Открытие…",
+        },
+        ["ReportDashboard.Chrome.OpeningDossier"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening dossier…",
+            ["tr-TR"] = "Dosya açılıyor…",
+            ["tk-TM"] = "Şahsy iş açylýar…",
+            ["ru-RU"] = "Открытие досье…",
+        },
+        ["ReportDashboard.Chrome.OpeningListView"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Opening list…",
+            ["tr-TR"] = "Liste açılıyor…",
+            ["tk-TM"] = "Sanaw açylýar…",
+            ["ru-RU"] = "Открытие списка…",
+        },
+        ["ReportDashboard.Chrome.OpenListView"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Open ListView",
+            ["tr-TR"] = "Listeyi aç",
+            ["tk-TM"] = "Sanawy aç",
+            ["ru-RU"] = "Открыть список",
+        },
+        ["ReportDashboard.Chrome.Overview"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Overview",
+            ["tr-TR"] = "Genel bakış",
+            ["tk-TM"] = "Umumy görnüş",
+            ["ru-RU"] = "Обзор",
+        },
+        ["ReportDashboard.Chrome.PageSize"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Page size",
+            ["tr-TR"] = "Sayfa boyutu",
+            ["tk-TM"] = "Sahypa ölçegi",
+            ["ru-RU"] = "Размер страницы",
+        },
+        ["ReportDashboard.Chrome.Period.AddressLast"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address · Last",
+            ["tr-TR"] = "Adres · Son",
+            ["tk-TM"] = "Salgy · Soňky",
+            ["ru-RU"] = "Адрес · Последние",
+        },
+        ["ReportDashboard.Chrome.Period.EducationLast"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education · Last",
+            ["tr-TR"] = "Eğitim · Son",
+            ["tk-TM"] = "Bilim · Soňky",
+            ["ru-RU"] = "Образование · Последние",
+        },
+        ["ReportDashboard.Chrome.Period.MedicalLast"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical · Last",
+            ["tr-TR"] = "Sağlık · Son",
+            ["tk-TM"] = "Saglyk · Soňky",
+            ["ru-RU"] = "Мед. · Последние",
+        },
+        ["ReportDashboard.Chrome.Period.PassportLast"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport · Last",
+            ["tr-TR"] = "Pasaport · Son",
+            ["tk-TM"] = "Pasport · Soňky",
+            ["ru-RU"] = "Паспорт · Последние",
+        },
+        ["ReportDashboard.Chrome.Period.PositionLast"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position · Last",
+            ["tr-TR"] = "Pozisyon · Son",
+            ["tk-TM"] = "Wezipe · Soňky",
+            ["ru-RU"] = "Должность · Последние",
+        },
+        ["ReportDashboard.Chrome.PieChart"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Pie Chart",
+            ["tr-TR"] = "Pasta grafik",
+            ["tk-TM"] = "Tebi diagramma",
+            ["ru-RU"] = "Круговая",
+        },
+        ["ReportDashboard.Chrome.Prev"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Prev",
+            ["tr-TR"] = "Önceki",
+            ["tk-TM"] = "Öňki",
+            ["ru-RU"] = "Назад",
+        },
+        ["ReportDashboard.Chrome.PreviewRange"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Showing {0}–{1} of {2}",
+            ["tr-TR"] = "{2} kayıttan {0}–{1} gösteriliyor",
+            ["tk-TM"] = "{2} ýazgydan {0}–{1} görkezilýär",
+            ["ru-RU"] = "Показаны {0}–{1} из {2}",
+        },
+        ["ReportDashboard.Chrome.PreviewRangeCapped"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Showing {0}–{1} of {2} loaded ({3} total)",
+            ["tr-TR"] = "{2} yüklenen kayıttan {0}–{1} gösteriliyor (toplam {3})",
+            ["tk-TM"] = "{2} ýüklän ýazgydan {0}–{1} görkezilýär (jemi {3})",
+            ["ru-RU"] = "Показаны {0}–{1} из {2} загруженных (всего {3})",
+        },
+        ["ReportDashboard.Chrome.Project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project",
+            ["tr-TR"] = "Proje",
+            ["tk-TM"] = "Taslama",
+            ["ru-RU"] = "Проект",
+        },
+        ["ReportDashboard.Chrome.Refresh"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refresh",
+            ["tr-TR"] = "Yenile",
+            ["tk-TM"] = "Täzele",
+            ["ru-RU"] = "Обновить",
+        },
+        ["ReportDashboard.Chrome.Refreshing"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Refreshing…",
+            ["tr-TR"] = "Yenileniyor…",
+            ["tk-TM"] = "Täzelenýär…",
+            ["ru-RU"] = "Обновление…",
+        },
+        ["ReportDashboard.Chrome.RefreshTitle"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Reload the dashboard with the latest data",
+            ["tr-TR"] = "Gösterge panelini en son verilerle yeniden yükle",
+            ["tk-TM"] = "Dolandyryş paneli iň soňky maglumatlar bilen täzeden ýükle",
+            ["ru-RU"] = "Обновить панель актуальными данными",
+        },
+        ["ReportDashboard.Chrome.SearchClear"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clear search",
+            ["tr-TR"] = "Aramayı temizle",
+            ["tk-TM"] = "Gözlegi arassala",
+            ["ru-RU"] = "Очистить поиск",
+        },
+        ["ReportDashboard.Chrome.Searching"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Searching…",
+            ["tr-TR"] = "Aranıyor…",
+            ["tk-TM"] = "Gözlenýär…",
+            ["ru-RU"] = "Поиск…",
+        },
+        ["ReportDashboard.Chrome.SearchPlaceholder"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name, personal number or passport #",
+            ["tr-TR"] = "Ad, kimlik no veya pasaport no",
+            ["tk-TM"] = "At, şahsy belgi ýa-da pasport belgisi",
+            ["ru-RU"] = "Имя, личный номер или номер паспорта",
+        },
+        ["ReportDashboard.Chrome.ShowLess"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Show less",
+            ["tr-TR"] = "Daha az göster",
+            ["tk-TM"] = "Az görkez",
+            ["ru-RU"] = "Свернуть",
+        },
+        ["ReportDashboard.Chrome.Title.Date.Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address of Residence: ApplicationItem.CurrentAddressOfResidence with Application.ApplicationDate in range",
+            ["tr-TR"] = "İkamet adresi: ApplicationItem.CurrentAddressOfResidence, Application.ApplicationDate aralıkta",
+            ["tk-TM"] = "Ýaşaýyş salgysy: ApplicationItem.CurrentAddressOfResidence, Application.ApplicationDate aralykda",
+            ["ru-RU"] = "Адрес проживания: ApplicationItem.CurrentAddressOfResidence с Application.ApplicationDate в диапазоне",
+        },
+        ["ReportDashboard.Chrome.Title.Date.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education: ApplicationItem.CurrentEducation with Application.ApplicationDate in range",
+            ["tr-TR"] = "Eğitim: ApplicationItem.CurrentEducation, Application.ApplicationDate aralıkta",
+            ["tk-TM"] = "Bilim: ApplicationItem.CurrentEducation, Application.ApplicationDate aralykda",
+            ["ru-RU"] = "Образование: ApplicationItem.CurrentEducation с Application.ApplicationDate в диапазоне",
+        },
+        ["ReportDashboard.Chrome.Title.Date.Medical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical Records: ApplicationItem.CurrentMedicalRecord with Application.ApplicationDate in range",
+            ["tr-TR"] = "Sağlık kayıtları: ApplicationItem.CurrentMedicalRecord, Application.ApplicationDate aralıkta",
+            ["tk-TM"] = "Saglyk ýazgylary: ApplicationItem.CurrentMedicalRecord, Application.ApplicationDate aralykda",
+            ["ru-RU"] = "Медкарты: ApplicationItem.CurrentMedicalRecord с Application.ApplicationDate в диапазоне",
+        },
+        ["ReportDashboard.Chrome.Title.Date.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport: ApplicationItem.CurrentPassport with Application.ApplicationDate in range",
+            ["tr-TR"] = "Pasaport: ApplicationItem.CurrentPassport, Application.ApplicationDate aralıkta",
+            ["tk-TM"] = "Pasport: ApplicationItem.CurrentPassport, Application.ApplicationDate aralykda",
+            ["ru-RU"] = "Паспорт: ApplicationItem.CurrentPassport с Application.ApplicationDate в диапазоне",
+        },
+        ["ReportDashboard.Chrome.Title.Date.Position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position History: ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range",
+            ["tr-TR"] = "Pozisyon geçmişi: ApplicationItem.CurrentPositionHistory, Application.ApplicationDate aralıkta",
+            ["tk-TM"] = "Wezipe taryhy: ApplicationItem.CurrentPositionHistory, Application.ApplicationDate aralykda",
+            ["ru-RU"] = "История должностей: ApplicationItem.CurrentPositionHistory с Application.ApplicationDate в диапазоне",
+        },
+        ["ReportDashboard.Chrome.Title.IgnoredValidVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ignored while Valid visa only is checked",
+            ["tr-TR"] = "«Yalnız geçerli vize» işaretliyken yok sayılır",
+            ["tk-TM"] = "«Diňe güýjündäki wiza» belgilänende hasaba alynmaýar",
+            ["ru-RU"] = "Игнорируется при «Только действующая виза»",
+        },
+        ["ReportDashboard.Chrome.Title.IgnoredValidVisaAlign"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ignored while Valid visa only is checked (aligns with Visa By Category)",
+            ["tr-TR"] = "«Yalnız geçerli vize» işaretliyken yok sayılır (Vize kategori ile uyumlu)",
+            ["tk-TM"] = "«Diňe güýjündäki wiza» belgilänende hasaba alynmaýar (Wiza kategoriýasy bilen gabat gelýär)",
+            ["ru-RU"] = "Игнорируется при «Только действующая виза» (как «По категории визы»)",
+        },
+        ["ReportDashboard.Chrome.Title.IncludeArchived"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include persons marked IsArchived",
+            ["tr-TR"] = "IsArchived işaretli kişileri dahil et",
+            ["tk-TM"] = "IsArchived belgilenen adamlary goş",
+            ["ru-RU"] = "Включать лиц с признаком IsArchived",
+        },
+        ["ReportDashboard.Chrome.Title.IncludeCancelled"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include applications whose latest progress is Process Cancelled (PROCESS_CANCELLED)",
+            ["tr-TR"] = "Son ilerleme Process Cancelled (PROCESS_CANCELLED) olan başvuruları dahil et",
+            ["tk-TM"] = "Soňky ösüşi Process Cancelled (PROCESS_CANCELLED) bolan ýüztutmalary goş",
+            ["ru-RU"] = "Включать заявки с последним прогрессом Process Cancelled (PROCESS_CANCELLED)",
+        },
+        ["ReportDashboard.Chrome.Title.IncludeCompleted"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include applications whose latest progress is Process Issued (PROCESS_ISSUED)",
+            ["tr-TR"] = "Son ilerleme Process Issued (PROCESS_ISSUED) olan başvuruları dahil et",
+            ["tk-TM"] = "Soňky ösüşi Process Issued (PROCESS_ISSUED) bolan ýüztutmalary goş",
+            ["ru-RU"] = "Включать заявки с последним прогрессом Process Issued (PROCESS_ISSUED)",
+        },
+        ["ReportDashboard.Chrome.Title.OneLastVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Count each person once using their valid visa with the latest expiry (vs all valid visas)",
+            ["tr-TR"] = "Her kişiyi bir kez say — en geç bitişli geçerli vize (tüm geçerli vizeler yerine)",
+            ["tk-TM"] = "Her adamy bir gezek sanap — iň soňky möhletli güýjündäki wiza (ähli güýjündäki wizalar ýerine)",
+            ["ru-RU"] = "Считать каждое лицо один раз по действующей визе с ближайшим сроком",
+        },
+        ["ReportDashboard.Chrome.Title.OneLastWp"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Count each person once using their valid work permit with the latest expiry (vs all valid work permits)",
+            ["tr-TR"] = "Her kişiyi bir kez say — en geç bitişli geçerli çalışma izni",
+            ["tk-TM"] = "Her adamy bir gezek sanap — iň soňky möhletli güýjündäki iş rugsady",
+            ["ru-RU"] = "Считать каждое лицо один раз по действующему РНТ с ближайшим сроком",
+        },
+        ["ReportDashboard.Chrome.Title.PersonSearch"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Search by name, personal number or passport number",
+            ["tr-TR"] = "Ada, kimlik numarasına veya pasaport numarasına göre ara",
+            ["tk-TM"] = "At, şahsy belgi ýa-da pasport belgisi boýunça gözle",
+            ["ru-RU"] = "Поиск по имени, личному номеру или номеру паспорта",
+        },
+        ["ReportDashboard.Chrome.Title.ValidVisaOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Include only persons with at least one valid visa (not cancelled, expiry on or after today)",
+            ["tr-TR"] = "En az bir geçerli vizesi olan kişileri dahil et (iptal değil, bitiş bugün veya sonrası)",
+            ["tk-TM"] = "Azyndan bir güýjündäki wizasy bolan adamlary goş (ýatyrylan däl, möhleti şu gün ýa soň)",
+            ["ru-RU"] = "Только лица с хотя бы одной действующей визой (не отменена, срок сегодня или позже)",
+        },
+        ["ReportDashboard.Chrome.TotalRecords"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "total records",
+            ["tr-TR"] = "toplam kayıt",
+            ["tk-TM"] = "jemi ýazgy",
+            ["ru-RU"] = "всего записей",
+        },
+        ["ReportDashboard.Chrome.ValidVisaOnly"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid visa only",
+            ["tr-TR"] = "Yalnız geçerli vize",
+            ["tk-TM"] = "Diňe güýjündäki wiza",
+            ["ru-RU"] = "Только действующая виза",
+        },
+        ["ReportDashboard.Chrome.View"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View",
+            ["tr-TR"] = "Görünüm",
+            ["tk-TM"] = "Görnüş",
+            ["ru-RU"] = "Вид",
+        },
+        ["ReportDashboard.Chrome.ViewReports"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "View reports ›",
+            ["tr-TR"] = "Raporları gör ›",
+            ["tk-TM"] = "Hasabatlary gör ›",
+            ["ru-RU"] = "Отчёты ›",
+        },
+        ["ReportDashboard.Chrome.Year1"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "1 year",
+            ["tr-TR"] = "1 yıl",
+            ["tk-TM"] = "1 ýyl",
+            ["ru-RU"] = "1 год",
+        },
+        ["ReportDashboard.Chrome.Years2"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "2 years",
+            ["tr-TR"] = "2 yıl",
+            ["tk-TM"] = "2 ýyl",
+            ["ru-RU"] = "2 года",
+        },
+        ["ReportDashboard.Chrome.Years3"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "3 years",
+            ["tr-TR"] = "3 yıl",
+            ["tk-TM"] = "3 ýyl",
+            ["ru-RU"] = "3 года",
+        },
+        ["ReportDashboard.Header.ActualPosition"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Actual Position",
+            ["tr-TR"] = "Fiili pozisyon",
+            ["tk-TM"] = "Hakyky wezipe",
+            ["ru-RU"] = "Фактическая должность",
+        },
+        ["ReportDashboard.Header.Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address",
+            ["tr-TR"] = "Adres",
+            ["tk-TM"] = "Salgy",
+            ["ru-RU"] = "Адрес",
+        },
+        ["ReportDashboard.Header.AddressType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address Type",
+            ["tr-TR"] = "Adres türü",
+            ["tk-TM"] = "Salgy görnüşi",
+            ["ru-RU"] = "Тип адреса",
+        },
+        ["ReportDashboard.Header.AppDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "App Date",
+            ["tr-TR"] = "Başvuru tarihi",
+            ["tk-TM"] = "Ýüztutma senesi",
+            ["ru-RU"] = "Дата заявки",
+        },
+        ["ReportDashboard.Header.ApplicationTypeProcessState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application Type · Process State",
+            ["tr-TR"] = "Başvuru türü · Süreç durumu",
+            ["tk-TM"] = "Arza görnüşi · Proses ýagdaýy",
+            ["ru-RU"] = "Тип заявки · Состояние процесса",
+        },
+        ["ReportDashboard.Header.AppNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "App #",
+            ["tr-TR"] = "Başvuru no",
+            ["tk-TM"] = "Ýüztutma no",
+            ["ru-RU"] = "№ заявки",
+        },
+        ["ReportDashboard.Header.AppType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "App Type",
+            ["tr-TR"] = "Başvuru türü",
+            ["tk-TM"] = "Ýüztutma görnüşi",
+            ["ru-RU"] = "Тип заявки",
+        },
+        ["ReportDashboard.Header.BzNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "BZ Number",
+            ["tr-TR"] = "SB no",
+            ["tk-TM"] = "SS no",
+            ["ru-RU"] = "№ ПЗ",
+        },
+        ["ReportDashboard.Header.Citizenship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Citizenship",
+            ["tr-TR"] = "Vatandaşlık",
+            ["tk-TM"] = "Raýatlyk",
+            ["ru-RU"] = "Гражданство",
+        },
+        ["ReportDashboard.Header.City"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "City",
+            ["tr-TR"] = "Şehir",
+            ["tk-TM"] = "Şäher",
+            ["ru-RU"] = "Город",
+        },
+        ["ReportDashboard.Header.Company"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Company",
+            ["tr-TR"] = "Şirket",
+            ["tk-TM"] = "Kompaniýa",
+            ["ru-RU"] = "Компания",
+        },
+        ["ReportDashboard.Header.Country"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Country",
+            ["tr-TR"] = "Ülke",
+            ["tk-TM"] = "Ýurt",
+            ["ru-RU"] = "Страна",
+        },
+        ["ReportDashboard.Header.CurrentExpiry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current Expiry",
+            ["tr-TR"] = "Mevcut bitiş",
+            ["tk-TM"] = "Häzirki möhlet",
+            ["ru-RU"] = "Текущий срок",
+        },
+        ["ReportDashboard.Header.Date"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Date",
+            ["tr-TR"] = "Tarih",
+            ["tk-TM"] = "Sene",
+            ["ru-RU"] = "Дата",
+        },
+        ["ReportDashboard.Header.DaysRemaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Days Remaining",
+            ["tr-TR"] = "Kalan gün",
+            ["tk-TM"] = "Galan gün",
+            ["ru-RU"] = "Осталось дней",
+        },
+        ["ReportDashboard.Header.DaysSinceEntry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Days Since Entry",
+            ["tr-TR"] = "Girişten beri gün",
+            ["tk-TM"] = "Girişden soňky gün",
+            ["ru-RU"] = "Дней с въезда",
+        },
+        ["ReportDashboard.Header.DocumentNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Document #",
+            ["tr-TR"] = "Belge no",
+            ["tk-TM"] = "Resminama no",
+            ["ru-RU"] = "№ документа",
+        },
+        ["ReportDashboard.Header.Entry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Entry",
+            ["tr-TR"] = "Giriş",
+            ["tk-TM"] = "Giriş",
+            ["ru-RU"] = "Въезд",
+        },
+        ["ReportDashboard.Header.Expiry"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiry",
+            ["tr-TR"] = "Bitiş",
+            ["tk-TM"] = "Möhleti",
+            ["ru-RU"] = "Срок",
+        },
+        ["ReportDashboard.Header.GradYear"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Grad Year",
+            ["tr-TR"] = "Mezuniyet yılı",
+            ["tk-TM"] = "Uçuryş ýyly",
+            ["ru-RU"] = "Год выпуска",
+        },
+        ["ReportDashboard.Header.HireDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Hire Date",
+            ["tr-TR"] = "İşe giriş",
+            ["tk-TM"] = "Işe giriş",
+            ["ru-RU"] = "Дата найма",
+        },
+        ["ReportDashboard.Header.Info"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Info",
+            ["tr-TR"] = "Bilgi",
+            ["tk-TM"] = "Maglumat",
+            ["ru-RU"] = "Сведения",
+        },
+        ["ReportDashboard.Header.Institution"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Institution",
+            ["tr-TR"] = "Kurum",
+            ["tk-TM"] = "Edara",
+            ["ru-RU"] = "Учреждение",
+        },
+        ["ReportDashboard.Header.InvitationNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation #",
+            ["tr-TR"] = "Davet no",
+            ["tk-TM"] = "Çakylyk no",
+            ["ru-RU"] = "№ приглашения",
+        },
+        ["ReportDashboard.Header.Issued"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued",
+            ["tr-TR"] = "Veriliş",
+            ["tk-TM"] = "Berilen",
+            ["ru-RU"] = "Выдано",
+        },
+        ["ReportDashboard.Header.IssueDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issue Date",
+            ["tr-TR"] = "Veriliş tarihi",
+            ["tk-TM"] = "Berilen senesi",
+            ["ru-RU"] = "Дата выдачи",
+        },
+        ["ReportDashboard.Header.IssuedVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Issued Visa",
+            ["tr-TR"] = "Düzenlenen vize",
+            ["tk-TM"] = "Berilen wiza",
+            ["ru-RU"] = "Выданная виза",
+        },
+        ["ReportDashboard.Header.Level"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Level",
+            ["tr-TR"] = "Seviye",
+            ["tk-TM"] = "Dereje",
+            ["ru-RU"] = "Уровень",
+        },
+        ["ReportDashboard.Header.Marked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Marked",
+            ["tr-TR"] = "İşaretlendi",
+            ["tk-TM"] = "Bellenildi",
+            ["ru-RU"] = "Отмечено",
+        },
+        ["ReportDashboard.Header.MissingAreas"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Missing areas",
+            ["tr-TR"] = "Eksik alanlar",
+            ["tk-TM"] = "Ýetmezçilik ugurlary",
+            ["ru-RU"] = "Недостающие области",
+        },
+        ["ReportDashboard.Header.Month"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Month",
+            ["tr-TR"] = "Ay",
+            ["tk-TM"] = "Aý",
+            ["ru-RU"] = "Месяц",
+        },
+        ["ReportDashboard.Header.Name"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Name",
+            ["tr-TR"] = "Ad",
+            ["tk-TM"] = "Ad",
+            ["ru-RU"] = "Имя",
+        },
+        ["ReportDashboard.Header.Notes"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Notes",
+            ["tr-TR"] = "Notlar",
+            ["tk-TM"] = "Bellikler",
+            ["ru-RU"] = "Заметки",
+        },
+        ["ReportDashboard.Header.PassportNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport #",
+            ["tr-TR"] = "Pasaport no",
+            ["tk-TM"] = "Pasport no",
+            ["ru-RU"] = "№ паспорта",
+        },
+        ["ReportDashboard.Header.Period"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Period",
+            ["tr-TR"] = "Dönem",
+            ["tk-TM"] = "Möhlet",
+            ["ru-RU"] = "Период",
+        },
+        ["ReportDashboard.Header.PeriodCategoryType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Period · Category · Type",
+            ["tr-TR"] = "Dönem · Kategori · Tür",
+            ["tk-TM"] = "Möhlet · Kategoriýa · Görnüş",
+            ["ru-RU"] = "Период · Категория · Тип",
+        },
+        ["ReportDashboard.Header.PeriodCategoryTypeState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Period · Category · Type · State",
+            ["tr-TR"] = "Dönem · Kategori · Tür · Durum",
+            ["tk-TM"] = "Möhlet · Kategoriýa · Görnüş · Ýagdaý",
+            ["ru-RU"] = "Период · Категория · Тип · Состояние",
+        },
+        ["ReportDashboard.Header.Person"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person",
+            ["tr-TR"] = "Kişi",
+            ["tk-TM"] = "Şahs",
+            ["ru-RU"] = "Лицо",
+        },
+        ["ReportDashboard.Header.PersonType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person type",
+            ["tr-TR"] = "Kişi türü",
+            ["tk-TM"] = "Şahs görnüşi",
+            ["ru-RU"] = "Тип лица",
+        },
+        ["ReportDashboard.Header.Position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position",
+            ["tr-TR"] = "Pozisyon",
+            ["tk-TM"] = "Wezipe",
+            ["ru-RU"] = "Должность",
+        },
+        ["ReportDashboard.Header.ProcessState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process State",
+            ["tr-TR"] = "Süreç durumu",
+            ["tk-TM"] = "Proses ýagdaýy",
+            ["ru-RU"] = "Статус процесса",
+        },
+        ["ReportDashboard.Header.Project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project",
+            ["tr-TR"] = "Proje",
+            ["tk-TM"] = "Taslama",
+            ["ru-RU"] = "Проект",
+        },
+        ["ReportDashboard.Header.ProjectPeriodCategoryTypeState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project · Period · Category · Type · State",
+            ["tr-TR"] = "Proje · Dönem · Kategori · Tür · Durum",
+            ["tk-TM"] = "Taslama · Möhlet · Kategoriýa · Görnüş · Ýagdaý",
+            ["ru-RU"] = "Проект · Период · Категория · Тип · Состояние",
+        },
+        ["ReportDashboard.Header.ProjectState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Project · State",
+            ["tr-TR"] = "Proje · Durum",
+            ["tk-TM"] = "Taslama · Ýagdaý",
+            ["ru-RU"] = "Проект · Состояние",
+        },
+        ["ReportDashboard.Header.Region"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Region",
+            ["tr-TR"] = "Bölge",
+            ["tk-TM"] = "Sebit",
+            ["ru-RU"] = "Регион",
+        },
+        ["ReportDashboard.Header.RegionCity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Region · City",
+            ["tr-TR"] = "Bölge · Şehir",
+            ["tk-TM"] = "Sebit · Şäher",
+            ["ru-RU"] = "Регион · Город",
+        },
+        ["ReportDashboard.Header.RejectionNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Rejection #",
+            ["tr-TR"] = "Ret no",
+            ["tk-TM"] = "Ret no",
+            ["ru-RU"] = "№ отказа",
+        },
+        ["ReportDashboard.Header.RequestedUntil"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Requested Until",
+            ["tr-TR"] = "Talep edilen",
+            ["tk-TM"] = "Soralýan möhlet",
+            ["ru-RU"] = "Запрошено до",
+        },
+        ["ReportDashboard.Header.Role"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Role",
+            ["tr-TR"] = "Rol",
+            ["tk-TM"] = "Rol",
+            ["ru-RU"] = "Роль",
+        },
+        ["ReportDashboard.Header.Speciality"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Speciality",
+            ["tr-TR"] = "Uzmanlık",
+            ["tk-TM"] = "Hünär",
+            ["ru-RU"] = "Специальность",
+        },
+        ["ReportDashboard.Header.Start"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Start",
+            ["tr-TR"] = "Başlangıç",
+            ["tk-TM"] = "Başlangyç",
+            ["ru-RU"] = "Начало",
+        },
+        ["ReportDashboard.Header.State"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "State",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaý",
+            ["ru-RU"] = "Состояние",
+        },
+        ["ReportDashboard.Header.Status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Status",
+            ["tr-TR"] = "Durum",
+            ["tk-TM"] = "Ýagdaý",
+            ["ru-RU"] = "Статус",
+        },
+        ["ReportDashboard.Header.TravelDate"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Travel Date",
+            ["tr-TR"] = "Seyahat tarihi",
+            ["tk-TM"] = "Syýahat senesi",
+            ["ru-RU"] = "Дата поездки",
+        },
+        ["ReportDashboard.Header.Type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Type",
+            ["tr-TR"] = "Tür",
+            ["tk-TM"] = "Görnüş",
+            ["ru-RU"] = "Тип",
+        },
+        ["ReportDashboard.Header.Validity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Validity",
+            ["tr-TR"] = "Geçerlilik",
+            ["tk-TM"] = "Güýji",
+            ["ru-RU"] = "Срок действия",
+        },
+        ["ReportDashboard.Header.ValidUntil"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid Until",
+            ["tr-TR"] = "Geçerlilik",
+            ["tk-TM"] = "Güýji",
+            ["ru-RU"] = "Действует до",
+        },
+        ["ReportDashboard.Header.VisaCategory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Category",
+            ["tr-TR"] = "Vize kategorisi",
+            ["tk-TM"] = "Wiza kategoriýasy",
+            ["ru-RU"] = "Категория визы",
+        },
+        ["ReportDashboard.Header.VisaNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa #",
+            ["tr-TR"] = "Vize no",
+            ["tk-TM"] = "Wiza no",
+            ["ru-RU"] = "№ визы",
+        },
+        ["ReportDashboard.Header.VisaOnExtension"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa on extension",
+            ["tr-TR"] = "Uzatılan vize",
+            ["tk-TM"] = "Uzatylýan wiza",
+            ["ru-RU"] = "Виза на продлении",
+        },
+        ["ReportDashboard.Header.VisaPeriod"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Period",
+            ["tr-TR"] = "Vize dönemi",
+            ["tk-TM"] = "Wiza möhleti",
+            ["ru-RU"] = "Период визы",
+        },
+        ["ReportDashboard.Header.VisaPosition"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Position",
+            ["tr-TR"] = "Vize pozisyonu",
+            ["tk-TM"] = "Wiza wezipesi",
+            ["ru-RU"] = "Визовая должность",
+        },
+        ["ReportDashboard.Header.VisaState"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa State",
+            ["tr-TR"] = "Vize durumu",
+            ["tk-TM"] = "Wiza ýagdaýy",
+            ["ru-RU"] = "Состояние визы",
+        },
+        ["ReportDashboard.Header.VisaType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Type",
+            ["tr-TR"] = "Vize türü",
+            ["tk-TM"] = "Wiza görnüşi",
+            ["ru-RU"] = "Тип визы",
+        },
+        ["ReportDashboard.Header.WpNumber"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WP Number",
+            ["tr-TR"] = "Çİ no",
+            ["tk-TM"] = "IR no",
+            ["ru-RU"] = "№ РНТ",
+        },
+        ["ReportDashboard.Header.Zone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Zone",
+            ["tr-TR"] = "Bölge",
+            ["tk-TM"] = "Zona",
+            ["ru-RU"] = "Зона",
+        },
+        ["ReportDashboard.PersonType.All"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "All",
+            ["tr-TR"] = "Tümü",
+            ["tk-TM"] = "Hemmesi",
+            ["ru-RU"] = "Все",
+        },
+        ["ReportDashboard.PersonType.Employees"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employees",
+            ["tr-TR"] = "Çalışanlar",
+            ["tk-TM"] = "Işgärler",
+            ["ru-RU"] = "Сотрудники",
+        },
+        ["ReportDashboard.PersonType.FamilyMembers"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family Members",
+            ["tr-TR"] = "Aile Üyeleri",
+            ["tk-TM"] = "Maşgalalar",
+            ["ru-RU"] = "Родственники",
+        },
+        ["ReportDashboard.PersonType.TemporaryVisitors"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Temporary Visitors",
+            ["tr-TR"] = "Geçici ziyaretçi",
+            ["tk-TM"] = "Wagtlaýyn myhman",
+            ["ru-RU"] = "Временные посетители",
+        },
+        ["ReportDashboard.Status.Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address",
+            ["tr-TR"] = "Adres",
+            ["tk-TM"] = "Salgy",
+            ["ru-RU"] = "Адрес",
+        },
+        ["ReportDashboard.Status.BeingPrepared"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Being Prepared",
+            ["tr-TR"] = "Hazırlanıyor",
+            ["tk-TM"] = "Taýýarlanýar",
+            ["ru-RU"] = "Готовится",
+        },
+        ["ReportDashboard.Status.Current"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Current",
+            ["tr-TR"] = "Güncel",
+            ["tk-TM"] = "Häzirki",
+            ["ru-RU"] = "Текущий",
+        },
+        ["ReportDashboard.Status.Cv"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "CV",
+            ["tr-TR"] = "Özgeçmiş",
+            ["tk-TM"] = "Ömürnama",
+            ["ru-RU"] = "Резюме",
+        },
+        ["ReportDashboard.Status.Education"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Education",
+            ["tr-TR"] = "Eğitim",
+            ["tk-TM"] = "Bilim",
+            ["ru-RU"] = "Образование",
+        },
+        ["ReportDashboard.Status.Employee"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Employee",
+            ["tr-TR"] = "Çalışan",
+            ["tk-TM"] = "Işgär",
+            ["ru-RU"] = "Сотрудник",
+        },
+        ["ReportDashboard.Status.Ended"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Ended",
+            ["tr-TR"] = "Sona erdi",
+            ["tk-TM"] = "Gutardy",
+            ["ru-RU"] = "Завершено",
+        },
+        ["ReportDashboard.Status.Expired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expired",
+            ["tr-TR"] = "Süresi dolmuş",
+            ["tk-TM"] = "Möhleti geçen",
+            ["ru-RU"] = "Истёк",
+        },
+        ["ReportDashboard.Status.Expiring"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring",
+            ["tr-TR"] = "Sona eriyor",
+            ["tk-TM"] = "Möhleti gutarýar",
+            ["ru-RU"] = "Истекает",
+        },
+        ["ReportDashboard.Status.ExpiringLt15"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring (<15 days)",
+            ["tr-TR"] = "Sona eriyor (<15 gün)",
+            ["tk-TM"] = "Möhleti gutarýar (<15 gün)",
+            ["ru-RU"] = "Истекает (<15 дн.)",
+        },
+        ["ReportDashboard.Status.ExpiringLt30"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring (<30 days)",
+            ["tr-TR"] = "Sona eriyor (<30 gün)",
+            ["tk-TM"] = "Möhleti gutarýar (<30 gün)",
+            ["ru-RU"] = "Истекает (<30 дн.)",
+        },
+        ["ReportDashboard.Status.ExpiringLt60"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring (<60 days)",
+            ["tr-TR"] = "Sona eriyor (<60 gün)",
+            ["tk-TM"] = "Möhleti gutarýar (<60 gün)",
+            ["ru-RU"] = "Истекает (<60 дн.)",
+        },
+        ["ReportDashboard.Status.ExpiringLt90"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring (<90 days)",
+            ["tr-TR"] = "Sona eriyor (<90 gün)",
+            ["tk-TM"] = "Möhleti gutarýar (<90 gün)",
+            ["ru-RU"] = "Истекает (<90 дн.)",
+        },
+        ["ReportDashboard.Status.ExpiringSoon"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring Soon",
+            ["tr-TR"] = "Yakında sona eriyor",
+            ["tk-TM"] = "Ýakyn wagtda gutarýar",
+            ["ru-RU"] = "Скоро истекает",
+        },
+        ["ReportDashboard.Status.FamilyDocs"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family docs",
+            ["tr-TR"] = "Aile belgeleri",
+            ["tk-TM"] = "Maşgala resminamalary",
+            ["ru-RU"] = "Семейные документы",
+        },
+        ["ReportDashboard.Status.FamilyMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Family Member",
+            ["tr-TR"] = "Aile üyesi",
+            ["tk-TM"] = "Maşgala agzasy",
+            ["ru-RU"] = "Член семьи",
+        },
+        ["ReportDashboard.Status.Gte1Month"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "≥ 1 month",
+            ["tr-TR"] = "≥ 1 ay",
+            ["tk-TM"] = "≥ 1 aý",
+            ["ru-RU"] = "≥ 1 мес.",
+        },
+        ["ReportDashboard.Status.Gte3Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "≥ 3 months",
+            ["tr-TR"] = "≥ 3 ay",
+            ["tk-TM"] = "≥ 3 aý",
+            ["ru-RU"] = "≥ 3 мес.",
+        },
+        ["ReportDashboard.Status.Gte6Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "≥ 6 months",
+            ["tr-TR"] = "≥ 6 ay",
+            ["tk-TM"] = "≥ 6 aý",
+            ["ru-RU"] = "≥ 6 мес.",
+        },
+        ["ReportDashboard.Status.Lt10Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 10 days",
+            ["tr-TR"] = "< 10 gün",
+            ["tk-TM"] = "< 10 gün",
+            ["ru-RU"] = "< 10 дн.",
+        },
+        ["ReportDashboard.Status.Lt14Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 14 days",
+            ["tr-TR"] = "< 14 gün",
+            ["tk-TM"] = "< 14 gün",
+            ["ru-RU"] = "< 14 дн.",
+        },
+        ["ReportDashboard.Status.Lt1Day"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 1 day",
+            ["tr-TR"] = "< 1 gün",
+            ["tk-TM"] = "< 1 gün",
+            ["ru-RU"] = "< 1 дн.",
+        },
+        ["ReportDashboard.Status.Lt1Month"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 1 month",
+            ["tr-TR"] = "< 1 ay",
+            ["tk-TM"] = "< 1 aý",
+            ["ru-RU"] = "< 1 мес.",
+        },
+        ["ReportDashboard.Status.Lt1Week"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 1 week",
+            ["tr-TR"] = "< 1 hafta",
+            ["tk-TM"] = "< 1 hepde",
+            ["ru-RU"] = "< 1 нед.",
+        },
+        ["ReportDashboard.Status.Lt2Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 2 days",
+            ["tr-TR"] = "< 2 gün",
+            ["tk-TM"] = "< 2 gün",
+            ["ru-RU"] = "< 2 дн.",
+        },
+        ["ReportDashboard.Status.Lt2Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 2 months",
+            ["tr-TR"] = "< 2 ay",
+            ["tk-TM"] = "< 2 aý",
+            ["ru-RU"] = "< 2 мес.",
+        },
+        ["ReportDashboard.Status.Lt2Weeks"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 2 weeks",
+            ["tr-TR"] = "< 2 hafta",
+            ["tk-TM"] = "< 2 hepde",
+            ["ru-RU"] = "< 2 нед.",
+        },
+        ["ReportDashboard.Status.Lt3Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 3 days",
+            ["tr-TR"] = "< 3 gün",
+            ["tk-TM"] = "< 3 gün",
+            ["ru-RU"] = "< 3 дн.",
+        },
+        ["ReportDashboard.Status.Lt3Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 3 months",
+            ["tr-TR"] = "< 3 ay",
+            ["tk-TM"] = "< 3 aý",
+            ["ru-RU"] = "< 3 мес.",
+        },
+        ["ReportDashboard.Status.Lt3Weeks"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 3 weeks",
+            ["tr-TR"] = "< 3 hafta",
+            ["tk-TM"] = "< 3 hepde",
+            ["ru-RU"] = "< 3 нед.",
+        },
+        ["ReportDashboard.Status.Lt4Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 4 days",
+            ["tr-TR"] = "< 4 gün",
+            ["tk-TM"] = "< 4 gün",
+            ["ru-RU"] = "< 4 дн.",
+        },
+        ["ReportDashboard.Status.Lt4Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 4 months",
+            ["tr-TR"] = "< 4 ay",
+            ["tk-TM"] = "< 4 aý",
+            ["ru-RU"] = "< 4 мес.",
+        },
+        ["ReportDashboard.Status.Lt4Weeks"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 4 weeks",
+            ["tr-TR"] = "< 4 hafta",
+            ["tk-TM"] = "< 4 hepde",
+            ["ru-RU"] = "< 4 нед.",
+        },
+        ["ReportDashboard.Status.Lt5Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 5 days",
+            ["tr-TR"] = "< 5 gün",
+            ["tk-TM"] = "< 5 gün",
+            ["ru-RU"] = "< 5 дн.",
+        },
+        ["ReportDashboard.Status.Lt5Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 5 months",
+            ["tr-TR"] = "< 5 ay",
+            ["tk-TM"] = "< 5 aý",
+            ["ru-RU"] = "< 5 мес.",
+        },
+        ["ReportDashboard.Status.Lt6Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 6 days",
+            ["tr-TR"] = "< 6 gün",
+            ["tk-TM"] = "< 6 gün",
+            ["ru-RU"] = "< 6 дн.",
+        },
+        ["ReportDashboard.Status.Lt6Months"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 6 months",
+            ["tr-TR"] = "< 6 ay",
+            ["tk-TM"] = "< 6 aý",
+            ["ru-RU"] = "< 6 мес.",
+        },
+        ["ReportDashboard.Status.Lt7Days"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "< 7 days",
+            ["tr-TR"] = "< 7 gün",
+            ["tk-TM"] = "< 7 gün",
+            ["ru-RU"] = "< 7 дн.",
+        },
+        ["ReportDashboard.Status.Medical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Medical",
+            ["tr-TR"] = "Sağlık",
+            ["tk-TM"] = "Saglyk",
+            ["ru-RU"] = "Медицина",
+        },
+        ["ReportDashboard.Status.NoCategory"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No category)",
+            ["tr-TR"] = "(Kategori yok)",
+            ["tk-TM"] = "(Kategoriýa ýok)",
+            ["ru-RU"] = "(Нет категории)",
+        },
+        ["ReportDashboard.Status.NoPeriod"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No period)",
+            ["tr-TR"] = "(Dönem yok)",
+            ["tk-TM"] = "(Döwür ýok)",
+            ["ru-RU"] = "(Нет периода)",
+        },
+        ["ReportDashboard.Status.NoProject"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No project)",
+            ["tr-TR"] = "(Proje yok)",
+            ["tk-TM"] = "(Taslama ýok)",
+            ["ru-RU"] = "(Нет проекта)",
+        },
+        ["ReportDashboard.Status.NoStatus"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No status)",
+            ["tr-TR"] = "(Durum yok)",
+            ["tk-TM"] = "(Ýagdaý ýok)",
+            ["ru-RU"] = "(Нет статуса)",
+        },
+        ["ReportDashboard.Status.NoType"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "(No type)",
+            ["tr-TR"] = "(Tür yok)",
+            ["tk-TM"] = "(Görnüş ýok)",
+            ["ru-RU"] = "(Нет типа)",
+        },
+        ["ReportDashboard.Status.NoVisa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No visa",
+            ["tr-TR"] = "Vize yok",
+            ["tk-TM"] = "Wiza ýok",
+            ["ru-RU"] = "Нет визы",
+        },
+        ["ReportDashboard.Status.Other"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other",
+            ["tr-TR"] = "Diğer",
+            ["tk-TM"] = "Beýleki",
+            ["ru-RU"] = "Прочее",
+        },
+        ["ReportDashboard.Status.Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport",
+            ["tr-TR"] = "Pasaport",
+            ["tk-TM"] = "Pasport",
+            ["ru-RU"] = "Паспорт",
+        },
+        ["ReportDashboard.Status.Pending"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Pending",
+            ["tr-TR"] = "Beklemede",
+            ["tk-TM"] = "Garaşylýar",
+            ["ru-RU"] = "Ожидание",
+        },
+        ["ReportDashboard.Status.PersonalData"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Personal data",
+            ["tr-TR"] = "Kişisel veri",
+            ["tk-TM"] = "Şahsy maglumat",
+            ["ru-RU"] = "Личные данные",
+        },
+        ["ReportDashboard.Status.Photo"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Photo",
+            ["tr-TR"] = "Fotoğraf",
+            ["tk-TM"] = "Surat",
+            ["ru-RU"] = "Фото",
+        },
+        ["ReportDashboard.Status.TemporaryVisitor"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Temporary Visitor",
+            ["tr-TR"] = "Geçici ziyaretçi",
+            ["tk-TM"] = "Wagtlaýyn myhman",
+            ["ru-RU"] = "Временный посетитель",
+        },
+        ["ReportDashboard.Status.Unassigned"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unassigned",
+            ["tr-TR"] = "Atanmamış",
+            ["tk-TM"] = "Bellenmedik",
+            ["ru-RU"] = "Не назначено",
+        },
+        ["ReportDashboard.Status.Unknown"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unknown",
+            ["tr-TR"] = "Bilinmiyor",
+            ["tk-TM"] = "Näbelli",
+            ["ru-RU"] = "Неизвестно",
+        },
+        ["ReportDashboard.Status.UnknownCity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Unknown city",
+            ["tr-TR"] = "Bilinmeyen şehir",
+            ["tk-TM"] = "Näbelli şäher",
+            ["ru-RU"] = "Неизвестный город",
+        },
+        ["ReportDashboard.Status.Valid"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid",
+            ["tr-TR"] = "Geçerli",
+            ["tk-TM"] = "Güýjünde",
+            ["ru-RU"] = "Действует",
+        },
+        ["ReportDashboard.Status.Valid3190"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid (31-90 days)",
+            ["tr-TR"] = "Geçerli (31-90 gün)",
+            ["tk-TM"] = "Güýjünde (31-90 gün)",
+            ["ru-RU"] = "Действует (31-90 дн.)",
+        },
+        ["ReportDashboard.Status.ValidGt90"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Valid (>90 days)",
+            ["tr-TR"] = "Geçerli (>90 gün)",
+            ["tk-TM"] = "Güýjünde (>90 gün)",
+            ["ru-RU"] = "Действует (>90 дн.)",
+        },
+        ["ReportDashboard.SubReport.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Visa (P)",
+            ["tr-TR"] = "Aktif Vize (P)",
+            ["tk-TM"] = "Aktiw wiza (P)",
+            ["ru-RU"] = "Активная виза (P)",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Check_In"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Check-In",
+            ["tr-TR"] = "Giriş",
+            ["tk-TM"] = "Giriş",
+            ["ru-RU"] = "Регистрация",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Check_In_Internal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Check-In (Internal)",
+            ["tr-TR"] = "Giriş (iç)",
+            ["tk-TM"] = "Giriş (içki)",
+            ["ru-RU"] = "Регистрация (внутр.)",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Check_Out"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Check-Out",
+            ["tr-TR"] = "Çıkış",
+            ["tk-TM"] = "Çykyş",
+            ["ru-RU"] = "Снятие с учёта",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Check_Out_Internal"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Check-Out (Internal)",
+            ["tr-TR"] = "Çıkış (iç)",
+            ["tk-TM"] = "Çykyş (içki)",
+            ["ru-RU"] = "Снятие (внутр.)",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Info_Change_Address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address Change",
+            ["tr-TR"] = "Adres değişikliği",
+            ["tk-TM"] = "Salgy üýtgeşmesi",
+            ["ru-RU"] = "Смена адреса",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Info_Change_Passport"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Passport Change",
+            ["tr-TR"] = "Pasaport değişikliği",
+            ["tk-TM"] = "Pasport üýtgeşmesi",
+            ["ru-RU"] = "Смена паспорта",
+        },
+        ["ReportDashboard.SubReport.App_Reg_Info_Change_Visa"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Change",
+            ["tr-TR"] = "Vize değişikliği",
+            ["tk-TM"] = "Wiza üýtgeşmesi",
+            ["ru-RU"] = "Смена визы",
+        },
+        ["ReportDashboard.SubReport.app-status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Application Status",
+            ["tr-TR"] = "Başvuru durumu",
+            ["tk-TM"] = "Ýüztutma ýagdaýy",
+            ["ru-RU"] = "Статус заявки",
+        },
+        ["ReportDashboard.SubReport.by-actual-position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position (actual / company)",
+            ["tr-TR"] = "Pozisyon (fiili / şirket)",
+            ["tk-TM"] = "Wezipe (hakyky / kompaniýa)",
+            ["ru-RU"] = "Должность (факт / компания)",
+        },
+        ["ReportDashboard.SubReport.by-address"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Address",
+            ["tr-TR"] = "Adrese göre",
+            ["tk-TM"] = "Salgy boýunça",
+            ["ru-RU"] = "По адресу",
+        },
+        ["ReportDashboard.SubReport.by-address-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Address Type",
+            ["tr-TR"] = "Adres türü",
+            ["tk-TM"] = "Salgy görnüşi",
+            ["ru-RU"] = "Тип адреса",
+        },
+        ["ReportDashboard.SubReport.by-category"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Visa Category",
+            ["tr-TR"] = "Vize kategorisine göre",
+            ["tk-TM"] = "Wiza kategoriýasy boýunça",
+            ["ru-RU"] = "По категории визы",
+        },
+        ["ReportDashboard.SubReport.by-citizenship"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Citizenship",
+            ["tr-TR"] = "Vatandaşlığa göre",
+            ["tk-TM"] = "Raýatlyk boýunça",
+            ["ru-RU"] = "По гражданству",
+        },
+        ["ReportDashboard.SubReport.by-city"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By City",
+            ["tr-TR"] = "Şehre göre",
+            ["tk-TM"] = "Şäher boýunça",
+            ["ru-RU"] = "По городу",
+        },
+        ["ReportDashboard.SubReport.by-company"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Company",
+            ["tr-TR"] = "Şirkete göre",
+            ["tk-TM"] = "Kompaniýa boýunça",
+            ["ru-RU"] = "По компании",
+        },
+        ["ReportDashboard.SubReport.by-country"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Country",
+            ["tr-TR"] = "Ülkeye göre",
+            ["tk-TM"] = "Ýurt boýunça",
+            ["ru-RU"] = "По стране",
+        },
+        ["ReportDashboard.SubReport.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Days Remaining",
+            ["tr-TR"] = "Kalan güne göre",
+            ["tk-TM"] = "Galan gün boýunça",
+            ["ru-RU"] = "По оставшимся дням",
+        },
+        ["ReportDashboard.SubReport.by-level"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Level",
+            ["tr-TR"] = "Seviyeye göre",
+            ["tk-TM"] = "Dereje boýunça",
+            ["ru-RU"] = "По уровню",
+        },
+        ["ReportDashboard.SubReport.by-month"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Month",
+            ["tr-TR"] = "Aya göre",
+            ["tk-TM"] = "Aý boýunça",
+            ["ru-RU"] = "По месяцу",
+        },
+        ["ReportDashboard.SubReport.by-period"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Visa Period",
+            ["tr-TR"] = "Vize dönemine göre",
+            ["tk-TM"] = "Wiza möhleti boýunça",
+            ["ru-RU"] = "По периоду визы",
+        },
+        ["ReportDashboard.SubReport.by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Visa (V)",
+            ["tr-TR"] = "Aktif Vize (V)",
+            ["tk-TM"] = "Aktiw wiza (V)",
+            ["ru-RU"] = "Активная виза (V)",
+        },
+        ["ReportDashboard.SubReport.by-position"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Position (visa reports)",
+            ["tr-TR"] = "Pozisyon (vize raporları)",
+            ["tk-TM"] = "Wezipe (wiza hasabatlary)",
+            ["ru-RU"] = "Должность (визовые отчёты)",
+        },
+        ["ReportDashboard.SubReport.by-region"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Region",
+            ["tr-TR"] = "Bölgeye göre",
+            ["tk-TM"] = "Sebit boýunça",
+            ["ru-RU"] = "По региону",
+        },
+        ["ReportDashboard.SubReport.by-specialty"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Speciality",
+            ["tr-TR"] = "Uzmanlığa göre",
+            ["tk-TM"] = "Hünär boýunça",
+            ["ru-RU"] = "По специальности",
+        },
+        ["ReportDashboard.SubReport.by-status"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Status",
+            ["tr-TR"] = "Duruma göre",
+            ["tk-TM"] = "Ýagdaý boýunça",
+            ["ru-RU"] = "По статусу",
+        },
+        ["ReportDashboard.SubReport.by-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Visa Type",
+            ["tr-TR"] = "Vize türüne göre",
+            ["tk-TM"] = "Wiza görnüşi boýunça",
+            ["ru-RU"] = "По типу визы",
+        },
+        ["ReportDashboard.SubReport.by-validity"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Validity",
+            ["tr-TR"] = "Geçerliliğe göre",
+            ["tk-TM"] = "Güýji boýunça",
+            ["ru-RU"] = "По сроку действия",
+        },
+        ["ReportDashboard.SubReport.by-validity.private-house"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Private House Validity",
+            ["tr-TR"] = "Özel ev geçerliliğine göre",
+            ["tk-TM"] = "Hususy öýüň güýji boýunça",
+            ["ru-RU"] = "По сроку частного жилья",
+        },
+        ["ReportDashboard.SubReport.by-zone"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Zone",
+            ["tr-TR"] = "Bölgeye göre",
+            ["tk-TM"] = "Zona boýunça",
+            ["ru-RU"] = "По зоне",
+        },
+        ["ReportDashboard.SubReport.check-in-by-city"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Registered (C)",
+            ["tr-TR"] = "Aktif Kayıtlı (C)",
+            ["tk-TM"] = "Aktiw hasaba alnan (C)",
+            ["ru-RU"] = "Активная регистрация (C)",
+        },
+        ["ReportDashboard.SubReport.check-in-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Registered (V)",
+            ["tr-TR"] = "Aktif Kayıtlı (V)",
+            ["tk-TM"] = "Aktiw hasaba alnan (V)",
+            ["ru-RU"] = "Активная регистрация (V)",
+        },
+        ["ReportDashboard.SubReport.check-in-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Registered (P)",
+            ["tr-TR"] = "Aktif Kayıtlı (P)",
+            ["tk-TM"] = "Aktiw hasaba alnan (P)",
+            ["ru-RU"] = "Активная регистрация (P)",
+        },
+        ["ReportDashboard.SubReport.default"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Overview",
+            ["tr-TR"] = "Genel bakış",
+            ["tk-TM"] = "Umumy görnüş",
+            ["ru-RU"] = "Обзор",
+        },
+        ["ReportDashboard.SubReport.expiring-state"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Expiring State",
+            ["tr-TR"] = "Sona erme durumu",
+            ["tk-TM"] = "Möhleti gutarýan ýagdaý",
+            ["ru-RU"] = "Истекающие",
+        },
+        ["ReportDashboard.SubReport.extension-required"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Required",
+            ["tr-TR"] = "Uzatma Gerekli",
+            ["tk-TM"] = "Uzatma gerek",
+            ["ru-RU"] = "Требуется продление",
+        },
+        ["ReportDashboard.SubReport.extension-required-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Required",
+            ["tr-TR"] = "Uzatma Gerekli",
+            ["tk-TM"] = "Uzatma gerek",
+            ["ru-RU"] = "Требуется продление",
+        },
+        ["ReportDashboard.SubReport.extension-result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Result (P)",
+            ["tr-TR"] = "Uzatma Sonucu (P)",
+            ["tk-TM"] = "Uzatma Netijesi (P)",
+            ["ru-RU"] = "Результат продления (P)",
+        },
+        ["ReportDashboard.SubReport.extension-result-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Result (V)",
+            ["tr-TR"] = "Uzatma Sonucu (V)",
+            ["tk-TM"] = "Uzatma Netijesi (V)",
+            ["ru-RU"] = "Результат продления (V)",
+        },
+        ["ReportDashboard.SubReport.in-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation Process (P)",
+            ["tr-TR"] = "Davetiye Süreci (P)",
+            ["tk-TM"] = "Çakylyk prosesi (P)",
+            ["ru-RU"] = "Процесс приглашения (P)",
+        },
+        ["ReportDashboard.SubReport.in-process-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation Process (V)",
+            ["tr-TR"] = "Davetiye Süreci (V)",
+            ["tk-TM"] = "Çakylyk prosesi (V)",
+            ["ru-RU"] = "Процесс приглашения (V)",
+        },
+        ["ReportDashboard.SubReport.IncompletePersons.by-missing-area"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Missing Area",
+            ["tr-TR"] = "Eksik alana göre",
+            ["tk-TM"] = "Ýetmezçilik ugry boýunça",
+            ["ru-RU"] = "По отсутствующим данным",
+        },
+        ["ReportDashboard.SubReport.invitation-completed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation Completed (P)",
+            ["tr-TR"] = "Davet başvurusu tamamlandı (P)",
+            ["tk-TM"] = "Çakylyk ýüztutmasy tamamlandy (P)",
+            ["ru-RU"] = "Заявка на приглашение завершена (P)",
+        },
+        ["ReportDashboard.SubReport.invitation-completed-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation Completed (V)",
+            ["tr-TR"] = "Davet başvurusu tamamlandı (V)",
+            ["tk-TM"] = "Çakylyk ýüztutmasy tamamlandy (V)",
+            ["ru-RU"] = "Заявка на приглашение завершена (V)",
+        },
+        ["ReportDashboard.SubReport.invitation-on-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation on Process (P)",
+            ["tr-TR"] = "Davet başvurusu süreçte (P)",
+            ["tk-TM"] = "Çakylyk ýüztutmasy prosesde (P)",
+            ["ru-RU"] = "Заявка на приглашение в процессе (P)",
+        },
+        ["ReportDashboard.SubReport.invitation-on-process-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation on Process (V)",
+            ["tr-TR"] = "Davet başvurusu süreçte (V)",
+            ["tk-TM"] = "Çakylyk ýüztutmasy prosesde (V)",
+            ["ru-RU"] = "Заявка на приглашение в процессе (V)",
+        },
+        ["ReportDashboard.SubReport.on-extension"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa On Extension (P)",
+            ["tr-TR"] = "Vize Uzatmada (P)",
+            ["tk-TM"] = "Wiza uzatmada (P)",
+            ["ru-RU"] = "Виза на продлении (P)",
+        },
+        ["ReportDashboard.SubReport.on-extension-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa On Extension (V)",
+            ["tr-TR"] = "Vize Uzatmada (V)",
+            ["tk-TM"] = "Wiza uzatmada (V)",
+            ["ru-RU"] = "Виза на продлении (V)",
+        },
+        ["ReportDashboard.SubReport.on-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "On Process",
+            ["tr-TR"] = "Süreçte",
+            ["tk-TM"] = "Prosesde",
+            ["ru-RU"] = "В процессе",
+        },
+        ["ReportDashboard.SubReport.on-process-a"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "On Process (A)",
+            ["tr-TR"] = "Süreçte (A)",
+            ["tk-TM"] = "Prosesde (A)",
+            ["ru-RU"] = "В процессе (A)",
+        },
+        ["ReportDashboard.SubReport.other-completed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other Process Completed (P)",
+            ["tr-TR"] = "Diğer başvuru süreci tamamlandı (P)",
+            ["tk-TM"] = "Beýleki ýüztutma prosesi tamamlandy (P)",
+            ["ru-RU"] = "Прочий процесс заявки завершён (P)",
+        },
+        ["ReportDashboard.SubReport.other-on-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Other on Process (P)",
+            ["tr-TR"] = "Diğer başvuru süreçte (P)",
+            ["tk-TM"] = "Beýleki ýüztutma prosesde (P)",
+            ["ru-RU"] = "Прочая заявка в процессе (P)",
+        },
+        ["ReportDashboard.SubReport.Passport.by-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "By Type",
+            ["tr-TR"] = "Türe göre",
+            ["tk-TM"] = "Görnüş boýunça",
+            ["ru-RU"] = "По типу",
+        },
+        ["ReportDashboard.SubReport.PersonSearch.by-name"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Person search",
+            ["tr-TR"] = "Kişi arama",
+            ["tk-TM"] = "Şahs gözlegi",
+            ["ru-RU"] = "Поиск персон",
+        },
+        ["ReportDashboard.SubReport.process-complete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Complete",
+            ["tr-TR"] = "Süreç tamamlandı",
+            ["tk-TM"] = "Proses tamamlandy",
+            ["ru-RU"] = "Процесс завершён",
+        },
+        ["ReportDashboard.SubReport.process-result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (P)",
+            ["tr-TR"] = "Süreç Sonucu (P)",
+            ["tk-TM"] = "Proses netijesi (P)",
+            ["ru-RU"] = "Результат процесса (P)",
+        },
+        ["ReportDashboard.SubReport.process-result-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (V)",
+            ["tr-TR"] = "Süreç Sonucu (V)",
+            ["tk-TM"] = "Proses netijesi (V)",
+            ["ru-RU"] = "Результат процесса (V)",
+        },
+        ["ReportDashboard.SubReport.ready-by-period-category"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Invitation (V)",
+            ["tr-TR"] = "Aktif Davetiye (V)",
+            ["tk-TM"] = "Aktiw çakylyk (V)",
+            ["ru-RU"] = "Активное приглашение (V)",
+        },
+        ["ReportDashboard.SubReport.ready-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active Invitation (P)",
+            ["tr-TR"] = "Aktif Davetiye (P)",
+            ["tk-TM"] = "Aktiw çakylyk (P)",
+            ["ru-RU"] = "Активное приглашение (P)",
+        },
+        ["ReportDashboard.SubReport.rejected-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (V)",
+            ["tr-TR"] = "Süreç Sonucu (V)",
+            ["tk-TM"] = "Proses netijesi (V)",
+            ["ru-RU"] = "Результат процесса (V)",
+        },
+        ["ReportDashboard.SubReport.rejected-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Process Result (P)",
+            ["tr-TR"] = "Süreç Sonucu (P)",
+            ["tk-TM"] = "Proses netijesi (P)",
+            ["ru-RU"] = "Результат процесса (P)",
+        },
+        ["ReportDashboard.SubReport.to-be-checked-in"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "To Be Checked In",
+            ["tr-TR"] = "Giriş bekleyen",
+            ["tk-TM"] = "Giriş etmeli",
+            ["ru-RU"] = "К регистрации",
+        },
+        ["ReportDashboard.SubReport.to-be-checked-out"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "To Be Checked Out",
+            ["tr-TR"] = "Çıkış bekleyen",
+            ["tk-TM"] = "Çykyş etmeli",
+            ["ru-RU"] = "К снятию с учёта",
+        },
+        ["ReportDashboard.SubReport.used"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Used (P)",
+            ["tr-TR"] = "Kullanılan (P)",
+            ["tk-TM"] = "Ulanylan (P)",
+            ["ru-RU"] = "Использованные (P)",
+        },
+        ["ReportDashboard.SubReport.used-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Used (V)",
+            ["tr-TR"] = "Kullanılan (V)",
+            ["tk-TM"] = "Ulanylan (V)",
+            ["ru-RU"] = "Использованные (V)",
+        },
+        ["ReportDashboard.SubReport.valid-until"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Invitation Validity",
+            ["tr-TR"] = "Davetiye Geçerliliği",
+            ["tk-TM"] = "Çakylygyň möhleti",
+            ["ru-RU"] = "Срок действия приглашения",
+        },
+        ["ReportDashboard.SubReport.visa-extension-completed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Extension Completed (P)",
+            ["tr-TR"] = "Vize uzatma başvurusu tamamlandı (P)",
+            ["tk-TM"] = "Wiza uzaltmak ýüztutmasy tamamlandy (P)",
+            ["ru-RU"] = "Заявка на продление визы завершена (P)",
+        },
+        ["ReportDashboard.SubReport.visa-extension-completed-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Extension Completed (V)",
+            ["tr-TR"] = "Vize uzatma başvurusu tamamlandı (V)",
+            ["tk-TM"] = "Wiza uzaltmak ýüztutmasy tamamlandy (V)",
+            ["ru-RU"] = "Заявка на продление визы завершена (V)",
+        },
+        ["ReportDashboard.SubReport.visa-extension-on-process"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Extension on Process (P)",
+            ["tr-TR"] = "Vize uzatma başvurusu süreçte (P)",
+            ["tk-TM"] = "Wiza uzaltmak ýüztutmasy prosesde (P)",
+            ["ru-RU"] = "Заявка на продление визы в процессе (P)",
+        },
+        ["ReportDashboard.SubReport.visa-extension-on-process-by-period-category-type"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Extension on Process (V)",
+            ["tr-TR"] = "Vize uzatma başvurusu süreçte (V)",
+            ["tk-TM"] = "Wiza uzaltmak ýüztutmasy prosesde (V)",
+            ["ru-RU"] = "Заявка на продление визы в процессе (V)",
+        },
+        ["ReportDashboard.SubReport.visa-state"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa State",
+            ["tr-TR"] = "Vize durumu",
+            ["tk-TM"] = "Wiza ýagdaýy",
+            ["ru-RU"] = "Состояние визы",
+        },
+        ["ReportDashboard.SubReport.VisaExtension.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa Validity",
+            ["tr-TR"] = "Vize Geçerliliği",
+            ["tk-TM"] = "Wiza möhleti",
+            ["ru-RU"] = "Срок действия визы",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.active-by-project"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Active WorkPermit (P)",
+            ["tr-TR"] = "Aktif Çalışma İzni (P)",
+            ["tk-TM"] = "Aktiw iş rugsady (P)",
+            ["ru-RU"] = "Активное РНТ (P)",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.by-days-remaining"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WorkPermit Validity",
+            ["tr-TR"] = "Çalışma İzni Geçerliliği",
+            ["tk-TM"] = "Iş rugsady möhleti",
+            ["ru-RU"] = "Срок действия РНТ",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.extension-result"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Extension Result (P)",
+            ["tr-TR"] = "Uzatma Sonucu (P)",
+            ["tk-TM"] = "Uzatma netijesi (P)",
+            ["ru-RU"] = "Результат продления (P)",
+        },
+        ["ReportDashboard.SubReport.WorkPermit.on-extension"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "WorkPermit Extension (P)",
+            ["tr-TR"] = "Çalışma İzni Uzatma (P)",
+            ["tk-TM"] = "Iş rugsady uzatma (P)",
+            ["ru-RU"] = "Продление РНТ (P)",
         },
         ["RuntimeLog.Action.MarkFixed"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -3754,7 +6785,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "No active passport on file for this employee. Add passport data before starting invitation, visa, or work-permit applications.",
             ["tr-TR"] = "Bu çalışan için aktif pasaport kaydı yok. Davet, vize veya çalışma izni başvurularından önce pasaport verilerini ekleyin.",
-            ["tk-TM"] = "Bu işgär üçin işjeň pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady arzalaryndan ozal pasport maglumatyny goşuň.",
+            ["tk-TM"] = "Bu işgär üçin aktiw pasport ýazgysy ýok. Çakylyk, wiza ýa-da iş rugsady arzalaryndan ozal pasport maglumatyny goşuň.",
             ["ru-RU"] = "У сотрудника нет действующего паспорта в системе. Добавьте паспорт до заявлений на приглашение, визу или РНТ.",
         },
         ["StateNotification.Sample.missing-passport.MissingItem"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -3908,7 +6939,7 @@ public static partial class VisaUiMessageCatalog
         {
             ["en-US"] = "Work permit is inside the 90-day extension window and no active extension application was found.",
             ["tr-TR"] = "Çalışma izni 90 günlük uzatma penceresinde ve aktif uzatma başvurusu bulunamadı.",
-            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we işjeň uzaltmak arzasy tapylmady.",
+            ["tk-TM"] = "Iş rugsady 90 günlük uzaltmak aralygynda we aktiw uzaltmak arzasy tapylmady.",
             ["ru-RU"] = "РНТ в 90-дневном окне продления, активное заявление на продление не найдено.",
         },
         ["StateNotification.Sample.work-permit-extension-required.StateLabel"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -4345,6 +7376,13 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Ýer tutujylary barlananda ýalňyşlyk: {0}",
             ["ru-RU"] = "Ошибка проверки заполнителей: {0}",
         },
+        ["Visa.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Visa copies",
+            ["tr-TR"] = "Vize kopyaları",
+            ["tk-TM"] = "Wiza nusgalary",
+            ["ru-RU"] = "Копии визы",
+        },
         ["VisaFamilyMembersText.AddMember"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Add member",
@@ -4611,12 +7649,19 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Resminamalary açmazdan ozal arzany ýazdyryň.",
             ["ru-RU"] = "Сохраните заявку перед открытием Resminamalar.",
         },
+        ["WorkPermit.Tab.DocumentCopies"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Work permit copies",
+            ["tr-TR"] = "Çalışma izni kopyaları",
+            ["tk-TM"] = "Iş rugsady nusgalary",
+            ["ru-RU"] = "Копии разрешения на работу",
+        },
         ["WorkPermitDocumentCopies.List.ColumnLink"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["en-US"] = "Copies",
-            ["tr-TR"] = "Kopyalar",
-            ["tk-TM"] = "Nusgalar",
-            ["ru-RU"] = "Копии",
+            ["en-US"] = "•",
+            ["tr-TR"] = "•",
+            ["tk-TM"] = "•",
+            ["ru-RU"] = "•",
         },
         ["WorkPermitDocumentCopies.List.SelectOne"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

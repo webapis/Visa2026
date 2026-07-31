@@ -65,7 +65,7 @@ The EasyTest framework is currently configured to use **Microsoft Edge**.
 The application is configured to find the driver automatically through the system's PATH. The browser type is specified in `Config.xml` via the `Browser="Edge"` attribute.
 
 ### Application Behavior
-1.  **Initialization**: The test runner initializes the test fixture. The existing test database (`Visa2026EasyTest`) is dropped and recreated to ensure a clean environment.
+1.  **Initialization**: The test runner initializes the test fixture. The existing PostgreSQL test database (`visa2026_easytest`) is dropped and recreated to ensure a clean environment.
 2.  **Launch**: On local dev, a visible Microsoft Edge window opens (headed). On CI (`CI=true` / `VISA2026_E2E_HEADLESS`), Edge runs headless — see `EasyTestBrowserMode.cs`.
 3.  **Navigation**: The browser will navigate to the local URL of the Blazor application (e.g., `http://localhost:5050`).
 4.  **Simulation**: You will see the browser automatically interacting with the application based on the `.ets` script.
@@ -73,7 +73,7 @@ The application is configured to find the driver automatically through the syste
 
 ### Troubleshooting: HTTP 404 on `localhost:65201`
 
-EasyTest must open **`http://localhost:5050`**, not **5000** (IDE dev). `E2ETestBase` registers the built **`Visa2026.Blazor.Server.exe`** (not the project folder) with **`--urls http://localhost:5050 --environment EasyTest`** — `--launch-profile` only works with `dotnet run` and leaves the standalone host on **:5000** (`ERR_CONNECTION_REFUSED` on **:5050**). After each test preflight `DropDB`, `EasyTestDatabaseProvisioner` creates the catalog and runs **`--updateDatabase --silent`**. Build **EasyTest** (`dotnet build Visa2026.slnx -c EasyTest`). Optional: `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\`.
+EasyTest must open **`http://localhost:5050`**, not **5000** (IDE dev). `E2ETestBase` registers the built **`Visa2026.Blazor.Server.exe`** (not the project folder) with **`--urls http://localhost:5050 --environment Development`** — `--launch-profile` only works with `dotnet run` and leaves the standalone host on **:5000** (`ERR_CONNECTION_REFUSED` on **:5050**). After each test preflight, `EasyTestDatabaseProvisioner` drops/creates **`visa2026_easytest`** on PostgreSQL and runs **`--updateDatabase --silent`**. Build **EasyTest** (`dotnet build Visa2026.slnx -c EasyTest`). Requires local PostgreSQL (`localhost:5432`, password from `PG_PASSWORD` or default `Visa2026Local`). Optional: `msedgedriver.exe` in `Visa2026.E2E.Tests\.webdrivers\`.
 
 ### Expected Results
 - **Test Explorer**:

@@ -386,7 +386,7 @@ public class ApplicationTypeSelectionController : ObjectViewController<DetailVie
             var builder = new SqlConnectionStringBuilder(connectionString);
             Log("Connection",
                 $"DataSource={builder.DataSource}, Database={builder.InitialCatalog}, IntegratedSecurity={builder.IntegratedSecurity} " +
-                $"(expect LocalDB profile: (localdb)\\mssqllocaldb / Visa2026)");
+                $"(expect PostgreSQL: localhost:5432 / visa2026)");
         }
         catch (Exception ex)
         {

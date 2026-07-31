@@ -14,6 +14,7 @@ namespace Visa2026.Module.Controllers
         private readonly string[] dependentProperties = {
             nameof(IExpirationLogic.ExpirationDate),
             "StartDate",
+            "IssuedDate",
             "IssueDate",
             "ContractStartDate",
             "ValidityDuration", // This affects ExpirationDate in some objects

@@ -8,7 +8,8 @@
 | **setup-openssh-server** | [../setup-openssh-server/](../setup-openssh-server/SKILL.md) — **Ubuntu SSH** (Win32 legacy in reference) | [learnings.md](../setup-openssh-server/learnings.md) |
 | **setup-docker-engine** | [../setup-docker-engine/](../setup-docker-engine/SKILL.md) — **Ubuntu on-prem** (was WSL) | [learnings.md](../setup-docker-engine/learnings.md) |
 | **visa2026-windows-iis-deploy** | [../visa2026-windows-iis-deploy/](../visa2026-windows-iis-deploy/SKILL.md) — **Windows IIS** (no Docker) | [learnings.md](../visa2026-windows-iis-deploy/learnings.md) |
-| **visa2026-onprem-legacy-sync** | [../visa2026-onprem-legacy-sync/](../visa2026-onprem-legacy-sync/SKILL.md) — **VISA2015 → Visa2026** on-prem LAN sync | [learnings.md](../visa2026-onprem-legacy-sync/learnings.md) |
+| **visa2026-postgresql** | [../visa2026-postgresql/](../visa2026-postgresql/SKILL.md) — **PostgreSQL** download/install/config on Windows (Demo pilot) | [learnings.md](../visa2026-postgresql/learnings.md) |
+| **visa2014-to-visa2026-import** | [../visa2014-to-visa2026-import/](../visa2014-to-visa2026-import/SKILL.md) — **VISA2015 → Visa2026** data migration (Demo/Prod Import; no delta Sync) | [learnings.md](../visa2014-to-visa2026-import/learnings.md) |
 
 **Runbook (narrative):** [docs/ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md) (current) · [docs/ON_PREM_WINDOWS_IIS.md](../../../docs/ON_PREM_WINDOWS_IIS.md) (IIS) · [docs/legacy/ON_PREM_WINDOWS_SERVER.md](../../../docs/legacy/ON_PREM_WINDOWS_SERVER.md) (legacy WSL) · **Prereqs:** [docs/ON_PREM_PREREQUISITES.md](../../../docs/ON_PREM_PREREQUISITES.md)
 
@@ -81,7 +82,7 @@
 | Prereq audit, WSL, Ubuntu, systemd, `.wslconfig` | **legacy-on-prem-windows-setup** |
 | `sshd`, domain SSH, port 22, connection reset | **setup-openssh-server** |
 | Docker Engine install, compose, images, HTTP app | **setup-docker-engine** |
-| VISA2015 → Visa2026 on-prem sync (`.15` → `.25`) | **visa2026-onprem-legacy-sync** |
+| VISA2015 → Visa2026 data migration (`.15` → `.25`) | **visa2014-to-visa2026-import** |
 
 ---
 

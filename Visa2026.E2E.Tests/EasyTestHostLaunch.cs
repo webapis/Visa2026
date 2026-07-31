@@ -13,7 +13,7 @@ internal static class EasyTestHostLaunch
 
     /// <summary>
     /// Kestrel on :5050 with <c>Development</c> middleware (matches F5 launch profile).
-    /// EasyTest supplies <c>ConnectionStrings__DefaultConnection</c> for <c>Visa2026EasyTest</c> — do not use
+    /// EasyTest supplies <c>ConnectionStrings__DefaultConnection</c> for <c>visa2026_easytest</c> — do not use
     /// <c>--environment EasyTest</c> here (enables HTTPS redirect/HSTS on HTTP-only CI and breaks script loading).
     /// </summary>
     public const string HostArguments = "--urls http://localhost:5050 --environment Development";

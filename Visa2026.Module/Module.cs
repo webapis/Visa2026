@@ -64,87 +64,48 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeRule));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateChangeLog));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PdfBatchEnqueueOptions));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.PersonIncompleteMarkOptions));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemDocumentCopiesListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationItemReportPackageListHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
-            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.LegacySyncDashboardHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ImportReimportHistoryHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {
+            // PostgreSQL-only: ObjectSpace seed/config + dual schema helpers + Report Dashboard PG views.
+            // (Former SQL Server T-SQL ModuleUpdaters are not registered.)
             return new ModuleUpdater[]
             {
                 new DatabaseUpdate.Updater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationUserThemePreferenceSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.TenantUserSeedUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PersonRoleMigrationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PersonFamilyRelationDocumentMigrationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractApprovalProfileFlattenMigrationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractApprovalProfileSchemaCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.MinistrySchemaCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SyncRulesUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.SystemSettingsUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.MinistryReviewSlaSettingsSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.OrganizationSingletonSeedUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PersonCurrentColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.EmployeeContractSchemaCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationItemCurrentSalarySchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationProgressMinistryLetterFileSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationProgressOrderSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationListQueryPerformanceSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationLatestProgressSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PersonIsActiveColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PassportCurrentVisaColumnCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationLegacyColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.InvitationHeaderStatusColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.WorkPermitItemStatusColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.WorkPermitApplicationNotRequiredColumnCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.VisaVisibilityToggleColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.OrganizationLegacySchemaCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.OrganizationPdfFormMappingUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PdfFormMappingUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.FamilyMembersPdfFormMappingUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.EducationPlacePdfFormMappingUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ReportsUpdater(Application, objectSpace, versionFromDB),
-                new DatabaseUpdate.UserReportTemplateApplicableTypesMigrationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.UserReportTemplateUpdater(Application, objectSpace, versionFromDB),
                 new DatabaseUpdate.StateChangeRulesUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.SqlViewsUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationLineItemsConsolidationUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationItemMovementFlattenUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.TravelHistorySourceApplicationItemCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationItemPurposeOfTravelColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.AddressOfResidenceStartDateColumnCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationItemBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.WorkPermitItemPermittedLocationsStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationItemWorkPermittedLocationsStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.VisaBorderZoneLocationStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.VisaBorderZoneLocationYokDefaultUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.PdfGenerationBatchRequestedCultureUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.WordReportGenerationBatchSelectedReportKeysUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.WordReportGenerationBatchSelectedApplicationItemIdsUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.EmployeeSalaryAmountStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.EducationGraduationYearStringUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.SubcontractorContactColumnsCleanupUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.SoftDeleteColumnsCleanupUpdater(objectSpace, versionFromDB),
+
                 new DatabaseUpdate.LookupBaseNameTmBackfillUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupCatalogSyncUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractTitleDescriptionMergeUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.LookupBaseNameTmPdfFormMappingUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ApplicationNumberingProfileMigrationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.LookupLocalizationKeyUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.UrgencyDuplicateCleanupUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeSelectionCodeUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationTypeCapabilityFlagsSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonIncompleteDataSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationTypeGroupSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationTypeGroupSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractApprovalLegProfileSchemaUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractMinistryLegsSchemaCleanupUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
@@ -165,14 +126,17 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.HistoryDashboardViewItemUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxModelUpdater());
             updaters.Add(new DatabaseUpdate.BoStateNotificationInboxDetailViewUpdater());
-            updaters.Add(new DatabaseUpdate.LegacySyncDashboardModelUpdater());
-            updaters.Add(new DatabaseUpdate.LegacySyncDashboardDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ImportReimportHistoryModelUpdater());
+            updaters.Add(new DatabaseUpdate.ImportReimportHistoryDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ReportDashboardModelUpdater());
+            updaters.Add(new DatabaseUpdate.ReportDashboardDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.PersonDossierDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackModelUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackViewsUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationRuntimeLogModelUpdater());
             updaters.Add(new DatabaseUpdate.ApplicationRuntimeLogViewsUpdater());
-            updaters.Add(new DatabaseUpdate.PersonDocumentCopiesListViewColumnUpdater());
+            updaters.Add(new DatabaseUpdate.PersonListViewActionColumnsUpdater());
             updaters.Add(new DatabaseUpdate.HeaderDocumentCopiesListViewColumnUpdater());
         }
         protected override IEnumerable<Type> GetRegularTypes()

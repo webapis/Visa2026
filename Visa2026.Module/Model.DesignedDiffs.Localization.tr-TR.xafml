@@ -28,7 +28,7 @@
       <Action Id="ShowInDocument" Caption="Belgede Göster" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF Oluştur" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Belge kopyaları" />
-      <Action Id="ViewApplicationItemWordReports" Caption="Belgeler" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Şablonlar" />
       <Action Id="ShowMyPdfBatches" Caption="PDF İşlerim" />
       <Action Id="ResetSyncRules" Caption="Kuralları Sıfırla" />
       <Action Id="ValidateSyncRules" Caption="Kuralları Doğrula" />
@@ -41,7 +41,7 @@
       <Action Id="OpenApplicationFromVisaStatus" Caption="Başvuruyu Aç" />
       <Action Id="OpenApplicationFromTransferStatus" Caption="Başvuruyu Aç" />
       <Action Id="CloneSyncRule" Caption="Kuralı Kopyala" />
-      <Action Id="GenerateWordReports" Caption="Belgeler" />
+      <Action Id="GenerateWordReports" Caption="Şablonlar" />
       <Action Id="OpenSourceObject" Caption="Kaynak Nesneyi Aç" />
       <Action Id="OpenTargetObject" Caption="Hedef Nesneyi Aç" />
       <Action Id="DialogOK" Caption="Tamam" />
@@ -81,7 +81,6 @@
       <Item Id="Housing" Caption="Konaklama" />
       <Item Id="Invitation" Caption="Davet" />
       <Item Id="InvitationItem" Caption="Davet Kalemleri" />
-      <Item Id="LegacySyncDashboard" Caption="Eski sistem senkronizasyonu" />
       <Item Id="Lookup" Caption="Referans">
         <Items>
           <Item Id="Application" Caption="Başvuru">
@@ -166,6 +165,7 @@
       <Item Id="Recycle Bin" Caption="Geri Dönüşüm" />
       <Item Id="Rejection" Caption="Ret" />
       <Item Id="RejectionItem" Caption="Ret Kalemleri" />
+      <Item Id="ReportDashboard" Caption="Rapor Panosu" />
       <Item Id="Reports" Caption="Raporlar" />
       <Item Id="StateNotifications" Caption="Durum bildirimleri" />
       <Item Id="System" Caption="Sistem" />
@@ -209,7 +209,7 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DaysRemaining" Caption="Kalan Gün" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="İkamet kopyaları" />
+        <Member Name="Documents" Caption="Adres kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="ExpirationState" Caption="Süre Durumu" />
         <Member Name="FullAddress" Caption="Tam Adres" />
@@ -246,16 +246,23 @@
         <Member Name="IsActive" Caption="Aktif" />
         <Member Name="IsForFamily" Caption="Aile İçin" />
         <Member Name="IsManualEntry" Caption="Manuel Giriş" />
+        <Member Name="LatestProgressDate" Caption="İlerleme tarihi" />
+        <Member Name="LatestProgressState" Caption="Durum" />
         <Member Name="MigrationService" Caption="Göç Dairesi" />
+        <Member Name="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <Member Name="Month" Caption="Ay" />
         <Member Name="MovementPermitLocation" Caption="Hareket İzni Yeri" />
+        <Member Name="ProgressSlaStatement" Caption="Onay süresi" />
         <Member Name="ProjectContract" Caption="Proje Sözleşmesi" />
         <Member Name="Rejections" Caption="Retler" />
         <Member Name="Representative" Caption="Temsilci" />
+        <Member Name="TotalPersonCount" Caption="Kişi sayısı" />
         <Member Name="Urgency" Caption="Aciliyet" />
         <Member Name="VisaCategory" Caption="Vize Kategorisi" />
         <Member Name="VisaPeriod" Caption="Vize Süresi" />
         <Member Name="VisaType" Caption="Vize Türü" />
+        <Member Name="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <Member Name="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <Member Name="WorkPermits" Caption="Çalışma İzinleri" />
         <Member Name="Year" Caption="Yıl" />
       </OwnMembers>
@@ -568,6 +575,18 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroup" Caption="Başvuru Türü Grubu">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeGroupMember" Caption="Başvuru Türü Grubu Üyesi">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ApplicationUser" Caption="Kullanıcı">
       <OwnMembers>
         <Member Name="ChangePasswordOnFirstLogon" Caption="İlk Girişte Şifre Değiştir" />
@@ -700,6 +719,7 @@
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
+        <Member Name="Documents" Caption="Sınır bölgesi kopyaları" />
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.BorderZoneItem" Caption="Sınır Bölgesi Kalemi">
@@ -1150,7 +1170,7 @@
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Davet kopyaları" />
+        <Member Name="Documents" Caption="Davetiye kopyaları" />
         <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
         <Member Name="InvitationItems" Caption="Davet Kalemleri" />
         <Member Name="InvitationNumber" Caption="Davet No" />
@@ -1347,47 +1367,6 @@
         <Member Name="Exit" Caption="Çıkış" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.OrganizationType" Caption="Organizasyon Türü">
-      <OwnMembers>
-        <Member Name="Application" Caption="Başvuru" />
-        <Member Name="Code" Caption="Kod" />
-        <Member Name="Company" Caption="Şirket" />
-        <Member Name="CurrentState" Caption="Durum" />
-        <Member Name="Date" Caption="Tarih" />
-        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
-        <Member Name="DaysRemaining" Caption="Kalan Gün" />
-        <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Department" Caption="Departman" />
-        <Member Name="Description" Caption="Açıklama" />
-        <Member Name="EndDate" Caption="Bitiş Tarihi" />
-        <Member Name="ExpirationDate" Caption="Bitiş Tarihi" />
-        <Member Name="ExpirationState" Caption="Süre Durumu" />
-        <Member Name="ExtensionRequired" Caption="Uzatma Gerekli" />
-        <Member Name="File" Caption="Dosya" />
-        <Member Name="FullAddress" Caption="Tam Adres" />
-        <Member Name="HasInvitation" Caption="Davet Var" />
-        <Member Name="HistoricalImport" Caption="Geçmiş kayıt (veren başvuru yok)" />
-        <Member Name="InvitationItem" Caption="Davet Kalemi" />
-        <Member Name="IsActive" Caption="Aktif" />
-        <Member Name="IsCancelled" Caption="İptal Edildi" />
-        <Member Name="IsChanged" Caption="Değiştirildi" />
-        <Member Name="IsDefault" Caption="Varsayılan" />
-        <Member Name="IsExtended" Caption="Uzatıldı" />
-        <Member Name="IssueDate" Caption="Veriliş Tarihi" />
-        <Member Name="IssuingApplicationItem" Caption="Veren Başvuru Kalemi" />
-        <Member Name="Location" Caption="Yer" />
-        <Member Name="Name" Caption="Ad" />
-        <Member Name="NameTm" Caption="Ad (Tm)" />
-        <Member Name="Notes" Caption="Notlar" />
-        <Member Name="Passport" Caption="Pasaport" />
-        <Member Name="Person" Caption="Kişi" />
-        <Member Name="Position" Caption="Pozisyon" />
-        <Member Name="RegistrationState" Caption="Kayıt Durumu" />
-        <Member Name="StartDate" Caption="Başlangıç Tarihi" />
-        <Member Name="State" Caption="Durum" />
-        <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
-      </OwnMembers>
-    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.Passport" Caption="Pasaport">
       <OwnMembers>
         <Member Name="Authority" Caption="Veren Makam" />
@@ -1510,7 +1489,9 @@
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DateOfBirth" Caption="Doğum Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
-        <Member Name="Documents" Caption="Kişi dosya kopyaları" />
+        <Member Name="DocumentCopiesListLink" Caption="Kopyalar" />
+        <Member Name="Documents" Caption="CV ve kişisel dosyalar" />
+        <Member Name="DossierListLink" Caption="Dosye" />
         <Member Name="Educations" Caption="Eğitimler" />
         <Member Name="Email" Caption="E-posta" />
         <Member Name="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
@@ -1792,6 +1773,12 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost" Caption="Rapor Panosu">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
     <Class Name="Visa2026.Module.BusinessObjects.ReportVisibility" Caption="Rapor Görünürlüğü">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
@@ -1987,6 +1974,12 @@
       </OwnMembers>
     </Class>
     <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplate" Caption="Rapor Şablonu">
+      <OwnMembers>
+        <Member Name="DateDeleted" Caption="Silinme Tarihi" />
+        <Member Name="DeletedBy" Caption="Silen" />
+      </OwnMembers>
+    </Class>
+    <Class Name="Visa2026.Module.BusinessObjects.UserReportTemplateApplicationTypeGroup" Caption="Rapor Şablonu — Başvuru Türü Grubu">
       <OwnMembers>
         <Member Name="DateDeleted" Caption="Silinme Tarihi" />
         <Member Name="DeletedBy" Caption="Silen" />
@@ -2376,8 +2369,8 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="İkamet Adresi" />
-          <LayoutGroup Id="Documents" Caption="İkamet kopyaları" />
-          <LayoutGroup Id="Documents_Group" Caption="İkamet kopyaları" />
+          <LayoutGroup Id="Documents" Caption="Adres kopyaları" />
+          <LayoutGroup Id="Documents_Group" Caption="Adres kopyaları" />
           <LayoutGroup Id="LodgingDocuments" Caption="Konaklama kopyaları" />
         </LayoutGroup>
       </Layout>
@@ -2419,7 +2412,14 @@
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="IsActive" Caption="Aktif" />
         <ColumnInfo Id="IsManualEntry" Caption="Manuel Giriş" />
+        <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Durum" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
@@ -2429,7 +2429,14 @@
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Durum" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
@@ -2437,9 +2444,20 @@
       <Columns>
         <ColumnInfo Id="ApplicationDate" Caption="Tarih" />
         <ColumnInfo Id="ApplicationType" Caption="Tür" />
+        <ColumnInfo Id="ApprovalLegProfile" Caption="Onay bakanlık profili" />
         <ColumnInfo Id="CurrentState" Caption="Güncel durum" />
         <ColumnInfo Id="FullApplicationNumber" Caption="Başvuru No" />
+        <ColumnInfo Id="LatestProgressDate" Caption="İlerleme tarihi" />
+        <ColumnInfo Id="LatestProgressState" Caption="Durum" />
+        <ColumnInfo Id="MigrationSlaStatement" Caption="Migrasyon süresi" />
         <ColumnInfo Id="Month" Caption="Ay" />
+        <ColumnInfo Id="ProgressSlaStatement" Caption="Onay süresi" />
+        <ColumnInfo Id="TotalPersonCount" Caption="Kişi sayısı" />
+        <ColumnInfo Id="Urgency" Caption="Aciliyet" />
+        <ColumnInfo Id="VisaPeriod" Caption="Vize Süresi" />
+        <ColumnInfo Id="VisaType" Caption="Vize Türü" />
+        <ColumnInfo Id="WorkingDaysInCurrentStep" Caption="İş günleri" />
+        <ColumnInfo Id="WorkingDaysInMigrationStep" Caption="Migrasyon iş günleri" />
         <ColumnInfo Id="Year" Caption="Yıl" />
       </Columns>
     </ListView>
@@ -2467,7 +2485,7 @@
     <ListView Id="ApplicationItem_ListView_DirectMigration" Caption="Başvuru kalemleri (doğrudan migrasyon)" />
     <ListView Id="ApplicationItem_ListView_ViaMinistries" Caption="Başvuru kalemleri (bakanlık süreci)" />
     <DetailView Id="ApplicationItemDocumentCopiesListHost_DetailView" Caption="Belge kopyaları" />
-    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Belgeler" />
+    <DetailView Id="ApplicationItemReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationLocation_DetailView" Caption="Başvuru Yeri" />
     <ListView Id="ApplicationLocation_ListView" Caption="Başvuru Yerleri" />
     <DetailView Id="ApplicationMigrationSlaProfile_DetailView" Caption="Göç SLA profili" />
@@ -2485,13 +2503,16 @@
     </ListView>
     <DetailView Id="ApplicationReason_DetailView" Caption="Başvuru Nedeni" />
     <ListView Id="ApplicationReason_ListView" Caption="Başvuru Nedenleri" />
-    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Belgeler" />
+    <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationState_DetailView" Caption="Başvuru Durumu" />
     <ListView Id="ApplicationState_ListView" Caption="Başvuru Durumları" />
     <DetailView Id="ApplicationType_DetailView" Caption="Başvuru Türü" />
     <ListView Id="ApplicationType_ListView" Caption="Başvuru Türleri" />
     <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Başvuru Türü Filtresi" />
     <ListView Id="ApplicationTypeFilter_ListView" Caption="Başvuru Türü Filtreleri" />
+    <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Başvuru Türü Grubu" />
+    <ListView Id="ApplicationTypeGroup_ListView" Caption="Başvuru Türü Grupları" />
+    <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Başvuru Türü Grubu Üyesi" />
     <DetailView Id="ApplicationUser_DetailView" Caption="Kullanıcı">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2644,7 +2665,7 @@
     <DetailView Id="Invitation_DetailView" Caption="Davet">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="Documents" Caption="Davet kopyaları" />
+          <LayoutGroup Id="Documents" Caption="Davetiye kopyaları" />
           <LayoutGroup Id="Invitation" Caption="Davet" />
           <LayoutGroup Id="InvitationItems" Caption="Davet Kalemleri" />
         </LayoutGroup>
@@ -2680,13 +2701,25 @@
     </ListView>
     <DetailView Id="LocalEmployee_DetailView" Caption="Yerel Çalışan" />
     <ListView Id="LocalEmployee_ListView" Caption="Yerel Çalışanlar" />
-    <DetailView Id="Lodging_DetailView" Caption="Konaklama" />
+    <DetailView Id="Lodging_DetailView" Caption="Konaklama">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Konaklama kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="Lodging_ListView" Caption="Konaklamalar" />
     <DetailView Id="MailMergeVisibility_DetailView" Caption="Mail Merge Görünürlüğü" />
     <ListView Id="MailMergeVisibility_ListView" Caption="Mail Merge Görünürlükleri" />
     <DetailView Id="MaritalStatus_DetailView" Caption="Medeni Hal" />
     <ListView Id="MaritalStatus_ListView" Caption="Medeni Haller" />
-    <DetailView Id="MedicalRecord_DetailView" Caption="Sağlık Kaydı" />
+    <DetailView Id="MedicalRecord_DetailView" Caption="Sağlık Kaydı">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Sağlık kaydı kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="MedicalRecord_ListView" Caption="Sağlık Kayıtları">
       <Columns>
         <ColumnInfo Id="DaysRemaining" Caption="Kalan Gün" />
@@ -2703,8 +2736,6 @@
     <ListView Id="MinistryReviewSlaSettings_ListView" Caption="Bakanlık inceleme SLA" />
     <DetailView Id="MovementPermitLocation_DetailView" Caption="Hareket İzni Yeri" />
     <ListView Id="MovementPermitLocation_ListView" Caption="Hareket İzni Yerleri" />
-    <DetailView Id="OrganizationType_DetailView" Caption="Organizasyon Türü" />
-    <ListView Id="OrganizationType_ListView" Caption="Organizasyon Türleri" />
     <DetailView Id="Passport_DetailView" Caption="Pasaport">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -2745,7 +2776,7 @@
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="İkamet Adresleri" />
           <LayoutGroup Id="ApplicationItems" Caption="Başvuru Kalemleri" />
-          <LayoutGroup Id="Documents" Caption="Kişi dosya kopyaları" />
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
           <LayoutGroup Id="Educations" Caption="Eğitim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Çalışan Sözleşmeleri" />
           <LayoutGroup Id="FamilyMembers" Caption="Aile Üyeleri" />
@@ -2775,6 +2806,7 @@
     <ListView Id="Person_DetailView_Employee" Caption="Çalışan">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="CV ve kişisel dosyalar" />
           <LayoutGroup Id="Person" Caption="Çalışan" />
         </LayoutGroup>
       </Layout>
@@ -2833,6 +2865,8 @@
         <ColumnInfo Id="CurrentVisa" Caption="Vize" />
         <ColumnInfo Id="CurrentWorkPermitItem" Caption="İş İzni Kalemi" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Kopyalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosye" />
         <ColumnInfo Id="FullName" Caption="Tam Ad" />
         <ColumnInfo Id="Gender" Caption="Cinsiyet" />
         <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
@@ -2855,6 +2889,8 @@
         <ColumnInfo Id="CurrentRejectionItem" Caption="Ret Kalemi" />
         <ColumnInfo Id="CurrentVisa" Caption="Vize" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Kopyalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosye" />
         <ColumnInfo Id="FirstName" Caption="Ad" />
         <ColumnInfo Id="ForeignAddress" Caption="Yurt Dışı Adres" />
         <ColumnInfo Id="ForeignAddressCountry" Caption="Yurt Dışı Adres Ülkesi" />
@@ -2875,6 +2911,8 @@
       <Columns>
         <ColumnInfo Id="Age" Caption="Yaş" />
         <ColumnInfo Id="DateOfBirth" Caption="Doğum Tarihi" />
+        <ColumnInfo Id="DocumentCopiesListLink" Caption="Kopyalar" />
+        <ColumnInfo Id="DossierListLink" Caption="Dosye" />
         <ColumnInfo Id="FullName" Caption="Tam Ad" />
         <ColumnInfo Id="Gender" Caption="Cinsiyet" />
         <ColumnInfo Id="IsArchived" Caption="Arşivlendi" />
@@ -2895,7 +2933,13 @@
     </ListView>
     <DetailView Id="Position_DetailView" Caption="Pozisyon" />
     <ListView Id="Position_ListView" Caption="Pozisyonlar" />
-    <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi" />
+    <DetailView Id="ProjectContract_DetailView" Caption="Proje Sözleşmesi">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Proje sözleşmesi kopyaları" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="ProjectContract_ListView" Caption="Proje Sözleşmeleri" />
     <DetailView Id="ProjectContractMinistryLeg_DetailView" Caption="Bakanlık adımı" />
     <ListView Id="ProjectContractMinistryLeg_ListView" Caption="Bakanlık adımları" />
@@ -2978,6 +3022,7 @@
     </ListView>
     <DetailView Id="UserReportTemplate_DetailView" Caption="Rapor Şablonu" />
     <ListView Id="UserReportTemplate_ListView" Caption="Rapor Şablonları" />
+    <DetailView Id="UserReportTemplateApplicationTypeGroup_DetailView" Caption="Rapor Şablonu — Başvuru Türü Grubu" />
     <DetailView Id="ValidityDuration_DetailView" Caption="Geçerlilik Süresi" />
     <ListView Id="ValidityDuration_ListView" Caption="Geçerlilik Süreleri" />
     <DetailView Id="Visa_DetailView" Caption="Vize">

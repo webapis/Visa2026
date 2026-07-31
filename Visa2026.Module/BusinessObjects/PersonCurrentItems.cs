@@ -98,7 +98,7 @@ namespace Visa2026.Module.BusinessObjects
         public static InvitationItem GetCurrentInvitationItem(Person person) =>
             person?.InvitationItems?
                 .Where(i => i != null)
-                .OrderByDescending(i => i.Invitation?.StartDate ?? default)
+                .OrderByDescending(i => i.Invitation?.IssuedDate ?? default)
                 .ThenByDescending(i => i.ID)
                 .FirstOrDefault();
 

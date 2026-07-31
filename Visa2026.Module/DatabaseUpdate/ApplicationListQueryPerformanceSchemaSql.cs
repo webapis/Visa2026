@@ -14,7 +14,7 @@ public static class ApplicationListQueryPerformanceSchemaSql
         BEGIN
             CREATE NONCLUSTERED INDEX IX_ApplicationProgresses_ApplicationID_ProgressOrder
             ON dbo.ApplicationProgresses (ApplicationID, ProgressOrder DESC)
-            INCLUDE (StateID, LocationID, Date);
+            INCLUDE (StateID, Date);
         END;
 
         IF OBJECT_ID(N'dbo.ApplicationApprovalLegSnapshots', N'U') IS NOT NULL

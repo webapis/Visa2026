@@ -1,9 +1,9 @@
-﻿# VISA2014 â†’ Visa2026 â€” migration status
+# VISA2014 â†’ Visa2026 â€” migration status
 
 **Last updated:** 2026-06-29  
 **Machine-readable:** [`migration-status.yaml`](migration-status.yaml) â€” **update this file first**, then refresh this dashboard if summaries drift.
 
-**Quick links:** [Migration plan](../VISA2014_MIGRATION.md) Â· [Multi-company sources](MULTI_COMPANY_LEGACY_SOURCES.md) Â· [Order](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) Â· [Import strategy](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) Â· [Lookup strategy](LOOKUP_RESOLUTION_STRATEGY.md)
+**Quick links:** [Migration plan](../VISA2014_MIGRATION.md) Â· [Multi-company sources](MULTI_COMPANY_LEGACY_SOURCES.md) Â· [Order](../../Visa2026.DataImporter/legacy/visa2014/order.yaml) Â· [Import strategy](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) Â· [Lookup strategy](LOOKUP_RESOLUTION_STRATEGY.md) · [Import exclusions](import-exclusions.yaml) · [Mapping verify](MAPPING_VERIFICATION.md)
 
 ---
 
@@ -22,7 +22,8 @@
 | Workstream | Status | Artifact |
 |------------|--------|----------|
 | Schema bootstrap | **Done** | [`schema-snapshot.md`](schema-snapshot.md) |
-| Lookup resolution strategy | **Done** | [`LOOKUP_RESOLUTION_STRATEGY.md`](LOOKUP_RESOLUTION_STRATEGY.md) |
+| Lookup resolution strategy | **Done** | [`LOOKUP_RESOLUTION_STRATEGY.md`](LOOKUP_RESOLUTION_STRATEGY.md) · [Import exclusions](import-exclusions.yaml) |
+| Mapping verification (post-import) | **Pilot shipped** | [`MAPPING_VERIFICATION.md`](MAPPING_VERIFICATION.md) — `--verify-visa2014-mapping` Application |
 | Import strategy approval | **Done** | [`import-strategy.yaml`](../../Visa2026.DataImporter/legacy/visa2014/import-strategy.yaml) (`approved` 2026-06-21) |
 | Multi-company legacy | **Done** | [`MULTI_COMPANY_LEGACY_SOURCES.md`](MULTI_COMPANY_LEGACY_SOURCES.md) |
 | Layer 3 lookup audit | **In progress** | Shared catalogs done; ProjectContract per company |
@@ -89,7 +90,7 @@ Full detail (notes, owners, dates): [`migration-status.yaml`](migration-status.y
 - [x] Person field-map + property gap registry
 - [x] Gender lookup translation (Ayal â†’ AÃ½al)
 - [x] **Country lookup audit (Person scope)** â€” 64 codes, identity map to `Country.Code` ([`lookup-translations.yaml`](lookup-translations.yaml))
-- [x] Lookup resolution strategy documented ([`LOOKUP_RESOLUTION_STRATEGY.md`](LOOKUP_RESOLUTION_STRATEGY.md))
+- [x] Lookup resolution strategy documented ([`LOOKUP_RESOLUTION_STRATEGY.md`](LOOKUP_RESOLUTION_STRATEGY.md) · [Import exclusions](import-exclusions.yaml))
 - [x] Import strategy **approved** (2026-06-21) â€” `import-strategy.yaml`
 - [x] **MaritalStatus lookup approved** â€” Status int 0â€“5 â†’ Visa2026 Code ([`lookup-translations.yaml`](lookup-translations.yaml), [`MaritalStatus.md`](lookup-comparisons/MaritalStatus.md))
 - [x] **Lookup review queue** â€” person-wave / application-wave gate ([`lookup-review-queue.yaml`](lookup-comparisons/lookup-review-queue.yaml))

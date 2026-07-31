@@ -130,7 +130,9 @@ public sealed class HeaderDocumentCopiesListLinkClickController : ViewController
         e.CssClass = string.IsNullOrEmpty(e.CssClass) ? linkClass : $"{e.CssClass} {linkClass}";
         e.Attributes["role"] = "button";
         e.Attributes["tabindex"] = "0";
-        e.Attributes["title"] = HeaderDocumentCopiesLocalization.Title(family);
+        var label = HeaderDocumentCopiesLocalization.Title(family);
+        e.Attributes["title"] = label;
+        e.Attributes["aria-label"] = label;
         e.Attributes["data-header-doc-family"] = family.ToString();
         e.Attributes["data-header-doc-parent-id"] = parentId.ToString("D");
         if (contextItemId is Guid contextId && contextId != Guid.Empty)

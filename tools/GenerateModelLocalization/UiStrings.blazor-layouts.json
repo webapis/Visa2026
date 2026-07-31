@@ -1,5 +1,23 @@
 {
   "views": {
+    "Person_ListView_Employees": {
+      "columns": {
+        "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+        "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+      }
+    },
+    "Person_ListView_FamilyMembers": {
+      "columns": {
+        "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+        "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+      }
+    },
+    "Person_ListView_TemporaryVisitors": {
+      "columns": {
+        "DossierListLink": { "tr-TR": "Dosye", "tk-TM": "Dosýe", "ru-RU": "Досье" },
+        "DocumentCopiesListLink": { "tr-TR": "Kopyalar", "tk-TM": "Nusgalar", "ru-RU": "Копии" }
+      }
+    },
     "Application_DetailView": {
       "nestedLayoutGroups": [
         {
@@ -32,14 +50,14 @@
       "layoutGroups": {
         "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+        "Documents": { "tr-TR": "Davetiye kopyaları", "tk-TM": "Çakylyk nusgalary", "ru-RU": "Копии приглашения" }
       }
     },
     "Rejection_DetailView": {
       "layoutGroups": {
         "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+        "Documents": { "tr-TR": "Ret kopyaları", "tk-TM": "Ret nusgalary", "ru-RU": "Копии отказа" }
       }
     },
     "WorkPermit_DetailView": {
@@ -55,7 +73,7 @@
           "path": ["Tabs"],
           "groups": {
             "WorkPermitItems": { "tr-TR": "İş İzni Kalemleri", "tk-TM": "Iş rugsady elementleri", "ru-RU": "Позиции РНТ" },
-            "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+            "Documents": { "tr-TR": "Çalışma izni kopyaları", "tk-TM": "Iş rugsady nusgalary", "ru-RU": "Копии разрешения на работу" }
           }
         }
       ]

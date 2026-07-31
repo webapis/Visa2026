@@ -1,8 +1,399 @@
+### 2026-07-30 — File waves .15 → local PG (DocumentCopies.ps1)
+
+- **Phase**: file-wave (`DocumentCopies.ps1`, `calik-energi-local-pg` → PostgreSQL `visa2026`)
+- **Pilot** (MaxRows 10): all 7 steps Failed=0 — Person.Photo 10/10; Passport/Visa/Education/WP/Invitation docs; FamilyProof 9+1 no parent map
+- **Person.Photo (full)**: Processed **3333** / Patched **3262** / No blob **71** / Failed **0** — STEP_OK
+- **PassportDocument**: first full run OOM/crash ~3.2 GB WS after ~11 min; **PassportCopy id-map ~3663** entries persisted; resume with `-StartAt PassportDocument`
+- **CLI**: `.\scripts\visa2014-migration\import\DocumentCopies.ps1 -LegacySource calik-energi-local-pg -TargetConnection 'Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres' -StartAt Person-Photo`
+- **Logs**: `artifacts/document-copies-import/*.log` (per-step `Person-Photo.log`, `PassportDocument.log`, …)
+- **Prevent**: do not start second DocumentCopies while DataImporter locks DLLs; parent shell kill leaves child import running — check `Get-Process Visa2026.DataImporter` before resume
+- **Resume order**: PassportDocument → VisaDocument → EducationDocument → WorkPermitDocument → InvitationDocument → FamilyProofDocument
+
+### 2026-07-27 — Full scalar reimport .15 → local PG (scalars complete; posts running)
+
+- **RunId**: `20260727-150349` (resume after Education seed)
+- **Scalars**: all STEP_OK Failed=0 — Person 3333; Passport 3682; Visa 6132; Education 3202; EPH 3084; Salary 2977; AoR 5189; Application 12282; WP 407 / WPI 3875; Invitation 2868 / InvItem 5123; ApplicationItem 21752; Rejection 207 / RejectionItem 254; ApplicationProgress DB **38096** (legacy prepared ~38216)
+- **Posts**: PersonSubcontractor + PersonRelationship OK; **post-PersonAddressPia** running; Visa FK fill still 0% until post-VisaIssuingApplicationItem / post-VisaInvitationItem
+- **Watch**: Profile Local — Visa link fill expected to rise after remaining post waves
+
+### 2026-07-27 — Full scalar reimport .15 → local PG (Education gap + resume)
+
+- **First chain** RunId `20260727-145553`: Person/Passport/Visa OK; **Education** Posted **3198** / Failed **4** (exit 1).
+- **Gaps** (exact NameTm from `.15`): institutions `Orta mekdep/Hünär şahadatnamaly`, `Jawaharlal Nehru adyndaky tehnologiki uniwersiteti`, `Netcare 911 gyssagly tiz kömek mekdebi`; specialty `Tiz kömek kömekçisi` (+ related `Mehaniki inženerçiligi` / `Orta bilim` already present).
+- **Seed**: INSERT into PG `EducationInstitutions`/`Specialties` with `IsDefault=FALSE`, `GCRecord=0`; append calik-energi tenant JSON (LastIndexOf `]`); refresh DI bin overlays. SQL: `artifacts/local-pg-import/_seed-edu-gaps.sql`.
+- **Resume** RunId `20260727-150349` PID 24368: Education Posted **4** / Failed **0** (already imported 3198); EPH/Salary/AoR STEP_OK; **Application** running.
+- **Log**: `artifacts/local-pg-import/chain-console-from15-resume-education-20260727-150348.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-27 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: full wipe + scalar chain (`Run-LocalPgScalarChain.ps1 -StartAt Person`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`) — legacy people≈3333 confirmed
+- **Target**: PostgreSQL `visa2026` (localhost)
+- **Prep**: stopped Blazor; `Wipe-LocalPostgresTransactional.sql` (People/Apps/Items/Progress → 0; kept EducationInstitutions 1520 / Specialties 1096); cleared source+bin `id-maps/calik-energi-local-pg` to `{}`; refreshed DI bin `LookupCatalogs/tenant` education-institution + specialty JSON from Module tenant catalogs
+- **PID**: 31524
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260727-145553.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-27 — Merge KYC Kobmine → Kombine (local PG)
+
+- **Decision**: keeper = correct spelling **Kombine** (user chose option 1).
+- **Apply** (`visa2026`): repointed People 515 + Applications 72; soft-deleted Kobmine row; active visas now **one** bar `KYC (…Kombine…)` = **392**.
+- **SQL**: `scripts/visa2014-migration/cleanup/MergeProjectContract-KycKobmineToKombine.postgres.sql`
+- **Catalog**: removed Kobmine from `project-contract.calik-energi.json` / `project-contract.json` (regex edit — do not ConvertTo-Json round-trip Turkmen).
+- **Alias**: `lookup-translations.calik-energi.yaml` values[] Kobmine → Kombine; generate script normalizes Kobmine→Kombine + skip dup code.
+- **Still open**: CS-1 Şatlık/Shatlık, KYM space, Subcontractor Çalyk/Çalık.
+### 2026-07-27 — Local PG duplicate preview (ProjectContract / Subcontractor)
+
+- **Evidence**: Report Dashboard Active By Project + Subcontractor bars on localhost:5001 / `visa2026`.
+- **Finding**: Not exact NameTm clones — **legacy spelling variants**:
+  - Project: KYC Kobmine vs Kombine; CS-1 Şatlık vs Shatlık; KYM vs KYM(;
+  - Subcontractor: **Çalyk** (y, default, 2083) vs **Çalık** (ı, 365) vs Çalik (i, 5).
+- **Artifacts**: `Preview-DuplicateProjectContractSubcontractor.ps1 -Profile Local`; `cleanup/DuplicateProjectContractAndSubcontractor.postgres.sql`; `cleanup/DuplicateProjectContractSubcontractor.local-pg-preview.md`.
+- **Next**: user approves keeper per group, then implement Postgres merge -Apply (repoint FKs).
+### 2026-07-27 — Preview duplicate ProjectContract / Subcontractor lookups
+
+- **Ask**: Preview duplicate ProjectContract + Subcontractor before merge (post-import from `.15`).
+- **Seed check**: `project-contract.calik-energi.json` (74) and `subcontractor.calik-energi.json` (131) — **0** exact NameTm/Code/LocalizationKey duplicate groups in repo JSON.
+- **Tooling**: preview-only `scripts/visa2014-migration/Preview-DuplicateProjectContractSubcontractor.ps1` + `cleanup/DuplicateProjectContractAndSubcontractor.sql` (SameNameTm / SameLocalizationKey / SameCode / PrefixCandidate + Subcontractor NormalizedNameTm; Person/Application ref counts). No `-Apply` yet.
+- **Note**: DB-side duplicates usually come from older seed + ForceUpdate cycles (long NameTm vs short Code title), not from the current calik JSON. PrefixCandidate needs human review (do not auto-merge Satlik/Shatlik variants).
+- **Next**: run preview against Demo/Prod with SQL connection env; then decide merge groups.
+
+### 2026-07-23 — ApplicationProgress PG reimport failed (DateTime Kind=UTC) then fixed
+
+- **Symptom**: Watch showed posted=0 fail=1100+; `Cannot write DateTime with Kind=UTC to PostgreSQL type 'timestamp without time zone'`.
+- **Cause**: Headless host uses `CreateHostBuilder` (skips `Program.Main` switch); payload used `SpecifyKind(..., Utc)`.
+- **Fix**: `AppContext.SetSwitch(Npgsql.EnableLegacyTimestampBehavior)` in `HeadlessMigrationHost.Start`; ApplicationProgress payload Date → `DateTimeKind.Unspecified`.
+- **Resume**: cleanup + reimport log `…processdate-issued-20260723-152159.log` — early progress posted>0 failed=0; prepared **38164** (ProcessDate⇒issued for direct migration).
+
+### 2026-07-23 — ApplicationProgress: direct-migration ProcessDate (sene) ⇒ PROCESS_ISSUED
+
+- **Correction**: source of truth is **Işlenmäge başlanan sene** (Application.ProcessDate), not belgi/ProcessNumber.
+- **Rule**: direct migration (ministryLegCount=0, Registration + other DirectMigration): ProcessDate set ⇒ PROCESS_STARTED + PROCESS_ISSUED. ProcessNumber optional on both steps. Bel alone does not issue.
+- **Reimport**: Posted/Failed from log above; state histogram from PG.
+- **Log**: `reimport-ApplicationProgress-localpg-processdate-issued-20260723-150530.log`
+
+### 2026-07-23 — ApplicationProgress.ProcessNumber field (not Description)
+
+- **Decision**: Legacy `Application.ProcessNumber` maps to `ApplicationProgress.ProcessNumber` on `PROCESS_STARTED` (and direct-migration `PROCESS_ISSUED`); Description no longer carries the process number.
+- **Target caption**: `Application.DisplayCaption` / denormalized `Application.ProcessNumber` (visa2026-application-progress).
+- **Verify**: transform unit tests updated; Module helper tests pass.
+- **Phase**: mapping/code (reimport optional for already-loaded Description-only rows — schema updater backfills PROCESS_STARTED Description → ProcessNumber).
+
+### 2026-07-23 — ApplicationProgress: direct-migration ProcessNumber ⇒ PROCESS_ISSUED
+
+- **Rule**: For apps that go straight to migration service (`ministryLegCount=0`, includes Registration + other DirectMigration): non-empty legacy `Application.ProcessNumber` (**Işlenmäge başlanan belgi**) synthesizes **PROCESS_STARTED** and **PROCESS_ISSUED**. ProcessDate alone does not issue. Ministry-routed apps unchanged (Inv/WP/extension completion only).
+- **Code**: `Visa2014ApplicationProgressTransform.SynthesizeSteps`; tests updated; discovery + field-map notes.
+- **Local PG reimport**: cleanup DELETE 31037; Posted **31128** / Failed **0** / Skipped no-App-map **95**; Prepared **31223**. `PROCESS_ISSUED` = **4599** (was ~4500).
+- **Log**: `reimport-ApplicationProgress-localpg-direct-issued-20260723-141320.log`
+- **Open**: confirm with user whether ProcessDate-only (sene, no belgi) should also issue when legacy status is Işlenen.
+
+
+### 2026-07-23 — Full scalar reimport .15 → local PG (Completed)
+
+- **Outcome**: Overall **Completed** / CHAIN_COMPLETE — RunId `20260723-120409` (resume after Education seed; Person–Visa from wipe run `20260723-115634`)
+- **Source**: `10.100.128.15` / `VISA2015` → PostgreSQL `visa2026`
+- **Waves (Failed=0)**: Person 3319; Passport 3667; Visa 6119; Education catch-up 4 (DB 3191); EPH 3070; Salary 2963; AoR 5176; Application **12261**; WP 406 / WPI 3860; Invitation 2864 / InvItem 5115; ApplicationItem **21707**; Rejection 207 / RejectionItem 254; ApplicationProgress (legacy ~31099; DB **31037**)
+- **Post-corrections**: PersonSubcontractor, PersonRelationship, PersonAddressPia, ApplicationItemPersonCurrent, VisaIssuingApplicationItem — ran after scalars
+- **Log**: `artifacts/local-pg-import/chain-console-from15-resume-education-20260723-120408.log`
+
+
+### 2026-07-23 — Full scalar reimport .15 → local PG (Education gap + resume)
+
+- **First chain** RunId `20260723-115634`: Person/Passport/Visa OK; **Education** Posted **3187** / Failed **4** (exit 1) — Institution `Stambul Arel uniwersiteti` missing (catalog had `… Uniwersitety` only).
+- **Seed**: INSERT Institution + related Specialties from live `.15` (`TitleOfIEducationInstitution` / `TitleOfSpeciality` via `Spcialty` FK); append calik-energi JSON; refresh DI bin overlay.
+- **Hung helper**: large-JSON regex append killed (exit -1); use LastIndexOf(`]`) append + labels from SqlClient, not Tee-Object log text (Turkmen mojibake).
+- **Resume** RunId `20260723-120409`: Education catch-up Posted **4** / Failed **0**; EPH/Salary/AoR OK; **Application** running (~12k). Watch: `Watch-OnPremImportLive.ps1 -Profile Local`.
+
+
+### 2026-07-23 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: full wipe + scalar chain (`Run-LocalPgScalarChain.ps1 -StartAt Person`)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: PostgreSQL `visa2026` (localhost)
+- **Prep**: `Wipe-LocalPostgresTransactional.sql` (People/apps/progress → 0; kept EducationInstitutions 1503 / Specialties 1088 incl. slash-compound Balıkesir + Gurluşyk rows); cleared bin id-maps; refreshed DataImporter bin overlay education-institution.json / specialty.json from calik-energi JSON
+- **RunId**: 20260723-115634
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260723-115633.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
 # Learnings (append-only): visa2014-to-visa2026-import
 
 **Purpose:** Record verified discovery, strategy decisions, mapping corrections, and OData import outcomes so **each session builds on the last**.
 
 **Loop:** [MATURITY.md](./MATURITY.md) — **read `## Entries` before every task**; **append after every import attempt** (success, failure, or partial) and after verified discovery/strategy work.
+
+
+
+
+### 2026-07-22 — ActualPosition dirty titles (numeric / no-letters → "-")
+
+- **Phase**: data-quality / mapping fix (pre-reimport + post-import cleanup)
+- **Problem**: ActualPosition catalog bloated (~1410–1433 rows); many Titles are Position.Code-style numbers (617-, 1902 -, 1 216, .) — not real positions. UI shows Lookup/Organization/Config → Actual Position.
+- **Rule**: if value has **no alphabetic letter**, treat as unset → canonical Name `-` (required placeholder). Real titles (letters) kept. Long task descriptions still need human CSV review (Guess=review).
+- **Code**: Visa2014ActualPositionNormalizer wired into EmployeePositionHistory transform + OData importer + MiddleName cleanup + review Guess/--auto-no-letters.
+- **Existing DB (from checked-in CSV)**: **193** no-letter Titles, **340** EmployeePositionHistory usages → dash via:
+  `dotnet run --project Visa2026.DataImporter -- --apply-visa2014-actual-positions --auto-no-letters [--dry-run] [--api-base-url …]`
+  Prefer dry-run first. Requires Blazor/OData up (cleanup is OData-only).
+- **Reimport**: normalizer prevents recreating numeric ActualPositions on next EmployeePositionHistory wave.
+- **Tests**: Visa2014ActualPositionNormalizerTests (build blocked this session by running `--import-visa2014 --entity ApplicationProgress` PID locking DLLs — re-run after that finishes).
+
+### 2026-07-22 — Full scalar reimport .15 → local PG (finished)
+
+- **Phase**: full wipe + scalar chain result
+- **Overall**: Failed
+- **RunId**: 20260722-111047
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260722-111046.log`
+- **Steps**:
+```
+STEP_OK Person
+STEP_OK Passport
+STEP_OK Visa
+STEP_FAILED Education exit=1
+```
+
+### 2026-07-22 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: full wipe + scalar chain (`Run-LocalPgScalarChain.ps1`)
+- **Source**: `10.100.128.15` / `VISA2015` (calik-energi-local-pg)
+- **Target**: PostgreSQL `visa2026` (localhost)
+- **Prep**: `Wipe-LocalPostgresTransactional.sql`; cleared `id-maps/calik-energi-local-pg/*.json`
+- **Chain update**: added `Rejection` / `RejectionItem` after `ApplicationItem`
+- **Bugfix**: Person greenfield failed `Id-map not found` after wipe — `LoadOrEmpty` on Person id-map + expander no-ops if missing
+- **First attempt**: Person STEP_FAILED (missing id-map); **resume**: Person STEP_OK; Passport running
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260722-111046.log`
+- **Watch**: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-22 — Rejection + RejectionItem importConfirmed and local PG import
+
+- **Phase**: Phase 1b confirm + Phase 3/4 import (calik-energi-local-pg → PostgreSQL `visa2026`)
+- **Confirm**: human `importConfirmed` in chat; updated `order.yaml`, discovery dossiers, entity-inventory
+- **Legacy**: localhost\SQLEXPRESS VISA2015 (Integrated Security); Application id-map 12247
+- **Dry-run Rejection**: prepared **207** / missing App map **0**
+- **Import Rejection**: Posted **207** / Failed **0** / id-map `id-maps/calik-energi-local-pg/Rejection.json`
+- **Import RejectionItem**: Posted **254** / Failed **0** / missing id-map **0** / id-map `RejectionItem.json`
+- **Logs**: `import-Rejection-localpg-20260722-110447.log`, `import-RejectionItem-localpg-20260722-110510.log`
+- **Note**: duplicate Numbers `178` / `AS-600159` imported with oid-tail suffixes (4 distinct headers)
+
+### 2026-07-22 — Rejection Excel preview + importer wired
+
+- **Phase**: Phase 1c preview + Phase 2 implementation (import gated on importConfirmed)
+- **CLI**: `--export-visa2014-preview --entity Rejection|RejectionItem`; `--import-visa2014 --entity Rejection|RejectionItem` (wired; do not POST until importConfirmed)
+- **Preview (local SQLEXPRESS VISA2015, Integrated Security)**: Rejection **207** import / **0** skipped; RejectionItem **254** / **0** skipped
+- **Files**: `legacy/visa2014/preview-export/Rejection-preview.calik-energi.xlsx`, `RejectionItem-preview.calik-energi.xlsx` (also under bin Debug output)
+- **Code**: `Visa2014RejectionTransform` / `RejectionItemTransform` / preview exporters / OData importers; Application FK required (skip if not in Application id-map)
+- **Next**: human review preview → set `importConfirmed` on Rejection + RejectionItem → dry-run then in-process import after ApplicationItem
+
+### 2026-07-22 — Rejection discovery + ApplicationResult Result split
+
+- **Phase**: discovery (Rejection / RejectionItem) + Invitation mapping correction
+- **Legacy**: `ApplicationResultEnum` — `0` Invitation, `1` Rejection (not cancel). Same `dbo.ApplicationResult` + `PersonInInvitation` (FK still named Invitation).
+- **Çalik VISA2015 counts**: Result=0 **2821** headers / **2776** referenced / **4984** items; Result=1 **207** headers (**185** with items, **22** orphans) / **254** items. Duplicate Rejection Numbers: **2** (`178`, `AS-600159`).
+- **Artifacts**: `discovery/Rejection.yaml`, `discovery/RejectionItem.yaml`, `field-maps/Rejection.yaml`, `field-maps/RejectionItem.yaml`, `table-mappings` `rejection-header`/`rejection-item`, `order.yaml` after ApplicationItem.
+- **Locked map**: Number→RejectedDocNumber; IssuedDate→Date; Application required; Reason allow_null; id-map ApplicationResult.Oid→Rejection.ID (separate from Invitation).
+- **Invitation fixes**: extract `Result = 0`; InvitationItem INNER JOIN Result=0; drop `Result==1→IsCancelled`; cancel index = PIA.Cancelled only; progress completion + ApplicationItem CurrentInvitationItem also Result=0.
+- **Gates**: Excel preview + `importConfirmed` before Rejection OData importer.
+- **Next**: `--export-visa2014-preview --entity Rejection` (after transform shell) → human confirm → implement importer mirroring Invitation.
+
+
+### 2026-07-22 — ApplicationProgress lineage sections were empty (fixed)
+
+- **Phase**: mapping-verify bugfix
+- **Symptom**: PASS report with empty **Property lineage** table + **No sample rows** (HTML had section shells only)
+- **Cause**: `ProgressVerifyReport` never assigned `PropertyLineage` / `SampleLineage`; transform did not emit `_lineage_*` / `_stepCode` on import rows
+- **Fix**: `BuildStaticPropertyLineage()` + sample build in `RunVerify`; transform wires `DateSource`/`DescriptionSource` per `SynthesisStep`
+- **Smoke**: exit **0**; `PropertyLineage` **7**; `SampleLineage` **20**; report `mapping-verify-ApplicationProgress-calik-energi-local-pg-20260722-051749.html`
+
+### 2026-07-22 — ApplicationProgress verify: property lineage in report
+
+- **Phase**: mapping-verify UX
+- **Change**: transform attaches `_lineage_Date` / `_lineage_Description` / … per synthetic step; verify HTML/JSON **Property lineage** + **Sample row lineage**
+- **Smoke**: exit **0**; report `mapping-verify-ApplicationProgress-calik-energi-local-pg-20260722-051330.html`
+### 2026-07-22 — ApplicationProgress reimport + mapping verify exit 0 (local PG)
+
+- **Phase**: partial-reimport + mapping-verify
+- **Prep**: `ImportedApplicationProgress.postgres.sql` (NULL LatestProgressId, DELETE 30703); clear ApplicationProgress id-map
+- **Import**: Posted **30704** / Failed **0** / Skipped no-App-map **66** / parent-skipped **167**; prepared **30770**; ~14 min
+- **Log**: `reimport-ApplicationProgress-localpg-20260722-094015.log`
+- **Verify fix**: resolve ministry-leg counts from target (same as import); treat no-Application-map as skip not missingIdMap
+- **Verify**: State histogram OK; mapped **30704**; missingIdMap **0**; parity sample 50 mismatches **0**; **exit 0**
+- **Report**: `mapping-verify-ApplicationProgress-calik-energi-local-pg-20260722-050004.json`
+### 2026-07-22 — Mapping verify ApplicationProgress shipped
+
+- **Phase**: mapping-verify
+- **CLI**: `--verify-visa2014-mapping --entity ApplicationProgress` (Tier A State histogram + Tier B sample; string id-map `{appOid}:{stepCode}`)
+- **Fields**: State (error), Application FK (error), Description (error if expected set), Date/Order (**warn**)
+- **Code**: `Visa2014ApplicationProgressMappingVerify.cs`; OnPrem-Sync runs verify after ApplicationProgress wave
+- **Smoke (local PG)**: State histogram **OK**; mapped **27966** / missingIdMap **597** (transform synthesizes steps not in current id-map) → exit **1**; sample mismatches were Order-only (warn)
+- **Follow-up**: reimport ApplicationProgress (or refresh id-map) when missingIdMap > 0 after transform changes; then re-verify for exit 0
+### 2026-07-22 — App_Visa_Ext VisaType inference → WP
+
+- **Phase**: mapping correction
+- **Change**: `App_Visa_Ext` VisaType LocalizationKey `EX` → `WP` (`Visa2014ApplicationVisaTypeInference` + UI default VisaType only)
+- **Unchanged**: `App_Exit_Visa` remains `EX`; App_Visa_Ext does not inherit Month6/Multiple defaults from WP invitation types
+- **Follow-up**: re-run Application VisaType correction if imported rows still have EX
+### 2026-07-22 — Silent reconciliation tracking (Application verify)
+
+- **Phase**: mapping-verify enhancement
+- **Code**: `Visa2014LookupOutcomeClassifier` + silent inventory in `Visa2014MappingVerifyCommand` (JSON/HTML **Silent / implicit outcomes**)
+- **Gate**: fail only on `actual_without_expected` (non-default actual when transform expected null); `default_applied` / `actual_default_tolerated` are info
+- **CLI**: `--verify-visa2014-mapping --entity Application --legacy-source calik-energi-local-pg --tier B --sample 50`
+- **Target**: local PostgreSQL `visa2026`
+- **Counts**: mapped **12247**; missingIdMap **1** (exit 1 from id-map gap, not silent)
+- **Histograms**: 4/4 OK; parity sample 50 mismatches **0**
+- **Silent**: unexpected **0**; default_applied **5**; tolerated_defaults **15866** (Month6/Multiple/NORM when expected null)
+- **Doc**: [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) silent buckets + gate policy
+- **Report**: `legacy/visa2014/import-logs/mapping-verify-Application-calik-energi-local-pg-20260722-034013.json`
+### 2026-07-21 — ApplicationProgress reimport (local PG, after agent interrupt)
+
+- **Phase**: partial-reimport (local PostgreSQL `visa2026`, `calik-energi-local-pg`)
+- **Prep**: `ImportedApplicationProgress.postgres.sql` (NULL `LatestProgressId`, DELETE manual-entry progress); clear `ApplicationProgress.json` id-map (source + bin).
+- **Run**: detached `dotnet run` background (~45 min) — **do not** use `Start-Process dotnet` with split args (startup seed failed); **do not** use multi-line `.ps1` without backticks after `--`.
+- **Result**: Posted **30703** / Failed **0** / Skipped **62** (30765 rows prepared). DB `"ApplicationProgresses"` = **30703**. Exit **0**.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-171015.log`
+- **Spot-check**: `7/-1229` (2026-07-07) → `App_Inv`, visa period `30 (otuz) gün`, **5** progress steps.
+
+### 2026-07-21 — Mapping verify Application (full local PG, tier B)
+
+- **Phase**: mapping-verify
+- **CLI**: `--verify-visa2014-mapping --entity Application --legacy-source calik-energi-local-pg --tier B --sample 50`
+- **Target**: local PostgreSQL `visa2026`
+- **Counts**: importable/mapped **12247**; missingIdMap **0**
+- **Histograms**: ApplicationType / Urgency / VisaPeriod / VisaCategory — **4/4 OK**
+- **Parity**: sampled **50**; mismatches **0**; missingTarget **0**
+- **Exit**: **0**
+- **Report**: `legacy/visa2014/import-logs/mapping-verify-Application-calik-energi-local-pg-20260721-114939.json`
+
+### 2026-07-21 — Shipped: --verify-visa2014-mapping (Application pilot)
+
+- **Phase**: implementation + local PG smoke
+- **CLI**: `--verify-visa2014-mapping --entity Application` (Tier A histograms + Tier B stratified sample; `--full` / `--tier C` for full parity)
+- **Expected**: `Visa2014ApplicationTransform.PrepareImportBatch` (same as import)
+- **Actual**: headless ObjectSpace load via id-map
+- **Fields**: ApplicationType, Urgency, VisaPeriod, VisaCategory, FullApplicationNumber, ApplicationDate, ProjectContract (parity only)
+- **Smoke**: local PG `visa2026`, `--max-rows 200 --sample 20` → histograms 4/4 OK, mismatches 0, exit 0
+- **Lessons**: histogram keys must use `CatalogMatchHelper.NormalizeKey`; optional VisaPeriod/VisaCategory rows with null expected must be skipped in Tier A (BO defaults Month6/Multiple inflate actuals)
+- **Orchestrator**: `OnPrem-Sync.ps1` verifies Application after successful wave; `-SkipMappingVerify` to bypass
+- **Wrapper**: `scripts/visa2014-migration/import/Verify-Mapping.ps1`
+- **Doc**: [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md)
+
+### 2026-07-21 — Design: post-import mapping verification (property + lookup)
+
+- **Phase**: strategy / design (no CLI yet)
+- **Decision**: After each scalar import/reimport wave, automate **expected vs actual** using the **same** transform pipeline as import (`field-maps` + `lookup-translations`), gated like FailedCount before the next `order.yaml` entity.
+- **Tiers**: A = lookup histograms; B = sampled field parity (default); C = full reconcile for critical BOs / after mapping changes.
+- **Pilot target**: Application (`ApplicationType` composite + Urgency/VisaPeriod/VisaCategory + key scalars).
+- **Artifact**: [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) — planned `--verify-visa2014-mapping`.
+- **Wiring**: skill scripts table + chain checklist; import-practices / VISA2014_MIGRATION reconciliation; scripts README; field-maps `_template.yaml` `verify:` stub.
+- **Next**: implement DataImporter command; opt-in `verify:` on Application.yaml; run after next Application reimport.
+
+### 2026-07-21 — Application partial reimport (local PG, Day30 VisaPeriod mapping)
+
+- **Phase**: partial-reimport (local PostgreSQL `visa2026`, `calik-energi-local-pg`)
+- **Prep**: `ImportedApplications.postgres.sql` (12241 deleted); cleared Application + downstream id-maps (source + bin); dropped stale `Applications.LatestIsCancelled` / `LatestIsRejected` (NOT NULL blocked first attempt).
+- **Result**: Posted **12247** / Failed **0** / Skipped **169** (E:33/E:55 etc.). DB `Applications` manual-entry = **12247**. Exit 0 (~1.8 min).
+- **Day30**: composite `30 (otuz) gün::30` → **43** apps (spot-check `7/-1229` = `day30` / `30 (otuz) gün`, `App_Inv`).
+- **Log**: `legacy/visa2014/import-logs/reimport-Application-localpg-20260721-161027.log`
+- **Next**: downstream chain required (cleanup wiped items/progress): WorkPermit → Invitation → ApplicationItem → ApplicationProgress.
+
+### 2026-07-21 — ApplicationProgress partial reimport (raw ProcessNumber / InvitationNumber descriptions)
+
+- **Phase**: partial-reimport (local PG, after `FormatLegacyDescriptionValue` — no `ProcessNumber:` / `InvitationNumber:` labels)
+- **Prep**: PG cleanup (`cleanup-applicationprogress.sql`); clear `ApplicationProgress.json` id-map; DataImporter Debug build.
+- **Result**: Posted **~30680** / Failed **0** / Skipped **18** (terminal progress log truncated at 8500/30764; exit 0 ~13 min). DB = **30696** `ApplicationProgresses`.
+- **Shape**: `ProcessNumber:` prefix = **0**; `InvitationNumber:` prefix = **0**; `2_REVIEW_APPROVED` + `MinisteriesDocumentNumber:` = **3274**; `PROCESS_ISSUED` = **4340**.
+- **Spot-check**: `7/-1206` → `PROCESS_STARTED` Description `CO0223973`, `PROCESS_ISSUED` `CO323977`.
+- **Code**: `Visa2014ApplicationProgressTransform.FormatLegacyDescriptionValue` for started/issued; ministry refs still use `FormatLegacyRef` labels.
+
+### 2026-07-21 — ApplicationProgress partial reimport (MinisteriesDocumentNumber → leg 2)
+
+- **Phase**: partial-reimport (local PG, after `BuildLegApprovedDescription` shift)
+- **Prep**: NULL `LatestProgressId`; DELETE manual-entry `ApplicationProgresses`; clear `ApplicationProgress.json` (+ sync-progress) source id-map; rebuild DataImporter if `runtimeconfig.json` missing after killing `dotnet`/`Visa2026.DataImporter`.
+- **Result**: Posted **30692** / Failed **0** / Skipped (no Application map) **66** / Parent-skipped **167**. DB = **30692** rows. Exit 0 (~25 min).
+- **Shape**: `1_REVIEW_APPROVED` with Description = **0**; `2_REVIEW_APPROVED` with `MinisteriesDocumentNumber:` = **3273**; `PROCESS_ISSUED` = **4339**.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-110757.log`
+- **PG cleanup SQL**: `artifacts/local-pg-import/cleanup-applicationprogress.sql` (use `C:\PostgreSQL\16\bin\psql.exe` — not in PATH). **Do not** run cleanup while import is in progress.
+
+### 2026-07-21 — ApplicationProgress: MinisteriesDocumentNumber on leg 2 only
+
+- **Mapping**: `MinisteriesDocumentNumber` → `2_REVIEW_APPROVED` Description (Energetika); leg 1 approved has no doc (ministry from `ApprovalLegProfile`). `DocNumberForwardedToMinConstruction` → leg 3 when present.
+- **Code**: `Visa2014ApplicationProgressTransform.BuildLegApprovedDescription`; tests `SynthesizeSteps_LongProcess_MinisteriesDocumentNumberOnLeg2NotLeg1`, `SynthesizeSteps_ThreeLegs_ConstructionDocOnLeg3`.
+
+
+### 2026-07-21 — ApplicationProgress: ProcessDate/ProcessNumber = processing start (not issued)
+### 2026-07-21 — ApplicationProgress: PROCESS_ISSUED from Invitation / WorkPermit evidence
+### 2026-07-21 — ApplicationProgress partial reimport (invitation/WP completion)
+
+- **Phase**: partial-reimport (local PG, after completion-index)
+- **Result**: Posted **30692** / Failed **0** / Skipped (no Application map) **62** / Parent-skipped **167**. Completion index: **4513** apps. DB = 30692 rows (`PROCESS_ISSUED` = 4339). Exit 0 (~19 min).
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-092326.log`
+
+
+- **Phase**: mapping / transform
+- **Rule**: Legacy app is complete when it has issued **ApplicationResult** (Invitation + PersonInInvitation) and/or **PersonInApplication.WorkPermit** → synthesize `PROCESS_ISSUED` with `InvitationNumber` / `WorkPermitNumber` + issued date. `ProcessDate`/`ProcessNumber` remain **PROCESS_STARTED** only.
+- **Code**: `Visa2014ApplicationProgressCompletionIndex` + `SynthesizeSteps` completion branch; auto-loaded in `PrepareImportBatch`.
+- **Reimport**: partial ApplicationProgress reimport after deploy to add issued rows.
+
+- **Phase**: partial-reimport (local PG, after ProcessDate/ProcessNumber → PROCESS_STARTED fix)
+- **Result**: Posted **26348** / Failed **0** / Skipped (no Application map) **60** / Parent-skipped **172**. DB = 26348 rows. Exit 0 (~15 min).
+- **Shape**: **0** `PROCESS_ISSUED` rows (was ~12063 before); `PROCESS_STARTED` = 12110 with ProcessNumber on Description. Total rows ~26k vs ~38k prior reimport.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-084658.log`
+
+
+- **Phase**: mapping / transform correction
+- **Decision**: Legacy `Application.ProcessDate` + `ProcessNumber` mark **migration-service processing start** (`PROCESS_STARTED`), not completion. `ProcessNumber` goes on the started step Description. Do **not** synthesize `PROCESS_ISSUED` from these columns.
+- **Follow-up**: `PROCESS_ISSUED` will use a separate legacy completion source (TBD).
+- **Code**: `Visa2014ApplicationProgressTransform.SynthesizeSteps` — removed `migration_issued` branch; tests updated (+ app `12/-7010` / AS538188 case).
+- **Reimport**: partial ApplicationProgress reimport required after deploy to drop bogus issued rows from prior transform.
+
+
+### 2026-07-21 — ApplicationProgress partial reimport (ProcessDate = start only)
+
+- **Phase**: partial-reimport (local PG, after ProcessDate/ProcessNumber → PROCESS_STARTED fix)
+- **Result**: Posted **26348** / Failed **0** / Skipped (no Application map) **60** / Parent-skipped **172**. DB = 26348 rows. Exit 0 (~15 min).
+- **Shape**: **0** `PROCESS_ISSUED` rows (was ~12063 before); `PROCESS_STARTED` = 12110 with ProcessNumber on Description. Total rows ~26k vs ~38k prior reimport.
+- **Log**: `reimport-ApplicationProgress-localpg-20260721-084658.log`
+### 2026-07-20 — ApplicationProgress partial reimport (local PG, state-only model)
+
+- **Phase**: partial-reimport
+- **Mode**: single-entity `--entity ApplicationProgress` / `--legacy-source calik-energi-local-pg` / in-process Postgres target
+- **Prep**: NULLed `Applications.LatestProgressId`; DELETE 45905 progress rows for `IsManualEntry` apps; cleared `ApplicationProgress.json` (+ sync-progress) under **source and bin** id-maps; copied `Application.json` from bin → source (source tree had stubs only).
+- **Result**: Posted **38411** / Failed **0** / Skipped (no Application map) **120** / Parent-skipped **172** / Seeds removed **0**. DB `"ApplicationProgresses"` = 38411. Exit 0 (~24 min).
+- **Log**: `legacy/visa2014/import-logs/reimport-ApplicationProgress-localpg-20260720-171707.log`
+- **Shape**: transform no longer posts `IS_BEING_PREPARED`; first ministry step = `1_REVIEW_STARTED` (`leg_1_started`). Stock `reimport/ApplicationProgress.ps1` is LocalDB/`calik-energi` — use PG cleanup + `--legacy-source calik-energi-local-pg` for this PC.
+- **Note**: `LocationID` column may still exist until Module schema updater runs (F5 / DB update); new rows do not depend on Location.
+
+
+### 2026-07-20 — Local PG wipe + scalar reimport from .15 (REVIEW_STARTED cleanup)
+
+- **Phase**: end-to-end (local PostgreSQL `visa2026`, source `10.100.128.15` / `VISA2015`, legacy-source `calik-energi-local-pg`)
+- **Goal**: Full scalar reimport so `ApplicationProgress` regenerates without `_REVIEW_STARTED` / «N-NJI IŞ YLALAŞYKDA» rows (transform already updated).
+- **Prep**: Stopped F5 Blazor; `Wipe-LocalPostgresTransactional.sql` (People/Apps → 0); **must clear id-maps under both** `Visa2026.DataImporter\legacy\...\id-maps\calik-energi-local-pg` **and** `bin\Debug\net8.0\legacy\...\id-maps\calik-energi-local-pg`.
+- **Attempt 1 (failed)**: Cleared only source-tree id-maps → Passport Posted 2 / Skipped already-imported 3661; Visa Failed 4 (stale Passport GUIDs) + Skipped already-imported 6089. **Prevent**: always wipe **bin** id-maps on local PG reimport.
+- **Attempt 2**: Cleared bin+source maps, rewipe, `Run-LocalPgScalarChain.ps1 -StartAt Person -SkipTenantCatalogGeneration` (tenant catalogs already regenerated from .15). Person 3316 / Passport 3663 / Visa 6093 Failed 0.
+- **Education gap**: 1 fail — Specialty `Zähmeti goramak we howpsuzlyk` missing on target (exists on .15; catalog had only `… we tehniki howpsuzlyk` variants). Inserted Specialty row (`GCRecord=0`); appended to `specialty.calik-energi.json`. Resume `-StartAt Education` → Education catch-up Posted 1 Failed 0; EPH 3068; Salary 2961; AoR 5169.
+- **In progress**: RunId `20260720-152656` — Application wave Running → WorkPermit…ApplicationProgress. Watch: `.\scripts\visa2014-migration\Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`. Logs: `artifacts/local-pg-import/chain-console-from15-resume-education2-20260720.log`.
+- **Artifacts**: wipe SQL; LocalPgScalarChain; specialty JSON append.
+
+### 2026-07-17 — Visa.VisaType collapsed to WP (LocalizationKey missing on in-process DTOs)
+
+- **Phase**: import / correction
+- **Symptom**: In-process Visa import set every `Visa.VisaType` to default WP because `MapLookupDto` omitted `LocalizationKey`.
+- **Fix**: copy `LocalizationKey` in `MapLookupDto`; stop silent default fallback in `ResolveVisaType` / related resolvers; `EnsureVisaTypeLookupKeysLoaded` + prepared-row histogram guard; CLI `--correct-visa-type` backfills from legacy `TypeOfVisaL:mgCode`.
+- **Artifacts**: `Visa2014VisaTypeCorrection.cs`, `Visa2014VisaODataImporter.cs`, `Visa2014ODataLookupResolver*.cs`, `Program.cs`.
+
+
+### 2026-07-17 — Application.VisaType inferred from ApplicationType (no legacy FK)
+
+- **Phase**: mapping
+- **Dossier**: docs/VISA2014_MIGRATION/discovery/Application.yaml / field-maps/Application.yaml
+- **Symptom**: Legacy `dbo.Application` has VisaPeriod/VisaCategory but **no VisaType**; local PG import had every Application.VisaType = WP (catalog IsDefault).
+- **Inference map** (`Visa2014ApplicationVisaTypeInference`, LocalizationKey):
+  - `App_Inv_And_WP` / `App_Visa_and_WP_Ext` / `App_Inv_According_to_WP` / `App_Visa_Ext_According_to_WP` → **WP** (`WP-Işçi Wiza`)
+  - `App_Inv` → **BS1** (`BS1-İşerwürlik`)
+  - `App_Inv_FM` / `App_Visa_Ext_FM` / `App_Visa_For_New_Born_FM` → **FM** (`FM-Maşgala`)
+  - `App_Visa_Ext` / `App_Exit_Visa` → **EX** (`EX-Çykyş`) — user confirmed App_Visa_Ext = EX
+  - `App_Sevice_Passport` → **OF** (`OF-Gulluk`)
+- **Artifacts**: transform sets `VisaType`; OData importer posts FK; `Application.TryGetDefaultVisaLookupKeys` aligned; CLI `--correct-application-visa-type` for existing DBs; unit tests 15 passed.
+- **Follow-up**: run correction on local PG after stopping F5 lock.
 
 **Canonical plan:** [docs/VISA2014_MIGRATION.md](../../../docs/VISA2014_MIGRATION.md) · [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md)
 
@@ -134,6 +525,60 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 ## Entries
 
 > **Script paths (2026-07):** VISA2014 migration PowerShell/SQL moved from `scripts/local/` to **`scripts/visa2014-migration/`** — see [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md). Older entries below may still cite `scripts/local/…`; use the README index for current names.
+
+### 2026-07-11 — Demo wipe-business + full reimport started
+
+- **Phase**: end-to-end (on-prem Demo)
+- **Mode**: end-to-end (`OnPrem-Sync.ps1 -Profile Demo -Mode Import`)
+- **Outcome**: stopped on Passport fail; resumed after fix
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` · `C:\visa2026-sync-demo` · task `Visa2026-OnPrem-DemoImportOnce`
+- **Policy**: **do not** pass `-ContinueOnError` on Demo full import — one failed BO must stop the chain so we can fix and `-StartAt` resume
+- **Passport fail**: 3642 posted / **5 failed** — legacy IssuedCountry **UAE** translated to Code `UAE` but Demo catalog only has **ARE** → `BuildPayload` null
+- **Fix**: `lookup-translations.yaml` `UAE` → target **ARE**; resume `-StartAt Passport` (no ContinueOnError)
+- **Side effect of ContinueOnError**: Visa completed; Education/EPH partially ran — resume skips via id-map
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh -ClearScreen`
+- **Cross-skill**: visa2026-onprem-legacy-sync
+
+### 2026-07-10 — ApplicationProgress import live percent (Demo resume)
+
+- **Phase**: end-to-end (on-prem Demo) — ApplicationProgress wave
+- **Mode**: end-to-end (`-Profile Demo -Mode Import -StartAt ApplicationProgress`)
+- **Outcome**: in progress (progress sidecar live)
+- **Environment**: `Visa2026DbDemo` / `C:\visa2026-sync-demo` · RunId **20260710-052517**
+- **Change**: Import path now writes `ApplicationProgress.sync-progress.json` every 100 rows with `processed/total/percent` + flushes stdout (same pattern as Sync upsert helper).
+- **Counts**: **54985** prepared progress rows from **12354** legacy apps; early sample `100/54985 (0.2%)` posted=49 failed=51
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh -ClearScreen` shows Wave progress bar from sidecar
+- **Prevent**: Do not rely on redirected wave `.log` alone for mid-wave counts; redeploy DataImporter after progress-reporting changes
+- **Cross-skill**: visa2026-onprem-legacy-sync
+
+### 2026-07-10 — Full fresh Demo import started (Visa2026DbDemo / :8081)
+
+- **Phase**: end-to-end (on-prem Demo)
+- **Mode**: end-to-end (`OnPrem-Sync.ps1 -Profile Demo -Mode Import`)
+- **Outcome**: in progress (Person completed; Passport running)
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` · sync host `C:\visa2026-sync-demo` · legacy `10.100.128.15` / `VISA2015`
+- **Script / CLI**: Scheduled Task `Visa2026-OnPrem-DemoImportOnce` → `Run-OnPremSyncOnServer.ps1 -Profile Demo -Mode Import -ContinueOnError` (SYSTEM; survives SSH)
+- **Preflight**: Demo IIS upgraded **556 → 566**; wiped business rows (NULL `LatestProgressId` before delete); **no `-IncludeFileWaves`** (E: ~17 GB free; prod DB ~41 GB with files)
+- **Blockers fixed this run**:
+  1. Parallel prod DataImporter holds `:5002` → set `VISA2026_MIGRATION_IMPORT_URLS=http://127.0.0.1:5012` (not `ASPNETCORE_URLS`); `OnPrem-Sync.ps1` now auto-offsets Staging/Demo ports
+  2. Fresh id-maps: `Visa2014IdMapHelper.Load` requires file → create empty `{}` stubs; orchestrator now stubs on `-Mode Import`
+- **Counts so far**: People **3280** posted; Passport wave started; id-map `Person.json` ~272 KB
+- **Watch**: `Watch-OnPremSyncRun.ps1` with `-SyncHostRoot C:\visa2026-sync-demo` (or SSH); UI `http://10.100.128.25:8081/LoginPage`
+- **Prevent**: Do not clear id-map dir without leaving `{}` stubs; do not run two headless hosts on `:5002`; move Demo MDF to `E:\visa2026\sql-data\` before file waves
+- **Cross-skill**: visa2026-onprem-legacy-sync | visa2026-windows-iis-deploy
+
+### 2026-07-10 — Application ApprovalLegSnapshot backfill (Ministrlik) — tool added
+
+- **Phase**: correction (CLI + patch script)
+- **Mode**: correction
+- **Outcome**: success (local + prod)
+- **Environment**: local LocalDB `Visa2026`; prod `10.100.128.25\SQLEXPRESS` / `Visa2026DbProd`
+- **Script / CLI**: `patch/Application-ApprovalLegSnapshots.ps1` → `--backfill-application-approval-leg-snapshots`; prod used SQL `cleanup/BackfillApplicationApprovalLegSnapshots.sql` (EF blocked by missing `BorderZoneLocation`)
+- **Symptom**: Migrated via-ministry apps have progress rows but empty **Ministrlik** / status without `- Energetika` — `ApprovalLegSnapshots` never created at import.
+- **Do not use**: `patch/ApplicationProgress-MinistryLegs.ps1` / `--correct-application-progress-ministry-legs` (deletes + regenerates progress).
+- **Counts (local apply)**: scanned **4705** → needing **4701** → backfilled **4701**
+- **Counts (prod apply)**: needing **4708** → inserted **9122** snapshots; **RemainingGaps=0**; active **9130**
+- **Prevent**: Prefer snapshot backfill for label-only gaps; on schema-behind hosts use SQL patch; reserve ministry-legs patch for apps missing `*_REVIEW_*` progress rows.
 
 ### 2026-07-03 — ApplicationItem — reimport after PersonDomainDownstream FK wipe (success)
 
@@ -1115,3 +1560,497 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Follow-up**: revalidate `ApplicationResult.Result == 1 → IsCancelled` heuristic (likely not cancellation); consider dropping or replacing that path in `Visa2014LegacyInvitationItemCancellationIndex` so index count matches importable rows. `InvitationItem` status distribution: 4897 none / 52 `IsChanged` / 6 `IsCancelled`.
 - **UTF-8**: rewrite `.ps1` / `.sql` with `[System.IO.File]::WriteAllText(..., UTF8Encoding(false))` if Cursor `Write` corrupts encoding (parse error on first run).
 
+
+### 2026-07-11 — Demo Import: stop-on-failure; Passport UAE; Education gaps
+
+- **Stop-on-failure**: OnPrem-Sync default (no `-ContinueOnError`) confirmed on Demo — Education fail exit 1 halted chain before EmployeePositionHistory.
+- **Passport**: calik Country overlay replaced base values[]; UAE identity-passed → ResolveCountry miss (ARE only). Merge Load() + explicit UAE→ARE in calik overlay. Resume Posted 5 / Failed 0.
+- **Education**: 47 incomplete payloads — EducationInstitution / Specialty NameTm not in Demo tenant catalogs (encoding-sensitive labels). Fix catalogs or allow_null policy before `-StartAt Education`.
+
+### 2026-07-11 — Zero FailedCount; Education institution/specialty seed catch-up
+
+- **Rule**: no tolerable FailedCount unless deliberate exclusion (skipped, not failed). Documented in import-practices §7b + onprem-legacy-sync hard rule 8.
+- **Education Demo**: missing 47 institution + related specialty labels vs live `.15`; SQL seed + refreshed calik-energi JSON (1500/1083). Resume Posted 47 / Failed 0.
+
+### 2026-07-11 — Intentional exclusions require approval + registry
+
+- **Rule**: skips only via `docs/VISA2014_MIGRATION/import-exclusions.yaml` (`status: approved`) with why, counts, approvedBy/At. FailedCount is never an exclusion.
+- **Seeded**: EXC-APPTYPE-E33-E55 (105 apps / 204 items), EXC-VISA-ISSUEDPLACE-EMBASSY (18 visas).
+- **Docs**: import-practices §7c, onprem hard rule 8, SKILL link, import-strategy pointer.
+
+### 2026-07-11 — Demo AddressOfResidence diagnosis
+
+- **Initial**: Posted 0 / Failed 5122. Gaps reported as City=...
+- **Root cause 1**: `Visa2014CityLookupMatcher` requires Region match; ObjectSpace loader left `City.Region`/`RegionName` empty (Demo `RegionName` all null). Fixed ObjectSpace Region load + name-only fallback when no city has region metadata.
+- **Root cause 2**: Demo `Lodgings` count was **0** after wipe (tenant lodging catalog not re-synced). `ForceUpdate` Demo -> Lodgings **76**.
+- **After fix**: Posted **3069** + PIA **970**; Failed **80** (City/Lodging gaps: Serdarabat, Beýik Saparmyrat…, Serhetabat + a few lodging/other-site scalars). Chain stopped (no ContinueOnError).
+- **Next**: align remaining city region links / lodging FullAddress normalize for ~80 rows; write full error list (not Take(10)).
+
+### 2026-07-11 — AoR geography policy (b): prefer legacy Region when Wiki/OSM agrees
+
+- **Decision**: City.Region catalog aligned to Wikipedia/OSM; import prefers legacy Region+City when that pair matches; if legacy Region is wrong but city name is unique among region-linked rows, use catalog City.Region.
+- **city.json**: Serhetabat etraby → Mary; Serdarabat etraby → Lebap; Beýik Saparmyrat… → Lebap (historical Beýik district).
+- **Demo SQL**: in-place RegionID updates for those cities; filled 3 Lodging.CityID nulls (Watan/Parahat/Çemenabat).
+- **Code**: `Visa2014CityLookupMatcher` unique region-linked fallback; ImportApplier sets Region from City after resolve; gap exporter CLI `--export-visa2014-import-gaps`.
+- **Result**: import-gap preview **80 → 9** remaining (mostly lodging/other-site scalar still unresolved after city fix).
+
+- **Follow-up**: unique Region-FK fallback (ignore null-Region orphan + RegionName enrich duplicates) → gap preview **0**; would-post 67 legacy + 14 PIA. Resume Demo -StartAt AddressOfResidence after deploying updated DataImporter to sync host.
+
+### 2026-07-11 — Turkmenistan geography reference SQLite DB
+
+- **Path**: `Visa2026.DataImporter/legacy/visa2014/reference/turkmenistan-geography.db` (6 regions, ~89 cities + aliases).
+- **Seed**: `region.json` + `city.json` + `geography-overrides.json` (Wiki/OSM conflict cities).
+- **Rebuild**: `--rebuild-visa2014-geography-db`.
+- **Import**: AddressOfResidence uses store policy (b) — keep legacy Region when it matches DB; else use DB Region for city name.
+
+### 2026-07-11 — Mandatory lookup preflight before full Import
+
+- **Gate**: `--preflight-visa2014-lookups` (Phase A catalog sampleQuery + Phase B entity transforms + optional target DB key check).
+- **Orchestrator**: `OnPrem-Sync.ps1 -Mode Import` runs preflight automatically; `-SkipLookupPreflight` only for approved exceptions; `-LookupPreflight` enables it for Sync.
+- **Wrapper**: `scripts/visa2014-migration/import/Preflight-LookupAudit.ps1`.
+- **Why**: live lookup drift (Education institutions, City/Region from FullAddress) must be audited → translated → seeded before Import, not discovered mid-wave as FailedCount.
+
+### 2026-07-11 — Skill: Full Import order = lookup resolution → preflight → Import
+
+- **Named process**: **lookup resolution** (audit → translate → seed LookupCatalogs/tenant JSON), then **lookup preflight**, then full Import.
+- **Updated**: visa2014-to-visa2026-import `SKILL.md` (§ Full Import order), `import-practices.md`; onprem-legacy-sync hard rule 9 + preflight table.
+- **Calik**: base + `lookup-translations.calik-energi.yaml`.
+
+### 2026-07-11 — user-prompts for lookup resolution / preflight
+
+- Added `visa2014-to-visa2026-import/user-prompts.md` (resolution, preflight, Calik, full Import order).
+- Linked from import `SKILL.md`; Demo/lookup openers added to onprem `user-prompts.md`.
+
+### 2026-07-11 — Demo lookup preflight (calik-energi-onprem-demo)
+
+- **Run**: `.25` `C:\visa2026-sync-demo`; report `lookup-preflight-demo-20260710-232046.json`.
+- **Result**: FAILED — Blocking=30 Allowed=47 TargetCatalogs=0 (target key load still broken).
+- **Gaps**: CityByName ~12 distinct (Atamyrat, Baharly, Balkanabat, Beyik…, Dowletli, Hojambaz, Serdar, Serdarabat, Tejen, Turkmenabat, Turkmenbasy) on Application/ApplicationItem; City (null) x2; Region free-text x3; CheckPoint sampleQuery syntax.
+- **Next**: lookup resolution for CityByName + fix CheckPoint query / target key loader before full Import.
+
+### 2026-07-11 — Obsolete visa2026-onprem-legacy-sync; sole migration skill
+
+- **Decision**: stop using `@visa2026-onprem-legacy-sync`. All data migration (lookup resolution, preflight, Demo/Prod Import on .25) is `@visa2014-to-visa2026-import` only.
+- **Obsolete skill**: `disable-model-invocation: true`; stub points here; learnings/reference kept as archive.
+- **Updated**: AGENTS.md, ON_PREM runbook, on-prem-deploy MATURITY, import SKILL + user-prompts (Demo/Prod section).
+
+### 2026-07-11 � Removed delta Sync (keep Import)
+
+- **Removed**: `--sync-visa2014` / `--sync-full` / `--sync-since` / `--sync-state-dir` / `--no-soft-delete-sync`; `Visa2014SyncCommand` + StateStore/IdMapLoader/RowFilter; `RunSyncAsync` on OData importers; soft-delete sync query; Sync-only PS1s (Register task, Compare/Export/Watch SyncState, OnPremSyncState lib); `LegacySyncDashboard` (Module + Blazor); skill folder `visa2026-onprem-legacy-sync`.
+- **Kept**: `OnPrem-Sync.ps1` Import-only; `--import-visa2014`; lookup preflight; `Visa2014SyncPayloadFkHelper`; Import progress sidecars on `Visa2014SyncUpsertHelper`; host roots `C:\visa2026-sync*`.
+- **Ops**: disable Task Scheduler `Visa2026-OnPrem-LegacySync` on `.25` manually if still registered.
+
+### 2026-07-13 � Demo hard wipe + reimport blocked by lookup preflight
+
+- **Phase**: end-to-end (on-prem Demo wipe + Import)
+- **Outcome**: wipe/seed success; Import **not started** (preflight exit 2)
+- **Environment**: `10.100.128.25` / `Visa2026DbDemo` � sync host `C:\visa2026-sync-demo` � legacy `10.100.128.15` / `VISA2015`
+- **Wipe**: DROP+CREATE `Visa2026DbDemo` (sqlcmd `-E -C`); cleared id-maps + `{}` stubs; `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate`; LoginPage HTTP 200; redeployed DataImporter (post delta-Sync removal)
+- **Import**: `Run-OnPremSyncOnServer.ps1 -Profile Demo` stopped at lookup preflight � **30 blocking** gaps
+- **Blockers**: CheckPoint sampleQuery syntax (`CheckPoint` reserved); CityByName ~12 cities on Application/ApplicationItem (encoding/normalize); City `(null)` x2; Region free-text x3 (AoR/Lodging)
+- **Person..EPH Phase B**: OK in preflight
+- **Next**: lookup resolution for CityByName (+ fix CheckPoint brackets on live YAML) then re-run preflight; or user-approved `-SkipLookupPreflight` (Application waves will still hit CityByName)
+
+### 2026-07-13 � Demo preflight fixed (CityByName + CheckPoint); Import started
+
+- **Phase**: end-to-end (Demo after hard wipe)
+- **Outcome**: preflight **exit 0**; Import **Running** (RunId `20260712-205532`, wave Person)
+- **Fixes**:
+  1. CheckPoint sampleQuery: `pia.[CheckPoint]` (reserved word)
+  2. CityByName: `identityPassThrough` + city.json NameTm identity enrich in `Visa2014LookupTranslator.Load` + fold-match targets; Application city aliases in YAML
+  3. City/Region: `unmappedPolicy: allow_null` for skip-row free-text/null city gaps (still skipped at import)
+  4. City sampleQuery keeps `dbo.[S�herEtrap]` (ASCII `SeherEtrap` is invalid on live VISA2015)
+- **Deploy**: republished DI + YAML + `LookupCatalogs/city.json` to `C:\visa2026-sync-demo`
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; log `logs\sync-run-20260712-205532.log` / wrap `demo-import-wrap-20260712-205531`
+
+### 2026-07-13 — Demo Import restart after orphaned Person wave
+
+- **Phase**: end-to-end (Demo Import restart)
+- **Outcome**: **success** (restart); prior run 20260712-205532 was **dead/orphaned**, not slow
+- **Environment**: 10.100.128.25 / Visa2026DbDemo · sync host C:\visa2026-sync-demo · legacy 10.100.128.15 / VISA2015
+- **Prior failure**: RunId 20260712-205532 — DI logged headless host on :5012 then stopped (~17s); no Progress lines; People=0; status stuck Overall=Running; DataImporter: alive=False; sync-run log never written. Watch elapsed time was stale status, not slow Person.
+- **Restart**: marked stale status Failed; launched wrap via `Win32_Process.Create` (survives SSH); `Run-OnPremSyncOnServer.ps1 -Profile Demo -SkipTenantCatalogGeneration -SkipLookupPreflight`
+- **New run**: RunId `20260712-211301` — Person **Posted 3303 / Failed 0** (~1 min); People=3303; advanced to Passport; DI alive
+- **Ops tip**: prefer `Win32_Process.Create` or equivalent detach for Demo Import on .25; do not trust Watch `Running` alone — check `alive` + People delta + Progress lines
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; wrap `logs\demo-import-wrap-20260712-211259.log`; sync-run `logs\sync-run-20260712-211300.log`
+
+
+### 2026-07-13 — Demo Education Failed (54 incomplete payload); catalogs gap; resume OK
+
+- **Phase**: end-to-end (Demo Import after wipe)
+- **Outcome**: Education **Failed** exit 1 (54 incomplete Institution/Specialty); after catalog refresh **Completed** Failed=0 (Posted 54 catch-up)
+- **Environment**: `Visa2026DbDemo` / live `10.100.128.15` VISA2015
+- **Symptom**: Person/Passport/Visa OK; Education 3115 posted / 54 failed; Overall Failed (stop-on-failure)
+- **Cause**: live Education labels ahead of Demo tenant catalogs (~52 Institution + ~32 Specialty exact gaps). Preflight Education `UnmappedLookupCount=0` because `identityPassThrough` — does not prove ObjectSpace catalog rows exist.
+- **Fix**: regenerated `education-institution*.json` / `specialty*.json` from live DISTINCT (~1507 / ~1085); tenant manifest **37→38**; disk overlay `C:\inetpub\visa2026-demo\LookupCatalogs\tenant\` + `Run-Visa2026DbUpdateOnServer.ps1 -Profile Demo -ForceUpdate`; resume `-StartAt Education`
+- **Resume**: RunId `20260712-212802` — Education Posted 54 / already 3115 / Failed 0; Educations=3169; continued to EPH then AddressOfResidence
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`
+
+
+### 2026-07-13 — Import reimport history archive + compare dashboard
+
+- **Phase**: tooling (on-prem Import ops)
+- **Outcome**: shipped archive + HTML index + compare CLI
+- **Artifacts**:
+  - `scripts/visa2014-migration/_lib/OnPremImportRunArchive.ps1`
+  - `Archive-OnPremImportRun.ps1` / `Compare-OnPremImportRuns.ps1`
+  - `OnPrem-Sync.ps1` archives on Complete / wave-fail / preflight-fail
+  - Dashboard: `<SyncHostRoot>\history\index.html`; runs under `history\runs\<RunId>\`
+- **Demo**: archived RunId `20260712-212802` (current completed reimport); need a second archive before compare is meaningful
+- **Note**: Import-only (hard-delete reimport friendly); not delta Sync
+
+
+### 2026-07-13 ? Import reimport history in XAF Navigation (Administrators)
+
+- **Phase**: tooling (on-prem Import ops UI)
+- **Outcome**: Operations ? Import reimport history (non-persistent host + Blazor editor)
+- **Data**: reads `history\runs\<RunId>\*.json` via `ImportHistory:RootPath` (defaults from `DeploymentEnvironment:Slot`)
+- **Security**: deny Users type/nav; Administrators via `IsAdministrative`
+- **Ops**: app pool must read `C:\visa2026-sync*\history`; `Configure-Visa2026Production.ps1` writes ImportHistory.RootPath per slot
+
+
+### 2026-07-13 - Archive file waves only after DocumentCopies
+- Reimport history must be finalized after scalar corrections and optional `DocumentCopies.ps1`; archive `file-waves-status.json` plus target file-presence metrics, and force a failed archive before a non-continue file-wave exit.
+### 2026-07-13 — Document copies on Import reimport history (Phase A + gap inventory)
+
+- **Phase**: tooling (archive + XAF history UI)
+- **Archive order**: scalar → postImportCorrections → optional DocumentCopies (`-IncludeFileWaves`) → Complete → Archive
+- **Artifacts per RunId**: `file-waves.json` (Included + Steps), `file-presence.json` (Photo / *Document vs parents), `meta.FileWavesIncluded`
+- **UI**: Operations → Import reimport history sections for file waves + file presence Left/Right
+- **DocumentCopies.ps1 covered today**: Person.Photo, PassportDocument, VisaDocument, EducationDocument, WorkPermitDocument, InvitationDocument, FamilyProofDocument
+- **Gap inventory (Phase B — not added yet)**: only add when `importConfirmed` + importer exists
+  - MedicalRecordDocument (presence metric already; import step not in DocumentCopies.ps1)
+  - RejectionDocument, BorderZoneDocument, AddressOfResidenceDocument, LodgingDocument, ProjectContractDocument, PersonFamilyRelationDocument
+  - ApplicationProgress.MinistryLetterFile (FileData) — separate from DocumentCopies child docs
+  - EducationDocument / VisaDocument tables may be missing on some Demo DBs (PresentCount null soft-fail) until BO/schema registered
+- **Demo backfill**: RunId `20260712-212802` got `file-waves.json` Included=false + live `file-presence.json` (photos/docs mostly 0 without file waves)
+
+
+### 2026-07-13 — Demo hard wipe + reimport with -IncludeFileWaves (started)
+
+- **Phase**: end-to-end (Demo wipe + Import + DocumentCopies)
+- **Outcome**: **started** (in progress)
+- **Wipe**: business tables cleared (People/Apps/docs=0); lookups/templates kept; id-maps cleared under `C:\visa2026-sync-demo\data\id-maps\calik-energi-onprem-demo`
+- **Import**: scheduled task `Visa2026-OnPrem-DemoImportFileWaves` → `Run-OnPremSyncOnServer.ps1 -Profile Demo -IncludeFileWaves -SkipTenantCatalogGeneration` (no ContinueOnError)
+- **RunId**: `20260712-235158` Overall=Running; Person done (~3304 People); Passport Running; DI alive
+- **Disk**: C ~18.6 GB free, E ~17.4 GB free — watch space during file waves (photos/scans)
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`; wrap `logs\demo-import-wrap-20260712-235156.log`; sync-run `logs\sync-run-20260712-235158.log`
+- **Expect**: after scalar waves, DocumentCopies.ps1 then archive with `file-waves.json` Included=true + file-presence
+
+
+### 2026-07-13 — Demo Education Failed (5) on IncludeFileWaves reimport; fixed + resumed
+
+- **Run**: `20260712-235158` Failed at Education (Posted 3165 / Failed 5) — stop-on-failure
+- **Cause**: missing catalog rows for composite labels
+  - Institution: `Lizabon s. orta mekdep,CCVD-VCA okuw kursy`
+  - Specialty (1 remaining after institution seed): exact legacy `Speciality.TitleOfSpeciality` via `Education.Spcialty` (Unicode İ/ş/ý/ç/ü)
+- **Fix**: INSERT into Demo `EducationInstitutions` / `Specialties` with `GCRecord=0` (NULL GCRecord insert fails)
+- **Resume**: `-StartAt Education -IncludeFileWaves -SkipLookupPreflight -SkipTenantCatalogGeneration`
+- **Outcome**: Education **Completed** Failed=0 (Posted 1 catch-up / already 3169); Educations=3170; continued to EPH then AddressOfResidence (RunId `20260713-000016`)
+- **Note**: keep exact Unicode from legacy when seeding; ASCII approximations do not resolve
+
+
+### 2026-07-13 — Demo IncludeFileWaves: scalars OK, DocumentCopies Failed (id-map path + LocalDB)
+
+- **Run**: `20260713-000016` Overall=Failed after ApplicationProgress Completed (scalar Fail=0; Person/Passport/Visa Pending due to `-StartAt Education`)
+- **Cause 1**: `DocumentCopies.ps1` on SyncHostRoot used DataImporter default id-map under `tools\DataImporter\legacy\visa2014\id-maps\...` → `Person id-map not found` (maps live at `data\id-maps\calik-energi-onprem-demo\`)
+- **Fix 1**: pass explicit `--id-map` / `--*-id-map` to `$SyncHostRoot\data\id-maps\<LegacySource>\*.json`
+- **Cause 2** (file-waves-only re-run): wrap used wrong env `VISA2026_DEMO_CONNECTION` + `appsettings.json` (LocalDB); correct is `VISA2026_DEMO_SQL_CONNECTION` / `appsettings.Production.json`
+- **Fix 2**: DocumentCopies sets `ConnectionStrings__DefaultConnection` + safe `--target-connection` (same as OnPrem-Sync); Demo file-waves re-run via task with correct CS
+- **Also**: archive history index coerces `ElapsedSeconds` when JSON yields Object[] (avoids `op_Division`)
+- **Outcome**: file-waves re-run in progress — Target SQL=`localhost\SQLEXPRESS`/`Visa2026DbDemo`; Id-map=`...\data\id-maps\...\Person.json`; Person-Photo Running
+
+### 2026-07-13 — Production hard wipe + Import (future prod; no backup)
+
+- **Phase**: end-to-end (Prod wipe + scalar Import)
+- **Outcome**: **running** after Encrypt/login fixes
+- **Wipe**: business tables cleared on `Visa2026DbProd`; id-maps cleared under `C:\visa2026-sync\data\id-maps\calik-energi-onprem-prod`; lookups/templates kept. No prod `.bak` (user: not official prod yet).
+- **Disk**: moved `C:\visa2026\backups` → `E:\visa2026\backups` before wipe (C: was ~2.5 GB free)
+- **Failures then fixes**:
+  1. Stale DI missing `--preflight-visa2014-lookups` → refresh published DataImporter on sync host
+  2. `Encrypt=False` → `Invalid value for key 'Encrypt'` (Microsoft.Data.SqlClient) → use `Encrypt=Optional` / `Mandatory`; OnPrem-Sync + ContentRoot normalize
+  3. Env-normalize script mangled `VISA2014_SQL_PASSWORD` and created `SQL_SERVER_10.100.128.15=...;Encrypt=Optional` → restore password; embed Password into `VISA2014_SQL_CONNECTION`; drop mangled key
+  4. SYSTEM task Login failed for ReadOnlyUser when CS lacked Password (env inject flaky) → embed password in CS
+  5. Person wave: `Visa2014LegacySqlGuard.DescribeLegacyConnection` used `SqlConnectionStringBuilder` which rejected `Encrypt=Optional` even when `SqlConnection.Open` worked → try/catch + MaskConnectionForLog fallback
+- **RunId**: `20260713-025546` Overall=Running; Person Completed (Posted 3306 / Failed 0; People=3306); Passport Running
+- **Task**: `Visa2026-OnPrem-ProdImportOnce` → `-Profile Production -SkipTenantCatalogGeneration -SkipLookupPreflight -StartAt Person` (scalar only; file waves later)
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh`; status `C:\visa2026-sync\sync-run-status.json` (wrap Tee fills only after Run-OnPremSyncOnServer exits)
+
+
+### 2026-07-13 — Prod Education Failed(15) then Failed(3); fixed with exact Unicode seeds
+
+- **Run**: `20260713-025546` Failed at Education (Posted 3157 / Failed 15)
+- **Cause**: missing `EducationInstitutions` / `Specialties` NameTm rows — same Demo gaps plus Turkmen Unicode (dotless `ı`, `ş`, `ý`, `ü`, `ç`) that ASCII/`Riko` seeds do not match
+- **Fix**: INSERT exact titles from VISA2015 via hex→UTF-16 (sqlcmd `-y 0 -Y`) into Prod; also copy known Demo rows first
+- **Resume**: `-StartAt Education -SkipLookupPreflight -SkipTenantCatalogGeneration`
+- **Outcome**: RunId `20260713-031108` Education **Completed** Failed=0 (Posted 3 catch-up; Educations=3172); continued to EmployeePositionHistory
+- **Lesson**: seed NameTm from legacy hex when console mangling hides `ı` vs `i`; verify LEN matches legacy LEN
+
+
+### 2026-07-13 — Prod ApplicationItem fail; sync.env parse bug (same Demo resume path)
+
+- **Phase**: end-to-end (Prod resume ApplicationItem)
+- **Symptom**: Watch showed ApplicationItem 0/21780 for ~14m (prepare, not hang); later `-StartAt ApplicationItem` failed in ~3s with exit `-532462766` (`0xE0434352` CLR) or `Invalid value for key 'Multiple Active Result Sets'`
+- **Root cause**: `Run-OnPremSyncOnServer.ps1` `Import-SyncEnvFile` used `Read-TextFileAutoEncoding -Path $Path -split` **without parentheses**. PowerShell binds `$Path -split` first → whole `sync.env` becomes one line → only `VISA2014_SQL_PASSWORD` is set (value = rest of file). `VISA2026_PROD_SQL_CONNECTION` never loads → appsettings fallback; CS builders choke on embedded newlines after `MultipleActiveResultSets=true`
+- **Fix**: `(Read-TextFileAutoEncoding -Path $Path) -split` in repo + patched on `.25` prod/demo sync hosts; Encrypt normalized on prod `sync.env`
+- **Resume (same as Demo)**: `Visa2026-OnPrem-ProdImportOnce` → `Run-OnPremSyncOnServer.ps1 -Profile Production -SkipTenantCatalogGeneration -SkipLookupPreflight -StartAt ApplicationItem -Parallelism 1`
+- **Outcome**: RunId `20260713-040316` Overall=Running; `parallel post: 21781 row(s), workers=1`; DI posting in progress (early 0% is normal)
+- **Prevent**: always parenthesize `Read-TextFileAutoEncoding` before `-split`; verify password env length ~11 not hundreds after sync.env edits
+
+### 2026-07-13 — ApplicationItem import: sequential post (no ParallelImportPoster)
+
+- **Phase**: import-code
+- **Context**: Prod ApplicationItem hung at 0/N on first CreateAsync via ParallelImportPoster (workers=1 or 4); Demo had completed earlier with workers=4
+- **Change**: `Visa2014ApplicationItemODataImporter` posts like Education/Passport — sequential `foreach` + `CreateAsync` + `FlushAsync` + progress sidecar; `--parallelism` ignored for this entity
+- **OnPrem-Sync**: comment updated (Application/ApplicationProgress may still use parallelism)
+- **Next**: publish DataImporter to `C:\visa2026-sync` and resume `-StartAt ApplicationItem`
+
+### 2026-07-13 — Prod ApplicationItem sequential resume (after `_legacyRowId` fix)
+
+- **Phase**: end-to-end (Prod `-StartAt ApplicationItem`)
+- **Deploy**: published DataImporter to `C:\visa2026-sync\tools\DataImporter`; RunId `20260713-045401`
+- **Bug**: first sequential build used `_legacyOid` (KeyNotFound) — must be `_legacyRowId`
+- **Outcome**: sequential post alive — ~2000/21786 (~9%), posted~1984 failed=0, DB ApplicationItems rising (~2050)
+
+### 2026-07-13 — Prod ApplicationProgress hang (batch-size 50) → sequential flush-per-row
+
+- **Phase**: end-to-end (Prod ApplicationProgress after ApplicationItem Completed)
+- **Symptom**: Watch `100/55068 posted=49 fail=51` then freeze at `200` with `DbCount=0`; DI CPU climbing; already `workers=1`
+- **Root cause**: importer intended one-row commits (`progressBatchSize=1`) but with `parallelism=1` ParallelImportPoster uses the **shared** headless target opened with `--batch-size 50`. First `CommitChanges` of ~50 ApplicationProgress rows fights `Application.LatestProgress` and hangs. Early `49/51` fail ratio matched Demo noise (incomplete State/Location payloads) and is unrelated to the hang.
+- **Fix**: `Visa2014ApplicationProgressODataImporter` sequential `foreach` + owned `Visa2014ObjectSpaceImportTarget(batchSize:1)` (flush per row); `--parallelism` ignored; log first 25 payload gaps to stderr
+- **Deploy**: published DI to `C:\visa2026-sync\tools\DataImporter`; resume RunId `20260713-051356` `-StartAt ApplicationProgress`
+- **Outcome (verified early)**: `sequential post: 55070`; ~3100/55070 posted~3091 failed=0 skipped=9; `ApplicationProgresses` DB count rising in lockstep (~3105)
+- **Ops note**: wrap scripts must pass `-StartAt` on **one line** — backtick line-continuation inside `@"..."@` here-strings drops args (first resume wrongly started Person)
+- **Prevent**: never batch ApplicationProgress commits; do not trust DbCount=0 alone when shared batch>1 (rows may be uncommitted)
+- **Cross-skill**: visa2026-windows-iis-deploy
+
+
+### 2026-07-14 — Prod file waves started (DocumentCopies only)
+
+- **Phase**: file-wave (Production, after scalar ApplicationProgress Completed)
+- **Mode**: file-wave only (`DocumentCopies.ps1`, not full scalar re-run)
+- **Environment**: `C:\visa2026-sync` · `Visa2026DbProd` on `E:\visa2026\sql-data\` (~145 GB free on E:; C: ~15 GB)
+- **Script**: task `Visa2026-OnPrem-ProdFileWavesOnce` → DocumentCopies `-LegacySource calik-energi-onprem-prod -StartAt Person-Photo`
+- **Outcome**: started — `file-waves-status.json` Overall=Running; Person-Photo Running; id-map path correct under `data\id-maps\...`
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh -ClearScreen` (File waves table)
+- **Prevent**: do not use `-IncludeFileWaves` without `-StartAt` if you only want files — that re-prepares all scalars; call DocumentCopies directly after scalar Complete
+
+
+### 2026-07-14 — Prod DocumentCopies failed mid EducationDocument (filegroup full); Demo removed
+
+- **File waves**: Person-Photo / PassportDocument / VisaDocument OK; EducationDocument Posted 3682 / Failed 605 then abort — `Could not allocate space for object dbo.FileData` (PRIMARY full)
+- **Mitigation**: removed Demo IIS + `Visa2026DbDemo` (~15 GB on C:) — C: free now ~32 GB; Prod/Staging untouched
+- **Resume next**: after confirming Prod data file can grow on E:, `DocumentCopies.ps1 -StartAt EducationDocument` (id-map skip already imported diplomas)
+- **Cross-skill**: visa2026-windows-iis-deploy
+
+
+### 2026-07-14 — Prod FileData hit SQL Express 50 GB cap; reclaim + resume EducationDocument
+
+- **Root cause**: `Visa2026DbProd` is Express Edition — licensed max **51200 MB (50 GB)**. MDF was 100% full (`FileData` ~48.9 GB). `ALTER ... SIZE` beyond 50 GB fails with licensed limit.
+- **Reclaim**: deleted ~992k `SyncRuleLogs`; `DBCC SHRINKFILE` → ~**0.7 GB** headroom (used ~49.29 / 50 GB). Demo removal freed C: only (Prod lives on E:).
+- **Resume**: DocumentCopies `-StartAt EducationDocument` with EducationDocument id-map **3682** keys (match DB). Task `Visa2026-OnPrem-ProdFileWavesOnce`.
+- **Risk**: remaining Education + WorkPermit/Invitation/FamilyProof may refill the 50 GB cap — lasting fix is **upgrade off Express** (Developer/Standard) or externalize FileData.
+- **Cross-skill**: visa2026-windows-iis-deploy
+
+
+
+### 2026-07-14 — Demo PostgreSQL Person pilot (scalar import, in-process)
+
+- **Phase**: end-to-end pilot (Demo PG target, Person only)
+- **Environment**: `10.100.128.25` · IIS `Visa2026-Demo` `:8081` · PG `visa2026_demo` (`EFCoreProvider=Postgres`) · sync host `C:\visa2026-sync-demo` · legacy `10.100.128.15` / `VISA2015`
+- **Deploy**: republished `Visa2026.DataImporter` to `C:\visa2026-sync-demo\tools\DataImporter`; `config\sync.env` with `VISA2014_SQL_PASSWORD` + `VISA2026_MIGRATION_IMPORT_URLS=http://127.0.0.1:5012`; target CS from `C:\inetpub\visa2026-demo\appsettings.Production.json` via `ConnectionStrings__DefaultConnection`
+- **Code gates (Postgres pilot)**:
+  - `Visa2014LookupPreflightCommand.LoadTargetCatalogKeys` — skip SqlClient target catalog load when `DatabaseProviderDetector.IsPostgreSql`
+  - `OnPrem-Sync.ps1` `Invoke-DataImporterCli` — do not append `Encrypt=Optional` to Npgsql connection strings
+  - `Visa2014PersonIdMapExpander` — skip PN-collision SqlClient scan on PostgreSQL (dedupe aliases still apply)
+  - `Visa2014ImportTrackingLogCleanup` — skip T-SQL `OBJECT_ID` cleanup on PostgreSQL
+- **Run**: direct `--import-visa2014 --entity Person --inprocess --max-rows 50 --batch-size 25` (log `demo-Person-pilot2-20260714-002442.log`)
+- **Outcome**: **exit 0** · Prepared 50 · Posted **50** / Failed **0** · PG `People` count **50** · id-map **50** keys · `PN collision skipped on PostgreSQL`
+- **First attempt**: Posted 50 then exit **1** — post-import `Visa2014PersonIdMapExpander` opened `SqlConnection` on Npgsql CS (`Keyword not supported: 'host'`). Fixed by PG skip above.
+- **Preflight**: use `-SkipLookupPreflight` for full Demo chain until Npgsql target catalog loader exists (Phase A legacy audit still runs when preflight enabled; target Phase A missing-target checks are empty on PG skip).
+- **Still SQL-only on target** (not hit by Person pilot): duplicate guards (`Visa2014PersonIdentityDuplicateGuard`, ApplicationItem/Progress guards), `Visa2014TargetIdMapRebuild`, archive/watch DbCounts — gate or Npgsql port before full scalar chain.
+- **File waves**: not attempted on PG (`FileData` / SqlClient paths unchanged).
+- **Prevent**: never run `OnPrem-Sync` Encrypt normalization on Postgres CS; verify exit code after pilot — posted count alone is insufficient when post-import hooks use SqlClient.
+
+
+### 2026-07-14 — Demo PG full scalar Import started (after Person pilot)
+
+- **Phase**: end-to-end (Demo PostgreSQL scalar chain)
+- **Prep**: redeployed DataImporter + OnPrem scripts to `C:\visa2026-sync-demo`; wiped pilot `People` (50); reset id-map JSON stubs
+- **Task**: `Visa2026-OnPrem-DemoImportOnce` → `Run-OnPremSyncOnServer.ps1 -Profile Demo -SkipTenantCatalogGeneration -SkipLookupPreflight` (SYSTEM)
+- **RunId**: `20260714-003304`
+- **Early outcome**: Person **Completed** exit 0 — Posted **3310** / Failed **0** (Dedupe merged 21); PG `People`=3310; id-map expand skipped PN collision on PostgreSQL
+- **In progress**: Passport done → current wave **Visa** (DI still running)
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh` · status `C:\visa2026-sync-demo\sync-run-status.json`
+- **Note**: wrap script must use real newlines (literal `` `r`n `` text breaks the scheduled task)
+
+
+### 2026-07-14 — Demo PG Education catalog gap; regenerate from VISA2015 + resume
+
+- **Symptom**: Run `20260714-003304` Education Failed exit 1 — Posted 3158 / Failed 18 (incomplete Institution/Specialty payloads); repo `education-institution.calik-energi.json` (1507 rows) lacked live labels (e.g. Lizabon, IHK Regensburg, Puerto-Riko, Jemgyyet ylymlary)
+- **First seed attempt**: deployed repo calik-energi JSON + manifest bump 39 + ForceUpdate → PG counts 1507/1085 but same 18 failures (stale catalog vs live VISA2015)
+- **Fix**: `generate-from-legacy.ps1` on `.25` — sqlcmd `10.100.128.15` / `VISA2015` DISTINCT Education institutions + specialties → overlay `C:\inetpub\visa2026-demo\LookupCatalogs\tenant\` + ForceUpdate (manifest 40) → **1512** institutions / **1089** specialties
+- **Resume**: `-StartAt Education` RunId `20260714-005140` — Education **Completed** Posted **18** catch-up / Failed **0** (3158 already in id-map); continued to EmployeePositionHistory
+- **Prevent**: for Demo PG greenfield, always regenerate tenant education/specialty JSON from live legacy before Import; repo calik-energi files can lag live `.15`
+
+
+### 2026-07-14 — Demo PG AddressOfResidence SqlClient host; Watch DbCounts blank
+
+- **Watch**: ViaSsh DbCount column empty — `Get-OnPremImportLiveSnapshot.ps1` always used `sqlcmd` / `Visa2026DbDemo` on SQLEXPRESS (DB gone / not PG). Fix: Demo detects `EFCoreProvider=Postgres` from `C:\inetpub\visa2026-demo\appsettings.Production.json` and uses `psql` → `visa2026_demo` (quoted table names). Sample now shows Person|3310 … AddressOfResidence|5148.
+- **AddressOfResidence Failed(5148)**: every row `Keyword not supported: 'host'` — `TryMatchExistingAddressAsync` opened `SqlConnection` on Npgsql CS (site-match before Create). Also gated `Visa2014AddressOfResidenceSiteDuplicateGuard.LoadFromSqlAsync` for PG.
+- **Fix**: skip site-match SqlClient path when `DatabaseProviderDetector.IsPostgreSql`; republish DI to `C:\visa2026-sync-demo`
+- **Resume**: `-StartAt AddressOfResidence` RunId `20260714-005636` — **Completed** Posted **5148** / Failed **0** (incl. PIA-inferred 1125); continued to EmployeeSalary
+- **Prevent**: any per-row target SqlClient helper fails loudly N times on Postgres; gate at entry. Watch must know Demo is PG after Express Demo removal.
+
+
+### 2026-07-14 ? Demo PG ApplicationItem T-SQL bracket DELETE (RegistrationTravelHistorySync)
+
+- **Symptom**: Run `20260714-005636` ApplicationItem ~61% ? sidecar **posted=49 fail=13319+**; PG `ApplicationItems`=0; `.err` `42601: syntax error at or near "["` on `DELETE FROM [TravelHistories] WHERE [SourceApplicationItemID] = ?`
+- **Cause**: `RegistrationTravelHistorySyncService` `ExecuteSqlRaw` T-SQL runs on every ApplicationItem save (clear soft-deleted travel rows before unique index). Demo Import uses **`--inprocess`** OData on `:5012` ? fix must land in **`C:\visa2026-sync-demo\tools\DataImporter\Visa2026.Module.dll`**, not IIS alone.
+- **Fix**: replace raw DELETE with EF `IgnoreQueryFilters()` + `RemoveRange`/`Remove` + `SaveChanges()` (provider-agnostic). Deploy Module DLL to DataImporter folder; restart `-StartAt ApplicationItem`.
+- **Resume**: RunId `20260714-013121` ? after deploy **inserted 1091+ / failed 0** within first ~1100 rows (0 err lines).
+- **Prevent**: any `ExecuteSqlRaw` with `[brackets]` breaks on Npgsql; prefer EF or quote/bracket translate like `Visa2026EFCoreDbContext.IndexFilter`. In-process import = DataImporter Module copy, not only `C:\inetpub\visa2026-demo`.
+
+### 2026-07-22 — Local PG wipe reimport: Education Failed=1 (slash-compound NameTm) then resume OK
+- **Context**: Full scalar chain .15 → local PG after wipe; Person/Passport/Visa OK; Education Posted 3189 / Failed 1 then chain stop.
+- **Failing oid**: `3e713db3-2a3e-4913-a154-15eefd0fc005` — Institution `Balıkesir uniwersiteti/Sakarya uniwersiteti`, Specialty `Gurluşyk inženeri/Gurluşyk mugallymy`.
+- **Cause**: Labels present in regenerated `education-institution.calik-energi.json` / `specialty.calik-energi.json`, but in-process import used **stale disk overlay** `DataImporter/bin/Debug/net8.0/LookupCatalogs/tenant/{education-institution,specialty}.json` (2026-07-15) — `LoadCatalogFile` prefers disk over embedded. `-SkipTenantCatalogGeneration` left overlay untouched; PG lacked both rows.
+- **Fix**: Regenerated calik catalogs from `10.100.128.15` DISTINCT Education labels; copied to bin overlay; bumped tenant `manifest.json` **40→41**; INSERT missing Institution/Specialty with `GCRecord=0`; resume `-StartAt Education -SkipTenantCatalogGeneration` → Education catch-up OK, continued EPH/Salary/…
+- **Practice**: After Education catalog regen, refresh **AppBase overlay** (or re-run tenant catalog generation from Person) and ensure rows exist in target DB before `-StartAt Education`. `GCRecord` NOT NULL on PG lookups.
+
+### 2026-07-22 — Local PG full scalar resume completed (Education fix → Overall OK)
+- **Resume**: `Run-LocalPgScalarChain.ps1 -StartAt Education -SkipTenantCatalogGeneration` after Education Institution/Specialty seed + overlay refresh.
+- **Waves**: Education catch-up Posted **1**; EPH 3070; Salary 2963; AoR 5175; Application 12248; WP 406 / WPI 3860; Invitation 2857 / InvItem 5106; ApplicationItem **21676**; **Rejection 207 / RejectionItem 254**; ApplicationProgress ~30k (Failed 0, small skip count for missing maps).
+- **Outcome**: chain finished with **EXIT=0** / Overall Completed (post-correction PIA address warnings for unmapped address keys remain; non-blocking).
+
+### 2026-07-22 — ApplicationProgress PROCESS_REJECTED from Rejection coverage OR legacy Rejected
+- **Rule**: `effectiveRejected = Application.Rejected=1 OR (ApplicationItemCount > 0 AND ApplicationItemCount == RejectionItemCount)`.
+- **Legacy proxy**: `PersonInApplication` vs `PersonInInvitation` under `ApplicationResult.Result=1` (same as imported Rejection/RejectionItem).
+- **Date**: prefer max Rejection `IssuedDate`; else `ProcessDate`; else prior step.
+- **Code**: `Visa2014ApplicationProgressRejectionIndex` + `SynthesizeSteps(..., rejection)`; partial coverage does not reject; blocks `PROCESS_ISSUED`.
+- **Docs**: discovery + field-maps ApplicationProgress terminal override notes updated.
+
+### 2026-07-22 — ApplicationProgress clean reimport (local PG, rejection coverage)
+- **Prep**: `ImportedApplicationProgress.postgres.sql` DELETE **30584**; clear ApplicationProgress id-map; build Debug.
+- **First attempt**: failed — rejection index SQL `STRING_AGG … WITHIN GROUP` not supported on legacy host (Incorrect syntax near '('). Fixed: plain `STRING_AGG`.
+- **Import**: Posted **30725** / Failed **0** / Skipped no-App-map **66** / Parent-skipped **169**; Prepared **30791**.
+- **Evidence**: `PROCESS_REJECTED` steps in PG = **141** (coverage OR legacy Rejected).
+- **Log**: `artifacts/local-pg-import/data/import-logs/reimport-ApplicationProgress-localpg-20260722-130503.log`
+- **Next**: optional `--verify-visa2014-mapping --entity ApplicationProgress`.
+
+### 2026-07-22 — Visa.IssuingApplicationItem post-pass (ProcessNumber + extension sibling)
+
+- **Rule**: (1) Prefer legacy `Visa.ProcessNumber` → `PersonInApplication` (FK exists). (2) Else: next passport sibling by issued date after a previous visa that sat on an **extension** PIA (employee/FM subtype **7**); tie-break latest App date then PIA oid. Null if neither matches.
+- **Why post-pass**: Visa wave runs before ApplicationItem; transform leaves `IssuingApplicationItem` null.
+- **Code**: `Visa2014VisaIssuingApplicationItemIndex` (+ unit tests), `Visa2014VisaIssuingApplicationItemCorrection`, CLI `--correct-visa2014-issuing-application-item`; wired in `OnPrem-Sync.ps1` / `Run-HeadlessChain.ps1` / `order.yaml` postImportCorrections.
+- **Local PG apply** (`calik-energi-local-pg` → `visa2026`): index **5923** links (processnumber=5887, extension_sibling=36); updated **5727**; no legacy link **243**; missing ApplicationItem map/target **132**; PG `Visas` linked **5727** / unlinked **375** / total **6102**.
+- **Idempotent**: re-run should report Already correct for the same links.
+- **Docs**: `field-maps/Visa.yaml`, `discovery/Visa.yaml` note the correction.
+- **Not in scope**: `InvitationItem` on Visa (legacy has no Invitation FK).
+
+### 2026-07-22 — ApplicationProgress PROCESS_ISSUED for extension subtype 7 (full visa coverage)
+
+- **Rule**: For employee/FM subtype **7**, synthesize `PROCESS_ISSUED` when every non-deleted PIA has a `Visa.ProcessNumber` → that PIA. Inv/WP completion evidence still wins when present. Partial coverage does not issue. Cancelled/Rejected still block.
+- **Date / Description**: `max(VisaIssuedDate)` / sample `VisaNumber` (`SourceLabel=VisaNumber`).
+- **Code**: `Visa2014ApplicationProgressCompletionIndex` second SQL + merge; unit tests; field-map + discovery notes.
+- **Local PG reimport**: DELETE ApplicationProgress **30725**; Posted **30794** / Failed **0** / Skipped no-App-map **66** / Parent-skipped **162**.
+- **Completion index**: **4432** apps (invitation/work-permit=**4370**, visa-extension-added=**62**).
+- **Log**: `reimport-ApplicationProgress-localpg-20260722-155408.log`
+
+### 2026-07-22 — Family-member visas force VisaType FM (override legacy WP)
+
+- **Problem**: Legacy often stores `WP:11` on visas for `IsFamilyMember` persons (e.g. `A1733149` / Serpil Demirbilek); import copied WP faithfully (~637 visas / 170 persons on Çalik).
+- **Rule**: `Person.IsFamilyMember=1 AND IsEmployee=0` → `VisaType` LocalizationKey **FM** (before TypeOfVisaL:mgCode map). Employees unchanged.
+- **Code**: `Visa2014VisaTransform.ResolveVisaTypeLocalizationKey`; `--correct-visa-type` reuses transform; wired in OnPrem-Sync / HeadlessChain postImportCorrections.
+- **Local PG correction**: Visas in scope **6143**; updated **652**; already correct **5450**; histogram WP=3422, BS1=1651, FM=1000, OF=55, EX=15. `A1733149` → FM; FM-person still-WP → **0**.
+
+### 2026-07-22 — IssuingApplicationItem: trust ProcessNumber only for extension subtype 7
+
+- **Bug**: `A1733547` linked to invitation `6/-820` because sticky `ProcessNumber` beat extension sibling `6/-930`.
+- **Rule**: (1) ProcessNumber→PIA when app is subtype **7**; (2) else extension sibling; (3) else remaining ProcessNumber (invitation etc.).
+- **Local PG**: index processnumber=4967 / extension_sibling=956; correction updated **911**; `A1733547` → `6/-930`.
+
+### 2026-07-23 — ApplicationProgress wipe + reimport (local PG)
+
+- **Wipe**: DELETE **31019**; cleared `ApplicationProgress` id-map.
+- **Import**: Posted **31019** / Failed **0** (log `reimport-ApplicationProgress-localpg-20260723-085454.log`).
+- **Shape**: `PROCESS_ISSUED` = **4500** (was ~4275 before sibling extension completion).
+- **Spot-check**: `6/-930` → `PROCESS_ISSUED` @ 2026-06-23 Description `A1733547`.
+
+### 2026-07-24 — Path B hybrid: Visa.InvitationItem closest-match post-pass
+
+- **Rule (hybrid)**: Keep `--correct-visa2014-issuing-application-item` (ProcessNumber/sibling). New `--correct-visa2014-invitation-item` runs after it: when IssuingApplicationItem type has `CanIssueInvitation`, closest unused InvitationItem under that app (same person; prefer IssuedDate > ApplicationDate; IssuedDate < Visa.IssueDate smallest gap; set IsUsed). No match → null, do not fail. Never calls Module Path A.
+- **Code**: `Visa2014VisaInvitationItemLinkMatcher` (+ 5 unit tests), `Visa2014VisaInvitationItemCorrection`; wired in `Program.cs`, `order.yaml`, `OnPrem-Sync.ps1`, `Run-HeadlessChain.ps1`, `field-maps/Visa.yaml`. Doc §4.1 in `docs/VISA_ISSUING_APPLICATION_AND_INVITATION_LINK.md`.
+- **Path A polish**: Visa `IssuingApplicationItem` / `InvitationItem` `AllowEdit=False` again.
+- **Ops**: Dry-run after issuing-app correction, e.g. `dotnet run --project Visa2026.DataImporter --no-launch-profile -c Debug -- --correct-visa2014-invitation-item --legacy-source calik-energi-local-pg --target-connection "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=***;EFCoreProvider=Postgres" --dry-run --verbose`. Requires Visa id-map + `CanIssue*` flags true on ApplicationTypes.
+- **Build/tests**: DataImporter Debug build OK; matcher tests 5/5 passed. Full DB dry-run deferred until id-map present in this workspace.
+
+### 2026-07-24 — IssuingApplicationItem: predecessor visa orientation (extension)
+
+- **Rule**: When the new visa follows a prior visa on the same passport (extension/transfer), prefer the ApplicationItem that references that **predecessor** (`CurrentVisa` / legacy PIA.Visa).
+- **Path B**: existing `extension_sibling` unchanged; added target-side fallback `target_predecessor` in `Visa2014VisaIssuingApplicationItemCorrection` when ProcessNumber/sibling leave IssuingApplicationItem null.
+- **Path A**: `VisaIssuingLinkPathAMatcher` now prefers `ApplicationItem.CurrentVisa == predecessor` before unused-invitation / latest-app heuristics.
+- **Docs**: §3.5 + §4.1.2 in `VISA_ISSUING_APPLICATION_AND_INVITATION_LINK.md`; Visa field-map + discovery notes.
+
+### 2026-07-24 — Full scalar reimport .15 → local PG (started)
+
+- **Phase**: wipe + scalar chain (Run-LocalPgScalarChain.ps1 -StartAt Person)
+- **Source**: `10.100.128.15` / `VISA2015` (`calik-energi-local-pg`)
+- **Target**: PostgreSQL `visa2026`
+- **Prep**: `Wipe-LocalPostgresTransactional.sql`; cleared `id-maps/calik-energi-local-pg/*.json` to `{}`; App_Inv CanIssue* still true
+- **Post-corrections**: includes VisaType + VisaIssuingApplicationItem + **VisaInvitationItem** (Path B)
+- **Log**: `artifacts/local-pg-import/chain-console-from15-wipe-reimport-20260724-113332.log`
+- **PID**: 28192
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Local -ClearScreen`
+
+### 2026-07-24 — Visa wave failed: stale bin id-maps after wipe
+
+- **Symptom**: Passport Posted **3** / Skipped already **3667**; Visa Posted **0** / Skipped already **6119** / Failed **1** (`FK Passport target ... not found`). DB Passports=3, Visas=0.
+- **Cause**: wipe cleared `legacy/.../id-maps/calik-energi-local-pg` to `{}`, but DataImporter reads **copied** maps under `bin/Debug/net8.0/legacy/visa2014/id-maps/...` which still held prior run.
+- **Fix**: reset bin (+ src) maps except current `Person.json`; truncate Passports; resume `Run-LocalPgScalarChain.ps1 -StartAt Passport -SkipTenantCatalogGeneration`.
+- **Resume PID**: 20416  Log: `artifacts/local-pg-import/chain-console-from15-resume-passport-20260724-113618.log`
+
+### 2026-07-24 — Education fail 1/3193: missing Palakkad institution (+ specialty)
+
+- **ERR**: incomplete OData payload `EducationInstitution=Palakkad döwlet politehniki ýörite orta hünärmen mekdebi`; `Specialty=Barlag-ölçeg enjamlarynyň tehnologiýasy`
+- **Fix**: INSERT both into local PG (`IsDefault=false`); append NameTm rows to `education-institution.calik-energi.json` / `specialty.calik-energi.json`
+- **Resume**: `Run-LocalPgScalarChain.ps1 -StartAt Education -SkipTenantCatalogGeneration` PID 27680
+
+### 2026-07-24 — Watch live table includes post-* Visa patch waves
+
+- **Ask**: show Visa IssuingApplicationItem / InvitationItem (and other) post-corrections in `Watch-OnPremImportLive`.
+- **Change**: `Run-LocalPgScalarChain.ps1` and `OnPrem-Sync.ps1` register `post-VisaType`, `post-VisaIssuingApplicationItem`, `post-VisaInvitationItem`, … in `sync-run-status.json` and call `Set-OnPremSyncRunWaveStarted/Completed` with teed logs.
+- **Stats**: `Get-OnPremWaveLogStats` parses `INF … updated:` and `Visas in id-map/scope`.
+- **Note**: already-running chain process still uses the old script body for posts — watch post rows apply on the **next** chain start.
+
+### 2026-07-24 — Visa.ProcessNumber (legacy PIA Oid) property + import
+
+- **Legacy**: `Visa.ProcessNumber` is `IPersonInApplication` (uniqueidentifier FK to PersonInApplication), not Application belgi string.
+- **Target**: `Visa.ProcessNumber` `Guid?` on Visa2026; schema updater `VisaProcessNumberSchemaUpdater`; read-only UI.
+- **Import**: scalar Visa transform/OData POST includes ProcessNumber; `--correct-visa2014-issuing-application-item` also backfills Guid for already-imported visas.
+- **Distinct**: `IssuingApplicationItem` remains domain ApplicationItem link; ProcessNumber keeps legacy PIA Oid for lineage.
+- **Next**: restart Blazor (schema), re-run issuing correction (or Visa reimport) to fill existing rows.
+
+### 2026-07-24 — Visa.ProcessNumber = legacy ASNumber (Işlenen belgisi), not PIA Guid
+
+- **UI**: Legacy Visa DetailView first field `Işlenen belgisi` is `ASNumber` (string e.g. C00138718) typed from stamp image.
+- **Correction**: `Visa.ProcessNumber` is now `string?` ← ASNumber; `LegacyPersonInApplicationOid` `Guid?` ← legacy ProcessNumber PIA FK.
+- **Schema**: rename mistaken uuid ProcessNumber → LegacyPersonInApplicationOid when present; add varchar ProcessNumber.
+- **Backfill**: issuing-application-item correction fills both ASNumber and PIA Oid for existing imports.
+
+### 2026-07-30 — Local PG file waves resumed (VisaDocument → FamilyProof)
+
+- **Profile**: `calik-energi-local-pg` → local PG `visa2026`; legacy read `10.100.128.15` / `VISA2015`.
+- **Resume**: `DocumentCopies.ps1 -StartAt VisaDocument` (port `5012` via `VISA2026_MIGRATION_IMPORT_URLS`).
+- **Outcome (this session)**:
+  - **VisaDocument**: 5932 already imported; 154 oversize (>5MB) skipped; 0 new posted.
+  - **EducationDocument**: 4312 posted; 40 oversize; 34 no blob.
+  - **WorkPermitDocument**: 1004 posted; 2 no blob.
+  - **InvitationDocument**: 2960 posted; 209 no parent map; 4 no blob.
+  - **FamilyProofDocument**: 436 posted (9 PersonDocument + 427 PersonFamilyRelationDocument); 1 oversize; 3 duplicate blob.
+- **Id-map counts (bin)**: PassportCopy 3663, VisaDocument 5932, EducationDocument 4322, WorkPermitDocument 1014, InvitationDocument 2969, FamilyProofDocument 446.
+- **Failures / workarounds**:
+  - **WorkPermit start**: `DevExtreme.AspNet.Data` missing in DataImporter `bin` — copy from `Visa2026.Blazor.Server\bin\Debug\net8.0\` (DocumentCopies build uses `/p:BuildProjectReferences=false`).
+  - **Invitation / FamilyProof after prior step**: `dotnet run --no-build` → `hostpolicy.dll` not found; `Visa2026.DataImporter.runtimeconfig.json` absent after each step. **Fix**: rebuild DataImporter before next step, or invoke `Visa2026.DataImporter.exe` directly for single wave.
+  - **Full solution build** blocked when F5 **Visa2026.Blazor.Server** holds DLL locks — use DataImporter-only build or stop F5 first.
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Local` reads `artifacts/local-pg-import/file-waves-status.json`.

@@ -494,25 +494,26 @@ internal static class Visa2014TargetIdMapRebuild
 
                 var legacyOid = (Guid)row["_legacyRowId"]!;
                 var invitationNumber = row.GetValueOrDefault("InvitationNumber") as string;
-                var startDateText = row.GetValueOrDefault("StartDate") as string;
+                var issuedDateText = row.GetValueOrDefault("IssuedDate") as string;
                 if (string.IsNullOrWhiteSpace(invitationNumber) ||
-                    !DateTime.TryParse(startDateText, out var startDate))
+                    !DateTime.TryParse(issuedDateText, out var issuedDate))
                 {
                     skipped++;
                     continue;
                 }
 
+                // IssuedDate maps to DB column StartDate on Invitation.
                 var targetId = await ScalarGuidAsync(conn,
                     """
                     SELECT TOP 1 CAST(ID AS varchar(36))
                     FROM Invitations
                     WHERE (GCRecord IS NULL OR GCRecord = 0)
                       AND InvitationNumber = @invitationNumber
-                      AND CAST(StartDate AS date) = @startDate
+                      AND CAST(StartDate AS date) = @issuedDate
                     ORDER BY ID
                     """,
                     ("@invitationNumber", invitationNumber.Trim()),
-                    ("@startDate", startDate.Date));
+                    ("@issuedDate", issuedDate.Date));
                 if (!targetId.HasValue)
                 {
                     skipped++;
@@ -660,7 +661,7 @@ internal static class Visa2014TargetIdMapRebuild
     private static string GetTargetConnection(IReadOnlyList<string> args) =>
         GetOptionValue(args, "--target-connection")
         ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-        ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true";
+        ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
     private static string? GetOptionValue(IReadOnlyList<string> args, string optionName)
     {

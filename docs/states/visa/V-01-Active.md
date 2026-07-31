@@ -16,11 +16,10 @@ The employee has an active visa record that is not cancelled, not extended, not 
 
 ## 3) Authoritative implementation logic (current code)
 
-### 3.1 Dashboard count logic
+### 3.1 Count / filter logic (evaluator)
 
-Stored in `Visa2026.Blazor.Server/Components/StateDashboardComponent.razor` inside `LoadData()`:
+> **Note:** Old State Dashboard UI removed. Home BI: [`REPORT_DASHBOARD.md`](../../REPORT_DASHBOARD.md). Predicate below remains for evaluators / list filters.
 
-- Key written: `_counts["Visa|Active"]`
 - Query predicate:
   - `v.IsActive`
   - `!v.IsCancelled`
@@ -29,19 +28,14 @@ Stored in `Visa2026.Blazor.Server/Components/StateDashboardComponent.razor` insi
   - `v.ExpirationDate.HasValue`
   - `v.ExpirationDate.Value >= DateTime.Today`
 
-### 3.2 Dashboard row rendering
+### 3.2 Display
 
-Stored in `Visa2026.Blazor.Server/Components/StateDashboardComponent.razor`:
+- Label: `Active`
+- Source: `BO`
 
-- Row label: `Active`
-- Source badge: `BO`
-- Badge renderer: `@CountBadgeWithSeverity("Visa|Active", "Healthy")`
+### 3.3 List navigation
 
-### 3.3 Click navigation behavior
-
-Stored in `Visa2026.Blazor.Server/Components/StateDashboardComponent.razor`:
-
-- On click, dashboard calls:
+- Filtered list opens with criteria equivalent to:
   - `NavigateWithVisaFilter("IsActive = true AND IsCancelled = false AND IsExtended = false AND IsDeleted = false AND ExpirationDate >= LocalDateTimeToday()", "Active Visas")`
 
 `NavigateWithVisaFilter(...)` does:

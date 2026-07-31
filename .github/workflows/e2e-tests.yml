@@ -1,22 +1,49 @@
-# Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + LocalDB + Edge (headed on GHA).
-# Person master-data CRUD journey E2E-001…008; see docs/TESTING_PLAN.md.
+# Native XAF EasyTest E2E (Visa2026.E2E.Tests) - Windows + PostgreSQL + Edge.
+#
+# Where this runs (see docs/TESTING_PLAN.md section 6):
+#   pull_request / push to master -> Tier 0 only (officer journey), strict, no retry
+#   nightly schedule + manual run -> full suite, hang dumps, one retry for flaky browser steps
+# Fast build + unit tests live in build-and-test.yml and gate every push.
+#
+# PUBLIC REPO: artifacts below (screen recording, host logs, trx) are downloadable by
+# anyone. Keep E2ETestDataSeed synthetic - no real personal or passport data.
 
 name: EasyTest E2E
 
 on:
-  push:
   pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  schedule:
+    # 20:00 UTC = 01:00 Ashgabat (UTC+5); results are ready before the workday.
+    # GitHub cron is best-effort and can drift during peak hours.
+    - cron: "0 20 * * *"
   workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional dotnet test --filter expression (empty = full suite)"
+        required: false
+        default: ""
+
+concurrency:
+  group: easytest-e2e-${{ github.event_name }}-${{ github.ref }}
+  # Never cancel a nightly or manual long run; only supersede PR gate runs.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PG_PASSWORD: Visa2026Local
+  PG_USER: postgres
+  PG_HOST: localhost
+  PG_PORT: "5432"
 
 jobs:
   easytest-e2e:
     name: EasyTest E2E (Windows)
     runs-on: windows-latest
-    timeout-minutes: 90
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 180 }}
 
     steps:
       - name: Checkout repository
@@ -26,6 +53,24 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      # Inputs arrive via env, never inlined into the script body (expression injection).
+      - name: Resolve test scope
+        id: scope
+        shell: pwsh
+        env:
+          INPUT_FILTER: ${{ github.event.inputs.test_filter }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          # Tier 0 on the PR gate keeps it fast; everything else runs the full suite.
+          $filter = $env:INPUT_FILTER
+          if ([string]::IsNullOrWhiteSpace($filter) -and $env:EVENT_NAME -eq 'pull_request') {
+            $filter = 'FullyQualifiedName~PersonOfficerJourneyTests'
+          }
+          $long = $env:EVENT_NAME -in @('schedule', 'workflow_dispatch', 'push')
+          "filter=$filter" | Out-File $env:GITHUB_OUTPUT -Append
+          "long=$($long.ToString().ToLower())" | Out-File $env:GITHUB_OUTPUT -Append
+          Write-Host "event=$($env:EVENT_NAME) filter='$filter' longRun=$long"
 
       - name: Write DevExpress license
         shell: pwsh
@@ -41,12 +86,60 @@ jobs:
           }
           Set-Content -Path DevExpress.Key/DevExpress_License.txt -Value $license.Trim() -Encoding utf8 -NoNewline
 
-      - name: Start SQL Server LocalDB
+      # windows-latest ships PostgreSQL preinstalled (service disabled, postgres/root).
+      # Reusing it instead of "choco install postgresql16" saves roughly 8 minutes per run;
+      # the Chocolatey path stays as a fallback if the image ever drops the preinstall.
+      - name: Start PostgreSQL
         shell: pwsh
         run: |
-          sqllocaldb info mssqllocaldb
-          sqllocaldb start mssqllocaldb
-          sqllocaldb info mssqllocaldb
+          $ErrorActionPreference = 'Stop'
+
+          function Get-PgBin {
+            $root = Get-ChildItem 'C:\Program Files\PostgreSQL' -Directory -ErrorAction SilentlyContinue |
+              Sort-Object { [int]($_.Name -replace '\D', '0') } -Descending | Select-Object -First 1
+            if ($root) { return (Join-Path $root.FullName 'bin') }
+            return $null
+          }
+
+          $usedPreinstalled = $false
+          $svc = Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          $bin = Get-PgBin
+
+          if ($svc -and $bin) {
+            Write-Host "Found preinstalled PostgreSQL service '$($svc.Name)' with binaries at $bin"
+            try {
+              Set-Service -Name $svc.Name -StartupType Automatic
+              if ((Get-Service $svc.Name).Status -ne 'Running') { Start-Service $svc.Name }
+              $env:Path = "$bin;$env:Path"
+              # Runner images use password 'root' for the postgres superuser; align it with PG_PASSWORD.
+              $env:PGPASSWORD = 'root'
+              & psql -h $env:PG_HOST -p $env:PG_PORT -U $env:PG_USER -d postgres `
+                -c "ALTER USER $env:PG_USER WITH PASSWORD '$env:PG_PASSWORD';" 2>$null
+              if ($LASTEXITCODE -ne 0) {
+                # Password may already match what the tests expect.
+                $env:PGPASSWORD = $env:PG_PASSWORD
+                & psql -h $env:PG_HOST -p $env:PG_PORT -U $env:PG_USER -d postgres -c "SELECT 1;"
+                if ($LASTEXITCODE -ne 0) { throw "Cannot authenticate against preinstalled PostgreSQL." }
+              }
+              $usedPreinstalled = $true
+            } catch {
+              Write-Host "::warning::Preinstalled PostgreSQL unusable ($($_.Exception.Message)); falling back to Chocolatey."
+            }
+          }
+
+          if (-not $usedPreinstalled) {
+            choco install postgresql16 --params "/Password:$env:PG_PASSWORD" -y --no-progress
+            $bin = Get-PgBin
+            if (-not $bin) { throw "PostgreSQL install directory not found." }
+            $env:Path = "$bin;$env:Path"
+            $svc = Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($svc -and $svc.Status -ne 'Running') { Start-Service $svc.Name }
+          }
+
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
+          $env:PGPASSWORD = $env:PG_PASSWORD
+          & psql -h $env:PG_HOST -p $env:PG_PORT -U $env:PG_USER -d postgres -c "SELECT version();"
+          if ($LASTEXITCODE -ne 0) { throw "PostgreSQL is not reachable with PG_PASSWORD." }
 
       - name: Install Microsoft Edge WebDriver
         shell: pwsh
@@ -82,11 +175,11 @@ jobs:
         shell: pwsh
         run: dotnet build Visa2026.slnx -c EasyTest --no-restore
 
-      # Record the headed-Edge desktop while the officer journey runs so the
-      # browser session is captured as a downloadable video artifact. Fragmented
-      # MP4 (frag_keyframe+empty_moov) stays playable even after the recorder is
-      # force-stopped. Best-effort: never fail the job on recording problems.
+      # Record the headed-Edge desktop so the browser session is a downloadable video.
+      # Fragmented MP4 (frag_keyframe+empty_moov) stays playable after a force-stop.
+      # Long runs only - not worth the setup cost on the PR gate. Never fails the job.
       - name: Start screen recording
+        if: steps.scope.outputs.long == 'true'
         continue-on-error: true
         shell: pwsh
         run: |
@@ -106,13 +199,56 @@ jobs:
           Write-Host "Started ffmpeg (pid $($proc.Id)) recording to $out"
 
       - name: Run EasyTest E2E suite
+        id: e2e
+        # Long runs tolerate a first failure so the retry below decides the verdict.
+        continue-on-error: ${{ steps.scope.outputs.long == 'true' }}
         shell: pwsh
         env:
           CI: true
-        run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=e2e-results.trx"
+          TEST_FILTER: ${{ steps.scope.outputs.filter }}
+          LONG_RUN: ${{ steps.scope.outputs.long }}
+        run: |
+          $testArgs = @(
+            'test', 'Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj',
+            '-c', 'EasyTest', '--no-build',
+            '--logger', 'console;verbosity=normal',
+            '--logger', 'trx;LogFileName=e2e-results.trx'
+          )
+          if (-not [string]::IsNullOrWhiteSpace($env:TEST_FILTER)) {
+            $testArgs += @('--filter', $env:TEST_FILTER)
+          }
+          if ($env:LONG_RUN -eq 'true') {
+            # Turn a hung browser session into a dump instead of eating the job timeout.
+            $testArgs += @('--blame-hang', '--blame-hang-timeout', '10m')
+          }
+          Write-Host "dotnet $($testArgs -join ' ')"
+          & dotnet @testArgs
+
+      # One retry only, and only on long runs: a flaky Edge/session failure should not
+      # mark the whole night red, but the PR gate stays strict.
+      - name: Retry EasyTest E2E suite
+        id: e2e_retry
+        if: steps.scope.outputs.long == 'true' && steps.e2e.outcome == 'failure'
+        shell: pwsh
+        env:
+          CI: true
+          TEST_FILTER: ${{ steps.scope.outputs.filter }}
+        run: |
+          Write-Host "::warning::First E2E attempt failed; retrying once."
+          $testArgs = @(
+            'test', 'Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj',
+            '-c', 'EasyTest', '--no-build',
+            '--logger', 'console;verbosity=normal',
+            '--logger', 'trx;LogFileName=e2e-results-retry.trx',
+            '--blame-hang', '--blame-hang-timeout', '10m'
+          )
+          if (-not [string]::IsNullOrWhiteSpace($env:TEST_FILTER)) {
+            $testArgs += @('--filter', $env:TEST_FILTER)
+          }
+          & dotnet @testArgs
 
       - name: Stop screen recording
-        if: always()
+        if: always() && steps.scope.outputs.long == 'true'
         continue-on-error: true
         shell: pwsh
         run: |
@@ -139,7 +275,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: easytest-e2e-results
-          path: "**/e2e-results.trx"
+          path: |
+            **/e2e-results.trx
+            **/e2e-results-retry.trx
+            **/*.dmp
           if-no-files-found: ignore
 
       - name: Upload EasyTest host logs
@@ -149,3 +288,8 @@ jobs:
           name: easytest-host-logs
           path: "**/easytest-host-logs/**"
           if-no-files-found: ignore
+
+      - name: Report flaky first attempt
+        if: steps.e2e.outcome == 'failure' && steps.e2e_retry.outcome == 'success'
+        shell: pwsh
+        run: Write-Host "::warning::E2E passed only on retry - treat as flaky and record in .cursor/skills/visa2026-easytest-e2e/learnings.md"

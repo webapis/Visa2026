@@ -40,7 +40,6 @@ public class ApplicationProgressImporter
     public async Task<ApplicationProgress?> CreateOneAsync(
         Guid applicationId,
         Guid stateId,
-        Guid locationId,
         DateTime date,
         string description = "")
     {
@@ -50,7 +49,6 @@ public class ApplicationProgressImporter
         {
             Application = new { ID = applicationId },
             State = new { ID = stateId },
-            Location = new { ID = locationId },
             Date = date,
             Description = description
         };
@@ -84,7 +82,6 @@ public class ApplicationProgressImporter
                 {
                     Application = record.Application != null ? new { ID = record.Application.Id } : null,
                     State = record.State != null ? new { ID = record.State.Id } : null,
-                    Location = record.Location != null ? new { ID = record.Location.Id } : null,
                     Date = record.Date,
                     Description = record.Description
                 };

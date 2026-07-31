@@ -1,0 +1,632 @@
+/*
+  Person dossier ("dosye") - read-only 360 page for one Person.
+  Canonical doc: docs/PERSON_DOSSIER.md
+
+  Palette follows the theme the same way report-dashboard.css does: derive every colour from
+  --bs-body-bg / --bs-body-color via color-mix so dark mode works without a second rule set.
+  Do not hard-code greys here.
+*/
+
+.person-dossier {
+  --pd-surface: var(--bs-body-bg, #ffffff);
+  --pd-text: var(--bs-body-color, #1e293b);
+
+  --pd-hue-green: #2f8f4e;
+  --pd-hue-amber: #c1841f;
+  --pd-hue-red: #c05a3a;
+  --pd-hue-accent: #2f5d8a;
+  --pd-hue-neutral: #8896a8;
+
+  --pd-bg: color-mix(in srgb, var(--pd-surface) 96%, var(--pd-text));
+  --pd-card: color-mix(in srgb, var(--pd-surface) 99%, var(--pd-text));
+  --pd-border: color-mix(in srgb, var(--pd-surface) 88%, var(--pd-text));
+  --pd-border-soft: color-mix(in srgb, var(--pd-surface) 93%, var(--pd-text));
+  --pd-muted: color-mix(in srgb, var(--pd-text) 58%, var(--pd-surface));
+  --pd-hover: color-mix(in srgb, var(--pd-surface) 94%, var(--pd-text));
+
+  --pd-accent: color-mix(in srgb, var(--pd-hue-accent) 70%, var(--pd-text));
+  --pd-accent-soft: color-mix(in srgb, var(--pd-hue-accent) 10%, var(--pd-surface));
+  --pd-accent-edge: color-mix(in srgb, var(--pd-hue-accent) 28%, var(--pd-surface));
+
+  --pd-radius: 10px;
+  --pd-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  color: var(--pd-text);
+  /* Soft desk behind centered Screen column (Word-like side gutters). */
+  background: color-mix(in srgb, var(--pd-surface) 90%, var(--pd-text));
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+  min-height: 100%;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.person-dossier__loading {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: max(40px, 8vh) 16px 28px;
+  min-height: 280px;
+}
+
+.person-dossier__loading--empty {
+  color: var(--pd-muted);
+  font-size: 13px;
+  align-items: center;
+  min-height: 160px;
+}
+
+.person-dossier__loading-panel {
+  width: min(420px, 100%);
+  padding: 20px 22px 18px;
+  border-radius: var(--pd-radius);
+  background: var(--pd-card);
+  border: 1px solid var(--pd-border);
+  box-shadow: var(--pd-shadow);
+}
+
+.person-dossier__loading-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pd-accent);
+  margin-bottom: 6px;
+}
+
+.person-dossier__loading-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--pd-text);
+  margin-bottom: 12px;
+}
+
+.person-dossier__loading-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pd-border-soft);
+  overflow: hidden;
+}
+
+.person-dossier__loading-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--pd-accent), color-mix(in srgb, var(--pd-accent) 55%, var(--pd-surface)));
+  transition: width 0.2s ease;
+}
+
+.person-dossier__loading-fill--indeterminate {
+  width: 42%;
+  transition: none;
+  animation: pd-loading-slide 1.15s ease-in-out infinite;
+}
+
+@keyframes pd-loading-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(280%); }
+}
+
+.person-dossier__loading-pct {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pd-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.person-dossier__skeleton {
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pd-border-soft);
+}
+
+.person-dossier__skeleton-photo {
+  width: 64px;
+  height: 80px;
+  border-radius: 6px;
+  flex: 0 0 auto;
+  background: linear-gradient(90deg, var(--pd-border-soft), var(--pd-hover), var(--pd-border-soft));
+  background-size: 200% 100%;
+  animation: pd-skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.person-dossier__skeleton-lines {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.person-dossier__skeleton-line {
+  height: 10px;
+  border-radius: 999px;
+  width: 78%;
+  background: linear-gradient(90deg, var(--pd-border-soft), var(--pd-hover), var(--pd-border-soft));
+  background-size: 200% 100%;
+  animation: pd-skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.person-dossier__skeleton-line--lg { width: 92%; height: 12px; }
+.person-dossier__skeleton-line--sm { width: 54%; }
+
+@keyframes pd-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ------------------------------------------------------------------ toolbar */
+
+.person-dossier__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.person-dossier__toolbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  /* Keeps the action buttons grouped on the right as more of them are added. */
+  margin-right: auto;
+}
+
+.person-dossier__view-switch {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--pd-border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--pd-card);
+  flex: 0 0 auto;
+}
+
+.person-dossier__view-btn {
+  border: 0;
+  background: transparent;
+  color: var(--pd-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.person-dossier__view-btn + .person-dossier__view-btn {
+  border-left: 1px solid var(--pd-border);
+}
+
+.person-dossier__view-btn:hover {
+  background: var(--pd-hover);
+  color: var(--pd-text);
+}
+
+.person-dossier__view-btn.is-active {
+  background: var(--pd-accent-soft);
+  color: var(--pd-accent);
+}
+
+.person-dossier__export-msg {
+  font-size: 12px;
+  color: var(--pd-muted);
+}
+
+/* -------------------------------------------------------------- screen column
+   Centered reading column with side gutters (like Word workspace padding).
+   Wider than A4 (~1120px) so section tables fit without horizontal scroll. */
+
+.person-dossier__screen-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px clamp(20px, 5vw, 72px) 28px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.person-dossier__screen-column {
+  width: 100%;
+  max-width: 1120px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 18px;
+  background: var(--pd-bg);
+  border: 1px solid var(--pd-border-soft);
+  border-radius: var(--pd-radius);
+  box-shadow: var(--pd-shadow);
+}
+
+@media (max-width: 900px) {
+  .person-dossier__screen-stage {
+    padding: 10px 8px 20px;
+  }
+
+  .person-dossier__screen-column {
+    padding: 12px;
+  }
+}
+
+/* -------------------------------------------------------------- paper preview
+   A4 chrome around PersonDossierDocumentHtmlBuilder.BuildFragment — export hand-over. */
+
+.person-dossier--paper {
+  background: color-mix(in srgb, var(--pd-surface) 88%, var(--pd-text));
+  padding: 14px;
+}
+
+.person-dossier__paper-stage {
+  display: flex;
+  justify-content: center;
+  padding: 8px 4px 24px;
+  overflow: auto;
+}
+
+.person-dossier__paper-sheet {
+  width: 210mm;
+  max-width: 100%;
+  min-height: 297mm;
+  box-sizing: border-box;
+  padding: 18mm 16mm;
+  background: #ffffff;
+  color: #1a1a1a;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid color-mix(in srgb, #ffffff 70%, #000000);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 9pt;
+  line-height: 1.35;
+}
+
+.person-dossier__paper-sheet img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 900px) {
+  .person-dossier__paper-sheet {
+    width: 100%;
+    min-height: 0;
+    padding: 14px 12px;
+  }
+}
+
+.person-dossier__copies-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--pd-accent-edge);
+  border-radius: 999px;
+  background: var(--pd-accent-soft);
+  color: var(--pd-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.person-dossier__copies-btn:hover {
+  background: var(--pd-hover);
+}
+
+.person-dossier__copies-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.person-dossier__clip {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ----------------------------------------------------------------- identity */
+
+.person-dossier__identity {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+  background: var(--pd-card);
+  border: 1px solid var(--pd-border);
+  border-radius: var(--pd-radius);
+  box-shadow: var(--pd-shadow);
+}
+
+.person-dossier__photo {
+  flex: 0 0 auto;
+  width: 113px;
+}
+
+/* Person.Photo is already cropped to a 3:4 passport ratio on save. */
+.person-dossier__photo img {
+  width: 113px;
+  height: 151px;
+  object-fit: cover;
+  border: 1px solid var(--pd-border);
+  border-radius: 6px;
+  display: block;
+}
+
+.person-dossier__photo-empty {
+  width: 113px;
+  height: 151px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+  border: 1px dashed var(--pd-border);
+  border-radius: 6px;
+  color: var(--pd-muted);
+  font-size: 11px;
+}
+
+.person-dossier__identity-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.person-dossier__name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.person-dossier__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.person-dossier__badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--pd-border);
+  background: var(--pd-bg);
+  color: var(--pd-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.person-dossier__badge--role {
+  background: var(--pd-accent-soft);
+  border-color: var(--pd-accent-edge);
+  color: var(--pd-accent);
+}
+
+.person-dossier__badge--archived {
+  background: color-mix(in srgb, var(--pd-hue-red) 10%, var(--pd-surface));
+  border-color: color-mix(in srgb, var(--pd-hue-red) 30%, var(--pd-surface));
+  color: color-mix(in srgb, var(--pd-hue-red) 70%, var(--pd-text));
+}
+
+.person-dossier__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 4px 20px;
+}
+
+.person-dossier__field {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.person-dossier__field-label {
+  flex: 0 0 42%;
+  color: var(--pd-muted);
+}
+
+.person-dossier__field-value {
+  flex: 1 1 auto;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* -------------------------------------------------------------- status tiles */
+
+.person-dossier__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.person-dossier__tile {
+  padding: 10px 12px;
+  background: var(--pd-card);
+  border: 1px solid var(--pd-border);
+  border-radius: var(--pd-radius);
+  box-shadow: var(--pd-shadow);
+  text-align: center;
+}
+
+.person-dossier__tile-label {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pd-muted);
+}
+
+.person-dossier__tile-value {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 4px 0 6px;
+  overflow-wrap: anywhere;
+}
+
+/* ----------------------------------------------------------------- sections */
+
+.person-dossier__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.person-dossier__section {
+  background: var(--pd-card);
+  border: 1px solid var(--pd-border);
+  border-radius: var(--pd-radius);
+  box-shadow: var(--pd-shadow);
+  overflow: hidden;
+}
+
+.person-dossier__section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--pd-border-soft);
+}
+
+.person-dossier__section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.person-dossier__section-count {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--pd-bg);
+  border: 1px solid var(--pd-border);
+  color: var(--pd-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.person-dossier__table-scroll {
+  overflow-x: visible;
+  width: 100%;
+}
+
+.person-dossier__table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+}
+
+.person-dossier__table th,
+.person-dossier__table td {
+  padding: 6px 10px;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  border-bottom: 1px solid var(--pd-border-soft);
+}
+
+.person-dossier__table th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pd-muted);
+}
+
+.person-dossier__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.person-dossier__table tbody tr:hover {
+  background: var(--pd-hover);
+}
+
+.person-dossier__row--current td {
+  font-weight: 600;
+}
+
+.person-dossier__col-status {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- status pill
+   Same vocabulary as the Report Dashboard (st-approved / st-pending /
+   st-expiring); no class renders neutral. Keep these in sync with
+   report-dashboard.css so a status means the same colour everywhere. */
+
+.person-dossier__pill {
+  display: inline-block;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--pd-text) 4%, var(--pd-surface));
+  border: 1px solid color-mix(in srgb, var(--pd-text) 13%, var(--pd-surface));
+  color: color-mix(in srgb, var(--pd-hue-neutral) 70%, var(--pd-text));
+}
+
+.person-dossier__pill + .person-dossier__pill {
+  margin-left: 4px;
+}
+
+.person-dossier__pill.st-approved {
+  background: color-mix(in srgb, var(--pd-hue-green) 10%, var(--pd-surface));
+  border-color: color-mix(in srgb, var(--pd-hue-green) 30%, var(--pd-surface));
+  color: color-mix(in srgb, var(--pd-hue-green) 70%, var(--pd-text));
+}
+
+.person-dossier__pill.st-pending {
+  background: color-mix(in srgb, var(--pd-hue-amber) 10%, var(--pd-surface));
+  border-color: color-mix(in srgb, var(--pd-hue-amber) 30%, var(--pd-surface));
+  color: color-mix(in srgb, var(--pd-hue-amber) 70%, var(--pd-text));
+}
+
+.person-dossier__pill.st-expiring {
+  background: color-mix(in srgb, var(--pd-hue-red) 10%, var(--pd-surface));
+  border-color: color-mix(in srgb, var(--pd-hue-red) 30%, var(--pd-surface));
+  color: color-mix(in srgb, var(--pd-hue-red) 70%, var(--pd-text));
+}
+
+/* Person ListView dossier column — centered pill */
+.app-person-dossier-link {
+  --dcb-text: #1e3a5f;
+  --dcb-bg: #e8eef8;
+  --dcb-border: #c5d0e4;
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding: 4px 2px !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.app-person-dossier-link > *,
+.app-person-dossier-link img {
+  display: none !important;
+}
+
+.app-person-dossier-link::before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--dcb-border);
+  border-radius: 999px;
+  background-color: var(--dcb-bg);
+  background-image: url('../images/person-dossier-mark.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.15rem 1.15rem;
+  box-sizing: border-box;
+}
+
+.app-person-dossier-link:hover {
+  filter: brightness(0.97);
+  text-decoration: none !important;
+}

@@ -2,9 +2,9 @@
 
 **Runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../../docs/ON_PREM_WINDOWS_IIS.md)
 
-**Agent skill:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [user-prompts.md](../../.cursor/skills/visa2026-windows-iis-deploy/user-prompts.md) · [learnings.md](../../.cursor/skills/visa2026-windows-iis-deploy/learnings.md)
+**Agent skills:** [visa2026-windows-iis-deploy](../../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) · [visa2026-postgresql](../../.cursor/skills/visa2026-postgresql/SKILL.md) (Demo Postgres download/install) · [user-prompts.md](../../.cursor/skills/visa2026-windows-iis-deploy/user-prompts.md)
 
-Use when the company host is **Windows Server** and **Docker / WSL is not acceptable**. The app runs as **ASP.NET Core** behind **IIS**; SQL Server runs **on Windows** (same machine).
+Use when the company host is **Windows Server** and **Docker / WSL is not acceptable**. The app runs as **ASP.NET Core** behind **IIS**; **PostgreSQL** runs **on Windows** (same machine). SQL Server Express is **not** a supported Visa2026 app database.
 
 **Not this folder:** `scripts/linux/` (Docker on Ubuntu), `scripts/legacy/on-prem-windows/` (WSL + Docker), `droplet-scripts/` (cloud).
 
@@ -14,9 +14,9 @@ One server hosts **three independent IIS stacks** (see [Visa2026-IisSlots.ps1](.
 
 | Profile | Port | Site | Publish path | Env file | Database |
 |---------|------|------|--------------|----------|----------|
-| **Production** | 80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `Visa2026DbProd` |
-| **Staging** | 8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `Visa2026DbStaging` |
-| **Demo** | 8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `Visa2026DbDemo` |
+| **Production** | 80 | `Visa2026-Prod` | `C:\inetpub\visa2026-prod` | `C:\visa2026\env\prod.env` | `visa2026_prod` |
+| **Staging** | 8080 | `Visa2026-Staging` | `C:\inetpub\visa2026-staging` | `C:\visa2026\env\staging.env` | `visa2026_staging` |
+| **Demo** | 8081 | `Visa2026-Demo` | `C:\inetpub\visa2026-demo` | `C:\visa2026\env\demo.env` | `visa2026_demo` |
 
 Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates: [env/](./env/).
 
@@ -39,9 +39,10 @@ Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates
 | `Enable-Visa2026IisSlotFirewall.ps1` | Windows Server | Inbound TCP firewall for Staging `:8080` and Demo `:8081` |
 | `Get-Visa2026RuntimeErrorsForPull.ps1` | Windows Server | Query `ApplicationRuntimeLogs` JSON for Cursor inbox pull |
 | `Pull-Visa2026RuntimeErrorsRemote.ps1` | Dev PC (SSH) | Pull prod/staging/demo runtime errors into `.cursor/runtime-errors/inbox` |
-| `Install-SqlServerExpress.ps1` | Windows Server | SQL Server 2022 Express (`SQLEXPRESS`) |
-| `Configure-SqlExpressSaLogin.ps1` | Windows Server | After manual SQL install: mixed mode, `sa` |
-| `Restore-Visa2026SqlBackup.ps1` | Windows Server | Restore `.bak` (`-Profile Production` default) |
+| `Install-SqlServerExpress.ps1` | Windows Server | **Obsolete** for Visa2026 app DB (SQL Express not supported). Historical only. |
+| `Install-PostgreSqlForVisa2026.ps1` | Windows Server | PostgreSQL 16 download/install + create slot DB (see [visa2026-postgresql](../../.cursor/skills/visa2026-postgresql/SKILL.md); prefer binaries zip under SSH) |
+| `Configure-SqlExpressSaLogin.ps1` | Windows Server | **Obsolete** for Visa2026 app DB. Historical only. |
+| `Restore-Visa2026SqlBackup.ps1` | Windows Server | **Obsolete** for Postgres slots — use empty PG + `--import-visa2014` instead of `.bak` |
 | `Install-Visa2026ServerPrerequisites.ps1` | Windows Server | IIS + .NET 8 Hosting Bundle |
 | `Install-Visa2026IisSite.ps1` | Windows Server | One site/app pool (`-Profile` or explicit paths) |
 | `Configure-Visa2026Production.ps1` | Windows Server | `appsettings.Production.json` from slot env file |

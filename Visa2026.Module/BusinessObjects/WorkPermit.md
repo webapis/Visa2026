@@ -20,7 +20,7 @@ This section details the data fields of the `WorkPermit` object as defined in `W
 |---------------|-----------|-------------|--------------------------------|
 | `WorkPermitNumber` | `string` | The official number of the approval letter. | Required. |
 | `IssuedDate` | `DateTime` | The date the work permit letter was issued. | Required. |
-| `Application` | `Application` | Optional link to a visa application. | Optional (gear); auto-expands when set. |
+| `Application` | `Application` | Optional link to a visa application. Lookup limited to types with `CanIssueWorkPermit`. | Optional (gear); auto-expands when set. |
 | `AvailableEmployees` | `IList<Person>` | Employees available for nested items (from application or all active employees). | Read-only; Not Mapped; Not Browsable. |
 
 ---
@@ -37,6 +37,8 @@ This section details the data fields of the `WorkPermit` object as defined in `W
 ## 5. Business Rules & Logic
 
 - **`AvailableEmployees`**: When `Application` is set, lists employees from that application's items; otherwise lists all active employees (standalone work permits).
+- **`AvailableApplications`**: Datasource for `Application` — only types with `ApplicationType.CanIssueWorkPermit`.
+- **`IsApplicationTypeAllowed`**: when `Application` is set, requires `CanIssueWorkPermit`.
 - **Optional detail fields**: `Application` is behind the gear toggle; auto-expands when set.
 
 ---

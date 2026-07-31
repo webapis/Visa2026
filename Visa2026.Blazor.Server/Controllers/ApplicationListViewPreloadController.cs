@@ -24,6 +24,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     private EventHandler<ComponentInstanceCapturedEventArgs<IGrid>>? gridCapturedHandler;
     private CancellationTokenSource? preloadCts;
     private int lastScrollAheadVisibleIndex = -1;
+    private bool suppressCollectionReloadPreload;
 
     public ApplicationListViewPreloadController()
     {
@@ -33,7 +34,12 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
     protected override void OnActivated()
     {
         base.OnActivated();
-        collectionReloadedHandler ??= (_, _) => StartPreload();
+        collectionReloadedHandler ??= (_, _) =>
+        {
+            if (suppressCollectionReloadPreload)
+                return;
+            StartPreload(syncBatches: InitialSyncBatchCount);
+        };
         View.CollectionSource.CollectionReloaded += collectionReloadedHandler;
     }
 
@@ -43,7 +49,7 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         if (View.Editor is DxGridListEditor gridListEditor)
         {
             gridListEditor.GridModel.TextWrapEnabled = false;
-            gridCapturedHandler ??= (_, _) => StartPreload();
+            gridCapturedHandler ??= (_, _) => StartPreload(syncBatches: InitialSyncBatchCount);
             gridListEditor.GridModel.ComponentInstanceCaptured += gridCapturedHandler;
         }
 
@@ -119,6 +125,21 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         for (var offset = 0; offset < syncRowCount; offset += BatchSize)
             PreloadByIds(ids.Skip(offset).Take(BatchSize).ToList());
 
+        if (syncRowCount > 0 && View != null)
+        {
+            // Grid may have bound empty NotMapped SLA values before MigrationSlaProfile was included.
+            // Force rebind so Migration deadline / working days pick up the warmed cache.
+            suppressCollectionReloadPreload = true;
+            try
+            {
+                View.Refresh();
+            }
+            finally
+            {
+                suppressCollectionReloadPreload = false;
+            }
+        }
+
         if (syncRowCount >= ids.Count)
             return;
 
@@ -157,14 +178,28 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
         var applications = ObjectSpace.GetObjectsQuery<Application>()
             .Where(application => batchIds.Contains(application.ID))
             .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
-            .Include(application => application.LatestProgress!).ThenInclude(progress => progress.Location)
+            .Include(application => application.LatestProgress!).ThenInclude(progress => progress.State)
             .Include(application => application.ApplicationType!).ThenInclude(applicationType => applicationType.MigrationSlaProfile)
+            .Include(application => application.ApprovalLegProfile!)
+                .ThenInclude(profile => profile.MinistryLegs)
+                .ThenInclude(leg => leg.ApprovingMinistry)
+            .Include(application => application.Urgency)
+            .Include(application => application.VisaPeriod)
+            .Include(application => application.VisaType)
             .Include(application => application.ApprovalLegSnapshots)
             .AsSplitQuery()
             .ToList();
 
+        var itemCounts = ObjectSpace.GetObjectsQuery<ApplicationItem>()
+            .Where(item => batchIds.Contains(item.Application.ID))
+            .GroupBy(item => item.Application.ID)
+            .Select(group => new { ApplicationId = group.Key, Count = group.Count() })
+            .ToDictionary(x => x.ApplicationId, x => x.Count);
+
         foreach (var application in applications)
         {
+            application.SetListViewTotalPersonCount(itemCounts.GetValueOrDefault(application.ID, 0));
+            application.InvalidateListViewDisplayCache();
             application.WarmListViewDisplayCache();
             preloadedIds.Add(application.ID);
         }

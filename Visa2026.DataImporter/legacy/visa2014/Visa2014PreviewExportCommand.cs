@@ -13,7 +13,7 @@ internal static class Visa2014PreviewExportCommand
 
         if (!IsSupportedEntity(entity))
         {
-            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, Application, ApplicationItem, ApplicationProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
+            Console.Error.WriteLine($"ERR Entity '{entity}' is not supported yet. Supported: Person, Passport, Visa, Education, EmployeePositionHistory, EmployeeSalary, AddressOfResidence, WorkPermit, WorkPermitItem, Invitation, InvitationItem, Rejection, RejectionItem, PrivateHouse, Lodging, Hotel, Hospital, OtherSite, Application, ApplicationItem, ApplicationProgress, ProjectContractMinistryLeg, ApplicationMigrationServiceInference.");
             return 1;
         }
 
@@ -192,6 +192,22 @@ internal static class Visa2014PreviewExportCommand
                     maxRows,
                     verbose,
                     source.Id)
+                : string.Equals(entity, "Rejection", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014RejectionPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
+                : string.Equals(entity, "RejectionItem", StringComparison.OrdinalIgnoreCase)
+                ? Visa2014RejectionItemPreviewExporter.Export(
+                    source.ConnectionString,
+                    source.LookupTranslationPaths,
+                    output,
+                    maxRows,
+                    verbose,
+                    source.Id)
                 : string.Equals(entity, "Education", StringComparison.OrdinalIgnoreCase)
                 ? Visa2014EducationPreviewExporter.Export(
                     source.ConnectionString,
@@ -252,6 +268,8 @@ internal static class Visa2014PreviewExportCommand
         || string.Equals(entity, "WorkPermitItem", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Invitation", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "InvitationItem", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "Rejection", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(entity, "RejectionItem", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "AddressOfResidence", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "PrivateHouse", StringComparison.OrdinalIgnoreCase)
         || string.Equals(entity, "Lodging", StringComparison.OrdinalIgnoreCase)

@@ -115,10 +115,28 @@ internal static class Visa2014AddressOfResidenceImportApplier
 
         var regionName = row.GetValueOrDefault("Region") as string;
         var cityName = row.GetValueOrDefault("City") as string;
-        regionId = resolver.ResolveRegion(regionName);
-        cityId = resolver.ResolveCity(cityName, regionName);
-        if (!regionId.HasValue || !cityId.HasValue)
+
+        // Reference geography DB: prefer legacy Region when it matches Wiki/OSM reference;
+        // otherwise use the reference Region for this city name.
+        var effectiveRegionName = regionName;
+        var geo = Visa2014TurkmenistanGeographyStore.TryOpenDefault();
+        if (geo != null &&
+            geo.TryResolvePreferredRegionNameTm(cityName, regionName, out var preferred) &&
+            !string.IsNullOrWhiteSpace(preferred))
+        {
+            effectiveRegionName = preferred;
+        }
+
+        cityId = resolver.ResolveCity(cityName, effectiveRegionName);
+        if (!cityId.HasValue)
             return false;
+
+        // Prefer catalog City.Region when present; else effective (reference-corrected) Region.
+        regionId = resolver.ResolveRegionForCity(cityId.Value) ?? resolver.ResolveRegion(effectiveRegionName);
+        if (!regionId.HasValue)
+            return false;
+
+        var siteRegionName = resolver.GetCityRegionNameTm(cityId.Value) ?? effectiveRegionName;
 
         switch (residenceType)
         {
@@ -133,25 +151,25 @@ internal static class Visa2014AddressOfResidenceImportApplier
                 return true;
 
             case ModuleResidenceType.Lodging:
-                var lodgingId = resolver.ResolveLodging(cityName, regionName, row.GetValueOrDefault("Lodging") as string);
+                var lodgingId = resolver.ResolveLodging(cityName, siteRegionName, row.GetValueOrDefault("Lodging") as string);
                 if (!lodgingId.HasValue) return false;
                 typeFields = new TypeFieldValues(null, null, lodgingId);
                 return true;
 
             case ModuleResidenceType.Hotel:
-                var hotelId = resolver.ResolveHotel(cityName, regionName, row.GetValueOrDefault("Hotel") as string);
+                var hotelId = resolver.ResolveHotel(cityName, siteRegionName, row.GetValueOrDefault("Hotel") as string);
                 if (!hotelId.HasValue) return false;
                 typeFields = new TypeFieldValues(null, null, hotelId);
                 return true;
 
             case ModuleResidenceType.Hospital:
-                var hospitalId = resolver.ResolveHospital(cityName, regionName, row.GetValueOrDefault("Hospital") as string);
+                var hospitalId = resolver.ResolveHospital(cityName, siteRegionName, row.GetValueOrDefault("Hospital") as string);
                 if (!hospitalId.HasValue) return false;
                 typeFields = new TypeFieldValues(null, null, hospitalId);
                 return true;
 
             case ModuleResidenceType.Other:
-                var otherSiteId = resolver.ResolveOtherSite(cityName, regionName, row.GetValueOrDefault("OtherSite") as string);
+                var otherSiteId = resolver.ResolveOtherSite(cityName, siteRegionName, row.GetValueOrDefault("OtherSite") as string);
                 if (!otherSiteId.HasValue) return false;
                 typeFields = new TypeFieldValues(null, null, otherSiteId);
                 return true;

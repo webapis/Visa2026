@@ -7,7 +7,7 @@
         "Application": { "tr-TR": "Başvuru", "tk-TM": "Arza", "ru-RU": "Заявка" },
         "IsCancelled": { "tr-TR": "İptal Edildi", "tk-TM": "Ýatyryldy", "ru-RU": "Отменено" },
         "IsChanged": { "tr-TR": "Değiştirildi", "tk-TM": "Üýtgedildi", "ru-RU": "Изменено" },
-        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "DaysRemaining": { "tr-TR": "Kalan Gün", "tk-TM": "Galan gün", "ru-RU": "Осталось дней" },
         "ValidityDuration": { "tr-TR": "Geçerlilik Süresi", "tk-TM": "Möhleti", "ru-RU": "Срок действия" }
       }
@@ -26,7 +26,7 @@
       "layoutGroups": {
         "Invitation": { "tr-TR": "Davet", "tk-TM": "Çakylyk", "ru-RU": "Приглашение" },
         "InvitationItems": { "tr-TR": "Davet Kalemleri", "tk-TM": "Çakylyk elementleri", "ru-RU": "Позиции приглашения" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" }
+        "Documents": { "tr-TR": "Davetiye kopyaları", "tk-TM": "Çakylyk nusgalary", "ru-RU": "Копии приглашения" }
       }
     },
     "Invitation_InvitationItems_ListView": {
@@ -52,7 +52,7 @@
     "Rejection_DetailView": {
       "layoutGroups": {
         "Rejection": { "tr-TR": "Ret", "tk-TM": "Ret", "ru-RU": "Отказ" },
-        "Documents": { "tr-TR": "Belgeler", "tk-TM": "Resminamalar", "ru-RU": "Документы" },
+        "Documents": { "tr-TR": "Ret kopyaları", "tk-TM": "Ret nusgalary", "ru-RU": "Копии отказа" },
         "RejectionItems": { "tr-TR": "Ret Kalemleri", "tk-TM": "Ret elementleri", "ru-RU": "Позиции отказа" }
       }
     },

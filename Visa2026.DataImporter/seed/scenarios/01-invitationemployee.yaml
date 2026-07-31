@@ -92,8 +92,10 @@ data:
   Invitations:
   - Invitation Number: INV-2026-001
     Application: 4/-001
-    Start Date: 2026-04-02
-    Validity Duration: 3 aý
+    Issued Date: 2026-04-02
+    Expiration Date: 2026-07-01
+    Visa Category: Köp gezeklik
+    Visa Period: 3 (üç) aý
   InvitationItems:
   - Invitation Number: INV-2026-001
     Person: John Doe

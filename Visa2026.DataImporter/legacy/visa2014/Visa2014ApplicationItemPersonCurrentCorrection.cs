@@ -35,7 +35,7 @@ internal static class Visa2014ApplicationItemPersonCurrentCorrection
         var dryRun = HasArg(args, "--dry-run");
         var targetConnection = GetOptionValue(args, "--target-connection")
             ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;";
+            ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
 
         Console.WriteLine("=== VISA2014 ApplicationItem person-current correction");
         Console.WriteLine($"INF Target SQL: {MaskConnectionString(targetConnection)}");

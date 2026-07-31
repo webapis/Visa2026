@@ -117,6 +117,16 @@ public static class VisaLocalization
     /// <summary>DevExpress Blazor grid empty-state message (not in XAF Application Model).</summary>
     public static string GetGridEmptyDataText() => GetShellText("NoDataToDisplay", "No data to display");
 
+    /// <summary>Empty-state message when a column filter or search text is active.</summary>
+    public static string GetGridEmptyFilteredDataText() =>
+        GetShellText("NoDataMatchingFilter", "No records match the current filter");
+
+    /// <summary>Caption for the empty-state Clear filters button.</summary>
+    public static string GetGridClearFiltersText() => GetShellText("ClearFilters", "Clear filters");
+
+    /// <summary>Short label appended to the ListView total when a grid filter is active.</summary>
+    public static string GetGridFilteredLabel() => GetShellText("Filtered", "Filtered");
+
     private static string GetShellText(string key, string englishFallback)
     {
         if (!TryNormalizeCulture(CultureInfo.CurrentUICulture.Name, out string culture))
@@ -131,6 +141,9 @@ public static class VisaLocalization
                 "TextToSearch" => "Aranacak metin...",
                 "TypeToSearch" => "Aranacak metin yazın...",
                 "NoDataToDisplay" => "Gösterilecek veri yok",
+                "NoDataMatchingFilter" => "Geçerli filtreyle eşleşen kayıt yok",
+                "ClearFilters" => "Filtreleri temizle",
+                "Filtered" => "Filtrelendi",
                 _ => englishFallback,
             },
             "tk-TM" => key switch
@@ -138,6 +151,9 @@ public static class VisaLocalization
                 "TextToSearch" => "Gözleýän tekst...",
                 "TypeToSearch" => "Gözlemek üçin ýazyň...",
                 "NoDataToDisplay" => "Görkezmek üçin maglumat ýok",
+                "NoDataMatchingFilter" => "Häzirki filtre bilen gabat gelýän ýazgy ýok",
+                "ClearFilters" => "Filtrleri arassala",
+                "Filtered" => "Filtrlenen",
                 _ => englishFallback,
             },
             "ru-RU" => key switch
@@ -145,6 +161,9 @@ public static class VisaLocalization
                 "TextToSearch" => "Текст для поиска...",
                 "TypeToSearch" => "Введите текст для поиска...",
                 "NoDataToDisplay" => "Нет данных для отображения",
+                "NoDataMatchingFilter" => "Нет записей, соответствующих текущему фильтру",
+                "ClearFilters" => "Очистить фильтры",
+                "Filtered" => "Отфильтровано",
                 _ => englishFallback,
             },
             _ => englishFallback,

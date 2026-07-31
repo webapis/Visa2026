@@ -86,8 +86,8 @@ disable-model-invocation: false
 
 | Where | Action | Scope |
 |-------|--------|--------|
-| **`Application`** DetailView | **Resminamalar** (`GenerateWordReports`) | `WordReportPackageScope.Application` — templates with `RootBoType.Application` |
-| **`ApplicationItem`** ListView (multi-select, same application) | **Resminamalar** (`ViewApplicationItemWordReports`) | `WordReportPackageScope.ApplicationItem` — `RootBoType.ApplicationItem` or `Person` |
+| **`Application`** DetailView | **Templates** (`GenerateWordReports`, ImageName `Templates`) | `WordReportPackageScope.Application` — templates with `RootBoType.Application` |
+| **`ApplicationItem`** ListView (multi-select, same application) | **Templates** (`ViewApplicationItemWordReports`, ImageName `Templates`) | `WordReportPackageScope.ApplicationItem` — `RootBoType.ApplicationItem` or `Person` |
 
 Controllers: `WordReportsController`, `ApplicationItemWordReportsController`.
 

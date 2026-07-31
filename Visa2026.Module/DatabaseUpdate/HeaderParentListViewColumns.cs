@@ -29,21 +29,24 @@ internal static class HeaderParentListViewColumns
             [
                 nameof(BusinessObjects.Invitation.InvitationNumber),
                 nameof(BusinessObjects.Invitation.DocumentCopiesListLink),
-                nameof(BusinessObjects.Invitation.StartDate),
+                nameof(BusinessObjects.Invitation.TotalPersonCount),
+                nameof(BusinessObjects.Invitation.IssuedDate),
+                nameof(BusinessObjects.Invitation.VisaCategory),
+                nameof(BusinessObjects.Invitation.VisaPeriod),
                 nameof(BusinessObjects.Invitation.ExpirationDate),
                 nameof(BusinessObjects.Invitation.DaysRemaining),
-                nameof(BusinessObjects.Invitation.ValidityDuration),
             ],
-            [110, 56, 100, 100, 72, 120]
+            [110, 48, 56, 100, 100, 100, 100, 72]
         ),
         (
             "WorkPermit_ListView",
             [
                 nameof(BusinessObjects.WorkPermit.WorkPermitNumber),
                 nameof(BusinessObjects.WorkPermit.DocumentCopiesListLink),
+                nameof(BusinessObjects.WorkPermit.TotalPersonCount),
                 nameof(BusinessObjects.WorkPermit.IssuedDate),
             ],
-            [120, 56, 100]
+            [120, 48, 56, 100]
         ),
         (
             "Rejection_ListView",
@@ -55,7 +58,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.Rejection.Application),
                 nameof(BusinessObjects.Rejection.Reason),
             ],
-            [200, 56, 100, 120, 140, 240]
+            [200, 48, 100, 120, 140, 240]
         ),
         (
             "BorderZone_ListView",
@@ -68,7 +71,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.BorderZone.ValidityDuration),
                 nameof(BusinessObjects.BorderZone.Application),
             ],
-            [110, 56, 100, 100, 72, 120, 140]
+            [110, 48, 100, 100, 72, 120, 140]
         ),
     ];
 
@@ -82,10 +85,12 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.InvitationItem.Person),
                 nameof(BusinessObjects.InvitationItem.Passport),
                 nameof(BusinessObjects.InvitationItem.Invitation),
+                nameof(BusinessObjects.InvitationItem.Application),
                 nameof(BusinessObjects.InvitationItem.IsCancelled),
                 nameof(BusinessObjects.InvitationItem.IsUsed),
+                nameof(BusinessObjects.InvitationItem.IssuedVisa),
             ],
-            [180, 56, 120, 100, 120, 80, 72]
+            [180, 48, 120, 100, 120, 140, 80, 72, 120]
         ),
         (
             "WorkPermitItem_ListView",
@@ -101,7 +106,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.WorkPermitItem.WorkPermittedLocations),
                 nameof(BusinessObjects.WorkPermitItem.ASNumber),
             ],
-            [180, 56, 120, 120, 90, 100, 100, 72, 240, 90]
+            [180, 48, 120, 120, 90, 100, 100, 72, 240, 90]
         ),
         (
             "RejectionItem_ListView",
@@ -112,7 +117,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.RejectionItem.Passport),
                 nameof(BusinessObjects.RejectionItem.Reason),
             ],
-            [200, 56, 120, 100, 200]
+            [200, 48, 120, 100, 200]
         ),
         (
             "BorderZoneItem_ListView",
@@ -122,7 +127,7 @@ internal static class HeaderParentListViewColumns
                 nameof(BusinessObjects.BorderZoneItem.Passport),
                 nameof(BusinessObjects.BorderZoneItem.BorderZone),
             ],
-            [140, 56, 100, 140]
+            [140, 48, 100, 140]
         ),
     ];
 

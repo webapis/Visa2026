@@ -79,14 +79,32 @@ internal sealed partial class Visa2014ODataLookupResolver
         _visaCategories = MapLookupDto<Bo.VisaCategory, Dto.VisaCategory>(objectSpace);
         _projectContracts = MapLookupDto<Bo.ProjectContract, Dto.ProjectContract>(objectSpace);
         _approvalLegProfiles = MapLookupDto<Bo.ApprovalLegProfile, Dto.ApprovalLegProfile>(objectSpace);
-        _cities = MapLookup(objectSpace.GetObjectsQuery<Bo.City>(), x => new Dto.City
+        // Region navigation must be read here: CityLookupMatcher scopes by region, and Demo/prod
+        // often leave City.RegionName null even when RegionID is set.
+        _cities = MapLookup(objectSpace.GetObjectsQuery<Bo.City>(), x =>
         {
-            Id = x.ID,
-            Name = x.Name ?? "",
-            NameTm = x.NameTm ?? "",
-            Code = x.Code ?? "",
-            IsDefault = x.IsDefault,
-            RegionName = x.RegionName,
+            var regionName = !string.IsNullOrWhiteSpace(x.RegionName)
+                ? x.RegionName
+                : x.Region?.NameTm;
+            return new Dto.City
+            {
+                Id = x.ID,
+                Name = x.Name ?? "",
+                NameTm = x.NameTm ?? "",
+                Code = x.Code ?? "",
+                IsDefault = x.IsDefault,
+                RegionName = regionName ?? "",
+                Region = x.Region == null
+                    ? null
+                    : new Dto.Region
+                    {
+                        Id = x.Region.ID,
+                        Name = x.Region.Name ?? "",
+                        NameTm = x.Region.NameTm ?? "",
+                        Code = x.Region.Code ?? "",
+                        IsDefault = x.Region.IsDefault,
+                    },
+            };
         });
         _movementPermitLocations = MapLookupDto<Bo.MovementPermitLocation, Dto.MovementPermitLocation>(objectSpace);
         _borderZoneLocations = MapLookupDto<Bo.BorderZoneLocation, Dto.BorderZoneLocation>(objectSpace);
@@ -117,12 +135,16 @@ internal sealed partial class Visa2014ODataLookupResolver
             var nameTmProperty = typeof(TDto).GetProperty(nameof(Dto.Gender.NameTm));
             var codeProperty = typeof(TDto).GetProperty(nameof(Dto.Gender.Code));
             var isDefaultProperty = typeof(TDto).GetProperty(nameof(Dto.Gender.IsDefault));
+            // Required for VisaType / VisaCategory / PassportType / EducationLevel resolve by
+            // LocalizationKey. Omitting this caused every in-process Visa to land on default WP.
+            var localizationKeyProperty = typeof(TDto).GetProperty(nameof(Dto.VisaType.LocalizationKey));
 
             idProperty?.SetValue(dto, x.ID);
             nameProperty?.SetValue(dto, x.Name ?? "");
             nameTmProperty?.SetValue(dto, x.NameTm ?? "");
             codeProperty?.SetValue(dto, x.Code ?? "");
             isDefaultProperty?.SetValue(dto, x.IsDefault);
+            localizationKeyProperty?.SetValue(dto, x.LocalizationKey ?? "");
             return dto;
         });
 }

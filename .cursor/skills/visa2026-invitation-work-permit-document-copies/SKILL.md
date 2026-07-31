@@ -22,6 +22,8 @@ disable-model-invocation: false
 
 **[`docs/INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md`](../../../docs/INVITATION_WORK_PERMIT_DOCUMENT_COPIES.md)**
 
+**Catalog chrome:** Header copies use shared `.doc-copies-catalog*` ([`PREVIEW_SLOT.md`](../../../docs/PREVIEW_SLOT.md) § Document-copies catalog chrome) — same sectioned look as Person copies. Do not reintroduce flat `__group` cards.
+
 ## Phases
 
 | Phase | Focus |

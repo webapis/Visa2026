@@ -41,7 +41,7 @@ public static class ApplicationProgressProfileResolver
     /// Excludes <see cref="Application.ProgressHistory"/> so officers may delete the last step.
     /// </summary>
     public const string TerminalLockedApplicationDetailTargetItems =
-        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApplicationType;ApplicationReason;ApprovalLegProfile;ProjectContract;MigrationService;FromCity;ToCity;BusinessTripStartDate;BusinessTripEndDate;BusinessTripPurpose;VisaPeriod;VisaType;VisaCategory;MovementPermitLocation;BorderZoneLocation;Urgency;IsForFamily;OrganizationType;ApplicationItems;Invitations;Rejections;WorkPermits";
+        "IsManualEntry;ApplicationNumber;AppNumberPrefix;FullApplicationNumber;ApplicationDate;ApplicationTypeQuickCode;ApplicationType;ApplicationReason;ApprovalLegProfile;ProjectContract;MigrationService;FromCity;ToCity;BusinessTripStartDate;BusinessTripEndDate;BusinessTripPurpose;VisaPeriod;VisaType;VisaCategory;MovementPermitLocation;BorderZoneLocation;Urgency;IsForFamily;ApplicationItems;Invitations;Rejections;WorkPermits";
 
 
 
@@ -777,15 +777,9 @@ public static class ApplicationProgressProfileResolver
 
 
 
-    private static bool IsOfficePreparationStep(ApplicationProgress progress) =>
-
+        private static bool IsOfficePreparationStep(ApplicationProgress progress) =>
         progress.State != null
-
-        && progress.Location != null
-
-        && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase)
-
-        && string.Equals(progress.Location.Code, ApplicationProgressLocationCodes.AtOffice, StringComparison.OrdinalIgnoreCase);
+        && string.Equals(progress.State.Code, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase);
 
 
 

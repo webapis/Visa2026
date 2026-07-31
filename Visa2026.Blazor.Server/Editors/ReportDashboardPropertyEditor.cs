@@ -1,0 +1,540 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using DevExpress.Data.Filtering;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor.Components.Models;
+using DevExpress.ExpressApp.Blazor.Editors;
+using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
+using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
+using Visa2026.Module.Editors;
+using Visa2026.Module.Services;
+using Visa2026.Module.Services.PersonDossier;
+using Visa2026.Module.Services.ReportDashboard;
+
+namespace Visa2026.Blazor.Server.Editors;
+
+[PropertyEditor(typeof(string), ReportDashboardEditorAliases.Dashboard, false)]
+public class ReportDashboardPropertyEditor : BlazorPropertyEditorBase, IComplexViewItem
+{
+    private XafApplication? _application;
+    private IReportDashboardQueryService? _queryService;
+    private int _refreshGeneration;
+
+    public ReportDashboardPropertyEditor(Type objectType, IModelMemberViewItem model)
+        : base(objectType, model) { }
+
+    public override ReportDashboardModel ComponentModel => (ReportDashboardModel)base.ComponentModel;
+
+    void IComplexViewItem.Setup(IObjectSpace objectSpace, XafApplication application)
+    {
+        _application = application;
+        _queryService = application.ServiceProvider?.GetService<IReportDashboardQueryService>();
+    }
+
+    protected override IComponentModel CreateComponentModel()
+    {
+        var initialCategory = ReportDashboardCategory.VisaExtension;
+        var model = new ReportDashboardModel
+        {
+            PersonType        = ReportDashboardPersonType.All,
+            Category          = initialCategory,
+            SubReport         = ReportDashboardCatalog.DefaultSubReport(initialCategory),
+            ProjectKey        = "All",
+            ChartView         = "pie",
+            DateRangeMonths   = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            PassportDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            PositionHistoryDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            AddressOfResidenceDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            MedicalRecordDateRangeMonths = ReportDashboardCatalog.DefaultCategoryDateRangeMonths,
+            ShowAllView       = true,
+            IncludeArchivedPersons = false,
+            OneLastValidVisaPerPerson = true,
+            OneLastValidWorkPermitPerPerson = true,
+            ValidVisaPersonsOnly = true,
+            IncludeCompletedApplicationProcesses = false,
+            IncludeCancelledApplicationProcesses = false,
+            SearchTerm = string.Empty,
+            SearchTermChanged = EventCallback.Factory.Create<string>(this, OnSearchTermChanged),
+            PersonSelected = EventCallback.Factory.Create<Guid>(this, OnPersonSelected),
+            PersonTypeChanged   = EventCallback.Factory.Create<ReportDashboardPersonType>(this, OnPersonTypeChanged),
+            CategoryChanged     = EventCallback.Factory.Create<ReportDashboardCategory>(this, OnCategoryChanged),
+            SubReportChanged    = EventCallback.Factory.Create<string>(this, OnSubReportChanged),
+            ProjectKeyChanged   = EventCallback.Factory.Create<string>(this, OnProjectKeyChanged),
+            ChartViewChanged    = EventCallback.Factory.Create<string>(this, OnChartViewChanged),
+            ShowAllViewChanged  = EventCallback.Factory.Create<bool>(this, OnShowAllViewChanged),
+            IncludeArchivedPersonsChanged = EventCallback.Factory.Create<bool>(this, OnIncludeArchivedPersonsChanged),
+            OneLastValidVisaPerPersonChanged = EventCallback.Factory.Create<bool>(this, OnOneLastValidVisaPerPersonChanged),
+            OneLastValidWorkPermitPerPersonChanged = EventCallback.Factory.Create<bool>(this, OnOneLastValidWorkPermitPerPersonChanged),
+            ValidVisaPersonsOnlyChanged = EventCallback.Factory.Create<bool>(this, OnValidVisaPersonsOnlyChanged),
+            IncludeCompletedApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCompletedApplicationProcessesChanged),
+            IncludeCancelledApplicationProcessesChanged = EventCallback.Factory.Create<bool>(this, OnIncludeCancelledApplicationProcessesChanged),
+            IsLoading               = true,
+            LoadingMessage          = ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview"),
+            LoadingProgressPercent  = 0,
+            OpenExcelRequested      = EventCallback.Factory.Create(this, OnOpenExcelAsync),
+            OpenListViewRequested   = EventCallback.Factory.Create<string?>(this, OnOpenListView),
+            DateRangeChanged        = EventCallback.Factory.Create<int>(this, OnDateRangeChanged),
+            PassportDateRangeChanged = EventCallback.Factory.Create<int>(this, OnPassportDateRangeChanged),
+            PositionHistoryDateRangeChanged = EventCallback.Factory.Create<int>(this, OnPositionHistoryDateRangeChanged),
+            AddressOfResidenceDateRangeChanged = EventCallback.Factory.Create<int>(this, OnAddressOfResidenceDateRangeChanged),
+            MedicalRecordDateRangeChanged = EventCallback.Factory.Create<int>(this, OnMedicalRecordDateRangeChanged)
+        };
+        model.InitialLoadRequested = EventCallback.Factory.Create(this, () => RefreshAsync(model));
+        return model;
+    }
+
+    private Task OnPersonTypeChanged(ReportDashboardPersonType personType)
+    {
+        ComponentModel.PersonType = personType;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnCategoryChanged(ReportDashboardCategory category)
+    {
+        ComponentModel.Category    = category;
+        ComponentModel.SubReport   = ReportDashboardCatalog.DefaultSubReport(category);
+        ComponentModel.ChartView   = DefaultChartViewFor(category, ComponentModel.SubReport);
+        ComponentModel.ShowAllView = false;
+        ComponentModel.AllPanels   = null;
+        ComponentModel.Panel       = null;
+        ComponentModel.SubReportCounts = null;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnSubReportChanged(string subReport)
+    {
+        ComponentModel.SubReport = subReport;
+        ComponentModel.ChartView = DefaultChartViewFor(ComponentModel.Category, subReport);
+        ComponentModel.Panel = null;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnProjectKeyChanged(string projectKey)
+    {
+        ComponentModel.ProjectKey = projectKey;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnSearchTermChanged(string searchTerm)
+    {
+        ComponentModel.SearchTerm = searchTerm ?? string.Empty;
+        return RefreshAsync(ComponentModel);
+    }
+
+    /// <summary>
+    /// A Person search result row hands over to the read-only dossier page.
+    /// </summary>
+    private void OnPersonSelected(Guid personId)
+    {
+        if (_application == null || personId == Guid.Empty)
+            return;
+
+        var detailView = PersonDossierOpenHelper.CreateDossierView(_application, personId);
+        if (detailView == null)
+            return;
+
+        var window = _application.MainWindow;
+        if (window == null)
+            return;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(window, null));
+    }
+
+
+    private static string DefaultChartViewFor(ReportDashboardCategory category, string subReport) =>
+        (category, subReport) switch
+        {
+            (ReportDashboardCategory.ApplicationViaMinistry, _) => "bar",
+            (ReportDashboardCategory.ApplicationDirectMigration, _) => "bar",
+            (ReportDashboardCategory.Passport, "by-citizenship") => "bar",
+            (ReportDashboardCategory.Education, "by-country") => "bar",
+            (ReportDashboardCategory.Education, "by-specialty") => "bar",
+            (ReportDashboardCategory.PositionHistory, "by-position") => "bar",
+            (ReportDashboardCategory.PositionHistory, "by-actual-position") => "bar",
+            (ReportDashboardCategory.Subcontractor, "by-company") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-region") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-city") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-address-type") => "bar",
+            (ReportDashboardCategory.AddressOfResidence, "by-address") => "bar",
+            (ReportDashboardCategory.Registration, _) => "bar",
+            (ReportDashboardCategory.Invitation, "ready-by-project") => "bar",
+            (ReportDashboardCategory.Invitation, "ready-by-period-category") => "bar",
+            (ReportDashboardCategory.VisaExtension, "on-extension") => "bar",
+            (ReportDashboardCategory.VisaExtension, "on-extension-by-period-category-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "app-progress") => "bar",
+            (ReportDashboardCategory.VisaExtension, "active-by-project") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-period-category-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "extension-required") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-days-remaining") => "bar",
+            (ReportDashboardCategory.WorkPermit, "active-by-project") => "bar",
+            (ReportDashboardCategory.WorkPermit, "on-extension") => "bar",
+            (ReportDashboardCategory.WorkPermit, "extension-result") => "bar",
+            (ReportDashboardCategory.WorkPermit, "by-days-remaining") => "bar",
+            (ReportDashboardCategory.VisaExtension, "extension-result") => "bar",
+            (ReportDashboardCategory.VisaExtension, "extension-result-by-period-category-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-category") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-type") => "bar",
+            (ReportDashboardCategory.VisaExtension, "by-period") => "bar",
+            (ReportDashboardCategory.Invitation, "in-process") => "bar",
+            (ReportDashboardCategory.Invitation, "in-process-by-period-category-type") => "bar",
+            (ReportDashboardCategory.Invitation, "process-result") => "bar",
+            (ReportDashboardCategory.Invitation, "process-result-by-period-category-type") => "bar",
+            (ReportDashboardCategory.Invitation, "rejected-by-project") => "bar",
+            (ReportDashboardCategory.Invitation, "rejected-by-period-category-type") => "bar",
+            (ReportDashboardCategory.Invitation, "used") => "bar",
+            (ReportDashboardCategory.Invitation, "used-by-period-category-type") => "bar",
+            (ReportDashboardCategory.Invitation, "valid-until") => "bar",
+            (ReportDashboardCategory.Invitation, "expired") => "bar",
+            _ => "pie"
+        };
+    private void OnChartViewChanged(string chartView)
+    {
+        ComponentModel.ChartView = chartView;
+    }
+
+    private Task OnDateRangeChanged(int months)
+    {
+        ComponentModel.DateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnPassportDateRangeChanged(int months)
+    {
+        ComponentModel.PassportDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnPositionHistoryDateRangeChanged(int months)
+    {
+        ComponentModel.PositionHistoryDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnAddressOfResidenceDateRangeChanged(int months)
+    {
+        ComponentModel.AddressOfResidenceDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnMedicalRecordDateRangeChanged(int months)
+    {
+        ComponentModel.MedicalRecordDateRangeMonths = months;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private static int ResolveDateRangeMonths(ReportDashboardModel model, ReportDashboardCategory category) =>
+        category switch
+        {
+            ReportDashboardCategory.Education => model.DateRangeMonths,
+            ReportDashboardCategory.Passport => model.PassportDateRangeMonths,
+            ReportDashboardCategory.PositionHistory => model.PositionHistoryDateRangeMonths,
+            ReportDashboardCategory.AddressOfResidence => model.AddressOfResidenceDateRangeMonths,
+            ReportDashboardCategory.MedicalRecord => model.MedicalRecordDateRangeMonths,
+            // No Last-N UI; Open ListView criteria omit ApplicationDate — do not silently cut Preview.
+            _ when ReportDashboardCatalog.IsApplicationCategory(category) => 0,
+            _ => ReportDashboardCatalog.DefaultCategoryDateRangeMonths
+        };
+
+    private Task OnShowAllViewChanged(bool showAll)
+    {
+        ComponentModel.ShowAllView = showAll;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnIncludeArchivedPersonsChanged(bool includeArchived)
+    {
+        ComponentModel.IncludeArchivedPersons = includeArchived;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnOneLastValidVisaPerPersonChanged(bool oneLast)
+    {
+        ComponentModel.OneLastValidVisaPerPerson = oneLast;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnOneLastValidWorkPermitPerPersonChanged(bool oneLast)
+    {
+        ComponentModel.OneLastValidWorkPermitPerPerson = oneLast;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnValidVisaPersonsOnlyChanged(bool validVisaOnly)
+    {
+        ComponentModel.ValidVisaPersonsOnly = validVisaOnly;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnIncludeCompletedApplicationProcessesChanged(bool include)
+    {
+        ComponentModel.IncludeCompletedApplicationProcesses = include;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private Task OnIncludeCancelledApplicationProcessesChanged(bool include)
+    {
+        ComponentModel.IncludeCancelledApplicationProcesses = include;
+        return RefreshAsync(ComponentModel);
+    }
+
+    private IObjectSpace? CreatePersistentObjectSpace() =>
+        _application?.CreateObjectSpace(typeof(Person));
+
+    private async Task RefreshAsync(ReportDashboardModel model)
+    {
+        if (_application == null || _queryService == null) return;
+
+        var generation = ++_refreshGeneration;
+        model.IsLoading = true;
+        model.LoadingProgressPercent = 0;
+        model.LoadingMessage = model.ShowAllView
+                ? ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingOverview")
+                : ReportDashboardLocalization.Get("ReportDashboard.Chrome.LoadingReport");
+        // Let Blazor paint the overlay before synchronous DB work (Task.Yield is not enough).
+        await Task.Delay(16);
+        if (generation != _refreshGeneration) return;
+
+        try
+        {
+            using var objectSpace = CreatePersistentObjectSpace();
+            if (objectSpace == null) return;
+
+            model.Snapshot = _queryService.LoadSnapshot(objectSpace, model.DateRangeMonths, model.PersonType);
+            await Task.Yield();
+            if (generation != _refreshGeneration) return;
+
+            if (model.ShowAllView)
+            {
+                var categories = ReportDashboardCatalog.Categories.ToList();
+                var allPanels = new Dictionary<ReportDashboardCategory, ReportDashboardPanelData>();
+                for (var i = 0; i < categories.Count; i++)
+                {
+                    if (generation != _refreshGeneration) return;
+
+                    var cat = categories[i];
+                    model.LoadingMessage = ReportDashboardLocalization.Format("ReportDashboard.Chrome.LoadingNamed", ReportDashboardCatalog.CategoryLabel(cat));
+                    model.LoadingProgressPercent = (int)Math.Round(100.0 * i / Math.Max(1, categories.Count));
+                    await Task.Delay(1);
+                    if (generation != _refreshGeneration) return;
+
+                    // Every Overview card = first sub-report snapshot (same LoadPanel args as category detail).
+                    var defaultSub = ReportDashboardCatalog.DefaultSubReport(cat);
+                    allPanels[cat] = LoadPanelFor(objectSpace, model, cat, defaultSub);
+
+                    // Progressive fill so Overview cards appear as each category finishes.
+                    model.AllPanels = new Dictionary<ReportDashboardCategory, ReportDashboardPanelData>(allPanels);
+                    model.LoadingProgressPercent = (int)Math.Round(100.0 * (i + 1) / Math.Max(1, categories.Count));
+                    await Task.Yield();
+                }
+
+                if (generation != _refreshGeneration) return;
+                model.Panel = null;
+                model.SubReportCounts = null;
+            }
+            else
+            {
+                model.AllPanels = null;
+                var subReports = ReportDashboardCatalog.SubReports(model.Category).ToList();
+                var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+                ReportDashboardPanelData? activePanel = null;
+                for (var i = 0; i < subReports.Count; i++)
+                {
+                    if (generation != _refreshGeneration) return;
+
+                    var sub = subReports[i];
+                    model.LoadingMessage = ReportDashboardLocalization.Format("ReportDashboard.Chrome.LoadingNamed", sub.Label);
+                    model.LoadingProgressPercent = (int)Math.Round(100.0 * i / Math.Max(1, subReports.Count));
+                    await Task.Delay(1);
+                    if (generation != _refreshGeneration) return;
+
+                    var panel = LoadPanelFor(objectSpace, model, model.Category, sub.Key);
+                    counts[sub.Key] = panel.TotalCount;
+                    if (string.Equals(sub.Key, model.SubReport, StringComparison.Ordinal)
+                        || (activePanel == null && subReports.Count == 1))
+                        activePanel = panel;
+
+                    model.LoadingProgressPercent = (int)Math.Round(100.0 * (i + 1) / Math.Max(1, subReports.Count));
+                    await Task.Yield();
+                }
+
+                if (generation != _refreshGeneration) return;
+
+                // Active key may be "default" while catalog uses a concrete key — fall back to DefaultSubReport.
+                if (activePanel == null)
+                {
+                    var fallbackKey = ReportDashboardCatalog.DefaultSubReport(model.Category);
+                    if (counts.ContainsKey(fallbackKey))
+                    {
+                        activePanel = LoadPanelFor(objectSpace, model, model.Category, fallbackKey);
+                        counts[fallbackKey] = activePanel.TotalCount;
+                    }
+                }
+
+                model.Panel = activePanel;
+                model.SubReportCounts = counts;
+            }
+        }
+        finally
+        {
+            if (generation == _refreshGeneration)
+            {
+                model.IsLoading = false;
+                model.LoadingProgressPercent = 100;
+                model.LoadingMessage = string.Empty;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Shared LoadPanel args for Overview cards and category detail so totals stay aligned.
+    /// </summary>
+    private ReportDashboardPanelData LoadPanelFor(
+        IObjectSpace objectSpace,
+        ReportDashboardModel model,
+        ReportDashboardCategory category,
+        string subReport)
+    {
+        return _queryService!.LoadPanel(
+            objectSpace,
+            model.PersonType,
+            category,
+            model.ProjectKey,
+            ResolveDateRangeMonths(model, category),
+            subReport,
+            model.IncludeArchivedPersons,
+            model.OneLastValidVisaPerPerson,
+            model.OneLastValidWorkPermitPerPerson,
+            model.IncludeCompletedApplicationProcesses,
+            model.IncludeCancelledApplicationProcesses,
+            model.ValidVisaPersonsOnly,
+            model.SearchTerm);
+    }
+
+    private async Task OnOpenExcelAsync()
+    {
+        if (_application == null) return;
+
+        var hint = ReportDashboardCatalog.ExcelTemplateNameHint(
+            ComponentModel.Category, ComponentModel.SubReport);
+        if (string.IsNullOrEmpty(hint))
+        {
+            _application.ShowViewStrategy.ShowMessage(
+                ReportDashboardLocalization.Get("ReportDashboard.Chrome.ExcelNotConfiguredBody"),
+                InformationType.Info, 4000);
+            return;
+        }
+
+        using var objectSpace = CreatePersistentObjectSpace();
+        if (objectSpace == null) return;
+
+        var template = objectSpace.GetObjectsQuery<UserReportTemplate>()
+            .FirstOrDefault(t => t.TemplateName != null
+                && t.TemplateName.Contains(hint)
+                && t.TemplateOutputFormat == TemplateOutputFormat.Excel);
+
+        if (template?.TemplateFile == null)
+        {
+            _application.ShowViewStrategy.ShowMessage(
+                ReportDashboardLocalization.Format("ReportDashboard.Chrome.ExcelTemplateMissing", hint),
+                InformationType.Warning, 5000);
+            return;
+        }
+
+        var downloader = _application.ServiceProvider?.GetService<IFileDownloader>();
+        if (downloader == null) return;
+
+        await using var ms = new MemoryStream();
+        template.TemplateFile.SaveToStream(ms);
+        ms.Position = 0;
+        var fileName = string.IsNullOrWhiteSpace(template.TemplateFile.FileName)
+            ? $"{hint}.xlsx"
+            : template.TemplateFile.FileName;
+        await downloader.DownloadAsync(
+            fileName, ms,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    private async Task OnOpenListView(string? statusLabel)
+    {
+        if (_application == null) return;
+
+        var model = ComponentModel;
+        model.IsLoading = true;
+        model.LoadingProgressPercent = -1; // indeterminate bar while navigating away
+        model.LoadingMessage = ReportDashboardLocalization.Get("ReportDashboard.Chrome.OpeningListView");
+        await Task.Delay(16);
+
+        try
+        {
+            var category = model.Category;
+            var subReport = model.SubReport;
+            var (listViewId, type) = ReportDashboardCatalog.ResolveListViewTarget(category, subReport);
+            var includeArchived = model.IncludeArchivedPersons;
+            var criteria = ReportDashboardCatalog.BuildListCriteria(
+                model.PersonType, category, model.ProjectKey, statusLabel,
+                includeArchived, subReport, model.OneLastValidVisaPerPerson, model.SearchTerm);
+
+            var objectSpace = _application.CreateObjectSpace(type);
+            var collectionSource = _application.CreateCollectionSource(objectSpace, type, listViewId);
+            var listView = _application.CreateListView(listViewId, collectionSource, true);
+            if (!string.IsNullOrWhiteSpace(criteria))
+                listView.CollectionSource.Criteria["ReportDashboard"] = CriteriaOperator.Parse(criteria);
+
+            ApplyLocalizedListViewChrome(listView, category, subReport);
+
+            var window = _application.MainWindow;
+            if (window == null) return;
+
+            _application.ShowViewStrategy.ShowView(
+                new ShowViewParameters(listView) { TargetWindow = TargetWindow.Current },
+                new ShowViewSource(window, null));
+        }
+        finally
+        {
+            // If ShowView replaced the dashboard, this model may already be disposed — still safe to clear flags.
+            model.IsLoading = false;
+            model.LoadingProgressPercent = 0;
+            model.LoadingMessage = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Open ListView caption = localized catalog Label; column captions via Header() on English Model.xafml captions.
+    /// </summary>
+    private static void ApplyLocalizedListViewChrome(
+        ListView listView, ReportDashboardCategory category, string? subReport)
+    {
+        var label = ReportDashboardCatalog.SubReports(category)
+            .FirstOrDefault(s => string.Equals(s.Key, subReport, StringComparison.Ordinal))
+            ?.Label;
+        if (string.IsNullOrWhiteSpace(label))
+            label = ReportDashboardLocalization.SubReport(category, subReport);
+
+        if (!string.IsNullOrWhiteSpace(label))
+            listView.Caption = label;
+
+        if (listView.Model is not IModelListView modelListView)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(label))
+            modelListView.Caption = label;
+
+        foreach (IModelColumn column in modelListView.Columns)
+        {
+            if (string.IsNullOrWhiteSpace(column.Caption))
+                continue;
+            column.Caption = ReportDashboardLocalization.Header(column.Caption);
+        }
+    }
+}

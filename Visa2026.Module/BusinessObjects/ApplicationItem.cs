@@ -21,7 +21,7 @@ namespace Visa2026.Module.BusinessObjects
     [DefaultClassOptions]
     [NavigationItem(false)]
     [XafDisplayName("Application item")]
-    [DefaultProperty(nameof(ApplicationItemName))]
+    [DefaultProperty(nameof(DisplayCaption))]
     [SupportsOptionalDetailFields]
     [Appearance("BusinessTripAddressFieldsVisible", Visibility = ViewItemVisibility.Hide,
         Criteria = "Application.ApplicationType is null or !" + BusinessTripWorkflowCriteria,
@@ -32,7 +32,7 @@ namespace Visa2026.Module.BusinessObjects
         Context = "DetailView")]
     [Appearance("ApplicationItem_LineCancelledRow", Priority = 310, AppearanceItemType = "ViewItem", TargetItems = "*",
         Criteria = "IsLineCancelled = true", Context = "ListView", BackColor = "LightCoral", FontColor = "Firebrick")]
-    public class ApplicationItem : BaseObject, IOptionalDetailFields
+    public class ApplicationItem : BaseObject, IOptionalDetailFields, IBoListRowState
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
 
@@ -113,8 +113,11 @@ namespace Visa2026.Module.BusinessObjects
 
         /// <summary>
         /// When true, changing <see cref="Person"/> does not run
-        /// <see cref="ApplyCurrentFieldsFromSelectedPerson"/> or person-triggered sync rules.
-        /// VISA2014 OData import sets this so legacy-mapped FKs (passport, visa, position, …) are kept.
+        /// <see cref="ApplyCurrentFieldsFromSelectedPerson"/> or person-triggered sync rules, and changing
+        /// <see cref="CurrentVisa"/>, <see cref="CurrentWorkPermitItem"/>, <see cref="CurrentInvitationItem"/>,
+        /// or <see cref="PreviousInvitationItem"/> skips their <see cref="CrossObjectSyncHelper"/> rule dispatch too.
+        /// VISA2014 OData import sets this so legacy-mapped FKs (passport, visa, position, …) are kept
+        /// without re-running per-property SyncRule evaluation for every imported row.
         /// </summary>
         [Browsable(false)]
         [VisibleInDetailView(false)]
@@ -1066,7 +1069,8 @@ namespace Visa2026.Module.BusinessObjects
         public string Invitation_Number => CurrentInvitationItem?.Invitation?.InvitationNumber;
 
         [XafDisplayName("Invitation Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Invitation_StartDateText => $"{CurrentInvitationItem?.Invitation?.StartDate:dd.MM.yyyy}";
+        /// <summary>Invitation formalization date (legacy Resmileşdirilen sene) — <see cref="Invitation.IssuedDate"/>.</summary>
+        public string Invitation_StartDateText => $"{CurrentInvitationItem?.Invitation?.IssuedDate:dd.MM.yyyy}";
 
         [XafDisplayName("Invitation Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string Invitation_ExpirationDateText => $"{CurrentInvitationItem?.Invitation?.ExpirationDate:dd.MM.yyyy}";
@@ -1075,7 +1079,8 @@ namespace Visa2026.Module.BusinessObjects
         public string PreviousInvitation_Number => PreviousInvitationItem?.Invitation?.InvitationNumber;
 
         [XafDisplayName("Previous Invitation Start Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string PreviousInvitation_StartDateText => $"{PreviousInvitationItem?.Invitation?.StartDate:dd.MM.yyyy}";
+        /// <summary>Previous invitation formalization date — <see cref="Invitation.IssuedDate"/>.</summary>
+        public string PreviousInvitation_StartDateText => $"{PreviousInvitationItem?.Invitation?.IssuedDate:dd.MM.yyyy}";
 
         [XafDisplayName("Previous Invitation Expiration Date (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         public string PreviousInvitation_ExpirationDateText => $"{PreviousInvitationItem?.Invitation?.ExpirationDate:dd.MM.yyyy}";
@@ -1605,7 +1610,9 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [XafDisplayName("Current Visa")]
         [InverseProperty(nameof(Visa.AssociatedApplicationItems))]
-        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
+        // ListView column visibility is model/controller-driven: nested Appearance cannot reliably
+        // resolve Application.ApplicationType (often null → column stays hidden even when ShowCurrentVisa).
+        [Appearance("VisaVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
         [RuleRequiredField(TargetCriteria = ShowCurrentVisaRequiredCriteria)]
         [ForeignKey(nameof(CurrentVisaId))] // Explicitly define foreign key
         [DataSourceProperty(nameof(AvailableVisas))]
@@ -1619,7 +1626,7 @@ namespace Visa2026.Module.BusinessObjects
                     var oldValue = currentVisa;
                     currentVisa = value;
 
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentVisa), oldValue);
                     }
@@ -1627,8 +1634,28 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
         // Foreign key property for CurrentVisa
-        [Appearance("VisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView,ListView")]
+        [Appearance("VisaIdVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentVisa", Context = "DetailView")]
         public virtual Guid? CurrentVisaId { get; set; }
+
+        /// <summary>
+        /// Visa issued from this line (<see cref="Visa.IssuingApplicationItem"/>). Typically 0–1.
+        /// Distinct from <see cref="CurrentVisa"/> (predecessor / target of this application line).
+        /// Read-only ListView/Detail column; cell tint follows visa <see cref="Visa.StateSeverityLevel"/>.
+        /// </summary>
+        [ExcludeFromOptionalDetailFields]
+        [InverseProperty(nameof(Visa.IssuingApplicationItem))]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInListView(true)]
+        [VisibleInLookupListView(false)]
+        [XafDisplayName("Issued Visa")]
+        [ToolTip("Visa issued from this application item (Visa.IssuingApplicationItem). Not the Current Visa predecessor.")]
+        [Appearance("ApplicationItem_IssuedVisa_Info", Priority = 100, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
+            Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel = 1", Context = "ListView", BackColor = "LightSkyBlue")]
+        [Appearance("ApplicationItem_IssuedVisa_Warning", Priority = 200, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
+            Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel = 2", Context = "ListView", BackColor = "LightSalmon")]
+        [Appearance("ApplicationItem_IssuedVisa_Critical", Priority = 300, AppearanceItemType = "ViewItem", TargetItems = "IssuedVisa",
+            Criteria = "IssuedVisa is not null and IssuedVisa.StateSeverityLevel >= 3", Context = "ListView", BackColor = "LightCoral")]
+        public virtual Visa IssuedVisa { get; set; }
 
         private WorkPermitItem currentWorkPermitItem;
         [ImmediatePostData]
@@ -1649,7 +1676,7 @@ namespace Visa2026.Module.BusinessObjects
                     if (value != null && Application?.ApplicationType?.ShowWorkPermittedLocations == true)
                         WorkPermittedLocations = value.WorkPermittedLocations ?? string.Empty;
 
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentWorkPermitItem), oldValue);
                     }
@@ -1678,7 +1705,7 @@ namespace Visa2026.Module.BusinessObjects
                     var oldValue = currentInvitationItem;
                     currentInvitationItem = value;
 
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                     {
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(CurrentInvitationItem), oldValue);
                     }
@@ -1701,7 +1728,7 @@ namespace Visa2026.Module.BusinessObjects
                 {
                     var oldValue = previousInvitationItem;
                     previousInvitationItem = value;
-                    if (ObjectSpaceHelper.Get(this) != null)
+                    if (ObjectSpaceHelper.Get(this) != null && !SuppressPersonCurrentFieldSync)
                         CrossObjectSyncHelper.SyncOnPropertyChanged(this, nameof(PreviousInvitationItem), oldValue);
                 }
             }
@@ -1727,6 +1754,7 @@ namespace Visa2026.Module.BusinessObjects
         public virtual EmployeeSalary CurrentSalary { get; set; }
 
         [Appearance("MedicalRecordVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowCurrentMedicalRecord", Context = "DetailView,ListView")]
+        [ExcludeFromOptionalDetailFields]
         [DataSourceProperty(nameof(AvailableMedicalRecords))]
         public virtual MedicalRecord CurrentMedicalRecord { get; set; }
 
@@ -1760,6 +1788,35 @@ namespace Visa2026.Module.BusinessObjects
         public virtual bool VisaIssued { get; set; }
 
         /// <summary>
+        /// Latest parent <see cref="Application"/> progress state/location code for ListView row color (<see cref="IBoListRowState"/>).
+        /// Reuses denormalized <see cref="Application.PrimaryStateCode"/> — no per-item progress history walk.
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string PrimaryStateCode => Application?.PrimaryStateCode ?? string.Empty;
+
+        /// <summary>
+        /// Localized latest application progress state (from parent denormalized display / computed fallback).
+        /// </summary>
+        [XafDisplayName("Last application state")]
+        [ModelDefault("AllowEdit", "False")]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(true)]
+        [NotMapped]
+        public string LastApplicationState =>
+            !string.IsNullOrEmpty(Application?.LatestProgressDisplay)
+                ? Application.LatestProgressDisplay
+                : Application?.LatestProgressState ?? string.Empty;
+
+        /// <summary>
+        /// Row CSS from parent <see cref="Application.ListRowCssClass"/> (includes SLA override). Empty when cancelled line wins.
+        /// </summary>
+        [Browsable(false)]
+        [NotMapped]
+        public string ListRowCssClass =>
+            IsLineCancelled ? string.Empty : Application?.ListRowCssClass ?? string.Empty;
+
+        /// <summary>
         /// Line or parent application is cancelled — type-specific flags or latest application <c>PROCESS_CANCELLED</c> progress.
         /// </summary>
         [XafDisplayName("Cancelled")]
@@ -1772,7 +1829,10 @@ namespace Visa2026.Module.BusinessObjects
             InvitationItemIsCancelled
             || VisaIsCancelled
             || IsCancelled
-            || (Application?.IsCancelled ?? false);
+            || string.Equals(
+                Application?.PrimaryStateCode,
+                ApplicationProgressStateCodes.ProcessCancelled,
+                StringComparison.OrdinalIgnoreCase);
 
 		[ExcludeFromOptionalDetailFields]
 		[Appearance("InvitationItemIsCancelledVisible", Visibility = ViewItemVisibility.Hide, Criteria = "Application.ApplicationType is null or !Application.ApplicationType.ShowInvitationItemIsCancelled", Context = "DetailView,ListView")]
@@ -1826,6 +1886,29 @@ namespace Visa2026.Module.BusinessObjects
         [ModelDefault("AllowEdit", "False")]
         public virtual string ApplicationItemName { get; set; }
 
+        /// <summary>
+        /// Lookup / object caption: person plus parent application caption
+        /// (application number · process number when present), matching <see cref="Application.DisplayCaption"/>.
+        /// </summary>
+        [XafDisplayName("Application item")]
+        [NotMapped]
+        [VisibleInDetailView(false)]
+        [VisibleInListView(false)]
+        [VisibleInLookupListView(false)]
+        public string DisplayCaption
+        {
+            get
+            {
+                var person = Person?.FullName?.Trim() ?? string.Empty;
+                var appCaption = ApplicationProcessNumberHelper.FormatDisplayCaption(Application);
+                if (person.Length == 0)
+                    return appCaption;
+                if (appCaption.Length == 0)
+                    return person;
+                return $"{person} - {appCaption}";
+            }
+        }
+
         public override void OnCreated()
         {
             base.OnCreated();
@@ -1845,7 +1928,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             ApplicationItemName = Person == null && Application == null
                 ? null
-                : $"{Person?.FullName} - {Application?.FullApplicationNumber}";
+                : DisplayCaption;
         }
 
         private static string? PreferLookupTmThenName(LookupBase? lookup)

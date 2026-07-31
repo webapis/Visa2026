@@ -30,6 +30,11 @@ public static class ApplicationRuntimeLogErrorCodes
     public const string WordBatchFailed = "WORD-BATCH-001";
     public const string WordBatchWait = "WORD-BATCH-WAIT-001";
 
+    // Person dossier hand-over export worker
+    public const string PersonExportWorkerLoop = "PERSON-EXPORT-LOOP-001";
+    public const string PersonExportBatchFailed = "PERSON-EXPORT-001";
+    public const string PersonExportBatchWait = "PERSON-EXPORT-WAIT-001";
+
     // PDF form filling
     public const string PdfFillTemplateMissing = "PDF-FILL-001";
     public const string PdfFillNoAcroForm = "PDF-FILL-002";

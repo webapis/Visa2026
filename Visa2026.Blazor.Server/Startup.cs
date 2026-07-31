@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.ApplicationBuilder;
+using DevExpress.ExpressApp.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
@@ -18,6 +18,7 @@ using Visa2026.Module.Services.StateNotifications;
 using Visa2026.Module.Services.Feedback;
 using Visa2026.Module.Services.WordReports;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.PersonLinkedDocuments;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
 using Visa2026.Blazor.Server.Localization;
@@ -25,6 +26,9 @@ using Visa2026.Blazor.Server.Hubs;
 using Visa2026.Blazor.Server.Middleware;
 using Visa2026.Module.Services.RuntimeLogging;
 using Visa2026.Module.DatabaseUpdate;
+using Visa2026.Module.Services.ImportHistory;
+using Visa2026.Module.Services.ReportDashboard;
+using Visa2026.Blazor.Server.Services.ImportHistory;
 
 namespace Visa2026.Blazor.Server
 {
@@ -128,15 +132,14 @@ namespace Visa2026.Blazor.Server
                         throw;
                     }
 
-                    // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal salary columns idempotently.
+                    // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal PG schema idempotently.
                     var connectionString = Configuration.GetConnectionString("DefaultConnection")
                         ?? Configuration.GetConnectionString("ConnectionString");
                     if (!string.IsNullOrWhiteSpace(connectionString))
                     {
-                        ApplicationItemCurrentSalarySchemaSql.ApplyIfMissing(connectionString);
-                        ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
-                        ApplicationProgressOrderSchemaSql.ApplyIfMissing(connectionString);
-                        ProjectContractApprovalLegProfileSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
+                        ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
                 });
                 builder.ObjectSpaceProviders
@@ -149,12 +152,7 @@ namespace Visa2026.Blazor.Server
                                 string connectionString = Configuration.GetConnectionString("DefaultConnection")
                                     ?? Configuration.GetConnectionString("ConnectionString");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                businessObjectDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
-                                {
-                                    sqlOptions.CommandTimeout(180);
-                                    // EF Core 8: split queries for multi-collection Includes (avoids cartesian explosion / warning 20504).
-                                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                                });
+                                DatabaseProviderDetector.ConfigureEfCore(businessObjectDbContextOptions, connectionString);
                                 // Required for HasChangeTrackingStrategy(ChangingAndChangedNotifications*) with BaseImpl types (e.g. FileData):
                                 // proxies supply INotifyPropertyChanged / INotifyPropertyChanging on the CLR types. See DX doc XAF0031 / 404292.
                                 businessObjectDbContextOptions.UseChangeTrackingProxies();
@@ -166,11 +164,7 @@ namespace Visa2026.Blazor.Server
                                 string connectionString = Configuration.GetConnectionString("DefaultConnection")
                                     ?? Configuration.GetConnectionString("ConnectionString");
                                 ArgumentNullException.ThrowIfNull(connectionString);
-                                auditHistoryDbContextOptions.UseSqlServer(connectionString, sqlOptions =>
-                                {
-                                    sqlOptions.CommandTimeout(180);
-                                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                                });
+                                DatabaseProviderDetector.ConfigureEfCore(auditHistoryDbContextOptions, connectionString);
                                 auditHistoryDbContextOptions.UseChangeTrackingProxies();
                                 auditHistoryDbContextOptions.UseObjectSpaceLinkProxies();
                                 auditHistoryDbContextOptions.UseLazyLoadingProxies();
@@ -194,11 +188,6 @@ namespace Visa2026.Blazor.Server
                         options.IsSupportChangePassword = true;
                     });
             });
-            services.Configure<Visa2026.Module.Services.LegacySyncDashboard.LegacySyncDashboardOptions>(
-                Configuration.GetSection(Visa2026.Module.Services.LegacySyncDashboard.LegacySyncDashboardOptions.SectionName));
-            services.AddSingleton<
-                Visa2026.Module.Services.LegacySyncDashboard.ILegacySyncDashboardService,
-                Visa2026.Module.Services.LegacySyncDashboard.LegacySyncDashboardService>();
             services.AddScoped<XafCultureInfoService>();
             services.AddScoped<IXafCultureInfoService, VisaXafCultureInfoService>();
 
@@ -229,6 +218,7 @@ namespace Visa2026.Blazor.Server
             services.AddHostedService<TempFileCleanupService>();
             services.AddHostedService<PdfGenerationBatchWorkerService>();
             services.AddHostedService<WordReportGenerationBatchWorkerService>();
+            services.AddHostedService<PersonExportBatchWorkerService>();
             services.AddSingleton<Visa2026.Module.Services.VisaExtFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaTransferFilterService>();
             services.AddSingleton<Visa2026.Module.Services.VisaFilterService>();
@@ -240,8 +230,19 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<IBoStateNotificationSummaryService, BoStateNotificationPrototypeSummaryService>();
             services.AddScoped<IUserFeedbackSubmitService, UserFeedbackSubmitService>();
             services.AddSingleton<BoStateNotificationNavigationHelper>();
+            services.AddSingleton<PersonDossierNavigationHelper>();
+            services.AddScoped<IPersonDossierPendingOpen, PersonDossierPendingOpen>();
+            services.Configure<ImportHistoryOptions>(Configuration.GetSection(ImportHistoryOptions.SectionName));
+            services.AddSingleton<IImportReimportHistoryReader, ImportReimportHistoryReader>();
+            services.AddScoped<ReportDashboardQueryService>();
+            services.AddScoped<ReportDashboardMockQueryService>();
+            services.AddScoped<IReportDashboardQueryService, ReportDashboardHybridQueryService>();
             services.AddScoped<ApplicationItemDocumentCopyPdfMerger>();
             services.AddScoped<PersonDocumentCopyPdfMerger>();
+            services.AddScoped<PersonDossierPdfBuilder>();
+            services.AddScoped<PersonExportPacker>();
+            services.AddScoped<PersonExportBatchEnqueueService>();
+            services.AddSingleton<IPersonExportBatchTrackNotifier, PersonExportBatchTrackNotifier>();
             services.AddScoped<HeaderDocumentCopyPdfMerger>();
             services.AddScoped<ApplicationItemDocumentBatchSummaryPdfBuilder>();
             services.AddScoped<ApplicationItemDocumentFileAccess>();
@@ -271,13 +272,13 @@ namespace Visa2026.Blazor.Server
                 ?? Configuration.GetConnectionString("ConnectionString");
             if (!string.IsNullOrWhiteSpace(connectionString))
             {
-                ApplicationRuntimeLogSchemaSql.ApplyIfMissing(connectionString);
-                MinistryReviewSlaSettingsSchemaSql.ApplyIfMissing(connectionString);
+                // Additive ProcessNumber / capability / Person incomplete columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
+                ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
+                PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
+                PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
+                ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
-
-            BatchWorkerSchemaGate.EnsureBatchSchemaColumns(
-                app.ApplicationServices,
-                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(BatchWorkerSchemaGate)));
 
             UserReportTemplateSeedGate.EnsureSeeded(
                 app.ApplicationServices,

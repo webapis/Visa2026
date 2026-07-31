@@ -24,7 +24,7 @@ function Get-Visa2026IisSlotDefinition {
             HttpPort               = 80
             PublishPath            = "C:\inetpub\visa2026-prod"
             EnvFile                = "C:\visa2026\env\prod.env"
-            DbName                 = "Visa2026DbProd"
+            DbName                 = "visa2026_prod"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys-Prod"
             BackupSubfolder        = "prod"
             LoginPageUrl           = "http://localhost/LoginPage"
@@ -36,7 +36,7 @@ function Get-Visa2026IisSlotDefinition {
             HttpPort               = 8080
             PublishPath            = "C:\inetpub\visa2026-staging"
             EnvFile                = "C:\visa2026\env\staging.env"
-            DbName                 = "Visa2026DbStaging"
+            DbName                 = "visa2026_staging"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys-Staging"
             BackupSubfolder        = "staging"
             LoginPageUrl           = "http://localhost:8080/LoginPage"
@@ -48,7 +48,7 @@ function Get-Visa2026IisSlotDefinition {
             HttpPort               = 8081
             PublishPath            = "C:\inetpub\visa2026-demo"
             EnvFile                = "C:\visa2026\env\demo.env"
-            DbName                 = "Visa2026DbDemo"
+            DbName                 = "visa2026_demo"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys-Demo"
             BackupSubfolder        = "demo"
             LoginPageUrl           = "http://localhost:8081/LoginPage"
@@ -60,7 +60,7 @@ function Get-Visa2026IisSlotDefinition {
             HttpPort               = 80
             PublishPath            = "C:\inetpub\visa2026"
             EnvFile                = "C:\visa2026\.env.prod"
-            DbName                 = "Visa2026DbProd"
+            DbName                 = "visa2026_prod"
             DataProtectionKeysPath = "C:\ProgramData\Visa2026\DataProtection-Keys"
             BackupSubfolder        = "legacy"
             LoginPageUrl           = "http://localhost/LoginPage"
@@ -163,8 +163,12 @@ function Get-Visa2026IisSlotEnvTemplate {
     $slot = Get-Visa2026IisSlotDefinition -Profile $Profile
     @(
         "# Copy to $($slot.EnvFile) on the server. Never commit real secrets."
-        "SA_PASSWORD=CHANGE_ME_STRONG_PASSWORD"
         "DEVEXPRESS_LICENSEKEY=CHANGE_ME_LICENSE_KEY"
+        "EFCORE_PROVIDER=Postgres"
+        "PG_HOST=localhost"
+        "PG_PORT=5432"
+        "PG_USER=postgres"
+        "PG_PASSWORD=CHANGE_ME_PG_PASSWORD"
         "DB_NAME=$($slot.DbName)"
         "# One-shot: FORCE_XAF_DB_UPDATE=true (then remove from app pool) - see docs/ENVIRONMENTS.md"
         "# FORCE_XAF_DB_UPDATE=true"
@@ -330,20 +334,6 @@ function Resolve-Visa2026DefaultHttpsPortForProfile {
         "Staging" { return 8080 }
         "Demo" { return 8081 }
         default { return 443 }
-    }
-}
-
-function Get-Visa2026LegacySyncHostRoot {
-    param(
-        [Parameter(Mandatory = $true)]
-        [ValidateSet("Production", "Staging", "Demo")]
-        [string]$Profile
-    )
-
-    switch ($Profile) {
-        "Staging" { return "C:\visa2026-sync-staging" }
-        "Demo" { return "C:\visa2026-sync-demo" }
-        default { return "C:\visa2026-sync" }
     }
 }
 

@@ -36,13 +36,15 @@ Legacy single `TabbedGroup Id="Tabs"` is **`Removed="True"`** on typed views.
 | Tab | Employee | Family member | Temporary visitor |
 |-----|----------|---------------|-------------------|
 | Educations | Person record | — (hidden via appearance) | — |
-| CV & personal files (`Documents`) | Person record (employee) | — | — |
-| Passports, Medical records, Addresses | Person record | Person record | Person record |
 | CV & personal files (`Documents`) | Person record (employee), after Educations/Passports | — (family uses `FamilyRelationDocuments`) | — |
+| Passports, Medical records, Addresses | Person record | Person record | Person record |
 | Family relation documents | — | Person record | — |
 | Position history, Salaries, Work duties, Travel histories | Person record (employee) | Mixed / employee-only hidden | Travel only |
+| Incomplete data (`IncompleteData`) | Person record (last tab; hidden when not incomplete) | Same | Same |
 | Application items, Work permit items, Invitations, Rejections | Issued | Issued | Application items + Invitations + Rejections |
 | Family members (linked) | Issued | Issued (tab hidden for non-employees) | — |
+
+**Caption scope:** Parent-specific captions for layout id `Documents` / `Documents_Group` via `DocumentCollectionTabCaptionHelper` (e.g. Passport → **Passport copies**, Education → **Diploma copies**, Employee Person → **CV & personal files**). Property names stay `Documents`. Localized in `UiStrings.messages.json` + `UiStrings.document-copies.json`; English runtime via `VisaUiMessages` / `DocumentCollectionCaptionLayoutController`.
 
 Issued tab **captions** use "(issued)" / "(linked)" suffix in English `Model.xafml`; runtime tab-group captions come from `VisaUiMessages`.
 

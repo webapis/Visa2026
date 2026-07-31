@@ -22,7 +22,7 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
         TargetObjectType = typeof(ApplicationItem);
 
         viewDocumentCopiesAction = new SimpleAction(this, "ViewApplicationItemDocumentCopies", "View");
-        viewDocumentCopiesAction.ImageName = "BO_FileAttachment";
+        viewDocumentCopiesAction.ImageName = "DocumentCopies";
         viewDocumentCopiesAction.SelectionDependencyType = SelectionDependencyType.Independent;
         viewDocumentCopiesAction.Execute += ViewDocumentCopiesAction_Execute;
     }

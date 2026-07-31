@@ -30,7 +30,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Controller | Role |
 |------------|------|
 | `ApplicationProgressCommitValidationController` | Block illegal progress + contract on commit |
-| `ApplicationProgressDetailViewController` | Suggest next state/location on detail |
+| `ApplicationProgressDetailViewController` | Suggest next state on detail |
 | `ApplicationProjectContractMinistryController` | Contract change → snapshot + warnings; reverts `ProjectContract` when header locked |
 | `ProjectContractMinistryController` | Block empty legs / structural leg edits when referenced |
 | `ApplicationProgressRowStateRefreshController` | Refresh Application list after progress save |
@@ -46,6 +46,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Updater | Role |
 |---------|------|
 | `ApplicationProgressMinistryLetterFileSchemaUpdater` | `MinistryLetterFileID` column + FK before EF schema |
+| `ApplicationProgressLocationDropSchemaUpdater` | Drops `LocationID` from `ApplicationProgresses` (state-only) |
 | `ProjectContractMinistrySeedUpdater` | Default ministries + contract leg rows on deploy |
 
 ---
@@ -57,7 +58,7 @@ ApplicationProgressCommitValidationController
   → ApplicationProgressProfileResolver.TryValidateApplicationUnchangedAfterProgress (Application — locked header only; §3.4)
   → ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication (Application)
   → ApplicationProgressTransitionHelper.TryValidateProgressStep (each ApplicationProgress)
-       → ApplicationProgressRouteHelper (state/location allowed for route + leg count)
+       → ApplicationProgressRouteHelper (state allowed for route + leg count)
        → ApplicationProgressProfileResolver.TryValidateProjectContractForProgress
        → canonical (state, location) pair
        → transition graph edge from previous row
@@ -96,7 +97,7 @@ Transition graph built for `legCount` clamped to `ApplicationProgressLegCodes.Ma
 
 ## Adding N-th ministry leg (checklist)
 
-1. `application-state.json`: `{n}_REVIEW_STARTED`, `_APPROVED`, `_REJECTED`
+1. `application-state.json`: `1_REVIEW_STARTED` (first leg only) + `{n}_REVIEW_APPROVED` / `{n}_REVIEW_REJECTED` (legs 2+ have no STARTED)
 2. `application-location.json`: `AT_THE_MINISTERY_{n}`
 3. Bump `LookupCatalogs/manifest.json` version
 4. Confirm `ApplicationProgressLegCodes.MaxLegCount >= n`
@@ -124,7 +125,7 @@ dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug -p:Enabl
 
 | Question | Owner |
 |----------|--------|
-| Which color for `2_REVIEW_STARTED` on Application list? | **visa2026-bo-state-colors** |
+| Which color for `2_REVIEW_APPROVED` on Application list? | **visa2026-bo-state-colors** |
 | Why is next step `PROCESS_STARTED` illegal? | **this skill** (transitions) |
 | Seed GT-15 contract rows | **visa2026-lookup-data** + `ProjectContractMinistrySeedUpdater` |
 | Column missing after deploy | **visa2026-lifecycle-docker** + schema updater here |

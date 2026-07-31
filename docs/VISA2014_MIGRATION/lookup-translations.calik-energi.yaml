@@ -41,14 +41,18 @@ catalogs:
       tenantSeedOverlapExactCode: 0
       gt15InLegacyData: false
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/ProjectContract.calik-energi.md
-    values: []
+    values:
+      # Typo in legacy NumberOfContract — keep correct Kombine catalog row only.
+      - legacy: KYC (Kiyanlı Kobmine Elektrik Santrali projesi)
+        target: KYC (Kiyanlı Kombine Elektrik Santrali projesi)
+        notes: Kobmine→Kombine; merge applied local PG 2026-07-27 (keeper Kombine)
     unmappedPolicy: allow_null
     unmappedDefault: null
     notes: |
       Legacy SQL database name is VISA2015 (not VISA2014). Çalik production data on SQLEXPRESS.
       identityPassThrough maps NumberOfContract → same Visa2026 ProjectContract.Code for OData resolve.
-      Seed tenant project-contract.calik-energi.json (73 rows) before import; deploy via disk overlay as project-contract.json.
-      Add explicit values[] rows only for aliases (e.g. Satlyk-1 → Şatlyk-1) if product requires.
+      Seed tenant project-contract.calik-energi.json before import; deploy via disk overlay as project-contract.json.
+      Add explicit values[] rows for aliases (Kobmine→Kombine; e.g. Satlyk-1 → Şatlyk-1 if product requires).
       Do NOT use Gap İnşaat GT-15 blanket remap (see lookup-translations.gap-insaat.yaml).
 
   - targetCatalog: Country
@@ -70,12 +74,23 @@ catalogs:
       completedAt: 2026-06-26
       scope: Education
       notes: Education uses Country.mgCode (field-map); Person wave audited NameOfCountryL — 38 rows had mgCode outside Person-scope values[] before pass-through.
-    values: []
+    values:
+      # Aliases that must survive overlay merge (base Person-wave values are merged in Load()).
+      - legacy: UAE
+        target: ARE
+        notes: Legacy NameOfCountryL UAE; Visa2026 Country.Code is ISO ARE
+      - legacy: UK
+        target: GBR
+        notes: Legacy NameOfCountry/NameOfCountryL UK when mgCode null; Visa2026 Code is GBR (no UK row)
     unmappedPolicy: skip_row
     unmappedDefault: null
     notes: |
+      Education prefers mgCode; when mgCode is null, transform falls back to NameOfCountry / NameOfCountryL
+      (2026-07-17 — recovers 6 Education rows skipped as required_null:EducationCountry).
+    notes: |
       identityPassThrough maps legacy mgCode → Visa2026 Country.Code (ISO alpha-3 in seed).
-      Person-wave explicit values[] remain in base lookup-translations.yaml when codes match.
+      Loader merges this catalog with base lookup-translations.yaml (overlay keys win; base aliases kept).
+      Explicit UAE→ARE here so Passport IssuedCountry works even if merge order changes.
 
   - targetCatalog: EducationInstitution
     targetMatchProperty: NameTm

@@ -1,0 +1,23 @@
+/*
+  Person document copies — person-specific extras.
+  Shared section/row chrome: document-copies-catalog.css
+  Canonical doc: docs/PERSON_DOCUMENT_COPIES.md
+ */
+
+/* Slot header: title + person line (PersonDocumentCopiesSlotPanel) */
+.visa-preview-drawer__title-block {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.visa-preview-drawer__subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: color-mix(in srgb, currentColor 68%, transparent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

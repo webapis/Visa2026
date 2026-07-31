@@ -116,6 +116,9 @@ catalogs:
         target: FRA
       - legacy: GBR
         target: GBR
+      - legacy: UK
+        target: GBR
+        notes: Legacy NameOfCountry/NameOfCountryL sometimes UK (mgCode null); Visa2026 Code is GBR
       - legacy: GEO
         target: GEO
       - legacy: GRC
@@ -193,7 +196,8 @@ catalogs:
       - legacy: TUR
         target: TUR
       - legacy: UAE
-        target: UAE
+        target: ARE
+        notes: Legacy NameOfCountryL often UAE; Visa2026 catalog Code is ISO ARE (UAE alias may also exist)
       - legacy: UKR
         target: UKR
       - legacy: USA
@@ -450,6 +454,8 @@ catalogs:
     unmappedDefault: WP
     notes: |
       Approved 2026-06-26 for Visa import (permits-and-visas). Resolve by LocalizationKey, not PdfForm_Code alone (TR2/BS1 share 14).
+      Person override (2026-07-22): family-member persons (IsFamilyMember=1, IsEmployee=0)
+      always import VisaType FM — legacy often stores WP:11 incorrectly (~637 rows on Çalik).
       Application/ApplicationItem FK audit deferred to Application wave.
 
   - targetCatalog: VisaCategory
@@ -662,37 +668,51 @@ catalogs:
       - legacy: DZ
         target: DZ
     identityPassThrough: true
-    unmappedPolicy: block_row
+    unmappedPolicy: allow_null
     notes: |
       Approved 2026-06-27 for AddressOfResidence. mgCode equals Visa2026 LocalizationKey/PdfForm_Code.
       Rows without Region FK use AddressLine prefix inference in transform.
+      allow_null (2026-07-13): free-text AddressLine leftovers that fail region resolve are skipped at import
+      (AoR/Lodging preflight was blocking on Region:<address snippet>).
 
   - targetCatalog: City
     targetMatchProperty: PdfForm_Code
     legacy:
       storage: legacy_lookup_table
-      table: dbo.ŞeherEtrap
+      table: dbo.[ŞäherEtrap]
       column: mgCode
+      valueKind: scalar
+      sampleQuery: |
+        SELECT se.mgCode, se.[ŞäherEtrapL] AS CityName, COUNT(*) AS cnt
+        FROM dbo.AddressOfResidence aor
+        INNER JOIN dbo.Address a ON aor.Address = a.Oid AND a.GCRecord IS NULL
+        INNER JOIN dbo.[ŞäherEtrap] se ON a.[ŞäherEtrap] = se.Oid
+        WHERE aor.GCRecord IS NULL
+          AND NULLIF(LTRIM(RTRIM(se.mgCode)), N'') IS NOT NULL
+        GROUP BY se.mgCode, se.[ŞäherEtrapL]
+        ORDER BY cnt DESC;
+    audit:
+      completedAt: 2026-06-27
+      scope: AddressOfResidence
+      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
+    identityPassThrough: true
+    unmappedPolicy: allow_null
+    notes: |
+      Primary City resolve on AddressOfResidence rows with ŞäherEtrap.mgCode.
+      allow_null (2026-07-13): City:(null) rows are skipped at import — do not block Demo preflight.
+
+  - targetCatalog: CityByName
+    targetMatchProperty: NameTm
+    legacy:
+      storage: legacy_lookup_table
+      table: dbo.[ŞäherEtrap]
+      column: ŞäherEtrapL
       valueKind: scalar
     audit:
       completedAt: 2026-06-27
       scope: AddressOfResidence
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
     identityPassThrough: true
-    unmappedPolicy: block_row
-    notes: Primary City resolve on AddressOfResidence rows with ŞeherEtrap.mgCode.
-
-  - targetCatalog: CityByName
-    targetMatchProperty: NameTm
-    legacy:
-      storage: legacy_lookup_table
-      table: dbo.ŞeherEtrap
-      column: ŞeherEtrapL
-      valueKind: scalar
-    audit:
-      completedAt: 2026-06-27
-      scope: AddressOfResidence
-      comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
     values:
       - legacy: Asgabat şäheri
         target: Aşgabat şäheri
@@ -706,8 +726,43 @@ catalogs:
         target: Ýolöten etraby
       - legacy: Türkmenbaşy etraby
         target: Türkmenbaşy etraby
+      # Application / ApplicationItem CityByName gaps (Demo preflight 2026-07-13)
+      - legacy: Atamyrat etraby
+        target: Atamyrat etraby
+      - legacy: Atamyrat şäheri
+        target: Atamyrat şäheri
+      - legacy: Baharly etraby
+        target: Baharly etraby
+      - legacy: Balkanabat şäheri
+        target: Balkanabat şäheri
+      - legacy: Beýik Saparmyrat Türkmenbaşy ad. etraby
+        target: Beýik Saparmyrat Türkmenbaşy ad. etraby
+      - legacy: Beyik Saparmyrat Türkmenbasy ad. etraby
+        target: Beýik Saparmyrat Türkmenbaşy ad. etraby
+      - legacy: Döwletli etraby
+        target: Döwletli etraby
+      - legacy: Dowletli etraby
+        target: Döwletli etraby
+      - legacy: Hojambaz etraby
+        target: Hojambaz etraby
+      - legacy: Serdar şäheri
+        target: Serdar şäheri
+      - legacy: Serdarabat etraby
+        target: Serdarabat etraby
+      - legacy: Tejen şäheri
+        target: Tejen şäheri
+      - legacy: Türkmenabat şäheri
+        target: Türkmenabat şäheri
+      - legacy: Turkmenabat şäheri
+        target: Türkmenabat şäheri
+      - legacy: Türkmenbaşy şäheri
+        target: Türkmenbaşy şäheri
+      - legacy: Turkmenbasy şäheri
+        target: Türkmenbaşy şäheri
     unmappedPolicy: block_row
-    notes: Fallback when ŞeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.
+    notes: |
+      Fallback when SeherEtrap.mgCode is null; fold/normalize via CatalogMatchHelper.
+      identityPassThrough + city.json NameTm enrich (Import/Preflight) resolves Application CityByName.
 
   - targetCatalog: Urgency
     targetMatchProperty: LocalizationKey
@@ -766,7 +821,7 @@ catalogs:
     audit:
       completedAt: 2026-06-29
       scope: Application
-      distinctLegacyValuesUsed: 12
+      distinctLegacyValuesUsed: 13
       allMappedToTarget: true
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/VisaPeriod.md
     values:
@@ -784,6 +839,9 @@ catalogs:
         target: Day15
       - legacy: "20 ( yigrimi )gün:GUN:20"
         target: Day20
+      - legacy: "30 (otuz) gün::30"
+        target: Day30
+        notes: 43 Application rows on Çalik VISA2015 (2026-07-21)
       - legacy: "1 (bir) yyl:YYL:365"
         target: Year1
       - legacy: "2 (iki) ay:AY:61"
@@ -987,7 +1045,7 @@ catalogs:
       sampleQuery: |
         SELECT cp.TitleOfCheckPoint, cp.TitleOfCheckPointL, COUNT(*) cnt
         FROM dbo.PersonInApplication pia
-        JOIN dbo.CheckPoint cp ON cp.Oid = pia.CheckPoint
+        JOIN dbo.[CheckPoint] cp ON cp.Oid = pia.[CheckPoint]
         WHERE pia.GCRecord IS NULL
         GROUP BY cp.TitleOfCheckPoint, cp.TitleOfCheckPointL ORDER BY cnt DESC;
     audit:

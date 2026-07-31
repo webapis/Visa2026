@@ -12,7 +12,7 @@ namespace Visa2026.Module.Services.UserReports
     public class UserReportVisibilityService : IUserReportVisibilityService
     {
         /// <summary>
-        /// Resminamalar visibility is the AND of optional filters: application types, project contracts, visibility criteria.
+        /// Resminamalar visibility is the AND of optional filters: application types/groups, project contracts, visibility criteria.
         /// Empty link lists or empty criteria mean no filter on that axis.
         /// </summary>
         public bool IsTemplateVisible(UserReportTemplate template, Application application)
@@ -26,15 +26,22 @@ namespace Visa2026.Module.Services.UserReports
         }
 
         /// <summary>
-        /// When <see cref="UserReportTemplate.ApplicableTypeLinks"/> has rows, the application type must match one of them.
-        /// Empty list means no application-type filter.
+        /// When both <see cref="UserReportTemplate.ApplicableTypeLinks"/> and
+        /// <see cref="UserReportTemplate.ApplicableGroupLinks"/> are empty, no application-type filter.
+        /// Otherwise the application type must match a linked type or a member of a linked group (union).
         /// </summary>
         private static bool IsApplicationTypeMatch(UserReportTemplate template, Application application)
         {
             var typeLinks = template.ApplicableTypeLinks?
                 .Where(l => l.ApplicationTypeId != Guid.Empty || l.ApplicationType != null)
                 .ToList();
-            if (typeLinks == null || typeLinks.Count == 0)
+            var groupLinks = template.ApplicableGroupLinks?
+                .Where(l => l.ApplicationTypeGroupId != Guid.Empty || l.ApplicationTypeGroup != null)
+                .ToList();
+
+            var hasTypeFilter = typeLinks != null && typeLinks.Count > 0;
+            var hasGroupFilter = groupLinks != null && groupLinks.Count > 0;
+            if (!hasTypeFilter && !hasGroupFilter)
                 return true;
 
             var applicationType = application?.ApplicationType;
@@ -42,10 +49,47 @@ namespace Visa2026.Module.Services.UserReports
                 return false;
 
             var applicationTypeId = applicationType.ID;
-            return typeLinks.Any(l =>
-                l.ApplicationTypeId == applicationTypeId
-                || (l.ApplicationType != null
-                    && string.Equals(l.ApplicationType.Name, applicationType.Name, StringComparison.OrdinalIgnoreCase)));
+            var applicationTypeName = applicationType.Name;
+
+            if (hasTypeFilter && typeLinks.Any(l =>
+                    l.ApplicationTypeId == applicationTypeId
+                    || (l.ApplicationType != null
+                        && string.Equals(l.ApplicationType.Name, applicationTypeName, StringComparison.OrdinalIgnoreCase))))
+            {
+                return true;
+            }
+
+            if (!hasGroupFilter)
+                return false;
+
+            return groupLinks.Any(l => GroupContainsApplicationType(l.ApplicationTypeGroup, applicationTypeId, applicationTypeName));
+        }
+
+        private static bool GroupContainsApplicationType(
+            ApplicationTypeGroup group,
+            Guid applicationTypeId,
+            string applicationTypeName)
+        {
+            if (group?.Members == null)
+                return false;
+
+            foreach (var member in group.Members)
+            {
+                if (member == null)
+                    continue;
+
+                if (member.ApplicationTypeId == applicationTypeId)
+                    return true;
+
+                if (member.ApplicationType != null
+                    && (member.ApplicationType.ID == applicationTypeId
+                        || string.Equals(member.ApplicationType.Name, applicationTypeName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

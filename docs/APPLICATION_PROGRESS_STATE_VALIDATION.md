@@ -1,6 +1,6 @@
 # Application progress — state validation and time scopes
 
-> **Purpose:** Specify how `ApplicationProgress` records workflow position for an `Application`, how **`ApplicationState`** and **`ApplicationLocation`** combine, how **`DaysElapsed`** time scopes apply, and what validation/alerts officers need when advancing the process **manually**.
+> **Purpose:** Specify how `ApplicationProgress` records workflow position for an `Application`, how **`ApplicationState`** (and optional ministry short name) identify the step, how **`DaysElapsed`** time scopes apply, and what validation/alerts officers need when advancing the process **manually**.
 >
 > **Related:**
 > - [`APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md`](APPLICATION_PROGRESS_APPROVAL_AND_CONTRACT_DEPTH.md) — **approval flows**, ministry legs, **`ProjectContract`** depth (Phase 1)
@@ -37,10 +37,10 @@ Officers do **not** edit the current state in place. They **add a new progress r
 
 | Dimension | Lookup | Example codes | Officer question |
 |-----------|--------|---------------|------------------|
-| **State** | `ApplicationState` | `IS_BEING_PREPARED`, `1_REVIEW_STARTED`, `PROCESS_ISSUED` | *What happened in the workflow?* (preparing, review, issued, rejected, …) |
+| **State** | `ApplicationState` | `IS_BEING_PREPARED`, `1_REVIEW_APPROVED`, `PROCESS_ISSUED` | *What happened in the workflow?* (preparing, review, issued, rejected, …) |
 | **Location** | `ApplicationLocation` | `AT_OFFICE`, `AT_THE_MINISTERY_1`, `AT_MIGRATION_SERVICE` | *Who holds the file physically?* |
 
-Both are required on every `ApplicationProgress` row today. Validation and SLA rules should treat **`(State.Code, Location.Code)`** as the **process step key**, not `State` alone.
+Validation and SLA rules treat **`State.Code`** as the process step key. Ministry context uses snapshot/profile short names, not `ApplicationLocation`.
 
 **Deprecated:** [`ApplicationStatus`](../Visa2026.Module/BusinessObjects/ApplicationStatus.cs) enum (`Office`, `ToMinistry`, `Processed`) — replaced by progress + `ApplicationLocation`. See [`DEPRECATED.md`](DEPRECATED.md).
 
@@ -110,13 +110,13 @@ Define **per application** which `(FromState, FromLocation) → (ToState, ToLoca
 
 **Route A — `ViaMinistries` (first ministry only):**
 
-- `IS_BEING_PREPARED` @ `AT_OFFICE` → `1_REVIEW_STARTED` @ `AT_THE_MINISTERY_1`
+- `IS_BEING_PREPARED` @ `AT_OFFICE` → `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1`
 - `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`
-- Review branches → `1_REVIEW_REJECTED` / `PROCESS_REJECTED` / `PROCESS_CANCELLED`
+- Rejection branch → `1_REVIEW_REJECTED` (from prep) / `PROCESS_REJECTED` / `PROCESS_CANCELLED`
 
 **Route B — `ViaMinistries` (first + second ministry):**
 
-- Same as A, plus `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `2_REVIEW_STARTED` @ `AT_THE_MINISTERY_2`, then `2_REVIEW_APPROVED` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`, and `2_REVIEW_REJECTED`
+- Same as A, plus `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` → `2_REVIEW_APPROVED` @ `AT_THE_MINISTERY_2`, then `2_REVIEW_APPROVED` → `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE`, and `2_REVIEW_REJECTED` (from `1_REVIEW_APPROVED`)
 
 **Route C — `DirectToMigrationService`:**
 
@@ -191,8 +191,6 @@ From [`application-state.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs
 | Code | Typical meaning | Default |
 |------|-----------------|---------|
 | `IS_BEING_PREPARED` | Being prepared at office | **Default** lookup row |
-| `1_REVIEW_STARTED` | First ministry review in progress | |
-| `2_REVIEW_STARTED` | Second ministry review in progress | |
 | `1_REVIEW_APPROVED` | First ministry approved | |
 | `2_REVIEW_APPROVED` | Second ministry approved | |
 | `1_REVIEW_REJECTED` | Rejected at first ministry | |
@@ -219,10 +217,8 @@ High-level sequence (see §8d in `BO_STATE_TRACKING.md` for per-type shortcuts):
 
 ```text
 (IS_BEING_PREPARED, AT_OFFICE)
-  → (1_REVIEW_STARTED, AT_THE_MINISTERY_1)
-  → (1_REVIEW_APPROVED, AT_THE_MINISTERY_1)   [or REJECTED]
-  → (2_REVIEW_STARTED, AT_THE_MINISTERY_2)    [optional second ministry]
-  → (2_REVIEW_APPROVED, AT_THE_MINISTERY_2)
+  → (1_REVIEW_APPROVED, AT_THE_MINISTERY_1)   [or 1_REVIEW_REJECTED]
+  → (2_REVIEW_APPROVED, AT_THE_MINISTERY_2)   [optional second ministry, or 2_REVIEW_REJECTED]
   → (PROCESS_STARTED, AT_MIGRATION_SERVICE)
   → (PROCESS_ISSUED, AT_MIGRATION_SERVICE)
 ```
@@ -242,11 +238,11 @@ One row per **process step** (not per transition edge):
 | Field | Example |
 |-------|---------|
 | `ApplicationTypeName` or `RoutingProfile` | `App_Visa_Ext` or `StandardMinistryRoute` |
-| `StateCode` | `1_REVIEW_STARTED` |
+| `StateCode` | `1_REVIEW_APPROVED` |
 | `LocationCode` | `AT_THE_MINISTERY_1` |
 | `MaxDaysInStep` | 10 |
-| `SuggestedNextStateCode` | `1_REVIEW_APPROVED` |
-| `SuggestedNextLocationCode` | `AT_THE_MINISTERY_1` |
+| `SuggestedNextStateCode` | `PROCESS_STARTED` |
+| `SuggestedNextLocationCode` | `AT_MIGRATION_SERVICE` |
 | `IsTerminal` | false |
 | `SortOrder` | 20 |
 

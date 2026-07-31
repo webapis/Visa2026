@@ -822,10 +822,15 @@ public static class ExcelMappings
             UpsertKeys = new[] { new UpsertKeyPart { ODataProperty = "InvitationNumber", Header = "Invitation Number" } },
             Columns = new() {
                 new() { Header = "Invitation Number", PayloadProperty = "InvitationNumber", Kind = ColumnKind.StringValue, Required = true },
-                new() { Header = "Start Date",        PayloadProperty = "StartDate",        Kind = ColumnKind.Scalar,      Required = true },
+                // Invitation BO uses IssuedDate (mapped to DB column StartDate), same pattern as WorkPermit.
+                new() { Header = "Issued Date",       PayloadProperty = "IssuedDate",       Kind = ColumnKind.Scalar,      Required = true },
+                new() { Header = "Expiration Date",   PayloadProperty = "ExpirationDate",   Kind = ColumnKind.Scalar,      Required = true },
+                new() { Header = "Visa Category",     PayloadProperty = "VisaCategory",     Kind = ColumnKind.LookupByName, LookupEntity = "VisaCategory", Required = true },
+                new() { Header = "Visa Period",       PayloadProperty = "VisaPeriod",       Kind = ColumnKind.LookupByName, LookupEntity = "VisaPeriod", Required = true },
+                new() { Header = "Visa Start And End Date Defined", PayloadProperty = "IsVisaStartAndEndDateDefined", Kind = ColumnKind.Bool },
+                new() { Header = "Visa Start Date",   PayloadProperty = "VisaStartDate",    Kind = ColumnKind.Scalar },
+                new() { Header = "Visa End Date",     PayloadProperty = "VisaEndDate",      Kind = ColumnKind.Scalar },
                 new() { Header = "Application",       PayloadProperty = "Application",      Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber" },
-                new() { Header = "Validity Duration", PayloadProperty = "ValidityDuration", Kind = ColumnKind.LookupByName, LookupEntity = "ValidityDuration" },
-                new() { Header = "Is Cancelled",      PayloadProperty = "IsCancelled",      Kind = ColumnKind.Bool },
             }
         },
         // Upsert in sync mode uses InvitationItemName = "{Person} - {Invitation Number}" (see ExcelImporter).
@@ -888,12 +893,11 @@ public static class ExcelMappings
             }
         },
 
-        // ApplicationProgresses — depends on Application and ApplicationState/ApplicationLocation lookups.
+        // ApplicationProgresses — depends on Application and ApplicationState lookups.
         new SheetMap { SheetName = "ApplicationProgresses", EntityName = "ApplicationProgress", DisplayName = "Application Progress",
             Columns = new() {
                 new() { Header = "Application", PayloadProperty = "Application", Kind = ColumnKind.LookupByName, LookupEntity = "Application", LookupFilterProperty = "FullApplicationNumber", Required = true },
                 new() { Header = "State",       PayloadProperty = "State",       Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationState",    LookupFilterProperty = "Code", Required = true },
-                new() { Header = "Location",    PayloadProperty = "Location",    Kind = ColumnKind.LookupByName, LookupEntity = "ApplicationLocation",  LookupFilterProperty = "Code", Required = true },
                 new() { Header = "Date",        PayloadProperty = "Date",        Kind = ColumnKind.Scalar, Required = true },
                 new() { Header = "Description", PayloadProperty = "Description", Kind = ColumnKind.Scalar },
             }

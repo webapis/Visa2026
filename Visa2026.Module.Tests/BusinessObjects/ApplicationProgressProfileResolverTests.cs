@@ -47,8 +47,7 @@ public class ApplicationProgressProfileResolverTests
         var progress = new ApplicationProgress
         {
             Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
-            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
+            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Approved },
         };
 
         Assert.False(ApplicationProgressProfileResolver.TryValidateApprovalLegProfileForProgress(progress, null, out var message));
@@ -205,7 +204,6 @@ public class ApplicationProgressProfileResolverTests
         {
             Application = app,
             State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
-            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
         };
 
         Assert.True(ApplicationProgressProfileResolver.TryValidateProjectContractForProgress(progress, null, out _));
@@ -223,8 +221,7 @@ public class ApplicationProgressProfileResolverTests
         var progress = new ApplicationProgress
         {
             Application = app,
-            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
-            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
+            State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Approved },
         };
 
         Assert.False(ApplicationProgressProfileResolver.TryValidateProjectContractForProgress(progress, null, out var message));
@@ -263,7 +260,6 @@ public class ApplicationProgressProfileResolverTests
                 new ApplicationProgress
                 {
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
                 }
             ]
         };
@@ -287,12 +283,10 @@ public class ApplicationProgressProfileResolverTests
                 new ApplicationProgress
                 {
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.IsBeingPrepared },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice }
                 },
                 new ApplicationProgress
                 {
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
                 }
             ]
         };
@@ -317,7 +311,6 @@ public class ApplicationProgressProfileResolverTests
                 new ApplicationProgress
                 {
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
                 }
             ]
         };
@@ -342,7 +335,6 @@ public class ApplicationProgressProfileResolverTests
                 new ApplicationProgress
                 {
                     State = new ApplicationState { Code = ApplicationProgressStateCodes.Review1Started },
-                    Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtMinistry1 }
                 }
             ]
         };

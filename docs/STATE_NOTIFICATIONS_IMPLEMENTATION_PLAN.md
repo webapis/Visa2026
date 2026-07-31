@@ -16,18 +16,21 @@ This plan covers the **State notifications** feature (header bell + full inbox).
 |----------|------|
 | [`BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) | Canonical **state codes** and business conditions per BO |
 | [`STATE_TRACKING_IMPLEMENTATION_PLAN.md`](STATE_TRACKING_IMPLEMENTATION_PLAN.md) | Backend **evaluation engine**, snapshots, on-save queue, XAF push dispatcher |
-| [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) | **State Dashboard** tiles (separate UI; counts must stay consistent with evaluators) |
-| [`STATE_SNAPSHOT_PATTERN.md`](STATE_SNAPSHOT_PATTERN.md) | Snapshot pattern for dashboard ↔ list parity |
-| [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md) | BR-010–012 (dashboard), **BR-013** (invitation prerequisites → data completeness) |
+| [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) | State **criteria** for evaluators / SQL (old State Dashboard UI removed) |
+| [`REPORT_DASHBOARD.md`](REPORT_DASHBOARD.md) | Officer **Report Dashboard** home (charts + Excel / ListView) |
+| [`STATE_SNAPSHOT_PATTERN.md`](STATE_SNAPSHOT_PATTERN.md) | Snapshot pattern for count ↔ list parity |
+| [`BUSINESS_LOGIC_BASELINE.md`](BUSINESS_LOGIC_BASELINE.md) | BR-010–012, **BR-013** (invitation prerequisites → data completeness) |
+| [`PERSON_INCOMPLETE_DATA.md`](PERSON_INCOMPLETE_DATA.md) | **Manual** officer Incomplete flag on `Person` (checkboxes + notes) — not auto-resolved |
 
 **Distinction**
 
 | Surface | User job |
 |---------|----------|
-| **State Dashboard** | “How many records are in state X?” → click tile → filtered list |
+| **Report Dashboard** | Aggregate BI by project / person type / category → Excel or ListView |
 | **State notifications** | “What needs my attention **now**?” → prioritized inbox → open person/document |
+| **Person incomplete data** | Officer **manually** holds a person with notes / missing-area checkboxes; clears by Mark complete |
 
-Both must use the **same evaluators / rules** so counts and messages never disagree.
+Inbox predicates should stay aligned with the same evaluators used for BO state colors.
 
 ---
 
@@ -269,7 +272,7 @@ Remove prototype toasts in `BoStateNotificationInboxPropertyEditor`.
 
 Before marking Phase 2 complete for a given rule:
 
-- [ ] Same predicate as State Dashboard criteria / evaluator branch.
+- [ ] Same predicate as evaluator / Report Dashboard ListView criteria where overlapping.
 - [ ] Same severity mapping.
 - [ ] Inbox count for “open + state code X” matches dashboard drill-down count (for overlapping rules).
 - [ ] Document edge cases in [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) or BO_STATE_TRACKING if new.

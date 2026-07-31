@@ -16,6 +16,25 @@ namespace Visa2026.Module.BusinessObjects
         {
             Database.SetCommandTimeout(180); // 3-minute timeout; the default 30s is too short for complex prefetch queries
         }
+
+        /// <summary>
+        /// Filtered-index predicates: SQL Server uses <c>[Col]</c>; PostgreSQL uses <c>"Col"</c>.
+        /// Bool filters use <c>= 0</c> on SQL Server and <c>= FALSE</c> on PostgreSQL.
+        /// </summary>
+        private string IndexFilter(string sqlServerPredicate)
+        {
+            var provider = Database.ProviderName ?? string.Empty;
+            if (!provider.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
+                return sqlServerPredicate;
+
+            return sqlServerPredicate
+                .Replace("[", "\"", StringComparison.Ordinal)
+                .Replace("]", "\"", StringComparison.Ordinal)
+                .Replace("N''", "''", StringComparison.Ordinal)
+                .Replace("N'0'", "'0'", StringComparison.Ordinal)
+                .Replace("= 0", "= FALSE", StringComparison.Ordinal);
+        }
+
         //public DbSet<ModuleInfo> ModulesInfo { get; set; }
         public DbSet<ModelDifference> ModelDifferences { get; set; }
         public DbSet<ModelDifferenceAspect> ModelDifferenceAspects { get; set; }
@@ -109,7 +128,8 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkDuty> WorkDuties { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
-        public DbSet<OrganizationType> OrganizationTypes { get; set; }
+        public DbSet<ApplicationTypeGroup> ApplicationTypeGroups { get; set; }
+        public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
         public DbSet<ApplicationProgress> ApplicationProgresses { get; set; }
         public DbSet<ApplicationLocation> ApplicationLocations { get; set; }
@@ -121,6 +141,52 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<VisaTransferStatus> VisaTransferStatus { get; set; }
         public DbSet<VisaCancelExtStatus> VisaCancelExtStatus { get; set; }
         public DbSet<VisaCancellationStatus> VisaCancellationStatus { get; set; }
+        public DbSet<ForeignWorkerMaglumat> ForeignWorkerMaglumat { get; set; }
+        public DbSet<VwRdPassport> VwRdPassport { get; set; }
+        public DbSet<VwRdWorkPermit> VwRdWorkPermit { get; set; }
+        public DbSet<VwRdWorkPermitActive> VwRdWorkPermitActive { get; set; }
+        public DbSet<VwRdWorkPermitAppProgress> VwRdWorkPermitAppProgress { get; set; }
+        public DbSet<VwRdInvitationReady> VwRdInvitationReady { get; set; }
+        public DbSet<VwRdInvitationInProcess> VwRdInvitationInProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationOnProcess> VwRdApplicationViaMinistryInvitationOnProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType> VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationCompleted> VwRdApplicationViaMinistryInvitationCompleted { get; set; }
+        public DbSet<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType> VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionOnProcess> VwRdApplicationViaMinistryVisaExtensionOnProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType> VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionCompleted> VwRdApplicationViaMinistryVisaExtensionCompleted { get; set; }
+        public DbSet<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType> VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType { get; set; }
+        public DbSet<VwRdApplicationViaMinistryOtherOnProcess> VwRdApplicationViaMinistryOtherOnProcess { get; set; }
+        public DbSet<VwRdApplicationViaMinistryOtherCompleted> VwRdApplicationViaMinistryOtherCompleted { get; set; }
+        public DbSet<VwRdApplicationDirectMigrationOnProcessA> VwRdApplicationDirectMigrationOnProcessA { get; set; }
+        public DbSet<VwRdApplicationDirectMigrationProcessComplete> VwRdApplicationDirectMigrationProcessComplete { get; set; }
+        public DbSet<VwRdInvitationRejected> VwRdInvitationRejected { get; set; }
+        public DbSet<VwRdInvitationUsed> VwRdInvitationUsed { get; set; }
+        public DbSet<VwRdInvitationValidUntil> VwRdInvitationValidUntil { get; set; }
+        public DbSet<VwRdVisaAppProgress> VwRdVisaAppProgress { get; set; }
+        public DbSet<VwRdProject> VwRdProject { get; set; }
+        public DbSet<VwRdPersonRole> VwRdPersonRole { get; set; }
+        public DbSet<VwRdVisaState> VwRdVisaState { get; set; }
+        public DbSet<VwRdVisaByCategory> VwRdVisaByCategory { get; set; }
+        public DbSet<VwRdVisaByType> VwRdVisaByType { get; set; }
+        public DbSet<VwRdVisaByPeriod> VwRdVisaByPeriod { get; set; }
+        public DbSet<VwRdVisaActiveByProject> VwRdVisaActiveByProject { get; set; }
+        public DbSet<VwRdVisaActiveByPeriodCategoryType> VwRdVisaActiveByPeriodCategoryType { get; set; }
+        public DbSet<VwRdVisaOnExtension> VwRdVisaOnExtension { get; set; }
+        public DbSet<VwRdVisaOnExtensionByPeriodCategoryType> VwRdVisaOnExtensionByPeriodCategoryType { get; set; }
+        public DbSet<VwRdVisaExtensionResult> VwRdVisaExtensionResult { get; set; }
+        public DbSet<VwRdVisaExtensionResultByPeriodCategoryType> VwRdVisaExtensionResultByPeriodCategoryType { get; set; }
+        public DbSet<VwRdVisaByDaysRemaining> VwRdVisaByDaysRemaining { get; set; }
+        public DbSet<VwRdVisaExtensionRequired> VwRdVisaExtensionRequired { get; set; }
+        public DbSet<VwRdApplication> VwRdApplication { get; set; }
+        public DbSet<VwRdEducation> VwRdEducation { get; set; }
+        public DbSet<VwRdEducationByCountry> VwRdEducationByCountry { get; set; }
+        public DbSet<VwRdIncompletePersonsByMissingArea> VwRdIncompletePersonsByMissingArea { get; set; }
+        public DbSet<VwRdPersonSearch> VwRdPersonSearch { get; set; }
+        public DbSet<VwRdPositionHistory> VwRdPositionHistory { get; set; }
+        public DbSet<VwRdRegistration> VwRdRegistration { get; set; }
+        public DbSet<VwRdToBeCheckedIn> VwRdToBeCheckedIn { get; set; }
+        public DbSet<VwRdToBeCheckedOut> VwRdToBeCheckedOut { get; set; }
         public DbSet<TravelHistory> TravelHistories { get; set; }
         public DbSet<ExternalArrival> ExternalArrivals { get; set; }
         public DbSet<ExternalDeparture> ExternalDepartures { get; set; }
@@ -139,10 +205,12 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ReportVisibility> ReportVisibilities { get; set; }
         public DbSet<UserReportTemplate> UserReportTemplates { get; set; }
         public DbSet<UserReportTemplateApplicationType> UserReportTemplateApplicationTypes { get; set; }
+        public DbSet<UserReportTemplateApplicationTypeGroup> UserReportTemplateApplicationTypeGroups { get; set; }
         public DbSet<UserReportTemplateProjectContract> UserReportTemplateProjectContracts { get; set; }
         public DbSet<UserReportPlaceholder> UserReportPlaceholders { get; set; }
         public DbSet<PdfGenerationBatch> PdfGenerationBatches { get; set; }
         public DbSet<WordReportGenerationBatch> WordReportGenerationBatches { get; set; }
+        public DbSet<PersonExportBatch> PersonExportBatches { get; set; }
         public DbSet<MailMergeVisibility> MailMergeVisibility { get; set; }
         public DbSet<StateChangeRule> StateChangeRules { get; set; }
         public DbSet<StateChangeLog> StateChangeLogs { get; set; }
@@ -164,7 +232,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 b.HasIndex(e => new { e.ProjectContractId, e.ApprovalLegProfileId })
                     .IsUnique()
-                    .HasFilter("[GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<TravelHistory>(b =>
@@ -174,6 +242,7 @@ namespace Visa2026.Module.BusinessObjects
                     .HasValue<ExternalDeparture>(nameof(ExternalDeparture))
                     .HasValue<InternalArrival>(nameof(InternalArrival))
                     .HasValue<InternalDeparture>(nameof(InternalDeparture));
+
             });
 
             modelBuilder.Entity<VisaExtensionTracking>(b => {
@@ -232,6 +301,268 @@ namespace Visa2026.Module.BusinessObjects
                 b.HasOne(c => c.CheckOutState).WithMany().HasForeignKey(c => c.CheckOutStateID).OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<ForeignWorkerMaglumat>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("View_ForeignWorkerMaglumat");
+            });
+
+            modelBuilder.Entity<VwRdPassport>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_passport");
+            });
+
+            modelBuilder.Entity<VwRdWorkPermit>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit");
+            });
+
+            modelBuilder.Entity<VwRdWorkPermitActive>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit_active");
+            });
+
+            modelBuilder.Entity<VwRdWorkPermitAppProgress>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_work_permit_app_progress");
+            });
+
+            modelBuilder.Entity<VwRdInvitationReady>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_ready");
+            });
+
+            modelBuilder.Entity<VwRdInvitationInProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_in_process");
+            });
+
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationOnProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_on_process");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_on_process_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationCompleted>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_completed");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_invitation_completed_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionOnProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_on_process");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_on_process_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionCompleted>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_completed");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_visa_extension_completed_by_period_category_type");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryOtherOnProcess>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_other_on_process");
+            });
+            modelBuilder.Entity<VwRdApplicationViaMinistryOtherCompleted>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_via_ministry_other_completed");
+            });
+
+            modelBuilder.Entity<VwRdApplicationDirectMigrationOnProcessA>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_direct_migration_on_process_a");
+            });
+            modelBuilder.Entity<VwRdApplicationDirectMigrationProcessComplete>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application_direct_migration_process_complete");
+            });
+
+            modelBuilder.Entity<VwRdInvitationRejected>(b => {
+                b.HasKey(t => new { t.SourceKind, t.ID });
+                b.ToView("vw_rd_invitation_rejected");
+            });
+
+            modelBuilder.Entity<VwRdInvitationUsed>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_used");
+            });
+
+            modelBuilder.Entity<VwRdInvitationValidUntil>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_invitation_valid_until");
+            });
+
+            modelBuilder.Entity<VwRdVisaAppProgress>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_app_progress");
+                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.CurrentState).WithMany().HasForeignKey(t => t.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdProject>(b => {
+                b.HasKey(t => new { t.ProjectOid, t.PersonRoleCode });
+                b.ToView("vw_rd_projects");
+            });
+
+            modelBuilder.Entity<VwRdPersonRole>(b => {
+                b.HasKey(t => t.PersonRoleCode);
+                b.ToView("vw_rd_person_roles");
+            });
+
+            modelBuilder.Entity<VwRdVisaState>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_state");
+            });
+
+            modelBuilder.Entity<VwRdVisaByCategory>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_category");
+            });
+
+            modelBuilder.Entity<VwRdVisaByType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_type");
+            });
+
+            modelBuilder.Entity<VwRdVisaByPeriod>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_period");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.ID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaActiveByProject>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_active_by_project");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.ID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaActiveByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_active_by_period_category_type");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.ID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaOnExtension>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_on_extension");
+                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.CurrentState).WithMany().HasForeignKey(t => t.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaOnExtensionByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_on_extension_by_period_category_type");
+                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.CurrentState).WithMany().HasForeignKey(t => t.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaExtensionResult>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_extension_result");
+                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.CurrentState).WithMany().HasForeignKey(t => t.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaExtensionResultByPeriodCategoryType>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_extension_result_by_period_category_type");
+                b.HasOne(t => t.Application).WithMany().HasForeignKey(t => t.ApplicationOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.ExpiringVisa).WithMany().HasForeignKey(t => t.ExpiringVisaID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.CurrentState).WithMany().HasForeignKey(t => t.CurrentStateID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaByDaysRemaining>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_by_days_remaining");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.ID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdVisaExtensionRequired>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_visa_extension_required");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Passport).WithMany().HasForeignKey(t => t.PassportID).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(t => t.Visa).WithMany().HasForeignKey(t => t.ID).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdApplication>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_application");
+            });
+
+            modelBuilder.Entity<VwRdEducation>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_education");
+            });
+
+            modelBuilder.Entity<VwRdEducationByCountry>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_education_by_country");
+            });
+
+            modelBuilder.Entity<VwRdIncompletePersonsByMissingArea>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_incomplete_persons_by_missing_area");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdPersonSearch>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_person_search");
+                b.HasOne(t => t.Person).WithMany().HasForeignKey(t => t.PersonOid).OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<VwRdPositionHistory>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_position_history");
+            });
+
+            modelBuilder.Entity<VwRdRegistration>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_registration");
+            });
+
+            modelBuilder.Entity<VwRdToBeCheckedIn>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_to_be_checked_in");
+            });
+
+            modelBuilder.Entity<VwRdToBeCheckedOut>(b => {
+                b.HasKey(t => t.ID);
+                b.ToView("vw_rd_to_be_checked_out");
+            });
+
             modelBuilder.Entity<UserReportTemplateApplicationType>(b => {
                 b.HasOne(l => l.UserReportTemplate)
                     .WithMany(t => t.ApplicableTypeLinks)
@@ -243,7 +574,35 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeId })
                     .IsUnique()
-                    .HasFilter("[GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
+            });
+
+            modelBuilder.Entity<ApplicationTypeGroupMember>(b => {
+                b.HasOne(l => l.ApplicationTypeGroup)
+                    .WithMany(g => g.Members)
+                    .HasForeignKey(l => l.ApplicationTypeGroupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApplicationType)
+                    .WithMany()
+                    .HasForeignKey(l => l.ApplicationTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(l => new { l.ApplicationTypeGroupId, l.ApplicationTypeId })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
+            });
+
+            modelBuilder.Entity<UserReportTemplateApplicationTypeGroup>(b => {
+                b.HasOne(l => l.UserReportTemplate)
+                    .WithMany(t => t.ApplicableGroupLinks)
+                    .HasForeignKey(l => l.UserReportTemplateId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(l => l.ApplicationTypeGroup)
+                    .WithMany()
+                    .HasForeignKey(l => l.ApplicationTypeGroupId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasIndex(l => new { l.UserReportTemplateId, l.ApplicationTypeGroupId })
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<UserReportTemplateProjectContract>(b => {
@@ -257,7 +616,7 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasIndex(l => new { l.UserReportTemplateId, l.ProjectContractId })
                     .IsUnique()
-                    .HasFilter("[GCRecord] IS NULL");
+                    .HasFilter(IndexFilter("[GCRecord] IS NULL"));
             });
 
             modelBuilder.Entity<Application>(b => {
@@ -268,7 +627,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
-                 .HasFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL");
+                 .HasFilter(IndexFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL"));
                 b.HasIndex("ApplicationTypeID")
                  .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
             });
@@ -287,7 +646,7 @@ namespace Visa2026.Module.BusinessObjects
                 b.Property(t => t.SelectionCode).HasMaxLength(3);
                 b.HasIndex(t => t.SelectionCode)
                     .IsUnique()
-                    .HasFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''");
+                    .HasFilter(IndexFilter("[SelectionCode] IS NOT NULL AND [SelectionCode] <> ''"));
                 b.HasOne(t => t.MigrationSlaProfile)
                     .WithMany(p => p.ApplicationTypes)
                     .HasForeignKey(t => t.MigrationSlaProfileId)
@@ -357,10 +716,21 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(v => v.IssuingApplicationItem).WithMany().OnDelete(DeleteBehavior.NoAction).IsRequired(false);
+                // Single-use by validation (Visa_IssuingApplicationItemSingleUse / Visa_InvitationItemSingleUse).
+                b.HasOne(v => v.IssuingApplicationItem)
+                    .WithOne(ai => ai.IssuedVisa)
+                    .HasForeignKey<Visa>("IssuingApplicationItemID")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired(false);
+                b.HasOne(v => v.InvitationItem)
+                    .WithOne(ii => ii.IssuedVisa)
+                    .HasForeignKey<Visa>("InvitationItemID")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired(false);
                 b.Metadata.UseSqlOutputClause(false);
                 b.Property(v => v.ExtensionRequired).HasDefaultValue(true);
                 b.Property(v => v.BorderZoneLocation).HasMaxLength(500);
+                b.Property(v => v.ProcessNumber).HasMaxLength(100);
             });
 
             modelBuilder.Entity<Passport>(b =>
@@ -382,7 +752,7 @@ namespace Visa2026.Module.BusinessObjects
             modelBuilder.Entity<Person>()
                 .HasIndex(p => p.PersonalNumber)
                 .IsUnique()
-                .HasFilter("[PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'");
+                .HasFilter(IndexFilter("[PersonalNumber] IS NOT NULL AND [PersonalNumber] <> N'' AND [PersonalNumber] <> N'0'"));
 
             // FIX: Person.ApplicationItems is a virtual collection navigation whose backing field
             // cannot be discovered by the lazy-loading proxy (it is an auto-property or an inline-
@@ -432,6 +802,14 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
+            modelBuilder.Entity<PersonExportBatch>(b =>
+            {
+                b.HasOne(x => x.Person)
+                    .WithMany()
+                    .HasForeignKey(x => x.PersonID)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<PdfGenerationBatch>(b =>
             {
                 b.Property(x => x.IncludeDiplomaFiles).HasDefaultValue(true);
@@ -449,7 +827,8 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<BusinessObjects.Operations.ApplicationRuntimeLog>(b =>
             {
-                b.Property(x => x.StackTrace).HasColumnType("nvarchar(max)");
+                // Provider-agnostic: SQL Server → nvarchar(max), PostgreSQL → text.
+                b.Property(x => x.StackTrace);
                 b.HasIndex(x => x.OccurredAtUtc);
                 b.HasIndex(x => x.Severity);
                 b.HasIndex(x => x.CorrelationId);

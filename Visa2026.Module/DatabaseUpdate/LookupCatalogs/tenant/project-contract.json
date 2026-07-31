@@ -15,13 +15,6 @@
       "IsActive": true
     },
     {
-      "NameTm": "KYC (Kiyanl\u0131 Kobmine Elektrik Santrali projesi)",
-      "Description": "(1 ylala\u015Fyk: t\u00FCrkmenenergo \u003E energetika)",
-      "LocalizationKey": "kyc-kiyanl-kobmine-elektrik-santrali-projesi-yl2-te-en",
-      "Code": "KYC (Kiyanl\u0131 Kobmine Elektrik Santrali projesi)",
-      "IsActive": true
-    },
-    {
       "NameTm": "12552 AST1",
       "Description": "A\u015Fgabat \u015F\u00E4her h\u00E4kimligi T\u00FCrkmenistany\u0148 Prezdentini\u0148 2012-nji \u00FDyly\u0148 17-nji Sent\u00FDabrynda 12552 belgili kararyna la\u00FDyklykda Berkarar d\u00F6wletimizi\u0148 Bagty\u00FDarlyk d\u00F6wr\u00FCnde A\u015Fgabat \u015F\u00E4herini\u0148 ya\u015Fa\u00FDjylaryny elektrik energiyasy bilen b\u00F6kden\u00E7siz \u00FCpj\u00FCn etmek hem-de energiya \u00FCpj\u00FCn\u00E7iligini\u0148 ygtybarlylygyny yokarlandyrmak maksady bilen \u2018\u00C7al\u0131k Enerji sana\u00FDi we tijaret A.\u015E.\u2019\u2019 kompan\u00FDasy bilen 2012-\u00FDyly\u0148 16-njy no\u00FDabrynda AST-1-001 belgili \u015Fertnama bagla\u015Fyldy.",
       "LocalizationKey": "12552-ast1-yl1-ah",

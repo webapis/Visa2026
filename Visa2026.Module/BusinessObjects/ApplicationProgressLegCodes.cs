@@ -5,16 +5,38 @@ using System.Linq;
 namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
-/// Dynamic <see cref="ApplicationState"/> / <see cref="ApplicationLocation"/> codes for ministry review legs 1…N.
+/// Dynamic <see cref="ApplicationState"/> codes for ministry review legs 1…N.
 /// </summary>
 public static class ApplicationProgressLegCodes
 {
     public const int MaxLegCount = 5;
 
+    /// <summary>
+    /// First-leg only for new progress ("Ministrlige iberilen"). Legs 2–5 STARTED are legacy rows only.
+    /// </summary>
     public static string ReviewStarted(int leg) => $"{leg}_REVIEW_STARTED";
     public static string ReviewApproved(int leg) => $"{leg}_REVIEW_APPROVED";
     public static string ReviewRejected(int leg) => $"{leg}_REVIEW_REJECTED";
     public static string AtMinistry(int leg) => $"AT_THE_MINISTERY_{leg}";
+
+    public static bool IsLegacyReviewStartedCode(string? stateCode) =>
+        IsMinistryReviewStartedStateCode(stateCode)
+        && TryParseMinistryLegFromStateCode(stateCode, out var leg)
+        && leg > 1;
+
+    public static bool IsActiveMinistryStateCode(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        var trimmed = stateCode.Trim();
+        if (trimmed.EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
+            || trimmed.EndsWith("_REVIEW_REJECTED", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // First-leg started is active workflow; later STARTED codes are legacy-only.
+        return string.Equals(trimmed, ReviewStarted(1), StringComparison.OrdinalIgnoreCase);
+    }
 
     public static bool IsReviewStateCode(string? stateCode) =>
         TryParseMinistryLegFromStateCode(stateCode, out _);
@@ -23,7 +45,6 @@ public static class ApplicationProgressLegCodes
         TryParseMinistryLegFromStateCode(stateCode, out _)
         && stateCode!.EndsWith("_REJECTED", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>Ministry review ended with approval or rejection — officers may attach the issued letter copy.</summary>
     public static bool IsMinistryReviewStartedStateCode(string? stateCode)
     {
         if (string.IsNullOrWhiteSpace(stateCode))
@@ -80,12 +101,25 @@ public static class ApplicationProgressLegCodes
             && leg is >= 1 and <= MaxLegCount;
     }
 
-    public static IReadOnlyList<string> GetReviewStateCodesForLeg(int leg) =>
-    [
-        ReviewStarted(leg),
-        ReviewApproved(leg),
-        ReviewRejected(leg)
-    ];
+    /// <summary>Active review states for a leg. Leg 1 includes STARTED; legs 2+ are approval/rejection only.</summary>
+    public static IReadOnlyList<string> GetReviewStateCodesForLeg(int leg)
+    {
+        if (leg == 1)
+        {
+            return
+            [
+                ReviewStarted(1),
+                ReviewApproved(1),
+                ReviewRejected(1)
+            ];
+        }
+
+        return
+        [
+            ReviewApproved(leg),
+            ReviewRejected(leg)
+        ];
+    }
 
     public static IEnumerable<string> GetReviewStateCodesUpToLegCount(int legCount)
     {

@@ -36,6 +36,12 @@ fields:
     default: null
     defaultValue: null
     mismatchNotes: null
+    # Post-import mapping verify (MAPPING_VERIFICATION.md):
+    # verify:
+    #   enabled: true
+    #   tier: A          # A = histogram; B = sample; C = full
+    #   severity: error  # error | warn
+    #   compare: lookup_key  # lookup_key | scalar | fk
     # Binary / file fields — see FILE_AND_IMAGE_IMPORT.md:
     # importWave: file-follow-up | excelExport.mode: stub | stubColumns: [_hasPhoto, ...]
 

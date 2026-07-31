@@ -12,7 +12,16 @@
     @if (!_previewActive)
     {
         <div class="resminamalar-slot-panel__header visa-preview-drawer__header">
-            <span class="visa-preview-drawer__title">@Title</span>
+            <div class="visa-preview-drawer__title-block">
+                <span class="visa-preview-drawer__title doc-copies-brand-title">
+                    <span class="doc-copies-brand-title__icon" aria-hidden="true"></span>
+                    @Title
+                </span>
+                @if (!string.IsNullOrWhiteSpace(HeaderPersonLine))
+                {
+                    <span class="visa-preview-drawer__subtitle">@HeaderPersonLine</span>
+                }
+            </div>
             <div class="visa-preview-drawer__header-actions">
                 <button class="visa-preview-drawer__btn visa-preview-drawer__btn--close"
                         type="button"
@@ -65,6 +74,27 @@
 
     private string Title => VisaUiMessages.Get("PersonDocumentCopies.Title", _uiCultureName);
     private string CloseLabel => VisaUiMessages.Get("PersonDocumentCopies.Action.Close", _uiCultureName);
+
+    private string HeaderPersonLine
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_snapshot.PersonDisplayName))
+                return string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(_snapshot.PersonalNumber))
+                return VisaUiMessages.FormatForCulture(
+                    _uiCultureName,
+                    "PersonDocumentCopies.Header.PersonWithNumber",
+                    _snapshot.PersonDisplayName,
+                    _snapshot.PersonalNumber);
+
+            return VisaUiMessages.FormatForCulture(
+                _uiCultureName,
+                "PersonDocumentCopies.Header.Person",
+                _snapshot.PersonDisplayName);
+        }
+    }
 
     protected override void OnInitialized()
     {

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Data.SqlClient;
 using Visa2026.DataImporter;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -224,7 +225,7 @@ internal static class Visa2014AddressOfResidenceODataImporter
     private static bool TryParseDate(string? text, out DateTime date) =>
         DateTime.TryParse(text, out date);
 
-    private static string DescribePayloadGap(Dictionary<string, object?> row, Visa2014ODataLookupResolver resolver)
+    internal static string DescribePayloadGap(Dictionary<string, object?> row, Visa2014ODataLookupResolver resolver)
     {
         var gaps = new List<string>();
         var typeText = row.GetValueOrDefault("Type") as string;
@@ -416,48 +417,6 @@ internal static class Visa2014AddressOfResidenceODataImporter
         return Visa2014IdMapHelper.Load(path);
     }
 
-    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
-        IVisa2014ImportTarget target,
-        Visa2014ODataLookupResolver resolver,
-        string legacyConnectionString,
-        IReadOnlyList<string> lookupTranslationPaths,
-        string personIdMapPath,
-        Visa2014SyncContext sync,
-        string? targetConnectionString,
-        int? maxRows,
-        bool verbose)
-    {
-        var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
-        if (verbose)
-            Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
-
-        var batch = Visa2014AddressOfResidenceTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose);
-
-        var normalizedRows = NormalizeLegacyRowIds(batch.ImportRows);
-
-        var duplicateGuard = await Visa2014AddressOfResidenceSiteDuplicateGuard.LoadFromSqlAsync(
-            targetConnectionString ?? "",
-            verbose);
-
-        return await Visa2014SyncUpsertHelper.RunAsync(
-            target,
-            typeof(Visa2026.Module.BusinessObjects.AddressOfResidence),
-            "AddressOfResidence",
-            normalizedRows,
-            sync,
-            row => BuildSyncPayload(row, resolver, personIdMap, sync.IdMap),
-            batch.LegacyRowCount,
-            batch.Skipped.Count,
-            batch.DedupeMergedCount,
-            verbose,
-            payload => duplicateGuard.TryResolveFromPayload(payload),
-            (payload, createdId) => duplicateGuard.RegisterFromPayload(payload, createdId));
-    }
-
     private static async Task<Guid?> TryMatchExistingAddressAsync(
         string? targetConnectionString,
         Guid personId,
@@ -466,73 +425,12 @@ internal static class Visa2014AddressOfResidenceODataImporter
         if (string.IsNullOrWhiteSpace(targetConnectionString))
             return null;
 
+        // Site-match scan uses SqlClient + T-SQL. Skip on PostgreSQL (Demo dual-provider pilot).
+        if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
+            return null;
+
         await using var connection = new SqlConnection(targetConnectionString);
         await connection.OpenAsync();
         return await Visa2014AddressOfResidenceTargetMatcher.TryMatchTargetIdAsync(connection, personId, importRow);
-    }
-
-    private static List<Dictionary<string, object?>> NormalizeLegacyRowIds(
-        IReadOnlyList<Dictionary<string, object?>> importRows)
-    {
-        var normalized = new List<Dictionary<string, object?>>(importRows.Count);
-        foreach (var row in importRows)
-        {
-            if (row["_legacyRowId"] is Guid)
-            {
-                normalized.Add(row);
-                continue;
-            }
-
-            if (!Guid.TryParse(row.GetValueOrDefault("_legacyRowId") as string, out var legacyOid))
-                continue;
-
-            var copy = new Dictionary<string, object?>(row, StringComparer.Ordinal)
-            {
-                ["_legacyRowId"] = legacyOid,
-            };
-            normalized.Add(copy);
-        }
-
-        return normalized;
-    }
-
-    private static Dictionary<string, object?>? BuildSyncPayload(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver,
-        IReadOnlyDictionary<Guid, Guid> personIdMap,
-        IReadOnlyDictionary<Guid, Guid> addressIdMap)
-    {
-        var legacyOid = row["_legacyRowId"] is Guid guid
-            ? guid
-            : Guid.TryParse(row.GetValueOrDefault("_legacyRowId") as string, out var parsed)
-                ? parsed
-                : Guid.Empty;
-        if (legacyOid == Guid.Empty)
-            return null;
-
-        var isUpdate = addressIdMap.ContainsKey(legacyOid);
-
-        if (!TryResolveLegacyPersonOid(row, out var legacyPersonOid))
-            return isUpdate ? BuildODataPayloadWithoutPerson(row, resolver) : null;
-
-        if (!personIdMap.TryGetValue(legacyPersonOid, out var personId))
-            return isUpdate ? BuildODataPayloadWithoutPerson(row, resolver) : null;
-
-        return Visa2014AddressOfResidenceImportApplier.BuildODataPayload(row, resolver, personId);
-    }
-
-    private static Dictionary<string, object?>? BuildODataPayloadWithoutPerson(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver)
-    {
-        var payload = Visa2014AddressOfResidenceImportApplier.BuildODataPayload(
-            row,
-            resolver,
-            Guid.Empty);
-        if (payload == null)
-            return null;
-
-        payload.Remove("Person");
-        return payload;
     }
 }

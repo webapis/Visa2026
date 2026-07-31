@@ -8,18 +8,14 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 internal static class Visa2014ApplicationProgressSeedHelper
 {
     public const string InitialStateCode = "IS_BEING_PREPARED";
-    public const string InitialLocationCode = "AT_OFFICE";
     public const string PrepareStepCode = "prepare";
 
     public static bool IsInitializerSeed(ApplicationProgress progress)
     {
-        if (progress.State == null || progress.Location == null)
+        if (progress.State == null)
             return false;
 
         if (!string.Equals(progress.State.Code, InitialStateCode, StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        if (!string.Equals(progress.Location.Code, InitialLocationCode, StringComparison.OrdinalIgnoreCase))
             return false;
 
         return string.IsNullOrWhiteSpace(progress.Description);
@@ -27,7 +23,6 @@ internal static class Visa2014ApplicationProgressSeedHelper
 
     public static bool IsPrepareSyntheticStep(Dictionary<string, object?> row) =>
         string.Equals(row.GetValueOrDefault("State") as string, InitialStateCode, StringComparison.OrdinalIgnoreCase)
-        && string.Equals(row.GetValueOrDefault("Location") as string, InitialLocationCode, StringComparison.OrdinalIgnoreCase)
         && string.Equals(ExtractStepCode(row), PrepareStepCode, StringComparison.OrdinalIgnoreCase);
 
     public static string? ExtractStepCode(Dictionary<string, object?> row)

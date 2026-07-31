@@ -35,14 +35,29 @@ internal static class Visa2014ApplicationProgressODataImporter
         bool dryRun,
         bool verbose,
         INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
-        string? targetConnectionForLegCounts = null)
+        string? targetConnectionForLegCounts = null,
+        // Retained for call-site compatibility; ApplicationProgress posts sequentially (flush per row).
+        int parallelism = 0,
+        int batchSize = 50)
     {
+        _ = parallelism;
+        _ = batchSize;
         var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
         if (verbose)
             Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
 
+        Console.WriteLine("INF ApplicationProgress import: resolving ministry leg counts...");
+        Console.Out.Flush();
+        Visa2014SyncUpsertHelper.WriteSyncProgressFile(
+            progressIdMapOutputPath, "ApplicationProgress", 0, 0, 0, 0, 0, 0, phase: "resolve-legs");
+
         var ministryLegCountByLegacyApplicationOid = await ResolveMinistryLegCountMapAsync(
             applicationIdMap, objectSpaceFactory, targetConnectionForLegCounts, verbose);
+
+        Console.WriteLine("INF ApplicationProgress import: preparing rows from legacy...");
+        Console.Out.Flush();
+        Visa2014SyncUpsertHelper.WriteSyncProgressFile(
+            progressIdMapOutputPath, "ApplicationProgress", 0, 0, 0, 0, 0, 0, phase: "prepare");
 
         var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
             legacyConnectionString,
@@ -87,78 +102,194 @@ internal static class Visa2014ApplicationProgressODataImporter
         if (verbose && progressIdMap.Count > 0)
             Console.WriteLine($"INF Existing ApplicationProgress id-map entries: {progressIdMap.Count}");
 
-        var errors = new List<string>();
-        int posted = 0;
-        int failed = 0;
-        int skippedNoApp = 0;
-        int skippedAlready = 0;
+        var total = batch.ImportRows.Count;
+        // One progress row per CommitChanges: batching multiple steps for the same Application
+        // fights Application.LatestProgress optimistic lock (and hung Prod at posted~49 / batch-size 50).
+        Console.WriteLine(
+            $"INF ApplicationProgress sequential post: {total} row(s) ({batch.LegacyRowCount} legacy apps; flush per row)");
+        Console.Out.Flush();
+        Visa2014SyncUpsertHelper.WriteSyncProgressFile(
+            progressIdMapOutputPath,
+            "ApplicationProgress",
+            processed: 0,
+            total,
+            updated: 0,
+            inserted: 0,
+            skippedUnchanged: 0,
+            failed: 0,
+            phase: "posting");
 
-        foreach (var row in batch.ImportRows)
+        Visa2014ObjectSpaceImportTarget? owned = null;
+        IVisa2014ImportTarget postTarget = target;
+        if (objectSpaceFactory != null)
         {
-            var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
-                ?? row.GetValueOrDefault("_legacyRowId") as string;
-            if (string.IsNullOrWhiteSpace(syntheticKey))
-            {
-                failed++;
-                errors.Add("row: missing _syntheticStepKey");
-                continue;
-            }
-
-            if (progressIdMap.ContainsKey(syntheticKey))
-            {
-                skippedAlready++;
-                continue;
-            }
-
-            if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid))
-            {
-                failed++;
-                errors.Add($"{syntheticKey}: missing legacy Application Oid");
-                continue;
-            }
-
-            if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
-            {
-                skippedNoApp++;
-                if (verbose)
-                    Console.WriteLine($"  SKIP {syntheticKey}: Application {legacyApplicationOid} not in id-map");
-                continue;
-            }
-
-            try
-            {
-                var payload = BuildPayload(row, resolver, applicationId);
-                if (payload == null)
-                {
-                    failed++;
-                    errors.Add($"{syntheticKey}: incomplete OData payload ({DescribePayloadGap(row, resolver)})");
-                    continue;
-                }
-
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
-                if (!createdId.HasValue)
-                {
-                    failed++;
-                    errors.Add($"{syntheticKey}: create returned null");
-                    continue;
-                }
-
-                progressIdMap[syntheticKey] = createdId.Value;
-                posted++;
-                if (posted % 500 == 0)
-                    Console.WriteLine($"INF Progress: {posted} posted, {failed} failed, {skippedNoApp} no app map...");
-                if (verbose)
-                    Console.WriteLine($"  SAVE ApplicationProgress {createdId.Value} <- {syntheticKey}");
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                errors.Add($"{syntheticKey}: {ex.Message}");
-                Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
-            }
+            owned = new Visa2014ObjectSpaceImportTarget(objectSpaceFactory, batchSize: 1);
+            postTarget = owned;
         }
 
-        await target.FlushAsync();
+        var posted = 0;
+        var failed = 0;
+        var skippedAlready = 0;
+        var skippedMissing = 0;
+        var processed = 0;
+        var errors = new List<string>();
+
+        try
+        {
+            foreach (var row in batch.ImportRows)
+            {
+                var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
+                    ?? row.GetValueOrDefault("_legacyRowId") as string;
+                if (string.IsNullOrWhiteSpace(syntheticKey))
+                {
+                    failed++;
+                    processed++;
+                    errors.Add("row: missing _syntheticStepKey");
+                    Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                        progressIdMapOutputPath,
+                        "ApplicationProgress",
+                        processed,
+                        total,
+                        posted,
+                        failed,
+                        skippedAlready + skippedMissing);
+                    continue;
+                }
+
+                if (progressIdMap.ContainsKey(syntheticKey))
+                {
+                    skippedAlready++;
+                    processed++;
+                    Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                        progressIdMapOutputPath,
+                        "ApplicationProgress",
+                        processed,
+                        total,
+                        posted,
+                        failed,
+                        skippedAlready + skippedMissing);
+                    continue;
+                }
+
+                if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid))
+                {
+                    failed++;
+                    processed++;
+                    errors.Add($"{syntheticKey}: missing legacy Application Oid");
+                    Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                        progressIdMapOutputPath,
+                        "ApplicationProgress",
+                        processed,
+                        total,
+                        posted,
+                        failed,
+                        skippedAlready + skippedMissing);
+                    continue;
+                }
+
+                if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
+                {
+                    skippedMissing++;
+                    processed++;
+                    if (verbose)
+                        Console.WriteLine($"  SKIP {syntheticKey}: Application {legacyApplicationOid} not in id-map");
+                    Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                        progressIdMapOutputPath,
+                        "ApplicationProgress",
+                        processed,
+                        total,
+                        posted,
+                        failed,
+                        skippedAlready + skippedMissing);
+                    continue;
+                }
+
+                try
+                {
+                    var payload = BuildPayload(row, resolver, applicationId);
+                    if (payload == null)
+                    {
+                        failed++;
+                        processed++;
+                        var gap =
+                            $"{syntheticKey}: incomplete OData payload ({DescribePayloadGap(row, resolver)})";
+                        errors.Add(gap);
+                        if (errors.Count <= 25)
+                            Console.Error.WriteLine($"ERR {gap}");
+                        Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                            progressIdMapOutputPath,
+                            "ApplicationProgress",
+                            processed,
+                            total,
+                            posted,
+                            failed,
+                            skippedAlready + skippedMissing);
+                        continue;
+                    }
+
+                    var createdId = await postTarget.CreateAsync(
+                        typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
+                    if (!createdId.HasValue)
+                    {
+                        failed++;
+                        processed++;
+                        errors.Add($"{syntheticKey}: create returned null");
+                        Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                            progressIdMapOutputPath,
+                            "ApplicationProgress",
+                            processed,
+                            total,
+                            posted,
+                            failed,
+                            skippedAlready + skippedMissing);
+                        continue;
+                    }
+
+                    // Shared headless target may use --batch-size 50; force one-row commits.
+                    if (owned == null)
+                        await postTarget.FlushAsync();
+
+                    progressIdMap[syntheticKey] = createdId.Value;
+                    posted++;
+                    processed++;
+                    if (verbose)
+                        Console.WriteLine($"  SAVE ApplicationProgress {createdId.Value} <- {syntheticKey}");
+                }
+                catch (Exception ex)
+                {
+                    failed++;
+                    processed++;
+                    errors.Add($"{syntheticKey}: {ex.Message}");
+                    Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
+                }
+
+                Visa2014SyncUpsertHelper.ReportImportLoopProgress(
+                    progressIdMapOutputPath,
+                    "ApplicationProgress",
+                    processed,
+                    total,
+                    posted,
+                    failed,
+                    skippedAlready + skippedMissing);
+            }
+        }
+        finally
+        {
+            await postTarget.FlushAsync();
+            owned?.Dispose();
+        }
+
+        Visa2014SyncUpsertHelper.WriteSyncProgressFile(
+            progressIdMapOutputPath,
+            "ApplicationProgress",
+            processed,
+            total,
+            updated: 0,
+            inserted: posted,
+            skippedUnchanged: skippedAlready + skippedMissing,
+            failed: failed,
+            phase: "done");
+        Console.Out.Flush();
 
         string? idMapPath = null;
         if (progressIdMap.Count > 0 && !string.IsNullOrWhiteSpace(progressIdMapOutputPath))
@@ -167,7 +298,9 @@ internal static class Visa2014ApplicationProgressODataImporter
             Directory.CreateDirectory(Path.GetDirectoryName(idMapPath)!);
             await File.WriteAllTextAsync(
                 idMapPath,
-                JsonSerializer.Serialize(progressIdMap, new JsonSerializerOptions { WriteIndented = true }));
+                System.Text.Json.JsonSerializer.Serialize(
+                    progressIdMap,
+                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
         }
 
         return new Visa2014ApplicationProgressImportResult
@@ -175,7 +308,7 @@ internal static class Visa2014ApplicationProgressODataImporter
             LegacyRowCount = batch.LegacyRowCount,
             PreparedCount = batch.ImportRows.Count,
             SkippedCount = batch.Skipped.Count,
-            SkippedNoApplicationMap = skippedNoApp,
+            SkippedNoApplicationMap = skippedMissing,
             SkippedAlreadyImported = skippedAlready,
             SeedsRemovedBeforeImport = seedsRemoved,
             PostedCount = posted,
@@ -312,21 +445,19 @@ internal static class Visa2014ApplicationProgressODataImporter
         Guid applicationId)
     {
         var stateCode = row.GetValueOrDefault("State") as string;
-        var locationCode = row.GetValueOrDefault("Location") as string;
         if (!TryParseDate(row.GetValueOrDefault("Date") as string, out var date))
             return null;
 
         var stateId = resolver.ResolveApplicationState(stateCode);
-        var locationId = resolver.ResolveApplicationLocation(locationCode);
-        if (!stateId.HasValue || !locationId.HasValue)
+        if (!stateId.HasValue)
             return null;
 
         var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
         {
             ["Application"] = new { ID = applicationId },
             ["State"] = new { ID = stateId.Value },
-            ["Location"] = new { ID = locationId.Value },
-            ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
+            // Unspecified for PG timestamp without time zone (Utc Kind fails without legacy switch).
+            ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Unspecified),
         };
 
         if (TryParseOrder(row.GetValueOrDefault("Order"), out var order))
@@ -336,6 +467,10 @@ internal static class Visa2014ApplicationProgressODataImporter
         if (!string.IsNullOrWhiteSpace(description))
             payload["Description"] = description.Trim();
 
+        var processNumber = row.GetValueOrDefault("ProcessNumber") as string;
+        if (!string.IsNullOrWhiteSpace(processNumber))
+            payload["ProcessNumber"] = processNumber.Trim();
+
         return payload;
     }
 
@@ -344,8 +479,6 @@ internal static class Visa2014ApplicationProgressODataImporter
         var gaps = new List<string>();
         if (!resolver.ResolveApplicationState(row.GetValueOrDefault("State") as string).HasValue)
             gaps.Add($"State={row.GetValueOrDefault("State")}");
-        if (!resolver.ResolveApplicationLocation(row.GetValueOrDefault("Location") as string).HasValue)
-            gaps.Add($"Location={row.GetValueOrDefault("Location")}");
         if (!TryParseDate(row.GetValueOrDefault("Date") as string, out _))
             gaps.Add($"Date={row.GetValueOrDefault("Date")}");
         return gaps.Count > 0 ? string.Join("; ", gaps) : "unknown";
@@ -387,271 +520,6 @@ internal static class Visa2014ApplicationProgressODataImporter
         }
 
         return map;
-    }
-
-    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
-        IVisa2014ImportTarget target,
-        Visa2014ODataLookupResolver resolver,
-        string legacyConnectionString,
-        IReadOnlyList<string> lookupTranslationPaths,
-        string applicationIdMapPath,
-        Visa2014SyncContext sync,
-        int? maxRows,
-        bool verbose,
-        INonSecuredObjectSpaceFactory? objectSpaceFactory = null,
-        string? targetConnectionForLegCounts = null)
-    {
-        Console.WriteLine("INF ApplicationProgress sync: loading Application id-map...");
-        var applicationIdMap = Visa2014IdMapHelper.Load(applicationIdMapPath);
-        if (verbose)
-            Console.WriteLine($"INF Application id-map entries: {applicationIdMap.Count}");
-
-        Console.WriteLine("INF ApplicationProgress sync: resolving ministry-leg counts...");
-        var ministryLegCountByLegacyApplicationOid = await ResolveMinistryLegCountMapAsync(
-            applicationIdMap, objectSpaceFactory, targetConnectionForLegCounts, verbose);
-
-        Console.WriteLine("INF ApplicationProgress sync: extracting legacy progress rows...");
-        var batch = Visa2014ApplicationProgressTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose,
-            ministryLegCountByLegacyApplicationOid);
-
-        Console.WriteLine(
-            $"INF ApplicationProgress sync: {batch.ImportRows.Count} rows prepared ({batch.LegacyRowCount} legacy); loading prod duplicate guard...");
-        var progressIdMap = LoadOptionalProgressIdMap(sync.IdMapOutputPath);
-        var duplicateGuard = await Visa2014ApplicationProgressDuplicateGuard.LoadFromSqlAsync(
-            targetConnectionForLegCounts ?? "",
-            verbose);
-        var errors = new List<string>();
-        int inserted = 0;
-        int updated = 0;
-        int relinked = 0;
-        int skippedUnchanged = 0;
-        int failed = 0;
-        int skippedNoApp = 0;
-        int processed = 0;
-
-        Console.WriteLine($"INF ApplicationProgress sync: applying upserts ({batch.ImportRows.Count} rows)...");
-        foreach (var row in batch.ImportRows)
-        {
-            processed++;
-            if (processed % 500 == 0)
-                Console.WriteLine(
-                    $"INF ApplicationProgress sync progress: {processed}/{batch.ImportRows.Count} " +
-                    $"(upd {updated}, ins {inserted}, skip {skippedUnchanged}, fail {failed})");
-            var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
-                ?? row.GetValueOrDefault("_legacyRowId") as string;
-            if (string.IsNullOrWhiteSpace(syntheticKey))
-            {
-                failed++;
-                errors.Add("row: missing _syntheticStepKey");
-                continue;
-            }
-
-            Dictionary<string, object?>? payload;
-            bool missingApplication;
-            try
-            {
-                payload = BuildSyncPayload(row, resolver, applicationIdMap, progressIdMap, out missingApplication);
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                errors.Add($"{syntheticKey}: payload build failed: {ex.Message}");
-                continue;
-            }
-
-            if (payload == null)
-            {
-                if (missingApplication)
-                {
-                    skippedNoApp++;
-                    if (verbose)
-                        Console.WriteLine($"  SKIP {syntheticKey}: Application not in id-map");
-                    continue;
-                }
-
-                failed++;
-                errors.Add($"{syntheticKey}: incomplete payload");
-                continue;
-            }
-
-            if (progressIdMap.TryGetValue(syntheticKey, out var targetId))
-            {
-                if (!ShouldUpdateProgressRow(row, sync.RowFilter))
-                {
-                    skippedUnchanged++;
-                    continue;
-                }
-
-                try
-                {
-                    await target.UpdateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), targetId, payload);
-                    updated++;
-                    if (verbose)
-                        Console.WriteLine($"  UPDATE ApplicationProgress {targetId} <- {syntheticKey}");
-                }
-                catch (Exception ex)
-                {
-                    failed++;
-                    errors.Add($"{syntheticKey}: update failed: {ex.Message}");
-                    Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
-                }
-
-                continue;
-            }
-
-            if (duplicateGuard.TryResolveFromPayload(payload) is Guid existingId)
-            {
-                try
-                {
-                    await target.UpdateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), existingId, payload);
-                    progressIdMap[syntheticKey] = existingId;
-                    updated++;
-                    relinked++;
-                    if (verbose)
-                        Console.WriteLine($"  RELINK ApplicationProgress {existingId} <- {syntheticKey} (existing Application+Order)");
-                }
-                catch (Exception ex)
-                {
-                    failed++;
-                    errors.Add($"{syntheticKey}: relink update failed: {ex.Message}");
-                    Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
-                }
-
-                continue;
-            }
-
-            try
-            {
-                var createdId = await target.CreateAsync(typeof(Visa2026.Module.BusinessObjects.ApplicationProgress), payload);
-                if (!createdId.HasValue)
-                {
-                    failed++;
-                    errors.Add($"{syntheticKey}: create returned null");
-                    continue;
-                }
-
-                progressIdMap[syntheticKey] = createdId.Value;
-                duplicateGuard.RegisterFromPayload(payload, createdId.Value);
-                inserted++;
-                if (inserted % 500 == 0 && !string.IsNullOrWhiteSpace(sync.IdMapOutputPath))
-                    await SaveProgressIdMapAsync(sync.IdMapOutputPath, progressIdMap);
-
-                if (verbose)
-                    Console.WriteLine($"  INSERT ApplicationProgress {createdId.Value} <- {syntheticKey}");
-            }
-            catch (Exception ex)
-            {
-                failed++;
-                errors.Add($"{syntheticKey}: create failed: {ex.Message}");
-                Console.Error.WriteLine($"ERR {syntheticKey}: {ex.Message}");
-            }
-        }
-
-        await target.FlushAsync();
-
-        string? idMapPath = null;
-        if (progressIdMap.Count > 0 && !string.IsNullOrWhiteSpace(sync.IdMapOutputPath))
-        {
-            await SaveProgressIdMapAsync(sync.IdMapOutputPath, progressIdMap);
-            idMapPath = Path.GetFullPath(sync.IdMapOutputPath);
-        }
-
-        return new Visa2014SyncEntityResult
-        {
-            LegacyRowCount = batch.LegacyRowCount,
-            PreparedCount = batch.ImportRows.Count,
-            InsertedCount = inserted,
-            UpdatedCount = updated,
-            RelinkedCount = relinked,
-            SkippedUnchangedCount = skippedUnchanged,
-            FailedCount = failed,
-            SkippedCount = batch.Skipped.Count + skippedNoApp,
-            IdMapPath = idMapPath,
-            Errors = errors,
-        };
-    }
-
-    private static Dictionary<string, object?>? BuildSyncPayload(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver,
-        IReadOnlyDictionary<Guid, Guid> applicationIdMap,
-        IReadOnlyDictionary<string, Guid> progressIdMap,
-        out bool missingApplication)
-    {
-        missingApplication = false;
-        var syntheticKey = row.GetValueOrDefault("_syntheticStepKey") as string
-            ?? row.GetValueOrDefault("_legacyRowId") as string
-            ?? "";
-        var isUpdate = !string.IsNullOrWhiteSpace(syntheticKey) && progressIdMap.ContainsKey(syntheticKey);
-
-        if (!TryResolveLegacyApplicationOid(row, out var legacyApplicationOid))
-            return isUpdate ? BuildPayloadWithoutApplication(row, resolver) : null;
-
-        if (!applicationIdMap.TryGetValue(legacyApplicationOid, out var applicationId))
-        {
-            if (isUpdate)
-                return BuildPayloadWithoutApplication(row, resolver);
-
-            missingApplication = true;
-            return null;
-        }
-
-        return BuildPayload(row, resolver, applicationId);
-    }
-
-    private static Dictionary<string, object?>? BuildPayloadWithoutApplication(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver)
-    {
-        var stateCode = row.GetValueOrDefault("State") as string;
-        var locationCode = row.GetValueOrDefault("Location") as string;
-        if (!TryParseDate(row.GetValueOrDefault("Date") as string, out var date))
-            return null;
-
-        var stateId = resolver.ResolveApplicationState(stateCode);
-        var locationId = resolver.ResolveApplicationLocation(locationCode);
-        if (!stateId.HasValue || !locationId.HasValue)
-            return null;
-
-        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
-        {
-            ["State"] = new { ID = stateId.Value },
-            ["Location"] = new { ID = locationId.Value },
-            ["Date"] = DateTime.SpecifyKind(date, DateTimeKind.Utc),
-        };
-
-        if (TryParseOrder(row.GetValueOrDefault("Order"), out var order))
-            payload["Order"] = order;
-
-        var description = row.GetValueOrDefault("Description") as string;
-        if (!string.IsNullOrWhiteSpace(description))
-            payload["Description"] = description.Trim();
-
-        return payload;
-    }
-
-    private static bool ShouldUpdateProgressRow(Dictionary<string, object?> row, Visa2014SyncRowFilter rowFilter)
-    {
-        if (rowFilter.ProcessAllMappedRows)
-            return true;
-
-        if (rowFilter.ChangedLegacyOids == null)
-            return false;
-
-        return TryResolveLegacyApplicationOid(row, out var legacyApplicationOid)
-            && rowFilter.ChangedLegacyOids.Contains(legacyApplicationOid);
-    }
-
-    private static async Task SaveProgressIdMapAsync(string path, Dictionary<string, Guid> progressIdMap)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
-        await File.WriteAllTextAsync(
-            path,
-            JsonSerializer.Serialize(progressIdMap, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static async Task<IReadOnlyDictionary<Guid, int>?> ResolveMinistryLegCountMapAsync(

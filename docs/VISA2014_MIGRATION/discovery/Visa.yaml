@@ -56,13 +56,28 @@ mapping:
     Import ALL active visa rows (1,460 passports have >1 visa — expected).
     Passport FK via Passport id-map (legacy Visa.Passport → Visa2026 Passport.ID).
     All 6,041 rows have active Passport FK; 0 orphan.
-    VisaType: join VisaType → IVisaType_Data; map TypeOfVisaL + mgCode → Visa2026 LocalizationKey (see legacyStats).
+    VisaType: |
+      join VisaType → IVisaType_Data; map TypeOfVisaL + mgCode → LocalizationKey.
+      Override: Person.IsFamilyMember=1 AND IsEmployee=0 → FM (legacy often WP:11).
     VisaCategory: CategoryOfVisaL + mgCode (1/2/4) → Single/Double/Multiple.
     VisaIssuedPlace: IssuedPlaceOfVisaL → NameTm; 5 aliases; 18 visas (DELİ, Pekin, London, …) skip_row — see VisaIssuedPlace.md.
     BorderZoneLocation: bit matrix → comma-separated NameTm; 5452+2 → Ýok; catalog expanded — see BorderZoneName.md.
     7 duplicate VisaNumber groups (2 sentinel × 8 + 5 real pairs) — see field-map dedupe rules.
     Scan blob: inline GöçürmeNusga varbinary (~5,976 rows) → VisaDocument file wave after scalar POST.
-    Defer InvitationItem + IssuingApplicationItem until ApplicationItem import.
+    InvitationItem: |
+      Null on Visa POST. Path B post-pass --correct-visa2014-invitation-item after
+      IssuingApplicationItem (closest unused line under issuing app when CanIssueInvitation).
+    IssuingApplicationItem: |
+      post-ApplicationItem correction --correct-visa2014-issuing-application-item.
+      ProcessNumber→PIA only trusted when app is extension subtype 7; else sibling
+      after extension CurrentVisa (predecessor); else remaining ProcessNumber;
+      else target ApplicationItem.CurrentVisa = predecessor visa on same passport.
+    ProcessNumber: |
+      Officer Işlenen belgisi — legacy ASNumber string (e.g. C00138718) imported to Visa.ProcessNumber.
+      Editable for manual entry from visa stamp image.
+    LegacyPersonInApplicationOid: |
+      Legacy Visa.ProcessNumber PersonInApplication Oid Guid (lineage). Distinct from ProcessNumber string.
+      Also backfilled by issuing-application-item correction.
 
 checklist:
   target_bo_reviewed: true

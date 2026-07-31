@@ -47,9 +47,7 @@ internal static class Visa2014PersonODataImporter
         if (supplementPermitReferencedOnly && verbose)
             Console.WriteLine("INF Mode: supplement permit-referenced soft-deleted Person rows (import as IsArchived).");
 
-        var existingIdMap = !string.IsNullOrWhiteSpace(idMapOutputPath)
-            ? Visa2014IdMapHelper.Load(idMapOutputPath)
-            : new Dictionary<Guid, Guid>();
+        var existingIdMap = Visa2014IdMapHelper.LoadOrEmpty(idMapOutputPath);
         if (supplementPermitReferencedOnly && verbose && existingIdMap.Count > 0)
             Console.WriteLine($"INF Existing Person id-map entries: {existingIdMap.Count}");
 
@@ -300,51 +298,5 @@ internal static class Visa2014PersonODataImporter
         await File.WriteAllTextAsync(
             idMapPath,
             JsonSerializer.Serialize(serializable, new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
-        IVisa2014ImportTarget target,
-        Visa2014ODataLookupResolver resolver,
-        string legacyConnectionString,
-        IReadOnlyList<string> lookupTranslationPaths,
-        Visa2014SyncContext sync,
-        int? maxRows,
-        bool verbose)
-    {
-        var batch = Visa2014PersonTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose);
-
-        var employeeProjectContractByLegacyOid = batch.ImportRows
-            .Where(IsEmployeeRow)
-            .Where(r => r["_legacyRowId"] is Guid)
-            .ToDictionary(
-                r => (Guid)r["_legacyRowId"]!,
-                r => r.GetValueOrDefault("ProjectContract") as string);
-
-        var employeeSubcontractorByLegacyOid = batch.ImportRows
-            .Where(IsEmployeeRow)
-            .Where(r => r["_legacyRowId"] is Guid)
-            .ToDictionary(
-                r => (Guid)r["_legacyRowId"]!,
-                r => r.GetValueOrDefault("Subcontractor") as string);
-
-        var employees = batch.ImportRows.Where(IsEmployeeRow).ToList();
-        var familyMembers = batch.ImportRows.Where(r => !IsEmployeeRow(r)).ToList();
-        var orderedRows = employees.Concat(familyMembers).ToList();
-
-        return await Visa2014SyncUpsertHelper.RunAsync(
-            target,
-            typeof(Visa2026.Module.BusinessObjects.Person),
-            "Person",
-            orderedRows,
-            sync,
-            row => BuildPayload(row, resolver, sync.IdMap, employeeProjectContractByLegacyOid, employeeSubcontractorByLegacyOid),
-            batch.LegacyRowCount,
-            batch.Skipped.Count,
-            batch.DedupeMergedCount,
-            verbose);
     }
 }

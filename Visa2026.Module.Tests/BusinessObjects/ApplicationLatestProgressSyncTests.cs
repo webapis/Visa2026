@@ -15,15 +15,12 @@ public class ApplicationLatestProgressSyncTests
             Date = new DateTime(2024, 6, 2),
             Order = 2,
             State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessRejected },
-            Location = new ApplicationLocation { Code = ApplicationProgressLocationCodes.AtOffice },
         };
 
         ApplicationLatestProgressSyncHelper.Apply(application, latest);
 
         Assert.Equal(latest.ID, application.LatestProgressId);
         Assert.Equal(ApplicationProgressStateCodes.ProcessRejected, application.LatestPrimaryStateCode);
-        Assert.True(application.LatestIsRejected);
-        Assert.False(application.LatestIsCancelled);
         Assert.False(string.IsNullOrWhiteSpace(application.LatestProgressDisplay));
     }
 

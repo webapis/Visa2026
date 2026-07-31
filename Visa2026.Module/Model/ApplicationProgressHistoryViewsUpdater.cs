@@ -22,6 +22,7 @@ public sealed class ApplicationProgressHistoryViewsUpdater : ModelNodesGenerator
         nameof(ApplicationProgress.Order),
         nameof(ApplicationProgress.StatusListLabel),
         nameof(ApplicationProgress.Date),
+        nameof(ApplicationProgress.ProcessNumber),
         nameof(ApplicationProgress.Description),
         nameof(ApplicationProgress.MinistryLetterFileName),
     ];

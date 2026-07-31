@@ -8,8 +8,8 @@ namespace Visa2026.Module.BusinessObjects;
 public static class ApplicationProgressOrderHelper
 {
     /// <summary>
-    /// Canonical timeline rank for a progress step. Ministry started/approved pairs stay adjacent
-    /// regardless of legacy date interpolation order.
+    /// Canonical timeline rank for a progress step. Legacy <c>_REVIEW_STARTED</c> rows sort
+    /// immediately before the matching <c>_REVIEW_APPROVED</c> step.
     /// </summary>
     public static int GetWorkflowSortKey(string? stateCode)
     {
@@ -24,10 +24,12 @@ public static class ApplicationProgressOrderHelper
         if (ApplicationProgressLegCodes.TryParseMinistryLegFromStateCode(state, out var leg))
         {
             if (state.EndsWith("_REVIEW_STARTED", StringComparison.OrdinalIgnoreCase))
+                return 9 + leg * 2;
+
+            if (state.EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase))
                 return 10 + leg * 2;
 
-            if (state.EndsWith("_REVIEW_APPROVED", StringComparison.OrdinalIgnoreCase)
-                || state.EndsWith("_REVIEW_REJECTED", StringComparison.OrdinalIgnoreCase))
+            if (state.EndsWith("_REVIEW_REJECTED", StringComparison.OrdinalIgnoreCase))
                 return 11 + leg * 2;
         }
 

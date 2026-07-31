@@ -163,31 +163,4 @@ internal static class Visa2014WorkPermitODataImporter
 
         return Visa2014IdMapHelper.Load(path);
     }
-
-    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
-        IVisa2014ImportTarget target,
-        string legacyConnectionString,
-        IReadOnlyList<string> lookupTranslationPaths,
-        Visa2014SyncContext sync,
-        int? maxRows,
-        bool verbose)
-    {
-        var batch = Visa2014WorkPermitTransform.PrepareImportBatch(
-            legacyConnectionString,
-            lookupTranslationPaths,
-            maxRows,
-            verbose);
-
-        return await Visa2014SyncUpsertHelper.RunAsync(
-            target,
-            typeof(Visa2026.Module.BusinessObjects.WorkPermit),
-            "WorkPermit",
-            batch.ImportRows,
-            sync,
-            BuildPayload,
-            batch.LegacyRowCount,
-            batch.Skipped.Count,
-            batch.DedupeMergedCount,
-            verbose);
-    }
 }

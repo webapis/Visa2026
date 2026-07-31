@@ -6,6 +6,77 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 
 ## Entries
 
+### 2026-07-25 — Hide Approval/Migration deadline on Direct migration ListView
+
+- **Request**: Hide **Approval deadline** (`ProgressSlaStatement`) and **Migration deadline** (`MigrationSlaStatement`) on `Application_ListView_DirectMigration` only.
+- **Approach**: `Index="-1"` in Blazor `Model.xafml`; `CustomViewClonerUpdater.SetColumnVisibility(..., false)` after DirectMigration clone so cloned defaults from `Application_ListView` do not re-show them. Left Via ministries / default Application lists unchanged.
+- **Prevent**: Do not set `[VisibleInListView(false)]` on the BO properties — that would hide deadlines on Via ministries too.
+- **Cross-skill**: —
+
+### 2026-07-23 — Postgres ProcessNumber column missing (42703)
+
+- **Symptom**: `Npgsql.PostgresException 42703: column a.ProcessNumber does not exist` on Application ListView (PostgreSQL Demo).
+- **Root cause**: ModuleUpdater SQL used `DO $$` blocks; XAF may skip updaters when ModuleInfo is current, and Postgres host-start `ApplyIfMissing` helpers were SQL Server–only.
+- **Fix**: Applied columns + backfill on local `visa2026`; switched ensure SQL to `ADD COLUMN IF NOT EXISTS`; added `ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing` and call it from Blazor `Startup` for **both** providers.
+- **Prevent**: New Postgres additive columns need host-start `ApplyIfMissing` (or `FORCE_XAF_DB_UPDATE` once), not ModuleUpdater alone; avoid DO-block SQL for simple ADD COLUMN.
+- **Cross-skill**: visa2026-lifecycle-docker | —
+
+### 2026-07-23 — Application DisplayCaption + ProcessNumber field
+
+- **Request**: Application DefaultProperty should include migration process number when present (not from "last" progress state).
+- **Decision**: Real `ApplicationProgress.ProcessNumber`; denormalized `Application.ProcessNumber` synced from `PROCESS_STARTED` (fallback: Description on that step for pre-field imports). `[DefaultProperty(DisplayCaption)]` → `FullApplicationNumber · ProcessNumber`.
+- **Schema**: `ApplicationProgressProcessNumberSchemaUpdater` (SQL Server + Postgres) + Description→ProcessNumber backfill on PROCESS_STARTED.
+- **Import**: synthesis writes ProcessNumber (not Description) for PROCESS_STARTED / direct-migration PROCESS_ISSUED.
+- **Prevent**: Do not resolve process number from latest progress alone (issued/cancelled often lack it).
+- **Cross-skill**: visa2014-to-visa2026-import
+
+### 2026-07-21 — Import: ProcessDate/ProcessNumber on PROCESS_STARTED only
+
+### 2026-07-21 — Import completion from Invitations / WorkPermits
+
+- **Decision**: `PROCESS_ISSUED` when legacy has issued invitation (`ApplicationResult` + `PersonInInvitation`) or work permit (`PersonInApplication.WorkPermit`). Date/number from latest invitation or work-permit evidence; cancelled/rejected apps skip issued.
+- **Cross-skill**: visa2014-to-visa2026-import (`Visa2014ApplicationProgressCompletionIndex`).
+
+
+- **Decision**: Legacy `ProcessDate` + `ProcessNumber` = **Işlenilýär** start, not **Resmileşdirildi**. Import puts `ProcessNumber: …` on `PROCESS_STARTED`; no `PROCESS_ISSUED` from these fields until completion source is mapped.
+- **Example**: App `12/-7010` — ministry steps then `PROCESS_STARTED` @ ProcessDate with `ProcessNumber: AS538188`.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+
+### 2026-07-20 — Office implied (no IS_BEING_PREPARED seed)
+
+- **Decision**: Do not write `IS_BEING_PREPARED` progress rows. Empty history = at office until first explicit step (`1_REVIEW_STARTED` / `PROCESS_STARTED`). Catalog code kept for ListView implied label (Ofisde) and legacy rows.
+- **Transitions**: First step from empty history is `Ylalaşyga Iberildi` (via ministries) or `PROCESS_STARTED` (direct). Legacy prep rows can still advance.
+- **Import**: No synthetic prepare step.
+- **Prevent**: Do not re-enable `ApplicationProgressInitializer` seeding.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+### 2026-07-20 — Legacy-aligned naming + remove Location from progress
+
+- **Decision**: Restore first-leg-only `1_REVIEW_STARTED` ("Ministrlige iberilen"); legs 2–5 stay approval/rejection only. Drop `ApplicationProgress.Location` — labels are state (+ ministry short name). Keep `ApplicationLocation` catalog unused by progress.
+- **Labels**: Ofisde / Sent to ministry / Received from ministry / Processing / Issued (tk+en in `application-state.json` + `LookupCatalogStrings.json`).
+- **Transitions**: `prep → 1_REVIEW_STARTED → 1_REVIEW_APPROVED`; later legs from prior approved; suggested next after prep = `1_REVIEW_STARTED`.
+- **Import**: synthesize `1_REVIEW_STARTED` then approvals; no Location payload.
+- **Schema**: `ApplicationProgressLocationDropSchemaUpdater` drops `LocationID`.
+- **Prevent**: Do not re-add `2..5_REVIEW_STARTED` for new progress; do not require Location on progress save.
+- **Cross-skill**: visa2014-to-visa2026-import
+
+### 2026-07-17 — ApprovalLegProfile column on Applications (via ministry) ListView
+
+- **Request**: Show **Approval leg profile** on `Application_ListView_ViaMinistries` only (not Direct migration / default Application list).
+- **Approach**: Keep `[VisibleInListView(false)]` on `Application.ApprovalLegProfile`; enable the column via model `Index` on ViaMinistries + `CustomViewClonerUpdater.SetColumnVisibility`; captions in DesignedDiffs + tr/ru/tk localization; Blazor `Model.xafml` column width/index.
+- **Preload**: `ApplicationListViewPreloadController` Includes `ApprovalLegProfile.MinistryLegs.ApprovingMinistry` so `DefaultProperty` `MinistriesLabel` (e.g. Türkmenenergo-Energetika) renders without N+1.
+- **Prevent**: Do not flip `VisibleInListView(true)` globally — that would pollute Direct migration lists; mirror Person TemporaryVisitors `ProjectContract` pattern (view-specific Index).
+- **Cross-skill**: —
+### 2026-07-10 — Ministrlik empty on ApplicationProgress (missing snapshots)
+
+- **Symptom**: Progress detail **Ministrlik** blank; Progress list status shows `1st ministry review approved` without `- Energetika` (or similar).
+- **Root cause**: `MinistryStepLabel` / `StatusListLabel` only read `Application.ApprovalLegSnapshots`. Snapshots are created when the officer changes **ApprovalLegProfile** in the Application detail controller, or during data-import `OnSaving`. Imported / older apps often have a profile + ministry progress rows but **empty snapshots**.
+- **Fix (runtime)**: `GetMinistryShortNameForLeg` falls back to live `ApprovalLegProfile.MinistryLegs` → `ApprovingMinistry.ShortNameTm`. `EnsureSnapshots` heals incomplete snapshots on every Application / Progress save.
+- **Fix (migrated data)**: `patch/Application-ApprovalLegSnapshots.ps1` / `--backfill-application-approval-leg-snapshots` — do **not** use `ApplicationProgress-MinistryLegs.ps1` (deletes progress).
+- **Prevent**: Do not resolve ministry labels from snapshots alone when `ApprovalLegProfile` is set; keep snapshot heal on save for SLA / persistence.
+- **Cross-skill**: visa2014-to-visa2026-import | visa2026-onprem-legacy-sync
+
 ### 2026-06-15 — Migration service SLA (Phase 2)
 
 - **Scope**: `ApplicationMigrationSlaProfile` tenant lookup + per-`ApplicationType` FK; runtime via `ApplicationMigrationSlaHelper`; ListView columns `WorkingDaysInMigrationStep`, `MigrationSlaStatement`; row tint merged into `ProgressSlaAppearanceCode` (ministry first, then migration).
@@ -39,7 +110,7 @@ Read **before** progress/approval work; **append** after verified fixes. Promoti
 - **Requirement**: Admin must set expected working days per ministry leg before a `ProjectContract` can be saved as active; officers see SLA warning/overdue on Application ListView.
 - **Model**: `ProjectContractMinistryLeg.MaxDaysInReview` + optional `WarningDaysBeforeMax`; copied to `ApplicationApprovalLegSnapshot` on contract selection.
 - **Validation**: `ProjectContractMinistryController` + `ProjectContractMinistryHelper.TryValidateLegSla` block commit when `IsActive` and any leg lacks `MaxDaysInReview > 0` or warning ≥ max. Class-level `RuleCriteria` for positive values and warning &lt; max; no `RuleRequiredField` on leg (allows draft leg setup).
-- **SLA clock**: Only on `{n}_REVIEW_STARTED`; Mon–Fri via `WorkingDaysHelper`; `ApplicationProgressSlaHelper` + ListView fields `WorkingDaysInCurrentStep`, `ProgressSlaStatement`; row tint via `APP_PROGRESS_SLA_WARNING` / `APP_PROGRESS_SLA_OVERDUE` (overrides workflow color in `ApplicationProgressRowAppearanceController`).
+- **SLA clock**: Triggers on `{n}_REVIEW_APPROVED` (elapsed days anchored on previous step's date); Mon–Fri via `WorkingDaysHelper`; `ApplicationProgressSlaHelper` + ListView fields `WorkingDaysInCurrentStep`, `ProgressSlaStatement`; row tint via `APP_PROGRESS_SLA_WARNING` / `APP_PROGRESS_SLA_OVERDUE` (overrides workflow color in `ApplicationProgressRowAppearanceController`). Legacy `_REVIEW_STARTED` rows handled for backward compat.
 - **Seed/backfill**: Defaults max 10 / warn 8 in `ProjectContractMinistrySeedUpdater` + `ProjectContractMinistryLegSlaBackfillUpdater`.
 - **Prevent**: Do not auto-advance progress for overdue; do not add new `ApplicationState` for SLA — computed signal only.
 - **Cross-skill**: visa2026-bo-state-colors (row CSS) | —

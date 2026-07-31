@@ -1,0 +1,260 @@
+@using System.Security.Claims
+@using DevExpress.ExpressApp.Blazor.Services
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PersonDossier
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IXafCultureInfoService CultureInfoService
+@inject IPersonExportBatchTrackNotifier BatchTrackNotifier
+
+@if (toast != null && !toastDismissed)
+{
+    <div class="pdf-batch-toast person-export-toast" role="status" aria-live="polite" style="bottom: 340px;">
+        <div class="pdf-batch-toast__header">
+            <div class="pdf-batch-toast__title">@Msg("PersonDossier.Export.Toast.Title")</div>
+            <button type="button" class="pdf-batch-toast__close" @onclick="Dismiss" aria-label="@Msg("PersonDossier.Export.Toast.Dismiss")">×</button>
+        </div>
+
+        <div class="pdf-batch-toast__body">
+            <div class="pdf-batch-toast__status">
+                <strong>@LocalizeStatus(toast.Status)</strong>
+                @if (toast.TotalRecords > 0)
+                {
+                    <span class="pdf-batch-toast__counts">(@toast.ProcessedRecords / @toast.TotalRecords)</span>
+                }
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(toast.PersonDisplayName))
+            {
+                <div class="pdf-batch-toast__counts">@toast.PersonDisplayName</div>
+            }
+
+            @if (toast.TotalRecords > 0 || toast.Status is "Queued" or "Running")
+            {
+                <div class="pdf-batch-toast__progress">
+                    <div class="pdf-batch-toast__progressbar">
+                        <div class="pdf-batch-toast__progressfill" style="width:@($"{ProgressPct:0.##}%")"></div>
+                    </div>
+                    <div class="pdf-batch-toast__pct">@($"{ProgressPct:0}%")</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(toast.ErrorMessage))
+            {
+                <div class="pdf-batch-toast__error">@toast.ErrorMessage</div>
+            }
+            else if (HasGaps)
+            {
+                <div class="pdf-batch-toast__error">@Msg("PersonDossier.Export.Toast.Gaps")</div>
+            }
+
+            <div class="pdf-batch-toast__actions">
+                @if (!string.IsNullOrWhiteSpace(toast.DownloadUrl) && toast.Status == "Completed")
+                {
+                    <a class="pdf-batch-toast__button" href="@toast.DownloadUrl" target="_blank" rel="noopener noreferrer">@Msg("PersonDossier.Export.Toast.Download")</a>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private PersonExportToastDto? toast;
+    private bool toastDismissed;
+    private PeriodicTimer? timer;
+    private CancellationTokenSource? cts;
+    private DateTime lastGoodUpdateUtc;
+    private Guid? trackedBatchId;
+    private bool sawActiveInThisSession;
+    private DateTime lastActiveSeenUtc;
+    private Guid? dismissedBatchId;
+
+    private double ProgressPct =>
+        toast is { TotalRecords: > 0 }
+            ? Math.Clamp((double)toast.ProcessedRecords / toast.TotalRecords * 100d, 0d, 100d)
+            : (toast?.Status is "Queued" or "Running" ? 10d : 100d);
+
+    /// <summary>The packer writes a gap list only when at least one record produced no readable PDF.</summary>
+    private bool HasGaps =>
+        toast is { Status: "Completed" }
+        && !string.IsNullOrWhiteSpace(toast.ExportNotes)
+        && toast.ExportNotes.Contains("  - ", StringComparison.Ordinal);
+
+    private string EffectiveUiCulture =>
+        VisaUiCultureResolver.Resolve(CultureInfoService, HttpContextAccessor.HttpContext);
+
+    private string Msg(string key) => VisaUiMessages.Get(key, EffectiveUiCulture);
+
+    private string LocalizeStatus(string? status) =>
+        status switch
+        {
+            "Queued" or "Running" => Msg("PersonDossier.Export.Toast.Running"),
+            "Completed" => Msg("PersonDossier.Export.Toast.Ready"),
+            "Failed" => Msg("PersonDossier.Export.Toast.Failed"),
+            _ => status ?? string.Empty,
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await TryApplyTrackedBatchIdAsync();
+
+        cts = new CancellationTokenSource();
+        timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
+        _ = PollLoopAsync(cts.Token);
+    }
+
+    private async Task TryApplyTrackedBatchIdAsync()
+    {
+        try
+        {
+            var userName = GetCurrentUserName();
+            if (!string.IsNullOrWhiteSpace(userName)
+                && BatchTrackNotifier.TryTakePendingBatchId(userName, out var pendingId)
+                && pendingId != Guid.Empty)
+            {
+                trackedBatchId = pendingId;
+                await JSRuntime.InvokeVoidAsync("visaPersonExportToast.setCurrentBatchId", pendingId.ToString("D"));
+            }
+            else
+            {
+                var idStr = await JSRuntime.InvokeAsync<string>("visaPersonExportToast.getCurrentBatchId");
+                if (Guid.TryParse(idStr, out var storedId) && storedId != Guid.Empty)
+                    trackedBatchId = storedId;
+            }
+        }
+        catch
+        {
+            // non-critical UI
+        }
+    }
+
+    private async Task PollLoopAsync(CancellationToken token)
+    {
+        while (await timer!.WaitForNextTickAsync(token))
+        {
+            try
+            {
+                await TryApplyTrackedBatchIdAsync();
+
+                PersonExportToastDto? dto = null;
+                if (trackedBatchId is Guid batchId && batchId != Guid.Empty)
+                {
+                    var statusResp = await JSRuntime.InvokeAsync<FetchResult>(
+                        "visaPersonExportToast.fetchJson",
+                        cancellationToken: token,
+                        $"/api/PersonExportBatches/{batchId:D}/status");
+                    if (statusResp.ok && statusResp.data != null)
+                        dto = statusResp.data;
+                }
+
+                if (dto == null)
+                {
+                    var latestResp = await JSRuntime.InvokeAsync<FetchResult>(
+                        "visaPersonExportToast.fetchJson",
+                        cancellationToken: token,
+                        "/api/PersonExportBatches/my-latest");
+                    if (latestResp.ok && latestResp.data != null)
+                        dto = latestResp.data;
+                }
+
+                if (dto != null && dto.BatchId != null && dismissedBatchId == dto.BatchId)
+                    dto = null;
+
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
+                {
+                    bool isActive = dto.Status is "Queued" or "Running";
+                    var createdUtc = dto.CreatedOnUtc == default
+                        ? default
+                        : (dto.CreatedOnUtc.Kind == DateTimeKind.Unspecified
+                            ? DateTime.SpecifyKind(dto.CreatedOnUtc, DateTimeKind.Utc)
+                            : dto.CreatedOnUtc.ToUniversalTime());
+
+                    if (isActive)
+                    {
+                        sawActiveInThisSession = true;
+                        lastActiveSeenUtc = DateTime.UtcNow;
+                        trackedBatchId = dto.BatchId;
+                    }
+
+                    var nowUtc = DateTime.UtcNow;
+                    var completedCooldown = TimeSpan.FromMinutes(2);
+                    bool allowCompleted = sawActiveInThisSession
+                                          && lastActiveSeenUtc != default
+                                          && nowUtc - lastActiveSeenUtc <= TimeSpan.FromMinutes(10)
+                                          && createdUtc != default
+                                          && nowUtc - createdUtc <= completedCooldown;
+
+                    if (!isActive && !allowCompleted)
+                        dto = null;
+                }
+
+                if (dto != null && !string.IsNullOrWhiteSpace(dto.Status) && dto.BatchId != null)
+                {
+                    toast = dto;
+                    lastGoodUpdateUtc = DateTime.UtcNow;
+                    if (dismissedBatchId != dto.BatchId)
+                    {
+                        toastDismissed = false;
+                        dismissedBatchId = null;
+                    }
+                }
+
+                if (toast != null && lastGoodUpdateUtc != default && DateTime.UtcNow - lastGoodUpdateUtc > TimeSpan.FromMinutes(20))
+                {
+                    toast = null;
+                    toastDismissed = false;
+                    sawActiveInThisSession = false;
+                    trackedBatchId = null;
+                }
+
+                await InvokeAsync(StateHasChanged);
+            }
+            catch
+            {
+                // non-critical UI
+            }
+        }
+    }
+
+    private string? GetCurrentUserName() =>
+        HttpContextAccessor.HttpContext?.User?.Identity?.Name
+        ?? HttpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
+
+    private void Dismiss()
+    {
+        toastDismissed = true;
+        dismissedBatchId = toast?.BatchId;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try { cts?.Cancel(); } catch { }
+        cts?.Dispose();
+        timer?.Dispose();
+        await Task.CompletedTask;
+    }
+
+    private sealed class PersonExportToastDto
+    {
+        public Guid? BatchId { get; set; }
+        public string? Status { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
+        public string? PersonDisplayName { get; set; }
+        public int TotalRecords { get; set; }
+        public int ProcessedRecords { get; set; }
+        public string? ErrorMessage { get; set; }
+        public string? ExportNotes { get; set; }
+        public string? DownloadUrl { get; set; }
+    }
+
+    private sealed class FetchResult
+    {
+        public bool ok { get; set; }
+        public int status { get; set; }
+        public PersonExportToastDto? data { get; set; }
+        public string? contentType { get; set; }
+        public string? textSnippet { get; set; }
+    }
+}

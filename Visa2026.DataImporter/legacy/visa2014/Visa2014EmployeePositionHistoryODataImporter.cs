@@ -111,7 +111,8 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
 
             try
             {
-                var actualPositionName = row.GetValueOrDefault("ActualPosition") as string ?? "-";
+                var actualPositionName = Visa2014ActualPositionNormalizer.Normalize(
+                    row.GetValueOrDefault("ActualPosition") as string);
                 var (actualPositionId, createdActual) = await ResolveOrCreateActualPositionAsync(
                     target, resolver, actualPositionCache, actualPositionName, verbose);
                 if (!actualPositionId.HasValue)
@@ -388,135 +389,5 @@ internal static class Visa2014EmployeePositionHistoryODataImporter
             return new Dictionary<Guid, Guid>();
 
         return Visa2014IdMapHelper.Load(path);
-    }
-
-    public static async Task<Visa2014SyncEntityResult> RunSyncAsync(
-        IVisa2014ImportTarget target,
-        Visa2014ODataLookupResolver resolver,
-        string legacyConnectionString,
-        IReadOnlyList<string> lookupTranslationPaths,
-        string personIdMapPath,
-        Visa2014SyncContext sync,
-        int? maxRows,
-        bool verbose,
-        bool supplementPermitReferencedOnly = false)
-    {
-        var personIdMap = Visa2014IdMapHelper.Load(personIdMapPath);
-        if (verbose)
-            Console.WriteLine($"INF Person id-map entries: {personIdMap.Count}");
-
-        var batch = supplementPermitReferencedOnly
-            ? Visa2014EmployeePositionHistoryTransform.PrepareSupplementPermitReferencedImportBatch(
-                legacyConnectionString,
-                lookupTranslationPaths,
-                maxRows,
-                verbose)
-            : Visa2014EmployeePositionHistoryTransform.PrepareImportBatch(
-                legacyConnectionString,
-                lookupTranslationPaths,
-                maxRows,
-                verbose);
-
-        var actualPositionCache = new Dictionary<string, Guid>(StringComparer.Ordinal);
-        foreach (var row in batch.ImportRows)
-        {
-            var name = row.GetValueOrDefault("ActualPosition") as string ?? "-";
-            var key = string.IsNullOrWhiteSpace(name) ? "-" : name.Trim();
-            if (actualPositionCache.ContainsKey(key))
-                continue;
-
-            var existing = resolver.ResolveActualPosition(key);
-            if (existing.HasValue)
-                actualPositionCache[key] = existing.Value;
-        }
-
-        foreach (var row in batch.ImportRows)
-        {
-            var legacyOid = (Guid)row["_legacyRowId"]!;
-            if (sync.IdMap.ContainsKey(legacyOid))
-                continue;
-
-            var name = row.GetValueOrDefault("ActualPosition") as string ?? "-";
-            var key = string.IsNullOrWhiteSpace(name) ? "-" : name.Trim();
-            if (actualPositionCache.ContainsKey(key))
-                continue;
-
-            var (actualPositionId, _) = await ResolveOrCreateActualPositionAsync(
-                target, resolver, actualPositionCache, name, verbose);
-            if (actualPositionId.HasValue)
-                actualPositionCache[key] = actualPositionId.Value;
-        }
-
-        return await Visa2014SyncUpsertHelper.RunAsync(
-            target,
-            typeof(Visa2026.Module.BusinessObjects.EmployeePositionHistory),
-            "EmployeePositionHistory",
-            batch.ImportRows,
-            sync,
-            row => BuildSyncPayload(row, resolver, personIdMap, sync.IdMap, actualPositionCache),
-            batch.LegacyRowCount,
-            batch.Skipped.Count,
-            batch.DedupeMergedCount,
-            verbose);
-    }
-
-    private static Dictionary<string, object?>? BuildSyncPayload(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver,
-        IReadOnlyDictionary<Guid, Guid> personIdMap,
-        IReadOnlyDictionary<Guid, Guid> historyIdMap,
-        IReadOnlyDictionary<string, Guid> actualPositionCache)
-    {
-        var legacyOid = (Guid)row["_legacyRowId"]!;
-        var isUpdate = historyIdMap.ContainsKey(legacyOid);
-
-        if (!TryResolveLegacyPersonOid(row, out var legacyPersonOid))
-            return isUpdate ? BuildPayloadWithoutPerson(row, resolver, actualPositionCache) : null;
-
-        if (!personIdMap.TryGetValue(legacyPersonOid, out var personId))
-            return isUpdate ? BuildPayloadWithoutPerson(row, resolver, actualPositionCache) : null;
-
-        var actualPositionName = row.GetValueOrDefault("ActualPosition") as string ?? "-";
-        var key = string.IsNullOrWhiteSpace(actualPositionName) ? "-" : actualPositionName.Trim();
-        if (!actualPositionCache.TryGetValue(key, out var actualPositionId))
-            return isUpdate ? BuildPayloadWithoutPerson(row, resolver, actualPositionCache) : null;
-
-        var positionId = resolver.ResolvePosition(row.GetValueOrDefault("Position") as string);
-        var departmentId = resolver.ResolveDepartment(row.GetValueOrDefault("Department") as string);
-        if (!positionId.HasValue || !departmentId.HasValue)
-            return isUpdate ? BuildPayloadWithoutPerson(row, resolver, actualPositionCache) : null;
-
-        return BuildPayload(row, personId, actualPositionId, positionId.Value, departmentId.Value);
-    }
-
-    private static Dictionary<string, object?>? BuildPayloadWithoutPerson(
-        Dictionary<string, object?> row,
-        Visa2014ODataLookupResolver resolver,
-        IReadOnlyDictionary<string, Guid> actualPositionCache)
-    {
-        var positionId = resolver.ResolvePosition(row.GetValueOrDefault("Position") as string);
-        var departmentId = resolver.ResolveDepartment(row.GetValueOrDefault("Department") as string);
-        if (!positionId.HasValue || !departmentId.HasValue)
-            return null;
-
-        if (!TryParseDate(row.GetValueOrDefault("StartDate") as string, out var startDate))
-            return null;
-
-        var payload = new Dictionary<string, object?>(StringComparer.Ordinal)
-        {
-            ["Position"] = new { ID = positionId.Value },
-            ["Department"] = new { ID = departmentId.Value },
-            ["StartDate"] = DateTime.SpecifyKind(startDate, DateTimeKind.Utc),
-        };
-
-        var actualPositionName = row.GetValueOrDefault("ActualPosition") as string ?? "-";
-        var key = string.IsNullOrWhiteSpace(actualPositionName) ? "-" : actualPositionName.Trim();
-        if (actualPositionCache.TryGetValue(key, out var actualPositionId))
-            payload["ActualPosition"] = new { ID = actualPositionId };
-
-        if (TryParseDate(row.GetValueOrDefault("EndDate") as string, out var endDate))
-            payload["EndDate"] = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
-
-        return payload;
     }
 }

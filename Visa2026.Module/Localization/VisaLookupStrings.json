@@ -208,6 +208,12 @@
       "tk-TM": "20 (yigrimi) gün",
       "ru-RU": "20 дней"
     },
+    "Day30": {
+      "en-US": "30 days",
+      "tr-TR": "30 gün",
+      "tk-TM": "30 (otuz) gün",
+      "ru-RU": "30 дней"
+    },
     "PerWorkPermit": {
       "en-US": "Until work permit expiry",
       "tr-TR": "Çalışma izni süresine kadar",

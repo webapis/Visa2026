@@ -17,9 +17,10 @@ internal static class Visa2014InvitationItemTransform
             CAST(pii.Invitation AS varchar(36)) AS InvitationOid,
             ar.Result AS ApplicationResultResult
         FROM dbo.PersonInInvitation pii
-        LEFT JOIN dbo.ApplicationResult ar
+        INNER JOIN dbo.ApplicationResult ar
             ON ar.Oid = pii.Invitation
            AND ar.GCRecord IS NULL
+           AND ar.Result = 0
         WHERE pii.GCRecord IS NULL
         """;
 

@@ -1,16 +1,16 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Deploy C:\visa2026-sync on 10.100.128.25 for legacy sync without .NET SDK on the server.
+  Deploy C:\visa2026-sync* on 10.100.128.25 for Import without .NET SDK on the server.
 
 .DESCRIPTION
   From a dev PC with the Visa2026 repo + .NET 8 SDK:
     1. dotnet publish Visa2026.DataImporter
-    2. Copy published bits + OnPrem-Sync scripts to SyncHostRoot
+    2. Copy published bits + OnPrem Import scripts to SyncHostRoot
     3. Optionally copy id-maps from repo or C:\visa2026-sync on server
     4. Create config\sync.env from example
 
-  Run on the server after files are present to register Task Scheduler (optional).
+  Import-only host (no nightly Task Scheduler Sync registration).
 
 .PARAMETER SyncHostRoot
   Override layout root. Default from -Profile: Production C:\visa2026-sync, Staging C:\visa2026-sync-staging, Demo C:\visa2026-sync-demo.
@@ -26,8 +26,8 @@
   .\scripts\visa2014-migration\import\Install-OnPremSyncHost.ps1 -PublishFromRepo
 
 .EXAMPLE
-  # On .25 after files copied - register nightly 02:30 task:
-  .\Install-OnPremSyncHost.ps1 -RegisterScheduledTask
+  # Demo slot on .25:
+  .\scripts\visa2014-migration\import\Install-OnPremSyncHost.ps1 -Profile Demo -PublishFromRepo -CopyIdMapsFromRepo
 #>
 [CmdletBinding()]
 param(
@@ -37,8 +37,6 @@ param(
     [string]$RepoRoot = '',
     [switch]$PublishFromRepo,
     [switch]$CopyIdMapsFromRepo,
-    [switch]$RegisterScheduledTask,
-    [string]$ScheduledTime = '02:30',
     [string]$LegacySource = ''
 )
 
@@ -66,7 +64,6 @@ $dirs = @(
     "$SyncHostRoot\tools\DataImporter",
     "$SyncHostRoot\tools\scripts",
     "$SyncHostRoot\data\id-maps\$LegacySource",
-    "$SyncHostRoot\data\sync-state",
     "$SyncHostRoot\data\import-logs",
     "$SyncHostRoot\config",
     "$SyncHostRoot\logs"
@@ -85,8 +82,9 @@ if ($PublishFromRepo) {
 
 $scriptsToCopy = @(
     'OnPrem-Sync.ps1',
+    'DocumentCopies.ps1',
     'Run-OnPremSyncOnServer.ps1',
-    'Register-OnPremLegacySyncTask.ps1'
+    'Preflight-LookupAudit.ps1'
 )
 foreach ($name in $scriptsToCopy) {
     Copy-Item -LiteralPath (Join-Path $scriptDir $name) -Destination (Join-Path $SyncHostRoot "tools\scripts\$name") -Force
@@ -97,8 +95,14 @@ Copy-Item -LiteralPath (Join-Path $scriptDir 'onprem-sync.env.example') `
 $libDir = Join-Path $SyncHostRoot 'tools\scripts\_lib'
 New-Item -ItemType Directory -Force -Path $libDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $scriptDir '..\_lib\Get-RepoRoot.ps1') -Destination (Join-Path $libDir 'Get-RepoRoot.ps1') -Force
-foreach ($libName in @('OnPremSyncState.ps1', 'OnPremSyncRunStatus.ps1', 'Export-OnPremSyncDashboardCore.ps1', 'Get-OnPremSyncHostRoot.ps1')) {
+foreach ($libName in @('OnPremSyncRunStatus.ps1', 'Get-OnPremSyncHostRoot.ps1', 'OnPremImportRunArchive.ps1')) {
     Copy-Item -LiteralPath (Join-Path $scriptDir "..\_lib\$libName") -Destination (Join-Path $libDir $libName) -Force
+}
+foreach ($toolName in @('Compare-OnPremImportRuns.ps1', 'Archive-OnPremImportRun.ps1')) {
+    $toolSrc = Join-Path $scriptDir "..\$toolName"
+    if (Test-Path -LiteralPath $toolSrc) {
+        Copy-Item -LiteralPath $toolSrc -Destination (Join-Path $SyncHostRoot "tools\scripts\$toolName") -Force
+    }
 }
 
 $lookupDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\lookup-translations'
@@ -108,6 +112,12 @@ foreach ($lookupName in @('lookup-translations.yaml', 'lookup-translations.calik
     if (Test-Path -LiteralPath $lookupSrc) {
         Copy-Item -LiteralPath $lookupSrc -Destination (Join-Path $lookupDst $lookupName) -Force
     }
+}
+$cityJsonSrc = Join-Path $RepoRoot 'Visa2026.Module\DatabaseUpdate\LookupCatalogs\city.json'
+$cityJsonDstDir = Join-Path $SyncHostRoot 'tools\DataImporter\LookupCatalogs'
+if (Test-Path -LiteralPath $cityJsonSrc) {
+    New-Item -ItemType Directory -Force -Path $cityJsonDstDir | Out-Null
+    Copy-Item -LiteralPath $cityJsonSrc -Destination (Join-Path $cityJsonDstDir 'city.json') -Force
 }
 $migrationArtifactsDst = Join-Path $SyncHostRoot 'tools\DataImporter\legacy\visa2014\migration-artifacts'
 New-Item -ItemType Directory -Force -Path $migrationArtifactsDst | Out-Null
@@ -130,16 +140,10 @@ if ($CopyIdMapsFromRepo) {
 $configPath = Join-Path $SyncHostRoot 'config\sync.env'
 if (-not (Test-Path -LiteralPath $configPath)) {
     Copy-Item -LiteralPath (Join-Path $SyncHostRoot 'config\onprem-sync.env.example') -Destination $configPath
-    Write-Host "WRN Created $configPath - set VISA2014_SQL_PASSWORD before first sync." -ForegroundColor Yellow
+    Write-Host "WRN Created $configPath - set VISA2014_SQL_PASSWORD before first Import." -ForegroundColor Yellow
 }
 
 Write-Host "INF Sync host layout ready: $SyncHostRoot" -ForegroundColor Green
-Write-Host "INF Manual run on server ($Profile):" -ForegroundColor DarkGray
-Write-Host "  $SyncHostRoot\tools\scripts\Run-OnPremSyncOnServer.ps1 -Profile $Profile -Mode Sync -SkipTenantCatalogGeneration" -ForegroundColor DarkGray
-Write-Host "INF Blazor dashboard: enable LegacySyncDashboard:SyncHostRoot=$SyncHostRoot in this slot appsettings.Production.json" -ForegroundColor DarkGray
-Write-Host "INF HTML report URL (admin): https://<host>/legacy-sync/dashboard" -ForegroundColor DarkGray
-
-if ($RegisterScheduledTask) {
-    & (Join-Path $SyncHostRoot 'tools\scripts\Register-OnPremLegacySyncTask.ps1') `
-        -SyncHostRoot $SyncHostRoot -ScheduledTime $ScheduledTime
-}
+Write-Host "INF Manual Import on server ($Profile):" -ForegroundColor DarkGray
+Write-Host "  $SyncHostRoot\tools\scripts\Run-OnPremSyncOnServer.ps1 -Profile $Profile -SkipTenantCatalogGeneration" -ForegroundColor DarkGray
+Write-Host "INF Live wave watch: Watch-OnPremImportLive.ps1 / Watch-OnPremSyncRun.ps1 (from repo)" -ForegroundColor DarkGray

@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Visa2026.Module.DatabaseUpdate;
 
 namespace Visa2026.DataImporter.Legacy.Visa2014;
 
@@ -35,6 +36,13 @@ internal static class Visa2014ImportTrackingLogCleanup
         {
             if (verbose)
                 Console.WriteLine("INF Import log cleanup: skipped target DB (no --target-connection / ConnectionStrings__DefaultConnection).");
+            return result with { SkippedTargetDatabase = true };
+        }
+
+        if (DatabaseProviderDetector.IsPostgreSql(targetConnectionString))
+        {
+            if (verbose)
+                Console.WriteLine("INF Import log cleanup: skipped target DB (PostgreSQL — T-SQL OBJECT_ID cleanup not used).");
             return result with { SkippedTargetDatabase = true };
         }
 

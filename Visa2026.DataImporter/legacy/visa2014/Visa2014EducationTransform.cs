@@ -6,6 +6,8 @@ internal sealed record Visa2014EducationRawRow(
     string? EducationLevelMgCode,
     string? TitleOfInstitution,
     string? CountryMgCode,
+    string? CountryName,
+    string? CountryNameL,
     string? TitleOfSpeciality,
     DateTime? EducationEndDate,
     Guid LegacyPersonOid);
@@ -19,6 +21,8 @@ internal static class Visa2014EducationTransform
             ISNULL(CAST(el.mgCode AS varchar(10)), '') AS EducationLevelMgCode,
             ei.TitleOfIEducationInstitution,
             c.mgCode AS EducationCountryCode,
+            c.NameOfCountry AS EducationCountryName,
+            c.NameOfCountryL AS EducationCountryNameL,
             s.TitleOfSpeciality,
             CONVERT(varchar(10), e.EducationEndDate, 23) AS EducationEndDate,
             CAST(e.Person AS varchar(36)) AS LegacyPersonOid
@@ -85,6 +89,8 @@ internal static class Visa2014EducationTransform
             EducationLevelMgCode: row.GetValueOrDefault("EducationLevelMgCode"),
             TitleOfInstitution: row.GetValueOrDefault("TitleOfIEducationInstitution"),
             CountryMgCode: row.GetValueOrDefault("EducationCountryCode"),
+            CountryName: row.GetValueOrDefault("EducationCountryName"),
+            CountryNameL: row.GetValueOrDefault("EducationCountryNameL"),
             TitleOfSpeciality: row.GetValueOrDefault("TitleOfSpeciality"),
             EducationEndDate: endDate,
             LegacyPersonOid: legacyPersonOid);
@@ -159,14 +165,15 @@ internal static class Visa2014EducationTransform
         TrySetEducationLevel(row, catalogs, levelComposite, unmapped);
 
         TrySetLookup(row, catalogs, "EducationInstitution", raw.TitleOfInstitution, "EducationInstitution", unmapped, ref skipReason);
-        TrySetLookup(row, catalogs, "Country", NormalizeLegacyCountryMgCode(raw.CountryMgCode), "EducationCountry", unmapped, ref skipReason);
+        var countryKey = ResolveEducationCountryLegacyKey(raw.CountryMgCode, raw.CountryName, raw.CountryNameL);
+        TrySetLookup(row, catalogs, "Country", countryKey, "EducationCountry", unmapped, ref skipReason);
         TrySetLookup(row, catalogs, "Specialty", raw.TitleOfSpeciality, "Specialty", unmapped, ref skipReason);
 
         if (raw.EducationEndDate.HasValue)
             row["GraduationYear"] = raw.EducationEndDate.Value.Year.ToString();
 
         row["Person"] = raw.LegacyPersonOid.ToString("D");
-        row["_legacy_EducationCountryCode"] = raw.CountryMgCode;
+        row["_legacy_EducationCountryCode"] = countryKey ?? raw.CountryMgCode;
         row["_legacy_PersonOid"] = raw.LegacyPersonOid.ToString("D");
 
         return row;
@@ -229,10 +236,33 @@ internal static class Visa2014EducationTransform
     internal static string? NormalizeLegacyCountryMgCode(string? mgCode)
     {
         if (string.IsNullOrWhiteSpace(mgCode))
-            return mgCode;
+            return null;
 
         var trimmed = mgCode.Trim();
         var dash = trimmed.IndexOf('-');
         return dash > 0 ? trimmed[..dash] : trimmed;
+    }
+
+    /// <summary>
+    /// Prefer Country.mgCode (prefix-normalized). When mgCode is null/blank on legacy dbo.Country
+    /// (32 active rows on Çalik), fall back to NameOfCountry then NameOfCountryL — same string
+    /// Person/Passport already resolve against Visa2026 Country.Code.
+    /// </summary>
+    internal static string? ResolveEducationCountryLegacyKey(
+        string? mgCode,
+        string? nameOfCountry,
+        string? nameOfCountryL)
+    {
+        var fromMg = NormalizeLegacyCountryMgCode(mgCode);
+        if (!string.IsNullOrWhiteSpace(fromMg))
+            return fromMg;
+
+        if (!string.IsNullOrWhiteSpace(nameOfCountry))
+            return nameOfCountry.Trim();
+
+        if (!string.IsNullOrWhiteSpace(nameOfCountryL))
+            return nameOfCountryL.Trim();
+
+        return null;
     }
 }

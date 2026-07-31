@@ -1,6 +1,6 @@
 # Person document copies
 
-**Status:** **Phases 1–2 shipped** — Person DetailView + ListView toolbar (single selection), per-row **Copies** column, sectioned catalog, per-record Preview + Refresh.
+**Status:** **Phases 1–2 shipped** — Person DetailView toolbar, per-row **Copies** column (ListView; no toolbar action), sectioned catalog, per-record Preview + Refresh.
 
 **Deferred (product decision — do not implement without explicit approval):**
 
@@ -57,7 +57,7 @@ Do **not** extend `ApplicationItemLinkedDocumentsResolver` for Person — differ
 
 ### Panel layout (catalog mode)
 
-Uses the same **elevated card** UX as Resminamalar / ApplicationItem document copies ([`PREVIEW_SLOT.md`](PREVIEW_SLOT.md)).
+Uses the same **elevated card** shell as Resminamalar / other document copies ([`PREVIEW_SLOT.md`](PREVIEW_SLOT.md)). Catalog rows use shared **`.doc-copies-catalog`** chrome (sectioned table — visual source of truth for AppItem/Header copies too).
 
 1. **Header** — person display name (+ optional personal number).
 2. **Sectioned catalog** — scrollable groups:
@@ -174,7 +174,7 @@ Keep **`DocumentCopiesSlotPanel`** for ApplicationItem only — separate occupan
 | `Services/PersonLinkedDocuments/PersonLinkedDocumentRecord.cs` | One child BO instance + files + `RecordKey` + is-current flag |
 | `Services/PersonLinkedDocuments/PersonDocumentCatalogRegistry.cs` | Optional: extensible section definitions |
 | `Localization/PersonDocumentCopiesLocalization.cs` | Section/record labels |
-| `Controllers/PersonDocumentCopiesController.cs` | DetailView + ListView actions → `OpenPersonDocumentCopiesAsync` |
+| `Controllers/PersonDocumentCopiesController.cs` | DetailView toolbar only → `OpenPersonDocumentCopiesAsync` (ListView uses row Copies column) |
 
 **Reuse (extract or call):**
 
@@ -217,7 +217,7 @@ Keep **`DocumentCopiesSlotPanel`** for ApplicationItem only — separate occupan
 | Phase | Deliverable | Status |
 |-------|-------------|--------|
 | **1 — MVP** | Resolver + DetailView action + slot panel + sectioned catalog + per-record Preview + Refresh | **Shipped** |
-| **2** | ListView toolbar + **Copies** column; gear file details; current badges; nested visa rows | **Shipped** |
+| **2** | ListView **Copies** column (no toolbar); gear file details; current badges; nested visa rows | **Shipped** |
 | **3** | Link to ApplicationItem document copies when `ApplicationItems` exist | **Deferred** — product decision |
 | **4 (optional)** | Person document ZIP export (separate from ministry `PdfGenerationBatch`) | **Deferred** — product decision |
 

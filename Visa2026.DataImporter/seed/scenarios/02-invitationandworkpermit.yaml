@@ -87,8 +87,10 @@ data:
   Invitations:
   - Invitation Number: INV-2026-002
     Application: 4/-002
-    Start Date: 2026-04-02
-    Validity Duration: 3 aý
+    Issued Date: 2026-04-02
+    Expiration Date: 2026-07-01
+    Visa Category: Köp gezeklik
+    Visa Period: 3 (üç) aý
   InvitationItems:
   - Invitation Number: INV-2026-002
     Person: Kemal Arslan

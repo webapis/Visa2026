@@ -4,7 +4,7 @@
       "caption": { "tr-TR": "Kullanıcı", "tk-TM": "Ulanyjy", "ru-RU": "Пользователь" },
       "members": {
         "UserName": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" },
-        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" },
+        "IsActive": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" },
         "ChangePasswordOnFirstLogon": {
           "tr-TR": "İlk Girişte Şifre Değiştir",
           "tk-TM": "Ilkinji gireşde paroly üýtget",
@@ -37,7 +37,7 @@
       },
       "items": {
         "UserName": { "caption": { "tr-TR": "Kullanıcı Adı", "tk-TM": "Ulanyjy ady", "ru-RU": "Имя пользователя" } },
-        "IsActive": { "caption": { "tr-TR": "Aktif", "tk-TM": "Işjeň", "ru-RU": "Активен" } },
+        "IsActive": { "caption": { "tr-TR": "Aktif", "tk-TM": "Aktiw", "ru-RU": "Активен" } },
         "ChangePasswordOnFirstLogon": {
           "caption": {
             "tr-TR": "İlk Girişte Şifre Değiştir",

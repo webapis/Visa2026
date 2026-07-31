@@ -1,8 +1,19 @@
 ---
 name: visa2026-restore-from-bak
-description: Restores a Visa2026 SQL Server .bak on a developer PC into either LocalDB (Visual Studio default connection) or the local Docker dev SQL container. Use when the user asks to restore visa2026-prod.bak, reload prod data locally, LocalDB restore, or import a backup while developing.
+description: >-
+  OBSOLETE for Visa2026 app databases (PostgreSQL-only). Do not restore SQL
+  Server .bak into LocalDB or Docker SQL for F5. Use empty PostgreSQL +
+  --import-visa2014 from VISA2015 instead. Retained for historical SQL Express
+  / LocalDB workflows only.
 disable-model-invocation: true
 ---
+
+# OBSOLETE — Restore Visa2026 from a .bak file
+
+> **Visa2026 is PostgreSQL-only.** SQL Server .bak restore is not a supported path for local F5, Docker, or IIS slots.
+> Create an empty Postgres database and load data with **`--import-visa2014`** (see visa2014-to-visa2026-import).
+
+The remainder of this skill is **historical** (LocalDB / Docker SQL Server).
 
 # Restore Visa2026 from a `.bak` file
 

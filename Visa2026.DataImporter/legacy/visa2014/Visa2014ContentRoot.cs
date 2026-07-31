@@ -70,7 +70,22 @@ internal static class Visa2014ContentRoot
         else
             cs = "Server=localhost\\SQLEXPRESS;Database=VISA2015;User Id=ReadOnlyUser;TrustServerCertificate=True;MultipleActiveResultSets=true";
 
-        return ApplySqlPasswordFromEnvironment(cs);
+        return ApplySqlPasswordFromEnvironment(NormalizeEncryptKeywords(cs));
+    }
+
+    /// <summary>
+    /// Encrypt=False/True breaks some Microsoft.Data.SqlClient builds ("Invalid value for key 'Encrypt'").
+    /// </summary>
+    internal static string NormalizeEncryptKeywords(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return connectionString;
+
+        return connectionString
+            .Replace("Encrypt=False", "Encrypt=Optional", StringComparison.OrdinalIgnoreCase)
+            .Replace("Encrypt=True", "Encrypt=Mandatory", StringComparison.OrdinalIgnoreCase)
+            .Replace("Encrypt=No", "Encrypt=Optional", StringComparison.OrdinalIgnoreCase)
+            .Replace("Encrypt=Yes", "Encrypt=Mandatory", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -81,11 +96,13 @@ internal static class Visa2014ContentRoot
         if (string.IsNullOrWhiteSpace(connectionString))
             return connectionString;
 
-        if (connectionString.Contains("Password=", StringComparison.OrdinalIgnoreCase))
+        if (connectionString.Contains("Password=", StringComparison.OrdinalIgnoreCase) ||
+            connectionString.Contains("PWD=", StringComparison.OrdinalIgnoreCase))
             return connectionString;
 
         if (!connectionString.Contains("User Id=", StringComparison.OrdinalIgnoreCase) &&
-            !connectionString.Contains("UserID=", StringComparison.OrdinalIgnoreCase))
+            !connectionString.Contains("UserID=", StringComparison.OrdinalIgnoreCase) &&
+            !connectionString.Contains("UID=", StringComparison.OrdinalIgnoreCase))
             return connectionString;
 
         var password = Environment.GetEnvironmentVariable("VISA2014_SQL_PASSWORD");

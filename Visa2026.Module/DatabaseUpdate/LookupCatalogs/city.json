@@ -223,8 +223,8 @@
                  },
                  {
                      "NameTm":  "Serhetabat etraby",
-                     "PdfForm_Code":  "LB24",
-                     "Region":  "Lebap welaýaty"
+                     "PdfForm_Code":  "MR24",
+                     "Region":  "Mary welaýaty"
                  },
                  {
                      "NameTm":  "Türkmengala etraby",
@@ -318,8 +318,8 @@
                  },
                  {
                      "NameTm":  "Beýik Saparmyrat Türkmenbaşy ad. etraby",
-                     "PdfForm_Code":  "DZ8",
-                     "Region":  "Daşoguz welaýaty"
+                     "PdfForm_Code":  "LB8",
+                     "Region":  "Lebap welaýaty"
                  },
                  {
                      "NameTm":  "Babadaýhan etraby",
@@ -416,7 +416,8 @@
                  },
                  {
                      "NameTm":  "Serdarabat etraby",
-                     "Region":  "Mary welaýaty"
+                     "PdfForm_Code":  "LB25",
+                     "Region":  "Lebap welaýaty"
                  },
                  {
                      "NameTm":  "Şatlyk şäheri",

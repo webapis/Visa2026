@@ -1,0 +1,55 @@
+@namespace Visa2026.Blazor.Server.Components
+@using Microsoft.JSInterop
+@using Visa2026.Blazor.Server.Controllers
+@using Visa2026.Blazor.Server.Services
+@implements IAsyncDisposable
+
+@code {
+    [Inject] private PersonDossierNavigationHelper DossierNavigation { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
+
+    private DotNetObjectReference<PersonDossierListLinkBridge>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("visaPersonDossier.registerHost", _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public void MarkLinkClickPending() => PersonDossierLinkClickGate.MarkPending();
+
+    [JSInvokable]
+    public Task OpenFromJs(string personIdText)
+    {
+        if (!Guid.TryParse(personIdText, out var personId) || personId == Guid.Empty)
+            return Task.CompletedTask;
+
+        return InvokeAsync(() =>
+        {
+            if (PersonListViewDossierOpenBridge.TryOpenDossier(personId))
+                return;
+
+            PersonDossierLinkClickGate.MarkPending();
+            DossierNavigation.OpenDossier(personId);
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef == null)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaPersonDossier.unregisterHost");
+        }
+        catch (JSDisconnectedException) { }
+
+        _dotNetRef.Dispose();
+        _dotNetRef = null;
+    }
+}

@@ -608,18 +608,51 @@ public static class ApprovalLegProfileMinistryHelper
             application.ApprovalLegSnapshots.Add(snapshot);
         }
     }
+
+    /// <summary>
+    /// Copies ministry short names from <see cref="Application.ApprovalLegProfile"/> when snapshots
+    /// are missing or incomplete (imported apps, profile set outside the detail controller).
+    /// </summary>
+    public static void EnsureSnapshots(IObjectSpace? objectSpace, Application? application)
+    {
+        if (objectSpace == null || application == null || application.ApprovalLegProfile == null)
+            return;
+
+        if (!ApplicationProgressProfileResolver.RequiresApprovalLegProfile(application))
+            return;
+
+        var expectedLegs = GetLegCount(application.ApprovalLegProfile);
+        if (expectedLegs <= 0)
+            return;
+
+        var snapshotLegs = application.ApprovalLegSnapshots?
+            .Count(s => !string.IsNullOrWhiteSpace(s.MinistryShortName)) ?? 0;
+        if (snapshotLegs == expectedLegs)
+            return;
+
+        ApplySnapshot(objectSpace, application, application.ApprovalLegProfile);
+    }
+
     public static bool IsProfileReferencedByApplications(ApprovalLegProfile profile, IObjectSpace objectSpace) =>
         objectSpace.GetObjectsQuery<Application>()
             .Any(a => a.ApprovalLegProfile != null && a.ApprovalLegProfile.ID == profile.ID);
 
     public static string? GetMinistryShortNameForLeg(Application? application, int leg)
     {
-        if (application?.ApprovalLegSnapshots == null || leg < 1)
+        if (application == null || leg < 1)
             return null;
 
-        return application.ApprovalLegSnapshots
+        var fromSnapshot = application.ApprovalLegSnapshots?
             .Where(s => s.Sequence == leg)
             .Select(s => s.MinistryShortName)
+            .FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
+        if (!string.IsNullOrWhiteSpace(fromSnapshot))
+            return fromSnapshot;
+
+        // Imported / older rows may have ApprovalLegProfile but empty ApprovalLegSnapshots.
+        return application.ApprovalLegProfile?.MinistryLegs?
+            .Where(l => l.Sequence == leg && l.ApprovingMinistry != null)
+            .Select(l => l.ApprovingMinistry.ShortNameTm ?? l.ApprovingMinistry.NameTm)
             .FirstOrDefault(s => !string.IsNullOrWhiteSpace(s));
     }
 

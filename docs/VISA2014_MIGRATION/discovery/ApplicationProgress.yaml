@@ -72,11 +72,12 @@ mapping:
         location: AT_MIGRATION_SERVICE
         dateSource: day_after_prepare_or_prior_migration_step
       - step: migration_issued
-        when: ProcessDate >= 2000-01-01 OR ProcessNumber non-empty
+        when: ProcessDate set (Işlenmäge başlanan sene) — source of truth for started + completed
         state: PROCESS_ISSUED
         location: AT_MIGRATION_SERVICE
-        dateSource: ProcessDate
+        dateSource: ProcessDate (else prior+1)
         descriptionFields: [ProcessNumber]
+        notes: Direct-to-migration only; ProcessNumber (belgi) is optional label, not the gate.
     longProcessSteps:
       - step: prepare
         when: always
@@ -90,15 +91,15 @@ mapping:
         dateSource: DateForwardedToMonistery
       - step: ministry_return
         when: MinisteriesDocumentDate >= 2000-01-01 OR MinisteriesDocumentNumber non-empty
-        state: 1_REVIEW_APPROVED
-        location: AT_THE_MINISTERY_1
+        state: 2_REVIEW_APPROVED
+        location: AT_THE_MINISTERY_2
         dateSource: MinisteriesDocumentDate
         descriptionFields: [MinisteriesDocumentNumber]
-        openDecision: location after approval — AT_OFFICE vs stay AT_THE_MINISTERY_1
+        notes: Leg 1 approved (Türkmenenergo) has no doc — ministry from ApprovalLegProfile
       - step: ministry_2_forward
-        when: DateForwardedToMinConstruction >= 2000-01-01 AND ProjectContract.MinistryLegs >= 2
-        state: 2_REVIEW_STARTED
-        location: AT_THE_MINISTERY_2
+        when: DateForwardedToMinConstruction >= 2000-01-01 AND ProjectContract.MinistryLegs >= 3
+        state: 3_REVIEW_STARTED
+        location: AT_THE_MINISTERY_3
         dateSource: DateForwardedToMinConstruction
         descriptionFields: [DocNumberForwardedToMinConstruction]
       - step: migration_started
@@ -107,23 +108,45 @@ mapping:
         location: AT_MIGRATION_SERVICE
         dateSource: day_after_last_ministry_step_or_prior_step
       - step: migration_issued
-        when: ProcessDate >= 2000-01-01 OR ProcessNumber non-empty
+        when: Invitation / WorkPermit / extension visa coverage (not ProcessNumber alone)
         state: PROCESS_ISSUED
         location: AT_MIGRATION_SERVICE
-        dateSource: ProcessDate
-        descriptionFields: [ProcessNumber]
+        dateSource: completion evidence IssuedDate
+        descriptionFields: [InvitationNumber, WorkPermitNumber, VisaNumber]
+        notes: Long/ministry route — ProcessNumber remains PROCESS_STARTED description only.
     terminalOverrides:
       - when: Cancelled = 1
         state: PROCESS_CANCELLED
         location: AT_OFFICE
         dateSource: last_non_null_progress_date_or_ApplicationDate
         priority: after_synthesis
-      - when: Rejected = 1
+      - when: Rejected = 1 OR full RejectionItem coverage
         state: PROCESS_REJECTED
         location: AT_MIGRATION_SERVICE
-        dateSource: ProcessDate
+        dateSource: |
+          Prefer max ApplicationResult.IssuedDate (Result=Rejection) when full coverage;
+          else Application.ProcessDate; else prior step / ApplicationDate.
         priority: after_synthesis
-        notes: Header Rejected rare on Çalik; item-level rejection may override in permits wave
+        notes: |
+          Full coverage = PersonInApplication count > 0 AND equals total PersonInInvitation
+          under ApplicationResult Result=Rejection for the same Application (maps to
+          ApplicationItems.Count == sum(Rejection.RejectionItems) after import).
+          OR with rare header Application.Rejected=1. Partial coverage does not reject.
+    completionEvidence:
+      - source: Invitation (ApplicationResult Result=0 with PersonInInvitation)
+        state: PROCESS_ISSUED
+        descriptionFields: [InvitationNumber]
+      - source: WorkPermit on PersonInApplication
+        state: PROCESS_ISSUED
+        descriptionFields: [WorkPermitNumber]
+      - source: |
+          Extension subtype 7 — every PersonInApplication covered by Visa.ProcessNumber=PIA
+          OR immediate next passport sibling after PIA.Visa (sticky invitation ProcessNumber).
+          Aligns with IssuingApplicationItem sibling rule. Inv/WP wins if both present.
+          Partial coverage does not issue.
+        state: PROCESS_ISSUED
+        dateSource: max Visa.VisaIssuedDate (ProcessNumber or sibling)
+        descriptionFields: [VisaNumber]
     skipParentApplication:
       - parent ApplicationType E:44/E:55 skipped at header import — no progress rows
     initializerConflict: |

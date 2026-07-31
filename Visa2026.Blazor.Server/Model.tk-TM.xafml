@@ -19,7 +19,7 @@
       <Action Id="ExtractPlaceholders" Caption="Ýer tutujylary çykar" />
       <Action Id="FullTextSearch" Caption="Gözle" />
       <Action Id="GenerateApplicationPdfBatch" Caption="PDF döret" />
-      <Action Id="GenerateWordReports" Caption="Resminamalar" />
+      <Action Id="GenerateWordReports" Caption="Şablonlar" />
       <Action Id="Link" Caption="Bagla" />
       <Action Id="Logoff" Caption="Çykmak" />
       <Action Id="Logon" Caption="Girmek" />
@@ -51,7 +51,7 @@
       <Action Id="ValidatePlaceholders" Caption="Ýer tutujylary barla" />
       <Action Id="ValidateSyncRules" Caption="Düzgünleri barla" />
       <Action Id="ViewApplicationItemDocumentCopies" Caption="Resminama nusgalary" />
-      <Action Id="ViewApplicationItemWordReports" Caption="Resminamalar" />
+      <Action Id="ViewApplicationItemWordReports" Caption="Şablonlar" />
     </Actions>
   </ActionDesign>
   <Localization>
@@ -97,9 +97,9 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressOfResidence" Caption="Ýaşaýyş salgysy" />
-          <LayoutGroup Id="Documents" Caption="Ýaşaýyş salgysy nusgalary" />
-          <LayoutGroup Id="Documents_Group" Caption="Ýaşaýyş salgysy nusgalary" />
-          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş nusgalary" />
+          <LayoutGroup Id="Documents" Caption="Salgy nusgalary" />
+          <LayoutGroup Id="Documents_Group" Caption="Salgy nusgalary" />
+          <LayoutGroup Id="LodgingDocuments" Caption="Ýaşaýyş ýeri nusgalary" />
         </LayoutGroup>
       </Layout>
     </DetailView>
@@ -125,12 +125,19 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <DetailView Id="Lodging_DetailView" Caption="Ýaşaýyş jaýy">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="Ýaşaýyş ýeri nusgalary" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Person_DetailView" Caption="Adam">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="AddressesOfResidence" Caption="Ýaşaýyş salgylary" />
           <LayoutGroup Id="ApplicationItems" Caption="Arza elementleri" />
-          <LayoutGroup Id="Documents" Caption="Adam faýl nusgalary" />
+          <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
           <LayoutGroup Id="Educations" Caption="Bilim" />
           <LayoutGroup Id="EmployeeContracts" Caption="Işgär şertnamalary" />
           <LayoutGroup Id="FamilyMembers" Caption="Maşgalalar" />
@@ -160,6 +167,7 @@
     <DetailView Id="Person_DetailView_Employee" Caption="Işgär">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="Documents" Caption="CV we şahsy faýllar" />
           <LayoutGroup Id="Person" Caption="Işgär" />
         </LayoutGroup>
       </Layout>

@@ -82,6 +82,10 @@ public static partial class ApplicationRuntimeLogTextHelper
             return ApplicationRuntimeLogErrorCodes.PdfWorkerLoop;
         if (message.Contains("WordReportGenerationBatchWorkerService loop error", StringComparison.OrdinalIgnoreCase))
             return ApplicationRuntimeLogErrorCodes.WordWorkerLoop;
+        if (message.Contains("Person export batch failed", StringComparison.OrdinalIgnoreCase))
+            return ApplicationRuntimeLogErrorCodes.PersonExportBatchFailed;
+        if (message.Contains("PersonExportBatchWorkerService loop error", StringComparison.OrdinalIgnoreCase))
+            return ApplicationRuntimeLogErrorCodes.PersonExportWorkerLoop;
         if (message.Contains("User report template seed failed", StringComparison.OrdinalIgnoreCase))
             return ApplicationRuntimeLogErrorCodes.InfraTemplateSeed;
         if (message.Contains("Batch schema column ensure failed", StringComparison.OrdinalIgnoreCase))

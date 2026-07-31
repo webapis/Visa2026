@@ -14,7 +14,7 @@ namespace Visa2026.DataImporter.Legacy.Visa2014;
 /// </summary>
 internal static class Visa2014ActualPositionReview
 {
-    private const string DashName = "-";
+    private static string DashName => Visa2014ActualPositionNormalizer.DashName;
 
     private static string DefaultCsvPath()
     {
@@ -63,7 +63,9 @@ internal static class Visa2014ActualPositionReview
         sb.AppendLine("SetToDash,Name,UsageCount,Guess,ActualPositionId");
         foreach (var r in rows)
         {
-            var guess = LooksLikeNonTitle(r.Name) ? "review" : "";
+            var guess = Visa2014ActualPositionNormalizer.IsNonTitlePlaceholder(r.Name)
+                ? "no-letters"
+                : LooksLikeNonTitle(r.Name) ? "review" : "";
             sb.Append(',')                       // SetToDash (empty — user fills)
               .Append(Csv(r.Name)).Append(',')
               .Append(r.Usage).Append(',')
@@ -75,9 +77,13 @@ internal static class Visa2014ActualPositionReview
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
         await File.WriteAllTextAsync(outPath, sb.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
 
+        var noLetters = rows.Count(r => Visa2014ActualPositionNormalizer.IsNonTitlePlaceholder(r.Name));
+        var reviewGuess = rows.Count(r => !Visa2014ActualPositionNormalizer.IsNonTitlePlaceholder(r.Name) && LooksLikeNonTitle(r.Name));
         Console.WriteLine($"INF Distinct ActualPosition rows: {rows.Count}");
-        Console.WriteLine($"INF Heuristic 'review' guesses: {rows.Count(r => LooksLikeNonTitle(r.Name))}");
+        Console.WriteLine($"INF Heuristic 'no-letters' (safe to dash via --auto-no-letters): {noLetters}");
+        Console.WriteLine($"INF Heuristic 'review' guesses (long/task-like — human review): {reviewGuess}");
         Console.WriteLine($"INF Mark non-titles by putting any value (e.g. x) in the SetToDash column, then run --apply-visa2014-actual-positions.");
+        Console.WriteLine($"INF Or run --apply-visa2014-actual-positions --auto-no-letters to dash all no-letter Names without editing the CSV.");
         return 0;
     }
 
@@ -115,7 +121,7 @@ internal static class Visa2014ActualPositionReview
         {
             markedSet = allActuals
                 .Where(a => !string.Equals(a.Name?.Trim(), DashName, StringComparison.Ordinal))
-                .Where(a => !ContainsLetter(a.Name))
+                .Where(a => Visa2014ActualPositionNormalizer.IsNonTitlePlaceholder(a.Name))
                 .Select(a => a.Id)
                 .ToHashSet();
             Console.WriteLine($"INF Auto-selected (no-letter) ActualPosition rows: {markedSet.Count}");
@@ -233,16 +239,14 @@ internal static class Visa2014ActualPositionReview
         return created.Id;
     }
 
-    /// <summary>True when the value contains at least one alphabetic letter (a real word → a real title).</summary>
-    private static bool ContainsLetter(string? s) =>
-        !string.IsNullOrEmpty(s) && s.Any(char.IsLetter);
-
     /// <summary>Heuristic hint only (not authoritative): flags strings that look like tasks/descriptions, not titles.</summary>
     private static bool LooksLikeNonTitle(string name)
     {
         var n = name?.Trim() ?? "";
         if (n.Length == 0 || n == DashName)
             return false;
+        if (Visa2014ActualPositionNormalizer.IsNonTitlePlaceholder(n))
+            return false; // covered by Guess=no-letters / --auto-no-letters
         if (n.Length > 45) return true;
         if (n.Contains('/') || n.Contains('&')) return true;
         if (n.EndsWith('.')) return true;

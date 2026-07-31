@@ -144,8 +144,8 @@ Lookup: `DatabaseUpdate/LookupCatalogs/application-state.json` · BO: `Applicati
 | State code | Display (TM seed) | Family | Tone | Severity | XAF row `BackColor` | CSS bg / text | Column `FontColor` |
 |---|---|---|---|---|---|---|---|
 | `IS_BEING_PREPARED` | TAÝÝARLYKDA | Gold | T2 | Info | `LemonChiffon` | `#fef9c3` / `#854d0e` | `DarkGoldenrod` |
-| `1_REVIEW_STARTED` | 1-NJI IŞ YLALAŞYKDA | Blue | T2 | Info | `LightSteelBlue` | `#dbeafe` / `#1e40af` | `DodgerBlue` |
-| `2_REVIEW_STARTED` | 2-NJI IŞ YLALAŞYKDA | Blue | T3 | Info | `SkyBlue` | `#bae6fd` / `#0369a1` | `DeepSkyBlue` |
+| ~~`1_REVIEW_STARTED`~~ | ~~1-NJI IŞ YLALAŞYKDA~~ | ~~Blue~~ | ~~T2~~ | ~~Info~~ | — | — | — | *Legacy — removed from active workflow* |
+| ~~`2_REVIEW_STARTED`~~ | ~~2-NJI IŞ YLALAŞYKDA~~ | ~~Blue~~ | ~~T3~~ | ~~Info~~ | — | — | — | *Legacy — removed from active workflow* |
 | `1_REVIEW_APPROVED` | 1-NJI IŞ YLALAŞYK ALYNDY | Green | T4 | Info | `Aquamarine` | `#a7f3d0` / `#047857` | `SeaGreen` |
 | `2_REVIEW_APPROVED` | 2-NJI IŞ YLALAŞYK ALYNDY | Green | T5 | Info | `MintCream` | `#ecfccb` / `#3f6212` | `DarkGreen` |
 | `1_REVIEW_REJECTED` | 1-NJI IŞ YLALAŞYK BERILMEDI | Red | T4 | Critical | `PeachPuff` | `#ffedd5` / `#c2410c` | `OrangeRed` |

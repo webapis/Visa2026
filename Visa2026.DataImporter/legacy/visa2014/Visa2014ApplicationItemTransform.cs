@@ -154,7 +154,7 @@ internal static class Visa2014ApplicationItemTransform
         OUTER APPLY (
             SELECT TOP 1 CAST(pii.Oid AS varchar(36)) AS InvitationItemOid
             FROM dbo.PersonInInvitation pii
-            INNER JOIN dbo.ApplicationResult ar ON ar.Oid = pii.Invitation AND ar.GCRecord IS NULL
+            INNER JOIN dbo.ApplicationResult ar ON ar.Oid = pii.Invitation AND ar.GCRecord IS NULL AND ar.Result = 0
             WHERE pii.GCRecord IS NULL
               AND ar.Application = pia.Application
               AND (

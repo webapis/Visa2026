@@ -278,13 +278,14 @@ internal static class Visa2014EmployeePositionHistoryTransform
 
         // Actual (company) position: legacy Person.MiddleName held the free-text title (no dedicated field in
         // VISA2014). Apply it to the current/latest row only; older periods fall back to Position.Code or "-".
+        // Numeric / punctuation-only values are not titles — Normalize collapses them to "-".
         // Permit-supplement rows are historical snapshots — never treat as "current".
         var middleName = raw.PersonMiddleName?.Trim();
-        row["ActualPosition"] = !forPermitSupplement
-                                && currentRowOids.Contains(raw.LegacyOid)
-                                && !string.IsNullOrEmpty(middleName)
-            ? middleName
-            : ResolveActualPosition(raw.PositionCode);
+        var fromMiddleName = !forPermitSupplement
+                             && currentRowOids.Contains(raw.LegacyOid)
+                             && !string.IsNullOrEmpty(middleName);
+        row["ActualPosition"] = Visa2014ActualPositionNormalizer.Normalize(
+            fromMiddleName ? middleName : raw.PositionCode);
 
         if (!raw.StartDateOnThisPosition.HasValue)
         {
@@ -304,12 +305,6 @@ internal static class Visa2014EmployeePositionHistoryTransform
         row["Person"] = raw.LegacyPersonOid.ToString("D");
 
         return row;
-    }
-
-    private static string ResolveActualPosition(string? positionCode)
-    {
-        var trimmed = positionCode?.Trim();
-        return string.IsNullOrEmpty(trimmed) ? "-" : trimmed;
     }
 
     private static void TrySetLookup(

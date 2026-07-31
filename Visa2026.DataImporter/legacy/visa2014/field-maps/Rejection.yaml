@@ -1,0 +1,90 @@
+# Rejection field map — layer 2
+# Layer 1: table-mappings.yaml (id: rejection-header)
+
+tableMappingId: rejection-header
+
+source:
+  table: ApplicationResult
+  schema: dbo
+  filter: Result = 1 (ApplicationResultEnum.Rejection)
+
+target:
+  odataEntity: Rejection
+
+deduplication:
+  enabled: true
+  keys:
+    - RejectedDocNumber
+  rejectedDocNumberSuffix:
+    when: duplicate Number across rejection headers
+    transform: append_legacy_oid_tail
+    notes: 2 groups on Çalik (178, AS-600159) — suffix last 8 hex chars of legacy ApplicationResult Oid
+
+propertyGaps:
+  legacyOnly:
+    - column: DateOfExpire
+      disposition: drop
+      notes: Always null for Result=Rejection (legacy RuleCriteria)
+    - column: VisaCategory
+      disposition: drop
+    - column: VisaPeriod
+      disposition: drop
+    - column: VisaStartDate
+      disposition: drop
+    - column: VisaEndDate
+      disposition: drop
+    - column: VisaStartAndEnDateDefined
+      disposition: drop
+    - column: CopyOfResult
+      disposition: file_wave
+      notes: RejectionDocument after scalar id-map
+    - column: NetijeGocurme
+      disposition: file_wave
+    - column: PersonInResultLetter
+      disposition: child_bo
+      notes: RejectionItem wave
+  targetOnly:
+    - property: Reason
+      default: null
+      missingBehavior: allow_null
+      notes: No legacy Reason on IApplicationResult / IPersonInResult
+    - property: Images
+      disposition: omit_from_post
+    - property: Documents
+      disposition: file_wave
+    - property: RejectionItems
+      disposition: child_bo
+
+fields:
+  - source: ApplicationResult.Oid
+    target: null
+    transform: legacy_id
+    notes: id-map key — ApplicationResult.Oid → Rejection.ID (not Invitation)
+
+  - source: ApplicationResult.Number
+    target: RejectedDocNumber
+    transform: identity_trim
+    missingBehavior: skip_row
+
+  - source: ApplicationResult.IssuedDate
+    target: Date
+    transform: date
+    missingBehavior: skip_row
+
+  - source: ApplicationResult.Application
+    target: Application
+    transform: fk_id_map
+    idMapEntity: Application
+    missingBehavior: skip_row
+    notes: Required on Visa2026 Rejection BO
+
+  - source: null
+    target: Reason
+    transform: constant_null
+    missingBehavior: allow_null
+
+export:
+  lastExportedAt: 2026-07-22
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/Rejection-preview.calik-energi.xlsx
+  importRowCount: 207
+  skippedRowCount: 0

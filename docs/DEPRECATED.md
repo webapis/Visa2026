@@ -40,6 +40,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **ApplicationTypeFilter** | Deprecated | `ApplicationType.SelectionCode` + `ApplicationTypeCodePickerHelper` (hundreds grouping) | Table retained; **not** in `LookupCatalogs/manifest.json` | Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
 | **ApplicationType `App_Visa_Ext` (702)** | Deprecated | **`App_Visa_and_WP_Ext` (708)** — Extend visa and work permit | Row retained; hidden from type-code picker | Employee visa extension only; legacy `E:7:*` imports map to 708. Migrated rows corrected via `--correct-visa-application-types`. |
 | **ApplicabilityMode** (enum) | Deprecated | `UserReportTemplate.ApplicableTypeLinks`, `ApplicableProjectContractLinks`, `VisibilityCriteria` | Enum column on `UserReportTemplates` retained | `[Obsolete]` on enum and `UserReportTemplate.ApplicabilityMode`. |
+| **VisaIssuingApplicationTypes** (name allowlist) | Removed | `ApplicationType.CanIssueVisa` + `ApplicationTypeCapabilities` | — | Hardcoded `ApplicationType.Name` set replaced by seeded capability flag. |
 | **ApplicationStatus** (enum) | Deprecated | `ApplicationProgress` + `Application.CurrentState`; locations via **ApplicationLocation** catalog | Enum unused on `Application` BO; may remain in old import models | Docs in [`docs/BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8b still describe the old enum — prefer §8c progress model for new work. |
 
 ### Lookups: seeding vs UI-only (not always “deprecated”)
@@ -51,7 +52,8 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Name | Status | Replacement | Schema | Notes |
 |------|--------|-------------|--------|-------|
-| **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Used on `ApplicationProgress.Location`. Layer B strings in `LookupCatalogStrings.json`. |
+| **ApplicationLocation** | Active (seeded) | — | `LookupCatalogs/application-location.json` | Catalog retained; **no longer** used on `ApplicationProgress` (progress is state-only). Layer B strings in `LookupCatalogStrings.json`. |
+| **OrganizationType** | Removed | — (obsolete lookup; unused by `Application` / `ApplicationType`) | Table/FK dropped by `OrganizationTypeSchemaCleanupUpdater` | Formerly under Lookup/Organization; leftover DetailView layout nodes removed. |
 | **BorderZoneLocation** | Deprecated | Comma-separated **`BorderZoneName`** on `Application`, `ApplicationItem`, and `Visa` | BO + table retained (hidden nav); **no** JSON catalog | Migrated by `ApplicationBorderZoneLocationStringUpdater` + earlier item/visa updaters. See [`docs/COMMA_SEPARATED_MULTI_SELECT.md`](COMMA_SEPARATED_MULTI_SELECT.md). Do not confuse with **ApplicationLocation**. |
 | **MovementPermitLocation** | Retained (UI catalog) | Per-deployment rows in lookup UI | Table retained; excluded from manifest | See [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md). |
 
@@ -69,7 +71,9 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **Person** | `DeclareFamilyMembersOnVisa` | Removed | `VisaApplicationFamilyMembersText` always on employee DetailView | `People.DeclareFamilyMembersOnVisa` column retained until optional schema cleanup |
 | **Person** | `IsSubcontractorEmployee` | Removed | `Subcontractor` (caption **Company (Subcontractor)**) on employee DetailView without a flag | Dropped by `OrganizationLegacySchemaCleanupUpdater` |
 | **Passport** | `PersonalNumber` | Retained (legacy) | `Person.PersonalNumber` | Column retained; hidden in UI |
+| **Application** | `IsCancelled`, `IsRejected`, `LatestIsCancelled`, `LatestIsRejected` | Removed | `ApplicationProgress` terminal states (`PROCESS_CANCELLED`, `PROCESS_REJECTED`); `CurrentState` on list/detail | Dropped by `ApplicationLatestTerminalFlagsColumnsCleanupUpdater` |
 | **Invitation** | `IsCancelled`, `IsChanged` | Removed | `InvitationItem.IsCancelled`, `InvitationItem.IsChanged`, `InvitationItem.IsUsed` | Dropped by `InvitationHeaderStatusColumnsCleanupUpdater` |
+| **Invitation** | `StartDate` (property name), `ValidityDuration` | Renamed / removed | `IssuedDate` (same DB column `StartDate`); `VisaPeriod` + `VisaCategory`; `ExpirationDate` stored directly | `InvitationLegacyShapeSchemaUpdater` drops `ValidityDurationID` |
 | **WorkPermitItem** | `IsChanged`, `IsExtended` | Removed | `ApplicationItem.WorkPermitItemIsChanged` (change workflow); `IsCancelled` only on item | Dropped by `WorkPermitItemStatusColumnsCleanupUpdater` |
 | **WorkPermit** | `IsApplicationNotRequired`, `IsCancelled` | Removed | Optional `Application` via gear toggle (same as `Invitation`) | Dropped by `WorkPermitApplicationNotRequiredColumnCleanupUpdater` |
 | **Visa** | `HasInvitation`, `HistoricalImport` | Removed | Optional `InvitationItem` / `IssuingApplicationItem` via gear toggle | Dropped by `VisaVisibilityToggleColumnsCleanupUpdater` |
@@ -86,7 +90,8 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Artifact | Removed by | Replacement |
 |----------|------------|-------------|
-| `Applications.BorderZoneLocationID` | `ApplicationBorderZoneLocationStringUpdater` | `Application.BorderZoneLocation` string + **BorderZoneName** catalog |
+| `Applications.LatestIsCancelled`, `Applications.LatestIsRejected` | `ApplicationLatestTerminalFlagsColumnsCleanupUpdater` | `ApplicationProgress` terminal states; `LatestPrimaryStateCode` / `CurrentState` |
+| **OrganizationType** / `OrganizationTypes` (+ `Applications.OrganizationTypeID`, `ApplicationTypes.OrganizationTypeID`) | `OrganizationTypeSchemaCleanupUpdater` | Obsolete; unused |
 | `Visas.HasBorderZonePermit` | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` string + **BorderZoneName** catalog |
 | `Visa` ↔ `City` link table | `VisaBorderZoneLocationStringUpdater` | `Visa.BorderZoneLocation` |
 | `WorkPermitItemPermittedCity` / link table | `WorkPermitItemPermittedLocationsStringUpdater` | `WorkPermitItem.WorkPermittedLocations` + **WorkPermittedLocation** catalog |
@@ -96,6 +101,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `People.Company`, `ProjectContracts.Company`, `Lodgings.Company` FK columns | `OrganizationLegacySchemaCleanupUpdater` | Single-tenant org; `CompanyProfile` for letterhead |
 | `tenant/company.json` lookup catalog | Phase 5 manifest rename | `tenant/company-profile.json` → `CompanyProfile` |
 | `Invitations.IsCancelled`, `Invitations.IsChanged` | `InvitationHeaderStatusColumnsCleanupUpdater` | `InvitationItems` status flags only |
+| `Invitations.ValidityDurationID` | `InvitationLegacyShapeSchemaUpdater` | `VisaPeriod` + editable `ExpirationDate` |
 | `WorkPermitItems.IsChanged`, `WorkPermitItems.IsExtended` | `WorkPermitItemStatusColumnsCleanupUpdater` | `ApplicationItem.WorkPermitItemIsChanged`; item `IsCancelled` only |
 | `WorkPermits.IsApplicationNotRequired`, `WorkPermits.IsCancelled` | `WorkPermitApplicationNotRequiredColumnCleanupUpdater` | Optional `WorkPermits.Application` + gear on detail view |
 | `Visas.HasInvitation`, `Visas.HistoricalImport` | `VisaVisibilityToggleColumnsCleanupUpdater` | Optional `IssuingApplicationItem` / `InvitationItem` + gear on detail view |
@@ -113,6 +119,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Item | Status | Replacement |
 |------|--------|-------------|
+| Report Dashboard **PROJECT** chip row + **person-type** tab strip (All / Employees / Family / Temporary) | Deprecated (hidden) | Category nav alone; filters locked to **All** / **All**. Re-enable: set `ReportDashboardCatalog.ShowProjectAndPersonTypeFilters = true`. See [`docs/REPORT_DASHBOARD.md`](REPORT_DASHBOARD.md). |
 | `Visa2026.DataImporter --seed-lookups-only` | **Removed** | App startup `LookupCatalogSyncUpdater` |
 | `Visa2026.DataImporter --sync-positions` / `--delete-missing` | **Removed** | Tenant/global JSON via `LookupCatalogSyncUpdater` |
 | `LookupSeeder.cs` (OData POST from `lookup.xlsm`) | **Removed** | Module JSON + `--export-lookup-catalogs` dev tool |

@@ -1,35 +1,167 @@
-name: E2E Tests
+# Native XAF EasyTest E2E (Visa2026.E2E.Tests) — Windows + PostgreSQL + Edge (headed on GHA).
+# Single officer journey E2E-001 (login → employee → passport); see docs/TESTING_PLAN.md.
+
+name: EasyTest E2E
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PG_PASSWORD: Visa2026Local
+  PG_USER: postgres
+  PG_HOST: localhost
+  PG_PORT: "5432"
 
 jobs:
-  build-and-test:
+  easytest-e2e:
+    name: EasyTest E2E (Windows)
     runs-on: windows-latest
+    timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Start LocalDB
-      run: |
-        sqllocaldb create MSSQLLocalDB
-        sqllocaldb start MSSQLLocalDB
+      - name: Write DevExpress license
+        shell: pwsh
+        env:
+          DEVEXPRESS_LICENSE: ${{ secrets.DEVEXPRESS_LICENSE }}
+          DEVEXPRESS_KEY: ${{ secrets.DEVEXPRESS_KEY }}
+        run: |
+          New-Item -ItemType Directory -Force -Path DevExpress.Key | Out-Null
+          $license = $env:DEVEXPRESS_LICENSE
+          if ([string]::IsNullOrWhiteSpace($license)) { $license = $env:DEVEXPRESS_KEY }
+          if ([string]::IsNullOrWhiteSpace($license)) {
+            throw "Set DEVEXPRESS_LICENSE or DEVEXPRESS_KEY in repository secrets."
+          }
+          Set-Content -Path DevExpress.Key/DevExpress_License.txt -Value $license.Trim() -Encoding utf8 -NoNewline
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Install and start PostgreSQL 16
+        shell: pwsh
+        run: |
+          choco install postgresql16 --params "/Password:$env:PG_PASSWORD" -y --no-progress
+          $pgRoot = Get-ChildItem 'C:\Program Files\PostgreSQL' -Directory -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending | Select-Object -First 1
+          if (-not $pgRoot) { throw "PostgreSQL install directory not found." }
+          $env:Path = "$($pgRoot.FullName)\bin;$env:Path"
+          Write-Host "Using PostgreSQL at $($pgRoot.FullName)"
+          $svc = Get-Service -Name 'postgresql*' -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($svc -and $svc.Status -ne 'Running') { Start-Service $svc.Name }
+          $env:PGPASSWORD = $env:PG_PASSWORD
+          & psql -h localhost -U postgres -d postgres -c "SELECT version();"
+          & psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_roles WHERE rolname='postgres';"
 
-    - name: Build
-      run: dotnet build --no-restore --configuration EasyTest
+      - name: Install Microsoft Edge WebDriver
+        shell: pwsh
+        run: |
+          $edgeExe = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+          if (-not (Test-Path $edgeExe)) {
+            $edgeExe = "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
+          }
+          if (-not (Test-Path $edgeExe)) {
+            throw "Microsoft Edge not found on the runner."
+          }
+          $edgeVersion = (Get-Item $edgeExe).VersionInfo.FileVersion
+          Write-Host "Edge version: $edgeVersion"
+          $driverDir = Join-Path $env:GITHUB_WORKSPACE "Visa2026.E2E.Tests\.webdrivers"
+          New-Item -ItemType Directory -Force -Path $driverDir | Out-Null
+          $zipPath = Join-Path $env:RUNNER_TEMP "edgedriver_win64.zip"
+          $zipUrl = "https://msedgedriver.microsoft.com/$edgeVersion/edgedriver_win64.zip"
+          Write-Host "Downloading: $zipUrl"
+          Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -UseBasicParsing
+          $extractRoot = Join-Path $env:RUNNER_TEMP "edgedriver_extract"
+          if (Test-Path $extractRoot) { Remove-Item $extractRoot -Recurse -Force }
+          Expand-Archive -LiteralPath $zipPath -DestinationPath $extractRoot -Force
+          $driverExe = Get-ChildItem -Path $extractRoot -Recurse -Filter msedgedriver.exe | Select-Object -First 1
+          if (-not $driverExe) { throw "msedgedriver.exe not found in downloaded zip." }
+          Copy-Item -LiteralPath $driverExe.FullName -Destination (Join-Path $driverDir "msedgedriver.exe") -Force
+          & (Join-Path $driverDir "msedgedriver.exe") --version
 
-    - name: Run Tests
-      env:
-        VISA2026_E2E_HEADLESS: true
-      run: dotnet test Visa2026.E2E.Tests\Visa2026.E2E.Tests.csproj --no-build --configuration EasyTest --logger trx
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore Visa2026.slnx
+
+      - name: Build EasyTest configuration
+        shell: pwsh
+        run: dotnet build Visa2026.slnx -c EasyTest --no-restore
+
+      # Record the headed-Edge desktop while the officer journey runs so the
+      # browser session is captured as a downloadable video artifact. Fragmented
+      # MP4 (frag_keyframe+empty_moov) stays playable even after the recorder is
+      # force-stopped. Best-effort: never fail the job on recording problems.
+      - name: Start screen recording
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $recDir = Join-Path $env:GITHUB_WORKSPACE "Visa2026.E2E.Tests\recordings"
+          New-Item -ItemType Directory -Force -Path $recDir | Out-Null
+          $out = Join-Path $recDir "officer-journey.mp4"
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+            Write-Host "ffmpeg not found; installing via choco."
+            choco install ffmpeg -y --no-progress | Out-Null
+          }
+          $ffArgs = @(
+            '-y','-f','gdigrab','-framerate','10','-draw_mouse','1','-i','desktop',
+            '-movflags','frag_keyframe+empty_moov','-pix_fmt','yuv420p',$out
+          )
+          $proc = Start-Process -FilePath 'ffmpeg' -ArgumentList $ffArgs -PassThru -WindowStyle Hidden
+          Set-Content -Path (Join-Path $env:RUNNER_TEMP 'ffmpeg.pid') -Value $proc.Id
+          Write-Host "Started ffmpeg (pid $($proc.Id)) recording to $out"
+
+      - name: Run EasyTest E2E suite
+        shell: pwsh
+        env:
+          CI: true
+          PG_PASSWORD: Visa2026Local
+          PG_USER: postgres
+          PG_HOST: localhost
+          PG_PORT: "5432"
+        run: dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --no-build --logger "console;verbosity=normal" --logger "trx;LogFileName=e2e-results.trx"
+
+      - name: Stop screen recording
+        if: always()
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $pidFile = Join-Path $env:RUNNER_TEMP 'ffmpeg.pid'
+          if (Test-Path $pidFile) {
+            $ffPid = (Get-Content $pidFile | Select-Object -First 1).Trim()
+            Write-Host "Stopping ffmpeg (pid $ffPid)."
+            try { Stop-Process -Id $ffPid -Force -ErrorAction SilentlyContinue } catch {}
+            Start-Sleep -Seconds 4
+          } else {
+            Write-Host "No ffmpeg pid file found; recording may not have started."
+          }
+
+      - name: Upload E2E recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easytest-e2e-recording
+          path: "**/recordings/*.mp4"
+          if-no-files-found: ignore
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easytest-e2e-results
+          path: "**/e2e-results.trx"
+          if-no-files-found: ignore
+
+      - name: Upload EasyTest host logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easytest-host-logs
+          path: "**/easytest-host-logs/**"
+          if-no-files-found: ignore

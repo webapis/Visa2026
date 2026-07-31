@@ -35,9 +35,9 @@ CSV: docs/localization/incomplete-uistrings-scan.csv
 | Action Caption | UserFeedbackViewController.cs | Mark in progress / fixed |
 | ToolTip | StateChangeLogNavigationController.cs | Open source/target |
 | ToolTip | VisaExtensionStatusController.cs, VisaTransferStatusController.cs | Open full Application |
-| Nav Caption | BoStateNotificationInboxModelUpdater.cs, LegacySyncDashboardModelUpdater.cs | State notifications / Legacy sync |
+| Nav Caption | BoStateNotificationInboxModelUpdater.cs | State notifications |
 | Blazor default | CommaSeparatedMultiSelectComponent.razor | No catalog items. |
-| Blazor title | LegacySyncDashboardComponent.razor | Legacy sync |
+| Blazor title | (removed 2026-07-11) | Legacy sync dashboard deleted |
 
 Also spot-check ShowMessage helpers that pass a message variable (ApplicationTypeSelectionController, SyncRulesController, notification inbox editors).
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Options xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" DefaultTimeout="15">
   <Applications>
     <Application Name="Visa2026Blazor"
@@ -10,11 +10,7 @@
                  WebDriverPath="[ConfigPath]\.webdrivers"
                  IgnoreCase="true" />
   </Applications>
+  <!-- EasyTest DropDB is SQL Server-only; Visa2026 E2E drops/creates Postgres visa2026_easytest in code. -->
   <TestDatabases>
-    <Database xsi:type="TestMSSQLDatabase"
-              Server="(localdb)\mssqllocaldb"
-              DBName="Visa2026EasyTest">
-      <Login UserID="sa" Password="qwertyuiop" />
-    </Database>
   </TestDatabases>
 </Options>

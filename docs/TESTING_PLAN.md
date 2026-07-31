@@ -1,7 +1,7 @@
 # Visa2026 — Testing Plan
 
 Status: **Active**  
-Last updated: 2026-07-30
+Last updated: 2026-06-11
 
 ---
 
@@ -25,7 +25,6 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 | [`STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) | Dashboard tiles; E2E drill-down parity |
 | [`LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md) | Lookup seeding (not Blazor E2E scope) |
 | [`LOCALIZATION_PLAN.md`](LOCALIZATION_PLAN.md) | E2E scripts stay **English** |
-| [`PERSON_DETAIL_NESTED_COLLECTION_TABS.md`](PERSON_DETAIL_NESTED_COLLECTION_TABS.md) | Editable Person record tabs vs issued browse-only |
 | Feature plans | Per-feature E2E notes when shipped |
 
 ---
@@ -38,15 +37,15 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 | Runner | xUnit |
 | UI driver | DevExpress **EasyTest** Blazor adapter + **Selenium** (Edge) |
 | App under test | [`Visa2026.Blazor.Server`](../Visa2026.Blazor.Server/) |
-| Launch profile | **`Visa2026 - EasyTest (LocalDB)`** |
+| Launch profile | **`Visa2026 - PostgreSQL`** (EasyTest host uses env CS, not a separate launch profile) |
 | URL | **`http://localhost:5050`** |
-| DB | **`Visa2026EasyTest`** on `(localdb)\mssqllocaldb` |
+| DB | **`visa2026_easytest`** on local PostgreSQL (`localhost:5432`) |
 | Build config | **EasyTest** |
 | Platform | **Windows** (`[SupportedOSPlatform("windows")]`) |
 | Selectors | **English model captions** + EasyTest actions (not Playwright hook ids) |
 | Style | **C# EasyTest API** (yaml in `scenarios/` is metadata only — Option A) |
 
-**Base fixture:** [`E2ETestBase.cs`](../Visa2026.E2E.Tests/E2ETestBase.cs) (+ [`E2ETestBase.PersonMasterData.cs`](../Visa2026.E2E.Tests/E2ETestBase.PersonMasterData.cs)) — drops DB once per run, launches app, `Login()`, shared helpers.
+**Base fixture:** [`E2ETestBase.cs`](../Visa2026.E2E.Tests/E2ETestBase.cs) — drops DB once per run, launches app, `Login()`, shared helpers.
 
 **Scenario maps:** [`Visa2026.E2E.Tests/scenarios/README.md`](../Visa2026.E2E.Tests/scenarios/README.md)
 
@@ -54,24 +53,19 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 
 ## 4. Current E2E inventory
 
-### Ready / implemented scenarios
+### Ready (promoted scenarios)
 
 | Scenario id | E2E id | C# test |
 |-------------|--------|---------|
-| `person-officer-journey` (legacy map) | E2E-001 | superseded by master-data journey |
-| `person-master-data-crud` | E2E-001…E2E-008 | `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud` |
-
-Map + yaml draft: [`scenarios/examples/person-master-data-crud_map.md`](../Visa2026.E2E.Tests/scenarios/examples/person-master-data-crud_map.md) — promote to `ready/` after GHA green.
+| `person-officer-journey` | E2E-001 | `PersonOfficerJourneyTests.PersonOfficerJourney_LoginCreateEmployeeAddPassport` |
 
 ### All implemented `[Fact]` tests
 
 | Test class | Tests | Backlog |
 |------------|-------|---------|
-| `PersonOfficerJourneyTests` | 1 | E2E-001…008 Person master-data CRUD |
+| `PersonOfficerJourneyTests` | 1 | E2E-001 (login + employee create + passport) |
 
-**Journey covers:** login → create employee → **Passport** → nested **Visa** → **Education** → **Address of residence** (Private house) → **Medical record** (create/update/delete) → **Position history** → **Work duty** → **Salary** → **External arrival** travel.
-
-**Not in journey:** issued-document tabs (Application items / Work permits / …); PersonDocument file upload.
+**Count:** 1 fact — single sequential officer journey (login → employee → passport).
 
 **Full suite:**
 
@@ -83,29 +77,21 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 ## 5. E2E backlog
 
-Target: **~12–20** stable E2E tests. One **ApplicationType** per scenario class for app workflows.
+Target: **~12–20** stable E2E tests, **&lt; ~10 min** on CI. One **ApplicationType** per scenario class.
 
 ### Tier 0 — CI gate
 
 | ID | Scenario | Status |
 |----|----------|--------|
-| E2E-001 | Officer journey: login → create employee → add passport | Done (folded into master-data Fact) |
-| E2E-002 | Add Education on same employee | Done |
-| E2E-003 | Add Visa under Passport | Done |
-| E2E-004 | Add Address of residence (Lodging) | Deferred (cascade lookup bind flaky on EasyTest) |
-| E2E-005 | Medical record create | Done (update/delete deferred) |
-| E2E-006 | Position history | Deferred (lookup bind flaky) |
-| E2E-007 | Work duty | Done |
-| E2E-008 | Salary | Done |
-| E2E-008b | External arrival travel | Done (split New button click; manual CRUD) |
+| E2E-001 | Officer journey: login → create employee → add passport | Done |
 
-### Tier 1 — Remaining Person / nav
+### Tier 1 — Extend same journey
 
 | ID | Scenario | Status |
 |----|----------|--------|
+| E2E-002 | Add Education on same employee (nested Educations tab) | Planned |
 | E2E-011 | Create/link Person for employee | Planned |
 | E2E-012 | ApplicationType selection changes visible tabs | Planned |
-| E2E-009 | PersonDocument (CV file upload) | Deferred (file dialog) |
 
 ### Tier 2 — Core operational value
 
@@ -114,7 +100,7 @@ Target: **~12–20** stable E2E tests. One **ApplicationType** per scenario clas
 | E2E-030 | Create Application (canonical type `App_Inv`) | Planned |
 | E2E-021 | Add ApplicationItem with person | Planned |
 | E2E-022 | Add ApplicationProgress milestone | Planned |
-| E2E-023 | State Dashboard tile → filtered list | Planned |
+| E2E-023 | Report Dashboard home → filtered ListView | Planned |
 
 ### Tier 3+ — Compliance, output, security, features
 
@@ -129,16 +115,16 @@ dotnet build Visa2026.slnx -c EasyTest
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 ```
 
-**Prerequisites:** Windows, SQL Server LocalDB, `msedgedriver.exe` matching Edge ([E2E README](../Visa2026.E2E.Tests/README.md)).
+**Prerequisites:** Windows, PostgreSQL (`localhost:5432`), `msedgedriver.exe` matching Edge ([E2E README](../Visa2026.E2E.Tests/README.md)).
 
 **Browser:** headed Edge locally (default); headless on CI via `EasyTestBrowserMode` (`CI=true` or `VISA2026_E2E_HEADLESS=true`). Override locally: `$env:VISA2026_E2E_HEADLESS='true'` before `dotnet test`.
 
-**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, LocalDB, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headed on Windows). Job timeout **90** minutes for the longer master-data journey.
+**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, PostgreSQL 16, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headless).
 
 **CI policy (recommended):**
 
-- **PR to `main`:** Tier 0 Person master-data Fact + `dotnet build -c EasyTest`
-- **Nightly / pre-release:** Full E2E suite (when Tier 2+ Facts exist)
+- **PR to `main`:** Tier 0 E2E + `dotnet build -c EasyTest` (workflow runs all current facts)
+- **Nightly / pre-release:** Full E2E suite (tier 0–2)
 
 ---
 
@@ -152,8 +138,6 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 6. Use unique `PersonalNumber` / codes per test to avoid collisions.
 7. One scenario per `[Fact]`; shared arrange via `E2ETestBase` helpers.
 8. Update §4 inventory when adding or removing tests.
-9. **Visa** is created under **Passport → Visas**, not on Person tabs.
-10. Do **not** create rows on issued-document nested lists.
 
 ---
 
@@ -165,7 +149,6 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 - **Word/Excel template layout** QA
 - **DataImporter** CLI bulk import
 - **Production** Docker/IIS deploy verification
-- **PersonDocument** binary file upload (deferred)
 
 ---
 

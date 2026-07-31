@@ -12,6 +12,10 @@
 #   - Lookup review gate: personWaveComplete in lookup-comparisons/lookup-review-queue.yaml before Person importConfirmed.
 #   - Application importConfirmed requires applicationWaveComplete in the same queue.
 #   - If a dependency is blocked, downstream BOs stay not_started unless waived in mapping.notes.
+#   - IMPORT CHAIN GATE: never start the next entities[] row until the previous import wave
+#     succeeds (process exit 0 AND FailedCount = 0). Children depend on parent id-maps /
+#     rows from earlier BOs. Omitting a parent BO (e.g. importing ApplicationItem without
+#     WorkPermitItem / InvitationItem) is a chain bug — fix the orchestrator step list.
 #
 # When adding a BO: insert at the correct dependency position (not at the end unless it is a leaf).
 
@@ -33,6 +37,7 @@ tenantCatalogGeneration:
     - calik-energi-onprem-staging
     - calik-energi-onprem-prod
     - calik-energi-onprem-demo
+    - calik-energi-local-pg
   steps:
     - id: project-contract-calik-energi
       script: scripts/visa2014-migration/catalogs/generate/ProjectContract-CalikEnergi.ps1
@@ -258,9 +263,10 @@ entities:
     importConfirmedBy: null
     importStatus: pending
     notes: |
-      2026-07-03: Header synthesized from dbo.ApplicationResult rows referenced by PersonInInvitation.Invitation (~2961).
-      ApplicationResult.Number → InvitationNumber; IssuedDate → StartDate; DateOfExpire → closest ValidityDuration (90/180/365).
-      13 duplicate InvitationNumber groups suffix with legacy oid tail; ~254 headers skipped (missing Number/IssuedDate/DateOfExpire).
+      2026-07-03 / 2026-07-22: Header from dbo.ApplicationResult WHERE Result = 0 referenced by PersonInInvitation (~2776).
+      Result = 1 → Rejection wave (not Invitation). Number → InvitationNumber; IssuedDate → IssuedDate;
+      DateOfExpire → ExpirationDate; VisaPeriod best-effort from span; VisaCategory default.
+      13 duplicate InvitationNumber groups → oid-tail suffix.
       Application FK optional via Application id-map.
 
   - targetODataEntity: InvitationItem
@@ -277,8 +283,8 @@ entities:
     importConfirmedBy: null
     importStatus: pending
     notes: |
-      2026-07-03: 1:1 dbo.PersonInInvitation (~5239 active). Person ← COALESCE(Employee, FamilyMember).
-      ApplicationResult.Result == 1 → IsCancelled heuristic. id-map: PersonInInvitation.Oid.
+      2026-07-03 / 2026-07-22: PersonInInvitation under Result = 0 (~4984). Person ← COALESCE(Employee, FamilyMember).
+      IsCancelled ← PIA.Cancelled on cancel-invitation apps (Result=1 is RejectionItem). id-map: PersonInInvitation.Oid.
 
   - targetODataEntity: ApplicationItem
     dependsOn:
@@ -302,7 +308,45 @@ entities:
       CurrentAddressOfResidence: legacy pia.AddressOfResidence FK, else pia.Address via AddressOfResidence id-map
       (PIA inference + sponsor canonical key for family lines). See postImportCorrections for DB backfill only.
 
-  # --- permits-and-visas (after application-domain) ---
+  # --- permits-and-visas (Rejection after ApplicationItem; Invitation/WorkPermit may already be earlier) ---
+  - targetODataEntity: Rejection
+    dependsOn:
+      - Application
+      - ApplicationItem
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Rejection.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-07-22
+    importConfirmedBy: developer
+    importStatus: complete
+    notes: |
+      Discovery 2026-07-22: dbo.ApplicationResult WHERE Result = 1 (Rejection) — 207 headers (185 with items, 22 orphans).
+      Number → RejectedDocNumber; IssuedDate → Date; Application required. 2 duplicate Number groups → oid-tail suffix.
+      Same legacy table as Invitation (Result = 0); separate id-map file.
+      importConfirmed 2026-07-22 after Rejection-preview.calik-energi.xlsx review (207 import / 0 skipped).
+      Local PG import 2026-07-22: Posted 207 / Failed 0; id-map id-maps/calik-energi-local-pg/Rejection.json.
+
+  - targetODataEntity: RejectionItem
+    dependsOn:
+      - Rejection
+      - Person
+      - Passport
+      - ApplicationItem
+    importPhase: permits-and-visas
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/RejectionItem.yaml
+    discoveryStatus: complete
+    legacySource: calik-energi
+    importConfirmed: true
+    importConfirmedAt: 2026-07-22
+    importConfirmedBy: developer
+    importStatus: complete
+    notes: |
+      Discovery 2026-07-22: PersonInInvitation under Result = 1 parents — 254 items; Person+Passport complete.
+      Parent FK column still Invitation → Rejection id-map. OnSaving sets ApplicationItem.RejectionIssued.
+      importConfirmed 2026-07-22 after RejectionItem-preview.calik-energi.xlsx review (254 import / 0 skipped).
+      Local PG import 2026-07-22: Posted 254 / Failed 0; id-map id-maps/calik-energi-local-pg/RejectionItem.json.
 
   # --- progress-and-history ---
   - targetODataEntity: ApplicationProgress
@@ -372,3 +416,30 @@ postImportCorrections:
       notes: |
         Greenfield: CurrentEducation/CurrentSalary resolve at ApplicationItem OData import when Show* gates pass.
         This correction backfills null FKs on DBs imported before that wiring shipped.
+    - id: visa-type
+      cliFlag: --correct-visa-type
+      dependsOn:
+        - Visa
+        - Person
+      notes: |
+        Rematches Visa.VisaType from transform: family-member persons → FM; else TypeOfVisaL:mgCode.
+        Also repairs older imports that collapsed to default WP (LocalizationKey missing on DTOs).
+    - id: visa-issuing-application-item
+      cliFlag: --correct-visa2014-issuing-application-item
+      dependsOn:
+        - Visa
+        - ApplicationItem
+      notes: |
+        Greenfield: Visa import leaves IssuingApplicationItem null (wave before ApplicationItem).
+        Prefer Visa.ProcessNumber → PersonInApplication; else next passport sibling after previous visa
+        linked on an extension PIA (subtype 7). Runs after ApplicationItem id-map exists.
+    - id: visa-invitation-item
+      cliFlag: --correct-visa2014-invitation-item
+      dependsOn:
+        - Visa
+        - ApplicationItem
+        - InvitationItem
+      notes: |
+        Path B hybrid: after IssuingApplicationItem is set, closest-match InvitationItem under that
+        application (same person, unused/not cancelled, IssuedDate before Visa.IssueDate).
+        Sets InvitationItem.IsUsed. Skips when issuing type lacks CanIssueInvitation. Leave null on no match.

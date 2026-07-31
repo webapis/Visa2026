@@ -27,8 +27,6 @@ namespace Visa2026.Module.BusinessObjects
         DefaultContexts.Save,
         "MinistryLetterFile == null or MinistryLetterFile.Size <= (MaxDocumentSizeInMB * 1024 * 1024)",
         "The ministry letter copy exceeds the maximum allowed size of {MaxDocumentSizeInMB}MB.")]
-    //[RuleCriteria("ApplicationProgressDateNotInFuture", DefaultContexts.Save, "Date <= Now()", "Date cannot be in the future.")]
-    //[RuleCriteria("ApplicationProgressDateNotBeforeApplicationDate", DefaultContexts.Save, "Date >= Application.ApplicationDate", "Progress date cannot be earlier than the application date.")]
     public class ApplicationProgress : BaseObject
     {
         [RuleRequiredField]
@@ -39,22 +37,14 @@ namespace Visa2026.Module.BusinessObjects
         [DataSourceProperty(nameof(AvailableStatesForNextStep))]
         public virtual ApplicationState State { get; set; }
 
-        [RuleRequiredField]
-        [DataSourceProperty(nameof(AvailableLocationsForSelectedState))]
-        public virtual ApplicationLocation Location { get; set; }
-
         [Browsable(false)]
         [NotMapped]
         public IList<ApplicationState> AvailableStatesForNextStep => LoadAvailableStatesForNextStep();
 
-        [Browsable(false)]
-        [NotMapped]
-        public IList<ApplicationLocation> AvailableLocationsForSelectedState => LoadAvailableLocationsForSelectedState();
-
         /// <summary>1-based step sequence within the parent application's progress history.</summary>
         [Column("ProgressOrder")]
         [ModelDefault("AllowEdit", "False")]
-        [VisibleInDetailView(true)]
+        [VisibleInDetailView(false)]
         public virtual int Order { get; set; }
 
         [RuleRequiredField]
@@ -65,41 +55,31 @@ namespace Visa2026.Module.BusinessObjects
         [MaxLength(255)]
         public virtual string Description { get; set; }
 
+        /// <summary>
+        /// Migration-service processing number (legacy Işlenmäge başlanan belgi).
+        /// Canonical on <c>PROCESS_STARTED</c>; may also appear on direct-migration <c>PROCESS_ISSUED</c>.
+        /// </summary>
+        [XafDisplayName("Process number")]
+        [MaxLength(100)]
+        public virtual string? ProcessNumber { get; set; }
+
         [XafDisplayName("Ministrlik")]
+        [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         [NotMapped]
         public string MinistryStepLabel =>
             ApprovalLegProfileMinistryHelper.GetMinistryShortNameForProgressStep(
                 Application,
                 State?.Code,
-                Location?.Code) ?? string.Empty;
+                locationCode: null) ?? string.Empty;
 
-        /// <summary>Progress history list: localized location plus ministry short name when at a ministry leg.</summary>
-        [NotMapped]
-        [VisibleInListView(false)]
-        [VisibleInDetailView(false)]
-        public string LocationWithMinistryLabel
-        {
-            get
-            {
-                var locationLabel = Location?.ToString() ?? string.Empty;
-                var ministry = MinistryStepLabel;
-                if (string.IsNullOrWhiteSpace(ministry))
-                    return locationLabel;
-                if (string.IsNullOrWhiteSpace(locationLabel))
-                    return ministry;
-                return $"{locationLabel} - {ministry}";
-            }
-        }
-
-        /// <summary>Progress history list: localized state; appends ministry short name at ministry legs (no location prefix).</summary>
+        /// <summary>Progress history list: localized state; appends ministry short name at ministry legs.</summary>
         [NotMapped]
         [VisibleInDetailView(false)]
         [VisibleInListView(false)]
         public string StatusListLabel =>
             ApplicationProgressListLabelHelper.FormatStatusLabel(
                 State?.ToString(),
-                Location?.Code,
                 MinistryStepLabel);
 
         [Browsable(false)]
@@ -151,6 +131,13 @@ namespace Visa2026.Module.BusinessObjects
         public override void OnSaving()
         {
             TryAssignOrder();
+            if (Application != null)
+            {
+                ApprovalLegProfileMinistryHelper.EnsureSnapshots(
+                    ObjectSpaceHelper.Get(this) ?? ObjectSpaceHelper.Get(Application),
+                    Application);
+            }
+
             base.OnSaving();
             if (Application != null)
                 ApplicationLatestProgressSyncHelper.Sync(Application, ObjectSpaceHelper.Get(this));
@@ -188,22 +175,6 @@ namespace Visa2026.Module.BusinessObjects
             return objectSpace.GetObjectsQuery<ApplicationState>()
                 .Where(s => s.Code != null && allowedCodes.Contains(s.Code))
                 .OrderBy(s => s.Code)
-                .ToList();
-        }
-
-        private IList<ApplicationLocation> LoadAvailableLocationsForSelectedState()
-        {
-            var objectSpace = ObjectSpaceHelper.Get(this) ?? ObjectSpaceHelper.Get(Application);
-            if (objectSpace == null || Application == null)
-                return Array.Empty<ApplicationLocation>();
-
-            var allowedCodes = ApplicationProgressTransitionHelper
-                .GetAllowedLocationCodesForProgressRow(this, objectSpace)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            return objectSpace.GetObjectsQuery<ApplicationLocation>()
-                .Where(l => l.Code != null && allowedCodes.Contains(l.Code))
-                .OrderBy(l => l.Code)
                 .ToList();
         }
     }

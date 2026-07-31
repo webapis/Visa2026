@@ -2,7 +2,7 @@
 
 
 
-**Resminamalar** on the **`Application`** detail view (and on **`ApplicationItem`** ListView for item-scoped templates) is the officer-facing **report package dialog**. It lists **user report templates** (`UserReportTemplate` seeded from **`Visa2026.Module/Resources/Templates/`**), supports **readiness chips**, **per-report selection**, **in-app PDF preview**, and **background ZIP download** via the existing `WordReportGenerationBatch` worker.
+**Templates** (toolbar / slot caption; historically **Resminamalar**) on the **`Application`** detail view (and on **`ApplicationItem`** ListView for item-scoped templates) is the officer-facing **report package dialog**. It lists **user report templates** (`UserReportTemplate` seeded from **`Visa2026.Module/Resources/Templates/`**), supports **readiness chips**, **per-report selection**, **in-app PDF preview**, and **background ZIP download** via the existing `WordReportGenerationBatch` worker. Brand mark: **`Templates`** ImageName + `.templates-brand*` (see [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md)).
 
 
 
@@ -85,6 +85,7 @@ The dialog is **not** a second ZIP builder. It is the **evolved entry point** fo
 | **Catalog / readiness** | `ApplicationWordReportPackageCatalogService`, `ApplicationWordReportPackageReadinessEvaluator`, dry-run hints |
 
 | **UI** | Global **`#visa-preview-slot`** — `ResminamalarSlotPanel` + `ApplicationReportPackageComponent` (`UseInlinePreview`) + `ReportPackageInlinePreview` |
+| **Catalog chrome** | Flat selectable cards (`.resminamalar-catalog`) — Document Copies Prototype A **look** (format icon circle + title + summary + READY/CHECK + Preview); keep checkboxes / ZIP selection (no section Open). See [`PREVIEW_SLOT.md`](PREVIEW_SLOT.md) § Resminamalar catalog chrome |
 | **Slot shell** | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../.cursor/skills/visa2026-preview-slot/SKILL.md) + [`docs/PREVIEW_SLOT.md`](PREVIEW_SLOT.md) |
 
 | **Slot policy** | Single global occupant — **last open wins** (`OccupantKey` + `Version`); `@key` remount on switch; **owner-aware** auto-close (`OwnerViewId` = XAF `View.Id`) |
@@ -390,6 +391,7 @@ Same XAF pattern as Document copies: **non-persistent host + custom Blazor prope
 - **Keep ZIP parity:** generator changes must affect both **Preview** and **Download package**.
 
 - **New user template:** seed under `Resources/Templates/` → `UserReportTemplateUpdater`; visibility via template record + `IUserReportVisibilityService`.
+- **Application type groups:** assign templates to an **`ApplicationTypeGroup`** (e.g. seeded **Registration** = eight `App_Reg_*` types) and/or individual **Applicable Application Types** (union). Empty type links **and** empty group links = all types. See [`.cursor/skills/visa2026-user-report-templates/SKILL.md`](../.cursor/skills/visa2026-user-report-templates/SKILL.md) (Resminamalar visibility).
 
 - **Empty template list after deploy:** ensure `UserReportTemplateSeedGate` runs (console log on success); DEBUG re-seeds every startup.
 - **Skill experience:** Resminamalar incidents → append [`.cursor/skills/visa2026-resminamalar/learnings.md`](../.cursor/skills/visa2026-resminamalar/learnings.md); promotion rules in [`.cursor/skills/visa2026-resminamalar/MATURITY.md`](../.cursor/skills/visa2026-resminamalar/MATURITY.md).

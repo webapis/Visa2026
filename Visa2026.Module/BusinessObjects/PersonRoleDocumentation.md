@@ -45,7 +45,7 @@ Rules use `PersonRole` (and `PersonRoleHelper` criteria strings). Family-only fi
 
 ## 4. Custom Navigation & Views
 
-Under **People**:
+Top-level navigation (legacy-style, not under a People folder):
 
 1. **Employees** → `Person_ListView_Employees` → `Person_DetailView_Employee`
 2. **Family Members** → `Person_ListView_FamilyMembers` → `Person_DetailView_FamilyMember`

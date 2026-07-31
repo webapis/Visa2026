@@ -2,6 +2,8 @@
 
 Applies when **loading** data into Visa2026 (Phase 3+). **Extract** always from **`VISA2015`** (not inferred from VISA2014 repo).
 
+**Çalik Enerji on-prem:** import data **and** lookup mapping values are sourced **only** from legacy **`10.100.128.15` / `VISA2015`**. Demo/Staging/Prod on **`10.100.128.25`** are **targets**, never alternate sources (no Demo→Prod dump as Import substitute; no copying catalogs from Visa2026 DBs). See [SKILL.md § Hard rule — Calik Energi data source](./SKILL.md).
+
 **Prerequisite:** [IMPORT_PLAN_AND_STRATEGY.md](../../../docs/VISA2014_MIGRATION/IMPORT_PLAN_AND_STRATEGY.md) **`approved`** in `import-strategy.yaml`. Phase 1 discovery **`complete`** and Phase **1b** **`importConfirmed: true`** per entity — see [VISA2014_MIGRATION.md § Import confirmation gate](../../../docs/VISA2014_MIGRATION.md). Do not implement import code or POST until gates pass.
 
 **Experience:** read [learnings.md](./learnings.md) before work; **append after every import attempt** (success or failure) per [MATURITY.md](./MATURITY.md).
@@ -21,10 +23,14 @@ Discovery/mapping rules live in [SKILL.md](./SKILL.md) and [VISA2014_MIGRATION.m
 | 1 | **Headless XAF ObjectSpace** into Visa2026 (`--inprocess`) | Same validation/rules as UI — never direct SQL into Visa2026; **no OData writes** for migration (scalar or file waves) |
 | 2 | **Never write** to `VISA2015` | Legacy is read-only source |
 | 3 | **Dependency order** from `order.yaml` | FKs and id-map must exist before children |
+| 3b | **Stop before next BO** | Never start the **next** `order.yaml` entity until the **previous** wave succeeds (**exit 0** + **FailedCount = 0**). No `-ContinueOnError` on full chains. |
+| 3c | **Chain must include all parents** | Orchestrator step lists must match `order.yaml` (e.g. `WorkPermitItem` + `InvitationItem` before `ApplicationItem`). Omitting a parent BO is a bug, not a shortcut. |
 | 4 | **Three-layer mapping** at transform time | Table → column → lookup value before POST |
 | 5 | **Idempotent runs** | Re-run safe via natural-key upsert + id-map |
 | 6 | **Pilot → reconcile → expand** | One **confirmed** BO on disposable DB before full prod cutover |
 | 7 | **Log skips and failures** | `skip_row`, unmapped lookups, OData 400 — no silent drops |
+| 7b | **Zero FailedCount** | A wave must finish with **FailedCount = 0**. Do not accept “N failed, continue”. |
+| 7c | **Intentional exclusions = approved + documented** | A row may be **skipped** (not failed) only if it has an **`approved`** entry in [`import-exclusions.yaml`](../../../docs/VISA2014_MIGRATION/import-exclusions.yaml): **why**, **how**, **counts** (headers/items/labels), **approvedBy/At**, evidence. Draft, then human approve, then wire `skip_row`, then reconcile Skipped* to documented counts. Unapproved skips are bugs. |
 | 8 | **Partial reimport = dev only** | `reimport/` scripts delete one BO scope on a **disposable** local DB while fixing importers — not staging/prod end-to-end |
 | 9 | **Dependency order always** | Full and partial reimport both follow `order.yaml` `dependsOn` — parents must exist (and id-maps resolve) before children; if you partial-reimport a parent, re-run downstream BOs in order |
 | 10 | **Reuse scripts first** | Search [scripts/visa2014-migration/README.md](../../../scripts/visa2014-migration/README.md) before adding a `.ps1`; prefer DataImporter CLI + `-StartAt` / `-MaxRows` on existing scripts; new file only when nothing fits |
@@ -57,8 +63,9 @@ Run in order:
 5. **Verify prerequisite lookups** — Country, Department, Position, ApplicationType, etc. exist in target DB (Module updaters ran once). **Abort** if critical catalogs empty.
 6. **Org singletons** — `CompanyProfile`, default `ProjectContract` if BO validation requires them (IMPORTING.md Phase 3).
 7. **OData exposure** — every imported BO registered in `WebApiServiceExtensions.cs`.
-8. **Lookup translations complete** — layer 3 mapped for every `lookupCatalog` used in current batch.
-9. **ApplicationType visibility** — if importing `Application` / `ApplicationItem`, catalog `Show*` flags should match Module ([visa2026-dataimporter](../visa2026-dataimporter/SKILL.md) visibility preflight). Fix catalog or DB before bulk import; avoid `--skip-visibility-preflight` except debug.
+8. **Lookup resolution complete** — layer 3 mapped for every `lookupCatalog` used in current batch ([LOOKUP_RESOLUTION_STRATEGY.md](../../../docs/VISA2014_MIGRATION/LOOKUP_RESOLUTION_STRATEGY.md)); seed gaps into `LookupCatalogs/` / tenant JSON first.
+9. **Lookup preflight** — for full / Demo / on-prem Import chains, `Preflight-LookupAudit.ps1` / `--preflight-visa2014-lookups` exit **0** before waves (`OnPrem-Sync.ps1 -Mode Import` runs this automatically).
+10. **ApplicationType visibility** — if importing `Application` / `ApplicationItem`, catalog `Show*` flags should match Module ([visa2026-dataimporter](../visa2026-dataimporter/SKILL.md) visibility preflight). Fix catalog or DB before bulk import; avoid `--skip-visibility-preflight` except debug.
 
 ---
 
@@ -81,6 +88,24 @@ VISA2015 (read SQL)
 | Transform | Layer 3 **before** OData lookup query — never `$filter` with raw legacy string on target |
 | Load | One entity batch per `order.yaml` row; children after parents |
 | Map IDs | Write `id-map/{Entity}-{legacyGuid}.json` on every successful create |
+| Gate | After each BO: exit 0 + FailedCount 0 **before** starting the next `order.yaml` entity |
+
+### Chain halt (orchestrators)
+
+```text
+for each entity in order.yaml entities[] (top → bottom):
+  run --import-visa2014 --entity <Entity>
+  if exit != 0 OR FailedCount > 0:
+    STOP  # do not start any later BO
+    fix root cause; resume at failed entity (-StartAt / --entity)
+  else:
+    continue
+```
+
+**Canonical application-domain slice:**  
+`Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem → ApplicationItem → ApplicationProgress`
+
+Reference orchestrator with full list: `import/OnPrem-Sync.ps1`. Headless / local chains must include the same item waves.
 
 ---
 
@@ -106,13 +131,21 @@ Mirror [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md) scenario idem
 
 ## Lookup resolution
 
+**Ops order (locked):** lookup resolution → lookup preflight → full Import. See [SKILL.md § Full Import order](./SKILL.md).
+
+**Name:** **lookup resolution** = audit live values → translate (`lookup-translations.yaml` + company overlay) → seed missing Visa2026 catalog rows (`LookupCatalogs/` / tenant JSON). Not bulk-import of legacy lookup tables.
+
+**At transform / POST time** (after resolution + preflight):
+
 1. Read legacy column value.
 2. Translate with `lookup-translations.yaml` (`legacy` → `target`).
-3. Resolve target row: OData GET on catalog with `$filter={targetMatchProperty} eq '...'`.
+3. Resolve target row: OData GET / ObjectSpace on catalog with `$filter={targetMatchProperty} eq '...'`.
 4. **Cache** lookups in memory per run (`BaseImporter` `_lookupCache` pattern) — one GET per distinct translated value.
 5. **Unmapped legacy value:** honor `unmappedPolicy` (`block_row` for required FKs — do not POST null and hope).
 
-**Do not** POST new global lookup rows during prod migration unless explicitly planned — use existing Module catalogs + translation table.
+**Do not** POST new global lookup rows during prod migration unless explicitly planned — use existing Module catalogs + translation table. Fix gaps in resolution/preflight, not mid-wave.
+
+**Çalik Enerji:** `lookup-translations.yaml` + `lookup-translations.calik-energi.yaml`.
 
 ---
 
@@ -136,7 +169,8 @@ Mirror [IMPORTING.md](../../../Visa2026.DataImporter/IMPORTING.md) scenario idem
 | Check | How |
 |-------|-----|
 | Row count | Legacy distinct keys (after dedupe) vs OData `$count` or SQL MCP on target |
-| Spot records | 5–10 random legacy IDs via id-map — field parity |
+| **Mapping verify** | Expected vs actual via same transform + id-map — [MAPPING_VERIFICATION.md](../../../docs/VISA2014_MIGRATION/MAPPING_VERIFICATION.md) (Tier A/B + Application silent-outcome inventory; fail on `actual_without_expected`). CLI: `--verify-visa2014-mapping` / `import/Verify-Mapping.ps1` |
+| Spot records | Also sample manually if needed: 5–10 random legacy IDs via id-map — field parity (lookups = catalog key, not caption) |
 | Lookup coverage | Zero unmapped legacy values in batch log |
 | Duplicate groups | `dedupeMerged` matches discovery SQL duplicate count |
 | FK integrity | Sample child rows — parent resolves via id-map |
@@ -264,11 +298,12 @@ Application → WorkPermit → WorkPermitItem → Invitation → InvitationItem 
 | SQL cleanup fails on `CurrentInvitationItemID` FK | Cleanup NULLs ApplicationItem permit/invitation FKs before deleting permit/invitation rows |
 | WorkPermit/Invitation import posts **0** (“already imported”) | Application wipe left orphan permit/invitation rows + stale id-maps — delete those BO tables and remove `WorkPermit.json`, `WorkPermitItem.json`, `Invitation.json`, `InvitationItem.json` before re-import |
 | Direct-migration apps show ministry progress steps | Reimport ApplicationProgress only — **do not** run `--correct-application-progress-ministry-legs` afterward (that patch is for via-ministry apps missing legs) |
+| Progress **Ministrlik** blank / status missing ministry suffix | `patch/Application-ApprovalLegSnapshots.ps1` (`--backfill-application-approval-leg-snapshots`) — fills `ApprovalLegSnapshots` from profile; does **not** touch progress rows |
 | WorkPermit `Application` FK null | Expected on current pilot — headers from `WorkPermitLetter`; Application link is a later backfill |
 
 **Pilot verify:** app **8/-967** — `App_Reg_Check_Out`, 1 progress step (`IS_BEING_PREPARED` @ `AT_OFFICE`), 2 items, 0 direct-ministry review rows.
 
-**Note:** `import/Run-HeadlessChain.ps1` still skips WorkPermit and Invitation — use the recipe above or individual import scripts; `order.yaml` is authoritative.
+**Note:** `order.yaml` is authoritative. `Run-HeadlessChain.ps1` / local PG chains must include **WorkPermitItem** and **InvitationItem** before ApplicationItem (same as `OnPrem-Sync.ps1`). If a chain omitted those waves, treat it as a script bug and fix the step list — do not “catch up” by only importing ApplicationItem.
 
 ### Partial reimport — ApplicationItem only
 

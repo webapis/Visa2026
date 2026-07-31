@@ -5,6 +5,7 @@ namespace Visa2026.Module.BusinessObjects;
 
 /// <summary>
 /// Resolves <see cref="Application.PrimaryStateCode"/> from the latest <see cref="ApplicationProgress"/> row.
+/// Empty history implies office (<see cref="ApplicationProgressStateCodes.IsBeingPrepared"/>).
 /// </summary>
 public static class ApplicationProgressPrimaryStateCodeResolver
 {
@@ -19,33 +20,13 @@ public static class ApplicationProgressPrimaryStateCodeResolver
     public static string? ResolveFromLatest(ApplicationProgress? latest)
     {
         if (latest == null)
-            return null;
-
-        var stateCode = latest.State?.Code?.Trim();
-        var locationCode = latest.Location?.Code?.Trim();
-
-        if (string.IsNullOrEmpty(stateCode))
-            return string.IsNullOrEmpty(locationCode) ? null : locationCode;
-
-        if (string.Equals(stateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase))
-            return ApplicationProgressStateCodes.ProcessIssued;
-
-        if (IsTerminalRejectOrCancel(stateCode))
-            return stateCode;
-
-        if (string.Equals(stateCode, ApplicationProgressStateCodes.IsBeingPrepared, StringComparison.OrdinalIgnoreCase))
             return ApplicationProgressStateCodes.IsBeingPrepared;
 
-        if (!ApplicationProgressTransitionHelper.IsTerminalStateCode(stateCode)
-            && string.Equals(locationCode, ApplicationProgressLocationCodes.AtOffice, StringComparison.OrdinalIgnoreCase))
-            return ApplicationProgressLocationCodes.AtOffice;
-
-        return stateCode;
+        var stateCode = latest.State?.Code?.Trim();
+        return string.IsNullOrEmpty(stateCode)
+            ? ApplicationProgressStateCodes.IsBeingPrepared
+            : stateCode;
     }
-
-    private static bool IsTerminalRejectOrCancel(string stateCode) =>
-        ApplicationProgressTransitionHelper.IsTerminalStateCode(stateCode)
-        && !string.Equals(stateCode, ApplicationProgressStateCodes.ProcessIssued, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Localized label for the latest progress step (ListView <see cref="Application.CurrentState"/>).
@@ -60,23 +41,13 @@ public static class ApplicationProgressPrimaryStateCodeResolver
 
     public static string? ResolveDisplayNameFromLatest(ApplicationProgress? latest)
     {
-        if (latest == null)
-            return null;
+        if (latest?.State != null)
+            return LookupLocalization.GetDisplayName(latest.State);
 
-        if (latest.State != null)
-        {
-            var stateName = LookupLocalization.GetDisplayName(latest.State);
-            if (latest.Location != null)
-            {
-                var locationName = LookupLocalization.GetDisplayName(latest.Location);
-                return $"{stateName} @ {locationName}";
-            }
-
-            return stateName;
-        }
-
-        return latest.Location != null
-            ? LookupLocalization.GetDisplayName(latest.Location)
-            : null;
+        // Implied office — Layer B catalog label for IS_BEING_PREPARED (e.g. Ofisde).
+        var implied = LookupLocalization.GetCatalogDisplayName(
+            "application-state",
+            ApplicationProgressStateCodes.IsBeingPrepared);
+        return string.IsNullOrEmpty(implied) ? "Ofisde" : implied;
     }
 }

@@ -36,7 +36,8 @@ disable-model-invocation: false
 | Resminamalar UX patterns (row progress CSS) — Word batch, not PDF ZIP | [`.cursor/skills/visa2026-resminamalar/SKILL.md`](../visa2026-resminamalar/SKILL.md) |
 | Global `#visa-preview-slot` shell, catalog card layout, resize/theme | [`.cursor/skills/visa2026-preview-slot/SKILL.md`](../visa2026-preview-slot/SKILL.md) |
 | `PdfGenerationBatch` worker failures, Docker, schema drift | [`.cursor/skills/visa2026-lifecycle-docker/SKILL.md`](../visa2026-lifecycle-docker/SKILL.md) |
-| Person master-data document catalog (planned, not ApplicationItem ZIP) | [`.cursor/skills/visa2026-person-document-copies/SKILL.md`](../visa2026-person-document-copies/SKILL.md) |
+| Person master-data document catalog (not ApplicationItem ZIP) | [`.cursor/skills/visa2026-person-document-copies/SKILL.md`](../visa2026-person-document-copies/SKILL.md) |
+| Shared sectioned catalog chrome (`.doc-copies-catalog`) | [`docs/PREVIEW_SLOT.md`](../../../docs/PREVIEW_SLOT.md) § Document-copies catalog chrome · [preview-slot](../visa2026-preview-slot/SKILL.md) |
 | Slot eligibility / diploma packaging rules (domain) | [`docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md`](../../../docs/APPLICATION_DIPLOMA_PACKAGE_PLAN.md) |
 
 **Long reference:** [reference.md](./reference.md). **Experience log:** [learnings.md](./learnings.md). **Maturity:** [MATURITY.md](./MATURITY.md).

@@ -1,7 +1,6 @@
 using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
@@ -11,8 +10,8 @@ using Visa2026.Module.Services.RuntimeLogging;
 namespace Visa2026.Blazor.Server.Services;
 
 /// <summary>
-/// Staging/prod can skip XAF ModuleUpdaters when ModuleInfo is already current. Ensures theme preference
-/// columns and Default-role self-write permissions exist on every host start (mirrors batch schema gate).
+/// Ensures Default-role self-write permissions for theme preference exist on every host start.
+/// Theme preference columns are created by EF/XAF database update on PostgreSQL.
 /// </summary>
 internal static class ApplicationUserThemePreferenceStartupGate
 {
@@ -23,13 +22,6 @@ internal static class ApplicationUserThemePreferenceStartupGate
             throw new ArgumentNullException(nameof(services));
         }
 
-        var connectionString = services.GetService<IConfiguration>()?.GetConnectionString("DefaultConnection")
-            ?? services.GetService<IConfiguration>()?.GetConnectionString("ConnectionString");
-        if (!string.IsNullOrWhiteSpace(connectionString))
-        {
-            ApplicationUserThemePreferenceSchemaSql.ApplyIfMissing(connectionString);
-        }
-
         try
         {
             using var scope = services.CreateScope();
@@ -38,7 +30,7 @@ internal static class ApplicationUserThemePreferenceStartupGate
             using var objectSpace = objectSpaceFactory.CreateNonSecuredObjectSpace(typeof(ApplicationUser));
             ApplicationUserThemePreferencePermissions.EnsureDefaultRoleSelfWrite(objectSpace);
 
-            logger?.LogInformation("ApplicationUser theme preference schema and Default-role permissions verified.");
+            logger?.LogInformation("ApplicationUser theme preference Default-role permissions verified.");
         }
         catch (Exception ex)
         {

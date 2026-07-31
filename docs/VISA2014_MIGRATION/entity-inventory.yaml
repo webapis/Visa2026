@@ -128,6 +128,30 @@ entities:
       Layer 3 PurposeOfTravel + CheckPoint drafted; WorkPermittedLocations pending WorkPermitItem audit.
       204 rows on parent apps with skipped ApplicationType E:44/E:55 (inherit parent skip_row).
 
+  - targetODataEntity: Rejection
+    discoveryDossier: discovery/Rejection.yaml
+    tableMappingId: rejection-header
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: ApplicationResult (Result=1)
+    legacyBo: IApplicationResult
+    blockReason: null
+    notes: |
+      importConfirmed + local PG import 2026-07-22: Posted 207 / Failed 0. Split from Invitation (Result=0).
+
+  - targetODataEntity: RejectionItem
+    discoveryDossier: discovery/RejectionItem.yaml
+    tableMappingId: rejection-item
+    discoveryStatus: complete
+    importConfirmed: true
+    importStatus: done
+    legacyTable: PersonInInvitation (parent Result=1)
+    legacyBo: IPersonInResult
+    blockReason: null
+    notes: |
+      importConfirmed + local PG import 2026-07-22: Posted 254 / Failed 0.
+
   - targetODataEntity: ApplicationProgress
     discoveryDossier: discovery/ApplicationProgress.yaml
     tableMappingId: application-progress-synthetic

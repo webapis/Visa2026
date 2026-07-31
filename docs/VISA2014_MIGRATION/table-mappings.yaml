@@ -345,6 +345,60 @@ mappings:
       Upsert/id-map on legacy Oid. Dedupe 925 (Application+Person) groups before POST.
       Requires Application + Person + Passport + Visa id-maps; WorkPermitItem id-map for CurrentWorkPermitItem (legacy WorkPermit.Oid).
 
+  - id: rejection-header
+    legacy:
+      schema: dbo
+      table: ApplicationResult
+      boClass: IApplicationResult
+      boPath: VISA2014.Module/DC/IApplicationResult.cs
+      filter: Result = 1 (ApplicationResultEnum.Rejection)
+    target:
+      odataEntity: Rejection
+      boPath: Visa2026.Module/BusinessObjects/Rejection.cs
+    relationship: child_of_application
+    legacyTablesExtra:
+      - schema: dbo
+        table: PersonInInvitation
+        join: PersonInInvitation.Invitation = ApplicationResult.Oid AND PersonInInvitation.GCRecord IS NULL
+        role: child_collection
+        notes: RejectionItem discovery — out of header import scope
+      - schema: dbo
+        table: Application
+        join: Application.Oid = ApplicationResult.Application
+        role: parent_header
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/Rejection.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/Rejection.yaml
+    status: mapped
+    notes: |
+      207 active ApplicationResult rows with Result=1 on Çalik VISA2015 (185 with items, 22 orphans).
+      Split from Invitation (Result=0). id-map ApplicationResult.Oid → Rejection.ID (separate file from Invitation).
+      Application FK required. Number → RejectedDocNumber; IssuedDate → Date. Reason allow_null.
+      Duplicate Numbers: 2 groups — oid-tail suffix. File wave: CopyOfResult / NetijeGocurme → RejectionDocument.
+
+  - id: rejection-item
+    legacy:
+      schema: dbo
+      table: PersonInInvitation
+      boClass: IPersonInResult
+      boPath: VISA2014.Module/DC/IPersonInResult.cs
+      filter: parent ApplicationResult.Result = 1
+    target:
+      odataEntity: RejectionItem
+      boPath: Visa2026.Module/BusinessObjects/RejectionItem.cs
+    relationship: child_of_rejection
+    legacyTablesExtra:
+      - schema: dbo
+        table: ApplicationResult
+        join: ApplicationResult.Oid = PersonInInvitation.Invitation AND ApplicationResult.Result = 1
+        role: parent_header
+    fieldMap: Visa2026.DataImporter/legacy/visa2014/field-maps/RejectionItem.yaml
+    discoveryDossier: docs/VISA2014_MIGRATION/discovery/RejectionItem.yaml
+    status: mapped
+    notes: |
+      254 active PersonInInvitation rows under Result=1 parents on Çalik VISA2015.
+      Person = COALESCE(Employee, FamilyMember); Passport required; parent FK column still named Invitation.
+      id-map PersonInInvitation.Oid → RejectionItem.ID. Import after Rejection + ApplicationItem.
+
   - id: application-progress-synthetic
     legacy:
       schema: dbo

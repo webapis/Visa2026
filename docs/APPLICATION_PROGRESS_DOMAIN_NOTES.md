@@ -34,19 +34,17 @@ Observed sequence (English UI labels; dates from sample screenshot):
 | # | State (UI) | Location (UI) | Date | Inferred `ApplicationState.Code` | Inferred `ApplicationLocation.Code` | Days in this step* |
 |---|------------|---------------|------|----------------------------------|-------------------------------------|-------------------|
 | 1 | In preparation | At office | 01.06.2026 | `IS_BEING_PREPARED` | `AT_OFFICE` | — (start) |
-| 2 | 1st ministry review (in progress) | At 1st ministry | 02.06.2026 | `1_REVIEW_STARTED` | `AT_THE_MINISTERY_1` | 1 |
-| 3 | 1st ministry review approved | At 1st ministry | 05.06.2026 | `1_REVIEW_APPROVED` | `AT_THE_MINISTERY_1` | 3 |
-| 4 | 2nd ministry review (in progress) | At 2nd ministry | 08.06.2026 | `2_REVIEW_STARTED` | `AT_THE_MINISTERY_2` | 3 |
-| 5 | 2nd ministry review approved | At 2nd ministry | 10.06.2026 | `2_REVIEW_APPROVED` | `AT_THE_MINISTERY_2` | 2 |
-| 6 | In processing | At migration service | 11.06.2026 | `PROCESS_STARTED` | `AT_MIGRATION_SERVICE` | 1 |
-| 7 | Issued | At office | 20.06.2026 | `PROCESS_ISSUED` | `AT_OFFICE` | 9 |
+| 2 | 1st ministry review approved | At 1st ministry | 05.06.2026 | `1_REVIEW_APPROVED` | `AT_THE_MINISTERY_1` | 4 |
+| 3 | 2nd ministry review approved | At 2nd ministry | 10.06.2026 | `2_REVIEW_APPROVED` | `AT_THE_MINISTERY_2` | 5 |
+| 4 | In processing | At migration service | 11.06.2026 | `PROCESS_STARTED` | `AT_MIGRATION_SERVICE` | 1 |
+| 5 | Issued | At office | 20.06.2026 | `PROCESS_ISSUED` | `AT_OFFICE` | 9 |
 
 \* *Days in this step* = days from this row’s `Date` until the **next** row’s `Date` (not elapsed since today). This is how officers reason about “how long ministry kept it” vs SLA we will configure later.
 
 **Notes from this example**
 
 - **State and Location move together** on the happy path but are **independent fields** — e.g. final row is **Issued** (`PROCESS_ISSUED`) while **Location** returns to **At office** (`AT_OFFICE`), not migration service.
-- Ministry review uses **pairs**: *in progress* (`*_REVIEW_STARTED`) then *approved* (`*_REVIEW_APPROVED`) at the **same** location before moving to the next authority.
+- Ministry review is recorded as a **single step** (`*_REVIEW_APPROVED`) per leg — the officer records the approval outcome directly (no separate "started" step). SLA elapsed days are calculated from the **previous step's date**.
 - Total calendar time office → issued in this sample: **19 days** (01.06 → 20.06).
 
 ---
@@ -58,10 +56,8 @@ These **stable codes** exist in seed today ([`application-state.json`](../Visa20
 | Code | Turkmen seed name (short) | Role |
 |------|---------------------------|------|
 | `IS_BEING_PREPARED` | TAÝÝARLYKDA | Preparation at office |
-| `1_REVIEW_STARTED` | 1-NJI IŞ YLALAŞYKDA | 1st ministry review ongoing |
 | `1_REVIEW_APPROVED` | 1-NJI IŞ YLALAŞYK ALYNDY | 1st ministry approved |
 | `1_REVIEW_REJECTED` | 1-NJI IŞ YLALAŞYK BERILMEDI | 1st ministry rejected |
-| `2_REVIEW_STARTED` | 2-NJI IŞ YLALAŞYKDA | 2nd ministry review ongoing |
 | `2_REVIEW_APPROVED` | 2-NJI IŞ YLALAŞYK ALYNDY | 2nd ministry approved |
 | `2_REVIEW_REJECTED` | 2-NJI IŞ YLALAŞYK BERILMEDI | 2nd ministry rejected |
 | `PROCESS_STARTED` | İŞLENMEKDE | Processing (often migration service) |
@@ -71,7 +67,7 @@ These **stable codes** exist in seed today ([`application-state.json`](../Visa20
 
 **Locations** ([`application-location.json`](../Visa2026.Module/DatabaseUpdate/LookupCatalogs/application-location.json)): `AT_OFFICE`, `AT_THE_MINISTERY_1`, `AT_THE_MINISTERY_2`, `AT_MIGRATION_SERVICE`.
 
-The happy-path screenshot uses **7 of 11** state codes and **all 4** locations. It does **not** show reject or cancel branches.
+The happy-path example uses **5 of 9** active state codes and **all 4** locations. It does **not** show reject or cancel branches. (`N_REVIEW_STARTED` codes are legacy — retained in DB for historical rows but removed from the catalog and no longer offered in new progress.)
 
 ---
 
@@ -87,7 +83,7 @@ Use this table as a **parking lot** while domain language is refined. Do **not**
 **Examples of gaps we expect (confirm with officers):**
 
 - Sub-states inside “in preparation” (waiting for documents, waiting for payment, …) — still `IS_BEING_PREPARED` or new codes?
-- “Sent to ministry” as a distinct milestone vs `1_REVIEW_STARTED` — same step or separate row?
+- “Sent to ministry” as a distinct milestone vs `1_REVIEW_APPROVED` — same step or separate row? (legacy `_REVIEW_STARTED` codes removed from active workflow)
 - Registration-only routes (office → migration, no ministry) — same codes, shorter graph?
 - **Visa / WP / Person** dimensions while application is in progress (`OnExtension`, `ExpiringSoon`, …) — **separate BO states**, not `ApplicationProgress` rows ([BR-049](BUSINESS_LOGIC_BASELINE.md)); colors may apply on **Visa** list while **Application** list uses progress codes.
 - Stuck / overdue as a **computed** signal (`DaysElapsed` > SLA) — **not** a separate catalog code; alert + row highlight, not a new `ApplicationState` name unless officers insist.
@@ -126,7 +122,7 @@ Until implementation, **Application** and **Progress History** lists use **defau
 | `Person` registration compliance | `DaysElapsed` | Arrived 5 days ago, not registered |
 | Flags on documents | Non-temporal | `IsCancelled`, `IsExtended` |
 
-One **Application** can be `1_REVIEW_STARTED` @ `AT_THE_MINISTERY_1` while linked **Visa** is `ExtensionApplicationRequired` — **multi-dimensional**; color plan is one primary row tint + optional column accents ([`BO_STATE_COLORS.md`](BO_STATE_COLORS.md) § Multi-dimensional display).
+One **Application** can be `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` while linked **Visa** is `ExtensionApplicationRequired` — **multi-dimensional**; color plan is one primary row tint + optional column accents ([`BO_STATE_COLORS.md`](BO_STATE_COLORS.md) § Multi-dimensional display).
 
 ---
 
@@ -143,7 +139,7 @@ One **Application** can be `1_REVIEW_STARTED` @ `AT_THE_MINISTERY_1` while linke
 
 ### Problem
 
-Today, whether the next step after office preparation is **`1_REVIEW_STARTED`** (ministries) or **`PROCESS_STARTED`** (migration service) is often inferred from **`ApplicationType.ShowProjectContract`** (whether `ProjectContract` appears on the Application detail view). That flag is a **UI visibility** concern, not a workflow contract. Many types correlate by accident; others will diverge.
+Today, whether the next step after office preparation is **`1_REVIEW_APPROVED`** (ministries) or **`PROCESS_STARTED`** (migration service) is often inferred from **`ApplicationType.ShowProjectContract`** (whether `ProjectContract` appears on the Application detail view). That flag is a **UI visibility** concern, not a workflow contract. Many types correlate by accident; others will diverge.
 
 ### Recommendation — explicit route on `ApplicationType`
 
@@ -154,7 +150,7 @@ Add a dedicated enum on **`ApplicationType`**, seeded in **`ApplicationTypeConfi
 
 | Value | Meaning | Typical next step after `IS_BEING_PREPARED` @ `AT_OFFICE` |
 |-------|---------|-----------------------------------------------------------|
-| `ViaMinistries` | File goes through ministry review and approval before migration processing | `1_REVIEW_STARTED` @ `AT_THE_MINISTERY_1` |
+| `ViaMinistries` | File goes through ministry review and approval before migration processing | `1_REVIEW_APPROVED` @ `AT_THE_MINISTERY_1` |
 | `DirectToMigrationService` | No ministry leg; office sends straight to migration service | `PROCESS_STARTED` @ `AT_MIGRATION_SERVICE` |
 
 **Second axis (optional but useful):** `MinistryReviewDepth` enum — `None` | `FirstMinistryOnly` | `FirstAndSecondMinistry`.
@@ -174,10 +170,9 @@ Keep one global catalog ([`application-state.json`](../Visa2026.Module/DatabaseU
 | `ApplicationState.Code` | `DirectToMigrationService` | `ViaMinistries` (1st only) | `ViaMinistries` (1st + 2nd) |
 |-------------------------|----------------------------|----------------------------|-----------------------------|
 | `IS_BEING_PREPARED` | Yes | Yes | Yes |
-| `1_REVIEW_STARTED` | **No** | Yes | Yes |
 | `1_REVIEW_APPROVED` | **No** | Yes | Yes |
 | `1_REVIEW_REJECTED` | **No** | Yes | Yes |
-| `2_REVIEW_STARTED` | **No** | **No** | Yes |
+| `2_REVIEW_APPROVED` | **No** | **No** | Yes |
 | `2_REVIEW_APPROVED` | **No** | **No** | Yes |
 | `2_REVIEW_REJECTED` | **No** | **No** | Yes |
 | `PROCESS_STARTED` | Yes | Yes | Yes |

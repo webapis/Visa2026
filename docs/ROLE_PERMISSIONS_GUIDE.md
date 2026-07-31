@@ -37,7 +37,7 @@ There are two places to set permissions:
 ### `EnsureNavigationPermission`
 Grants or updates a navigation item permission for an existing role.
 ```csharp
-EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
+EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
 ```
 
 ### `EnsureTypePermission<T>`
@@ -99,7 +99,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type |
 |------|
 | `ProjectContract`, `FileData` |
-| `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateProjectContract` |
+| `UserReportTemplate`, `UserReportTemplateApplicationType`, `UserReportTemplateApplicationTypeGroup`, `UserReportTemplateProjectContract` |
 
 ### Full recursive (templates)
 
@@ -114,8 +114,9 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 
 | Type | Notes |
 |------|-------|
-| `OrganizationType`, `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
+| `ReportDataV2`, `ReportVisibility`, `PdfFormMapping` | |
 | `ApplicationType` | Link popup on migration SLA profile detail |
+| `ApplicationTypeGroup`, `ApplicationTypeGroupMember` | Report template group picker / membership (read) |
 
 ### Navigation (allow)
 
@@ -158,14 +159,32 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | Type |
 |---|
 | `ApplicationTypeFilter`, `ApplicationType`, `ApplicationState`, `ApplicationLocation` |
+| `ApplicationMigrationSlaProfile` | Read only (Migration deadline column via `ApplicationType.MigrationSlaProfile`; no Configuration nav) — also via `EnsureApplicationProcessTrackingReadPermissions` |
 | `CheckPoint`, `Country`, `Department`, `EducationLevel`, `Gender`, `MaritalStatus` |
-| `MigrationService`, `OrganizationType`, `PassportType`, `Position`, `PurposeOfTravel` |
+| `MigrationService`, `PassportType`, `Position`, `PurposeOfTravel` |
 | `Region`, `Relationship`, `Urgency`, `ValidityDuration` |
 | `VisaCategory`, `VisaIssuedPlace`, `VisaType` |
 | `WorkPermitLocation`, `MovementPermitLocation`, `BorderZoneLocation` |
 | `Company`, `ProjectContract` |
 | `ExpirationAlertRule` | Read only (runtime state evaluators; no Configuration nav) |
 | `ReportDataV2`, `ReportVisibility` |
+
+---
+
+## Current UsersReadOnly Role Permissions
+
+Parallel-period / reader officers (`UsersReadOnly` — same navigation as Users for Applications, People, etc.; no Configuration / Reports / Operations). All business types are **read-only**.
+
+### Process-tracking reads (same columns as Users)
+
+Shared helper `EnsureApplicationProcessTrackingReadPermissions` — required for Application ListView:
+
+| Column / data | Types |
+|---|---|
+| Migration deadline / working days | `ApplicationMigrationSlaProfile` (via `ApplicationType`) |
+| Approval deadline / working days | `ApplicationApprovalLegSnapshot`, `ApprovingMinistry`, `ApprovalLegProfile` (+ legs) |
+| Current status | `ApplicationProgress`, `ApplicationState`, `ApplicationLocation`, `MigrationService` |
+| Project/Contract | `ProjectContract`, `ProjectContractApprovalLegProfile` |
 
 ---
 
@@ -220,4 +239,6 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 | Jun 2026 | Visa office staff need org singleton + project contract + template screens without full admin | Added **`VisaOffice`** role (`CreateVisaOfficeRole`, `EnsureVisaOfficeConfigurationPermissions`, `EnsureVisaOfficeNavigationPermissions`); seeded user `VisaOffice` |
 | Jun 2026 | Runtime log + state-notification inbox visible to officers | **`EnsureAdminOnlyOperationsDeny`** on Users / VisaOffice — super administrators only; state inbox remains a future-release prototype |
 | Jun 2026 | Visa office cannot open migration SLA profiles or system settings | **`EnsureFullAccessRecursivePermission`** for `ApplicationMigrationSlaProfile` and `SystemSettings` on VisaOffice; nav allow for those items; `ApplicationType` read for link popup |
+| Jul 2026 | Migration deadline empty for VisaOfficer / Users; Admin OK | **`EnsureReadOnlyPermission<ApplicationMigrationSlaProfile>`** on Users + UsersReadOnly (creation block + Ensure); officers need Read to resolve `ApplicationType.MigrationSlaProfile` for ListView SLA text |
+| Jul 2026 | UsersReadOnly (reader) must see process-tracking columns | Shared **`EnsureApplicationProcessTrackingReadPermissions`** for Users + UsersReadOnly (migration/approval SLA, progress state/location, snapshots); Users keep write on progress/snapshots |
 | Jun 2026 | Document expiration thresholds under System nav for all Users | **`ExpirationAlertRule`** moved to **Configuration**; VisaOffice read/write + nav; Users read-only without System nav ([`DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md`](DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md)) |

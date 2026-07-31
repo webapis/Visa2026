@@ -71,7 +71,7 @@ internal static class Visa2014EducationDocumentCleanup
         var password = GetOptionValue(args, "--password") ?? "";
         var targetConnection = GetOptionValue(args, "--target-connection")
             ?? Environment.GetEnvironmentVariable("VISA2026_SQL_CONNECTION")
-            ?? "Server=(localdb)\\mssqllocaldb;Database=Visa2026;Trusted_Connection=True;TrustServerCertificate=True";
+            ?? "Host=localhost;Port=5432;Database=visa2026;Username=postgres;Password=Visa2026Local;Persist Security Info=True;EFCoreProvider=Postgres";
         var documentIdMapPath = GetOptionValue(args, "--document-id-map-output")
             ?? source.IdMapPath(dataImporterRoot, "EducationDocument");
 

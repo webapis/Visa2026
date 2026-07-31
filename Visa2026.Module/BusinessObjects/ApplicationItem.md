@@ -88,6 +88,16 @@ Catalog flags are defined on [`ApplicationType`](LookupBusinessObjects.cs) and s
 | `VisaIsCancelled` | `ShowVisaIsCancelled` |
 | `VisaIsChanged` | `ShowVisaIsChanged` |
 
+### Last application state (calculated from parent)
+
+| Property | Type | Notes |
+|----------|------|--------|
+| `LastApplicationState` | `string` (`[NotMapped]`) | Localized latest parent progress (prefers `Application.LatestProgressDisplay`). List column only. |
+| `PrimaryStateCode` | `string` (`[NotMapped]`, `IBoListRowState`) | Parent `Application.PrimaryStateCode` for row color. |
+| `ListRowCssClass` | `string` (`[NotMapped]`) | Parent `Application.ListRowCssClass` (SLA-aware); empty when `IsLineCancelled` so cancel Appearance wins. |
+
+Row tint on item ListViews uses Blazor `ApplicationItemProgressRowAppearanceController` and the same `visa-progress-row--state-*` CSS as Application. No denormalized columns on the item.
+
 ### Soft delete
 
 `IsDeleted`, `DateDeleted`, `DeletedBy` — `ISoftDelete`.
@@ -126,7 +136,7 @@ Clears `CurrentVisa`, `NextVisa`, and `WorkPermittedLocations` when the parent t
 
 ## 4. Visa linkage (issuing line vs target visa)
 
-- **`Visa.IssuingApplicationItem`**: From a **visa** back to the **application line under which that visa was issued** (person + parent application). Validated against allowed issuing application types.
+- **`Visa.IssuingApplicationItem`**: From a **visa** back to the **application line under which that visa was issued** (person + parent application). Validated against **`ApplicationType.CanIssueVisa`**.
 - **`ApplicationItem.CurrentVisa`**: From a **line** to the **visa used as input** for this procedure (extension, cancellation, registration context, etc.). Inverse: `Visa.AssociatedApplicationItems`.
 - **`ApplicationItem.NextVisa`**: Optional **future** visa on the line when `ShowNextVisa` is true.
 
@@ -159,7 +169,7 @@ Document links on the main tab follow the opposite pattern for many application 
 
 - **Always required:** `Application`, `Person`, `CurrentPassport`.
 - **Required when visible (application type `Show*` flags):** document links (`PreviousPassport`, `CurrentVisa`, `NextVisa`, work permit and invitation items, address, education, …) — each uses `[RuleRequiredField(TargetCriteria = …)]` matching the field's `[Appearance]` hide rule.
-- **Visible when `Show*` but not required on save:** `CurrentMedicalRecord`, `WorkPermittedLocations` — no reliable VISA2014 `PersonInApplication` source; import may leave null/empty/`Ýok`; officers can fill later. **`BorderZoneLocation`** is always visible when `ShowBorderZoneLocation` (not behind the gear).
+- **Visible when `Show*` but not required on save:** `WorkPermittedLocations` — no reliable VISA2014 `PersonInApplication` source; import may leave null/empty/`Ýok`; officers can fill later. **`BorderZoneLocation`** and **`CurrentMedicalRecord`** are always visible when their `Show*` flags are true (not behind the gear — `[ExcludeFromOptionalDetailFields]`).
 - **Registration / travel:** **`TravelDate`** and **`CheckPoint`** are required when shown (`ShowRegistrations`; external for `CheckPoint`); always visible in the Travel group — `[ExcludeFromOptionalDetailFields]`, defaults in `ApplyRegistrationMovementDefaults`. **Gear:** `RegistrationDate`, `TravelType`, `MovementType`, `TravelNotes` are optional on save and hidden when the gear is off. Travel purpose on registration lines is **`CurrentPositionHistory`** (not a separate purpose-of-travel lookup). Application-type `[Appearance]` still gates the registration block (`ShowRegistrations`). `BusinessTripAddress` and workflow status columns use `[ExcludeFromOptionalDetailFields]`.
 - **Employee-only lines:** `CurrentPositionHistory`, `CurrentSalary`, `CurrentWorkPermitItem`, `CurrentWorkDuty` are required only when `Person.IsEmployee` and the field is shown (hidden for family members via `PersonIsFamilyMemberCriteria`).
 - **Education on registration:** `CurrentEducation` is hidden and not required on all registration application lines (`RegistrationApplicationItemContextCriteria`), including employees — `ShowCurrentEducation` in the catalog does not apply there.

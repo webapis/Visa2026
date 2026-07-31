@@ -1,0 +1,74 @@
+{
+  "source": "Wikipedia Districts of Turkmenistan + OSM wiki Districts_in_Turkmenistan (2026-07-11)",
+  "policy": "Prefer legacy Region when it matches this reference; otherwise use reference Region for the city name.",
+  "cities": [
+    {
+      "nameTm": "Serhetabat etraby",
+      "regionCode": "MR",
+      "status": "abolished",
+      "aliases": [ "Serhetabat", "Kushka" ],
+      "notes": "Ex-Kushka / Tagtabazar area in Mary; district abolished 2022.",
+      "source": "wikipedia+osm"
+    },
+    {
+      "nameTm": "Serhetabat şäheri",
+      "regionCode": "MR",
+      "status": "current",
+      "notes": "Town in Mary (Tagtabazar).",
+      "source": "osm"
+    },
+    {
+      "nameTm": "Serdarabat etraby",
+      "regionCode": "LB",
+      "status": "historical",
+      "aliases": [ "Çärjew etraby", "Carjew etraby" ],
+      "notes": "Former Serdarabat / Çärjew district in Lebap.",
+      "source": "wikipedia+osm"
+    },
+    {
+      "nameTm": "Beýik Saparmyrat Türkmenbaşy ad. etraby",
+      "regionCode": "LB",
+      "status": "abolished",
+      "aliases": [ "Beýik Türkmenbaşy etraby", "Beyik Saparmyrat Turkmenbasy ad. etraby" ],
+      "notes": "Historical Beýik Türkmenbaşy district in Lebap (abolished). Distinct from Daşoguz Saparmyrat Türkmenbaşy.",
+      "source": "wikipedia"
+    },
+    {
+      "nameTm": "Saparmyrat Türkmenbaşy ad. etraby",
+      "regionCode": "DZ",
+      "status": "current",
+      "notes": "Current Saparmyrat Türkmenbaşy district in Daşoguz.",
+      "source": "wikipedia"
+    },
+    {
+      "nameTm": "Akbugday etraby",
+      "regionCode": "AH",
+      "status": "current",
+      "aliases": [ "Akbugdaý etraby", "Ak bugdaý", "Ak bugdaý etraby" ],
+      "notes": "Ak bugdaý district in Ahal — not under Aşgabat.",
+      "source": "wikipedia"
+    },
+    {
+      "nameTm": "Türkmenabat şäheri",
+      "regionCode": "LB",
+      "status": "current",
+      "aliases": [ "Turkmenabat", "Çärjew" ],
+      "notes": "Lebap capital city.",
+      "source": "wikipedia"
+    },
+    {
+      "nameTm": "Türkmenbaşy etraby",
+      "regionCode": "BN",
+      "status": "current",
+      "notes": "Balkan province district (ex-Krasnovodsk area).",
+      "source": "wikipedia"
+    },
+    {
+      "nameTm": "Türkmenbaşy şäheri",
+      "regionCode": "BN",
+      "status": "current",
+      "notes": "Balkan province city with district status.",
+      "source": "wikipedia"
+    }
+  ]
+}

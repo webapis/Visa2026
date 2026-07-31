@@ -1,0 +1,66 @@
+# RejectionItem field map — layer 2
+# Layer 1: table-mappings.yaml (id: rejection-item)
+
+tableMappingId: rejection-item
+
+source:
+  table: PersonInInvitation
+  schema: dbo
+  filter: parent ApplicationResult.Result = 1
+
+target:
+  odataEntity: RejectionItem
+
+deduplication:
+  enabled: false
+  notes: 1:1 legacy PersonInInvitation row per item (Rejection parents only)
+
+propertyGaps:
+  legacyOnly:
+    - column: ExpectedDateOfArrival
+      disposition: drop
+      notes: Hidden for Result=Rejection in legacy UI; no Visa2026 RejectionItem field
+  targetOnly:
+    - property: Reason
+      default: null
+      missingBehavior: allow_null
+    - property: RejectionItemName
+      disposition: omit_from_post
+      notes: Computed OnSaving from Person + Rejection.Date
+
+fields:
+  - source: Oid
+    target: null
+    transform: legacy_id
+    notes: id-map legacy PersonInInvitation.Oid → RejectionItem.ID
+
+  - source: COALESCE(Employee, FamilyMember)
+    target: Person
+    transform: fk_id_map
+    idMapEntity: Person
+    missingBehavior: skip_row
+
+  - source: Passport
+    target: Passport
+    transform: fk_id_map
+    idMapEntity: Passport
+    missingBehavior: skip_row
+
+  - source: Invitation
+    target: Rejection
+    transform: fk_id_map
+    idMapEntity: Rejection
+    idMapLegacyTable: ApplicationResult
+    missingBehavior: skip_row
+    notes: FK column name Invitation; parent must be Result=1 ApplicationResult
+
+  - source: null
+    target: Reason
+    transform: constant_null
+    missingBehavior: allow_null
+
+export:
+  lastExportedAt: 2026-07-22
+  lastExportPath: Visa2026.DataImporter/legacy/visa2014/preview-export/RejectionItem-preview.calik-energi.xlsx
+  importRowCount: 254
+  skippedRowCount: 0

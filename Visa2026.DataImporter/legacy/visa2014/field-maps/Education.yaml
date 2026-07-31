@@ -89,12 +89,18 @@ fields:
 
   - source: EducationCountry
     target: EducationCountry
-    transform: lookup_country_mgcode
+    transform: lookup_country_code
     lookupCatalog: Country
     lookupLegacyColumn: Country.mgCode
+    lookupLegacyFallbackColumns:
+      - Country.NameOfCountry
+      - Country.NameOfCountryL
     lookupMatch: Code
     missingBehavior: skip_row
-    notes: Reuse Person-wave Country layer-3 (ISO alpha-3)
+    notes: |
+      Prefer Country.mgCode (ISO3 prefix before '-'). When mgCode is null (32 Country rows on Çalik),
+      fall back to NameOfCountry / NameOfCountryL — same codes Person/Passport already map to Country.Code.
+      Alias UK→GBR in lookup-translations (UK is not a Visa2026 Country.Code).
 
   - source: Spcialty
     target: Specialty

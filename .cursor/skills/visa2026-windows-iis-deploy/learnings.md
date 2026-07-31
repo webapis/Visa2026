@@ -104,3 +104,59 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **HTTP env**: `HTTPS_ENABLED=false` on both `prod.env` and `staging.env` — HTTP-only smoke as requested.
 - **Smoke**: `http://10.100.128.25/LoginPage` and `:8080/LoginPage` → **200**; `publish-version.txt` AssemblyVersion **1.0.0.557**, GitSha **e422045** on both slots.
 - **Duration**: ~8 min prod (publish + scp + DB update), ~5 min staging (reuse publish).
+
+### 2026-07-10 — Staging deploy 1.0.0.566 (HTTP)
+
+- **Commit**: `ee84d498` (HEAD) — SLA visibility for officers + prior Ministrlik/snapshot work.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Staging -ForceUpdate` → `dist/visa2026-iis-1.0.0.566`.
+- **HTTP**: `HTTPS_ENABLED` not true in `staging.env` — skipped `Enable-Visa2026IisHttps.ps1` (expected for HTTP-only).
+- **Smoke**: `http://10.100.128.25:8080/LoginPage` → **200**; `publish-version.txt` AssemblyVersion **1.0.0.566**, GitSha **ee84d49**.
+- **DB**: `--updateDatabase --forceUpdate` on `Visa2026DbStaging` (exit 0).
+
+### 2026-07-10 — Production deploy 1.0.0.566 (HTTP)
+
+- **Same bits**: reused staging publish via `-SkipPublish -PublishPath dist/visa2026-iis-1.0.0.566`.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Production -ForceUpdate -SkipPublish …` (exit 0, ~4.5 min).
+- **HTTP**: `HTTPS_ENABLED` not true in `prod.env` — skipped HTTPS enable (expected).
+- **Smoke**: `http://10.100.128.25/LoginPage` → **200**; `publish-version.txt` **1.0.0.566** / **ee84d49**.
+- **DB**: `--updateDatabase --forceUpdate` on `Visa2026DbProd` (brings schema forward, e.g. `BorderZoneLocation`).
+
+### 2026-07-13 — Demo deploy 1.0.0.568 (HTTP only)
+
+- **Commit**: `d2a83fc7` — Import reimport history XAF nav + Maglumat CSV + education catalog gaps.
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate` → publish `1.0.0.568` copied; `HTTPS_ENABLED=false` in `demo.env` (HTTP :8081 only — skip Enable-Visa2026IisHttps).
+- **Binding**: `http/*:8081:`; `ImportHistory:RootPath` = `C:\visa2026-sync-demo\history`.
+- **Issue**: Demo `--forceUpdate` on large `Visa2026DbDemo` ran very long; local SSH deploy hung after copy; app pool left **Stopped** → HTTP **503**.
+- **Fix**: `appcmd start apppool Visa2026-Demo`; smoke `http://10.100.128.25:8081/LoginPage` → **200**.
+- **Prevent**: After long Demo ForceUpdate, confirm pool Started; smoke HTTP not HTTPS for Demo.
+
+
+### 2026-07-13 — All-slot deploy 1.0.0.569 (HTTP)
+
+- **Commit**: `15a91408` — DocumentCopies sync-host id-map/SQL + live watch file waves + import history file-wave UI.
+- **Deploy**: `Deploy-Visa2026AllIisSlotsRemote.ps1 -ForceUpdate` → publish `dist/visa2026-iis-1.0.0.569`.
+- **HTTP**: `HTTPS_ENABLED=false` on prod/staging/demo.env — skipped Enable-Visa2026IisHttps (expected).
+- **Smoke**: LoginPage **200** on :80 / :8080 / :8081; pools Started; `publish-version.txt` AssemblyVersion **1.0.0.569**, GitSha **15a9140** on all three inetpub folders.
+- **Note**: Local deploy terminal capture truncated during Prod ForceUpdate EF noise; verify slots via remote smoke, not only local log.
+
+### 2026-07-14 — Removed Demo slot to free C: for Prod file waves
+
+- **Why**: Prod DocumentCopies failed on EducationDocument — PRIMARY filegroup full (`dbo.FileData`); C: was ~14 GB free while `Visa2026DbDemo.mdf` (~15.5 GB) lived on C:\...\MSSQL\DATA\
+- **Removed**: site/pool `Visa2026-Demo`, DROP `Visa2026DbDemo`, `C:\inetpub\visa2026-demo`, `C:\visa2026-sync-demo`, Demo DP keys; renamed `demo.env` → `demo.env.removed-*`
+- **Left intact**: Prod + Staging sites/pools/DBs (`Visa2026DbProd` / `Visa2026DbStaging` on E:)
+- **Disk**: C: free **~14.5 → ~32.4 GB**
+- **Note**: Prod MDF is on **E:** (~133 GB free); Express Edition — filegroup-full on FileData may still need Autogrowth/Express size review before resume `-StartAt EducationDocument`
+- **Cross-skill**: visa2014-to-visa2026-import
+
+
+### 2026-07-14 — Demo PostgreSQL pilot LoginPage (dual EF provider)
+
+- **Goal:** Same publish binary; Demo slot on PostgreSQL; Prod/Staging stay SQL Express.
+- **Host:** `10.100.128.25` — PG 16 binaries `C:\PostgreSQL\16`, service `postgresql-x64-16`, DB `visa2026_demo`. EDB GUI installer failed under SSH (`temp_check_comspec.bat`); binaries zip + `initdb` (let initdb create data dir) worked.
+- **Env:** `C:\visa2026\env\demo.env` → `EFCORE_PROVIDER=Postgres` + `PG_*`; `Configure-Visa2026Production.ps1` writes Npgsql CS with `Persist Security Info=True;EFCoreProvider=Postgres`.
+- **App:** `DatabaseProviderDetector` (UseSqlServer/UseNpgsql); slim ModuleUpdater allowlist on PG; `IndexFilter` for filtered indexes; `Npgsql.EnableLegacyTimestampBehavior`; skip T-SQL schema gates.
+- **Deploy:** `Deploy-Visa2026IisRemote.ps1 -Profile Demo -ForceUpdate -EnableForceXafDbUpdate` → DB update OK; smoke `http://10.100.128.25:8081/LoginPage` **200**; `Remove-Visa2026ForceXafDbUpdate.ps1 -Profile Demo`.
+- **Docs:** `docs/ON_PREM_WINDOWS_IIS.md` § Dual EF providers; `reference.md` Demo PG notes; `demo.env.example`.
+- **Not yet:** Full ModuleUpdater/PDF seed parity on PG; Staging/Prod PG cutover.
+- **Related:** Prod LoginPage 500 after earlier Demo wipe work — `UserReportTemplates` missing on SQL Prod DB (schema incomplete); repair with Production ForceUpdate (SQL), not related to Demo PG.
+

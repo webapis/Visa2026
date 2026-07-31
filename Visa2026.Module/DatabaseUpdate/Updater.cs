@@ -162,6 +162,9 @@ namespace Visa2026.Module.DatabaseUpdate
         /// </summary>
         private void RunVisaApplicationItemOrphanCleanupSql()
         {
+            if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+                return;
+
             const string sql = @"
 IF OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL OR OBJECT_ID(N'dbo.Visas', N'U') IS NULL
     RETURN;
@@ -212,6 +215,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         /// </summary>
         private void DropAllApplicationItemsForeignKeysToVisas()
         {
+            if (DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+                return;
+
             const string sql = @"
 IF OBJECT_ID(N'dbo.ApplicationItems', N'U') IS NULL OR OBJECT_ID(N'dbo.Visas', N'U') IS NULL
     RETURN;
@@ -261,6 +267,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureVisaOfficeConfigurationPermissions(visaOfficeRole);
             EnsureUserReportTemplateOfficerPermissions(visaOfficeRole);
             EnsureVisaOfficeNavigationPermissions(visaOfficeRole);
+            EnsureReportDashboardOfficerPermissions(visaOfficeRole);
             EnsureAdminOnlyOperationsDeny(visaOfficeRole);
 
             return visaOfficeRole;
@@ -282,6 +289,45 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        // Dashboard Open ListView for Visa Extension / Extension Result (vw_rd_visa_app_progress).
+        userRole.AddTypePermissionsRecursively<VwRdVisaAppProgress>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaByPeriod>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaActiveByProject>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaActiveByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaOnExtension>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaOnExtensionByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaExtensionResult>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaExtensionResultByPeriodCategoryType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaExtensionRequired>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaByDaysRemaining>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationOnProcess>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationCompleted>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionOnProcess>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionCompleted>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryOtherOnProcess>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationViaMinistryOtherCompleted>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationDirectMigrationOnProcessA>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplicationDirectMigrationProcessComplete>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdIncompletePersonsByMissingArea>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdPersonSearch>(
+            SecurityOperations.Read, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
@@ -312,13 +358,18 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // Extract placeholders replaces all rows — delete required (read/write/create alone is not enough).
         userRole.AddTypePermissionsRecursively<UserReportPlaceholder>(ReadWriteCreateDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationType>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<UserReportTemplateApplicationTypeGroup>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<UserReportTemplateProjectContract>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationTypeGroup>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationTypeGroupMember>(SecurityOperations.Read, SecurityPermissionState.Allow);
 
         // =====================================================================
         // READ ONLY — Lookup objects (can be referenced but not modified)
         // =====================================================================
         userRole.AddTypePermissionsRecursively<ApplicationTypeFilter>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Migration deadline ListView column resolves ApplicationType.MigrationSlaProfile (MaxDays / labels).
+        userRole.AddTypePermissionsRecursively<ApplicationMigrationSlaProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationState>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationLocation>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<CheckPoint>(SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -328,7 +379,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<Gender>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<MaritalStatus>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<MigrationService>(SecurityOperations.Read, SecurityPermissionState.Allow);
-        userRole.AddTypePermissionsRecursively<OrganizationType>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<PassportType>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Position>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ActualPosition>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -387,6 +437,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
+        userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
         // Rejection group (separate from Application)
         userRole.AddNavigationPermission(@"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
@@ -471,6 +522,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<PdfFormMapping>(userRole);
 
     EnsureUsersOfficerNavigationPermissions(userRole);
+    EnsureReportDashboardOfficerPermissions(userRole);
 
     // Users: EducationInstitution, Specialty, Position & Lodging — read/write/create only (no delete), including existing roles.
     EnsureReadWriteCreatePermission<EducationInstitution>(userRole);
@@ -491,6 +543,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadWriteCreatePermission<BorderZoneItem>(userRole);
     EnsureReadWriteCreatePermission<WorkPermit>(userRole);
     EnsureReadWriteCreatePermission<WorkPermitItem>(userRole);
+    EnsureReadOnlyPermission<ForeignWorkerMaglumat>(userRole);
     EnsureReadWriteCreatePermission<FileData>(userRole);
     // Application.VisaPeriod lookup popup — officers add/edit periods without Lookup navigation.
     EnsureReadWriteCreatePermission<VisaPeriod>(userRole);
@@ -525,6 +578,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
     EnsureReadOnlyPermission<ApplicationNumberingProfile>(userRole);
     EnsureReadOnlyPermission<ExpirationAlertRule>(userRole);
 
+    // Application ListView process-tracking columns (status, approval/migration SLA).
+    EnsureApplicationProcessTrackingReadPermissions(userRole, officerCanWriteProgress: true);
+
     EnsureUserFeedbackOfficerPermissions(userRole);
     EnsureAdminOnlyOperationsDeny(userRole);
 
@@ -545,6 +601,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             }
 
             EnsureUsersOfficerNavigationPermissions(role);
+            EnsureReportDashboardOfficerPermissions(role);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Configuration", SecurityPermissionState.Deny);
@@ -554,12 +611,69 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             return role;
         }
 
+        /// <summary>Report Dashboard home — readable by all officer roles.</summary>
+        static void EnsureReportDashboardOfficerPermissions(PermissionPolicyRole role)
+        {
+            if (role == null)
+                return;
+
+            EnsureTypePermission<BusinessObjects.ReportDashboard.ReportDashboardHost>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            // Open ListView for Visa Extension / Extension Result (vw_rd_visa_app_progress).
+            EnsureTypePermission<VwRdVisaAppProgress>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByPeriod>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaActiveByProject>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaActiveByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaOnExtension>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaOnExtensionByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionResult>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionResultByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionRequired>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByDaysRemaining>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationOnProcess>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryInvitationCompletedByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionOnProcess>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionOnProcessByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryVisaExtensionCompletedByPeriodCategoryType>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryOtherOnProcess>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationViaMinistryOtherCompleted>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationDirectMigrationOnProcessA>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplicationDirectMigrationProcessComplete>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdIncompletePersonsByMissingArea>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdPersonSearch>(
+                role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/ReportDashboard",
+                SecurityPermissionState.Allow);
+        }
+
         /// <summary>Shared case-officer navigation for <c>Users</c> and <c>UsersReadOnly</c> roles.</summary>
         static void EnsureUsersOfficerNavigationPermissions(PermissionPolicyRole role)
         {
             if (role == null)
                 return;
 
+            EnsureNavigationPermission(
+                role,
+                @"Application/NavigationItems/Items/ReportDashboard",
+                SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_ViaMinistries", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/Application_DirectMigration", SecurityPermissionState.Allow);
@@ -577,6 +691,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/BusinessTrip", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PdfGenerationBatch", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/WordReportGenerationBatch", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application/Items/PersonExportBatch", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Rejection/Items/Rejection", SecurityPermissionState.Allow);
@@ -593,11 +708,13 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermit", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/WorkPermitItem", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/WorkPermit/Items/ForeignWorkerMaglumat", SecurityPermissionState.Allow);
 
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/Employees", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/FamilyMembers", SecurityPermissionState.Allow);
-            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+            // Top-level person lists (legacy-style; not under People).
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Allow);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Operations", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
@@ -640,7 +757,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<Person>(role);
             EnsureReadOnlyPermission<Application>(role);
             EnsureReadOnlyPermission<ApplicationItem>(role);
-            EnsureReadOnlyPermission<ApplicationProgress>(role);
             EnsureReadOnlyPermission<Passport>(role);
             EnsureReadOnlyPermission<Visa>(role);
             EnsureReadOnlyPermission<Education>(role);
@@ -661,6 +777,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<RejectionItem>(role);
             EnsureReadOnlyPermission<WorkPermit>(role);
             EnsureReadOnlyPermission<WorkPermitItem>(role);
+            EnsureReadOnlyPermission<ForeignWorkerMaglumat>(role);
             EnsureReadOnlyPermission<FileData>(role);
             EnsureReadOnlyPermission<Position>(role);
             EnsureReadOnlyPermission<ActualPosition>(role);
@@ -669,26 +786,25 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<AddressOfResidenceDocument>(role);
             EnsureReadOnlyPermission<BorderZoneName>(role);
             EnsureReadOnlyPermission<WorkPermittedLocationName>(role);
-            EnsureReadOnlyPermission<ApplicationApprovalLegSnapshot>(role);
             EnsureReadOnlyPermission<UserReportTemplate>(role);
             EnsureReadOnlyPermission<UserReportPlaceholder>(role);
             EnsureReadOnlyPermission<UserReportTemplateApplicationType>(role);
+            EnsureReadOnlyPermission<UserReportTemplateApplicationTypeGroup>(role);
             EnsureReadOnlyPermission<UserReportTemplateProjectContract>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroup>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroupMember>(role);
             EnsureReadOnlyPermission<PdfGenerationBatch>(role);
             EnsureReadOnlyPermission<WordReportGenerationBatch>(role);
+            EnsureReadOnlyPermission<PersonExportBatch>(role);
 
             EnsureReadOnlyPermission<ApplicationTypeFilter>(role);
             EnsureReadOnlyPermission<ApplicationType>(role);
-            EnsureReadOnlyPermission<ApplicationState>(role);
-            EnsureReadOnlyPermission<ApplicationLocation>(role);
             EnsureReadOnlyPermission<CheckPoint>(role);
             EnsureReadOnlyPermission<Country>(role);
             EnsureReadOnlyPermission<Department>(role);
             EnsureReadOnlyPermission<EducationLevel>(role);
             EnsureReadOnlyPermission<Gender>(role);
             EnsureReadOnlyPermission<MaritalStatus>(role);
-            EnsureReadOnlyPermission<MigrationService>(role);
-            EnsureReadOnlyPermission<OrganizationType>(role);
             EnsureReadOnlyPermission<PassportType>(role);
             EnsureReadOnlyPermission<PurposeOfTravel>(role);
             EnsureReadOnlyPermission<Region>(role);
@@ -702,14 +818,12 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<WorkPermitLocation>(role);
             EnsureReadOnlyPermission<MovementPermitLocation>(role);
             EnsureReadOnlyPermission<BorderZoneLocation>(role);
-            EnsureReadOnlyPermission<ProjectContract>(role);
-            EnsureReadOnlyPermission<ApprovingMinistry>(role);
-            EnsureReadOnlyPermission<ApprovalLegProfile>(role);
-            EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
-            EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ApplicationNumberingProfile>(role);
             EnsureReadOnlyPermission<ExpirationAlertRule>(role);
             EnsureReadOnlyPermission<PdfFormMapping>(role);
+
+            // Same process-tracking reads as Users (status + approval/migration SLA columns); no write.
+            EnsureApplicationProcessTrackingReadPermissions(role, officerCanWriteProgress: false);
 
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -718,6 +832,45 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureTypePermission<BusinessObjects.ApplicationItemReportPackageListHost>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
 
             EnsureDenyTypeAccess<UserFeedback>(role);
+        }
+
+        /// <summary>
+        /// Grants types needed to display Application ListView process-tracking columns
+        /// (Current status, Approval/Migration working days &amp; deadlines). No Configuration navigation.
+        /// Shared by <c>Users</c> and <c>UsersReadOnly</c> (reader officers).
+        /// </summary>
+        /// <param name="officerCanWriteProgress">
+        /// When true (Users): officers may create/update progress and approval snapshots.
+        /// When false (UsersReadOnly): progress and snapshots are read-only.
+        /// </param>
+        static void EnsureApplicationProcessTrackingReadPermissions(PermissionPolicyRole role, bool officerCanWriteProgress)
+        {
+            if (role == null)
+                return;
+
+            // Migration deadline / working days — ApplicationType.MigrationSlaProfile
+            EnsureReadOnlyPermission<ApplicationMigrationSlaProfile>(role);
+            // Current status labels
+            EnsureReadOnlyPermission<ApplicationState>(role);
+            EnsureReadOnlyPermission<ApplicationLocation>(role);
+            EnsureReadOnlyPermission<MigrationService>(role);
+            // Approval deadline / working days — Application.ApprovalLegSnapshots
+            EnsureReadOnlyPermission<ApprovingMinistry>(role);
+            EnsureReadOnlyPermission<ApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
+            EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ProjectContract>(role);
+
+            if (officerCanWriteProgress)
+            {
+                EnsureFullAccessRecursivePermission<ApplicationProgress>(role);
+                EnsureReadWriteCreatePermission<ApplicationApprovalLegSnapshot>(role);
+            }
+            else
+            {
+                EnsureReadOnlyPermission<ApplicationProgress>(role);
+                EnsureReadOnlyPermission<ApplicationApprovalLegSnapshot>(role);
+            }
         }
 
         static void EnsureDenyTypeAccess<T>(PermissionPolicyRole role) where T : class
@@ -926,7 +1079,6 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<ProjectContract>(role);
             EnsureReadWriteCreatePermission<ApprovingMinistry>(role);
             EnsureReadWriteCreatePermission<ApprovalLegProfile>(role);
-            EnsureReadOnlyPermission<OrganizationType>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
@@ -976,6 +1128,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Lookup/Invitation", SecurityPermissionState.Deny);
 
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Application", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employees", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/FamilyMembers", SecurityPermissionState.Deny);
+            EnsureNavigationPermission(role, @"Application/NavigationItems/Items/TemporaryVisitors", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/People", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Employee", SecurityPermissionState.Deny);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Documents", SecurityPermissionState.Deny);
@@ -994,7 +1149,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<UserReportTemplate>(role);
             EnsureFullAccessRecursivePermission<UserReportPlaceholder>(role);
             EnsureReadWriteCreatePermission<UserReportTemplateApplicationType>(role);
+            EnsureReadWriteCreatePermission<UserReportTemplateApplicationTypeGroup>(role);
             EnsureReadWriteCreatePermission<UserReportTemplateProjectContract>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroup>(role);
+            EnsureReadOnlyPermission<ApplicationTypeGroupMember>(role);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports", SecurityPermissionState.Allow);
             EnsureNavigationPermission(role, @"Application/NavigationItems/Items/Reports/Items/UserReportTemplate", SecurityPermissionState.Allow);
         }
@@ -1037,8 +1195,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         }
 
         /// <summary>
-        /// Application runtime log and state-notification inbox — super administrators only
-        /// (<see cref="PermissionPolicyRole.IsAdministrative"/>). State inbox is a future-release prototype.
+        /// Application runtime log, state-notification inbox, and Import reimport history —
+        /// super administrators only (<see cref="PermissionPolicyRole.IsAdministrative"/>).
         /// </summary>
         static void EnsureAdminOnlyOperationsDeny(PermissionPolicyRole role)
         {
@@ -1047,7 +1205,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             DenyTypeRead<ApplicationRuntimeLog>(role);
             DenyTypeRead<BoStateNotificationInboxHost>(role);
-            DenyTypeRead<LegacySyncDashboardHost>(role);
+            DenyTypeRead<ImportReimportHistoryHost>(role);
 
             EnsureNavigationPermission(
                 role,
@@ -1059,7 +1217,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 SecurityPermissionState.Deny);
             EnsureNavigationPermission(
                 role,
-                @"Application/NavigationItems/Items/Operations/Items/LegacySyncDashboard",
+                @"Application/NavigationItems/Items/Operations/Items/ImportReimportHistory",
                 SecurityPermissionState.Deny);
         }
 

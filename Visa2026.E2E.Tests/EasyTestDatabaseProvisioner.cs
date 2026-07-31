@@ -2,16 +2,41 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 
 namespace Visa2026.E2E.Tests;
 
 /// <summary>
-/// Creates and updates <see cref="EasyTestHostEnvironment.DatabaseName"/> via XAF <c>--updateDatabase</c>
-/// after EasyTest <see cref="DevExpress.EasyTest.Framework.EasyTestFixtureContext.DropDB"/>.
+/// Drops/creates <see cref="EasyTestHostEnvironment.DatabaseName"/> and runs XAF <c>--updateDatabase</c>.
 /// </summary>
 internal static class EasyTestDatabaseProvisioner
 {
+    internal static void DropDatabase()
+    {
+        string databaseName = EasyTestHostEnvironment.DatabaseName;
+        using var connection = new NpgsqlConnection(EasyTestHostEnvironment.MaintenanceConnectionString);
+        connection.Open();
+
+        using (var terminate = connection.CreateCommand())
+        {
+            terminate.CommandText = """
+                SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = @name AND pid <> pg_backend_pid();
+                """;
+            terminate.Parameters.AddWithValue("name", databaseName);
+            terminate.ExecuteNonQuery();
+        }
+
+        using (var drop = connection.CreateCommand())
+        {
+            drop.CommandText = $"""DROP DATABASE IF EXISTS "{databaseName}";""";
+            drop.ExecuteNonQuery();
+        }
+
+        Trace.WriteLine($"[EasyTest] Dropped PostgreSQL database '{databaseName}' (if it existed).");
+    }
+
     internal static void EnsureCreated(string blazorServerProjectPath)
     {
         EnsureEmptyDatabaseExists();
@@ -50,32 +75,32 @@ internal static class EasyTestDatabaseProvisioner
         {
             throw new InvalidOperationException(
                 $"EasyTest database provisioning failed (exit {process.ExitCode}). " +
-                $"Build the host with 'dotnet build Visa2026.slnx -c EasyTest' and ensure LocalDB is running.\n" +
+                $"Build the host with 'dotnet build Visa2026.slnx -c EasyTest' and ensure PostgreSQL is running on {EasyTestHostEnvironment.PgHost}:{EasyTestHostEnvironment.PgPort}.\n" +
                 $"stderr: {stderr.Trim()}\nstdout: {stdout.Trim()}");
         }
 
         WaitUntilDatabaseOnline(timeout: TimeSpan.FromMinutes(3));
     }
 
-    /// <summary>
-    /// XAF <c>--updateDatabase</c> and Startup schema gates connect to the target DB name;
-    /// after <see cref="DevExpress.EasyTest.Framework.EasyTestFixtureContext.DropDB"/> the catalog must exist first.
-    /// </summary>
     private static void EnsureEmptyDatabaseExists()
     {
         string databaseName = EasyTestHostEnvironment.DatabaseName;
 
-        using var connection = new SqlConnection(EasyTestHostEnvironment.MasterConnectionString);
+        using var connection = new NpgsqlConnection(EasyTestHostEnvironment.MaintenanceConnectionString);
         connection.Open();
 
-        using var command = connection.CreateCommand();
-        command.CommandText = $"""
-            IF DB_ID(N'{databaseName}') IS NULL
-                CREATE DATABASE [{databaseName}];
-            """;
-        command.ExecuteNonQuery();
+        using var existsCmd = connection.CreateCommand();
+        existsCmd.CommandText = "SELECT 1 FROM pg_database WHERE datname = @name";
+        existsCmd.Parameters.AddWithValue("name", databaseName);
+        var exists = existsCmd.ExecuteScalar() != null;
+        if (!exists)
+        {
+            using var create = connection.CreateCommand();
+            create.CommandText = $"""CREATE DATABASE "{databaseName}";""";
+            create.ExecuteNonQuery();
+        }
 
-        Trace.WriteLine($"[EasyTest] Ensured empty database catalog '{databaseName}' exists on {EasyTestHostEnvironment.LocalDbServer}.");
+        Trace.WriteLine($"[EasyTest] Ensured empty PostgreSQL database '{databaseName}' exists on {EasyTestHostEnvironment.PgHost}:{EasyTestHostEnvironment.PgPort}.");
     }
 
     private static void WaitUntilDatabaseOnline(TimeSpan timeout)
@@ -104,24 +129,19 @@ internal static class EasyTestDatabaseProvisioner
 
         try
         {
-            using var connection = new SqlConnection(EasyTestHostEnvironment.MasterConnectionString);
+            using var connection = new NpgsqlConnection(EasyTestHostEnvironment.MaintenanceConnectionString);
             connection.Open();
 
             using var command = connection.CreateCommand();
-            command.CommandText =
-                """
-                SELECT d.state_desc
-                FROM sys.databases d
-                WHERE d.name = @name
-                """;
-            command.Parameters.AddWithValue("@name", EasyTestHostEnvironment.DatabaseName);
+            command.CommandText = "SELECT 1 FROM pg_database WHERE datname = @name";
+            command.Parameters.AddWithValue("name", EasyTestHostEnvironment.DatabaseName);
 
             object? result = command.ExecuteScalar();
-            if (result is not string stateDesc)
+            if (result is null)
                 return false;
 
-            state = stateDesc;
-            return string.Equals(stateDesc, "ONLINE", StringComparison.OrdinalIgnoreCase);
+            state = "ONLINE";
+            return true;
         }
         catch (Exception ex)
         {

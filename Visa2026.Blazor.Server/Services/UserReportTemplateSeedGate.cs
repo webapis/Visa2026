@@ -37,13 +37,22 @@ internal static class UserReportTemplateSeedGate
 
             using var objectSpace = osFactory.CreateNonSecuredObjectSpace(typeof(UserReportTemplate));
 
+            // Groups must exist even when full template seed is skipped (Release with existing rows).
+            ApplicationTypeGroupSchemaSql.EnsureTables(objectSpace);
+            ApplicationTypeGroupSeed.EnsureRegistrationGroup(objectSpace);
+            objectSpace.CommitChanges();
+
 #if DEBUG
             bool shouldSeed = true;
 #else
             bool shouldSeed = !objectSpace.GetObjectsQuery<UserReportTemplate>().Any();
 #endif
             if (!shouldSeed)
+            {
+                logger?.LogInformation(
+                    "User report template seed skipped (templates already present); ApplicationTypeGroup Registration ensured.");
                 return;
+            }
 
             var moduleVersion = typeof(Visa2026Module).Assembly.GetName().Version ?? new Version(1, 0, 0, 0);
             var updater = new UserReportTemplateUpdater(application: null, objectSpace, moduleVersion);

@@ -100,14 +100,14 @@ internal static class Visa2014PersonMiddleNameToActualPositionCleanup
 
         foreach (var person in withMiddleName)
         {
-            var title = person.MiddleName.Trim();
+            var title = Visa2014ActualPositionNormalizer.Normalize(person.MiddleName);
             try
             {
                 if (!historyByPerson.TryGetValue(person.Id, out var rows) || rows.Count == 0)
                 {
                     keptNoHistory++;
                     if (verbose)
-                        Console.WriteLine($"  KEEP Person {person.Id}: MiddleName '{title}' (no position history)");
+                        Console.WriteLine($"  KEEP Person {person.Id}: MiddleName '{person.MiddleName}' (no position history)");
                     continue;
                 }
 
@@ -119,7 +119,7 @@ internal static class Visa2014PersonMiddleNameToActualPositionCleanup
                 if (dryRun)
                 {
                     bool exists = actualByName.ContainsKey(title);
-                    if (!exists) created++;
+                    if (!exists && title != Visa2014ActualPositionNormalizer.DashName) created++;
                     patched++;
                     cleared++;
                     if (verbose)

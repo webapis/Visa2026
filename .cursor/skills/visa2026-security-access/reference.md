@@ -59,7 +59,7 @@ Examples from `CreateUserRole()`:
 
 | Path suffix | Typical state (Users) |
 |-------------|----------------------|
-| `People`, `People/Items/Employees` | Allow |
+| `Employees`, `FamilyMembers`, `TemporaryVisitors` (top-level) | Allow |
 | `Lookup` | Deny |
 | `Application/Items/Application` (legacy combined list) | Deny |
 | `Application/Items/Application_ViaMinistries` | Allow |

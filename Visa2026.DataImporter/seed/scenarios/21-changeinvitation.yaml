@@ -22,8 +22,10 @@ data:
   Invitations:
   - Invitation Number: INV-2026-021
     Application: 5/-021
-    Start Date: 2026-05-10
-    Validity Duration: 6 aý
+    Issued Date: 2026-05-10
+    Expiration Date: 2026-11-06
+    Visa Category: Köp gezeklik
+    Visa Period: 6 (alty) aý
   InvitationItems:
   - Invitation Number: INV-2026-021
     Person: John Doe

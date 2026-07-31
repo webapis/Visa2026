@@ -406,7 +406,9 @@ dxd-license,
 }
 
 /* Nested ListViews with ShowAllRows: let the grid grow to fit all rows instead of
-   scrolling inside a fixed-height flex box (global VirtualScrollingEnabled + .dxbl-grid flex rules). */
+   scrolling inside a fixed-height flex box (global VirtualScrollingEnabled + .dxbl-grid flex rules).
+   Layout CustomCSSClassName (xaf-show-all-rows*) and/or NestedListViewShowAllRowsController
+   (xaf-nested-show-all-rows on the DxGrid) enable this. */
 .xaf-show-all-rows-tabbed,
 .xaf-show-all-rows {
     min-height: 0;
@@ -416,13 +418,17 @@ dxd-license,
 .xaf-show-all-rows-tabbed .dxbl-tabpage,
 .xaf-show-all-rows-tabbed .dxbl-tab-page,
 .xaf-show-all-rows-tabbed .dxbl-tabpage-content,
-.xaf-show-all-rows-tabbed .dxbl-tab-page-content {
+.xaf-show-all-rows-tabbed .dxbl-tab-page-content,
+.dxbl-tabpage:has(.xaf-nested-show-all-rows),
+.dxbl-tab-page:has(.xaf-nested-show-all-rows),
+.dxbl-tabpage-content:has(.xaf-nested-show-all-rows),
+.dxbl-tab-page-content:has(.xaf-nested-show-all-rows) {
     height: auto;
     min-height: 0;
 }
 
 .xaf-show-all-rows .dxbl-grid,
-.xaf-show-all-rows [class*="dxbl-grid"] {
+.dxbl-grid.xaf-nested-show-all-rows {
     flex: 0 0 auto;
     height: auto !important;
     min-height: unset;
@@ -430,23 +436,23 @@ dxd-license,
 
 .xaf-show-all-rows .dxbl-grid .dxbl-grid-content,
 .xaf-show-all-rows .dxbl-grid .dxbl-grid-container,
-.xaf-show-all-rows [class*="dxbl-grid"] .dxbl-grid-content,
-.xaf-show-all-rows [class*="dxbl-grid"] .dxbl-grid-container {
+.dxbl-grid.xaf-nested-show-all-rows .dxbl-grid-content,
+.dxbl-grid.xaf-nested-show-all-rows .dxbl-grid-container {
     height: auto !important;
     max-height: none !important;
     min-height: unset;
     overflow: visible !important;
 }
 
-/* Application Progress tab — current status summary above the history grid */
-.visa-progress-current-status {
+/* Nested list property-editor wrappers must not keep a fixed flex height. */
+.dxbl-fl-ctrl:has(.xaf-nested-show-all-rows),
+.dxbl-fl-ctrl:has(.xaf-nested-show-all-rows) > * {
+    height: auto !important;
+    min-height: 0;
     flex: 0 0 auto;
-    margin-block-end: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-    background: var(--bs-secondary-bg, #f8f9fa);
 }
 
+/* Application Progress tab — latest history row emphasis */
 .visa-progress-history-latest > td:first-child {
     box-shadow: inset 3px 0 0 #2563eb;
 }
@@ -3359,20 +3365,8 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     border-color: var(--resminamalar-slot-border);
 }
 
-.app-person-doc-copies__subtitle {
-    margin: 0 0.65rem 0.5rem;
-}
+/* Person document copies catalog layout: person-document-copies.css */
 
-.app-person-doc-copies__section-hint {
-    margin: 0 0.65rem 0.5rem;
-    font-size: 0.8125rem;
-}
-
-.resminamalar-slot-panel .app-item-doc-copies--inline-slot .app-person-doc-copies__section:not(:last-child) {
-    border-bottom: 1px solid var(--resminamalar-slot-border);
-}
-
-/* Placeholder manual — searchable catalog in preview slot */
 .placeholder-manual-slot-panel__toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -3448,44 +3442,6 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
 
 .placeholder-manual-slot-panel__copy-cell {
     white-space: nowrap;
-}
-
-.app-person-doc-copies__section-more {
-    display: flex;
-    justify-content: flex-start;
-    padding: 0.35rem 0.65rem 0.75rem;
-}
-
-.app-person-doc-copies__section-title {
-    margin: 0.75rem 0.65rem 0.35rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    opacity: 0.72;
-}
-
-.app-person-doc-copies__section:first-child .app-person-doc-copies__section-title {
-    margin-top: 0.35rem;
-}
-
-.app-person-doc-copies__record--nested {
-    margin-left: 1rem;
-    border-left: 2px solid var(--resminamalar-slot-border);
-}
-
-.app-person-doc-copies__badge {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 0.5rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-    background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
 .progress-letters-catalog__date {
@@ -3668,267 +3624,206 @@ body:has(#force-xaf-db-update-banner) #visa-app-shell {
     text-decoration: underline;
 }
 
-.app-person-document-copies-link {
-    color: var(--dxbl-link-color, #0d6efd);
-    cursor: pointer;
-    font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
+/* Person/Header document-copies ListView cells: styles in document-copies-brand.css */
+
+/* Import reimport history (Operations — Administrators) */
+.import-history-detail .xaf-detail-view,
+.import-history-detail .layout-main,
+.import-history-detail .layout-SimpleEditors,
+.import-history-detail .layout-ImportReimportHistoryHost,
+.import-history-detail .layout-item-HistoryUi {
+    height: 100%;
+    min-height: 0;
 }
 
-.app-person-document-copies-link:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
+.import-history {
+    padding: 0.75rem 1rem 1.5rem;
+    max-width: 1100px;
+    color: var(--bs-body-color, #212529);
 }
 
-/* Legacy sync dashboard (Operations) */
-.legacy-sync-dashboard {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
-    min-height: calc(100vh - 11rem);
-    padding: 0.35rem 0.85rem 1rem;
-    box-sizing: border-box;
+.import-history__title {
+    font-size: 1.25rem;
+    margin: 0 0 0.25rem;
 }
 
-.legacy-sync-dashboard__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.1rem;
-    border-radius: 0.65rem;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 1px solid var(--bs-border-color, #e2e8f0);
-}
-
-.legacy-sync-dashboard__title {
-    margin: 0;
-    font-size: 1.35rem;
-}
-
-.legacy-sync-dashboard__subtitle {
-    margin: 0.25rem 0 0;
-    color: #64748b;
+.import-history__subtitle,
+.import-history__path,
+.import-history__hint {
+    color: var(--bs-secondary-color, #6c757d);
+    margin: 0.25rem 0;
     font-size: 0.9rem;
 }
 
-.legacy-sync-dashboard__refresh {
-    border: 1px solid #cbd5e1;
-    background: #fff;
-    border-radius: 0.45rem;
-    padding: 0.45rem 0.85rem;
-    cursor: pointer;
-    font-weight: 600;
+.import-history__section {
+    margin-top: 1.25rem;
 }
 
-.legacy-sync-dashboard__refresh--busy {
-    opacity: 0.6;
-    cursor: wait;
-}
-
-.legacy-sync-dashboard__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-shrink: 0;
-}
-
-.legacy-sync-dashboard__open {
-    white-space: nowrap;
-    font-size: 0.9rem;
-    text-decoration: none;
-}
-
-.legacy-sync-dashboard__open:hover {
-    text-decoration: underline;
-    text-underline-offset: 0.12em;
-}
-
-.legacy-sync-dashboard__frame {
-    flex: 1 1 auto;
-    width: 100%;
-    min-height: 42rem;
-    border: 1px solid var(--bs-border-color, #e2e8f0);
-    border-radius: 0.65rem;
-    background: #fff;
-}
-
-.legacy-sync-dashboard__alert {
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    background: #fef3c7;
-    border: 1px solid #fcd34d;
-    color: #92400e;
-}
-
-.legacy-sync-dashboard__summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.legacy-sync-dashboard__stat {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 8rem;
-}
-
-.legacy-sync-dashboard__stat-label {
-    font-size: 0.75rem;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.legacy-sync-dashboard__stat-value {
-    font-weight: 600;
-}
-
-.legacy-sync-dashboard__pill {
-    display: inline-block;
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.legacy-sync-dashboard__pill--running { background: #dbeafe; color: #1d4ed8; }
-.legacy-sync-dashboard__pill--completed { background: #dcfce7; color: #15803d; }
-.legacy-sync-dashboard__pill--failed { background: #fee2e2; color: #b91c1c; }
-.legacy-sync-dashboard__pill--pending { background: #f1f5f9; color: #475569; }
-
-.legacy-sync-dashboard__wave-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.legacy-sync-dashboard__chip {
-    padding: 0.3rem 0.65rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 600;
-}
-
-.legacy-sync-dashboard__chip--pending { background: #f1f5f9; color: #475569; }
-.legacy-sync-dashboard__chip--running { background: #dbeafe; color: #1d4ed8; }
-.legacy-sync-dashboard__chip--completed { background: #dcfce7; color: #15803d; }
-.legacy-sync-dashboard__chip--failed { background: #fee2e2; color: #b91c1c; }
-
-.legacy-sync-dashboard__section-title {
-    margin: 0 0 0.65rem;
+.import-history__section h3 {
     font-size: 1rem;
+    margin: 0 0 0.5rem;
 }
 
-.legacy-sync-dashboard__bars {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
+.import-history__table-wrap {
+    overflow: auto;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 4px;
+    background: var(--bs-body-bg, #fff);
 }
 
-.legacy-sync-dashboard__bar-row {
-    display: grid;
-    grid-template-columns: 9rem 1fr 7rem;
-    gap: 0.65rem;
-    align-items: center;
-    font-size: 0.82rem;
-}
-
-.legacy-sync-dashboard__bar-label {
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.legacy-sync-dashboard__bar-track {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
-.legacy-sync-dashboard__bar {
-    height: 0.45rem;
-    border-radius: 999px;
-    min-width: 2px;
-}
-
-.legacy-sync-dashboard__bar--legacy { background: #94a3b8; }
-.legacy-sync-dashboard__bar--migrated { background: #0ea5e9; }
-
-.legacy-sync-dashboard__bar-meta {
-    text-align: right;
-    color: #64748b;
-    font-variant-numeric: tabular-nums;
-}
-
-.legacy-sync-dashboard__gap {
-    color: #b45309;
-    font-weight: 600;
-}
-
-.legacy-sync-dashboard__table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--bs-border-color, #e2e8f0);
-    border-radius: 0.5rem;
-}
-
-.legacy-sync-dashboard__table {
+.import-history__table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85rem;
 }
 
-.legacy-sync-dashboard__table th,
-.legacy-sync-dashboard__table td {
-    padding: 0.4rem 0.55rem;
-    border-bottom: 1px solid var(--bs-border-color, #e2e8f0);
+.import-history__table th,
+.import-history__table td {
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    padding: 0.35rem 0.5rem;
     text-align: left;
+    white-space: nowrap;
 }
 
-.legacy-sync-dashboard__table th {
-    background: #f8fafc;
-    color: #64748b;
-    font-weight: 600;
+.import-history__table th {
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    position: sticky;
+    top: 0;
 }
 
-.legacy-sync-dashboard__wave-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+.import-history__row--fail td:nth-child(3),
+.import-history__row--anomaly {
+    background: #ffe8e8;
 }
 
-.legacy-sync-dashboard__wave {
+.import-history__compare-bar {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0.65rem;
-    border-radius: 0.45rem;
-    border: 1px solid var(--bs-border-color, #e2e8f0);
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.import-history__compare-bar label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
     font-size: 0.85rem;
 }
 
-.legacy-sync-dashboard__wave-name {
+.import-history__compare-bar select {
+    min-width: 12rem;
+    padding: 0.25rem 0.4rem;
+}
+
+.import-history__btn {
+    padding: 0.35rem 0.85rem;
+    border: 1px solid var(--bs-border-color, #adb5bd);
+    border-radius: 4px;
+    background: var(--bs-primary, #0d6efd);
+    color: #fff;
+    cursor: pointer;
+}
+
+.import-history__empty {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px dashed var(--bs-border-color, #adb5bd);
+    border-radius: 4px;
+}
+
+.import-history__ok {
+    color: #0a7a2f;
+}
+
+.import-history__anomalies {
+    margin: 0.25rem 0 0 1.1rem;
+}
+
+
+/* Active grid filter awareness (GridSearchBoxLocalizationController). */
+.visa-grid-empty-filtered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+    text-align: center;
+}
+
+.visa-grid-empty-filtered__message {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #92400e;
+}
+
+.visa-grid-empty-filtered__clear {
+    appearance: none;
+    border: 1px solid #d97706;
+    background: #fffbeb;
+    color: #92400e;
+    border-radius: 0.375rem;
+    padding: 0.35rem 0.85rem;
+    font: inherit;
     font-weight: 600;
-    min-width: 10rem;
+    cursor: pointer;
 }
 
-.legacy-sync-dashboard__wave-stats {
-    color: #64748b;
-    font-variant-numeric: tabular-nums;
+.visa-grid-empty-filtered__clear:hover,
+.visa-grid-empty-filtered__clear:focus-visible {
+    background: #fef3c7;
+    border-color: #b45309;
+    outline: none;
 }
 
-.legacy-sync-dashboard__footer {
-    font-size: 0.78rem;
-    color: #94a3b8;
+/* Filtered column header (ListViewTotalCountController CustomizeElement). */
+.dxbl-grid .visa-grid-header-filtered,
+.dxbl-grid th.visa-grid-header-filtered {
+    background: #fef3c7 !important;
+    box-shadow: inset 0 -3px 0 #f59e0b;
+}
+
+.dxbl-grid .visa-grid-header-filtered .dxbl-grid-header-content,
+.dxbl-grid .visa-grid-header-filtered .dxbl-text {
+    font-weight: 600;
+    color: #92400e;
+}
+
+/* Filter panel when Auto mode shows it. */
+.dxbl-grid .dxbl-grid-filter-panel {
+    background: #fffbeb;
+    border-top: 1px solid #fcd34d;
+}
+
+/* Toolbar Clear filters — clickable, sits beside Total (ListViewClearFilters). */
+.visa-list-clear-filters-action {
+    margin-inline-start: 0.25rem !important;
+}
+
+.dxbl-toolbar-item.visa-list-clear-filters-action,
+.dxbl-toolbar-item:has(> .visa-list-clear-filters-action) {
+    margin-inline-start: 0.15rem !important;
+}
+
+.visa-list-clear-filters-action .dxbl-btn,
+.visa-list-clear-filters-action.dxbl-btn,
+.visa-list-clear-filters-action button {
+    border: 1px solid #d97706 !important;
+    background: #fffbeb !important;
+    color: #92400e !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+    border-radius: 0.375rem !important;
+    padding-inline: 0.65rem !important;
+}
+
+.visa-list-clear-filters-action .dxbl-btn:hover,
+.visa-list-clear-filters-action .dxbl-btn:focus,
+.visa-list-clear-filters-action.dxbl-btn:hover,
+.visa-list-clear-filters-action.dxbl-btn:focus {
+    background: #fef3c7 !important;
+    border-color: #b45309 !important;
+    color: #78350f !important;
 }
