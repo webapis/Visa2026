@@ -110,7 +110,7 @@ namespace Visa2026.Module.DatabaseUpdate
 
         /// <summary>
         /// <see cref="ActualPosition"/> has no lookup catalog seed. EasyTest PositionHistory needs one stable row
-        /// on the <c>Visa2026EasyTest</c> database only.
+        /// on the EasyTest database only (<c>visa2026_easytest</c>; legacy LocalDB name <c>Visa2026EasyTest</c>).
         /// </summary>
         private void EnsureEasyTestActualPositionSeed()
         {
@@ -134,7 +134,8 @@ namespace Visa2026.Module.DatabaseUpdate
 
                 var connectionString = efObjectSpace.DbContext.Database.GetConnectionString();
                 return !string.IsNullOrEmpty(connectionString)
-                       && connectionString.Contains("Visa2026EasyTest", StringComparison.OrdinalIgnoreCase);
+                       && (connectionString.Contains("visa2026_easytest", StringComparison.OrdinalIgnoreCase)
+                           || connectionString.Contains("Visa2026EasyTest", StringComparison.OrdinalIgnoreCase));
             }
             catch
             {

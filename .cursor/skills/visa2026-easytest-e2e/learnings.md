@@ -221,6 +221,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: `ReportDashboardPostgresViewsHealSql` and `ReportDashboardPostgresViewsUpdater` no-op until `"Visas"` / `"Applications"` / `"People"` / `"ApplicationItems"` exist (`to_regclass`). EasyTest provisioner uses `--forceUpdate`.
 - **Reuse**: Host-start view heals must gate on base tables like incomplete-persons already gates on People columns.
 
+### 2026-07-31 — GHA EasyTest: Postgres login case — standarduser vs StandardUser
+
+- **Outcome**: negative → fix (pending GHA verify)
+- **Context**: After greenfield `--updateDatabase` succeeded; host log `Login failed for 'standarduser'`
+- **Symptom**: Stuck on `/LoginPage` — Updater seeds **`StandardUser`**; E2E used lowercase **`standarduser`** (LocalDB was case-insensitive). Also ActualPosition EasyTest seed looked for DB name `Visa2026EasyTest` only.
+- **Fix / reuse**: `E2ETestLoginValues.StandardUserName = "StandardUser"`; `IsEasyTestDatabase` / `EasyTestHostMode` recognize **`visa2026_easytest`**.
+- **Reuse**: On PostgreSQL EasyTest, login user name must match seeded casing exactly.
+
 ### 2026-07-30 — Nested Travel New: click split-button primary, not only data-action-name
 
 - **Outcome**: negative → fix (GHA green: push `30603693018`, PR `30603694743`)
