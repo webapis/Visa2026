@@ -148,7 +148,8 @@ public sealed class PersonExportPacker
         [typeof(Visa)] = "PersonDocumentCopies.Section.Visas"
     };
 
-    private static string BuildEntryName(
+    /// <summary>Visible to Module.Tests for entry-name / folder-override / uniqueness coverage.</summary>
+    internal static string BuildEntryName(
         PersonLinkedDocumentSection section,
         PersonLinkedDocumentRecord record,
         string? mergedFileName,
@@ -203,14 +204,15 @@ public sealed class PersonExportPacker
         return text.ToString();
     }
 
-    private static string BuildZipFileName(Person person)
+    /// <summary>Visible to Module.Tests. <paramref name="stamp"/> defaults to local <see cref="DateTime.Now"/>.</summary>
+    internal static string BuildZipFileName(Person person, DateTime? stamp = null)
     {
         string name = ZipEntryFileNameSanitizer.Sanitize(person.FullName ?? "Person", maxLength: 60);
         string baseName = Path.GetFileNameWithoutExtension(name);
         if (string.IsNullOrWhiteSpace(baseName))
             baseName = "Person";
 
-        string stamp = DateTime.Now.ToString("yyyyMMdd_HHmm", CultureInfo.InvariantCulture);
-        return $"Dossier_{baseName}_{stamp}.zip";
+        string stampText = (stamp ?? DateTime.Now).ToString("yyyyMMdd_HHmm", CultureInfo.InvariantCulture);
+        return $"Dossier_{baseName}_{stampText}.zip";
     }
 }
