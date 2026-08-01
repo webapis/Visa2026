@@ -207,7 +207,9 @@ public sealed class PersonExportPacker
     /// <summary>Visible to Module.Tests. <paramref name="stamp"/> defaults to local <see cref="DateTime.Now"/>.</summary>
     internal static string BuildZipFileName(Person person, DateTime? stamp = null)
     {
-        string name = ZipEntryFileNameSanitizer.Sanitize(person.FullName ?? "Person", maxLength: 60);
+        // FullName is "" (not null) when name parts are empty — do not let Sanitize map that to "report.bin".
+        string rawName = string.IsNullOrWhiteSpace(person.FullName) ? "Person" : person.FullName;
+        string name = ZipEntryFileNameSanitizer.Sanitize(rawName, maxLength: 60);
         string baseName = Path.GetFileNameWithoutExtension(name);
         if (string.IsNullOrWhiteSpace(baseName))
             baseName = "Person";

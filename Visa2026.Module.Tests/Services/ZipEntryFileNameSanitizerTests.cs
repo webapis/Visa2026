@@ -12,11 +12,17 @@ public sealed class ZipEntryFileNameSanitizerTests
 {
     [Theory]
     [InlineData("3/-433", "3_-433")]
-    [InlineData("report<>name", "report_name")]
+    [InlineData(@"path\leaf", "path_leaf")]
     [InlineData("  spaced  ", "spaced")]
     public void Sanitize_ReplacesInvalidAndSlashCharacters(string input, string expected)
     {
         Assert.Equal(expected, ZipEntryFileNameSanitizer.Sanitize(input));
+    }
+
+    [Fact]
+    public void Sanitize_CollapsesRepeatedUnderscoresFromSlashes()
+    {
+        Assert.Equal("a_b_c", ZipEntryFileNameSanitizer.Sanitize("a//b\\\\c"));
     }
 
     [Fact]
