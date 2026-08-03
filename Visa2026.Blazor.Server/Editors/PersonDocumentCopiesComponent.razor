@@ -35,34 +35,34 @@
             }
 
             <div class="doc-copies-catalog__sections">
-                @foreach (var section in Snapshot.Sections)
+                @foreach (var catalogSection in Snapshot.Sections)
                 {
-                    var sectionCollapsed = IsSectionCollapsed(section.SectionId);
-                    var sectionExpanded = IsSectionExpanded(section.SectionId);
+                    var sectionCollapsed = IsSectionCollapsed(catalogSection.SectionId);
+                    var sectionExpanded = IsSectionExpanded(catalogSection.SectionId);
                     var visibleRecords = PersonDocumentCopiesCatalogFilter.GetVisibleRecords(
-                        section, _showAllDocuments, sectionExpanded);
+                        catalogSection, _showAllDocuments, sectionExpanded);
                     var hiddenCount = PersonDocumentCopiesCatalogFilter.GetHiddenCount(
-                        section, _showAllDocuments, sectionExpanded);
+                        catalogSection, _showAllDocuments, sectionExpanded);
                     var showsRecentFallback = PersonDocumentCopiesCatalogFilter.ShowsRecentFallback(
-                        section, _showAllDocuments, sectionExpanded);
-                    var withFilesCount = CountRecordsWithFiles(section);
+                        catalogSection, _showAllDocuments, sectionExpanded);
+                    var withFilesCount = CountRecordsWithFiles(catalogSection);
 
                     <section class="doc-copies-catalog__section @(sectionCollapsed ? "doc-copies-catalog__section--collapsed" : null)"
-                             aria-label="@section.SectionLabel">
+                             aria-label="@catalogSection.SectionLabel">
                         <header class="doc-copies-catalog__section-head doc-copies-catalog__section-head--nav"
                                 role="button"
                                 tabindex="0"
                                 aria-expanded="@(!sectionCollapsed)"
                                 aria-label="@(sectionCollapsed ? SectionExpandLabel : SectionCollapseLabel)"
-                                @onclick="@(() => ToggleSectionNavAsync(section.SectionId))"
-                                @onkeydown="@(e => OnSectionNavKeyDownAsync(e, section.SectionId))">
-                            <span class="doc-copies-catalog__nav-icon @DocumentCopiesCatalogNavIcons.CssClass(section.SectionId)" aria-hidden="true">
-                                @((MarkupString)DocumentCopiesCatalogNavIcons.Svg(section.SectionId))
+                                @onclick="@(() => ToggleSectionNavAsync(catalogSection.SectionId))"
+                                @onkeydown="@(e => OnSectionNavKeyDownAsync(e, catalogSection.SectionId))">
+                            <span class="doc-copies-catalog__nav-icon @DocumentCopiesCatalogNavIcons.CssClass(catalogSection.SectionId)" aria-hidden="true">
+                                @((MarkupString)DocumentCopiesCatalogNavIcons.Svg(catalogSection.SectionId))
                             </span>
 
                             <div class="doc-copies-catalog__section-head-main">
-                                <span class="doc-copies-catalog__section-title">@section.SectionLabel</span>
-                                <span class="doc-copies-catalog__section-summary">@GetSectionSummary(section, withFilesCount)</span>
+                                <span class="doc-copies-catalog__section-title">@catalogSection.SectionLabel</span>
+                                <span class="doc-copies-catalog__section-summary">@GetSectionSummary(catalogSection, withFilesCount)</span>
                             </div>
 
                             <div class="doc-copies-catalog__section-head-actions" @onclick:stopPropagation="true">
@@ -70,11 +70,11 @@
                                 {
                                     @if (!_showAllDocuments && hiddenCount > 0)
                                     {
-                                        <DxButton Text="@GetShowMoreLabel(section, hiddenCount)"
+                                        <DxButton Text="@GetShowMoreLabel(catalogSection, hiddenCount)"
                                                   RenderStyle="ButtonRenderStyle.Link"
                                                   SizeMode="SizeMode.Small"
                                                   CssClass="app-item-doc-copies__action-btn doc-copies-catalog__section-more-btn"
-                                                  Click="@(() => ExpandSectionAsync(section.SectionId))" />
+                                                  Click="@(() => ExpandSectionAsync(catalogSection.SectionId))" />
                                     }
                                     else if (!_showAllDocuments && sectionExpanded)
                                     {
@@ -82,14 +82,14 @@
                                                   RenderStyle="ButtonRenderStyle.Link"
                                                   SizeMode="SizeMode.Small"
                                                   CssClass="app-item-doc-copies__action-btn doc-copies-catalog__section-more-btn"
-                                                  Click="@(() => CollapseSectionAsync(section.SectionId))" />
+                                                  Click="@(() => CollapseSectionAsync(catalogSection.SectionId))" />
                                     }
                                 }
 
                                 <button type="button"
                                         class="doc-copies-catalog__nav-open"
                                         aria-expanded="@(!sectionCollapsed)"
-                                        @onclick="@(() => ToggleSectionNavAsync(section.SectionId))">
+                                        @onclick="@(() => ToggleSectionNavAsync(catalogSection.SectionId))">
                                     @(sectionCollapsed ? ActionOpen : ActionClose)
                                 </button>
                             </div>

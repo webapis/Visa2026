@@ -173,19 +173,19 @@
             }
 
             <div class="person-dossier__sections">
-                @foreach (var section in Snapshot.Sections)
+                @foreach (var dossierSection in Snapshot.Sections)
                 {
                     <section class="person-dossier__section">
                         <header class="person-dossier__section-head">
-                            <span class="person-dossier__section-title">@section.SectionLabel</span>
-                            <span class="person-dossier__section-count">@section.Records.Count</span>
+                            <span class="person-dossier__section-title">@dossierSection.SectionLabel</span>
+                            <span class="person-dossier__section-count">@dossierSection.Records.Count</span>
                         </header>
 
                         <div class="person-dossier__table-scroll">
                             <table class="person-dossier__table">
                                 <thead>
                                     <tr>
-                                        @foreach (var header in section.ColumnHeaders)
+                                        @foreach (var header in dossierSection.ColumnHeaders)
                                         {
                                             <th>@header</th>
                                         }
@@ -193,7 +193,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var record in section.Records)
+                                    @foreach (var record in dossierSection.Records)
                                     {
                                         <tr class="@(record.IsCurrent ? "person-dossier__row--current" : null)">
                                             @foreach (var cell in record.Cells)
