@@ -1,3 +1,17 @@
+### 2026-08-03 — Docker Demo Import RunId 20260803-010653 (Education failed)
+
+- **Ask**: Continue/watch Demo Import into Docker `:8081` / sync host `C:\visa2026-sync-demo`.
+- **Outcome**: Overall **Failed** after ~9m — Person/Passport/Visa **Completed**; **Education** Posted **3171** / Failed **35** (exit 1); later waves Pending.
+- **Cause**: classic catalog gaps — `incomplete OData payload` for missing **EducationInstitution** (and some Specialty). Sampled institutions include `Lizabon s. orta mekdep,CCVD-VCA okuw kursy`, `Jawaharlal Nehru adyndaky tehnologiki uniwersiteti`, `"F.D.Assisi" orta mekdep`, `IHK Regensburg…`, `IRT Training (PTY) LTD…`, `Palakkad…` (log mojibake; pull exact NameTm from `.15`).
+- **Logs**: `C:\visa2026-sync-demo\data\import-logs\demo-Education-20260803-010653.log` (+ `.err`); chain `logs\docker-demo-import-20260803-010651.log`.
+- **Next**: seed missing EducationInstitution/Specialty into Docker PG + calik-energi tenant JSON / DI bin overlay; resume `-Profile Demo -StartAt Education` (id-map keeps 3171). Do not ContinueOnError on full Demo chain.
+
+### 2026-08-03 — Docker Demo Education gaps seeded + resume
+
+- **Symptom**: RunId `20260803-010653` Education Failed **35** (`incomplete OData payload` / missing Institution+Specialty).
+- **Fix**: anti-join `.15` Education-used titles vs Docker PG `visa2026_staging_docker` NameTm → inserted **33** EducationInstitutions + **23** Specialties (counts **1527** / **1105**). SQL on host `C:\visa2026-deploy\_seed_edu_gaps_docker.sql`.
+- **Resume**: `Run-OnPremSyncOnServer -Profile Demo -SkipTenantCatalogGeneration -StartAt Education` via Win32_Process; new RunId **`20260803-022424`**; log `logs\docker-demo-resume-edu-20260803-022422.log`.
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh` (DbCount label still says Visa2026DbDemo; target is Docker PG via sync.env).
 ### 2026-07-30 — File waves .15 → local PG (DocumentCopies.ps1)
 
 - **Phase**: file-wave (`DocumentCopies.ps1`, `calik-energi-local-pg` → PostgreSQL `visa2026`)

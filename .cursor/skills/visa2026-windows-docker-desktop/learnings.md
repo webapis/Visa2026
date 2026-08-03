@@ -4,6 +4,15 @@ Append-only. Newest first.
 
 ## Entries
 
+### 2026-08-03 — Docker Desktop production on `.25` (`E:\visa2026-prod`, `:80`)
+
+- **Layout:** `E:\visa2026-prod`, project `visa2026-prod`, image `1.0.0.644`, `DB_NAME=visa2026_prod_docker`, `PG_HOST_PORT=5435`, `APP_PORT=80`.
+- **Port 80:** stopped IIS `Visa2026-Prod` (and legacy `Visa2026` already stopped) so Docker could bind `:80`. IIS Staging `:8080` left running; Docker staging `:8081` unchanged.
+- **Compose CLI:** on this host use `E:\Docker\resources\bin\docker-compose.exe` (`docker compose` plugin unavailable). Pull with stub cred helpers + `DOCKER_CONFIG` under the client folder (same as staging).
+- **First boot:** `compose run … --updateDatabase --forceUpdate --silent` then `up -d app`. Allow ~40–60s after recreate before LoginPage smoke (early curl can return `000`).
+- **Smoke:** `http://10.100.128.25/LoginPage` → **HTTP 200**; staging still `http://10.100.128.25:8081/LoginPage` → 200. Empty Docker prod DB (lookups seeded only) — business import is a separate skill.
+- **FORCE_XAF:** removed from `.env.prod` after ModuleUpdaters ran.
+
 ### 2026-08-03 — Skill promoted; local pilot waived
 
 - **Decision:** Create this skill after **one** verified on-prem Desktop pilot (`.25` staging). Local `C:\visa2026-pilot` waived — workstation disk insufficient; staging shipped on `10.100.128.25` instead.

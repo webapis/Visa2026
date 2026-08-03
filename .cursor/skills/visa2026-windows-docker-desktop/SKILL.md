@@ -15,7 +15,10 @@ disable-model-invocation: false
 
 Run Visa2026 on **Windows + Docker Desktop** (Linux containers / WSL2) using Hub images and `docker-compose.prod.yml`. One compose project + one Postgres volume per client (or per slot).
 
-**Verified pilot (2026-08-03):** Calik on-prem `10.100.128.25` — `E:\visa2026-staging`, project `visa2026-staging`, app **`:8081`**, DB `visa2026_staging_docker` @ host port **5434**, image **`1.0.0.644`**. Local `C:\visa2026-pilot` **waived** (insufficient disk on the workstation).
+**Verified on `10.100.128.25` (2026-08-03):**
+- **Prod:** `E:\visa2026-prod`, project `visa2026-prod`, app **`:80`**, DB `visa2026_prod_docker` @ **5435**, image **`1.0.0.644`** (IIS Prod stopped to free `:80`).
+- **Staging:** `E:\visa2026-staging`, **`:8081`**, DB `visa2026_staging_docker` @ **5434**, same image.
+- Local `C:\visa2026-pilot` **waived** (insufficient disk on the workstation).
 
 **Canonical runbook:** [docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md](../../../docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md)
 
