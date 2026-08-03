@@ -22,7 +22,7 @@ namespace Visa2026.Blazor.Server
 
         void Visa2026BlazorApplication_CustomizeLanguage(object sender, CustomizeLanguageEventArgs e)
         {
-            // Align XAF Application Model language with ASP.NET request culture (cookie / default en-US).
+            // Align XAF Application Model language with ASP.NET request culture (cookie / default tr-TR).
             if (VisaLocalization.TryNormalizeCulture(
                     System.Globalization.CultureInfo.CurrentUICulture.Name,
                     out string fromRequest))

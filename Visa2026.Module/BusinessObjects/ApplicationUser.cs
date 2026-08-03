@@ -18,7 +18,7 @@ namespace Visa2026.Module.BusinessObjects
         [Browsable(false)]
         public virtual DateTime LockoutEnd { get; set; }
 
-        /// <summary>BCP-47 UI culture (e.g. en-US). Set via runtime language switcher; restored on logon.</summary>
+        /// <summary>BCP-47 UI culture (e.g. tr-TR). Set via runtime language switcher; restored on logon.</summary>
         [Browsable(false)]
         [MaxLength(10)]
         public virtual string PreferredCulture { get; set; }
