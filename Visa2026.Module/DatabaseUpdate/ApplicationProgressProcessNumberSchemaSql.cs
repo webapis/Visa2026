@@ -120,6 +120,14 @@ public static class ApplicationProgressProcessNumberSchemaSql
             var cleaned = DatabaseProviderDetector.StripEfCoreProvider(connectionString);
             using var connection = new NpgsqlConnection(cleaned);
             connection.Open();
+            // Greenfield EasyTest/host start can call this before EF creates tables.
+            // SQL Server path already no-ops via OBJECT_ID; match that for Postgres.
+            if (!PostgresRelationExists(connection, "ApplicationProgresses")
+                || !PostgresRelationExists(connection, "Applications"))
+            {
+                return;
+            }
+
             Execute(connection, EnsureColumnsPostgres);
             if (backfill)
             {
@@ -147,5 +155,16 @@ public static class ApplicationProgressProcessNumberSchemaSql
         using var command = connection.CreateCommand();
         command.CommandText = sql;
         command.ExecuteNonQuery();
+    }
+
+    private static bool PostgresRelationExists(NpgsqlConnection connection, string tableName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT to_regclass(@qualified) IS NOT NULL;
+            """;
+        command.Parameters.AddWithValue("qualified", $"public.\"{tableName}\"");
+        var result = command.ExecuteScalar();
+        return result is true || result is bool b && b;
     }
 }
