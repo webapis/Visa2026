@@ -144,20 +144,80 @@ curl -X POST "https://api2.cursor.sh/automations/webhook/<automation-id>" \
 
 ## Prompt tips for the automation
 
-Tell the agent explicitly how to use the webhook JSON, for example:
+Keep the instruction field **once** (do not paste the same block twice). Prefer **two automations** over one agent that “waits forever” for CI (see [CI fix loop](#recommended-ci-fix-loop-two-automations)).
+
+### Automation A — issue opened (implement)
 
 ```text
 You were started because a GitHub issue was opened.
 The HTTP body includes: title, body, url, number, author, labels.
 
+Goals:
 1. Read the issue title and body.
-2. Inspect the Visa2026 repository as needed.
-3. If the issue is actionable, implement a minimal fix on a feature branch and open a draft PR that references the issue.
-4. If the issue is unclear or not a code task, do not change code; summarize what is missing.
-5. Prefer matching existing patterns in Visa2026.Module; do not widen scope.
+2. If unclear or not a code task: do not change code; comment what is missing; stop.
+3. Implement a minimal fix on a feature branch named cursor/<short-slug>-####.
+4. Prefer matching existing patterns in Visa2026.Module; do not widen scope.
+5. BEFORE opening a PR, verify locally:
+   - dotnet build Visa2026.slnx -c Debug
+   - dotnet test Visa2026.Module.Tests/Visa2026.Module.Tests.csproj -c Debug --no-build
+   Fix compile/test failures from that run (up to 3 local attempts). Do not open a PR while local build/tests fail.
+6. Open a draft PR that references the issue (Fixes #N). Target the repo default branch unless the issue says otherwise.
+7. Do NOT stop only because the PR was opened. After push:
+   - Use gh to watch checks on the PR (gh pr checks --watch, or poll gh pr checks).
+   - Wait for Build & unit tests (and EasyTest if it started). Timeout ~25 minutes.
+   - If checks fail: fetch failed logs (gh run view --log-failed), fix on the same branch, push, increment attempt.
+   - Retry CI fix at most 5 times total. After 5 failures, comment on the PR with root cause + what you tried, leave draft open.
+8. Do not skip or delete tests to force green unless the issue explicitly asks for that.
 ```
 
-Adjust for triage-only vs. auto-fix behavior.
+### Automation B — CI failed on PR (recommended second automation)
+
+Relying only on Automation A to stay alive through CI is fragile (long E2E, agent timeout). Add a second automation:
+
+| Setting | Value |
+|---------|--------|
+| Trigger | GitHub → **Checks completed** (on failure) **or** **Workflow run completed** (failure) |
+| Scope | PRs / this repo; prefer **Anyone** (not only “Me”) so `github-actions` / bot check actors still match |
+| Tools | Open Pull Request (push to existing branch), Memories |
+
+**Caveat:** Cursor’s “Checks completed” trigger has been reported to **skip PRs created/pushed by `cursor[bot]`**. If Run History stays empty for agent PRs, use **Workflow run completed**, or keep the `gh pr checks --watch` loop in Automation A, or comment `@cursor` on the failed PR.
+
+Paste-ready prompt for Automation B (max 5 attempts via Memories):
+
+```text
+You fix CI failures on an open Visa2026 pull request.
+
+Attempt limit:
+1. Memory file name: ci-retry-pr-<PR_NUMBER>
+2. Read that memory. If attempts >= 5, comment on the PR that the retry budget is exhausted and stop.
+3. Else set attempts = (previous or 0) + 1 and write the memory.
+
+Then:
+1. Identify failing checks; pull failed logs with gh (gh pr checks, gh run view --log-failed).
+2. Reproduce locally when possible: dotnet build Visa2026.slnx -c Debug and the failing test project.
+3. Apply a minimal fix on the EXISTING PR branch (do not open a duplicate PR).
+4. Push and summarize what failed and what you changed.
+5. Do not widen scope. Do not skip tests unless clearly flaky and justified in the PR comment.
+```
+
+Marketplace starting point: [Fix CI failures](https://cursor.com/marketplace/automations/ci-autofix) (adapt to push onto the existing PR branch, not always open a new PR).
+
+---
+
+## Recommended CI fix loop (two automations)
+
+```text
+Issue opened
+    → Automation A: implement + local verify + draft PR
+         → (optional) A watches gh checks and may fix up to 5 times
+CI fails on PR
+    → Automation B: read logs + fix + push (attempts tracked in Memories, max 5)
+Green checks
+    → human reviews / marks ready
+```
+
+**Why not only “retry 5 times” inside the first prompt?**  
+One cloud-agent run can end after opening the PR. Waiting for Build + EasyTest (~10+ minutes) × 5 attempts is slow, expensive, and easy to cut off. A **CI-failed trigger** starts a fresh agent with the failure context.
 
 ---
 
