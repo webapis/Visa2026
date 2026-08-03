@@ -1,4 +1,46 @@
 {
+  "PersonIncomplete.Action.MarkIncomplete": {
+    "en": "Mark incomplete",
+    "tr-TR": "Eksik olarak işaretle",
+    "tk-TM": "Doly däl diýlip bellen",
+    "ru-RU": "Отметить неполным"
+  },
+  "PersonIncomplete.Action.UpdateIncomplete": {
+    "en": "Update incomplete",
+    "tr-TR": "Eksik bilgisini güncelle",
+    "tk-TM": "Doly däli täzele",
+    "ru-RU": "Обновить неполные данные"
+  },
+  "PersonIncomplete.Action.MarkComplete": {
+    "en": "Mark complete",
+    "tr-TR": "Tamamlandı olarak işaretle",
+    "tk-TM": "Doly diýlip bellen",
+    "ru-RU": "Отметить полным"
+  },
+  "PersonIncomplete.Action.MarkComplete.Confirmation": {
+    "en": "Clear incomplete status and notes for this person?",
+    "tr-TR": "Bu kişinin eksik durumu ve notları temizlensin mi?",
+    "tk-TM": "Bu şahsyň doly däl ýagdaýy we bellikleri arassalansynmy?",
+    "ru-RU": "Снять признак неполноты и очистить заметки для этого лица?"
+  },
+  "PersonIncomplete.Dialog.Apply": {
+    "en": "Apply",
+    "tr-TR": "Uygula",
+    "tk-TM": "Ulan",
+    "ru-RU": "Применить"
+  },
+  "PersonIncomplete.Message.SelectAtLeastOneArea": {
+    "en": "Select at least one missing-data area.",
+    "tr-TR": "En az bir eksik veri alanı seçin.",
+    "tk-TM": "Azyndan bir ýetmezçilik meýdançasyny saýlaň.",
+    "ru-RU": "Выберите хотя бы одну область недостающих данных."
+  },
+  "PersonIncomplete.Message.NotesRequired": {
+    "en": "Notes are required.",
+    "tr-TR": "Notlar zorunludur.",
+    "tk-TM": "Bellikler hökmany.",
+    "ru-RU": "Заметки обязательны."
+  },
   "PersonDossier.Title": {
     "en": "Person dossier",
     "tr-TR": "Kişi dosyası",

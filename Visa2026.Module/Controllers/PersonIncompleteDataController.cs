@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
 
 namespace Visa2026.Module.Controllers;
 
@@ -21,7 +22,7 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
     {
         _markIncompleteAction = new PopupWindowShowAction(this, "MarkPersonIncomplete", PredefinedCategory.Edit)
         {
-            Caption = "Mark incomplete",
+            Caption = VisaUiMessages.Get("PersonIncomplete.Action.MarkIncomplete"),
             ImageName = "Action_Deny",
             SelectionDependencyType = SelectionDependencyType.RequireSingleObject
         };
@@ -30,10 +31,10 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
 
         _markCompleteAction = new SimpleAction(this, "MarkPersonComplete", PredefinedCategory.Edit)
         {
-            Caption = "Mark complete",
+            Caption = VisaUiMessages.Get("PersonIncomplete.Action.MarkComplete"),
             ImageName = "Action_Grant",
             SelectionDependencyType = SelectionDependencyType.RequireSingleObject,
-            ConfirmationMessage = "Clear incomplete status and notes for this person?"
+            ConfirmationMessage = VisaUiMessages.Get("PersonIncomplete.Action.MarkComplete.Confirmation")
         };
         _markCompleteAction.Execute += MarkComplete_Execute;
     }
@@ -41,6 +42,9 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
     protected override void OnActivated()
     {
         base.OnActivated();
+        _markCompleteAction.Caption = VisaUiMessages.Get("PersonIncomplete.Action.MarkComplete");
+        _markCompleteAction.ConfirmationMessage =
+            VisaUiMessages.Get("PersonIncomplete.Action.MarkComplete.Confirmation");
         UpdateActionState();
         ObjectSpace.ObjectChanged += ObjectSpace_ObjectChanged;
         View.CurrentObjectChanged += View_CurrentObjectChanged;
@@ -66,7 +70,9 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
         var person = View.CurrentObject as Person;
         var incomplete = person?.IsDataIncomplete == true;
         _markIncompleteAction.Active["PersonIncomplete"] = person != null;
-        _markIncompleteAction.Caption = incomplete ? "Update incomplete" : "Mark incomplete";
+        _markIncompleteAction.Caption = incomplete
+            ? VisaUiMessages.Get("PersonIncomplete.Action.UpdateIncomplete")
+            : VisaUiMessages.Get("PersonIncomplete.Action.MarkIncomplete");
         _markCompleteAction.Active["PersonIncomplete"] = person != null && incomplete;
     }
 
@@ -82,7 +88,7 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
         detailView.ViewEditMode = ViewEditMode.Edit;
         e.View = detailView;
         e.DialogController.SaveOnAccept = false;
-        e.DialogController.AcceptAction.Caption = "Apply";
+        e.DialogController.AcceptAction.Caption = VisaUiMessages.Get("PersonIncomplete.Dialog.Apply");
     }
 
     private void MarkIncomplete_Execute(object sender, PopupWindowShowActionExecuteEventArgs e)
@@ -95,7 +101,7 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
         if (!opts.HasAtLeastOneMissingArea)
         {
             Application.ShowViewStrategy.ShowMessage(
-                "Select at least one missing-data area.",
+                VisaUiMessages.Get("PersonIncomplete.Message.SelectAtLeastOneArea"),
                 InformationType.Warning);
             return;
         }
@@ -103,7 +109,7 @@ public class PersonIncompleteDataController : ObjectViewController<DetailView, P
         if (string.IsNullOrWhiteSpace(opts.Notes))
         {
             Application.ShowViewStrategy.ShowMessage(
-                "Notes are required.",
+                VisaUiMessages.Get("PersonIncomplete.Message.NotesRequired"),
                 InformationType.Warning);
             return;
         }

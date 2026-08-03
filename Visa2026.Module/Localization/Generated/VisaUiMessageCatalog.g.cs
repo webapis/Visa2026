@@ -3918,6 +3918,55 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "Dosýe görnüşi",
             ["ru-RU"] = "Вид досье",
         },
+        ["PersonIncomplete.Action.MarkComplete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark complete",
+            ["tr-TR"] = "Tamamlandı olarak işaretle",
+            ["tk-TM"] = "Doly diýlip bellen",
+            ["ru-RU"] = "Отметить полным",
+        },
+        ["PersonIncomplete.Action.MarkComplete.Confirmation"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Clear incomplete status and notes for this person?",
+            ["tr-TR"] = "Bu kişinin eksik durumu ve notları temizlensin mi?",
+            ["tk-TM"] = "Bu şahsyň doly däl ýagdaýy we bellikleri arassalansynmy?",
+            ["ru-RU"] = "Снять признак неполноты и очистить заметки для этого лица?",
+        },
+        ["PersonIncomplete.Action.MarkIncomplete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Mark incomplete",
+            ["tr-TR"] = "Eksik olarak işaretle",
+            ["tk-TM"] = "Doly däl diýlip bellen",
+            ["ru-RU"] = "Отметить неполным",
+        },
+        ["PersonIncomplete.Action.UpdateIncomplete"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Update incomplete",
+            ["tr-TR"] = "Eksik bilgisini güncelle",
+            ["tk-TM"] = "Doly däli täzele",
+            ["ru-RU"] = "Обновить неполные данные",
+        },
+        ["PersonIncomplete.Dialog.Apply"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Apply",
+            ["tr-TR"] = "Uygula",
+            ["tk-TM"] = "Ulan",
+            ["ru-RU"] = "Применить",
+        },
+        ["PersonIncomplete.Message.NotesRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Notes are required.",
+            ["tr-TR"] = "Notlar zorunludur.",
+            ["tk-TM"] = "Bellikler hökmany.",
+            ["ru-RU"] = "Заметки обязательны.",
+        },
+        ["PersonIncomplete.Message.SelectAtLeastOneArea"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Select at least one missing-data area.",
+            ["tr-TR"] = "En az bir eksik veri alanı seçin.",
+            ["tk-TM"] = "Azyndan bir ýetmezçilik meýdançasyny saýlaň.",
+            ["ru-RU"] = "Выберите хотя бы одну область недостающих данных.",
+        },
         ["PlaceholderManual.Column.Canonical"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Full name",
