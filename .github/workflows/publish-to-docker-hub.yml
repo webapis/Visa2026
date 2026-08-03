@@ -1,67 +1,130 @@
-# This GitHub Actions workflow automates the process of building and deploying
-# the Visa2026 application image to Docker Hub.
+# Build and push webapia/visa2026 (+ importer) to Docker Hub.
 #
-# It triggers automatically on every push to the 'main' branch.
+# When this runs:
+#   After EasyTest E2E succeeds for a push to master (full suite), and Build & unit
+#   tests for that same commit are green (waits if unit tests are still running).
+#   workflow_dispatch -> manual republish of current default-branch HEAD (skips the gate).
+# Does not publish after PR Tier 0 E2E, nightly schedule, or failed runs.
 
 name: Build and Publish to Docker Hub
 
 on:
-  push:
-    branches:
-      - setup-docker-engine  
+  workflow_run:
+    workflows: ["EasyTest E2E"]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
 
 env:
-  # Configuration: Set this to your Docker Hub repository
-  DOCKER_IMAGE_NAME: webapia/visa2026 # <-- TODO: Replace with "your-username/your-repo-name"
+  DOCKER_IMAGE_NAME: webapia/visa2026
 
 jobs:
   build-and-publish:
+    name: Build and publish
     runs-on: ubuntu-latest
+    # Auto-publish only after a successful E2E run triggered by push to master.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    permissions:
+      contents: read
+      actions: read
+
     steps:
-      # 1. Check out the repository code
+      - name: Resolve commit to publish
+        id: ref
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            SHA="${{ github.event.workflow_run.head_sha }}"
+          else
+            SHA="${{ github.sha }}"
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "sha_short=${SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "Publishing commit $SHA"
+
+      # E2E and unit tests start together on push; E2E usually finishes later, but poll
+      # in case unit tests are still running when this workflow is triggered.
+      - name: Wait for Build & unit tests on same commit
+        if: github.event_name == 'workflow_run'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = '${{ steps.ref.outputs.sha }}';
+            const workflowName = 'Build & unit tests';
+            const deadline = Date.now() + 30 * 60 * 1000;
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+            async function findRun() {
+              const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head_sha: sha,
+                event: 'push',
+                per_page: 20,
+              });
+              return runs.find((r) => r.name === workflowName) || null;
+            }
+
+            let run = await findRun();
+            while (!run || run.status !== 'completed') {
+              if (Date.now() > deadline) {
+                core.setFailed(`Timed out waiting for "${workflowName}" on ${sha}`);
+                return;
+              }
+              core.info(run
+                ? `"${workflowName}" status=${run.status} — waiting…`
+                : `"${workflowName}" not found yet for ${sha} — waiting…`);
+              await sleep(30000);
+              run = await findRun();
+            }
+
+            core.info(`"${workflowName}" conclusion=${run.conclusion} url=${run.html_url}`);
+            if (run.conclusion !== 'success') {
+              core.setFailed(`Refusing to publish: "${workflowName}" concluded ${run.conclusion}`);
+            }
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref.outputs.sha }}
 
-      # 2. Log in to Docker Hub
-      #    This action uses secrets to log in securely.
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 2.5 Write DevExpress license files for build-time and embedded licensing
       - name: Write DevExpress license key
         run: |
           mkdir -p DevExpress.Key
           echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key/DevExpress_License.txt
-          
+
       - name: Write DevExpress license file
         run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress.Key/DevExpress_License.txt
 
-      - name: List files for verification
-        run: ls -la
-
-      # 2.6 Extract Version from .csproj
       - name: Get Version from Project
         id: get_version
         run: |
           echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
-          echo "GIT_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # 3. Build and push the main app Docker image
       - name: Build and push app Docker image
+        env:
+          PUBLISH_SHA: ${{ steps.ref.outputs.sha }}
+          PUBLISH_SHA_SHORT: ${{ steps.ref.outputs.sha_short }}
         run: |
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:latest
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          docker build . \
+            --build-arg APP_VERSION=${{ env.APP_VERSION }} \
+            --build-arg GIT_SHA=${PUBLISH_SHA_SHORT} \
+            -t ${{ env.DOCKER_IMAGE_NAME }}:${PUBLISH_SHA} \
+            -t ${{ env.DOCKER_IMAGE_NAME }}:latest \
+            -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
+          docker push ${{ env.DOCKER_IMAGE_NAME }}:${PUBLISH_SHA}
           docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
           docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
 
-      # 4. Build and push the importer Docker image
       - name: Build and push importer Docker image
         run: |
           docker build -f Visa2026.DataImporter/Dockerfile . -t webapia/visa2026-importer:latest
