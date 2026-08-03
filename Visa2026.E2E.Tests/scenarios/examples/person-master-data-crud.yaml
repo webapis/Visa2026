@@ -6,7 +6,7 @@ e2eId: E2E-001-008
 description: >-
   Log in, create employee, passport+visa, education, address, medical (CRUD),
   position history, work duty, salary, external arrival travel
-user: standarduser
+user: StandardUser
 password: ""
 
 env:
@@ -24,7 +24,7 @@ env:
   salaryCurrency: TMT
 
 steps:
-  - login: { user: standarduser, password: "" }
+  - login: { user: StandardUser, password: "" }
   - assert-shell: true
   - goto: Person_ListView_Employees
   - create-employee-required: env

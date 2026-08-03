@@ -3,7 +3,7 @@
 id: person-officer-journey
 e2eId: E2E-001
 description: Log in, create employee, add passport on same employee (single journey)
-user: standarduser
+user: StandardUser
 password: ""
 
 env:
@@ -14,7 +14,7 @@ env:
 
 steps:
   - login:
-      user: standarduser
+      user: StandardUser
       password: ""
   - navigate: Application
   - assert-action: New

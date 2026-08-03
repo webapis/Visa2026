@@ -123,7 +123,7 @@ AssertEmployeeDetailViewActive(); // URL or employee form (TabbedMDI may keep UR
 |------|---------|
 | `E2ETestEmployeeCreateValues` | Officer journey employee field values |
 | `E2ETestPassportCreateValues` | Officer journey passport field values |
-| `E2ETestLoginValues` | `standarduser`, list/detail view paths |
+| `E2ETestLoginValues` | `StandardUser`, list/detail view paths |
 
 ---
 

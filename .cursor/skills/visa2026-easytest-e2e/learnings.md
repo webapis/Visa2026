@@ -212,3 +212,19 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: `Could not execute nested New [New External Arrival | External Arrival]` while HTML had `title="New External Arrival"` on a **split** control.
 - **Fix / reuse**: Polymorphic New puts `data-action-name` + `title` on `div.dxbl-btn-split`; inner `button` has `title` only. Extend `TryClickToolbarActionByTitle` / `HasToolbarActionByTitle` to click split primary / titled buttons without requiring `@data-action-name`. Re-enabled External Arrival after TravelHistory↔ApplicationItem decoupling.
 - **Reuse**: Nested polymorphic New → match split toolbar, not only `button[@data-action-name]`.
+
+### 2026-08-03 — Tier 0 login: `standarduser` vs seeded `StandardUser` on Postgres
+
+- **Outcome**: negative → fix (pending GHA re-verify)
+- **Context**: `PersonOfficerJourneyTests`, Hub publish gate run `30798831369` (`development` @ `2a71203`); also PR #17 after English EasyTest culture force
+- **Symptom**: Stayed on `/LoginPage`; host-out.log `Login failed for 'standarduser'. User name or password is incorrect.` Unit tests green; Hub push skipped.
+- **Fix / reuse**: `E2ETestLoginValues.StandardUserName` must be **`StandardUser`** (exact match to `Updater` seed). Postgres username match is case-sensitive; lowercase `standarduser` worked under old SQL Server CI habits only.
+- **Reuse**: Officer E2E login = seeded user name casing exactly; never assume case-insensitive auth on Postgres.
+
+### 2026-08-03 — EasyTest must use English UI when app default is Turkish
+
+- **Outcome**: negative → fix
+- **Context**: PR #17 (`tr-TR` default), `PersonOfficerJourneyTests`, `VisaLocalization` / `EasyTestHostMode`
+- **Symptom**: After default UI → Turkish, EasyTest failed with `Cannot find the 'User Name' control` (login captions Turkish: Kullanıcı adı / Giriş).
+- **Fix / reuse**: Keep E2E captions English. When `EasyTestHostMode.IsEnabled`, force `en-US` (request localization default + empty culture providers, XAF `CustomizeLanguage`, `DevExpress__ExpressApp__Languages` env, skip `ApplyStoredCultureAfterLogonAsync`). App default remains `tr-TR`.
+- **Reuse**: E2E = English UI only; never localize EasyTest captions to match production default.
