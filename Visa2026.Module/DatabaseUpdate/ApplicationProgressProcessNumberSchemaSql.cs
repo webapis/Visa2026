@@ -15,8 +15,16 @@ public static class ApplicationProgressProcessNumberSchemaSql
     /// statement splitting cannot break Postgres schema ensure.
     /// </summary>
     internal const string EnsureColumnsPostgres = """
-        ALTER TABLE "ApplicationProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
-        ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+        DO $ensure$
+        BEGIN
+          IF to_regclass('public."ApplicationProgresses"') IS NOT NULL THEN
+            ALTER TABLE "ApplicationProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          END IF;
+          IF to_regclass('public."Applications"') IS NOT NULL THEN
+            ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          END IF;
+        END
+        $ensure$;
         """;
 
     internal const string EnsureColumnsSqlServer = """

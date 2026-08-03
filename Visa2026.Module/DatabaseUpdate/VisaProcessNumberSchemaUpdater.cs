@@ -17,7 +17,10 @@ public sealed class VisaProcessNumberSchemaUpdater : ModuleUpdater
     public override void UpdateDatabaseBeforeUpdateSchema()
     {
         base.UpdateDatabaseBeforeUpdateSchema();
-        EnsureColumns();
+        // SQL Server script no-ops via OBJECT_ID when Visas is missing.
+        // Postgres ALTER TABLE does not — wait for AfterUpdateSchema on greenfield.
+        if (!DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+            EnsureColumns();
     }
 
     public override void UpdateDatabaseAfterUpdateSchema()
