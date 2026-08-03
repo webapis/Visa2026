@@ -16,6 +16,12 @@ public static class UserCultureHelper
 {
     public static async Task ApplyStoredCultureAfterLogonAsync(BlazorApplication application)
     {
+        // EasyTest must stay on English captions for the whole officer journey.
+        if (EasyTestHostMode.IsEnabled)
+        {
+            return;
+        }
+
         if (SecuritySystem.CurrentUser is not ApplicationUser user)
         {
             return;

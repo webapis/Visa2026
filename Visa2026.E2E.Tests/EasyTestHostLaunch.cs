@@ -26,6 +26,8 @@ internal static class EasyTestHostLaunch
         startInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
         startInfo.Environment["VISA2026_EASYTEST"] = "true";
         startInfo.Environment["Sentry__Enabled"] = "false";
+        // E2E FillForm uses English captions ("User Name", etc.); keep app default Turkish elsewhere.
+        startInfo.Environment["DevExpress__ExpressApp__Languages"] = "en-US;tr-TR;tk-TM;ru-RU";
     }
 
     /// <summary>
