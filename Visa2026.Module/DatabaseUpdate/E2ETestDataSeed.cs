@@ -209,7 +209,8 @@ public static class E2ETestTravelCreateValues
 /// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {
-    public const string StandardUserName = "standarduser";
+    /// <summary>Must match <c>Updater</c> seed user name exactly (Postgres auth is case-sensitive).</summary>
+    public const string StandardUserName = "StandardUser";
     public const string StandardUserPassword = "";
 
     /// <summary>Blazor route for <c>Person_ListView_Employees</c>.</summary>

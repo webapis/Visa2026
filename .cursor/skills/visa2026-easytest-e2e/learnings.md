@@ -212,3 +212,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: `Could not execute nested New [New External Arrival | External Arrival]` while HTML had `title="New External Arrival"` on a **split** control.
 - **Fix / reuse**: Polymorphic New puts `data-action-name` + `title` on `div.dxbl-btn-split`; inner `button` has `title` only. Extend `TryClickToolbarActionByTitle` / `HasToolbarActionByTitle` to click split primary / titled buttons without requiring `@data-action-name`. Re-enabled External Arrival after TravelHistory↔ApplicationItem decoupling.
 - **Reuse**: Nested polymorphic New → match split toolbar, not only `button[@data-action-name]`.
+
+### 2026-08-03 — Tier 0 login: `standarduser` vs seeded `StandardUser` on Postgres
+
+- **Outcome**: negative → fix (pending GHA re-verify)
+- **Context**: `PersonOfficerJourneyTests`, Hub publish gate run `30798831369` (`development` @ `2a71203`)
+- **Symptom**: Stayed on `/LoginPage`; host-out.log `Login failed for 'standarduser'. User name or password is incorrect.` Unit tests green; Hub push skipped.
+- **Fix / reuse**: `E2ETestLoginValues.StandardUserName` must be **`StandardUser`** (exact match to `Updater` seed). Postgres username match is case-sensitive; lowercase `standarduser` worked under old SQL Server CI habits only.
+- **Reuse**: Officer E2E login = seeded user name casing exactly; never assume case-insensitive auth on Postgres.

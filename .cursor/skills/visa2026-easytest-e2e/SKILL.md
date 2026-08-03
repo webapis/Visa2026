@@ -56,7 +56,7 @@ EasyTest must **not** share the IDE dev host (`:5000` / `:5001`).
 | Build config | **`EasyTest`** |
 | Browser | **Edge** — **headed** locally; **headless** on CI (`EasyTestBrowserMode` / `CI` or `VISA2026_E2E_HEADLESS`) |
 
-**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when **`Visa2026EasyTest`** is the connection string (see `EasyTestHostMode` in Blazor.Server). Without this, **`standarduser`** can reopen **Family Members** instead of Employees.
+**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when **`Visa2026EasyTest`** is the connection string (see `EasyTestHostMode` in Blazor.Server). Without this, **`StandardUser`** can reopen **Family Members** instead of Employees.
 
 Full host + driver setup: [reference.md § Host and driver](./reference.md#host-and-driver).
 
