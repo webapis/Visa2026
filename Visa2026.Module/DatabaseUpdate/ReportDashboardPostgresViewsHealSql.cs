@@ -127,6 +127,11 @@ public static class ReportDashboardPostgresViewsHealSql
         using var connection = new NpgsqlConnection(cleaned);
         connection.Open();
 
+        // Greenfield EasyTest/host start can run before EF creates base tables.
+        // Creating vw_rd_* against missing "Visas"/"Applications" fails with 42P01.
+        if (!RelationExists(connection, "Visas") || !RelationExists(connection, "Applications"))
+            return;
+
         if (NeedsVisaAppProgressPrimaryCodeHeal(connection))
         {
             foreach (var resourceLeaf in VisaAppProgressDependentViews)
@@ -321,6 +326,17 @@ public static class ReportDashboardPostgresViewsHealSql
         command.Parameters.AddWithValue("qualified", "public." + viewName);
         var result = command.ExecuteScalar();
         return result is true || (result is bool b && b);
+    }
+
+    private static bool RelationExists(NpgsqlConnection connection, string tableName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT to_regclass(@qualified) IS NOT NULL;
+            """;
+        command.Parameters.AddWithValue("qualified", $"public.\"{tableName}\"");
+        var result = command.ExecuteScalar();
+        return result is true || result is bool b && b;
     }
 
     private static bool ColumnExists(NpgsqlConnection connection, string viewName, string columnName)
