@@ -1,3 +1,4 @@
+using System.Globalization;
 using Visa2026.Module;
 using Xunit;
 
@@ -8,21 +9,41 @@ public sealed class PersonNestedTabCaptionHelperTests
     [Fact]
     public void TryGetBaseCaption_EmployeePersonDocuments_returnsLocalizedCaption()
     {
-        var caption = PersonNestedTabCaptionHelper.TryGetBaseCaption(
-            PersonDetailViewIds.Employee,
-            PersonNestedCollectionLayout.CvAndPersonalFilesTab);
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
 
-        Assert.Equal("CV & personal files", caption);
+            var caption = PersonNestedTabCaptionHelper.TryGetBaseCaption(
+                PersonDetailViewIds.Employee,
+                PersonNestedCollectionLayout.CvAndPersonalFilesTab);
+
+            Assert.Equal("CV & personal files", caption);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Fact]
     public void TryGetBaseCaption_PassportDocuments_returnsPassportCopies()
     {
-        var caption = PersonNestedTabCaptionHelper.TryGetBaseCaption(
-            "Passport_DetailView",
-            PersonNestedCollectionLayout.CvAndPersonalFilesTab);
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
 
-        Assert.Equal("Passport copies", caption);
+            var caption = PersonNestedTabCaptionHelper.TryGetBaseCaption(
+                "Passport_DetailView",
+                PersonNestedCollectionLayout.CvAndPersonalFilesTab);
+
+            Assert.Equal("Passport copies", caption);
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Fact]

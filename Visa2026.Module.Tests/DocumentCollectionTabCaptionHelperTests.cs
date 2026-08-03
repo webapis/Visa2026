@@ -1,3 +1,4 @@
+using System.Globalization;
 using Visa2026.Module;
 using Xunit;
 
@@ -20,12 +21,24 @@ public sealed class DocumentCollectionTabCaptionHelperTests
     [InlineData("AddressOfResidence_DetailView", "Address copies")]
     public void TryGetBaseCaption_DocumentsLayout_returnsParentSpecificCaption(string detailViewId, string expected)
     {
-        Assert.Equal(
-            expected,
-            DocumentCollectionTabCaptionHelper.TryGetBaseCaption(detailViewId, "Documents"));
-        Assert.Equal(
-            expected,
-            DocumentCollectionTabCaptionHelper.TryGetBaseCaption(detailViewId, "Documents_Group"));
+        var previous = CultureInfo.CurrentUICulture;
+        try
+        {
+            // Caption helpers follow CurrentUICulture; pin en-US so assertions stay stable
+            // when the app default culture is Turkish (tr-TR).
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en-US");
+
+            Assert.Equal(
+                expected,
+                DocumentCollectionTabCaptionHelper.TryGetBaseCaption(detailViewId, "Documents"));
+            Assert.Equal(
+                expected,
+                DocumentCollectionTabCaptionHelper.TryGetBaseCaption(detailViewId, "Documents_Group"));
+        }
+        finally
+        {
+            CultureInfo.CurrentUICulture = previous;
+        }
     }
 
     [Fact]
