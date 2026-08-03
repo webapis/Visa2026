@@ -215,8 +215,16 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ### 2026-08-03 — Tier 0 login: `standarduser` vs seeded `StandardUser` on Postgres
 
-- **Outcome**: negative → fix (pending GHA re-verify)
+- **Outcome**: negative → fix (login casing verified on PR run `30799775920`; shell assert still failed)
 - **Context**: `PersonOfficerJourneyTests`, Hub publish gate run `30798831369` (`development` @ `2a71203`)
 - **Symptom**: Stayed on `/LoginPage`; host-out.log `Login failed for 'standarduser'. User name or password is incorrect.` Unit tests green; Hub push skipped.
 - **Fix / reuse**: `E2ETestLoginValues.StandardUserName` must be **`StandardUser`** (exact match to `Updater` seed). Postgres username match is case-sensitive; lowercase `standarduser` worked under old SQL Server CI habits only.
 - **Reuse**: Officer E2E login = seeded user name casing exactly; never assume case-insensitive auth on Postgres.
+
+### 2026-08-03 — Shell assert: do not `Navigate("Application")` for Users role
+
+- **Outcome**: negative → fix (re-applied; pending GHA)
+- **Context**: PR run `30799775920` after username casing fix; URL left `/LoginPage` → `http://localhost:5050/`
+- **Symptom**: `AssertAuthenticatedAppShell` timed out (~4.5 min) — `Navigate("Application")` + `New` never succeeds for Users (untyped Application list Denied; typed ViaMinistries/DirectMigration only). Prior greenfield fix (`400d8c8`) was lost on merge.
+- **Fix / reuse**: `AssertAuthenticatedAppShell` / `IsAuthenticatedShellReady` open **`/Person_ListView_Employees`** and require list + `New` (same as `NavigateEmployeesList`).
+- **Reuse**: Users-role shell shield = Employees URL, never untyped Application nav.

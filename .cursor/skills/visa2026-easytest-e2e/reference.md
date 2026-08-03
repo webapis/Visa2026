@@ -90,7 +90,8 @@ AppContext.GetAction("Log In").Execute();
 // Sidebar paths (non-People) — usually OK
 AppContext.Navigate("Organization.Company");
 AppContext.Navigate("Lookup/Geography.Country");
-AppContext.Navigate("Application");
+// Prefer Employees URL — Navigate("Application") is Denied for Users (untyped list).
+EasyTestBlazorNavigationHelper.GoToRelativeUrl(AppContext, EasyTestHostEnvironment.BaseUrl, E2ETestLoginValues.EmployeesListViewPath);
 
 // Typed Person lists — use URL helper, not sidebar alone
 NavigateEmployeesList(); // → /Person_ListView_Employees
