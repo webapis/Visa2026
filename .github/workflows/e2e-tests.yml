@@ -1,9 +1,11 @@
 # Native XAF EasyTest E2E (Visa2026.E2E.Tests) - Windows + PostgreSQL + Edge.
 #
 # Where this runs (see docs/TESTING_PLAN.md section 6):
+#   Unit tests must be green before the Windows E2E job starts.
+#     push / pull_request -> wait for "Build & unit tests" on the same commit
+#     schedule / workflow_dispatch -> run unit tests via workflow_call first
 #   pull_request / push to master -> Tier 0 only (officer journey), strict, no retry
 #   nightly schedule + manual run -> full suite, hang dumps, one retry for flaky browser steps
-# Fast build + unit tests live in build-and-test.yml and gate every push.
 #
 # PUBLIC REPO: artifacts below (screen recording, host logs, trx) are downloadable by
 # anyone. Keep E2ETestDataSeed synthetic - no real personal or passport data.
@@ -40,8 +42,74 @@ env:
   PG_PORT: "5432"
 
 jobs:
+  # Push/PR: "Build & unit tests" already runs for this event — wait; skip Windows if red.
+  unit-tests-gate:
+    name: Wait for unit tests
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      actions: read
+    steps:
+      - name: Require Build & unit tests success
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.sha;
+            const workflowName = 'Build & unit tests';
+            const eventName = context.eventName;
+            const deadline = Date.now() + 30 * 60 * 1000;
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+            async function findRun() {
+              const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head_sha: sha,
+                event: eventName,
+                per_page: 20,
+              });
+              const matches = runs.filter((r) => r.name === workflowName);
+              if (matches.length === 0) return null;
+              const active = matches.find((r) => r.status !== 'completed');
+              if (active) return active;
+              return matches.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+            }
+
+            let run = await findRun();
+            while (!run || run.status !== 'completed') {
+              if (Date.now() > deadline) {
+                core.setFailed(`Timed out waiting for "${workflowName}" on ${sha}`);
+                return;
+              }
+              core.info(run
+                ? `"${workflowName}" status=${run.status} — waiting…`
+                : `"${workflowName}" not found yet for ${sha} (${eventName}) — waiting…`);
+              await sleep(15000);
+              run = await findRun();
+            }
+
+            core.info(`"${workflowName}" conclusion=${run.conclusion} url=${run.html_url}`);
+            if (run.conclusion !== 'success') {
+              core.setFailed(`E2E blocked: "${workflowName}" concluded ${run.conclusion}`);
+            }
+
+  # Nightly / manual: no concurrent unit-test workflow for this event — run them here first.
+  unit-tests:
+    name: Build + unit tests
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/build-and-test.yml
+    secrets: inherit
+
   easytest-e2e:
     name: EasyTest E2E (Windows)
+    needs: [unit-tests-gate, unit-tests]
+    # One of the gates runs; the other is skipped. Do not start Windows unless a gate succeeded.
+    if: >-
+      always() &&
+      (needs.unit-tests-gate.result == 'success' || needs.unit-tests-gate.result == 'skipped') &&
+      (needs.unit-tests.result == 'success' || needs.unit-tests.result == 'skipped') &&
+      (needs.unit-tests-gate.result == 'success' || needs.unit-tests.result == 'success')
     runs-on: windows-latest
     timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 180 }}
 

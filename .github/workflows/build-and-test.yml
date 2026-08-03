@@ -8,6 +8,8 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+  # Called by EasyTest E2E for schedule / manual runs (no concurrent unit-test workflow).
+  workflow_call:
 
 concurrency:
   group: build-and-test-${{ github.ref }}

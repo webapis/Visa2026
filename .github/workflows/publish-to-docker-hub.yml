@@ -1,8 +1,8 @@
 # Build and push webapia/visa2026 (+ importer) to Docker Hub.
 #
 # When this runs:
-#   After EasyTest E2E succeeds for a push to master (full suite), and Build & unit
-#   tests for that same commit are green (waits if unit tests are still running).
+#   After EasyTest E2E succeeds for a push to master (full suite).
+#   E2E itself requires green unit tests, so publish does not re-check them.
 #   workflow_dispatch -> manual republish of current default-branch HEAD (skips the gate).
 # Does not publish after PR Tier 0 E2E, nightly schedule, or failed runs.
 
@@ -44,47 +44,6 @@ jobs:
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "sha_short=${SHA::7}" >> "$GITHUB_OUTPUT"
           echo "Publishing commit $SHA"
-
-      # E2E and unit tests start together on push; E2E usually finishes later, but poll
-      # in case unit tests are still running when this workflow is triggered.
-      - name: Wait for Build & unit tests on same commit
-        if: github.event_name == 'workflow_run'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const sha = '${{ steps.ref.outputs.sha }}';
-            const workflowName = 'Build & unit tests';
-            const deadline = Date.now() + 30 * 60 * 1000;
-            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-            async function findRun() {
-              const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                head_sha: sha,
-                event: 'push',
-                per_page: 20,
-              });
-              return runs.find((r) => r.name === workflowName) || null;
-            }
-
-            let run = await findRun();
-            while (!run || run.status !== 'completed') {
-              if (Date.now() > deadline) {
-                core.setFailed(`Timed out waiting for "${workflowName}" on ${sha}`);
-                return;
-              }
-              core.info(run
-                ? `"${workflowName}" status=${run.status} — waiting…`
-                : `"${workflowName}" not found yet for ${sha} — waiting…`);
-              await sleep(30000);
-              run = await findRun();
-            }
-
-            core.info(`"${workflowName}" conclusion=${run.conclusion} url=${run.html_url}`);
-            if (run.conclusion !== 'success') {
-              core.setFailed(`Refusing to publish: "${workflowName}" concluded ${run.conclusion}`);
-            }
 
       - name: Checkout repository
         uses: actions/checkout@v4
