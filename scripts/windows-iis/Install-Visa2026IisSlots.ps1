@@ -17,7 +17,7 @@
   Do not run Set-Visa2026IisSlotsAutoStart.ps1 at the end.
 
 .NOTES
-  Runbook: docs/ON_PREM_WINDOWS_IIS.md — PostgreSQL only (Install-PostgreSqlForVisa2026.ps1 first).
+  Runbook: docs/ON_PREM_WINDOWS_IIS.md - PostgreSQL only (Install-PostgreSqlForVisa2026.ps1 first).
 #>
 param(
     [ValidateSet("Production", "Staging", "Demo", "All")]
@@ -35,12 +35,12 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
 
 if (-not [string]::IsNullOrWhiteSpace($SqlServer)) {
-    Write-Warning "SqlServer parameter is ignored — Visa2026 uses PostgreSQL only."
+    Write-Warning "SqlServer parameter is ignored - Visa2026 uses PostgreSQL only."
 }
 
 Initialize-Visa2026IisServerFolders | Out-Null
 
-# Legacy single-site install binds :80 as "Visa2026" — stop it before slot sites use port 80.
+# Legacy single-site install binds :80 as "Visa2026" - stop it before slot sites use port 80.
 $appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
 & $appcmd stop site Visa2026 2>$null | Out-Null
 & $appcmd stop apppool Visa2026 2>$null | Out-Null

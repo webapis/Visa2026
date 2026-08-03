@@ -374,7 +374,13 @@ function Invoke-PostImportCorrections {
             $corr.Flag,
             "--legacy-source", $LegacySource,
             "--target-connection", $Conn,
-            "--verbose"
+            "--verbose",
+            "--person-id-map", (Get-MapPath "Person"),
+            "--visa-id-map", (Get-MapPath "Visa"),
+            "--application-id-map", (Get-MapPath "Application"),
+            "--application-item-id-map", (Get-MapPath "ApplicationItem"),
+            "--progress-id-map", (Get-MapPath "ApplicationProgress"),
+            "--address-id-map", (Get-MapPath "AddressOfResidence")
         )
         $exit = Invoke-DataImporterCli -CliArgs $corrArgs -LogFile $logFile
         Set-OnPremSyncRunWaveCompleted -Root $syncStatusRoot -WaveName $corr.Wave -ExitCode $exit -LogFile $logFile

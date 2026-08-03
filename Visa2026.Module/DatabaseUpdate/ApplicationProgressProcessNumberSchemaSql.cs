@@ -14,9 +14,21 @@ public static class ApplicationProgressProcessNumberSchemaSql
     /// Prefer <c>ADD COLUMN IF NOT EXISTS</c> (no DO block) so XAF <c>ExecuteNonQueryCommand</c>
     /// statement splitting cannot break Postgres schema ensure.
     /// </summary>
+    /// <summary>
+    /// Single DO block so empty greenfield DBs (no tables yet) no-op during
+    /// <c>UpdateDatabaseBeforeUpdateSchema</c>; AfterUpdateSchema still adds columns.
+    /// </summary>
     internal const string EnsureColumnsPostgres = """
-        ALTER TABLE "ApplicationProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
-        ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+        DO $heal$
+        BEGIN
+          IF to_regclass('public."ApplicationProgresses"') IS NOT NULL THEN
+            ALTER TABLE "ApplicationProgresses" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          END IF;
+          IF to_regclass('public."Applications"') IS NOT NULL THEN
+            ALTER TABLE "Applications" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          END IF;
+        END
+        $heal$;
         """;
 
     internal const string EnsureColumnsSqlServer = """
@@ -120,6 +132,13 @@ public static class ApplicationProgressProcessNumberSchemaSql
             var cleaned = DatabaseProviderDetector.StripEfCoreProvider(connectionString);
             using var connection = new NpgsqlConnection(cleaned);
             connection.Open();
+            // Empty greenfield DB: XAF creates tables later; skip heal until relations exist.
+            if (!PostgresRelationExists(connection, "ApplicationProgresses")
+                || !PostgresRelationExists(connection, "Applications"))
+            {
+                return;
+            }
+
             Execute(connection, EnsureColumnsPostgres);
             if (backfill)
             {
@@ -147,5 +166,16 @@ public static class ApplicationProgressProcessNumberSchemaSql
         using var command = connection.CreateCommand();
         command.CommandText = sql;
         command.ExecuteNonQuery();
+    }
+
+    private static bool PostgresRelationExists(NpgsqlConnection connection, string tableName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """SELECT to_regclass(@name) IS NOT NULL;""";
+        var p = command.CreateParameter();
+        p.ParameterName = "name";
+        p.Value = $"public.\"{tableName}\"";
+        command.Parameters.Add(p);
+        return command.ExecuteScalar() is true;
     }
 }

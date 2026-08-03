@@ -47,3 +47,19 @@ Spelling normalization: legacy ASCII/Turkish variants (`Akbugday`, `Asgabat`, `D
 ## Import gate
 
 - Approved **2026-06-27** for AddressOfResidence discovery — `City` + `CityByName` in `lookup-translations.yaml`.
+
+---
+
+## Near-duplicate / keeper rule (2026-08-01)
+
+Human-eye duplicates in `city.json` (same Region) break Address Of Residence UI: `Lodging`/`City` cascade filters by exact `City` row, so a short alias (e.g. **Ak bugdaý**) shows empty Lodging while catalog sites point at **Akbugdaý etraby** (`AH48`).
+
+| Rule | Detail |
+|------|--------|
+| **Keeper** | Prefer row with **`PdfForm_Code`**, else higher AoR/Lodging usage, else longer official `… etraby` / `… şäheri` title |
+| **Do not merge** | Distinct **etraby** vs **şäheri** seats that share a stem (e.g. Baharly etraby / Baharly şäheri) — keep both |
+| **Do not auto-merge** | Long admin-prefix labels that match **two** keepers (ambiguous) — leave `KeepBoth` until human picks |
+| **Review workbook** | `Export-AddressCityHumanReview.ps1 -ViaSsh` → `preview-export/AddressCity-HumanReview.xlsx` |
+| **Apply** | `Apply-AddressCityHumanReviewDecisions.ps1 -FillEmptyKeepBoth [-ApplyProdHealViaSsh]` |
+| **Applied (Calik)** | Removed aliases **Ak bugdaý**, **Akbudaý etraby** → keeper **Akbugdaý etraby**; `CityByName` aliases added; manifest **v9** |
+| **KeepBoth (human)** | Remaining NearDuplicates in workbook (etraby/şäheri seats + ambiguous admin-prefix rows) — **KeepBoth**; catalog stays at **87** cities |

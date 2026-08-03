@@ -1921,6 +1921,8 @@
         <Member Name="Notes" Caption="Seyahat Notları" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Region" Caption="Bölge" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
         <Member Name="Title" Caption="Başlık" />
         <Member Name="TravelDate" Caption="Seyahat Tarihi" />
         <Member Name="TravelType" Caption="Seyahat Türü" />
@@ -2927,6 +2929,8 @@
         <ColumnInfo Id="CheckPoint" Caption="Kontrol Noktası" />
         <ColumnInfo Id="MovementType" Caption="Hareket Türü" />
         <ColumnInfo Id="Notes" Caption="Seyahat Notları" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="TravelDate" Caption="Seyahat Tarihi" />
         <ColumnInfo Id="TravelType" Caption="Seyahat Türü" />
       </Columns>

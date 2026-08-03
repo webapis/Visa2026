@@ -26,6 +26,7 @@ param(
     [switch]$IncludeFileWaves,
     [switch]$SkipTenantCatalogGeneration,
     [switch]$SkipLookupPreflight,
+    [switch]$SkipPostImportCorrections,
     [switch]$ContinueOnError,
     [string[]]$Entity = @(),
     [string]$StartAt = '',
@@ -141,12 +142,12 @@ if (-not (Test-Path -LiteralPath $onPremSync)) {
 $args = @(
     '-Profile', $Profile,
     '-SyncHostRoot', $SyncHostRoot,
-    '-Configuration', 'Release',
-    '-SkipPostImportCorrections'
+    '-Configuration', 'Release'
 )
 if ($IncludeFileWaves) { $args += '-IncludeFileWaves' }
 if ($SkipTenantCatalogGeneration) { $args += '-SkipTenantCatalogGeneration' }
 if ($SkipLookupPreflight) { $args += '-SkipLookupPreflight' }
+if ($SkipPostImportCorrections) { $args += '-SkipPostImportCorrections' }
 if ($ContinueOnError) { $args += '-ContinueOnError' }
 if ($Entity.Count -gt 0) { $args += @('-Entity') + $Entity }
 if ($StartAt) { $args += @('-StartAt', $StartAt) }

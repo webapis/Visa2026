@@ -29,12 +29,16 @@
           <LayoutGroup Id="SimpleEditors" RelativeSize="18.078512396694215">
             <LayoutGroup Id="AddressOfResidence" RelativeSize="100" Direction="Vertical">
               <LayoutGroup Id="AddressOfResidence_col1" RelativeSize="100">
-                <LayoutItem Id="Type" RelativeSize="23.529411764705884" />
-                <LayoutItem Id="Lodging" RelativeSize="17.647058823529413" />
-                <LayoutItem Id="Region" ViewItem="Region" Index="2" RelativeSize="17.647058823529413" IsNewNode="True" />
-                <LayoutItem Id="City" ViewItem="City" Index="3" RelativeSize="17.647058823529413" IsNewNode="True" />
-                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="5" RelativeSize="17.647058823529413" IsNewNode="True" />
-                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="6" RelativeSize="23.529411764705884" IsNewNode="True" />
+                <LayoutItem Id="Type" Index="0" RelativeSize="12" />
+                <LayoutItem Id="Region" ViewItem="Region" Index="1" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="City" ViewItem="City" Index="2" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="Lodging" ViewItem="Lodging" Index="3" RelativeSize="12" />
+                <LayoutItem Id="Hotel" ViewItem="Hotel" Index="4" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="Hospital" ViewItem="Hospital" Index="5" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="OtherSite" ViewItem="OtherSite" Index="6" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="FullAddress" ViewItem="FullAddress" Index="7" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="ExpirationDate" ViewItem="ExpirationDate" Index="8" RelativeSize="12" IsNewNode="True" />
+                <LayoutItem Id="DaysRemaining" ViewItem="DaysRemaining" Index="9" RelativeSize="16" IsNewNode="True" />
               </LayoutGroup>
               <LayoutGroup Id="AddressOfResidence_col2" RelativeSize="50" Caption="AddressOfResidence_col2" Removed="True">
                 <LayoutItem Id="DaysRemaining" RelativeSize="100" Index="0" Removed="True" />

@@ -29,3 +29,20 @@ dotnet run --project Visa2026.DataImporter -- `
 ```
 
 **Workflow:** generate after discovery `complete` → review in Excel → then set `importConfirmed: true` on the dossier.
+
+## Address City near-duplicate human review
+
+```powershell
+.\scripts\visa2014-migration\Export-AddressCityHumanReview.ps1 -ViaSsh
+# Output: AddressCity-HumanReview.xlsx (+ AddressCity-prod-usage.csv)
+
+.\scripts\visa2014-migration\Apply-AddressCityHumanReviewDecisions.ps1 -FillEmptyKeepBoth -ApplyProdHealViaSsh
+```
+
+Sheets: **NearDuplicates** (Decision column), **CityCatalog**, **LodgingCityRefs**, **README**.  
+Also regenerate Address preview for Region/City spot-check:
+
+```powershell
+# On sync host (example):
+Visa2026.DataImporter.exe --export-visa2014-preview --entity AddressOfResidence --legacy-source calik-energi-onprem-prod
+```

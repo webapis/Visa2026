@@ -20,7 +20,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
-. (Join-Path $PSScriptRoot '..\_lib\FileWaveLogMetrics.ps1')
+function Resolve-OnPremMigrationLibPath {
+    param([Parameter(Mandatory)][string]$FileName)
+    foreach ($candidate in @(
+            (Join-Path $PSScriptRoot "_lib\$FileName"),
+            (Join-Path $PSScriptRoot "..\_lib\$FileName")
+        )) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+    throw "Lib not found: $FileName under $PSScriptRoot\_lib or ..\_lib (sync-host vs repo layout)."
+}
+. (Resolve-OnPremMigrationLibPath 'FileWaveLogMetrics.ps1')
 if ($SyncHostRoot) {
     if (-not (Test-Path -LiteralPath $SyncHostRoot)) { throw "SyncHostRoot not found: $SyncHostRoot" }
     $SyncHostRoot = (Resolve-Path -LiteralPath $SyncHostRoot).Path

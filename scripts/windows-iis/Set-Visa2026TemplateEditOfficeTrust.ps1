@@ -7,7 +7,7 @@
   Resminamalar "Edit template" opens desktop Word/Excel via ms-word:/ms-excel: after exporting
   to the officer PC local sandbox. Office may block with:
 
-    "Unsafe Content — coming from a site in the Restricted Sites zone"
+    "Unsafe Content - coming from a site in the Restricted Sites zone"
 
   This script maps the Visa2026 HTTPS origin to the Local intranet zone (Internet Explorer
   zone settings still used by Office protocol handlers).
@@ -35,7 +35,7 @@
   .\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -ServerHost ENJ18VWSPVIZE2
 
 .EXAMPLE
-  # Elevated — all profiles on a shared workstation
+  # Elevated - all profiles on a shared workstation
   .\scripts\windows-iis\Set-Visa2026TemplateEditOfficeTrust.ps1 -AllUsers
 
 .NOTES

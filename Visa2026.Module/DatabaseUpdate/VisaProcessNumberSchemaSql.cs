@@ -13,6 +13,10 @@ public static class VisaProcessNumberSchemaSql
     internal const string EnsureColumnsPostgres = """
         DO $migrate$
         BEGIN
+          IF to_regclass('public."Visas"') IS NULL THEN
+            RETURN;
+          END IF;
+
           IF EXISTS (
             SELECT 1 FROM information_schema.columns
             WHERE table_schema = 'public' AND table_name = 'Visas'
@@ -24,11 +28,11 @@ public static class VisaProcessNumberSchemaSql
           ) THEN
             ALTER TABLE public."Visas" RENAME COLUMN "ProcessNumber" TO "LegacyPersonInApplicationOid";
           END IF;
+
+          ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
+          ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "LegacyPersonInApplicationOid" uuid NULL;
         END
         $migrate$;
-
-        ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "ProcessNumber" character varying(100) NULL;
-        ALTER TABLE public."Visas" ADD COLUMN IF NOT EXISTS "LegacyPersonInApplicationOid" uuid NULL;
         """;
 
     internal const string EnsureColumnsSqlServer = """

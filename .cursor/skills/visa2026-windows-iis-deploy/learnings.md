@@ -160,3 +160,19 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Not yet:** Full ModuleUpdater/PDF seed parity on PG; Staging/Prod PG cutover.
 - **Related:** Prod LoginPage 500 after earlier Demo wipe work — `UserReportTemplates` missing on SQL Prod DB (schema incomplete); repair with Production ForceUpdate (SQL), not related to Demo PG.
 
+
+### 2026-07-31 — Production deploy 1.0.0.639 (PostgreSQL, HTTP)
+
+- **Commit**: `ca438b4f` (HEAD) — publish `dist/visa2026-iis-1.0.0.639`.
+- **Host**: `10.100.128.25` / `visa2026-onprem` — slot **Production** (`Visa2026-Prod` → `C:\inetpub\visa2026-prod`).
+- **DB**: `Configure-Visa2026Production.ps1` wrote Npgsql for `visa2026_prod` (`localhost:5432`); `--updateDatabase --forceUpdate` exit 0.
+- **HTTP**: `HTTPS_ENABLED=false` in `prod.env` — skipped `Enable-Visa2026IisHttps.ps1` (expected).
+- **Smoke**: `http://127.0.0.1/LoginPage` → **200**; `publish-version.txt` AssemblyVersion **1.0.0.639**, GitSha **ca438b4**.
+- **Blocker/fix**: First attempt failed — `Install-Visa2026IisSlots.ps1` / `Configure-Visa2026Production.ps1` ParserError from mojibake em-dashes (`â€"` / U+201D) inside double-quoted `Write-Warning` strings. Replaced with ASCII `--` / `-` (UTF-8 no BOM); retry with `-SkipPublish` succeeded (~7 min).
+- **Prevent**: Keep deploy `.ps1` ASCII punctuation in quoted strings; parse-check `scripts/windows-iis\*.ps1` before remote scp.
+### 2026-08-03 — Production IIS deploy after import (city catalog + AoR layout)
+
+- **Deploy**: `Deploy-Visa2026IisRemote.ps1 -Profile Production -ForceUpdate` exit 0; LoginPage smoke **200**; pool `Visa2026-Prod` started.
+- **Lookup sync**: manifest **v10** → `LookupCatalogSyncUpdater: city (City) created=0, updated=87` (Akbugdaý keeper catalog).
+- **Also shipped**: AddressOfResidence DetailView order Type→Region→City→Lodging (Model.xafml + BO).
+- **Prior**: Prod import posts+files completed RunId `20260801-000345`.

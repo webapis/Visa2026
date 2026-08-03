@@ -20,3 +20,13 @@
 - **Fix / wire**: Launch profile `Visa2026 - PostgreSQL` in `Visa2026.Blazor.Server/Properties/launchSettings.json` with `EFCoreProvider=Postgres`; local password `Visa2026Local`; helper `scripts/local/Start-LocalPostgreSql.ps1`.
 - **Prevent**: Prefer binaries zip on local too; without admin use `pg_ctl start` until service is elevated once. Do not point LocalDB and Postgres at the same DB name differently — LocalDB stays `Visa2026`, Postgres `visa2026`.
 - **Skill**: visa2026-postgresql.
+
+### 2026-07-31 — Prod PG cluster on E:; fresh visa2026_prod; remove C: data
+
+- **Host**: `10.100.128.25`
+- **Binaries** (unchanged): `C:\PostgreSQL\16`
+- **Data directory**: `E:\visa2026\postgresql\16\data` (`SHOW data_directory`; service `postgresql-x64-16` `-D` on E:)
+- **Action**: Dropped/recreated empty UTF8 DB `visa2026_prod` (0 public tables). Deleted leftover `C:\PostgreSQL\16\data` (~1 GB) after confirming live cluster on E:.
+- **Disk**: C: free ~32 GB after delete; E: used for PG data (~185 GB free before).
+- **Next**: `Run-Visa2026DbUpdateOnServer.ps1 -Profile Production -ForceUpdate` (or deploy ForceUpdate) before Import; start `Visa2026-Prod` app pool.
+- **Skill**: visa2026-postgresql

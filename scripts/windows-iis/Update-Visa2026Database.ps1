@@ -6,7 +6,7 @@
 .DESCRIPTION
   Invokes Visa2026.Blazor.Server.exe --updateDatabase. Use on the server after
   deploy or when schema drift is reported. Reads optional env from the current
-  session (ConnectionStrings__DefaultConnection, etc.) — same as IIS app pool.
+  session (ConnectionStrings__DefaultConnection, etc.) - same as IIS app pool.
 
 .EXAMPLE
   cd C:\inetpub\visa2026

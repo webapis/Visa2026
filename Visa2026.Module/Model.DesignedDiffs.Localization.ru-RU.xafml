@@ -1921,6 +1921,8 @@
         <Member Name="Notes" Caption="Примечания к поездке" />
         <Member Name="Person" Caption="Лицо" />
         <Member Name="Region" Caption="Регион" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Дата заявки" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Номер заявки" />
         <Member Name="Title" Caption="Заголовок" />
         <Member Name="TravelDate" Caption="Дата поездки" />
         <Member Name="TravelType" Caption="Тип поездки" />
@@ -2927,6 +2929,8 @@
         <ColumnInfo Id="CheckPoint" Caption="КПП" />
         <ColumnInfo Id="MovementType" Caption="Тип перемещения" />
         <ColumnInfo Id="Notes" Caption="Примечания к поездке" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Дата заявки" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Номер заявки" />
         <ColumnInfo Id="TravelDate" Caption="Дата поездки" />
         <ColumnInfo Id="TravelType" Caption="Тип поездки" />
       </Columns>

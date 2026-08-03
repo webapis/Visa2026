@@ -80,6 +80,13 @@ public static class ApplicationTypeCapabilityFlagsSchemaSql
         {
             using var connection = new NpgsqlConnection(cleaned);
             connection.Open();
+            using (var existsCmd = connection.CreateCommand())
+            {
+                existsCmd.CommandText = """SELECT to_regclass('public."ApplicationTypes"') IS NOT NULL;""";
+                if (existsCmd.ExecuteScalar() is not true)
+                    return;
+            }
+
             using var command = connection.CreateCommand();
             command.CommandText = EnsureColumnsPostgres;
             command.ExecuteNonQuery();

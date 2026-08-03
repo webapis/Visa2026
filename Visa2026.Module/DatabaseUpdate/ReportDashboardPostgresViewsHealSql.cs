@@ -127,6 +127,14 @@ public static class ReportDashboardPostgresViewsHealSql
         using var connection = new NpgsqlConnection(cleaned);
         connection.Open();
 
+        // Empty greenfield DB: XAF creates base tables first; skip view heal until Visas exists.
+        using (var existsCmd = connection.CreateCommand())
+        {
+            existsCmd.CommandText = """SELECT to_regclass('public."Visas"') IS NOT NULL;""";
+            if (existsCmd.ExecuteScalar() is not true)
+                return;
+        }
+
         if (NeedsVisaAppProgressPrimaryCodeHeal(connection))
         {
             foreach (var resourceLeaf in VisaAppProgressDependentViews)

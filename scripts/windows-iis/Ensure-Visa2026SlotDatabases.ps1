@@ -11,7 +11,7 @@
   Optional env file with PG_PASSWORD (used as fallback). Prefer each slot's own env file.
 
 .NOTES
-  Runbook: docs/ON_PREM_WINDOWS_IIS.md — Visa2026 is PostgreSQL-only.
+  Runbook: docs/ON_PREM_WINDOWS_IIS.md - Visa2026 is PostgreSQL-only.
 #>
 param(
     [ValidateSet("Production", "Staging", "Demo", "All")]

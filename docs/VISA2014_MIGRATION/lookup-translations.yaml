@@ -714,6 +714,10 @@ catalogs:
       comparisonDoc: docs/VISA2014_MIGRATION/lookup-comparisons/City.md
     identityPassThrough: true
     values:
+      - legacy: Ak bugdaý
+        target: Akbugdaý etraby
+      - legacy: Akbudaý etraby
+        target: Akbugdaý etraby
       - legacy: Asgabat şäheri
         target: Aşgabat şäheri
       - legacy: Akbugday etraby

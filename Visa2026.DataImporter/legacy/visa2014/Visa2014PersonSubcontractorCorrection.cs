@@ -54,7 +54,8 @@ internal static class Visa2014PersonSubcontractorCorrection
                 resolver.LoadFromObjectSpace(lookupSpace, Visa2014HeadlessImportSession.ResolveTenantCatalogDirStatic());
             }
 
-            var personIdMapPath = source.IdMapPath(dataImporterRoot, "Person");
+            var personIdMapPath = GetOptionValue(args, "--person-id-map")
+                ?? source.IdMapPath(dataImporterRoot, "Person");
             var personIdMap = File.Exists(personIdMapPath)
                 ? Visa2014IdMapHelper.Load(personIdMapPath)
                 : new Dictionary<Guid, Guid>();

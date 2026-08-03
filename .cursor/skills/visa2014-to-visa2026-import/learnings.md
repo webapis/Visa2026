@@ -2054,3 +2054,61 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
   - **Invitation / FamilyProof after prior step**: `dotnet run --no-build` → `hostpolicy.dll` not found; `Visa2026.DataImporter.runtimeconfig.json` absent after each step. **Fix**: rebuild DataImporter before next step, or invoke `Visa2026.DataImporter.exe` directly for single wave.
   - **Full solution build** blocked when F5 **Visa2026.Blazor.Server** holds DLL locks — use DataImporter-only build or stop F5 first.
 - **Watch**: `Watch-OnPremImportLive.ps1 -Profile Local` reads `artifacts/local-pg-import/file-waves-status.json`.
+
+### 2026-07-31 — Prod PG (E:) empty DB ForceUpdate + Import+files started
+
+- **Target**: `visa2026_prod` on `E:\visa2026\postgresql\16\data` (fresh empty DB after C: data delete)
+- **App**: deploy `1.0.0.639` / `ca438b4` with empty-DB heal fixes (`ApplicationProgressProcessNumberSchemaSql` DO-block; `VisaProcessNumberSchemaSql` table guard; `ReportDashboardPostgresViewsHealSql` skip if no Visas)
+- **ForceUpdate**: exit 0 (schema ~184 public tables); LoginPage 200; removed `FORCE_XAF_DB_UPDATE`
+- **Sync host**: restored empty `C:\visa2026-sync\config\sync.env` connections from appsettings + VISA2014 password; cleared `calik-energi-onprem-prod` id-maps; refreshed DataImporter publish
+- **Import**: task `Visa2026-OnPrem-ProdImportFileWaves` → `Run-OnPremSyncOnServer.ps1 -Profile Production -IncludeFileWaves -SkipTenantCatalogGeneration`
+- **RunId**: `20260731-210145` — Overall Running, wave **Person** running (DI PID observed)
+- **Logs**: `C:\visa2026-sync\logs\prod-import-filewaves-20260731-210143.log`, `sync-run-20260731-210145.log`
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh -ClearScreen`
+- **Prevent**: do not run `Install-OnPremSyncHost.ps1` against local `C:\visa2026-sync` without copying to `.25` and without preserving server `sync.env` passwords/CS
+
+### 2026-08-01 — Prod Import relaunch after id-map wipe + SSH job-object kills
+
+- **Target**: `visa2026_prod` (PG on E:); legacy `10.100.128.15` / `VISA2015`; sync `C:\visa2026-sync`
+- **Failure 1**: prior run `20260731-210145` Person/Passport/Visa OK; Education Failed(35) missing Institution/Specialty NameTm
+- **Failure 2**: id-maps cleared to `{}` while People/Passport/Visa/Education rows remained → Person reimport hit `IX_People_PersonalNumber` (4MB EF error log)
+- **Failure 3**: `Start-Process` under OpenSSH dies with the session (job object). Use `Invoke-CimMethod Win32_Process Create` (or schtasks) for breakaway
+- **Fix**: seed 6 institutions + 9 specialties from failed Education Oids via ADO.NET (`Encrypt=Optional` → `Encrypt=False` for System.Data.SqlClient); wipe transactional via `Wipe-LocalPostgresTransactional.sql` (lookups kept: EducationInstitutions ~1515 / Specialties ~1096); relaunch Import+files
+- **RunId**: `20260731-214502` Overall=Running — Person 3334/0, Passport 3684/0, Visa 6165/0, Education running (0 failed at Progress 250)
+- **Logs**: `C:\visa2026-sync\logs\prod-import-files-20260731-214458.log`; status `C:\visa2026-sync\sync-run-status.json`
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Production -ViaSsh`
+- **Prevent**: never clear prod id-maps while transactional rows exist unless wiping DB; never rely on Start-Process alone over SSH for long imports
+
+### 2026-08-01 — Address City near-duplicate Excel review (prod)
+
+- **Symptom**: Address Of Residence Lodging empty after Region/City pick — `city.json` had human-eye duplicates (e.g. Ak bugdaý vs Akbugdaý etraby AH48); Lodging filtered by exact City row.
+- **Tooling**: `Export-AddressCityHumanReview.ps1 -ViaSsh` → `preview-export/AddressCity-HumanReview.xlsx`; `Apply-AddressCityHumanReviewDecisions.ps1`.
+- **Keeper rule**: prefer PdfForm_Code; never auto-merge etraby↔şäheri siblings; skip losers with multiple keepers.
+- **Applied**: removed Ak bugdaý + Akbudaý etraby from city.json (87 cities); CityByName aliases; manifest v9; prod heal soft-deletes losers; AoR 790 + 2 lodgings on Akbugdaý etraby.
+- **Also**: regenerated AddressOfResidence-preview.calik-energi.xlsx (4077 rows) from VISA2015 on .15.
+- **Follow-up**: Medium NearDuplicates (etraby/şäheri pairs, long admin prefixes) left KeepBoth for human review in the workbook.
+- **Human decision 2026-08-01**: remaining NearDuplicates in `AddressCity-HumanReview.xlsx` → **KeepBoth** (19 rows). No further city.json removals; only Ak aliases were merged.
+### 2026-08-01 — Prod Import Failed after ApplicationProgress mapping verify
+
+- **Run**: `20260731-221743` Production; resumed at Education; scalars through ApplicationProgress exit 0 (DB Progress ~38197).
+- **Fail gate**: mapping verify ApplicationProgress exit 1 — histograms OK, parity sample 0 mismatches, **missingIdMap=6** (of ~38323 importable / 38197 mapped). Orchestrator archives and exits before postImportCorrections.
+- **Symptom in watch**: Overall=Failed; all `post-*` Pending; Visa IssuingApplicationItem / InvitationItem **0%** (corrections never ran); Person/Passport/Visa show Pending only because resume skipped them (rows already in DB).
+- **Resume**: run OnPrem-Sync with `-StartAt post-PersonSubcontractor` (skips all scalars; posts still run) + `-SkipLookupPreflight` as before; add `-IncludeFileWaves` if document copies needed. Do **not** `-StartAt ApplicationProgress` (would reimport ~1h+).
+- **Optional**: investigate 6 missing Progress id-map later; not blocking post-corrections.
+### 2026-08-01 — Resume posts: Run-OnPremSyncOnServer skipped corrections
+
+- **Bug**: sync-host `Run-OnPremSyncOnServer.ps1` hard-coded `-SkipPostImportCorrections`, so post waves never ran after scalars (Visa FK fill stayed 0%).
+- **Also**: `DocumentCopies.ps1` dotted `..\ _lib\FileWaveLogMetrics.ps1` but sync-host layout keeps `_lib` under `tools\scripts\_lib` — fixed with Resolve-OnPremMigrationLibPath.
+- **Resume**: `StartAt=post-PersonSubcontractor` + IncludeFileWaves; RunId `20260731-235930` Running on Current=post-PersonSubcontractor.
+### 2026-08-01 — Post corrections need DataImporter default id-map path
+
+- **Fail**: `post-PersonSubcontractor` exit 1 — "Person id-map is empty" while `data\id-maps\...\Person.json` was full (276KB). Corrections resolve maps via `source.IdMapPath(dataImporterRoot)` under `tools\DataImporter\legacy\visa2014\id-maps\...`, not sync-host `data\id-maps`.
+- **Ops fix**: copy scalar maps into DataImporter id-map dir (restore document maps from `C:\visa2026-sync\id-maps\...` after robocopy overwrote stubs). Resume RunId `20260801-000345`: Subcontractor Completed, Relationship Running.
+- **Code**: `Run-OnPremSyncOnServer` no longer hard-skips posts; `OnPrem-Sync` passes `--*-id-map` into corrections; Person correction C# honors `--person-id-map` (needs DataImporter republish to take effect on host).
+### 2026-08-03 — Prod resume posts+files completed (RunId 20260801-000345)
+
+- **Outcome**: `DONE exit=0` after `StartAt=post-PersonSubcontractor` + IncludeFileWaves.
+- **Posts**: Subcontractor/Relationship no-op (already set); IssuingApplicationItem updated **6490**; InvitationItem updated **2154**; VisaType already correct **6165**.
+- **Files**: Person.Photo patched **3263**; VisaDocument posted **5965**; other doc waves mostly Already imported; InvitationDocument No parent map **203**.
+- **Follow-up**: deploy local city.json/manifest + AddressOfResidence DetailView reorder to IIS Production; Refresh Report Dashboard (valid-visa / ready filters still apply).
+- **Deploy 2026-08-03**: Production IIS ForceUpdate; lookup city sync updated=87 (manifest v10).
