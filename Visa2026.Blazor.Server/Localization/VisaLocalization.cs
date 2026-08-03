@@ -12,7 +12,7 @@ namespace Visa2026.Blazor.Server.Localization;
 /// </summary>
 public static class VisaLocalization
 {
-    public const string DefaultCultureName = "en-US";
+    public const string DefaultCultureName = "tr-TR";
 
     /// <summary>Semicolon-separated list for <c>DevExpress:ExpressApp:Languages</c> in appsettings.</summary>
     public static string LanguagesConfigurationValue => string.Join(";", SupportedCultureNames);
@@ -20,7 +20,7 @@ public static class VisaLocalization
     public static IReadOnlyList<string> SupportedCultureNames { get; } = new[]
     {
         DefaultCultureName,
-        "tr-TR",
+        "en-US",
         "tk-TM",
         "ru-RU",
     };
@@ -36,7 +36,7 @@ public static class VisaLocalization
             options.SupportedCultures = cultures;
             options.SupportedUICultures = cultures;
             // Cookie (used by IXafCultureInfoService in A2+) and query string for manual testing.
-            // Accept-Language is omitted so the default stays English until the user picks a language.
+            // Accept-Language is omitted so the default stays Turkish until the user picks a language.
             options.RequestCultureProviders = new List<IRequestCultureProvider>
             {
                 new CookieRequestCultureProvider(),
