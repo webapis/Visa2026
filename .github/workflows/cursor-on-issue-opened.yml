@@ -1,0 +1,36 @@
+name: Trigger Cursor on new issue
+
+# Must live on the default branch (master) — GitHub ignores issues: workflows
+# that exist only on development / feature branches.
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  trigger-cursor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Cursor automation webhook
+        env:
+          CURSOR_WEBHOOK_URL: ${{ secrets.CURSOR_WEBHOOK_URL }}
+          CURSOR_WEBHOOK_AUTH: ${{ secrets.CURSOR_WEBHOOK_AUTH }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CURSOR_WEBHOOK_URL}" ] || [ -z "${CURSOR_WEBHOOK_AUTH}" ]; then
+            echo "Missing CURSOR_WEBHOOK_URL or CURSOR_WEBHOOK_AUTH repository secret." >&2
+            exit 1
+          fi
+
+          PAYLOAD=$(jq '{
+            title: .issue.title,
+            body: (.issue.body // ""),
+            url: .issue.html_url,
+            number: .issue.number,
+            author: .issue.user.login,
+            labels: [.issue.labels[].name]
+          }' "$GITHUB_EVENT_PATH")
+
+          curl -fsS -X POST "${CURSOR_WEBHOOK_URL}" \
+            -H "Authorization: Bearer ${CURSOR_WEBHOOK_AUTH}" \
+            -H "Content-Type: application/json" \
+            -d "${PAYLOAD}"
