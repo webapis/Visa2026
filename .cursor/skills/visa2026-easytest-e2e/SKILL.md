@@ -56,7 +56,7 @@ EasyTest must **not** share the IDE dev host (`:5000` / `:5001`).
 | Build config | **`EasyTest`** |
 | Browser | **Edge** — **headed** locally; **headless** on CI (`EasyTestBrowserMode` / `CI` or `VISA2026_E2E_HEADLESS`) |
 
-**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when **`Visa2026EasyTest`** is the connection string (see `EasyTestHostMode` in Blazor.Server). Without this, **`standarduser`** can reopen **Family Members** instead of Employees.
+**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when **`Visa2026EasyTest`** is the connection string (see `EasyTestHostMode` in Blazor.Server). Without this, **`StandardUser`** can reopen **Family Members** instead of Employees.
 
 Full host + driver setup: [reference.md § Host and driver](./reference.md#host-and-driver).
 
@@ -71,6 +71,10 @@ Full host + driver setup: [reference.md § Host and driver](./reference.md#host-
 - Inherit **`E2ETestBase`** (`IAsyncLifetime` — app starts in `InitializeAsync`, DB dropped once per run).
 - **`[SupportedOSPlatform("windows")]`** on test class/method (Edge E2E is Windows-only today).
 - Use **`Login(userName, password)`** — officer flows: **`E2ETestLoginValues.StandardUserName`** + empty password.
+
+### UI culture: English only for EasyTest
+
+App default UI is **Turkish (`tr-TR`)**. EasyTest **must** run with **English (`en-US`)** so caption-based FillForm (`User Name`, `Log In`, field labels) matches the suite. The host forces this when **`EasyTestHostMode`** is on (`VISA2026_EASYTEST=true` / EasyTest DB): request culture, XAF `CustomizeLanguage`, Languages env override, and skip post-logon culture restore. Do **not** rewrite E2E captions to Turkish.
 
 ### Selectors: captions, not hooks
 

@@ -29,7 +29,7 @@ Officer session: **log on** → create **Employee** → **Passport** → nested 
 | Item | Value |
 |------|--------|
 | **Base URL** | `http://localhost:5050` |
-| **User** | `standarduser` / empty password |
+| **User** | `StandardUser` / empty password |
 | **List path** | `Person_ListView_Employees` |
 | **Employee detail** | `Person_DetailView_Employee` |
 | **Nested details** | Passport / Visa / Education / AddressOfResidence / MedicalRecord / EmployeePositionHistory / WorkDuty / EmployeeSalary / ExternalArrival |

@@ -31,7 +31,7 @@ Single officer session: **log on** → **Employees list** → **create employee*
 | Item | Value |
 |------|--------|
 | **Base URL** | `http://localhost:5050` |
-| **User** | `standarduser` / empty password |
+| **User** | `StandardUser` / empty password |
 | **List path** | `Person_ListView_Employees` |
 | **Employee detail** | `Person_DetailView_Employee` |
 | **Passport detail** | `Passport_DetailView` (nested New) |

@@ -18,7 +18,10 @@ public sealed class ApplicationProgressProcessNumberSchemaUpdater : ModuleUpdate
     public override void UpdateDatabaseBeforeUpdateSchema()
     {
         base.UpdateDatabaseBeforeUpdateSchema();
-        EnsureColumns();
+        // SQL Server script no-ops via OBJECT_ID when tables are missing.
+        // Postgres ALTER TABLE does not — skip until AfterUpdateSchema creates them.
+        if (!DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+            EnsureColumns();
     }
 
     public override void UpdateDatabaseAfterUpdateSchema()

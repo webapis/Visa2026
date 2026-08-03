@@ -20,7 +20,9 @@ public sealed class InvitationLegacyShapeSchemaUpdater : ModuleUpdater
     public override void UpdateDatabaseBeforeUpdateSchema()
     {
         base.UpdateDatabaseBeforeUpdateSchema();
-        ApplyEnsureColumns();
+        // Postgres ADD COLUMN fails when Invitations does not exist yet (greenfield EasyTest).
+        if (!DatabaseProviderDetector.IsPostgreSql(ObjectSpace))
+            ApplyEnsureColumns();
     }
 
     public override void UpdateDatabaseAfterUpdateSchema()

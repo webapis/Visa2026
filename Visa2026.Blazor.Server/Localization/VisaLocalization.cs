@@ -12,7 +12,17 @@ namespace Visa2026.Blazor.Server.Localization;
 /// </summary>
 public static class VisaLocalization
 {
-    public const string DefaultCultureName = "en-US";
+    public const string DefaultCultureName = "tr-TR";
+
+    /// <summary>English UI for EasyTest E2E (caption-based FillForm expects en-US login/shell strings).</summary>
+    public const string EasyTestCultureName = "en-US";
+
+    /// <summary>
+    /// Request/XAF default culture: Turkish for normal hosts; English when
+    /// <see cref="EasyTestHostMode"/> is enabled.
+    /// </summary>
+    public static string EffectiveDefaultCultureName =>
+        EasyTestHostMode.IsEnabled ? EasyTestCultureName : DefaultCultureName;
 
     /// <summary>Semicolon-separated list for <c>DevExpress:ExpressApp:Languages</c> in appsettings.</summary>
     public static string LanguagesConfigurationValue => string.Join(";", SupportedCultureNames);
@@ -20,7 +30,7 @@ public static class VisaLocalization
     public static IReadOnlyList<string> SupportedCultureNames { get; } = new[]
     {
         DefaultCultureName,
-        "tr-TR",
+        "en-US",
         "tk-TM",
         "ru-RU",
     };
@@ -30,18 +40,27 @@ public static class VisaLocalization
         services.AddLocalization();
 
         var cultures = CreateSupportedCultures();
+        var defaultCulture = EffectiveDefaultCultureName;
         services.Configure<RequestLocalizationOptions>(options =>
         {
-            options.DefaultRequestCulture = new RequestCulture(DefaultCultureName);
+            options.DefaultRequestCulture = new RequestCulture(defaultCulture);
             options.SupportedCultures = cultures;
             options.SupportedUICultures = cultures;
-            // Cookie (used by IXafCultureInfoService in A2+) and query string for manual testing.
-            // Accept-Language is omitted so the default stays English until the user picks a language.
-            options.RequestCultureProviders = new List<IRequestCultureProvider>
+            if (EasyTestHostMode.IsEnabled)
             {
-                new CookieRequestCultureProvider(),
-                new QueryStringRequestCultureProvider(),
-            };
+                // Deterministic English UI for E2E — ignore cookie/query leftovers.
+                options.RequestCultureProviders = new List<IRequestCultureProvider>();
+            }
+            else
+            {
+                // Cookie (used by IXafCultureInfoService in A2+) and query string for manual testing.
+                // Accept-Language is omitted so the default stays Turkish until the user picks a language.
+                options.RequestCultureProviders = new List<IRequestCultureProvider>
+                {
+                    new CookieRequestCultureProvider(),
+                    new QueryStringRequestCultureProvider(),
+                };
+            }
         });
     }
 

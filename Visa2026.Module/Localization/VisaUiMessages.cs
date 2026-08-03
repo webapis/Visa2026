@@ -6,7 +6,7 @@ namespace Visa2026.Module.Localization;
 /// <summary>Layer A runtime UI strings (controllers, confirmations). Regenerate catalog via GenerateModelLocalization.</summary>
 public static class VisaUiMessages
 {
-    public const string DefaultCultureName = "en-US";
+    public const string DefaultCultureName = "tr-TR";
 
     public static string Get(string key) => Get(key, null);
 
@@ -40,7 +40,7 @@ public static class VisaUiMessages
             return DefaultCultureName;
         }
 
-        string[] supported = [DefaultCultureName, "tr-TR", "tk-TM", "ru-RU"];
+        string[] supported = [DefaultCultureName, "en-US", "tk-TM", "ru-RU"];
         foreach (string supportedCulture in supported)
         {
             if (string.Equals(cultureName, supportedCulture, StringComparison.OrdinalIgnoreCase))
