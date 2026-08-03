@@ -42,6 +42,8 @@ namespace Visa2026.E2E.Tests
         /// <summary>Skip logon when the session is already on the authenticated shell.</summary>
         private bool IsAuthenticatedShellReady()
         {
+            const string listViewPath = E2ETestLoginValues.EmployeesListViewPath;
+
             for (var attempt = 0; attempt < 10; attempt++)
             {
                 try
@@ -52,8 +54,10 @@ namespace Visa2026.E2E.Tests
                     if (AppContext.GetAction("Log In") != null)
                         return false;
 
-                    AppContext.Navigate("Application");
-                    if (AppContext.GetAction("New") != null)
+                    // Do not use Navigate("Application") — Users cannot open the untyped Application list.
+                    EasyTestBlazorNavigationHelper.GoToRelativeUrl(
+                        AppContext, EasyTestHostEnvironment.BaseUrl, listViewPath);
+                    if (IsEmployeesListActive(listViewPath))
                         return true;
                 }
                 catch (Exception) when (attempt < 9)
@@ -66,11 +70,14 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Outcome shield after logon — authenticated shell with navigable Application list.
-        /// Navigates to Application list and expects toolbar <c>New</c>.
+        /// Confirms logon reached the officer shell via Employees list URL + New.
+        /// <c>Navigate("Application")</c> fails for Users (untyped Application list Denied;
+        /// only ViaMinistries / DirectMigration allowed).
         /// </summary>
         protected void AssertAuthenticatedAppShell()
         {
+            const string listViewPath = E2ETestLoginValues.EmployeesListViewPath;
+
             for (var attempt = 0; attempt < 30; attempt++)
             {
                 try
@@ -81,8 +88,10 @@ namespace Visa2026.E2E.Tests
                         continue;
                     }
 
-                    AppContext.Navigate("Application");
-                    if (AppContext.GetAction("New") != null)
+                    EasyTestBlazorNavigationHelper.GoToRelativeUrl(
+                        AppContext, EasyTestHostEnvironment.BaseUrl, listViewPath);
+
+                    if (IsEmployeesListActive(listViewPath))
                         return;
                 }
                 catch (Exception) when (attempt < 29)

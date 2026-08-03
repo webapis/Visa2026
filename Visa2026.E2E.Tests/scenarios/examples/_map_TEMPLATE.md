@@ -25,7 +25,7 @@
 | Item | Value |
 |------|--------|
 | **Base URL** | `http://localhost:5050` (EasyTest host) |
-| **User** | `standarduser` / empty password (or `Admin`) |
+| **User** | `StandardUser` / empty password (or `Admin`) |
 | **Paths** | Blazor view ids, e.g. `Person_ListView_Employees` |
 | **Seed constants** | `E2ETestLoginValues`, `E2ETestEmployeeCreateValues`, … |
 
@@ -50,10 +50,10 @@
 id: <scenario-id>
 e2eId: E2E-xxx
 description: ...
-user: standarduser
+user: StandardUser
 password: ""
 steps:
-  - login: { user: standarduser, password: "" }
+  - login: { user: StandardUser, password: "" }
   - assert-shell: true
 ```
 
