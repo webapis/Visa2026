@@ -8,7 +8,7 @@ Runbook for deploying Visa2026 on a **company LAN Ubuntu VM** using **Docker Eng
 
 **Scripts:** [scripts/linux/README.md](../scripts/linux/README.md)
 
-**Not this path:** [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy WSL + Docker) · [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) (native IIS, no Docker).
+**Not this path:** [ON_PREM_WINDOWS_DOCKER_DESKTOP.md](./ON_PREM_WINDOWS_DOCKER_DESKTOP.md) (Windows + Docker Desktop) · [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) (native IIS, still supported) · [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) (legacy WSL + Docker).
 
 **Cloud alternative:** DigitalOcean droplet — `droplet-scripts/` and [visa2026-droplet-prod-deploy](../.cursor/skills/visa2026-droplet-prod-deploy/SKILL.md).
 

@@ -2,7 +2,7 @@
 
 Runbook for deploying Visa2026 on **Windows Server** using **IIS**, the **ASP.NET Core Module**, and **PostgreSQL on Windows** — **no containers**, **no WSL**, **no Docker Engine**.
 
-**Status:** Pilot / optional path. Prefer [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) (Ubuntu + Docker) when Linux VMs are allowed.
+**Status:** **Supported** (not deprecated). Multi-client Windows **target** is Docker Desktop — [ON_PREM_WINDOWS_DOCKER_DESKTOP.md](./ON_PREM_WINDOWS_DOCKER_DESKTOP.md) — while IIS stays active until that path passes the success gate ([DOCKER_DEPLOY_STRATEGY_PLAN.md](./DOCKER_DEPLOY_STRATEGY_PLAN.md)).
 
 **Agent skill:** [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) (deploy, update, triage — read [learnings.md](../.cursor/skills/visa2026-windows-iis-deploy/learnings.md) before work on a host). PostgreSQL install: [visa2026-postgresql](../.cursor/skills/visa2026-postgresql/SKILL.md).
 
@@ -10,9 +10,9 @@ Runbook for deploying Visa2026 on **Windows Server** using **IIS**, the **ASP.NE
 
 **Experience log:** [DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](./DEPLOYMENT_LIFECYCLE_EXPERIENCE.md) §8
 
-**Prerequisites (hardware):** [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) (RAM/CPU/disk; ignore WSL/Docker rows)
+**Prerequisites (hardware):** [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md)
 
-**Not this path:** [legacy/ON_PREM_WINDOWS_SERVER.md](./legacy/ON_PREM_WINDOWS_SERVER.md) (WSL + Docker), [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) (Ubuntu + Docker).
+**Related paths:** [ON_PREM_WINDOWS_DOCKER_DESKTOP.md](./ON_PREM_WINDOWS_DOCKER_DESKTOP.md) (Windows + Docker Desktop) · [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) (Ubuntu + Docker Engine) · [legacy/ON_PREM_WINDOWS_SERVER.md](./legacy/ON_PREM_WINDOWS_SERVER.md) (legacy WSL + Docker)
 
 ---
 

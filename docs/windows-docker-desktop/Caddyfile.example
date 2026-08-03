@@ -1,0 +1,17 @@
+# Replace host.example.local with the hostname officers use (or use :443 block for IP).
+# tls internal = Caddy local CA (trust on officer PCs). For enterprise certs, see runbook.
+
+host.example.local {
+	reverse_proxy app:8080
+	tls internal
+}
+
+# Optional IP / any-host listener (comment hostname block if you use only this):
+# :443 {
+# 	reverse_proxy app:8080
+# 	tls internal
+# }
+#
+# :80 {
+# 	redir https://{host}{uri} permanent
+# }

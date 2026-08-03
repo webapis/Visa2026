@@ -1,0 +1,33 @@
+# Optional HTTPS front door for Docker Desktop client hosts (Caddy).
+# Copy to C:\visa2026\ with Caddyfile (from Caddyfile.example).
+#
+# In .env.prod set APP_PORT=8080 (app not on 80/443). Open Windows Firewall
+# for TCP 443 (and optionally 80 for redirect) only — do not expose 8080 to LAN.
+#
+#   cd C:\visa2026
+#   docker compose -p visa2026-prod --env-file .env.prod `
+#     -f docker-compose.prod.yml -f docker-compose.https.override.yml up -d
+#
+# Requires Docker Compose v2. Requires outbound pull for caddy:2.8.
+
+services:
+  caddy:
+    image: caddy:2.8
+    depends_on:
+      - app
+    ports:
+      - "${CADDY_HTTP_PORT:-80}:80"
+      - "${CADDY_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  caddy_data:
+  caddy_config:

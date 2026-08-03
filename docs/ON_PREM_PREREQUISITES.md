@@ -2,7 +2,19 @@
 
 Canonical requirements to **deploy and run Visa2026** on a company LAN using **`docker-compose.prod.yml`**.
 
-## Recommended: Linux Ubuntu (on-prem)
+## Multi-client target: Windows + Docker Desktop
+
+| Item | Detail |
+|------|--------|
+| **Host** | Windows 10/11 or Windows Server + **Docker Desktop** (WSL2, Linux containers) |
+| **Stack** | `docker-compose.prod.yml` — Hub image `webapia/visa2026` + `postgres:16` |
+| **Runbook** | [ON_PREM_WINDOWS_DOCKER_DESKTOP.md](./ON_PREM_WINDOWS_DOCKER_DESKTOP.md) |
+| **Strategy** | [DOCKER_DEPLOY_STRATEGY_PLAN.md](./DOCKER_DEPLOY_STRATEGY_PLAN.md) |
+| **Skill** | None yet (promote after 2+ verified Desktop deploys) |
+
+**IIS remains supported** until the Docker Desktop success gate. Do not use `scripts/local/` or `docker-compose.watch.yml` as the client fleet path.
+
+## Supported: Linux Ubuntu (on-prem Docker Engine)
 
 | Item | Detail |
 |------|--------|
@@ -12,18 +24,17 @@ Canonical requirements to **deploy and run Visa2026** on a company LAN using **`
 | **Scripts** | [scripts/linux/](../scripts/linux/README.md) |
 | **SSH (optional)** | [setup-openssh-server](../.cursor/skills/setup-openssh-server/SKILL.md) — `openssh-server`, TCP **22** |
 
-**Not this path:** developer PC Docker Desktop for prod (`scripts/local/`).
-
-## Alternative: Windows Server native (IIS, no Docker)
+## Supported: Windows Server native (IIS, no Docker)
 
 | Item | Detail |
 |------|--------|
 | **Host** | Windows Server 2019/2022 + **IIS** + **.NET 8 Hosting Bundle** |
-| **Database** | **SQL Server on Windows** (not Linux container) |
+| **Database** | **PostgreSQL on Windows** (Npgsql; see IIS runbook) |
 | **Runbook** | [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) |
 | **Scripts** | [scripts/windows-iis/](../scripts/windows-iis/README.md) |
+| **Skill** | [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md) |
 
-Use when IT requires **Windows Server only** and **Docker/WSL is not allowed**. You own publish, IIS, and SQL patching (no Hub image pull).
+Use for current IIS hosts and when containers are not allowed. **Not deprecated.** New multi-client Windows work should prefer Docker Desktop once that runbook is piloted.
 
 ## Legacy: Windows Server + WSL (deprecated for new deploys)
 
@@ -49,8 +60,8 @@ The sections below apply to **both** Linux and legacy Windows hosts unless noted
 | Item | Assumption |
 |------|------------|
 | Users | ~**10** concurrent Blazor users (company LAN) |
-| Stack | `webapia/visa2026` (Linux) + **SQL Server Express** in Linux container |
-| Host OS | **Ubuntu 22.04/24.04 LTS** + Docker (recommended), **Windows Server + IIS** (no Docker), or legacy **Windows + WSL** + containers |
+| Stack | `webapia/visa2026` (Linux containers) + **PostgreSQL 16** (`postgres:16` in compose, or host Postgres for IIS) |
+| Host OS | **Windows + Docker Desktop** (multi-client target), **Ubuntu + Docker Engine**, **Windows Server + IIS** (supported), or legacy **Windows + WSL** |
 
 ---
 

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Visa2026 Docker deploy strategy — diagrams</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, theme: "neutral" });
+  </script>
+  <style>
+    body { font-family: Georgia, "Times New Roman", serif; margin: 2rem; background: #f7f5f1; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.15rem; margin-top: 2.5rem; border-bottom: 1px solid #ccc; padding-bottom: 0.35rem; }
+    p.note { color: #555; font-size: 0.95rem; }
+    .mermaid { background: #fff; padding: 1.25rem; margin: 1rem 0; border: 1px solid #ddd; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Visa2026 — Docker deploy strategy diagrams</h1>
+  <p class="note">Target host: Windows + Docker Desktop (Linux containers). Source: DOCKER_DEPLOY_STRATEGY_PLAN.md</p>
+
+  <h2>1. End-to-end (dev → CI → agent → Docker Desktop clients)</h2>
+  <pre class="mermaid">
+flowchart TB
+  subgraph dev [Developer_workstation]
+    Code[Edit_code]
+    OptionalLocal[Optional_local_build_or_test]
+    Code --> OptionalLocal
+  end
+
+  subgraph ci [GitHub_Actions]
+    Push[git_push_or_PR]
+    UnitCI[build_and_test_yml]
+    E2ECI[e2e_tests_yml]
+    CiResult{CI_green}
+    Publish[publish_to_Docker_Hub]
+    Push --> UnitCI
+    Push --> E2ECI
+    UnitCI --> CiResult
+    E2ECI --> CiResult
+    CiResult -->|yes| Publish
+  end
+
+  subgraph agentFix [Cursor_cloud_agent]
+    Trigger[Trigger_on_CI_failure]
+    Diagnose[Read_logs_and_diff]
+    Patch[Patch_code]
+    PushFix[Push_fix_commit_or_PR]
+    Trigger --> Diagnose --> Patch --> PushFix
+  end
+
+  subgraph registry [Docker_Hub]
+    AppImg["webapia/visa2026:tag"]
+  end
+
+  subgraph clients [Client_Windows_Docker_Desktop]
+    Pull[compose_pull_and_up]
+    Smoke[Post_deploy_LoginPage_smoke]
+    AppA[app_plus_postgres_containers]
+    Pull --> Smoke --> AppA
+  end
+
+  OptionalLocal --> Push
+  CiResult -->|no| Trigger
+  PushFix -->|re_runs_CI| Push
+  Publish --> AppImg
+  AppImg -->|APP_IMAGE_TAG| Pull
+  </pre>
+
+  <h2>2. Day-to-day (CI + agent)</h2>
+  <pre class="mermaid">
+flowchart LR
+  Edit[Change_code]
+  Push[git_push_or_PR]
+  CI[GitHub_Actions_tests]
+  Agent[Cursor_cloud_agent_fix]
+  Green[CI_green]
+  Edit --> Push --> CI
+  CI -->|fail| Agent
+  Agent -->|push_fix| Push
+  CI -->|pass| Green
+  </pre>
+
+  <h2>3. Sequence: CI → agent → Windows Docker Desktop</h2>
+  <pre class="mermaid">
+sequenceDiagram
+  participant Dev as Developer
+  participant GHA as GitHub_Actions
+  participant Agent as Cursor_cloud_agent
+  participant Hub as Docker_Hub
+  participant Desk as Windows_Docker_Desktop
+  participant Off as Officers
+
+  Dev->>GHA: git_push_or_PR
+  GHA->>GHA: build_and_test_plus_E2E
+  alt CI_fails
+    GHA->>Agent: trigger_fix_on_failure
+    Agent->>Agent: diagnose_and_patch
+    Agent->>GHA: push_fix_commit_or_PR
+    GHA->>GHA: re_run_tests
+  end
+  Note over GHA: Only_green_CI_publishes
+  GHA->>Hub: publish_webapia_visa2026_tag
+  Desk->>Hub: compose_pull_app
+  Desk->>Desk: compose_up_and_smoke
+  Desk->>Off: https_LoginPage
+  </pre>
+
+  <h2>4. Deprecated IIS path</h2>
+  <pre class="mermaid">
+flowchart LR
+  Dev2[Developer] -->|Publish_Visa2026ForIis| Zip[Publish_folder]
+  Zip -->|SCP_SSH| Win[Windows_IIS_host]
+  Win --> Pool[App_pool_recycle]
+  Win --> NativePg[(Host_PostgreSQL)]
+  Pool --> Officers2[Officers]
+  </pre>
+</body>
+</html>

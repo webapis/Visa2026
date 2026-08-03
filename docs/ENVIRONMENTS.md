@@ -10,10 +10,12 @@ This guide shows how to run production and development stacks safely on the same
 - `docker-compose.dev.yml`
 - `docker-compose.watch.yml` — optional local **hot reload** (SDK + `dotnet watch`, see below)
 - `scripts/README.md` — which scripts are for **local workstation** vs **droplet**
-- [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) — on-prem **hardware/software** (Ubuntu recommended)
+- [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) — on-prem **hardware/software**
+- [ON_PREM_WINDOWS_DOCKER_DESKTOP.md](./ON_PREM_WINDOWS_DOCKER_DESKTOP.md) — **Windows + Docker Desktop** multi-client target (`docker-compose.prod.yml`; HTTPS helpers in [windows-docker-desktop/](./windows-docker-desktop/))
 - [ON_PREM_LINUX_SERVER.md](./ON_PREM_LINUX_SERVER.md) — **Ubuntu on company LAN** ([setup-docker-engine](../.cursor/skills/setup-docker-engine/SKILL.md), `scripts/linux/`)
-- [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) — **Windows Server IIS** (no Docker; `scripts/windows-iis/`)
+- [ON_PREM_WINDOWS_IIS.md](./ON_PREM_WINDOWS_IIS.md) — **Windows Server IIS** (supported; no Docker; `scripts/windows-iis/`)
 - [ON_PREM_WINDOWS_SERVER.md](./ON_PREM_WINDOWS_SERVER.md) — **legacy** Windows Server + WSL
+- [DOCKER_DEPLOY_STRATEGY_PLAN.md](./DOCKER_DEPLOY_STRATEGY_PLAN.md) — dual-path strategy (Desktop target; IIS until success gate)
 - `.env.prod.example`
 - `.env.dev.example`
 - [DEBUGGING_DOCKER_DEPLOYMENTS.md](./DEBUGGING_DOCKER_DEPLOYMENTS.md) — troubleshooting when Droplet and local Docker differ

@@ -26,3 +26,22 @@
 **/Values.yaml
 LICENSE
 README.md
+
+# Local/agent build and publish artifacts (must not enter image context)
+dist/
+.publish/
+.publish-*/
+_agent_build_out/
+_agent_build_out*/
+_scenario_build_out/
+_scenario_build_out*/
+_build_out/
+_build_out*/
+artifacts/
+TestResults/
+.vs/
+.cursor/
+mcp/
+graphify-out/
+*.bak
+*.zip

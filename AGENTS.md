@@ -84,8 +84,9 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`.cursor/skills/visa2026-runtime-error-tracking/SKILL.md`** (+ **`reference.md`**, **`agent-fix-loop.md`**, **`user-prompts.md`**, **`environments.md`**, **`learnings.md`**) — **developer-only**: `ApplicationRuntimeLog` SQL, pull-remote inbox, Cursor hooks, autonomous Agent triage/fix loop (local F5 auto-fix; IIS slots suggest-only unless opted in); not officers, `UserFeedback`, or Audit Trail.
 - **`docs/USAGE_LICENSE_LOGIN_BANNER.md`** — login-page **Visa2026 usage / trial license** banner (`UsageLicense` in appsettings); not DevExpress licensing.
 - **`docs/CALIK_SPLASH_SCREEN.md`** — **Çalık** startup splash (`CalikSplashScreen`), header logo, `CalikLogo` assets, and progress bar; host-only (`_Host.cshtml` + `site.css`).
-- **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`); **recommended** LAN path.
-- **`docs/ON_PREM_WINDOWS_IIS.md`** — **optional** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.
+- **`docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md`** — **Windows + Docker Desktop** multi-client **target** (`docker-compose.prod.yml`); IIS stays supported until success gate — see **`docs/DOCKER_DEPLOY_STRATEGY_PLAN.md`**.
+- **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`).
+- **`docs/ON_PREM_WINDOWS_IIS.md`** — **supported** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.
 - **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.
 - **`docs/COMMA_SEPARATED_MULTI_SELECT.md`** — border-zone and work-permitted catalog multi-select editor (`ApplicationItem`, `WorkPermitItem`).
 - **`docs/OPTIONAL_DETAIL_FIELDS.md`** — optional detail-field gear toggle (`IOptionalDetailFields`, `EmployeeSalary`, `Education`, `EmployeePositionHistory`).

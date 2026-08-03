@@ -48,6 +48,12 @@ Use on the **DigitalOcean droplet** (or after syncing repo there). These scripts
 
 ---
 
+## `scripts/windows-docker-desktop/` — Windows Docker Desktop pilot
+
+**Runbook:** [docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md](../docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md) · **Checklist:** [docs/windows-docker-desktop/PILOT_CHECKLIST.md](../docs/windows-docker-desktop/PILOT_CHECKLIST.md)
+
+`Prepare-Visa2026DesktopPilot.ps1` stages `C:\visa2026-pilot\` (compose + env template). Does not replace IIS — [scripts/windows-iis/](windows-iis/).
+
 ## `scripts/windows-iis/` — company Windows Server (IIS, no Docker)
 
 **Runbook:** [docs/ON_PREM_WINDOWS_IIS.md](../docs/ON_PREM_WINDOWS_IIS.md) · **Skill:** [visa2026-windows-iis-deploy](../.cursor/skills/visa2026-windows-iis-deploy/SKILL.md)
