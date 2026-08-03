@@ -2112,3 +2112,25 @@ Promote repeated patterns into [SKILL.md](./SKILL.md) after **2+** occurrences (
 - **Files**: Person.Photo patched **3263**; VisaDocument posted **5965**; other doc waves mostly Already imported; InvitationDocument No parent map **203**.
 - **Follow-up**: deploy local city.json/manifest + AddressOfResidence DetailView reorder to IIS Production; Refresh Report Dashboard (valid-visa / ready filters still apply).
 - **Deploy 2026-08-03**: Production IIS ForceUpdate; lookup city sync updated=87 (manifest v10).
+
+### 2026-08-03 — Prod clean reimport of all file waves
+
+- **Ask**: wipe + reimport file data for all file BOs on Production (`visa2026_prod`).
+- **Wipe**: `cleanup/Wipe-PostgresImportedFileWaves.sql` — clear `People.Photo`, truncate Passport/Visa/Education/WorkPermit/Invitation/Person/FamilyProof/MedicalRecord document tables; keep scalar BOs.
+- **FileData**: plain `DELETE` on ~6GB TOAST was too slow (~IO bound). Use keepers temp table + `TRUNCATE "FileData"` + restore templates/contracts/ministry letters (**22** kept).
+- **Id-maps**: reset document maps only (`PassportCopy`, `*Document`, `MedicalRecord*`) to `{}` under `data\id-maps`, `id-maps`, and DataImporter `legacy\...\id-maps` — do **not** clear Person/Passport/Visa scalars.
+- **Orchestrator**: `import/Reimport-OnPremFileWaves.ps1` (target env key `VISA2026_PROD_SQL_CONNECTION`); launch via `Win32_Process.Create` (not bare SSH `Start-Process`).
+- **Run**: MedicalRecordDocument then DocumentCopies `Person-Photo`…; logs `C:\visa2026-sync\data\import-logs\file-reimport\`; watch `file-waves-status.json`.
+- **Prevent**: do not use slow orphan `DELETE` for FileData on prod; always reset document id-maps or waves skip as Already imported.
+### 2026-08-03 — Docker staging (:8081) Demo Import started
+
+- **Ask**: Import VISA2014 → Docker stack `http://10.100.128.25:8081` (compose `visa2026-staging`, DB `visa2026_staging_docker` @ `127.0.0.1:5434`).
+- **Wire-up**: Reused `-Profile Demo` / `C:\visa2026-sync-demo` (ApiBaseUrl already `:8081`). Set `VISA2026_DEMO_SQL_CONNECTION` to Docker Npgsql; archived old Demo id-maps → `_archive-before-docker-*`; reset maps to `{}`.
+- **Failure 1**: Person FailedCount≈42703 — in-process DataImporter (old publish) expected `ApplicationTypes.OrganizationTypeID`; Docker image `1.0.0.644` schema already dropped OrganizationType (cleanup updater). **Not** a mapping bug.
+- **Fix**: Republish current `Visa2026.DataImporter` to `C:\visa2026-sync-demo\tools\DataImporter` (preserve id-maps/lookup-translations); relaunch `Run-OnPremSyncOnServer -Profile Demo -StartAt Person` via `Win32_Process.Create`.
+- **RunId**: `20260803-010653` — Person **Running** (progress 1750+ posted / 0 failed at watch).
+- **Logs**: `C:\visa2026-sync-demo\logs\docker-demo-import-20260803-010651.log`; wave `data\import-logs\demo-Person-*.log`.
+- **Watch**: `Watch-OnPremImportLive.ps1 -Profile Demo -ViaSsh`.
+- **Prevent**: Keep sync-host DataImporter Module DLL in lockstep with target app image schema; after OrganizationType removal, old DI publish cannot import into new Postgres.
+- **Note**: IIS Demo site remains stopped (port 8081 owned by Docker). Scalar import only (no `-IncludeFileWaves` this run).
+

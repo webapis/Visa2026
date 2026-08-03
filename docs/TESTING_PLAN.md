@@ -119,12 +119,13 @@ dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 
 **Browser:** headed Edge locally (default); headless on CI via `EasyTestBrowserMode` (`CI=true` or `VISA2026_E2E_HEADLESS=true`). Override locally: `$env:VISA2026_E2E_HEADLESS='true'` before `dotnet test`.
 
-**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, PostgreSQL 16, Edge WebDriver, full EasyTest suite on push/PR (`CI=true`, headless).
+**CI:** GitHub Actions workflow **`.github/workflows/e2e-tests.yml`** — `windows-latest`, PostgreSQL 16, Edge WebDriver (`CI=true`, headless). Unit/build gate: **`build-and-test.yml`**.
 
-**CI policy (recommended):**
+**CI policy:**
 
-- **PR to `main`:** Tier 0 E2E + `dotnet build -c EasyTest` (workflow runs all current facts)
-- **Nightly / pre-release:** Full E2E suite (tier 0–2)
+- **PR to `master` or `development`:** Tier 0 EasyTest (`PersonOfficerJourneyTests`) + `build-and-test.yml` unit/build
+- **Push to `development` (Hub release):** `publish-to-docker-hub.yml` runs unit + Tier 0 E2E, then publishes to Docker Hub only if both green
+- **Push to `master` / nightly / manual `workflow_dispatch`:** Full E2E suite (tier 0–2; long run with one retry)
 
 ---
 

@@ -93,6 +93,7 @@ Do **not** use `reimport/` for staging or production cutover.
 |------|--------|-------|
 | Full local chain (in-process) | `import/Run-HeadlessChain.ps1` | `-StartAt <Entity>` to resume |
 | Document copies only (photos + scans) | `import/DocumentCopies.ps1` | `-StartAt WorkPermitDocument` to resume mid-wave |
+| Clean reimport file waves (Prod/Demo) | `import/Reimport-OnPremFileWaves.ps1` | wipe docs + reset doc id-maps + MedicalRecord + DocumentCopies
 | On-prem Import (Demo / Staging / Prod) | `import/OnPrem-Sync.ps1` | Import-only (`--import-visa2014`); `-Profile Staging\|Production\|Demo`; `-IncludeFileWaves` for scans |
 | **Import host on `.25`** (no SDK) | `import/Install-OnPremSyncHost.ps1` | Publish + `C:\visa2026-sync*`; then `Run-OnPremSyncOnServer.ps1` |
 | On-prem staging (wrapper) | `import/OnPrem-Staging.ps1` | Delegates to `OnPrem-Sync.ps1 -Profile Staging` |

@@ -1,9 +1,10 @@
 # Native XAF EasyTest E2E (Visa2026.E2E.Tests) - Windows + PostgreSQL + Edge.
 #
 # Where this runs (see docs/TESTING_PLAN.md section 6):
-#   pull_request / push to master -> Tier 0 only (officer journey), strict, no retry
-#   nightly schedule + manual run -> full suite, hang dumps, one retry for flaky browser steps
-# Fast build + unit tests live in build-and-test.yml and gate every push.
+#   pull_request (master|development) -> Tier 0 only (officer journey), strict, no retry
+#   push to master / nightly / manual -> full suite (manual may pass filter), hang dumps, one retry
+#   workflow_call from publish-to-docker-hub.yml (development) -> Tier 0 gate before Hub publish
+# Fast build + unit tests live in build-and-test.yml (and are called by the publish workflow).
 #
 # PUBLIC REPO: artifacts below (screen recording, host logs, trx) are downloadable by
 # anyone. Keep E2ETestDataSeed synthetic - no real personal or passport data.
@@ -12,7 +13,7 @@ name: EasyTest E2E
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, development]
   push:
     branches: [master]
   schedule:
@@ -25,11 +26,23 @@ on:
         description: "Optional dotnet test --filter expression (empty = full suite)"
         required: false
         default: ""
+  workflow_call:
+    inputs:
+      test_filter:
+        description: "dotnet test --filter (default = Tier 0 officer journey)"
+        type: string
+        required: false
+        default: "FullyQualifiedName~PersonOfficerJourneyTests"
+      long_run:
+        description: "Full suite mode (retry + hang dumps + recording)"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: easytest-e2e-${{ github.event_name }}-${{ github.ref }}
-  # Never cancel a nightly or manual long run; only supersede PR gate runs.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Never cancel a nightly or manual long run; only supersede PR / Tier-0 gate runs.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_call' }}
 
 env:
   DOTNET_NOLOGO: true
@@ -43,7 +56,7 @@ jobs:
   easytest-e2e:
     name: EasyTest E2E (Windows)
     runs-on: windows-latest
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 45 || 180 }}
+    timeout-minutes: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_call' && inputs.long_run)) && 180 || 45 }}
 
     steps:
       - name: Checkout repository
@@ -59,18 +72,33 @@ jobs:
         id: scope
         shell: pwsh
         env:
-          INPUT_FILTER: ${{ github.event.inputs.test_filter }}
+          INPUT_FILTER: ${{ inputs.test_filter || github.event.inputs.test_filter || '' }}
           EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          LONG_RUN_INPUT: ${{ inputs.long_run }}
         run: |
-          # Tier 0 on the PR gate keeps it fast; everything else runs the full suite.
           $filter = $env:INPUT_FILTER
-          if ([string]::IsNullOrWhiteSpace($filter) -and $env:EVENT_NAME -eq 'pull_request') {
-            $filter = 'FullyQualifiedName~PersonOfficerJourneyTests'
+          $event = $env:EVENT_NAME
+          $refName = $env:GITHUB_REF_NAME
+          $long = $false
+
+          if ($event -eq 'workflow_call') {
+            $long = $env:LONG_RUN_INPUT -eq 'true'
+            if ([string]::IsNullOrWhiteSpace($filter)) {
+              $filter = 'FullyQualifiedName~PersonOfficerJourneyTests'
+            }
+          } else {
+            $isPr = $event -eq 'pull_request'
+            $isDevPush = ($event -eq 'push') -and ($refName -eq 'development')
+            if ([string]::IsNullOrWhiteSpace($filter) -and ($isPr -or $isDevPush)) {
+              $filter = 'FullyQualifiedName~PersonOfficerJourneyTests'
+            }
+            $long = $event -in @('schedule', 'workflow_dispatch') -or (($event -eq 'push') -and ($refName -eq 'master'))
           }
-          $long = $env:EVENT_NAME -in @('schedule', 'workflow_dispatch', 'push')
+
           "filter=$filter" | Out-File $env:GITHUB_OUTPUT -Append
           "long=$($long.ToString().ToLower())" | Out-File $env:GITHUB_OUTPUT -Append
-          Write-Host "event=$($env:EVENT_NAME) filter='$filter' longRun=$long"
+          Write-Host "event=$event ref=$refName filter='$filter' longRun=$long"
 
       - name: Write DevExpress license
         shell: pwsh
@@ -266,7 +294,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: easytest-e2e-recording
+          name: easytest-e2e-recording-${{ github.run_id }}
           path: "**/recordings/*.mp4"
           if-no-files-found: ignore
 
@@ -274,7 +302,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: easytest-e2e-results
+          name: easytest-e2e-results-${{ github.run_id }}
           path: |
             **/e2e-results.trx
             **/e2e-results-retry.trx
@@ -285,7 +313,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: easytest-host-logs
+          name: easytest-host-logs-${{ github.run_id }}
           path: "**/easytest-host-logs/**"
           if-no-files-found: ignore
 

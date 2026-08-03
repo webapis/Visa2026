@@ -85,6 +85,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/USAGE_LICENSE_LOGIN_BANNER.md`** — login-page **Visa2026 usage / trial license** banner (`UsageLicense` in appsettings); not DevExpress licensing.
 - **`docs/CALIK_SPLASH_SCREEN.md`** — **Çalık** startup splash (`CalikSplashScreen`), header logo, `CalikLogo` assets, and progress bar; host-only (`_Host.cshtml` + `site.css`).
 - **`docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md`** — **Windows + Docker Desktop** multi-client **target** (`docker-compose.prod.yml`); IIS stays supported until success gate — see **`docs/DOCKER_DEPLOY_STRATEGY_PLAN.md`**.
+- **`.cursor/skills/visa2026-windows-docker-desktop/SKILL.md`** (+ `reference.md`, `prompts.md`, append-only `learnings.md`) — optional Agent **Skill**: **Windows Docker Desktop** compose deploy/update (Hub pin, SSH Hub stubs, first-boot DB); IIS remains supported ([`visa2026-windows-iis-deploy`](.cursor/skills/visa2026-windows-iis-deploy/SKILL.md)).
 - **`docs/ON_PREM_LINUX_SERVER.md`** — company **Ubuntu** on-prem deploy (Docker Engine + `scripts/linux/`, `/opt/visa2026`).
 - **`docs/ON_PREM_WINDOWS_IIS.md`** — **supported** Windows Server **IIS** deploy (no Docker); `scripts/windows-iis/Publish-Visa2026ForIis.ps1`.
 - **`docs/legacy/ON_PREM_WINDOWS_SERVER.md`** — **legacy** Windows Server + WSL (`scripts/legacy/on-prem-windows/`); deprecated for new deploys.

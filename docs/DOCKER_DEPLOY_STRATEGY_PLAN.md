@@ -24,11 +24,11 @@ todos:
     content: On GitHub Actions test failure (push/PR), trigger Cursor cloud agent to diagnose, patch, and push a fix so CI re-runs
     status: pending
   - id: pilot-then-cutover
-    content: Pilot Desktop stack (checklist + prepare script shipped; live up blocked until Docker Desktop installed); then cutover/archive IIS after success gate
-    status: pending
+    content: Pilot Desktop staging on 10.100.128.25 (E:\visa2026-staging :8081); local C:\visa2026-pilot waived (disk)
+    status: completed
   - id: promote-skill-after-pilots
-    content: After 2+ verified Desktop deploys, create .cursor/skills/visa2026-windows-docker-desktop (SKILL.md + learnings.md); do not create empty skill before runbook
-    status: pending
+    content: Created .cursor/skills/visa2026-windows-docker-desktop after on-prem staging pilot (local second pilot waived)
+    status: completed
 isProject: true
 ---
 
@@ -67,11 +67,12 @@ Target model: **develop locally → push/PR → GitHub Actions tests → (on fai
 | Layer | Where | What |
 |-------|--------|------|
 | **Local** | Dev machine | Optional `dotnet build` / unit / EasyTest; may also use Docker Desktop for local compose |
-| **CI** | GitHub Actions on **every push and PR** | `build-and-test.yml`; `e2e-tests.yml` |
-| **Auto-fix** | Cursor **cloud** agent | Triggered when CI fails; patch + push; CI re-runs |
-| **Post-deploy** | Client **Windows + Docker Desktop** | HTTP(S) `/LoginPage` smoke |
+| **CI (PR / non-`development` push)** | GitHub Actions | `build-and-test.yml`; Tier 0 E2E on PRs to `master`/`development` (`e2e-tests.yml`) |
+| **CI + Hub (`development` push / manual publish)** | `publish-to-docker-hub.yml` | **Enforced:** reusable unit tests + Tier 0 EasyTest (`PersonOfficerJourneyTests`); Hub push only if both green |
+| **Auto-fix** | Cursor **cloud** agent | Triggered when CI fails; patch + push; CI re-runs (**todo:** wire trigger) |
+| **Post-deploy** | Client **Windows + Docker Desktop** | HTTP(S) `/LoginPage` smoke (host script; not GHA) |
 
-**CI rule:** Tests gate push/PR. Publish Hub only when green. On red: trigger Cursor cloud agent; do not publish.
+**CI rule (enforced for Hub):** On `development`, `publish-to-docker-hub.yml` runs unit + Tier 0 E2E first and publishes only when both succeed. Full E2E remains on `master` push / nightly / manual. On red: do not publish; Cursor cloud agent auto-fix is still a pending todo.
 
 ### End-to-end (dev → CI → agent → Docker Desktop clients)
 
@@ -216,6 +217,13 @@ Native IIS remains valid until Desktop is proven. Long-term multi-client model i
 - Do not create an empty Agent skill before the Windows Docker Desktop runbook exists and has been piloted.
 - Do not mark IIS deprecated in docs/skills until the success gate passes.
 
+## Pilot gate (updated 2026-08-03)
+
+- **Verified pilot:** on-prem Docker Desktop staging on `10.100.128.25` (`E:\visa2026-staging`, LoginPage `:8081`).
+- **Local second pilot waived:** workstation disk insufficient for `C:\visa2026-pilot` full smoke; do not block skill promotion on it.
+- **Skill:** [visa2026-windows-docker-desktop](../.cursor/skills/visa2026-windows-docker-desktop/SKILL.md).
+- **IIS deprecation** still requires production-equivalent cutover + human approval (not granted by staging pilot alone).
+
 ## Docs first, then Agent skill (agreed)
 
 Follow the repo funnel ([AGENTS.md](../AGENTS.md) / [DEPLOYMENT_LIFECYCLE_EXPERIENCE.md](DEPLOYMENT_LIFECYCLE_EXPERIENCE.md)): **one skill = one recurring task**; capture in docs first; promote after repeat or high risk.
@@ -225,7 +233,7 @@ Follow the repo funnel ([AGENTS.md](../AGENTS.md) / [DEPLOYMENT_LIFECYCLE_EXPERI
 | 1 | **Desktop runbook in `docs/`** | **Now** — add `ON_PREM_WINDOWS_DOCKER_DESKTOP.md`; dual-path pointers (IIS still supported) |
 | 2 | Harden docs (HTTPS, `APP_IMAGE_TAG`, multi-client isolation, CI→agent) | After runbook draft |
 | 3 | **Pilot** (1–2 real Desktop stacks) | Capture verified fixes in the runbook notes |
-| 4 | **Agent skill** `.cursor/skills/visa2026-windows-docker-desktop/` (`SKILL.md`, `reference.md`, append-only `learnings.md`) | **Only after 2+ verified deploys** |
+| 4 | **Agent skill** `.cursor/skills/visa2026-windows-docker-desktop/` | **Done** (2026-08-03) — on-prem staging pilot; local second pilot waived |
 
 **Do not** overload these for the new path:
 
@@ -240,7 +248,7 @@ When the Desktop skill is promoted and the success gate passes, point AGENTS.md 
 1. **Dual-path docs** — add Windows Docker Desktop runbook; keep IIS fully supported (no deprecate banners yet).
 2. **Desktop hardening** — HTTPS, tags, backup/update, multi-client isolation (still no IIS deprecate).
 3. **Pilot** — non-prod Desktop stack; prove pull/up, smoke, backup/rollback.
-4. **Promote Desktop skill** — after 2+ verified Desktop deploys (`visa2026-windows-docker-desktop`).
+4. **Promote Desktop skill** — **done** (`visa2026-windows-docker-desktop`); local second pilot waived.
 5. **Production-equivalent cutover** — migrate or parallel-run a real slot off IIS onto Desktop; stabilize.
 6. **Deprecate IIS** — only after success gate + approval; archive IIS skill as legacy-only; keep scripts until last host gone.
 7. **Scale** — copy `C:\visa2026` + `.env.prod` per client; same Hub tag for fleet updates.

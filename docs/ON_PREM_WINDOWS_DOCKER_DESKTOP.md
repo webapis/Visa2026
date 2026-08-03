@@ -2,7 +2,7 @@
 
 Runbook for deploying Visa2026 on a **Windows** host using **Docker Desktop**, **Compose**, and **`docker-compose.prod.yml`**.
 
-**Status:** Multi-client **target** path (Phases 1–2 docs; **Phase 3 pilot** in progress — see Pilot log). **IIS remains fully supported** until Docker Desktop is proven — see [DOCKER_DEPLOY_STRATEGY_PLAN.md](./DOCKER_DEPLOY_STRATEGY_PLAN.md). Do not treat IIS as deprecated.
+**Status:** Multi-client **target** path. **Phase 3 pilot verified** on `10.100.128.25` (`E:\visa2026-staging`, `:8081`). Local `C:\visa2026-pilot` **waived** (disk). Agent skill: [visa2026-windows-docker-desktop](../.cursor/skills/visa2026-windows-docker-desktop/SKILL.md). **IIS remains fully supported** until Docker Desktop is proven — see [DOCKER_DEPLOY_STRATEGY_PLAN.md](./DOCKER_DEPLOY_STRATEGY_PLAN.md). Do not treat IIS as deprecated.
 
 **Prerequisites:** [ON_PREM_PREREQUISITES.md](./ON_PREM_PREREQUISITES.md) (Windows + Docker Desktop section)
 
@@ -313,3 +313,24 @@ Strategy: [DOCKER_DEPLOY_STRATEGY_PLAN.md](./DOCKER_DEPLOY_STRATEGY_PLAN.md).
 - **Result:** blocked — Docker Desktop / `docker` CLI **not installed** (not on PATH; no `C:\Program Files\Docker`).
 - **Done:** pilot checklist [windows-docker-desktop/PILOT_CHECKLIST.md](./windows-docker-desktop/PILOT_CHECKLIST.md); prepare script [scripts/windows-docker-desktop/Prepare-Visa2026DesktopPilot.ps1](../scripts/windows-docker-desktop/Prepare-Visa2026DesktopPilot.ps1); layout `C:\visa2026-pilot\` (compose + `.env.prod` template, `APP_PORT=9080`, `DB_NAME=visa2026_pilot`).
 - **Next on a Docker-ready host:** edit secrets + pin `APP_IMAGE_TAG`, then complete the checklist (up, smoke, backup, rollback). Append a new dated entry here when the pilot passes.
+### 2026-08-03 — On-prem staging layout (`10.100.128.25`)
+
+- **Folder:** `E:\visa2026-staging` (E: ~163 GB free; separate from IIS `C:\inetpub\visa2026-staging`).
+- **Copied:** `docker-compose.prod.yml`, HTTPS override helpers, `.env.prod` (`APP_PORT=9080`, `DB_NAME=visa2026_staging_docker`, `PG_HOST_PORT=5434`, `APP_IMAGE_TAG=1.0.0.644`; secrets seeded from IIS `C:\visa2026\env\staging.env` DevExpress key + `SA_PASSWORD` as `PG_PASSWORD` for container Postgres).
+- **Compose project:** `visa2026-staging`.
+- **Blocked for up:** Docker Engine/Desktop **not installed** on this host (`com.docker.service` missing; no `docker` on PATH). Install Docker Desktop (or approved engine) on `.25`, then:
+  `cd /d E:\visa2026-staging` → `docker compose -p visa2026-staging --env-file .env.prod -f docker-compose.prod.yml pull` → `up -d` → smoke `http://10.100.128.25:9080/LoginPage`.
+- **Do not** reuse IIS Staging port 8080 / `visa2026_staging` DB for this Docker stack unless intentionally sharing.
+### 2026-08-03 — On-prem staging stack UP (`10.100.128.25`)
+
+- **Docker Desktop:** installed under **`E:\Docker`** (not Program Files); engine **29.6.2** / Desktop **4.84.0** was already running (desktop shortcut).
+- **Folder:** `E:\visa2026-staging` — image `webapia/visa2026:1.0.0.644`, project `visa2026-staging`, app **`:9080`**, Postgres host **`127.0.0.1:5434`**, DB `visa2026_staging_docker`.
+- **SSH pull caveat:** Docker Hub credential helper (`wincred`/`desktop`) fails over non-interactive SSH. Workaround: stub helpers in `E:\visa2026-staging\bin\` + `DOCKER_CONFIG=E:\visa2026-staging\.docker` (or pull from an interactive RDP session).
+- **First boot:** empty Postgres needed `--updateDatabase --forceUpdate --silent` once; then app stayed up.
+- **Smoke:** `http://127.0.0.1:9080/LoginPage` → **HTTP 200** (also try `http://10.100.128.25:9080/LoginPage` from LAN).
+- **Follow-up:** remove `FORCE_XAF_DB_UPDATE` from `.env.prod` after ModuleUpdaters have run; keep IIS Staging (:8080) separate.
+### 2026-08-03 — Local pilot waived; skill promoted
+
+- **Waive:** `C:\visa2026-pilot` full smoke not required — insufficient disk on the workstation; staging Desktop stack already shipped on `10.100.128.25`.
+- **Port:** Docker staging moved **9080 → 8081** for LAN reachability (IIS Demo stopped).
+- **Skill:** `.cursor/skills/visa2026-windows-docker-desktop/` created from on-prem pilot learnings.

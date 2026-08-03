@@ -1,16 +1,22 @@
 # Fast gate: solution build + unit tests (Visa2026.Module.Tests, Visa2026.DataImporter).
 # No database, no browser - target is under ~10 minutes so it can block every push and PR.
 # Long-running browser coverage lives in e2e-tests.yml; see docs/TESTING_PLAN.md.
+#
+# On push to development, unit tests run inside publish-to-docker-hub.yml (with Tier 0 E2E)
+# so Hub publish is gated on green CI without duplicating this job.
 
 name: Build & unit tests
 
 on:
   push:
+    branches-ignore:
+      - development
   pull_request:
   workflow_dispatch:
+  workflow_call:
 
 concurrency:
-  group: build-and-test-${{ github.ref }}
+  group: build-and-test-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -80,6 +86,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-results
+          name: unit-test-results-${{ github.run_id }}-${{ github.job }}
           path: "**/TestResults/*.trx"
           if-no-files-found: ignore

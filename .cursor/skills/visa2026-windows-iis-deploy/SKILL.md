@@ -49,7 +49,7 @@ Manifest: [Visa2026-IisSlots.ps1](../../../scripts/windows-iis/Visa2026-IisSlots
 
 **Still supported:** this IIS path is **not deprecated**. Multi-client Windows **target** is Docker Desktop — [ON_PREM_WINDOWS_DOCKER_DESKTOP.md](../../../docs/ON_PREM_WINDOWS_DOCKER_DESKTOP.md); strategy [DOCKER_DEPLOY_STRATEGY_PLAN.md](../../../docs/DOCKER_DEPLOY_STRATEGY_PLAN.md).
 
-**Not this skill:** Windows + Docker Desktop (runbook above; skill TBD after pilots), Ubuntu + Docker ([setup-docker-engine](../setup-docker-engine/SKILL.md)), droplet ([visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md)), legacy WSL ([legacy-on-prem-windows-setup](../legacy-on-prem-windows-setup/SKILL.md)), local dev Docker ([visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md)).
+**Not this skill:** Windows + Docker Desktop ([visa2026-windows-docker-desktop](../visa2026-windows-docker-desktop/SKILL.md)), Ubuntu + Docker ([setup-docker-engine](../setup-docker-engine/SKILL.md)), droplet ([visa2026-droplet-prod-deploy](../visa2026-droplet-prod-deploy/SKILL.md)), legacy WSL ([legacy-on-prem-windows-setup](../legacy-on-prem-windows-setup/SKILL.md)), local dev Docker ([visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md)).
 
 **Runtime app errors:** [visa2026-runtime-error-tracking](../visa2026-runtime-error-tracking/SKILL.md) — not IIS deploy/502/sa login (§6 below).
 

@@ -1,5 +1,7 @@
 # Builds and pushes webapia/visa2026 (+ importer) to Docker Hub.
-# Triggers on push to development (and optional manual run from Actions).
+#
+# Gate (option B): on development push / manual dispatch, run unit tests + Tier 0 E2E first;
+# publish only when both are green. See docs/DOCKER_DEPLOY_STRATEGY_PLAN.md.
 
 name: Build and Publish to Docker Hub
 
@@ -9,59 +11,78 @@ on:
       - development
   workflow_dispatch:
 
+concurrency:
+  group: publish-docker-hub-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
-  # Configuration: Set this to your Docker Hub repository
-  DOCKER_IMAGE_NAME: webapia/visa2026 # <-- TODO: Replace with "your-username/your-repo-name"
+  DOCKER_IMAGE_NAME: webapia/visa2026
 
 jobs:
+  unit-tests:
+    name: Build + unit tests
+    uses: ./.github/workflows/build-and-test.yml
+    secrets: inherit
+
+  easytest-e2e:
+    name: EasyTest E2E (Tier 0)
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      test_filter: FullyQualifiedName~PersonOfficerJourneyTests
+      long_run: false
+    secrets: inherit
+
   build-and-publish:
+    name: Build and push Hub images
+    needs: [unit-tests, easytest-e2e]
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
-      # 1. Check out the repository code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Log in to Docker Hub
-      #    This action uses secrets to log in securely.
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 2.5 Write DevExpress license files for build-time and embedded licensing
-      - name: Write DevExpress license key
+      - name: Write DevExpress license
+        shell: bash
+        env:
+          DEVEXPRESS_LICENSE: ${{ secrets.DEVEXPRESS_LICENSE }}
+          DEVEXPRESS_KEY: ${{ secrets.DEVEXPRESS_KEY }}
         run: |
+          license="${DEVEXPRESS_LICENSE:-$DEVEXPRESS_KEY}"
+          if [ -z "$license" ]; then
+            echo "::error::DEVEXPRESS_LICENSE or DEVEXPRESS_KEY secret is required to publish."
+            exit 1
+          fi
           mkdir -p DevExpress.Key
-          echo "${{ secrets.DEVEXPRESS_KEY }}" > DevExpress.Key/DevExpress_License.txt
-          
-      - name: Write DevExpress license file
-        run: echo "${{ secrets.DEVEXPRESS_LICENSE }}" > DevExpress.Key/DevExpress_License.txt
+          printf '%s' "$license" > DevExpress.Key/DevExpress_License.txt
 
-      - name: List files for verification
-        run: ls -la
-
-      # 2.6 Extract Version from .csproj
       - name: Get Version from Project
         id: get_version
         run: |
           echo "APP_VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" Visa2026.Module/Visa2026.Module.csproj)" >> $GITHUB_ENV
           echo "GIT_SHA_SHORT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # 3. Build and push the main app Docker image
       - name: Build and push app Docker image
         run: |
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:latest
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
-          docker push ${{ env.DOCKER_IMAGE_NAME }}:${{ env.APP_VERSION }}
-          docker build . --build-arg APP_VERSION=${{ env.APP_VERSION }} --build-arg GIT_SHA=${{ env.GIT_SHA_SHORT }} --tag ${{ env.DOCKER_IMAGE_NAME }}:latest --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-          docker push ${{ env.DOCKER_IMAGE_NAME }} --all-tags
+          set -euo pipefail
+          IMAGE="${{ env.DOCKER_IMAGE_NAME }}"
+          docker build . \
+            --build-arg "APP_VERSION=${{ env.APP_VERSION }}" \
+            --build-arg "GIT_SHA=${{ env.GIT_SHA_SHORT }}" \
+            -t "${IMAGE}:${{ github.sha }}" \
+            -t "${IMAGE}:latest" \
+            -t "${IMAGE}:${{ env.APP_VERSION }}"
+          docker push "${IMAGE}:${{ github.sha }}"
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${{ env.APP_VERSION }}"
 
-      # 4. Build and push the importer Docker image
       - name: Build and push importer Docker image
         run: |
+          set -euo pipefail
           docker build -f Visa2026.DataImporter/Dockerfile . -t webapia/visa2026-importer:latest
           docker push webapia/visa2026-importer:latest
