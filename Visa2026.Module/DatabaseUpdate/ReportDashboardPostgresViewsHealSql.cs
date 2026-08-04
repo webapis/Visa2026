@@ -127,6 +127,12 @@ public static class ReportDashboardPostgresViewsHealSql
         using var connection = new NpgsqlConnection(cleaned);
         connection.Open();
 
+        // Empty / pre-schema DBs (EasyTest drop+create, --updateDatabase app build): views need base tables.
+        if (!RelationExists(connection, "Visas")
+            || !RelationExists(connection, "Applications")
+            || !RelationExists(connection, "People"))
+            return;
+
         if (NeedsVisaAppProgressPrimaryCodeHeal(connection))
         {
             foreach (var resourceLeaf in VisaAppProgressDependentViews)
@@ -310,6 +316,18 @@ public static class ReportDashboardPostgresViewsHealSql
         using var command = connection.CreateCommand();
         command.CommandText = sql;
         command.ExecuteNonQuery();
+    }
+
+    private static bool RelationExists(NpgsqlConnection connection, string tableName)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT to_regclass(@qualified) IS NOT NULL;
+            """;
+        // Quoted identifiers match XAF/EF table names (e.g. public."Visas").
+        command.Parameters.AddWithValue("qualified", "public.\"" + tableName + "\"");
+        var result = command.ExecuteScalar();
+        return result is true || (result is bool b && b);
     }
 
     private static bool ViewExists(NpgsqlConnection connection, string viewName)

@@ -14,30 +14,33 @@ public class PersonOfficerJourneyTests : E2ETestBase
 {
     public PersonOfficerJourneyTests(EasyTestSessionFixture session) : base(session) { }
 
+    /// <summary>
+    /// Short journey: login → create employee → nested passport create (stops after passport assert).
+    /// Prefer for local headed runs / ffmpeg UI recording. Distinct personal/passport numbers from the
+    /// full master-data Fact so both can share one EasyTest session DB.
+    /// </summary>
+    [Fact]
+    [SupportedOSPlatform("windows")]
+    public void PersonOfficerJourney_LoginCreateEmployeeAddPassport()
+    {
+        RunLoginCreateEmployeeAddPassport(
+            E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,
+            E2ETestPassportCreateOnlyJourneyValues.FirstName,
+            E2ETestPassportCreateOnlyJourneyValues.LastName,
+            E2ETestPassportCreateOnlyJourneyValues.FullName,
+            E2ETestPassportCreateOnlyJourneyValues.PassportNumber);
+    }
+
     [Fact]
     [SupportedOSPlatform("windows")]
     public void PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud()
     {
-        Login(E2ETestLoginValues.StandardUserName, E2ETestLoginValues.StandardUserPassword);
-        AssertAuthenticatedAppShell();
-
-        NavigateEmployeesList();
-        Assert.NotNull(AppContext.GetAction("New"));
-
-        CreateEmployeeWithRequiredFields();
-
-        OpenEmployeeInListByPersonalNumber(E2ETestEmployeeCreateValues.PersonalNumber);
-        Assert.Equal(E2ETestEmployeeCreateValues.FirstName, AppContext.GetForm().GetPropertyValue("First Name"));
-        Assert.Equal(E2ETestEmployeeCreateValues.LastName, AppContext.GetForm().GetPropertyValue("Last Name"));
-        Assert.Equal(
+        RunLoginCreateEmployeeAddPassport(
             E2ETestEmployeeCreateValues.PersonalNumber,
-            AppContext.GetForm().GetPropertyValue("Personal Number"));
-
-        // Passport → Visa (Visa is nested under Passport, not a Person tab).
-        ExecutePersonPassportsNestedNew();
-        FillPassportRequiredFields();
-        SavePassportDetail();
-        AssertPassportDetailShowsNumber(E2ETestPassportCreateValues.PassportNumber);
+            E2ETestEmployeeCreateValues.FirstName,
+            E2ETestEmployeeCreateValues.LastName,
+            E2ETestEmployeeCreateValues.FullName,
+            E2ETestPassportCreateValues.PassportNumber);
 
         ExecutePassportVisasNestedNew();
         FillVisaRequiredFields();
@@ -80,5 +83,39 @@ public class PersonOfficerJourneyTests : E2ETestBase
         FillTravelExternalArrivalRequiredFields();
         SaveTravelHistoryDetail();
         AssertTravelExternalArrivalSaved();
+    }
+
+    /// <summary>Shared prefix: login → Employees list → create employee → nested Passports New → passport DetailView (not Lookup/Passport nav).</summary>
+    private void RunLoginCreateEmployeeAddPassport(
+        string personalNumber,
+        string firstName,
+        string lastName,
+        string fullName,
+        string passportNumber)
+    {
+        Login(E2ETestLoginValues.StandardUserName, E2ETestLoginValues.StandardUserPassword);
+        EasyTestScreenshotCapture.Capture(AppContext, "01-after-login");
+        AssertAuthenticatedAppShell();
+        EasyTestScreenshotCapture.Capture(AppContext, "02-employees-list");
+
+        NavigateEmployeesList();
+        Assert.NotNull(AppContext.GetAction("New"));
+
+        CreateEmployeeWithRequiredFields(personalNumber, firstName, lastName);
+        EasyTestScreenshotCapture.Capture(AppContext, "03-employee-created");
+
+        OpenEmployeeInListByPersonalNumber(personalNumber, fullName);
+        Assert.Equal(firstName, AppContext.GetForm().GetPropertyValue("First Name"));
+        Assert.Equal(lastName, AppContext.GetForm().GetPropertyValue("Last Name"));
+        Assert.Equal(personalNumber, AppContext.GetForm().GetPropertyValue("Personal Number"));
+        EasyTestScreenshotCapture.Capture(AppContext, "04-employee-detail");
+
+        ExecutePersonPassportsNestedNew();
+        EasyTestScreenshotCapture.Capture(AppContext, "05-passport-detail-new");
+        FillPassportRequiredFields(passportNumber);
+        EasyTestScreenshotCapture.Capture(AppContext, "06-passport-fields-filled");
+        SavePassportDetail();
+        AssertPassportDetailShowsNumber(passportNumber);
+        EasyTestScreenshotCapture.Capture(AppContext, "07-passport-saved");
     }
 }

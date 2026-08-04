@@ -483,3 +483,6 @@ graphify-out/reflections/
 graphify-out/20*/
 .publish-*/
 *.zip
+
+# Local portable ffmpeg for EasyTest recording
+Visa2026.E2E.Tests/.tools/

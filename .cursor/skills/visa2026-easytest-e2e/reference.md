@@ -145,6 +145,31 @@ Workflow: **`.github/workflows/e2e-tests.yml`** — build `-c EasyTest`, `dotnet
 
 ---
 
+## User manual media
+
+Contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md).
+
+### Video (shipped)
+
+```powershell
+.\scripts\local\Record-EasyTest.ps1 `
+  -Filter 'PersonOfficerJourney_LoginCreateEmployeeAddPassport' `
+  -OutputName 'person-register.mp4'
+# → Visa2026.E2E.Tests/recordings/ (gitignored)
+```
+
+CI long runs upload **`easytest-e2e-recording`** artifact (`recordings/*.mp4`). **Publish target** (embed, static, object, Postgres/`FileData`) is TBD — see [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) §5.1.
+
+### Screenshots (today: diagnostics)
+
+`EasyTestBlazorNavigationHelper.TryDumpDiagnostics` → `diag-{label}-{stamp}.png` (post-mortem).
+
+### Screenshots (planned: manual assets)
+
+`UserManualMediaCapture.CaptureStep(slug, stepKey, dir)` → copy to `user-manual/assets/screenshots/v{version}/{locale}/` via `Copy-EasyTestManualScreenshots.ps1`.
+
+---
+
 ## Scenario metadata (Option A)
 
 YAML + map document officer journeys; **C# `[Fact]` methods execute** them (no yaml runner yet).

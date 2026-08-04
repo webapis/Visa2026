@@ -22,6 +22,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 **VISA2014 → Visa2026 prod migration** scripts live in **`scripts/visa2014-migration/`** (import waves, catalogs, reimport, restore). **Search that README before adding new scripts** — reuse CLI/orchestrators first. See [visa2014-migration/README.md](visa2014-migration/README.md) and [visa2014-to-visa2026-import](../.cursor/skills/visa2014-to-visa2026-import/SKILL.md).
 
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. See [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md). |
+| `Record-EasyTest.ps1` | Run a headed EasyTest filter while **ffmpeg** records the desktop to **`Visa2026.E2E.Tests/recordings/`** (gitignored). Default filter: passport-create-only Fact. |
 
 **Typical env files here:** `.env.dev` (paths passed into scripts or compose).
 

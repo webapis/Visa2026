@@ -212,3 +212,25 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: `Could not execute nested New [New External Arrival | External Arrival]` while HTML had `title="New External Arrival"` on a **split** control.
 - **Fix / reuse**: Polymorphic New puts `data-action-name` + `title` on `div.dxbl-btn-split`; inner `button` has `title` only. Extend `TryClickToolbarActionByTitle` / `HasToolbarActionByTitle` to click split primary / titled buttons without requiring `@data-action-name`. Re-enabled External Arrival after TravelHistory↔ApplicationItem decoupling.
 - **Reuse**: Nested polymorphic New → match split toolbar, not only `button[@data-action-name]`.
+
+### 2026-08-04 — User manual media interlock (visa2026-user-manual)
+
+- **Outcome**: positive (planning)
+- **Context**: Officer manual roadmap; `Record-EasyTest.ps1`; CI `easytest-e2e-recording` artifact
+- **Symptom**: N/A — new cross-skill contract
+- **Fix / reuse**: EasyTest is **media producer**: video via `Record-EasyTest.ps1` / CI ffmpeg; screenshots today via `TryDumpDiagnostics`; planned `UserManualMediaCapture` → `user-manual/assets/`. Guides link via `e2eScenarioId` + `scenarios/ready/<id>/`. See `docs/USER_MANUAL_E2E_MEDIA.md` and `docs/USER_MANUAL_ROADMAP.md`.
+- **Reuse**: When adding a UserManual guide, tag E2E `[Trait("Category", "UserManual")]`; pipeline runs via `Build-UserManual.ps1` — see `docs/USER_MANUAL_PIPELINE.md`.
+
+### 2026-08-04 — Unified doc pipeline (E2E embedded)
+
+- **Outcome**: positive (architecture)
+- **Context**: User priority — manual is shipment gate; doc generation is orchestrator
+- **Fix / reuse**: `USER_MANUAL_PIPELINE.md` — single `Build-UserManual.ps1`; fail closed; manifest-driven UserManual filter; `e2e-tests.yml` stays for full regression only.
+- **Reuse**: Never publish manual without running UserManual E2E inside doc build.
+### 2026-08-04 — Shell assert must not Navigate(Application) for StandardUser
+
+- **Outcome**: positive
+- **Context**: `PersonOfficerJourney_LoginCreateEmployeeAddPassport`, Users role, Report Dashboard home
+- **Symptom**: After successful login, Edge shows Report Dashboard; test hangs ~30s× timeouts on `AssertAuthenticatedAppShell` / `Navigate("Application")`. Never reaches Employees or nested Passport DetailView.
+- **Fix / reuse**: Users role **denies** Application list nav. Probe authenticated shell via URL **`/Person_ListView_Employees`**. Passport DetailView is **nested** (`Passports` tab → `New Passport`), not Lookup/Passport sidebar (also denied).
+- **Reuse**: Officer EasyTest shell check = Employees URL + New; never `Navigate("Application")` for StandardUser.

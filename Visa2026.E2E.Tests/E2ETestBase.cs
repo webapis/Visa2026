@@ -52,8 +52,11 @@ namespace Visa2026.E2E.Tests
                     if (AppContext.GetAction("Log In") != null)
                         return false;
 
-                    AppContext.Navigate("Application");
-                    if (AppContext.GetAction("New") != null)
+                    // Users role denies Application list nav; officers land on Report Dashboard.
+                    // Employees URL is the passport-journey entry and a reliable shell probe.
+                    EasyTestBlazorNavigationHelper.GoToRelativeUrl(
+                        AppContext, EasyTestHostEnvironment.BaseUrl, E2ETestLoginValues.EmployeesListViewPath);
+                    if (IsEmployeesListActive(E2ETestLoginValues.EmployeesListViewPath))
                         return true;
                 }
                 catch (Exception) when (attempt < 9)
@@ -66,8 +69,9 @@ namespace Visa2026.E2E.Tests
         }
 
         /// <summary>
-        /// Outcome shield after logon — authenticated shell with navigable Application list.
-        /// Navigates to Application list and expects toolbar <c>New</c>.
+        /// Outcome shield after logon — authenticated shell with navigable Employees list.
+        /// Officers land on Report Dashboard; <c>Navigate("Application")</c> is denied for Users.
+        /// Passport DetailView is reached later via nested New on employee Passports tab (not Lookup).
         /// </summary>
         protected void AssertAuthenticatedAppShell()
         {
@@ -81,8 +85,9 @@ namespace Visa2026.E2E.Tests
                         continue;
                     }
 
-                    AppContext.Navigate("Application");
-                    if (AppContext.GetAction("New") != null)
+                    EasyTestBlazorNavigationHelper.GoToRelativeUrl(
+                        AppContext, EasyTestHostEnvironment.BaseUrl, E2ETestLoginValues.EmployeesListViewPath);
+                    if (IsEmployeesListActive(E2ETestLoginValues.EmployeesListViewPath))
                         return;
                 }
                 catch (Exception) when (attempt < 29)

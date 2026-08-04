@@ -47,6 +47,20 @@ public static class E2ETestPassportCreateValues
     public const string Authority = "E2E second passport authority";
 }
 
+
+/// <summary>
+/// Distinct employee + passport numbers for the short passport-create-only EasyTest Fact
+/// so it can share the same EasyTest session DB as the full officer journey.
+/// </summary>
+public static class E2ETestPassportCreateOnlyJourneyValues
+{
+    public const string PersonalNumber = "E2E-EMP-021";
+    public const string FirstName = "Ferdi";
+    public const string LastName = "PassportOnly";
+    public const string PassportNumber = "E2E-PASS-021";
+
+    public static string FullName => $"{FirstName} {LastName}";
+}
 /// <summary>English Blazor captions for <see cref="BusinessObjects.Passport"/> detail (required fields).</summary>
 public static class E2ETestPassportFieldCaptions
 {
@@ -209,7 +223,7 @@ public static class E2ETestTravelCreateValues
 /// <summary>Officer logon for EasyTest E2E (empty password in dev).</summary>
 public static class E2ETestLoginValues
 {
-    public const string StandardUserName = "standarduser";
+    public const string StandardUserName = "StandardUser";
     public const string StandardUserPassword = "";
 
     /// <summary>Blazor route for <c>Person_ListView_Employees</c>.</summary>

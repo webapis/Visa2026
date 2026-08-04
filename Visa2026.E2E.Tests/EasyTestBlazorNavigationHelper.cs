@@ -91,6 +91,30 @@ internal static class EasyTestBlazorNavigationHelper
     }
 
     /// <summary>
+    /// Best-effort PNG of the current browser viewport into <paramref name="outputDirectory"/>.
+    /// Enabled for milestone captures when <c>VISA2026_E2E_SCREENSHOTS=true</c>.
+    /// </summary>
+    public static void TryCaptureScreenshot(IApplicationContext appContext, string outputDirectory, string label)
+    {
+        IWebDriver? driver = ResolveWebDriver(appContext);
+        if (driver is not ITakesScreenshot shooter)
+            return;
+
+        try
+        {
+            Directory.CreateDirectory(outputDirectory);
+            string stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff");
+            string safe = string.Join("_", (label ?? "shot").Split(Path.GetInvalidFileNameChars()));
+            string path = Path.Combine(outputDirectory, $"{safe}-{stamp}.png");
+            shooter.GetScreenshot().SaveAsFile(path);
+            Console.WriteLine($"[EasyTest] Screenshot: {path}");
+        }
+        catch
+        {
+            /* screenshots are best-effort */
+        }
+    }
+    /// <summary>
     /// Best-effort capture of the current browser state (URL, page HTML, screenshot)
     /// into <paramref name="outputDirectory"/> for post-mortem of CI-only failures.
     /// Never throws — diagnostics must not mask the original test error.

@@ -46,12 +46,13 @@ if (-not $major -or $major -notmatch '^\d+$') {
 }
 
 # Resolve driver build from Microsoft CDN (matches major branch)
-$metaUrl = "https://msedgedriver.azureedge.net/LATEST_RELEASE_${major}_WINDOWS"
+$metaUrl = "https://msedgedriver.microsoft.com/LATEST_RELEASE_${major}_WINDOWS"
 Write-Host "Querying: $metaUrl"
-$driverVer = (Invoke-WebRequest -Uri $metaUrl -UseBasicParsing -TimeoutSec 60).Content.Trim()
+$metaResp = Invoke-WebRequest -Uri $metaUrl -UseBasicParsing -TimeoutSec 60
+$driverVer = if ($metaResp.Content -is [byte[]]) { [System.Text.Encoding]::UTF8.GetString($metaResp.Content).Trim() } else { "$($metaResp.Content)".Trim() }
 Write-Host "Using Edge WebDriver build: $driverVer"
 
-$zipUrl = "https://msedgedriver.azureedge.net/$driverVer/edgedriver_win64.zip"
+$zipUrl = "https://msedgedriver.microsoft.com/$driverVer/edgedriver_win64.zip"
 $zipPath = Join-Path $env:TEMP "edgedriver_win64_$driverVer.zip"
 
 Write-Host "Downloading: $zipUrl"

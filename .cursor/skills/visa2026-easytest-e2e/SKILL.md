@@ -6,7 +6,8 @@ description: >-
   :5050, Visa2026EasyTest DB, msedgedriver, caption-based FillForm/Navigate,
   URL navigation for typed Person lists, seed constants, and dotnet test -c EasyTest.
   Use when adding EasyTest, E2E test class, EmployeeTests, E2ETestBase helper,
-  headed Edge run, or CI e2e-tests.yml. See user-prompts.md.
+  headed Edge run, or CI e2e-tests.yml. Officer-manual screenshots and video:
+  see docs/USER_MANUAL_E2E_MEDIA.md and visa2026-user-manual skill.
 disable-model-invocation: false
 ---
 
@@ -19,6 +20,10 @@ disable-model-invocation: false
 **Project:** `Visa2026.E2E.Tests` — native XAF EasyTest Blazor adapter + xUnit + Edge (Selenium).
 
 **Strategy context:** [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md). **Experience log:** [learnings.md](./learnings.md) — read before, append after verified runs.
+
+**User manual media (interlocked):** [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) · [`docs/USER_MANUAL_PIPELINE.md`](../../../docs/USER_MANUAL_PIPELINE.md) · [visa2026-user-manual](../visa2026-user-manual/SKILL.md)
+
+**Critical:** UserManual E2E is invoked by **`Build-UserManual.ps1`**, not a separate doc-update workflow. Tag tests `[Trait("Category", "UserManual")]`.
 
 ---
 
@@ -38,9 +43,10 @@ Copy-paste catalog: [user-prompts.md](./user-prompts.md). Invoke with **`@visa20
 5. RUN       — dotnet test Visa2026.E2E.Tests -c EasyTest --filter "FullyQualifiedName~YourTests"
 6. PROMOTE   — move map + yaml to scenarios/ready/ when CI-stable
 7. RECORD    — append learnings.md on non-obvious fixes (nav, captions, driver, host)
+8. USERMANUAL — add `[Trait("Category", "UserManual")]`; media captured by Build-UserManual.ps1 ([pipeline doc](../../../docs/USER_MANUAL_PIPELINE.md))
 ```
 
-**Scenario metadata (Option A):** YAML documents steps; C# executes them. Map contract: [reference-map-contract.md](./reference-map-contract.md). Inventory: [`Visa2026.E2E.Tests/scenarios/README.md`](../../../Visa2026.E2E.Tests/scenarios/README.md).
+**Scenario metadata (Option A):** YAML documents steps; C# executes them. Map contract: [reference-map-contract.md](./reference-map-contract.md). Manual media: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md). Inventory: [`Visa2026.E2E.Tests/scenarios/README.md`](../../../Visa2026.E2E.Tests/scenarios/README.md).
 
 ---
 
@@ -139,6 +145,27 @@ Config: **`Config.xml`**, **`.github/workflows/e2e-tests.yml`** (CI). Docs: [`Vi
 
 ---
 
+## User manual media (visa2026-user-manual)
+
+E2E is the **producer**; the manual site is the **consumer**.
+
+| Media | How (today / planned) | Consumer |
+|-------|----------------------|----------|
+| **Video** | `Record-EasyTest.ps1`; CI ffmpeg → `recordings/*.mp4` artifact | Guide `video` frontmatter — **storage TBD** Phase 3 |
+| **Screenshots** | `TryDumpDiagnostics` (diag); **planned** `UserManualMediaCapture` at step keys | `user-manual/assets/screenshots/` |
+| **Step truth** | `scenarios/ready/*_map.md` §3 captions | Guide prose must match |
+
+When adding a journey that will become a guide:
+
+1. Set **`e2eScenarioId`** folder name = `scenarios/ready/<id>/`.
+2. Notify / update [user-manual tracking.md](../visa2026-user-manual/tracking.md) guide row.
+3. After CI green, run `Record-EasyTest.ps1 -Filter <Fact> -OutputName <slug>.mp4`.
+4. Phase 3+: call screenshot capture at stable steps; copy via `Copy-EasyTestManualScreenshots.ps1`.
+
+Full contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md). Roadmap Phase 3: [`docs/USER_MANUAL_ROADMAP.md`](../../../docs/USER_MANUAL_ROADMAP.md).
+
+---
+
 ## Agent workflow
 
 When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`Visa2026.E2E.Tests`**:
@@ -149,6 +176,7 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 4. **Build** `-c EasyTest`; **run** filtered `dotnet test`.
 5. **Append** learnings.md after verified fixes (not for trivial typos).
 6. **Stay in EasyTest** — scenario yaml under `Visa2026.E2E.Tests/scenarios/` is metadata only (Option A).
+7. **Manual media** — when task mentions guide/screenshot/video, read [`USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) and coordinate with [visa2026-user-manual](../visa2026-user-manual/SKILL.md).
 
 ---
 
@@ -173,5 +201,8 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 - [reference.md](./reference.md) — host, driver, API patterns, CI
 - [reference-map-contract.md](./reference-map-contract.md) — `*_map.md` + yaml + C# (Option A)
 - [learnings.md](./learnings.md) — append-only verified experience
+- [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) — screenshot/video contract with user manual
+- [`docs/USER_MANUAL_ROADMAP.md`](../../../docs/USER_MANUAL_ROADMAP.md) — manual + E2E timeline
+- [visa2026-user-manual](../visa2026-user-manual/SKILL.md) — guide authoring consumer skill
 - [`Visa2026.E2E.Tests/scenarios/`](../../../Visa2026.E2E.Tests/scenarios/README.md) — scenario maps and yaml specs
 - [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — E2E inventory, backlog E2E-xxx
