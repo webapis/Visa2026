@@ -328,6 +328,28 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<VwRdPersonSearch>(
             SecurityOperations.Read, SecurityPermissionState.Allow);
+        // Remaining Report Dashboard vw_rd_* views (also synced every startup via EnsureReportDashboardOfficerPermissions).
+        userRole.AddTypePermissionsRecursively<VwRdProject>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdPersonRole>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdApplication>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaByCategory>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaByType>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdVisaState>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdInvitationReady>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdInvitationInProcess>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdInvitationUsed>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdInvitationValidUntil>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdInvitationRejected>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdRegistration>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdToBeCheckedIn>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdToBeCheckedOut>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdWorkPermit>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdWorkPermitActive>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdWorkPermitAppProgress>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdPassport>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdEducation>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdEducationByCountry>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<VwRdPositionHistory>(SecurityOperations.Read, SecurityPermissionState.Allow);
         // Diplomas / file copies live on Education (+ aggregated EducationDocument); not always covered by Person recursive grants alone (same pattern as Passport).
         userRole.AddTypePermissionsRecursively<Education>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         // Medical records on Person (+ aggregated document/image rows + FileData); same gap as EducationDocument.
@@ -611,7 +633,10 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             return role;
         }
 
-        /// <summary>Report Dashboard home — readable by all officer roles.</summary>
+        /// <summary>
+        /// Report Dashboard home + all <c>vw_rd_*</c> view BOs — Read for Users / UsersReadOnly / VisaOffice.
+        /// Secured ObjectSpace deny-by-default: missing Read on a VwRd* type makes Overview cards show Total 0.
+        /// </summary>
         static void EnsureReportDashboardOfficerPermissions(PermissionPolicyRole role)
         {
             if (role == null)
@@ -619,17 +644,13 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
 
             EnsureTypePermission<BusinessObjects.ReportDashboard.ReportDashboardHost>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            // Open ListView for Visa Extension / Extension Result (vw_rd_visa_app_progress).
-            EnsureTypePermission<VwRdVisaAppProgress>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaByPeriod>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaActiveByProject>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaActiveByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaOnExtension>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaOnExtensionByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaExtensionResult>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaExtensionResultByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaExtensionRequired>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
-            EnsureTypePermission<VwRdVisaByDaysRemaining>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Shared chips / person-type tabs
+            EnsureTypePermission<VwRdProject>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdPersonRole>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdApplication>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Application (via ministry / direct migration)
             EnsureTypePermission<VwRdApplicationViaMinistryInvitationOnProcess>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdApplicationViaMinistryInvitationOnProcessByPeriodCategoryType>(
@@ -654,10 +675,51 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdApplicationDirectMigrationProcessComplete>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Visa / Visa Extension
+            EnsureTypePermission<VwRdVisaAppProgress>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByPeriod>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByCategory>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaState>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaActiveByProject>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaActiveByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaOnExtension>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaOnExtensionByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionResult>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionResultByPeriodCategoryType>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaExtensionRequired>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdVisaByDaysRemaining>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Invitation
+            EnsureTypePermission<VwRdInvitationReady>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdInvitationInProcess>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdInvitationUsed>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdInvitationValidUntil>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdInvitationRejected>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Registration
+            EnsureTypePermission<VwRdRegistration>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdToBeCheckedIn>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdToBeCheckedOut>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Work Permit
+            EnsureTypePermission<VwRdWorkPermit>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdWorkPermitActive>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdWorkPermitAppProgress>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Passport / Education / Position
+            EnsureTypePermission<VwRdPassport>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdEducation>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdEducationByCountry>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+            EnsureTypePermission<VwRdPositionHistory>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
+            // Incomplete persons / Person search
             EnsureTypePermission<VwRdIncompletePersonsByMissingArea>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<VwRdPersonSearch>(
                 role, SecurityOperations.Read, SecurityPermissionState.Allow);
+
             EnsureNavigationPermission(
                 role,
                 @"Application/NavigationItems/Items/ReportDashboard",

@@ -168,6 +168,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `Company`, `ProjectContract` |
 | `ExpirationAlertRule` | Read only (runtime state evaluators; no Configuration nav) |
 | `ReportDataV2`, `ReportVisibility` |
+| **Report Dashboard `VwRd*`** (all `vw_rd_*` view BOs) | Read via `EnsureReportDashboardOfficerPermissions` — Users, UsersReadOnly, VisaOffice. Missing Read → Overview cards show Total **0** even when data exists. |
 
 ---
 
