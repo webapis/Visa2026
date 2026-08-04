@@ -14,7 +14,7 @@ Copy **`Visa2026.E2E.Tests/scenarios/examples/_map_TEMPLATE.md`** when starting 
 |------|------|------|
 | **`<scenario-id>_map.md`** | **First** | Planned YAML + caption gap analysis |
 | **`<scenario-id>.yaml`** | **After** captions verified | Step metadata (not executed by a runner yet) |
-| **`*Tests.cs` method** | With yaml | Executable EasyTest API |
+| **`*Tests.cs` method** | With yaml | Executable EasyTest **or Playwright** API |
 
 ### Folder rules
 
@@ -43,10 +43,10 @@ Copy **`Visa2026.E2E.Tests/scenarios/examples/_map_TEMPLATE.md`** when starting 
 
 | § | Title | Content |
 |---|--------|---------|
-| **0** | Header | Scenario id, **E2E id**, status, date, yaml file, C# test method |
+| **0** | Header | Scenario id, **E2E id**, **`driver:`** (`easytest` / `playwright` / `hybrid`), status, date, yaml file, C# test method |
 | **1** | Journey | Officer goal (BO, views, outcome) |
 | **2** | Navigation | User, `:5050` paths, seed constants |
-| **3** | Caption inventory | Table: caption/action, UI target, step, status |
+| **3** | Caption / locator inventory | EasyTest: captions; Playwright: `data-testid` / CSS / role — status per row |
 | **4** | Proposed YAML | Sketch of final `.yaml` |
 | **5** | Blockers | TabbedMDI, combo retry, nested New, … |
 | **6** | Changelog | Date + note |
@@ -89,6 +89,17 @@ Use **`user` / `password`** top-level or under `login:` — align with `E2ETestL
 | Situation | Action |
 |-----------|--------|
 | User asks for EasyTest scenario | Write `_map.md` first in `scenarios/examples/` |
-| Caption missing | Fix Blazor/Module accessibility, `InputId`, or URL navigation |
+| Caption missing on standard XAF field | Fix Blazor/Module accessibility, `InputId`, or URL navigation |
+| Custom component / EasyTest unsupported | Set `driver: playwright`; add `data-testid`; implement under `Playwright/` |
 | Yaml without C# | Incomplete — add matching `[Fact]` |
 | Promote to ready/ | Only after filtered `dotnet test` passes |
+
+---
+
+## Playwright maps
+
+When `driver: playwright` (or `hybrid`):
+
+- §3 may list **locators** instead of (or in addition to) EasyTest captions.
+- Status **verified** means headed Playwright run passed against that locator.
+- C# lives under `Visa2026.E2E.Tests/Playwright/` with `[Trait("Driver", "Playwright")]` unless hybrid shares an EasyTest class for XAF steps only.

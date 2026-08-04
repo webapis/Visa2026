@@ -14,6 +14,13 @@ Copy-paste in Cursor with `@visa2026-user-manual`.
 - What pre-flight questions should we answer before publishing a guide?
 - Feature **{X}** ships next week — when should we create the officer guide (now vs after UI freeze vs with E2E)?
 
+## Scan (drift triage)
+
+- Scan `master` since last release — which guides might be stale after recent Module/Blazor changes? **Report only, no edits.**
+- PR #{n} merged — run manual drift scan; map to guide slugs; add doc-debt rows to tracking.
+- Does feature **{X}** require officer manual updates? Diff code paths per code-drift-scan.md.
+- Weekly manual drift review — produce scan report template; wait for approval before updating guides.
+
 ## Create
 
 - Scaffold `user-manual/` with MkDocs Material (Phase 0) — after confirming B1 vs B2 path.

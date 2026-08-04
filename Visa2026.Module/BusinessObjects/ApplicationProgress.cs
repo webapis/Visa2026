@@ -11,9 +11,11 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Services;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [UserDocumentation("applications/progress", Category = "Applications")]
     [DefaultClassOptions]
     [DefaultProperty(nameof(State))]
     [FileAttachment(nameof(MinistryLetterFile))]

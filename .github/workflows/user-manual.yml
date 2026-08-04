@@ -1,0 +1,122 @@
+# Officer user manual — MkDocs build + catalog generator (Phase 1).
+# See docs/USER_MANUAL_PIPELINE.md and docs/USER_MANUAL_STATUS.md.
+
+name: User manual
+
+on:
+  pull_request:
+    paths:
+      - 'user-manual/**'
+      - 'tools/UserManualManifestGenerator/**'
+      - 'tools/UserManualManifestGenerator.Tests/**'
+      - 'Visa2026.Module/Documentation/**'
+      - 'Visa2026.Module/BusinessObjects/Person.cs'
+      - 'Visa2026.Module/BusinessObjects/Application.cs'
+      - 'Visa2026.Module/BusinessObjects/ApplicationItem.cs'
+      - 'Visa2026.Module/BusinessObjects/ApplicationProgress.cs'
+      - 'scripts/ci/Build-UserManual.ps1'
+      - 'scripts/ci/Validate-UserManualLinks.ps1'
+      - '.github/workflows/user-manual.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'user-manual/**'
+      - 'tools/UserManualManifestGenerator/**'
+      - 'tools/UserManualManifestGenerator.Tests/**'
+      - 'Visa2026.Module/Documentation/**'
+      - 'Visa2026.Module/BusinessObjects/Person.cs'
+      - 'Visa2026.Module/BusinessObjects/Application.cs'
+      - 'Visa2026.Module/BusinessObjects/ApplicationItem.cs'
+      - 'Visa2026.Module/BusinessObjects/ApplicationProgress.cs'
+      - 'scripts/ci/Build-UserManual.ps1'
+      - 'scripts/ci/Validate-UserManualLinks.ps1'
+      - '.github/workflows/user-manual.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: user-manual-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build officer manual
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: user-manual/requirements.txt
+
+      - name: Write DevExpress license
+        shell: bash
+        env:
+          DEVEXPRESS_LICENSE: ${{ secrets.DEVEXPRESS_LICENSE }}
+          DEVEXPRESS_KEY: ${{ secrets.DEVEXPRESS_KEY }}
+        run: |
+          license="${DEVEXPRESS_LICENSE:-$DEVEXPRESS_KEY}"
+          if [ -z "$license" ]; then
+            echo "::warning::No DevExpress license secret available (fork PR?); building with NoWarn."
+            exit 0
+          fi
+          mkdir -p DevExpress.Key
+          printf '%s' "$license" > DevExpress.Key/DevExpress_License.txt
+
+      - name: Build manual site
+        shell: pwsh
+        run: ./scripts/ci/Build-UserManual.ps1 -SkipE2E
+
+      - name: Upload static site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: user-manual-site
+          path: user-manual/site/
+          if-no-files-found: error
+
+  deploy-preview:
+    name: Publish manual preview (GitHub Pages)
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: user-manual-pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download static site
+        uses: actions/download-artifact@v4
+        with:
+          name: user-manual-site
+          path: site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

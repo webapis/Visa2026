@@ -15,8 +15,10 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp;
+using Visa2026.Module.Documentation;
 namespace Visa2026.Module.BusinessObjects
 {
+    [UserDocumentation("applications/overview", Category = "Applications")]
     [DefaultClassOptions]
     [NavigationItem(false)]
     [XafDisplayName("Application")]

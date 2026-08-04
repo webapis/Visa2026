@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-08-04T11:02:13.0420829Z",
+  "paths": [
+    {
+      "path": "(root)",
+      "types": [
+        {
+          "name": "Application",
+          "displayName": "Application",
+          "userDocSlug": "applications/overview"
+        },
+        {
+          "name": "ApplicationItem",
+          "displayName": "Application item",
+          "userDocSlug": "applications/item-overview"
+        },
+        {
+          "name": "ApplicationProgress",
+          "displayName": "Application Progress",
+          "userDocSlug": "applications/progress"
+        },
+        {
+          "name": "Person",
+          "displayName": "Person",
+          "userDocSlug": "person/overview"
+        }
+      ]
+    }
+  ]
+}

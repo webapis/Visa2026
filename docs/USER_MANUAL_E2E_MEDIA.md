@@ -24,11 +24,12 @@ EasyTest runs **inside** [USER_MANUAL_PIPELINE.md](USER_MANUAL_PIPELINE.md) — 
 | Production screenshots | PII risk |
 | **EasyTest in `Build-UserManual.ps1`** | Same run proves journeys + produces PNG/MP4 |
 
-EasyTest already provides:
+EasyTest already provides (media **ON by default** for documentation generation):
 
-- **Video:** `scripts/local/Record-EasyTest.ps1` (ffmpeg desktop) + CI `easytest-e2e-recording` artifact (`.github/workflows/e2e-tests.yml`)
-- **Screenshots (today):** `EasyTestBlazorNavigationHelper.TryDumpDiagnostics` (post-mortem PNG)
-- **Screenshots (planned):** named step capture → `user-manual/assets/` (Phase 3)
+- **Video:** `scripts/local/Record-EasyTest.ps1` (ffmpeg **Edge window** by default, `-RecordTarget Desktop` for full screen; `-NoRecord` to skip) + CI long-run `easytest-e2e-recording` artifact
+- **Screenshots:** `EasyTestScreenshotCapture` milestone PNGs under `recordings/screenshots/` (**default ON**; opt out `VISA2026_E2E_SCREENSHOTS=false` / `-NoScreenshots`) + CI `easytest-e2e-screenshots` artifact
+- **Failure dumps:** `EasyTestBlazorNavigationHelper.TryDumpDiagnostics` (post-mortem PNG)
+- **Guide promotion:** `Copy-EasyTestManualScreenshots.ps1` → `user-manual/assets/` (Phase 3 polish: `UserManualMediaCapture`)
 
 ---
 
@@ -95,9 +96,13 @@ When writing a guide:
 Officer or tech writer captures PNG while running headed EasyTest locally:
 
 ```powershell
+# Preferred — video + screenshots ON by default:
+.\scripts\local\Record-EasyTest.ps1 `
+  -Filter 'PersonOfficerJourney_LoginCreateEmployeeAddPassport'
+
+# Bare test still captures milestone PNGs (no ffmpeg MP4):
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest `
   --filter "FullyQualifiedName~PersonOfficerJourney_LoginCreateEmployeeAddPassport"
-# VISA2026_E2E_HEADED=true (default locally) — pause and screenshot, or use OS capture
 ```
 
 Save to:
@@ -147,7 +152,7 @@ Call capture after stable navigation assertions (`NavigateEmployeesList`, `Asser
 
 **Decision gate (Phase 3):** product + IT choose A–E per environment (dev demo vs on-prem prod). Document the winner in [tracking.md](../.cursor/skills/visa2026-user-manual/tracking.md) open decisions and update guide `videoStorage` frontmatter.
 
-**Invariant (all options):** EasyTest **source** recordings stay in `Visa2026.E2E.Tests/recordings/` (gitignored) or CI artifacts until promoted to the chosen store.
+**Invariant (all options):** EasyTest **source** recordings stay in `Visa2026.E2E.Tests/recordings/` (gitignored). Promoted PNG/MP4 under `user-manual/assets/screenshots/` and `user-manual/assets/videos/` are also **gitignored** — generate via `Record-EasyTest.ps1` + `Copy-EasyTestManual*.ps1` before local preview or run `Build-UserManual.ps1 -RequireMedia` after media copy.
 
 ### Local record
 
@@ -157,7 +162,7 @@ Call capture after stable navigation assertions (`NavigateEmployeesList`, `Asser
   -OutputName 'person-register.mp4'
 ```
 
-Output: `Visa2026.E2E.Tests/recordings/person-register.mp4` (gitignored).
+Output: `Visa2026.E2E.Tests/recordings/person-register.mp4` and `recordings/screenshots/{run}/` (gitignored). Both ON by default.
 
 ### CI record
 

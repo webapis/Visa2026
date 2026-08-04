@@ -1,0 +1,1599 @@
+{
+  "generatedAt": "2026-08-04T11:02:13.0420829Z",
+  "assemblyVersion": "1.0.0.645",
+  "types": [
+    {
+      "name": "Application",
+      "fullName": "Visa2026.Module.BusinessObjects.Application",
+      "displayName": "Application",
+      "userDocSlug": "applications/overview",
+      "userDocCategory": "Applications",
+      "properties": [
+        {
+          "name": "AppNumberPrefix",
+          "displayName": "App Number Prefix",
+          "required": false
+        },
+        {
+          "name": "DisplayCaption",
+          "displayName": "Application",
+          "required": false
+        },
+        {
+          "name": "ApplicationDate",
+          "displayName": "Application Date",
+          "required": true
+        },
+        {
+          "name": "ApplicationDateText",
+          "displayName": "Application Date (Word)",
+          "required": false
+        },
+        {
+          "name": "ApplicationNumber",
+          "displayName": "Application Number",
+          "required": false
+        },
+        {
+          "name": "ApplicationType",
+          "displayName": "Application Type",
+          "required": true
+        },
+        {
+          "name": "ApplicationTypeQuickCode",
+          "displayName": "Application Type Code",
+          "required": false
+        },
+        {
+          "name": "ApplicationType_Name",
+          "displayName": "Application Type Name (Word)",
+          "required": false
+        },
+        {
+          "name": "ApprovalLegProfile",
+          "displayName": "Approval Leg Profile",
+          "required": false
+        },
+        {
+          "name": "ProgressSlaStatement",
+          "displayName": "Approval deadline",
+          "required": false
+        },
+        {
+          "name": "BorderZoneLocation",
+          "displayName": "Border Zone Location",
+          "required": true
+        },
+        {
+          "name": "BusinessTripDurationDays",
+          "displayName": "Business Trip Duration (Days)",
+          "required": false
+        },
+        {
+          "name": "BusinessTripEndDate",
+          "displayName": "Business Trip End Date",
+          "required": false
+        },
+        {
+          "name": "BusinessTripEndDateText",
+          "displayName": "Business Trip End Date (Text)",
+          "required": false
+        },
+        {
+          "name": "BusinessTripPurpose",
+          "displayName": "Business Trip Purpose",
+          "required": false
+        },
+        {
+          "name": "BusinessTripPurpose_NameTm",
+          "displayName": "Business Trip Purpose (Tm)",
+          "required": false
+        },
+        {
+          "name": "BusinessTripStartDate",
+          "displayName": "Business Trip Start Date",
+          "required": false
+        },
+        {
+          "name": "BusinessTripStartDateText",
+          "displayName": "Business Trip Start Date (Text)",
+          "required": false
+        },
+        {
+          "name": "CancelInvCount",
+          "displayName": "Cancel Inv Count",
+          "required": false
+        },
+        {
+          "name": "CancelInvCountText",
+          "displayName": "Cancel Inv Count (Text)",
+          "required": false
+        },
+        {
+          "name": "CancelPersonCount",
+          "displayName": "Cancel Person Count",
+          "required": false
+        },
+        {
+          "name": "CancelPersonCountText",
+          "displayName": "Cancel Person Count (Text)",
+          "required": false
+        },
+        {
+          "name": "CancelVisaCount",
+          "displayName": "Cancel Visa Count",
+          "required": false
+        },
+        {
+          "name": "CancelVisaCountText",
+          "displayName": "Cancel Visa Count (Text)",
+          "required": false
+        },
+        {
+          "name": "CancelWPCount",
+          "displayName": "Cancel WP Count",
+          "required": false
+        },
+        {
+          "name": "CancelWPCountText",
+          "displayName": "Cancel WP Count (Text)",
+          "required": false
+        },
+        {
+          "name": "Application_Company_Address",
+          "displayName": "Company Address (Word)",
+          "required": false
+        },
+        {
+          "name": "Company_Code",
+          "displayName": "Company Code",
+          "required": false
+        },
+        {
+          "name": "Application_Company_Email",
+          "displayName": "Company Email (Word)",
+          "required": false
+        },
+        {
+          "name": "Application_CompanyHead_FullName",
+          "displayName": "Company Head Full Name (Word)",
+          "required": false
+        },
+        {
+          "name": "Application_CompanyHead_PositionTm",
+          "displayName": "Company Head Position (Tm, Word)",
+          "required": false
+        },
+        {
+          "name": "Application_Company_Name",
+          "displayName": "Company Name (Word)",
+          "required": false
+        },
+        {
+          "name": "Application_Company_PhoneNumber",
+          "displayName": "Company Phone (Word)",
+          "required": false
+        },
+        {
+          "name": "CurrentState",
+          "displayName": "Current status",
+          "required": false
+        },
+        {
+          "name": "FamilyMember_Relationship_NameTm",
+          "displayName": "FM Relationship (Tm)",
+          "required": false
+        },
+        {
+          "name": "FromCity",
+          "displayName": "From City",
+          "required": false
+        },
+        {
+          "name": "FromCityName_Ablative",
+          "displayName": "From City (Ablative)",
+          "required": false
+        },
+        {
+          "name": "FromCityName",
+          "displayName": "From City Name",
+          "required": false
+        },
+        {
+          "name": "FromRegionName_Genitive",
+          "displayName": "From Region (Genitive)",
+          "required": false
+        },
+        {
+          "name": "FromRegionName",
+          "displayName": "From Region Name",
+          "required": false
+        },
+        {
+          "name": "FullApplicationNumber",
+          "displayName": "Full Application Number",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "LatestProgressDate",
+          "displayName": "Latest progress date",
+          "required": false
+        },
+        {
+          "name": "LatestProgressState",
+          "displayName": "Latest progress state",
+          "required": false
+        },
+        {
+          "name": "IsManualEntry",
+          "displayName": "Manual Entry",
+          "required": false
+        },
+        {
+          "name": "MigrationService",
+          "displayName": "Migration Service",
+          "required": false
+        },
+        {
+          "name": "MigrationService_NameTm",
+          "displayName": "Migration Service Name (Tm)",
+          "required": false
+        },
+        {
+          "name": "MigrationSlaStatement",
+          "displayName": "Migration deadline",
+          "required": false
+        },
+        {
+          "name": "WorkingDaysInMigrationStep",
+          "displayName": "Migration working days",
+          "required": false
+        },
+        {
+          "name": "ProjectContract_Ministry_FormOfAddress",
+          "displayName": "Ministry Form of Address",
+          "required": false
+        },
+        {
+          "name": "ProjectContract_Ministry_RecipientBlock",
+          "displayName": "Ministry Recipient Block",
+          "required": false
+        },
+        {
+          "name": "Month",
+          "displayName": "Month",
+          "required": false
+        },
+        {
+          "name": "MovementPermitLocation",
+          "displayName": "Movement Permit Location",
+          "required": false
+        },
+        {
+          "name": "MovementPermitLocation_NameTm",
+          "displayName": "Movement Permit Location (Tm)",
+          "required": false
+        },
+        {
+          "name": "TotalPersonCount",
+          "displayName": "Person count",
+          "required": false
+        },
+        {
+          "name": "ProcessNumber",
+          "displayName": "Process number",
+          "required": false
+        },
+        {
+          "name": "ProjectContract",
+          "displayName": "Project Contract",
+          "required": false
+        },
+        {
+          "name": "ProjectContract_Description",
+          "displayName": "Project Contract Description",
+          "required": false
+        },
+        {
+          "name": "SponsoringEmployee_FullName",
+          "displayName": "Sponsoring Employee Full Name",
+          "required": false
+        },
+        {
+          "name": "SponsoringEmployee_PositionTm",
+          "displayName": "Sponsoring Employee Position (Tm)",
+          "required": false
+        },
+        {
+          "name": "ToCity",
+          "displayName": "To City",
+          "required": false
+        },
+        {
+          "name": "ToCityName_Dative",
+          "displayName": "To City (Dative)",
+          "required": false
+        },
+        {
+          "name": "ToCityName",
+          "displayName": "To City Name",
+          "required": false
+        },
+        {
+          "name": "ToRegionName_Genitive",
+          "displayName": "To Region (Genitive)",
+          "required": false
+        },
+        {
+          "name": "ToRegionName",
+          "displayName": "To Region Name",
+          "required": false
+        },
+        {
+          "name": "TotalPersonCountText",
+          "displayName": "Total Person Count (Text)",
+          "required": false
+        },
+        {
+          "name": "Urgency",
+          "displayName": "Urgency",
+          "required": false
+        },
+        {
+          "name": "Urgency_NameTm",
+          "displayName": "Urgency (Tm)",
+          "required": false
+        },
+        {
+          "name": "VisaCategory",
+          "displayName": "Visa Category",
+          "required": false
+        },
+        {
+          "name": "VisaCategory_NameTm",
+          "displayName": "Visa Category (Tm)",
+          "required": false
+        },
+        {
+          "name": "VisaPeriod",
+          "displayName": "Visa Period",
+          "required": false
+        },
+        {
+          "name": "VisaPeriod_NameTm",
+          "displayName": "Visa Period (Tm)",
+          "required": false
+        },
+        {
+          "name": "VisaType",
+          "displayName": "Visa Type",
+          "required": false
+        },
+        {
+          "name": "WorkingDaysInCurrentStep",
+          "displayName": "Working days",
+          "required": false
+        },
+        {
+          "name": "Year",
+          "displayName": "Year",
+          "required": false
+        }
+      ],
+      "guideSlugs": []
+    },
+    {
+      "name": "ApplicationItem",
+      "fullName": "Visa2026.Module.BusinessObjects.ApplicationItem",
+      "displayName": "Application item",
+      "userDocSlug": "applications/item-overview",
+      "userDocCategory": "Applications",
+      "properties": [
+        {
+          "name": "ShowOptionalFields",
+          "displayName": " ",
+          "required": false
+        },
+        {
+          "name": "Address_CityTm",
+          "displayName": "Address City (Tm)",
+          "required": false
+        },
+        {
+          "name": "Address_ExpirationDate",
+          "displayName": "Address Expiration Date",
+          "required": false
+        },
+        {
+          "name": "Address_ExpirationDateText",
+          "displayName": "Address Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Address_FullAddress",
+          "displayName": "Address Full Address",
+          "required": false
+        },
+        {
+          "name": "Address_RegionTm",
+          "displayName": "Address Region (Tm)",
+          "required": false
+        },
+        {
+          "name": "Address_Type",
+          "displayName": "Address Type",
+          "required": false
+        },
+        {
+          "name": "Application",
+          "displayName": "Application",
+          "required": true
+        },
+        {
+          "name": "Application_DateText",
+          "displayName": "Application Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Application_FullNumber",
+          "displayName": "Application Full Number",
+          "required": false
+        },
+        {
+          "name": "ApplicationItemName",
+          "displayName": "Application Item Name",
+          "required": false
+        },
+        {
+          "name": "DisplayCaption",
+          "displayName": "Application item",
+          "required": false
+        },
+        {
+          "name": "Application_CompanyHead_FullName",
+          "displayName": "Application_ Company Head_ Full Name",
+          "required": false
+        },
+        {
+          "name": "Application_CompanyHead_PositionTm",
+          "displayName": "Application_ Company Head_ Position Tm",
+          "required": false
+        },
+        {
+          "name": "Person_BirthPlace",
+          "displayName": "Birth Place",
+          "required": false
+        },
+        {
+          "name": "BorderZoneLocation",
+          "displayName": "Border Zone Location",
+          "required": false
+        },
+        {
+          "name": "Application_BorderZoneLocation_NameTm",
+          "displayName": "Border Zone Location (Tm)",
+          "required": false
+        },
+        {
+          "name": "BusinessTripAddress",
+          "displayName": "Business Trip Address",
+          "required": false
+        },
+        {
+          "name": "BusinessTripAddress_FullAddress",
+          "displayName": "Business Trip Address_ Full Address",
+          "required": false
+        },
+        {
+          "name": "CancelVisa_ExpirationDateBlock",
+          "displayName": "Cancel Visa_ Expiration Date Block",
+          "required": false
+        },
+        {
+          "name": "CancelVisa_NumberBlock",
+          "displayName": "Cancel Visa_ Number Block",
+          "required": false
+        },
+        {
+          "name": "CancelVisa_StartDateBlock",
+          "displayName": "Cancel Visa_ Start Date Block",
+          "required": false
+        },
+        {
+          "name": "IsLineCancelled",
+          "displayName": "Cancelled",
+          "required": false
+        },
+        {
+          "name": "CheckPoint",
+          "displayName": "Check Point",
+          "required": true
+        },
+        {
+          "name": "Application_CompanyAddress",
+          "displayName": "Company Address",
+          "required": false
+        },
+        {
+          "name": "Application_CompanyRegistryAddressLine",
+          "displayName": "Company registry, address and phone (one line)",
+          "required": false
+        },
+        {
+          "name": "Contract_ExpirationDateText",
+          "displayName": "Contract Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Contract_PeriodFallbackText",
+          "displayName": "Contract Period Fallback Text",
+          "required": false
+        },
+        {
+          "name": "Contract_Salary",
+          "displayName": "Contract Salary",
+          "required": false
+        },
+        {
+          "name": "Contract_SalaryText",
+          "displayName": "Contract Salary (Text)",
+          "required": false
+        },
+        {
+          "name": "Contract_StartDateText",
+          "displayName": "Contract Start Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Person_CountryOfBirthTm",
+          "displayName": "Country of Birth (Tm)",
+          "required": false
+        },
+        {
+          "name": "Person_CountryOfBirthCode",
+          "displayName": "Country of Birth Code",
+          "required": false
+        },
+        {
+          "name": "CurrentAddressOfResidence",
+          "displayName": "Current Address Of Residence",
+          "required": true
+        },
+        {
+          "name": "CurrentEducation",
+          "displayName": "Current Education",
+          "required": true
+        },
+        {
+          "name": "CurrentInvitationItem",
+          "displayName": "Current Invitation Item",
+          "required": true
+        },
+        {
+          "name": "CurrentMedicalRecord",
+          "displayName": "Current Medical Record",
+          "required": false
+        },
+        {
+          "name": "CurrentPassport",
+          "displayName": "Current Passport",
+          "required": true
+        },
+        {
+          "name": "CurrentPositionHistory",
+          "displayName": "Current Position History",
+          "required": true
+        },
+        {
+          "name": "CurrentSalary",
+          "displayName": "Current Salary",
+          "required": true
+        },
+        {
+          "name": "CurrentVisa",
+          "displayName": "Current Visa",
+          "required": true
+        },
+        {
+          "name": "CurrentVisaId",
+          "displayName": "Current Visa Id",
+          "required": false
+        },
+        {
+          "name": "CurrentWorkDuty",
+          "displayName": "Current Work Duty",
+          "required": true
+        },
+        {
+          "name": "CurrentWorkPermitItem",
+          "displayName": "Current Work Permit Item",
+          "required": true
+        },
+        {
+          "name": "Person_DateOfBirth",
+          "displayName": "Date of Birth",
+          "required": false
+        },
+        {
+          "name": "Person_DateOfBirthText",
+          "displayName": "Date of Birth (Text)",
+          "required": false
+        },
+        {
+          "name": "Position_DepartmentTm",
+          "displayName": "Department (Tm)",
+          "required": false
+        },
+        {
+          "name": "Education_CountryCode",
+          "displayName": "Education Country Code",
+          "required": false
+        },
+        {
+          "name": "Education_GraduationYear",
+          "displayName": "Education Graduation Year",
+          "required": false
+        },
+        {
+          "name": "Education_InstitutionName",
+          "displayName": "Education Institution",
+          "required": false
+        },
+        {
+          "name": "Education_LevelTm",
+          "displayName": "Education Level (Tm)",
+          "required": false
+        },
+        {
+          "name": "Education_LevelAndInstitutionTm",
+          "displayName": "Education Level and Institution",
+          "required": false
+        },
+        {
+          "name": "Education_SpecialtyTm",
+          "displayName": "Education Specialty (Tm)",
+          "required": false
+        },
+        {
+          "name": "FM_EducationLevelTm",
+          "displayName": "FM Education Level (Tm)",
+          "required": false
+        },
+        {
+          "name": "FM_SpecialtyTm",
+          "displayName": "FM Specialty (Tm)",
+          "required": false
+        },
+        {
+          "name": "FM_WezipesiTm",
+          "displayName": "FM Wezipesi (Tm)",
+          "required": false
+        },
+        {
+          "name": "Person_FirstName",
+          "displayName": "First Name",
+          "required": false
+        },
+        {
+          "name": "Person_ForeignAddress",
+          "displayName": "Foreign Address",
+          "required": false
+        },
+        {
+          "name": "Person_ForeignAddressCountryCode",
+          "displayName": "Foreign Address Country Code",
+          "required": false
+        },
+        {
+          "name": "Person_ForeignAddressWithCountry",
+          "displayName": "Foreign Address with Country",
+          "required": false
+        },
+        {
+          "name": "Person_FullName",
+          "displayName": "Full Name",
+          "required": false
+        },
+        {
+          "name": "Registration_GelmeginMaksadyTm",
+          "displayName": "Gelmegini\u0148 maksady (registration)",
+          "required": false
+        },
+        {
+          "name": "Person_GenderTm",
+          "displayName": "Gender (Tm)",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "Invitation_ExpirationDateText",
+          "displayName": "Invitation Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "InvitationItemIsCancelled",
+          "displayName": "Invitation Item Is Cancelled",
+          "required": false
+        },
+        {
+          "name": "InvitationItemIsChanged",
+          "displayName": "Invitation Item Is Changed",
+          "required": false
+        },
+        {
+          "name": "InvitationItemIsIssued",
+          "displayName": "Invitation Item Is Issued",
+          "required": false
+        },
+        {
+          "name": "Invitation_Number",
+          "displayName": "Invitation Number",
+          "required": false
+        },
+        {
+          "name": "Invitation_StartDateText",
+          "displayName": "Invitation Start Date (Text)",
+          "required": false
+        },
+        {
+          "name": "IsCancelled",
+          "displayName": "Is Cancelled",
+          "required": false
+        },
+        {
+          "name": "Person_IsEmployee",
+          "displayName": "Is Employee",
+          "required": false
+        },
+        {
+          "name": "IssuedVisa",
+          "displayName": "Issued Visa",
+          "required": false
+        },
+        {
+          "name": "Person_LastName",
+          "displayName": "Last Name",
+          "required": false
+        },
+        {
+          "name": "LastApplicationState",
+          "displayName": "Last application state",
+          "required": false
+        },
+        {
+          "name": "Person_MaritalStatusTm",
+          "displayName": "Marital Status (Tm)",
+          "required": false
+        },
+        {
+          "name": "MedicalRecord_ExpirationDate",
+          "displayName": "Medical Record Expiration Date",
+          "required": false
+        },
+        {
+          "name": "MedicalRecord_ExpirationDateText",
+          "displayName": "Medical Record Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "MedicalRecord_IssueDate",
+          "displayName": "Medical Record Issue Date",
+          "required": false
+        },
+        {
+          "name": "MedicalRecord_Number",
+          "displayName": "Medical Record Number",
+          "required": false
+        },
+        {
+          "name": "Person_MiddleName",
+          "displayName": "Middle Name",
+          "required": false
+        },
+        {
+          "name": "Application_MigrationServiceCode",
+          "displayName": "Migration Service Code",
+          "required": false
+        },
+        {
+          "name": "MovementType",
+          "displayName": "Movement Type",
+          "required": false
+        },
+        {
+          "name": "Person_NationalityTm",
+          "displayName": "Nationality (Tm)",
+          "required": false
+        },
+        {
+          "name": "Person_NationalityCode",
+          "displayName": "Nationality Code",
+          "required": false
+        },
+        {
+          "name": "NextVisa",
+          "displayName": "Next Visa",
+          "required": true
+        },
+        {
+          "name": "NextVisaId",
+          "displayName": "Next Visa Id",
+          "required": false
+        },
+        {
+          "name": "Pdf_AccompanyingDetail1",
+          "displayName": "PDF Accompanying Detail 1",
+          "required": false
+        },
+        {
+          "name": "Pdf_AccompanyingDetail2",
+          "displayName": "PDF Accompanying Detail 2",
+          "required": false
+        },
+        {
+          "name": "Pdf_AccompanyingDetail3",
+          "displayName": "PDF Accompanying Detail 3",
+          "required": false
+        },
+        {
+          "name": "Pdf_AccompanyingDetail4",
+          "displayName": "PDF Accompanying Detail 4",
+          "required": false
+        },
+        {
+          "name": "Pdf_AccompanyingFullName",
+          "displayName": "PDF Accompanying Full Name",
+          "required": false
+        },
+        {
+          "name": "Pdf_AccompanyingNationalityCode",
+          "displayName": "PDF Accompanying Nationality Code",
+          "required": false
+        },
+        {
+          "name": "Pdf_EducationPlaceOfStudy",
+          "displayName": "PDF Education Place of Study",
+          "required": false
+        },
+        {
+          "name": "Pdf_FamilyMembersAggregateText",
+          "displayName": "PDF Family Members Aggregate",
+          "required": false
+        },
+        {
+          "name": "Pdf_FamilyMembersMaritalLine1",
+          "displayName": "PDF Family Members Marital Line 1",
+          "required": false
+        },
+        {
+          "name": "Pdf_FamilyMembersMaritalLine2",
+          "displayName": "PDF Family Members Marital Line 2",
+          "required": false
+        },
+        {
+          "name": "Pdf_FamilyMembersMaritalLine3",
+          "displayName": "PDF Family Members Marital Line 3",
+          "required": false
+        },
+        {
+          "name": "Pdf_SpouseAdditional",
+          "displayName": "PDF Spouse Additional",
+          "required": false
+        },
+        {
+          "name": "Pdf_SpouseFirstName",
+          "displayName": "PDF Spouse First Name",
+          "required": false
+        },
+        {
+          "name": "Pdf_SpouseLastName",
+          "displayName": "PDF Spouse Last Name",
+          "required": false
+        },
+        {
+          "name": "Passport_Authority",
+          "displayName": "Passport Authority",
+          "required": false
+        },
+        {
+          "name": "Passport_CountryTm",
+          "displayName": "Passport Country (Tm)",
+          "required": false
+        },
+        {
+          "name": "Passport_CountryCode",
+          "displayName": "Passport Country Code",
+          "required": false
+        },
+        {
+          "name": "Passport_ExpirationDate",
+          "displayName": "Passport Expiration Date",
+          "required": false
+        },
+        {
+          "name": "Passport_ExpirationDateText",
+          "displayName": "Passport Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Passport_IssueDate",
+          "displayName": "Passport Issue Date",
+          "required": false
+        },
+        {
+          "name": "Passport_IssueDateText",
+          "displayName": "Passport Issue Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Passport_Number",
+          "displayName": "Passport Number",
+          "required": false
+        },
+        {
+          "name": "Passport_PersonalNumber",
+          "displayName": "Passport Personal Number",
+          "required": false
+        },
+        {
+          "name": "Person",
+          "displayName": "Person",
+          "required": true
+        },
+        {
+          "name": "Position_PositionTm",
+          "displayName": "Position (Tm)",
+          "required": false
+        },
+        {
+          "name": "Position_NameTm",
+          "displayName": "Position_ Name Tm",
+          "required": false
+        },
+        {
+          "name": "PreviousInvitation_ExpirationDateText",
+          "displayName": "Previous Invitation Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "PreviousInvitationItem",
+          "displayName": "Previous Invitation Item",
+          "required": true
+        },
+        {
+          "name": "PreviousInvitation_Number",
+          "displayName": "Previous Invitation Number",
+          "required": false
+        },
+        {
+          "name": "PreviousInvitation_StartDateText",
+          "displayName": "Previous Invitation Start Date (Text)",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport",
+          "displayName": "Previous Passport",
+          "required": true
+        },
+        {
+          "name": "PreviousPassport_Authority",
+          "displayName": "Previous Passport Authority",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_CountryTm",
+          "displayName": "Previous Passport Country (Tm)",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_CountryCode",
+          "displayName": "Previous Passport Country Code",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_ExpirationDate",
+          "displayName": "Previous Passport Expiration Date",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_ExpirationDateText",
+          "displayName": "Previous Passport Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_IssueDate",
+          "displayName": "Previous Passport Issue Date",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_IssueDateText",
+          "displayName": "Previous Passport Issue Date (Text)",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_Number",
+          "displayName": "Previous Passport Number",
+          "required": false
+        },
+        {
+          "name": "PreviousPassport_PersonalNumber",
+          "displayName": "Previous Passport Personal Number",
+          "required": false
+        },
+        {
+          "name": "PreviousWorkPermit_ExpirationDateText",
+          "displayName": "Previous Work Permit Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "PreviousWorkPermitItem",
+          "displayName": "Previous Work Permit Item",
+          "required": true
+        },
+        {
+          "name": "PreviousWorkPermit_Number",
+          "displayName": "Previous Work Permit Number",
+          "required": false
+        },
+        {
+          "name": "RegistrationDate",
+          "displayName": "Registration Date",
+          "required": false
+        },
+        {
+          "name": "Application_RegistrationDateText",
+          "displayName": "Registration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "RejectionIssued",
+          "displayName": "Rejection Issued",
+          "required": false
+        },
+        {
+          "name": "Person_RelationshipTm",
+          "displayName": "Relationship (Tm)",
+          "required": false
+        },
+        {
+          "name": "Representative_FullName",
+          "displayName": "Representative Full Name",
+          "required": false
+        },
+        {
+          "name": "Representative_PassportLine",
+          "displayName": "Representative Passport (one line)",
+          "required": false
+        },
+        {
+          "name": "Representative_Phone",
+          "displayName": "Representative Phone",
+          "required": false
+        },
+        {
+          "name": "RowNumber",
+          "displayName": "Row Number",
+          "required": false
+        },
+        {
+          "name": "Salary_CurrencyCode",
+          "displayName": "Salary Currency Code",
+          "required": false
+        },
+        {
+          "name": "CompanyHead_FullName",
+          "displayName": "Signatory Full Name",
+          "required": false
+        },
+        {
+          "name": "CompanyHead_PassportLine",
+          "displayName": "Signatory Passport (one line)",
+          "required": false
+        },
+        {
+          "name": "CompanyHead_PassportAuthority",
+          "displayName": "Signatory Passport Authority",
+          "required": false
+        },
+        {
+          "name": "CompanyHead_PassportIssueDateText",
+          "displayName": "Signatory Passport Issue Date (Text)",
+          "required": false
+        },
+        {
+          "name": "CompanyHead_PassportNumber",
+          "displayName": "Signatory Passport Number",
+          "required": false
+        },
+        {
+          "name": "CompanyHead_PositionTm",
+          "displayName": "Signatory Position (Tm)",
+          "required": false
+        },
+        {
+          "name": "Application_SponsorSignatory",
+          "displayName": "Sponsor Authorized Signatory",
+          "required": false
+        },
+        {
+          "name": "Application_SponsorName",
+          "displayName": "Sponsor Name",
+          "required": false
+        },
+        {
+          "name": "Person_SponsoringEmployeeFullName",
+          "displayName": "Sponsoring Employee Full Name",
+          "required": false
+        },
+        {
+          "name": "Person_SponsoringEmployeePositionTm",
+          "displayName": "Sponsoring Employee Position (Tm)",
+          "required": false
+        },
+        {
+          "name": "Travel_CheckPointTm",
+          "displayName": "Travel Checkpoint (Tm)",
+          "required": false
+        },
+        {
+          "name": "TravelDate",
+          "displayName": "Travel Date",
+          "required": true
+        },
+        {
+          "name": "Travel_Date",
+          "displayName": "Travel Date",
+          "required": false
+        },
+        {
+          "name": "Travel_DateText",
+          "displayName": "Travel Date (Text)",
+          "required": false
+        },
+        {
+          "name": "TravelNotes",
+          "displayName": "Travel Notes",
+          "required": false
+        },
+        {
+          "name": "Travel_PurposeOfTravelTm",
+          "displayName": "Travel Purpose of Travel (Tm)",
+          "required": false
+        },
+        {
+          "name": "TravelType",
+          "displayName": "Travel Type",
+          "required": false
+        },
+        {
+          "name": "Visa_CategoryTm",
+          "displayName": "Visa Category (Tm)",
+          "required": false
+        },
+        {
+          "name": "Application_VisaCategory_NameTm",
+          "displayName": "Visa Category (Tm)",
+          "required": false
+        },
+        {
+          "name": "Visa_ExpirationDate",
+          "displayName": "Visa Expiration Date",
+          "required": false
+        },
+        {
+          "name": "Visa_ExpirationDateText",
+          "displayName": "Visa Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "VisaIsCancelled",
+          "displayName": "Visa Is Cancelled",
+          "required": false
+        },
+        {
+          "name": "VisaIsChanged",
+          "displayName": "Visa Is Changed",
+          "required": false
+        },
+        {
+          "name": "Visa_IssueDate",
+          "displayName": "Visa Issue Date",
+          "required": false
+        },
+        {
+          "name": "Visa_IssueDateText",
+          "displayName": "Visa Issue Date (Text)",
+          "required": false
+        },
+        {
+          "name": "VisaIssued",
+          "displayName": "Visa Issued",
+          "required": false
+        },
+        {
+          "name": "Visa_IssuedPlaceTm",
+          "displayName": "Visa Issued Place (Tm)",
+          "required": false
+        },
+        {
+          "name": "Visa_Number",
+          "displayName": "Visa Number",
+          "required": false
+        },
+        {
+          "name": "Application_VisaPeriod_NameTm",
+          "displayName": "Visa Period (Tm)",
+          "required": false
+        },
+        {
+          "name": "Visa_StartDate",
+          "displayName": "Visa Start Date",
+          "required": false
+        },
+        {
+          "name": "Visa_StartDateText",
+          "displayName": "Visa Start Date (Text)",
+          "required": false
+        },
+        {
+          "name": "Visa_TypeTm",
+          "displayName": "Visa Type (Tm)",
+          "required": false
+        },
+        {
+          "name": "Visa_DurationFrequencyBlock",
+          "displayName": "Visa duration \u002B frequency (multiline)",
+          "required": false
+        },
+        {
+          "name": "Visa_NumberAndType",
+          "displayName": "Visa_ Number And Type",
+          "required": false
+        },
+        {
+          "name": "WorkDuty_Description",
+          "displayName": "Work Duty (Gelmegini\u0148 Maksady)",
+          "required": false
+        },
+        {
+          "name": "WorkPermit_ASNumber",
+          "displayName": "Work Permit AS Number",
+          "required": false
+        },
+        {
+          "name": "WorkPermit_ExpirationDate",
+          "displayName": "Work Permit Expiration Date",
+          "required": false
+        },
+        {
+          "name": "WorkPermit_ExpirationDateText",
+          "displayName": "Work Permit Expiration Date (Text)",
+          "required": false
+        },
+        {
+          "name": "WorkPermitItemIsChanged",
+          "displayName": "Work Permit Item Is Changed",
+          "required": false
+        },
+        {
+          "name": "WorkPermitItemIsIssued",
+          "displayName": "Work Permit Item Is Issued",
+          "required": false
+        },
+        {
+          "name": "WorkPermit_Number",
+          "displayName": "Work Permit Number",
+          "required": false
+        },
+        {
+          "name": "WorkPermit_WorkPermittedLocations",
+          "displayName": "Work Permit Permitted Locations",
+          "required": false
+        },
+        {
+          "name": "WorkPermit_StartDateText",
+          "displayName": "Work Permit Start Date (Text)",
+          "required": false
+        },
+        {
+          "name": "WorkPermittedLocations",
+          "displayName": "Work Permitted Locations",
+          "required": false
+        },
+        {
+          "name": "SahsyKagyz_FamilyStatusText",
+          "displayName": "\u015Eahsy Kagyz Family Status",
+          "required": false
+        }
+      ],
+      "guideSlugs": []
+    },
+    {
+      "name": "ApplicationProgress",
+      "fullName": "Visa2026.Module.BusinessObjects.ApplicationProgress",
+      "displayName": "Application Progress",
+      "userDocSlug": "applications/progress",
+      "userDocCategory": "Applications",
+      "properties": [
+        {
+          "name": "Application",
+          "displayName": "Application",
+          "required": true
+        },
+        {
+          "name": "Date",
+          "displayName": "Date",
+          "required": true
+        },
+        {
+          "name": "Description",
+          "displayName": "Description",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "MinistryStepLabel",
+          "displayName": "Ministrlik",
+          "required": false
+        },
+        {
+          "name": "MinistryLetterFileName",
+          "displayName": "Ministry Letter File Name",
+          "required": false
+        },
+        {
+          "name": "Order",
+          "displayName": "Order",
+          "required": false
+        },
+        {
+          "name": "ProcessNumber",
+          "displayName": "Process number",
+          "required": false
+        },
+        {
+          "name": "State",
+          "displayName": "State",
+          "required": true
+        },
+        {
+          "name": "StatusListLabel",
+          "displayName": "Status List Label",
+          "required": false
+        }
+      ],
+      "guideSlugs": []
+    },
+    {
+      "name": "Person",
+      "fullName": "Visa2026.Module.BusinessObjects.Person",
+      "displayName": "Person",
+      "userDocSlug": "person/overview",
+      "userDocCategory": "Person management",
+      "properties": [
+        {
+          "name": "ShowOptionalFields",
+          "displayName": " ",
+          "required": false
+        },
+        {
+          "name": "Age",
+          "displayName": "Age",
+          "required": false
+        },
+        {
+          "name": "BirthPlace",
+          "displayName": "Birth Place",
+          "required": true
+        },
+        {
+          "name": "Subcontractor",
+          "displayName": "Company (Subcontractor)",
+          "required": true
+        },
+        {
+          "name": "CountryOfBirth",
+          "displayName": "Country Of Birth",
+          "required": true
+        },
+        {
+          "name": "CurrentRejectionItem",
+          "displayName": "Current Rejection Item",
+          "required": false
+        },
+        {
+          "name": "DateOfBirth",
+          "displayName": "Date Of Birth",
+          "required": true
+        },
+        {
+          "name": "DocumentCopiesListLink",
+          "displayName": "Document Copies List Link",
+          "required": false
+        },
+        {
+          "name": "DossierListLink",
+          "displayName": "Dossier List Link",
+          "required": false
+        },
+        {
+          "name": "Email",
+          "displayName": "Email",
+          "required": false
+        },
+        {
+          "name": "VisaApplicationFamilyMembersText",
+          "displayName": "Family members for visa (manual)",
+          "required": true
+        },
+        {
+          "name": "FirstName",
+          "displayName": "First Name",
+          "required": true
+        },
+        {
+          "name": "ForeignAddress",
+          "displayName": "Foreign Address",
+          "required": true
+        },
+        {
+          "name": "ForeignAddressCountry",
+          "displayName": "Foreign Address Country",
+          "required": true
+        },
+        {
+          "name": "FullName",
+          "displayName": "Full Name",
+          "required": false
+        },
+        {
+          "name": "Gender",
+          "displayName": "Gender",
+          "required": true
+        },
+        {
+          "name": "HireDate",
+          "displayName": "Hire Date",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "IsDataIncomplete",
+          "displayName": "Incomplete",
+          "required": false
+        },
+        {
+          "name": "IncompleteMarkedBy",
+          "displayName": "Incomplete marked by",
+          "required": false
+        },
+        {
+          "name": "IncompleteMarkedOn",
+          "displayName": "Incomplete marked on",
+          "required": false
+        },
+        {
+          "name": "IncompleteNotes",
+          "displayName": "Incomplete notes",
+          "required": false
+        },
+        {
+          "name": "IsArchived",
+          "displayName": "Is Archived",
+          "required": false
+        },
+        {
+          "name": "LastName",
+          "displayName": "Last Name",
+          "required": true
+        },
+        {
+          "name": "MaritalStatus",
+          "displayName": "Marital Status",
+          "required": true
+        },
+        {
+          "name": "MiddleName",
+          "displayName": "Middle Name",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingAreasDisplay",
+          "displayName": "Missing areas",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingAddress",
+          "displayName": "Missing: Address",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingCv",
+          "displayName": "Missing: CV",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingEducation",
+          "displayName": "Missing: Education",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingFamilyDocs",
+          "displayName": "Missing: Family docs",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingMedical",
+          "displayName": "Missing: Medical",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingOther",
+          "displayName": "Missing: Other",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingPassport",
+          "displayName": "Missing: Passport",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingPersonalData",
+          "displayName": "Missing: Personal data",
+          "required": false
+        },
+        {
+          "name": "IncompleteMissingPhoto",
+          "displayName": "Missing: Photo",
+          "required": false
+        },
+        {
+          "name": "Nationality",
+          "displayName": "Nationality",
+          "required": true
+        },
+        {
+          "name": "PersonalNumber",
+          "displayName": "Personal Number",
+          "required": true
+        },
+        {
+          "name": "ProjectContract",
+          "displayName": "Project Contract",
+          "required": true
+        },
+        {
+          "name": "Relationship",
+          "displayName": "Relationship",
+          "required": true
+        },
+        {
+          "name": "SponsoringEmployee",
+          "displayName": "Sponsoring Employee",
+          "required": true
+        }
+      ],
+      "guideSlugs": [
+        "person/add-passport",
+        "person/register"
+      ]
+    }
+  ]
+}

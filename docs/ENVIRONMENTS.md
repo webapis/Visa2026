@@ -54,6 +54,15 @@ docker compose -p visa2026-dev --env-file .env.dev -f docker-compose.dev.yml up 
 Default ports:
 - Prod app: `80`
 - Dev app: `8081`
+- Prod manual (nginx): `8082` (`MANUAL_PORT`)
+- Dev manual (nginx): `8083` (`MANUAL_PORT`)
+
+Officer user manual is a **separate** `manual` service (static HTML + media), not inside the Blazor image. It is **opt-in** via compose profile **`manual`**. Publish workflow: [USER_MANUAL_RELEASE.md](./USER_MANUAL_RELEASE.md).
+
+```bash
+# Manual nginx only (after publish)
+docker compose -p visa2026-prod --env-file .env.prod -f docker-compose.prod.yml --profile manual up -d manual
+```
 
 Each stack has its own Postgres data volume:
 - `visa2026-prod_postgres_data_prod`

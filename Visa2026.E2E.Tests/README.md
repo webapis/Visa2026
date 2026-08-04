@@ -8,7 +8,8 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 
 ## 2. Frameworks and Tools
 
-- **DevExpress EasyTest:** The core framework used for scripting and running the E2E tests. EasyTest provides a high-level, script-based approach to testing XAF applications.
+- **Microsoft Playwright:** Officer E2E for **Local** (`:5050`) and **Staging** (live URL). Uses injected `e2e-*` CSS locators. See `Playwright/` folder.
+- **DevExpress EasyTest:** Legacy framework (still in repo for existing journeys). Prefer Playwright for new manual media work.
 - **xUnit:** The primary test runner for executing the test fixtures. The `[Theory]` and `[InlineData]` attributes are used to create and run tests.
 - **Selenium WebDriver:** Used under the hood by the `DevExpress.ExpressApp.EasyTest.BlazorAdapter` to control the web browser and interact with the Blazor application.
 - **.NET 8:** The target framework for the test project.
@@ -39,7 +40,31 @@ This project contains the end-to-end (E2E) functional tests for the Visa2026 app
 
 ## 5. Running the Tests
 
-### User Actions
+### Playwright E2E (Local + Staging)
+
+```powershell
+dotnet build Visa2026.slnx -c EasyTest
+.\Visa2026.E2E.Tests\bin\EasyTest\net8.0\playwright.ps1 install msedge
+
+# Local — fresh DB + :5050
+.\scripts\local\Record-PlaywrightE2e.ps1 -Target Local
+
+# Staging — live URL (manual)
+.\scripts\local\Record-PlaywrightE2e.ps1 -Target Staging -BaseUrl 'https://10.100.128.25:8080'
+```
+
+Environment:
+
+| Variable | Purpose |
+|----------|---------|
+| `VISA2026_E2E_TARGET` | `Local` (default) or `Staging` |
+| `VISA2026_E2E_BASE_URL` | Override app URL |
+| `VISA2026_E2E_USER` / `VISA2026_E2E_PASSWORD` | Officer credentials (staging) |
+| `VISA2026_E2E_SCREENSHOTS` | `false` to disable milestone PNGs |
+
+Filter: `dotnet test ... --filter "Driver=Playwright&E2ETarget=Local"`.
+
+---
 1.  **Prerequisites**: Ensure that the appropriate Selenium browser driver is installed and its path is added to the system's PATH environment variable.
 2.  **Build**: Build the solution with the **`EasyTest`** configuration (required for the Blazor host under test):
 

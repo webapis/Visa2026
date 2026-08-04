@@ -18,10 +18,13 @@ Read learnings + tracking + this file
 Classify intent (§2) ──► Is officer manual the right surface? (§3)
         │
         ▼
+Code change detection needed? ──► YES: [code-drift-scan.md](./code-drift-scan.md) (report only)
+        │                              NO:  exact user-scoped edit only
+        ▼
 Check phase readiness (§4) ──► Offer options menu (§5) ──► User picks path
         │
         ▼
-Only then implement (SKILL.md checklists)
+Only then implement (SKILL.md checklists) — Update after scan approval
 ```
 
 **Do not** in the first response:
@@ -139,6 +142,8 @@ Present **relevant** options only. Respect **[curriculum.md](./curriculum.md)** 
 
 ### C. Update / fix existing guide
 
+**First:** run [code-drift-scan.md](./code-drift-scan.md) unless the user scoped an exact slug/edit with no discovery.
+
 | Option | Best when |
 |--------|-----------|
 | **C1 — Text-only fix** | Wrong business wording; UI unchanged |
@@ -184,11 +189,13 @@ Present **relevant** options only. Respect **[curriculum.md](./curriculum.md)** 
 ### Scenario: "We changed Application progress UI"
 
 ```text
-1. Find guide applications/progress in tracking
-2. If none → backlog row + A2 draft (don't publish under pressure)
-3. If exists → status: stale; diff feature doc APPLICATION_PROGRESS_*
-4. Regen catalog if BO/properties changed
-5. Offer C2 vs C1 based on visual change
+1. Run code-drift-scan.md on the merge diff — report only
+2. Find guide applications/progress in tracking
+3. If none → backlog row + A2 draft (don't publish under pressure)
+4. If exists → status: stale; diff feature doc APPLICATION_PROGRESS_*
+5. Regen catalog if BO/properties changed
+6. Offer C2 vs C1 based on scan report; wait for approval
+7. Then Update checklist
 ```
 
 ### Scenario: "Start the user manual project"

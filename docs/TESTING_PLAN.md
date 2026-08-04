@@ -35,14 +35,14 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 |------|--------|
 | Project | [`Visa2026.E2E.Tests`](../Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj) |
 | Runner | xUnit |
-| UI driver | DevExpress **EasyTest** Blazor adapter + **Selenium** (Edge) |
+| UI driver | DevExpress **EasyTest** Blazor adapter + **Selenium** (Edge); **Playwright** where EasyTest lacks support (custom Blazor) |
 | App under test | [`Visa2026.Blazor.Server`](../Visa2026.Blazor.Server/) |
 | Launch profile | **`Visa2026 - PostgreSQL`** (EasyTest host uses env CS, not a separate launch profile) |
 | URL | **`http://localhost:5050`** |
 | DB | **`visa2026_easytest`** on local PostgreSQL (`localhost:5432`) |
 | Build config | **EasyTest** |
 | Platform | **Windows** (`[SupportedOSPlatform("windows")]`) |
-| Selectors | **English model captions** + EasyTest actions (not Playwright hook ids) |
+| Selectors | EasyTest: **English model captions**; Playwright: **`data-testid`** / role / stable CSS for custom UI |
 | Style | **C# EasyTest API** (yaml in `scenarios/` is metadata only — Option A) |
 
 **Base fixture:** [`E2ETestBase.cs`](../Visa2026.E2E.Tests/E2ETestBase.cs) — drops DB once per run, launches app, `Login()`, shared helpers.

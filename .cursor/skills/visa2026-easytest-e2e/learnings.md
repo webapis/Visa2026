@@ -249,3 +249,18 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Needed still frames plus desktop MP4 for review.
 - **Fix / reuse**: Set `VISA2026_E2E_SCREENSHOTS=true` (+ optional `VISA2026_E2E_SCREENSHOT_RUN`); call `EasyTestScreenshotCapture.Capture` at journey steps. Video remains ffmpeg gdigrab via `Record-EasyTest.ps1`. Portable ffmpeg under `Visa2026.E2E.Tests\.tools\ffmpeg\`.
 - **Reuse**: `-Screenshots` for local media; CI already records desktop video separately.
+### 2026-08-04 — Playwright for EasyTest gaps (custom components)
+
+- **Outcome**: positive (policy)
+- **Context**: skill `visa2026-easytest-e2e`; custom Blazor (preview slot, Resminamalar, Document copies)
+- **Symptom**: EasyTest caption/`FillForm` API does not map cleanly to non-PropertyEditor Razor UI
+- **Fix / reuse**: Default remains **EasyTest** for XAF List/Detail/toolbar. Use **Microsoft Playwright** when EasyTest is unsupported or weak; prefer `data-testid` + `#visa-preview-slot`; same `:5050` / `visa2026_easytest` host; trait `Driver=Playwright`; do not rewrite stable EasyTest journeys
+- **Reuse**: Custom component E2E → Playwright; standard XAF forms → EasyTest
+
+### 2026-08-04 — Media default ON for user-manual generation
+
+- **Outcome**: positive (policy + code)
+- **Context**: `EasyTestScreenshotCapture`, `Record-EasyTest.ps1`, `e2e-tests.yml`
+- **Symptom**: Screenshots required `-Screenshots`; agents skipped media needed for manual docs
+- **Fix / reuse**: Screenshots **ON by default** (opt out `VISA2026_E2E_SCREENSHOTS=false` / `-NoScreenshots`). Video **ON by default** in `Record-EasyTest.ps1` (`-NoRecord` to skip). Prefer script over bare `dotnet test` when MP4 is required. CI uploads `easytest-e2e-screenshots` artifact.
+- **Reuse**: User-manual E2E always assume media unless explicitly opted out

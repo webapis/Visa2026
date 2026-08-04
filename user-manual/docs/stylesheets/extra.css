@@ -1,0 +1,16 @@
+/* Officer manual — embedded EasyTest walkthrough videos */
+.visa-manual-video {
+  display: block;
+  max-width: 100%;
+  width: min(960px, 100%);
+  margin: 1rem 0 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.md-typeset .visa-manual-video-caption {
+  margin-top: -0.75rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--md-default-fg-color--light);
+}

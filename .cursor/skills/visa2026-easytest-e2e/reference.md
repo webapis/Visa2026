@@ -7,8 +7,10 @@
 | Skill | **visa2026-easytest-e2e** |
 | Project | `Visa2026.E2E.Tests` |
 | Port | **5050** |
-| DB | **Visa2026EasyTest** |
-| Selectors | **Captions** / EasyTest actions (`FillFormWithRetry` may fall back to `InputId` / `data-testid`) |
+| DB | **Visa2026EasyTest** / Postgres `visa2026_easytest` |
+| Drivers | **EasyTest** (default) + **Playwright** (custom / unsupported surfaces) |
+| Selectors (EasyTest) | **Captions** / EasyTest actions (`FillFormWithRetry` may fall back to `InputId` / `data-testid`) |
+| Selectors (Playwright) | **`data-testid`**, role, stable CSS (e.g. `#visa-preview-slot`) |
 | Config | **EasyTest** |
 | CI | `.github/workflows/e2e-tests.yml` |
 
@@ -123,7 +125,7 @@ AssertEmployeeDetailViewActive(); // URL or employee form (TabbedMDI may keep UR
 |------|---------|
 | `E2ETestEmployeeCreateValues` | Officer journey employee field values |
 | `E2ETestPassportCreateValues` | Officer journey passport field values |
-| `E2ETestLoginValues` | `standarduser`, list/detail view paths |
+| `E2ETestLoginValues` | `StandardUser` (+ empty password), list/detail view paths |
 
 ---
 
@@ -155,18 +157,24 @@ Contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.
 .\scripts\local\Record-EasyTest.ps1 `
   -Filter 'PersonOfficerJourney_LoginCreateEmployeeAddPassport' `
   -OutputName 'person-register.mp4'
-# → Visa2026.E2E.Tests/recordings/ (gitignored)
+# video + screenshots ON by default → Visa2026.E2E.Tests/recordings/ (gitignored)
+# opt out: -NoRecord -NoScreenshots
 ```
 
 CI long runs upload **`easytest-e2e-recording`** artifact (`recordings/*.mp4`). **Publish target** (embed, static, object, Postgres/`FileData`) is TBD — see [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) §5.1.
 
-### Screenshots (today: diagnostics)
+### Screenshots (default ON — user manual)
 
-`EasyTestBlazorNavigationHelper.TryDumpDiagnostics` → `diag-{label}-{stamp}.png` (post-mortem).
+`EasyTestScreenshotCapture` writes milestone PNGs under `recordings/screenshots/{run}/` **unless** `VISA2026_E2E_SCREENSHOTS=false` (or `0` / `no` / `off`).
 
-### Screenshots (planned: manual assets)
+- Local preferred: `Record-EasyTest.ps1` (sets run id + copies into manual assets on success).
+- Opt out: `Record-EasyTest.ps1 -NoScreenshots` or env false.
+- Failure diagnostics still use `TryDumpDiagnostics` → `diag-{label}-{stamp}.png`.
+- Guide promotion: `Copy-EasyTestManualScreenshots.ps1` / planned `UserManualMediaCapture`.
 
-Local: `Record-EasyTest.ps1 -Screenshots` → `EasyTestScreenshotCapture` → `recordings/screenshots/{run}/`. Manual guides: `UserManualMediaCapture.CaptureStep` → `Copy-EasyTestManualScreenshots.ps1`.
+### Video (default ON for Record-EasyTest)
+
+`Record-EasyTest.ps1` starts ffmpeg desktop capture unless `-NoRecord`. CI long runs also record. Bare `dotnet test` does **not** start ffmpeg — use the script for MP4.
 
 ---
 
@@ -198,9 +206,74 @@ Example yaml step → C#:
 |------|------|
 | `Visa2026.E2E.Tests/EasyTestBrowserMode.cs` | Headed (local) vs headless (CI) |
 | `Visa2026.E2E.Tests/E2ETestBase.cs` | Fixture, helpers |
-| `Visa2026.E2E.Tests/PersonOfficerJourneyTests.cs` | E2E-001 officer journey |
+| `Visa2026.E2E.Tests/PersonOfficerJourneyTests.cs` | E2E-001 officer journey (EasyTest) |
+| `Visa2026.E2E.Tests/Playwright/` | Playwright tests for custom / unsupported UI |
 | `Visa2026.E2E.Tests/EasyTestBlazorNavigationHelper.cs` | URL navigation |
 | `Visa2026.E2E.Tests/Config.xml` | Legacy EasyTest XML config |
 | `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs` | Shared constants |
 | `Visa2026.Blazor.Server/EasyTestHostMode.cs` | Test host detection |
 | `scripts/local/Install-MsEdgeDriver.ps1` | Driver install |
+---
+
+## Playwright fallback
+
+Use **Microsoft Playwright** when EasyTest cannot reliably drive the UI — especially **custom Blazor components** (preview slot, Resminamalar / Document copies editors, dossier chrome, JS-only controls). Keep EasyTest for standard XAF caption forms.
+
+### Decision (short)
+
+1. Can EasyTest `Navigate` / `FillForm` / `GetAction` / nested New express the assertion? → **EasyTest**.
+2. Is the interaction inside custom Razor / `#visa-preview-slot` / non-PropertyEditor DOM? → **Playwright**.
+3. Need both? Prefer **hybrid** only when cost is low; otherwise one Playwright journey that logs in via page + goes to URL (same `:5050` host).
+
+### Project layout (when introducing Playwright)
+
+| Path / item | Role |
+|-------------|------|
+| `Visa2026.E2E.Tests/Playwright/` | Playwright `[Fact]` classes |
+| `[Trait("Driver", "Playwright")]` | Filter: `--filter "Driver=Playwright"` |
+| `Microsoft.Playwright` (+ optional Xunit package) | PackageReference on `Visa2026.E2E.Tests` |
+| Shared host | Same **`:5050`** + **`visa2026_easytest`** as EasyTest — reuse preflight / do not race a second host |
+
+### Locators
+
+```csharp
+// Prefer stable hooks in product markup
+await page.GetByTestId("resminamalar-catalog").ClickAsync();
+await page.Locator("#visa-preview-slot.visa-preview-slot--open").WaitForAsync();
+
+// Login constants match EasyTest
+await page.GetByLabel("User Name").FillAsync(E2ETestLoginValues.StandardUserName);
+await page.GetByRole(AriaRole.Button, new() { Name = "Log In" }).ClickAsync();
+```
+
+Add **`data-testid`** on new custom controls when writing Playwright coverage — do not rely on EasyTest caption inventory for those nodes.
+
+### Install browsers (once per machine / CI)
+
+```powershell
+# After build that restores Playwright package — adjust path to output folder
+dotnet build Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
+pwsh bin/EasyTest/net8.0/playwright.ps1 install chromium
+# Or install msedge channel if tests target Edge explicitly
+```
+
+CI: install Playwright browsers in **`e2e-tests.yml`** when the first Playwright suite is added (keep EasyTest Edge/msedgedriver steps for existing facts).
+
+### Headed / headless
+
+Mirror **`EasyTestBrowserMode`**: headed locally and on Windows CI; allow `VISA2026_E2E_HEADLESS=true` for headless Playwright locally.
+
+### Media
+
+- EasyTest journeys: **`Record-EasyTest.ps1`** (video + screenshots **default ON**) / `EasyTestScreenshotCapture`.
+- Playwright-only journeys: use Playwright **`page.ScreenshotAsync`** / video context options; still land artifacts under `Visa2026.E2E.Tests/recordings/` (gitignored) for the user-manual pipeline.
+
+### Anti-patterns
+
+| Avoid | Prefer |
+|-------|--------|
+| Rewriting stable EasyTest person/passport Facts in Playwright | Keep EasyTest |
+| EasyTest `FillForm` against preview-slot catalog cards | Playwright + `data-testid` |
+| Second Kestrel on another port for Playwright | Share **`:5050`** fixture |
+| Fragile absolute XPath | `GetByTestId` / role / stable CSS |
+

@@ -29,8 +29,8 @@ TRIGGER (you choose when)
         │
         ▼
 GENERATE (agent session)
-  · Read diff, tracking, content-policy, curriculum
-  · Update guides (UI labels only — no code)
+  · Scan code diff for officer impact (code-drift-scan.md) — report first
+  · Update guides only after human approval (UI labels only — no code)
   · Run Build-UserManual.ps1 where the environment allows
   · Open PR with user-manual/ + asset changes
         │

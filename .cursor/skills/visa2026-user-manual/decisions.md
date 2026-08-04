@@ -26,7 +26,7 @@
 |---|----------|---------------------|
 | **D1** | Manual hosting | **On-prem — Docker container** (static manual site + test-report path on LAN; align with company compose stack) |
 | **D2** | Who sets `status: published` | **Tech** (technical publish authority) |
-| **D3** | Screenshot environment | **EasyTest `:5050` only** — synthetic seed, no PII |
+| **D3** | Screenshot environment | **Local E2E** default (`:5050`); **Staging E2E** optional against live staging URL |
 | **D4** | Commit `bo-catalog.json`? | **Yes on `main`** |
 | **D5** | Reviewers per language | **Name owners before Phase 2**; same person may cover multiple locales |
 | **D6** | Generated `reference/*.md` in git? | **CI-only** at build time |
@@ -41,6 +41,9 @@
 | **D15** | Video coverage | **Top 3–5 pilots** first; expand after D14 |
 | **D16** | Cursor push-notify webhook | **Optional later** — not v1 |
 | **D17** | Block app deploy if manual CI red? | **Yes** for **on-prem officer releases**; dev branches looser |
+| **D18** | E2E driver for manual media | **Playwright** for Local + Staging (same journeys); EasyTest legacy until migrated |
+| **D19** | Media on app deploy? | **No** — separate `Publish-ManualRelease.ps1` / `Record-PlaywrightE2e.ps1` step |
+| **D20** | Staging E2E trigger | **Manual only** (`VISA2026_E2E_TARGET=Staging`); validates live staging before promote |
 
 ### Governance
 

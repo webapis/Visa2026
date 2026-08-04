@@ -93,6 +93,7 @@ public class PersonOfficerJourneyTests : E2ETestBase
         string fullName,
         string passportNumber)
     {
+        EasyTestScreenshotCapture.Capture(AppContext, "00-logon-page");
         Login(E2ETestLoginValues.StandardUserName, E2ETestLoginValues.StandardUserPassword);
         EasyTestScreenshotCapture.Capture(AppContext, "01-after-login");
         AssertAuthenticatedAppShell();

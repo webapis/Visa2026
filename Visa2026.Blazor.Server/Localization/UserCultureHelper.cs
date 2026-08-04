@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Blazor.Server.Localization;
@@ -70,11 +71,6 @@ public static class UserCultureHelper
             return;
         }
 
-        if (string.Equals(user.PreferredCulture, currentCulture, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
         using IObjectSpace objectSpace = application.CreateObjectSpace(typeof(ApplicationUser));
         ApplicationUser userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
         if (userInOs == null)
@@ -82,8 +78,38 @@ public static class UserCultureHelper
             return;
         }
 
+        if (string.Equals(userInOs.PreferredCulture, currentCulture, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         userInOs.PreferredCulture = currentCulture;
-        objectSpace.CommitChanges();
+        TryCommitUserPreference(objectSpace);
+    }
+
+    internal static void TryCommitUserPreference(IObjectSpace objectSpace)
+    {
+        try
+        {
+            objectSpace.CommitChanges();
+        }
+        catch (UserFriendlyException ex) when (IsConcurrencyConflict(ex))
+        {
+            // LoggedOn seeding and window activation can persist culture in parallel on first login.
+        }
+    }
+
+    internal static bool IsConcurrencyConflict(Exception exception)
+    {
+        for (Exception? current = exception; current != null; current = current.InnerException)
+        {
+            if (current is DbUpdateConcurrencyException)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

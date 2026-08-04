@@ -22,7 +22,20 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 **VISA2014 → Visa2026 prod migration** scripts live in **`scripts/visa2014-migration/`** (import waves, catalogs, reimport, restore). **Search that README before adding new scripts** — reuse CLI/orchestrators first. See [visa2014-migration/README.md](visa2014-migration/README.md) and [visa2014-to-visa2026-import](../.cursor/skills/visa2014-to-visa2026-import/SKILL.md).
 
 | `Install-MsEdgeDriver.ps1` | Download **Edge WebDriver** (`msedgedriver.exe`) from Microsoft’s CDN into **`%USERPROFILE%\.local\bin`** and prepend that folder to your **user PATH**. Run once per machine (or after a major Edge upgrade) so **`Visa2026.E2E.Tests`** can launch Edge via EasyTest. See [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md). |
-| `Record-EasyTest.ps1` | Run a headed EasyTest filter while **ffmpeg** records the desktop to **`Visa2026.E2E.Tests/recordings/`** (gitignored). Default filter: passport-create-only Fact. |
+| `Record-EasyTest.ps1` | Run headed EasyTest filter (legacy; prefer `Record-PlaywrightE2e.ps1`). |
+| `Record-PlaywrightE2e.ps1` | **Playwright E2E** — Local (:5050) or Staging (live URL) + manual screenshots. |
+| `Serve-UserManual.ps1` | **Officer manual preview** — bootstraps portable Python if needed, runs `Build-UserManual.ps1`, then **`mkdocs serve`** at **http://127.0.0.1:8765/manual/** (live reload). See [visa2026-user-manual](../.cursor/skills/visa2026-user-manual/SKILL.md). |
+
+## `scripts/ci/` — build, validate, publish
+
+| Script | Purpose |
+|--------|---------|
+| `Build-UserManual.ps1` | MkDocs build pipeline (generator, tests, validate). Supports `MANUAL_MEDIA_BASE_URL`. |
+| `Publish-ManualMedia.ps1` | Copy `user-manual/assets/` → on-prem `MANUAL_MEDIA_ROOT`. |
+| `Publish-UserManualSite.ps1` | Copy `user-manual/site/` → `MANUAL_SITE_ROOT`. |
+| `Publish-ManualRelease.ps1` | Orchestrator: optional record → media → build → site. See [USER_MANUAL_RELEASE.md](../docs/USER_MANUAL_RELEASE.md). |
+| `Copy-EasyTestManualScreenshots.ps1` | Copy E2E milestone PNGs → `user-manual/assets/screenshots/` (via `Record-EasyTest.ps1`). |
+| `Copy-EasyTestManualVideos.ps1` | Copy E2E journey MP4s → `user-manual/assets/videos/`. |
 
 **Typical env files here:** `.env.dev` (paths passed into scripts or compose).
 
@@ -67,6 +80,7 @@ Use when IT requires **native Windows** (IIS + SQL Server) and **not** Docker/WS
 |--------|---------|
 | `ensure-openssh-server.sh` | Install/enable OpenSSH (optional admin access) |
 | `remote-compose-sql-up.sh` | SQL-first prod deploy on `/opt/visa2026` |
+| `publish-manual-release.sh` | Rsync pre-built manual media + site to `/opt/visa2026/manual/*` |
 | `docker-compose.restart.override.yml` | Optional `restart: unless-stopped` |
 
 ---

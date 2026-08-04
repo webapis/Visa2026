@@ -1,0 +1,95 @@
+site_name: Visa2026 User Manual
+site_description: Officer how-to guides for Visa2026
+site_url: http://localhost:8080/manual/
+repo_url: https://github.com/calikenerji/Visa2026
+edit_uri: edit/master/user-manual/docs/en/
+
+theme:
+  name: material
+  language: en
+  custom_dir: overrides
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+hooks:
+  - hooks/sync_manual_assets.py
+  - hooks/manual_media_base_url.py
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      languages:
+        - locale: en
+          name: English
+          default: true
+          build: true
+        - locale: tr
+          name: Türkçe
+          build: true
+        - locale: tk
+          name: Türkmen
+          build: true
+          theme:
+            language: en
+        - locale: ru
+          name: Русский
+          build: true
+      nav_translations:
+        tr:
+          Home: Ana sayfa
+          Getting started: Başlangıç
+          Guides: Kılavuzlar
+          About: Hakkında
+          Reference: Referans
+        tk:
+          Home: Baş sahypa
+          Getting started: Başlangyç
+          Guides: Gollanmalar
+          About: Hakda
+          Reference: Salgyş
+        ru:
+          Home: Главная
+          Getting started: Начало работы
+          Guides: Инструкции
+          About: О руководстве
+          Reference: Справочник
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - getting-started/login.md
+      - getting-started/navigation.md
+  - Guides:
+      - guides/person/register.md
+      - guides/person/add-passport.md
+  - About:
+      - about/roadmap.md
+  - Reference:
+      - reference/index.md
+      - reference/business-objects.md
+
+extra:
+  generator: false
+
+extra_css:
+  - stylesheets/extra.css

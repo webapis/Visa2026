@@ -15,9 +15,11 @@ using System.Collections.Generic;
 using DevExpress.ExpressApp.DC;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [UserDocumentation("applications/item-overview", Category = "Applications")]
     [DefaultClassOptions]
     [NavigationItem(false)]
     [XafDisplayName("Application item")]

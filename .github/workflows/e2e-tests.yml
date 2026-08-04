@@ -273,6 +273,7 @@ jobs:
         shell: pwsh
         env:
           CI: true
+          VISA2026_E2E_SCREENSHOTS: 'true'
           TEST_FILTER: ${{ steps.scope.outputs.filter }}
           LONG_RUN: ${{ steps.scope.outputs.long }}
         run: |
@@ -300,6 +301,7 @@ jobs:
         shell: pwsh
         env:
           CI: true
+          VISA2026_E2E_SCREENSHOTS: 'true'
           TEST_FILTER: ${{ steps.scope.outputs.filter }}
         run: |
           Write-Host "::warning::First E2E attempt failed; retrying once."
@@ -336,6 +338,14 @@ jobs:
         with:
           name: easytest-e2e-recording
           path: "**/recordings/*.mp4"
+          if-no-files-found: ignore
+
+      - name: Upload E2E screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easytest-e2e-screenshots
+          path: "**/recordings/screenshots/**"
           if-no-files-found: ignore
 
       - name: Upload test results

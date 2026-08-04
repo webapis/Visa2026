@@ -1,6 +1,6 @@
 # User Manual — status, roadmap & next steps
 
-Status: **Planning complete — Phase 0 not started**  
+Status: **Phase 1 complete — catalog + validator + UserManualDocs tests**  
 Last updated: 2026-08-04  
 Owner: Product + Visa officers + Tech lead
 
@@ -13,6 +13,7 @@ Owner: Product + Visa officers + Tech lead
 | [`USER_MANUAL_ROADMAP.md`](USER_MANUAL_ROADMAP.md) | Full phased timeline and milestones |
 | [`USER_MANUAL_PIPELINE.md`](USER_MANUAL_PIPELINE.md) | Unified build — E2E embedded in doc generation |
 | [`USER_MANUAL_E2E_MEDIA.md`](USER_MANUAL_E2E_MEDIA.md) | Screenshots & video contract |
+| [`USER_MANUAL_RELEASE.md`](USER_MANUAL_RELEASE.md) | On-prem release bundle (media + site, nginx compose) |
 | [`.cursor/skills/visa2026-user-manual/localization.md`](../.cursor/skills/visa2026-user-manual/localization.md) | **en, tr, tk, ru** i18n |
 | [`.cursor/skills/visa2026-user-manual/testing-evidence.md`](../.cursor/skills/visa2026-user-manual/testing-evidence.md) | Green tick; separate `manual-test-reports/` |
 | [`.cursor/skills/visa2026-user-manual/tracking.md`](../.cursor/skills/visa2026-user-manual/tracking.md) | Guide inventory, infra checklist, doc debt |
@@ -26,12 +27,14 @@ Owner: Product + Visa officers + Tech lead
 
 | Item | Value |
 |------|--------|
-| **Phase 0** | **Unblocked** (D1–D4, D11 recorded 2026-08-04) |
-| **Officer site** | Not deployed — `user-manual/` does not exist yet |
-| **Published guides** | 0 / 16 planned |
-| **Pipeline** | Designed — `Build-UserManual.ps1` not implemented |
-| **E2E UserManual traits** | Not implemented |
-| **CI** | `user-manual.yml` not wired |
+| **Phase 0** | **Complete** |
+| **Phase 1** | **Complete** — `bo-catalog.json`, validator, `UserManualDocs` tests |
+| **Officer site** | MkDocs scaffold + generated reference catalog page |
+| **Published guides** | 0 / 16 planned (4 drafts) |
+| **Pipeline** | `Build-UserManual.ps1` (generator → unit tests → validate → mkdocs) |
+| **E2E UserManual traits** | Not implemented (Phase 3) |
+| **CI** | `user-manual.yml` (build + validate + UserManualDocs; **GitHub Pages** on `master` push) |
+| **Local preview** | `scripts/local/Serve-UserManual.ps1` → **http://127.0.0.1:8765/manual/** |
 
 **Shipment principle:** documentation generation orchestrates EasyTest ([`USER_MANUAL_PIPELINE.md`](USER_MANUAL_PIPELINE.md)). Publish is **fail closed** if UserManual E2E or required media fails.
 
@@ -43,9 +46,9 @@ Full detail: [`USER_MANUAL_ROADMAP.md`](USER_MANUAL_ROADMAP.md). Calendar target
 
 | Phase | Focus | Target window | Status |
 |-------|--------|---------------|--------|
-| **0** | MkDocs scaffold, empty catalog generator | Aug 2026 W1–2 | **Not started** |
-| **1** | `bo-catalog.json`, link validator, CI build | Aug–Sep 2026 | Not started |
-| **2** | Pilot guides **tiers 0–4** (CRUD-first curriculum) | Sep 2026 | Not started |
+| **0** | MkDocs scaffold, empty catalog generator | Aug 2026 W1–2 | **Complete** |
+| **1** | `bo-catalog.json`, link validator, CI build | Aug–Sep 2026 | **Complete** |
+| **2** | Tier 0–4 pilot guides + screenshots | Sep 2026 | **In progress** — login guide draft |
 | **3** | Unified pipeline: E2E → screenshots → publish | Oct 2026 | Not started |
 | **4** | Tiers 5–7 + **tr/tk/ru** for tier 0–4 pilots | Nov 2026 – Q1 2027 | Not started |
 | **5** | In-app Help links (optional) | Q1 2027 | Not started |
@@ -104,8 +107,12 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-04 | **Locales** en/tr/tk/ru — localization.md, mkdocs-static-i18n |
 | 2026-08-04 | **Testing evidence** — green tick on manual; `manual-test-reports/` separate |
 | 2026-08-04 | **D1–D17 decided** — on-prem Docker, tech publish, minimal pilot ([decisions.md](../.cursor/skills/visa2026-user-manual/decisions.md)) |
+| 2026-08-04 | **Phase 0 scaffold** — `user-manual/` MkDocs i18n, generator stub, `Build-UserManual.ps1`, `user-manual.yml` |
+| 2026-08-04 | **Phase 1 catalog** — `[UserDocumentation]` on pilot BOs, `bo-catalog.json`, validator, `UserManualDocs` tests |
+| 2026-08-04 | **Phase 2 login guide** — `getting-started/login` draft (en/tr/tk/ru) |
+| 2026-08-04 | **Phase 2 navigation guide** — `getting-started/navigation` draft (en/tr/tk/ru) |
 
-**Not changed yet (code):** no `user-manual/` folder, no generator, no CI workflow, no officer-facing content.
+**Run locally:** `./scripts/ci/Build-UserManual.ps1 -SkipE2E` (requires Python 3 for mkdocs step).
 
 ---
 
@@ -115,24 +122,25 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 
 | # | Task | Path / artifact | Owner skill | Depends on | Status |
 |---|------|-----------------|-------------|------------|--------|
-| **1** | MkDocs Material scaffold | `user-manual/mkdocs.yml`, `requirements.txt` | user-manual | — | **Next** |
-| **2** | Placeholder site content | `user-manual/docs/index.md`, `getting-started/`, nav skeleton | user-manual | 1 | Pending |
-| **3** | Status & roadmap pages in site | `user-manual/docs/about/roadmap.md` (sync from this doc) | user-manual | 2 | Pending |
-| **4** | Empty manifest generator project | `tools/UserManualManifestGenerator/` | user-manual | — | Pending |
-| **5** | Build script skeleton | `scripts/ci/Build-UserManual.ps1` (`-SkipE2E`, mkdocs only) | user-manual | 1, 4 | Pending |
-| **6** | CI workflow (build + validate stub) | `.github/workflows/user-manual.yml` | user-manual | 5 | Pending |
-| **7** | Phase 0 acceptance | `mkdocs build` + CI green on PR | user-manual | 1–6 | Pending |
-| **8** | `cursor-on-push-user-manual.yml` (optional notify only) | Webhook wakes agent after UI merge — does not auto-generate | user-manual | 7 | Optional |
+| **1** | MkDocs Material scaffold | `user-manual/mkdocs.yml`, `requirements.txt` | user-manual | — | **Done** |
+| **2** | Placeholder site content | `user-manual/docs/{en,tr,tk,ru}/` | user-manual | 1 | **Done** |
+| **3** | Status & roadmap pages in site | `user-manual/docs/*/about/roadmap.md` | user-manual | 2 | **Done** |
+| **4** | Empty manifest generator project | `tools/UserManualManifestGenerator/` | user-manual | — | **Done** |
+| **5** | Build script skeleton | `scripts/ci/Build-UserManual.ps1` (`-SkipE2E`) | user-manual | 1, 4 | **Done** |
+| **6** | CI workflow (build + validate stub) | `.github/workflows/user-manual.yml` | user-manual | 5 | **Done** |
+| **7** | Phase 0 acceptance | `mkdocs build` + CI green on PR | user-manual | 1–6 | **Done** |
 
-### Immediately after Phase 0 (Phase 1 preview)
+### Phase 2 (in progress)
 
-| # | Task | Notes |
-|---|------|-------|
-| 8 | `UserDocumentationAttribute` on pilot BOs | Person, Application, ApplicationItem, ApplicationProgress |
-| 9 | Generator → `bo-catalog.json` | Commit JSON on main |
-| 10 | `UserManualManifestGenerator.Tests` — `Category=UserManualDocs` | Catalog + manifest parity |
-| 11 | `Validate-UserManualLinks.ps1` | Fail on bad `bo:` references |
-| 11 | Guide `_template.md` | Frontmatter: `tier`, `e2eScenarioId`, `status` |
+| # | Task | Status |
+|---|------|--------|
+| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Draft** |
+| **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Draft** |
+| **P2-3** | Login + navigation screenshots (`v2026.08/en/`) | **Done** (EasyTest `person-officer-journey`; en UI replicated to tr/tk/ru per D12) |
+| **P2-4** | `person/register` guide (en/tr/tk/ru) | **Draft** |
+| **P2-5** | `person/add-passport` guide (en/tr/tk/ru) | **Draft** |
+| **P2-6** | `person/edit-employee` guide | Backlog |
+| **P2-7** | Assign reviewer names (D5) | TBD |
 
 ### Parallel E2E (Phase 2 prep)
 
@@ -152,7 +160,7 @@ Full table: [tracking.md § Guide inventory](../.cursor/skills/visa2026-user-man
 | Status | Count |
 |--------|------:|
 | Backlog | 16 |
-| Draft | 0 |
+| Draft | 4 |
 | Published | 0 |
 
 **First guide to implement (Phase 2):** `getting-started/login` (tier 0), then `person/register` (tier 2, E2E: `person-employee-create`).
@@ -163,13 +171,16 @@ Full table: [tracking.md § Guide inventory](../.cursor/skills/visa2026-user-man
 
 | Component | Status |
 |-----------|--------|
-| `user-manual/` MkDocs site | Planned |
-| `tools/UserManualManifestGenerator/` | Planned |
-| `scripts/ci/Build-UserManual.ps1` | Planned |
+| `user-manual/` MkDocs site | **Scaffold** + generated reference |
+| `tools/UserManualManifestGenerator/` | **Shipped** (4 pilot types) |
+| `user-manual/generated/bo-catalog.json` | **Committed** (D4) |
+| `scripts/ci/Build-UserManual.ps1` | **Phase 1** pipeline |
+| `scripts/ci/Validate-UserManualLinks.ps1` | **Phase 1** (`bo:` + slug checks) |
+| `UserManualManifestGenerator.Tests` | **3 tests** (`Category=UserManualDocs`) |
 | `manual-generation-manifest.yaml` | Planned (Phase 2) |
-| `user-manual.yml` CI | Planned |
+| `user-manual.yml` CI | **Wired** |
 | `UserManualMediaCapture` (E2E) | Planned (Phase 3) |
-| Published URL | TBD |
+| Published URL | TBD (on-prem Docker, D1) |
 
 ---
 
@@ -209,3 +220,4 @@ Full table: [tracking.md § Guide inventory](../.cursor/skills/visa2026-user-man
 | Date | Change |
 |------|--------|
 | 2026-08-04 | Initial status hub — roadmap summary, consolidated changelog, Phase 0 next-inline queue |
+| 2026-08-04 | Phase 0 scaffold shipped — MkDocs i18n site, generator stub, build script, CI workflow |

@@ -58,6 +58,9 @@ Pass **`-Profile Production|Staging|Demo`** on slot-aware scripts. Env templates
 | `Enable-Visa2026StdoutLog.ps1` | Windows Server | Enable stdout logging (`-Profile`) |
 | `Set-Visa2026EnvDbName.ps1` | Windows Server | **Legacy** — change `DB_NAME` in one env file; prefer slot deploy |
 | `Remove-Visa2026ForceXafDbUpdate.ps1` | Windows Server | Remove `FORCE_XAF_DB_UPDATE` from slot app pool |
+| `Install-Visa2026ManualIisSite.ps1` | Windows Server | Officer manual static IIS site (`:8082`, `/manual`, `/manual-media`) |
+| `Enable-Visa2026ManualFirewall.ps1` | Windows Server | Inbound TCP firewall for manual site |
+| `Publish-Visa2026UserManualRelease.ps1` | Windows Server / build agent | Record (optional) + build + publish manual bundle ([USER_MANUAL_RELEASE.md](../../docs/USER_MANUAL_RELEASE.md)) |
 
 ## Quick start (workstation)
 
@@ -78,6 +81,10 @@ C:\visa2026\env\
   prod.env                      # SA_PASSWORD, DEVEXPRESS_LICENSEKEY, DB_NAME
   staging.env
   demo.env
+  manual-release.env            # Officer manual publish (see env/manual-release.env.example)
+C:\visa2026\manual\
+  site\                         # MkDocs HTML (/manual)
+  media\                        # screenshots/, videos/ (/manual-media)
 C:\visa2026-deploy\iis\         # scripts copied from repo
 C:\visa2026\backups\
   prod\  staging\  demo\       # SQL .bak per slot

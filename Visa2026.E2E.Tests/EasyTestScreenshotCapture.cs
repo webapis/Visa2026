@@ -5,15 +5,17 @@ using DevExpress.EasyTest.Framework;
 namespace Visa2026.E2E.Tests;
 
 /// <summary>
-/// Milestone browser screenshots when <c>VISA2026_E2E_SCREENSHOTS=true</c>.
+/// Milestone browser screenshots for user-manual media — <b>enabled by default</b>.
+/// Opt out: <c>VISA2026_E2E_SCREENSHOTS=false</c> (or <c>0</c> / <c>no</c> / <c>off</c>).
 /// Files land under <c>Visa2026.E2E.Tests/recordings/screenshots/{runId}/</c> (gitignored with recordings/).
 /// </summary>
 internal static class EasyTestScreenshotCapture
 {
     private static readonly Lazy<string?> OutputDirectory = new(ResolveOutputDirectory);
 
+    /// <summary>True unless explicitly disabled via env.</summary>
     internal static bool Enabled =>
-        IsTruthy(Environment.GetEnvironmentVariable("VISA2026_E2E_SCREENSHOTS"));
+        !IsFalsy(Environment.GetEnvironmentVariable("VISA2026_E2E_SCREENSHOTS"));
 
     internal static void Capture(IApplicationContext appContext, string label)
     {
@@ -48,7 +50,9 @@ internal static class EasyTestScreenshotCapture
         }
     }
 
-    private static bool IsTruthy(string? value) =>
-        string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(value, "1", StringComparison.OrdinalIgnoreCase);
+    private static bool IsFalsy(string? value) =>
+        string.Equals(value, "false", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(value, "0", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(value, "no", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(value, "off", StringComparison.OrdinalIgnoreCase);
 }

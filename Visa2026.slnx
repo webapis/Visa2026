@@ -11,4 +11,6 @@
   <Project Path="Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj" />
   <Project Path="Visa2026.Module.Tests/Visa2026.Module.Tests.csproj" />
   <Project Path="Visa2026.Module/Visa2026.Module.csproj" />
+  <Project Path="tools/UserManualManifestGenerator/UserManualManifestGenerator.csproj" />
+  <Project Path="tools/UserManualManifestGenerator.Tests/UserManualManifestGenerator.Tests.csproj" />
 </Solution>

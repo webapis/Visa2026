@@ -23,6 +23,7 @@
 | Activity | Update here |
 |----------|-------------|
 | **Plan** | Phase progress, backlog, open decisions |
+| **Scan** | Code change detection report; doc-debt rows — [code-drift-scan.md](./code-drift-scan.md) |
 | **Create** | New guide row → `draft`; respect **tier** order in [curriculum.md](./curriculum.md) |
 | **Update** | Guide `status`, `lastReviewed`, `screenshotsVersion` |
 | **Fix** | Move item from **Doc debt** → resolved; note in learnings |
@@ -38,10 +39,10 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | Phase | Focus | Status | Notes |
 |-------|--------|--------|-------|
-| **0** | MkDocs scaffold, empty generator | **Not started** | |
-| **1** | Catalog generator + CI validator | **Not started** | |
-| **2** | Tier 0–4 pilot guides + screenshots | **Not started** | CRUD-first per curriculum |
-| **3** | GitHub Pages + EasyTest screenshots | **Not started** | |
+| **0** | MkDocs scaffold, empty generator | **Complete** | |
+| **1** | Catalog generator + CI validator | **Complete** | `bo-catalog.json` committed; 3 UserManualDocs tests |
+| **2** | Tier 0–4 pilot guides + screenshots | **In progress** | Login, navigation, register, add-passport drafts |
+| **3** | GitHub Pages + EasyTest screenshots + **static videos** | **In progress** | `Copy-EasyTestManualVideos.ps1`; storage **static** (D6) |
 | **4** | Tiers 5–7 + **tr/tk/ru** for pilots | **Not started** | Packages, dossier, templates last |
 | **5** | In-app Help links | **Not started** | |
 
@@ -51,17 +52,21 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | Component | Path | Status |
 |-----------|------|--------|
-| MkDocs site | `user-manual/` | Planned |
-| Catalog generator | `tools/UserManualManifestGenerator/` | Planned |
-| Doc unit tests | `tools/UserManualManifestGenerator.Tests/` (`Category=UserManualDocs`) | Planned (Phase 1) |
-| `[UserDocumentation]` attribute | `Visa2026.Module/Documentation/` | Planned |
-| Link validator | `scripts/ci/Validate-UserManualLinks.ps1` | Planned |
-| Build script (orchestrator) | `scripts/ci/Build-UserManual.ps1` — **E2E + catalog + mkdocs** | Planned |
+| MkDocs site | `user-manual/` | **Scaffold** + generated reference |
+| Catalog generator | `tools/UserManualManifestGenerator/` | **Shipped** |
+| Doc unit tests | `tools/UserManualManifestGenerator.Tests/` (`Category=UserManualDocs`) | **3 tests** |
+| `[UserDocumentation]` attribute | `Visa2026.Module/Documentation/` | **Shipped** (4 pilot BOs) |
+| Link validator | `scripts/ci/Validate-UserManualLinks.ps1` | **Phase 1** |
+| Build script (orchestrator) | `scripts/ci/Build-UserManual.ps1` | **Phase 1** |
+| `bo-catalog.json` | `user-manual/generated/` | **Committed** |
 | Manual generation manifest | `user-manual/manual-generation-manifest.yaml` | Planned (Phase 2) |
 | Publish script | `scripts/ci/Publish-UserManualPages.ps1` | Planned |
-| CI workflow | `.github/workflows/user-manual.yml` | Planned |
+| CI workflow | `.github/workflows/user-manual.yml` | **Wired** |
 | Cursor push notify (optional) | `.github/workflows/cursor-on-push-user-manual.yml` | Optional — wakes agent, not auto-generate |
-| E2E screenshot copy | `scripts/ci/Copy-EasyTestManualScreenshots.ps1` | Planned (Phase 3) |
+| E2E screenshot copy | `scripts/ci/Copy-EasyTestManualScreenshots.ps1` | **Shipped** |
+| E2E video copy (static) | `scripts/ci/Copy-EasyTestManualVideos.ps1` | **Shipped** |
+| Code change detection (mandatory for skill) | [code-drift-scan.md](./code-drift-scan.md) | **Shipped** (script planned Phase 2–3) |
+| `Scan-UserManualDrift.ps1` | `scripts/ci/` | Planned |
 | E2E step capture helper | `Visa2026.E2E.Tests/UserManualMediaCapture.cs` | Planned (Phase 3) |
 | Test results (separate) | `manual-test-reports/` — full report; manual shows **green tick** only | Planned (Phase 3) |
 | Published URL | _TBD_ | — |
@@ -74,11 +79,11 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | Order | Tier | Slug | Title | `bo` | Ops | `e2eScenarioId` | Status | Phase |
 |------:|------|------|-------|------|-----|-----------------|--------|-------|
-| 1 | 0 | `getting-started/login` | Login and roles | — | read | — | **Backlog** | 2 |
-| 2 | 0 | `getting-started/navigation` | Main navigation | — | read | — | **Backlog** | 2 |
+| 1 | 0 | `getting-started/login` | Sign in to Visa2026 | — | read | `person-officer-journey` | **Draft** | 2 |
+| 2 | 0 | `getting-started/navigation` | Main navigation | — | read | `person-officer-journey` | **Draft** | 2 |
 | 3 | 1 | `person/open-and-search` | Find and open a person | Person | read | _TBD_ | **Backlog** | 2 |
-| 4 | 2 | `person/register` | Register a new employee | Person | create | `person-employee-create` | **Backlog** | 2 |
-| 5 | 2 | `person/add-passport` | Add a passport | Passport | create | `person-employee-passport-create` | **Backlog** | 2 |
+| 4 | 2 | `person/register` | Register a new employee | Person | create | `person-officer-journey` | **Draft** | 2 |
+| 5 | 2 | `person/add-passport` | Add a passport | Person | create | `person-officer-journey` | **Draft** | 2 |
 | 6 | 3 | `person/edit-employee` | Update employee details | Person | update | _TBD_ | **Backlog** | 2 |
 | 7 | 3 | `person/mark-incomplete` | Mark incomplete / complete | Person | update | _TBD_ | **Backlog** | 2 |
 | 8 | 4 | `applications/create` | Create an application | Application | create | _TBD_ | **Backlog** | 2 |
@@ -101,11 +106,11 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | BO / type | Slug | Tier | Guide exists | Catalog in CI |
 |-----------|------|------|--------------|---------------|
-| Person | `person/overview` | 1–3 | No | No |
+| Person | `person/overview` | 1–3 | No | **Yes** |
 | Passport | `person/passport-overview` | 2 | No | No |
-| Application | `applications/overview` | 4 | No | No |
-| ApplicationItem | `applications/item-overview` | 4 | No | No |
-| ApplicationProgress | `applications/progress` | 4 | No | No |
+| Application | `applications/overview` | 4 | No | **Yes** |
+| ApplicationItem | `applications/item-overview` | 4 | No | **Yes** |
+| ApplicationProgress | `applications/progress` | 4 | No | **Yes** |
 | UserReportTemplate | `administration/templates-overview` | 7 | No | No |
 
 ---
@@ -124,10 +129,11 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | Check | Last known | Notes |
 |-------|------------|-------|
-| `Validate-UserManualLinks` | — | Not wired |
-| `mkdocs build` | — | Not wired |
-| `user-manual.yml` on PR | — | Not wired |
-| Pages deploy (main) | — | Not wired |
+| `Validate-UserManualLinks` | 2026-08-04 | Phase 1 (`bo:`, slugs, code fences) |
+| `UserManualDocs` tests | 2026-08-04 | 3 passing |
+| `mkdocs build` | Pending CI | Local dev needs Python 3 |
+| `user-manual.yml` on PR | Wired | Awaiting first green run |
+| Pages deploy (main) | — | On-prem Docker (D1), Phase 3 |
 
 ---
 
@@ -152,7 +158,11 @@ Full table: [decisions.md](./decisions.md). Summary:
 
 ## Open decisions
 
-_None blocking Phase 0._ Reviewer names (D5) due before Phase 2.
+| # | Topic | Status |
+|---|--------|--------|
+| 6 | **Video storage backend** | **Decided: static** — `user-manual/assets/videos/v{version}/{locale}/`; MP4 promoted via `Copy-EasyTestManualVideos.ps1` (**gitignored**; same as PNG) |
+
+Reviewer names (D5) due before Phase 2 publish sign-off.
 
 ---
 

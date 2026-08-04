@@ -18,9 +18,11 @@ using System.Drawing.Imaging;
 using System.IO;
 using Visa2026.Module.Services;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [UserDocumentation("person/overview", Category = "Person management")]
     [DefaultClassOptions]
     [NavigationItem(false)]
     [DefaultProperty(nameof(FullName))]

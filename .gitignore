@@ -486,3 +486,16 @@ graphify-out/20*/
 
 # Local portable ffmpeg for EasyTest recording
 Visa2026.E2E.Tests/.tools/
+
+# Officer user manual — MkDocs build output and internal test reports
+user-manual/site/
+user-manual/user-manual/
+user-manual/.tools/
+pw-test-out.txt
+manual-test-reports/
+user-manual/docs/assets/
+user-manual/docs/*/reference/business-objects.md
+# Promoted EasyTest media (Record-EasyTest.ps1 + Copy-EasyTestManual*.ps1) — not in git
+user-manual/assets/screenshots/**/*.png
+user-manual/assets/videos/**/*.mp4
+deploy/manual/

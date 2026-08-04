@@ -1,20 +1,18 @@
 ---
 name: visa2026-user-manual
 description: >-
-  Sole Agent skill for Visa2026 officer user manual documentation generation:
-  create, update, plan, fix, and track the MkDocs site (user-manual/), BO catalog
-  generator, guides, screenshots, video embeds, CI validation, and publish pipeline.
-  Officer site content: UI language only — no code (content-policy.md). Status hub:
-  docs/USER_MANUAL_STATUS.md. Before implementing anything, read advisory.md and
-  curriculum.md: publish order is CRUD on BusinessObjects (read/create/update)
-  through workflows to template generation last. Unified pipeline: Build-UserManual.ps1
-  runs EasyTest for screenshots/video (not a separate runner). Locales en/tr/tk/ru
-  (localization.md). Interlocked with visa2026-easytest-e2e.
+  Sole Agent skill for Visa2026 officer user manual: create, update, plan, fix, track.
+  Code change detection: always use code-drift-scan.md when app/UI changes may affect guides
+  (report first; guide edits only after human approval). MkDocs, catalog generator, CI.
+  Officer site: UI language only (content-policy.md). Read advisory.md + curriculum.md first.
+  Interlocked with visa2026-easytest-e2e.
 ---
 
 # Visa2026 — User manual (documentation generation)
 
-**This skill owns the full documentation-generation lifecycle:** **create** · **update** · **plan** · **fix** · **track**.
+**This skill owns the full documentation-generation lifecycle:** **create** · **update** · **plan** · **fix** · **track** · **scan** (code change detection).
+
+**Code change detection:** whenever this skill must determine whether app code affects officer guides, run **[code-drift-scan.md](./code-drift-scan.md)** — do not improvise ad-hoc diffs or edit guides without a scan report and approval (except when the user already scoped exact files/slugs).
 
 ---
 
@@ -57,19 +55,33 @@ Published pages under `user-manual/docs/` use **UI language only** — menus, fi
 ```text
 1. Read learnings.md + tracking.md + advisory.md + curriculum.md
 2. Classify intent → right audience? (officer vs developer)
-3. Check phase + **curriculum tier** — next guide should follow tier order unless user skips
-4. Check phase readiness (advisory §4) — don't skip infra if guides need CI
-5. Offer 2–4 paths from advisory §5 — recommend a default; wait for user unless they said "go ahead"
-6. Then run the checklist below (Create / Update / Fix / …)
+3. Code change detection needed? → [code-drift-scan.md](./code-drift-scan.md) (report only; no guide edits yet)
+4. Check phase + **curriculum tier** — next guide should follow tier order unless user skips
+5. Check phase readiness (advisory §4) — don't skip infra if guides need CI
+6. Offer 2–4 paths from advisory §5 — recommend a default; wait for user unless they said "go ahead"
+7. Then run the checklist below (Create / Update / Fix / …)
 ```
+
+### When this skill requires code change detection
+
+Use **[code-drift-scan.md](./code-drift-scan.md)** (mandatory — not optional) if **any** of:
+
+- Updating guides after a UI, BO, nav, or workflow change
+- User asks whether the manual is stale or needs updates
+- Feature just merged; release or drift review
+- Regenerating catalog and comparing impact on published/draft guides
+- Create/Update task references changed Module, Blazor, or XAF model paths
+
+**Skip scan** only when the user names **exact** slugs/files to edit with no discovery needed (e.g. "fix typo in `person/register` step 3").
 
 | User says… | Start with |
 |------------|------------|
 | "Start the manual" / "Phase 0" | Advisory §5 **B** (infra options) |
-| "Document feature X" | Advisory §5 **A** + scenario path §6 |
-| "Update docs after UI change" | Advisory §5 **C** |
-| "What's the status?" | **Track** only — no implementation |
-| "Just implement" | State recommended path, then proceed |
+| "Document feature X" | **Scan** (if code shipped) → advisory §5 **A** |
+| "Update docs after UI change" | **[code-drift-scan.md](./code-drift-scan.md)** → advisory §5 **C** after approval |
+| "Does the manual need updates?" / merged PR | **[code-drift-scan.md](./code-drift-scan.md)** — report only |
+| "What's the status?" | **Track** only — no scan unless drift suspected |
+| "Just implement" | **Scan** if code context unknown; else state path and proceed |
 
 ---
 
@@ -80,6 +92,7 @@ Published pages under `user-manual/docs/` use **UI language only** — menus, fi
 | **[testing-evidence.md](./testing-evidence.md)** | **Green tick** on manual; full results separate |
 | **[localization.md](./localization.md)** | **en · tr · tk · ru** — structure, rollout, screenshots |
 | **[content-policy.md](./content-policy.md)** | **Officer site: no code** — UI labels only |
+| **[code-drift-scan.md](./code-drift-scan.md)** | **Mandatory code change detection** for this skill — report first, update after approval |
 | **[advisory.md](./advisory.md)** | **When / how / options before code** |
 | **[curriculum.md](./curriculum.md)** | **Publish order:** CRUD on BOs → template generation |
 | **[decisions.md](./decisions.md)** | **Pre-implementation checklist** — decide before coding |
@@ -102,10 +115,11 @@ Published pages under `user-manual/docs/` use **UI language only** — menus, fi
 1. **Read** [learnings.md](./learnings.md), [`USER_MANUAL_STATUS.md`](../../../docs/USER_MANUAL_STATUS.md), [tracking.md](./tracking.md), [advisory.md](./advisory.md), [content-policy.md](./content-policy.md).
 2. **Advise** — phase, audience, options, recommended path ([advisory.md](./advisory.md) §5–§8).
 3. **Classify** activity (table below) and open the matching checklist.
-4. **Regenerate catalog** when BOs, `[UserDocumentation]`, or XAF nav changed ([reference.md](./reference.md)).
-5. **Never invent** field labels, menu paths, or roles — use `bo-catalog.json` or E2E map §3.
-6. **Validate** before finishing (`Build-UserManual.ps1` or [reference.md](./reference.md)).
-7. **Track** — [tracking.md](./tracking.md) + append [learnings.md](./learnings.md).
+4. **Code change detection** — if required (see § Before implementing), run [code-drift-scan.md](./code-drift-scan.md) before Update/Create that depends on app diffs.
+5. **Regenerate catalog** when BOs, `[UserDocumentation]`, or XAF nav changed ([reference.md](./reference.md)) — part of scan, not a substitute for it.
+6. **Never invent** field labels, menu paths, or roles — use `bo-catalog.json` or E2E map §3.
+7. **Validate** before finishing (`Build-UserManual.ps1` or [reference.md](./reference.md)).
+8. **Track** — [tracking.md](./tracking.md) + append [learnings.md](./learnings.md).
 
 ---
 
@@ -130,10 +144,11 @@ Full tables: [advisory.md §2](./advisory.md#2-when-to-create-or-update-document
 |----------|---------|--------|
 | **Advising** | Options menu, phase check, no code until path chosen | tracking if planning only |
 | **Creating** | Guide, scaffold, generator, CI, BO attribute | guide → `draft`; phase checklist |
-| **Updating** | Refresh steps, screenshots, locale | `lastReviewed`, `stale` → `review` |
-| **Planning** | Backlog, IA, open decisions | tracking + roadmap alignment |
-| **Fixing** | CI, links, drift, mkdocs | doc debt → resolved |
+| **Updating** | **Scan** if code changed → then refresh steps/screenshots | `lastReviewed`, `stale` → `review` |
+| **Planning** | Backlog, IA, open decisions; **scan** for coverage gaps | tracking + roadmap alignment |
+| **Fixing** | CI, links, mkdocs; **scan** if drift caused the break | doc debt → resolved |
 | **Tracking** | Status report | [USER_MANUAL_STATUS.md](../../../docs/USER_MANUAL_STATUS.md) + tracking only |
+| **Scanning** | **Code change detection** for this skill — [code-drift-scan.md](./code-drift-scan.md); no guide edits until approved | report → approval → **Update** |
 
 ---
 
@@ -162,10 +177,26 @@ See [advisory.md §5A–B](./advisory.md#5-options-menu-offer-the-user) for path
 
 Triggers: [advisory.md §2](./advisory.md#2-when-to-create-or-update-documentation). Offer **C1–C4** before editing.
 
+**Prerequisite:** Drift scan approved items, or user explicitly scoped the edit — see [code-drift-scan.md](./code-drift-scan.md).
+
 1. Diff `bo-catalog.json` vs guide
 2. Edit body; bump `screenshotsVersion` if UI changed
 3. `status: review` until officer sign-off
 4. `tracking.md` + `learnings.md`
+
+---
+
+## Scan (code change detection)
+
+**Canonical:** [code-drift-scan.md](./code-drift-scan.md)
+
+**This is the skill's code change detection procedure** — use it whenever officer-visible app changes must be compared to guides. Not a separate workflow; **Updating** and **Planning** call into it when discovery is needed.
+
+1. Diff officer-visible paths (BOs, controllers, Blazor editors, XAF model)
+2. Regen or diff `bo-catalog.json`; map to guide slugs + `tracking.md` inventory
+3. Emit scan report (template in code-drift-scan.md); add doc-debt rows
+4. Offer C1–C4 / A2 options — **wait for user approval**
+5. Only then switch to **Update** checklist; max `status: review`
 
 ---
 

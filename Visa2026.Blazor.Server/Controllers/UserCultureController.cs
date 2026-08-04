@@ -75,8 +75,12 @@ public sealed class UserCultureController : WindowController
             ApplicationUser? userInOs = objectSpace.GetObjectByKey<ApplicationUser>(user.ID);
             if (userInOs != null)
             {
+                string? cultureBefore = userInOs.PreferredCulture;
                 UserCultureHelper.SeedPreferredCultureFromRequestIfEmpty(userInOs, httpContext);
-                objectSpace.CommitChanges();
+                if (!string.Equals(cultureBefore, userInOs.PreferredCulture, StringComparison.Ordinal))
+                {
+                    UserCultureHelper.TryCommitUserPreference(objectSpace);
+                }
             }
         }
 
