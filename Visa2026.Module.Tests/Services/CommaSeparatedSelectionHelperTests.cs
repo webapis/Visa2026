@@ -11,7 +11,7 @@ public sealed class CommaSeparatedSelectionHelperTests
     [InlineData("   ")]
     [InlineData("Ýok")]
     [InlineData("ýok")]
-    public void ParseSelected_NoneOrBlank_ReturnsEmpty(string? stored)
+    public void ParseSelected_NoneOrBlank_ReturnsEmpty(string stored)
     {
         Assert.Empty(CommaSeparatedSelectionHelper.ParseSelected(stored));
     }
@@ -55,7 +55,7 @@ public sealed class CommaSeparatedSelectionHelperTests
     [InlineData("Ýok", true)]
     [InlineData("ýOK", true)]
     [InlineData("Zone", false)]
-    public void IsNoneValue_MatchesBlankAndDefaultNone(string? stored, bool expected)
+    public void IsNoneValue_MatchesBlankAndDefaultNone(string stored, bool expected)
     {
         Assert.Equal(expected, CommaSeparatedSelectionHelper.IsNoneValue(stored));
     }
@@ -82,7 +82,7 @@ public sealed class CommaSeparatedSelectionHelperTests
     [InlineData("Ýok", "Alpha", false)]
     [InlineData(null, "Alpha", false)]
     [InlineData("Alpha", "  ", false)]
-    public void ContainsLabel_MatchesCaseInsensitively(string? stored, string label, bool expected)
+    public void ContainsLabel_MatchesCaseInsensitively(string stored, string label, bool expected)
     {
         Assert.Equal(expected, CommaSeparatedSelectionHelper.ContainsLabel(stored, label));
     }
