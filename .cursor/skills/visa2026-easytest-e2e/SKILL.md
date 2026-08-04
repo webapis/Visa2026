@@ -3,11 +3,11 @@ name: visa2026-easytest-e2e
 description: >-
   Creates and runs Visa2026 native XAF EasyTest E2E tests (Visa2026.E2E.Tests,
   C# API, Edge/Selenium, EasyTest config). Covers E2ETestBase, Blazor host on
-  :5050, Visa2026EasyTest DB, msedgedriver, caption-based FillForm/Navigate,
-  URL navigation for typed Person lists, seed constants, and dotnet test -c EasyTest.
-  Use when adding EasyTest, E2E test class, EmployeeTests, E2ETestBase helper,
-  headed Edge run, or CI e2e-tests.yml. Officer-manual screenshots and video:
-  see docs/USER_MANUAL_E2E_MEDIA.md and visa2026-user-manual skill.
+  :5050, Postgres visa2026_easytest, msedgedriver, caption-based FillForm/Navigate,
+  URL navigation for typed Person lists, seed constants, Record-EasyTest.ps1
+  (video + -Screenshots), and dotnet test -c EasyTest. Use when adding EasyTest,
+  PersonOfficerJourneyTests, E2ETestBase helper, headed Edge run, or CI e2e-tests.yml.
+  Officer-manual media: docs/USER_MANUAL_E2E_MEDIA.md and visa2026-user-manual skill.
 disable-model-invocation: false
 ---
 
@@ -43,7 +43,7 @@ Copy-paste catalog: [user-prompts.md](./user-prompts.md). Invoke with **`@visa20
 5. RUN       — dotnet test Visa2026.E2E.Tests -c EasyTest --filter "FullyQualifiedName~YourTests"
 6. PROMOTE   — move map + yaml to scenarios/ready/ when CI-stable
 7. RECORD    — append learnings.md on non-obvious fixes (nav, captions, driver, host)
-8. USERMANUAL — add `[Trait("Category", "UserManual")]`; media captured by Build-UserManual.ps1 ([pipeline doc](../../../docs/USER_MANUAL_PIPELINE.md))
+8. USERMANUAL — add `[Trait("Category", "UserManual")]`; media via Record-EasyTest / Build-UserManual.ps1
 ```
 
 **Scenario metadata (Option A):** YAML documents steps; C# executes them. Map contract: [reference-map-contract.md](./reference-map-contract.md). Manual media: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md). Inventory: [`Visa2026.E2E.Tests/scenarios/README.md`](../../../Visa2026.E2E.Tests/scenarios/README.md).
@@ -56,17 +56,16 @@ EasyTest must **not** share the IDE dev host (`:5000` / `:5001`).
 
 | Setting | Value |
 |---------|--------|
-| Launch profile | **`Visa2026 - EasyTest (LocalDB)`** |
 | URL | **`http://localhost:5050`** |
-| DB | **`Visa2026EasyTest`** on `(localdb)\mssqllocaldb` |
+| DB | **`visa2026_easytest`** on local **PostgreSQL** (`PG_*` / default `Visa2026Local`) |
 | Build config | **`EasyTest`** |
-| Browser | **Edge** — **headed** locally; **headless** on CI (`EasyTestBrowserMode` / `CI` or `VISA2026_E2E_HEADLESS`) |
+| Browser | **Edge** — **headed** locally; on Windows CI keep headed (`EasyTestBrowserMode`) |
 
-**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when **`Visa2026EasyTest`** is the connection string (see `EasyTestHostMode` in Blazor.Server). Without this, **`standarduser`** can reopen **Family Members** instead of Employees.
+**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when the EasyTest DB is detected (see `EasyTestHostMode` in Blazor.Server). Without this, **`StandardUser`** can reopen **Family Members** instead of Employees.
 
 Full host + driver setup: [reference.md § Host and driver](./reference.md#host-and-driver).
 
-**Preflight (session):** `EasyTestPreflight` logs LocalDB state, checks **`:5050`** is free, drops DB, creates empty catalog + **`--updateDatabase --silent`** (`EasyTestDatabaseProvisioner`), then `RunApplication` on the built **`.exe`** with **`--urls http://localhost:5050 --environment Development`** (EasyTest supplies test DB connection string; not `--launch-profile`). Teardown closes host in `EasyTestSessionFixture.DisposeAsync`.
+**Preflight (session):** `EasyTestPreflight` checks **`:5050`** is free, drops/recreates Postgres **`visa2026_easytest`**, runs **`--updateDatabase --silent`**, then `RunApplication` on the built **`.exe`** with **`--urls http://localhost:5050 --environment Development`**. Teardown closes host in `EasyTestSessionFixture.DisposeAsync`.
 
 ---
 
@@ -74,9 +73,9 @@ Full host + driver setup: [reference.md § Host and driver](./reference.md#host-
 
 ### Base class
 
-- Inherit **`E2ETestBase`** (`IAsyncLifetime` — app starts in `InitializeAsync`, DB dropped once per run).
+- Inherit **`E2ETestBase`** (collection fixture — one host/browser session; DB dropped once per run).
 - **`[SupportedOSPlatform("windows")]`** on test class/method (Edge E2E is Windows-only today).
-- Use **`Login(userName, password)`** — officer flows: **`E2ETestLoginValues.StandardUserName`** + empty password.
+- Use **`Login(userName, password)`** — officer flows: **`E2ETestLoginValues.StandardUserName`** (`StandardUser`, seeded in `Updater`) + empty password. Not `standarduser`.
 
 ### Selectors: captions, not hooks
 
@@ -86,28 +85,32 @@ EasyTest fills fields by **English model caption** (`EasyTestParameter("First Na
 
 | Target | Do | Do not |
 |--------|-----|--------|
-| **Employees list** | Selenium URL **`/Person_ListView_Employees`** via **`NavigateEmployeesList()`** / **`EasyTestBlazorNavigationHelper`** | Rely on **`Navigate("Employees")`** or **`People.Employees`** alone — TabbedMDI may stay on **Family Members** while **New** still exists |
-| **After New employee** | **`AssertEmployeeDetailViewActive()`** — URL must contain **`Person_DetailView_Employee`** | Assume list context from sidebar highlight |
-| **Organization / Lookup** | **`AppContext.Navigate("Organization.Company")`**, **`Lookup/Geography.Country`** — dot/slash paths | Mix with bare leaf ids under **People** |
+| **After login (shell)** | **`AssertAuthenticatedAppShell()`** -> URL **`/Person_ListView_Employees`** | **`Navigate("Application")`** — Users role denies Application list; officers land on Report Dashboard |
+| **Employees list** | Selenium URL **`/Person_ListView_Employees`** via **`NavigateEmployeesList()`** | Rely on **`Navigate("Employees")`** alone — TabbedMDI may stay on **Family Members** |
+| **Passport DetailView** | Nested: employee detail → **Passports** tab → **New Passport** | Lookup/Passport sidebar (denied for Users) |
+| **After New employee** | **`AssertEmployeeDetailViewActive()`** | Assume list context from sidebar highlight |
+| **Organization / Lookup** | **`AppContext.Navigate("Organization.Company")`**, etc. | Mix with bare leaf ids under **People** |
 
-Constants: **`E2ETestLoginValues`** in `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs`.
+Constants: **`E2ETestLoginValues`**, **`E2ETestPassportCreateOnlyJourneyValues`**, etc. in `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs`.
 
-### Helpers already on `E2ETestBase`
+### Helpers already on `E2ETestBase` / companions
 
 | Helper | Use |
 |--------|-----|
-| `Login` | Logon form |
+| `Login` | Logon form (`StandardUser`) |
+| `AssertAuthenticatedAppShell` | Employees URL probe (not Application) |
 | `NavigateEmployeesList` | URL → employees list |
-| `CreateEmployeeWithRequiredFields` | E2E-010 pattern |
-| `OpenEmployeeInListByPersonalNumber` | Grid `ProcessRow` |
+| `CreateEmployeeWithRequiredFields` | Employee create |
+| `ExecutePersonPassportsNestedNew` / `FillPassportRequiredFields` | Nested passport create |
+| `EasyTestScreenshotCapture.Capture` | Milestone PNGs when `VISA2026_E2E_SCREENSHOTS=true` |
 | `FillFormWithRetry` | One field at a time + retry |
 | `ExecuteActionWithRetry` | Toolbar actions after Blazor load |
 
 ### Test data
 
 - Officer journey creates employee + passport via **UI** — no DB person/passport seed updater.
-- **`E2ETestEmployeeCreateValues`** / **`E2ETestPassportCreateValues`** / **`E2ETestLoginValues`** — stable strings in `E2ETestDataSeed.cs`.
-- Lookup catalogs still come from normal **`ModuleUpdater`** sync on **`Visa2026EasyTest`**.
+- Short passport Fact uses **`E2ETestPassportCreateOnlyJourneyValues`** (`E2E-EMP-021` / `E2E-PASS-021`) so it can share a session DB with the full CRUD Fact.
+- Lookup catalogs still come from normal **`ModuleUpdater`** sync on **`visa2026_easytest`**.
 
 ---
 
@@ -115,22 +118,23 @@ Constants: **`E2ETestLoginValues`** in `Visa2026.Module/DatabaseUpdate/E2ETestDa
 
 ```powershell
 dotnet build Visa2026.slnx -c EasyTest
-dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --filter "FullyQualifiedName~EmployeeTests"
+dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --filter "FullyQualifiedName~PersonOfficerJourney_LoginCreateEmployeeAddPassport"
+.\scripts\local\Record-EasyTest.ps1 -Screenshots
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest
 ```
 
-**Prerequisites:** Windows, LocalDB, **`msedgedriver.exe`** matching Edge (see [reference.md](./reference.md)). Optional: `Visa2026.E2E.Tests\.webdrivers\` (copied to output on build).
+**Prerequisites:** Windows, local **PostgreSQL**, **`msedgedriver.exe`** matching Edge (copy project `.webdrivers` → `bin/EasyTest/.../.webdrivers/` — `Record-EasyTest.ps1` does this). Portable ffmpeg: `Visa2026.E2E.Tests\.tools\ffmpeg\` (gitignored) or PATH.
 
 ### Browser mode (headed vs headless)
 
 | Environment | Edge window | How |
 |-------------|-------------|-----|
 | **Local dev** (default) | Visible (headed) | No env vars — `dotnet test -c EasyTest` |
-| **GitHub Actions / CI** | Headless | `CI=true` (automatic) or `VISA2026_E2E_HEADLESS=true` in workflow |
-| **Force headed** (e.g. debug CI-like run) | Visible | `VISA2026_E2E_HEADED=true` |
+| **Windows CI** | Headed | `CI=true` keeps headed on Windows (`EasyTestBrowserMode`) |
+| **Force headed** | Visible | `VISA2026_E2E_HEADED=true` |
 | **Force headless locally** | Hidden | `VISA2026_E2E_HEADLESS=true` |
 
-Implemented in **`EasyTestBrowserMode.RunHeadless`** → `BlazorApplicationOptions.runHeadless` in `E2ETestBase`.
+Implemented in **`EasyTestBrowserMode.RunHeadless`**.
 
 ---
 
@@ -138,10 +142,9 @@ Implemented in **`EasyTestBrowserMode.RunHeadless`** → `BlazorApplicationOptio
 
 | Test class | Focus |
 |------------|--------|
-| `SmokeTests` | E2E-001 / E2E-001-nav (`scenarios/ready/`) |
-| `EmployeeTests` | E2E-010 employee create (`scenarios/ready/person-employee-create`) |
+| `PersonOfficerJourneyTests` | Short passport create + full master-data CRUD (`scenarios/ready/person-officer-journey`) |
 
-Config: **`Config.xml`**, **`.github/workflows/e2e-tests.yml`** (CI). Docs: [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md), [`EasyTestFixtureContext.md`](../../../Visa2026.E2E.Tests/EasyTestFixtureContext.md).
+Config: **`Config.xml`**, **`.github/workflows/e2e-tests.yml`** (CI). Docs: [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md).
 
 ---
 
@@ -151,18 +154,18 @@ E2E is the **producer**; the manual site is the **consumer**.
 
 | Media | How (today / planned) | Consumer |
 |-------|----------------------|----------|
-| **Video** | `Record-EasyTest.ps1`; CI ffmpeg → `recordings/*.mp4` artifact | Guide `video` frontmatter — **storage TBD** Phase 3 |
-| **Screenshots** | `TryDumpDiagnostics` (diag); **planned** `UserManualMediaCapture` at step keys | `user-manual/assets/screenshots/` |
+| **Video** | `Record-EasyTest.ps1`; CI ffmpeg → `recordings/*.mp4` | Guide `video` frontmatter — **storage TBD** Phase 3 |
+| **Screenshots** | `Record-EasyTest.ps1 -Screenshots` -> `EasyTestScreenshotCapture` -> `recordings/screenshots/{run}/`; diag via `TryDumpDiagnostics`; guide copy via planned `UserManualMediaCapture` | `user-manual/assets/screenshots/` |
 | **Step truth** | `scenarios/ready/*_map.md` §3 captions | Guide prose must match |
 
 When adding a journey that will become a guide:
 
 1. Set **`e2eScenarioId`** folder name = `scenarios/ready/<id>/`.
 2. Notify / update [user-manual tracking.md](../visa2026-user-manual/tracking.md) guide row.
-3. After CI green, run `Record-EasyTest.ps1 -Filter <Fact> -OutputName <slug>.mp4`.
-4. Phase 3+: call screenshot capture at stable steps; copy via `Copy-EasyTestManualScreenshots.ps1`.
+3. After CI green, run `Record-EasyTest.ps1 -Filter <Fact> -Screenshots -OutputName <slug>.mp4`.
+4. Copy selected PNGs into the manual assets pipeline when ready.
 
-Full contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md). Roadmap Phase 3: [`docs/USER_MANUAL_ROADMAP.md`](../../../docs/USER_MANUAL_ROADMAP.md).
+Full contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md).
 
 ---
 
@@ -173,10 +176,10 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 1. **Read** [learnings.md](./learnings.md) for navigation, login, driver, caption pitfalls.
 2. **Read** target production test + **`E2ETestBase`** for existing helpers.
 3. **Implement** minimal test class; prefer extending base helpers over duplicating steps.
-4. **Build** `-c EasyTest`; **run** filtered `dotnet test`.
+4. **Build** `-c EasyTest`; **run** filtered `dotnet test` (sync msedgedriver into test output).
 5. **Append** learnings.md after verified fixes (not for trivial typos).
 6. **Stay in EasyTest** — scenario yaml under `Visa2026.E2E.Tests/scenarios/` is metadata only (Option A).
-7. **Manual media** — when task mentions guide/screenshot/video, read [`USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) and coordinate with [visa2026-user-manual](../visa2026-user-manual/SKILL.md).
+7. **Manual media** — video/screenshots via `Record-EasyTest.ps1`; coordinate guides with [visa2026-user-manual](../visa2026-user-manual/SKILL.md).
 
 ---
 
@@ -184,14 +187,14 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 
 | Pitfall | Do instead |
 |---------|------------|
-| Run E2E on `:5000` IDE host | **EasyTest** profile → **`:5050`**; explicit `BlazorApplicationOptions` URL in `E2ETestBase` |
-| **`Navigate("Employees")`** → Family Members detail | **`NavigateEmployeesList()`** (URL **`Person_ListView_Employees`**) + **`AssertEmployeeDetailViewActive()`** |
-| **`GetAction("New")` null** | Wait/retry; ensure correct list URL first |
-| **`msedgedriver` not found** | Install to **`.webdrivers/`** or `%USERPROFILE%\.local\bin`; CDN **`msedgedriver.microsoft.com`** |
-| Duplicate evaluator matrix in E2E | E2E = one officer path per journey; not full BR matrix |
-| Caption fill fails on custom editor | Add `InputId` / E2e selector in Blazor; use `FillFormWithRetry` fallback |
-| Headless on local dev | Unset `VISA2026_E2E_HEADLESS`; local default is headed |
-| No visible browser on CI | Expected — `CI` / `VISA2026_E2E_HEADLESS`; use `VISA2026_E2E_HEADED=true` to debug headed |
+| Run E2E on `:5000` IDE host | **`:5050`**; explicit `BlazorApplicationOptions` URL |
+| Stuck after login on Report Dashboard | **`AssertAuthenticatedAppShell()`** uses Employees URL — never **`Navigate("Application")`** for `StandardUser` |
+| Login `standarduser` fails | Use **`StandardUser`** (`E2ETestLoginValues`) |
+| **`Navigate("Employees")`** → Family Members | **`NavigateEmployeesList()`** + **`AssertEmployeeDetailViewActive()`** |
+| Passport via Lookup sidebar | Nested **Passports** → **New Passport** on employee detail |
+| **`msedgedriver` version skew / old bin copy** | Match Edge major; copy `.webdrivers` → `bin/EasyTest/.../.webdrivers/`; CDN **`msedgedriver.microsoft.com`** |
+| Empty-DB `--updateDatabase` fails on schema heal | Host-start SQL must `to_regclass` / no-op when tables missing |
+| Headless on local / wrong CI mode | Local headed; Windows CI headed; `VISA2026_E2E_HEADED=true` to force |
 
 ---
 
@@ -201,8 +204,8 @@ When the user asks for **EasyTest**, **E2E test**, **headed Edge test**, or **`V
 - [reference.md](./reference.md) — host, driver, API patterns, CI
 - [reference-map-contract.md](./reference-map-contract.md) — `*_map.md` + yaml + C# (Option A)
 - [learnings.md](./learnings.md) — append-only verified experience
+- [`scripts/local/Record-EasyTest.ps1`](../../../scripts/local/Record-EasyTest.ps1) — local video + `-Screenshots`
 - [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) — screenshot/video contract with user manual
-- [`docs/USER_MANUAL_ROADMAP.md`](../../../docs/USER_MANUAL_ROADMAP.md) — manual + E2E timeline
 - [visa2026-user-manual](../visa2026-user-manual/SKILL.md) — guide authoring consumer skill
 - [`Visa2026.E2E.Tests/scenarios/`](../../../Visa2026.E2E.Tests/scenarios/README.md) — scenario maps and yaml specs
 - [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — E2E inventory, backlog E2E-xxx

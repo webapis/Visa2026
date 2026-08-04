@@ -234,3 +234,18 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: After successful login, Edge shows Report Dashboard; test hangs ~30s× timeouts on `AssertAuthenticatedAppShell` / `Navigate("Application")`. Never reaches Employees or nested Passport DetailView.
 - **Fix / reuse**: Users role **denies** Application list nav. Probe authenticated shell via URL **`/Person_ListView_Employees`**. Passport DetailView is **nested** (`Passports` tab → `New Passport`), not Lookup/Passport sidebar (also denied).
 - **Reuse**: Officer EasyTest shell check = Employees URL + New; never `Navigate("Application")` for StandardUser.
+### 2026-08-04 — Login user is StandardUser not standarduser
+
+- **Outcome**: positive
+- **Context**: `E2ETestLoginValues`, `Updater` seed, host log `Login failed for 'standarduser'`
+- **Symptom**: Stay on `/LoginPage` after FillForm + Log In.
+- **Fix / reuse**: Seeded officer is **`StandardUser`** (empty password). Keep `E2ETestLoginValues.StandardUserName = "StandardUser"`.
+- **Reuse**: Match `Updater.CreateUser` names exactly; do not assume case-insensitive Identity login.
+
+### 2026-08-04 — Record-EasyTest -Screenshots milestone PNGs
+
+- **Outcome**: positive
+- **Context**: `EasyTestScreenshotCapture`, `Record-EasyTest.ps1 -Screenshots`, passport journey
+- **Symptom**: Needed still frames plus desktop MP4 for review.
+- **Fix / reuse**: Set `VISA2026_E2E_SCREENSHOTS=true` (+ optional `VISA2026_E2E_SCREENSHOT_RUN`); call `EasyTestScreenshotCapture.Capture` at journey steps. Video remains ffmpeg gdigrab via `Record-EasyTest.ps1`. Portable ffmpeg under `Visa2026.E2E.Tests\.tools\ffmpeg\`.
+- **Reuse**: `-Screenshots` for local media; CI already records desktop video separately.

@@ -18,7 +18,7 @@
 
 ### Launch profile (`Properties/launchSettings.json`)
 
-Profile: **`Visa2026 - EasyTest (LocalDB)`**
+Host: Postgres **`visa2026_easytest`** on `:5050` (not IDE `:5000`). Legacy launch-profile name may still say LocalDB — ignore for DB.
 
 - `applicationUrl`: `http://localhost:5050`
 - `ConnectionStrings__DefaultConnection`: `Database=Visa2026EasyTest`
@@ -90,7 +90,7 @@ AppContext.GetAction("Log In").Execute();
 // Sidebar paths (non-People) — usually OK
 AppContext.Navigate("Organization.Company");
 AppContext.Navigate("Lookup/Geography.Country");
-AppContext.Navigate("Application");
+// Do NOT Navigate("Application") for StandardUser — use NavigateEmployeesList() / AssertAuthenticatedAppShell()
 
 // Typed Person lists — use URL helper, not sidebar alone
 NavigateEmployeesList(); // → /Person_ListView_Employees
@@ -166,7 +166,7 @@ CI long runs upload **`easytest-e2e-recording`** artifact (`recordings/*.mp4`). 
 
 ### Screenshots (planned: manual assets)
 
-`UserManualMediaCapture.CaptureStep(slug, stepKey, dir)` → copy to `user-manual/assets/screenshots/v{version}/{locale}/` via `Copy-EasyTestManualScreenshots.ps1`.
+Local: `Record-EasyTest.ps1 -Screenshots` → `EasyTestScreenshotCapture` → `recordings/screenshots/{run}/`. Manual guides: `UserManualMediaCapture.CaptureStep` → `Copy-EasyTestManualScreenshots.ps1`.
 
 ---
 
