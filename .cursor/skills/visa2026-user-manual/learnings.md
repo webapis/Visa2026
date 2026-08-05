@@ -157,3 +157,83 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 - **What worked:** `person/add-passport` en/tr/tk/ru; **Passports** tab + **New Passport** toolbar; fields from `E2ETestPassportFieldCaptions`; screenshots `05`–`07` + employee detail `04`.
 - **Gotcha / drift:** Passport BO not in catalog yet — guide uses `bo: Person`; nested list UX may show **New** vs **New Passport**.
 - **Follow-up:** Visa nested create guide; add `Passport` to `[UserDocumentation]` catalog when reference page ships.
+
+### 2026-08-05 — person/open-and-search guide (Phase 2)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** `person/open-and-search` draft en/tr/tk/ru — tier 1 curriculum gap closed; list FullTextSearch (name, personal number, passport); **Person search** dashboard alternative (dossier vs detail form); reuses `navigation-step-03/04` screenshots; `e2eScenarioId: person-officer-journey`.
+- **Gotcha / drift:** No dedicated search-box screenshot yet — list step reuses employees list capture; `person-open-search.mp4` not recorded; register prerequisites updated to include this slug.
+- **Follow-up:** Officer review; optional dedicated screenshot after EasyTest search step; next tier 3 guide `person/edit-employee`.
+
+### 2026-08-05 — person/edit-employee guide (Phase 2)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** `person/edit-employee` draft en/tr/tk/ru — open saved employee, edit scalars, **Show optional fields** / **Hide optional fields** gear, **Save** / **Save and Close**; defers passport tabs and incomplete flag to sibling guides; `e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud`.
+- **Gotcha / drift:** No UserManual E2E trait on full CRUD test yet; screenshots map `04-employee-detail` / `03-employee-created` to edit guide paths; video placeholder like other pilots.
+- **Follow-up:** `person/mark-incomplete` guide; officer review before `published`.
+
+### 2026-08-05 — person/mark-incomplete guide (Phase 2)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** `person/mark-incomplete` draft en/tr/tk/ru — **Mark incomplete** / **Update incomplete** / **Mark complete** / **Apply** popup; nine missing-area checkboxes + **Notes**; read-only **Incomplete data** tab; **Report Dashboard** category **Persons with incomplete data**; soft-flag disclaimer (no app block).
+- **Gotcha / drift:** No E2E or dedicated popup screenshot yet — reuses `04-employee-detail` and `01-after-login` via copy script; popup step 02 shares detail capture until EasyTest adds incomplete flow.
+- **Follow-up:** E2E scenario + UserManual trait; officer review; tier 4 `applications/create`.
+
+### 2026-08-05 — Inventory + curriculum v2 (BO dependency)
+
+- **Phase:** 2
+- **Area:** plan
+- **What worked:** Expanded guide inventory **16 → 25**; [curriculum.md](./curriculum.md) §2.1 mermaid + `ApplicationItem` `Current*` table; `applications/add-items` blocked until Person nested guides (orders 5–14); renamed `person/nested-education` → `person/add-education`.
+- **Gotcha / drift:** `person/add-passport` frontmatter still `bo: Person` — consider `bo: Passport` + `parentBo: Person` when validator supports it; address/position E2E deferred — guides can ship prose-first.
+- **Follow-up:** Draft `person/add-visa` (order 6); add `[UserDocumentation]` on Passport/Visa/Education when catalog anchors ship.
+
+### 2026-08-05 — PersonRole-scoped guide paths (`employee/`, `family-member/`)
+
+- **Phase:** 2
+- **Area:** plan + guides
+- **What worked:** Replaced generic `person/add-*` nested guides with **`PersonRecordRole`-scoped slugs** — `employee/add-visa` + `family-member/add-visa`; employee-only tabs under `employee/`; shared tabs (medical, address) duplicated per role; frontmatter `personRole` + `navPath`; mkdocs nav grouped by role; curriculum §2.1 table updated.
+- **Gotcha / drift:** Family member header fields (**Sponsoring Employee**, **Relationship**) differ from employee; `bo:` stays `Person` until catalog splits; temporary-visitor guides not drafted yet; total planned guides **25 → 29** (splits 5b/6b/8b/9b).
+- **Follow-up:** `family-member/register` or linked-create guide; `temporary-visitor/add-travel`; officer review of FM prose; E2E traits per role.
+
+### 2026-08-05 — `temporary-visitor/` nested guides (Phase 2)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** `temporary-visitor/add-passport`, `add-visa`, `add-medical-record`, `add-address` drafts (en/tr/tk/ru); `personRole: TemporaryVisitor`; **Temporary Visitors** nav + **Company (Subcontractor)** header note; no family-link fields; mkdocs nav section; curriculum/tracking +4 guides (**33** planned, **20** drafts).
+- **Gotcha / drift:** Visitors share Passports/Medical/Address with employees/FM but typed view hides issued tabs until save; `temporary-visitor/add-travel` still backlog; fixed corrupted `family-member/add-visa` table.
+- **Follow-up:** Dedicated `temporary-visitor/add-travel`; register/create visitor guide; officer review.
+
+### 2026-08-05 — `employee/add-work-duty` guide (Phase 2, order 11)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** `employee/add-work-duty` draft en/tr/tk/ru — **Work Duties** tab, single required description field (`Gelmeginiň Maksady` / localized); employee-only; `e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud`; screenshot aliases in copy script; mkdocs nav after position history.
+- **Gotcha / drift:** Tab/button captions vary by locale (Work Duties vs Gelmeginiň Maksady); no dedicated E2E screenshot yet — reuses `04-employee-detail` milestones; `add-salary` still backlog.
+- **Follow-up:** Order **12** `employee/add-salary`; link-fix sweep for moved `employee/` slugs in tr/tk/ru.
+
+### 2026-08-05 — Guides: employee/add-salary (order 12)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** `employee/add-salary` draft en/tr/tk/ru — **Salaries** tab, required **Amount** + **Currency** (`E2ETestSalaryCreateValues`: 5000 / TMT); optional **End Date** via gear; employee-only; same E2E journey as work duty; screenshot aliases `person-add-salary-step-*` in copy script; mkdocs nav after work duty.
+- **Gotcha / drift:** `OnSaving` may auto-close prior open salary rows when a new **Start Date** is later; tr/tk/ru remain short prose (match work-duty pattern).
+- **Follow-up:** Order **13** `employee/add-travel` + `temporary-visitor/add-travel`; link-fix sweep for stale `person/register` paths in tr/tk/ru.
+
+### 2026-08-05 — Skill: preview + deploy docs (stop re-bootstrapping Python)
+
+- **Phase:** 0–2
+- **Area:** infra / agent UX
+- **What worked:** `SKILL.md` § **View the manual locally** + **Deploy alongside Blazor**; `reference.md` and `prompts.md` point to **`Serve-UserManual.ps1`** only; reuse `user-manual/.tools/python312/`.
+- **Gotcha / drift:** Agents answering “how do I see the manual?” often ran bare `pip install` + `mkdocs serve` or re-downloaded portable Python — wrong port (8000 vs **8765**), skipped build/sync, ignored existing `.tools/`.
+- **Follow-up:** If preview fails, debug the script output first; only then manual pip/Python fixes.
+
+### 2026-08-05 — Sidebar: tree-style nav (Material CSS, not MUI React)
+
+- **Phase:** 0–2
+- **Area:** infra / UX
+- **What worked:** `navigation.path` in `mkdocs.yml`; `extra.css` tree styling (indent, chevron rotate, active highlight, collapsed branches). Keeps static MkDocs pipeline — no `@mui/x-tree-view` bundle.
+- **Gotcha / drift:** Skipped `navigation.prune` — it **hides** sibling sections; MUI docs keep collapsed groups visible. Skipped `navigation.expand` — expands all sections by default.
+- **Follow-up:** Rebuild/serve manual (`Serve-UserManual.ps1`); if Guides list still feels long, add section index pages (`employee/index.md`) with `navigation.indexes`.

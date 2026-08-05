@@ -4,6 +4,14 @@ Copy-paste in Cursor with `@visa2026-user-manual`.
 
 ---
 
+## View / preview (answer first — no setup from scratch)
+
+- **How do I see the user manual?** → Run `./scripts/local/Serve-UserManual.ps1` from repo root; open **http://127.0.0.1:8765/manual/**. Reuse existing `user-manual/.tools/` — do not pip install or download Python unless the script failed.
+- **Quick reopen after edits:** `./scripts/local/Serve-UserManual.ps1 -SkipBuild`
+- **How is the manual shipped with Visa2026?** → Static `/manual/` + `/manual-media/` beside Blazor — see [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md); not inside the Blazor Docker image.
+
+---
+
 ## Before starting (advisory — use first)
 
 - What is the **next guide in the curriculum** (tier order: CRUD → templates)?

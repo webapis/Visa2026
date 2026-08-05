@@ -2,10 +2,11 @@
 name: visa2026-user-manual
 description: >-
   Sole Agent skill for Visa2026 officer user manual: create, update, plan, fix, track.
-  Code change detection: always use code-drift-scan.md when app/UI changes may affect guides
-  (report first; guide edits only after human approval). MkDocs, catalog generator, CI.
-  Officer site: UI language only (content-policy.md). Read advisory.md + curriculum.md first.
-  Interlocked with visa2026-easytest-e2e.
+  View locally: run scripts/local/Serve-UserManual.ps1 only — reuse user-manual/.tools/ Python;
+  do not pip install or download Python unless that script fails. Deploy: docs/USER_MANUAL_RELEASE.md
+  (static /manual/ + /manual-media/, not inside Blazor). Code change detection: code-drift-scan.md.
+  MkDocs, catalog generator, CI. Officer site: UI language only (content-policy.md).
+  Read advisory.md + curriculum.md first. Interlocked with visa2026-easytest-e2e.
 ---
 
 # Visa2026 — User manual (documentation generation)
@@ -82,6 +83,8 @@ Use **[code-drift-scan.md](./code-drift-scan.md)** (mandatory — not optional) 
 | "Does the manual need updates?" / merged PR | **[code-drift-scan.md](./code-drift-scan.md)** — report only |
 | "What's the status?" | **Track** only — no scan unless drift suspected |
 | "Just implement" | **Scan** if code context unknown; else state path and proceed |
+| "How do I see / view the manual?" / "preview docs" | **Preview locally** (§ below) — **do not** bootstrap Python/pip yourself |
+| "How is the manual shipped with the app?" | **Deploy alongside Blazor** (§ below) — [`USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md) |
 
 ---
 
@@ -100,6 +103,8 @@ Use **[code-drift-scan.md](./code-drift-scan.md)** (mandatory — not optional) 
 | [`docs/USER_MANUAL_IMPLEMENTATION_PLAN.md`](../../../docs/USER_MANUAL_IMPLEMENTATION_PLAN.md) | Architecture and phased rollout |
 | [`docs/USER_MANUAL_ROADMAP.md`](../../../docs/USER_MANUAL_ROADMAP.md) | Timeline, milestones, E2E interlock |
 | [`docs/USER_MANUAL_PIPELINE.md`](../../../docs/USER_MANUAL_PIPELINE.md) | **Unified build** — E2E embedded in doc generation |
+| [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md) | **Deploy** — static site + media **beside** Blazor (Docker nginx / IIS); not in app image |
+| [`scripts/local/Serve-UserManual.ps1`](../../../scripts/local/Serve-UserManual.ps1) | **Local preview** — one script, reuses `user-manual/.tools/`, MkDocs hot reload |
 | [cursor-integration.md](./cursor-integration.md) | **Git push** — GHA manual pipeline + optional Cursor agent |
 | [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) | Screenshots & video contract |
 | [learnings.md](./learnings.md) | Append-only experience |
@@ -149,6 +154,62 @@ Full tables: [advisory.md §2](./advisory.md#2-when-to-create-or-update-document
 | **Fixing** | CI, links, mkdocs; **scan** if drift caused the break | doc debt → resolved |
 | **Tracking** | Status report | [USER_MANUAL_STATUS.md](../../../docs/USER_MANUAL_STATUS.md) + tracking only |
 | **Scanning** | **Code change detection** for this skill — [code-drift-scan.md](./code-drift-scan.md); no guide edits until approved | report → approval → **Update** |
+| **Previewing** | Run **`Serve-UserManual.ps1`** only — see § View the manual locally | none |
+
+---
+
+## View the manual locally (default answer)
+
+When the user asks to **see**, **view**, **open**, or **preview** the officer manual — answer with the repo script. **Do not** install Python, run `pip install`, download embeddable Python, or run bare `mkdocs serve` unless the user explicitly asked to debug the script after it failed.
+
+**Canonical command** (from repo root):
+
+```powershell
+./scripts/local/Serve-UserManual.ps1
+```
+
+| Detail | Value |
+|--------|--------|
+| **URL** | **http://127.0.0.1:8765/manual/** (locales: `/tr/`, `/tk/`, `/ru/`) |
+| **Hot reload** | Edit `user-manual/docs/` — MkDocs `--dirtyreload` reloads the browser |
+| **Reuse** | Script reuses **system Python** when available, else portable **`user-manual/.tools/python312/`** (created once; **do not delete or re-download** on every ask) |
+| **MkDocs deps** | Installed into that same Python via `pip install -r user-manual/requirements.txt` inside the script — **not** a separate manual step |
+| **Build** | Runs `Build-UserManual.ps1 -SkipE2E` unless `-SkipBuild` |
+
+**Faster reopen** (site already built under `user-manual/site/`):
+
+```powershell
+./scripts/local/Serve-UserManual.ps1 -SkipBuild
+```
+
+**Prose-only iteration** (no generator/tests): same script — it already skips E2E locally. For screenshot work, run full `Build-UserManual.ps1` or E2E separately per [reference.md](./reference.md).
+
+**Separate from Blazor:** the manual dev server is **not** `dotnet run` / F5. Officers document the app; previewing docs does **not** require the Visa2026 Blazor host unless capturing new screenshots.
+
+**Agent anti-patterns (avoid):**
+
+- Running `pip install -r user-manual/requirements.txt` before checking whether `Serve-UserManual.ps1` was run
+- Deleting `user-manual/.tools/` to “fix” preview
+- Bootstrapping a new venv or Python install when `.tools/python312/python.exe` already exists
+- Telling the user to use `mkdocs serve` on port 8000 (outdated — script uses **8765** and `/manual/` base path)
+
+Full flags and remote media mode: [reference.md § Local preview](./reference.md#local-preview).
+
+---
+
+## Deploy alongside Blazor (not embedded)
+
+The officer manual is **static HTML + static media**, served **next to** the Blazor app — **not** baked into `Visa2026.Blazor.Server` or the Docker app image.
+
+| Surface | Manual URL | Physical / volume |
+|---------|------------|-------------------|
+| **Local dev preview** | `http://127.0.0.1:8765/manual/` | MkDocs serve (above) |
+| **Docker compose** (`manual` profile) | `http://<host>:8082/manual/` | `MANUAL_SITE_ROOT` + `MANUAL_MEDIA_ROOT` → nginx |
+| **IIS on-prem** | e.g. `https://10.100.128.25:8082/manual/` | `C:\visa2026\manual\site` + `\media` |
+
+**Canonical release runbook:** [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md) — `Publish-ManualRelease.ps1`, `MANUAL_MEDIA_BASE_URL`, promote media/site trees staging → prod.
+
+**CI / GitHub Pages:** `user-manual.yml` publishes committed/built site artifacts — separate from app deploy.
 
 ---
 
@@ -236,11 +297,19 @@ Layer B must not invent names — reference Layer A and E2E maps.
 
 ---
 
-## Local verify
+## Local verify (maintainers)
+
+**Officers / “show me the manual”:** use [§ View the manual locally](#view-the-manual-locally-default-answer) — `Serve-UserManual.ps1` only.
+
+**Full publish gate** (CI parity, includes UserManual E2E when implemented):
 
 ```powershell
 dotnet build Visa2026.slnx -c Debug
-./scripts/ci/Build-UserManual.ps1    # Phase 1+ — includes EasyTest UserManual subset
-pip install -r user-manual/requirements.txt
-mkdocs serve -f user-manual/mkdocs.yml   # after Build-UserManual for fresh assets
+./scripts/ci/Build-UserManual.ps1
+```
+
+**Preview after a full build** without re-running generator:
+
+```powershell
+./scripts/local/Serve-UserManual.ps1 -SkipBuild
 ```

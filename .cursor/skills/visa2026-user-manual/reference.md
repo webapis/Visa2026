@@ -97,11 +97,37 @@ mkdocs build -f user-manual/mkdocs.yml -d user-manual/site
 
 ### Local preview
 
+**Default:** run the repo script — do **not** hand-install Python or pip unless debugging a script failure.
+
 ```powershell
-pip install -r user-manual/requirements.txt
-mkdocs serve -f user-manual/mkdocs.yml
-# Default: http://127.0.0.1:8000
+# From repo root — builds (SkipE2E) + mkdocs serve + hot reload
+./scripts/local/Serve-UserManual.ps1
+
+# Reopen only (reuse user-manual/site/ and user-manual/.tools/)
+./scripts/local/Serve-UserManual.ps1 -SkipBuild
+
+# Custom port; no browser launch
+./scripts/local/Serve-UserManual.ps1 -Port 9000 -NoBrowser
 ```
+
+| Item | Detail |
+|------|--------|
+| **URL** | http://127.0.0.1:8765/manual/ (not port 8000) |
+| **Hot reload** | `mkdocs serve --dirtyreload` — edit `user-manual/docs/` |
+| **Python reuse** | System `python` / `py -3` if found; else **`user-manual/.tools/python312/`** (portable embed, **keep between runs**) |
+| **Requirements** | Script runs `pip install -r user-manual/requirements.txt` into that interpreter |
+| **Build step** | `Build-UserManual.ps1 -SkipE2E` unless `-SkipBuild` |
+| **Remote media** | `-ManualMediaBaseUrl 'https://host:8082/manual-media'` — loads PNGs from nginx instead of local `user-manual/assets/` |
+
+**Do not** (common agent mistakes):
+
+- `pip install -r user-manual/requirements.txt` as a standalone first step when the script suffices
+- Delete or re-download `user-manual/.tools/` on every preview request
+- Bare `mkdocs serve -f user-manual/mkdocs.yml` (wrong port/path; skips build/sync)
+
+**Not Blazor:** preview does not require `dotnet run` unless recording new E2E screenshots.
+
+**Deploy (static beside app):** [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md).
 
 ### Publish (Phase 3+, main branch)
 
@@ -161,7 +187,9 @@ sourceDocs:
 |-------|------|
 | `slug` | Unique; same across all locales; matches `[UserDocumentation]` when overview |
 | `locale` | **Required** — `en`, `tr`, `tk`, or `ru`; path `docs/{locale}/guides/...` |
-| `bo` | Must exist in `bo-catalog.json` |
+| `bo` | Must exist in `bo-catalog.json` (usually `Person` until per-BO catalog pages ship) |
+| `personRole` | Optional — `Employee`, `FamilyMember`, `TemporaryVisitor`; must match typed detail view when set |
+| `navPath` | Optional — sidebar grouping hint (`Employee`, `FamilyMember`) |
 | `status` | Only `published` after officer review |
 | `screenshotsVersion` | Folder must exist under `assets/screenshots/` (warn if missing) |
 | `e2eScenarioId` | Folder `Visa2026.E2E.Tests/scenarios/ready/<id>/` when set |
