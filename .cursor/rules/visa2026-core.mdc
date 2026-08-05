@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Visa2026 — core
 
-- **Stack:** .NET 8, DevExpress XAF **25.2.6** (EF Core, Blazor, Security, Reports V2, Web API/OData), **PostgreSQL only** (Npgsql), Spire.PDF, xUnit + Selenium (E2E uses EasyTest Blazor adapter).
+- **Stack:** .NET 8, DevExpress XAF **25.2.6** (EF Core, Blazor, Security, Reports V2, Web API/OData), **PostgreSQL only** (Npgsql), Spire.PDF, xUnit + **Playwright** E2E (EasyTest Blazor adapter deprecated; MSBuild config still named EasyTest).
 - **Solution:** `Visa2026.slnx` — **Visa2026.Module** (domain + EF + XAF logic), **Visa2026.Blazor.Server** (host), **Visa2026.DataImporter**, **Visa2026.E2E.Tests**.
 
 **Database — PostgreSQL only (Visa2026 app):**

@@ -7,7 +7,7 @@ Last updated: 2026-06-11
 
 ## 1. Purpose
 
-This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E**: project layout, current inventory, backlog, and CI notes.
+This document defines **how Visa2026 is tested** with **Playwright E2E** (DevExpress EasyTest **deprecated**): project layout, current inventory, backlog, and CI notes.
 
 **Agent skill:** [`.cursor/skills/visa2026-easytest-e2e/SKILL.md`](../.cursor/skills/visa2026-easytest-e2e/SKILL.md)
 
@@ -29,23 +29,25 @@ This document defines **how Visa2026 is tested** with **native XAF EasyTest E2E*
 
 ---
 
-## 3. EasyTest E2E stack
+## 3. Playwright E2E stack (EasyTest deprecated)
 
 | Item | Value |
 |------|--------|
 | Project | [`Visa2026.E2E.Tests`](../Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj) |
 | Runner | xUnit |
-| UI driver | DevExpress **EasyTest** Blazor adapter + **Selenium** (Edge); **Playwright** where EasyTest lacks support (custom Blazor) |
+| UI driver | **Microsoft Playwright** (canonical). DevExpress EasyTest + Selenium = **deprecated** (legacy Facts only until migrated) |
 | App under test | [`Visa2026.Blazor.Server`](../Visa2026.Blazor.Server/) |
 | Launch profile | **`Visa2026 - PostgreSQL`** (EasyTest host uses env CS, not a separate launch profile) |
 | URL | **`http://localhost:5050`** |
 | DB | **`visa2026_easytest`** on local PostgreSQL (`localhost:5432`) |
 | Build config | **EasyTest** |
 | Platform | **Windows** (`[SupportedOSPlatform("windows")]`) |
-| Selectors | EasyTest: **English model captions**; Playwright: **`data-testid`** / role / stable CSS for custom UI |
-| Style | **C# EasyTest API** (yaml in `scenarios/` is metadata only — Option A) |
+| Selectors | Playwright: accessible **label** / role / **`data-testid`** / stable CSS |
+| Style | **C# Playwright** under `Playwright/` (yaml in `scenarios/` is metadata only — Option A). DetailView fill **top→bottom** |
 
-**Base fixture:** [`E2ETestBase.cs`](../Visa2026.E2E.Tests/E2ETestBase.cs) — drops DB once per run, launches app, `Login()`, shared helpers.
+**Canonical tests:** [Visa2026.E2E.Tests/Playwright/](../Visa2026.E2E.Tests/) — Playwright Facts + shared host on `:5050`.
+
+**Deprecated:** [E2ETestBase.cs](../Visa2026.E2E.Tests/E2ETestBase.cs) / EasyTest Facts — do not extend; migrate when touched. Skill: [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md).
 
 **Scenario maps:** [`Visa2026.E2E.Tests/scenarios/README.md`](../Visa2026.E2E.Tests/scenarios/README.md)
 

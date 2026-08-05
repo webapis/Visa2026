@@ -264,3 +264,11 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Screenshots required `-Screenshots`; agents skipped media needed for manual docs
 - **Fix / reuse**: Screenshots **ON by default** (opt out `VISA2026_E2E_SCREENSHOTS=false` / `-NoScreenshots`). Video **ON by default** in `Record-EasyTest.ps1` (`-NoRecord` to skip). Prefer script over bare `dotnet test` when MP4 is required. CI uploads `easytest-e2e-screenshots` artifact.
 - **Reuse**: User-manual E2E always assume media unless explicitly opted out
+
+### 2026-08-05 — Playwright-only; EasyTest deprecated; DetailView top→bottom fill
+
+- **Outcome**: positive (policy)
+- **Context**: skill `visa2026-easytest-e2e`; UserManual media; officer simulation
+- **Symptom**: Dual-driver guidance and EasyTest batch fill did not match custom UI or real officer top→bottom entry
+- **Fix / reuse**: **Playwright only** for new E2E under `Playwright/`. **EasyTest deprecated** (do not add/extend; migrate when touching). All DetailView fills **top → bottom** in layout order (map §3 + yaml `fill:` + helper arrays). MSBuild config / `Record-EasyTest.ps1` names remain historical.
+- **Reuse**: New journey → Playwright + ordered fill; never new EasyTest Facts

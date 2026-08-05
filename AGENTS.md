@@ -8,7 +8,7 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 - **DevExpress / XAF** 25.2.6 (ExpressApp **EF Core**, **Blazor** UI, Security, Reports V2, Validation, Office, Audit Trail, Web API + OData, EasyTest adapter for E2E)
 - **Database:** PostgreSQL only (EF Core + Npgsql). Legacy VISA2015 SQL Server is the import source only — not a Visa2026 app DB.
 - **PDF:** Spire.PDF (form filling / document workflows)
-- **Tests:** xUnit, Selenium WebDriver; Blazor EasyTest adapter in E2E project
+- **Tests:** xUnit; **Playwright** E2E (EasyTest Blazor adapter **deprecated**); MSBuild config name `EasyTest` remains for host/test project
 
 ## Solution layout (`Visa2026.slnx`)
 
@@ -17,7 +17,7 @@ Guidance for AI coding assistants (Cursor, Claude Code, Copilot, etc.) working i
 | **Visa2026.Module** | **Primary place for domain logic:** EF `DbContext`, business objects (`BusinessObjects/`), XAF controllers (`Controllers/`), module wiring (`Module.cs`), database update / seeding (`DatabaseUpdate/`), PDF form mapping (`PdfFormMapping*`, `Services/PdfMappingHelper.cs`). Prefer extending patterns here instead of duplicating logic in the web host. |
 | **Visa2026.Blazor.Server** | Blazor **application host**: XAF Blazor startup, `Model.xafml` (copy to output), Web API / Swagger as configured. Keep thin; heavy rules belong in the Module. |
 | **Visa2026.DataImporter** | Separate tool for data import / maintenance (used with Docker **tools** profile where applicable). |
-| **Visa2026.E2E.Tests** | End-to-end tests (Selenium + EasyTest Blazor adapter), references the Module. |
+| **Visa2026.E2E.Tests** | End-to-end tests (**Playwright** canonical; EasyTest legacy until migrated), references the Module. |
 
 ## Conventions
 
@@ -118,7 +118,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`docs/LOOKUP_ORGANIZATION_SINGLETONS.md`** — organization singletons (`CompanyProfile`, signatory, representative, numbering, `SystemSettings`): tenant JSON, sync/prune, `TryGetInstance`, reports vs templates.
 - **`docs/DEPRECATED.md`** — registry of deprecated/legacy business objects, properties, and removed schema (update when deprecating domain members).
 - **`.cursor/skills/visa2026-lookup-data/SKILL.md`** (+ **`reference.md`**) — optional Agent **Skill**: **lookup / ApplicationType** maintenance (links to **`docs/LOOKUP_SEEDING.md`**).
-- **`.cursor/skills/visa2026-easytest-e2e/SKILL.md`** (+ **`reference.md`**, **`user-prompts.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **native XAF EasyTest E2E** by default (`Visa2026.E2E.Tests`, C# API, Edge/Selenium, **:5050** / `Visa2026EasyTest`); **Playwright** where EasyTest lacks support (custom Blazor); **UserManual** journeys captured by **`Build-UserManual.ps1`** ([`docs/USER_MANUAL_PIPELINE.md`](docs/USER_MANUAL_PIPELINE.md)); full regression in **`e2e-tests.yml`**.
+- **`.cursor/skills/visa2026-easytest-e2e/SKILL.md`** (+ **`reference.md`**, **`user-prompts.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **Playwright-only E2E** (`Visa2026.E2E.Tests/Playwright/`, **:5050** / `visa2026_easytest`); DetailView fills **top→bottom**; **EasyTest deprecated**; **UserManual** via **`Build-UserManual.ps1`** ([`docs/USER_MANUAL_PIPELINE.md`](docs/USER_MANUAL_PIPELINE.md)); regression in **`e2e-tests.yml`**.
 - **`.cursor/skills/visa2026-bo-state-colors/SKILL.md`** (+ **`reference.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **BO state codes**, how states are determined (flags, dates, evaluators, progress, linkage, SQL views), color families/tones ([`docs/BO_STATE_COLORS.md`](docs/BO_STATE_COLORS.md)), **`DaysRemaining` vs `DaysElapsed`** ([`docs/BO_STATE_TEMPORAL_TYPES.md`](docs/BO_STATE_TEMPORAL_TYPES.md)), ListView row `[Appearance]` and planned `BoStateAppearanceColors` registrar.
 - **[`docs/ROLE_PERMISSIONS_GUIDE.md`](docs/ROLE_PERMISSIONS_GUIDE.md)** — XAF **PermissionPolicyRole** matrix, `Ensure*` helpers, fresh-DB vs production role sync (`Updater.cs`).
 - **`.cursor/skills/visa2026-security-access/SKILL.md`** (+ **`reference.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **roles and access management**, navigation/type/object permissions, access-denied triage (links to **`docs/ROLE_PERMISSIONS_GUIDE.md`**).
@@ -133,7 +133,7 @@ Optional hot reload inside Docker: **`docker-compose.watch.yml`** and **`scripts
 - **`.cursor/skills/visa2026-pdf-form-mapping/SKILL.md`** (+ **`prompts.md`**, **`reference.md`**, **`MATURITY.md`**, append-only **`learnings.md`**) — optional Agent **Skill**: **XFA PDF form filling** (`PdfFormMapping`, `PdfMappingHelper`, Spire fill, template); **not** Document copies UI — see **document-copies**.
 - **[`docs/APPLICATION_REPORT_PACKAGE.md`](docs/APPLICATION_REPORT_PACKAGE.md)** — **Resminamalar** report package dialog on `Application` detail: improved successor to one-click Word/Excel ZIP (catalog, readiness, selection, preview, **local sandbox template editing**); same `WordReportGenerationBatch` engine. Plan: **[`docs/TEMPLATE_STAGING_EDIT.md`](docs/TEMPLATE_STAGING_EDIT.md)**.
 - **[`docs/APPLICATION_LISTVIEW_STATE_COLORS.md`](docs/APPLICATION_LISTVIEW_STATE_COLORS.md)** — **planned** `Application` ListView row background from latest `ApplicationProgress` (`CurrentState`); not implemented.
-- **`docs/TESTING_PLAN.md`** — EasyTest E2E strategy, current inventory, backlog IDs, CI notes.
+- **`docs/TESTING_PLAN.md`** — E2E strategy (Playwright; EasyTest deprecated), inventory, backlog IDs, CI notes.
 - **`docs/USER_MANUAL_STATUS.md`** — **read first**: snapshot, roadmap summary, what changed, next inline implementation queue.
 - **`docs/USER_MANUAL_IMPLEMENTATION_PLAN.md`** — officer-facing web manual (MkDocs, BO catalog generator, guides, screenshots, CI sync); separate from developer `docs/`.
 - **`docs/USER_MANUAL_PIPELINE.md`** — unified doc generation (E2E embedded, fail closed, manifest).

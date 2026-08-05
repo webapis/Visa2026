@@ -1,10 +1,14 @@
-# EasyTest E2E `*_map.md` contract
+# E2E `*_map.md` contract (Playwright)
 
-**Blocking:** Do **not** author **`<scenario-id>.yaml`** until the map shows **all required captions verified** (or explicitly waived).
+**Driver:** **`playwright` only** for new scenarios. DevExpress EasyTest is **deprecated**.
 
-**Execution (Option A):** YAML is **spec metadata**; matching C# in `Visa2026.E2E.Tests` runs the steps. Keep map, yaml, and `[Fact]` in sync on every change.
+**Blocking:** Do **not** author **`<scenario-id>.yaml`** until the map shows **all required locators verified** (or explicitly waived).
 
-Copy **`Visa2026.E2E.Tests/scenarios/examples/_map_TEMPLATE.md`** when starting a new scenario.
+**Execution (Option A):** YAML is **spec metadata**; matching C# under `Visa2026.E2E.Tests/Playwright/` runs the steps. Keep map, yaml, and `[Fact]` in sync.
+
+**DetailView fill:** §3 and yaml `fill:` must list fields in **top → bottom** layout order (officer simulation).
+
+Copy **`Visa2026.E2E.Tests/scenarios/examples/_map_TEMPLATE.md`** when starting a new scenario (set `driver: playwright`).
 
 ---
 
@@ -12,29 +16,29 @@ Copy **`Visa2026.E2E.Tests/scenarios/examples/_map_TEMPLATE.md`** when starting 
 
 | File | When | Role |
 |------|------|------|
-| **`<scenario-id>_map.md`** | **First** | Planned YAML + caption gap analysis |
-| **`<scenario-id>.yaml`** | **After** captions verified | Step metadata (not executed by a runner yet) |
-| **`*Tests.cs` method** | With yaml | Executable EasyTest **or Playwright** API |
+| **`<scenario-id>_map.md`** | **First** | Planned YAML + locator inventory (fill order) |
+| **`<scenario-id>.yaml`** | **After** locators verified | Step metadata |
+| **`Playwright/*Tests.cs` method** | With yaml | Executable Playwright API |
 
 ### Folder rules
 
 | Map status | Location |
 |------------|----------|
-| **Draft**, **Captions pending** | `Visa2026.E2E.Tests/scenarios/examples/` |
+| **Draft**, locators pending | `Visa2026.E2E.Tests/scenarios/examples/` |
 | **Ready for YAML**, stable in CI | `Visa2026.E2E.Tests/scenarios/ready/` |
 
-**Basename rule:** same stem in the same folder — e.g. `login-smoke_map.md` + `login-smoke.yaml`.
+**Basename rule:** same stem — e.g. `login-smoke_map.md` + `login-smoke.yaml`.
 
 ---
 
 ## Workflow (mandatory order)
 
 ```text
-1. MAP   — user describes journey → write <id>_map.md (proposed YAML + caption status table)
-2. YAML  — when map caption table all ✅ verified → write <id>.yaml in examples/
-3. C#    — implement [Fact] referencing scenario id + e2eId
-4. RUN   — dotnet test Visa2026.E2E.Tests -c EasyTest
-5. PROMOTE — move <id>_map.md + <id>.yaml → scenarios/ready/ when CI-stable
+1. MAP   — <id>_map.md with driver: playwright; §3 top→bottom
+2. YAML  — when §3 all verified/waived → <id>.yaml
+3. C#    — Playwright [Fact] + Trait Driver=Playwright
+4. RUN   — dotnet test -c EasyTest --filter "Driver=Playwright"
+5. PROMOTE — examples/ → ready/ when CI-stable
 ```
 
 ---
@@ -43,44 +47,45 @@ Copy **`Visa2026.E2E.Tests/scenarios/examples/_map_TEMPLATE.md`** when starting 
 
 | § | Title | Content |
 |---|--------|---------|
-| **0** | Header | Scenario id, **E2E id**, **`driver:`** (`easytest` / `playwright` / `hybrid`), status, date, yaml file, C# test method |
+| **0** | Header | Scenario id, **E2E id**, **`driver: playwright`**, status, date, yaml file, C# test method |
 | **1** | Journey | Officer goal (BO, views, outcome) |
 | **2** | Navigation | User, `:5050` paths, seed constants |
-| **3** | Caption / locator inventory | EasyTest: captions; Playwright: `data-testid` / CSS / role — status per row |
-| **4** | Proposed YAML | Sketch of final `.yaml` |
-| **5** | Blockers | TabbedMDI, combo retry, nested New, … |
+| **3** | Locator inventory | **Ordered top→bottom** for DetailView fills: label / `data-testid` / role, UI target, step, status |
+| **4** | Proposed YAML | Sketch of final `.yaml` (`fill:` keys in same order) |
+| **5** | Blockers | TabbedMDI, lookup settle, nested New, … |
 | **6** | Changelog | Date + note |
+
+Do **not** set `driver: easytest` or `hybrid` on new maps.
 
 ---
 
-## Caption status values (§3)
+## Locator status values (§3)
 
 | Status | Meaning | Next action |
 |--------|---------|-------------|
-| **verified** | Works in headed EasyTest run | None — ready for YAML |
-| **flaky** | Needs retry helper | Use `FillFormWithRetry` / URL nav; document in §5 |
-| **missing** | Caption not found by EasyTest | Fix `InputId`/aria in Module/Blazor or waive with URL-only step |
-| **waived** | Step works without caption (e.g. `goto` URL) | Document why in §5 |
+| **verified** | Works in headed Playwright run | Ready for YAML |
+| **flaky** | Needs wait/retry | Document in §5; harden locator |
+| **missing** | No stable locator | Add `data-testid` / accessible name in Blazor, or waive with URL-only step |
+| **waived** | Step works without field fill (e.g. `goto` URL) | Document why in §5 |
 
-**Ready for YAML:** every row in §3 is **verified** or **waived**.
+**Ready for YAML:** every §3 row is **verified** or **waived**. Order of fill rows = layout top→bottom.
 
 ---
 
-## YAML step vocabulary (EasyTest)
+## YAML step vocabulary (Playwright)
 
-| Step | Meaning | C# helper |
-|------|---------|-----------|
-| `login:` | Fill User Name / Password, click Log In | `Login()` |
-| `goto:` | Blazor view path segment | `EasyTestBlazorNavigationHelper.GoToRelativeUrl` / `NavigateEmployeesList()` |
-| `fill:` | Map of caption → value | `FillForm` / `FillFormWithRetry` |
-| `action:` | Toolbar action caption | `ExecuteActionWithRetry` |
-| `assert-shell:` | Post-login app shell | `AssertAuthenticatedAppShell()` |
-| `assert-action-visible:` | Action exists | `Assert.NotNull(AppContext.GetAction(...))` |
-| `assert-url-contains:` | URL check | `EasyTestBlazorNavigationHelper.UrlContains` |
-| `assert-property:` | Form field value | `GetForm().GetPropertyValue` + `Assert.Equal` |
-| `open-grid-row:` | Grid lookup column → value | `GetGrid().ProcessRow` |
+| Step | Meaning | C# |
+|------|---------|-----|
+| `login:` | User Name / Password, Log In | Label fill + button |
+| `goto:` | View path segment | `page.GotoAsync` |
+| `fill:` | **Ordered** label → value (top→bottom) | `FillDetailViewTopToBottomAsync` |
+| `action:` | Toolbar / button caption | `GetByRole(Button, …)` |
+| `assert-shell:` | Post-login shell | Employees URL / shell locator |
+| `assert-url-contains:` | URL check | `page.Url` |
+| `assert-property:` / visible text | Field or grid value | Locator assertions |
+| `open-grid-row:` | Grid row by column value | Row locator + click |
 
-Use **`user` / `password`** top-level or under `login:` — align with `E2ETestLoginValues`.
+Use **`user` / `password`** aligned with `E2ETestLoginValues`.
 
 ---
 
@@ -88,18 +93,9 @@ Use **`user` / `password`** top-level or under `login:` — align with `E2ETestL
 
 | Situation | Action |
 |-----------|--------|
-| User asks for EasyTest scenario | Write `_map.md` first in `scenarios/examples/` |
-| Caption missing on standard XAF field | Fix Blazor/Module accessibility, `InputId`, or URL navigation |
-| Custom component / EasyTest unsupported | Set `driver: playwright`; add `data-testid`; implement under `Playwright/` |
-| Yaml without C# | Incomplete — add matching `[Fact]` |
-| Promote to ready/ | Only after filtered `dotnet test` passes |
-
----
-
-## Playwright maps
-
-When `driver: playwright` (or `hybrid`):
-
-- §3 may list **locators** instead of (or in addition to) EasyTest captions.
-- Status **verified** means headed Playwright run passed against that locator.
-- C# lives under `Visa2026.E2E.Tests/Playwright/` with `[Trait("Driver", "Playwright")]` unless hybrid shares an EasyTest class for XAF steps only.
+| User asks for E2E / EasyTest scenario | Playwright map + `Playwright/` Fact; EasyTest is deprecated |
+| Locator missing | Add `data-testid` / accessible name in Module/Blazor |
+| DetailView multi-field | Fill **top → bottom** only |
+| Yaml without C# | Incomplete — add matching Playwright `[Fact]` |
+| Legacy EasyTest Fact touched | Migrate to Playwright; do not extend EasyTest |
+| Promote to ready/ | Only after filtered Playwright `dotnet test` passes |

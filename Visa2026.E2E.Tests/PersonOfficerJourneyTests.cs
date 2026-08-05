@@ -21,6 +21,8 @@ public class PersonOfficerJourneyTests : E2ETestBase
     /// </summary>
     [Fact]
     [SupportedOSPlatform("windows")]
+    [Trait("Category", "UserManual")]
+    [Trait("GuideSlug", "person/register")]
     public void PersonOfficerJourney_LoginCreateEmployeeAddPassport()
     {
         RunLoginCreateEmployeeAddPassport(

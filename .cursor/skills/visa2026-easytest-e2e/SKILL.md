@@ -1,60 +1,61 @@
 ---
 name: visa2026-easytest-e2e
 description: >-
-  Creates and runs Visa2026 E2E tests: native XAF EasyTest (C# API, Edge/Selenium)
-  by default, plus Microsoft Playwright where EasyTest is unsupported or weak
-  (custom Blazor components, preview slot, Resminamalar/Document copies UI).
-  Covers E2ETestBase, :5050, Postgres visa2026_easytest, msedgedriver, caption
-  FillForm/Navigate, Playwright locators (data-testid/CSS/role), Record-EasyTest.ps1,
-  and dotnet test -c EasyTest. Use when adding EasyTest or Playwright E2E,
-  PersonOfficerJourneyTests, custom-component UI tests, headed Edge, or e2e-tests.yml.
-  Officer-manual media: docs/USER_MANUAL_E2E_MEDIA.md and visa2026-user-manual skill.
+  Creates and runs Visa2026 E2E tests with Microsoft Playwright only
+  (Visa2026.E2E.Tests/Playwright/, xUnit, Edge/Chromium, :5050, Postgres
+  visa2026_easytest). DetailView forms filled top-to-bottom. DevExpress EasyTest
+  is deprecated — do not add new EasyTest Facts. Covers Playwright fixtures,
+  locators (label/data-testid/role), Record-EasyTest.ps1 media defaults, UserManual
+  trait, e2e-tests.yml. Use for E2E, officer journeys, custom Blazor UI tests,
+  headed runs, user-manual media. Skill folder name is historical.
 disable-model-invocation: false
 ---
 
-# Visa2026: XAF EasyTest E2E (native) + Playwright fallback
+# Visa2026: Playwright E2E (EasyTest deprecated)
 
 ## Purpose
 
-**Author and run** officer-journey tests in **`Visa2026.E2E.Tests`**.
+**Author and run** officer-journey tests in **`Visa2026.E2E.Tests`** using **Microsoft Playwright** only.
 
-| Driver | When |
-|--------|------|
-| **EasyTest** (Blazor adapter + xUnit + Edge/Selenium) | Default for standard XAF ListView / DetailView / toolbar / caption forms |
-| **Playwright** (.NET `Microsoft.Playwright`) | Where EasyTest is **not supported** or **lacks proper support** — especially **custom Blazor components** |
+| Driver | Status |
+|--------|--------|
+| **Playwright** (`.NET` `Microsoft.Playwright` + xUnit) | **Required for all new E2E** |
+| **DevExpress EasyTest** (Blazor adapter + Selenium) | **Deprecated** — do not add or extend; migrate when touching a journey |
 
-Tests use the **C# API** (`IApplicationContext`, `EasyTestParameter`) for EasyTest — not `.ets` scripts in this repo. Playwright tests use page locators (`data-testid`, role, CSS).
+Skill folder / MSBuild config name **`EasyTest`** and script **`Record-EasyTest.ps1`** are **historical** (host build config + media helper). They do **not** mean new tests should use the EasyTest API.
 
-**Project:** `Visa2026.E2E.Tests` — EasyTest + (when needed) Playwright in the same E2E project unless a split is justified later.
+**Project layout:** new tests under **`Visa2026.E2E.Tests/Playwright/`** with `[Trait("Driver", "Playwright")]`.
 
-**Strategy context:** [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md). **Experience log:** [learnings.md](./learnings.md) — read before, append after verified runs.
+**Strategy:** [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md). **Experience:** [learnings.md](./learnings.md) — read before, append after verified runs.
 
-**User manual media (interlocked):** [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) · [`docs/USER_MANUAL_PIPELINE.md`](../../../docs/USER_MANUAL_PIPELINE.md) · [visa2026-user-manual](../visa2026-user-manual/SKILL.md)
+**User manual media:** [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) · [`docs/USER_MANUAL_PIPELINE.md`](../../../docs/USER_MANUAL_PIPELINE.md) · [visa2026-user-manual](../visa2026-user-manual/SKILL.md)
 
-**Critical:** UserManual E2E is invoked by **`Build-UserManual.ps1`**, not a separate doc-update workflow. Tag tests `[Trait("Category", "UserManual")]`.
+**Critical:** UserManual E2E is invoked by **`Build-UserManual.ps1`**. Tag tests `[Trait("Category", "UserManual")]`.
 
 ---
 
-## EasyTest vs Playwright (choose deliberately)
+## Deprecated: EasyTest
 
-**Default to EasyTest.** Switch to Playwright only when EasyTest cannot drive the surface reliably.
+- **Do not** create new `E2ETestBase` Facts, `.ets` scripts, or EasyTest `FillForm` / `GetAction` journeys.
+- **Do not** “fix” EasyTest flakiness by adding more EasyTest helpers — rewrite the journey in Playwright.
+- Legacy files (`E2ETestBase`, `PersonOfficerJourneyTests`, `Config.xml`, msedgedriver sync) may remain until migrated; treat as **read-only legacy**.
+- When migrating a Fact: keep the same **E2E-xxx** id / scenario folder; set map `driver: playwright`; delete or `#if false` the EasyTest Fact only after Playwright is green in CI.
 
-| Surface | Prefer | Why |
-|---------|--------|-----|
-| Logon, XAF nav, ListView/DetailView, standard PropertyEditors | **EasyTest** | Caption/`FillForm`/`GetAction` match model |
-| Nested New on typed collections (Passports, Educations, …) | **EasyTest** first | Existing `E2ETestBase` helpers |
-| Custom Razor editors / non-XAF DOM (Document copies, Resminamalar catalog, preview slot `#visa-preview-slot`, dossier panels, JS-heavy chrome) | **Playwright** | EasyTest captions / form API do not map cleanly |
-| Drag-resize, canvas, file-input quirks, shadow/portal UI | **Playwright** | Locator + browser APIs |
-| Hybrid journey (XAF create → open custom dialog) | **EasyTest for XAF steps**, then **Playwright** for the custom panel — or full Playwright if switching drivers mid-test is painful |
+---
 
-**Do not** replace working EasyTest officer journeys with Playwright. **Do not** force EasyTest `FillForm` on custom components when locators are the stable contract — add `data-testid` (or stable ids/classes) in Blazor and assert with Playwright.
+## DetailView form fill — top to bottom (mandatory)
 
-**Selector policy:**
+All **DetailView** (and Logon) field entry must simulate an officer: **top → bottom** in layout order.
 
-- EasyTest: **English model captions** (+ `FillFormWithRetry` / `InputId` fallbacks).
-- Playwright: **`data-testid`**, roles, and stable CSS (`#visa-preview-slot`, …). Prefer `data-testid` on new custom UI. Avoid brittle XPath/absolute CSS.
+| Rule | Do | Do not |
+|------|-----|--------|
+| Order | Fill editors in **visual layout order** (top to bottom; left to right within the same row) | Random / alphabetical / “all textboxes then lookups” |
+| Tabs | Complete the **active layout group/tab** top→bottom before switching tabs | Jump between tabs mid-form |
+| Lookups / dates | Fill when reached in layout order (wait for Blazor settle), then continue downward | Prefill hidden/off-screen fields out of order |
+| Map / YAML | §3 inventory and `fill:` keys listed **in fill order** | Unordered caption bags |
+| Helpers | Shared `Fill*TopToBottom` helpers that take an ordered field list | Parallel fills / unordered dictionaries applied in hash order |
 
-Host isolation is the same for both: **`:5050`** + Postgres **`visa2026_easytest`**. Details: [reference.md § Playwright](./reference.md#playwright-fallback).
+**Why:** Matches real officer behavior for user-manual video/screenshots and catches layout/tab-order bugs EasyTest batch fill hid.
 
 ---
 
@@ -67,94 +68,94 @@ Copy-paste catalog: [user-prompts.md](./user-prompts.md). Invoke with **`@visa20
 ## Process (new E2E test)
 
 ```text
-1. CHOOSE   — EasyTest (default) vs Playwright (custom/unsupported surface); note in map
-2. MAP      — scenarios/examples/<id>_map.md (caption inventory §3) + E2E-xxx id
-3. YAML     — scenarios/examples/<id>.yaml when map Ready for YAML (Option A: spec only)
-4. C#       — *Tests.cs [Fact]; EasyTest via E2ETestBase, or Playwright*Tests + shared host helpers
+1. MAP      — scenarios/examples/<id>_map.md; driver: playwright; §3 locators in top→bottom fill order; E2E-xxx id
+2. YAML     — scenarios/examples/<id>.yaml when map Ready (Option A: spec only)
+3. C#       — Playwright/[Fact] under Playwright/; trait Driver=Playwright; top→bottom DetailView fill
+4. HOOKS    — add data-testid / accessible names in Blazor when locators are missing
 5. BUILD    — dotnet build Visa2026.slnx -c EasyTest
-6. RUN      — dotnet test Visa2026.E2E.Tests -c EasyTest --filter "FullyQualifiedName~YourTests"
+6. RUN      — Record-EasyTest.ps1 or dotnet test -c EasyTest --filter "Driver=Playwright"
 7. PROMOTE  — move map + yaml to scenarios/ready/ when CI-stable
-8. RECORD   — append learnings.md on non-obvious fixes (nav, captions, driver, host, Playwright locators)
-9. USERMANUAL — add `[Trait("Category", "UserManual")]`; media via Record-EasyTest / Build-UserManual.ps1
+8. RECORD   — append learnings.md on non-obvious fixes
+9. USERMANUAL — [Trait("Category", "UserManual")]; media defaults ON
 ```
 
-**Scenario metadata (Option A):** YAML documents steps; C# executes them. Map contract: [reference-map-contract.md](./reference-map-contract.md). Manual media: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md). Inventory: [`Visa2026.E2E.Tests/scenarios/README.md`](../../../Visa2026.E2E.Tests/scenarios/README.md).
+Map contract: [reference-map-contract.md](./reference-map-contract.md). Inventory: [`Visa2026.E2E.Tests/scenarios/README.md`](../../../Visa2026.E2E.Tests/scenarios/README.md).
 
-In `*_map.md` §0 or frontmatter, set **`driver: easytest`** or **`driver: playwright`** (or `hybrid`) so agents do not guess.
+Maps: **`driver: playwright` only** for new work (no `easytest` / `hybrid` for new scenarios).
 
 ---
 
 ## Host isolation (mandatory)
 
-EasyTest **and** Playwright must **not** share the IDE dev host (`:5000` / `:5001`).
+Playwright must **not** share the IDE dev host (`:5000` / `:5001`).
 
 | Setting | Value |
 |---------|--------|
 | URL | **`http://localhost:5050`** |
-| DB | **`visa2026_easytest`** on local **PostgreSQL** (`PG_*` / default `Visa2026Local`) |
-| Build config | **`EasyTest`** |
-| Browser | **Edge** — **headed** locally; on Windows CI keep headed (`EasyTestBrowserMode`) |
+| DB | **`visa2026_easytest`** on local **PostgreSQL** |
+| Build config | **`EasyTest`** (MSBuild name only — still required for host/test project) |
+| Browser | **Edge** (or Chromium) — **headed** locally; Windows CI headed |
 
-**TabbedMDI / saved tabs:** EasyTest host sets ephemeral user model differences when the EasyTest DB is detected (see `EasyTestHostMode` in Blazor.Server). Without this, **`StandardUser`** can reopen **Family Members** instead of Employees.
+**TabbedMDI / saved tabs:** host sets ephemeral user model differences when the EasyTest DB is detected (`EasyTestHostMode`). Without this, **`StandardUser`** can reopen **Family Members** instead of Employees.
 
-Full host + driver setup: [reference.md § Host and driver](./reference.md#host-and-driver).
-
-**Preflight (session):** `EasyTestPreflight` checks **`:5050`** is free, drops/recreates Postgres **`visa2026_easytest`**, runs **`--updateDatabase --silent`**, then `RunApplication` on the built **`.exe`** with **`--urls http://localhost:5050 --environment Development`**. Teardown closes host in `EasyTestSessionFixture.DisposeAsync`. Playwright tests should reuse the same preflight/host pattern (or attach to an already-launched EasyTest host) — do not invent a second DB/port.
+**Preflight:** keep using existing host launch on **`:5050`** (drop/recreate DB, `--updateDatabase`, built `.exe` with `--urls http://localhost:5050 --environment Development`). One host per session — no second port/DB. Details: [reference.md](./reference.md#host-and-browser).
 
 ---
 
-## Writing tests
+## Writing Playwright tests
 
-### Base class (EasyTest)
+### Layout
 
-- Inherit **`E2ETestBase`** (collection fixture — one host/browser session; DB dropped once per run).
-- **`[SupportedOSPlatform("windows")]`** on test class/method (Edge E2E is Windows-only today).
-- Use **`Login(userName, password)`** — officer flows: **`E2ETestLoginValues.StandardUserName`** (`StandardUser`, seeded in `Updater`) + empty password. Not `standarduser`.
+| Item | Value |
+|------|--------|
+| Folder | `Visa2026.E2E.Tests/Playwright/` |
+| Trait | `[Trait("Driver", "Playwright")]` |
+| Package | `Microsoft.Playwright` (+ xUnit fixture) |
+| Login | `E2ETestLoginValues.StandardUserName` = **`StandardUser`** (not `standarduser`) + empty password |
+| OS | `[SupportedOSPlatform("windows")]` while Edge E2E stays Windows-only |
 
-### Selectors: captions (EasyTest), hooks (Playwright)
+### Selectors
 
-EasyTest fills fields by **English model caption** (`EasyTestParameter("First Name", value)`). Keep captions aligned with embedded model / en-US.
+Prefer, in order: accessible **label** / role → **`data-testid`** → stable CSS (`#visa-preview-slot`, …). Avoid brittle absolute XPath.
 
-For **custom Blazor** surfaces, prefer **`data-testid`** (or stable element id/class) in Module/Blazor host markup, then drive with **Playwright**. Do not stretch EasyTest caption fill for non-PropertyEditor UI. `E2ETestBase.FillFormWithRetry` may fall back to `data-testid` via `EasyTestBlazorNavigationHelper` when a standard field still fails — that is not a substitute for Playwright on custom panels.
+Add **`data-testid`** on custom Blazor (preview slot, Resminamalar, Document copies) when missing.
 
-### Navigation (critical — EasyTest)
+### Navigation (critical)
 
 | Target | Do | Do not |
 |--------|-----|--------|
-| **After login (shell)** | **`AssertAuthenticatedAppShell()`** -> URL **`/Person_ListView_Employees`** | **`Navigate("Application")`** — Users role denies Application list; officers land on Report Dashboard |
-| **Employees list** | Selenium URL **`/Person_ListView_Employees`** via **`NavigateEmployeesList()`** | Rely on **`Navigate("Employees")`** alone — TabbedMDI may stay on **Family Members** |
-| **Passport DetailView** | Nested: employee detail → **Passports** tab → **New Passport** | Lookup/Passport sidebar (denied for Users) |
-| **After New employee** | **`AssertEmployeeDetailViewActive()`** | Assume list context from sidebar highlight |
-| **Organization / Lookup** | **`AppContext.Navigate("Organization.Company")`**, etc. | Mix with bare leaf ids under **People** |
+| After login | Probe shell via Employees URL **`/Person_ListView_Employees`** | Open Application list (Users role denies; home is Report Dashboard) |
+| Employees list | `page.GotoAsync(.../Person_ListView_Employees)` (or shared helper) | Sidebar “Employees” alone (TabbedMDI may stay on Family Members) |
+| Passport | Employee detail → **Passports** tab → **New Passport** | Lookup/Passport sidebar |
+| After New employee | Assert employee DetailView (form / URL) | Assume list context from nav highlight |
 
-Constants: **`E2ETestLoginValues`**, **`E2ETestPassportCreateOnlyJourneyValues`**, etc. in `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs`.
+Constants: `E2ETestLoginValues`, `E2ETestPassportCreateOnlyJourneyValues`, etc. in `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs`.
 
-### Helpers already on `E2ETestBase` / companions
+### DetailView fill pattern
 
-| Helper | Use |
-|--------|-----|
-| `Login` | Logon form (`StandardUser`) |
-| `AssertAuthenticatedAppShell` | Employees URL probe (not Application) |
-| `NavigateEmployeesList` | URL → employees list |
-| `CreateEmployeeWithRequiredFields` | Employee create |
-| `ExecutePersonPassportsNestedNew` / `FillPassportRequiredFields` | Nested passport create |
-| `EasyTestScreenshotCapture.Capture` | Milestone PNGs (**on by default**; opt out `VISA2026_E2E_SCREENSHOTS=false`) |
-| `FillFormWithRetry` | One field at a time + retry |
-| `ExecuteActionWithRetry` | Toolbar actions after Blazor load |
+```csharp
+// Ordered top → bottom (match DetailView layout / map §3)
+await FillDetailViewTopToBottomAsync(page, new (string Label, string Value)[]
+{
+    ("Personal Number", values.PersonalNumber),
+    ("First Name", values.FirstName),
+    ("Last Name", values.LastName),
+    // … next layout fields downward …
+});
+await page.GetByRole(AriaRole.Button, new() { Name = "Save" }).ClickAsync();
+```
 
-### Playwright tests (custom / unsupported)
+Implement / extend a shared helper that fills **one field at a time in array order** (never `Dictionary` iteration order).
 
-- Package: **`Microsoft.Playwright`** (+ `Microsoft.Playwright.Xunit` or plain xUnit + `Playwright` fixture).
-- Prefer folder **`Visa2026.E2E.Tests/Playwright/`** and trait **`[Trait("Driver", "Playwright")]`**.
-- Reuse EasyTest host URL/DB; share login seed constants (`E2ETestLoginValues`).
-- Install browsers once: `pwsh bin/.../playwright.ps1 install` (or `dotnet tool` flow documented in [reference.md](./reference.md#playwright-fallback)).
-- Tag UserManual media the same way when a Playwright journey produces guide assets.
+### Media
+
+Screenshots and video **ON by default** for user-manual generation — see [Media defaults](#media-defaults-user-manual). Prefer Playwright `page.ScreenshotAsync` + `Record-EasyTest.ps1` (ffmpeg desktop) until a Playwright-native recorder replaces the script name.
 
 ### Test data
 
-- Officer journey creates employee + passport via **UI** — no DB person/passport seed updater.
-- Short passport Fact uses **`E2ETestPassportCreateOnlyJourneyValues`** (`E2E-EMP-021` / `E2E-PASS-021`) so it can share a session DB with the full CRUD Fact.
-- Lookup catalogs still come from normal **`ModuleUpdater`** sync on **`visa2026_easytest`**.
+- Create person/passport via **UI** — no DB person seed for officer journeys.
+- Distinct IDs: `E2ETestPassportCreateOnlyJourneyValues` (`E2E-EMP-021` / `E2E-PASS-021`) when sharing a session DB.
+- Lookups from normal `ModuleUpdater` on `visa2026_easytest`.
 
 ---
 
@@ -162,85 +163,58 @@ Constants: **`E2ETestLoginValues`**, **`E2ETestPassportCreateOnlyJourneyValues`*
 
 ```powershell
 dotnet build Visa2026.slnx -c EasyTest
-# Preferred for UserManual media (video + screenshots ON by default):
-.\scripts\local\Record-EasyTest.ps1
-# Screenshots also ON for bare dotnet test (opt out: $env:VISA2026_E2E_SCREENSHOTS='false')
-dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --filter "FullyQualifiedName~PersonOfficerJourney_LoginCreateEmployeeAddPassport"
+# Preferred (video + screenshots ON by default):
+.\scripts\local\Record-EasyTest.ps1 -Filter 'YourPlaywrightFactName'
 dotnet test Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj -c EasyTest --filter "Driver=Playwright"
 # Opt out of media: .\scripts\local\Record-EasyTest.ps1 -NoRecord -NoScreenshots
 ```
 
-**Prerequisites:** Windows, local **PostgreSQL**, **`msedgedriver.exe`** matching Edge for EasyTest (copy project `.webdrivers` → `bin/EasyTest/.../.webdrivers/` — `Record-EasyTest.ps1` does this). Portable ffmpeg: `Visa2026.E2E.Tests\.tools\ffmpeg\` (gitignored) or PATH. Playwright: install browser binaries per [reference.md](./reference.md#playwright-fallback).
+**Prerequisites:** Windows, local PostgreSQL, Playwright browsers installed ([reference.md](./reference.md#install-browsers)), ffmpeg for desktop video (`Visa2026.E2E.Tests\.tools\ffmpeg\` or PATH).
 
-### Browser mode (headed vs headless)
+### Browser mode
 
-| Environment | Edge window | How |
-|-------------|-------------|-----|
-| **Local dev** (default) | Visible (headed) | No env vars — `dotnet test -c EasyTest` |
-| **Windows CI** | Headed | `CI=true` keeps headed on Windows (`EasyTestBrowserMode`) |
-| **Force headed** | Visible | `VISA2026_E2E_HEADED=true` |
-| **Force headless locally** | Hidden | `VISA2026_E2E_HEADLESS=true` |
-
-Implemented in **`EasyTestBrowserMode.RunHeadless`**. Mirror the same env intent for Playwright (`headless: false` locally / Windows CI).
+| Environment | Window | How |
+|-------------|--------|-----|
+| Local (default) | Headed | No env / `VISA2026_E2E_HEADED=true` |
+| Windows CI | Headed | Prefer headed for Blazor stability |
+| Force headless | Hidden | `VISA2026_E2E_HEADLESS=true` |
 
 ---
 
-## Current inventory (extend, do not duplicate)
+## Current inventory
 
-| Test class | Focus |
-|------------|--------|
-| `PersonOfficerJourneyTests` | Short passport create + full master-data CRUD (`scenarios/ready/person-officer-journey`) — **EasyTest** |
+| Test class | Focus | Status |
+|------------|--------|--------|
+| `PersonOfficerJourneyTests` | Passport + master-data CRUD | **Legacy EasyTest** — migrate to `Playwright/` when next touched |
+| `Playwright/*` | All new journeys | **Canonical** |
 
-Config: **`Config.xml`**, **`.github/workflows/e2e-tests.yml`** (CI). Docs: [`Visa2026.E2E.Tests/README.md`](../../../Visa2026.E2E.Tests/README.md).
-
-Playwright inventory starts empty until the first custom-component suite lands under `Playwright/`.
+CI: **`.github/workflows/e2e-tests.yml`**. Project README may still describe EasyTest — follow **this skill** for new work.
 
 ---
 
 ## Media defaults (user manual)
 
-Video recording and milestone screenshots are **enabled by default** — they feed [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) / `Build-UserManual.ps1`.
-
 | Media | Default | Opt out |
 |-------|---------|---------|
-| Screenshots | ON (`EasyTestScreenshotCapture`) | `VISA2026_E2E_SCREENSHOTS=false` or `Record-EasyTest.ps1 -NoScreenshots` |
-| Desktop video | ON in `Record-EasyTest.ps1` | `-NoRecord` (requires ffmpeg otherwise) |
+| Screenshots | ON | `VISA2026_E2E_SCREENSHOTS=false` or `-NoScreenshots` |
+| Desktop video | ON in `Record-EasyTest.ps1` | `-NoRecord` |
 
-Agents running UserManual or media-producing journeys should prefer **`Record-EasyTest.ps1`**, not bare `dotnet test` alone (bare test still writes PNGs but not ffmpeg MP4).
-
-## User manual media (visa2026-user-manual)
-
-E2E is the **producer**; the manual site is the **consumer**.
-
-| Media | How (today / planned) | Consumer |
-|-------|----------------------|----------|
-| **Video** | **ON by default** via `Record-EasyTest.ps1` (ffmpeg); CI long-run ffmpeg → `recordings/*.mp4`. Opt out: `-NoRecord` | Guide `video` frontmatter — **storage TBD** Phase 3 |
-| **Screenshots** | **ON by default** (`EasyTestScreenshotCapture` / `Record-EasyTest.ps1`) → `recordings/screenshots/{run}/`. Opt out: `-NoScreenshots` or `VISA2026_E2E_SCREENSHOTS=false` | `user-manual/assets/screenshots/` |
-| **Step truth** | `scenarios/ready/*_map.md` §3 captions | Guide prose must match |
-
-When adding a journey that will become a guide:
-
-1. Set **`e2eScenarioId`** folder name = `scenarios/ready/<id>/`.
-2. Notify / update [user-manual tracking.md](../visa2026-user-manual/tracking.md) guide row.
-3. After CI green, run `Record-EasyTest.ps1 -Filter <Fact> -OutputName <slug>.mp4` (video + screenshots default ON).
-4. Copy selected PNGs into the manual assets pipeline when ready.
-
-Full contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md).
+Prefer **`Record-EasyTest.ps1`** when MP4 is required. Coordinate guides with [visa2026-user-manual](../visa2026-user-manual/SKILL.md). Full contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md).
 
 ---
 
 ## Agent workflow
 
-When the user asks for **EasyTest**, **E2E test**, **Playwright E2E**, **headed Edge test**, **custom component UI test**, or **`Visa2026.E2E.Tests`**:
+When the user asks for **E2E**, **Playwright**, **EasyTest** (redirect), or **`Visa2026.E2E.Tests`**:
 
-1. **Read** [learnings.md](./learnings.md) for navigation, login, driver, caption, and Playwright pitfalls.
-2. **Choose driver** — EasyTest unless the surface is custom / unsupported (table above).
-3. **Read** target production test + **`E2ETestBase`** (and any `Playwright/` fixtures) for existing helpers.
-4. **Implement** minimal test; prefer extending helpers over duplicating steps. For Playwright, add stable `data-testid` in product markup when missing.
-5. **Build** `-c EasyTest`; **run** filtered `dotnet test` (sync msedgedriver for EasyTest; ensure Playwright browsers installed).
-6. **Append** learnings.md after verified fixes (not for trivial typos).
-7. **Scenario yaml** under `Visa2026.E2E.Tests/scenarios/` is metadata only (Option A) — mark `driver:`.
-8. **Manual media** — video + screenshots are **required and ON by default** (`Record-EasyTest.ps1`; bare test still captures PNGs). Playwright journeys: screenshot/video APIs ON by default when implemented. Coordinate guides with [visa2026-user-manual](../visa2026-user-manual/SKILL.md).
+1. **Read** [learnings.md](./learnings.md).
+2. **Use Playwright only** — if asked for EasyTest, explain it is deprecated and implement Playwright.
+3. **Map first** with `driver: playwright` and §3 in **top→bottom** fill order.
+4. **Implement** under `Playwright/`; reuse host/login constants; add `data-testid` when needed.
+5. **Fill DetailViews top→bottom** (mandatory).
+6. **Build** `-c EasyTest`; **run** filtered Playwright tests; ensure browsers installed.
+7. **Append** learnings after verified fixes.
+8. **Media** ON by default for UserManual journeys.
 
 ---
 
@@ -248,27 +222,24 @@ When the user asks for **EasyTest**, **E2E test**, **Playwright E2E**, **headed 
 
 | Pitfall | Do instead |
 |---------|------------|
-| Run E2E on `:5000` IDE host | **`:5050`**; explicit `BlazorApplicationOptions` URL |
-| Stuck after login on Report Dashboard | **`AssertAuthenticatedAppShell()`** uses Employees URL — never **`Navigate("Application")`** for `StandardUser` |
-| Login `standarduser` fails | Use **`StandardUser`** (`E2ETestLoginValues`) |
-| **`Navigate("Employees")`** → Family Members | **`NavigateEmployeesList()`** + **`AssertEmployeeDetailViewActive()`** |
-| Passport via Lookup sidebar | Nested **Passports** → **New Passport** on employee detail |
-| **`msedgedriver` version skew / old bin copy** | Match Edge major; copy `.webdrivers` → `bin/EasyTest/.../.webdrivers/`; CDN **`msedgedriver.microsoft.com`** |
-| Empty-DB `--updateDatabase` fails on schema heal | Host-start SQL must `to_regclass` / no-op when tables missing |
-| Headless on local / wrong CI mode | Local headed; Windows CI headed; `VISA2026_E2E_HEADED=true` to force |
-| Force EasyTest on custom Razor / preview slot | **Playwright** + `data-testid` / `#visa-preview-slot` |
-| Parallel EasyTest + Playwright hosts on same port | One host on **`:5050`**; serialize or share fixture — never two DB resets racing |
+| New EasyTest Fact / `E2ETestBase` extension | **Playwright** under `Playwright/` |
+| Fill DetailView fields out of layout order | **Top → bottom** ordered helper |
+| Run E2E on `:5000` | **`:5050`** + `visa2026_easytest` |
+| Login `standarduser` | **`StandardUser`** |
+| Sidebar Employees → Family Members | Goto **`/Person_ListView_Employees`** |
+| Passport via Lookup | Nested **Passports** → New Passport |
+| Second host/port for Playwright | Share **`:5050`** preflight |
+| Fragile XPath | Label / `data-testid` / role |
 
 ---
 
 ## Additional resources
 
-- [user-prompts.md](./user-prompts.md) — invoke messages
-- [reference.md](./reference.md) — host, driver, EasyTest API, Playwright fallback, CI
-- [reference-map-contract.md](./reference-map-contract.md) — `*_map.md` + yaml + C# (Option A)
-- [learnings.md](./learnings.md) — append-only verified experience
-- [`scripts/local/Record-EasyTest.ps1`](../../../scripts/local/Record-EasyTest.ps1) — local video + screenshots (**default ON**; `-NoRecord` / `-NoScreenshots` to opt out)
-- [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) — screenshot/video contract with user manual
-- [visa2026-user-manual](../visa2026-user-manual/SKILL.md) — guide authoring consumer skill
-- [`Visa2026.E2E.Tests/scenarios/`](../../../Visa2026.E2E.Tests/scenarios/README.md) — scenario maps and yaml specs
-- [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md) — E2E inventory, backlog E2E-xxx
+- [user-prompts.md](./user-prompts.md)
+- [reference.md](./reference.md) — host, Playwright patterns, deprecated EasyTest notes
+- [reference-map-contract.md](./reference-map-contract.md)
+- [learnings.md](./learnings.md)
+- [`scripts/local/Record-EasyTest.ps1`](../../../scripts/local/Record-EasyTest.ps1) — media (name historical)
+- [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md)
+- [visa2026-user-manual](../visa2026-user-manual/SKILL.md)
+- [`docs/TESTING_PLAN.md`](../../../docs/TESTING_PLAN.md)

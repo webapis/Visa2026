@@ -11,6 +11,7 @@ namespace Visa2026.E2E.Tests.Playwright;
 /// </summary>
 [Collection(PlaywrightE2eCollection.Name)]
 [Trait("Driver", "Playwright")]
+[Trait("Category", "UserManual")]
 public sealed class PersonOfficerJourneyPlaywrightTests
 {
     private readonly PlaywrightE2eFixture _fixture;
