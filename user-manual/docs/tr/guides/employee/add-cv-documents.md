@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - employee/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-cv-documents.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

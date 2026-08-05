@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
+using Visa2026.E2E.Tests.UserManual;
 using Visa2026.Module.DatabaseUpdate;
 using Xunit;
 
@@ -20,16 +21,32 @@ internal sealed class PlaywrightPersonOfficerJourney
         string fullName,
         string passportNumber)
     {
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "00-logon-page");
-        await LoginAsync();
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "01-after-login");
+        await PlaywrightPageInteractions.GotoRelativeAsync(_page, "LoginPage");
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy00LogonPage);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.LoginStep01Logon,
+            PlaywrightPageInteractions.LoginSubmitButton(_page));
+        await LoginAsync(skipNavigation: true);
+        await PlaywrightPageInteractions.WaitForApplicationShellAsync(_page);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.LoginStep02ReportDashboard);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.NavigationStep01Shell);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.NavigationStep02LeftMenu,
+            PlaywrightPageInteractions.NavigationMenuItem(_page, "Employees"));
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy01AfterLogin);
 
         await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
         await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "02-employees-list");
+        ILocator newToolbar = PlaywrightPageInteractions.ToolbarButton(_page, "New");
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep01EmployeesList, newToolbar);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.NavigationStep03EmployeesList, newToolbar);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy02EmployeesList);
 
         await CreateEmployeeAsync(personalNumber, firstName, lastName);
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "03-employee-created");
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonRegisterStep02SavedDetail);
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy03EmployeeCreated);
 
         if (!await EmployeeDetailShowsPersonalNumberAsync(personalNumber))
         {
@@ -39,22 +56,35 @@ internal sealed class PlaywrightPersonOfficerJourney
         Assert.Equal(firstName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-first-name", E2ETestPersonFieldCaptions.FirstName));
         Assert.Equal(lastName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-last-name", E2ETestPersonFieldCaptions.LastName));
         Assert.Equal(personalNumber, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber));
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "04-employee-detail");
+        ILocator passportsTab = PlaywrightPageInteractions.TabItem(_page, "Passports");
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonAddPassportStep01EmployeeDetail, passportsTab);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.PersonRegisterStep03OpenFromList,
+            PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.NavigationStep04DetailForm,
+            PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy04EmployeeDetail);
 
-        await AddPassportAsync(passportNumber);
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "07-passport-saved");
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-passport", () => AddPassportAsync(passportNumber));
+        await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy07PassportSaved);
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-visa", () => AddVisaAsync());
 
         _ = fullName;
     }
 
-    private async Task LoginAsync()
+    private async Task LoginAsync(bool skipNavigation = false)
     {
-        await PlaywrightPageInteractions.GotoRelativeAsync(_page, "LoginPage");
+        if (!skipNavigation)
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, "LoginPage");
         await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-login-user-name", PlaywrightE2eEnvironment.UserName, "User Name");
         await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-login-password", PlaywrightE2eEnvironment.Password, "Password");
-        await _page.Locator(".e2e-login-submit button, button[title='Log In'], button:has-text('Log In')").First
-            .ClickAsync();
-        await _page.WaitForURLAsync(url => !url.Contains("LoginPage", StringComparison.OrdinalIgnoreCase),
+        await PlaywrightPageInteractions.LoginSubmitButton(_page).ClickAsync();
+        await _page.WaitForURLAsync(
+            url => !url.Contains("LoginPage", StringComparison.OrdinalIgnoreCase),
             new PageWaitForURLOptions { Timeout = 120_000 });
     }
 
@@ -189,22 +219,156 @@ internal sealed class PlaywrightPersonOfficerJourney
 
     private async Task AddPassportAsync(string passportNumber)
     {
-        await PlaywrightPageInteractions.ClickTabAsync(_page, "Passports");
-        await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "New Passport");
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "05-passport-detail-new");
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-passport-open-form", async () =>
+        {
+            await PlaywrightPageInteractions.ClickPassportsNestedNewAsync(_page);
+            ILocator passportNumberField = await PlaywrightPageInteractions.WaitForPassportNumberFieldAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonAddPassportStep02PassportFormNew, passportNumberField);
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy05PassportDetailNew);
+        });
 
-        await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-passport-passport-number", passportNumber);
-        await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-passport-passport-type", E2ETestPassportCreateValues.PassportTypeDisplay);
-        await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-passport-issue-date", E2ETestPassportCreateValues.IssueDate);
-        await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-passport-expiration-date", E2ETestPassportCreateValues.ExpirationDate);
-        await PlaywrightPageInteractions.FillTextFieldAsync(_page, "e2e-passport-authority", E2ETestPassportCreateValues.Authority);
-        await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-passport-issued-country", E2ETestPassportCreateValues.IssuedCountryDisplay);
-        await PlaywrightScreenshotCapture.CaptureAsync(_page, "06-passport-fields-filled");
+        ILocator passportNumberField = await PlaywrightPageInteractions.WaitForPassportNumberFieldAsync(_page);
 
-        await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
-        await Task.Delay(1000);
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-passport-fill-fields", async () =>
+        {
+            await PlaywrightPageInteractions.FillTextFieldAsync(
+                _page,
+                "e2e-passport-passport-number",
+                passportNumber,
+                E2ETestPassportFieldCaptions.PassportNumber);
+            await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+                _page,
+                "e2e-passport-passport-type",
+                E2ETestPassportCreateValues.PassportTypeDisplay,
+                E2ETestPassportFieldCaptions.PassportType);
+            await PlaywrightPageInteractions.FillDateFieldAsync(
+                _page,
+                "e2e-passport-issue-date",
+                E2ETestPassportCreateValues.IssueDate,
+                E2ETestPassportFieldCaptions.IssueDate);
+            await PlaywrightPageInteractions.FillDateFieldAsync(
+                _page,
+                "e2e-passport-expiration-date",
+                E2ETestPassportCreateValues.ExpirationDate,
+                E2ETestPassportFieldCaptions.ExpirationDate);
+            await PlaywrightPageInteractions.FillTextFieldAsync(
+                _page,
+                "e2e-passport-authority",
+                E2ETestPassportCreateValues.Authority,
+                E2ETestPassportFieldCaptions.Authority);
+            await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+                _page,
+                "e2e-passport-issued-country",
+                E2ETestPassportCreateValues.IssuedCountryDisplay,
+                E2ETestPassportFieldCaptions.IssuedCountry);
 
-        string actual = await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-passport-passport-number");
-        Assert.Equal(passportNumber, actual);
+            string passportType = await PlaywrightPageInteractions.TryReadLookupDisplayAsync(
+                _page, "e2e-passport-passport-type", E2ETestPassportFieldCaptions.PassportType);
+            Assert.True(
+                PlaywrightPageInteractions.LookupDisplayMatches(passportType, E2ETestPassportCreateValues.PassportTypeDisplay),
+                $"Passport Type must be selected before save (actual: '{passportType}').");
+
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonAddPassportStep03PassportFieldsFilled, passportNumberField);
+            await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.Legacy06PassportFieldsFilled);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-passport-save", async () =>
+        {
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
+            await Task.Delay(2000);
+
+            string content = await _page.ContentAsync();
+            Assert.False(
+                content.Contains("Passport type must not be empty", StringComparison.OrdinalIgnoreCase)
+                    || content.Contains("must not be empty", StringComparison.OrdinalIgnoreCase)
+                        && content.Contains("Passport Type", StringComparison.OrdinalIgnoreCase),
+                "Passport save failed validation — Passport Type may be unbound.");
+
+            string actual = await PlaywrightPageInteractions.ReadFieldAsync(
+                _page,
+                "e2e-passport-passport-number",
+                E2ETestPassportFieldCaptions.PassportNumber);
+            Assert.Equal(passportNumber, actual);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonAddPassportStep04PassportSaved,
+                PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+        });
+    }
+
+    private async Task AddVisaAsync()
+    {
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-visa-open-passport", async () =>
+        {
+            await PlaywrightPageInteractions.ActivateMdiPassportTabAsync(_page);
+            ILocator passportsTab = PlaywrightPageInteractions.TabItem(_page, "Visas");
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonAddVisaStep01PassportDetail,
+                passportsTab);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-visa-open-form", async () =>
+        {
+            await PlaywrightPageInteractions.ClickPassportVisasNestedNewAsync(_page);
+            ILocator visaNumberField = await PlaywrightPageInteractions.WaitForVisaNumberFieldAsync(_page);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonAddVisaStep02VisaFormNew,
+                visaNumberField);
+        });
+
+        ILocator visaNumberField = await PlaywrightPageInteractions.WaitForVisaNumberFieldAsync(_page);
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-visa-fill-fields", async () =>
+        {
+            await PlaywrightPageInteractions.ActivateMdiVisaTabAsync(_page);
+            await PlaywrightPageInteractions.FillTextFieldAsync(
+                _page,
+                "e2e-visa-process-number",
+                E2ETestVisaCreateValues.ProcessNumber,
+                E2ETestVisaFieldCaptions.ProcessNumber);
+            await PlaywrightPageInteractions.FillTextFieldAsync(
+                _page,
+                "e2e-visa-visa-number",
+                E2ETestVisaCreateValues.VisaNumber,
+                E2ETestVisaFieldCaptions.VisaNumber);
+            await PlaywrightPageInteractions.FillDateFieldAsync(
+                _page,
+                "e2e-visa-issue-date",
+                E2ETestVisaCreateValues.IssueDate,
+                E2ETestVisaFieldCaptions.IssueDate);
+            await PlaywrightPageInteractions.FillDateFieldAsync(
+                _page,
+                "e2e-visa-start-date",
+                E2ETestVisaCreateValues.StartDate,
+                E2ETestVisaFieldCaptions.StartDate);
+            await PlaywrightPageInteractions.FillDateFieldAsync(
+                _page,
+                "e2e-visa-expiration-date",
+                E2ETestVisaCreateValues.ExpirationDate,
+                E2ETestVisaFieldCaptions.ExpirationDate);
+
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonAddVisaStep03VisaFieldsFilled,
+                visaNumberField);
+        });
+
+        await PlaywrightE2eStepRunner.RunAsync(_page, "add-visa-save", async () =>
+        {
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
+            await Task.Delay(2000);
+
+            string actual = await PlaywrightPageInteractions.ReadFieldAsync(
+                _page,
+                "e2e-visa-visa-number",
+                E2ETestVisaFieldCaptions.VisaNumber);
+            Assert.Equal(E2ETestVisaCreateValues.VisaNumber, actual);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonAddVisaStep04VisaSaved,
+                PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+        });
     }
 }

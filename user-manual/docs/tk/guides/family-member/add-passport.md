@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - family-member/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

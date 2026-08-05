@@ -374,15 +374,63 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 - **navigation.md** — bell section replaced with postponed note + Report Dashboard / Mark incomplete alternatives.
 - Guide files retained with `guideStatus: postponed` for reference only.
 
+### 2026-08-05 — add-visa screenshots were legacy passport fan-out (doc drift)
+
+- **Symptom:** `employee/add-visa` images showed **passport** forms (Passport Number, P — National passport) while prose described **visa** steps (Visas tab, Visa Number, Visa Type).
+- **Root cause:** `Copy-EasyTestManualScreenshots.ps1` **legacy fan-out** mapped passport-only E2E labels to visa PNG stems (`05-passport-detail-new` → `person-add-visa-step-02`, `06-passport-fields-filled` → step-03, `07-passport-saved` → step-01 + step-04). No doc-anchored visa captures existed in `media-capture-registry.yaml` or Playwright journey.
+- **Fix:** Registry keys `person-add-visa-step-01..04`; Playwright `AddVisaAsync` after passport save (Passport MDI → Visas tab → New Visa → Visa MDI tab); removed visa stems from legacy fan-out map; re-run E2E + `Copy-EasyTestManualScreenshots.ps1` for **direct** captures.
+- **Reuse:** Draft guides with `legacy fan-out` in tracking → treat screenshots as **wrong** until registry + E2E capture ship; never publish with fan-out-only media.
+
 ### 2026-08-05 — Officer review: pilot #1 login (en)
 
 - **Guide:** `getting-started/login` — officer walkthrough sign-off.
 - **Status:** `guideStatus: review`, `lastReviewed: 2026-08-05` (en only).
-- **Next:** Tech may set `published` after E2E green tick; tr/tk/ru login still `draft` until locale review.
+- **Next:** Officer review P2-6 (`employee/add-visa`); tr/tk/ru locale review for published slugs.
 
-### 2026-08-05 — Officer review: pilots 2–5 (en)
+### 2026-08-05 — E2 UserManual E2E + publish pilots 1–5
 
-- **Guides:** `getting-started/navigation`, `person/open-and-search`, `employee/register`, `employee/add-passport`.
-- **Status:** `guideStatus: review`, `lastReviewed: 2026-08-05` (en).
-- **Pilot set:** tier 0–2 English pilots **5/5** officer-reviewed; `family-member/add-passport` not in this batch.
-- **Next:** Tech `published` for en pilots when ready; continue review on remaining drafts or tr/tk/ru locales.
+- **E2:** `PersonOfficerJourneyPlaywrightTests` already had `[Trait("Category", "UserManual")]`; wired `Build-UserManual.ps1 -SkipE2E:$false` → `Record-PlaywrightE2e.ps1` + `Update-UserManualGuideVerification.ps1`.
+- **E2E:** `PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local` green (Playwright, `visa2026_easytest`, screenshots copied).
+- **Publish:** pilots 1–5 — en `guideStatus: published`; all locales `verified: true` + `verifiedAt` / `verifiedCommit`.
+- **Fix:** `ReportDashboardOfficerPermissions.EnsureHostShellPermission` — use `AddTypePermission` for non-persistent `ReportDashboardHost` (fresh DB `Sequence contains no matching element`).
+- **Gotcha:** `Validate-UserManualLinks` still fails on unrelated `UserReportTemplate` bo in `template-staging.md` — pre-existing; use `-SkipValidate` locally until catalog fixed.
+
+### 2026-08-05 — E2E media capture timestamps on guides
+
+- **Frontmatter:** `screenshotsCapturedAt`, `videoCapturedAt`, `mediaE2eRunId` after `videosVersion` / `screenshotsVersion` (pipeline-set, not hand-edited).
+- **Display:** `user-manual/hooks/media_capture_labels.py` — video caption, Screenshots tip, per-PNG frame caption (en/tr/tk/ru).
+- **Pipeline:** `Copy-EasyTestManualScreenshots.ps1` writes `capture-manifest.json` + `TestResults/user-manual-media-capture.json`; `Build-UserManual.ps1` passes to `Update-UserManualGuideVerification.ps1`.
+- **Pilots 1–5:** backfilled from E2E run `20260805-124857`.
+
+### 2026-08-05 — Default passport type P (national)
+
+- **Product:** new `Passport` records default to **P — National passport** (`Passport.DefaultPassportTypeCode`, catalog `IsDefault` + PdfForm_Code fallback).
+- **E2E:** `E2ETestPassportCreateValues.PassportTypeDisplay` → **P — National passport**; Playwright `EnsureLookupBoundAsync` skips fill when default already applied.
+- **Manual:** `employee/add-passport` (en/tr/tk/ru) + en family-member/temporary-visitor — step 3 tip + step 4 table note.
+
+### 2026-08-05 — Passport Type lookup bind (Playwright UserManual)
+
+- **Symptom:** `person-add-passport-step-03` / step 5 manual screenshots showed empty **Passport Type** + validation banner *"Passport type must not be empty"* — E2E `FillLookupAsync` typed filter text without selecting dropdown row.
+- **Fix:** `PlaywrightPageInteractions.FillLookupUntilBoundAsync` (retry + partial tokens `AML`, em-dash split); `AddPassportAsync` asserts type bound **before** field-filled capture and after Save; EasyTest `FillPassportFormWithRetry` uses existing `FillLookupUntilBound` for Passport Type + Issued Country.
+- **Re-run:** `Record-PlaywrightE2e.ps1 -Target Local` then `Build-UserManual.ps1` to refresh `person-add-passport-step-03` / `step-04` assets + frontmatter.
+
+- **Principle:** guide section owns image/video meaning; E2E + registry prove UI state at capture time.
+- **Registry v2:** `user-manual/media-capture-registry.yaml` — `guideSlugs` per capture key; `videos:` section for pilot walkthroughs.
+- **Docs:** `USER_MANUAL_E2E_MEDIA.md` v0.3; skill § Doc-anchored media; `reference.md` workflow; `tracking.md` **Media** column.
+- **Validator:** `Validate-UserManualMediaCaptures.ps1` checks `guideSlugs` when `-RequireRegistry`.
+- **Legacy fan-out:** deprecated in `Copy-EasyTestManualScreenshots.ps1` — migrate drafts before publish.
+- **Video trim:** `UserManualVideoMarkerCapture` + `Copy-EasyTestManualVideos.ps1` (registry `fromCaptureKey`/`toCaptureKey`).
+
+### 2026-08-05 — Screenshots-only policy (D21)
+
+- **Decision:** Officer manual uses **doc-anchored PNGs only** — no video in guides or publish pipeline.
+- **Guides:** Stripped `## Video walkthrough` + video frontmatter from all locales (`Strip-UserManualGuideVideos.ps1`).
+- **E2E:** `VISA2026_E2E_VIDEO_RECORDING` opt-in only; `Record-PlaywrightE2e.ps1` default no video.
+- **Validator:** Published guides must not contain `<video>` or `video*` frontmatter.
+- **Pilots 1–5:** `doc-anchored`; all other screenshot guides still `legacy fan-out`.
+
+### 2026-08-05 — Commit screenshots for GitHub Pages (D22)
+
+- **Decision:** Track `user-manual/assets/screenshots/**/*.png` in git; CI `-RequireMedia` + `--site-url` for Pages deploy.
+- **Still ignored:** videos (`user-manual/assets/videos/`), `user-manual/site/`, `docs/assets/` sync copy.
+- **Workflow:** Record → `Copy-EasyTestManualScreenshots.ps1` → commit PNGs with guide changes; `user-manual.yml` on `master` publishes to `https://<owner>.github.io/<repo>/`.

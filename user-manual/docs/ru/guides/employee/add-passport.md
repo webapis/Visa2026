@@ -11,13 +11,13 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Добавление паспорта сотруднику
@@ -31,12 +31,6 @@ verified: false
     Изображения с **английского** интерфейса (версия **2026.08**).
 
 ## Видеоинструкция
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/ru/person-add-passport.mp4"
-  title="Добавление паспорта сотруднику"></video>
-
-<p class="visa-manual-video-caption">Запись из учебной среды (тестовые данные). Шаги ниже соответствуют видео.</p>
 
 ## Шаг 1 — Откройте сотрудника
 
@@ -55,6 +49,9 @@ verified: false
 1. Нажмите **New Passport**.
 2. Дождитесь открытия карточки паспорта.
 
+!!! tip "Тип паспорта по умолчанию"
+    Поле **Passport Type** заранее заполнено значением **P — Национальный паспорт** (самый частый выбор сотрудников). Меняйте только если документ другого типа.
+
 ![Новая карточка паспорта](../../../assets/screenshots/v2026.08/ru/person-add-passport-step-02-passport-form-new.png)
 
 ## Шаг 4 — Обязательные поля
@@ -62,7 +59,7 @@ verified: false
 | Поле | Ввод |
 |------|------|
 | **Passport Number** | Номер паспорта |
-| **Passport Type** | Из списка |
+| **Passport Type** | Обычно уже **P — Национальный паспорт**; при необходимости выберите другой тип из списка |
 | **Issue Date** | Дата |
 | **Expiration Date** | Дата |
 | **Authority** | Текст |

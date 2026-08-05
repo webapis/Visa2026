@@ -11,10 +11,6 @@ prerequisiteSlugs:
   - administration/user-report-templates
   - applications/resminamalar
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: template-staging.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:

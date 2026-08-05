@@ -31,9 +31,9 @@ Owner: Product + Visa officers + Tech lead
 | **Phase 0** | **Complete** |
 | **Phase 1** | **Complete** — `bo-catalog.json`, validator, `UserManualDocs` tests |
 | **Officer site** | MkDocs scaffold + generated reference catalog page |
-| **Published guides** | 0 / 44 planned (**39 drafts**, **5 in review** (pilots 1–5 en), 1 postponed) |
+| **Published guides** | **5 / 44** pilots 1–5 (en **published** + **verified**); **34 drafts**, 1 postponed |
 | **Pipeline** | `Build-UserManual.ps1` (generator → unit tests → validate → mkdocs) |
-| **E2E UserManual traits** | Not implemented (Phase 3) |
+| **E2E UserManual traits** | **Shipped** — Playwright `Category=UserManual` on `person-officer-journey`; wired in `Build-UserManual.ps1` |
 | **CI** | `user-manual.yml` (build + validate + UserManualDocs; **GitHub Pages** on `master` push) |
 | **Local preview** | `scripts/local/Serve-UserManual.ps1` → **http://127.0.0.1:8765/manual/** |
 
@@ -117,7 +117,7 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-05 | **tracking/state-notifications** — **postponed** (capabilities #6); removed from nav; use Report Dashboard + Mark incomplete instead |
 | 2026-08-05 | **tracking/state-notifications** — draft (en/tr/tk/ru); Phase 1 prototype; admin-only; bell optional |
 | 2026-08-05 | **Officer review pilot #1** — `getting-started/login` (en) → `guideStatus: review`; tracking + status board |
-| 2026-08-05 | **Officer review pilots 2–5** — navigation, open-and-search, register, add-passport (en) → `guideStatus: review` |
+| 2026-08-05 | **E2 + publish pilots 1–5** — Playwright UserManual E2E green; `guideStatus: published` + `verified: true` (en publish; all locales verified) |
 | 2026-08-05 | **Officer review pilot #1** — `getting-started/login` (en) → `guideStatus: review` |
 | 2026-08-05 | **Tier 8 configuration** — `administration/configuration/*` drafts (overview + organization, contracts, SLA, alerts; en/tr/tk/ru); maps eleven Configuration menu BOs |
 | 2026-08-05 | **Tier 6 person/document-copies** — draft (en/tr/tk/ru); detail toolbar, list • column, dossier; not ministry ZIP |
@@ -151,12 +151,12 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 
 | # | Task | Status |
 |---|------|--------|
-| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
-| **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
+| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
+| **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
 | **P2-3** | Login + navigation screenshots (`v2026.08/en/`) | **Done** (EasyTest `person-officer-journey`; en UI replicated to tr/tk/ru per D12) |
-| **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
-| **P2-4** | `employee/register` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
-| **P2-5** | `employee/add-passport` + `family-member/add-passport` | **Review** (employee **en** 2026-08-05); FM still **Draft** |
+| **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
+| **P2-4** | `employee/register` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
+| **P2-5** | `employee/add-passport` + `family-member/add-passport` | **Published** (employee en); FM still **Draft** |
 | **P2-6** | `employee/add-visa` + `family-member/add-visa` | **Draft** |
 | **P2-7** | `employee/add-education` | **Draft** |
 | **P2-8** | `employee/add-medical-record` + `family-member/add-medical-record` | **Draft** |
@@ -180,24 +180,24 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 | **P2-25** | Tier 7 `administration/template-staging` | **Draft** (en/tr/tk/ru) |
 | **P2-26** | `person/document-copies` (capabilities #10) | **Draft** (en/tr/tk/ru) |
 | **P2-27** | `tracking/state-notifications` (capabilities #6) | **Postponed** — not in officer manual scope |
-| **P2-next** | Publish pilots 1–5 (en), E2E media, locale depth | **Next** — pilot set **5/5** officer-reviewed (en) |
+| **P2-next** | Officer review pilots 6+ (en), locale depth, more E2E media | **Next** — tier 0–2 pilots **published** (en) |
 
 ### Pilot officer review (tier 0–2)
 
 | # | Guide | Officer review | Tech `published` |
 |---|-------|----------------|------------------|
-| 1 | [Sign in](../user-manual/docs/en/getting-started/login.md) | **Done** 2026-08-05 (en) | Pending |
-| 2 | [Main navigation](../user-manual/docs/en/getting-started/navigation.md) | **Done** 2026-08-05 (en) | Pending |
-| 3 | [Find and open a person](../user-manual/docs/en/guides/person/open-and-search.md) | **Done** 2026-08-05 (en) | Pending |
-| 4 | [Register employee](../user-manual/docs/en/guides/employee/register.md) | **Done** 2026-08-05 (en) | Pending |
-| 5 | [Add passport (employee)](../user-manual/docs/en/guides/employee/add-passport.md) | **Done** 2026-08-05 (en) | Pending |
+| 1 | [Sign in](../user-manual/docs/en/getting-started/login.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
+| 2 | [Main navigation](../user-manual/docs/en/getting-started/navigation.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
+| 3 | [Find and open a person](../user-manual/docs/en/guides/person/open-and-search.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
+| 4 | [Register employee](../user-manual/docs/en/guides/employee/register.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
+| 5 | [Add passport (employee)](../user-manual/docs/en/guides/employee/add-passport.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
 
 ### Parallel E2E (Phase 2 prep)
 
 | # | Task | Notes |
 |---|------|-------|
 | E1 | Promote `person-employee-create` → `scenarios/ready/` | easytest-e2e |
-| E2 | Add `[Trait("Category", "UserManual")]` on person register journey | Wired in Phase 3 pipeline |
+| E2 | Add `[Trait("Category", "UserManual")]` on person register journey | **Done** — `PersonOfficerJourneyPlaywrightTests`; `Build-UserManual.ps1 -SkipE2E:$false` |
 
 **Rule:** when an item ships, check the box in [implementation plan §11](USER_MANUAL_IMPLEMENTATION_PLAN.md), update [tracking.md](../.cursor/skills/visa2026-user-manual/tracking.md), and append §3 above.
 

@@ -13,10 +13,6 @@ prerequisiteSlugs:
   - applications/overview
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: application-create.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -37,14 +33,6 @@ An application holds shared header data (type, date, contract, visa settings). Y
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/application-create.mp4"
-  title="Create an application in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the application create flow.</p>
 
 ## Before you start
 

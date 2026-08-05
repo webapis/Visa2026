@@ -12,11 +12,7 @@ prerequisiteSlugs:
   - employee/add-passport
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-visa.mp4
-videoSource: recordings/person-master-data-journey.mp4
-e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
+e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -33,19 +29,12 @@ Application items resolve the employee's **current visa** from this nested list 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
 
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-visa.mp4"
-  title="Add a visa on a passport in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
-
 ## Before you start
 
 | You need | Notes |
 |----------|--------|
 | An **employee** with a saved **passport** | [Add a passport](add-passport.md) first |
+| **Process number** | Typed from the visa stamp (Işlenen belgisi) |
 | **Visa Number** and validity dates | Use office rules for numbering |
 | Lookup values | **Visa Type**, **Visa Category**, **Visa Issued Place** — defaults may apply |
 
@@ -57,6 +46,7 @@ Application items resolve the employee's **current visa** from this nested list 
 
 Wait for the **passport detail form** to load.
 
+<!-- media-capture: person-add-visa-step-01-passport-detail -->
 ![Passport detail form](../../../assets/screenshots/v2026.08/en/person-add-visa-step-01-passport-detail.png)
 
 ## Step 2 — Open the Visas tab
@@ -73,6 +63,7 @@ The nested toolbar should offer **New Visa** (or **New** on the visas list).
 
 The new visa is linked to the passport you opened in step 1.
 
+<!-- media-capture: person-add-visa-step-02-visa-form-new -->
 ![New visa detail form](../../../assets/screenshots/v2026.08/en/person-add-visa-step-02-visa-form-new.png)
 
 ## Step 4 — Fill required fields
@@ -81,6 +72,7 @@ Enter values using the on-screen labels. Typical **required** fields include:
 
 | Field | What to enter |
 |-------|----------------|
+| **Process number** | Stamp / processed document number from the visa image (e.g. ministry reference) |
 | **Visa Number** | Unique visa number |
 | **Visa Type** | Choose from the list |
 | **Visa Category** | Choose from the list |
@@ -90,8 +82,9 @@ Enter values using the on-screen labels. Typical **required** fields include:
 | **Expiration Date** | Must be later than **Start Date** |
 | **Border Zone Location** | Multi-select catalog; **None** is allowed |
 
-Use the optional-fields gear (if shown) for extra stamp or process fields.
+Use the optional-fields gear (if shown) for extra stamp fields not listed above.
 
+<!-- media-capture: person-add-visa-step-03-visa-fields-filled -->
 ![Visa fields filled before save](../../../assets/screenshots/v2026.08/en/person-add-visa-step-03-visa-fields-filled.png)
 
 ## Step 5 — Save the visa
@@ -103,6 +96,7 @@ If validation fails, read the message and complete any missing required field.
 
 After save, **Visa Number** on the form should match what you entered.
 
+<!-- media-capture: person-add-visa-step-04-visa-saved -->
 ![Visa saved on detail form](../../../assets/screenshots/v2026.08/en/person-add-visa-step-04-visa-saved.png)
 
 !!! success "Visa added"
@@ -123,6 +117,7 @@ Select **Refresh** on the nested list if the row does not appear immediately.
 | **Visas** tab missing | Open a **passport** row first — visas are not on the employee header |
 | **New Visa** not found | Select the **Visas** tab; wait for the nested list to load |
 | **Expiration Date** validation | Ensure expiration is after **Start Date** |
+| **Process number** required | Type the stamp / processed document number from the visa image |
 | Duplicate visa number | Another active visa may use the same number — change the number or retire the old visa |
 
 ## What to read next

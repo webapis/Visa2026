@@ -11,10 +11,6 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-visa.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
 e2eScenarioId: person-officer-journey
 verified: false
@@ -26,12 +22,6 @@ Bu kılavuz mevcut bir **pasaporta** **vize** kaydı eklemeyi anlatır. Vizeler 
 
 !!! tip "Ön koşul"
     Çalışanın kayıtlı bir **pasaportu** olmalıdır ([Pasaport ekleme](add-passport.md)).
-
-## Video anlatımı
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tr/person-add-visa.mp4"
-  title="Pasaporta vize ekleme"></video>
 
 ## Adım 1 — Pasaportu açın
 

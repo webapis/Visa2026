@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-mark-incomplete.mp4
-videoSource: recordings/passport-create.mp4
 verified: false
 ---
 
@@ -32,10 +28,6 @@ Bu gollanma esasy maglumatlary heniz doly däl adamy **Incomplete** hökmünde b
     Suratlar **Iňlis** interfeýsinden (wersiýa **2026.08**).
 
 ## Wideo gollanma
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tk/person-mark-incomplete.mp4"
-  title="Doly däl bellemek"></video>
 
 ## Başlamazdan öň
 

@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - employee/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-work-duty.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
 e2eScenarioId: person-officer-journey
 verified: false
@@ -34,14 +30,6 @@ This guide applies to **employees** only — family members and temporary visito
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Tab and field labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-work-duty.mp4"
-  title="Add a work duty in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 

@@ -280,6 +280,7 @@ try {
 
     if ($RecordTarget -eq 'Desktop') {
         $ffProc = Start-FfmpegGdigrabCapture -InputSource 'desktop' -OutputFile $outFile
+        $env:VISA2026_E2E_VIDEO_RECORDING_START = [DateTimeOffset]::UtcNow.ToString('o')
         Write-Host "Recording desktop (ffmpeg pid $($ffProc.Id)) -> $outFile"
         Start-Sleep -Seconds 1
         Write-Host "Running EasyTest filter: $Filter"
@@ -297,6 +298,7 @@ try {
                 Where-Object { $_.MainWindowHandle -eq $hwnd } |
                 Select-Object -First 1).MainWindowTitle
             $ffProc = Start-FfmpegGdigrabCapture -InputSource "hwnd=$hwndHex" -OutputFile $outFile
+            $env:VISA2026_E2E_VIDEO_RECORDING_START = [DateTimeOffset]::UtcNow.ToString('o')
             Write-Host "Recording Edge window '$title' ($hwndHex, ffmpeg pid $($ffProc.Id)) -> $outFile"
         }
         else {

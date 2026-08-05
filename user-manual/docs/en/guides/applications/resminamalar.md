@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - applications/create
   - applications/add-items
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: application-resminamalar.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -33,14 +29,6 @@ Templates replaces the older one-click **Resminamalar** queue. The same backgrou
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). The toolbar button is **Templates**; internal name Resminamalar.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/application-resminamalar.mp4"
-  title="Templates report package in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the Templates (Resminamalar) flow.</p>
 
 ## Before you start
 

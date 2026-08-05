@@ -265,6 +265,36 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Fix / reuse**: Screenshots **ON by default** (opt out `VISA2026_E2E_SCREENSHOTS=false` / `-NoScreenshots`). Video **ON by default** in `Record-EasyTest.ps1` (`-NoRecord` to skip). Prefer script over bare `dotnet test` when MP4 is required. CI uploads `easytest-e2e-screenshots` artifact.
 - **Reuse**: User-manual E2E always assume media unless explicitly opted out
 
+### 2026-08-05 — Mandatory failure capture before browser exit
+
+- **Outcome**: positive (policy + code)
+- **Context**: User asked for PNG + HTML on every Playwright E2E failure before exit
+- **Fix / reuse**: `PlaywrightFailureCapture` writes PNG + HTML + `.txt` (logs all three paths). `PlaywrightE2eTestRunner` wraps Facts; `PlaywrightE2eStepRunner` wraps journey steps; `PlaywrightE2eFixture.DisposeAsync` calls `CaptureBeforeExitAsync` as safety net before `Page.CloseAsync`. Independent of milestone screenshot setting.
+- **Reuse**: New Playwright Facts → `PlaywrightE2eTestRunner.RunAsync`; new journey phases → `PlaywrightE2eStepRunner.RunAsync`; triage `recordings/screenshots/{runId}/failures/`
+
+### 2026-08-05 — Playwright failure capture + passport field locators
+
+- **Outcome**: positive (investigation) — superseded by **Person add-passport RCA** below for full root-cause stack
+- **Context**: UserManual E2E stuck on new Passport detail (defaults set, Passport Number empty)
+- **Symptom**: Test exited without showing which step/field failed; `FillTextFieldAsync` had no caption fallback for passport fields; milestone screenshots only on success path
+- **Fix / reuse**: `PlaywrightFailureCapture` → `recordings/screenshots/{runId}/failures/` (PNG + HTML + `.txt` note, always on). `PlaywrightE2eStepRunner` wraps journey steps (`add-passport-open-form`, `add-passport-fill-fields`, `add-passport-save`). Passport fills use `E2ETestPassportFieldCaptions` + `PassportFieldInput`; `FillTextFieldAsync` retries with `PressSequentially`. Pinpoint/lookup timeouts are non-fatal.
+- **Reuse**: On red Playwright run, open `failures/` under the screenshot run id first
+
+### 2026-08-05 — Close all MDI tabs at Playwright journey start — **reverted**
+
+- **Outcome**: reverted (do not use)
+- **Context**: Post-login `CloseAllMdiTabsAndRestoreShellAsync` added during passport E2E debugging
+- **Decision**: **Do not close MDI tabs** in Playwright E2E — rely on `ActivateMdi*TabAsync` + visible-field locators instead; closing also dismisses Report Dashboard and adds an extra officer step not in real journeys
+- **Reuse**: Never call **Close all tabs** / `VisaCloseAllTabs` in automated E2E
+
+### 2026-08-05 — Close all MDI tabs at Playwright journey start
+
+- **Outcome**: positive (policy) — part of **Person add-passport RCA** below — **superseded by revert above**
+- **Context**: TabbedMDI keeps inactive views in DOM; passport step matched hidden duplicate fields / wrong toolbar
+- **Symptom**: Stale Employees / Passport tabs from prior attempts or headed debugging caused invisible `xaf-item-passportnumber` matches
+- **Fix / reuse**: After login + first `WaitForApplicationShellAsync`, call `CloseAllMdiTabsAndRestoreShellAsync` (toolbar **Close all tabs** / `VisaCloseAllTabs`, then re-open **Report Dashboard** nav — closing also dismisses the dashboard tab). **Do not** close all before nested Passport New — that would close the employee detail tab.
+- **Reuse**: Post-login MDI reset only; passport flow still needs `ActivateMdiPassportTabAsync` + visible-field locators
+
 ### 2026-08-05 — Playwright-only; EasyTest deprecated; DetailView top→bottom fill
 
 - **Outcome**: positive (policy)
@@ -272,3 +302,45 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 - **Symptom**: Dual-driver guidance and EasyTest batch fill did not match custom UI or real officer top→bottom entry
 - **Fix / reuse**: **Playwright only** for new E2E under `Playwright/`. **EasyTest deprecated** (do not add/extend; migrate when touching). All DetailView fills **top → bottom** in layout order (map §3 + yaml `fill:` + helper arrays). MSBuild config / `Record-EasyTest.ps1` names remain historical.
 - **Reuse**: New journey → Playwright + ordered fill; never new EasyTest Facts
+
+### 2026-08-05 — Person add-passport Playwright failure RCA (TabbedMDI + locators) — **canonical**
+
+- **Outcome**: positive (verified green — run `20260805-160740`, `PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local`, ~1m 8s)
+- **Context**: UserManual Playwright `PlaywrightPersonOfficerJourney.RunLoginCreateEmployeeAddPassportAsync`; media keys `person-add-passport-step-*`; red on runs `20260805-154058`, `20260805-155226` at step `add-passport-open-form`
+- **Symptoms**:
+  - Timeout waiting for `e2e-passport-passport-number` — DOM had `xaf-item-passportnumber` but field **not visible**
+  - Headed: Passport detail opened with defaults (**P — National passport**, Türkiye) yet test never filled Passport Number
+  - Wrong toolbar **New** (e.g. Education) when multiple MDI tabs were open
+  - `WaitForURL` after **New Passport** never fires — URL stays on `Person_DetailView_Employee` (TabbedMDI)
+- **Root causes** (stacked — all contributed):
+  1. **TabbedMDI DOM duplication** — inactive MDI tabs keep full form HTML; Playwright `.First` / non-visible locators match **hidden** duplicates
+  2. **`e2e-passport-*` not in rendered HTML** — `ModelDefault(CustomCSSClassName)` on `Passport` BO does not appear in Blazor output; real markers are `xaf-item-passportnumber`, `xaf-item-passporttype`, etc.
+  3. **MDI tab name collision** — `:has-text('Passport')` / substring tab click hit nested layout tab **Passports**, not MDI tab **Passport**
+  4. **Stale MDI tabs** — headed retries left Employees / Passport tabs open → wrong Save/New targets
+  5. **Unscoped nested New** — generic `button[title='New']` on employee detail can hit the wrong nested collection
+- **Fixes** (`PlaywrightPageInteractions.cs`, `PlaywrightPersonOfficerJourney.cs`):
+  - `FindFirstVisibleLocatorAsync` + `TryGetVisibleXafItemLocatorAsync` — map `e2e-passport-*` → `xaf-item-{suffix}`; always pick **first visible**
+  - `ActivateMdiPassportTabAsync` — `GetByRole(Tab, Name: "Passport", Exact: true)` after nested New
+  - `PassportsNestedNewButton` — `title^='New Passport'` + `data-action-name='New'`, scoped to Passports nested list
+  - `ClickPassportsNestedNewAsync` — layout **Passports** tab → wait list → New Passport → activate MDI **Passport** tab → `WaitForPassportNumberFieldAsync`
+  - `PlaywrightFailureCapture` + `PlaywrightE2eStepRunner` — step-scoped artifacts (`add-passport-open-form`, `add-passport-fill-fields`, `add-passport-save`) under `recordings/screenshots/{runId}/failures/`
+  - `EnsureLookupBoundAsync` for Passport Type; product default **P — National passport** (`Passport.DefaultPassportTypeCode = "P"`, `E2ETestPassportCreateValues.PassportTypeDisplay`)
+  - ~~`CloseAllMdiTabsAndRestoreShellAsync`~~ — **reverted**; do not close MDI tabs in E2E
+- **Reuse checklist** (any TabbedMDI nested DetailView):
+  1. Do not close all MDI tabs in E2E
+  2. Do not rely on URL after nested New — assert visible fields / toolbar on **active** tab
+  3. Activate MDI tab by **exact** title before fill/assert
+  4. Locators: visible-first; prefer `xaf-item-*` or caption/`GetByLabel` over bare `e2e-*` unless wired in `Model.xafml` (like login fields)
+  5. Scope nested **New** by full action title (`New Passport`, not `New`)
+  6. On red: open `failures/` under screenshot run id first
+- **Files**: `PlaywrightPageInteractions.cs`, `PlaywrightPersonOfficerJourney.cs`, `PlaywrightFailureCapture.cs`, `PlaywrightE2eStepRunner.cs`, `Passport.cs`, `E2ETestDataSeed.cs`, `CloseTabsToolbarController.cs` (`VisaCloseAllTabs`)
+- **See also**: earlier same-day bullets (failure capture, close-all-tabs) — this entry is the **single RCA** for person-add-passport
+
+### 2026-08-05 — Visa fill: Issue Date caption collision + failure capture verified
+
+- **Context**: `add-visa-fill-fields` red after passport steps green; failure artifacts under `20260805-165402/failures/`
+- **Symptoms**: `Could not find visible field '' (Issue Date)` — `FillDateFieldAsync` caption/`GetByLabel` path finds nothing visible
+- **Root cause**: TabbedMDI keeps passport **and** visa forms in DOM; both have `xaf-item-issuedate` / caption **Issue Date**; caption-only locators cannot distinguish active visa tab from hidden passport tab
+- **Fix**: Add `ModelDefault(CustomCSSClassName)` on `Visa` BO (`e2e-visa-visa-number`, `e2e-visa-issue-date`, `e2e-visa-start-date`, `e2e-visa-expiration-date`); journey fills use these classes → `TryGetVisibleXafItemLocatorAsync` picks **first visible** `xaf-item-{suffix}` on active MDI tab
+- **Failure capture**: `PlaywrightFailureCapture` wrote PNG + HTML + `.txt` at step failure before rethrow; fixture/test runners also captured — open `failures/add-visa-fill-fields-*.html` to confirm field markup
+- **Green**: full journey pass after visa e2e classes (run after `20260805-165402`)

@@ -13,9 +13,6 @@ prerequisiteSlugs:
   - getting-started/navigation
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-register.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

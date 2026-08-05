@@ -33,6 +33,7 @@ hooks:
   - hooks/sync_manual_assets.py
   - hooks/manual_media_base_url.py
   - hooks/manual_test_report_url.py
+  - hooks/media_capture_labels.py
 
 plugins:
   - search

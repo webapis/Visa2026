@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-mark-incomplete.mp4
-videoSource: recordings/passport-create.mp4
 verified: false
 ---
 
@@ -32,10 +28,6 @@ verified: false
     Изображения с **английского** интерфейса (версия **2026.08**).
 
 ## Видеоинструкция
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/ru/person-mark-incomplete.mp4"
-  title="Отметка неполных данных"></video>
 
 ## Перед началом
 

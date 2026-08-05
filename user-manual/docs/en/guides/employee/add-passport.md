@@ -3,7 +3,7 @@ title: Add a passport to an employee
 slug: employee/add-passport
 locale: en
 tier: 2
-guideStatus: review
+guideStatus: published
 lastReviewed: "2026-08-05"
 bo: Person
 personRole: Employee
@@ -12,13 +12,13 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Add a passport to an employee
@@ -30,14 +30,6 @@ This guide shows how to add a **passport** record on an existing employee. Passp
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-passport.mp4"
-  title="Add a passport to an employee in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 
@@ -55,6 +47,7 @@ This guide shows how to add a **passport** record on an existing employee. Passp
 
 You should see tabs such as **Passports**, **Educations**, and other collections for this person.
 
+<!-- media-capture: person-add-passport-step-01-employee-detail -->
 ![Employee detail with tabs](../../../assets/screenshots/v2026.08/en/person-add-passport-step-01-employee-detail.png)
 
 ## Step 2 — Open the Passports tab
@@ -71,6 +64,9 @@ The nested toolbar should offer **New Passport** (or **New** on the passports li
 
 The new passport is linked to the employee you opened in step 1.
 
+!!! tip "Default passport type"
+    **Passport Type** is preset to **P — National passport** (the type officers use most often). Change it only when the document is a different type.
+
 ![New passport detail form](../../../assets/screenshots/v2026.08/en/person-add-passport-step-02-passport-form-new.png)
 
 ## Step 4 — Fill required fields
@@ -80,7 +76,7 @@ Enter values using the on-screen labels. Typical **required** fields include:
 | Field | What to enter |
 |-------|----------------|
 | **Passport Number** | Unique passport number |
-| **Passport Type** | Choose from the list (for example national passport types) |
+| **Passport Type** | Usually already **P — National passport**; change from the list if needed |
 | **Issue Date** | Date picker |
 | **Expiration Date** | Date picker |
 | **Authority** | Issuing authority text |
@@ -97,6 +93,7 @@ If validation fails, read the message and complete any missing required field.
 
 After save, the **Passport Number** on the form should match what you entered.
 
+<!-- media-capture: person-add-passport-step-04-passport-saved -->
 ![Passport saved on detail form](../../../assets/screenshots/v2026.08/en/person-add-passport-step-04-passport-saved.png)
 
 !!! success "Passport added"

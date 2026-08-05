@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Playwright;
+using Visa2026.E2E.Tests.UserManual;
 
 namespace Visa2026.E2E.Tests.Playwright;
 
@@ -15,7 +16,10 @@ internal static class PlaywrightScreenshotCapture
 
     internal static bool Enabled => !IsFalsy(Environment.GetEnvironmentVariable("VISA2026_E2E_SCREENSHOTS"));
 
-    internal static async Task CaptureAsync(IPage page, string label)
+    internal static Task CaptureAsync(IPage page, string label) =>
+        CaptureAsync(page, label, pinpointTarget: null);
+
+    internal static async Task CaptureAsync(IPage page, string label, ILocator? pinpointTarget)
     {
         if (!Enabled)
             return;
@@ -28,7 +32,9 @@ internal static class PlaywrightScreenshotCapture
         string safe = string.Join("_", (label ?? "shot").Split(Path.GetInvalidFileNameChars()));
         string path = Path.Combine(dir, $"{safe}-{stamp}.png");
         await page.ScreenshotAsync(new PageScreenshotOptions { Path = path, FullPage = false });
+        await UserManualScreenshotPinpoint.TryApplyAsync(label, path, pinpointTarget);
         Console.WriteLine($"[Playwright] Screenshot: {path}");
+        UserManualVideoMarkerCapture.Mark(label);
     }
 
     private static string? ResolveOutputDirectory()

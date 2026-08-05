@@ -40,7 +40,7 @@ public static class E2ETestPersonFieldCaptions
 public static class E2ETestPassportCreateValues
 {
     public const string PassportNumber = "E2E-PASS-020";
-    public const string PassportTypeDisplay = "AML — Accredited national passport";
+    public const string PassportTypeDisplay = "P — National passport";
     public const string IssuedCountryDisplay = "Türkiye";
     public const string IssueDate = "15.01.2020";
     public const string ExpirationDate = "15.01.2030";
@@ -75,6 +75,7 @@ public static class E2ETestPassportFieldCaptions
 /// <summary>Stable values for nested Visa under Passport (E2E-003).</summary>
 public static class E2ETestVisaCreateValues
 {
+    public const string ProcessNumber = "E2E-PROC-030";
     public const string VisaNumber = "E2E-VISA-030";
     public const string IssueDate = "15.01.2024";
     public const string StartDate = "15.01.2024";
@@ -84,6 +85,7 @@ public static class E2ETestVisaCreateValues
 /// <summary>English Blazor captions for <see cref="BusinessObjects.Visa"/> detail (required visible fields).</summary>
 public static class E2ETestVisaFieldCaptions
 {
+    public const string ProcessNumber = "Process number";
     public const string VisaNumber = "Visa Number";
     public const string IssueDate = "Issue Date";
     public const string StartDate = "Start Date";

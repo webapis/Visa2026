@@ -155,11 +155,11 @@ Present **relevant** options only. Respect **[curriculum.md](./curriculum.md)** 
 
 | Option | Best when |
 |--------|-----------|
-| **D1 — Defer video** | Phase &lt; 3 or storage undecided (open decision #6) |
-| **D2 — Record locally** (`Record-EasyTest.ps1`) | Review cut; storage TBD |
-| **D3 — Wait for storage decision** | Need Postgres vs static vs embed |
+| **D1 — No video (recorded D21)** | **Default** — screenshots-only officer manual |
+| **D2 — Record locally** (`Record-PlaywrightE2e.ps1 -EnableVideo`) | Experiments only; not publish |
+| **D3 — Wait** | N/A while D21 stands |
 
-**Default recommendation:** **D1** until Phase 3 unless user explicitly needs a demo recording.
+**Default recommendation:** **D1** — doc-anchored screenshots from UserManual Playwright E2E.
 
 ### E. AI-assisted draft
 

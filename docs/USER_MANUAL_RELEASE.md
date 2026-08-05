@@ -219,11 +219,15 @@ Same layout: virtual applications or static file roots for `/manual/` and `/manu
 
 ## What stays out of git
 
-- `user-manual/assets/**/*.png`, `*.mp4`
+- `user-manual/assets/videos/**/*` (screenshots-only policy; D21)
 - `user-manual/site/`, `user-manual/docs/assets/`
 - `deploy/manual/` (local publish staging)
 
-GitHub Pages CI builds prose-only manuals without on-prem media unless a self-hosted runner records assets.
+**Committed (D22):** `user-manual/assets/screenshots/**/*.png` — required for **GitHub Pages** (`user-manual.yml` on `master` uses `-RequireMedia`). Refresh after E2E: `Record-PlaywrightE2e.ps1` → `Copy-EasyTestManualScreenshots.ps1` → commit PNGs.
+
+**GitHub Pages URL:** `https://<owner>.github.io/<repo>/` (CI sets MkDocs `--site-url`). Enable **Settings → Pages → Source: GitHub Actions** on the repo once.
+
+On-prem IIS/nginx can still use `MANUAL_MEDIA_BASE_URL` for a separate media host; git-tracked PNGs are the default for public Pages.
 
 ---
 

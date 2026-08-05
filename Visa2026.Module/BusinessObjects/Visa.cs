@@ -36,6 +36,7 @@ namespace Visa2026.Module.BusinessObjects
     {
         [MaxLength(50)]
         [RuleRequiredField]
+        [ModelDefault("CustomCSSClassName", "e2e-visa-visa-number")]
         public virtual string VisaNumber { get; set; }
 
         /// <summary>
@@ -82,13 +83,15 @@ namespace Visa2026.Module.BusinessObjects
         /// <see cref="LegacyPersonInApplicationOid"/> (legacy PIA FK also named ProcessNumber in VISA2014).
         /// </summary>
         [Index(0)]
+        [RuleRequiredField]
         [XafDisplayName("Process number")]
         [ToolTip("Işlenen belgisi — typed from the visa image stamp (legacy ASNumber).")]
         [MaxLength(100)]
         [ExcludeFromOptionalDetailFields]
         [VisibleInListView(true)]
         [VisibleInLookupListView(false)]
-        public virtual string? ProcessNumber { get; set; }
+        [ModelDefault("CustomCSSClassName", "e2e-visa-process-number")]
+        public virtual string ProcessNumber { get; set; }
 
         /// <summary>
         /// Legacy <c>Visa.ProcessNumber</c> PersonInApplication Oid (import lineage). Domain line link is <see cref="IssuingApplicationItem"/>.
@@ -105,6 +108,7 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [ModelDefault("CustomCSSClassName", "e2e-visa-issue-date")]
         public virtual DateTime IssueDate
         {
             get => issueDate;
@@ -138,12 +142,14 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [ModelDefault("CustomCSSClassName", "e2e-visa-start-date")]
         public virtual DateTime StartDate { get; set; }
 
         [RuleRequiredField]
         [ImmediatePostData]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
+        [ModelDefault("CustomCSSClassName", "e2e-visa-expiration-date")]
         public virtual DateTime? ExpirationDate { get; set; }
 
         [NotMapped]

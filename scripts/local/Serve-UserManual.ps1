@@ -31,13 +31,17 @@
 .EXAMPLE
   ./scripts/local/Serve-UserManual.ps1 -ManualMediaBaseUrl 'https://10.100.128.25:8081/manual-media'
 
+.PARAMETER SkipLinkValidation
+  Skip link/BO validation (local preview when validator is out of date).
+
 .EXAMPLE
-  ./scripts/local/Serve-UserManual.ps1 -Port 9000 -SkipBuild
+  ./scripts/local/Serve-UserManual.ps1 -SkipLinkValidation
 #>
 [CmdletBinding()]
 param(
     [int]$Port = 8765,
     [switch]$SkipBuild,
+    [switch]$SkipLinkValidation,
     [switch]$NoBrowser,
     [string]$ManualMediaBaseUrl,
     [string]$ManualTestReportUrl
@@ -264,7 +268,12 @@ function Start-ManualPreview {
             Remove-Item Env:USER_MANUAL_PYTHON_ARGS -ErrorAction SilentlyContinue
         }
 
-        & $buildScript -SkipE2E -ManualMediaBaseUrl $ManualMediaBaseUrl
+        $buildArgs = @('-SkipE2E')
+        if ($SkipLinkValidation) { $buildArgs += '-SkipValidate' }
+        if (-not [string]::IsNullOrWhiteSpace($ManualMediaBaseUrl)) {
+            $buildArgs += @('-ManualMediaBaseUrl', $ManualMediaBaseUrl)
+        }
+        & $buildScript @buildArgs
         if ($LASTEXITCODE -ne 0) {
             throw "Build-UserManual.ps1 failed."
         }

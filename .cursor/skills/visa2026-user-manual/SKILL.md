@@ -21,7 +21,7 @@ description: >-
 
 **Canonical:** [`docs/USER_MANUAL_PIPELINE.md`](../../../docs/USER_MANUAL_PIPELINE.md)
 
-Documentation generation **orchestrates** EasyTest — officers get fresh screenshots/video from the **same run** that proves guides still work.
+Documentation generation **orchestrates** Playwright E2E — officers get fresh **doc-anchored screenshots** from the same run that proves guides still work. **Video is deferred** (D21 — screenshots-only).
 
 ```powershell
 ./scripts/ci/Build-UserManual.ps1   # EasyTest → assets → catalog → validate → mkdocs
@@ -35,6 +35,26 @@ Documentation generation **orchestrates** EasyTest — officers get fresh screen
 | **Manifest** | `manual-generation-manifest.yaml` lists slugs + `testFilter` + expected PNGs |
 | **Trait** | E2E tests: `[Trait("Category", "UserManual")]` + `[Trait("GuideSlug", "...")]` |
 
+### Doc-anchored media (mandatory for published guides)
+
+**Canonical:** [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) § Doc-anchored capture.
+
+The **guide section** owns what each image/video must show. E2E proves that state at capture time.
+
+| Step | Owner | Action |
+|------|-------|--------|
+| 1 | user-manual | Write step prose; add `<!-- media-capture: {key} -->` above each screenshot |
+| 2 | user-manual | Register key in `user-manual/media-capture-registry.yaml` (`guideSlugs`, `description`, `assertBeforeCapture`) |
+| 3 | easytest-e2e | Add key to `UserManualMediaCaptureKeys.cs`; `CaptureAsync` after assertions |
+| 4 | pipeline | `Copy-EasyTestManualScreenshots.ps1` — 1:1 copy; **no new legacy fan-out** |
+| 5 | CI | `Validate-UserManualMediaCaptures.ps1` — anchor, basename match, `guideSlugs` contains guide `slug` |
+
+**Pinpoint (action shots):** registry `pinpoint:` + `CaptureAsync(page, key, locator)` — orange highlight burned into PNG (`UserManualScreenshotPinpoint`). Skip overview frames. Opt out: `VISA2026_E2E_PINPOINTS=false`.
+
+**Rules:** capture key = PNG stem = E2E label. Shared keys across guides are allowed when the same UI state is correct. **No video** in published guides (D21). Optional video infra remains in repo (`-EnableVideo` on `Record-PlaywrightE2e.ps1`) — not used for officer manual publish.
+
+**Pilots 1–5** are doc-anchored. Other guides still on **legacy fan-out** until migrated — see tracking **Media** column.
+
 Local prose-only edit: `-SkipE2E` allowed with warning — **never** on CI/main publish.
 
 **Triggers:** **Cursor Cloud Agent** runs manual generation (primary). Git push / PR only **verifies** committed manual artifacts via CI — see [cursor-integration.md](./cursor-integration.md).
@@ -45,7 +65,7 @@ Local prose-only edit: `-SkipE2E` allowed with warning — **never** on CI/main 
 
 **Canonical:** [content-policy.md](./content-policy.md)
 
-Published pages under `user-manual/docs/` use **UI language only** — menus, field labels, screenshots, video. No C#, SQL, BO/property names, repo paths, or links to developer `docs/`. **Testing:** green tick only when verified — full results are separate ([testing-evidence.md](./testing-evidence.md)).
+Published pages under `user-manual/docs/` use **UI language only** — menus, field labels, screenshots. No C#, SQL, BO/property names, repo paths, links to developer `docs/`, or **video embeds** (screenshots-only, D21). **Testing:** green tick only when verified — full results are separate ([testing-evidence.md](./testing-evidence.md)).
 
 ---
 
@@ -107,6 +127,7 @@ Use **[code-drift-scan.md](./code-drift-scan.md)** (mandatory — not optional) 
 | [`scripts/local/Serve-UserManual.ps1`](../../../scripts/local/Serve-UserManual.ps1) | **Local preview** — one script, reuses `user-manual/.tools/`, MkDocs hot reload |
 | [cursor-integration.md](./cursor-integration.md) | **Git push** — GHA manual pipeline + optional Cursor agent |
 | [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) | Screenshots & video contract |
+| [`user-manual/media-capture-registry.yaml`](../../../user-manual/media-capture-registry.yaml) | Doc-anchored capture keys + `guideSlugs` |
 | [learnings.md](./learnings.md) | Append-only experience |
 | [tracking.md](./tracking.md) | Guide inventory, infra, doc debt |
 | [reference.md](./reference.md) | Commands, frontmatter, CI rules, **gitignore contract** |
@@ -228,9 +249,10 @@ See [advisory.md §5A–B](./advisory.md#5-options-menu-offer-the-user) for path
 1. Confirm phase + officer reviewer ([advisory.md](./advisory.md))
 2. Frontmatter: `slug`, `bo`, `status: draft`, `sourceDocs`, `e2eScenarioId` if E2E exists
 3. Draft from catalog display names + E2E map §3 — **no code in body** ([content-policy.md](./content-policy.md))
-4. Validator green (Phase 1+)
-5. `tracking.md` inventory row
-6. `learnings.md`
+4. For each screenshot: `<!-- media-capture: {key} -->` + registry row (`guideSlugs`, `description`, `assertBeforeCapture`) — see [§ Doc-anchored media](#doc-anchored-media-mandatory-for-published-guides)
+5. Validator green (Phase 1+)
+6. `tracking.md` inventory row (`Media: doc-anchored` when keys are wired)
+7. `learnings.md`
 
 ---
 
@@ -241,7 +263,7 @@ Triggers: [advisory.md §2](./advisory.md#2-when-to-create-or-update-documentati
 **Prerequisite:** Drift scan approved items, or user explicitly scoped the edit — see [code-drift-scan.md](./code-drift-scan.md).
 
 1. Diff `bo-catalog.json` vs guide
-2. Edit body; bump `screenshotsVersion` if UI changed
+2. Edit body; for UI changes add/update `media-capture` anchors + registry rows; bump `screenshotsVersion` if UI changed
 3. `status: review` until officer sign-off
 4. `tracking.md` + `learnings.md`
 
@@ -288,10 +310,10 @@ Layer B must not invent names — reference Layer A and E2E maps.
 | In scope | Out of scope |
 |----------|----------------|
 | Advisory + full doc lifecycle | Rewriting all `docs/` for officers |
-| E2E media interlock | Video in git; storage backend TBD Phase 3 |
+| E2E media interlock | Video in officer guides (D21 — screenshots-only) |
 | **Four locales** en/tr/tk/ru | Single language only |
 | **Green tick verification** | Raw test logs on officer pages |
-| Officer UI prose, screenshots, video | **Code, APIs, BO names, dev `docs/` on the site** |
+| Officer UI prose, screenshots | **Code, APIs, BO names, dev `docs/` on the site** |
 
 **Phases 0–5:** [ROADMAP](../../../docs/USER_MANUAL_ROADMAP.md). **E2E producer:** [visa2026-easytest-e2e](../visa2026-easytest-e2e/SKILL.md). **Adapt sources:** PERSON_DOSSIER, APPLICATION_ITEM_DOCUMENT_COPIES, REPORT_DASHBOARD, etc. (table in [reference.md](./reference.md) or implementation plan).
 

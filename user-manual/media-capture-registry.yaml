@@ -1,0 +1,264 @@
+# Doc-anchored media capture registry (officer manual)
+# Each capture key equals the PNG file stem in guides and the E2E screenshot label.
+# Guides anchor captures with: <!-- media-capture: {key} --> above the image markdown.
+# guideSlugs must list every guide frontmatter slug that embeds this image.
+
+version: 2
+
+captures:
+  login-step-01-logon:
+    guideSlugs:
+      - getting-started/login
+    journey: person-officer-journey
+    description: Sign-in page before Log In
+    pinpoint:
+      kind: button
+      label: Log In
+    assertBeforeCapture:
+      - urlContains: LoginPage
+
+  login-step-02-report-dashboard:
+    guideSlugs:
+      - getting-started/login
+    journey: person-officer-journey
+    description: Report Dashboard immediately after successful sign-in
+    assertBeforeCapture:
+      - splashDismissed: true
+      - textVisible: Report Dashboard
+
+  navigation-step-01-shell:
+    guideSlugs:
+      - getting-started/navigation
+    journey: person-officer-journey
+    description: Application shell — header, left nav, dashboard content, toolbar
+    assertBeforeCapture:
+      - splashDismissed: true
+      - textVisible: Report Dashboard
+
+  navigation-step-02-left-menu:
+    guideSlugs:
+      - getting-started/navigation
+    journey: person-officer-journey
+    description: Left navigation menu with officer items visible
+    pinpoint:
+      kind: navItem
+      label: Employees
+    assertBeforeCapture:
+      - splashDismissed: true
+      - textVisible: Employees
+
+  navigation-step-03-employees-list:
+    guideSlugs:
+      - getting-started/navigation
+      - person/open-and-search
+    journey: person-officer-journey
+    description: Employees list with toolbar
+    pinpoint:
+      kind: toolbar
+      titlePrefix: New
+    assertBeforeCapture:
+      - urlContains: Person_ListView_Employees
+      - toolbarVisible: New
+
+  navigation-step-04-detail-form:
+    guideSlugs:
+      - getting-started/navigation
+      - person/open-and-search
+    journey: person-officer-journey
+    description: Employee detail form with tabs
+    pinpoint:
+      kind: toolbar
+      titlePrefix: Save
+    assertBeforeCapture:
+      - fieldVisible: First Name
+      - toolbarVisible: Save
+
+  person-register-step-01-employees-list:
+    guideSlugs:
+      - employee/register
+    journey: person-officer-journey
+    description: Employees list before New
+    pinpoint:
+      kind: toolbar
+      titlePrefix: New
+    assertBeforeCapture:
+      - urlContains: Person_ListView_Employees
+      - toolbarVisible: New
+
+  person-register-step-02-saved-detail:
+    guideSlugs:
+      - employee/register
+    journey: person-officer-journey
+    description: Employee detail immediately after first Save
+    assertBeforeCapture:
+      - fieldVisible: Personal Number
+
+  person-register-step-03-open-from-list:
+    guideSlugs:
+      - employee/register
+    journey: person-officer-journey
+    description: Employee detail reopened from list row
+    assertBeforeCapture:
+      - fieldVisible: Personal Number
+
+  person-add-passport-step-01-employee-detail:
+    guideSlugs:
+      - employee/add-passport
+    journey: person-officer-journey
+    description: Employee detail before Passports tab
+    pinpoint:
+      kind: tab
+      label: Passports
+    assertBeforeCapture:
+      - tabVisible: Passports
+
+  person-add-passport-step-02-passport-form-new:
+    guideSlugs:
+      - employee/add-passport
+    journey: person-officer-journey
+    description: Blank passport detail after New Passport
+    pinpoint:
+      kind: field
+      cssClass: e2e-passport-passport-number
+    assertBeforeCapture:
+      - fieldVisible: Passport Number
+
+  person-add-passport-step-03-passport-fields-filled:
+    guideSlugs:
+      - employee/add-passport
+    journey: person-officer-journey
+    description: Passport form with required fields filled
+    pinpoint:
+      kind: field
+      cssClass: e2e-passport-passport-number
+    assertBeforeCapture:
+      - fieldVisible: Passport Number
+
+  person-add-passport-step-04-passport-saved:
+    guideSlugs:
+      - employee/add-passport
+    journey: person-officer-journey
+    description: Passport detail after Save
+    pinpoint:
+      kind: toolbar
+      titlePrefix: Save
+    assertBeforeCapture:
+      - fieldVisible: Passport Number
+
+  person-add-visa-step-01-passport-detail:
+    guideSlugs:
+      - employee/add-visa
+      - family-member/add-visa
+      - temporary-visitor/add-visa
+    journey: person-officer-journey
+    description: Passport detail before Visas nested tab — open passport row first
+    pinpoint:
+      kind: tab
+      label: Visas
+    assertBeforeCapture:
+      - fieldVisible: Passport Number
+      - tabVisible: Visas
+
+  person-add-visa-step-02-visa-form-new:
+    guideSlugs:
+      - employee/add-visa
+      - family-member/add-visa
+      - temporary-visitor/add-visa
+    journey: person-officer-journey
+    description: Blank visa detail after New Visa on passport Visas tab
+    pinpoint:
+      kind: field
+      caption: Visa Number
+    assertBeforeCapture:
+      - fieldVisible: Process number
+      - fieldVisible: Visa Number
+
+  person-add-visa-step-03-visa-fields-filled:
+    guideSlugs:
+      - employee/add-visa
+      - family-member/add-visa
+      - temporary-visitor/add-visa
+    journey: person-officer-journey
+    description: Visa form with required fields filled before Save
+    pinpoint:
+      kind: field
+      caption: Visa Number
+    assertBeforeCapture:
+      - fieldVisible: Process number
+      - fieldVisible: Visa Number
+
+  person-add-visa-step-04-visa-saved:
+    guideSlugs:
+      - employee/add-visa
+      - family-member/add-visa
+      - temporary-visitor/add-visa
+    journey: person-officer-journey
+    description: Visa detail after Save
+    pinpoint:
+      kind: toolbar
+      titlePrefix: Save
+    assertBeforeCapture:
+      - fieldVisible: Process number
+      - fieldVisible: Visa Number
+
+videos:
+  # DORMANT — officer manual is screenshots-only (D21). Retained for optional -EnableVideo experiments.
+  login-sign-in:
+    guideSlugs:
+      - getting-started/login
+    journey: person-officer-journey
+    videoFile: login-sign-in.mp4
+    sourceRecording: person-officer-journey.mp4
+    fromCaptureKey: login-step-01-logon
+    toCaptureKey: login-step-02-report-dashboard
+    paddingStartSeconds: 0.5
+    paddingEndSeconds: 2.0
+    description: Sign in and land on Report Dashboard
+
+  navigation-shell:
+    guideSlugs:
+      - getting-started/navigation
+    journey: person-officer-journey
+    videoFile: navigation-shell.mp4
+    sourceRecording: person-officer-journey.mp4
+    fromCaptureKey: navigation-step-01-shell
+    toCaptureKey: navigation-step-04-detail-form
+    paddingStartSeconds: 0.5
+    paddingEndSeconds: 2.5
+    description: Main navigation walkthrough — shell, menu, list, detail form
+
+  person-open-search:
+    guideSlugs:
+      - person/open-and-search
+    journey: person-officer-journey
+    videoFile: person-open-search.mp4
+    sourceRecording: person-officer-journey.mp4
+    fromCaptureKey: navigation-step-03-employees-list
+    toCaptureKey: navigation-step-04-detail-form
+    paddingStartSeconds: 0.5
+    paddingEndSeconds: 2.5
+    description: Find and open a person — list search and detail form
+
+  person-register:
+    guideSlugs:
+      - employee/register
+    journey: person-officer-journey
+    videoFile: person-register.mp4
+    sourceRecording: person-officer-journey.mp4
+    fromCaptureKey: person-register-step-01-employees-list
+    toCaptureKey: person-register-step-03-open-from-list
+    paddingStartSeconds: 0.5
+    paddingEndSeconds: 2.5
+    description: Register a new employee — New, fill, Save, reopen from list
+
+  person-add-passport:
+    guideSlugs:
+      - employee/add-passport
+    journey: person-officer-journey
+    videoFile: person-add-passport.mp4
+    sourceRecording: person-officer-journey.mp4
+    fromCaptureKey: person-add-passport-step-01-employee-detail
+    toCaptureKey: person-add-passport-step-04-passport-saved
+    paddingStartSeconds: 0.5
+    paddingEndSeconds: 2.5
+    description: Add a passport on employee — Passports tab, New, fill, Save

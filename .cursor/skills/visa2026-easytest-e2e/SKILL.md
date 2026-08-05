@@ -129,6 +129,19 @@ Add **`data-testid`** on custom Blazor (preview slot, Resminamalar, Document cop
 | Passport | Employee detail → **Passports** tab → **New Passport** | Lookup/Passport sidebar |
 | After New employee | Assert employee DetailView (form / URL) | Assume list context from nav highlight |
 
+### TabbedMDI (Playwright) — nested DetailView
+
+Blazor TabbedMDI keeps **every open view in the DOM** (hidden tabs included). Nested **New** (e.g. Passport on employee) opens a **new MDI tab**; browser URL often **stays on the parent** (`Person_DetailView_Employee`).
+
+| Rule | Do | Do not |
+|------|-----|--------|
+| After nested New | `GetByRole(Tab, Name: "Passport", Exact: true)` — activate MDI tab | `:has-text('Passport')` (matches nested **Passports** layout tab) |
+| Field locators | **First visible** match; map `e2e-passport-*` → `xaf-item-{suffix}` | `.First` on `e2e-*` CSS (often absent in DOM; hidden duplicates exist) |
+| Nested New button | `title^='New Passport'` + `data-action-name='New'` scoped to Passports list | Generic `button[title='New']` on employee detail |
+| URL | Wait for visible field / Save toolbar | `WaitForURL` to Passport DetailView id |
+
+Canonical RCA: [learnings.md § 2026-08-05 Person add-passport](./learnings.md).
+
 Constants: `E2ETestLoginValues`, `E2ETestPassportCreateOnlyJourneyValues`, etc. in `Visa2026.Module/DatabaseUpdate/E2ETestDataSeed.cs`.
 
 ### DetailView fill pattern
@@ -201,6 +214,42 @@ CI: **`.github/workflows/e2e-tests.yml`**. Project README may still describe Eas
 
 Prefer **`Record-EasyTest.ps1`** when MP4 is required. Coordinate guides with [visa2026-user-manual](../visa2026-user-manual/SKILL.md). Full contract: [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md).
 
+### Doc-anchored screenshot capture (mandatory for new keys)
+
+Before adding `CaptureAsync` / `EasyTestScreenshotCapture.Capture`:
+
+1. The capture **key** must exist in `user-manual/media-capture-registry.yaml` with `guideSlugs` listing every guide that embeds the image.
+2. Each guide must have `<!-- media-capture: {key} -->` above the matching `![...](.../{key}.png)`.
+3. Capture **only after** `assertBeforeCapture` conditions in the registry are satisfied in the test.
+4. Use `UserManualMediaCaptureKeys` constants — never ad-hoc label strings.
+5. **Do not** add new legacy fan-out rows in `Copy-EasyTestManualScreenshots.ps1`.
+
+Shared keys across guides are allowed when the same UI state is correct (e.g. employees list in navigation + open-and-search).
+
+**Video:** **Off by default** (D21 screenshots-only). Opt in with `Record-PlaywrightE2e.ps1 -EnableVideo` for experiments only — not officer manual publish.
+
+---
+
+## Failure capture (mandatory)
+
+On **any** Playwright test or journey step failure, capture UI state **before** the browser closes:
+
+| Layer | Type | When |
+|-------|------|------|
+| Journey step | `PlaywrightE2eStepRunner.RunAsync(page, stepName, …)` | Per step (`add-passport-open-form`, `add-visa-fill-fields`, …) |
+| Test Fact | `PlaywrightE2eTestRunner.RunAsync(fixture, testName, …)` | Outer test wrapper — **required** for new Facts |
+| Fixture dispose | `PlaywrightFailureCapture.CaptureBeforeExitAsync` | Safety net if page still open |
+
+**Artifacts** (always, independent of `VISA2026_E2E_SCREENSHOTS`):
+
+`Visa2026.E2E.Tests/recordings/screenshots/{runId}/failures/{step}-{timestamp}.png`  
+`…/{step}-{timestamp}.html` (full DOM)  
+`…/{step}-{timestamp}.txt` (URL, exception, paths)
+
+Console logs all three paths. On red runs, open `failures/` under the screenshot run id first.
+
+**Do not** add Facts with bare `try/catch` — use `PlaywrightE2eTestRunner`. Wrap new journey phases in `PlaywrightE2eStepRunner`.
+
 ---
 
 ## Agent workflow
@@ -228,8 +277,12 @@ When the user asks for **E2E**, **Playwright**, **EasyTest** (redirect), or **`V
 | Login `standarduser` | **`StandardUser`** |
 | Sidebar Employees → Family Members | Goto **`/Person_ListView_Employees`** |
 | Passport via Lookup | Nested **Passports** → New Passport |
+| TabbedMDI `.First` locator | **First visible** field; activate correct MDI tab (`Exact: true`) |
+| `e2e-passport-*` CSS only | `xaf-item-*` suffix or caption fallback (`ModelDefault` may not render) |
+| `WaitForURL` after nested New | Wait for visible Passport Number / Save on active tab |
 | Second host/port for Playwright | Share **`:5050`** preflight |
 | Fragile XPath | Label / `data-testid` / role |
+| Red Playwright run with no artifacts | Use `PlaywrightE2eTestRunner` + `PlaywrightE2eStepRunner`; check `failures/` under run id |
 
 ---
 

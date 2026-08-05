@@ -1,7 +1,7 @@
 # User Manual — EasyTest media contract
 
-Status: **Draft v0.1**  
-Last updated: 2026-08-04
+Status: **v0.4** (screenshots-only — D21)  
+Last updated: 2026-08-05
 
 **Skills:** [visa2026-user-manual](../.cursor/skills/visa2026-user-manual/SKILL.md) · [visa2026-easytest-e2e](../.cursor/skills/visa2026-easytest-e2e/SKILL.md)
 
@@ -64,9 +64,101 @@ status: draft
 | `e2eScenarioId` | When E2E exists | easytest-e2e creates scenario; user-manual references |
 | `e2eTestFilter` | When video auto-recorded | easytest-e2e |
 | `screenshotsVersion` | When guide has images | user-manual |
+| `screenshotsCapturedAt` | ISO-8601 UTC when milestone PNGs were copied from UserManual E2E | pipeline (`Update-UserManualGuideVerification.ps1`) |
+| `videoCapturedAt` | ISO-8601 UTC when walkthrough MP4 was captured (same run when applicable) | pipeline |
+| `mediaE2eRunId` | E2E screenshot run folder id (e.g. `20260805-124857`) | pipeline — ties to `recordings/screenshots/{id}/` |
 | `video` | Optional embed URL | user-manual (after officer review) |
 
 **Validator (Phase 3+):** warn if `e2eScenarioId` set but `scenarios/ready/<id>/` missing.
+
+**Officer site display:** MkDocs hook `hooks/media_capture_labels.py` reads `screenshotsCapturedAt`, `videoCapturedAt`, and `mediaE2eRunId` from page meta and injects:
+
+- **Screenshots** admonition — E2E capture line (UTC + run id)
+- **Video walkthrough** caption — same capture line
+- **Per-frame caption** under each `assets/screenshots/...` image
+
+Per-file capture detail is also written to `user-manual/assets/screenshots/v{version}/capture-manifest.json` when `Copy-EasyTestManualScreenshots.ps1` runs.
+
+### Doc-anchored capture (canonical — v0.3)
+
+**Principle:** the **guide section** where an image or video appears defines what the media must show. E2E captures that UI state; the registry records the contract; the pipeline copies **1:1** — no fan-out from unrelated journey milestones.
+
+```text
+Guide prose + step (officer-visible meaning)
+    ↓
+<!-- media-capture: {key} --> above the image
+    ↓
+media-capture-registry.yaml — guideSlugs, description, assertBeforeCapture
+    ↓
+UserManualMediaCaptureKeys + E2E CaptureAsync at assertion point
+    ↓
+assets/screenshots/v{version}/{locale}/{key}.png
+```
+
+Each screenshot in a **published** guide must declare the capture key on the line **immediately above** the image:
+
+```markdown
+<!-- media-capture: navigation-step-01-shell -->
+![Application shell with left navigation menu](../../assets/screenshots/v2026.08/en/navigation-step-01-shell.png)
+```
+
+| Piece | Rule |
+|-------|------|
+| **Capture key** | Equals the PNG file stem (`navigation-step-01-shell`) |
+| **E2E label** | Same string passed to `PlaywrightScreenshotCapture` / `EasyTestScreenshotCapture` |
+| **`guideSlugs`** | One or more guide frontmatter `slug` values where this image is embedded (shared keys allowed when the same UI state is correct in multiple guides) |
+| **`description`** | Officer-visible meaning — should match the figure caption / step text |
+| **`assertBeforeCapture`** | UI state E2E must satisfy **before** capture (url, visible text, toolbar, field) |
+| **Registry** | `user-manual/media-capture-registry.yaml` — source of truth for keys |
+| **Copy** | `Copy-EasyTestManualScreenshots.ps1` copies **1:1** (`{key}.png` → `{key}.png`) |
+| **Validator** | `Validate-UserManualMediaCaptures.ps1` — published guides: anchor required; key = basename; registry `guideSlugs` must include guide `slug` when `-RequireRegistry` |
+| **Pinpoint** | Optional `pinpoint:` in registry; E2E passes Playwright locator to `CaptureAsync` — orange highlight burned into PNG; bbox in `pinpoints.json` |
+
+Constants for the person-officer journey: `Visa2026.E2E.Tests/UserManual/UserManualMediaCaptureKeys.cs`.
+
+#### Pinpoint highlights (action screenshots)
+
+Borrow the **“where to click”** pattern from tools like [Guidde](https://www.guidde.com/gallery/how-to-create-learning-plan-in-docebo) — without external SaaS.
+
+| Rule | Detail |
+|------|--------|
+| **When** | Toolbar buttons, nav items, tabs, primary fields — not full-shell overview shots |
+| **How** | `CaptureAsync(page, key, locator)` → `UserManualScreenshotPinpoint` draws ring + pointer on PNG |
+| **Registry** | `pinpoint: { kind, label \| titlePrefix \| cssClass }` documents intent |
+| **Opt out** | `VISA2026_E2E_PINPOINTS=false` |
+| **Manifest** | `recordings/screenshots/{runId}/pinpoints.json` merged into `capture-manifest.json` |
+
+Overview captures (`navigation-step-01-shell`, `login-step-02-report-dashboard`) omit pinpoint.
+
+**Workflow (create or update a guide):**
+
+1. Write the step prose and decide what the figure must show.
+2. Add `<!-- media-capture: {key} -->` + `![...](.../{key}.png)`.
+3. Add or update a registry row (`guideSlugs`, `description`, `assertBeforeCapture`).
+4. Add the key to `UserManualMediaCaptureKeys.cs` and call `CaptureAsync` after the assertions in E2E.
+5. Run `Build-UserManual.ps1` (or E2E + copy scripts) — verify PNG matches the prose.
+
+#### Legacy fan-out (deprecated)
+
+`Copy-EasyTestManualScreenshots.ps1` still maps old milestone labels (`00-logon-page`, `04-employee-detail`, …) to **many** destination PNGs for guides **not yet migrated** to doc-anchored keys. That reuse causes screenshots that do not match guide prose.
+
+| Status | Guides |
+|--------|--------|
+| **Doc-anchored** | Pilots 1–5 (`getting-started/login`, `getting-started/navigation`, `person/open-and-search`, `employee/register`, `employee/add-passport`) |
+| **Legacy fan-out** | All other guides with screenshots until migrated per guide |
+
+**Do not add new fan-out mappings.** Migrate guides to dedicated capture keys instead.
+
+#### Video (deferred — D21)
+
+**Officer manual publish is screenshots-only.** Do not add `<video>` blocks or `video*` frontmatter to guides.
+
+| Policy | Detail |
+|--------|--------|
+| **Default** | UserManual Playwright E2E captures **PNG only** (`VISA2026_E2E_VIDEO_RECORDING` off) |
+| **Guides** | Step prose + doc-anchored screenshots; no Video walkthrough section |
+| **CI** | `Validate-UserManualMediaCaptures.ps1` fails published guides with `<video>` or video frontmatter |
+| **Optional infra** | `Copy-EasyTestManualVideos.ps1`, registry `videos:`, `-EnableVideo` on `Record-PlaywrightE2e.ps1` — retained for future experiments, not officer publish |
 
 ---
 
@@ -111,21 +203,20 @@ Save to:
 user-manual/assets/screenshots/v2026.09/en/person-register-step-NN-<short-label>.png
 ```
 
-### Phase 3 — automated capture (planned)
+### Phase 3 — automated capture (in progress)
 
-**New helper** (E2E.Tests): `UserManualMediaCapture.CaptureStep(slug, stepKey, outputDir)`
+Doc-anchored keys ship in **`UserManualMediaCaptureKeys.cs`** + `PlaywrightScreenshotCapture.CaptureAsync(page, key)`.
 
 | Piece | Path |
 |-------|------|
-| Helper | `Visa2026.E2E.Tests/UserManualMediaCapture.cs` |
-| Output (CI artifact) | `Visa2026.E2E.Tests/manual-media/{slug}/{stepKey}.png` |
-| Copy script | `scripts/ci/Copy-EasyTestManualScreenshots.ps1` |
-| Destination | `user-manual/assets/screenshots/v{version}/{locale}/` |
+| Keys | `Visa2026.E2E.Tests/UserManual/UserManualMediaCaptureKeys.cs` |
+| Capture | `PlaywrightScreenshotCapture` / `EasyTestScreenshotCapture` at registry assertion point |
+| Copy script | `scripts/ci/Copy-EasyTestManualScreenshots.ps1` (1:1 for doc keys) |
+| Destination | `user-manual/assets/screenshots/v{version}/{locale}/{key}.png` |
 
-**Naming:** `{slug-with-dashes}-step-{NN}-{stepKey}.png`  
-**Example:** `person-register-step-02-employees-list.png`
+**Naming:** `{topic}-step-{NN}-{short-label}` — key equals PNG stem (e.g. `person-register-step-02-saved-detail`).
 
-Call capture after stable navigation assertions (`NavigateEmployeesList`, `AssertEmployeeDetailViewActive`).
+Call capture only after `assertBeforeCapture` conditions in the registry are satisfied in the test.
 
 ### Markdown reference in guide
 
@@ -152,7 +243,7 @@ Call capture after stable navigation assertions (`NavigateEmployeesList`, `Asser
 
 **Decision gate (Phase 3):** product + IT choose A–E per environment (dev demo vs on-prem prod). Document the winner in [tracking.md](../.cursor/skills/visa2026-user-manual/tracking.md) open decisions and update guide `videoStorage` frontmatter.
 
-**Invariant (all options):** EasyTest **source** recordings stay in `Visa2026.E2E.Tests/recordings/` (gitignored). Promoted PNG/MP4 under `user-manual/assets/screenshots/` and `user-manual/assets/videos/` are also **gitignored** — generate via `Record-EasyTest.ps1` + `Copy-EasyTestManual*.ps1` before local preview or run `Build-UserManual.ps1 -RequireMedia` after media copy.
+**Invariant:** EasyTest **source** recordings stay in `Visa2026.E2E.Tests/recordings/` (gitignored). **Screenshots** under `user-manual/assets/screenshots/**/*.png` are **committed** (D22) for GitHub Pages. **Videos** under `user-manual/assets/videos/` remain gitignored (D21). Regenerate PNGs via `Record-PlaywrightE2e.ps1` + `Copy-EasyTestManualScreenshots.ps1`, then commit; CI uses `Build-UserManual.ps1 -RequireMedia`.
 
 ### Local record
 
@@ -250,3 +341,6 @@ Update this table when scenarios ship.
 | 2026-08-04 | Initial contract v0.1 |
 | 2026-08-04 | Video storage options A–E documented; backend TBD Phase 3 |
 | 2026-08-04 | E2E embedded in unified pipeline ([USER_MANUAL_PIPELINE.md](USER_MANUAL_PIPELINE.md)) |
+| 2026-08-05 | **v0.3** — doc-anchored capture canonical; `guideSlugs` in registry; legacy fan-out deprecated |
+| 2026-08-05 | Video doc-anchoring at guide level (`videoFile`, optional `videoCaptureKey`) |
+| 2026-08-05 | **D21** — screenshots-only officer manual; video deferred |

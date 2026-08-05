@@ -10,13 +10,13 @@ prerequisiteSlugs:
   - getting-started/login
   - getting-started/navigation
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-open-search.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Поиск и открытие персоны
@@ -30,12 +30,6 @@ verified: false
     Изображения с **английского** интерфейса (версия **2026.08**).
 
 ## Видеоинструкция
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/ru/person-open-search.mp4"
-  title="Поиск и открытие персоны"></video>
-
-<p class="visa-manual-video-caption">Запись из учебной среды (тестовые данные).</p>
 
 ## Перед началом
 

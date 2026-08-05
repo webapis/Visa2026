@@ -3,22 +3,22 @@ title: Main navigation
 slug: getting-started/navigation
 locale: en
 tier: 0
-guideStatus: review
+guideStatus: published
 lastReviewed: "2026-08-05"
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: navigation-shell.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
 sourceDocs:
   - docs/REPORT_DASHBOARD.md
   - docs/STATE_NOTIFICATIONS_IMPLEMENTATION_PLAN.md
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Main navigation
@@ -31,14 +31,6 @@ This guide explains how to move around Visa2026 after you sign in: the home page
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
 
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../assets/videos/v2026.08/en/navigation-shell.mp4"
-  title="Main navigation in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The sections below match the video.</p>
-
 ## The application shell
 
 After sign-in, Visa2026 shows four main areas:
@@ -50,6 +42,7 @@ After sign-in, Visa2026 shows four main areas:
 | **Main content** (center) | Dashboard, lists, or detail forms |
 | **Toolbar** (above content) | Actions such as **New**, **Save**, and **Refresh** for the current view |
 
+<!-- media-capture: navigation-step-01-shell -->
 ![Application shell with left navigation menu](../../assets/screenshots/v2026.08/en/navigation-step-01-shell.png)
 
 ## Home page — Report Dashboard
@@ -91,6 +84,7 @@ Typical officer menus include:
 !!! note "Your menu may differ"
     Supervisors assign roles that control which items appear. If you expect a menu and do not see it, ask your administrator — do not sign in as someone else.
 
+<!-- media-capture: navigation-step-02-left-menu -->
 ![Left navigation menu expanded](../../assets/screenshots/v2026.08/en/navigation-step-02-left-menu.png)
 
 ## Open a list
@@ -102,6 +96,7 @@ Lists show many records in a table (for example all employees).
 
 The list toolbar usually includes **New** (create a record), **Refresh** (reload the list), and search or filter controls.
 
+<!-- media-capture: navigation-step-03-employees-list -->
 ![Employees list](../../assets/screenshots/v2026.08/en/navigation-step-03-employees-list.png)
 
 The same pattern applies to other list menus: **Family Members**, **Applications (via ministry)**, and so on.
@@ -125,6 +120,7 @@ Common toolbar actions on a detail form:
 | **Refresh** | Reload the current view |
 | **Delete** / **Remove** | Only when your role allows removing records |
 
+<!-- media-capture: navigation-step-04-detail-form -->
 ![Employee detail form with tabs](../../assets/screenshots/v2026.08/en/navigation-step-04-detail-form.png)
 
 !!! warning "Unsaved changes"

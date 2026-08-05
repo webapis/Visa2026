@@ -1,5 +1,6 @@
 using System.Runtime.Versioning;
 using DevExpress.EasyTest.Framework;
+using Visa2026.E2E.Tests.UserManual;
 using Visa2026.Module.DatabaseUpdate;
 using Xunit;
 
@@ -95,30 +96,43 @@ public class PersonOfficerJourneyTests : E2ETestBase
         string fullName,
         string passportNumber)
     {
-        EasyTestScreenshotCapture.Capture(AppContext, "00-logon-page");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy00LogonPage);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.LoginStep01Logon);
         Login(E2ETestLoginValues.StandardUserName, E2ETestLoginValues.StandardUserPassword);
-        EasyTestScreenshotCapture.Capture(AppContext, "01-after-login");
         AssertAuthenticatedAppShell();
-        EasyTestScreenshotCapture.Capture(AppContext, "02-employees-list");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.LoginStep02ReportDashboard);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.NavigationStep01Shell);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.NavigationStep02LeftMenu);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy01AfterLogin);
 
         NavigateEmployeesList();
         Assert.NotNull(AppContext.GetAction("New"));
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonRegisterStep01EmployeesList);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.NavigationStep03EmployeesList);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy02EmployeesList);
 
         CreateEmployeeWithRequiredFields(personalNumber, firstName, lastName);
-        EasyTestScreenshotCapture.Capture(AppContext, "03-employee-created");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonRegisterStep02SavedDetail);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy03EmployeeCreated);
 
         OpenEmployeeInListByPersonalNumber(personalNumber, fullName);
         Assert.Equal(firstName, AppContext.GetForm().GetPropertyValue("First Name"));
         Assert.Equal(lastName, AppContext.GetForm().GetPropertyValue("Last Name"));
         Assert.Equal(personalNumber, AppContext.GetForm().GetPropertyValue("Personal Number"));
-        EasyTestScreenshotCapture.Capture(AppContext, "04-employee-detail");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonAddPassportStep01EmployeeDetail);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonRegisterStep03OpenFromList);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.NavigationStep04DetailForm);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy04EmployeeDetail);
 
         ExecutePersonPassportsNestedNew();
-        EasyTestScreenshotCapture.Capture(AppContext, "05-passport-detail-new");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonAddPassportStep02PassportFormNew);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy05PassportDetailNew);
         FillPassportRequiredFields(passportNumber);
-        EasyTestScreenshotCapture.Capture(AppContext, "06-passport-fields-filled");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonAddPassportStep03PassportFieldsFilled);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy06PassportFieldsFilled);
         SavePassportDetail();
         AssertPassportDetailShowsNumber(passportNumber);
-        EasyTestScreenshotCapture.Capture(AppContext, "07-passport-saved");
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.PersonAddPassportStep04PassportSaved);
+        EasyTestScreenshotCapture.Capture(AppContext, UserManualMediaCaptureKeys.Legacy07PassportSaved);
     }
 }

@@ -44,6 +44,8 @@
 | **D18** | E2E driver for manual media | **Playwright** for Local + Staging (same journeys); EasyTest legacy until migrated |
 | **D19** | Media on app deploy? | **No** — separate `Publish-ManualRelease.ps1` / `Record-PlaywrightE2e.ps1` step |
 | **D20** | Staging E2E trigger | **Manual only** (`VISA2026_E2E_TARGET=Staging`); validates live staging before promote |
+| **D21** | Officer manual media | **Screenshots-only** — doc-anchored PNGs from UserManual Playwright E2E; **no video** in guides or publish pipeline (video infra optional/deferred) |
+| **D22** | Screenshot storage | **Commit** `user-manual/assets/screenshots/**/*.png` in git — powers **GitHub Pages** and clone-and-preview without E2E; refresh via E2E + commit |
 
 ### Governance
 

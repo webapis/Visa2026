@@ -14,10 +14,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-edit-employee.mp4
-videoSource: recordings/passport-create.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
 e2eScenarioId: person-officer-journey
 verified: false
@@ -34,10 +30,6 @@ verified: false
     Изображения с **английского** интерфейса (версия **2026.08**).
 
 ## Видеоинструкция
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/ru/person-edit-employee.mp4"
-  title="Обновление данных сотрудника"></video>
 
 ## Перед началом
 

@@ -11,10 +11,6 @@ prerequisiteSlugs:
   - administration/user-report-templates
   - applications/resminamalar
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: template-staging.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -36,14 +32,6 @@ You do **not** need to open **User Report Template** in the left menu for every 
     - **HTTPS** in production (or `localhost` for development)
     - Desktop **Word** and/or **Excel**
     - Template edit permission (same gate as **User Report Template** maintenance)
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/template-staging.mp4"
-  title="Template staging in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the Templates footer workflow.</p>
 
 ## Before you start
 

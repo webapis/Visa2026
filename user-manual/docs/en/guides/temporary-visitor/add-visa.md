@@ -13,10 +13,6 @@ prerequisiteSlugs:
   - temporary-visitor/add-passport
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-visa.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -31,19 +27,12 @@ This guide shows how to add a **visa** on an existing temporary visitor **passpo
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
 
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-visa.mp4"
-  title="Add a visa on a temporary visitor passport in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
-
 ## Before you start
 
 | You need | Notes |
 |----------|--------|
 | A **temporary visitor** with a saved **passport** | [Add a passport](add-passport.md) first |
+| **Process number** | Typed from the visa stamp (Işlenen belgisi) |
 | **Visa Number** and validity dates | Office numbering rules |
 | Lookup values | **Visa Type**, **Visa Category**, **Visa Issued Place** |
 
@@ -75,6 +64,7 @@ Wait for the **passport detail form** to load.
 
 | Field | What to enter |
 |-------|----------------|
+| **Process number** | Stamp / processed document number from the visa image |
 | **Visa Number** | Unique visa number |
 | **Visa Type** | Choose from the list |
 | **Visa Category** | Choose from the list |

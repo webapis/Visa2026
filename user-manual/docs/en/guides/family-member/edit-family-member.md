@@ -14,10 +14,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - family-member/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-edit-employee.mp4
-videoSource: recordings/passport-create.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -33,14 +29,6 @@ This guide shows how to change fields on an existing **family member** person re
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-edit-family-member.mp4"
-  title="Update family member details in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 

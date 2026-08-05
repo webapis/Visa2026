@@ -659,11 +659,37 @@ namespace Visa2026.E2E.Tests
             return false;
         }
 
+        private bool TryPassportLookupAlreadyBound(string caption, string expectedDisplay)
+        {
+            try
+            {
+                string actual = AppContext.GetForm().GetPropertyValue(caption) ?? string.Empty;
+                return !string.IsNullOrWhiteSpace(actual)
+                    && (actual.Contains(expectedDisplay, StringComparison.OrdinalIgnoreCase)
+                        || expectedDisplay.Contains(actual, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (AdapterOperationException)
+            {
+                return false;
+            }
+        }
+
         private void FillPassportFormWithRetry(params EasyTestParameter[] fields)
         {
             foreach (EasyTestParameter field in fields)
             {
-                FillSinglePassportFieldWithRetry(field);
+                if (string.Equals(field.Name, E2ETestPassportFieldCaptions.PassportType, StringComparison.Ordinal)
+                    || string.Equals(field.Name, E2ETestPassportFieldCaptions.IssuedCountry, StringComparison.Ordinal))
+                {
+                    if (!TryPassportLookupAlreadyBound(field.Name, field.Value))
+                    {
+                        FillLookupUntilBound(field.Name, field.Value);
+                    }
+                }
+                else
+                {
+                    FillSinglePassportFieldWithRetry(field);
+                }
             }
         }
 

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-05T05:55:50.8747057Z",
-  "assemblyVersion": "1.0.0.648",
+  "generatedAt": "2026-08-05T12:10:12.7673758Z",
+  "assemblyVersion": "1.0.0.650",
   "types": [
     {
       "name": "Application",
@@ -386,7 +386,9 @@
         }
       ],
       "guideSlugs": [
-        "applications/create"
+        "applications/create",
+        "applications/overview",
+        "applications/resminamalar"
       ]
     },
     {
@@ -1317,7 +1319,10 @@
           "required": false
         }
       ],
-      "guideSlugs": []
+      "guideSlugs": [
+        "applications/add-items",
+        "applications/document-copies"
+      ]
     },
     {
       "name": "ApplicationProgress",
@@ -1377,7 +1382,9 @@
           "required": false
         }
       ],
-      "guideSlugs": []
+      "guideSlugs": [
+        "applications/progress"
+      ]
     },
     {
       "name": "Person",
@@ -1612,6 +1619,8 @@
         "family-member/add-visa",
         "family-member/edit-family-member",
         "family-member/register",
+        "person/document-copies",
+        "person/dossier",
         "person/mark-incomplete",
         "person/open-and-search",
         "temporary-visitor/add-address",

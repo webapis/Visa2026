@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - temporary-visitor/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -31,14 +27,6 @@ Temporary visitors use a typed detail view: you will **not** see employee-only t
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-passport.mp4"
-  title="Add a passport to a temporary visitor in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 
@@ -66,6 +54,9 @@ Temporary visitors use a typed detail view: you will **not** see employee-only t
 1. On the **Passports** nested list toolbar, select **New Passport**.
 2. Wait for the passport **detail form** to open.
 
+!!! tip "Default passport type"
+    **Passport Type** is preset to **P — National passport** (the type officers use most often). Change it only when the document is a different type.
+
 ![New passport detail form](../../../assets/screenshots/v2026.08/en/person-add-passport-step-02-passport-form-new.png)
 
 ## Step 4 — Fill required fields
@@ -73,7 +64,7 @@ Temporary visitors use a typed detail view: you will **not** see employee-only t
 | Field | What to enter |
 |-------|----------------|
 | **Passport Number** | Unique passport number |
-| **Passport Type** | Choose from the list |
+| **Passport Type** | Usually already **P — National passport**; change from the list if needed |
 | **Issue Date** | Date picker |
 | **Expiration Date** | Date picker |
 | **Authority** | Issuing authority text |

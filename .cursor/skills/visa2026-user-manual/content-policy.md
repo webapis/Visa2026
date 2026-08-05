@@ -16,7 +16,7 @@ The officer manual describes **what to click, what to type, and what to expect o
 
 | Officer manual (`user-manual/`) | Developer docs (`docs/`, skills, code) |
 |---------------------------------|----------------------------------------|
-| UI labels, menus, screenshots, videos | Architecture, CI, E2E, generators |
+| UI labels, menus, screenshots | Architecture, CI, E2E, generators |
 | Plain-language steps | C#, SQL, OData, APIs |
 | Roles as shown in the app | Property names, type names, file paths |
 
@@ -114,7 +114,7 @@ Before `status: published`:
 - [ ] No code blocks or programming syntax in the page
 - [ ] No class names, property names, or repo paths
 - [ ] Every field name matches what appears on screen (English manual)
-- [ ] Steps match screenshots or video
+- [ ] Steps match screenshots (no video — D21)
 - [ ] No links to `docs/` developer pages
 
 ---

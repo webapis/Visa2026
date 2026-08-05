@@ -8,13 +8,13 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: navigation-shell.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Ana gezinme
@@ -26,14 +26,6 @@ Bu kılavuz, oturum açtıktan sonra Visa2026'da nasıl gezineceğinizi anlatır
 
 !!! tip "Ekran görüntüleri"
     Görseller **İngilizce** arayüzden alınmıştır (sürüm **2026.08**). Etiketler dilinize göre değişir; adımlar aynıdır.
-
-## Video anlatımı
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../assets/videos/v2026.08/tr/navigation-shell.mp4"
-  title="Visa2026 ana gezinme"></video>
-
-<p class="visa-manual-video-caption">Kayıt eğitim ortamından alınmıştır (test verisi). Aşağıdaki bölümler videoyla aynıdır.</p>
 
 ## Uygulama kabuğu
 

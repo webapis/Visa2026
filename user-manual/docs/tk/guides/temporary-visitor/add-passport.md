@@ -11,10 +11,6 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -30,12 +26,6 @@ Temporary visitors use a typed detail view (`Person_DetailView_TemporaryVisitor`
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tk/person-add-passport.mp4"
-  title="Add a passport to a temporary visitor in Visa2026"></video>
 
 ## Before you start
 

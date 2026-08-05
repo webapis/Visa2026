@@ -11,10 +11,6 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-visa.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
 e2eScenarioId: person-officer-journey
 verified: false
@@ -32,20 +28,13 @@ Application items resolve the family member's **current visa** from this nested 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
 
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-visa.mp4"
-  title="Add a visa on a passport in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
-
 ## Before you start
 
 | You need | Notes |
 |----------|--------|
 | A family member with a saved **passport** | [Add a passport](add-passport.md) first |
 | **Sponsoring Employee** and **Relationship** on the header | Required unless the sponsor uses manual visa family text |
+| **Process number** | Stamp / processed document number from the visa image |
 | **Visa Number** and validity dates | Use office rules for numbering |
 | Lookup values | **Visa Type**, **Visa Category**, **Visa Issued Place** — defaults may apply |
 
@@ -81,6 +70,7 @@ Enter values using the on-screen labels. Typical **required** fields include:
 
 | Field | What to enter |
 |-------|----------------|
+| **Process number** | Stamp / processed document number from the visa image (e.g. ministry reference) |
 | **Visa Number** | Unique visa number |
 | **Visa Type** | Choose from the list |
 | **Visa Category** | Choose from the list |
@@ -90,7 +80,7 @@ Enter values using the on-screen labels. Typical **required** fields include:
 | **Expiration Date** | Must be later than **Start Date** |
 | **Border Zone Location** | Multi-select catalog; **None** is allowed |
 
-Use the optional-fields gear (if shown) for extra stamp or process fields.
+Use the optional-fields gear (if shown) for extra stamp fields not listed above.
 
 ![Visa fields filled before save](../../../assets/screenshots/v2026.08/en/person-add-visa-step-03-visa-fields-filled.png)
 

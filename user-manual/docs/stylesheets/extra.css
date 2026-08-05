@@ -15,6 +15,14 @@
   color: var(--md-default-fg-color--light);
 }
 
+.md-typeset .visa-manual-screenshot-caption {
+  margin-top: -0.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--md-default-fg-color--light);
+  font-style: italic;
+}
+
 /* Home page footer: link to separate test results report */
 .md-typeset hr + p:has(a[href*="summary.html"]) {
   margin-top: 1.5rem;

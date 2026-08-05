@@ -70,7 +70,7 @@ scripts/ci/
 
 ## Gitignore contract
 
-**Rule:** officer **prose** and **generator JSON** are committed; **build output**, **local tooling**, **promoted media**, and **test report runs** are not.
+**Rule:** officer **prose**, **generator JSON**, and **promoted screenshots** are committed; **build output**, **local tooling**, **videos**, and **test report runs** are not.
 
 Do **not** `git add` ignored paths “to fix CI” — regenerate with `Build-UserManual.ps1` / `Serve-UserManual.ps1` / E2E copy scripts instead.
 
@@ -84,8 +84,7 @@ Do **not** `git add` ignored paths “to fix CI” — regenerate with `Build-Us
 | `user-manual/user-manual/` | Accidental nested MkDocs output |
 | `user-manual/docs/assets/` | Build-time media sync into docs tree |
 | `user-manual/docs/*/reference/business-objects.md` | Build-time copy of generated reference page |
-| `user-manual/assets/screenshots/**/*.png` | Promoted E2E screenshots |
-| `user-manual/assets/videos/**/*.{mp4,webm,mov}` | Promoted E2E video (any common container) |
+| `user-manual/assets/videos/**/*.{mp4,webm,mov}` | Promoted E2E video (deferred; D21) |
 | `user-manual/manual-media.env` | Local env override (keep `manual-media.env.example` tracked) |
 | `deploy/manual/` | Published site + media bundle on server/agent |
 | `manual-test-reports/latest/` | Generated green-tick / summary JSON+HTML |
@@ -105,18 +104,21 @@ Do **not** `git add` ignored paths “to fix CI” — regenerate with `Build-Us
 | `user-manual/generated/bo-catalog.json` | Layer A catalog |
 | `user-manual/generated/navigation-tree.json` | Nav tree from generator |
 | `user-manual/generated/reference/**/business-objects.md` | Generator output (reviewed; synced to docs at build) |
-| `user-manual/assets/**/.gitkeep` | Placeholder version/locale folders without PNG/MP4 |
+| `user-manual/assets/screenshots/**/*.png` | Promoted E2E screenshots (**D22** — GitHub Pages + clone-and-build) |
+| `user-manual/media-capture-registry.yaml` | Doc-anchored capture keys |
 | `manual-test-reports/manifest.yaml`, `README.md` | Suite registry (not generated output) |
 | `.cursor/skills/visa2026-user-manual/**` | This skill |
 
 ### Agent anti-patterns
 
-- Committing PNG/MP4 under `user-manual/assets/` — media is regenerated from E2E; use `-RequireMedia` locally if missing
 - Committing `user-manual/site/` or `.tools/` — bloats PRs; CI builds its own site
+- Committing video under `user-manual/assets/videos/` — screenshots-only policy (D21)
 - Deleting `.gitkeep` files in empty screenshot version folders — they document expected layout
-- Adding `git add -f` on ignored media “because the guide needs images” — run Record + copy scripts instead
+- Publishing guides that reference PNGs not yet copied from E2E — run Record + `Copy-EasyTestManualScreenshots.ps1`, then commit PNGs before merge (CI uses `-RequireMedia`)
 
-Canonical deploy of ignored artifacts: [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md).
+**GitHub Pages:** `user-manual.yml` on `master` deploys `user-manual/site/` with `--site-url https://<owner>.github.io/<repo>/`. Enable **Settings → Pages → GitHub Actions** once per repo.
+
+Canonical on-prem deploy of ignored artifacts (videos, remote media URL): [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md).
 
 ---
 
@@ -246,12 +248,14 @@ sourceDocs:
 | `navPath` | Optional — sidebar grouping hint (`Employee`, `FamilyMember`) |
 | `status` | Only `published` after officer review |
 | `screenshotsVersion` | Folder must exist under `assets/screenshots/` (warn if missing) |
+| `screenshotsCapturedAt` | ISO-8601 UTC — pipeline sets when milestone PNGs copied from UserManual E2E |
+| `videoCapturedAt` | _Deprecated (D21)_ — omit on new guides |
+| `mediaE2eRunId` | E2E screenshot run folder id — ties media to `recordings/screenshots/{id}/` |
 | `e2eScenarioId` | Folder `Visa2026.E2E.Tests/scenarios/ready/<id>/` when set |
 | `verified` | **`true` only** when set by `Build-UserManual.ps1` — shows green tick on site |
 | `verifiedAt` / `verifiedCommit` | Auto from test report — not hand-edited |
 | `e2eTestFilter` | Maintainer/CI only — not shown on officer site |
-| `video` | Playback URL when published — embed, static HTTPS, object URL, or app stream (storage TBD) |
-| `videoStorage` | `embed` \| `static` \| `object` \| `filedata` \| `hybrid` \| `tbd` (Phase 3 decision) |
+| `video` / `videoFile` / `videoCaptureKey` | **Do not use** — screenshots-only (D21) |
 | `sourceDocs` | Traceability for AI; not shown on site; **do not quote in guide body** |
 
 ---
@@ -356,18 +360,44 @@ Extend `nav` as guides ship. Reference section may be partially generated in CI.
 
 ---
 
-## Screenshot conventions
+## Screenshot conventions (doc-anchored)
+
+**Canonical:** [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) § Doc-anchored capture.
 
 | Piece | Convention |
 |-------|------------|
-| Path | `assets/screenshots/v2026.08/{en|tr|tk|ru}/person-register-step-03.png` |
-| Markdown | `![Step 3](../assets/screenshots/v2026.08/en/person-register-step-03.png)` |
-| EasyTest hook | `ModelDefault("CustomCSSClassName", "e2e-...")` on stable elements |
-| Baseline update | PR review when CI refreshes PNGs |
+| Anchor | `<!-- media-capture: {key} -->` on the line **above** each `![...](assets/screenshots/...)` |
+| Key | Equals PNG basename without extension |
+| Registry | `user-manual/media-capture-registry.yaml` — `guideSlugs`, `description`, `assertBeforeCapture` |
+| E2E | `UserManualMediaCaptureKeys.{Key}` → `CaptureAsync(page, key)` after assertions |
+| Path | `assets/screenshots/v2026.08/{en\|tr\|tk\|ru}/{key}.png` |
+| Copy | `Copy-EasyTestManualScreenshots.ps1` — 1:1 for doc keys; legacy fan-out **deprecated** |
+| Validate | `Validate-UserManualMediaCaptures.ps1` in `Build-UserManual.ps1` |
+
+**Workflow:** prose → anchor → registry → E2E key → pipeline. Never add a screenshot without all four.
+
+**Markdown example:**
+
+```markdown
+<!-- media-capture: person-register-step-02-saved-detail -->
+![Employee detail after Save](../assets/screenshots/v2026.08/en/person-register-step-02-saved-detail.png)
+*Figure: New employee saved — note the assigned Personal Number.*
+```
 
 ---
 
-## Video in guides (storage open)
+## Screenshot conventions (legacy — unmigrated guides only)
+
+| Piece | Convention |
+|-------|------------|
+| Path | `assets/screenshots/v2026.08/{en\|tr\|tk\|ru}/person-register-step-03.png` |
+| Markdown | `![Step 3](../assets/screenshots/v2026.08/en/person-register-step-03.png)` |
+| Copy | `Copy-EasyTestManualScreenshots.ps1` legacy `$map` fan-out from milestone labels |
+| Baseline update | PR review when CI refreshes PNGs |
+
+**Migrate to doc-anchored** before adding new images to a guide.
+
+---
 
 Playback markup depends on the **Phase 3** storage choice ([USER_MANUAL_E2E_MEDIA.md](../../../docs/USER_MANUAL_E2E_MEDIA.md) §5.1).
 

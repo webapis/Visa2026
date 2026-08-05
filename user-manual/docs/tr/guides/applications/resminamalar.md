@@ -11,8 +11,6 @@ prerequisiteSlugs:
   - applications/create
   - applications/add-items
 screenshotsVersion: "2026.08"
-videoStorage: static
-videoFile: application-resminamalar.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

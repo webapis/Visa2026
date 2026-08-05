@@ -11,10 +11,6 @@ prerequisiteSlugs:
   - getting-started/login
   - getting-started/navigation
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: report-dashboard.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -33,14 +29,6 @@ The dashboard answers: *what needs attention today?* It does **not** replace per
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Category names differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/report-dashboard.mp4"
-  title="Report Dashboard in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the dashboard flow.</p>
 
 ## Before you start
 

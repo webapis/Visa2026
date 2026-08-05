@@ -123,3 +123,14 @@ Promote to [SKILL.md](./SKILL.md) **scenarios** after **2+** hosts.
 - **Fix**: Build `debs` on internet PC per [reference-docker-offline-install.md](../../../scripts/legacy/on-prem-windows/reference-docker-offline-install.md).
 - **Prevent**: Offline path only when WSL cannot reach `download.docker.com` (**A3**).
 - **Skill**: setup-docker-engine
+
+---
+
+### 2026-08-04 — Docker Desktop on `10.100.128.25` (IIS removed, port remap)
+
+- **Symptom**: Officers stuck on splash; hybrid IIS + Docker Desktop; staging on wrong port `:8081`; WSL Ubuntu **Stopped** (missing `ext4.vhdx`).
+- **Try**: `Remove-Visa2026IisDeployment.ps1`; `Repair-OnPremDockerDesktopStack.ps1`; prod `restart app` without postgres.
+- **Test**: `http://10.100.128.25/LoginPage` + `:8080/LoginPage` → **200**; IIS sites removed; WSL keepalive tasks disabled.
+- **Fix**: IIS slots removed; staging `APP_PORT=8080`; prod **SQL-first** `compose up -d postgres` then `app`; officer notice `C:\visa2026\OFFICER_URLS.txt`.
+- **Prevent**: Do not use Docker Desktop on Server long-term — plan Ubuntu + Engine ([ON_PREM_LINUX_SERVER.md](../../../docs/ON_PREM_LINUX_SERVER.md)). After Docker restart, never `restart app` alone — postgres first. MemoryMiB in `adm43418` `settings-store.json` may need interactive Docker Desktop quit to apply.
+- **Skill**: setup-docker-engine

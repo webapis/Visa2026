@@ -3,7 +3,7 @@ title: Find and open a person
 slug: person/open-and-search
 locale: en
 tier: 1
-guideStatus: review
+guideStatus: published
 lastReviewed: "2026-08-05"
 bo: Person
 roles: [Visa Officer]
@@ -11,16 +11,16 @@ prerequisiteSlugs:
   - getting-started/login
   - getting-started/navigation
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-open-search.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
 sourceDocs:
   - docs/REPORT_DASHBOARD.md
   - docs/PERSON_DOSSIER.md
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Find and open a person
@@ -32,14 +32,6 @@ This guide shows how to locate an existing person in Visa2026 and open their rec
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-open-search.mp4"
-  title="Find and open a person in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 
@@ -64,6 +56,7 @@ Visa2026 stores people in separate lists by type. Use the list that matches who 
 
 The table shows columns such as **Full Name**, **Personal Number**, **Date Of Birth**, and **Nationality**. The first columns may include **Dossier** and **Copies** shortcuts — this guide focuses on opening the standard detail form.
 
+<!-- media-capture: navigation-step-03-employees-list -->
 ![Employees list](../../assets/screenshots/v2026.08/en/navigation-step-03-employees-list.png)
 
 ## Step 2 — Search the list
@@ -92,6 +85,7 @@ Tips:
 
 You can now read tabs such as **Passports**, **Educations**, and **Addresses**. To change data, use **Save** after edits — see [Register a new employee](register.md) and later update guides.
 
+<!-- media-capture: navigation-step-04-detail-form -->
 ![Employee detail form](../../assets/screenshots/v2026.08/en/navigation-step-04-detail-form.png)
 
 !!! success "Person opened"

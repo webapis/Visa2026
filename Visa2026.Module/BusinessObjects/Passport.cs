@@ -30,6 +30,9 @@ namespace Visa2026.Module.BusinessObjects
     [SupportsOptionalDetailFields]
     public class Passport : BaseObject, IExpirationLogic, IOptionalDetailFields
     {
+        /// <summary>Default <see cref="PassportType"/> for new passports (national passport — most common officer choice).</summary>
+        public const string DefaultPassportTypeCode = "P";
+
         public Passport()
         {
             Images = new ObservableCollection<PassportImage>();
@@ -159,9 +162,18 @@ namespace Visa2026.Module.BusinessObjects
             var objectSpace = ObjectSpaceHelper.Get(this);
             if (objectSpace != null)
             {
-                PassportType = objectSpace.GetObjectsQuery<PassportType>().FirstOrDefault(pt => pt.IsDefault);
+                PassportType = ResolveDefaultPassportType(objectSpace);
                 IssuedCountry = objectSpace.GetObjectsQuery<Country>().FirstOrDefault(c => c.IsDefault);
             }
+        }
+
+        private static PassportType? ResolveDefaultPassportType(IObjectSpace objectSpace)
+        {
+            var query = objectSpace.GetObjectsQuery<PassportType>();
+            return query.FirstOrDefault(pt => pt.IsDefault)
+                ?? query.FirstOrDefault(pt =>
+                    string.Equals(pt.PdfForm_Code, DefaultPassportTypeCode, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(pt.LocalizationKey, DefaultPassportTypeCode, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -6,13 +6,13 @@ tier: 0
 guideStatus: draft
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: login-sign-in.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Visa2026-a girmek
@@ -23,12 +23,6 @@ Bu gollanma işgärleriň Visa2026-y açyp hasaba girmegini görkezýär. Gutara
     Aşakdaky suratlar **Iňlis** interfeýsinden alnan (wersiýa **2026.08**). Ofisiňiz Türk, Türkmen ýa-da Rus dilinde bolsa, bellikler terjime edilýär; ädimler şol bir.
 
 ## Wideo gollanma
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../assets/videos/v2026.08/tk/login-sign-in.mp4"
-  title="Visa2026-a girmek"></video>
-
-<p class="visa-manual-video-caption">Ýazgy okuw gurşawyndan alnan (synag maglumatlary). Aşakdaky ädimler wideo bilen gabat gelýär.</p>
 
 ## Başlamazdan öň
 

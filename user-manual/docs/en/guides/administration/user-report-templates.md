@@ -10,10 +10,6 @@ roles: [Administrator]
 prerequisiteSlugs:
   - applications/resminamalar
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: user-report-templates.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -32,14 +28,6 @@ Each layout is stored as a **User Report Template** record under **Reports** in 
 
 !!! warning "Administrator task"
     Most visa officers do not need this screen. Changing templates affects every future ZIP and preview for that report.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/user-report-templates.mp4"
-  title="User report templates in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the template maintenance form.</p>
 
 ## Before you start
 

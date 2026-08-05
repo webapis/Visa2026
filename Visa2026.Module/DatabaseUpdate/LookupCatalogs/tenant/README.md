@@ -36,7 +36,7 @@ For a new customer deployment, replace these files with that customer's data.
 
 | JSON file | Purpose |
 |-----------|---------|
-| `tenant-users.json` | Officers for this deployment (`UserName` + `Roles[]`). Synced on every DB update via `TenantUserSeedUpdater` — **exact** role list (adds and removes). Disk overlay: `{AppBase}/LookupCatalogs/tenant/tenant-users.json`. Parallel period: `UsersReadOnly`; cutover: `Users` + `VisaOffice`. Default password: empty (set on first login). |
+| `tenant-users.json` | Officers for this deployment (`UserName` + `Roles[]`). Synced on every DB update via `TenantUserSeedUpdater` — **exact** role list (adds and removes). Disk overlay: `{AppBase}/LookupCatalogs/tenant/tenant-users.json`. Current Calik seed: `Default` + `Users`. Optional `VisaOffice` for configuration staff. `UsersReadOnly` for parallel-period read-only if needed. Default password: empty (set on first login). |
 
 **Approval leg profiles** (shared ministry chains — **generated**, not hand-edited):
 

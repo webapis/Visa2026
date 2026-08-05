@@ -18,6 +18,12 @@
 .PARAMETER NoScreenshots
   Disable milestone PNG capture.
 
+.PARAMETER WriteTrx
+  Write a TRX file for manual-test-reports (pipeline).
+
+.PARAMETER TrxPath
+  TRX output path when -WriteTrx is set.
+
 .EXAMPLE
   .\scripts\local\Record-PlaywrightE2e.ps1 -Target Local
 
@@ -37,7 +43,13 @@ param(
 
     [switch]$SkipBuild,
 
-    [switch]$NoScreenshots
+    [switch]$NoScreenshots,
+
+    [switch]$EnableVideo,
+
+    [switch]$WriteTrx,
+
+    [string]$TrxPath = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -74,6 +86,13 @@ else {
     $env:VISA2026_E2E_SCREENSHOT_RUN = $runStamp
 }
 
+if ($EnableVideo) {
+    $env:VISA2026_E2E_VIDEO_RECORDING = 'true'
+}
+else {
+    $env:VISA2026_E2E_VIDEO_RECORDING = 'false'
+}
+
 if (-not $SkipBuild) {
     Write-Host 'Building EasyTest configuration...'
     dotnet build Visa2026.slnx -c EasyTest
@@ -94,9 +113,20 @@ Write-Host "Running Playwright E2E - Target=$Target Filter=$Filter"
 $testArgs = @(
     'test', 'Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj',
     '-c', 'EasyTest', '--no-build',
-    '--filter', "FullyQualifiedName~$Filter&Driver=Playwright",
+    '--filter', "FullyQualifiedName~$Filter&Driver=Playwright&Category=UserManual",
     '--logger', 'console;verbosity=normal'
 )
+if ($WriteTrx) {
+    if (-not $TrxPath) {
+        $TrxPath = Join-Path $repoRoot 'TestResults\user-manual-e2e-playwright-local.trx'
+    }
+    $trxDir = Split-Path -Parent $TrxPath
+    if ($trxDir -and -not (Test-Path -LiteralPath $trxDir)) {
+        New-Item -ItemType Directory -Force -Path $trxDir | Out-Null
+    }
+    $trxName = Split-Path -Leaf $TrxPath
+    $testArgs += @('--logger', "trx;LogFileName=$trxName", '--results-directory', $trxDir)
+}
 dotnet @testArgs
 $testExit = $LASTEXITCODE
 
@@ -104,6 +134,20 @@ if (-not $NoScreenshots -and $testExit -eq 0) {
     $screenshotDir = Join-Path $repoRoot "Visa2026.E2E.Tests\recordings\screenshots\$runStamp"
     if (Test-Path -LiteralPath $screenshotDir) {
         & (Join-Path $repoRoot 'scripts\ci\Copy-EasyTestManualScreenshots.ps1') -ScreenshotRunDir $screenshotDir
+    }
+
+    if ($EnableVideo) {
+        $markersPath = Join-Path $screenshotDir 'video-markers.json'
+        $videoScript = Join-Path $repoRoot 'scripts\ci\Copy-EasyTestManualVideos.ps1'
+        if ((Test-Path -LiteralPath $videoScript) -and (Test-Path -LiteralPath $markersPath)) {
+            & $videoScript -MarkersPath $markersPath
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Copy-EasyTestManualVideos.ps1 failed.'
+            }
+        }
+        else {
+            Write-Warning "Skipping video trim (EnableVideo set but markers missing at $markersPath)."
+        }
     }
 }
 

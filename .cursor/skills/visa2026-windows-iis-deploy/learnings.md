@@ -160,3 +160,22 @@ Read before IIS deploy/update work on a company Windows Server. **Append** verif
 - **Not yet:** Full ModuleUpdater/PDF seed parity on PG; Staging/Prod PG cutover.
 - **Related:** Prod LoginPage 500 after earlier Demo wipe work — `UserReportTemplates` missing on SQL Prod DB (schema incomplete); repair with Production ForceUpdate (SQL), not related to Demo PG.
 
+---
+
+### 2026-08-04 — IIS slots removed after Docker cutover (`10.100.128.25`)
+
+- **Symptom**: Hybrid IIS + Docker Desktop; `:8080` IIS staging **503**; Docker staging on `:8081`.
+- **Fix**: `Remove-Visa2026IisDeployment.ps1` — removed `Visa2026-Prod`, `-Staging`, `-Demo`, legacy `Visa2026` sites/pools; unregistered `Visa2026-IisAfterBoot`. Publish folders kept under `C:\inetpub\visa2026*`.
+- **After**: Docker prod `:80`, staging `:8080` (`E:\visa2026-prod`, `E:\visa2026-staging`). Officer URLs: `C:\visa2026\OFFICER_URLS.txt`.
+- **Skill**: visa2026-windows-iis-deploy
+
+---
+
+### 2026-08-05 — Docker cutover reversed: IIS prod + staging on `10.100.128.25`
+
+- **Symptom**: Hybrid Docker Desktop stacks (`E:\visa2026-prod`, `E:\visa2026-staging`) serving prod/staging; IIS slots removed 2026-08-04.
+- **Fix**: `docker-compose down` both stacks (no containers left); disabled `Visa2026-WslKeepAlive` / `WslPersistent` / `Startup` tasks; updated `staging.env` to PostgreSQL (`visa2026_staging` on native `postgresql-x64-16`); redeployed **1.0.0.648** via `Deploy-Visa2026IisRemote.ps1 -ForceUpdate` (Production then Staging `-SkipPublish`).
+- **Blocker**: `Install-Visa2026IisSlots.ps1` parse error on server PS 5.1 — UTF-8 em-dash (`—`) in comment/help text misread as smart quote; replace with ASCII `-` in `Install-Visa2026IisSlots.ps1`, `Configure-Visa2026Production.ps1`, `Ensure-Visa2026SlotDatabases.ps1` before `scp`.
+- **Smoke**: `http://10.100.128.25/LoginPage` and `:8080/LoginPage` → **200**; IIS sites `Visa2026-Prod` / `Visa2026-Staging` Started; `docker ps` empty.
+- **Prevent**: After `scp` of `.ps1` to Windows Server, smoke `Install-Visa2026IisSlots.ps1 -SkipConfigure` before full deploy; avoid Unicode punctuation in scripts consumed by PS 5.1 over SSH.
+

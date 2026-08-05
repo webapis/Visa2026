@@ -11,9 +11,6 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - family-member/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-edit-employee.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

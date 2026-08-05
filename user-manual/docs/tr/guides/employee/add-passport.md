@@ -11,13 +11,13 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Çalışana pasaport ekleme
@@ -29,14 +29,6 @@ Bu kılavuz mevcut bir çalışana **pasaport** kaydı eklemeyi anlatır. Pasapo
 
 !!! tip "Ekran görüntüleri"
     Görseller **İngilizce** arayüzden (sürüm **2026.08**).
-
-## Video anlatımı
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tr/person-add-passport.mp4"
-  title="Çalışana pasaport ekleme"></video>
-
-<p class="visa-manual-video-caption">Kayıt eğitim ortamından alınmıştır (test verisi). Aşağıdaki adımlar videoyla aynıdır.</p>
 
 ## Adım 1 — Çalışanı açın
 
@@ -55,6 +47,9 @@ Bu kılavuz mevcut bir çalışana **pasaport** kaydı eklemeyi anlatır. Pasapo
 1. **New Passport** seçin.
 2. Pasaport ayrıntı formunun açılmasını bekleyin.
 
+!!! tip "Varsayılan pasaport türü"
+    **Passport Type** alanı varsayılan olarak **P — Ulusal pasaport** ile gelir (memurların en sık kullandığı tür). Belge farklı bir türdeyse listeden değiştirin.
+
 ![Yeni pasaport formu](../../../assets/screenshots/v2026.08/tr/person-add-passport-step-02-passport-form-new.png)
 
 ## Adım 4 — Zorunlu alanlar
@@ -62,7 +57,7 @@ Bu kılavuz mevcut bir çalışana **pasaport** kaydı eklemeyi anlatır. Pasapo
 | Alan | Giriş |
 |------|--------|
 | **Passport Number** | Pasaport numarası |
-| **Passport Type** | Listeden |
+| **Passport Type** | Genelde zaten **P — Ulusal pasaport**; gerekirse listeden değiştirin |
 | **Issue Date** | Tarih |
 | **Expiration Date** | Tarih |
 | **Authority** | Metin |

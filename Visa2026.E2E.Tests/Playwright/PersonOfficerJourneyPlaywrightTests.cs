@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Visa2026.Module.DatabaseUpdate;
@@ -21,32 +22,34 @@ public sealed class PersonOfficerJourneyPlaywrightTests
     [Fact]
     [SupportedOSPlatform("windows")]
     [Trait("E2ETarget", "Local")]
-    public async Task PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local()
-    {
-        Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
+    public Task PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local() =>
+        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local), async () =>
+        {
+            Assert.Equal(PlaywrightE2eTarget.Local, PlaywrightE2eEnvironment.Target);
 
-        var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
-        await journey.RunLoginCreateEmployeeAddPassportAsync(
-            E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,
-            E2ETestPassportCreateOnlyJourneyValues.FirstName,
-            E2ETestPassportCreateOnlyJourneyValues.LastName,
-            E2ETestPassportCreateOnlyJourneyValues.FullName,
-            E2ETestPassportCreateOnlyJourneyValues.PassportNumber);
-    }
+            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
+            await journey.RunLoginCreateEmployeeAddPassportAsync(
+                E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,
+                E2ETestPassportCreateOnlyJourneyValues.FirstName,
+                E2ETestPassportCreateOnlyJourneyValues.LastName,
+                E2ETestPassportCreateOnlyJourneyValues.FullName,
+                E2ETestPassportCreateOnlyJourneyValues.PassportNumber);
+        });
 
     [Fact]
     [SupportedOSPlatform("windows")]
     [Trait("E2ETarget", "Staging")]
-    public async Task PersonOfficerJourney_LoginCreateEmployeeAddPassport_Staging()
-    {
-        Assert.Equal(PlaywrightE2eTarget.Staging, PlaywrightE2eEnvironment.Target);
+    public Task PersonOfficerJourney_LoginCreateEmployeeAddPassport_Staging() =>
+        PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_LoginCreateEmployeeAddPassport_Staging), async () =>
+        {
+            Assert.Equal(PlaywrightE2eTarget.Staging, PlaywrightE2eEnvironment.Target);
 
-        var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
-        await journey.RunLoginCreateEmployeeAddPassportAsync(
-            E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,
-            E2ETestPassportCreateOnlyJourneyValues.FirstName,
-            E2ETestPassportCreateOnlyJourneyValues.LastName,
-            E2ETestPassportCreateOnlyJourneyValues.FullName,
-            E2ETestPassportCreateOnlyJourneyValues.PassportNumber);
-    }
+            var journey = new PlaywrightPersonOfficerJourney(_fixture.Page);
+            await journey.RunLoginCreateEmployeeAddPassportAsync(
+                E2ETestPassportCreateOnlyJourneyValues.PersonalNumber,
+                E2ETestPassportCreateOnlyJourneyValues.FirstName,
+                E2ETestPassportCreateOnlyJourneyValues.LastName,
+                E2ETestPassportCreateOnlyJourneyValues.FullName,
+                E2ETestPassportCreateOnlyJourneyValues.PassportNumber);
+        });
 }

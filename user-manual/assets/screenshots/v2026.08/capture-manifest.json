@@ -1,0 +1,618 @@
+{
+    "version":  1,
+    "mediaE2eRunId":  "20260805-172303",
+    "screenshotsCapturedAt":  "2026-08-05T12:25:13.4431086Z",
+    "screenshotsVersion":  "2026.08",
+    "sourceRunDir":  "C:\\Users\\webap\\Documents\\GitHub\\Visa2026\\Visa2026.E2E.Tests\\recordings\\screenshots\\20260805-172303",
+    "files":  {
+                  "person-add-medical-record-step-04-medical-saved.png":  {
+                                                                              "sourceLabel":  "07-passport-saved",
+                                                                              "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                              "copyMode":  "legacy-fanout"
+                                                                          },
+                  "person-add-cv-documents-step-03-document-file-attached.png":  {
+                                                                                     "sourceLabel":  "06-passport-fields-filled",
+                                                                                     "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                                     "copyMode":  "legacy-fanout"
+                                                                                 },
+                  "person-document-copies-step-04-preview.png":  {
+                                                                     "sourceLabel":  "03-employee-created",
+                                                                     "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                     "copyMode":  "legacy-fanout"
+                                                                 },
+                  "application-resminamalar-step-03-toast.png":  {
+                                                                     "sourceLabel":  "03-employee-created",
+                                                                     "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                     "copyMode":  "legacy-fanout"
+                                                                 },
+                  "person-register-family-member-step-03-open-from-list.png":  {
+                                                                                   "sourceLabel":  "04-employee-detail",
+                                                                                   "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                                   "copyMode":  "legacy-fanout"
+                                                                               },
+                  "person-add-medical-record-step-02-medical-form-new.png":  {
+                                                                                 "sourceLabel":  "05-passport-detail-new",
+                                                                                 "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                                 "copyMode":  "legacy-fanout"
+                                                                             },
+                  "user-report-templates-step-01-list.png":  {
+                                                                 "sourceLabel":  "02-employees-list",
+                                                                 "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                 "copyMode":  "legacy-fanout"
+                                                             },
+                  "04-employee-detail.png":  {
+                                                 "sourceLabel":  "04-employee-detail",
+                                                 "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                 "copyMode":  "direct"
+                                             },
+                  "person-edit-family-member-step-01-detail-form.png":  {
+                                                                            "sourceLabel":  "04-employee-detail",
+                                                                            "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                            "copyMode":  "legacy-fanout"
+                                                                        },
+                  "02-employees-list.png":  {
+                                                "sourceLabel":  "02-employees-list",
+                                                "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                "copyMode":  "direct"
+                                            },
+                  "login-step-01-logon.png":  {
+                                                  "sourceLabel":  "login-step-01-logon",
+                                                  "capturedAt":  "2026-08-05T12:23:44.7121984Z",
+                                                  "copyMode":  "direct",
+                                                  "pinpoint":  {
+                                                                   "X":  771,
+                                                                   "Y":  654.3333740234375,
+                                                                   "Width":  378,
+                                                                   "Height":  31.33331298828125
+                                                               }
+                                              },
+                  "person-add-address-step-02-address-form-new.png":  {
+                                                                          "sourceLabel":  "05-passport-detail-new",
+                                                                          "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                          "copyMode":  "legacy-fanout"
+                                                                      },
+                  "05-passport-detail-new.png":  {
+                                                     "sourceLabel":  "05-passport-detail-new",
+                                                     "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                     "copyMode":  "direct"
+                                                 },
+                  "application-add-items-step-03-item-saved.png":  {
+                                                                       "sourceLabel":  "03-employee-created",
+                                                                       "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                       "copyMode":  "legacy-fanout"
+                                                                   },
+                  "person-add-position-history-step-02-position-form-new.png":  {
+                                                                                    "sourceLabel":  "05-passport-detail-new",
+                                                                                    "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                                    "copyMode":  "legacy-fanout"
+                                                                                },
+                  "person-add-travel-step-02-travel-form-new.png":  {
+                                                                        "sourceLabel":  "05-passport-detail-new",
+                                                                        "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-mark-incomplete-step-03-incomplete-tab.png":  {
+                                                                            "sourceLabel":  "04-employee-detail",
+                                                                            "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                            "copyMode":  "legacy-fanout"
+                                                                        },
+                  "person-add-family-relation-documents-step-01-detail.png":  {
+                                                                                  "sourceLabel":  "04-employee-detail",
+                                                                                  "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                                  "copyMode":  "legacy-fanout"
+                                                                              },
+                  "person-add-passport-step-03-passport-fields-filled.png":  {
+                                                                                 "sourceLabel":  "person-add-passport-step-03-passport-fields-filled",
+                                                                                 "capturedAt":  "2026-08-05T12:24:57.4279502Z",
+                                                                                 "copyMode":  "direct",
+                                                                                 "pinpoint":  {
+                                                                                                  "X":  479.3333435058594,
+                                                                                                  "Y":  263.9270935058594,
+                                                                                                  "Width":  854.4375,
+                                                                                                  "Height":  30
+                                                                                              }
+                                                                             },
+                  "person-add-travel-step-04-travel-saved.png":  {
+                                                                     "sourceLabel":  "07-passport-saved",
+                                                                     "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                     "copyMode":  "legacy-fanout"
+                                                                 },
+                  "00-logon-page.png":  {
+                                            "sourceLabel":  "00-logon-page",
+                                            "capturedAt":  "2026-08-05T12:23:44.5126404Z",
+                                            "copyMode":  "direct"
+                                        },
+                  "person-add-education-step-03-education-fields-filled.png":  {
+                                                                                   "sourceLabel":  "06-passport-fields-filled",
+                                                                                   "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                                   "copyMode":  "legacy-fanout"
+                                                                               },
+                  "person-add-visa-step-04-visa-saved.png":  {
+                                                                 "sourceLabel":  "person-add-visa-step-04-visa-saved",
+                                                                 "capturedAt":  "2026-08-05T12:25:13.4431086Z",
+                                                                 "copyMode":  "direct",
+                                                                 "pinpoint":  {
+                                                                                  "X":  24.666667938232422,
+                                                                                  "Y":  110.42708587646484,
+                                                                                  "Width":  63.92708206176758,
+                                                                                  "Height":  31.333335876464844
+                                                                              }
+                                                             },
+                  "person-mark-incomplete-step-04-dashboard.png":  {
+                                                                       "sourceLabel":  "01-after-login",
+                                                                       "capturedAt":  "2026-08-05T12:24:04.3690478Z",
+                                                                       "copyMode":  "legacy-fanout"
+                                                                   },
+                  "person-add-position-history-step-04-position-saved.png":  {
+                                                                                 "sourceLabel":  "07-passport-saved",
+                                                                                 "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                                 "copyMode":  "legacy-fanout"
+                                                                             },
+                  "person-add-work-duty-step-01-employee-detail.png":  {
+                                                                           "sourceLabel":  "04-employee-detail",
+                                                                           "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                           "copyMode":  "legacy-fanout"
+                                                                       },
+                  "person-register-step-02-saved-detail.png":  {
+                                                                   "sourceLabel":  "person-register-step-02-saved-detail",
+                                                                   "capturedAt":  "2026-08-05T12:24:46.4623704Z",
+                                                                   "copyMode":  "direct"
+                                                               },
+                  "person-register-step-03-open-from-list.png":  {
+                                                                     "sourceLabel":  "person-register-step-03-open-from-list",
+                                                                     "capturedAt":  "2026-08-05T12:24:47.6479102Z",
+                                                                     "copyMode":  "direct",
+                                                                     "pinpoint":  {
+                                                                                      "X":  24.666667938232422,
+                                                                                      "Y":  110.42708587646484,
+                                                                                      "Width":  63.92708206176758,
+                                                                                      "Height":  31.333335876464844
+                                                                                  }
+                                                                 },
+                  "application-progress-step-01-progress-tab.png":  {
+                                                                        "sourceLabel":  "03-employee-created",
+                                                                        "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-document-copies-step-03-list-column.png":  {
+                                                                         "sourceLabel":  "02-employees-list",
+                                                                         "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                         "copyMode":  "legacy-fanout"
+                                                                     },
+                  "login-step-02-report-dashboard.png":  {
+                                                             "sourceLabel":  "login-step-02-report-dashboard",
+                                                             "capturedAt":  "2026-08-05T12:23:55.7311299Z",
+                                                             "copyMode":  "direct"
+                                                         },
+                  "06-passport-fields-filled.png":  {
+                                                        "sourceLabel":  "06-passport-fields-filled",
+                                                        "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                        "copyMode":  "direct"
+                                                    },
+                  "person-add-medical-record-step-01-employee-detail.png":  {
+                                                                                "sourceLabel":  "04-employee-detail",
+                                                                                "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                                "copyMode":  "legacy-fanout"
+                                                                            },
+                  "person-add-passport-step-02-passport-form-new.png":  {
+                                                                            "sourceLabel":  "person-add-passport-step-02-passport-form-new",
+                                                                            "capturedAt":  "2026-08-05T12:24:54.0430883Z",
+                                                                            "copyMode":  "direct",
+                                                                            "pinpoint":  {
+                                                                                             "X":  479.3333435058594,
+                                                                                             "Y":  263.9270935058594,
+                                                                                             "Width":  886.4375,
+                                                                                             "Height":  30
+                                                                                         }
+                                                                        },
+                  "application-resminamalar-step-01-app-detail.png":  {
+                                                                          "sourceLabel":  "02-employees-list",
+                                                                          "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                          "copyMode":  "legacy-fanout"
+                                                                      },
+                  "person-register-temporary-visitor-step-02-saved-detail.png":  {
+                                                                                     "sourceLabel":  "03-employee-created",
+                                                                                     "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                                     "copyMode":  "legacy-fanout"
+                                                                                 },
+                  "navigation-step-02-left-menu.png":  {
+                                                           "sourceLabel":  "navigation-step-02-left-menu",
+                                                           "capturedAt":  "2026-08-05T12:23:56.1386531Z",
+                                                           "copyMode":  "direct"
+                                                       },
+                  "person-add-cv-documents-step-04-document-saved.png":  {
+                                                                             "sourceLabel":  "07-passport-saved",
+                                                                             "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                             "copyMode":  "legacy-fanout"
+                                                                         },
+                  "person-add-cv-documents-step-02-document-form-new.png":  {
+                                                                                "sourceLabel":  "05-passport-detail-new",
+                                                                                "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                                "copyMode":  "legacy-fanout"
+                                                                            },
+                  "person-add-visa-step-02-visa-form-new.png":  {
+                                                                    "sourceLabel":  "person-add-visa-step-02-visa-form-new",
+                                                                    "capturedAt":  "2026-08-05T12:25:06.7600824Z",
+                                                                    "copyMode":  "direct",
+                                                                    "pinpoint":  {
+                                                                                     "X":  515.3333740234375,
+                                                                                     "Y":  307.9270935058594,
+                                                                                     "Width":  588,
+                                                                                     "Height":  30
+                                                                                 }
+                                                                },
+                  "person-register-temporary-visitor-step-01-list.png":  {
+                                                                             "sourceLabel":  "02-employees-list",
+                                                                             "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                             "copyMode":  "legacy-fanout"
+                                                                         },
+                  "person-add-address-step-04-address-saved.png":  {
+                                                                       "sourceLabel":  "07-passport-saved",
+                                                                       "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                       "copyMode":  "legacy-fanout"
+                                                                   },
+                  "person-register-step-01-employees-list.png":  {
+                                                                     "sourceLabel":  "person-register-step-01-employees-list",
+                                                                     "capturedAt":  "2026-08-05T12:24:13.3920790Z",
+                                                                     "copyMode":  "direct",
+                                                                     "pinpoint":  {
+                                                                                      "X":  24.666667938232422,
+                                                                                      "Y":  110.42708587646484,
+                                                                                      "Width":  63.250003814697266,
+                                                                                      "Height":  31.333335876464844
+                                                                                  }
+                                                                 },
+                  "person-add-work-duty-step-03-work-duty-fields-filled.png":  {
+                                                                                   "sourceLabel":  "06-passport-fields-filled",
+                                                                                   "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                                   "copyMode":  "legacy-fanout"
+                                                                               },
+                  "person-add-travel-step-01-employee-detail.png":  {
+                                                                        "sourceLabel":  "04-employee-detail",
+                                                                        "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-dossier-step-04-export-toast.png":  {
+                                                                  "sourceLabel":  "03-employee-created",
+                                                                  "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                  "copyMode":  "legacy-fanout"
+                                                              },
+                  "person-add-position-history-step-03-position-fields-filled.png":  {
+                                                                                         "sourceLabel":  "06-passport-fields-filled",
+                                                                                         "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                                         "copyMode":  "legacy-fanout"
+                                                                                     },
+                  "navigation-step-04-detail-form.png":  {
+                                                             "sourceLabel":  "navigation-step-04-detail-form",
+                                                             "capturedAt":  "2026-08-05T12:24:47.9082427Z",
+                                                             "copyMode":  "direct",
+                                                             "pinpoint":  {
+                                                                              "X":  24.666667938232422,
+                                                                              "Y":  110.42708587646484,
+                                                                              "Width":  63.92708206176758,
+                                                                              "Height":  31.333335876464844
+                                                                          }
+                                                         },
+                  "person-add-salary-step-03-salary-fields-filled.png":  {
+                                                                             "sourceLabel":  "06-passport-fields-filled",
+                                                                             "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                             "copyMode":  "legacy-fanout"
+                                                                         },
+                  "person-dossier-step-01-entry.png":  {
+                                                           "sourceLabel":  "04-employee-detail",
+                                                           "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                           "copyMode":  "legacy-fanout"
+                                                       },
+                  "person-mark-incomplete-step-01-detail-form.png":  {
+                                                                         "sourceLabel":  "04-employee-detail",
+                                                                         "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                         "copyMode":  "legacy-fanout"
+                                                                     },
+                  "07-passport-saved.png":  {
+                                                "sourceLabel":  "07-passport-saved",
+                                                "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                "copyMode":  "direct"
+                                            },
+                  "person-edit-family-member-step-02-after-save.png":  {
+                                                                           "sourceLabel":  "03-employee-created",
+                                                                           "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                           "copyMode":  "legacy-fanout"
+                                                                       },
+                  "person-add-passport-step-04-passport-saved.png":  {
+                                                                         "sourceLabel":  "person-add-passport-step-04-passport-saved",
+                                                                         "capturedAt":  "2026-08-05T12:25:00.1049181Z",
+                                                                         "copyMode":  "direct",
+                                                                         "pinpoint":  {
+                                                                                          "X":  24.666667938232422,
+                                                                                          "Y":  110.42708587646484,
+                                                                                          "Width":  63.92708206176758,
+                                                                                          "Height":  31.333335876464844
+                                                                                      }
+                                                                     },
+                  "person-add-address-step-01-employee-detail.png":  {
+                                                                         "sourceLabel":  "04-employee-detail",
+                                                                         "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                         "copyMode":  "legacy-fanout"
+                                                                     },
+                  "person-add-family-relation-documents-step-04-saved.png":  {
+                                                                                 "sourceLabel":  "07-passport-saved",
+                                                                                 "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                                 "copyMode":  "legacy-fanout"
+                                                                             },
+                  "03-employee-created.png":  {
+                                                  "sourceLabel":  "03-employee-created",
+                                                  "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                  "copyMode":  "direct"
+                                              },
+                  "person-add-work-duty-step-04-work-duty-saved.png":  {
+                                                                           "sourceLabel":  "07-passport-saved",
+                                                                           "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                           "copyMode":  "legacy-fanout"
+                                                                       },
+                  "application-create-step-02-type-selected.png":  {
+                                                                       "sourceLabel":  "04-employee-detail",
+                                                                       "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                       "copyMode":  "legacy-fanout"
+                                                                   },
+                  "application-resminamalar-step-02-catalog.png":  {
+                                                                       "sourceLabel":  "03-employee-created",
+                                                                       "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                       "copyMode":  "legacy-fanout"
+                                                                   },
+                  "navigation-step-03-employees-list.png":  {
+                                                                "sourceLabel":  "navigation-step-03-employees-list",
+                                                                "capturedAt":  "2026-08-05T12:24:13.5997752Z",
+                                                                "copyMode":  "direct",
+                                                                "pinpoint":  {
+                                                                                 "X":  24.666667938232422,
+                                                                                 "Y":  110.42708587646484,
+                                                                                 "Width":  63.250003814697266,
+                                                                                 "Height":  31.333335876464844
+                                                                             }
+                                                            },
+                  "person-add-salary-step-01-employee-detail.png":  {
+                                                                        "sourceLabel":  "04-employee-detail",
+                                                                        "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-add-address-step-03-address-fields-filled.png":  {
+                                                                               "sourceLabel":  "06-passport-fields-filled",
+                                                                               "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                               "copyMode":  "legacy-fanout"
+                                                                           },
+                  "person-document-copies-step-02-catalog.png":  {
+                                                                     "sourceLabel":  "03-employee-created",
+                                                                     "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                     "copyMode":  "legacy-fanout"
+                                                                 },
+                  "person-document-copies-step-01-detail-toolbar.png":  {
+                                                                            "sourceLabel":  "04-employee-detail",
+                                                                            "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                            "copyMode":  "legacy-fanout"
+                                                                        },
+                  "person-mark-incomplete-step-02-popup.png":  {
+                                                                   "sourceLabel":  "04-employee-detail",
+                                                                   "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                   "copyMode":  "legacy-fanout"
+                                                               },
+                  "report-dashboard-step-03-listview.png":  {
+                                                                "sourceLabel":  "02-employees-list",
+                                                                "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                "copyMode":  "legacy-fanout"
+                                                            },
+                  "application-document-copies-step-02-panel.png":  {
+                                                                        "sourceLabel":  "03-employee-created",
+                                                                        "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "navigation-step-01-shell.png":  {
+                                                       "sourceLabel":  "navigation-step-01-shell",
+                                                       "capturedAt":  "2026-08-05T12:23:55.9325276Z",
+                                                       "copyMode":  "direct"
+                                                   },
+                  "state-notifications-step-01-inbox.png":  {
+                                                                "sourceLabel":  "01-after-login",
+                                                                "capturedAt":  "2026-08-05T12:24:04.3690478Z",
+                                                                "copyMode":  "legacy-fanout"
+                                                            },
+                  "person-add-visa-step-03-visa-fields-filled.png":  {
+                                                                         "sourceLabel":  "person-add-visa-step-03-visa-fields-filled",
+                                                                         "capturedAt":  "2026-08-05T12:25:11.0012969Z",
+                                                                         "copyMode":  "direct",
+                                                                         "pinpoint":  {
+                                                                                          "X":  515.3333740234375,
+                                                                                          "Y":  307.9270935058594,
+                                                                                          "Width":  556,
+                                                                                          "Height":  30
+                                                                                      }
+                                                                     },
+                  "person-add-passport-step-01-employee-detail.png":  {
+                                                                          "sourceLabel":  "person-add-passport-step-01-employee-detail",
+                                                                          "capturedAt":  "2026-08-05T12:24:47.2683327Z",
+                                                                          "copyMode":  "direct",
+                                                                          "pinpoint":  {
+                                                                                           "X":  435.03125,
+                                                                                           "Y":  921.9271240234375,
+                                                                                           "Width":  84.63543701171875,
+                                                                                           "Height":  44
+                                                                                       }
+                                                                      },
+                  "person-add-education-step-01-employee-detail.png":  {
+                                                                           "sourceLabel":  "04-employee-detail",
+                                                                           "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                           "copyMode":  "legacy-fanout"
+                                                                       },
+                  "application-add-items-step-02-item-form-new.png":  {
+                                                                          "sourceLabel":  "04-employee-detail",
+                                                                          "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                          "copyMode":  "legacy-fanout"
+                                                                      },
+                  "login-step-01-logon":  {
+                                              "sourceLabel":  "00-logon-page",
+                                              "capturedAt":  "2026-08-05T12:23:44.5126404Z",
+                                              "copyMode":  "legacy-fanout",
+                                              "pinpoint":  {
+                                                               "X":  771,
+                                                               "Y":  654.3333740234375,
+                                                               "Width":  378,
+                                                               "Height":  31.33331298828125
+                                                           }
+                                          },
+                  "report-dashboard-step-01-overview.png":  {
+                                                                "sourceLabel":  "01-after-login",
+                                                                "capturedAt":  "2026-08-05T12:24:04.3690478Z",
+                                                                "copyMode":  "legacy-fanout"
+                                                            },
+                  "person-add-cv-documents-step-01-employee-detail.png":  {
+                                                                              "sourceLabel":  "04-employee-detail",
+                                                                              "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                              "copyMode":  "legacy-fanout"
+                                                                          },
+                  "person-add-medical-record-step-03-medical-fields-filled.png":  {
+                                                                                      "sourceLabel":  "06-passport-fields-filled",
+                                                                                      "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                                      "copyMode":  "legacy-fanout"
+                                                                                  },
+                  "template-staging-step-02-edit-sync.png":  {
+                                                                 "sourceLabel":  "03-employee-created",
+                                                                 "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                 "copyMode":  "legacy-fanout"
+                                                             },
+                  "person-edit-employee-step-01-detail-form.png":  {
+                                                                       "sourceLabel":  "04-employee-detail",
+                                                                       "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                       "copyMode":  "legacy-fanout"
+                                                                   },
+                  "person-add-education-step-04-education-saved.png":  {
+                                                                           "sourceLabel":  "07-passport-saved",
+                                                                           "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                           "copyMode":  "legacy-fanout"
+                                                                       },
+                  "report-dashboard-step-02-category.png":  {
+                                                                "sourceLabel":  "01-after-login",
+                                                                "capturedAt":  "2026-08-05T12:24:04.3690478Z",
+                                                                "copyMode":  "legacy-fanout"
+                                                            },
+                  "application-document-copies-step-01-items-list.png":  {
+                                                                             "sourceLabel":  "02-employees-list",
+                                                                             "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                             "copyMode":  "legacy-fanout"
+                                                                         },
+                  "person-edit-employee-step-02-after-save.png":  {
+                                                                      "sourceLabel":  "03-employee-created",
+                                                                      "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                      "copyMode":  "legacy-fanout"
+                                                                  },
+                  "application-progress-step-02-new-row-form.png":  {
+                                                                        "sourceLabel":  "04-employee-detail",
+                                                                        "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-add-education-step-02-education-form-new.png":  {
+                                                                              "sourceLabel":  "05-passport-detail-new",
+                                                                              "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                              "copyMode":  "legacy-fanout"
+                                                                          },
+                  "user-report-templates-step-02-detail.png":  {
+                                                                   "sourceLabel":  "04-employee-detail",
+                                                                   "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                   "copyMode":  "legacy-fanout"
+                                                               },
+                  "template-staging-step-01-catalog-gear.png":  {
+                                                                    "sourceLabel":  "03-employee-created",
+                                                                    "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                    "copyMode":  "legacy-fanout"
+                                                                },
+                  "application-create-step-01-applications-list.png":  {
+                                                                           "sourceLabel":  "02-employees-list",
+                                                                           "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                           "copyMode":  "legacy-fanout"
+                                                                       },
+                  "application-create-step-03-saved-header.png":  {
+                                                                      "sourceLabel":  "03-employee-created",
+                                                                      "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                      "copyMode":  "legacy-fanout"
+                                                                  },
+                  "person-dossier-step-03-copies-slot.png":  {
+                                                                 "sourceLabel":  "03-employee-created",
+                                                                 "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                 "copyMode":  "legacy-fanout"
+                                                             },
+                  "person-add-work-duty-step-02-work-duty-form-new.png":  {
+                                                                              "sourceLabel":  "05-passport-detail-new",
+                                                                              "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                              "copyMode":  "legacy-fanout"
+                                                                          },
+                  "person-add-family-relation-documents-step-02-form-new.png":  {
+                                                                                    "sourceLabel":  "05-passport-detail-new",
+                                                                                    "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                                    "copyMode":  "legacy-fanout"
+                                                                                },
+                  "01-after-login.png":  {
+                                             "sourceLabel":  "01-after-login",
+                                             "capturedAt":  "2026-08-05T12:24:04.3690478Z",
+                                             "copyMode":  "direct"
+                                         },
+                  "person-add-travel-step-03-travel-fields-filled.png":  {
+                                                                             "sourceLabel":  "06-passport-fields-filled",
+                                                                             "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                             "copyMode":  "legacy-fanout"
+                                                                         },
+                  "application-progress-step-03-row-saved.png":  {
+                                                                     "sourceLabel":  "03-employee-created",
+                                                                     "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                     "copyMode":  "legacy-fanout"
+                                                                 },
+                  "person-add-position-history-step-01-employee-detail.png":  {
+                                                                                  "sourceLabel":  "04-employee-detail",
+                                                                                  "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                                                  "copyMode":  "legacy-fanout"
+                                                                              },
+                  "person-add-visa-step-01-passport-detail.png":  {
+                                                                      "sourceLabel":  "person-add-visa-step-01-passport-detail",
+                                                                      "capturedAt":  "2026-08-05T12:25:00.4672651Z",
+                                                                      "copyMode":  "direct",
+                                                                      "pinpoint":  {
+                                                                                       "X":  460.9583435058594,
+                                                                                       "Y":  553.9271240234375,
+                                                                                       "Width":  56.020843505859375,
+                                                                                       "Height":  44
+                                                                                   }
+                                                                  },
+                  "person-add-salary-step-02-salary-form-new.png":  {
+                                                                        "sourceLabel":  "05-passport-detail-new",
+                                                                        "capturedAt":  "2026-08-05T12:24:54.3379526Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-register-family-member-step-01-family-members-list.png":  {
+                                                                                        "sourceLabel":  "02-employees-list",
+                                                                                        "capturedAt":  "2026-08-05T12:24:13.7698321Z",
+                                                                                        "copyMode":  "legacy-fanout"
+                                                                                    },
+                  "person-add-family-relation-documents-step-03-file-attached.png":  {
+                                                                                         "sourceLabel":  "06-passport-fields-filled",
+                                                                                         "capturedAt":  "2026-08-05T12:24:57.6614434Z",
+                                                                                         "copyMode":  "legacy-fanout"
+                                                                                     },
+                  "person-dossier-step-02-screen.png":  {
+                                                            "sourceLabel":  "04-employee-detail",
+                                                            "capturedAt":  "2026-08-05T12:24:48.2004605Z",
+                                                            "copyMode":  "legacy-fanout"
+                                                        },
+                  "person-add-salary-step-04-salary-saved.png":  {
+                                                                     "sourceLabel":  "07-passport-saved",
+                                                                     "capturedAt":  "2026-08-05T12:25:00.3032632Z",
+                                                                     "copyMode":  "legacy-fanout"
+                                                                 },
+                  "application-document-copies-step-03-toast.png":  {
+                                                                        "sourceLabel":  "03-employee-created",
+                                                                        "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                        "copyMode":  "legacy-fanout"
+                                                                    },
+                  "person-register-family-member-step-02-saved-detail.png":  {
+                                                                                 "sourceLabel":  "03-employee-created",
+                                                                                 "capturedAt":  "2026-08-05T12:24:46.7237919Z",
+                                                                                 "copyMode":  "legacy-fanout"
+                                                                             }
+              }
+}

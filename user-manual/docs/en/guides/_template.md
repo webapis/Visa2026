@@ -8,6 +8,8 @@ bo:
 relatedBo: []
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
+screenshotsCapturedAt:
+mediaE2eRunId:
 e2eScenarioId:
 verified: false
 verifiedAt:

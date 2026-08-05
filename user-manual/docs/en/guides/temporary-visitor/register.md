@@ -13,10 +13,6 @@ prerequisiteSlugs:
   - getting-started/navigation
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-register.mp4
-videoSource: recordings/passport-create.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -30,14 +26,6 @@ This guide shows how to create a new **temporary visitor** person record in Visa
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-register.mp4"
-  title="Register a temporary visitor in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). UI labels match employee registration; temporary visitor fields are described below.</p>
 
 ## Before you start
 

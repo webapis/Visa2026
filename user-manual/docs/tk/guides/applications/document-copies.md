@@ -10,8 +10,6 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - applications/add-items
 screenshotsVersion: "2026.08"
-videoStorage: static
-videoFile: application-document-copies.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

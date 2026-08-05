@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - temporary-visitor/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-travel.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -33,14 +29,6 @@ This walkthrough uses **External Arrival** (entry at a border checkpoint).
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Tab labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-travel.mp4"
-  title="Add a travel history for a temporary visitor in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 

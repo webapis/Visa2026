@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - applications/create
   - applications/add-items
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: application-progress.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -34,14 +30,6 @@ Visa2026 keeps an **append-only history**: you **add a new progress row** when t
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). State labels are localized; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/application-progress.mp4"
-  title="Track application progress in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the progress history flow.</p>
 
 ## Before you start
 

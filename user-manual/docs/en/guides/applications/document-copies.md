@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - applications/create
   - applications/add-items
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: application-document-copies.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:
@@ -33,14 +29,6 @@ Document copies replaces the older **Generate PDF** / **My PDF Jobs** buttons. T
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/application-document-copies.mp4"
-  title="Ministry document copies in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording placeholder — steps below match the document copies flow.</p>
 
 ## Before you start
 

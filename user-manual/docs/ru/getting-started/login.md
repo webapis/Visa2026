@@ -6,13 +6,13 @@ tier: 0
 guideStatus: draft
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: login-sign-in.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Вход в Visa2026
@@ -23,12 +23,6 @@ verified: false
     Изображения ниже сделаны в **английском** интерфейсе (версия **2026.08**). Если в офисе используется турецкий, туркменский или русский язык, подписи переведены, но шаги те же.
 
 ## Видеоинструкция
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../assets/videos/v2026.08/ru/login-sign-in.mp4"
-  title="Вход в Visa2026"></video>
-
-<p class="visa-manual-video-caption">Запись из учебной среды (тестовые данные). Шаги ниже соответствуют видео.</p>
 
 ## Перед началом
 

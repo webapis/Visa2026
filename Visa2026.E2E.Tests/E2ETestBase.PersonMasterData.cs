@@ -273,6 +273,7 @@ public abstract partial class E2ETestBase
     {
         WaitForDetailReady("Visa_DetailView", E2ETestVisaFieldCaptions.VisaNumber, "Visa");
         FillDetailFormWithRetry(
+            new EasyTestParameter(E2ETestVisaFieldCaptions.ProcessNumber, E2ETestVisaCreateValues.ProcessNumber),
             new EasyTestParameter(E2ETestVisaFieldCaptions.VisaNumber, visaNumber),
             new EasyTestParameter(E2ETestVisaFieldCaptions.IssueDate, E2ETestVisaCreateValues.IssueDate),
             new EasyTestParameter(E2ETestVisaFieldCaptions.StartDate, E2ETestVisaCreateValues.StartDate),

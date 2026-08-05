@@ -259,22 +259,7 @@ foreach ($pageFile in $guideAndGettingStartedFiles) {
 
         $videoStorage = $frontmatter['videoStorage']
         if ($videoStorage -eq 'static') {
-            $videosVersion = $frontmatter['videosVersion']
-            $videoFile = $frontmatter['videoFile']
-            if ([string]::IsNullOrWhiteSpace($videosVersion) -or [string]::IsNullOrWhiteSpace($videoFile)) {
-                $failures.Add("Guide with videoStorage static must set videosVersion and videoFile: $($pageFile.FullName)")
-            }
-            else {
-                $videoError = Test-ManualVideoAsset -ManualRoot $manualRoot -Locale $pageLocale -VideosVersion $videosVersion -VideoFile $videoFile
-                if ($videoError) {
-                    if ($RequireMedia) {
-                        $failures.Add("$videoError (referenced in $($pageFile.FullName))")
-                    }
-                    else {
-                        $warnings.Add("$videoError (referenced in $($pageFile.FullName)) - run Record-EasyTest.ps1 + Copy-EasyTestManualVideos.ps1")
-                    }
-                }
-            }
+            $warnings.Add("Guide still has videoStorage static (screenshots-only D21): $($pageFile.FullName)")
         }
     }
 
@@ -291,16 +276,7 @@ foreach ($pageFile in $guideAndGettingStartedFiles) {
     }
 
     foreach ($videoLink in Get-ManualVideoSrcLinks -Content $content) {
-        $videoLinkError = Test-ManualScreenshotLink -MarkdownFile $pageFile.FullName -RelativeLink $videoLink -DocsRoot $docsRoot -ManualRoot $manualRoot
-        if ($videoLinkError) {
-            $message = $videoLinkError.Replace('screenshot', 'video')
-            if ($RequireMedia) {
-                $failures.Add($message)
-            }
-            else {
-                $warnings.Add("$message - run Record-EasyTest.ps1 + Copy-EasyTestManualVideos.ps1")
-            }
-        }
+        $warnings.Add("Guide contains <video> src (screenshots-only D21): $videoLink in $($pageFile.FullName)")
     }
 }
 

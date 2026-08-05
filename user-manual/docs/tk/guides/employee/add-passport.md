@@ -11,13 +11,13 @@ roles: [Visa Officer]
 prerequisiteSlugs:
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Işgäre pasport goşmak
@@ -31,12 +31,6 @@ Bu gollanma bar bolan işgäre **pasport** ýazgysyny goşmagy görkezýär. Pas
     Suratlar **Iňlis** interfeýsinden (wersiýa **2026.08**).
 
 ## Wideo gollanma
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tk/person-add-passport.mp4"
-  title="Işgäre pasport goşmak"></video>
-
-<p class="visa-manual-video-caption">Ýazgy okuw gurşawyndan alnan (synag maglumatlary). Aşakdaky ädimler wideo bilen gabat gelýär.</p>
 
 ## Ädim 1 — Işgäri açyň
 
@@ -55,6 +49,9 @@ Bu gollanma bar bolan işgäre **pasport** ýazgysyny goşmagy görkezýär. Pas
 1. **New Passport** basyň.
 2. Pasport formasynyň açylmagyna garaşyň.
 
+!!! tip "Bellenen pasport görnüşi"
+    **Passport Type** meýdany deslapdan **P — National passport** (iň köp ulanylýan görnüş) bilen doldurylýar. Resminama başga görnüşde bolsa, sanawdan üýtgediň.
+
 ![Täze pasport formasy](../../../assets/screenshots/v2026.08/tk/person-add-passport-step-02-passport-form-new.png)
 
 ## Ädim 4 — Hökman meýdanlar
@@ -62,7 +59,7 @@ Bu gollanma bar bolan işgäre **pasport** ýazgysyny goşmagy görkezýär. Pas
 | Meýdan | Giriş |
 |--------|--------|
 | **Passport Number** | Pasport belgisi |
-| **Passport Type** | Sanawdan |
+| **Passport Type** | Köplenç eýýäm **P — National passport**; gerek bolsa sanawdan üýtgediň |
 | **Issue Date** | Sene |
 | **Expiration Date** | Sene |
 | **Authority** | Tekst |

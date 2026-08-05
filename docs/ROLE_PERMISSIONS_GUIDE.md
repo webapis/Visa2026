@@ -19,7 +19,7 @@ Roles are managed in `Updater.cs` → `CreateAdminRole()`, `CreateUserRole()`, `
 | **VisaOffice** | Organization / tenant configuration + Resminamalar templates |
 | **Default** | Self-service profile, password, culture |
 
-**Tenant users:** `LookupCatalogs/tenant/tenant-users.json` — per-deployment officer accounts (`Updater` + `TenantUserSeedUpdater`). Syncs the **exact** role list on every DB update (adds missing roles, **removes** roles not listed); does not change passwords on existing accounts. During legacy parallel period use **`UsersReadOnly`** instead of `Users` + `VisaOffice`; restore full roles on cutover.
+**Tenant users:** `LookupCatalogs/tenant/tenant-users.json` — per-deployment officer accounts (`Updater` + `TenantUserSeedUpdater`). Syncs the **exact** role list on every DB update (adds missing roles, **removes** roles not listed); does not change passwords on existing accounts. Calik tenant officers use **`Users`** (full case-officer write access). Add **`VisaOffice`** only for staff who manage Configuration / templates. **`UsersReadOnly`** remains available for future parallel-period lockdown but is not assigned in the current seed file.
 
 There are two places to set permissions:
 
@@ -132,7 +132,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 ### Full Access
 | Type | Access |
 |---|---|
-| `Person` | Full |
+| `Person` | Full (+ member Write on incomplete flag fields via `PersonIncompleteDataOfficerPermissions`) |
 | `Application` | Full |
 | `ApplicationItem` | Full |
 | `Passport` | Full |
@@ -168,7 +168,7 @@ Tenant configuration (`LookupCatalogs/tenant/*.json`) and user report templates.
 | `Company`, `ProjectContract` |
 | `ExpirationAlertRule` | Read only (runtime state evaluators; no Configuration nav) |
 | `ReportDataV2`, `ReportVisibility` |
-| **Report Dashboard `VwRd*`** (all `vw_rd_*` view BOs) | Read via `EnsureReportDashboardOfficerPermissions` — Users, UsersReadOnly, VisaOffice. Missing Read → Overview cards show Total **0** even when data exists. |
+| **Report Dashboard `VwRd*`** (all `vw_rd_*` view BOs) + **`ReportDashboardHost`** | Read + Navigate on all view BOs; host shell Read/Write/Create — via `ReportDashboardOfficerPermissions.Ensure` (Users, UsersReadOnly, VisaOffice). Upgrades existing permission rows on startup (not add-only). Missing Read → Overview cards show Total **0** even when data exists. |
 
 ---
 
@@ -242,4 +242,5 @@ EnsureNavigationPermission(userRole, @"Application/NavigationItems/Items/MyGroup
 | Jun 2026 | Visa office cannot open migration SLA profiles or system settings | **`EnsureFullAccessRecursivePermission`** for `ApplicationMigrationSlaProfile` and `SystemSettings` on VisaOffice; nav allow for those items; `ApplicationType` read for link popup |
 | Jul 2026 | Migration deadline empty for VisaOfficer / Users; Admin OK | **`EnsureReadOnlyPermission<ApplicationMigrationSlaProfile>`** on Users + UsersReadOnly (creation block + Ensure); officers need Read to resolve `ApplicationType.MigrationSlaProfile` for ListView SLA text |
 | Jul 2026 | UsersReadOnly (reader) must see process-tracking columns | Shared **`EnsureApplicationProcessTrackingReadPermissions`** for Users + UsersReadOnly (migration/approval SLA, progress state/location, snapshots); Users keep write on progress/snapshots |
+| Aug 2026 | Users cannot Mark incomplete / Mark complete on Person | **`PersonIncompleteDataOfficerPermissions.Ensure`** — `PersonIncompleteMarkOptions` Read/Write/Create + member Write on `IsDataIncomplete` and `Incomplete*` fields |
 | Jun 2026 | Document expiration thresholds under System nav for all Users | **`ExpirationAlertRule`** moved to **Configuration**; VisaOffice read/write + nav; Users read-only without System nav ([`DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md`](DOCUMENT_EXPIRATION_ALERT_CONFIGURATION.md)) |

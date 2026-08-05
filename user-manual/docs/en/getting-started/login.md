@@ -3,20 +3,20 @@ title: Sign in to Visa2026
 slug: getting-started/login
 locale: en
 tier: 0
-guideStatus: review
+guideStatus: published
 lastReviewed: "2026-08-05"
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: login-sign-in.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
 sourceDocs:
   - docs/REPORT_DASHBOARD.md
   - docs/USAGE_LICENSE_LOGIN_BANNER.md
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Sign in to Visa2026
@@ -25,14 +25,6 @@ This guide shows how visa officers open Visa2026 and sign in. When you finish, y
 
 !!! tip "Screenshots"
     Images below are from the **English** application UI (version **2026.08**). If your office uses Turkish, Turkmen, or Russian, the labels are translated but the steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../assets/videos/v2026.08/en/login-sign-in.mp4"
-  title="Sign in to Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 
@@ -51,6 +43,7 @@ Use a supported browser (Microsoft Edge or Google Chrome). Keep your password pr
 
 You should see the application title **Visa Management** and a sign-in form with **User Name** and **Password**.
 
+<!-- media-capture: login-step-01-logon -->
 ![Sign-in page with User Name, Password, and Log In](../../assets/screenshots/v2026.08/en/login-step-01-logon.png)
 
 !!! note "Trial notice (optional)"
@@ -81,6 +74,7 @@ You should see:
 - The main **navigation menu** on the left (menus depend on your assigned role)
 - The application header with your user menu and notification bell
 
+<!-- media-capture: login-step-02-report-dashboard -->
 ![Report Dashboard after sign-in](../../assets/screenshots/v2026.08/en/login-step-02-report-dashboard.png)
 
 !!! success "You are signed in"

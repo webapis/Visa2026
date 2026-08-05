@@ -3,7 +3,7 @@ title: Register a new employee
 slug: employee/register
 locale: en
 tier: 2
-guideStatus: review
+guideStatus: published
 lastReviewed: "2026-08-05"
 bo: Person
 personRole: Employee
@@ -13,13 +13,13 @@ prerequisiteSlugs:
   - getting-started/login
   - getting-started/navigation
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-register.mp4
-videoSource: recordings/passport-create.mp4
+screenshotsCapturedAt: "2026-08-05T08:48:03.3957272Z"
+mediaE2eRunId: "20260805-134241"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-05T08:49:33.7498506Z"
+verifiedCommit: "2d70b13c"
 ---
 
 # Register a new employee
@@ -31,14 +31,6 @@ This guide shows how to create a new **employee** person record in Visa2026. Whe
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-register.mp4"
-  title="Register a new employee in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 
@@ -56,6 +48,7 @@ This guide shows how to create a new **employee** person record in Visa2026. Whe
 
 The toolbar should show **New** and **Refresh**.
 
+<!-- media-capture: person-register-step-01-employees-list -->
 ![Employees list ready for a new record](../../../assets/screenshots/v2026.08/en/person-register-step-01-employees-list.png)
 
 ## Step 2 — Start a new employee
@@ -117,6 +110,7 @@ If **Save** fails:
 
 After a successful save, you usually remain on the employee **detail form** with your values shown.
 
+<!-- media-capture: person-register-step-02-saved-detail -->
 ![Employee detail after save](../../../assets/screenshots/v2026.08/en/person-register-step-02-saved-detail.png)
 
 ## Step 5 — Confirm the employee in the list
@@ -127,6 +121,7 @@ After a successful save, you usually remain on the employee **detail form** with
 
 Check that **First Name**, **Last Name**, and **Personal Number** match what you saved.
 
+<!-- media-capture: person-register-step-03-open-from-list -->
 ![Employee detail opened from the list](../../../assets/screenshots/v2026.08/en/person-register-step-03-open-from-list.png)
 
 !!! success "Employee registered"

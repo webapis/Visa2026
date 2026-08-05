@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - family-member/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
 verified: false
@@ -30,14 +26,6 @@ This guide shows how to add a **passport** record on an existing **family member
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-passport.mp4"
-  title="Add a passport to a family member in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 
@@ -71,6 +59,9 @@ The nested toolbar should offer **New Passport** (or **New** on the passports li
 
 The new passport is linked to the family member you opened in step 1.
 
+!!! tip "Default passport type"
+    **Passport Type** is preset to **P — National passport** (the type officers use most often). Change it only when the document is a different type.
+
 ![New passport detail form](../../../assets/screenshots/v2026.08/en/person-add-passport-step-02-passport-form-new.png)
 
 ## Step 4 — Fill required fields
@@ -80,7 +71,7 @@ Enter values using the on-screen labels. Typical **required** fields include:
 | Field | What to enter |
 |-------|----------------|
 | **Passport Number** | Unique passport number |
-| **Passport Type** | Choose from the list (for example national passport types) |
+| **Passport Type** | Usually already **P — National passport**; change from the list if needed |
 | **Issue Date** | Date picker |
 | **Expiration Date** | Date picker |
 | **Authority** | Issuing authority text |

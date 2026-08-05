@@ -501,8 +501,8 @@ manual-test-reports/runs/
 TestResults/
 user-manual/docs/assets/
 user-manual/docs/*/reference/business-objects.md
-# Promoted EasyTest media (Record-EasyTest.ps1 + Copy-EasyTestManual*.ps1) — not in git
-user-manual/assets/screenshots/**/*.png
+# Officer manual screenshots — committed in git for GitHub Pages + clone-and-build (D22). Videos remain deferred (D21).
+# user-manual/assets/screenshots/**/*.png  — tracked (do not re-ignore)
 user-manual/assets/videos/**/*.mp4
 user-manual/assets/videos/**/*.webm
 user-manual/assets/videos/**/*.mov

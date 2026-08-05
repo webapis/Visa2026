@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-mark-incomplete.mp4
-videoSource: recordings/passport-create.mp4
 verified: false
 sourceDocs:
   - docs/PERSON_INCOMPLETE_DATA.md
@@ -33,14 +29,6 @@ The **Incomplete** flag is a **soft** reminder for officers — it does **not** 
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-mark-incomplete.mp4"
-  title="Mark person incomplete or complete in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The steps below match the video.</p>
 
 ## Before you start
 

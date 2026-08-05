@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using DevExpress.EasyTest.Framework;
+using Visa2026.E2E.Tests.UserManual;
 
 namespace Visa2026.E2E.Tests;
 
@@ -27,6 +28,7 @@ internal static class EasyTestScreenshotCapture
             return;
 
         EasyTestBlazorNavigationHelper.TryCaptureScreenshot(appContext, dir, label);
+        UserManualVideoMarkerCapture.Mark(label);
     }
 
     private static string? ResolveOutputDirectory()

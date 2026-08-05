@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-mark-incomplete.mp4
-videoSource: recordings/passport-create.mp4
 verified: false
 ---
 
@@ -30,12 +26,6 @@ Bu kılavuz ana verisi henüz tamamlanmamış bir kişiyi **eksik** olarak işar
 
 !!! tip "Ekran görüntüleri"
     Görseller **İngilizce** arayüzden (sürüm **2026.08**).
-
-## Video anlatımı
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tr/person-mark-incomplete.mp4"
-  title="Eksik işaretleme ve tamamlama"></video>
 
 ## Başlamadan önce
 

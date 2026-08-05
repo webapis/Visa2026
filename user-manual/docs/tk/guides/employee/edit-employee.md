@@ -14,10 +14,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-edit-employee.mp4
-videoSource: recordings/passport-create.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
 e2eScenarioId: person-officer-journey
 verified: false
@@ -34,10 +30,6 @@ Bu gollanma bar bolan **işgär** ýazgysyndaky meýdanlary üýtgetmek we ýatd
     Suratlar **Iňlis** interfeýsinden (wersiýa **2026.08**).
 
 ## Wideo gollanma
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tk/person-edit-employee.mp4"
-  title="Işgäriň maglumatlaryny täzelemek"></video>
 
 ## Başlamazdan öň
 

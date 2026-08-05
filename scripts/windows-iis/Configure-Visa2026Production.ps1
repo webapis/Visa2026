@@ -25,7 +25,7 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "Visa2026-IisSlots.ps1")
 
 if (-not [string]::IsNullOrWhiteSpace($SqlServer) -or $SqlPort -gt 0) {
-    Write-Warning "SqlServer/SqlPort parameters are ignored — Visa2026 uses PostgreSQL only."
+    Write-Warning "SqlServer/SqlPort parameters are ignored - Visa2026 uses PostgreSQL only."
 }
 
 $ctx = Resolve-Visa2026IisSlotContext -Profile $Profile -PublishPath $PublishPath -EnvFile $EnvFile

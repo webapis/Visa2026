@@ -13,9 +13,6 @@ prerequisiteSlugs:
   - applications/overview
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: application-create.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---

@@ -8,7 +8,10 @@
   See docs/USER_MANUAL_PIPELINE.md and .cursor/skills/visa2026-user-manual/reference.md.
 
 .PARAMETER SkipE2E
-  Skip EasyTest UserManual journeys (default until Phase 3).
+  Skip Playwright UserManual E2E (default). Pass -SkipE2E:$false to run person-officer-journey.
+
+.PARAMETER PublishSlugs
+  After green UserManual E2E, set guideStatus published (en) and verified on listed slugs.
 
 .PARAMETER SkipGenerator
   Skip UserManualManifestGenerator (bo-catalog.json).
@@ -38,12 +41,15 @@
 [CmdletBinding()]
 param(
     [switch]$SkipE2E = $true,
+    [string[]]$PublishSlugs = @(),
     [switch]$SkipGenerator,
     [switch]$SkipValidate,
     [switch]$SkipUnitTests,
     [switch]$RequireMedia,
     [string]$ManualMediaBaseUrl,
-    [switch]$SkipTestReport
+    [switch]$SkipTestReport,
+
+    [string]$SiteUrl = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -85,6 +91,7 @@ $docsRoot = Join-Path $manualRoot 'docs'
 $generatorProject = Join-Path $repoRoot 'tools\UserManualManifestGenerator\UserManualManifestGenerator.csproj'
 $generatorTestsProject = Join-Path $repoRoot 'tools\UserManualManifestGenerator.Tests\UserManualManifestGenerator.Tests.csproj'
 $validateScript = Join-Path $PSScriptRoot 'Validate-UserManualLinks.ps1'
+$mediaCaptureValidateScript = Join-Path $PSScriptRoot 'Validate-UserManualMediaCaptures.ps1'
 $testResultsRoot = Join-Path $repoRoot 'TestResults'
 
 function Invoke-External {
@@ -115,12 +122,7 @@ function Sync-ManualAssets {
 
     $screenshotsRoot = Join-Path $source 'screenshots'
     if (-not (Test-Path -LiteralPath $screenshotsRoot)) {
-        Write-Warning "user-manual/assets/screenshots/ is empty. Run Record-EasyTest.ps1 then Copy-EasyTestManualScreenshots.ps1."
-    }
-
-    $videosRoot = Join-Path $source 'videos'
-    if (-not (Test-Path -LiteralPath $videosRoot)) {
-        Write-Warning "user-manual/assets/videos/ is empty. Run Record-EasyTest.ps1 (with ffmpeg) then Copy-EasyTestManualVideos.ps1."
+        Write-Warning "user-manual/assets/screenshots/ is empty. Run Record-PlaywrightE2e.ps1 then Copy-EasyTestManualScreenshots.ps1."
     }
 
     $target = Join-Path $DocsRoot 'assets'
@@ -193,10 +195,54 @@ if (-not $SkipValidate) {
     if ($LASTEXITCODE -ne 0) {
         throw "Validate-UserManualLinks.ps1 failed."
     }
+
+    if (Test-Path -LiteralPath $mediaCaptureValidateScript) {
+        & $mediaCaptureValidateScript -ManualRoot $manualRoot -RequireRegistry
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Validate-UserManualMediaCaptures.ps1 failed.'
+        }
+    }
 }
 
 if (-not $SkipE2E) {
-    Write-Warning 'UserManual E2E is not wired until Phase 3. Re-run with -SkipE2E.'
+    $recordScript = Join-Path $repoRoot 'scripts\local\Record-PlaywrightE2e.ps1'
+    if (-not (Test-Path -LiteralPath $recordScript)) {
+        throw "Playwright recorder not found: $recordScript"
+    }
+
+    New-Item -ItemType Directory -Force -Path $testResultsRoot | Out-Null
+    $e2eTrx = Join-Path $testResultsRoot 'user-manual-e2e-playwright-local.trx'
+
+    & $recordScript -Target Local -WriteTrx -TrxPath $e2eTrx
+    if ($LASTEXITCODE -ne 0) {
+        throw 'UserManual Playwright E2E failed.'
+    }
+
+    $reportScript = Join-Path $PSScriptRoot 'Write-ManualTestReport.ps1'
+    if (Test-Path -LiteralPath $reportScript) {
+        & $reportScript -TrxPath @($e2eTrx)
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Write-ManualTestReport.ps1 failed after UserManual E2E.'
+        }
+    }
+
+    if ($PublishSlugs.Count -gt 0) {
+        $patchScript = Join-Path $PSScriptRoot 'Update-UserManualGuideVerification.ps1'
+        $patchArgs = @{
+            Slugs = $PublishSlugs
+        }
+        $mediaCapturePath = Join-Path $testResultsRoot 'user-manual-media-capture.json'
+        if (Test-Path -LiteralPath $mediaCapturePath) {
+            $mediaCapture = Get-Content -LiteralPath $mediaCapturePath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($mediaCapture.mediaE2eRunId) { $patchArgs['MediaE2eRunId'] = [string]$mediaCapture.mediaE2eRunId }
+            if ($mediaCapture.screenshotsCapturedAt) { $patchArgs['ScreenshotsCapturedAt'] = [string]$mediaCapture.screenshotsCapturedAt }
+            if ($mediaCapture.videoCapturedAt) { $patchArgs['VideoCapturedAt'] = [string]$mediaCapture.videoCapturedAt }
+        }
+        & $patchScript @patchArgs
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Update-UserManualGuideVerification.ps1 failed.'
+        }
+    }
 }
 
 function Get-PythonCommand {
@@ -255,6 +301,9 @@ if (Test-Path -LiteralPath $siteDir) {
 }
 
 $mkdocsArgs = $python.Prefix + @('-m', 'mkdocs', 'build', '-f', $mkdocsConfig, '-d', $siteDir)
+if (-not [string]::IsNullOrWhiteSpace($SiteUrl)) {
+    $mkdocsArgs += @('--site-url', $SiteUrl.Trim().TrimEnd('/'))
+}
 Invoke-External -FilePath $python.FilePath -ArgumentList $mkdocsArgs
 
 if (-not $SkipTestReport) {

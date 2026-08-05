@@ -14,10 +14,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-edit-employee.mp4
-videoSource: recordings/passport-create.mp4
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeMasterDataCrud
 e2eScenarioId: person-officer-journey
 verified: false
@@ -32,14 +28,6 @@ Bu kılavuz mevcut bir **çalışan** kaydındaki alanları değiştirip kaydetm
 
 !!! tip "Ekran görüntüleri"
     Görseller **İngilizce** arayüzden (sürüm **2026.08**).
-
-## Video anlatımı
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tr/person-edit-employee.mp4"
-  title="Çalışan bilgilerini güncelleme"></video>
-
-<p class="visa-manual-video-caption">Kayıt eğitim ortamından alınmıştır (test verisi).</p>
 
 ## Başlamadan önce
 

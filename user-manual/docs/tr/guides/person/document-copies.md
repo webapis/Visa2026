@@ -11,10 +11,6 @@ prerequisiteSlugs:
   - person/open-and-search
   - getting-started/navigation
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-document-copies.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 sourceDocs:

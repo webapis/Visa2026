@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - family-member/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-cv-documents.mp4
-videoSource: recordings/person-master-data-journey.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -33,14 +29,6 @@ Employees use **CV & personal files** instead; temporary visitors do not have th
 
 !!! tip "Screenshots"
     Images are from the **English** UI (version **2026.08**). Tab labels differ by language; steps are the same.
-
-## Video walkthrough
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/en/person-add-cv-documents.mp4"
-  title="Add family relation documents in Visa2026"></video>
-
-<p class="visa-manual-video-caption">Recording from the training environment (test data). The tab name differs; upload steps are the same.</p>
 
 ## Before you start
 

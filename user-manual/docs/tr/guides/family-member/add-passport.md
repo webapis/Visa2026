@@ -12,10 +12,6 @@ prerequisiteSlugs:
   - family-member/register
   - person/open-and-search
 screenshotsVersion: "2026.08"
-videosVersion: "2026.08"
-videoStorage: static
-videoFile: person-add-passport.mp4
-videoSource: recordings/passport-create-with-shots.mp4
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -29,12 +25,6 @@ Bu kılavuz mevcut bir **aile üyesine** **pasaport** kaydı eklemeyi anlatır. 
 
 !!! tip "Ekran görüntüleri"
     Görseller **İngilizce** arayüzden (sürüm **2026.08**).
-
-## Video anlatımı
-
-<video class="visa-manual-video" controls preload="metadata"
-  src="../../../assets/videos/v2026.08/tr/person-add-passport.mp4"
-  title="Aile üyesine pasaport ekleme"></video>
 
 ## Adım 1 — Aile üyesini açın
 
