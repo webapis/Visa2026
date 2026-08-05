@@ -3,7 +3,7 @@ title: Ana gezinme
 slug: getting-started/navigation
 locale: tr
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
@@ -116,5 +116,5 @@ Tam liste için **Operasyonlar → Durum bildirimleri**.
 ## Sırada ne var
 
 - [Giriş](login.md)
-- Kişi bulma ve açma (yakında)
-- Yeni çalışan kaydı (yakında)
+- [Kişi bulma ve açma](../guides/person/open-and-search.md)
+- [Yeni çalışan kaydı](../guides/employee/register.md)

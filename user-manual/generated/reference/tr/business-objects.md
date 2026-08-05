@@ -1,7 +1,7 @@
 ---
 title: Business objects
 locale: tr
-status: generated
+guideStatus: generated
 ---
 
 # Business objects

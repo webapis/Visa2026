@@ -3,7 +3,7 @@ title: Main navigation
 slug: getting-started/navigation
 locale: en
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
@@ -63,6 +63,8 @@ On the dashboard you can:
 
 You can return to the dashboard anytime by choosing **Report Dashboard** in the left menu.
 
+For full steps (categories, charts, **Open ListView**, Excel, **Person search**, incomplete persons), see [Report Dashboard](../guides/tracking/report-dashboard.md).
+
 ## Left navigation menu
 
 The **navigation menu** on the left lists the areas your role allows. Groups may expand to show sub-items.
@@ -83,6 +85,7 @@ Typical officer menus include:
 | **Work Permit** / **Work permit items** | Work permit workflows |
 | **Operations** | Officer tools (see below) |
 | **Reports** | User report templates (when your role allows) |
+| **Configuration** | Office settings — company, contracts, SLA, upload limits (**VisaOffice** / administrators) |
 
 !!! note "Your menu may differ"
     Supervisors assign roles that control which items appear. If you expect a menu and do not see it, ask your administrator — do not sign in as someone else.
@@ -128,11 +131,11 @@ Common toolbar actions on a detail form:
 
 ## Header — notifications and user menu
 
-### Notification bell
+### Notification bell (postponed)
 
-The **bell icon** in the header opens **State notifications** — a list of items that may need attention (for example expiring documents or missing data). Select a row to open the related person or record when a link is available.
+**State notifications** (header bell + inbox) is **postponed** — not part of the officer manual rollout. A UI prototype exists for administrators only; your office should not expect the bell or **Operations → State notifications** in daily work.
 
-You can also open the full inbox from **Operations → State notifications** in the left menu.
+Use [Report Dashboard](../guides/tracking/report-dashboard.md) for expiry-style overview and [Mark incomplete or complete](../guides/person/mark-incomplete.md) when an officer flags a person manually.
 
 ### User menu
 
@@ -148,10 +151,24 @@ Under **Operations**, officers may see:
 
 | Item | Purpose |
 |------|---------|
-| **State notifications** | Full notification inbox |
+| **State notifications** | *Postponed* — not in officer rollout |
 | **Import reimport history** | History of data import runs (when shown) |
 
 Administrators see additional operations; your list may be shorter.
+
+## Configuration menu (VisaOffice / administrators)
+
+Under **Configuration**, maintain tenant settings that officers consume indirectly:
+
+| Item | Guide |
+|------|-------|
+| Overview — all eleven menu items | [Configuration overview](../guides/administration/configuration/overview.md) |
+| Company, numbering, signatory, representative | [Organization settings](../guides/administration/configuration/organization.md) |
+| Contracts, ministries, approval legs | [Contracts and approvals](../guides/administration/configuration/contracts-and-approvals.md) |
+| Migration and ministry SLA | [SLA settings](../guides/administration/configuration/sla.md) |
+| Expiry alerts and upload limits | [Alerts and upload limits](../guides/administration/configuration/alerts-and-upload-limits.md) |
+
+Standard **Visa Officer** roles do not see **Configuration**.
 
 ## Tips for daily work
 
@@ -172,5 +189,5 @@ Administrators see additional operations; your list may be shorter.
 ## What to read next
 
 - [Sign in to Visa2026](login.md) — if you need to sign in again
-- **Find and open a person** — search and open employee records (guide coming soon)
-- [Register a new employee](../guides/person/register.md) — create a person from the **Employees** list
+- [Find and open a person](../guides/person/open-and-search.md) — search and open employee records
+- [Register a new employee](../guides/employee/register.md) — create a person from the **Employees** list

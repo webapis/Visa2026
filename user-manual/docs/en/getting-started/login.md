@@ -3,7 +3,7 @@ title: Sign in to Visa2026
 slug: getting-started/login
 locale: en
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
 videosVersion: "2026.08"
@@ -107,4 +107,4 @@ Always sign out on shared PCs so the next person cannot use your account.
 ## What to read next
 
 - [Main navigation](navigation.md) — left menu, lists, detail forms, and header tools
-- [Register a new employee](../guides/person/register.md) — create an employee from the **Employees** list
+- [Register a new employee](../guides/employee/register.md) — create an employee from the **Employees** list

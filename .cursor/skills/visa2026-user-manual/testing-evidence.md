@@ -46,20 +46,20 @@ screenshotsVersion: "2026.09"     # ties to asset folder
 
 Full results live **outside** officer guide bodies.
 
-### Location (planned)
+### Location
 
 ```text
 manual-test-reports/              # separate from user-manual/ prose
-  latest/
+  manifest.yaml                   # tracked — suite registry
+  README.md                       # tracked
+  latest/                         # generated (gitignored)
     summary.json                  # machine-readable
     summary.html                  # human-readable dashboard
     guides-matrix.md              # optional markdown for supervisors
-  runs/
-    2026-09-12_abc1234/
-      UserManual.trx              # xUnit TRX (CI artifact)
-      manifest-snapshot.yaml
-      per-guide.json
+  runs/                           # archived TRX per run (gitignored)
 ```
+
+**Implemented (foundation):** `scripts/ci/Write-ManualTestReport.ps1` + `scripts/local/Serve-ManualTestReports.ps1`. See [docs/MANUAL_TEST_REPORTS.md](../../../docs/MANUAL_TEST_REPORTS.md).
 
 **Publish options (pick in Phase 3):**
 

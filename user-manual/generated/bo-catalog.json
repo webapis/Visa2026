@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-04T11:02:13.0420829Z",
-  "assemblyVersion": "1.0.0.645",
+  "generatedAt": "2026-08-05T05:55:50.8747057Z",
+  "assemblyVersion": "1.0.0.648",
   "types": [
     {
       "name": "Application",
@@ -385,7 +385,9 @@
           "required": false
         }
       ],
-      "guideSlugs": []
+      "guideSlugs": [
+        "applications/create"
+      ]
     },
     {
       "name": "ApplicationItem",
@@ -1591,8 +1593,33 @@
         }
       ],
       "guideSlugs": [
-        "person/add-passport",
-        "person/register"
+        "employee/add-address",
+        "employee/add-cv-documents",
+        "employee/add-education",
+        "employee/add-medical-record",
+        "employee/add-passport",
+        "employee/add-position-history",
+        "employee/add-salary",
+        "employee/add-travel",
+        "employee/add-visa",
+        "employee/add-work-duty",
+        "employee/edit-employee",
+        "employee/register",
+        "family-member/add-address",
+        "family-member/add-family-relation-documents",
+        "family-member/add-medical-record",
+        "family-member/add-passport",
+        "family-member/add-visa",
+        "family-member/edit-family-member",
+        "family-member/register",
+        "person/mark-incomplete",
+        "person/open-and-search",
+        "temporary-visitor/add-address",
+        "temporary-visitor/add-medical-record",
+        "temporary-visitor/add-passport",
+        "temporary-visitor/add-travel",
+        "temporary-visitor/add-visa",
+        "temporary-visitor/register"
       ]
     }
   ]

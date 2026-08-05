@@ -14,3 +14,87 @@
   font-size: 0.85rem;
   color: var(--md-default-fg-color--light);
 }
+
+/* Home page footer: link to separate test results report */
+.md-typeset hr + p:has(a[href*="summary.html"]) {
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--md-default-fg-color--light);
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar tree navigation — MUI TreeView-like density and affordances.
+   Uses Material nested nav (not navigation.sections — that mode disables
+   pointer-events on group labels and breaks expand-on-click).
+   -------------------------------------------------------------------------- */
+
+.md-sidebar--primary .md-nav--primary > .md-nav__list > .md-nav__item {
+  margin-bottom: 0.15rem;
+}
+
+/* Role group headers under Guides (Employee, Family member, …) */
+.md-sidebar--primary .md-nav[data-md-level="2"] > .md-nav__list > .md-nav__item--nested > .md-nav__link {
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--md-default-fg-color);
+  padding-top: 0.55rem;
+  padding-bottom: 0.35rem;
+}
+
+/* Nested branches: tree indent + guide line */
+.md-sidebar--primary .md-nav__item--nested > .md-nav {
+  margin-left: 0.35rem;
+  padding-left: 0.55rem;
+  border-left: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-sidebar--primary .md-nav__item--nested .md-nav__item--nested > .md-nav {
+  margin-left: 0.25rem;
+}
+
+/* Leaf links — compact, full-width hit target */
+.md-sidebar--primary .md-nav__link {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.md-sidebar--primary .md-nav__link:hover {
+  background-color: var(--md-accent-fg-color--transparent, rgba(63, 81, 181, 0.08));
+}
+
+/* Active page — MUI-style soft highlight */
+.md-sidebar--primary .md-nav__link--active,
+.md-sidebar--primary .md-nav__item--active > .md-nav__link {
+  background-color: var(--md-accent-fg-color--transparent, rgba(63, 81, 181, 0.12));
+  color: var(--md-primary-fg-color, var(--md-accent-fg-color));
+  font-weight: 500;
+}
+
+/* Chevron rotates when branch is open (checkbox toggle) */
+.md-sidebar--primary .md-nav__toggle:checked ~ .md-nav__link .md-nav__icon {
+  transform: rotate(90deg);
+}
+
+.md-sidebar--primary .md-nav__icon {
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+/* Path breadcrumb (navigation.path) — subtle trail above content area */
+.md-path {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* Material reserves frontmatter `status` for nav badges — we use `guideStatus` instead.
+   Hide any legacy badges in the officer sidebar. */
+.md-sidebar--primary .md-status {
+  display: none;
+}

@@ -1,6 +1,6 @@
 # Gollanma ýol kartasy
 
-Bu sahypa häzir nämeleriň barlygyny we indiki nämeleriň geljekdigini gysgaça beýan edýär. Täze gollanmalar çykanda täzelenýär.
+Bu sahypa **haýsy nädip edilýär gollanmalarynyň neşir edilendigini** gysgaça beýan edýär. Programmada Visa2026 näme edýändigi üçin **[Visa2026 näme berýär](capabilities.md)** sahypasyna serediň.
 
 ## Häzirki ýagdaý (2-nji faz)
 

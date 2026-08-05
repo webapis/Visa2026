@@ -1,27 +1,36 @@
 # Visa2026 Ulanyjy gollanmasy
 
-**Visa2026 işgär ulanyjy gollanmasyna** hoş geldiňiz. Bu saýt gündelik işleri programmada görýän bellikleriňiz bilen ädimme-ädim düşündirýär.
+**Visa2026 işgär gollanmasyna** hoş geldiňiz. Bu sahypa programmadaky ýazgylar bilen günlük işleri ädimme-ädim görkezýär.
 
-## Bu ýerde näme taparsyňyz
+## Visa2026 näme berýär
 
-| Bölüm | Maksady |
-|-------|---------|
-| **Başlangyç** | Giriş, gezim we rollar |
-| **Nädip edilýär** | Wezipa esasynda görkezmeler (indiki neşirde) |
-| **Salgyş** | Programma katalogyndan döredilen meýdan we ekran kömegi |
+Wiza bölümine daşary ýurtly işgärler we migrasiýa resminamalary üçin **bir ulgam**.
+
+1. **Report Dashboard** — şu gün haýsy iş gerek
+2. **Şahsy maglumatlar** — pasport, wiza, tibbiýa, salgy
+3. **Applications** — bakanlyk we göni migrasiýa arzalary
+4. **Application progress** — dosyanyň ýeri
+5. **Document copies we Templates** — PDF we hasabat paketleri
+
+Doly sanaw: **[Visa2026 näme berýär](about/capabilities.md)**
+
+## Bu ýerde
+
+| Bölüm | Maksat |
+|-------|--------|
+| **Başlangyç** | Giriş, nawigasiýa |
+| **Gollanmalar** | Ädimme-ädim |
+| **Hakda** | Mümkinçilikler, meýilnamalar |
+| **Salgyş** | Meýdan kömekleri |
+
+## Başlangyç ýol
+
+[Giriş](getting-started/login.md) → [Nawigasiýa](getting-started/navigation.md) → [Adamy tapmak](guides/person/open-and-search.md)
 
 ## Diller
 
-Ýokarky menýudan **Iňlis**, **Türk**, **Türkmen** we **Rus** diline geçip bilersiňiz.
+**Iňlis**, **Türk**, **Türkmen**, **Rus** — ýokarky menýu.
 
-Gollanmalar ilki Iňlis dilinde neşir edilýär; beýleki diller şol bir okuw tertibini yzarlaýar.
+## Kömek gerekmi?
 
-**Şundan başlaň:** [Giriş](getting-started/login.md) soňra [Esasy gezim](getting-started/navigation.md) (0-njy dereje, garalama).
-
-## Barlanan gollanmalar
-
-Gollanma neşir edilen gurluşda awtomatiki synaglardan geçende, adynyň gapdalynda **ýaşyl bellik** görner. Bu bellik ädimleriň synag gurşawynda barlanandygyny aňladýar — neşirden öň işgär gözden geçirmesi gerek.
-
-## Kömek
-
-Programmadaky ekran bu gollanma bilen gabat gelmeýän bolsa, ýolbaşçyňyza ýa-da ulgam dolandyryjyňyza ýüz tutuň.
+Programma bilen gabat gelmeýän bolsa, ýolbaşçyňyza ýüz tutuň.

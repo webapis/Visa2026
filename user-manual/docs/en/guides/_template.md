@@ -2,7 +2,7 @@
 title: "Guide template (maintainers)"
 slug: _template
 locale: en
-status: draft
+guideStatus: draft
 tier: 0
 bo:
 relatedBo: []

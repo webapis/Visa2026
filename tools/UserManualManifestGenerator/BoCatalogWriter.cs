@@ -46,7 +46,7 @@ internal sealed class BoCatalogWriter
             builder.AppendLine("---");
             builder.AppendLine("title: Business objects");
             builder.AppendLine($"locale: {locale}");
-            builder.AppendLine("status: generated");
+            builder.AppendLine("guideStatus: generated");
             builder.AppendLine("---");
             builder.AppendLine();
             builder.AppendLine("# Business objects");

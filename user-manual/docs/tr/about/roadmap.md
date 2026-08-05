@@ -1,6 +1,6 @@
 # Kılavuz yol haritası
 
-Bu sayfa bugün nelerin hazır olduğunu ve sırada ne olduğunu özetler. Yeni kılavuzlar yayımlandıkça güncellenir.
+Bu sayfa **hangi nasıl yapılır kılavuzlarının yayımlandığını** özetler. Uygulamada Visa2026'nın ne yaptığı (özellikler ve çözdükleri sorunlar) için **[Visa2026 ne sunar](capabilities.md)** sayfasına bakın.
 
 ## Güncel durum (Faz 2)
 

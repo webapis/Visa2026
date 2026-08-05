@@ -42,7 +42,8 @@ param(
     [switch]$SkipValidate,
     [switch]$SkipUnitTests,
     [switch]$RequireMedia,
-    [string]$ManualMediaBaseUrl
+    [string]$ManualMediaBaseUrl,
+    [switch]$SkipTestReport
 )
 
 $ErrorActionPreference = 'Stop'
@@ -70,6 +71,10 @@ else {
     Remove-Item Env:\MANUAL_MEDIA_BASE_URL -ErrorAction SilentlyContinue
 }
 
+if (-not $env:MANUAL_TEST_REPORT_URL) {
+    $env:MANUAL_TEST_REPORT_URL = '/manual-test-reports/latest/summary.html'
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $manualRoot = Join-Path $repoRoot 'user-manual'
 $mkdocsConfig = Join-Path $manualRoot 'mkdocs.yml'
@@ -80,6 +85,7 @@ $docsRoot = Join-Path $manualRoot 'docs'
 $generatorProject = Join-Path $repoRoot 'tools\UserManualManifestGenerator\UserManualManifestGenerator.csproj'
 $generatorTestsProject = Join-Path $repoRoot 'tools\UserManualManifestGenerator.Tests\UserManualManifestGenerator.Tests.csproj'
 $validateScript = Join-Path $PSScriptRoot 'Validate-UserManualLinks.ps1'
+$testResultsRoot = Join-Path $repoRoot 'TestResults'
 
 function Invoke-External {
     param(
@@ -164,9 +170,12 @@ if (-not $SkipGenerator) {
 }
 
 if (-not $SkipUnitTests) {
+    New-Item -ItemType Directory -Force -Path $testResultsRoot | Out-Null
     Invoke-External -FilePath 'dotnet' -ArgumentList @(
         'test', $generatorTestsProject, '-c', 'Debug', '--no-restore',
-        '--filter', 'Category=UserManualDocs'
+        '--filter', 'Category=UserManualDocs',
+        '--logger', 'trx;LogFileName=user-manual-docs.trx',
+        '--results-directory', $testResultsRoot
     )
 }
 
@@ -247,5 +256,21 @@ if (Test-Path -LiteralPath $siteDir) {
 
 $mkdocsArgs = $python.Prefix + @('-m', 'mkdocs', 'build', '-f', $mkdocsConfig, '-d', $siteDir)
 Invoke-External -FilePath $python.FilePath -ArgumentList $mkdocsArgs
+
+if (-not $SkipTestReport) {
+    $reportScript = Join-Path $PSScriptRoot 'Write-ManualTestReport.ps1'
+    if (Test-Path -LiteralPath $reportScript) {
+        $trxPaths = @()
+        $docsTrx = Join-Path $testResultsRoot 'user-manual-docs.trx'
+        if (Test-Path -LiteralPath $docsTrx) {
+            $trxPaths += $docsTrx
+        }
+
+        & $reportScript -TrxPath $trxPaths
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Write-ManualTestReport.ps1 failed.'
+        }
+    }
+}
 
 Write-Host "User manual site built at $siteDir"

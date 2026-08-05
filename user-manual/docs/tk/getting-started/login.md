@@ -3,7 +3,7 @@ title: Visa2026-a girmek
 slug: getting-started/login
 locale: tk
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
 videosVersion: "2026.08"
@@ -92,4 +92,4 @@ Görmeli zatlaryňyz:
 ## Indiki näme
 
 - [Esasy gezim](navigation.md) — çep menýu we sanawlar
-- [Täze işgär hasaba almak](../guides/person/register.md)
+- [Täze işgär hasaba almak](../guides/employee/register.md)

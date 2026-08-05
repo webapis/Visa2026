@@ -21,6 +21,10 @@
   Overrides MANUAL_MEDIA_BASE_URL env. When set, media is loaded from that URL instead of
   user-manual/docs/assets/ during mkdocs serve.
 
+.PARAMETER ManualTestReportUrl
+  URL for the home-page footer link to the separate test results report.
+  Overrides MANUAL_TEST_REPORT_URL env. Local default: http://127.0.0.1:8766/latest/summary.html
+
 .EXAMPLE
   ./scripts/local/Serve-UserManual.ps1
 
@@ -35,7 +39,8 @@ param(
     [int]$Port = 8765,
     [switch]$SkipBuild,
     [switch]$NoBrowser,
-    [string]$ManualMediaBaseUrl
+    [string]$ManualMediaBaseUrl,
+    [string]$ManualTestReportUrl
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,6 +67,20 @@ function Get-ManualMediaBaseUrl {
     }
 
     return ''
+}
+
+function Get-ManualTestReportUrl {
+    param([string]$Override)
+
+    if (-not [string]::IsNullOrWhiteSpace($Override)) {
+        return $Override.Trim()
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($env:MANUAL_TEST_REPORT_URL)) {
+        return $env:MANUAL_TEST_REPORT_URL.Trim()
+    }
+
+    return 'http://127.0.0.1:8766/latest/summary.html'
 }
 
 function Invoke-External {
@@ -229,6 +248,10 @@ function Start-ManualPreview {
         Remove-Item Env:\MANUAL_MEDIA_BASE_URL -ErrorAction SilentlyContinue
     }
 
+    $testReportUrl = Get-ManualTestReportUrl -Override $ManualTestReportUrl
+    $env:MANUAL_TEST_REPORT_URL = $testReportUrl
+    Write-Host "MANUAL_TEST_REPORT_URL=$testReportUrl"
+
     if (-not $SkipBuild) {
         if (-not (Test-Path -LiteralPath $buildScript)) {
             throw "Build script not found: $buildScript"
@@ -269,11 +292,12 @@ function Start-ManualPreview {
 
     Stop-ManualPreviewListener -ListenPort $Port
 
+    # Do not pass --dirtyreload: MkDocs Page.title is None until each file is read.
+    # Dirty reload skips unchanged pages, so the sidebar shows literal "None" for them.
     $serveArgs = $Python.Prefix + @(
         '-m', 'mkdocs', 'serve',
         '-f', $mkdocsConfig,
-        '-a', "127.0.0.1:$Port",
-        '--dirtyreload'
+        '-a', "127.0.0.1:$Port"
     )
 
     Write-Host "Starting mkdocs serve..."

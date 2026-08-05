@@ -1,7 +1,7 @@
 # User Manual — status, roadmap & next steps
 
 Status: **Phase 1 complete — catalog + validator + UserManualDocs tests**  
-Last updated: 2026-08-04  
+Last updated: 2026-08-05  
 Owner: Product + Visa officers + Tech lead
 
 **Read this first** for where the manual program stands, what changed recently, and what to implement next.
@@ -16,8 +16,9 @@ Owner: Product + Visa officers + Tech lead
 | [`USER_MANUAL_RELEASE.md`](USER_MANUAL_RELEASE.md) | On-prem release bundle (media + site, nginx compose) |
 | [`.cursor/skills/visa2026-user-manual/localization.md`](../.cursor/skills/visa2026-user-manual/localization.md) | **en, tr, tk, ru** i18n |
 | [`.cursor/skills/visa2026-user-manual/testing-evidence.md`](../.cursor/skills/visa2026-user-manual/testing-evidence.md) | Green tick; separate `manual-test-reports/` |
+| [`MANUAL_TEST_REPORTS.md`](MANUAL_TEST_REPORTS.md) | Test results dashboard (passed / failed / not run) |
 | [`.cursor/skills/visa2026-user-manual/tracking.md`](../.cursor/skills/visa2026-user-manual/tracking.md) | Guide inventory, infra checklist, doc debt |
-| [`.cursor/skills/visa2026-user-manual/curriculum.md`](../.cursor/skills/visa2026-user-manual/curriculum.md) | Publish order (tiers 0–7) |
+| [`.cursor/skills/visa2026-user-manual/curriculum.md`](../.cursor/skills/visa2026-user-manual/curriculum.md) | Publish order (tiers 0–8) |
 
 **Agent skill:** [visa2026-user-manual](../.cursor/skills/visa2026-user-manual/SKILL.md)
 
@@ -30,7 +31,7 @@ Owner: Product + Visa officers + Tech lead
 | **Phase 0** | **Complete** |
 | **Phase 1** | **Complete** — `bo-catalog.json`, validator, `UserManualDocs` tests |
 | **Officer site** | MkDocs scaffold + generated reference catalog page |
-| **Published guides** | 0 / 16 planned (4 drafts) |
+| **Published guides** | 0 / 44 planned (**44 active drafts**, 1 postponed) |
 | **Pipeline** | `Build-UserManual.ps1` (generator → unit tests → validate → mkdocs) |
 | **E2E UserManual traits** | Not implemented (Phase 3) |
 | **CI** | `user-manual.yml` (build + validate + UserManualDocs; **GitHub Pages** on `master` push) |
@@ -48,7 +49,7 @@ Full detail: [`USER_MANUAL_ROADMAP.md`](USER_MANUAL_ROADMAP.md). Calendar target
 |-------|--------|---------------|--------|
 | **0** | MkDocs scaffold, empty catalog generator | Aug 2026 W1–2 | **Complete** |
 | **1** | `bo-catalog.json`, link validator, CI build | Aug–Sep 2026 | **Complete** |
-| **2** | Tier 0–4 pilot guides + screenshots | Sep 2026 | **In progress** — login guide draft |
+| **2** | Tier 0–4 pilot guides + screenshots | Sep 2026 | **In progress** — Person nested BO guides (orders 6–14) before applications |
 | **3** | Unified pipeline: E2E → screenshots → publish | Oct 2026 | Not started |
 | **4** | Tiers 5–7 + **tr/tk/ru** for tier 0–4 pilots | Nov 2026 – Q1 2027 | Not started |
 | **5** | In-app Help links (optional) | Q1 2027 | Not started |
@@ -111,6 +112,19 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-04 | **Phase 1 catalog** — `[UserDocumentation]` on pilot BOs, `bo-catalog.json`, validator, `UserManualDocs` tests |
 | 2026-08-04 | **Phase 2 login guide** — `getting-started/login` draft (en/tr/tk/ru) |
 | 2026-08-04 | **Phase 2 navigation guide** — `getting-started/navigation` draft (en/tr/tk/ru) |
+| 2026-08-05 | **Phase 2 CV & personal files** — `employee/add-cv-documents` drafts (en/tr/tk/ru); **CV & personal files** tab, `PersonDocument` upload |
+| 2026-08-05 | **FM + TV guide completion** — `family-member/register`, `add-family-relation-documents`, `edit-family-member`; `temporary-visitor/register`; full EN TV nested guides |
+| 2026-08-05 | **tracking/state-notifications** — **postponed** (capabilities #6); removed from nav; use Report Dashboard + Mark incomplete instead |
+| 2026-08-05 | **tracking/state-notifications** — draft (en/tr/tk/ru); Phase 1 prototype; admin-only; bell optional |
+| 2026-08-05 | **Tier 8 configuration** — `administration/configuration/*` drafts (overview + organization, contracts, SLA, alerts; en/tr/tk/ru); maps eleven Configuration menu BOs |
+| 2026-08-05 | **Tier 6 person/document-copies** — draft (en/tr/tk/ru); detail toolbar, list • column, dossier; not ministry ZIP |
+| 2026-08-05 | **Tier 7 administration** — `user-report-templates` + `template-staging` drafts (en/tr/tk/ru); curriculum inventory complete |
+| 2026-08-05 | **Tier 6 tracking/report-dashboard** — draft (en/tr/tk/ru); Overview, categories, ListView, Excel, Person search, incomplete persons |
+| 2026-08-05 | **Tier 6 person/dossier** — draft (en/tr/tk/ru); three entry points; Screen/Paper; director export |
+| 2026-08-05 | **Tier 4 applications/create** — draft (en/tr/tk/ru); Applications nav group; capabilities link updated |
+| 2026-08-05 | **Phase 2 edit-employee guide** — `person/edit-employee` draft (en/tr/tk/ru); optional-fields gear + save flow |
+| 2026-08-05 | **Phase 2 mark-incomplete guide** — `person/mark-incomplete` draft (en/tr/tk/ru); soft flag, popup, Incomplete data tab, dashboard |
+| 2026-08-05 | **Curriculum + inventory v2** — BO dependency order (`Application` / `ApplicationItem` after Person children); 25 guides in [tracking.md](../.cursor/skills/visa2026-user-manual/tracking.md) |
 
 **Run locally:** `./scripts/ci/Build-UserManual.ps1 -SkipE2E` (requires Python 3 for mkdocs step).
 
@@ -137,10 +151,33 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 | **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Draft** |
 | **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Draft** |
 | **P2-3** | Login + navigation screenshots (`v2026.08/en/`) | **Done** (EasyTest `person-officer-journey`; en UI replicated to tr/tk/ru per D12) |
-| **P2-4** | `person/register` guide (en/tr/tk/ru) | **Draft** |
-| **P2-5** | `person/add-passport` guide (en/tr/tk/ru) | **Draft** |
-| **P2-6** | `person/edit-employee` guide | Backlog |
-| **P2-7** | Assign reviewer names (D5) | TBD |
+| **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Draft** |
+| **P2-4** | `employee/register` guide (en/tr/tk/ru) | **Draft** |
+| **P2-5** | `employee/add-passport` + `family-member/add-passport` | **Draft** |
+| **P2-6** | `employee/add-visa` + `family-member/add-visa` | **Draft** |
+| **P2-7** | `employee/add-education` | **Draft** |
+| **P2-8** | `employee/add-medical-record` + `family-member/add-medical-record` | **Draft** |
+| **P2-9** | `employee/add-address` + `family-member/add-address` | **Draft** |
+| **P2-9b** | `temporary-visitor/` passport, visa, medical, address (4 guides × 4 locales) | **Draft** |
+| **P2-10** | `employee/add-position-history` | **Draft** |
+| **P2-11** | `employee/edit-employee` | **Draft** |
+| **P2-12** | `person/mark-incomplete` | **Draft** |
+| **P2-13** | `employee/add-work-duty` | **Draft** |
+| **P2-14** | `employee/add-salary` | **Draft** |
+| **P2-15** | `employee/add-travel` + `temporary-visitor/add-travel` | **Draft** |
+| **P2-16** | `employee/add-cv-documents` | **Draft** |
+| **P2-17** | Tier 4 `applications/create` | **Draft** (en/tr/tk/ru) |
+| **P2-18** | Tier 4 `applications/add-items` | **Draft** (en/tr/tk/ru) |
+| **P2-19** | Tier 4 `applications/progress` | **Draft** (en/tr/tk/ru) |
+| **P2-20** | Tier 5 `applications/document-copies` | **Draft** (en/tr/tk/ru) |
+| **P2-21** | Tier 5 `applications/resminamalar` | **Draft** (en/tr/tk/ru) |
+| **P2-22** | Tier 6 `person/dossier` | **Draft** (en/tr/tk/ru) |
+| **P2-23** | Tier 6 `tracking/report-dashboard` | **Draft** (en/tr/tk/ru) |
+| **P2-24** | Tier 7 `administration/user-report-templates` | **Draft** (en/tr/tk/ru) |
+| **P2-25** | Tier 7 `administration/template-staging` | **Draft** (en/tr/tk/ru) |
+| **P2-26** | `person/document-copies` (capabilities #10) | **Draft** (en/tr/tk/ru) |
+| **P2-27** | `tracking/state-notifications` (capabilities #6) | **Postponed** — not in officer manual scope |
+| **P2-next** | Review, publish, E2E media, locale depth | **Next** |
 
 ### Parallel E2E (Phase 2 prep)
 
@@ -159,11 +196,11 @@ Full table: [tracking.md § Guide inventory](../.cursor/skills/visa2026-user-man
 
 | Status | Count |
 |--------|------:|
-| Backlog | 16 |
-| Draft | 4 |
+| Draft | 35 |
+| Backlog | 5 |
 | Published | 0 |
 
-**First guide to implement (Phase 2):** `getting-started/login` (tier 0), then `person/register` (tier 2, E2E: `person-employee-create`).
+**First guide to implement (Phase 2):** `employee/add-work-duty` (order 11). Person nested guides use **`employee/`** or **`family-member/`** slugs by `PersonRecordRole` — not generic `person/` — because typed detail views hide different tabs and required fields ([`Person.cs`](../Visa2026.Module/BusinessObjects/Person.cs)).
 
 ---
 
@@ -221,3 +258,5 @@ Full table: [tracking.md § Guide inventory](../.cursor/skills/visa2026-user-man
 |------|--------|
 | 2026-08-04 | Initial status hub — roadmap summary, consolidated changelog, Phase 0 next-inline queue |
 | 2026-08-04 | Phase 0 scaffold shipped — MkDocs i18n site, generator stub, build script, CI workflow |
+| 2026-08-05 | **Phase 2 Person nested guides 6–10** — `add-visa`, `add-education`, `add-medical-record`, `add-address`, `add-position-history` drafts (en/tr/tk/ru); 12 drafts total |
+| 2026-08-05 | Inventory v2 — 25 guides; BO dependency before `ApplicationItem`; next inline P2-13 `person/add-work-duty` |

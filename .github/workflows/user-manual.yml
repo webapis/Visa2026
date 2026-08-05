@@ -16,6 +16,8 @@ on:
       - 'Visa2026.Module/BusinessObjects/ApplicationProgress.cs'
       - 'scripts/ci/Build-UserManual.ps1'
       - 'scripts/ci/Validate-UserManualLinks.ps1'
+      - 'scripts/ci/Write-ManualTestReport.ps1'
+      - 'manual-test-reports/manifest.yaml'
       - '.github/workflows/user-manual.yml'
   push:
     branches: [master]
@@ -30,6 +32,8 @@ on:
       - 'Visa2026.Module/BusinessObjects/ApplicationProgress.cs'
       - 'scripts/ci/Build-UserManual.ps1'
       - 'scripts/ci/Validate-UserManualLinks.ps1'
+      - 'scripts/ci/Write-ManualTestReport.ps1'
+      - 'manual-test-reports/manifest.yaml'
       - '.github/workflows/user-manual.yml'
   workflow_dispatch:
 
@@ -87,6 +91,13 @@ jobs:
           name: user-manual-site
           path: user-manual/site/
           if-no-files-found: error
+
+      - name: Upload manual test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: manual-test-reports
+          path: manual-test-reports/latest/
+          if-no-files-found: warn
 
   deploy-preview:
     name: Publish manual preview (GitHub Pages)

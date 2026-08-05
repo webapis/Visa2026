@@ -491,11 +491,19 @@ Visa2026.E2E.Tests/.tools/
 user-manual/site/
 user-manual/user-manual/
 user-manual/.tools/
+user-manual/.mkdocs_cache/
+user-manual/manual-media.env
 pw-test-out.txt
-manual-test-reports/
+playwright-report/
+test-results/
+manual-test-reports/latest/
+manual-test-reports/runs/
+TestResults/
 user-manual/docs/assets/
 user-manual/docs/*/reference/business-objects.md
 # Promoted EasyTest media (Record-EasyTest.ps1 + Copy-EasyTestManual*.ps1) — not in git
 user-manual/assets/screenshots/**/*.png
 user-manual/assets/videos/**/*.mp4
+user-manual/assets/videos/**/*.webm
+user-manual/assets/videos/**/*.mov
 deploy/manual/

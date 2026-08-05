@@ -25,6 +25,7 @@ Use on your **own PC** with **Docker Desktop** (or any machine where you edit th
 | `Record-EasyTest.ps1` | Run headed EasyTest filter (legacy; prefer `Record-PlaywrightE2e.ps1`). |
 | `Record-PlaywrightE2e.ps1` | **Playwright E2E** — Local (:5050) or Staging (live URL) + manual screenshots. |
 | `Serve-UserManual.ps1` | **Officer manual preview** — bootstraps portable Python if needed, runs `Build-UserManual.ps1`, then **`mkdocs serve`** at **http://127.0.0.1:8765/manual/** (live reload). See [visa2026-user-manual](../.cursor/skills/visa2026-user-manual/SKILL.md). |
+| `Serve-ManualTestReports.ps1` | **Test results preview** (separate from officer manual) — **http://127.0.0.1:8766/latest/summary.html**. See [MANUAL_TEST_REPORTS.md](../docs/MANUAL_TEST_REPORTS.md). |
 
 ## `scripts/ci/` — build, validate, publish
 

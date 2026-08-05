@@ -38,7 +38,7 @@ public static class GuideFrontmatterScanner
                 Locale = locale,
                 Slug = ReadYamlScalar(yaml, "slug"),
                 Bo = ReadYamlScalar(yaml, "bo"),
-                Status = ReadYamlScalar(yaml, "status"),
+                Status = ReadYamlScalar(yaml, "guideStatus") ?? ReadYamlScalar(yaml, "status"),
             });
         }
 

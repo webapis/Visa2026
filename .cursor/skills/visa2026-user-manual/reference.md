@@ -64,6 +64,60 @@ scripts/ci/
   user-manual.yml
 ```
 
+**Gitignore contract:** [§ Gitignore](#gitignore-contract) below — authoritative list is repo [`.gitignore`](../../../.gitignore) lines ~490–510.
+
+---
+
+## Gitignore contract
+
+**Rule:** officer **prose** and **generator JSON** are committed; **build output**, **local tooling**, **promoted media**, and **test report runs** are not.
+
+Do **not** `git add` ignored paths “to fix CI” — regenerate with `Build-UserManual.ps1` / `Serve-UserManual.ps1` / E2E copy scripts instead.
+
+### Ignore (never commit)
+
+| Path | Role |
+|------|------|
+| `user-manual/site/` | MkDocs HTML output |
+| `user-manual/.tools/` | Portable Python from `Serve-UserManual.ps1` |
+| `user-manual/.mkdocs_cache/` | MkDocs cache |
+| `user-manual/user-manual/` | Accidental nested MkDocs output |
+| `user-manual/docs/assets/` | Build-time media sync into docs tree |
+| `user-manual/docs/*/reference/business-objects.md` | Build-time copy of generated reference page |
+| `user-manual/assets/screenshots/**/*.png` | Promoted E2E screenshots |
+| `user-manual/assets/videos/**/*.{mp4,webm,mov}` | Promoted E2E video (any common container) |
+| `user-manual/manual-media.env` | Local env override (keep `manual-media.env.example` tracked) |
+| `deploy/manual/` | Published site + media bundle on server/agent |
+| `manual-test-reports/latest/` | Generated green-tick / summary JSON+HTML |
+| `manual-test-reports/runs/` | Archived TRX per pipeline run |
+| `TestResults/` | xUnit output (`UserManualDocs`, E2E) |
+| `pw-test-out.txt` | Playwright log scratch |
+| `playwright-report/`, `test-results/` | Playwright artifacts when recording manual E2E |
+
+**E2E upstream** (visa2026-easytest-e2e): `Visa2026.E2E.Tests/recordings/`, `.tools/`, `.webdrivers/` — raw captures before `Copy-EasyTestManual*.ps1`.
+
+### Commit (source of truth)
+
+| Path | Role |
+|------|------|
+| `user-manual/docs/**` | Guide prose (en/tr/tk/ru) — except ignored copies above |
+| `user-manual/mkdocs.yml`, `requirements.txt`, `hooks/` | Site config |
+| `user-manual/generated/bo-catalog.json` | Layer A catalog |
+| `user-manual/generated/navigation-tree.json` | Nav tree from generator |
+| `user-manual/generated/reference/**/business-objects.md` | Generator output (reviewed; synced to docs at build) |
+| `user-manual/assets/**/.gitkeep` | Placeholder version/locale folders without PNG/MP4 |
+| `manual-test-reports/manifest.yaml`, `README.md` | Suite registry (not generated output) |
+| `.cursor/skills/visa2026-user-manual/**` | This skill |
+
+### Agent anti-patterns
+
+- Committing PNG/MP4 under `user-manual/assets/` — media is regenerated from E2E; use `-RequireMedia` locally if missing
+- Committing `user-manual/site/` or `.tools/` — bloats PRs; CI builds its own site
+- Deleting `.gitkeep` files in empty screenshot version folders — they document expected layout
+- Adding `git add -f` on ignored media “because the guide needs images” — run Record + copy scripts instead
+
+Canonical deploy of ignored artifacts: [`docs/USER_MANUAL_RELEASE.md`](../../../docs/USER_MANUAL_RELEASE.md).
+
 ---
 
 ## Commands
@@ -113,7 +167,7 @@ mkdocs build -f user-manual/mkdocs.yml -d user-manual/site
 | Item | Detail |
 |------|--------|
 | **URL** | http://127.0.0.1:8765/manual/ (not port 8000) |
-| **Hot reload** | `mkdocs serve --dirtyreload` — edit `user-manual/docs/` |
+| **Hot reload** | `mkdocs serve` (no `--dirtyreload` — dirty reload leaves unread pages as `None` in nav) — edit `user-manual/docs/` |
 | **Python reuse** | System `python` / `py -3` if found; else **`user-manual/.tools/python312/`** (portable embed, **keep between runs**) |
 | **Requirements** | Script runs `pip install -r user-manual/requirements.txt` into that interpreter |
 | **Build step** | `Build-UserManual.ps1 -SkipE2E` unless `-SkipBuild` |
@@ -169,7 +223,7 @@ bo: Person
 relatedBo: [Passport, Education]
 navPath: Employee
 roles: [Visa Officer]
-status: draft   # draft | review | published
+guideStatus: draft   # draft | review | published (not `status` — reserved by MkDocs Material for nav badges)
 screenshotsVersion: "2026.08"
 locale: en   # en | tr | tk | ru — must match folder docs/{locale}/
 video: https://youtu.be/xxxxxxxx
@@ -352,7 +406,7 @@ Reference nav tree mirrors `[NavigationItem("Lookup/Visa")]` paths from catalog 
 | # | Topic | Recommendation |
 |---|--------|----------------|
 | 1 | Commit `bo-catalog.json` | Yes, on main |
-| 2 | Commit generated `reference/*.md` | No (CI-only initially) |
+| 2 | Commit generated `reference/*.md` | **Yes** under `user-manual/generated/reference/`; **no** under `docs/*/reference/` (build copy, gitignored) |
 | 3 | Hosting | Internal first if screenshots sensitive |
 | 4 | **Locales** | **en, tr, tk, ru** — see [localization.md](./localization.md) |
 | 5 | `LookupNavigationStructure.md` | Deprecate when nav tree generated |

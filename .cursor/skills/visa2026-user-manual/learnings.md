@@ -235,5 +235,141 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 - **Phase:** 0–2
 - **Area:** infra / UX
 - **What worked:** `navigation.path` in `mkdocs.yml`; `extra.css` tree styling (indent, chevron rotate, active highlight, collapsed branches). Keeps static MkDocs pipeline — no `@mui/x-tree-view` bundle.
-- **Gotcha / drift:** Skipped `navigation.prune` — it **hides** sibling sections; MUI docs keep collapsed groups visible. Skipped `navigation.expand` — expands all sections by default.
-- **Follow-up:** Rebuild/serve manual (`Serve-UserManual.ps1`); if Guides list still feels long, add section index pages (`employee/index.md`) with `navigation.indexes`.
+- **Gotcha / drift:** Skipped `navigation.prune` — it **hides** sibling sections; MUI docs keep collapsed groups visible. Skipped `navigation.expand` — expands all sections by default. **`navigation.sections` + custom `display:none` broke expand-on-click** (`pointer-events: none` on section labels); removed sections flag and the override rule. Frontmatter **`status`** collides with Material nav badges — renamed to **`guideStatus`** across guides.
+- **Follow-up:** Rebuild/serve manual; if Guides list still feels long, add section index pages (`employee/index.md`) with `navigation.indexes`. **`status` → `guideStatus`** in frontmatter — Material `status` meta caused sidebar badge noise.
+
+### 2026-08-05 — Sidebar “None” labels during `mkdocs serve --dirtyreload`
+
+- **Symptom:** Left nav shows **None** for some guides (login, register, education, …) while others look fine; `mkdocs build` output is correct.
+- **Cause:** MkDocs `Page.title` returns **`None` until `read_source()`** runs. `--dirtyreload` only re-reads changed files, so untouched nav entries render as literal `None` in Material’s `md-ellipsis`.
+- **Fix:** `Serve-UserManual.ps1` — **omit `--dirtyreload`** (full rebuild on each save; slightly slower, correct nav). Restart preview after bulk frontmatter edits.
+- **Not the issue:** `guideStatus` rename / `md-status` CSS — static `site/` never had `None`; problem is serve-only dirty incremental read.
+
+### 2026-08-05 — Active guide vanishes from sidebar after click
+
+- **Symptom:** Current page (e.g. **Add a visa on a passport**) missing from the Employee list once selected; siblings still show.
+- **Cause:** `extra.css` hid `.md-nav__item--active > a.md-nav__link--active`. Material already hides `label[for=__toc]` in the primary sidebar (`.md-nav--primary .md-nav__link[for=__toc]{display:none}`), so the **anchor** is the only visible title — hiding it removed the active entry entirely.
+- **Fix:** Removed that CSS rule. Hard-refresh preview after save.
+
+### 2026-08-05 — Order 13 travel history guides (`employee/add-travel`, `temporary-visitor/add-travel`)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** Full **External Arrival** walkthrough (en) — **Travel Histories** tab, split **New** menu, Check Point / Country; TV prose-first guide links to employee guide; en/tr/tk/ru; `mkdocs.yml` nav; screenshot aliases in `Copy-EasyTestManualScreenshots.ps1`.
+- **Gotcha / drift:** Family members have **no** Travel histories tab; registration apps do not auto-sync rows. Screenshot/video placeholders until dedicated E2E media labels.
+- **Follow-up:** Order **14** `employee/add-cv-documents`; dedicated `travel-external-arrival` EasyTest capture for travel-specific PNGs.
+
+### 2026-08-05 — Order 14 CV & personal files (`employee/add-cv-documents`)
+
+- **Phase:** 2
+- **Area:** guides
+- **What worked:** **CV & personal files** tab (`PersonDocument`); file upload types/size; distinction from passport/diploma copy tabs; optional **Document copies** toolbar mention; en/tr/tk/ru; `mkdocs.yml` nav.
+- **Gotcha / drift:** Employee-only tab; family members use **Family relation documents**. No dedicated E2E capture yet — screenshot aliases reuse master-data journey placeholders.
+- **Follow-up:** Tier 4 **`applications/create`**; E2E trait for CV upload when journey extended.
+
+### 2026-08-05 — Remove “Person (all types)” sidebar section
+
+- **Why:** Officers work on typed person records (Employee / Family member / Temporary visitor), not a generic Person nav bucket.
+- **Nav:** Dropped **Person (all types)** from `mkdocs.yml`. **`person/open-and-search`** → **Getting started**; **`person/mark-incomplete`** → end of **Employee**, **Family member**, and **Temporary visitor** (one page, three nav entries).
+- **Files unchanged:** Slugs and cross-links (`../person/open-and-search.md`) stay the same.
+
+### 2026-08-05 — Family member + temporary visitor guide sets completed
+
+- **Phase:** 2
+- **Area:** guides / nav
+- **Added:** `family-member/register`, `family-member/add-family-relation-documents`, `family-member/edit-family-member`, `temporary-visitor/register` (en/tr/tk/ru).
+- **Expanded:** Temporary visitor `add-visa`, `add-medical-record`, `add-address`, `add-travel`, `add-passport` to full EN step-by-step (employee pattern).
+- **Fixed:** FM `add-address` broken `edit-employee` link; tr/tk/ru FM `add-passport` wrongly described employees; prerequisites now point at `family-member/register` / `temporary-visitor/register`.
+- **Nav:** `mkdocs.yml` — register first in FM/TV sections; relation documents + edit before mark-incomplete.
+- **Screenshots:** Aliases in `Copy-EasyTestManualScreenshots.ps1` (reuse employee journey PNGs until role-specific E2E).
+- **Gotcha:** Employee **Family members** nested tab is browse-only — FM create is **Family Members** list **New** only.
+
+### 2026-08-05 — About → What Visa2026 does (capabilities)
+
+- **Phase:** 2
+- **Area:** manual IA / About
+- **Added:** `about/capabilities.md` (en/tr/tk/ru) — 10 features ordered by importance, each with **Problem** + **What Visa2026 does** + guide link or *Coming*.
+- **Home:** Short top-5 summary + link to capabilities; updated start-here path and section table (all locales).
+- **Nav:** `mkdocs.yml` — About → capabilities before roadmap; nav_translations for page title.
+- **Rule:** Capabilities = concepts; Guides = tasks; Roadmap = publication status only.
+
+### 2026-08-05 — Tier 6 `person/dossier`
+
+- **Added:** `guides/person/dossier.md` (en full steps, tr/tk/ru); nav after open-and-search; capabilities item 8 linked.
+- **Content:** Open dossier / Dossier column / Person search; Screen vs Paper; Document copies in preview slot; Export for director ZIP; read-only vs detail form.
+- **Screenshots:** `person-dossier-step-*` aliases reuse person detail / panel PNGs.
+- **Next:** Order **23** `tracking/report-dashboard`.
+
+### 2026-08-05 — Tier 5 `applications/resminamalar`
+
+- **Added:** `guides/applications/resminamalar.md` (en full steps, tr/tk/ru); nav; capabilities item 7 linked.
+- **Content:** **Templates** action (Resminamalar); Application vs Application item scope; catalog Ready/Check; Preview; Download package + report generation toast; vs Document copies distinction.
+- **Screenshots:** `application-resminamalar-step-*` aliases reuse application panel PNGs.
+- **Next:** Order **22** `person/dossier`.
+
+### 2026-08-05 — Tier 5 `applications/document-copies`
+
+- **Added:** `guides/applications/document-copies.md` (en full steps, tr/tk/ru); nav under **Applications**; capabilities item 5 linked.
+- **Content:** Application items list entry; multi-select; **Document copies** in preview slot; linked documents + application form; readiness/gap confirm; **Download package** + PDF generation toast; **Refresh** / gear.
+- **Screenshots:** `application-document-copies-step-*` aliases reuse application list PNGs.
+- **Next:** Order **21** `applications/resminamalar`.
+
+### 2026-08-05 — Tier 4 `applications/progress`
+
+- **Added:** `guides/applications/progress.md` (en full steps, tr/tk/ru); nav under **Applications**; capabilities item 4 linked.
+- **Content:** Progress tab / Progress history; append-only rows; implied office preparation; ministry vs direct-migration first steps; State/Date/Description/Process number/Ministry letter; terminal states; delete last row only.
+- **Fixed:** `create.md` — no auto-seeded progress row on save (office implied until first row).
+- **Screenshots:** `application-progress-step-*` aliases reuse application header PNGs.
+- **Next:** Order **20** `applications/document-copies`.
+
+### 2026-08-05 — Applications overview (via ministry + direct migration)
+
+- **Added:** `guides/applications/overview.md` (en/tr/tk/ru) — hub for four **Applications** lists; when to use each route.
+- **Updated:** `create.md` and `add-items.md` (all locales) — explicit subsections for **Applications (via ministry)** vs **Applications (direct migration)** and matching **Application items** lists.
+- **Nav:** overview first under Applications; capabilities item 3 links to overview.
+
+### 2026-08-05 — Tier 4 `applications/add-items`
+
+- **Phase:** 2 / tier 4
+- **Added:** `guides/applications/add-items.md` (en full steps, tr/tk/ru); nav under **Applications**; `create.md` next-link updated (all locales).
+- **Content:** Application items tab; **Person** picker by type; **Current\*** auto-fill; duplicate-person rule; optional fields gear; standalone ministry/migration item lists mentioned.
+- **Capabilities:** Item 3 links to create + add-items (all locales).
+- **Screenshots:** `application-add-items-step-*` aliases reuse employee detail PNGs until dedicated E2E.
+- **Next:** Order **19** `applications/progress`.
+
+### 2026-08-05 — Tier 4 `applications/create`
+
+- **Phase:** 2 / tier 4
+- **Added:** `guides/applications/create.md` (en full steps, tr/tk/ru); **Applications** nav group in `mkdocs.yml`.
+- **Content:** Via ministry vs direct migration list; **Application Type Code**; conditional header fields; auto numbering + initial progress on save.
+- **Capabilities:** Item 3 links to create guide (all locales).
+- **Screenshots:** `application-create-step-*` aliases reuse navigation/employee PNGs until dedicated E2E.
+- **Next:** Order **18** `applications/add-items`.
+
+- **Phase:** 0–2
+- **Area:** infra / agent UX
+- **What worked:** `reference.md` § **Gitignore contract** + `.gitignore` gaps (`.mkdocs_cache`, `manual-media.env`, webm/mov, Playwright dirs); SKILL doc map points agents here.
+- **Gotcha / drift:** Agents sometimes `git add` PNGs or `user-manual/site/` to “fix” missing images — regenerate via E2E copy + `Build-UserManual.ps1` instead.
+- **Follow-up:** Keep `generated/reference/` committed until policy flips to CI-only (open decision #2 in reference).
+
+### 2026-08-05 — Tier 6 `person/document-copies` (capabilities #10)
+
+- **Added:** `guides/person/document-copies.md` (en full steps, tr/tk/ru); nav after `person/dossier` in Getting started.
+- **UI labels:** Detail toolbar **Person document copies**; dossier **Document copies**; list **•** column (no list-toolbar action).
+- **Distinction:** Preview-only person catalog — not ministry `PdfGenerationBatch` (link to `applications/document-copies`).
+- **Screenshots:** `person-document-copies-step-*` aliases reuse dossier/catalog/employee list PNGs.
+- **Cross-links:** capabilities #10, dossier step 4, application document-copies intro.
+
+### 2026-08-05 — `tracking/state-notifications` (capabilities #6)
+
+- **Added:** `guides/tracking/state-notifications.md` (en/tr/tk/ru); nav after report-dashboard.
+- **Accuracy:** Phase 1 **UI prototype** — `BoStateNotificationPrototypeData`; admin-only (`EnsureAdminOnlyOperationsDeny`); header bell commented in `_Host.cshtml`.
+- **Code map** in EN guide for IT; officer rollout documented as future.
+- **Cross-links:** navigation, report-dashboard, mark-incomplete, capabilities #6.
+
+### 2026-08-05 — State notifications **postponed** (capabilities #6)
+
+- **Decision:** Not productizing for officers; manual marks feature **postponed**.
+- **Removed** from `mkdocs.yml` nav; capabilities #6 → *Postponed* (all locales).
+- **navigation.md** — bell section replaced with postponed note + Report Dashboard / Mark incomplete alternatives.
+- Guide files retained with `guideStatus: postponed` for reference only.

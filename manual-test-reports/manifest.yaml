@@ -1,0 +1,39 @@
+# Registry of automated test suites for the officer user manual program.
+# Guides are discovered from user-manual/docs/*/ frontmatter at report time.
+# Generated output: manual-test-reports/latest/ (gitignored).
+
+version: 1
+
+suites:
+  - id: user-manual-docs
+    name: UserManualDocs (catalog + manifest)
+    kind: unit
+    project: tools/UserManualManifestGenerator.Tests/UserManualManifestGenerator.Tests.csproj
+    configuration: Debug
+    filter: "Category=UserManualDocs"
+
+  - id: user-manual-e2e-easytest
+    name: UserManual EasyTest E2E
+    kind: e2e
+    driver: EasyTest
+    project: Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj
+    configuration: EasyTest
+    filter: "Category=UserManual"
+
+  - id: user-manual-e2e-playwright-local
+    name: UserManual Playwright E2E (Local)
+    kind: e2e
+    driver: Playwright
+    project: Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj
+    configuration: EasyTest
+    filter: "Driver=Playwright&Category=UserManual&E2ETarget=Local"
+    optional: true
+
+  - id: user-manual-e2e-playwright-staging
+    name: UserManual Playwright E2E (Staging)
+    kind: e2e
+    driver: Playwright
+    project: Visa2026.E2E.Tests/Visa2026.E2E.Tests.csproj
+    configuration: EasyTest
+    filter: "Driver=Playwright&Category=UserManual&E2ETarget=Staging"
+    optional: true

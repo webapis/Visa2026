@@ -3,7 +3,7 @@ title: Visa2026'ya giriş
 slug: getting-started/login
 locale: tr
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
 videosVersion: "2026.08"
@@ -92,4 +92,4 @@ Görmeniz gerekenler:
 ## Sırada ne var
 
 - [Ana gezinme](navigation.md) — sol menü, listeler, ayrıntı formları
-- [Yeni çalışan kaydı](../guides/person/register.md) — **Employees** listesinden kayıt
+- [Yeni çalışan kaydı](../guides/employee/register.md) — **Employees** listesinden kayıt

@@ -3,7 +3,7 @@ title: Esasy gezim
 slug: getting-started/navigation
 locale: tk
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
@@ -116,5 +116,5 @@ Doly sanaw üçin **Operasiýalar → Ýagdaý habarnamalary**.
 ## Indiki näme
 
 - [Giriş](login.md)
-- Adam tapmak we açmak (ýakynda)
-- Täze işgär hasaba almak (ýakynda)
+- [Adamy tapmak we açmak](../guides/person/open-and-search.md)
+- [Täze işgär hasaba almak](../guides/employee/register.md)

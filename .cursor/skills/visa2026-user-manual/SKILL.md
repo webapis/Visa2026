@@ -109,7 +109,7 @@ Use **[code-drift-scan.md](./code-drift-scan.md)** (mandatory — not optional) 
 | [`docs/USER_MANUAL_E2E_MEDIA.md`](../../../docs/USER_MANUAL_E2E_MEDIA.md) | Screenshots & video contract |
 | [learnings.md](./learnings.md) | Append-only experience |
 | [tracking.md](./tracking.md) | Guide inventory, infra, doc debt |
-| [reference.md](./reference.md) | Commands, frontmatter, CI rules |
+| [reference.md](./reference.md) | Commands, frontmatter, CI rules, **gitignore contract** |
 | [prompts.md](./prompts.md) | Copy-paste prompts |
 | [MATURITY.md](./MATURITY.md) | Promotion ladder |
 
@@ -171,7 +171,7 @@ When the user asks to **see**, **view**, **open**, or **preview** the officer ma
 | Detail | Value |
 |--------|--------|
 | **URL** | **http://127.0.0.1:8765/manual/** (locales: `/tr/`, `/tk/`, `/ru/`) |
-| **Hot reload** | Edit `user-manual/docs/` — MkDocs `--dirtyreload` reloads the browser |
+| **Hot reload** | Edit `user-manual/docs/` — `mkdocs serve` reloads the browser (avoid `--dirtyreload`; it breaks sidebar titles) |
 | **Reuse** | Script reuses **system Python** when available, else portable **`user-manual/.tools/python312/`** (created once; **do not delete or re-download** on every ask) |
 | **MkDocs deps** | Installed into that same Python via `pip install -r user-manual/requirements.txt` inside the script — **not** a separate manual step |
 | **Build** | Runs `Build-UserManual.ps1 -SkipE2E` unless `-SkipBuild` |

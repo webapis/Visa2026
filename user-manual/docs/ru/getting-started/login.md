@@ -3,7 +3,7 @@ title: Вход в Visa2026
 slug: getting-started/login
 locale: ru
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
 videosVersion: "2026.08"
@@ -92,4 +92,4 @@ verified: false
 ## Дальше
 
 - [Основная навигация](navigation.md) — левое меню и списки
-- [Регистрация нового сотрудника](../guides/person/register.md)
+- [Регистрация нового сотрудника](../guides/employee/register.md)

@@ -3,7 +3,7 @@ title: Основная навигация
 slug: getting-started/navigation
 locale: ru
 tier: 0
-status: draft
+guideStatus: draft
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login
@@ -116,5 +116,5 @@ verified: false
 ## Дальше
 
 - [Вход в Visa2026](login.md)
-- Поиск и открытие персоны (скоро)
-- Регистрация нового сотрудника (скоро)
+- [Поиск и открытие персоны](../guides/person/open-and-search.md)
+- [Регистрация нового сотрудника](../guides/employee/register.md)

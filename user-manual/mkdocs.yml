@@ -10,7 +10,7 @@ theme:
   custom_dir: overrides
   features:
     - navigation.tabs
-    - navigation.sections
+    - navigation.path
     - navigation.top
     - search.suggest
     - search.highlight
@@ -32,6 +32,7 @@ theme:
 hooks:
   - hooks/sync_manual_assets.py
   - hooks/manual_media_base_url.py
+  - hooks/manual_test_report_url.py
 
 plugins:
   - search
@@ -61,28 +62,90 @@ plugins:
           Guides: Kılavuzlar
           About: Hakkında
           Reference: Referans
+          Applications: Başvurular
+          Administration: Yönetim
+          Configuration: Yapılandırma
+          What Visa2026 does: Visa2026 ne sunar
         tk:
           Home: Baş sahypa
           Getting started: Başlangyç
           Guides: Gollanmalar
           About: Hakda
           Reference: Salgyş
+          Applications: Arzalar
+          Administration: Dolandyryş
+          Configuration: Sazlamalar
+          What Visa2026 does: Visa2026 näme berýär
         ru:
           Home: Главная
           Getting started: Начало работы
           Guides: Инструкции
           About: О руководстве
           Reference: Справочник
+          Applications: Заявки
+          Administration: Администрирование
+          Configuration: Настройки
+          What Visa2026 does: Что делает Visa2026
 
 nav:
   - Home: index.md
   - Getting started:
       - getting-started/login.md
       - getting-started/navigation.md
+      - guides/tracking/report-dashboard.md
+      - guides/person/open-and-search.md
+      - guides/person/dossier.md
+      - guides/person/document-copies.md
   - Guides:
-      - guides/person/register.md
-      - guides/person/add-passport.md
+      - Employee:
+          - guides/employee/register.md
+          - guides/employee/add-passport.md
+          - guides/employee/add-visa.md
+          - guides/employee/add-education.md
+          - guides/employee/add-medical-record.md
+          - guides/employee/add-address.md
+          - guides/employee/add-position-history.md
+          - guides/employee/add-work-duty.md
+          - guides/employee/add-salary.md
+          - guides/employee/add-travel.md
+          - guides/employee/add-cv-documents.md
+          - guides/employee/edit-employee.md
+          - guides/person/mark-incomplete.md
+      - Family member:
+          - guides/family-member/register.md
+          - guides/family-member/add-passport.md
+          - guides/family-member/add-visa.md
+          - guides/family-member/add-medical-record.md
+          - guides/family-member/add-address.md
+          - guides/family-member/add-family-relation-documents.md
+          - guides/family-member/edit-family-member.md
+          - guides/person/mark-incomplete.md
+      - Temporary visitor:
+          - guides/temporary-visitor/register.md
+          - guides/temporary-visitor/add-passport.md
+          - guides/temporary-visitor/add-visa.md
+          - guides/temporary-visitor/add-medical-record.md
+          - guides/temporary-visitor/add-address.md
+          - guides/temporary-visitor/add-travel.md
+          - guides/person/mark-incomplete.md
+      - Applications:
+          - guides/applications/overview.md
+          - guides/applications/create.md
+          - guides/applications/add-items.md
+          - guides/applications/progress.md
+          - guides/applications/document-copies.md
+          - guides/applications/resminamalar.md
+      - Administration:
+          - guides/administration/configuration/overview.md
+          - Configuration:
+              - guides/administration/configuration/organization.md
+              - guides/administration/configuration/contracts-and-approvals.md
+              - guides/administration/configuration/sla.md
+              - guides/administration/configuration/alerts-and-upload-limits.md
+          - guides/administration/user-report-templates.md
+          - guides/administration/template-staging.md
   - About:
+      - about/capabilities.md
       - about/roadmap.md
   - Reference:
       - reference/index.md
