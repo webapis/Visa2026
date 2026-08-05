@@ -3,7 +3,8 @@ title: Main navigation
 slug: getting-started/navigation
 locale: en
 tier: 0
-guideStatus: draft
+guideStatus: review
+lastReviewed: "2026-08-05"
 roles: [Visa Officer]
 prerequisiteSlugs:
   - getting-started/login

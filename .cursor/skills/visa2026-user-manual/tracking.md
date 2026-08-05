@@ -41,7 +41,7 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 |-------|--------|--------|-------|
 | **0** | MkDocs scaffold, empty generator | **Complete** | |
 | **1** | Catalog generator + CI validator | **Complete** | `bo-catalog.json` committed; 3 UserManualDocs tests |
-| **2** | Tier 0–4 pilot guides + screenshots | **In progress** | **44 active drafts** + 1 postponed (#6 state-notifications) |
+| **2** | Tier 0–4 pilot guides + screenshots | **In progress** | **39 drafts**, **5 in review** (pilots 1–5 en), **1 postponed** (#6) |
 | **3** | GitHub Pages + EasyTest screenshots + **static videos** | **In progress** | `Copy-EasyTestManualVideos.ps1`; storage **static** (D6) |
 | **4** | Tiers 5–7 + **tr/tk/ru** for pilots | **Not started** | Packages, dossier, templates last |
 | **5** | In-app Help links | **Not started** | |
@@ -79,11 +79,11 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 
 | Order | Tier | Slug | Title | `bo` | Parent | Ops | `e2eScenarioId` | E2E notes | Status | Phase |
 |------:|------|------|-------|------|--------|-----|-----------------|-----------|--------|-------|
-| 1 | 0 | `getting-started/login` | Sign in to Visa2026 | — | — | read | `person-officer-journey` | Short journey | **Draft** | 2 |
-| 2 | 0 | `getting-started/navigation` | Main navigation | — | — | read | `person-officer-journey` | Short journey | **Draft** | 2 |
-| 3 | 1 | `person/open-and-search` | Find and open a person | Person | — | read | `person-officer-journey` | Short journey | **Draft** | 2 |
-| 4 | 2 | `employee/register` | Register a new employee | Person | — | create | `person-officer-journey` | Short journey | **Draft** | 2 |
-| 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | create | `person-officer-journey` | Short journey | **Draft** | 2 |
+| 1 | 0 | `getting-started/login` | Sign in to Visa2026 | — | — | read | `person-officer-journey` | Short journey; officer review 2026-08-05 | **Review** | 2 |
+| 2 | 0 | `getting-started/navigation` | Main navigation | — | — | read | `person-officer-journey` | Officer review 2026-08-05 | **Review** | 2 |
+| 3 | 1 | `person/open-and-search` | Find and open a person | Person | — | read | `person-officer-journey` | Officer review 2026-08-05 | **Review** | 2 |
+| 4 | 2 | `employee/register` | Register a new employee | Person | — | create | `person-officer-journey` | Officer review 2026-08-05 | **Review** | 2 |
+| 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | create | `person-officer-journey` | Officer review 2026-08-05 | **Review** | 2 |
 | 5b | 2 | `family-member/add-passport` | Add a passport (family member) | Person | — | create | `person-officer-journey` | Full EN | **Draft** | 2 |
 | 4b | 2 | `family-member/register` | Register a family member | Person | — | create | `person-officer-journey` | List New; sponsor + relationship | **Draft** | 2 |
 | 6a | 2 | `employee/add-visa` | Add a visa (employee) | Person | Passport | create | `person-officer-journey` | Full CRUD test | **Draft** | 2 |

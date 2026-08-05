@@ -3,7 +3,8 @@ title: Find and open a person
 slug: person/open-and-search
 locale: en
 tier: 1
-guideStatus: draft
+guideStatus: review
+lastReviewed: "2026-08-05"
 bo: Person
 roles: [Visa Officer]
 prerequisiteSlugs:

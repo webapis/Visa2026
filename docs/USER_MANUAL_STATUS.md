@@ -31,7 +31,7 @@ Owner: Product + Visa officers + Tech lead
 | **Phase 0** | **Complete** |
 | **Phase 1** | **Complete** — `bo-catalog.json`, validator, `UserManualDocs` tests |
 | **Officer site** | MkDocs scaffold + generated reference catalog page |
-| **Published guides** | 0 / 44 planned (**44 active drafts**, 1 postponed) |
+| **Published guides** | 0 / 44 planned (**39 drafts**, **5 in review** (pilots 1–5 en), 1 postponed) |
 | **Pipeline** | `Build-UserManual.ps1` (generator → unit tests → validate → mkdocs) |
 | **E2E UserManual traits** | Not implemented (Phase 3) |
 | **CI** | `user-manual.yml` (build + validate + UserManualDocs; **GitHub Pages** on `master` push) |
@@ -116,6 +116,9 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-05 | **FM + TV guide completion** — `family-member/register`, `add-family-relation-documents`, `edit-family-member`; `temporary-visitor/register`; full EN TV nested guides |
 | 2026-08-05 | **tracking/state-notifications** — **postponed** (capabilities #6); removed from nav; use Report Dashboard + Mark incomplete instead |
 | 2026-08-05 | **tracking/state-notifications** — draft (en/tr/tk/ru); Phase 1 prototype; admin-only; bell optional |
+| 2026-08-05 | **Officer review pilot #1** — `getting-started/login` (en) → `guideStatus: review`; tracking + status board |
+| 2026-08-05 | **Officer review pilots 2–5** — navigation, open-and-search, register, add-passport (en) → `guideStatus: review` |
+| 2026-08-05 | **Officer review pilot #1** — `getting-started/login` (en) → `guideStatus: review` |
 | 2026-08-05 | **Tier 8 configuration** — `administration/configuration/*` drafts (overview + organization, contracts, SLA, alerts; en/tr/tk/ru); maps eleven Configuration menu BOs |
 | 2026-08-05 | **Tier 6 person/document-copies** — draft (en/tr/tk/ru); detail toolbar, list • column, dossier; not ministry ZIP |
 | 2026-08-05 | **Tier 7 administration** — `user-report-templates` + `template-staging` drafts (en/tr/tk/ru); curriculum inventory complete |
@@ -148,12 +151,12 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 
 | # | Task | Status |
 |---|------|--------|
-| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Draft** |
-| **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Draft** |
+| **P2-1** | `getting-started/login` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
+| **P2-2** | `getting-started/navigation` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
 | **P2-3** | Login + navigation screenshots (`v2026.08/en/`) | **Done** (EasyTest `person-officer-journey`; en UI replicated to tr/tk/ru per D12) |
-| **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Draft** |
-| **P2-4** | `employee/register` guide (en/tr/tk/ru) | **Draft** |
-| **P2-5** | `employee/add-passport` + `family-member/add-passport` | **Draft** |
+| **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
+| **P2-4** | `employee/register` guide (en/tr/tk/ru) | **Review** (officer sign-off **en** 2026-08-05) |
+| **P2-5** | `employee/add-passport` + `family-member/add-passport` | **Review** (employee **en** 2026-08-05); FM still **Draft** |
 | **P2-6** | `employee/add-visa` + `family-member/add-visa` | **Draft** |
 | **P2-7** | `employee/add-education` | **Draft** |
 | **P2-8** | `employee/add-medical-record` + `family-member/add-medical-record` | **Draft** |
@@ -177,7 +180,17 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 | **P2-25** | Tier 7 `administration/template-staging` | **Draft** (en/tr/tk/ru) |
 | **P2-26** | `person/document-copies` (capabilities #10) | **Draft** (en/tr/tk/ru) |
 | **P2-27** | `tracking/state-notifications` (capabilities #6) | **Postponed** — not in officer manual scope |
-| **P2-next** | Review, publish, E2E media, locale depth | **Next** |
+| **P2-next** | Publish pilots 1–5 (en), E2E media, locale depth | **Next** — pilot set **5/5** officer-reviewed (en) |
+
+### Pilot officer review (tier 0–2)
+
+| # | Guide | Officer review | Tech `published` |
+|---|-------|----------------|------------------|
+| 1 | [Sign in](../user-manual/docs/en/getting-started/login.md) | **Done** 2026-08-05 (en) | Pending |
+| 2 | [Main navigation](../user-manual/docs/en/getting-started/navigation.md) | **Done** 2026-08-05 (en) | Pending |
+| 3 | [Find and open a person](../user-manual/docs/en/guides/person/open-and-search.md) | **Done** 2026-08-05 (en) | Pending |
+| 4 | [Register employee](../user-manual/docs/en/guides/employee/register.md) | **Done** 2026-08-05 (en) | Pending |
+| 5 | [Add passport (employee)](../user-manual/docs/en/guides/employee/add-passport.md) | **Done** 2026-08-05 (en) | Pending |
 
 ### Parallel E2E (Phase 2 prep)
 

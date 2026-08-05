@@ -373,3 +373,16 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 - **Removed** from `mkdocs.yml` nav; capabilities #6 → *Postponed* (all locales).
 - **navigation.md** — bell section replaced with postponed note + Report Dashboard / Mark incomplete alternatives.
 - Guide files retained with `guideStatus: postponed` for reference only.
+
+### 2026-08-05 — Officer review: pilot #1 login (en)
+
+- **Guide:** `getting-started/login` — officer walkthrough sign-off.
+- **Status:** `guideStatus: review`, `lastReviewed: 2026-08-05` (en only).
+- **Next:** Tech may set `published` after E2E green tick; tr/tk/ru login still `draft` until locale review.
+
+### 2026-08-05 — Officer review: pilots 2–5 (en)
+
+- **Guides:** `getting-started/navigation`, `person/open-and-search`, `employee/register`, `employee/add-passport`.
+- **Status:** `guideStatus: review`, `lastReviewed: 2026-08-05` (en).
+- **Pilot set:** tier 0–2 English pilots **5/5** officer-reviewed; `family-member/add-passport` not in this batch.
+- **Next:** Tech `published` for en pilots when ready; continue review on remaining drafts or tr/tk/ru locales.

@@ -3,7 +3,8 @@ title: Register a new employee
 slug: employee/register
 locale: en
 tier: 2
-guideStatus: draft
+guideStatus: review
+lastReviewed: "2026-08-05"
 bo: Person
 personRole: Employee
 navPath: Employee

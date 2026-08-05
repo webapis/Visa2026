@@ -3,7 +3,8 @@ title: Sign in to Visa2026
 slug: getting-started/login
 locale: en
 tier: 0
-guideStatus: draft
+guideStatus: review
+lastReviewed: "2026-08-05"
 roles: [Visa Officer]
 screenshotsVersion: "2026.08"
 videosVersion: "2026.08"
