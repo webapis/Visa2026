@@ -125,22 +125,22 @@ public sealed class ApplicationRuntimeLogResolutionHelperTests
         var row = new ApplicationRuntimeLog
         {
             ResolutionStatus = ApplicationRuntimeLogResolutionStatus.Fixed,
-            AcknowledgedAtUtc = new DateTime(2026, 7, 1, DateTimeKind.Utc),
-            ResolvedAtUtc = new DateTime(2026, 7, 2, DateTimeKind.Utc),
+            AcknowledgedAtUtc = new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc),
+            ResolvedAtUtc = new DateTime(2026, 7, 2, 0, 0, 0, DateTimeKind.Utc),
         };
 
         ApplicationRuntimeLogResolutionHelper.ApplyStatus(
             row,
             ApplicationRuntimeLogResolutionStatus.Open,
-            new DateTime(2026, 8, 5, DateTimeKind.Utc),
+            new DateTime(2026, 8, 5, 0, 0, 0, DateTimeKind.Utc),
             resolvedBy: null,
             resolutionNotes: null,
             fixCommitHash: null,
             agentRunId: null);
 
         Assert.Equal(ApplicationRuntimeLogResolutionStatus.Open, row.ResolutionStatus);
-        Assert.Equal(new DateTime(2026, 7, 1, DateTimeKind.Utc), row.AcknowledgedAtUtc);
-        Assert.Equal(new DateTime(2026, 7, 2, DateTimeKind.Utc), row.ResolvedAtUtc);
+        Assert.Equal(new DateTime(2026, 7, 1, 0, 0, 0, DateTimeKind.Utc), row.AcknowledgedAtUtc);
+        Assert.Equal(new DateTime(2026, 7, 2, 0, 0, 0, DateTimeKind.Utc), row.ResolvedAtUtc);
     }
 
     [Fact]
