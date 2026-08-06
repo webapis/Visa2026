@@ -35,6 +35,10 @@ internal static class UserManualMediaCaptureKeys
     internal const string EmployeeVisaFamilyManualStep04PopupWithMember = "employee-visa-family-manual-step-04-popup-with-member";
     internal const string EmployeeVisaFamilyManualStep05SavedSummary = "employee-visa-family-manual-step-05-saved-summary";
 
+    internal const string PersonRegisterFamilyMemberStep01FamilyMembersList = "person-register-family-member-step-01-family-members-list";
+    internal const string PersonRegisterFamilyMemberStep02SavedDetail = "person-register-family-member-step-02-saved-detail";
+    internal const string PersonRegisterFamilyMemberStep03OpenFromList = "person-register-family-member-step-03-open-from-list";
+
     // Legacy milestone labels — still captured for guides not yet migrated to doc keys.
     internal const string Legacy00LogonPage = "00-logon-page";
     internal const string Legacy01AfterLogin = "01-after-login";

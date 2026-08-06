@@ -56,6 +56,15 @@ internal sealed class PlaywrightPersonOfficerJourney
         Assert.Equal(firstName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-first-name", E2ETestPersonFieldCaptions.FirstName));
         Assert.Equal(lastName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-last-name", E2ETestPersonFieldCaptions.LastName));
         Assert.Equal(personalNumber, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber));
+
+        await PlaywrightE2eStepRunner.RunAsync(
+            _page,
+            "register-family-member",
+            () => RegisterFamilyMemberAsync(personalNumber, fullName));
+
+        await OpenEmployeeFromListAsync(personalNumber);
+        await PlaywrightPageInteractions.WaitForEmployeeDetailAsync(_page);
+
         ILocator passportsTab = PlaywrightPageInteractions.TabItem(_page, "Passports");
         await PlaywrightE2eStepRunner.RunAsync(_page, "visa-family-manual", () => AddVisaFamilyManualLinesAsync(personalNumber));
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonAddPassportStep01EmployeeDetail, passportsTab);
@@ -75,6 +84,317 @@ internal sealed class PlaywrightPersonOfficerJourney
         await PlaywrightE2eStepRunner.RunAsync(_page, "add-visa", () => AddVisaAsync());
 
         _ = fullName;
+    }
+
+    private async Task RegisterFamilyMemberAsync(string sponsorPersonalNumber, string sponsorDisplayName)
+    {
+        await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.FamilyMembersListViewPath);
+        await PlaywrightPageInteractions.WaitForFamilyMembersListAsync(_page);
+        await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+        await Task.Delay(1500);
+
+        ILocator newToolbar = PlaywrightPageInteractions.ToolbarButton(_page, "New");
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.PersonRegisterFamilyMemberStep01FamilyMembersList,
+            newToolbar);
+
+        if (await TryFindFamilyMemberInListAsync(E2ETestFamilyMemberCreateValues.PersonalNumber, sponsorDisplayName))
+        {
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonRegisterFamilyMemberStep02SavedDetail,
+                PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.FamilyMembersListViewPath);
+            await PlaywrightPageInteractions.WaitForFamilyMembersListAsync(_page);
+            await OpenFamilyMemberFromListAsync(E2ETestFamilyMemberCreateValues.PersonalNumber, sponsorDisplayName);
+            await PlaywrightScreenshotCapture.CaptureAsync(
+                _page,
+                UserManualMediaCaptureKeys.PersonRegisterFamilyMemberStep03OpenFromList,
+                PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+            return;
+        }
+
+        await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "New");
+        await PlaywrightPageInteractions.WaitForFamilyMemberDetailAsync(_page);
+        await FillFamilyMemberFormAsync(sponsorDisplayName);
+
+        await SaveFamilyMemberDetailAndConfirmAsync(
+            E2ETestFamilyMemberCreateValues.PersonalNumber,
+            sponsorDisplayName);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.PersonRegisterFamilyMemberStep02SavedDetail,
+            PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+
+        await OpenFamilyMemberFromListAsync(E2ETestFamilyMemberCreateValues.PersonalNumber, sponsorDisplayName);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.PersonRegisterFamilyMemberStep03OpenFromList,
+            PlaywrightPageInteractions.ToolbarButton(_page, "Save"));
+
+        Assert.Equal(
+            E2ETestFamilyMemberCreateValues.FirstName,
+            await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-first-name", E2ETestPersonFieldCaptions.FirstName));
+        Assert.Equal(
+            E2ETestFamilyMemberCreateValues.PersonalNumber,
+            await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber));
+
+        string sponsor = await PlaywrightPageInteractions.TryReadLookupDisplayAsync(
+            _page,
+            "e2e-person-sponsoring-employee",
+            E2ETestFamilyMemberFieldCaptions.SponsoringEmployee);
+        Assert.True(
+            sponsor.Contains(sponsorPersonalNumber, StringComparison.OrdinalIgnoreCase)
+                || sponsor.Contains(sponsorDisplayName, StringComparison.OrdinalIgnoreCase),
+            $"Sponsoring Employee must reference sponsor (actual: '{sponsor}').");
+
+        _ = sponsorPersonalNumber;
+    }
+
+    private async Task FillFamilyMemberFormAsync(string sponsorDisplayName)
+    {
+        await PlaywrightPageInteractions.FillTextFieldAsync(
+            _page,
+            "e2e-person-first-name",
+            E2ETestFamilyMemberCreateValues.FirstName,
+            E2ETestPersonFieldCaptions.FirstName);
+        await PlaywrightPageInteractions.FillTextFieldAsync(
+            _page,
+            "e2e-person-last-name",
+            E2ETestFamilyMemberCreateValues.LastName,
+            E2ETestPersonFieldCaptions.LastName);
+        await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestPersonFieldCaptions.DateOfBirth);
+        await PlaywrightPageInteractions.FillTextFieldAsync(
+            _page,
+            "e2e-person-date-of-birth",
+            E2ETestFamilyMemberCreateValues.DateOfBirth,
+            E2ETestPersonFieldCaptions.DateOfBirth);
+        await PlaywrightPageInteractions.FillTextFieldAsync(
+            _page,
+            "e2e-person-birth-place",
+            E2ETestFamilyMemberCreateValues.BirthPlace,
+            E2ETestPersonFieldCaptions.BirthPlace);
+        await PlaywrightPageInteractions.FillLookupAsync(
+            _page,
+            "e2e-person-country-of-birth",
+            E2ETestFamilyMemberCreateValues.CountryDisplay,
+            E2ETestPersonFieldCaptions.CountryOfBirth);
+        await PlaywrightPageInteractions.FillLookupAsync(
+            _page,
+            "e2e-person-gender",
+            E2ETestFamilyMemberCreateValues.GenderDisplay,
+            E2ETestPersonFieldCaptions.Gender);
+        await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+            _page,
+            "e2e-person-nationality",
+            E2ETestFamilyMemberCreateValues.CountryDisplay,
+            E2ETestPersonFieldCaptions.Nationality);
+        await PlaywrightPageInteractions.FillTextFieldAsync(
+            _page,
+            "e2e-person-personal-number",
+            E2ETestFamilyMemberCreateValues.PersonalNumber,
+            E2ETestPersonFieldCaptions.PersonalNumber);
+        await PlaywrightPageInteractions.FillLookupAsync(
+            _page,
+            "e2e-person-project-contract",
+            E2ETestEmployeeCreateValues.ProjectContractDisplay,
+            E2ETestPersonFieldCaptions.ProjectContract);
+        await PlaywrightPageInteractions.FillLookupAsync(
+            _page,
+            "e2e-person-subcontractor",
+            E2ETestEmployeeCreateValues.SubcontractorDisplay,
+            E2ETestPersonFieldCaptions.Subcontractor);
+        await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestFamilyMemberFieldCaptions.SponsoringEmployee);
+        await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+            _page,
+            "e2e-person-sponsoring-employee",
+            sponsorDisplayName,
+            E2ETestFamilyMemberFieldCaptions.SponsoringEmployee);
+        await Task.Delay(500);
+        await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestFamilyMemberFieldCaptions.Relationship);
+        await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+            _page,
+            "e2e-person-relationship",
+            E2ETestFamilyMemberCreateValues.RelationshipDisplay,
+            E2ETestFamilyMemberFieldCaptions.Relationship);
+    }
+
+    private async Task SaveFamilyMemberDetailAndConfirmAsync(string personalNumber, string sponsorDisplayName)
+    {
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            if (attempt > 0)
+            {
+                await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.FamilyMembersListViewPath);
+                await PlaywrightPageInteractions.WaitForFamilyMembersListAsync(_page);
+                await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+                await Task.Delay(1500);
+                if (await TryFindFamilyMemberInListAsync(personalNumber, sponsorDisplayName))
+                {
+                    return;
+                }
+
+                await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "New");
+                await PlaywrightPageInteractions.WaitForFamilyMemberDetailAsync(_page);
+                await FillFamilyMemberFormAsync(sponsorDisplayName);
+            }
+
+            await PlaywrightPageInteractions.ActivateMdiDocumentTabAsync(
+                _page,
+                E2ETestFamilyMemberCreateValues.FullName);
+            await EnsureFamilyMemberRequiredLookupsBoundAsync(sponsorDisplayName);
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
+            await Task.Delay(4000);
+
+            if (await PlaywrightPageInteractions.PageShowsDuplicatePersonalNumberAsync(_page))
+            {
+                await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.FamilyMembersListViewPath);
+                await PlaywrightPageInteractions.WaitForFamilyMembersListAsync(_page);
+                await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+                await Task.Delay(2000);
+                if (await TryFindFamilyMemberInListAsync(personalNumber, sponsorDisplayName))
+                {
+                    return;
+                }
+
+                throw new InvalidOperationException(
+                    $"Personal Number '{personalNumber}' is reported as duplicate but the Family Members list row was not found.");
+            }
+
+            if (await PlaywrightPageInteractions.PageShowsValidationErrorAsync(_page))
+            {
+                continue;
+            }
+
+            if (await FamilyMemberDetailShowsPersonalNumberAsync(personalNumber))
+            {
+                return;
+            }
+
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.FamilyMembersListViewPath);
+            await PlaywrightPageInteractions.WaitForFamilyMembersListAsync(_page);
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+            await Task.Delay(2000);
+
+            if (await TryFindFamilyMemberInListAsync(personalNumber, sponsorDisplayName))
+            {
+                return;
+            }
+        }
+
+        await PlaywrightPageInteractions.DumpPageDiagnosticsAsync(_page, "family-member-save-failed");
+        throw new InvalidOperationException(
+            $"Family member with Personal Number '{personalNumber}' was not confirmed after Save.");
+    }
+
+    private async Task EnsureFamilyMemberRequiredLookupsBoundAsync(string sponsorDisplayName)
+    {
+        string nationality = await PlaywrightPageInteractions.TryReadLookupDisplayAsync(
+            _page,
+            "e2e-person-nationality",
+            E2ETestPersonFieldCaptions.Nationality);
+        if (string.IsNullOrWhiteSpace(nationality))
+        {
+            await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+                _page,
+                "e2e-person-nationality",
+                E2ETestFamilyMemberCreateValues.CountryDisplay,
+                E2ETestPersonFieldCaptions.Nationality);
+        }
+
+        string relationship = await PlaywrightPageInteractions.TryReadLookupDisplayAsync(
+            _page,
+            "e2e-person-relationship",
+            E2ETestFamilyMemberFieldCaptions.Relationship);
+        if (string.IsNullOrWhiteSpace(relationship))
+        {
+            await PlaywrightPageInteractions.FillLookupAsync(
+                _page,
+                "e2e-person-relationship",
+                E2ETestFamilyMemberCreateValues.RelationshipDisplay,
+                E2ETestFamilyMemberFieldCaptions.Relationship);
+        }
+
+        string sponsor = await PlaywrightPageInteractions.TryReadLookupDisplayAsync(
+            _page,
+            "e2e-person-sponsoring-employee",
+            E2ETestFamilyMemberFieldCaptions.SponsoringEmployee);
+        if (string.IsNullOrWhiteSpace(sponsor))
+        {
+            await PlaywrightPageInteractions.EnsureLookupBoundAsync(
+                _page,
+                "e2e-person-sponsoring-employee",
+                sponsorDisplayName,
+                E2ETestFamilyMemberFieldCaptions.SponsoringEmployee);
+        }
+    }
+
+    private async Task<bool> FamilyMemberDetailShowsPersonalNumberAsync(string personalNumber)
+    {
+        try
+        {
+            string actual = await PlaywrightPageInteractions.ReadFieldAsync(
+                _page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber);
+            return string.Equals(actual, personalNumber, StringComparison.Ordinal);
+        }
+        catch (TimeoutException)
+        {
+            return false;
+        }
+    }
+
+    private async Task OpenFamilyMemberFromListAsync(string personalNumber, string sponsorDisplayName)
+    {
+        for (var attempt = 0; attempt < 5; attempt++)
+        {
+            await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.FamilyMembersListViewPath);
+            await PlaywrightPageInteractions.WaitForFamilyMembersListAsync(_page);
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+            await Task.Delay(2000);
+
+            if (await TryFindFamilyMemberInListAsync(personalNumber, sponsorDisplayName))
+                return;
+        }
+
+        await PlaywrightPageInteractions.DumpPageDiagnosticsAsync(_page, "family-member-list-missing");
+        throw new InvalidOperationException($"Family member list row containing '{personalNumber}' was not found.");
+    }
+
+    private async Task<bool> TryFindFamilyMemberInListAsync(string personalNumber, string? sponsorDisplayName = null)
+    {
+        await PlaywrightPageInteractions.ClearListSearchFilterAsync(_page);
+
+        string[] searchTokens =
+        [
+            personalNumber,
+            E2ETestFamilyMemberCreateValues.FullName,
+            E2ETestFamilyMemberCreateValues.FirstName,
+            E2ETestFamilyMemberCreateValues.LastName,
+            sponsorDisplayName ?? string.Empty,
+        ];
+
+        foreach (string token in searchTokens)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                continue;
+
+            try
+            {
+                await PlaywrightPageInteractions.ClearListSearchFilterAsync(_page);
+                await PlaywrightPageInteractions.ApplyListSearchFilterAsync(_page, token);
+                await PlaywrightPageInteractions.ClickListRowContainingAsync(_page, token);
+                if (await FamilyMemberDetailShowsPersonalNumberAsync(personalNumber))
+                    return true;
+            }
+            catch (TimeoutException)
+            {
+                // Try the next token.
+            }
+        }
+
+        return false;
     }
 
     private async Task LoginAsync(bool skipNavigation = false)
@@ -111,20 +431,42 @@ internal sealed class PlaywrightPersonOfficerJourney
         await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-person-project-contract", E2ETestEmployeeCreateValues.ProjectContractDisplay, E2ETestPersonFieldCaptions.ProjectContract);
         await PlaywrightPageInteractions.FillLookupAsync(_page, "e2e-person-subcontractor", E2ETestEmployeeCreateValues.SubcontractorDisplay, E2ETestPersonFieldCaptions.Subcontractor);
 
-        await SaveEmployeeDetailAndConfirmAsync(personalNumber);
+        await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestVisaFamilyManualUi.FieldCaption);
+
+        await SaveEmployeeDetailAndConfirmAsync(personalNumber, $"{firstName} {lastName}");
     }
 
-    private async Task SaveEmployeeDetailAndConfirmAsync(string personalNumber)
+    private async Task SaveEmployeeDetailAndConfirmAsync(string personalNumber, string? documentTabTitle = null)
     {
         for (var attempt = 0; attempt < 5; attempt++)
         {
-            await EnsureEmployeeRequiredLookupsBoundAsync();
-            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
-            await Task.Delay(2000);
+            if (!string.IsNullOrWhiteSpace(documentTabTitle))
+            {
+                await PlaywrightPageInteractions.ActivateMdiDocumentTabAsync(_page, documentTabTitle);
+            }
 
-            string content = await _page.ContentAsync();
-            if (content.Contains("must not be empty", StringComparison.OrdinalIgnoreCase)
-                || content.Contains("Data Validation Error", StringComparison.OrdinalIgnoreCase))
+            if (await EmployeeDetailShowsPersonalNumberAsync(personalNumber))
+            {
+                await EnsureEmployeeRequiredLookupsBoundAsync();
+            }
+
+            await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Save");
+            await Task.Delay(3000);
+
+            if (await PlaywrightPageInteractions.PageShowsDuplicatePersonalNumberAsync(_page))
+            {
+                await PlaywrightPageInteractions.GotoRelativeAsync(_page, E2ETestLoginValues.EmployeesListViewPath);
+                await PlaywrightPageInteractions.WaitForEmployeesListAsync(_page);
+                await PlaywrightPageInteractions.ClickToolbarByTitlePrefixAsync(_page, "Refresh");
+                await Task.Delay(2000);
+                if (await TryFindEmployeeInListAsync(personalNumber))
+                    return;
+
+                throw new InvalidOperationException(
+                    $"Personal Number '{personalNumber}' is reported as duplicate but the Employees list row was not found.");
+            }
+
+            if (await PlaywrightPageInteractions.PageShowsValidationErrorAsync(_page))
             {
                 continue;
             }
@@ -264,7 +606,9 @@ internal sealed class PlaywrightPersonOfficerJourney
         await PlaywrightPageInteractions.ClickVisaFamilyManualMainOkAsync(_page);
         await Task.Delay(500);
 
-        await SaveEmployeeDetailAndConfirmAsync(personalNumber);
+        await SaveEmployeeDetailAndConfirmAsync(
+            personalNumber,
+            E2ETestPassportCreateOnlyJourneyValues.FullName);
 
         ILocator familyFieldAfterSave = PlaywrightPageInteractions.VisaFamilyManualFieldContainer(_page);
         await PlaywrightScreenshotCapture.CaptureAsync(

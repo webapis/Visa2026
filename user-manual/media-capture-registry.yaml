@@ -101,6 +101,36 @@ captures:
     assertBeforeCapture:
       - fieldVisible: Personal Number
 
+  person-register-family-member-step-01-family-members-list:
+    guideSlugs:
+      - family-member/register
+    journey: person-officer-journey
+    description: Family Members list before New
+    pinpoint:
+      kind: toolbar
+      titlePrefix: New
+    assertBeforeCapture:
+      - urlContains: Person_ListView_FamilyMembers
+      - toolbarVisible: New
+
+  person-register-family-member-step-02-saved-detail:
+    guideSlugs:
+      - family-member/register
+    journey: person-officer-journey
+    description: Family member detail immediately after first Save
+    assertBeforeCapture:
+      - fieldVisible: Personal Number
+      - fieldVisible: Sponsoring Employee
+
+  person-register-family-member-step-03-open-from-list:
+    guideSlugs:
+      - family-member/register
+    journey: person-officer-journey
+    description: Family member detail reopened from list row
+    assertBeforeCapture:
+      - fieldVisible: Personal Number
+      - fieldVisible: Sponsoring Employee
+
   person-add-passport-step-01-employee-detail:
     guideSlugs:
       - employee/add-passport

@@ -6,6 +6,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using System.ComponentModel;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -13,6 +14,7 @@ namespace Visa2026.Module.BusinessObjects
     /// Calendar-day thresholds before <see cref="IExpirationLogic.ExpirationDate"/> for expiring-soon UI states.
     /// Configuration nav lists <see cref="DocumentExpirationAlertConfigurationKeys"/> only; other keys stay seeded for runtime.
     /// </summary>
+    [UserDocumentation("administration/configuration/alerts-and-upload-limits", Category = "Administration")]
     [DefaultClassOptions]
     [NavigationItem("Configuration")]
     [DisplayName("Document expiration alerts")]

@@ -13,10 +13,12 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>User-defined Word or Excel report template uploaded via XAF UI.</summary>
+    [UserDocumentation("administration/user-report-templates", Category = "Administration")]
     [DefaultClassOptions]
     [NavigationItem("Reports")]
     [DefaultProperty(nameof(TemplateName))]

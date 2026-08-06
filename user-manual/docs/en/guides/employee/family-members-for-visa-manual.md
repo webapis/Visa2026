@@ -4,6 +4,7 @@ slug: employee/family-members-for-visa-manual
 locale: en
 tier: 3
 guideStatus: draft
+lastReviewed: "2026-08-06"
 bo: Person
 personRole: Employee
 navPath: Employee
@@ -18,13 +19,15 @@ mediaE2eRunId: "20260805-172303"
 e2eScenarioId: person-officer-journey
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 verified: false
+verifiedAt:
+verifiedCommit:
 ---
 
 # Family members for visa (manual)
 
-This guide shows how to enter **manual family lines** on an employee when dependents are **not** registered as full **Family Members** persons in Visa2026 (for example family abroad). The lines appear on the **visa PDF** when the employee has no linked family member records.
+This guide shows how to enter **family lines for visa outputs** on an employee — visa PDF (item 18 and spouse block), **Şahsy kagyz**, and Word merge fields. These lines are stored in **Family members for visa (manual)** and are the **only** source for that household text on outputs.
 
-Use the **Family Members** list instead when dependents accompany the employee in Turkmenistan and need passports, visas, and applications — see [Register a family member](../family-member/register.md).
+Use the **Family Members** list when dependents need full person records in Turkmenistan (passports, visas, applications) — see [Register a family member](../family-member/register.md). Linked family member persons **do not** replace manual lines on visa outputs; keep manual text in sync when close family should appear on forms.
 
 !!! tip "Prerequisites"
     The employee must already exist ([Register a new employee](register.md)). You can open them from [Find and open a person](../person/open-and-search.md).
@@ -42,14 +45,15 @@ Use the **Family Members** list instead when dependents accompany the employee i
 
 ### Manual lines vs linked family members
 
-| Situation | What to use |
-|-----------|-------------|
-| Dependents registered as **Family Members** persons | [Register a family member](../family-member/register.md) — visa PDF uses linked records |
-| Dependents **not** in Visa2026 (abroad, no full person record) | **Family members for visa (manual)** on the employee (this guide) |
-| Employee is **Single** | Field may show **Ýok** — no manual lines required |
+| Track | Purpose |
+|-------|---------|
+| **Family members for visa (manual)** (this guide) | Close family as it should print on visa PDF, Şahsy kagyz, and Word outputs |
+| **Family Members** persons | Full dependent records in TM (passport, visa, applications, dossier) |
 
-!!! note "PDF precedence"
-    When the employee has **linked** family member persons, those records take precedence on the visa PDF. Manual lines apply when the linked list is empty.
+Both can exist for the same employee. **Manual lines always control visa household text** — even when linked family members exist. If a dependent appears in both places, only the manual line is used on outputs (no automatic merge).
+
+!!! note "Single employees"
+    **Marital status** **Single** may show **Ýok** (no manual lines). That is correct unless office rules require explicit lines.
 
 ## Step 1 — Open the employee
 
@@ -130,7 +134,8 @@ The inline summary should show the member count (for example **1 family member(s
 | **…** button missing | Open an **employee** — the field is not on family member or visitor forms |
 | **Save** disabled on member dialog | Fill **Full name**, **Birth date**, **Relationship**, and **Country of residence** |
 | Summary still shows **Ýok** | **Marital status** may be **Single**; or open **…** and add lines, then **OK** and **Save** |
-| PDF shows linked family instead | Register dependents on **Family Members** — linked records override manual text |
+| PDF / Şahsy kagyz shows no family block | Manual text empty or **Ýok** — add lines here and **Save**; linked **Family Members** do not fill outputs |
+| Spouse block empty on PDF | Add a manual line with spouse relationship (e.g. **aýaly**) |
 | Changes lost after popup **OK** | Select **Save** on the **employee** detail toolbar |
 
 ## What to read next

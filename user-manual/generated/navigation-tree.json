@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T04:39:17.4764466Z",
+  "generatedAt": "2026-08-06T05:13:14.5986668Z",
   "paths": [
     {
       "path": "(root)",
@@ -15,14 +15,39 @@
           "userDocSlug": "applications/item-overview"
         },
         {
+          "name": "ApplicationMigrationSlaProfile",
+          "displayName": "Application Migration Sla Profile",
+          "userDocSlug": "administration/configuration/sla"
+        },
+        {
           "name": "ApplicationProgress",
           "displayName": "Application Progress",
           "userDocSlug": "applications/progress"
         },
         {
+          "name": "CompanyProfile",
+          "displayName": "Company",
+          "userDocSlug": "administration/configuration/organization"
+        },
+        {
+          "name": "ExpirationAlertRule",
+          "displayName": "Document expiration alerts",
+          "userDocSlug": "administration/configuration/alerts-and-upload-limits"
+        },
+        {
           "name": "Person",
           "displayName": "Person",
           "userDocSlug": "person/overview"
+        },
+        {
+          "name": "ProjectContract",
+          "displayName": "Project Contract",
+          "userDocSlug": "administration/configuration/contracts-and-approvals"
+        },
+        {
+          "name": "UserReportTemplate",
+          "displayName": "User Report Template",
+          "userDocSlug": "administration/user-report-templates"
         }
       ]
     }

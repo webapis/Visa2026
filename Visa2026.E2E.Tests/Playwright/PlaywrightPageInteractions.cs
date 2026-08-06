@@ -769,6 +769,21 @@ internal static class PlaywrightPageInteractions
             .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 60_000 });
     }
 
+    internal static async Task WaitForFamilyMembersListAsync(IPage page)
+    {
+        await page.Locator("button[data-action-name='New'], button[title='New']").First
+            .WaitForAsync(new LocatorWaitForOptions { Timeout = 120_000 });
+    }
+
+    /// <summary>After <c>New</c> on family members list — shows sponsor + relationship fields.</summary>
+    internal static async Task WaitForFamilyMemberDetailAsync(IPage page)
+    {
+        await page.Locator("button[title^='Save']:not([dxbl-virtual-el])").First
+            .WaitForAsync(new LocatorWaitForOptions { Timeout = 120_000 });
+        await page.GetByLabel(E2ETestFamilyMemberFieldCaptions.SponsoringEmployee, new PageGetByLabelOptions { Exact = false })
+            .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 60_000 });
+    }
+
     /// <summary>Scrolls the detail form until a captioned field is rendered (virtualized Blazor layout).</summary>
     internal static async Task EnsureFieldRenderedAsync(IPage page, string caption)
     {
@@ -797,11 +812,63 @@ internal static class PlaywrightPageInteractions
 
     internal static async Task ClickListRowContainingAsync(IPage page, string text)
     {
-        ILocator row = page.Locator(
-            $"xpath=//table[contains(@class,'dxbl-grid')]//tr[contains(@class,'dxbl-grid-data-row') and contains(., '{text}')]");
-        await row.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 60_000 });
+        await ApplyListSearchFilterAsync(page, text);
+
+        ILocator row = page.Locator("tr.dxbl-grid-data-row")
+            .Filter(new LocatorFilterOptions { HasText = text });
+        if (await row.CountAsync() == 0)
+        {
+            row = page.Locator("[role='gridcell']").Filter(new LocatorFilterOptions { HasText = text })
+                .Locator("xpath=ancestor::tr[contains(@class,'dxbl-grid-data-row')][1]");
+        }
+
+        await row.First.WaitForAsync(new LocatorWaitForOptions { Timeout = 20_000 });
+        await row.First.ScrollIntoViewIfNeededAsync();
         await row.First.ClickAsync();
         await Task.Delay(500);
+    }
+
+    internal static async Task ClearListSearchFilterAsync(IPage page)
+    {
+        ILocator searchInput = page.Locator(
+            ".dxbl-grid-toolbar input[type='text'], " +
+            ".dxbl-grid-search-panel input, " +
+            "input[placeholder*='Search' i]");
+        if (await searchInput.CountAsync() == 0)
+        {
+            return;
+        }
+
+        ILocator input = searchInput.First;
+        await input.ScrollIntoViewIfNeededAsync();
+        await input.ClickAsync(new LocatorClickOptions { Force = true });
+        await input.FillAsync(string.Empty);
+        await input.PressAsync("Enter");
+        await Task.Delay(800);
+    }
+
+    internal static async Task ApplyListSearchFilterAsync(IPage page, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
+        ILocator searchInput = page.Locator(
+            ".dxbl-grid-toolbar input[type='text'], " +
+            ".dxbl-grid-search-panel input, " +
+            "input[placeholder*='Search' i]");
+        if (await searchInput.CountAsync() == 0)
+        {
+            return;
+        }
+
+        ILocator input = searchInput.First;
+        await input.ScrollIntoViewIfNeededAsync();
+        await input.ClickAsync(new LocatorClickOptions { Force = true });
+        await input.FillAsync(text);
+        await input.PressAsync("Enter");
+        await Task.Delay(1200);
     }
 
     internal static async Task<string> ReadFieldAsync(IPage page, string cssClass, string? caption = null)
@@ -831,6 +898,48 @@ internal static class PlaywrightPageInteractions
 
     internal static ILocator TabItem(IPage page, string tabText) =>
         page.Locator($"[role='tab']:has-text('{tabText}')").First;
+
+    /// <summary>TabbedMDI document tab — not layout tabs inside the detail form or left nav.</summary>
+    internal static async Task ActivateMdiDocumentTabAsync(IPage page, string documentTitle)
+    {
+        if (string.IsNullOrWhiteSpace(documentTitle))
+        {
+            return;
+        }
+
+        ILocator tab = page.Locator(
+                ".dxbl-tabs-header [role='tab'], " +
+                "[class*='TabbedMdi'] [role='tab'], " +
+                "[class*='xaf-document'] [role='tab']")
+            .Filter(new LocatorFilterOptions { HasText = documentTitle });
+
+        if (await tab.CountAsync() == 0)
+        {
+            return;
+        }
+
+        await tab.First.ScrollIntoViewIfNeededAsync();
+        await tab.First.ClickAsync(new LocatorClickOptions { Force = true });
+        await Task.Delay(400);
+    }
+
+    internal static async Task<bool> PageShowsValidationErrorAsync(IPage page)
+    {
+        string content = await page.ContentAsync();
+        if (content.Contains("already uses this personal number", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return content.Contains("must not be empty", StringComparison.OrdinalIgnoreCase)
+            || content.Contains("Data Validation Error", StringComparison.OrdinalIgnoreCase);
+    }
+
+    internal static async Task<bool> PageShowsDuplicatePersonalNumberAsync(IPage page)
+    {
+        string content = await page.ContentAsync();
+        return content.Contains("already uses this personal number", StringComparison.OrdinalIgnoreCase);
+    }
 
     internal static ILocator VisaFamilyManualFieldContainer(IPage page) =>
         page.Locator(

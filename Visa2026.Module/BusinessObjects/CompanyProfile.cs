@@ -7,9 +7,11 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 {
+    [UserDocumentation("administration/configuration/organization", Category = "Administration")]
     [DefaultClassOptions]
     [NavigationItem("Configuration")]
     [DisplayName("Company")]

@@ -18,6 +18,14 @@ Append-only. Read **## Entries** before new E2E work; append after **verified** 
 
 ## Entries
 
+### 2026-08-06 — Family member register: list row by Full Name, return to employee
+
+- **Outcome**: positive (in progress)
+- **Context**: `PlaywrightPersonOfficerJourney`, `family-member/register`, `Person_ListView_FamilyMembers`
+- **Symptom**: `ClickListRowContainingAsync` with **Personal Number** never finds a row — typed FM list columns are **Dossier / Copies / Full Name** only (`PersonListViewActionColumnsUpdater`). After FM step, journey stayed on FM detail and broke `visa-family-manual` on employee.
+- **Fix / reuse**: Search list by `E2ETestFamilyMemberCreateValues.FullName` (then first name). **Sponsoring Employee** lookup binds to sponsor **Full Name**, not personal number. After `register-family-member`, call `OpenEmployeeFromListAsync` before employee-only steps.
+- **Reuse**: Typed person ListViews are not identical column sets — check updater before assuming personal-number row search works.
+
 ### 2026-06-11 — GHA: host never binds :5050 before EasyTest 60s script wait
 
 - **Outcome**: negative → fix

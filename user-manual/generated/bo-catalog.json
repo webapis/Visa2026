@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-06T04:39:17.4764466Z",
-  "assemblyVersion": "1.0.0.651",
+  "generatedAt": "2026-08-06T05:13:14.5986668Z",
+  "assemblyVersion": "1.0.0.652",
   "types": [
     {
       "name": "Application",
@@ -1325,6 +1325,53 @@
       ]
     },
     {
+      "name": "ApplicationMigrationSlaProfile",
+      "fullName": "Visa2026.Module.BusinessObjects.ApplicationMigrationSlaProfile",
+      "displayName": "Application Migration Sla Profile",
+      "userDocSlug": "administration/configuration/sla",
+      "userDocCategory": "Administration",
+      "properties": [
+        {
+          "name": "Code",
+          "displayName": "Code",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "IsDefault",
+          "displayName": "Is Default",
+          "required": false
+        },
+        {
+          "name": "LocalizedDisplayName",
+          "displayName": "Localized Display Name",
+          "required": false
+        },
+        {
+          "name": "MaxDaysInReview",
+          "displayName": "Max working days",
+          "required": false
+        },
+        {
+          "name": "NameTm",
+          "displayName": "Name (Tm)",
+          "required": true
+        },
+        {
+          "name": "WarningDaysBeforeMax",
+          "displayName": "Warning (working days)",
+          "required": false
+        }
+      ],
+      "guideSlugs": [
+        "administration/configuration/sla"
+      ]
+    },
+    {
       "name": "ApplicationProgress",
       "fullName": "Visa2026.Module.BusinessObjects.ApplicationProgress",
       "displayName": "Application Progress",
@@ -1384,6 +1431,85 @@
       ],
       "guideSlugs": [
         "applications/progress"
+      ]
+    },
+    {
+      "name": "CompanyProfile",
+      "fullName": "Visa2026.Module.BusinessObjects.CompanyProfile",
+      "displayName": "Company",
+      "userDocSlug": "administration/configuration/organization",
+      "userDocCategory": "Administration",
+      "properties": [
+        {
+          "name": "Address",
+          "displayName": "Address",
+          "required": false
+        },
+        {
+          "name": "Code",
+          "displayName": "Code",
+          "required": false
+        },
+        {
+          "name": "Email",
+          "displayName": "Email",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "Name",
+          "displayName": "Name",
+          "required": true
+        },
+        {
+          "name": "PhoneNumber",
+          "displayName": "Phone Number",
+          "required": false
+        },
+        {
+          "name": "TaxInformation",
+          "displayName": "Tax Information",
+          "required": false
+        }
+      ],
+      "guideSlugs": [
+        "administration/configuration/organization"
+      ]
+    },
+    {
+      "name": "ExpirationAlertRule",
+      "fullName": "Visa2026.Module.BusinessObjects.ExpirationAlertRule",
+      "displayName": "Document expiration alerts",
+      "userDocSlug": "administration/configuration/alerts-and-upload-limits",
+      "userDocCategory": "Administration",
+      "properties": [
+        {
+          "name": "DisplayName",
+          "displayName": "Display Name",
+          "required": true
+        },
+        {
+          "name": "ExpiringSoonDays",
+          "displayName": "Du\u00FDdury\u015F (g\u00FCn)",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "ExtensionApplicationRequiredDays",
+          "displayName": "Uzaltma arzasy (g\u00FCn)",
+          "required": false
+        }
+      ],
+      "guideSlugs": [
+        "administration/configuration/alerts-and-upload-limits"
       ]
     },
     {
@@ -1630,6 +1756,121 @@
         "temporary-visitor/add-travel",
         "temporary-visitor/add-visa",
         "temporary-visitor/register"
+      ]
+    },
+    {
+      "name": "ProjectContract",
+      "fullName": "Visa2026.Module.BusinessObjects.ProjectContract",
+      "displayName": "Project Contract",
+      "userDocSlug": "administration/configuration/contracts-and-approvals",
+      "userDocCategory": "Administration",
+      "properties": [
+        {
+          "name": "ApprovalLegProfile",
+          "displayName": "Approval Leg Profile",
+          "required": false
+        },
+        {
+          "name": "Code",
+          "displayName": "Code",
+          "required": false
+        },
+        {
+          "name": "Description",
+          "displayName": "Description",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "IsActive",
+          "displayName": "Is Active",
+          "required": false
+        },
+        {
+          "name": "IsDefault",
+          "displayName": "Is Default",
+          "required": false
+        },
+        {
+          "name": "LocalizedDisplayName",
+          "displayName": "Localized Display Name",
+          "required": false
+        },
+        {
+          "name": "NameTm",
+          "displayName": "Name (Tm)",
+          "required": true
+        }
+      ],
+      "guideSlugs": [
+        "administration/configuration/contracts-and-approvals"
+      ]
+    },
+    {
+      "name": "UserReportTemplate",
+      "fullName": "Visa2026.Module.BusinessObjects.UserReportTemplate",
+      "displayName": "User Report Template",
+      "userDocSlug": "administration/user-report-templates",
+      "userDocCategory": "Administration",
+      "properties": [
+        {
+          "name": "Description",
+          "displayName": "Description",
+          "required": false
+        },
+        {
+          "name": "ExcelMergeMode",
+          "displayName": "Excel Merge Mode",
+          "required": false
+        },
+        {
+          "name": "ID",
+          "displayName": "ID",
+          "required": false
+        },
+        {
+          "name": "IsActive",
+          "displayName": "Is Active",
+          "required": false
+        },
+        {
+          "name": "RootBoType",
+          "displayName": "Root Bo Type",
+          "required": false
+        },
+        {
+          "name": "SortOrder",
+          "displayName": "Sort Order",
+          "required": false
+        },
+        {
+          "name": "TemplateName",
+          "displayName": "Template Name",
+          "required": true
+        },
+        {
+          "name": "TemplateOutputFormat",
+          "displayName": "Template Output Format",
+          "required": false
+        },
+        {
+          "name": "ValidationStatus",
+          "displayName": "Validation Status",
+          "required": false
+        },
+        {
+          "name": "VisibilityCriteria",
+          "displayName": "Visibility Criteria",
+          "required": false
+        }
+      ],
+      "guideSlugs": [
+        "administration/template-staging",
+        "administration/user-report-templates"
       ]
     }
   ]

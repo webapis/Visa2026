@@ -14,6 +14,7 @@ prerequisiteSlugs:
   - person/open-and-search
   - employee/register
 screenshotsVersion: "2026.08"
+e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
 verified: false
 ---
@@ -41,7 +42,7 @@ Family members are always linked to a **Sponsoring Employee**. Create the employ
 
 The **Family members** tab on an employee detail form is **read-only** (browse linked dependents). Create new family members from the **Family Members** list — not from that nested tab.
 
-For dependents **not** registered as persons (for example family abroad), use **Family members for visa (manual)** on the sponsoring employee — see [Family members for visa (manual)](../employee/family-members-for-visa-manual.md).
+For dependents who also need visa household text on PDF / Şahsy kagyz, maintain **Family members for visa (manual)** on the sponsoring employee separately — linked records do not feed those outputs. See [Family members for visa (manual)](../employee/family-members-for-visa-manual.md).
 
 ## Step 1 — Open the Family Members list
 
@@ -51,6 +52,7 @@ For dependents **not** registered as persons (for example family abroad), use **
 
 The toolbar should show **New** and **Refresh**.
 
+<!-- media-capture: person-register-family-member-step-01-family-members-list -->
 ![Family Members list ready for a new record](../../../assets/screenshots/v2026.08/en/person-register-family-member-step-01-family-members-list.png)
 
 ## Step 2 — Start a new family member
@@ -96,16 +98,18 @@ If **Save** fails:
 - Confirm **Sponsoring Employee** and **Relationship** are set.
 - If *already uses this personal number* appears, choose a different **Personal Number**.
 
+<!-- media-capture: person-register-family-member-step-02-saved-detail -->
 ![Family member detail after save](../../../assets/screenshots/v2026.08/en/person-register-family-member-step-02-saved-detail.png)
 
 ## Step 5 — Confirm in the Family Members list
 
 1. Open **Family Members** in the left menu again (or use **Save and Close**).
-2. Find the row with the **Personal Number** you entered.
+2. Find the row with the **Full Name** you entered (the list shows **Full Name** by default).
 3. Open the row to view the detail form.
 
-Check **Full Name**, **Sponsoring Employee**, and **Relationship**.
+Confirm **Personal Number**, **Sponsoring Employee**, and **Relationship** on the detail form.
 
+<!-- media-capture: person-register-family-member-step-03-open-from-list -->
 ![Family member opened from the list](../../../assets/screenshots/v2026.08/en/person-register-family-member-step-03-open-from-list.png)
 
 !!! success "Family member registered"

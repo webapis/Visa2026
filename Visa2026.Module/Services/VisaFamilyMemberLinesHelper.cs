@@ -158,7 +158,7 @@ public static class VisaFamilyMemberLinesHelper
         return FormatVisaPdfMaritalFamilyBlockFromRows(Parse(text));
     }
 
-    /// <summary>Same as <see cref="FormatForVisaPdfMaritalFamilyBlock"/> but from parsed rows (master or manual).</summary>
+    /// <summary>Same as <see cref="FormatForVisaPdfMaritalFamilyBlock"/> but from parsed manual rows.</summary>
     public static string? FormatVisaPdfMaritalFamilyBlockFromRows(IReadOnlyList<VisaFamilyMemberLineDto>? rows)
     {
         var segments = BuildVisaPdfMaritalFamilySegments(rows ?? Array.Empty<VisaFamilyMemberLineDto>());
@@ -449,6 +449,158 @@ public static class VisaFamilyMemberLinesHelper
         row.CountryCode = (country.Code ?? string.Empty).Trim();
     }
 
+    /// <summary>
+    /// Builds manual storage text from linked <see cref="Person.FamilyMembers"/> (migration / import helper).
+    /// </summary>
+    public static string? FormatLinesFromFamilyMembers(Person? employee)
+    {
+        if (employee?.FamilyMembers == null)
+        {
+            return null;
+        }
+
+        var rows = new List<VisaFamilyMemberLineDto>();
+        foreach (var fm in employee.FamilyMembers
+                     .Where(f => f != null)
+                     .OrderBy(f => f.LastName)
+                     .ThenBy(f => f.FirstName))
+        {
+            var rel = (fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(rel) || fm.DateOfBirth == default)
+            {
+                continue;
+            }
+
+            rows.Add(new VisaFamilyMemberLineDto
+            {
+                FullName = fm.FullName?.Trim() ?? string.Empty,
+                BirthDate = fm.DateOfBirth,
+                RelationshipNameTm = rel,
+                RelationshipOid = fm.Relationship?.ID,
+                CountryCode = fm.Nationality?.Code?.Trim(),
+                CountryOid = fm.Nationality?.ID,
+            });
+        }
+
+        return Format(rows);
+    }
+
+    /// <summary>True when manual text has no usable lines (empty, whitespace, or <see cref="NoneValue"/>).</summary>
+    public static bool IsManualVisaFamilyEmpty(string? text) =>
+        string.IsNullOrWhiteSpace(text) || IsNoneValue(text);
+
+    /// <summary>First manual line whose relationship is spouse (catalog or name pattern).</summary>
+    public static VisaFamilyMemberLineDto? FindSpouseLine(string? manualText, IObjectSpace? objectSpace)
+    {
+        foreach (var row in Parse(manualText))
+        {
+            if (IsSpouseRelationshipNameTm(row.RelationshipNameTm, objectSpace, row.RelationshipOid))
+            {
+                return row;
+            }
+        }
+
+        return null;
+    }
+
+    public static bool IsSpouseRelationshipNameTm(
+        string? relationshipNameTm,
+        IObjectSpace? objectSpace,
+        Guid? relationshipOid = null)
+    {
+        if (objectSpace != null && relationshipOid is Guid oid && oid != Guid.Empty)
+        {
+            var rel = objectSpace.GetObjectByKey<Relationship>(oid);
+            if (IsSpouseRelationship(rel))
+            {
+                return true;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(relationshipNameTm))
+        {
+            return false;
+        }
+
+        var name = relationshipNameTm.Trim();
+        if (name.Equals("aýaly", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("adamsy", StringComparison.OrdinalIgnoreCase)
+            || name.Equals("eri", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var upper = name.ToUpperInvariant();
+        return upper is "SPOUSE" or "WIFE" or "HUSBAND";
+    }
+
+    public static bool IsSpouseRelationship(Relationship? relationship)
+    {
+        if (relationship == null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(relationship.Code))
+        {
+            var code = relationship.Code.Trim().ToUpperInvariant();
+            if (code is "SPOUSE" or "WIFE" or "HUSBAND")
+            {
+                return true;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(relationship.Name))
+        {
+            var name = relationship.Name.ToUpperInvariant();
+            if (name.Contains("SPOUSE", StringComparison.Ordinal)
+                || name.Contains("WIFE", StringComparison.Ordinal)
+                || name.Contains("HUSBAND", StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(relationship.NameTm))
+        {
+            var nameTm = relationship.NameTm.Trim();
+            if (nameTm.Equals("aýaly", StringComparison.OrdinalIgnoreCase)
+                || nameTm.Equals("adamsy", StringComparison.OrdinalIgnoreCase)
+                || nameTm.Equals("eri", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Splits a single full-name field into first/last (first token / remainder).</summary>
+    public static void SplitFullNameForPdf(string? fullName, out string? firstName, out string? lastName)
+    {
+        firstName = null;
+        lastName = null;
+        var trimmed = fullName?.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+        {
+            return;
+        }
+
+        var spaceIndex = trimmed.IndexOf(' ');
+        if (spaceIndex < 0)
+        {
+            firstName = trimmed;
+            return;
+        }
+
+        firstName = trimmed[..spaceIndex].Trim();
+        lastName = trimmed[(spaceIndex + 1)..].Trim();
+        if (string.IsNullOrEmpty(lastName))
+        {
+            lastName = null;
+        }
+    }
+
     private static VisaFamilyMemberLineDto ParseLine(string line)
     {
         var parts = line.Split(';');
@@ -461,7 +613,7 @@ public static class VisaFamilyMemberLinesHelper
             return dto;
         }
 
-        dto.FullName = VisaFamilyMemberLinesHelper.SanitizeFamilyMemberFullName(parts[0]);
+        dto.FullName = SanitizeFamilyMemberFullName(parts[0]);
 
         if (parts.Length == 1)
         {

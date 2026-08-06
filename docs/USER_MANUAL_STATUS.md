@@ -128,6 +128,8 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-05 | **Phase 2 edit-employee guide** — `person/edit-employee` draft (en/tr/tk/ru); optional-fields gear + save flow |
 | 2026-08-05 | **Phase 2 mark-incomplete guide** — `person/mark-incomplete` draft (en/tr/tk/ru); soft flag, popup, Incomplete data tab, dashboard |
 | 2026-08-05 | **Curriculum + inventory v2** — BO dependency order (`Application` / `ApplicationItem` after Person children); 25 guides in [tracking.md](../.cursor/skills/visa2026-user-manual/tracking.md) |
+| 2026-08-06 | **Officer review pilots 6–7** — `employee/family-members-for-visa-manual` + `employee/add-visa` (en) → `guideStatus: published`, verified E2E `20260805-172303` |
+| 2026-08-06 | **Catalog fix** — `[UserDocumentation]` on `UserReportTemplate` for administration guides validator |
 
 **Run locally:** `./scripts/ci/Build-UserManual.ps1 -SkipE2E` (requires Python 3 for mkdocs step).
 
@@ -157,7 +159,8 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 | **P2-3b** | `person/open-and-search` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
 | **P2-4** | `employee/register` guide (en/tr/tk/ru) | **Published** (en 2026-08-05; verified E2E) |
 | **P2-5** | `employee/add-passport` + `family-member/add-passport` | **Published** (employee en); FM still **Draft** |
-| **P2-6** | `employee/add-visa` + `family-member/add-visa` | **Draft** |
+| **P2-6** | `employee/add-visa` + `family-member/add-visa` | **Published** (employee en); FM still **Draft** |
+| **P2-6a** | `employee/family-members-for-visa-manual` | **Published** (en 2026-08-06; verified E2E) |
 | **P2-7** | `employee/add-education` | **Draft** |
 | **P2-8** | `employee/add-medical-record` + `family-member/add-medical-record` | **Draft** |
 | **P2-9** | `employee/add-address` + `family-member/add-address` | **Draft** |
@@ -191,6 +194,8 @@ Ordered queue for **Phase 0**. Complete in sequence unless noted. Update this se
 | 3 | [Find and open a person](../user-manual/docs/en/guides/person/open-and-search.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
 | 4 | [Register employee](../user-manual/docs/en/guides/employee/register.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
 | 5 | [Add passport (employee)](../user-manual/docs/en/guides/employee/add-passport.md) | **Done** 2026-08-05 (en) | **Done** — verified E2E |
+| 6 | [Family members for visa (manual)](../user-manual/docs/en/guides/employee/family-members-for-visa-manual.md) | **Done** 2026-08-06 (en) | **Done** — verified E2E |
+| 7 | [Add a visa (employee)](../user-manual/docs/en/guides/employee/add-visa.md) | **Done** 2026-08-06 (en) | **Done** — verified E2E |
 
 ### Parallel E2E (Phase 2 prep)
 

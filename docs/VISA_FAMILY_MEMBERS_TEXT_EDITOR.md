@@ -8,21 +8,18 @@ Custom Blazor property editor for **structured manual family lines** on an emplo
 
 | Concept | Role |
 |---------|------|
-| `Person.FamilyMembers` | Master list: full `Person` rows (`IsEmployee = false`) with passports, addresses, etc. Used when family **accompanies** the employee in Turkmenistan. |
-| `Person.VisaApplicationFamilyMembersText` | Manual lines when master `FamilyMembers` is empty but visa PDF still needs household info (family abroad, not in TM, etc.). Always visible on employee DetailView. |
+| `Person.FamilyMembers` | Master list: full `Person` rows for dependents in Turkmenistan (passports, visas, applications). **Does not** feed visa PDF / Şahsy kagyz / Word merge — maintain **manual** lines separately for those outputs. |
+| `Person.VisaApplicationFamilyMembersText` | **Authoritative** close-family lines for **all** visa outputs (PDF item 18, spouse block, Şahsy kagyz, Word merge). Always visible on employee DetailView. |
 
-Precedence for PDF and related aggregates (already implemented on `ApplicationItem`):
+Precedence for PDF and related aggregates (implemented on `ApplicationItem`):
 
-1. If employee has any active `FamilyMembers` → format from master (`FormatFamilyMembersFromMaster`).
-2. Else if manual text is non-empty → use parsed manual lines (`VisaFamilyMemberLinesHelper`).
+1. **Manual text only** — `VisaApplicationFamilyMembersText` parsed via `VisaFamilyMemberLinesHelper`.
+2. Empty, whitespace, or `Ýok` → **no family lines** on outputs (no fallback to linked `FamilyMembers`).
+3. Spouse PDF name fields are derived from the **manual** line whose relationship is spouse (not from `FamilyMembers`).
 
-Master formatting (target for manual serialization):
+One-time DB migration (`VisaFamilyManualFromFamilyMembersMigrationUpdater`): employees with empty/`Ýok` manual text and non-empty `FamilyMembers` get manual lines copied from linked records (idempotent; skips when manual already has lines).
 
-```text
-{FullName}; {DateOfBirth:dd.MM.yyyy}; {Relationship.NameTm}
-```
-
-Example:
+Canonical manual line format (same as storage):
 
 ```text
 Smith John; 15.03.2010; oglum
@@ -42,15 +39,15 @@ Property documentation today: `Visa2026.Module/BusinessObjects/Person.cs` (`Visa
 | Relationship UI | Dropdown from `Relationship` lookup (`NameTm` display) | Same catalog as real family members; global seed (`relationship.json`); **no** add/rename/delete of `Relationship` inside this popup (unlike `BorderZoneName` catalog gear). |
 | Full name | Single free-text field per row | Manual entries are not `Person` records; may not match `FirstName`/`LastName` split. Matches `Person.FullName` usage in master formatter. |
 | Birth date | `DateTime` date picker, `dd.MM.yyyy` | Matches `Person.DateOfBirth` display and master formatter. |
-| Serialized relationship | Store `Relationship.NameTm` in the line | Matches `FormatFamilyMembersFromMaster`; PDF and merge fields expect Turkmen labels, not OIDs. |
+| Serialized relationship | Store `Relationship.NameTm` in the line | PDF and merge fields expect Turkmen labels, not OIDs. |
 | Module logic | `VisaFamilyMemberLinesHelper` (+ small DTO) | Parse / format / validate / tolerant import of legacy lines; testable without Blazor. |
 | Editor registration | Dedicated alias on `string`, e.g. `VisaFamilyMembersTextEditor` | One usage today; avoid overloading `CommaSeparatedMultiSelect` (different semantics). |
 
 **Do not** store JSON in the column unless you accept a migration and breaking existing DB values; the visa pipeline assumes human-readable lines.
 
-### Sahsy kagyz (`SahsyKagyz_FamilyStatusText`) caveat
+### Sahsy kagyz (`SahsyKagyz_FamilyStatusText`)
 
-Master `FamilyMembers` produce a **different** shape (`relLower-Name dd.MM.yyyyý. CODE.`). Manual text is currently passed through unchanged for `SahsyKagyz_FamilyStatusText`. Phase 1 of this editor should optimize for **visa PDF line format** only. Optional phase 2: build `SahsyKagyz_FamilyStatusText` from parsed manual rows (would require nationality per row or a separate field—out of scope unless product asks).
+Built from parsed manual rows via `VisaFamilyMemberLinesHelper.FormatSahsyKagyzFamilyStatus` (same source as visa PDF item 18). Linked `FamilyMembers` are not used.
 
 ## Comparison with comma-separated multi-select
 

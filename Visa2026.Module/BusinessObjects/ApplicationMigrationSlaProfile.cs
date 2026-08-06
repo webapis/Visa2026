@@ -7,7 +7,9 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -15,6 +17,7 @@ namespace Visa2026.Module.BusinessObjects;
 /// Tenant lookup: migration-service SLA tier (max working days at
 /// <c>PROCESS_STARTED</c> @ <c>AT_MIGRATION_SERVICE</c>). Assigned per <see cref="ApplicationType"/>.
 /// </summary>
+[UserDocumentation("administration/configuration/sla", Category = "Administration")]
 [DefaultClassOptions]
 [DefaultProperty(nameof(NameTm))]
 [NavigationItem("Configuration")]

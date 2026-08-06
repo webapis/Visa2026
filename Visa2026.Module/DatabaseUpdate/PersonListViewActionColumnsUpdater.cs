@@ -26,6 +26,11 @@ public sealed class PersonListViewActionColumnsUpdater : ModelNodesGeneratorUpda
                 continue;
 
             EnsureActionColumns(listView);
+
+            if (viewId == "Person_ListView_FamilyMembers")
+            {
+                EnsureColumn(listView, nameof(Person.PersonalNumber), 3, 120, "Personal Number");
+            }
         }
     }
 

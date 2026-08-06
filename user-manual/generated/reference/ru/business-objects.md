@@ -8,6 +8,77 @@ guideStatus: generated
 
 This page is generated from the application catalog. Field labels match the on-screen captions in Visa2026.
 
+## Application Migration Sla Profile
+
+Category: Administration
+
+| Field | Required | Hidden when |
+|-------|----------|-------------|
+| Code | No |  |
+| ID | No |  |
+| Is Default | No |  |
+| Localized Display Name | No |  |
+| Max working days | No |  |
+| Name (Tm) | Yes |  |
+| Warning (working days) | No |  |
+
+## Company
+
+Category: Administration
+
+| Field | Required | Hidden when |
+|-------|----------|-------------|
+| Address | No |  |
+| Code | No |  |
+| Email | No |  |
+| ID | No |  |
+| Name | Yes |  |
+| Phone Number | No |  |
+| Tax Information | No |  |
+
+## Document expiration alerts
+
+Category: Administration
+
+| Field | Required | Hidden when |
+|-------|----------|-------------|
+| Display Name | Yes |  |
+| Duýduryş (gün) | No |  |
+| ID | No |  |
+| Uzaltma arzasy (gün) | No |  |
+
+## Project Contract
+
+Category: Administration
+
+| Field | Required | Hidden when |
+|-------|----------|-------------|
+| Approval Leg Profile | No |  |
+| Code | No |  |
+| Description | No |  |
+| ID | No |  |
+| Is Active | No |  |
+| Is Default | No |  |
+| Localized Display Name | No |  |
+| Name (Tm) | Yes |  |
+
+## User Report Template
+
+Category: Administration
+
+| Field | Required | Hidden when |
+|-------|----------|-------------|
+| Description | No |  |
+| Excel Merge Mode | No |  |
+| ID | No |  |
+| Is Active | No |  |
+| Root Bo Type | No |  |
+| Sort Order | No |  |
+| Template Name | Yes |  |
+| Template Output Format | No |  |
+| Validation Status | No |  |
+| Visibility Criteria | No |  |
+
 ## Application
 
 Category: Applications

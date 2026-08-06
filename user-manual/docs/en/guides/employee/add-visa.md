@@ -3,7 +3,8 @@ title: Add a visa on a passport
 slug: employee/add-visa
 locale: en
 tier: 2
-guideStatus: draft
+guideStatus: published
+lastReviewed: "2026-08-06"
 bo: Person
 personRole: Employee
 navPath: Employee
@@ -12,9 +13,13 @@ prerequisiteSlugs:
   - employee/add-passport
   - person/open-and-search
 screenshotsVersion: "2026.08"
+screenshotsCapturedAt: "2026-08-06T04:29:37.0400000Z"
+mediaE2eRunId: "20260805-172303"
 e2eTestFilter: PersonOfficerJourney_LoginCreateEmployeeAddPassport
 e2eScenarioId: person-officer-journey
-verified: false
+verified: true
+verifiedAt: "2026-08-06T05:00:00.0000000Z"
+verifiedCommit: "aaa8eac5"
 ---
 
 # Add a visa on a passport

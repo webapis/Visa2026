@@ -20,7 +20,7 @@ using DevExpress.Persistent.Base;
 
 using DevExpress.Persistent.BaseImpl.EF;
 
-
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects
 
@@ -33,6 +33,8 @@ namespace Visa2026.Module.BusinessObjects
     /// Selected on <see cref="Application"/> and <see cref="Person"/> when <see cref="ApplicationType.ShowProjectContract"/> applies.
 
     /// </summary>
+
+    [UserDocumentation("administration/configuration/contracts-and-approvals", Category = "Administration")]
 
     [DefaultClassOptions]
 

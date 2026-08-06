@@ -422,12 +422,13 @@ namespace Visa2026.Module.BusinessObjects
         public virtual DateTime HireDate { get; set; }
 
         /// <summary>
-        /// Manual lines for the visa PDF family block when <see cref="FamilyMembers"/> is empty.
+        /// Manual lines for visa outputs (PDF, Şahsy kagyz, Word). Authoritative source — linked
+        /// <see cref="FamilyMembers"/> do not override this field.
         /// Format (one person per line): Full name; dd.MM.yyyy; Relation (e.g. NameTm); Country code (e.g. TUR).
         /// Employees only (<see cref="IsEmployee"/>).
         /// </summary>
         [XafDisplayName("Family members for visa (manual)")]
-        [ToolTip("One line per person, e.g. Smith John; 15.03.2010; oglum; TUR. For the PDF, master \"Family members\" takes precedence when it has any active members.")]
+        [ToolTip("One line per close family member for visa outputs (PDF, Şahsy kagyz, Word). Format: Full name; dd.MM.yyyy; relationship; country code. Linked Family members records do not override this field — maintain lines here for all outputs. Single employees: Ýok.")]
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]
         [RuleRequiredField(TargetCriteria = VisaFamilyManualTextRequiredCriteria)]

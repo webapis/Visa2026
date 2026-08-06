@@ -61,6 +61,29 @@ public static class E2ETestPassportCreateOnlyJourneyValues
 
     public static string FullName => $"{FirstName} {LastName}";
 }
+
+/// <summary>Stable values for family member create in officer journey E2E-001.</summary>
+public static class E2ETestFamilyMemberCreateValues
+{
+    public const string PersonalNumber = "E2E-FM-022";
+    public const string FirstName = "Ayla";
+    public const string LastName = "FamilyMember";
+    public const string DateOfBirth = "10.06.2012";
+    public const string BirthPlace = "Ankara";
+    public const string CountryDisplay = "Türkiye";
+    public const string GenderDisplay = "Female";
+    public const string RelationshipDisplay = "Daughter";
+
+    public static string FullName => $"{FirstName} {LastName}";
+}
+
+/// <summary>English Blazor captions for family member-only <see cref="BusinessObjects.Person"/> fields.</summary>
+public static class E2ETestFamilyMemberFieldCaptions
+{
+    public const string SponsoringEmployee = "Sponsoring Employee";
+    public const string Relationship = "Relationship";
+}
+
 /// <summary>English Blazor captions for <see cref="BusinessObjects.Passport"/> detail (required fields).</summary>
 public static class E2ETestPassportFieldCaptions
 {
@@ -260,4 +283,13 @@ public static class E2ETestLoginValues
 
     /// <summary>EasyTest sidebar navigation item path (fallback only — prefer <see cref="EmployeesListViewPath"/> URL).</summary>
     public const string EmployeesNavigationPath = "Employees";
+
+    /// <summary>Blazor route for <c>Person_ListView_FamilyMembers</c>.</summary>
+    public const string FamilyMembersListViewPath = "Person_ListView_FamilyMembers";
+
+    /// <summary>Expected detail view id after New on the family members list.</summary>
+    public const string FamilyMemberDetailViewPath = "Person_DetailView_FamilyMember";
+
+    /// <summary>EasyTest sidebar navigation item path (fallback only).</summary>
+    public const string FamilyMembersNavigationPath = "Family Members";
 }

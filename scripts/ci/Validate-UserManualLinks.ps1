@@ -34,6 +34,28 @@ function Get-MarkdownFrontmatter {
     return $map
 }
 
+function Test-IsNoBoFrontmatterValue {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return $true
+    }
+
+    $trimmed = $Value.Trim()
+    if ($trimmed -eq '-') {
+        return $true
+    }
+
+    if ($trimmed.Length -eq 1) {
+        $code = [int][char]$trimmed
+        if ($code -eq 0x2014 -or $code -eq 0x2013) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Test-OfficerContentHasCodeFence {
     param([string]$Content)
 
@@ -42,6 +64,7 @@ function Test-OfficerContentHasCodeFence {
         $body = $body.Substring($Matches[0].Length)
     }
 
+    $body = [regex]::Replace($body, '(?ms)^```mermaid\s*\r?\n.*?^```\s*\r?\n?', '')
     return $body -match '(?m)^```'
 }
 
@@ -204,7 +227,7 @@ else {
             }
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($bo) -and $catalogTypeNames -notcontains $bo) {
+        if (-not (Test-IsNoBoFrontmatterValue $bo) -and $catalogTypeNames -notcontains $bo) {
             $failures.Add("Guide references unknown bo '$bo' in $($guideFile.FullName)")
         }
 

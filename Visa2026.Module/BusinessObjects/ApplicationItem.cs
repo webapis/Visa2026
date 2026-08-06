@@ -1236,10 +1236,9 @@ namespace Visa2026.Module.BusinessObjects
 
         #region PDF Visa Application (XFA) — family members aggregate
         /// <summary>
-        /// Full family list for the TM visa PDF: from <see cref="Person.FamilyMembers"/> when non-empty,
-        /// otherwise from <see cref="Person.VisaApplicationFamilyMembersText"/> when non-empty (manual fallback).
-        /// For an <see cref="ApplicationItem"/> whose <see cref="Person"/> is a family member, uses the
-        /// <see cref="Person.SponsoringEmployee"/>'s data.
+        /// Full family list for the TM visa PDF from the sponsoring employee's
+        /// <see cref="Person.VisaApplicationFamilyMembersText"/> only (no fallback to linked
+        /// <see cref="Person.FamilyMembers"/>). For a family-member item, uses the sponsor's manual text.
         /// </summary>
         [NotMapped]
         [XafDisplayName("PDF Family Members Aggregate"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -1271,59 +1270,13 @@ namespace Visa2026.Module.BusinessObjects
         private IReadOnlyList<VisaFamilyMemberLineDto> BuildVisaPdfMaritalFamilyRows()
         {
             var emp = PdfEmployeeForHouseholdOnVisaForm();
-            if (emp == null)
-            {
-                return null;
-            }
-
-            var fromMaster = BuildVisaPdfMaritalFamilyRowsFromMaster(emp);
-            if (fromMaster.Count > 0)
-            {
-                return fromMaster;
-            }
-
-            if (string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+            if (emp == null
+                || VisaFamilyMemberLinesHelper.IsManualVisaFamilyEmpty(emp.VisaApplicationFamilyMembersText))
             {
                 return Array.Empty<VisaFamilyMemberLineDto>();
             }
 
             return VisaFamilyMemberLinesHelper.Parse(emp.VisaApplicationFamilyMembersText);
-        }
-
-        private List<VisaFamilyMemberLineDto> BuildVisaPdfMaritalFamilyRowsFromMaster(Person employee)
-        {
-            if (employee?.FamilyMembers == null)
-            {
-                return new List<VisaFamilyMemberLineDto>();
-            }
-
-            var rows = new List<VisaFamilyMemberLineDto>();
-            foreach (var fm in employee.FamilyMembers
-                         .Where(f => f != null)
-                         .OrderBy(f => f.LastName)
-                         .ThenBy(f => f.FirstName))
-            {
-                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true)
-                {
-                    continue;
-                }
-
-                var rel = (fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(rel) || fm.DateOfBirth == default)
-                {
-                    continue;
-                }
-
-                rows.Add(new VisaFamilyMemberLineDto
-                {
-                    FullName = fm.FullName?.Trim() ?? string.Empty,
-                    BirthDate = fm.DateOfBirth,
-                    RelationshipNameTm = rel,
-                    CountryCode = fm.Nationality?.Code?.Trim(),
-                });
-            }
-
-            return rows;
         }
 
         /// <summary>Employee whose household is listed on the visa form (applicant or sponsor).</summary>
@@ -1334,8 +1287,8 @@ namespace Visa2026.Module.BusinessObjects
         }
 
         /// <summary>
-        /// Maşgala ýagdaýy line for <c>sahsy_kagyz.docx</c> (e.g. <c>ayaly-Name 23.05.1985ý. TUR., gyzy-…</c>).
-        /// Uses employee <see cref="Person.FamilyMembers"/> or manual <see cref="Person.VisaApplicationFamilyMembersText"/>.
+        /// Maşgala ýagdaýy line for <c>sahsy_kagyz.docx</c> from manual
+        /// <see cref="Person.VisaApplicationFamilyMembersText"/> only.
         /// </summary>
         [NotMapped]
         [XafDisplayName("Şahsy Kagyz Family Status"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -1344,53 +1297,53 @@ namespace Visa2026.Module.BusinessObjects
         private string BuildSahsyKagyzFamilyStatusText()
         {
             var emp = PdfEmployeeForHouseholdOnVisaForm();
-            if (emp == null) return string.Empty;
-            var fromMaster = FormatSahsyKagyzFamilyFromMaster(emp);
-            if (!string.IsNullOrWhiteSpace(fromMaster))
-                return fromMaster.Trim();
-            if (!string.IsNullOrWhiteSpace(emp.VisaApplicationFamilyMembersText))
+            if (emp == null)
             {
-                var fromManual = VisaFamilyMemberLinesHelper.FormatSahsyKagyzFamilyStatus(
-                    emp.VisaApplicationFamilyMembersText);
-                if (!string.IsNullOrWhiteSpace(fromManual))
-                    return fromManual.Trim();
-            }
-            return string.Empty;
-        }
-
-        private string FormatSahsyKagyzFamilyFromMaster(Person employee)
-        {
-            if (employee?.FamilyMembers == null) return null;
-            var segments = new List<string>();
-            foreach (var fm in employee.FamilyMembers
-                         .Where(f => f != null)
-                         .OrderBy(f => f.LastName)
-                         .ThenBy(f => f.FirstName))
-            {
-                if (ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true) continue;
-                var rel = (fm.Relationship?.NameTm ?? fm.Relationship?.Name ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(rel)) continue;
-                var relLower = rel.ToLowerInvariant();
-                var code = fm.Nationality?.Code?.Trim() ?? string.Empty;
-                segments.Add($"{relLower}-{fm.FullName} {fm.DateOfBirth:dd.MM.yyyy}ý. {code}.");
+                return string.Empty;
             }
 
-            return segments.Count == 0 ? null : string.Join(", ", segments);
+            return VisaFamilyMemberLinesHelper.FormatSahsyKagyzFamilyStatus(emp.VisaApplicationFamilyMembersText)?.Trim()
+                ?? string.Empty;
         }
         #endregion
 
         #region PDF Visa Application (XFA) — spouse & accompanying travellers
         /// <summary>
-        /// Spouse row on the TM visa PDF is filled from the employee's <see cref="Person.FamilyMembers"/>
-        /// when <see cref="Relationship"/> is marked as spouse (see <see cref="IsSpouseRelationship"/>).
+        /// Spouse row on the TM visa PDF from the employee's manual family line whose relationship is spouse.
         /// </summary>
         [NotMapped]
         [XafDisplayName("PDF Spouse Last Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Pdf_SpouseLastName => PdfSpousePersonFromMasterData()?.LastName;
+        public string Pdf_SpouseLastName
+        {
+            get
+            {
+                var spouse = PdfSpouseManualLine();
+                if (spouse == null)
+                {
+                    return null;
+                }
+
+                VisaFamilyMemberLinesHelper.SplitFullNameForPdf(spouse.FullName, out _, out var lastName);
+                return lastName;
+            }
+        }
 
         [NotMapped]
         [XafDisplayName("PDF Spouse First Name"), VisibleInDetailView(false), VisibleInListView(false)]
-        public string Pdf_SpouseFirstName => PdfSpousePersonFromMasterData()?.FirstName;
+        public string Pdf_SpouseFirstName
+        {
+            get
+            {
+                var spouse = PdfSpouseManualLine();
+                if (spouse == null)
+                {
+                    return null;
+                }
+
+                VisaFamilyMemberLinesHelper.SplitFullNameForPdf(spouse.FullName, out var firstName, out _);
+                return firstName;
+            }
+        }
 
         [NotMapped]
         [XafDisplayName("PDF Spouse Additional"), VisibleInDetailView(false), VisibleInListView(false)]
@@ -1398,14 +1351,13 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                var s = PdfSpousePersonFromMasterData();
-                if (s == null) return null;
-                var parts = new List<string>();
-                if (!string.IsNullOrWhiteSpace(s.MiddleName))
-                    parts.Add(s.MiddleName.Trim());
-                if (s.DateOfBirth != default)
-                    parts.Add(s.DateOfBirth.ToString("dd.MM.yyyy"));
-                return parts.Count == 0 ? null : string.Join(", ", parts);
+                var spouse = PdfSpouseManualLine();
+                if (spouse?.BirthDate == null)
+                {
+                    return null;
+                }
+
+                return spouse.BirthDate.Value.ToString("dd.MM.yyyy");
             }
         }
 
@@ -1452,41 +1404,17 @@ namespace Visa2026.Module.BusinessObjects
             }
         }
 
-        private Person PdfSpousePersonFromMasterData()
+        private VisaFamilyMemberLineDto? PdfSpouseManualLine()
         {
             var emp = Person;
-            if (emp is not { IsEmployee: true }) return null;
-            if (emp.FamilyMembers == null) return null;
-            foreach (var fm in emp.FamilyMembers)
+            if (emp is not { IsEmployee: true })
             {
-                if (fm == null || ObjectSpaceHelper.Get(this)?.IsObjectToDelete(fm) == true) continue;
-                if (IsSpouseRelationship(fm.Relationship))
-                    return fm;
+                return null;
             }
-            return null;
-        }
 
-        private static bool IsSpouseRelationship(Relationship r)
-        {
-            if (r == null) return false;
-            if (!string.IsNullOrWhiteSpace(r.Code))
-            {
-                var c = r.Code.Trim().ToUpperInvariant();
-                if (c is "SPOUSE" or "WIFE" or "HUSBAND") return true;
-            }
-            if (!string.IsNullOrWhiteSpace(r.Name))
-            {
-                var n = r.Name.ToUpperInvariant();
-                if (n.Contains("SPOUSE") || n is "WIFE" or "HUSBAND") return true;
-            }
-            if (!string.IsNullOrWhiteSpace(r.NameTm))
-            {
-                var tm = r.NameTm.Trim();
-                if (tm.Equals("aýaly", StringComparison.OrdinalIgnoreCase) ||
-                    tm.Equals("adamsy", StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
-            return false;
+            return VisaFamilyMemberLinesHelper.FindSpouseLine(
+                emp.VisaApplicationFamilyMembersText,
+                ObjectSpaceHelper.Get(this));
         }
 
         private ApplicationItem FirstAccompanyingApplicationItemForEmployee()

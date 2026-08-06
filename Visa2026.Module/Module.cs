@@ -105,7 +105,8 @@ namespace Visa2026.Module
                 new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
-                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB)
+                new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaFamilyManualFromFamilyMembersMigrationUpdater(objectSpace, versionFromDB)
             };
         }
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters)
@@ -162,6 +163,7 @@ namespace Visa2026.Module
         private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e)
         {
             ApprovalLegProfileMinistryLegObjectSpaceHooks.Subscribe(e.ObjectSpace);
+            PersonVisaFamilyManualDefaultsObjectSpaceHooks.Subscribe(e.ObjectSpace);
             MigrationImportAuditTrailObjectSpaceHooks.ApplyIfNeeded(e.ObjectSpace);
         }
     }
