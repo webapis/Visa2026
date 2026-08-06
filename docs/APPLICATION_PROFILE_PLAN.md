@@ -48,7 +48,7 @@ Creating or tweaking a “new kind of application” requires editing lookup fla
 | 14 | Automatic placeholders | Beyond the required-properties list, **identity / signatory / process** fields (name, description, code, route, SLA, signatory, representative, enabled states summary, etc.) are **always** available as merge placeholders. |
 | 15 | Person checkboxes → templates | Person requirements also **drive template availability** (e.g. which person-roster columns / item-level placeholders are in play), not form/readiness only. |
 | 16 | Placeholder naming | Keep today’s **`{{…}}`** conventions (existing map / Word–Excel pipeline). |
-| 17 | Clone divergence allowlist | Officers may change **only** the allowlisted Application field values on the Application (see §2.1). Structural profile config (route, action family, produce/cancel, legs, states, nested template files, person requirement flags, which properties are required) is **frozen** on the clone — not reconfigured per Application. |
+| 17 | Clone divergence allowlist | Officers may change **only** the allowlisted Application field values on the Application (see §2.1). Structural profile config is **frozen** on the clone (see §2.2) — not reconfigured per Application. |
 
 ### 2.1 Clone-editable Application properties (allowlist)
 
@@ -71,7 +71,18 @@ These are the only Application-side values officers may set/override after clone
 | 13 | Entry Date |
 | 14 | Entry Check Point |
 
-**Not clone-reconfigurable (examples):** action family, route, produce/cancel sets, embedded legs, process state checklists, nested template file set, person requirement checkboxes, applicability criteria, profile identity (name/code of the *source* template).
+### 2.2 Frozen on Application after clone (not editable)
+
+Copied from the source profile onto the Application clone, then **read-only** for officers on that Application. Changing these means editing the **source** Application Profile (affects future Applications only).
+
+| Group | Locked choices |
+|-------|----------------|
+| **Directed to** (route) | Via ministry · Direct migration service |
+| **May be for** (audience) | Employee · Family member · Temporary visitor |
+| **Related to** (action family, exclusive) | Issuance · Cancellation · Registration · Business trip |
+| **Result may produce (change)** | Invitation · Work permit · Visa · Border zone · Work location |
+| **Result may cancel existing** | Invitation(s) · Work permit(s) · Visa(s) · Border zone permit(s) · Application(s) |
+| **Also frozen** | Embedded approval legs · process state checklists · SLA day integers · nested template file set · which of the 14 properties are required/defaults · person requirement checkboxes · applicability criteria · source profile identity (name/code/description) |
 
 ### Still open (narrow)
 

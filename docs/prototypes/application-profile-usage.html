@@ -237,8 +237,12 @@
           <li>Progress reads the frozen structural clone; Word/Excel fill uses Application values + defaults + automatic placeholders.</li>
         </ol>
         <div class="callout">
-          Allowlist: Visa Type, Visa Category, Visa Period, Border Zone, Migration Service, Start Date, End Date,
+          <strong>Editable:</strong> Visa Type, Visa Category, Visa Period, Border Zone, Migration Service, Start/End Date,
           Region (City), Business Trip Address, Project, Urgency, Work Permit Location, Entry Date, Entry Check Point.
+          <br />
+          <strong>Frozen on Application:</strong> directed to (ministry / migration), may be for (employee / FM / visitor),
+          related to (issuance / cancellation / registration / business trip), produce (invitation / WP / visa / border zone / work location),
+          cancel-existing sets, plus legs / states / templates / person flags / required-property config.
           No re-sync to source.
         </div>
       </div>
@@ -256,6 +260,7 @@
         <div class="decisions">
           <div><strong>Clone</strong> Always deep-clone · no re-sync · structural config frozen on Application</div>
           <div><strong>Editable on Application</strong> Only the 14 allowlisted field values</div>
+          <div><strong>Frozen on Application</strong> Route · audience · related-to · produce · cancel-existing · legs/states/templates/person flags</div>
           <div><strong>Properties dual use</strong> Form show/require + Word/Excel merge fields</div>
           <div><strong>Merge</strong> Defaults if empty · identity/signatory/process automatic · keep <code>{{…}}</code></div>
           <div><strong>Person</strong> 4 checkboxes · form + template/roster availability</div>
