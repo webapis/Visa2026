@@ -634,7 +634,12 @@
 
             <div class="section">
               <h3>Application properties required</h3>
-              <p class="hint">Checked = shown &amp; required on Application. Default column = seed value when cloning.</p>
+              <p class="hint">
+                Same list, two jobs: <strong>(a)</strong> shown/required on the Application form and
+                <strong>(b)</strong> merge fields for nested Word/Excel templates (<code>{{…}}</code>).
+                If the Application value is empty at fill time, the <strong>default</strong> is used.
+                Only these 14 values may be changed on the Application after clone; structural profile config stays frozen.
+              </p>
               <table class="prop-table">
                 <thead>
                   <tr>
@@ -666,7 +671,7 @@
 
             <div class="section">
               <h3>Application signatory</h3>
-              <p class="hint">Defaults applied when cloning the profile onto a new Application.</p>
+              <p class="hint">Defaults on clone. Signatory (and identity / process / SLA) are also <strong>automatic</strong> <code>{{…}}</code> placeholders for nested templates.</p>
               <div class="field-grid">
                 <div class="field">
                   <label class="lbl">Authorized signatory</label>
@@ -767,7 +772,11 @@
           <div class="panel-body">
             <div class="section">
               <h3>Application templates</h3>
-              <p class="hint">Today this lives on UserReportTemplate via Applicable Application Types / groups / contracts. Profile owns the list instead.</p>
+              <p class="hint">
+                Nested files live on the profile. Fill uses today’s <code>{{…}}</code> pipeline:
+                required properties (+ defaults), automatic identity/signatory/process fields,
+                and person-gated roster columns.
+              </p>
               <div class="list-editor">
                 <div class="list-row">
                   <span class="ord">1</span>
@@ -799,7 +808,7 @@
 
             <div class="section">
               <h3>Required person-related data</h3>
-              <p class="hint">Drives ApplicationItem readiness / required child data (today: many Show* flags on ApplicationType).</p>
+              <p class="hint">Drives form/readiness <strong>and</strong> template availability (e.g. person-roster columns / item placeholders).</p>
               <div class="choice-row">
                 <label class="choice"><input type="checkbox" checked /> Passport</label>
                 <label class="choice"><input type="checkbox" checked /> Education</label>
@@ -872,9 +881,10 @@
           </div>
           <div class="lp-body">
             <strong>Source profile</strong> (this wizard) is reusable.
-            <strong>Application.ApplicationProfile</strong> = deep clone at create time.
-            Officer may adjust the clone (defaults, legs, templates) without mutating the source.
-            Later template edits affect only Applications created afterward.
+            Structural config is deep-cloned onto the Application and frozen for reconfigure.
+            Officers may change only the <strong>14 allowlisted field values</strong> (Visa Type … Entry Check Point).
+            Nested Word/Excel fill uses those values, profile defaults when empty, plus automatic identity/signatory/process placeholders.
+            Source edits affect only Applications created afterward — no re-sync.
           </div>
         </div>
       </div>

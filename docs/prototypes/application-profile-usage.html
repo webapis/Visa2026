@@ -114,7 +114,10 @@
 
     <div class="banner">
       Locked: deep clone · no re-sync · freeform criteria · exclusive action family · embedded legs ·
-      free state checklists · nested template files · person v1 = 4 checkboxes · selected officers · wizard UX.
+      free state checklists · nested template files · person v1 = 4 checkboxes · selected officers · wizard UX ·
+      required properties = form <strong>and</strong> Word/Excel merge · defaults used when empty ·
+      identity/signatory/process automatic <code>{{…}}</code> · person flags gate template columns ·
+      clone divergence only on the 14 allowlisted Application fields.
       <strong>Clone storage:</strong> full owned BO graph (not JSON).
     </div>
 
@@ -139,8 +142,9 @@
         <ol>
           <li>Selected officer configures and publishes a <strong>source Application Profile</strong>.</li>
           <li>On Application create, the picker lists profiles that match <strong>freeform applicability criteria</strong>.</li>
-          <li>Choosing a profile <strong>deep-clones</strong> the full owned graph onto the Application.</li>
-          <li>Edits on the Application clone never write back; source edits never update existing clones.</li>
+          <li>Choosing a profile <strong>deep-clones</strong> structural config onto the Application.</li>
+          <li>Officers edit only the <strong>14 allowlisted field values</strong>; nested Word/Excel fill uses those values + defaults + <code>{{…}}</code> automatic fields.</li>
+          <li>No write-back to source; source edits never update existing clones.</li>
         </ol>
       </div>
     </section>
@@ -158,8 +162,9 @@
         <ol>
           <li>Open <strong>Application Profiles</strong> → New.</li>
           <li>Step through Identity → Results &amp; fields → Process &amp; SLA → Templates &amp; person → Review.</li>
-          <li>Embed approval legs; enable ministry/migration states; upload nested template files.</li>
-          <li>Optional freeform criteria (e.g. project contract / office context) for picker filtering.</li>
+          <li>Mark required properties (form + merge) and defaults; embed legs; enable states; upload nested Word/Excel files.</li>
+          <li>Person checkboxes gate readiness and template roster columns.</li>
+          <li>Optional freeform criteria for picker filtering.</li>
           <li>Publish. Interactive detail:
             <a class="inline" href="application-profile-wizard.html">application-profile-wizard.html</a>
           </li>
@@ -181,7 +186,8 @@
           <li>New Application → <strong>Choose Application Profile</strong>.</li>
           <li>List filtered by freeform criteria + audience / action family as needed.</li>
           <li>Preview route, produce capabilities, legs, templates.</li>
-          <li><strong>Use profile (clone)</strong> → deep copy into <code>Application.ProfileInstance</code>; apply field defaults.</li>
+          <li><strong>Use profile (clone)</strong> → deep-copy structural config; seed the 14 allowlisted fields from defaults.</li>
+          <li>Later Word/Excel fill resolves <code>{{…}}</code> from Application values, falling back to profile defaults when empty.</li>
         </ol>
 
         <div class="mock" aria-hidden="true">
@@ -218,20 +224,22 @@
     <section class="scene" id="clone">
       <div class="scene-head">
         <div>
-          <h2>3. Application owns the clone</h2>
-          <p>Officers can change legs, defaults, or nested files on this Application. Source template stays unchanged.</p>
+          <h2>3. Application owns the clone (limited edits)</h2>
+          <p>Structural profile is frozen on the Application. Officers change only the allowlisted field values used by the form and by nested Word/Excel merge.</p>
         </div>
         <span class="badge">Story C</span>
       </div>
       <img src="images/ap-03-clone-on-application.png" alt="Application detail with independent profile clone" />
       <div class="scene-body">
         <ol>
-          <li>Application detail → <strong>Profile (this application)</strong>.</li>
-          <li>Edit clone: field defaults, embedded legs, enabled states, nested template files.</li>
-          <li>Progress and Resminamalar-style generation read the <strong>clone</strong>, not the source.</li>
+          <li>Application detail shows profile lineage and the 14 allowlisted fields (Visa Type … Entry Check Point).</li>
+          <li>Edit those <strong>values</strong> only — not legs, state checklists, nested files, or which properties are required.</li>
+          <li>Progress reads the frozen structural clone; Word/Excel fill uses Application values + defaults + automatic placeholders.</li>
         </ol>
         <div class="callout">
-          No re-sync. Improving the source profile only affects Applications created afterward (Story D).
+          Allowlist: Visa Type, Visa Category, Visa Period, Border Zone, Migration Service, Start Date, End Date,
+          Region (City), Business Trip Address, Project, Urgency, Work Permit Location, Entry Date, Entry Check Point.
+          No re-sync to source.
         </div>
       </div>
     </section>
@@ -246,14 +254,14 @@
       </div>
       <div class="scene-body">
         <div class="decisions">
-          <div><strong>Clone</strong> Always deep-clone · divergence permanent · no live link</div>
-          <div><strong>Storage</strong> Full owned BO graph (source + instance same shape)</div>
-          <div><strong>Scope</strong> Freeform XAF criteria on picker</div>
-          <div><strong>Action family</strong> Exclusive radio (issuance / cancel / registration / trip)</div>
-          <div><strong>Legs / states</strong> Embedded legs · freely enabled state checklists</div>
-          <div><strong>Templates / person</strong> Nested files on profile · 4 person checkboxes in v1</div>
+          <div><strong>Clone</strong> Always deep-clone · no re-sync · structural config frozen on Application</div>
+          <div><strong>Editable on Application</strong> Only the 14 allowlisted field values</div>
+          <div><strong>Properties dual use</strong> Form show/require + Word/Excel merge fields</div>
+          <div><strong>Merge</strong> Defaults if empty · identity/signatory/process automatic · keep <code>{{…}}</code></div>
+          <div><strong>Person</strong> 4 checkboxes · form + template/roster availability</div>
+          <div><strong>Templates</strong> Nested files on profile · filled from properties + automatic fields</div>
           <div><strong>Access</strong> Selected officers · wizard UX for v1</div>
-          <div><strong>Still open</strong> Temp visitor, criteria target, field placement, SLA tiers, template engine path</div>
+          <div><strong>Still open</strong> Temp visitor, criteria target, field placement, SLA tiers, merge host confirm</div>
         </div>
       </div>
     </section>
