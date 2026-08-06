@@ -201,6 +201,55 @@ captures:
       - fieldVisible: Process number
       - fieldVisible: Visa Number
 
+  employee-visa-family-manual-step-01-field:
+    guideSlugs:
+      - employee/family-members-for-visa-manual
+    journey: person-officer-journey
+    description: Employee Person tab — Family members for visa (manual) field visible
+    pinpoint:
+      kind: field
+      caption: Family members for visa (manual)
+    assertBeforeCapture:
+      - fieldVisible: Family members for visa (manual)
+
+  employee-visa-family-manual-step-02-popup-open:
+    guideSlugs:
+      - employee/family-members-for-visa-manual
+    journey: person-officer-journey
+    description: Manual family popup open with empty or existing list
+    assertBeforeCapture:
+      - buttonVisible: Add member
+
+  employee-visa-family-manual-step-03-add-member-form:
+    guideSlugs:
+      - employee/family-members-for-visa-manual
+    journey: person-officer-journey
+    description: Add family member row dialog with required fields filled
+    pinpoint:
+      kind: field
+      caption: Full name
+    assertBeforeCapture:
+      - fieldVisible: Full name
+
+  employee-visa-family-manual-step-04-popup-with-member:
+    guideSlugs:
+      - employee/family-members-for-visa-manual
+    journey: person-officer-journey
+    description: Manual family popup list showing saved row before OK
+    assertBeforeCapture:
+      - buttonVisible: OK
+
+  employee-visa-family-manual-step-05-saved-summary:
+    guideSlugs:
+      - employee/family-members-for-visa-manual
+    journey: person-officer-journey
+    description: Employee detail after Save — inline manual family summary
+    pinpoint:
+      kind: field
+      caption: Family members for visa (manual)
+    assertBeforeCapture:
+      - fieldVisible: Family members for visa (manual)
+
 videos:
   # DORMANT — officer manual is screenshots-only (D21). Retained for optional -EnableVideo experiments.
   login-sign-in:

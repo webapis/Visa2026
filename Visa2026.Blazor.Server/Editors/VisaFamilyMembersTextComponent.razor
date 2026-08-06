@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Components
 @using Visa2026.Module.Services
 
-<div class="visa-family-lines-inline cs-multi-select-inline">
+<div class="visa-family-lines-inline cs-multi-select-inline e2e-person-visa-application-family-members-text">
     <DxTextBox Text="@DisplayText"
                ReadOnly="true"
                CssClass="visa-family-lines-inline__summary cs-multi-select-inline__summary" />
@@ -10,6 +10,7 @@
     {
         <DxButton Text="…"
                   title="@PopupButtonTitle"
+                  CssClass="e2e-visa-family-manual-open"
                   RenderStyle="ButtonRenderStyle.Secondary"
                   SizeMode="SizeMode.Small"
                   Click="@OpenPopupAsync" />
@@ -37,6 +38,7 @@
                 @if (!ReadOnly)
                 {
                     <DxButton Text="@AddButtonText"
+                              CssClass="e2e-visa-family-manual-add-member"
                               RenderStyle="ButtonRenderStyle.Secondary"
                               SizeMode="SizeMode.Small"
                               Click="@OpenAddPopup" />
@@ -91,7 +93,7 @@
     </BodyContentTemplate>
     <FooterContentTemplate>
         <div class="cs-multi-select-popup__footer">
-            <DxButton Text="@OkText" RenderStyle="ButtonRenderStyle.Primary" Click="@ApplyPopupAsync" />
+            <DxButton Text="@OkText" CssClass="e2e-visa-family-manual-ok" RenderStyle="ButtonRenderStyle.Primary" Click="@ApplyPopupAsync" />
             <DxButton Text="@CancelText" RenderStyle="ButtonRenderStyle.Secondary" Click="@CancelPopupAsync" />
         </div>
     </FooterContentTemplate>
@@ -107,11 +109,13 @@
             <label class="visa-family-lines-edit__label">@FullNameLabel</label>
             <DxTextBox Text="@_editFullName"
                        TextChanged="@OnEditFullNameChanged"
+                       CssClass="e2e-visa-family-manual-full-name"
                        ClearButtonDisplayMode="DataEditorClearButtonDisplayMode.Auto" />
 
             <label class="visa-family-lines-edit__label">@BirthDateLabel</label>
             <DxDateEdit @bind-Date="@_editBirthDate"
                         @bind-Date:after="OnEditFieldChanged"
+                        CssClass="e2e-visa-family-manual-birth-date"
                         Mask="dd.MM.yyyy"
                         DisplayFormat="dd.MM.yyyy"
                         PickerDisplayMode="DatePickerDisplayMode.Calendar"
@@ -124,6 +128,7 @@
             <DxComboBox Data="@_editRelationshipOptions"
                         @bind-Value="@_editRelationshipOid"
                         @bind-Value:after="OnEditFieldChanged"
+                        CssClass="e2e-visa-family-manual-relationship"
                         ValueFieldName="@nameof(RelationshipLookupItem.Oid)"
                         TextFieldName="@nameof(RelationshipLookupItem.NameTm)"
                         NullText="@RelationshipLabel"
@@ -136,6 +141,7 @@
             <DxComboBox Data="@_editCountryOptions"
                         @bind-Value="@_editCountryOid"
                         @bind-Value:after="OnEditFieldChanged"
+                        CssClass="e2e-visa-family-manual-country"
                         ValueFieldName="@nameof(CountryLookupItem.Oid)"
                         TextFieldName="@nameof(CountryLookupItem.DisplayText)"
                         NullText="@CountryLabel"
@@ -153,6 +159,7 @@
     <FooterContentTemplate>
         <div class="cs-multi-select-popup__footer">
             <DxButton Text="@SaveEditText"
+                      CssClass="e2e-visa-family-manual-save-member"
                       RenderStyle="ButtonRenderStyle.Primary"
                       Click="@SaveEditPopupAsync"
                       Enabled="@CanSaveEdit" />

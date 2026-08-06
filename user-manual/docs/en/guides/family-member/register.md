@@ -41,6 +41,8 @@ Family members are always linked to a **Sponsoring Employee**. Create the employ
 
 The **Family members** tab on an employee detail form is **read-only** (browse linked dependents). Create new family members from the **Family Members** list — not from that nested tab.
 
+For dependents **not** registered as persons (for example family abroad), use **Family members for visa (manual)** on the sponsoring employee — see [Family members for visa (manual)](../employee/family-members-for-visa-manual.md).
+
 ## Step 1 — Open the Family Members list
 
 1. Sign in to Visa2026.

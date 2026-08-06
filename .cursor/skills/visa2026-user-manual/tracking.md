@@ -85,6 +85,7 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 | 2 | 0 | `getting-started/navigation` | Main navigation | — | — | read | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
 | 3 | 1 | `person/open-and-search` | Find and open a person | Person | — | read | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
 | 4 | 2 | `employee/register` | Register a new employee | Person | — | create | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
+| 4a | 3 | `employee/family-members-for-visa-manual` | Family members for visa (manual) | Person | — | update | `person-officer-journey` | Playwright E2E 20260805-172303 | **doc-anchored** | **Draft** | 2 |
 | 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | create | `person-officer-journey` | Officer review + E2E 2026-08-05 | **doc-anchored** | **Published** | 2 |
 | 5b | 2 | `family-member/add-passport` | Add a passport (family member) | Person | — | create | `person-officer-journey` | Full EN | legacy fan-out | **Draft** | 2 |
 | 4b | 2 | `family-member/register` | Register a family member | Person | — | create | `person-officer-journey` | List New; sponsor + relationship | legacy fan-out | **Draft** | 2 |

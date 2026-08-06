@@ -22,6 +22,7 @@ public sealed class PersonOfficerJourneyPlaywrightTests
     [Fact]
     [SupportedOSPlatform("windows")]
     [Trait("E2ETarget", "Local")]
+    [Trait("GuideSlug", "employee/family-members-for-visa-manual")]
     public Task PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local() =>
         PlaywrightE2eTestRunner.RunAsync(_fixture, nameof(PersonOfficerJourney_LoginCreateEmployeeAddPassport_Local), async () =>
         {

@@ -139,5 +139,6 @@ Check that **First Name**, **Last Name**, and **Personal Number** match what you
 ## What to read next
 
 - [Main navigation](../../getting-started/navigation.md) — lists, detail forms, and tabs
+- [Family members for visa (manual)](family-members-for-visa-manual.md) — manual family lines when dependents are not full person records
 - [Add a passport](add-passport.md) — passport on the **Passports** tab
 - **Person reference** — field help generated from the application catalog ([Business objects](../../reference/business-objects.md))

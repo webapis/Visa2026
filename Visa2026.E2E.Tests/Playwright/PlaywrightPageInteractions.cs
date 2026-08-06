@@ -831,4 +831,142 @@ internal static class PlaywrightPageInteractions
 
     internal static ILocator TabItem(IPage page, string tabText) =>
         page.Locator($"[role='tab']:has-text('{tabText}')").First;
+
+    internal static ILocator VisaFamilyManualFieldContainer(IPage page) =>
+        page.Locator(
+            ".e2e-person-visa-application-family-members-text, " +
+            "[class*='e2e-person-visa-application-family-members-text'], " +
+            ".visa-family-lines-inline").First;
+
+    internal static async Task OpenVisaFamilyManualPopupAsync(IPage page)
+    {
+        await EnsureFieldRenderedAsync(page, E2ETestVisaFamilyManualUi.FieldCaption);
+        ILocator container = VisaFamilyManualFieldContainer(page);
+        await container.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 60_000,
+        });
+        await container.ScrollIntoViewIfNeededAsync();
+        ILocator openButton = container.Locator(".e2e-visa-family-manual-open button, .e2e-visa-family-manual-open, button").First;
+        await openButton.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 30_000 });
+        await openButton.ClickAsync();
+        await page.Locator(".visa-family-lines-popup").WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 60_000,
+        });
+    }
+
+    internal static async Task FillVisaFamilyManualMemberFormAsync(IPage page)
+    {
+        ILocator edit = page.Locator(".visa-family-lines-edit");
+        await edit.WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 60_000,
+        });
+
+        ILocator fullName = VisaFamilyManualEditInputByLabel(edit, E2ETestVisaFamilyManualUi.FullName);
+        await fullName.FillAsync(E2ETestVisaFamilyManualValues.MemberFullName);
+
+        ILocator birthDate = VisaFamilyManualEditInputByLabel(edit, E2ETestVisaFamilyManualUi.BirthDate);
+        await FillMaskedInputAsync(birthDate, E2ETestVisaFamilyManualValues.MemberBirthDate);
+
+        await FillVisaFamilyManualComboAsync(edit, E2ETestVisaFamilyManualUi.Relationship, E2ETestVisaFamilyManualValues.MemberRelationshipDisplay);
+        await FillVisaFamilyManualComboAsync(edit, E2ETestVisaFamilyManualUi.Country, E2ETestVisaFamilyManualValues.MemberCountryDisplay);
+    }
+
+    private static ILocator VisaFamilyManualEditInputByLabel(ILocator editScope, string label)
+    {
+        string literal = label.Replace("'", "\\'");
+        return editScope.Locator(
+            $"xpath=.//label[contains(normalize-space(),'{literal}')]/following-sibling::*[1]//input[not(@type='hidden')][1]");
+    }
+
+    private static async Task FillVisaFamilyManualComboAsync(ILocator editScope, string label, string displayValue)
+    {
+        ILocator input = VisaFamilyManualEditInputByLabel(editScope, label);
+        await input.ScrollIntoViewIfNeededAsync();
+        await input.ClickAsync(new LocatorClickOptions { Force = true });
+        await input.FillAsync(string.Empty);
+        await input.FillAsync(displayValue);
+        await input.PressAsync("Enter");
+        await Task.Delay(400);
+
+        IPage page = editScope.Page;
+        if (await TrySelectLookupOptionAsync(page, displayValue))
+            return;
+
+        await input.PressAsync("ArrowDown");
+        await input.PressAsync("Enter");
+        await Task.Delay(300);
+        if (await TrySelectLookupOptionAsync(page, displayValue))
+            return;
+
+        foreach (string token in GetLookupSearchTokens(displayValue))
+        {
+            await input.ClickAsync(new LocatorClickOptions { Force = true });
+            await input.FillAsync(string.Empty);
+            await input.FillAsync(token);
+            await input.PressAsync("Enter");
+            await Task.Delay(400);
+            if (await TrySelectLookupOptionAsync(page, token))
+                return;
+        }
+
+        await input.PressAsync("Tab");
+        await Task.Delay(200);
+    }
+
+    internal static async Task ClickVisaFamilyManualMainOkAsync(IPage page)
+    {
+        ILocator mainPopup = page.Locator(".dxbl-popup:visible")
+            .Filter(new LocatorFilterOptions { Has = page.Locator(".visa-family-lines-popup") })
+            .Last;
+        await mainPopup.Locator(".cs-multi-select-popup__footer button")
+            .Filter(new LocatorFilterOptions { HasText = E2ETestVisaFamilyManualUi.Ok })
+            .First.ClickAsync();
+    }
+
+    internal static async Task ClickVisaFamilyManualEditSaveAsync(IPage page)
+    {
+        ILocator editPopup = page.Locator(".dxbl-popup:visible")
+            .Filter(new LocatorFilterOptions { Has = page.Locator(".visa-family-lines-edit") })
+            .Last;
+        ILocator saveButton = editPopup.Locator(".cs-multi-select-popup__footer button").Filter(new LocatorFilterOptions { HasText = E2ETestVisaFamilyManualUi.SaveMember }).First;
+
+        for (var attempt = 0; attempt < 40; attempt++)
+        {
+            if (await saveButton.IsEnabledAsync())
+            {
+                await saveButton.ClickAsync();
+                return;
+            }
+
+            await Task.Delay(250);
+        }
+
+        throw new InvalidOperationException(
+            "Visa family manual member Save stayed disabled — relationship or country may not be bound.");
+    }
+
+    internal static ILocator VisaFamilyManualPopupButton(IPage page, string cssClass) =>
+        page.Locator($".{cssClass} button, [class*='{cssClass}']").First;
+
+    private static async Task FillPopupComboByLabelAsync(IPage page, string label, string displayValue)
+    {
+        ILocator input = page.GetByLabel(label, new PageGetByLabelOptions { Exact = true });
+        await input.ScrollIntoViewIfNeededAsync();
+        await input.ClickAsync(new LocatorClickOptions { Force = true });
+        await input.FillAsync(string.Empty);
+        await input.FillAsync(displayValue);
+        await input.PressAsync("Enter");
+        await Task.Delay(400);
+
+        if (await TrySelectLookupOptionAsync(page, displayValue))
+            return;
+
+        await input.PressAsync("Tab");
+    }
 }

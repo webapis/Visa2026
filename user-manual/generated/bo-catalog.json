@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-05T12:10:12.7673758Z",
-  "assemblyVersion": "1.0.0.650",
+  "generatedAt": "2026-08-06T04:39:17.4764466Z",
+  "assemblyVersion": "1.0.0.651",
   "types": [
     {
       "name": "Application",
@@ -1611,6 +1611,7 @@
         "employee/add-visa",
         "employee/add-work-duty",
         "employee/edit-employee",
+        "employee/family-members-for-visa-manual",
         "employee/register",
         "family-member/add-address",
         "family-member/add-family-relation-documents",

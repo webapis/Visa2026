@@ -57,6 +57,7 @@ internal sealed class PlaywrightPersonOfficerJourney
         Assert.Equal(lastName, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-last-name", E2ETestPersonFieldCaptions.LastName));
         Assert.Equal(personalNumber, await PlaywrightPageInteractions.ReadFieldAsync(_page, "e2e-person-personal-number", E2ETestPersonFieldCaptions.PersonalNumber));
         ILocator passportsTab = PlaywrightPageInteractions.TabItem(_page, "Passports");
+        await PlaywrightE2eStepRunner.RunAsync(_page, "visa-family-manual", () => AddVisaFamilyManualLinesAsync(personalNumber));
         await PlaywrightScreenshotCapture.CaptureAsync(_page, UserManualMediaCaptureKeys.PersonAddPassportStep01EmployeeDetail, passportsTab);
         await PlaywrightScreenshotCapture.CaptureAsync(
             _page,
@@ -215,6 +216,61 @@ internal sealed class PlaywrightPersonOfficerJourney
         {
             return false;
         }
+    }
+
+    private async Task AddVisaFamilyManualLinesAsync(string personalNumber)
+    {
+        await PlaywrightPageInteractions.EnsureFieldRenderedAsync(_page, E2ETestVisaFamilyManualUi.FieldCaption);
+        await PlaywrightPageInteractions.FillLookupAsync(
+            _page,
+            "e2e-person-marital-status",
+            E2ETestVisaFamilyManualValues.MarriedMaritalStatusDisplay,
+            E2ETestPersonFieldCaptions.MaritalStatus);
+
+        ILocator familyField = PlaywrightPageInteractions.VisaFamilyManualFieldContainer(_page);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.EmployeeVisaFamilyManualStep01Field,
+            familyField);
+
+        await PlaywrightPageInteractions.OpenVisaFamilyManualPopupAsync(_page);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.EmployeeVisaFamilyManualStep02PopupOpen,
+            _page.Locator(".visa-family-lines-popup").First);
+
+        ILocator mainPopup = _page.Locator(".visa-family-lines-popup").First;
+        await mainPopup.GetByRole(AriaRole.Button, new LocatorGetByRoleOptions { Name = E2ETestVisaFamilyManualUi.AddMember }).ClickAsync();
+        await _page.Locator(".visa-family-lines-edit").WaitForAsync(new LocatorWaitForOptions
+        {
+            State = WaitForSelectorState.Visible,
+            Timeout = 60_000,
+        });
+        await PlaywrightPageInteractions.FillVisaFamilyManualMemberFormAsync(_page);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.EmployeeVisaFamilyManualStep03AddMemberForm,
+            _page.Locator(".visa-family-lines-edit").First);
+
+        await PlaywrightPageInteractions.ClickVisaFamilyManualEditSaveAsync(_page);
+        await _page.Locator(".visa-family-lines-popup__name")
+            .Filter(new LocatorFilterOptions { HasText = E2ETestVisaFamilyManualValues.MemberFullName })
+            .WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 30_000 });
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.EmployeeVisaFamilyManualStep04PopupWithMember,
+            _page.Locator(".visa-family-lines-popup").First);
+
+        await PlaywrightPageInteractions.ClickVisaFamilyManualMainOkAsync(_page);
+        await Task.Delay(500);
+
+        await SaveEmployeeDetailAndConfirmAsync(personalNumber);
+
+        ILocator familyFieldAfterSave = PlaywrightPageInteractions.VisaFamilyManualFieldContainer(_page);
+        await PlaywrightScreenshotCapture.CaptureAsync(
+            _page,
+            UserManualMediaCaptureKeys.EmployeeVisaFamilyManualStep05SavedSummary,
+            familyFieldAfterSave);
     }
 
     private async Task AddPassportAsync(string passportNumber)

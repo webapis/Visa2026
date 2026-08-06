@@ -129,6 +129,7 @@ Guides are scoped by **`PersonRecordRole`** (`employee/`, `family-member/`, `tem
 | **Salaries** | `EmployeeSalary` | `employee/add-salary` | — | — |
 | **Travel histories** | `TravelHistory` | `employee/add-travel` | — | `temporary-visitor/add-travel` |
 | **CV & personal files** | `PersonDocument` | `employee/add-cv-documents` | — | — |
+| **Family members for visa (manual)** | — (employee header field) | `employee/family-members-for-visa-manual` | — | — |
 | **Family relation documents** | `FamilyRelationDocument` | — | `family-member/add-family-relation-documents` | — |
 
 **Cross-role guides** (any `PersonRecordRole`): `person/open-and-search` (nav: **Getting started**); `person/mark-incomplete` (same page under **Employee**, **Family member**, and **Temporary visitor**).
@@ -145,6 +146,7 @@ Publish in **order** column. **Phase 2** = orders **1–20** (through `applicati
 | 2 | 0 | `getting-started/navigation` | Main navigation | — | — | — | 1 |
 | 3 | 1 | `person/open-and-search` | Find and open a person | Person | — | — | 2 |
 | 4 | 2 | `employee/register` | Register a new employee | Person | — | Employee | 3 |
+| 4a | 3 | `employee/family-members-for-visa-manual` | Family members for visa (manual) | Person | — | Employee | 4 |
 | 5a | 2 | `employee/add-passport` | Add a passport (employee) | Person | — | Employee | 4 |
 | 5b | 2 | `family-member/add-passport` | Add a passport (family member) | Person | — | FamilyMember | 3 |
 | 6a | 2 | `employee/add-visa` | Add a visa (employee) | Person | Passport | Employee | 5a |

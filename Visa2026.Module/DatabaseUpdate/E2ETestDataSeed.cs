@@ -72,6 +72,30 @@ public static class E2ETestPassportFieldCaptions
     public const string IssuedCountry = "Issued Country";
 }
 
+/// <summary>Stable values for employee manual visa family lines popup (E2E).</summary>
+public static class E2ETestVisaFamilyManualValues
+{
+  public const string MarriedMaritalStatusDisplay = "Married";
+  public const string MemberFullName = "E2E Manual Child";
+  public const string MemberBirthDate = "15.03.2010";
+  public const string MemberRelationshipDisplay = "ogly";
+  public const string MemberCountryDisplay = "TUR";
+}
+
+/// <summary>English UI strings for the visa family manual popup editor.</summary>
+public static class E2ETestVisaFamilyManualUi
+{
+  public const string FieldCaption = "Family members for visa (manual)";
+  public const string PopupTitle = "Family members for visa (manual)";
+  public const string AddMember = "Add member";
+  public const string Ok = "OK";
+  public const string SaveMember = "Save";
+  public const string FullName = "Full name";
+  public const string BirthDate = "Birth date";
+  public const string Relationship = "Relationship";
+  public const string Country = "Country of residence";
+}
+
 /// <summary>Stable values for nested Visa under Passport (E2E-003).</summary>
 public static class E2ETestVisaCreateValues
 {
