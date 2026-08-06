@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Application Profile — configuration wizard (prototype)</title>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5c6b7a;
+      --line: #d5dde6;
+      --surface: #f7f9fb;
+      --panel: #ffffff;
+      --accent: #0b6e4f;
+      --accent-soft: #e6f3ee;
+      --accent-deep: #08553c;
+      --warn: #9a5b00;
+      --warn-soft: #fff4e5;
+      --clone: #1e4d8c;
+      --clone-soft: #e8f0fa;
+      --radius: 10px;
+      --shadow: 0 1px 2px rgba(26, 35, 50, 0.06), 0 8px 24px rgba(26, 35, 50, 0.06);
+      --font: "Segoe UI", "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif;
+      --mono: "IBM Plex Mono", "Cascadia Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #dceee6 0%, transparent 55%),
+        radial-gradient(900px 400px at 100% 0%, #dde7f2 0%, transparent 50%),
+        linear-gradient(180deg, #eef2f6 0%, var(--surface) 40%, #e9eef4 100%);
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+
+    .proto-banner {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border: 1px solid #c9d6e4;
+      background: var(--clone-soft);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      font-size: 0.92rem;
+      color: #243447;
+    }
+    .proto-banner strong { color: var(--clone); }
+
+    header.appbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 1.55rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    header .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 52ch;
+    }
+    .meta-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      font-size: 0.78rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--muted);
+    }
+    .pill.on {
+      background: var(--accent-soft);
+      border-color: #b7d9cb;
+      color: var(--accent-deep);
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    nav.steps {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      position: sticky;
+      top: 16px;
+    }
+    nav.steps h2 {
+      margin: 4px 8px 10px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .step-btn {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      padding: 10px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: var(--ink);
+      font: inherit;
+    }
+    .step-btn:hover { background: var(--surface); }
+    .step-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+    }
+    .step-btn .n {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      display: grid; place-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 1px;
+      background: #fff;
+    }
+    .step-btn.active .n {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .step-btn .t { font-size: 0.88rem; font-weight: 600; line-height: 1.25; }
+    .step-btn .d { font-size: 0.75rem; color: var(--muted); margin-top: 2px; font-weight: 400; }
+    .step-btn.active .d { color: #3d6b58; }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .panel-head h2 {
+      margin: 0 0 4px;
+      font-size: 1.2rem;
+      letter-spacing: -0.01em;
+    }
+    .panel-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 60ch;
+    }
+    .panel-body { padding: 18px 22px 8px; }
+    .panel-foot {
+      padding: 14px 22px;
+      border-top: 1px solid var(--line);
+      background: #fafbfc;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .section {
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px dashed #e3e9ef;
+    }
+    .section:last-child { border-bottom: 0; }
+    .section h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+    }
+    .section .hint {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 14px;
+    }
+    @media (max-width: 640px) {
+      .field-grid { grid-template-columns: 1fr; }
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1 / -1; }
+    label.lbl {
+      font-size: 0.78rem;
+      font-weight: 650;
+      color: #334155;
+    }
+    input[type="text"], input[type="number"], select, textarea {
+      border: 1px solid #c7d2de;
+      border-radius: 8px;
+      padding: 9px 11px;
+      font: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    input:focus, select:focus, textarea:focus, button:focus-visible {
+      outline: 2px solid #8fc9b2;
+      outline-offset: 1px;
+    }
+
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.88rem;
+      user-select: none;
+    }
+    .choice:has(input:checked) {
+      border-color: #8fc9b2;
+      background: var(--accent-soft);
+    }
+    .choice input { accent-color: var(--accent); }
+
+    .prop-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .prop-table th, .prop-table td {
+      border-bottom: 1px solid #e8eef4;
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .prop-table th {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .prop-table tr:hover td { background: #f8fafc; }
+    .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #eef2f6;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .list-editor {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .list-row {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .list-row:last-child { border-bottom: 0; }
+    .list-row .ord {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      background: var(--surface);
+      display: grid; place-items: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .ghost {
+      border: 1px dashed #b7c4d2;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font: inherit;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .ghost:hover { background: var(--surface); color: var(--ink); }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-deep); }
+    .btn-secondary {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--ink);
+    }
+    .btn-secondary:hover { background: var(--surface); }
+    .btn-link {
+      background: transparent;
+      color: var(--clone);
+      border: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      padding: 9px 4px;
+    }
+
+    .clone-callout {
+      margin: 0 22px 18px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: var(--warn-soft);
+      border: 1px solid #f0d4a8;
+      color: #5c3b08;
+      font-size: 0.86rem;
+    }
+    .clone-callout code {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      background: rgba(255,255,255,0.55);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 640px) {
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+    .sum-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fbfcfd;
+    }
+    .sum-card h4 {
+      margin: 0 0 6px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .sum-card ul {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 0.88rem;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .scope-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    @media (max-width: 640px) {
+      .scope-box { grid-template-columns: 1fr; }
+    }
+    .scope-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+    .scope-card h4 { margin: 0 0 4px; font-size: 0.9rem; }
+    .scope-card p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+
+    .live-preview {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .live-preview .lp-head {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      background: #fafbfc;
+    }
+    .live-preview .lp-head h3 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .lp-body { padding: 14px 16px; font-size: 0.88rem; color: var(--muted); }
+    .lp-body strong { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="proto-banner">
+      <div>
+        <strong>Visual prototype only</strong> — not wired to Visa2026.
+        Models the officer-facing <em>Application Profile</em> wizard from
+        <code>Application.xlsx</code>. Source profile = reusable template;
+        each new Application receives a clone that can diverge.
+      </div>
+    </div>
+
+    <header class="appbar">
+      <div>
+        <h1>Application Profile</h1>
+        <p class="sub">
+          One place to configure what an application is for, which fields and person data it needs,
+          how the process runs, and which report templates apply — replacing scattered
+          ApplicationType flags.
+        </p>
+      </div>
+      <div class="meta-pills">
+        <span class="pill on">Template mode</span>
+        <span class="pill">Clone on Application create</span>
+        <span class="pill">Draft · not saved</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="steps" aria-label="Wizard steps">
+        <h2>Steps</h2>
+        <button type="button" class="step-btn active" data-step="0">
+          <span class="n">1</span>
+          <span><span class="t">Identity &amp; purpose</span><span class="d">Name, route, audience, action</span></span>
+        </button>
+        <button type="button" class="step-btn" data-step="1">
+          <span class="n">2</span>
+          <span><span class="t">Results &amp; fields</span><span class="d">Issue / cancel + required properties</span></span>
+        </button>
+        <button type="button" class="step-btn" data-step="2">
+          <span class="n">3</span>
+          <span><span class="t">Process &amp; SLA</span><span class="d">Legs, states, durations</span></span>
+        </button>
+        <button type="button" class="step-btn" data-step="3">
+          <span class="n">4</span>
+          <span><span class="t">Templates &amp; person</span><span class="d">Reports + required person data</span></span>
+        </button>
+        <button type="button" class="step-btn" data-step="4">
+          <span class="n">5</span>
+          <span><span class="t">Review &amp; save</span><span class="d">Summary before publish</span></span>
+        </button>
+      </nav>
+
+      <div>
+        <!-- STEP 0 -->
+        <section class="panel view active" data-view="0">
+          <div class="panel-head">
+            <div>
+              <h2>Identity &amp; purpose</h2>
+              <p>Define who this profile is for and how applications created from it are directed.</p>
+            </div>
+          </div>
+          <div class="clone-callout">
+            Saving creates a <strong>source Application Profile</strong> (template).
+            When an officer creates an Application and picks this profile, Visa2026
+            <code>clones</code> it onto that Application. Edits on the clone do not change this template;
+            edits here apply to the <em>next</em> clone only.
+          </div>
+          <div class="panel-body">
+            <div class="section">
+              <h3>Application name and description</h3>
+              <div class="field-grid">
+                <div class="field full">
+                  <label class="lbl" for="name">1. Application name</label>
+                  <input id="name" type="text" value="Invitation + work permit (employee)" />
+                </div>
+                <div class="field full">
+                  <label class="lbl" for="desc">2. Description</label>
+                  <textarea id="desc">Combined invitation and work-permit issuance for employees under a project contract.</textarea>
+                </div>
+                <div class="field">
+                  <label class="lbl" for="code">3. Code</label>
+                  <input id="code" type="text" value="INV_WP_EMP" />
+                </div>
+                <div class="field">
+                  <label class="lbl" for="sel">Selection / quick code (optional)</label>
+                  <input id="sel" type="text" maxlength="3" value="101" />
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Application may be directed to</h3>
+              <p class="hint">Maps today’s ApplicationProgressRoute (ministry vs direct migration).</p>
+              <div class="choice-row">
+                <label class="choice"><input type="radio" name="route" checked /> Via ministry</label>
+                <label class="choice"><input type="radio" name="route" /> Direct migration service</label>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Application may be for</h3>
+              <p class="hint">Audience — replaces ApplicationType.Category (Employee / Family / …).</p>
+              <div class="choice-row">
+                <label class="choice"><input type="checkbox" checked /> Employee</label>
+                <label class="choice"><input type="checkbox" /> Family member</label>
+                <label class="choice"><input type="checkbox" /> Temporary visitor</label>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Application related to</h3>
+              <p class="hint">Primary action family for this profile.</p>
+              <div class="choice-row">
+                <label class="choice"><input type="radio" name="related" checked /> Issuance</label>
+                <label class="choice"><input type="radio" name="related" /> Cancellation</label>
+                <label class="choice"><input type="radio" name="related" /> Registration</label>
+                <label class="choice"><input type="radio" name="related" /> Business trip</label>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Applicability scope (optional)</h3>
+              <p class="hint">A profile can be general, or narrowed (e.g. only when a Project Contract matches).</p>
+              <div class="scope-box">
+                <div class="scope-card">
+                  <h4>Always available</h4>
+                  <p>Officers can pick this profile for any new Application of this purpose.</p>
+                </div>
+                <div class="scope-card">
+                  <h4>Scoped (example)</h4>
+                  <p>Project contract · Approval leg profile · Migration office — multi-dimensional, not limited to one axis.</p>
+                  <div class="field" style="margin-top:10px">
+                    <label class="lbl">Example scope</label>
+                    <select>
+                      <option>No extra scope</option>
+                      <option selected>Project contract = GT-15 family</option>
+                      <option>Approval leg profile = Energetika chain</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <button type="button" class="btn btn-link" disabled>← Back</button>
+            <button type="button" class="btn btn-primary" data-next>Continue →</button>
+          </div>
+        </section>
+
+        <!-- STEP 1 -->
+        <section class="panel view" data-view="1">
+          <div class="panel-head">
+            <div>
+              <h2>Results &amp; fields</h2>
+              <p>What successful processing may produce or cancel, and which Application header fields are required.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="section">
+              <h3>Application result may produce (change)</h3>
+              <div class="choice-row">
+                <label class="choice"><input type="checkbox" checked /> Invitation</label>
+                <label class="choice"><input type="checkbox" checked /> Work permit</label>
+                <label class="choice"><input type="checkbox" /> Visa</label>
+                <label class="choice"><input type="checkbox" /> Border zone</label>
+                <label class="choice"><input type="checkbox" /> Work location</label>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Application result may cancel existing</h3>
+              <div class="choice-row">
+                <label class="choice"><input type="checkbox" /> Invitation(s)</label>
+                <label class="choice"><input type="checkbox" /> Work permit(s)</label>
+                <label class="choice"><input type="checkbox" /> Visa(s)</label>
+                <label class="choice"><input type="checkbox" /> Border zone permit(s)</label>
+                <label class="choice"><input type="checkbox" /> Application(s)</label>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Application properties required</h3>
+              <p class="hint">Checked = shown &amp; required on Application. Default column = seed value when cloning.</p>
+              <table class="prop-table">
+                <thead>
+                  <tr>
+                    <th>Use</th>
+                    <th>Property</th>
+                    <th>Kind</th>
+                    <th>Has default</th>
+                    <th>Default value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><input type="checkbox" checked /></td><td>Visa type</td><td><span class="tag">lookup</span></td><td><input type="checkbox" checked /></td><td><select><option>WP</option><option>BS1</option><option>FM</option></select></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Visa category</td><td><span class="tag">lookup</span></td><td><input type="checkbox" checked /></td><td><select><option>Multiple</option><option>Double</option></select></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Visa period</td><td><span class="tag">lookup</span></td><td><input type="checkbox" checked /></td><td><select><option>Month6</option><option>Month1</option></select></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Border zone</td><td><span class="tag">lookup</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Migration service</td><td><span class="tag">lookup</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Start date</td><td><span class="tag">date</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>End date</td><td><span class="tag">date</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Region (city)</td><td><span class="tag">lookup</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Business trip address</td><td><span class="tag">lookup</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Project</td><td><span class="tag">lookup</span></td><td><input type="checkbox" checked /></td><td><select><option>From contract</option></select></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Urgency</td><td><span class="tag">lookup</span></td><td><input type="checkbox" checked /></td><td><select><option>Normal</option></select></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Work permit location</td><td><span class="tag">lookup</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Entry date</td><td><span class="tag">date</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                  <tr><td><input type="checkbox" /></td><td>Entry check point</td><td><span class="tag">lookup</span></td><td><input type="checkbox" /></td><td><input type="text" placeholder="—" disabled /></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <h3>Application signatory</h3>
+              <p class="hint">Defaults applied when cloning the profile onto a new Application.</p>
+              <div class="field-grid">
+                <div class="field">
+                  <label class="lbl">Authorized signatory</label>
+                  <select><option>Default company signatory</option><option>Director — Ashgabat</option></select>
+                </div>
+                <div class="field">
+                  <label class="lbl">Visa representative</label>
+                  <select><option>Default visa representative</option></select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <button type="button" class="btn btn-secondary" data-prev>← Back</button>
+            <button type="button" class="btn btn-primary" data-next>Continue →</button>
+          </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="panel view" data-view="2">
+          <div class="panel-head">
+            <div>
+              <h2>Process &amp; SLA</h2>
+              <p>Approval chain and which progress states apply for ministry vs migration service.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="section">
+              <h3>Process steps — approval legs</h3>
+              <p class="hint">Ordered ministry legs (today: ApprovalLegProfile / ProjectContract legs).</p>
+              <div class="list-editor" id="legs">
+                <div class="list-row"><span class="ord">1</span><span>Türkmenenergo</span><button type="button" class="btn btn-link">Remove</button></div>
+                <div class="list-row"><span class="ord">2</span><span>Energetika</span><button type="button" class="btn btn-link">Remove</button></div>
+                <div class="list-row"><span class="ord">3</span><span>Gurluşyk</span><button type="button" class="btn btn-link">Remove</button></div>
+              </div>
+              <button type="button" class="ghost">+ Add approval leg</button>
+            </div>
+
+            <div class="section">
+              <h3>States related to ministry</h3>
+              <p class="hint">SLA track = include in duration tracking.</p>
+              <table class="prop-table">
+                <thead><tr><th>Include</th><th>State</th><th>SLA track</th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox" checked /></td><td>Submitted</td><td><input type="checkbox" checked /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Approved</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Disapproved</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Cancelled</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Postponed</td><td><input type="checkbox" /></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <h3>States related to migration service</h3>
+              <table class="prop-table">
+                <thead><tr><th>Include</th><th>State</th><th>SLA track</th></tr></thead>
+                <tbody>
+                  <tr><td><input type="checkbox" checked /></td><td>Submitted</td><td><input type="checkbox" checked /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>On process</td><td><input type="checkbox" checked /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Process complete</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Postponed</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Issued</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Rejected</td><td><input type="checkbox" /></td></tr>
+                  <tr><td><input type="checkbox" checked /></td><td>Cancelled</td><td><input type="checkbox" /></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <h3>Expected process duration (SLA)</h3>
+              <div class="field-grid">
+                <div class="field">
+                  <label class="lbl">1. Ministry (days)</label>
+                  <input type="number" value="14" min="0" />
+                </div>
+                <div class="field">
+                  <label class="lbl">2. Migration (days)</label>
+                  <input type="number" value="14" min="0" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <button type="button" class="btn btn-secondary" data-prev>← Back</button>
+            <button type="button" class="btn btn-primary" data-next>Continue →</button>
+          </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="panel view" data-view="3">
+          <div class="panel-head">
+            <div>
+              <h2>Templates &amp; person data</h2>
+              <p>Report templates attached to this profile, and which person-related data lines must carry.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="section">
+              <h3>Application templates</h3>
+              <p class="hint">Today this lives on UserReportTemplate via Applicable Application Types / groups / contracts. Profile owns the list instead.</p>
+              <div class="list-editor">
+                <div class="list-row">
+                  <span class="ord">1</span>
+                  <span><strong>Forma 16</strong> · Word · Application root</span>
+                  <button type="button" class="btn btn-link">Edit</button>
+                </div>
+                <div class="list-row">
+                  <span class="ord">2</span>
+                  <span><strong>Borçnama</strong> · Word · ApplicationItem roster</span>
+                  <button type="button" class="btn btn-link">Edit</button>
+                </div>
+              </div>
+              <button type="button" class="ghost">+ Add template (name · type · file)</button>
+              <div class="field-grid" style="margin-top:14px">
+                <div class="field">
+                  <label class="lbl">Template name</label>
+                  <input type="text" placeholder="e.g. Cover letter" />
+                </div>
+                <div class="field">
+                  <label class="lbl">Template type</label>
+                  <select><option>Word report</option><option>Excel report</option><option>PDF form</option></select>
+                </div>
+                <div class="field full">
+                  <label class="lbl">Template file</label>
+                  <input type="text" placeholder="Choose file… (prototype)" disabled />
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h3>Required person-related data</h3>
+              <p class="hint">Drives ApplicationItem readiness / required child data (today: many Show* flags on ApplicationType).</p>
+              <div class="choice-row">
+                <label class="choice"><input type="checkbox" checked /> Passport</label>
+                <label class="choice"><input type="checkbox" checked /> Education</label>
+                <label class="choice"><input type="checkbox" checked /> Position</label>
+                <label class="choice"><input type="checkbox" /> Local address of residence</label>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <button type="button" class="btn btn-secondary" data-prev>← Back</button>
+            <button type="button" class="btn btn-primary" data-next>Continue →</button>
+          </div>
+        </section>
+
+        <!-- STEP 4 -->
+        <section class="panel view" data-view="4">
+          <div class="panel-head">
+            <div>
+              <h2>Review &amp; save</h2>
+              <p>Confirm the template before publishing. Officers will clone this onto each new Application.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="summary-grid">
+              <div class="sum-card">
+                <h4>Identity</h4>
+                <ul>
+                  <li>Invitation + work permit (employee)</li>
+                  <li>Code INV_WP_EMP · quick 101</li>
+                  <li>Via ministry · Employee · Issuance</li>
+                </ul>
+              </div>
+              <div class="sum-card">
+                <h4>Results</h4>
+                <ul>
+                  <li>Produces: invitation, work permit</li>
+                  <li>Cancels: none</li>
+                  <li>Defaults: visa WP / Multiple / Month6</li>
+                </ul>
+              </div>
+              <div class="sum-card">
+                <h4>Process</h4>
+                <ul>
+                  <li>3 ministry legs</li>
+                  <li>Ministry SLA 14d · Migration 14d</li>
+                </ul>
+              </div>
+              <div class="sum-card">
+                <h4>Templates &amp; person</h4>
+                <ul>
+                  <li>2 report templates</li>
+                  <li>Person: passport, education, position</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="panel-foot">
+            <button type="button" class="btn btn-secondary" data-prev>← Back</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" class="btn btn-secondary" onclick="alert('Prototype: would save as draft.')">Save draft</button>
+              <button type="button" class="btn btn-primary" onclick="alert('Prototype: would publish Application Profile template.')">Publish profile</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="live-preview">
+          <div class="lp-head">
+            <h3>Clone lifecycle (conceptual)</h3>
+            <span class="pill on">Template → Application clone</span>
+          </div>
+          <div class="lp-body">
+            <strong>Source profile</strong> (this wizard) is reusable.
+            <strong>Application.ApplicationProfile</strong> = deep clone at create time.
+            Officer may adjust the clone (defaults, legs, templates) without mutating the source.
+            Later template edits affect only Applications created afterward.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const views = [...document.querySelectorAll("[data-view]")];
+      const steps = [...document.querySelectorAll(".step-btn")];
+      let current = 0;
+
+      function show(i) {
+        current = Math.max(0, Math.min(views.length - 1, i));
+        views.forEach((v) => v.classList.toggle("active", Number(v.dataset.view) === current));
+        steps.forEach((s) => s.classList.toggle("active", Number(s.dataset.step) === current));
+      }
+
+      steps.forEach((s) => s.addEventListener("click", () => show(Number(s.dataset.step))));
+      document.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", () => show(current + 1)));
+      document.querySelectorAll("[data-prev]").forEach((b) => b.addEventListener("click", () => show(current - 1)));
+    })();
+  </script>
+</body>
+</html>
