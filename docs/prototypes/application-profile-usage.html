@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Application Profile — usage storyboard</title>
+  <style>
+    :root {
+      --ink: #1a2332;
+      --muted: #5c6b7a;
+      --line: #d5dde6;
+      --panel: #fff;
+      --accent: #0b6e4f;
+      --accent-soft: #e6f3ee;
+      --warn-soft: #fff4e5;
+      --warn: #5c3b08;
+      --surface: #f4f7fa;
+      --font: "Segoe UI", "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1000px 420px at 0% 0%, #dceee6 0%, transparent 55%),
+        linear-gradient(180deg, #eef2f6, var(--surface));
+    }
+    .shell { max-width: 1080px; margin: 0 auto; padding: 28px 20px 72px; }
+    h1 { margin: 0 0 6px; font-size: 1.6rem; letter-spacing: -0.02em; }
+    .lede { color: var(--muted); max-width: 62ch; margin: 0 0 22px; }
+    .banner {
+      background: #e8f0fa; border: 1px solid #c9d6e4; border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 22px; font-size: 0.92rem;
+    }
+    .toc {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px;
+    }
+    .toc a {
+      text-decoration: none; color: var(--accent);
+      border: 1px solid #b7d9cb; background: var(--accent-soft);
+      padding: 8px 12px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;
+    }
+    .scene {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+      overflow: hidden; margin-bottom: 22px;
+      box-shadow: 0 1px 2px rgba(26,35,50,.06), 0 8px 24px rgba(26,35,50,.05);
+    }
+    .scene-head {
+      padding: 16px 18px 12px; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .scene-head h2 { margin: 0 0 4px; font-size: 1.15rem; }
+    .scene-head p { margin: 0; color: var(--muted); font-size: 0.9rem; max-width: 70ch; }
+    .badge {
+      align-self: flex-start; font-size: 0.75rem; font-weight: 700;
+      padding: 5px 9px; border-radius: 999px; background: var(--accent-soft); color: #08553c;
+    }
+    .scene img {
+      display: block; width: 100%; height: auto; background: #dfe6ee;
+      border-bottom: 1px solid var(--line);
+    }
+    .scene-body { padding: 14px 18px 18px; }
+    .scene-body ol { margin: 0; padding-left: 1.2rem; }
+    .scene-body li { margin: 6px 0; font-size: 0.92rem; }
+    .callout {
+      margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+      background: var(--warn-soft); border: 1px solid #f0d4a8; color: var(--warn);
+      font-size: 0.88rem;
+    }
+    .mock {
+      border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 12px;
+    }
+    .mock-bar {
+      background: #fafbfc; border-bottom: 1px solid var(--line);
+      padding: 10px 12px; font-weight: 650; font-size: 0.9rem;
+    }
+    .mock-list { list-style: none; margin: 0; padding: 0; }
+    .mock-list li {
+      padding: 12px 14px; border-bottom: 1px solid #eef2f6;
+      display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center;
+    }
+    .mock-list li:last-child { border-bottom: 0; }
+    .mock-list li.selected { background: var(--accent-soft); }
+    .mock-list .meta { color: var(--muted); font-size: 0.8rem; }
+    .btn-row { display: flex; gap: 8px; justify-content: flex-end; padding: 12px; background: #fafbfc; border-top: 1px solid var(--line); }
+    .btn {
+      border-radius: 8px; padding: 8px 12px; font: inherit; font-weight: 650; font-size: 0.88rem; cursor: default;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border: 0; }
+    .btn-sec { background: #fff; border: 1px solid var(--line); }
+    .decisions {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px;
+    }
+    @media (max-width: 720px) { .decisions { grid-template-columns: 1fr; } }
+    .decisions div {
+      border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: #fbfcfd;
+      font-size: 0.88rem;
+    }
+    .decisions strong { display: block; margin-bottom: 4px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    a.inline { color: var(--accent); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>Application Profile — usage storyboard</h1>
+    <p class="lede">
+      How selected officers configure a reusable Application Profile, pick it when creating an Application,
+      and edit the permanent clone on that Application only.
+      Companion to the
+      <a class="inline" href="application-profile-wizard.html">configuration wizard prototype</a>
+      and <a class="inline" href="../APPLICATION_PROFILE_PLAN.md">plan</a>.
+    </p>
+
+    <div class="banner">
+      Locked: deep clone · no re-sync · freeform criteria · exclusive action family · embedded legs ·
+      free state checklists · nested template files · person v1 = 4 checkboxes · selected officers · wizard UX.
+      <strong>Clone storage:</strong> full owned BO graph (not JSON).
+    </div>
+
+    <nav class="toc">
+      <a href="#lifecycle">Lifecycle</a>
+      <a href="#configure">1. Configure</a>
+      <a href="#pick">2. Pick on Application</a>
+      <a href="#clone">3. Edit clone</a>
+      <a href="#decisions">Decisions</a>
+    </nav>
+
+    <section class="scene" id="lifecycle">
+      <div class="scene-head">
+        <div>
+          <h2>Lifecycle at a glance</h2>
+          <p>Source template is reusable. Each Application receives an independent deep clone.</p>
+        </div>
+        <span class="badge">Overview</span>
+      </div>
+      <img src="images/ap-04-lifecycle.png" alt="Application Profile lifecycle: configure, publish, clone, edit clone only" />
+      <div class="scene-body">
+        <ol>
+          <li>Selected officer configures and publishes a <strong>source Application Profile</strong>.</li>
+          <li>On Application create, the picker lists profiles that match <strong>freeform applicability criteria</strong>.</li>
+          <li>Choosing a profile <strong>deep-clones</strong> the full owned graph onto the Application.</li>
+          <li>Edits on the Application clone never write back; source edits never update existing clones.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="scene" id="configure">
+      <div class="scene-head">
+        <div>
+          <h2>1. Configure source profile (wizard)</h2>
+          <p>Permissioned officers use the wizard (Excel sections). Legs, states, and template files live on the profile.</p>
+        </div>
+        <span class="badge">Story A</span>
+      </div>
+      <img src="images/ap-01-configure-wizard.png" alt="Application Profile configuration wizard mockup" />
+      <div class="scene-body">
+        <ol>
+          <li>Open <strong>Application Profiles</strong> → New.</li>
+          <li>Step through Identity → Results &amp; fields → Process &amp; SLA → Templates &amp; person → Review.</li>
+          <li>Embed approval legs; enable ministry/migration states; upload nested template files.</li>
+          <li>Optional freeform criteria (e.g. project contract / office context) for picker filtering.</li>
+          <li>Publish. Interactive detail:
+            <a class="inline" href="application-profile-wizard.html">application-profile-wizard.html</a>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="scene" id="pick">
+      <div class="scene-head">
+        <div>
+          <h2>2. Create Application — pick profile</h2>
+          <p>Picker shows matching profiles; Accept creates the Application with a deep-cloned profile instance.</p>
+        </div>
+        <span class="badge">Story B</span>
+      </div>
+      <img src="images/ap-02-pick-on-application.png" alt="Select Application Profile when creating an Application" />
+      <div class="scene-body">
+        <ol>
+          <li>New Application → <strong>Choose Application Profile</strong>.</li>
+          <li>List filtered by freeform criteria + audience / action family as needed.</li>
+          <li>Preview route, produce capabilities, legs, templates.</li>
+          <li><strong>Use profile (clone)</strong> → deep copy into <code>Application.ProfileInstance</code>; apply field defaults.</li>
+        </ol>
+
+        <div class="mock" aria-hidden="true">
+          <div class="mock-bar">Prototype — profile picker (wire)</div>
+          <ul class="mock-list">
+            <li class="selected">
+              <div>
+                <strong>Invitation + work permit (employee)</strong>
+                <div class="meta">INV_WP_EMP · 101 · Via ministry · Issuance</div>
+              </div>
+              <span class="badge">Selected</span>
+            </li>
+            <li>
+              <div>
+                <strong>Visa extension (family)</strong>
+                <div class="meta">VISA_EXT_FM · 210 · Via ministry · Issuance</div>
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Registration — Ashgabat</strong>
+                <div class="meta">REG_AG · 401 · Direct migration · Registration</div>
+              </div>
+            </li>
+          </ul>
+          <div class="btn-row">
+            <button type="button" class="btn btn-sec">Cancel</button>
+            <button type="button" class="btn btn-primary">Use profile (clone)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" id="clone">
+      <div class="scene-head">
+        <div>
+          <h2>3. Application owns the clone</h2>
+          <p>Officers can change legs, defaults, or nested files on this Application. Source template stays unchanged.</p>
+        </div>
+        <span class="badge">Story C</span>
+      </div>
+      <img src="images/ap-03-clone-on-application.png" alt="Application detail with independent profile clone" />
+      <div class="scene-body">
+        <ol>
+          <li>Application detail → <strong>Profile (this application)</strong>.</li>
+          <li>Edit clone: field defaults, embedded legs, enabled states, nested template files.</li>
+          <li>Progress and Resminamalar-style generation read the <strong>clone</strong>, not the source.</li>
+        </ol>
+        <div class="callout">
+          No re-sync. Improving the source profile only affects Applications created afterward (Story D).
+        </div>
+      </div>
+    </section>
+
+    <section class="scene" id="decisions">
+      <div class="scene-head">
+        <div>
+          <h2>Decision snapshot</h2>
+          <p>Locked for planning; remaining open items are in the plan doc.</p>
+        </div>
+        <span class="badge">Locked</span>
+      </div>
+      <div class="scene-body">
+        <div class="decisions">
+          <div><strong>Clone</strong> Always deep-clone · divergence permanent · no live link</div>
+          <div><strong>Storage</strong> Full owned BO graph (source + instance same shape)</div>
+          <div><strong>Scope</strong> Freeform XAF criteria on picker</div>
+          <div><strong>Action family</strong> Exclusive radio (issuance / cancel / registration / trip)</div>
+          <div><strong>Legs / states</strong> Embedded legs · freely enabled state checklists</div>
+          <div><strong>Templates / person</strong> Nested files on profile · 4 person checkboxes in v1</div>
+          <div><strong>Access</strong> Selected officers · wizard UX for v1</div>
+          <div><strong>Still open</strong> Temp visitor, criteria target, field placement, SLA tiers, template engine path</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

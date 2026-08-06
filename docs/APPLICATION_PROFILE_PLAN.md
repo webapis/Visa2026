@@ -1,9 +1,12 @@
 # Application Profile — configuration & clone model (plan)
 
-**Status:** Prototype + questions (no domain implementation yet)  
-**Prototype:** [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)  
-**Input draft:** `Application.xlsx` (attached to planning chat)  
-**Related today:** `ApplicationType` (`LookupBusinessObjects.cs`), `Application`, `ApplicationItem`, `ApplicationProgress`, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
+**Status:** Decisions locked (see §2) · UX prototyping in progress · no domain implementation yet  
+**Prototypes:**
+- Wizard: [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)
+- Usage storyboard: [`docs/prototypes/application-profile-usage.html`](prototypes/application-profile-usage.html)
+- Storyboard images: [`docs/prototypes/images/`](prototypes/images/)
+**Input draft:** [`docs/prototypes/Application-profile-wizard-draft.xlsx`](prototypes/Application-profile-wizard-draft.xlsx)  
+**Related today:** `ApplicationType`, `Application`, `ApplicationItem`, `ApplicationProgress`, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
 
 ---
 
@@ -21,132 +24,169 @@ Application-type behavior is **scattered**:
 | SLA | `ApplicationMigrationSlaProfile` (+ duration fields) |
 | Selection UX | `SelectionCode` + quick code (see `APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`) |
 
-Creating or tweaking a “new kind of application” requires editing lookup flags, seed JSON, Appearance criteria, and often C# defaults — poor officer/admin UX and hard to reuse.
+Creating or tweaking a “new kind of application” requires editing lookup flags, seed JSON, Appearance criteria, and often C# defaults — poor officer UX and hard to reuse.
 
 ---
 
-## 2. Goal
+## 2. Locked decisions
 
-Introduce **Application Profile** as the single configuration surface (wizard) that defines how an Application behaves.
+| # | Topic | Decision |
+|---|--------|----------|
+| 1 | Clone on Application create | **Always deep-clone.** No live link to the source profile. |
+| 2 | Re-sync from source | **Not supported.** Divergence is permanent. Source edits affect **future** Applications only. Lineage FK (`SourceProfileId`) is informational. |
+| 3 | Clone storage | **Full owned BO graph in XAF** (recommended — see §3). Not a JSON blob. |
+| 4 | Scope / applicability | **Freeform criteria** (XAF criteria against Application context) filters which source profiles appear in the picker. |
+| 5 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. |
+| 6 | Approval legs | **Embedded** on the profile (ordered ministry legs). Do not reference `ApprovalLegProfile` as the owner. |
+| 7 | Process states | **Freely enable** ministry / migration state checklists from Excel (profile defines allowed states + SLA-track flags). Transition rules derived from enabled set (replace hard-coded route tables over time). |
+| 8 | Templates | **Nest files inside the profile** (name, type, `FileData`). Profile is the store for that template set — not association-only to `UserReportTemplate`. |
+| 9 | Person data (v1) | **Four checkboxes only:** Passport, Education, Position, Local address of residence. Full `ShowCurrent*` matrix is a later phase. |
+| 10 | Who configures | **Selected officers** (permissioned), not Administrators-only. |
+| 11 | Config UX (v1) | **Wizard** (as prototyped), not a single long DetailView. |
 
-- **Rename conceptually:** Application Profile **replaces** today’s `ApplicationType` as the thing officers configure and Applications bind to.
-- **Template + clone:**
-  - Source profile = reusable template (created once).
-  - On Application create, profile is **cloned** onto the Application.
-  - Clone edits **do not** change the source template.
-  - Template edits apply to **future** clones only.
-- **Scope:** profiles may be general or scoped (Application purpose only, or + ProjectContract, ApprovalLegProfile, etc. — unbounded dimensions).
-- **Wizard content** follows `Application.xlsx` sections (identity, results/fields, process/SLA, templates, person data).
+### Still open (narrow)
 
-**First deliverable (this PR):** visual wizard prototype only — not EF/BOs.
-
----
-
-## 3. Excel → wizard mapping
-
-| Excel section | Wizard step (prototype) | Notes vs current model |
-|---------------|-------------------------|------------------------|
-| Name / Description / Code | Step 1 — Identity | Replaces `LookupBase` name/code (+ optional `SelectionCode`) |
-| Directed to: ministry / migration | Step 1 — Route | `ApplicationProgressRoute` |
-| For: Employee / FM / Temporary visitor | Step 1 — Audience | Extends/replaces `ApplicationTypeCategory` |
-| Related to: issuance / cancel / registration / business trip | Step 1 — Action family | Partly overlaps lifecycle + ShowRegistrations / ShowBusinessTrips |
-| Result may produce | Step 2 — Produce | `CanIssue*` + border zone / work location (new explicit axes) |
-| Result may cancel | Step 2 — Cancel | Today mostly implicit via cancel application types |
-| Properties required + defaults | Step 2 — Fields | Replaces `Show*` + hard-coded defaults in `Application.cs` |
-| Signatory / representative | Step 2 — Signatory | New first-class defaults (org singletons exist) |
-| Approval legs + states + SLA | Step 3 — Process | Absorbs legs/SLA now split across type, profile, contract |
-| Application templates | Step 4 — Templates | Invert ownership vs `UserReportTemplate` applicability lists |
-| Required person-related data | Step 4 — Person | Passport / education / position / address — today many item `Show*` flags |
+| # | Topic | Notes |
+|---|--------|------|
+| A | Naming in UI | Confirm officers never see “Application type” after cutover; interim dual labels OK? |
+| B | Temporary visitor | Real audience for v1, or seed later? |
+| C | Scope criteria target | Criteria against `Application` only, or also ProjectContract / person context at pick time? |
+| D | Cancel-existing “Application(s)” | Excel showed radio for that one row — treat all cancel targets as checkboxes? |
+| E | Field placement | Which Excel “required properties” belong on Application header vs ApplicationItem (entry date / checkpoint)? |
+| F | SLA integers | Raw ministry/migration days on profile replace `ApplicationMigrationSlaProfile` tiers? |
+| G | Nested template engine | New profile-owned files still feed Resminamalar / Word merge via same placeholder pipeline, or parallel path? |
 
 ---
 
-## 4. Proposed domain shape (sketch — not implemented)
+## 3. Clone storage recommendation — full owned BO graph
+
+**Recommendation: full XAF-owned aggregate**, deep-cloned onto the Application.
+
+| | Owned BO graph (chosen) | Serialized JSON snapshot |
+|--|-------------------------|---------------------------|
+| Nested template **files** | Native `FileData` / aggregated children | Awkward (bytes in JSON or side tables anyway) |
+| Embedded **approval legs** | Ordered child BOs, editable in clone | Thin custom editor required |
+| Free state checklists | Child rows or flags, validation rules | Harder to Appearance / RuleCriteria |
+| Officer edits on Application clone | Standard DetailView / nested ListViews | Custom UI for every change |
+| Progress / reports runtime | Queryable graph, same shape as source | Deserialize + map on every use |
+| Schema / migration cost | Higher (more tables) | Lower initially, debt later |
+
+Because decisions already require **nested files**, **embedded legs**, **editable clones**, and **officer configuration**, JSON would immediately fight the product shape. Use one aggregate shape for source and clone:
 
 ```
-ApplicationProfile          // source template (admin/config)
-  - Identity, route, audience, action family
-  - Produce / cancel capability sets
-  - Field requirements + default values
-  - Signatory defaults
-  - Process: legs, allowed states, SLA days
-  - Template links
-  - Person data requirements
-  - Optional scope predicates (contract, etc.)
-  - IsActive, Version?
-
-ApplicationProfileClone     // owned by Application (or embedded JSON / owned aggregate)
-  - Snapshot of profile at create time
-  - Mutable per Application
-  - SourceProfileId (nullable FK for lineage; not live-bound)
+ApplicationProfile                    // source template (Configuration nav)
+  ├─ FieldRequirement[]               // required + default value
+  ├─ ApprovalLeg[]                    // embedded, ordered
+  ├─ ProcessStateFlag[]               // ministry/migration + SLA track
+  ├─ NestedTemplate[] + FileData      // files owned by profile
+  ├─ PersonDataRequirements           // 4 bools (v1)
+  ├─ ApplicabilityCriteria (string)   // freeform XAF criteria
+  └─ identity / route / audience / action family / produce / cancel / signatory / SLA days
 
 Application
-  - ApplicationProfileClone (required after migration)
-  - (transitional) ApplicationType retained until cutover
+  └─ ApplicationProfileInstance       // deep clone, Aggregated
+       ├─ (same child shape as above)
+       ├─ SourceProfileId?            // lineage only; never auto-updated
+       └─ ClonedAt
 ```
 
-**Clone depth:** deep enough that process legs, field defaults, template list, and person requirements on the Application are independent of later template edits.
+**Clone algorithm (conceptual):** on Application create, after officer picks a source profile → deep-copy aggregate into `Application.ProfileInstance` → apply field defaults onto Application header → never write back to source.
 
 ---
 
-## 5. Migration posture (high level)
+## 4. How officers use Application Profile
 
-1. Prototype UX (this PR) → lock wizard sections with stakeholders.  
-2. Introduce `ApplicationProfile` alongside `ApplicationType`; seed profiles from existing type catalog.  
-3. Dual-read: Application still has Type; profile clone derived from type.  
-4. Switch Appearance / progress / reports to read clone.  
-5. Deprecate `ApplicationType` / type groups / type-linked template filters.  
-6. Remove hard-coded type-name defaults from `Application.cs`.
+```mermaid
+flowchart LR
+  subgraph config [Configure once]
+    A[Selected officer opens Application Profiles]
+    B[Wizard: identity → results → process → templates → person]
+    C[Publish source Application Profile]
+    A --> B --> C
+  end
+  subgraph use [Reuse many times]
+    D[Create Application]
+    E[Picker shows profiles matching freeform criteria]
+    F[Deep clone onto Application]
+    G[Edit clone on this Application only]
+    D --> E --> F --> G
+  end
+  C -.->|template for future apps| E
+  G -.->|no write-back| C
+```
 
-Exact cutover and data migration are **out of scope** until questions below are answered.
+### Story A — Create / edit a source profile
+1. Officer with permission opens **Application Profiles**.
+2. Runs the **wizard** (Excel sections).
+3. Sets freeform **applicability criteria** (optional).
+4. Embeds approval legs, enables process states, uploads nested templates, sets person checkboxes.
+5. **Publish** → available in Application picker (when criteria match).
 
----
+### Story B — Create an Application from a profile
+1. New Application → **Choose Application Profile** (filtered by criteria + audience/action family).
+2. System **deep-clones** profile → `Application.ProfileInstance`.
+3. Header fields get profile defaults (visa type/period/…); produce/cancel capabilities drive collections.
+4. Progress uses cloned legs + enabled states + SLA days.
 
-## 6. Non-goals (for now)
+### Story C — Adjust this Application only
+1. On Application detail, open **Profile (this application)**.
+2. Change a default, leg order, or replace a nested template file.
+3. Source profile unchanged; other Applications unchanged; **no re-sync**.
 
-- Implementing EF entities, updaters, or XAF DetailViews for the wizard.
-- Changing VISA2014 import mapping.
-- Replacing Resminamalar / Document copies engines (only how templates are *associated*).
-
----
-
-## 7. Open questions
-
-### A. Product / naming
-1. Confirm **Application Profile** replaces **ApplicationType** in officer language (nav, manuals, reports) — keep internal `ApplicationType` table only during migration?
-2. Is “Temporary visitor” a real third audience, or a placeholder for a later person category?
-
-### B. Clone semantics
-3. On Application create: always clone entire profile, or allow “link to live template” for some tenants?
-4. Can officers **re-sync** a clone from the updated source (overwrite with confirm), or is divergence permanent until manual edit?
-5. Is the clone a **full owned BO graph** (queryable in XAF) or a **serialized snapshot** (JSON) with a thin editor?
-
-### C. Scope
-6. How is multi-scope expressed? (e.g. profile applicable when `ProjectContract` matches **or** when approval-leg profile matches — AND vs OR? UI for arbitrary criteria?)
-7. Does scope filter which profiles appear in the Application picker only, or also constrain runtime validation?
-
-### D. Excel vs current capabilities
-8. Excel “related to” is a **single** radio (issuance | cancel | registration | business trip). Today one type can combine flags (e.g. show registrations + issue visa). Keep exclusive families, or allow multi-select?
-9. “Cancel existing Application(s)” as radio in Excel — intentional single-select vs checkboxes?
-10. Which Excel “required properties” map 1:1 to Application header vs ApplicationItem (e.g. entry date / checkpoint today live on registration lines)?
-
-### E. Process
-11. Do approval legs on the profile **replace** `ApprovalLegProfile` / contract legs, or reference an existing `ApprovalLegProfile` as a building block?
-12. Excel ministry/migration **state checklists** — freeform enablement of `ApplicationState` rows, or stay on today’s fixed route transition tables (`ApplicationProgressProfileResolver`)?
-13. SLA: replace `ApplicationMigrationSlaProfile` tiers with raw day integers on the profile?
-
-### F. Templates & person
-14. Should profiles **own** template attachments, while `UserReportTemplate` remains the file/placeholder store — or fully nest files inside the profile?
-15. Person requirements: only the four Excel checkboxes for v1, or expand to the full current `ShowCurrent*` matrix in a later step?
-
-### G. Permissions & UX
-16. Who edits source profiles — Administrators only, or selected officers?
-17. Prefer **wizard** (as prototype) vs single long DetailView with tabs in XAF for v1?
+### Story D — Improve the template for next time
+1. Edit source profile (wizard).
+2. Existing Applications keep their clones.
+3. Next new Application gets the updated clone.
 
 ---
 
-## 8. Suggested next steps after answers
+## 5. Excel → wizard mapping
 
-1. Lock decisions for A–C (naming + clone model + scope).  
-2. Produce a field dictionary: Excel row → profile property → current `Show*` / capability.  
-3. Thin vertical slice: `ApplicationProfile` BO + clone on Application create (read-only clone on Application) — still no full wizard.  
-4. Migrate one sample type (e.g. invitation+WP) end-to-end as proof.
+| Excel section | Wizard step | Locked behavior |
+|---------------|-------------|-----------------|
+| Name / Description / Code | 1 Identity | Source profile identity |
+| Directed to | 1 Route | Ministry vs direct migration |
+| For | 1 Audience | Employee / FM / Temporary visitor (multi checkbox) |
+| Related to | 1 Action family | **Exclusive** radio |
+| Result may produce / cancel | 2 Results | Capability sets |
+| Properties required + defaults | 2 Fields | Replaces `Show*` + C# defaults |
+| Signatory | 2 Signatory | Defaults on clone |
+| Approval legs + states + SLA | 3 Process | Embedded legs; free state checklists; day integers |
+| Application templates | 4 Templates | **Nested files** on profile |
+| Required person-related data | 4 Person | **Four checkboxes (v1)** |
+| Scope | 1 / Review | Freeform criteria |
+
+---
+
+## 6. Migration posture (after UX sign-off)
+
+1. Lock remaining open items (§2).  
+2. Field dictionary: Excel row → profile property → current `Show*` / capability.  
+3. Introduce `ApplicationProfile` + `ApplicationProfileInstance` alongside `ApplicationType`.  
+4. Seed profiles from existing type catalog (best-effort mapping).  
+5. Dual-read period: Type still set; clone also present.  
+6. Switch Appearance / progress / reports to read **instance**.  
+7. Deprecate `ApplicationType`, type groups, type-linked template filters, hard-coded defaults.  
+8. Resminamalar path: consume nested profile templates (or migrate `UserReportTemplate` rows into profile seeds).
+
+---
+
+## 7. Non-goals (this prototyping phase)
+
+- EF entities, ModuleUpdater, production wizard host.
+- VISA2014 import remapping.
+- Expanding person requirements beyond the four Excel checkboxes.
+- Re-sync / live-link features.
+
+---
+
+## 8. Prototype checklist
+
+| Artifact | Purpose |
+|----------|---------|
+| `application-profile-wizard.html` | Configure source profile (5 steps) |
+| `application-profile-usage.html` | End-to-end usage storyboard (picker → clone → edit) |
+| `images/ap-01-configure-wizard.png` | Visual: officer configuring profile |
+| `images/ap-02-pick-on-application.png` | Visual: picking profile on new Application |
+| `images/ap-03-clone-on-application.png` | Visual: cloned profile on Application (independent) |
+| `images/ap-04-lifecycle.png` | Visual: template vs clone lifecycle |
