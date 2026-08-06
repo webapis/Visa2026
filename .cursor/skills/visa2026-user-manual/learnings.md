@@ -434,3 +434,11 @@ Record verified outcomes after catalog generator changes, CI fixes, guide public
 - **Decision:** Track `user-manual/assets/screenshots/**/*.png` in git; CI `-RequireMedia` + `--site-url` for Pages deploy.
 - **Still ignored:** videos (`user-manual/assets/videos/`), `user-manual/site/`, `docs/assets/` sync copy.
 - **Workflow:** Record → `Copy-EasyTestManualScreenshots.ps1` → commit PNGs with guide changes; `user-manual.yml` on `master` publishes to `https://<owner>.github.io/<repo>/`.
+
+### 2026-08-06 — `family-member/register` draft → review (path A4)
+
+- **Phase:** 2
+- **Area:** guide
+- **What worked:** Doc-anchored media was already fully wired for `family-member/register` — 3 capture keys (`person-register-family-member-step-01..03`) present as body `<!-- media-capture -->` anchors, `media-capture-registry.yaml` rows (with `assertBeforeCapture`), `UserManualMediaCaptureKeys` constants, `RegisterFamilyMemberAsync` `CaptureAsync` calls, `[Trait("GuideSlug","family-member/register")]`, and committed PNGs. Transition to `review` = en frontmatter `guideStatus: draft → review` + `tracking.md` row 4b + `USER_MANUAL_STATUS.md §3`.
+- **Gotcha / drift:** `step-02-saved-detail` and `step-03-open-from-list` share the **same** git blob (`c1f2b117…`) — and it is the **same placeholder blob** as the published `employee/register` pilot. So current family-member captures are employee-journey fan-out placeholders, not role-specific frames. Accepted for `review` (matches shipped pilot baseline); genuine family-member frames come from a real `person-officer-journey` E2E run at the `verified`/`published` gate. Left `verified: false`; did **not** set `lastReviewed` (no officer walkthrough yet). en only — tr/tk/ru stay `draft` per en-first rule.
+- **Follow-up:** Officer walkthrough of en `family-member/register`; run `person-officer-journey` UserManual E2E to replace placeholder step-01/02/03 PNGs with genuine family-member captures, then pipeline sets `verified: true` → `published`; then locale depth (tr/tk/ru).

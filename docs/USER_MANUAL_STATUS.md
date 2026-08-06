@@ -130,6 +130,7 @@ Consolidated changelog across planning docs. Append here when architecture or ph
 | 2026-08-05 | **Curriculum + inventory v2** — BO dependency order (`Application` / `ApplicationItem` after Person children); 25 guides in [tracking.md](../.cursor/skills/visa2026-user-manual/tracking.md) |
 | 2026-08-06 | **Officer review pilots 6–7** — `employee/family-members-for-visa-manual` + `employee/add-visa` (en) → `guideStatus: published`, verified E2E `20260805-172303` |
 | 2026-08-06 | **Catalog fix** — `[UserDocumentation]` on `UserReportTemplate` for administration guides validator |
+| 2026-08-06 | **`family-member/register` → review** (en) — doc-anchored media confirmed (3 capture keys wired: registry + `UserManualMediaCaptureKeys` + `RegisterFamilyMemberAsync`); queued for officer walkthrough |
 
 **Run locally:** `./scripts/ci/Build-UserManual.ps1 -SkipE2E` (requires Python 3 for mkdocs step).
 

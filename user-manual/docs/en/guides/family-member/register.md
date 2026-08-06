@@ -3,7 +3,7 @@ title: Register a family member
 slug: family-member/register
 locale: en
 tier: 2
-guideStatus: draft
+guideStatus: review
 bo: Person
 personRole: FamilyMember
 navPath: FamilyMember
