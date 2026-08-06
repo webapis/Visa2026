@@ -43,12 +43,14 @@ Creating or tweaking a “new kind of application” requires editing lookup fla
 | 9 | Person data (v1) | **Four checkboxes only:** Passport, Education, Position, Local address of residence. Full `ShowCurrent*` matrix is a later phase. |
 | 10 | Who configures | **Selected officers** (permissioned), not Administrators-only. |
 | 11 | Config UX (v1) | **Wizard** (as prototyped), not a single long DetailView. |
-| 12 | Required properties dual use | Each checked **Application property required** is both **(a)** shown/required on the Application form and **(b)** a **merge field** for nested Word/Excel templates on that profile. Same list, two jobs. |
+| 12 | Required properties dual use | Catalog properties feed **(a)** Application form (when visible per §2.3) and **(b)** Word/Excel merge when referenced by nested templates. |
 | 13 | Defaults in template fill | When merging Word/Excel, if the Application value is empty, **use the profile default** for that property. |
-| 14 | Automatic placeholders | Beyond the required-properties list, **identity / signatory / process** fields (name, description, code, route, SLA, signatory, representative, enabled states summary, etc.) are **always** available as merge placeholders. |
-| 15 | Person checkboxes → templates | Person requirements also **drive template availability** (e.g. which person-roster columns / item-level placeholders are in play), not form/readiness only. |
+| 14 | Automatic placeholders | Identity / signatory / process (name, description, code, route, SLA, signatory, representative, states summary, etc.) are **merge-only** `{{…}}` placeholders — **not** shown as Application form fields from template usage. |
+| 15 | Person checkboxes → templates | **Explicit profile toggles** (recommended — see §2.4). Enable readiness **and** person/roster template column packs; do not solely auto-derive from placeholder extraction. |
 | 16 | Placeholder naming | Keep today’s **`{{…}}`** conventions (existing map / Word–Excel pipeline). |
 | 17 | Clone divergence allowlist | Officers may change **only** the allowlisted Application field values on the Application (see §2.1). Structural profile config is **frozen** on the clone (see §2.2) — not reconfigured per Application. |
+| 18 | Workflow-only fields on Application | If a catalog field (e.g. Migration Service, Project) is needed for **progress/routing** but appears in **no** Word/Excel file, it **still appears** on the Application form. |
+| 19 | Template-driven form surface | For the 14 allowlisted properties, Application **visibility/editability** is driven primarily by nested-template `{{…}}` usage, **plus** the workflow-only exception (§2.3). Automatic placeholders stay merge-only (§14). |
 
 ### 2.1 Clone-editable Application properties (allowlist)
 
@@ -84,6 +86,46 @@ Copied from the source profile onto the Application clone, then **read-only** fo
 | **Result may cancel existing** | Invitation(s) · Work permit(s) · Visa(s) · Border zone permit(s) · Application(s) |
 | **Also frozen** | Embedded approval legs · process state checklists · SLA day integers · nested template file set · which of the 14 properties are required/defaults · person requirement checkboxes · applicability criteria · source profile identity (name/code/description) |
 
+### 2.3 Application form visibility (catalog properties)
+
+For the **14 allowlisted** properties on an Application:
+
+| Shown / editable when | Rule |
+|----------------------|------|
+| Used in a nested Word/Excel template | Property’s `{{…}}` appears in at least one profile template → **visible + editable** on Application |
+| Workflow-only | Needed for progress/routing (e.g. Migration Service, Project) even if unused in templates → **still visible + editable** |
+| Neither | **Hidden** on Application (still may exist as catalog/default on profile for future templates) |
+
+**Merge-only (never form-driven by templates):** identity, route, SLA, signatory, representative, process summaries (§14).
+
+```mermaid
+flowchart LR
+  T[Nested template {{…}} for catalog props] --> V[Visible on Application]
+  W[Workflow-needed props] --> V
+  Auto[Identity / signatory / process] --> M[Merge only]
+  V --> Edit[Officer edits allowlisted values]
+  Edit --> M2[Word/Excel fill]
+  Auto --> M2
+  Def[Profile defaults if empty] --> M2
+```
+
+### 2.4 Person checkboxes — recommendation (pending confirm)
+
+**Keep explicit profile toggles** (Passport, Education, Position, Local address) that:
+
+1. Drive **readiness / validation** on ApplicationItem (must collect that person data), and  
+2. **Enable** the related person/roster `{{…}}` column pack for nested templates.
+
+**Do not** solely auto-show person blocks from placeholder extraction.
+
+| Why toggles win over derive-only | |
+|--------------------------------|--|
+| Readiness ≠ merge | An application may require Passport on file even when a given letter template doesn’t print passport number. |
+| Roster packs are coarse | Officers think “needs education + position,” not individual placeholder keys. |
+| Safer publish | Extraction can **warn/block** if a template references Education while the Education toggle is off (constrain), without removing intentional readiness. |
+
+**Suggested validate-on-publish:** template placeholder references to person packs must have the matching toggle ON; unused toggles allowed (readiness without merge).
+
 ### Still open (narrow)
 
 | # | Topic | Notes |
@@ -94,32 +136,37 @@ Copied from the source profile onto the Application clone, then **read-only** fo
 | D | Cancel-existing “Application(s)” | Excel showed radio for that one row — treat all cancel targets as checkboxes? |
 | E | Field placement | Which of the 14 live on Application header vs ApplicationItem (e.g. entry date / checkpoint)? |
 | F | SLA integers | Raw ministry/migration days on profile replace `ApplicationMigrationSlaProfile` tiers? |
-| G | Merge host | Profile-owned nested files use the same Resminamalar / Word–Excel merge host with `{{…}}`, with data resolved from Application + profile defaults + person flags — confirm no parallel engine. |
-
+| G | Merge host | Profile-owned nested files use the same Resminamalar / Word–Excel merge host with `{{…}}` — confirm no parallel engine. |
+| H | Required-to-save vs visible | **Undecided.** Recommendation: visible = template ∪ workflow; **required-to-save = separate** profile flag (default ON for template-used fields; officer may clear for optional merge fields). |
+| I | Derive vs constrain catalog | **Undecided.** Recommendation: **hybrid** — auto-derive candidate visible set from template extraction ∪ workflow set; keep profile defaults; **hard-block publish** if a template uses an unknown/disabled catalog property; soft-warn if an enabled property is unused by any template. |
+| J | Person toggles | Confirm §2.4 recommendation (explicit toggles + constrain templates to toggles). |
 ---
 
 ## 3. Properties → form + Word/Excel merge
 
 ```mermaid
 flowchart TB
-  P[Application Profile required properties + defaults]
-  P --> F[Application form: show / require]
-  P --> M[Nested Word/Excel templates: merge fields]
-  I[Identity / signatory / process] --> M
-  Pers[Person checkboxes] --> F
-  Pers --> T[Template availability / roster columns]
-  App[Application live values for allowlisted 14 fields] --> M
-  Def[Profile defaults] -->|if Application value empty| M
-  M --> Out["Filled {{…}} output"]
+  Tmpl[Nested Word/Excel placeholders]
+  Wf[Workflow-needed catalog fields]
+  Tmpl --> Vis[Visible editable on Application]
+  Wf --> Vis
+  Auto[Identity / signatory / process] --> MergeOnly[Merge only]
+  PersToggle[Person toggles on profile] --> Ready[Item readiness]
+  PersToggle --> Pack[Enable roster/person placeholder packs]
+  Vis --> AppVals[Application allowlisted values]
+  AppVals --> Fill[Fill nested templates]
+  Def[Profile defaults if empty] --> Fill
+  MergeOnly --> Fill
+  Pack --> Fill
 ```
 
 ### Merge data resolution (conceptual)
 
-1. Build merge dictionary from Application + clone lineage.  
-2. For each required property on the profile: map to today’s `{{…}}` placeholder key.  
+1. Extract `{{…}}` from nested profile templates; map to catalog properties + automatic + person packs.  
+2. Application form shows catalog props in **(template usage ∪ workflow-needed)**.  
 3. Value = Application allowlisted field if set; else **profile default**.  
-4. Always add identity / signatory / process automatic placeholders.  
-5. Person flags gate which person/item placeholders or roster columns are available (and readiness).  
+4. Add identity / signatory / process as **merge-only** automatic placeholders.  
+5. Person toggles gate readiness and which person/roster packs may be filled; publish validation ensures templates don’t reference a pack while its toggle is off.  
 6. Fill nested profile Word/Excel files with that dictionary.
 
 ---
