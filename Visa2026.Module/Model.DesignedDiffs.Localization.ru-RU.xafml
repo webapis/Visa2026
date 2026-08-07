@@ -228,8 +228,8 @@
         <Member Name="ApplicationItems" Caption="Позиции" />
         <Member Name="ApplicationNumber" Caption="Номер заявки" />
         <Member Name="ApplicationReason" Caption="Причина" />
-        <Member Name="ApplicationType" Caption="Тип заявки" />
-        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа" />
+        <Member Name="ApplicationType" Caption="Тип заявки (устарело)" />
+        <Member Name="ApplicationTypeFilter" Caption="Фильтр типа (устарело)" />
         <Member Name="ApprovalLegProfile" Caption="Профиль этапов министерств" />
         <Member Name="BorderZoneLocation" Caption="Место погран. зоны" />
         <Member Name="Category" Caption="Категория" />
@@ -481,7 +481,7 @@
         <Member Name="ValidityDuration" Caption="Срок действия" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Тип заявки (устарело)">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
         <Member Name="ApplicationProgressRoute" Caption="Маршрут прогресса" />
@@ -533,7 +533,7 @@
         <Member Name="FamilyMember" Caption="Член семьи" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Фильтр типа заявки">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Фильтр типа заявки (устарело)">
       <OwnMembers>
         <Member Name="Application" Caption="Заявка" />
         <Member Name="Category" Caption="Категория" />
@@ -2506,10 +2506,10 @@
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Шаблоны" />
     <DetailView Id="ApplicationState_DetailView" Caption="Статус заявки" />
     <ListView Id="ApplicationState_ListView" Caption="Статусы заявки" />
-    <DetailView Id="ApplicationType_DetailView" Caption="Тип заявки" />
-    <ListView Id="ApplicationType_ListView" Caption="Типы заявки" />
-    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Фильтр типа заявки" />
-    <ListView Id="ApplicationTypeFilter_ListView" Caption="Фильтры типа" />
+    <DetailView Id="ApplicationType_DetailView" Caption="Тип заявки (устарело)" />
+    <ListView Id="ApplicationType_ListView" Caption="Типы заявки (устарело)" />
+    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Фильтр типа заявки (устарело)" />
+    <ListView Id="ApplicationTypeFilter_ListView" Caption="Фильтры типа (устарело)" />
     <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Группа типов заявок" />
     <ListView Id="ApplicationTypeGroup_ListView" Caption="Группы типов заявок" />
     <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Участник группы типов заявок" />

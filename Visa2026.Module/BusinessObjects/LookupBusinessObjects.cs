@@ -115,9 +115,14 @@ namespace Visa2026.Module.BusinessObjects
         FirstAndSecondMinistry = 2
     }
 
+    /// <summary>
+    /// DEPRECATED — replaced by <see cref="ApplicationType.SelectionCode"/> grouping, then
+    /// <see cref="ApplicationProfile"/> selection (see docs/DEPRECATED.md).
+    /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(NameTm))]
+    [XafDisplayName("Application Type Filter (Deprecated)")]
     public class ApplicationTypeFilter : LookupBase
     {
         public ApplicationTypeFilter()
@@ -136,10 +141,14 @@ namespace Visa2026.Module.BusinessObjects
     /// Retained for dual-read / import until Applications bind only to ApplicationProfile.
     /// Do not add new Show* / capability flags here.
     /// </summary>
+    /// <remarks>
+    /// Not marked <c>[Obsolete]</c> to avoid CS0618 noise on dual-read call sites.
+    /// </remarks>
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(LocalizedDisplayName))]
     [ModelDefault("IsCloneable", "True")]
+    [XafDisplayName("Application Type (Deprecated)")]
     public class ApplicationType : LookupBase
     {
         public ApplicationType()

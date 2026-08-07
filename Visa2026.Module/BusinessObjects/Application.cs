@@ -353,6 +353,7 @@ namespace Visa2026.Module.BusinessObjects
         [ImmediatePostData, RuleRequiredField]
         [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]
         [Appearance("ApplicationTypeReadOnlyOnDetail", Enabled = false, Context = "DetailView")]
+        [XafDisplayName("Application Type (Deprecated)")]
         [ToolTip("Deprecated. Prefer Application Profile. Still required during dual-read migration.")]
         public virtual ApplicationType ApplicationType
         {

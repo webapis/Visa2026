@@ -432,11 +432,27 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 
 ---
 
+## 12. Implementation progress
+
+| Slice | Status |
+|-------|--------|
+| Plan + prototypes | Done |
+| **Deprecate `ApplicationType` BO** (registry, UI caption/tooltip, dual-read retained) | Done |
+| `ApplicationProfile` BO + approval legs + nested templates | Done (v1 scalars/collections) |
+| `Application.ApplicationProfile` live FK + default seeding | Done (optional during dual-read) |
+| Permissions (Users read / VisaOffice manage) | Done |
+| Seed profiles from ApplicationType catalog | Pending |
+| Switch Appearance / progress to profile | Pending |
+| Person M2M DetailView / hard-remove ApplicationItem | Pending |
+| Person/Dossier Start application | Pending |
+| Remove `Application.ApplicationType` FK | Pending (after cutover) |
+
+---
+
 ## 8. Non-goals (this phase)
 
-- EF implementation / ModuleUpdater.  
 - Full profile clone / re-sync machinery (rejected).  
-- Expanding person matrix beyond four toggles.
+- Expanding person matrix beyond four toggles in the first UX slice (Excel person-config may extend later).
 
 ---
 
