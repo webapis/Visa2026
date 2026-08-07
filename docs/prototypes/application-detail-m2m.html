@@ -347,10 +347,11 @@
         </section>
 
         <div class="note">
-          <strong>Open design points</strong> (see questions below in chat):
-          whether linking Person auto-links “current” passport/visa/… vs fully manual M2M;
-          ApplicationItem retirement cutover; left rail meaning (profile pick vs something else);
-          SQL view grain (one view per tab vs roster).
+          <strong>Locked:</strong> Person add → auto-link valid related M2Ms; ApplicationItem hard-removed;
+          one wide roster SQL view; tab visibility from profile person-config (Passport/Education/Position/Address);
+          multiple People per Application; RejectionItem + travel/registration in v1;
+          existing InvitationItem/WP item/Visa as inputs; new Invitation/WP via headers; new Visa via <code>IssuingApplication</code> (drop <code>IssuingApplicationItem</code>).
+          <strong>Open:</strong> left rail purpose; resolve refresh; valid rules per BO; travel field home; extra tab visibility.
         </div>
       </div>
     </div>
