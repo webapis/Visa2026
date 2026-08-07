@@ -47,7 +47,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | 16 | Profile identity on Application | Name / Description / Code: **visible** on Application, **not** editable there (read live from profile); also available to merge. |
 | 17 | Signatory on Application | Authorized signatory + Visa representative: **visible + editable + persistent** per Application (Excel); defaults from profile at create. |
 | 18 | Profile pick timing | Application may set `ApplicationProfile` **only at create**. No switch to another profile afterward. |
-| 19 | Profile edit lock | When any Application using the profile has reached a **configured progress lock state** (see §2.6), **configuration-related** edits on that profile are blocked (or require a special override). Defaults for per-Application fields may still be editable for *future* creates only if product allows — v1 recommendation: lock whole profile config wizard when lock engages. |
+| 19 | Profile edit lock | When any Application using the profile has reached the **lock progress state** (§2.6 = option **A**), configuration-related edits on that profile are blocked. New Applications may still select a locked profile. |
 
 ### 2.2 Configuration-related (live from profile)
 
