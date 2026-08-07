@@ -127,11 +127,12 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | B | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
 | C | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
 | D | Temporary visitor | Real for v1? |
-| E | Field placement | Which of the 14 live on Application header vs elsewhere (ApplicationItem retired). |
+| E | Field placement | Largely settled: 14 props on Application (§10.4). Any remaining former ApplicationItem-only fields? |
 | F | SLA integers vs tiers | Raw days on profile? |
 | G | Merge host | Same Resminamalar / Word–Excel pipeline? |
-| H | Confirm person toggles | §2.5 — also drive M2M tab visibility (§10.2) |
-| I | Application DetailView remaining | §10.3 (left rail, resolve refresh, “valid” rules, travel fields home, …) |
+| H | Person toggles / extended Excel | Extend person-config block for all M2M tabs (§10.3) — capture full row list in next Excel. |
+| I | BorderZoneItem / RejectionItem validity | Confirm §10.2 TBD rows. |
+| J | Resolve refresh trigger list | Open / DetailView / profile save — confirm. |
 
 ---
 

@@ -162,7 +162,7 @@
           <li data-name="Service passport inv."><span class="dot"></span><span>Service passport inv.</span><span class="plus">+</span></li>
         </ul>
         <p style="margin:0;font-size:0.72rem;color:var(--muted)">
-          Sketch rail — clarify: create-time profile pick only vs browse/filter aid (profile FK immutable after create).
+          Rail actions: select profile at create · open profile configuration · start new Application from profile.
         </p>
       </aside>
 
@@ -348,10 +348,10 @@
 
         <div class="note">
           <strong>Locked:</strong> Left rail = pick + configure + new from profile.
-          Officers only link/unlink <strong>Person</strong>; children auto-resolve (valid/current) at link and on later refresh.
-          Wide roster = one row per Person. Travel/entry fields on <strong>Application</strong> via profile property catalog.
-          Extend Excel person-config for all person-data tabs. ApplicationItem hard-removed;
-          new Visa via <code>IssuingApplication</code>.
+          Officers only link/unlink <strong>Person</strong>; children auto-resolve on link/unlink, DetailView open, and person-config save.
+          BorderZoneItem / RejectionItem = current / not cancelled.
+          <strong>TravelHistory</strong> is M2M (not Application Profile scalar config). Wide roster = one row per Person.
+          Person tabs from extended Excel person-config. New Visa via <code>IssuingApplication</code>.
         </div>
       </div>
     </div>
