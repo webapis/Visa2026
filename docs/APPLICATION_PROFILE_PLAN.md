@@ -291,11 +291,27 @@ Avoid a separate `PersonApplicationProfileUsage` table unless you need to record
 
 ### Open questions (§11)
 
-1. From Person/Dossier create: **only this Person** on the new Application, or multi-select family members in the same dialog?
-2. If an **open** Application already uses the same profile for this Person — **warn**, **block**, or allow freely?
-3. Picker default sort — unused profiles first, or most recently used first?
-4. After create from Dossier — navigate to Application DetailView, or stay on Dossier with a link?
-5. Should Dossier **Applications** section switch from `ApplicationItem`-based read model to Application↔Person M2M + profile name (required when ApplicationItem is removed)?
+**Locked:** From Person/Dossier, the start dialog supports **multi-select People** (seed person + additional persons) for the same Application / profile.
+
+| # | Topic | Notes |
+|---|--------|------|
+| 1 | Seed + candidates | Dialog opens with **current Person pre-selected**. Candidate list = ? (all searchable Persons · family members of seed only · employees under same ProjectContract · mix) |
+| 2 | Family defaults | If seed is Employee, auto-**suggest** (not force) linked FamilyMembers? |
+| 3 | Audience filter | Hide Persons that don’t match profile “may be for” (Employee / FM / visitor), or allow + validate on confirm? |
+| 4 | Duplicate open Application | If an **open** Application already uses this profile for **any** of the selected People — **warn**, **block**, or allow? |
+| 5 | Picker sort (profiles) | Unused profiles first, or most recently used for the **seed** Person first? |
+| 6 | After create from Dossier | Navigate to Application DetailView, or stay on Dossier with a link? |
+| 7 | Dossier Applications section | Remodel to Application↔Person M2M + profile name when ApplicationItem is removed? |
+| 8 | Partial resolve failure | If one selected Person has no valid passport while profile requires Passport — block whole create, or create and flag that Person? |
+
+```mermaid
+flowchart LR
+  Seed[Person / Dossier Start application]
+  Seed --> Prof[Pick Application Profile]
+  Prof --> People[Multi-select People seed pre-checked]
+  People --> App[Create Application + profile FK]
+  App --> Link[Link all selected People + auto-resolve each]
+```
 
 ---
 
