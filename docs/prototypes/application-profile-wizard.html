@@ -458,8 +458,9 @@
       <div>
         <strong>Visual prototype only</strong> — not wired to Visa2026.
         Models the officer-facing <em>Application Profile</em> wizard from
-        <code>Application.xlsx</code>. Source profile = reusable template;
-        each new Application receives a clone that can diverge.
+        <code>Application.xlsx</code>. <strong>Live FK</strong> for configuration-related fields
+        (profile edits affect Applications using this profile).
+        <strong>Per-Application</strong> fields get defaults at create, then persist independently.
       </div>
     </div>
 
@@ -473,8 +474,8 @@
         </p>
       </div>
       <div class="meta-pills">
-        <span class="pill on">Template mode</span>
-        <span class="pill">Clone on Application create</span>
+        <span class="pill on">Live configuration</span>
+        <span class="pill">Per-App values + defaults</span>
         <span class="pill">Draft · not saved</span>
       </div>
     </header>
@@ -514,10 +515,11 @@
             </div>
           </div>
           <div class="clone-callout">
-            Saving creates a <strong>source Application Profile</strong> (template).
-            When an officer creates an Application and picks this profile, Visa2026
-            <code>clones</code> it onto that Application. Edits on the clone do not change this template;
-            edits here apply to the <em>next</em> clone only.
+            Saving publishes an <strong>Application Profile</strong> Applications will <strong>reference live</strong>
+            (FK). Configuration-related settings (Related to, produce/cancel, legs, states, templates, person flags)
+            always read from this profile — later edits affect existing Applications.
+            Per-Application fields (Visa Type … Entry Check Point, signatories) get <strong>defaults once</strong> at create,
+            then officers edit values stored on the Application.
           </div>
           <div class="panel-body">
             <div class="section">
@@ -544,7 +546,7 @@
 
             <div class="section">
               <h3>Application may be directed to</h3>
-              <p class="hint">Maps today’s ApplicationProgressRoute. <strong>Frozen</strong> on the Application after clone — not officer-editable there.</p>
+              <p class="hint">Maps today’s ApplicationProgressRoute. <strong>Configuration-related (live)</strong> — not edited on Application; profile changes apply to apps using this profile.</p>
               <div class="choice-row">
                 <label class="choice"><input type="radio" name="route" checked /> Via ministry</label>
                 <label class="choice"><input type="radio" name="route" /> Direct migration service</label>
@@ -553,7 +555,7 @@
 
             <div class="section">
               <h3>Application may be for</h3>
-              <p class="hint">Audience — replaces ApplicationType.Category. <strong>Frozen</strong> on the Application after clone.</p>
+              <p class="hint">Audience — replaces ApplicationType.Category. <strong>Configuration-related (live).</strong></p>
               <div class="choice-row">
                 <label class="choice"><input type="checkbox" checked /> Employee</label>
                 <label class="choice"><input type="checkbox" /> Family member</label>
@@ -563,7 +565,7 @@
 
             <div class="section">
               <h3>Application related to</h3>
-              <p class="hint">Primary action family (exclusive). <strong>Frozen</strong> on the Application after clone.</p>
+              <p class="hint">Primary action family (exclusive). <strong>Configuration-related (live)</strong> — drives tracking and property visibility on Applications.</p>
               <div class="choice-row">
                 <label class="choice"><input type="radio" name="related" checked /> Issuance</label>
                 <label class="choice"><input type="radio" name="related" /> Cancellation</label>
@@ -612,7 +614,7 @@
           <div class="panel-body">
             <div class="section">
               <h3>Application result may produce (change)</h3>
-              <p class="hint"><strong>Frozen</strong> on the Application after clone (capabilities come from the profile).</p>
+              <p class="hint"><strong>Configuration-related (live)</strong> — capabilities come from the profile FK, not a clone.</p>
               <div class="choice-row">
                 <label class="choice"><input type="checkbox" checked /> Invitation</label>
                 <label class="choice"><input type="checkbox" checked /> Work permit</label>
@@ -624,7 +626,7 @@
 
             <div class="section">
               <h3>Application result may cancel existing</h3>
-              <p class="hint"><strong>Frozen</strong> on the Application after clone.</p>
+              <p class="hint"><strong>Configuration-related (live).</strong></p>
               <div class="choice-row">
                 <label class="choice"><input type="checkbox" /> Invitation(s)</label>
                 <label class="choice"><input type="checkbox" /> Work permit(s)</label>
@@ -637,11 +639,9 @@
             <div class="section">
               <h3>Application properties required</h3>
               <p class="hint">
-                Catalog fields appear on the Application when used in a nested Word/Excel template
-                <strong>or</strong> needed for workflow (e.g. Migration Service / Project).
-                Identity / signatory / process stay <strong>merge-only</strong> <code>{{…}}</code> (not form fields).
-                If the Application value is empty at fill time, the <strong>default</strong> is used.
-                Only these 14 values may be changed on the Application after clone; structural profile config stays frozen.
+                <strong>Per-Application</strong> values (Excel: editable + persistent). Visible when used in nested Word/Excel
+                <strong>or</strong> needed for workflow. Defaults apply at Application create and when merge value is empty.
+                Name/Description/Code stay on the profile (visible read-only on Application).
               </p>
               <table class="prop-table">
                 <thead>
@@ -674,7 +674,7 @@
 
             <div class="section">
               <h3>Application signatory</h3>
-              <p class="hint">Defaults on clone. Signatory (and identity / process / SLA) are also <strong>automatic</strong> <code>{{…}}</code> placeholders for nested templates.</p>
+              <p class="hint">Defaults at Application create; then <strong>editable + persistent per Application</strong> (Excel). Also available to <code>{{…}}</code> merge.</p>
               <div class="field-grid">
                 <div class="field">
                   <label class="lbl">Authorized signatory</label>
@@ -811,7 +811,7 @@
 
             <div class="section">
               <h3>Required person-related data</h3>
-              <p class="hint">Drives form/readiness <strong>and</strong> template availability (e.g. person-roster columns / item placeholders).</p>
+              <p class="hint">Explicit toggles for readiness <strong>and</strong> enabling person/roster template packs (recommended). Templates should not reference a pack while its toggle is off.</p>
               <div class="choice-row">
                 <label class="choice"><input type="checkbox" checked /> Passport</label>
                 <label class="choice"><input type="checkbox" checked /> Education</label>
@@ -831,7 +831,7 @@
           <div class="panel-head">
             <div>
               <h2>Review &amp; save</h2>
-              <p>Confirm the template before publishing. Officers will clone this onto each new Application.</p>
+              <p>Confirm before publishing. Applications will reference this profile live; per-Application fields get defaults at create.</p>
             </div>
           </div>
           <div class="panel-body">
@@ -879,15 +879,13 @@
 
         <div class="live-preview">
           <div class="lp-head">
-            <h3>Clone lifecycle (conceptual)</h3>
-            <span class="pill on">Template → Application clone</span>
+            <h3>Binding lifecycle (conceptual)</h3>
+            <span class="pill on">Live FK + per-App values</span>
           </div>
           <div class="lp-body">
-            <strong>Source profile</strong> (this wizard) is reusable.
-            Structural config is deep-cloned onto the Application and frozen for reconfigure.
-            Officers may change only the <strong>14 allowlisted field values</strong> (Visa Type … Entry Check Point).
-            Nested Word/Excel fill uses those values, profile defaults when empty, plus automatic identity/signatory/process placeholders.
-            Source edits affect only Applications created afterward — no re-sync.
+            <strong>ApplicationProfile</strong> is referenced live (FK). Configuration-related settings always come from the profile.
+            <strong>Per-Application</strong> fields (Visa Type … Entry Check Point, signatories) are stored on the Application after defaults are applied at create.
+            Profile config edits affect existing Applications; they do not overwrite saved per-Application values.
           </div>
         </div>
       </div>

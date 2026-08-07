@@ -1,307 +1,235 @@
-# Application Profile — configuration & clone model (plan)
+# Application Profile — live configuration + per-Application values (plan)
 
-**Status:** Decisions locked (see §2) · UX prototyping in progress · no domain implementation yet  
+**Status:** Binding model revised (see §2) — **no full profile clone** · UX prototyping · no domain implementation yet  
 **Prototypes:**
 - Wizard: [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)
 - Usage storyboard: [`docs/prototypes/application-profile-usage.html`](prototypes/application-profile-usage.html)
-- Storyboard images: [`docs/prototypes/images/`](prototypes/images/)
-**Input draft:** [`docs/prototypes/Application-profile-wizard-draft.xlsx`](prototypes/Application-profile-wizard-draft.xlsx)  
+- Storyboard images: [`docs/prototypes/images/`](prototypes/images/) *(lifecycle images still show older “clone” wording — refresh next)*  
+**Input draft:** [`docs/prototypes/Application-profile-wizard-draft.xlsx`](prototypes/Application-profile-wizard-draft.xlsx) (columns E–H classify each field)  
 **Related today:** `ApplicationType`, `Application`, `ApplicationItem`, `ApplicationProgress`, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
 
 ---
 
 ## 1. Problem
 
-Application-type behavior is **scattered**:
+Application-type behavior is **scattered** across `ApplicationType` `Show*` / `CanIssue*` flags, hard-coded defaults in `Application.cs`, progress/legs, and template applicability. Officers need one **Application Profile** that is easy to configure and reuse.
 
-| Concern | Where it lives today |
-|--------|----------------------|
-| UI visibility / required fields | Dozens of `Show*` flags on `ApplicationType` + `[Appearance]` on `Application` / `ApplicationItem` |
-| Issue capabilities | `CanIssueVisa` / `CanIssueInvitation` / `CanIssueWorkPermit` (+ catalog JSON) |
-| Progress route / ministry depth | `ApplicationProgressRoute`, `MinistryReviewDepth` on type; legs on `ApprovalLegProfile` / `ProjectContract` |
-| Defaults (visa type/period/…) | Hard-coded in `Application.cs` by type `Name` |
-| Report applicability | `UserReportTemplate` links to types / type groups / project contracts |
-| SLA | `ApplicationMigrationSlaProfile` (+ duration fields) |
-| Selection UX | `SelectionCode` + quick code (see `APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`) |
-
-Creating or tweaking a “new kind of application” requires editing lookup flags, seed JSON, Appearance criteria, and often C# defaults — poor officer UX and hard to reuse.
+**Why not full clone:** if the Application kept a frozen copy of the whole profile, later configuration fixes (route, “related to”, produce/cancel, legs, templates, person requirements) would **not** affect existing Applications. That defeats central configuration. The updated Excel splits fields into **configuration-related** (live) vs **per-Application** (persistent values with defaults).
 
 ---
 
 ## 2. Locked decisions
 
+### 2.0 Binding model (replaces full clone)
+
 | # | Topic | Decision |
 |---|--------|----------|
-| 1 | Clone on Application create | **Always deep-clone.** No live link to the source profile. |
-| 2 | Re-sync from source | **Not supported.** Divergence is permanent. Source edits affect **future** Applications only. Lineage FK (`SourceProfileId`) is informational. |
-| 3 | Clone storage | **Full owned BO graph in XAF** (see §3). Not a JSON blob. |
-| 4 | Scope / applicability | **Freeform criteria** (XAF criteria against Application context) filters which source profiles appear in the picker. |
-| 5 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. |
-| 6 | Approval legs | **Embedded** on the profile (ordered ministry legs). Do not reference `ApprovalLegProfile` as the owner. |
-| 7 | Process states | **Freely enable** ministry / migration state checklists from Excel (profile defines allowed states + SLA-track flags). Transition rules derived from enabled set (replace hard-coded route tables over time). |
-| 8 | Templates | **Nest files inside the profile** (name, type, `FileData`). Profile is the store for that template set — not association-only to `UserReportTemplate`. |
-| 9 | Person data (v1) | **Four checkboxes only:** Passport, Education, Position, Local address of residence. Full `ShowCurrent*` matrix is a later phase. |
-| 10 | Who configures | **Selected officers** (permissioned), not Administrators-only. |
-| 11 | Config UX (v1) | **Wizard** (as prototyped), not a single long DetailView. |
-| 12 | Required properties dual use | Catalog properties feed **(a)** Application form (when visible per §2.3) and **(b)** Word/Excel merge when referenced by nested templates. |
-| 13 | Defaults in template fill | When merging Word/Excel, if the Application value is empty, **use the profile default** for that property. |
-| 14 | Automatic placeholders | Identity / signatory / process (name, description, code, route, SLA, signatory, representative, states summary, etc.) are **merge-only** `{{…}}` placeholders — **not** shown as Application form fields from template usage. |
-| 15 | Person checkboxes → templates | **Explicit profile toggles** (recommended — see §2.4). Enable readiness **and** person/roster template column packs; do not solely auto-derive from placeholder extraction. |
-| 16 | Placeholder naming | Keep today’s **`{{…}}`** conventions (existing map / Word–Excel pipeline). |
-| 17 | Clone divergence allowlist | Officers may change **only** the allowlisted Application field values on the Application (see §2.1). Structural profile config is **frozen** on the clone (see §2.2) — not reconfigured per Application. |
-| 18 | Workflow-only fields on Application | If a catalog field (e.g. Migration Service, Project) is needed for **progress/routing** but appears in **no** Word/Excel file, it **still appears** on the Application form. |
-| 19 | Template-driven form surface | For the 14 allowlisted properties, Application **visibility/editability** is driven primarily by nested-template `{{…}}` usage, **plus** the workflow-only exception (§2.3). Automatic placeholders stay merge-only (§14). |
+| 1 | Profile binding | Application holds a **live FK** to `ApplicationProfile`. **Do not** deep-clone the whole profile. |
+| 2 | Configuration changes | Edits to **configuration-related** profile fields take effect on **all Applications** that reference that profile (visibility, tracking, process rules, templates, person requirements). |
+| 3 | Per-Application values | **Per-Application** fields are stored on the Application (or its items). On first use / create, seed from profile **defaults**; afterward officers edit them independently. Profile default changes do **not** overwrite existing Application values. |
+| 4 | Excel classification | Each wizard field is tagged (Excel cols E–H): Visibility on Application · Editable+persistent per Application · Configuration related · Only per Application related. |
 
-### 2.1 Clone-editable Application properties (allowlist)
+### 2.1 Other locked product decisions
 
-These are the only Application-side values officers may set/override after clone (and that participate in the dual form + merge property list). Source profile still defines which are required and their defaults; the Application holds the live values.
+| # | Topic | Decision |
+|---|--------|----------|
+| 5 | Scope / applicability | **Freeform criteria** filters which profiles appear in the Application picker. |
+| 6 | “Related to” (action family) | **Exclusive radio:** Issuance \| Cancellation \| Registration \| Business trip. **Configuration-related** — drives tracking / property visibility. |
+| 7 | Approval legs | **Embedded** on the profile. Configuration-related (live). |
+| 8 | Process states | **Freely enable** ministry / migration state checklists. Configuration-related (live). |
+| 9 | Templates | **Nest files** on the profile. Configuration-related; list **visible** on Application, **not** editable per Application. |
+| 10 | Person data (v1) | Four checkboxes: Passport, Education, Position, Local address. Configuration-related (live readiness / template packs). |
+| 11 | Who configures | **Selected officers**; **wizard** UX for v1. |
+| 12 | Defaults in template fill | If a per-Application value is empty at merge, use profile default. |
+| 13 | Placeholder naming | Keep today’s **`{{…}}`**. |
+| 14 | Workflow-only fields | Catalog fields needed for progress/routing still appear on Application even if unused in Word/Excel. |
+| 15 | Template-driven surface | Per-Application catalog fields visible primarily from nested-template usage ∪ workflow need. |
+| 16 | Profile identity on Application | Name / Description / Code: **visible** on Application, **not** editable there (read live from profile); also available to merge. |
+| 17 | Signatory on Application | Authorized signatory + Visa representative: **visible + editable + persistent** per Application (Excel); defaults from profile at create. |
 
-| # | Property |
-|---|----------|
-| 1 | Visa Type |
-| 2 | Visa Category |
-| 3 | Visa Period |
-| 4 | Border Zone |
-| 5 | Migration Service |
-| 6 | Start Date |
-| 7 | End Date |
-| 8 | Region (City) |
-| 9 | Business Trip Address |
-| 10 | Project |
-| 11 | Urgency |
-| 12 | Work Permit Location |
-| 13 | Entry Date |
-| 14 | Entry Check Point |
+### 2.2 Configuration-related (live from profile)
 
-### 2.2 Frozen on Application after clone (not editable)
+Stored only on `ApplicationProfile`. Application **reads** them via FK. Officers do **not** edit these on the Application. Profile updates apply to existing Applications.
 
-Copied from the source profile onto the Application clone, then **read-only** for officers on that Application. Changing these means editing the **source** Application Profile (affects future Applications only).
+| Group | Fields | Visible on Application? |
+|-------|--------|-------------------------|
+| Identity | Application Name, Description, Code | Yes (read-only) |
+| Directed to | Via ministry · Direct migration | No (controls behavior) |
+| May be for | Employee · Family member · Temporary visitor | No |
+| Related to | Issuance · Cancellation · Registration · Business trip | No (controls tracking / visibility) |
+| Produce | Invitation · Work permit · Visa · Border zone · Work location | No |
+| Cancel existing | Invitation(s) · WP(s) · Visa(s) · Border zone · Application(s) | No |
+| Process | Approval legs · ministry/migration states · SLA days | No |
+| Templates | Name · Type · File | Yes (catalog list; not editable) |
+| Person requirements | Passport · Education · Position · Address | No (gates readiness / packs) |
 
-| Group | Locked choices |
-|-------|----------------|
-| **Directed to** (route) | Via ministry · Direct migration service |
-| **May be for** (audience) | Employee · Family member · Temporary visitor |
-| **Related to** (action family, exclusive) | Issuance · Cancellation · Registration · Business trip |
-| **Result may produce (change)** | Invitation · Work permit · Visa · Border zone · Work location |
-| **Result may cancel existing** | Invitation(s) · Work permit(s) · Visa(s) · Border zone permit(s) · Application(s) |
-| **Also frozen** | Embedded approval legs · process state checklists · SLA day integers · nested template file set · which of the 14 properties are required/defaults · person requirement checkboxes · applicability criteria · source profile identity (name/code/description) |
+### 2.3 Per-Application related (persistent on Application)
 
-### 2.3 Application form visibility (catalog properties)
+Stored on Application. Seeded from profile defaults at initial usage. Editable afterward. Profile default changes do not overwrite saved values.
 
-For the **14 allowlisted** properties on an Application:
+| # | Property | Notes |
+|---|----------|--------|
+| 1 | Visa Type | Lookup · often has default |
+| 2 | Visa Category | Lookup · often has default |
+| 3 | Visa Period | Lookup · often has default |
+| 4 | Border Zone | Lookup |
+| 5 | Migration Service | Lookup · also workflow |
+| 6 | Start Date | Date |
+| 7 | End Date | Date |
+| 8 | Region (City) | Lookup |
+| 9 | Business Trip Address | Lookup |
+| 10 | Project | Lookup · also workflow |
+| 11 | Urgency | Lookup |
+| 12 | Work Permit Location | Lookup |
+| 13 | Entry Date | Date |
+| 14 | Entry Check Point | Lookup |
+| 15 | Authorized signatory | Lookup · default from profile |
+| 16 | Visa representative | Lookup · default from profile |
+
+Visibility of 1–14 still follows §2.4 (template ∪ workflow). Signatory fields follow Excel: visible + editable.
+
+### 2.4 Application form visibility (per-Application catalog)
 
 | Shown / editable when | Rule |
 |----------------------|------|
-| Used in a nested Word/Excel template | Property’s `{{…}}` appears in at least one profile template → **visible + editable** on Application |
-| Workflow-only | Needed for progress/routing (e.g. Migration Service, Project) even if unused in templates → **still visible + editable** |
-| Neither | **Hidden** on Application (still may exist as catalog/default on profile for future templates) |
+| Used in nested Word/Excel | `{{…}}` in at least one profile template → visible + editable |
+| Workflow-only | Needed for progress/routing even if unused in templates → still visible + editable |
+| Neither | Hidden on Application |
 
-**Merge-only (never form-driven by templates):** identity, route, SLA, signatory, representative, process summaries (§14).
+Configuration-related fields are never “edited on Application”; some are shown read-only (identity, template list).
 
-```mermaid
-flowchart LR
-  T[Nested template {{…}} for catalog props] --> V[Visible on Application]
-  W[Workflow-needed props] --> V
-  Auto[Identity / signatory / process] --> M[Merge only]
-  V --> Edit[Officer edits allowlisted values]
-  Edit --> M2[Word/Excel fill]
-  Auto --> M2
-  Def[Profile defaults if empty] --> M2
-```
+### 2.5 Person toggles — recommendation (pending confirm)
 
-### 2.4 Person checkboxes — recommendation (pending confirm)
-
-**Keep explicit profile toggles** (Passport, Education, Position, Local address) that:
-
-1. Drive **readiness / validation** on ApplicationItem (must collect that person data), and  
-2. **Enable** the related person/roster `{{…}}` column pack for nested templates.
-
-**Do not** solely auto-show person blocks from placeholder extraction.
-
-| Why toggles win over derive-only | |
-|--------------------------------|--|
-| Readiness ≠ merge | An application may require Passport on file even when a given letter template doesn’t print passport number. |
-| Roster packs are coarse | Officers think “needs education + position,” not individual placeholder keys. |
-| Safer publish | Extraction can **warn/block** if a template references Education while the Education toggle is off (constrain), without removing intentional readiness. |
-
-**Suggested validate-on-publish:** template placeholder references to person packs must have the matching toggle ON; unused toggles allowed (readiness without merge).
+Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}}` packs; constrain publish if a template references a pack while its toggle is off.
 
 ### Still open (narrow)
 
 | # | Topic | Notes |
 |---|--------|------|
-| A | Naming in UI | Confirm officers never see “Application type” after cutover; interim dual labels OK? |
-| B | Temporary visitor | Real audience for v1, or seed later? |
-| C | Scope criteria target | Criteria against `Application` only, or also ProjectContract / person context at pick time? |
-| D | Cancel-existing “Application(s)” | Excel showed radio for that one row — treat all cancel targets as checkboxes? |
-| E | Field placement | Which of the 14 live on Application header vs ApplicationItem (e.g. entry date / checkpoint)? |
-| F | SLA integers | Raw ministry/migration days on profile replace `ApplicationMigrationSlaProfile` tiers? |
-| G | Merge host | Profile-owned nested files use the same Resminamalar / Word–Excel merge host with `{{…}}` — confirm no parallel engine. |
-| H | Required-to-save vs visible | **Undecided.** Recommendation: visible = template ∪ workflow; **required-to-save = separate** profile flag (default ON for template-used fields; officer may clear for optional merge fields). |
-| I | Derive vs constrain catalog | **Undecided.** Recommendation: **hybrid** — auto-derive candidate visible set from template extraction ∪ workflow set; keep profile defaults; **hard-block publish** if a template uses an unknown/disabled catalog property; soft-warn if an enabled property is unused by any template. |
-| J | Person toggles | Confirm §2.4 recommendation (explicit toggles + constrain templates to toggles). |
+| A | Mid-flight profile edits | If officers change “Related to” / produce / legs on a profile while Applications are in progress — always OK, or lock profile when any Application is past a state? |
+| B | Switch profile | Can an Application change `ApplicationProfile` after create, or only at create? |
+| C | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
+| D | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
+| E | Temporary visitor | Real for v1? |
+| F | Field placement | Which of 1–14 are Application header vs ApplicationItem? |
+| G | SLA integers vs tiers | Raw days on profile? |
+| H | Merge host | Same Resminamalar / Word–Excel pipeline? |
+| I | Confirm person toggles | §2.5 |
+
 ---
 
-## 3. Properties → form + Word/Excel merge
+## 3. Domain shape (sketch — not implemented)
+
+```
+ApplicationProfile                         // configuration (live)
+  ├─ Name, Description, Code
+  ├─ Route, Audience, ActionFamily (Related to)
+  ├─ Produce[] / CancelExisting[]
+  ├─ FieldCatalog[]                        // which of 14 enabled + default values
+  ├─ SignatoryDefault, RepresentativeDefault
+  ├─ ApprovalLeg[]
+  ├─ ProcessStateFlag[] + SlaDays
+  ├─ NestedTemplate[] + FileData
+  ├─ PersonDataRequirements                // 4 toggles
+  └─ ApplicabilityCriteria
+
+Application
+  ├─ ApplicationProfile (FK, required)     // LIVE — not a clone
+  ├─ VisaType, VisaCategory, …             // per-Application values (persistent)
+  ├─ AuthorizedSignatory, VisaRepresentative
+  └─ … progress, items, etc.
+```
+
+**Create algorithm:** pick profile → set FK → copy **defaults only** into empty per-Application fields → thereafter read configuration live from profile; persist only per-Application values.
+
+```mermaid
+flowchart LR
+  P[Application Profile config]
+  A[Application]
+  P -->|live FK: related-to, produce, legs, templates, person flags| A
+  P -->|defaults once at create| V[Per-Application field values]
+  V --> A
+  P2[Later profile config edit] -->|affects existing apps| A
+  P2 -.->|does not overwrite| V
+```
+
+---
+
+## 4. Properties → form + Word/Excel merge
 
 ```mermaid
 flowchart TB
-  Tmpl[Nested Word/Excel placeholders]
-  Wf[Workflow-needed catalog fields]
-  Tmpl --> Vis[Visible editable on Application]
-  Wf --> Vis
-  Auto[Identity / signatory / process] --> MergeOnly[Merge only]
-  PersToggle[Person toggles on profile] --> Ready[Item readiness]
-  PersToggle --> Pack[Enable roster/person placeholder packs]
-  Vis --> AppVals[Application allowlisted values]
-  AppVals --> Fill[Fill nested templates]
-  Def[Profile defaults if empty] --> Fill
-  MergeOnly --> Fill
-  Pack --> Fill
+  PLive[Live profile config]
+  PLive --> VisRules[Visibility / process / person packs]
+  PLive --> Tmpl[Nested Word/Excel files]
+  Tmpl --> FormVis[Which per-App fields show]
+  Wf[Workflow-needed fields] --> FormVis
+  FormVis --> Vals[Per-Application values]
+  Def[Profile defaults if empty] --> Fill[Fill templates]
+  Vals --> Fill
+  PLive --> AutoId[Identity read-only + merge]
+  AutoId --> Fill
 ```
 
-### Merge data resolution (conceptual)
-
-1. Extract `{{…}}` from nested profile templates; map to catalog properties + automatic + person packs.  
-2. Application form shows catalog props in **(template usage ∪ workflow-needed)**.  
-3. Value = Application allowlisted field if set; else **profile default**.  
-4. Add identity / signatory / process as **merge-only** automatic placeholders.  
-5. Person toggles gate readiness and which person/roster packs may be filled; publish validation ensures templates don’t reference a pack while its toggle is off.  
-6. Fill nested profile Word/Excel files with that dictionary.
-
----
-
-## 4. Clone storage — full owned BO graph
-
-**Chosen: full XAF-owned aggregate**, deep-cloned onto the Application.
-
-| | Owned BO graph (chosen) | Serialized JSON snapshot |
-|--|-------------------------|---------------------------|
-| Nested template **files** | Native `FileData` / aggregated children | Awkward (bytes in JSON or side tables anyway) |
-| Embedded **approval legs** | Ordered child BOs on source; **frozen on Application clone** | Thin custom editor required |
-| Free state checklists | Child rows/flags; frozen on clone | Harder Appearance / RuleCriteria |
-| Allowlisted field values | Live on `Application` (14 properties) | Still need real columns for form + merge |
-| Progress / reports runtime | Queryable graph + Application values | Deserialize + map on every use |
-
-```
-ApplicationProfile                    // source template (Configuration nav)
-  ├─ FieldRequirement[]               // which of the 14 are required + default value
-  ├─ ApprovalLeg[]                    // embedded, ordered
-  ├─ ProcessStateFlag[]               // ministry/migration + SLA track
-  ├─ NestedTemplate[] + FileData      // files owned by profile; {{…}} merge
-  ├─ PersonDataRequirements           // 4 bools (v1) → form + template availability
-  ├─ ApplicabilityCriteria (string)   // freeform XAF criteria
-  └─ identity / route / audience / action family / produce / cancel / signatory / SLA days
-
-Application
-  ├─ allowlisted field values         // Visa Type … Entry Check Point (live data)
-  └─ ApplicationProfileInstance       // deep clone of structural config (frozen for officer reconfigure)
-       ├─ FieldRequirement[] snapshot // required+default as cloned (not officer-edited)
-       ├─ legs / states / nested templates / person flags (frozen snapshot)
-       ├─ SourceProfileId?            // lineage only
-       └─ ClonedAt
-```
-
-**Clone algorithm (conceptual):** pick source profile → deep-copy structural aggregate into `Application.ProfileInstance` → seed allowlisted Application fields from defaults → officer edits only those Application field values → merge uses Application values with default fallback → never write back to source.
+1. Application resolves profile via FK (always current).  
+2. Form shows per-Application fields in (template usage ∪ workflow).  
+3. Merge value = Application value if set; else profile default.  
+4. Identity from live profile (read-only on form; merge). Signatory values from Application (seeded from defaults).  
+5. Person toggles on profile gate readiness + packs.  
+6. Fill nested profile templates with `{{…}}`.
 
 ---
 
 ## 5. How officers use Application Profile
 
-```mermaid
-flowchart LR
-  subgraph config [Configure once]
-    A[Selected officer opens Application Profiles]
-    B[Wizard: identity → results → process → templates → person]
-    C[Publish source Application Profile]
-    A --> B --> C
-  end
-  subgraph use [Reuse many times]
-    D[Create Application]
-    E[Picker shows profiles matching freeform criteria]
-    F[Deep clone structural profile onto Application]
-    G[Edit only allowlisted Application field values]
-    D --> E --> F --> G
-  end
-  C -.->|template for future apps| E
-  G -.->|no write-back| C
-```
+### Story A — Configure profile
+Selected officer runs wizard; sets configuration-related options and defaults for per-Application fields; publishes.
 
-### Story A — Create / edit a source profile
-1. Officer with permission opens **Application Profiles**.
-2. Runs the **wizard** (Excel sections).
-3. Sets which of the **14 properties** are required + defaults (feeds form **and** Word/Excel merge).
-4. Embeds approval legs; enables process states; uploads nested templates; sets person checkboxes (form + template availability).
-5. Optional freeform **applicability criteria**.
-6. **Publish** → available in Application picker (when criteria match).
+### Story B — Create Application
+Pick profile (criteria filter) → FK set → defaults applied to per-Application fields → officer edits those values.
 
-### Story B — Create an Application from a profile
-1. New Application → **Choose Application Profile**.
-2. System **deep-clones** structural profile → `Application.ProfileInstance`.
-3. Allowlisted fields seeded from defaults; produce/cancel capabilities drive collections.
-4. Progress uses cloned legs + enabled states + SLA days.
-5. Nested templates fill via `{{…}}` from Application values, defaults, identity/signatory/process, and person-gated placeholders.
+### Story C — Use Application
+Form visibility / process / templates / person rules come **live** from profile. Officer only edits per-Application values (and progress data).
 
-### Story C — Adjust this Application only
-1. Officer changes **allowlisted** field values (Visa Type, Period, Project, …).
-2. Structural clone (legs, states, templates, person flags, which fields are required) stays as cloned — **not** reconfigured on the Application.
-3. Source profile unchanged; **no re-sync**.
-
-### Story D — Improve the template for next time
-1. Edit source profile (wizard): required properties, defaults, nested files, person flags, legs, etc.
-2. Existing Applications keep their structural clones and already-entered field values.
-3. Next new Application gets the updated clone + new defaults.
+### Story D — Improve configuration
+Edit profile (e.g. change Related to, add template, enable Education). **Existing Applications** pick up configuration behavior immediately. Their saved Visa Type / dates / signatory values stay as entered.
 
 ---
 
-## 6. Excel → wizard mapping
+## 6. Excel → classification (cols E–H)
 
-| Excel section | Wizard step | Locked behavior |
-|---------------|-------------|-----------------|
-| Name / Description / Code | 1 Identity | Source identity; also **automatic** merge placeholders |
-| Directed to | 1 Route | Ministry vs direct migration; automatic merge placeholders |
-| For | 1 Audience | Employee / FM / Temporary visitor (multi checkbox) |
-| Related to | 1 Action family | **Exclusive** radio |
-| Result may produce / cancel | 2 Results | Capability sets |
-| Properties required + defaults | 2 Fields | **14-property list** · form show/require **and** Word/Excel merge · defaults used when Application empty |
-| Signatory | 2 Signatory | Defaults; **automatic** merge placeholders |
-| Approval legs + states + SLA | 3 Process | Embedded legs; free state checklists; day integers; process fields → automatic placeholders |
-| Application templates | 4 Templates | **Nested files** · filled with `{{…}}` from properties + automatic + person-gated fields |
-| Required person-related data | 4 Person | **Four checkboxes** · form/readiness **and** template availability |
-| Scope | 1 / Review | Freeform criteria |
+| Excel meaning | Plan term |
+|---------------|-----------|
+| G Configuration Related = 1 | Live on profile; not edited on Application |
+| H Only Per Application Related = 1 | Persistent on Application; defaults from profile |
+| E Visibility on Application = 1 | Show on Application UI (read-only if config; editable if per-App) |
+| F Editable Per Application = 1 | Officer may change; value stored on Application |
 
 ---
 
 ## 7. Migration posture (after UX sign-off)
 
-1. Lock remaining open items (§2).  
-2. Field dictionary: each of the 14 properties → Application/ApplicationItem member → `{{…}}` placeholder → current `Show*`.  
-3. Introduce `ApplicationProfile` + `ApplicationProfileInstance` alongside `ApplicationType`.  
-4. Seed profiles from existing type catalog (best-effort mapping).  
-5. Dual-read period: Type still set; clone also present.  
-6. Switch Appearance / progress / reports to read **instance** + allowlisted Application values.  
-7. Deprecate `ApplicationType`, type groups, type-linked template filters, hard-coded defaults.  
-8. Point nested profile templates through the existing `{{…}}` merge pipeline (defaults + person gating).
+1. Lock open items A–I.  
+2. Field dictionary from Excel E–H → BO members → `{{…}}`.  
+3. Introduce `ApplicationProfile` + `Application.ApplicationProfile` FK alongside `ApplicationType`.  
+4. Seed profiles from type catalog; dual-read; then deprecate Type.  
+5. Refresh prototypes/images that still say “clone”.
 
 ---
 
-## 8. Non-goals (this prototyping phase)
+## 8. Non-goals (this phase)
 
-- EF entities, ModuleUpdater, production wizard host.
-- VISA2014 import remapping.
-- Expanding person requirements beyond the four Excel checkboxes.
-- Re-sync / live-link features.
-- Letting officers reconfigure structural profile settings on an existing Application clone.
+- EF implementation / ModuleUpdater.  
+- Full profile clone / re-sync machinery (rejected).  
+- Expanding person matrix beyond four toggles.
 
 ---
 
 ## 9. Prototype checklist
 
-| Artifact | Purpose |
-|----------|---------|
-| `application-profile-wizard.html` | Configure source profile (5 steps); properties dual-use callouts |
-| `application-profile-usage.html` | Usage storyboard (picker → clone → allowlisted edits) |
-| `images/ap-01-configure-wizard.png` | Visual: officer configuring profile |
-| `images/ap-02-pick-on-application.png` | Visual: picking profile on new Application |
-| `images/ap-03-clone-on-application.png` | Visual: Application with clone (structural frozen; fields editable) |
-| `images/ap-04-lifecycle.png` | Visual: template vs clone lifecycle |
+| Artifact | Purpose | Notes |
+|----------|---------|--------|
+| `application-profile-wizard.html` | Configure profile | Update copy: live config vs per-App defaults |
+| `application-profile-usage.html` | Usage storyboard | Replace clone story with live FK + defaults |
+| `images/ap-0*.png` | Visuals | Refresh lifecycle image (no full clone) |
+| Excel draft | Source of E–H tags | Updated workbook in repo |
