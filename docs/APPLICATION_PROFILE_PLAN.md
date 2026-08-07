@@ -130,9 +130,10 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | E | Field placement | Largely settled: 14 props on Application (§10.4). Any remaining former ApplicationItem-only fields? |
 | F | SLA integers vs tiers | Raw days on profile? |
 | G | Merge host | Same Resminamalar / Word–Excel pipeline? |
-| H | Person toggles / extended Excel | Extend person-config block for all M2M tabs (§10.3) — capture full row list in next Excel. |
-| I | BorderZoneItem / RejectionItem validity | Confirm §10.2 TBD rows. |
-| J | Resolve refresh trigger list | Open / DetailView / profile save — confirm. |
+| H | Person-config Excel sync | Re-attach updated `Application.xlsx` (Downloads) — not present in cloud workspace yet. |
+| I | TravelHistory validity | Current/latest vs broader set when auto-resolving. |
+| J | Wide view columns | Mandatory joined columns for v1 roster? |
+| K | Unlock profile config | Auto when no apps ≥ lock state A? |
 
 ---
 
@@ -149,13 +150,14 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | 1 | ApplicationItem | **Hard remove** (no migrate-in-place dual model). |
 | 2 | Roster | Application has **many People** via M2M (replaces one-row-per-person `ApplicationItem`). |
 | 3 | Link on Person add | When a `Person` is linked, **auto-resolve and link** related M2M rows for that person — **only active / valid** rows (§10.2). |
-| 4 | Auto-resolve timing | At Person link time **and refresh later** (e.g. reopen Application, profile person-config change, or explicit refresh) so newly valid/current rows appear and expired ones drop as rules dictate. |
-| 5 | Manual child links | Officers **only link/unlink `Person`**. Passport / Visa / Education / … are **never** manually linked or unlinked — always auto-resolved. |
+| 4 | Auto-resolve timing / refresh | Resolve at Person link/unlink **and** on **Application DetailView open** and after **profile person-config save**. (No extra triggers required for v1.) |
+| 5 | Manual child links | Officers **only link/unlink `Person`**. Child BOs are **never** manually linked or unlinked — always auto-resolved. |
 | 6 | SQL presentation | **One wide roster SQL view** — **one row per linked Person** with joined columns from auto-linked children. |
-| 7 | Tab visibility | Driven by Application Profile **person-config block** (Excel). **Extend** that block beyond Passport / Education / Position / Address to cover Visa, InvitationItem, WorkPermitItem, BorderZoneItem, Salary, Medical, Rejection, etc. |
-| 8 | Travel / registration / entry fields | Live as **per-Application properties** on `Application` (Excel “Application properties required”: Start/End Date, Entry Date, Entry Check Point, Region, Business Trip Address, …). Visibility + defaults from profile; **not** on an Application↔Person join entity. |
-| 9 | Left rail (Application Profiles) | Used for **all**: create-time profile pick, open/edit profile configuration, and “new Application from profile”. |
-| 10 | Issued documents | Input: existing InvitationItem / WorkPermitItem / Visa via auto M2M. Output: new Invitation / WorkPermit headers; new Visa via **`Visa.IssuingApplication`** (remove `IssuingApplicationItem`). |
+| 7 | Tab visibility | Driven by Application Profile **person-config block** (Excel). Full toggle list maintained in Excel (Passport, Education, Position, Address, Visa, InvitationItem, WorkPermitItem, BorderZoneItem, Salary, Medical, Rejection, **TravelHistory**, …). |
+| 8 | Application-scoped props | Per-Application catalog on `Application` (Visa Type … Entry Check Point, etc. — Excel “Application properties required”). Visibility + defaults from profile. |
+| 9 | TravelHistory | **Not** Application Profile scalar configuration. `TravelHistory` (and subtypes) has **M2M with Application**, auto-resolved like other person-related BOs when Person is linked; tab via person-config toggle. |
+| 10 | Left rail | Pick at create · open/edit profile config · new Application from profile. |
+| 11 | Issued documents | Input M2M: existing InvitationItem / WorkPermitItem / Visa / … Output: Invitation / WorkPermit headers; new Visa via **`Visa.IssuingApplication`** (remove `IssuingApplicationItem`). |
 
 ### 10.2 Valid / active resolve rules
 
@@ -168,23 +170,27 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | EmployeePositionHistory (Position) | Current |
 | EmployeeSalary | Current |
 | MedicalRecord | Current |
-| InvitationItem | Current / active (existing rules) |
-| WorkPermitItem | Current / active (existing rules) |
-| BorderZoneItem | **TBD** (recommend: current / not cancelled) |
-| RejectionItem | **TBD** (recommend: current / relevant open rejection) |
+| InvitationItem | Current / active |
+| WorkPermitItem | Current / active |
+| BorderZoneItem | **Current / not cancelled** |
+| RejectionItem | **Current / not cancelled** |
+| TravelHistory | **TBD** (recommend: current / latest relevant movements — confirm) |
 
-### 10.3 Person-config block → tabs (extend Excel)
+### 10.3 Person-config block → tabs
 
-Profile toggles (configuration-related, live) control which person-data tabs/requirements apply. Excel today lists Passport, Education, Position, Local address — **extend** the same pattern for Visa, InvitationItem, WorkPermitItem, BorderZoneItem, Salary, Medical, Rejection, …
+Profile toggles (configuration-related, live) control which person-data tabs/requirements apply. Excel owns the full list (officer-updated workbook). Expected members include at least:
 
-| Profile toggle (examples) | Effect when enabled |
-|---------------------------|---------------------|
-| Passport / Education / Position / Address | Tab + requirement for linked people |
-| Visa / Invitation item / WP item / … | Same — extended Excel rows |
+Passport · Education · Position · Local address of residence · Visa · InvitationItem · WorkPermitItem · BorderZoneItem · EmployeeSalary · MedicalRecord · RejectionItem · **TravelHistory** · …
 
-### 10.4 Per-Application property catalog (travel / entry / …)
+| Toggle enabled | Effect |
+|----------------|--------|
+| (any person-related BO) | Show tab / require that auto-resolved data for linked people |
 
-From Excel **Application properties required** (all: visible on Application, editable+persistent per Application, not configuration-related):
+**Note:** Cloud workspace did not receive `c:\Users\webap\Downloads\Application.xlsx` — re-attach/upload so the repo draft Excel and §10.3 list can be synced to the exact rows.
+
+### 10.4 Per-Application property catalog
+
+From Excel **Application properties required** (visible + editable + persistent per Application):
 
 | # | Property | Default from profile? |
 |---|----------|------------------------|
@@ -196,13 +202,13 @@ From Excel **Application properties required** (all: visible on Application, edi
 | 13 | Entry Date | No |
 | 14 | Entry Check Point | Yes |
 
-These replace former ApplicationItem travel/registration placement for fields that are application-scoped in the Excel.
+These remain **Application** fields (not `TravelHistory`). Movement history itself comes from **`TravelHistory` M2M**, not from profile-configured travel BO settings.
 
 ### 10.5 Still open (narrow)
 
-1. **BorderZoneItem / RejectionItem “valid”** — confirm include rules (recommend current / not cancelled).
-2. **Refresh triggers** — exact list: Application DetailView open, after Person link/unlink, after profile person-config save, nightly job?
-3. **Wide view columns** — which joined columns are mandatory in v1 roster?
+1. **TravelHistory “valid”** — current/latest only, or all non-cancelled movements in a window?
+2. **Re-attach Excel** — sync full person-config toggle list into `docs/prototypes/Application-profile-wizard-draft.xlsx`.
+3. **Wide view columns** — mandatory joined columns for v1 roster?
 4. **Unlock profile config** — auto when no apps ≥ lock state A?
 
 ### Sketch layout (prototype)
@@ -210,20 +216,21 @@ These replace former ApplicationItem travel/registration placement for fields th
 | Region | Content |
 |--------|---------|
 | Left rail | Profiles: pick at create · open config · new Application from profile |
-| Top | Progress · header (incl. per-Application props as profile-visible) · SLA |
+| Top | Progress · header (per-Application props) · SLA |
 | Middle | Live Application Profile summary |
-| Bottom | Wide person roster + tabs from extended person-config |
+| Bottom | Wide person roster + tabs from person-config (incl. TravelHistory) |
 
 ```mermaid
 flowchart TB
   Rail[Left rail: pick / configure / new from profile]
   Add[Link or unlink Person only]
   Add --> Resolve[Auto-resolve valid related BOs]
-  Refresh[Later refresh] --> Resolve
-  Resolve --> M2M[Auto M2M children]
-  Prof[Extended person-config on profile] --> Tabs[Tab visibility]
+  Open[DetailView open] --> Resolve
+  CfgSave[Person-config save on profile] --> Resolve
+  Resolve --> M2M[Auto M2M: Passport Visa TravelHistory …]
+  Prof[Person-config toggles] --> Tabs[Tab visibility]
   M2M --> View[Wide SQL view: 1 row per Person]
-  AppProps[Per-Application props: Entry Date CheckPoint …] --> App[Application]
+  AppProps[Per-Application props catalog] --> App[Application]
   View --> UI[DetailView]
 ```
 
@@ -249,10 +256,11 @@ Application
   ├─ ApplicationProfile (FK, required)     // LIVE — set only at create; never switch
   ├─ VisaType, VisaCategory, …             // per-Application values (persistent)
   ├─ AuthorizedSignatory, VisaRepresentative
-  ├─ People M2M (+ auto-resolved child M2Ms)
+  ├─ People M2M (+ auto-resolved child M2Ms incl. TravelHistory)
   ├─ Invitations / WorkPermits (issued headers)
   └─ … progress, etc.
 // Visa.IssuingApplication → Application (replaces IssuingApplicationItem)
+// TravelHistory M2M — not profile scalar travel configuration
 ```
 
 **Create algorithm:** pick profile (only at create) → set FK → copy **defaults only** into empty per-Application fields → thereafter read configuration live from profile; persist only per-Application values. Profile FK is immutable after create.

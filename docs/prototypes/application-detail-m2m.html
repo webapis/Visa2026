@@ -228,6 +228,8 @@
             <button type="button" class="tab" data-tab="position">Position</button>
             <button type="button" class="tab" data-tab="salary">Salary</button>
             <button type="button" class="tab" data-tab="medical">Medical</button>
+            <button type="button" class="tab" data-tab="travel">Travel history</button>
+            <button type="button" class="tab" data-tab="rejection">Rejection</button>
             <div class="tab-tools">
               <button type="button" class="icon-btn" title="Preview / find">⌕</button>
             </div>
@@ -322,6 +324,20 @@
                   <tbody><tr><td>Berdiýew A.A.</td><td>MED-91</td><td>01.01.2027</td></tr></tbody>
                 </table>
               </div>
+              <div class="tab-body hidden" data-body="travel">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Kind</th><th>Date</th><th>Check point</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>External arrival</td><td>12.07.2026</td><td>Howdan</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="rejection">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Rejection item</th><th>Status</th></tr></thead>
+                  <tbody><tr><td colspan="3" style="color:var(--muted)">No current rejection items</td></tr></tbody>
+                </table>
+              </div>
             </div>
 
             <aside class="card sidebox" style="margin:10px 10px 10px 0;align-self:start">
@@ -340,6 +356,8 @@
                   <li>EmployeeSalary</li>
                   <li>EmployeePositionHistory</li>
                   <li>MedicalRecord</li>
+                  <li>TravelHistory</li>
+                  <li>RejectionItem</li>
                 </ul>
               </div>
             </aside>
