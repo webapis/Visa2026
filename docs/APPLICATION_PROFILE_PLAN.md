@@ -251,9 +251,9 @@ Keep **one** create pipeline (same as today planned): set `Application.Applicati
 
 | Entry | Officer action | Result |
 |-------|----------------|--------|
-| Person DetailView | **Start application…** | Profile picker (filtered) → create Application with this Person already linked |
-| Person Dossier | **Start application…** (header or Applications section) | Same pipeline; return/deep-link to new Application or stay in dossier with toast + link |
-| Application Profiles rail / list | **New Application from profile** | Create Application with profile set; officer adds people (existing plan) |
+| Person DetailView | **Start application…** | Profile picker → **multi-select People** (seed Person pre-selected) → create Application with all selected linked |
+| Person Dossier | **Start application…** (header or Applications section) | Same; multi-select People |
+| Application Profiles rail / list | **New Application from profile** | Create Application with profile set; officer adds people (multi-select or later on Application) |
 | Application create (blank) | Pick profile then add people | Existing plan |
 
 ```mermaid
@@ -281,7 +281,7 @@ Avoid a separate `PersonApplicationProfileUsage` table unless you need to record
 
 1. Show Application Profiles matching **applicability criteria** + audience (Employee / FM / visitor vs person role).
 2. Annotate each row: **Used before** (count / last date) · **Has open Application** · lock badge if profile config locked.
-3. Confirm → create Application → link this Person only (officer may add more people later on Application) → open Application DetailView.
+3. Confirm → create Application → link **all selected People** → auto-resolve each → open Application DetailView.
 
 ### Why this improves UX
 
@@ -291,26 +291,38 @@ Avoid a separate `PersonApplicationProfileUsage` table unless you need to record
 
 ### Open questions (§11)
 
-**Locked:** From Person/Dossier, the start dialog supports **multi-select People** (seed person + additional persons) for the same Application / profile.
+**Locked (Person / Dossier start dialog):**
+
+| # | Topic | Decision |
+|---|--------|----------|
+| 1 | Multi-select People | Yes — seed Person pre-selected; officer may add more for the same Application / profile. |
+| 2 | Candidate mix | **Mix**, with route rule: profiles **via ministry** → candidates restricted to **same ProjectContract** as seed (or app context); profiles **direct migration** → **no** same-ProjectContract requirement (broader search). Family / other filters may still apply as UX aids. |
+| 3 | Family suggest | Auto-**suggest** FamilyMembers of an Employee seed **only** when Application Profile **Related to = Registration**; suggestions remain optional (officer can deselect). |
+| 4 | Audience mismatch | **Allow** selecting People who don’t match profile “may be for”; **validate on confirm** (errors if incompatible). |
+| 5 | Duplicate open Application | **Warn** if any selected Person already has an open Application on that profile; officer may continue. |
+| 6 | Profile picker sort | **Most recently used** for the **seed** Person first. |
+| 7 | After create from Dossier | **Stay on Dossier** with a link to the new Application. |
+| 8 | Missing required person data | **Create anyway** and **flag** Persons who lack required valid data (e.g. passport when profile requires it) — do not block create. |
+
+**Still open (narrow):**
 
 | # | Topic | Notes |
 |---|--------|------|
-| 1 | Seed + candidates | Dialog opens with **current Person pre-selected**. Candidate list = ? (all searchable Persons · family members of seed only · employees under same ProjectContract · mix) |
-| 2 | Family defaults | If seed is Employee, auto-**suggest** (not force) linked FamilyMembers? |
-| 3 | Audience filter | Hide Persons that don’t match profile “may be for” (Employee / FM / visitor), or allow + validate on confirm? |
-| 4 | Duplicate open Application | If an **open** Application already uses this profile for **any** of the selected People — **warn**, **block**, or allow? |
-| 5 | Picker sort (profiles) | Unused profiles first, or most recently used for the **seed** Person first? |
-| 6 | After create from Dossier | Navigate to Application DetailView, or stay on Dossier with a link? |
-| 7 | Dossier Applications section | Remodel to Application↔Person M2M + profile name when ApplicationItem is removed? |
-| 8 | Partial resolve failure | If one selected Person has no valid passport while profile requires Passport — block whole create, or create and flag that Person? |
+| A | “Open” Application definition | Which progress states count as open for the warn (anything not terminal / issued / cancelled)? |
+| B | Via-ministry ProjectContract | If seed Person has no ProjectContract, block, warn, or fall back to full search? |
+| C | Dossier Applications section | Remodel to Application↔Person M2M + profile name when ApplicationItem is removed — assume **yes** unless objected. |
 
 ```mermaid
 flowchart LR
   Seed[Person / Dossier Start application]
-  Seed --> Prof[Pick Application Profile]
-  Prof --> People[Multi-select People seed pre-checked]
-  People --> App[Create Application + profile FK]
-  App --> Link[Link all selected People + auto-resolve each]
+  Seed --> Prof[Pick profile MRU for seed]
+  Prof --> People[Multi-select People]
+  People -->|via ministry| PC[Same ProjectContract]
+  People -->|direct migration| Broad[Broader person search]
+  People -->|Related to Registration| Fam[Suggest FamilyMembers]
+  People --> Warn[Warn on duplicate open app]
+  Warn --> App[Create Application even if some People flagged]
+  App --> Dossier[Stay on Dossier + link]
 ```
 
 ---
