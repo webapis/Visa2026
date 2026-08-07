@@ -346,10 +346,14 @@ namespace Visa2026.Module.BusinessObjects
         public string MigrationSlaStatement => ListViewDisplay.MigrationSlaStatement;
 
         private ApplicationType applicationType;
+        /// <summary>
+        /// DEPRECATED — use <see cref="ApplicationProfile"/>. Retained for dual-read / import
+        /// (see docs/DEPRECATED.md, docs/APPLICATION_PROFILE_PLAN.md).
+        /// </summary>
         [ImmediatePostData, RuleRequiredField]
         [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]
         [Appearance("ApplicationTypeReadOnlyOnDetail", Enabled = false, Context = "DetailView")]
-        [ToolTip("Selected via Application type code or the … list beside it.")]
+        [ToolTip("Deprecated. Prefer Application Profile. Still required during dual-read migration.")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;
@@ -366,6 +370,51 @@ namespace Visa2026.Module.BusinessObjects
                     }
                 }
             }
+        }
+
+        private ApplicationProfile? applicationProfile;
+        /// <summary>
+        /// Live Application Profile (configuration). Set only at Application create; not switched later.
+        /// Replaces deprecated <see cref="ApplicationType"/> after cutover.
+        /// </summary>
+        [ImmediatePostData]
+        [DataSourceCriteria("IsActive")]
+        [Appearance("ApplicationProfileReadOnlyOnDetail", Enabled = false, Context = "DetailView")]
+        [ToolTip("Live configuration for this Application. Chosen at create (or Person/Dossier start); not switched later. Profile config applies live until lock state A.")]
+        [XafDisplayName("Application Profile")]
+        public virtual ApplicationProfile? ApplicationProfile
+        {
+            get => applicationProfile;
+            set
+            {
+                if (applicationProfile != value)
+                {
+                    applicationProfile = value;
+                    ApplyDefaultsForApplicationProfile();
+                }
+            }
+        }
+
+        private void ApplyDefaultsForApplicationProfile()
+        {
+            var os = ObjectSpaceHelper.Get(this);
+            if (os == null || applicationProfile == null)
+                return;
+
+            if (applicationProfile.DefaultVisaType != null)
+                VisaType = applicationProfile.DefaultVisaType;
+            if (applicationProfile.DefaultVisaCategory != null)
+                VisaCategory = applicationProfile.DefaultVisaCategory;
+            if (applicationProfile.DefaultVisaPeriod != null)
+                VisaPeriod = applicationProfile.DefaultVisaPeriod;
+            if (applicationProfile.DefaultUrgency != null)
+                Urgency = applicationProfile.DefaultUrgency;
+            if (applicationProfile.DefaultProjectContract != null)
+                ProjectContract = applicationProfile.DefaultProjectContract;
+            if (applicationProfile.DefaultMigrationService != null)
+                MigrationService = applicationProfile.DefaultMigrationService;
+            if (!string.IsNullOrWhiteSpace(applicationProfile.DefaultBorderZoneLocation))
+                BorderZoneLocation = applicationProfile.DefaultBorderZoneLocation;
         }
 
         private void ApplyDefaultsForApplicationType()

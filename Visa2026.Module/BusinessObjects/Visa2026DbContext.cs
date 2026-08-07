@@ -128,6 +128,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<WorkDuty> WorkDuties { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<ApplicationType> ApplicationTypes { get; set; }
+        public DbSet<ApplicationProfile> ApplicationProfiles { get; set; }
+        public DbSet<ApplicationProfileApprovalLeg> ApplicationProfileApprovalLegs { get; set; }
+        public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
         public DbSet<ApplicationTypeGroup> ApplicationTypeGroups { get; set; }
         public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
@@ -624,12 +627,50 @@ namespace Visa2026.Module.BusinessObjects
                     .WithMany()
                     .HasForeignKey(a => a.LatestProgressId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(a => a.ApplicationProfile)
+                    .WithMany(p => p.Applications)
+                    .HasForeignKey("ApplicationProfileID")
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Restrict);
                 b.Property(a => a.BorderZoneLocation).HasMaxLength(500);
                 b.HasIndex(a => new { a.AppNumberPrefix, a.ApplicationNumber, a.Year, a.Month })
                  .IsUnique()
                  .HasFilter(IndexFilter("[IsManualEntry] = 0 AND [GCRecord] IS NULL"));
                 b.HasIndex("ApplicationTypeID")
                  .HasDatabaseName("IX_Applications_ApplicationTypeID_List");
+                b.HasIndex("ApplicationProfileID")
+                 .HasDatabaseName("IX_Applications_ApplicationProfileID");
+            });
+
+            modelBuilder.Entity<ApplicationProfile>(b =>
+            {
+                b.Property(p => p.Name).HasMaxLength(200);
+                b.Property(p => p.Code).HasMaxLength(64);
+                b.Property(p => p.SelectionCode).HasMaxLength(3);
+                b.Property(p => p.DefaultBorderZoneLocation).HasMaxLength(500);
+                b.HasIndex(p => p.Code)
+                    .IsUnique()
+                    .HasFilter(IndexFilter("[Code] IS NOT NULL AND [Code] <> '' AND [GCRecord] IS NULL"));
+                b.HasIndex(p => p.SelectionCode)
+                    .HasDatabaseName("IX_ApplicationProfiles_SelectionCode");
+            });
+
+            modelBuilder.Entity<ApplicationProfileApprovalLeg>(b =>
+            {
+                b.HasOne(l => l.ApplicationProfile)
+                    .WithMany(p => p.ApprovalLegs)
+                    .HasForeignKey(l => l.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(l => new { l.ApplicationProfileId, l.Sequence })
+                    .HasDatabaseName("IX_ApplicationProfileApprovalLegs_Profile_Sequence");
+            });
+
+            modelBuilder.Entity<ApplicationProfileTemplate>(b =>
+            {
+                b.HasOne(t => t.ApplicationProfile)
+                    .WithMany(p => p.NestedTemplates)
+                    .HasForeignKey(t => t.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ApplicationProgress>(b => {

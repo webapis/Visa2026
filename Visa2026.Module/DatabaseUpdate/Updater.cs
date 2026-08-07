@@ -363,6 +363,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ProjectContract>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovingMinistry>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileApprovalLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileTemplate>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContractApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -787,6 +790,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             // Approval deadline / working days — Application.ApprovalLegSnapshots
             EnsureReadOnlyPermission<ApprovingMinistry>(role);
             EnsureReadOnlyPermission<ApprovalLegProfile>(role);
+            EnsureReadOnlyPermission<ApplicationProfile>(role);
+            EnsureReadOnlyPermission<ApplicationProfileApprovalLeg>(role);
+            EnsureReadOnlyPermission<ApplicationProfileTemplate>(role);
             EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
             EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ProjectContract>(role);
@@ -1009,6 +1015,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<ProjectContract>(role);
             EnsureReadWriteCreatePermission<ApprovingMinistry>(role);
             EnsureReadWriteCreatePermission<ApprovalLegProfile>(role);
+            EnsureReadWriteCreatePermission<ApplicationProfile>(role);
+            EnsureReadWriteCreatePermission<ApplicationProfileApprovalLeg>(role);
+            EnsureReadWriteCreatePermission<ApplicationProfileTemplate>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);

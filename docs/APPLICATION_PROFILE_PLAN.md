@@ -1,13 +1,13 @@
 # Application Profile — live configuration + per-Application values (plan)
 
-**Status:** Binding model revised (see §2) — **no full profile clone** · UX prototyping · no domain implementation yet  
+**Status:** Binding model locked · **`ApplicationType` deprecated** · first code slice: `ApplicationProfile` BO + `Application.ApplicationProfile` FK (dual-read) · UX prototypes · ApplicationItem / M2M DetailView not implemented yet  
 **Prototypes:**
 - Wizard: [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)
 - Usage storyboard: [`docs/prototypes/application-profile-usage.html`](prototypes/application-profile-usage.html)
 - Application DetailView (M2M, no ApplicationItem): [`docs/prototypes/application-detail-m2m.html`](prototypes/application-detail-m2m.html)
 - Storyboard images: [`docs/prototypes/images/`](prototypes/images/)
 **Input draft:** [`docs/prototypes/Application-profile-wizard-draft.xlsx`](prototypes/Application-profile-wizard-draft.xlsx) (columns E–H classify each field)  
-**Related today:** `ApplicationType`, `Application`, `ApplicationItem` *(planned retire)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
+**Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
 
 ---
 
@@ -48,7 +48,7 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | 16 | Profile identity on Application | Name / Description / Code: **visible** on Application, **not** editable there (read live from profile); also available to merge. |
 | 17 | Signatory on Application | Authorized signatory + Visa representative: **visible + editable + persistent** per Application (Excel); defaults from profile at create. |
 | 18 | Profile pick timing | Application may set `ApplicationProfile` **only at create**. No switch to another profile afterward. |
-| 19 | Profile edit lock | When any Application using the profile has reached the **lock progress state** (§2.6 = option **A**), configuration-related edits on that profile are blocked. New Applications may still select a locked profile. |
+| 20 | ApplicationType deprecation | **`ApplicationType` is deprecated.** New configuration and officer UX use **`ApplicationProfile`**. Keep Type table/FK for dual-read and import until cutover; do not add new Type flags. Registry: [`docs/DEPRECATED.md`](DEPRECATED.md). |
 
 ### 2.2 Configuration-related (live from profile)
 
@@ -425,8 +425,9 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 
 1. Lock open items A–I.  
 2. Field dictionary from Excel E–H → BO members → `{{…}}`.  
-3. Introduce `ApplicationProfile` + `Application.ApplicationProfile` FK alongside `ApplicationType`.  
-4. Seed profiles from type catalog; dual-read; then deprecate Type.  
+3. Introduce `ApplicationProfile` + `Application.ApplicationProfile` FK; mark **`ApplicationType` deprecated** (dual-read).  
+4. Seed profiles from type catalog; switch Appearance / progress / reports to profile.  
+5. Remove `Application.ApplicationType` FK and retire Type/group/template-type links.  
 5. Refresh prototypes/images that still say “clone”.
 
 ---

@@ -131,6 +131,11 @@ namespace Visa2026.Module.BusinessObjects
         public virtual IList<ApplicationType> ApplicationTypes { get; set; }
     }
 
+    /// <summary>
+    /// DEPRECATED — use <see cref="ApplicationProfile"/> (see docs/APPLICATION_PROFILE_PLAN.md, docs/DEPRECATED.md).
+    /// Retained for dual-read / import until Applications bind only to ApplicationProfile.
+    /// Do not add new Show* / capability flags here.
+    /// </summary>
     [DefaultClassOptions]
     [NavigationItem("Lookup/Application/Config")]
     [DefaultProperty(nameof(LocalizedDisplayName))]
