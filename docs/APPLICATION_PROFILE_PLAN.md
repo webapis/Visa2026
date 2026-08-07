@@ -210,6 +210,7 @@ These remain **Application** fields (not `TravelHistory`). Movement history itse
 2. **Re-attach Excel** — sync full person-config toggle list into `docs/prototypes/Application-profile-wizard-draft.xlsx`.
 3. **Wide view columns** — mandatory joined columns for v1 roster?
 4. **Unlock profile config** — auto when no apps ≥ lock state A?
+5. **Person / Dossier → Application** — see §11 (entry points + profile-usage UX).
 
 ### Sketch layout (prototype)
 
@@ -233,6 +234,68 @@ flowchart TB
   AppProps[Per-Application props catalog] --> App[Application]
   View --> UI[DetailView]
 ```
+
+---
+
+## 11. Start Application from Person / Dossier (proposed)
+
+**Status:** Suggestion for UX — not implemented · complements manual Application create + profile pick
+
+### Problem
+
+Creating an Application only from the Application side (pick profile → add people) is slow when the officer is already on a **Person** or **Dossier**. Officers also need to see **which Application Profiles were already used** for that person (renewals, follow-ups, avoid duplicate open apps).
+
+### Suggestion (recommended)
+
+Keep **one** create pipeline (same as today planned): set `Application.ApplicationProfile` FK → seed per-Application defaults → link Person → auto-resolve children. Add **extra entry points** that pre-select the person and profile.
+
+| Entry | Officer action | Result |
+|-------|----------------|--------|
+| Person DetailView | **Start application…** | Profile picker (filtered) → create Application with this Person already linked |
+| Person Dossier | **Start application…** (header or Applications section) | Same pipeline; return/deep-link to new Application or stay in dossier with toast + link |
+| Application Profiles rail / list | **New Application from profile** | Create Application with profile set; officer adds people (existing plan) |
+| Application create (blank) | Pick profile then add people | Existing plan |
+
+```mermaid
+flowchart LR
+  P[Person / Dossier] -->|Start application| Pick[Filtered Application Profile picker]
+  Rail[Profiles rail] -->|New from profile| Pick
+  Pick --> App[Create Application + live profile FK]
+  App --> Link[Link Person + auto-resolve M2M]
+  Link --> Track[Profile usage visible on Person]
+```
+
+### Track Application Profiles used for a Person
+
+**Prefer derived tracking** (no second write model):
+
+- Source of truth: Applications where Person ∈ Application.People M2M, grouped by `Application.ApplicationProfile`.
+- Person / Dossier UI surfaces:
+  - **Applications** list (number, date, state, profile name/code)
+  - **Profiles used** chips or compact list (distinct profiles ever used)
+  - Optional: **Open applications** using a profile (warn before starting another)
+
+Avoid a separate `PersonApplicationProfileUsage` table unless you need to record “officer considered profile X but cancelled before save.”
+
+### Picker UX (from Person / Dossier)
+
+1. Show Application Profiles matching **applicability criteria** + audience (Employee / FM / visitor vs person role).
+2. Annotate each row: **Used before** (count / last date) · **Has open Application** · lock badge if profile config locked.
+3. Confirm → create Application → link this Person only (officer may add more people later on Application) → open Application DetailView.
+
+### Why this improves UX
+
+- Starts where officers already work (Person / Dossier).
+- Same binding rules (live profile FK, defaults, auto-resolve) — no parallel create path.
+- Profile history is free from M2M + FK — supports renewals and duplicate awareness.
+
+### Open questions (§11)
+
+1. From Person/Dossier create: **only this Person** on the new Application, or multi-select family members in the same dialog?
+2. If an **open** Application already uses the same profile for this Person — **warn**, **block**, or allow freely?
+3. Picker default sort — unused profiles first, or most recently used first?
+4. After create from Dossier — navigate to Application DetailView, or stay on Dossier with a link?
+5. Should Dossier **Applications** section switch from `ApplicationItem`-based read model to Application↔Person M2M + profile name (required when ApplicationItem is removed)?
 
 ---
 
