@@ -127,47 +127,76 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | B | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
 | C | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
 | D | Temporary visitor | Real for v1? |
-| E | Field placement | Which of 1–14 are Application header vs ApplicationItem? |
+| E | Field placement | Which of the 14 live on Application header vs elsewhere (ApplicationItem retired). |
 | F | SLA integers vs tiers | Raw days on profile? |
 | G | Merge host | Same Resminamalar / Word–Excel pipeline? |
-| H | Confirm person toggles | §2.5 |
-| I | ApplicationItem retirement / M2M DetailView | See §10 |
+| H | Confirm person toggles | §2.5 — also drive M2M tab visibility (§10.2) |
+| I | Application DetailView remaining | §10.3 (left rail, resolve refresh, “valid” rules, travel fields home, …) |
 
 ---
 
-## 10. Application DetailView redesign (sketch) — retire ApplicationItem
+## 10. Application DetailView redesign — retire ApplicationItem
 
-**Status:** UX prototype only · domain not implemented  
+**Status:** Decisions largely locked (§10.1) · UX prototype · no domain implementation  
 **Prototype:** [`docs/prototypes/application-detail-m2m.html`](prototypes/application-detail-m2m.html)  
 **Image:** [`docs/prototypes/images/ap-05-application-detail-m2m.png`](prototypes/images/ap-05-application-detail-m2m.png)
 
-### Intent
+### 10.1 Locked decisions
 
-Stop using `ApplicationItem` as the per-person line on Application. Instead, Application has **many-to-many** links to Person-owned / person-related BOs:
+| # | Topic | Decision |
+|---|--------|----------|
+| 1 | ApplicationItem | **Hard remove** (no migrate-in-place dual model). Data cutover strategy for existing rows is a separate migration script/problem if needed outside the BO. |
+| 2 | Roster | Application has **many People** via M2M (replaces one-row-per-person `ApplicationItem`). |
+| 3 | Link on Person add | When a `Person` is linked to `Application`, **auto-resolve and link** related M2M rows for that person. **Only active / valid** rows (e.g. non-expired Passport, non-expired Visa; same idea for other BOs — exact rules in §10.3). |
+| 4 | SQL presentation | **One wide roster SQL view** feeding the Application person/context grid (not one view per tab). |
+| 5 | Tab visibility | Driven by **Application Profile** “Required Person Related data” configuration (Excel: Passport / Education / Position / Local address — configuration-related toggles). Those rows are not per-Application fields; they control which person-data tabs/requirements apply. |
+| 6 | v1 BO set (M2M inputs) | Person, Passport, Visa, AddressOfResidence, WorkPermitItem, InvitationItem, BorderZoneItem, Education, EmployeeSalary, EmployeePositionHistory, MedicalRecord, plus **RejectionItem** and former ApplicationItem **travel/registration** fields (home TBD). |
+| 7 | Existing vs issued documents | **Input (existing):** `InvitationItem`, `WorkPermitItem`, `Visa` linked M2M as current/valid items for the person. **Output (new):** new Invitation via `Invitation` header, new WP via `WorkPermit` header (as today on Application). **New Visa:** link via new **`Visa.IssuingApplication`** → `Application`; **remove `Visa.IssuingApplicationItem`**. |
 
-`Person`, `Passport`, `Visa`, `AddressOfResidence`, `WorkPermitItem`, `InvitationItem`, `BorderZoneItem`, `Education`, `EmployeeSalary`, `EmployeePositionHistory`, `MedicalRecord`.
+### 10.2 Person-related profile config → tabs
 
-Tab grids show data via **SQL views** joining Application↔M2M↔BO properties.
+From Excel **PERSON IN APPLICATION RELATED CONFIGURATION** (all configuration-related, not editable per Application):
+
+| Profile toggle | Effect when enabled |
+|----------------|---------------------|
+| Passport | Passport tab / requirement for linked people |
+| Education | Education tab / requirement |
+| Position | Position (`EmployeePositionHistory`) tab / requirement |
+| Local address of residence | Address tab / requirement |
+
+Additional M2M tabs (Visa, WP item, Invitation item, Border zone, Salary, Medical, Rejection, travel) — visibility rules **still open** if not in this Excel block (produce flags? always? extend Excel?).
+
+### 10.3 Still open (DetailView)
+
+1. **Left rail** (unanswered) — Always-visible Application Profiles list: create-time pick only, navigation to configure profiles, or “New Application from profile”?
+2. **Auto-resolve timing** — Resolve M2M children only at Person link time, or refresh when profile toggles change / on reopen?
+3. **“Valid / active” rules** — Confirm per BO: Passport/Visa by expiry date; Address/Education/Position/Salary/Medical = “current” via `PersonCurrentItems`-style rules? RejectionItem / BorderZoneItem criteria?
+4. **Manual override** — After auto-link, may officer unlink a passport and link another valid one?
+5. **Wide roster view grain** — One row per linked **Person** with pivoted/joined columns from linked children?
+6. **Travel / registration fields** — Without ApplicationItem, where do TravelDate, CheckPoint, MovementType, etc. live? (link-row payload on Application↔Person join entity? separate BO?)
+7. **Extra tabs** — Visa / InvitationItem / WorkPermitItem / BorderZone / Salary / Medical / Rejection visibility: extend person-config Excel, use produce/cancel flags, or always show when any links exist?
+8. **`IssuingApplication`** — Replace `IssuingApplicationItem` with `Visa.IssuingApplication` → `Application`; validation: passport person must be in Application’s Person M2M; profile/type must allow issuing visa (`CanIssueVisa` / produce visa).
 
 ### Sketch layout (prototype)
 
 | Region | Content |
 |--------|---------|
-| Left rail | Application Profiles list + search (+ actions) |
+| Left rail | Application Profiles list + search (+ actions) — purpose TBD |
 | Top | Application Progress · header (N, Date, Urgency) · steps + SLA |
 | Middle | Application profile used by Application (live FK summary) |
-| Bottom tabs | M2M collections (Person, Passport, Visa, Education, …) |
+| Bottom | Wide roster + tabs whose visibility follows profile person-config |
 
-### Open questions (blocking implementation)
-
-1. **Link semantics** — Explicit M2M for every BO, or link `Person` + resolve “current” children from profile person toggles?
-2. **ApplicationItem cutover** — Hard remove vs migrate existing rows into M2M links?
-3. **Left rail** — Create-time profile pick only, or always-visible catalog for another purpose?
-4. **SQL view grain** — One view per tab vs one wide roster view?
-5. **Tab visibility** — From profile person toggles / produce flags, or always all tabs?
-6. **Roster identity** — Is `Person` M2M the sole “who is on this application” list?
-7. **Omitted BOs** — `RejectionItem`, `WorkDuty`, former ApplicationItem travel/registration fields — in v1?
-8. **Issued vs input** — Produced Invitations/WPs/Visas stay on Application collections; tabs only link *input* existing items?
+```mermaid
+flowchart TB
+  Add[Link Person to Application] --> Resolve[Auto-resolve valid related BOs]
+  Resolve --> M2M[M2M links: Passport Visa Education …]
+  Prof[Profile person toggles] --> Tabs[Tab visibility / requirements]
+  M2M --> View[Wide SQL roster view]
+  View --> UI[Application DetailView]
+  OutInv[New Invitation header] --> App[Application]
+  OutWp[New WorkPermit header] --> App
+  OutVisa[Visa.IssuingApplication] --> App
+```
 
 ---
 
@@ -191,7 +220,10 @@ Application
   ├─ ApplicationProfile (FK, required)     // LIVE — set only at create; never switch
   ├─ VisaType, VisaCategory, …             // per-Application values (persistent)
   ├─ AuthorizedSignatory, VisaRepresentative
-  └─ … progress, items, etc.
+  ├─ People M2M (+ auto-resolved child M2Ms)
+  ├─ Invitations / WorkPermits (issued headers)
+  └─ … progress, etc.
+// Visa.IssuingApplication → Application (replaces IssuingApplicationItem)
 ```
 
 **Create algorithm:** pick profile (only at create) → set FK → copy **defaults only** into empty per-Application fields → thereafter read configuration live from profile; persist only per-Application values. Profile FK is immutable after create.
