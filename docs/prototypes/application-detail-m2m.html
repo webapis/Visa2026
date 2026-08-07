@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Application DetailView prototype — M2M Person BOs (no ApplicationItem)</title>
+  <style>
+    :root {
+      --ink: #1a2332; --muted: #5c6b7a; --line: #d5dde6; --panel: #fff;
+      --accent: #0b6e4f; --accent-soft: #e6f3ee; --surface: #eef2f6;
+      --sidebar: #f7f9fb; --warn: #9a5b00; --warn-soft: #fff4e5;
+      --font: "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: var(--font); color: var(--ink);
+      background: linear-gradient(180deg, #e8eef4, var(--surface));
+      min-height: 100vh;
+    }
+    .page { max-width: 1280px; margin: 0 auto; padding: 18px 16px 48px; }
+    .banner {
+      background: #e8f0fa; border: 1px solid #c9d6e4; border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 14px; font-size: 0.9rem;
+    }
+    .banner strong { color: #1e4d8c; }
+    h1 { margin: 0 0 4px; font-size: 1.35rem; }
+    .lede { margin: 0 0 14px; color: var(--muted); font-size: 0.92rem; max-width: 80ch; }
+
+    .app-shell {
+      display: grid; grid-template-columns: 240px 1fr; gap: 12px;
+      min-height: 720px;
+    }
+    @media (max-width: 960px) { .app-shell { grid-template-columns: 1fr; } }
+
+    .sidebar {
+      background: var(--sidebar); border: 1px solid var(--line); border-radius: 12px;
+      padding: 12px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .sidebar h2 { margin: 0; font-size: 0.95rem; }
+    .search {
+      display: flex; align-items: center; gap: 6px;
+      border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 9px;
+    }
+    .search input { border: 0; outline: 0; width: 100%; font: inherit; font-size: 0.85rem; }
+    .profile-list { list-style: none; margin: 0; padding: 0; overflow: auto; flex: 1; }
+    .profile-list li {
+      display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center;
+      padding: 9px 8px; border-radius: 8px; border: 1px solid transparent; margin-bottom: 4px;
+      font-size: 0.82rem; cursor: pointer; background: #fff; border-color: var(--line);
+    }
+    .profile-list li.active { background: var(--accent-soft); border-color: #8fc9b2; }
+    .profile-list li .dot { width: 8px; height: 8px; border-radius: 50%; background: #9aa8b5; }
+    .profile-list li.active .dot { background: var(--accent); }
+    .profile-list .plus {
+      width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--line);
+      background: #fff; color: var(--muted); display: grid; place-items: center; font-weight: 700;
+    }
+
+    .main { display: flex; flex-direction: column; gap: 10px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+      box-shadow: 0 1px 2px rgba(26,35,50,.05);
+    }
+    .card-h {
+      padding: 10px 12px; border-bottom: 1px solid var(--line);
+      font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center;
+    }
+    .card-b { padding: 10px 12px; }
+
+    .top {
+      display: grid; grid-template-columns: 1.4fr 0.9fr; gap: 10px;
+    }
+    @media (max-width: 960px) { .top { grid-template-columns: 1fr; } }
+
+    table.grid { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    table.grid th, table.grid td { border-bottom: 1px solid #e8eef4; padding: 7px 6px; text-align: left; }
+    table.grid th { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em; }
+
+    .meta dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; font-size: 0.85rem; }
+    .meta dt { color: var(--muted); }
+    .meta dd { margin: 0; font-weight: 600; }
+
+    .prog-label { font-size: 0.8rem; color: var(--muted); margin: 10px 0 4px; }
+    .bar {
+      height: 12px; border-radius: 999px; background: #e5ebf1; overflow: hidden; position: relative;
+    }
+    .bar > i { display: block; height: 100%; width: 50%; background: linear-gradient(90deg, #0b6e4f, #2f9e7a); }
+    .bar-cap { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    .profile-used .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .chip {
+      font-size: 0.75rem; padding: 4px 8px; border-radius: 999px;
+      background: var(--accent-soft); color: #08553c; border: 1px solid #b7d9cb;
+    }
+    .chip.muted { background: #eef2f6; color: var(--muted); border-color: var(--line); }
+
+    .tabs-wrap { display: grid; grid-template-columns: 1fr 200px; gap: 10px; }
+    @media (max-width: 960px) { .tabs-wrap { grid-template-columns: 1fr; } }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 10px 0; border-bottom: 1px solid var(--line); }
+    .tab {
+      border: 1px solid transparent; border-bottom: 0; background: transparent;
+      padding: 8px 10px; border-radius: 8px 8px 0 0; font: inherit; font-size: 0.8rem;
+      font-weight: 600; color: var(--muted); cursor: pointer;
+    }
+    .tab.active { background: #fff; color: var(--accent-deep, #08553c); border-color: var(--line); margin-bottom: -1px; }
+    .tab-tools { margin-left: auto; display: flex; gap: 6px; align-items: center; padding: 4px 8px; }
+    .icon-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--line);
+      background: #fff; cursor: pointer; font-size: 0.85rem;
+    }
+    .tab-panel { padding: 10px 12px 14px; }
+    .toolbar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .btn {
+      border-radius: 7px; padding: 6px 10px; font: inherit; font-size: 0.8rem; font-weight: 650; cursor: pointer;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border: 0; }
+    .btn-sec { background: #fff; border: 1px solid var(--line); }
+
+    .sidebox .hint { font-size: 0.78rem; color: var(--muted); margin: 0 0 8px; }
+    .sidebox ul { margin: 0; padding-left: 16px; font-size: 0.8rem; }
+    .note {
+      margin-top: 12px; padding: 10px 12px; border-radius: 8px;
+      background: var(--warn-soft); border: 1px solid #f0d4a8; color: #5c3b08; font-size: 0.85rem;
+    }
+    .hidden { display: none; }
+    a { color: var(--accent); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="banner">
+      <strong>Prototype / sketch</strong> — custom <code>Application</code> DetailView.
+      Retires <code>ApplicationItem</code>; Application ↔ Person-related BOs via <strong>many-to-many</strong>.
+      Tab grids intended to bind to <strong>SQL views</strong> joining linked BO properties.
+      Binding to Application Profile remains live FK (see
+      <a href="../APPLICATION_PROFILE_PLAN.md">APPLICATION_PROFILE_PLAN.md</a>).
+    </div>
+
+    <h1>Application DetailView</h1>
+    <p class="lede">
+      Layout from officer sketch: profiles rail · progress + header · profile summary · M2M tabs
+      (Person, Passport, Visa, Education, …) instead of nested ApplicationItem lines.
+    </p>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <h2>Application Profiles</h2>
+        <div class="search">
+          <span aria-hidden="true">⌕</span>
+          <input type="search" placeholder="Search profiles…" />
+        </div>
+        <ul class="profile-list" id="profiles">
+          <li class="active" data-name="Invitation + WP (employee)"><span class="dot"></span><span>Invitation + WP (employee)</span><span class="plus">+</span></li>
+          <li data-name="Visa extension (FM)"><span class="dot"></span><span>Visa extension (FM)</span><span class="plus">+</span></li>
+          <li data-name="Registration — Ashgabat"><span class="dot"></span><span>Registration — Ashgabat</span><span class="plus">+</span></li>
+          <li data-name="Border zone permission"><span class="dot"></span><span>Border zone permission</span><span class="plus">+</span></li>
+          <li data-name="Exit visa"><span class="dot"></span><span>Exit visa</span><span class="plus">+</span></li>
+          <li data-name="WP extension"><span class="dot"></span><span>WP extension</span><span class="plus">+</span></li>
+          <li data-name="Cancel invitation"><span class="dot"></span><span>Cancel invitation</span><span class="plus">+</span></li>
+          <li data-name="Business trip"><span class="dot"></span><span>Business trip</span><span class="plus">+</span></li>
+          <li data-name="Service passport inv."><span class="dot"></span><span>Service passport inv.</span><span class="plus">+</span></li>
+        </ul>
+        <p style="margin:0;font-size:0.72rem;color:var(--muted)">
+          Sketch rail — clarify: create-time profile pick only vs browse/filter aid (profile FK immutable after create).
+        </p>
+      </aside>
+
+      <div class="main">
+        <div class="top">
+          <section class="card">
+            <div class="card-h">Application Progress</div>
+            <div class="card-b" style="padding-top:4px">
+              <table class="grid">
+                <thead><tr><th>State</th><th>Date</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td>Office preparation</td><td>01.08.2026</td><td>Draft package</td></tr>
+                  <tr><td>Submitted (ministry)</td><td>03.08.2026</td><td>Türkmenenergo</td></tr>
+                  <tr><td>Approved (ministry)</td><td>05.08.2026</td><td>Letter on file</td></tr>
+                  <tr><td>Submitted (migration)</td><td>06.08.2026</td><td>AS538188</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-h">Application</div>
+            <div class="card-b meta">
+              <dl>
+                <dt>N</dt><dd>12/-7010</dd>
+                <dt>Date</dt><dd>01.08.2026</dd>
+                <dt>Urgency</dt><dd>Normal</dd>
+              </dl>
+              <div class="prog-label">Progress · 3 / 6 steps</div>
+              <div class="bar" title="SLA"><i></i></div>
+              <div class="bar-cap"><span>5 / 10 days</span><span>SLA</span></div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card profile-used">
+          <div class="card-h">
+            <span>Application profile used by Application</span>
+            <span class="chip muted" title="Live FK">live link</span>
+          </div>
+          <div class="card-b">
+            <div style="font-weight:700;font-size:0.95rem" id="profileTitle">Invitation + WP (employee)</div>
+            <div class="chips">
+              <span class="chip">Related to: Issuance</span>
+              <span class="chip">Via ministry</span>
+              <span class="chip">For: Employee</span>
+              <span class="chip">Produces: Invitation, Work permit</span>
+              <span class="chip muted">Code INV_WP_EMP</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="tabs" id="tabs">
+            <button type="button" class="tab active" data-tab="person">Person</button>
+            <button type="button" class="tab" data-tab="passport">Passport</button>
+            <button type="button" class="tab" data-tab="visa">Visa</button>
+            <button type="button" class="tab" data-tab="education">Education</button>
+            <button type="button" class="tab" data-tab="address">Address</button>
+            <button type="button" class="tab" data-tab="wp">Work permit</button>
+            <button type="button" class="tab" data-tab="inv">Invitation</button>
+            <button type="button" class="tab" data-tab="bz">Border zone</button>
+            <button type="button" class="tab" data-tab="position">Position</button>
+            <button type="button" class="tab" data-tab="salary">Salary</button>
+            <button type="button" class="tab" data-tab="medical">Medical</button>
+            <div class="tab-tools">
+              <button type="button" class="icon-btn" title="Preview / find">⌕</button>
+            </div>
+          </div>
+
+          <div class="tabs-wrap">
+            <div class="tab-panel">
+              <div class="toolbar">
+                <button type="button" class="btn btn-primary">Link existing…</button>
+                <button type="button" class="btn btn-sec">Unlink</button>
+                <button type="button" class="btn btn-sec">Open detail</button>
+              </div>
+
+              <div class="tab-body" data-body="person">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Role</th><th>Personal №</th><th>From view</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>Employee</td><td>I-123456</td><td>vw_app_persons</td></tr>
+                    <tr><td>Berdiýewa G.A.</td><td>Family member</td><td>I-654321</td><td>vw_app_persons</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="passport">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Passport №</th><th>Issued</th><th>Expires</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>A-998877</td><td>12.01.2022</td><td>12.01.2032</td></tr>
+                    <tr><td>Berdiýewa G.A.</td><td>A-112233</td><td>03.05.2021</td><td>03.05.2031</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="visa">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Visa №</th><th>Type</th><th>Valid to</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>V-44001</td><td>WP</td><td>01.02.2027</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="education">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Institution</th><th>Level</th><th>Year</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>TDU</td><td>Bachelor</td><td>2014</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="address">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>City</th><th>Address</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>Aşgabat</td><td>…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="wp">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>WP item</th><th>Location</th><th>Valid to</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>WP-7788</td><td>Aşgabat</td><td>01.02.2027</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="inv">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Invitation item</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>Berdiýew A.A.</td><td>INV-2201</td><td>Current</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="bz">
+                <table class="grid"><thead><tr><th>Person</th><th>Border zone item</th><th>Zones</th></tr></thead>
+                  <tbody><tr><td colspan="3" style="color:var(--muted)">No linked border-zone items</td></tr></tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="position">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Position</th><th>From</th></tr></thead>
+                  <tbody><tr><td>Berdiýew A.A.</td><td>Engineer</td><td>01.03.2023</td></tr></tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="salary">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Amount</th><th>Currency</th></tr></thead>
+                  <tbody><tr><td>Berdiýew A.A.</td><td>…</td><td>TMT</td></tr></tbody>
+                </table>
+              </div>
+              <div class="tab-body hidden" data-body="medical">
+                <table class="grid">
+                  <thead><tr><th>Person</th><th>Record</th><th>Valid to</th></tr></thead>
+                  <tbody><tr><td>Berdiýew A.A.</td><td>MED-91</td><td>01.01.2027</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+
+            <aside class="card sidebox" style="margin:10px 10px 10px 0;align-self:start">
+              <div class="card-h">Link context</div>
+              <div class="card-b">
+                <p class="hint">Many-to-many with Application. Tab content from SQL views joining linked BO properties.</p>
+                <ul>
+                  <li>Person</li>
+                  <li>Passport</li>
+                  <li>Visa</li>
+                  <li>AddressOfResidence</li>
+                  <li>WorkPermitItem</li>
+                  <li>InvitationItem</li>
+                  <li>BorderZoneItem</li>
+                  <li>Education</li>
+                  <li>EmployeeSalary</li>
+                  <li>EmployeePositionHistory</li>
+                  <li>MedicalRecord</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <div class="note">
+          <strong>Open design points</strong> (see questions below in chat):
+          whether linking Person auto-links “current” passport/visa/… vs fully manual M2M;
+          ApplicationItem retirement cutover; left rail meaning (profile pick vs something else);
+          SQL view grain (one view per tab vs roster).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const tabs = [...document.querySelectorAll(".tab[data-tab]")];
+      const bodies = [...document.querySelectorAll(".tab-body")];
+      tabs.forEach((t) => t.addEventListener("click", () => {
+        tabs.forEach((x) => x.classList.toggle("active", x === t));
+        bodies.forEach((b) => b.classList.toggle("hidden", b.dataset.body !== t.dataset.tab));
+      }));
+      const title = document.getElementById("profileTitle");
+      document.querySelectorAll("#profiles li").forEach((li) => {
+        li.addEventListener("click", (e) => {
+          if (e.target.classList.contains("plus")) return;
+          document.querySelectorAll("#profiles li").forEach((x) => x.classList.remove("active"));
+          li.classList.add("active");
+          title.textContent = li.dataset.name;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -4,9 +4,10 @@
 **Prototypes:**
 - Wizard: [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)
 - Usage storyboard: [`docs/prototypes/application-profile-usage.html`](prototypes/application-profile-usage.html)
-- Storyboard images: [`docs/prototypes/images/`](prototypes/images/) *(lifecycle images still show older “clone” wording — refresh next)*  
+- Application DetailView (M2M, no ApplicationItem): [`docs/prototypes/application-detail-m2m.html`](prototypes/application-detail-m2m.html)
+- Storyboard images: [`docs/prototypes/images/`](prototypes/images/)
 **Input draft:** [`docs/prototypes/Application-profile-wizard-draft.xlsx`](prototypes/Application-profile-wizard-draft.xlsx) (columns E–H classify each field)  
-**Related today:** `ApplicationType`, `Application`, `ApplicationItem`, `ApplicationProgress`, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
+**Related today:** `ApplicationType`, `Application`, `ApplicationItem` *(planned retire)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
 
 ---
 
@@ -106,42 +107,69 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 
 ### 2.6 Profile edit lock (in-progress Applications)
 
-**Rule:** Always allow profile configuration edits **until** at least one Application that references the profile reaches a **lock progress state**. After that, lock configuration-related editing on the profile.
+**Rule:** Allow profile configuration edits **until** at least one Application that references the profile reaches lock state **A**. After that, lock configuration-related editing on the profile.
 
 | Topic | Decision |
 |-------|----------|
-| Trigger | Any linked Application’s current progress ≥ lock state |
+| **Lock state (A)** | First progress beyond office preparation / **submitted** to ministry or migration (left-office / submitted) |
+| Trigger | Any linked Application’s current progress ≥ lock state A |
 | Effect | Block wizard/config edits to configuration-related fields (Related to, legs, states, produce/cancel, templates, person toggles, route, audience, identity) |
 | Per-Application values | Unaffected — officers still edit Visa Type, dates, signatories, etc. on each Application |
 | Profile FK on Application | Set **only at create** — never switch afterward (§18) |
-| New Applications on locked profile | **Open** — recommendation: still allow create (FK + defaults); profile config remains read-only |
-| Unlock | **Open** — recommendation: auto-unlock when no Applications remain at/above lock state; optional admin override |
-
-**Which progress state locks the profile — not chosen yet.** Candidates:
-
-| Candidate | Meaning |
-|-----------|---------|
-| A | First progress beyond office preparation / submitted to ministry or migration |
-| B | `PROCESS_STARTED` (or equivalent) at migration |
-| C | Any non-initial progress row exists |
-| D | Explicit profile setting: “Lock when Application reaches [state]” (configurable per profile) |
-
-**Recommendation:** **D** (per-profile lock state) with a seeded default = first “submitted” / left-office state.
+| New Applications on locked profile | **Yes** — still allowed (FK + defaults); profile config remains read-only |
+| Unlock | **Open** — recommendation: auto-unlock when no Applications remain at/above lock state A; optional admin override |
 
 ### Still open (narrow)
 
 | # | Topic | Notes |
 |---|--------|------|
-| A | Lock progress state | Pick A/B/C/D in §2.6 (recommend D). |
-| B | Locked profile still selectable for new Applications? | Recommend yes. |
-| C | Unlock / admin override | Recommend auto-unlock when no apps at/above lock state. |
-| D | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
-| E | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
-| F | Temporary visitor | Real for v1? |
-| G | Field placement | Which of 1–14 are Application header vs ApplicationItem? |
-| H | SLA integers vs tiers | Raw days on profile? |
-| I | Merge host | Same Resminamalar / Word–Excel pipeline? |
-| J | Confirm person toggles | §2.5 |
+| A | Unlock / admin override | Recommend auto-unlock when no apps at/above lock state A. |
+| B | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
+| C | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
+| D | Temporary visitor | Real for v1? |
+| E | Field placement | Which of 1–14 are Application header vs ApplicationItem? |
+| F | SLA integers vs tiers | Raw days on profile? |
+| G | Merge host | Same Resminamalar / Word–Excel pipeline? |
+| H | Confirm person toggles | §2.5 |
+| I | ApplicationItem retirement / M2M DetailView | See §10 |
+
+---
+
+## 10. Application DetailView redesign (sketch) — retire ApplicationItem
+
+**Status:** UX prototype only · domain not implemented  
+**Prototype:** [`docs/prototypes/application-detail-m2m.html`](prototypes/application-detail-m2m.html)  
+**Image:** [`docs/prototypes/images/ap-05-application-detail-m2m.png`](prototypes/images/ap-05-application-detail-m2m.png)
+
+### Intent
+
+Stop using `ApplicationItem` as the per-person line on Application. Instead, Application has **many-to-many** links to Person-owned / person-related BOs:
+
+`Person`, `Passport`, `Visa`, `AddressOfResidence`, `WorkPermitItem`, `InvitationItem`, `BorderZoneItem`, `Education`, `EmployeeSalary`, `EmployeePositionHistory`, `MedicalRecord`.
+
+Tab grids show data via **SQL views** joining Application↔M2M↔BO properties.
+
+### Sketch layout (prototype)
+
+| Region | Content |
+|--------|---------|
+| Left rail | Application Profiles list + search (+ actions) |
+| Top | Application Progress · header (N, Date, Urgency) · steps + SLA |
+| Middle | Application profile used by Application (live FK summary) |
+| Bottom tabs | M2M collections (Person, Passport, Visa, Education, …) |
+
+### Open questions (blocking implementation)
+
+1. **Link semantics** — Explicit M2M for every BO, or link `Person` + resolve “current” children from profile person toggles?
+2. **ApplicationItem cutover** — Hard remove vs migrate existing rows into M2M links?
+3. **Left rail** — Create-time profile pick only, or always-visible catalog for another purpose?
+4. **SQL view grain** — One view per tab vs one wide roster view?
+5. **Tab visibility** — From profile person toggles / produce flags, or always all tabs?
+6. **Roster identity** — Is `Person` M2M the sole “who is on this application” list?
+7. **Omitted BOs** — `RejectionItem`, `WorkDuty`, former ApplicationItem travel/registration fields — in v1?
+8. **Issued vs input** — Produced Invitations/WPs/Visas stay on Application collections; tabs only link *input* existing items?
+
+---
 
 ## 3. Domain shape (sketch — not implemented)
 
@@ -157,7 +185,7 @@ ApplicationProfile                         // configuration (live)
   ├─ NestedTemplate[] + FileData
   ├─ PersonDataRequirements                // 4 toggles
   ├─ ApplicabilityCriteria
-  └─ ConfigLockProgressState?              // when any linked App reaches this, lock config edits
+  └─ (derived) IsConfigLocked            // true when any linked App ≥ lock state A
 
 Application
   ├─ ApplicationProfile (FK, required)     // LIVE — set only at create; never switch
@@ -222,7 +250,7 @@ Form visibility / process / templates / person rules come **live** from profile.
 Edit profile (e.g. change Related to, add template). **Existing Applications** pick up configuration behavior. Saved per-Application values stay as entered.
 
 ### Story E — Profile locks
-When any linked Application reaches the lock progress state, configuration wizard becomes read-only for that profile. Per-Application field edits on Applications continue.
+When any linked Application reaches lock state **A** (first progress beyond office preparation / submitted to ministry or migration), the configuration wizard becomes read-only for that profile. New Applications may still pick the locked profile. Per-Application field edits on Applications continue.
 ---
 
 ## 6. Excel → classification (cols E–H)
@@ -261,4 +289,6 @@ When any linked Application reaches the lock progress state, configuration wizar
 | `application-profile-wizard.html` | Configure profile | Update copy: live config vs per-App defaults |
 | `application-profile-usage.html` | Usage storyboard | Replace clone story with live FK + defaults |
 | `images/ap-0*.png` | Visuals | Refresh lifecycle image (no full clone) |
+| `application-detail-m2m.html` | Custom Application DetailView sketch (M2M tabs, no ApplicationItem) |
+| `images/ap-05-application-detail-m2m.png` | Visual mock of Application DetailView |
 | Excel draft | Source of E–H tags | Updated workbook in repo |
