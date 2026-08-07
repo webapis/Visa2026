@@ -516,10 +516,9 @@
           </div>
           <div class="clone-callout">
             Saving publishes an <strong>Application Profile</strong> Applications will <strong>reference live</strong>
-            (FK). Configuration-related settings (Related to, produce/cancel, legs, states, templates, person flags)
-            always read from this profile — later edits affect existing Applications.
-            Per-Application fields (Visa Type … Entry Check Point, signatories) get <strong>defaults once</strong> at create,
-            then officers edit values stored on the Application.
+            (FK, set only at Application create). Configuration-related settings always read from this profile
+            until a linked Application reaches the <strong>progress lock state</strong> (then config edits lock).
+            Per-Application fields get <strong>defaults once</strong> at create, then officers edit values on the Application.
           </div>
           <div class="panel-body">
             <div class="section">

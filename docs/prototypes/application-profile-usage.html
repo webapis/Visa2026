@@ -101,9 +101,8 @@
     </p>
 
     <div class="banner">
-      Excel cols E–H: configuration-related fields stay on the profile (live).
-      Per-Application fields (Visa Type … Entry Check Point, signatories) are editable/persistent on the Application.
-      Profile config changes affect existing Applications; defaults do not overwrite saved values.
+      Locked: live FK · profile only at create · config lock after progress state (which state TBD) ·
+      per-Application values with defaults · Excel E–H classification · nested templates · person toggles (pending).
     </div>
 
     <nav class="toc">
@@ -236,11 +235,11 @@
       <div class="scene-body">
         <div class="decisions">
           <div><strong>Binding</strong> Live FK to ApplicationProfile — no full clone</div>
-          <div><strong>Config changes</strong> Affect existing Applications using the profile</div>
+          <div><strong>Profile pick</strong> Only at Application create — never switch later</div>
+          <div><strong>Config changes</strong> Affect linked Applications until progress lock engages</div>
+          <div><strong>Profile lock</strong> After a progress lock state — config wizard read-only (state TBD)</div>
           <div><strong>Per-Application</strong> 14 fields + signatories; defaults at create only</div>
-          <div><strong>Related to / produce / …</strong> Configuration-related · drive visibility &amp; tracking</div>
-          <div><strong>Templates</strong> Nested on profile · visible list · not edited per App</div>
-          <div><strong>Open</strong> Mid-flight profile edits · switch profile · required vs visible</div>
+          <div><strong>Open</strong> Which lock state (A–D) · unlock · required vs visible</div>
         </div>
       </div>
     </section>

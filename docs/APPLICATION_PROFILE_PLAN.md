@@ -46,6 +46,8 @@ Application-type behavior is **scattered** across `ApplicationType` `Show*` / `C
 | 15 | Template-driven surface | Per-Application catalog fields visible primarily from nested-template usage ∪ workflow need. |
 | 16 | Profile identity on Application | Name / Description / Code: **visible** on Application, **not** editable there (read live from profile); also available to merge. |
 | 17 | Signatory on Application | Authorized signatory + Visa representative: **visible + editable + persistent** per Application (Excel); defaults from profile at create. |
+| 18 | Profile pick timing | Application may set `ApplicationProfile` **only at create**. No switch to another profile afterward. |
+| 19 | Profile edit lock | When any Application using the profile has reached a **configured progress lock state** (see §2.6), **configuration-related** edits on that profile are blocked (or require a special override). Defaults for per-Application fields may still be editable for *future* creates only if product allows — v1 recommendation: lock whole profile config wizard when lock engages. |
 
 ### 2.2 Configuration-related (live from profile)
 
@@ -102,21 +104,44 @@ Configuration-related fields are never “edited on Application”; some are sho
 
 Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}}` packs; constrain publish if a template references a pack while its toggle is off.
 
+### 2.6 Profile edit lock (in-progress Applications)
+
+**Rule:** Always allow profile configuration edits **until** at least one Application that references the profile reaches a **lock progress state**. After that, lock configuration-related editing on the profile.
+
+| Topic | Decision |
+|-------|----------|
+| Trigger | Any linked Application’s current progress ≥ lock state |
+| Effect | Block wizard/config edits to configuration-related fields (Related to, legs, states, produce/cancel, templates, person toggles, route, audience, identity) |
+| Per-Application values | Unaffected — officers still edit Visa Type, dates, signatories, etc. on each Application |
+| Profile FK on Application | Set **only at create** — never switch afterward (§18) |
+| New Applications on locked profile | **Open** — recommendation: still allow create (FK + defaults); profile config remains read-only |
+| Unlock | **Open** — recommendation: auto-unlock when no Applications remain at/above lock state; optional admin override |
+
+**Which progress state locks the profile — not chosen yet.** Candidates:
+
+| Candidate | Meaning |
+|-----------|---------|
+| A | First progress beyond office preparation / submitted to ministry or migration |
+| B | `PROCESS_STARTED` (or equivalent) at migration |
+| C | Any non-initial progress row exists |
+| D | Explicit profile setting: “Lock when Application reaches [state]” (configurable per profile) |
+
+**Recommendation:** **D** (per-profile lock state) with a seeded default = first “submitted” / left-office state.
+
 ### Still open (narrow)
 
 | # | Topic | Notes |
 |---|--------|------|
-| A | Mid-flight profile edits | If officers change “Related to” / produce / legs on a profile while Applications are in progress — always OK, or lock profile when any Application is past a state? |
-| B | Switch profile | Can an Application change `ApplicationProfile` after create, or only at create? |
-| C | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
-| D | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
-| E | Temporary visitor | Real for v1? |
-| F | Field placement | Which of 1–14 are Application header vs ApplicationItem? |
-| G | SLA integers vs tiers | Raw days on profile? |
-| H | Merge host | Same Resminamalar / Word–Excel pipeline? |
-| I | Confirm person toggles | §2.5 |
-
----
+| A | Lock progress state | Pick A/B/C/D in §2.6 (recommend D). |
+| B | Locked profile still selectable for new Applications? | Recommend yes. |
+| C | Unlock / admin override | Recommend auto-unlock when no apps at/above lock state. |
+| D | Required-to-save vs visible | Undecided. Recommendation: visible = template ∪ workflow; required = separate flag. |
+| E | Derive vs constrain catalog | Undecided. Recommendation: hybrid extract + hard-block unknown placeholders. |
+| F | Temporary visitor | Real for v1? |
+| G | Field placement | Which of 1–14 are Application header vs ApplicationItem? |
+| H | SLA integers vs tiers | Raw days on profile? |
+| I | Merge host | Same Resminamalar / Word–Excel pipeline? |
+| J | Confirm person toggles | §2.5 |
 
 ## 3. Domain shape (sketch — not implemented)
 
@@ -131,16 +156,17 @@ ApplicationProfile                         // configuration (live)
   ├─ ProcessStateFlag[] + SlaDays
   ├─ NestedTemplate[] + FileData
   ├─ PersonDataRequirements                // 4 toggles
-  └─ ApplicabilityCriteria
+  ├─ ApplicabilityCriteria
+  └─ ConfigLockProgressState?              // when any linked App reaches this, lock config edits
 
 Application
-  ├─ ApplicationProfile (FK, required)     // LIVE — not a clone
+  ├─ ApplicationProfile (FK, required)     // LIVE — set only at create; never switch
   ├─ VisaType, VisaCategory, …             // per-Application values (persistent)
   ├─ AuthorizedSignatory, VisaRepresentative
   └─ … progress, items, etc.
 ```
 
-**Create algorithm:** pick profile → set FK → copy **defaults only** into empty per-Application fields → thereafter read configuration live from profile; persist only per-Application values.
+**Create algorithm:** pick profile (only at create) → set FK → copy **defaults only** into empty per-Application fields → thereafter read configuration live from profile; persist only per-Application values. Profile FK is immutable after create.
 
 ```mermaid
 flowchart LR
@@ -149,7 +175,8 @@ flowchart LR
   P -->|live FK: related-to, produce, legs, templates, person flags| A
   P -->|defaults once at create| V[Per-Application field values]
   V --> A
-  P2[Later profile config edit] -->|affects existing apps| A
+  P2[Later profile config edit] -->|affects apps until lock state| A
+  Lock[App reaches lock progress state] -->|blocks profile config edits| P
   P2 -.->|does not overwrite| V
 ```
 
@@ -186,14 +213,16 @@ flowchart TB
 Selected officer runs wizard; sets configuration-related options and defaults for per-Application fields; publishes.
 
 ### Story B — Create Application
-Pick profile (criteria filter) → FK set → defaults applied to per-Application fields → officer edits those values.
+Pick profile **once at create** (criteria filter) → FK set (immutable) → defaults applied to per-Application fields → officer edits those values.
 
 ### Story C — Use Application
-Form visibility / process / templates / person rules come **live** from profile. Officer only edits per-Application values (and progress data).
+Form visibility / process / templates / person rules come **live** from profile. Officer only edits per-Application values (and progress data). Cannot change profile.
 
-### Story D — Improve configuration
-Edit profile (e.g. change Related to, add template, enable Education). **Existing Applications** pick up configuration behavior immediately. Their saved Visa Type / dates / signatory values stay as entered.
+### Story D — Improve configuration (while unlocked)
+Edit profile (e.g. change Related to, add template). **Existing Applications** pick up configuration behavior. Saved per-Application values stay as entered.
 
+### Story E — Profile locks
+When any linked Application reaches the lock progress state, configuration wizard becomes read-only for that profile. Per-Application field edits on Applications continue.
 ---
 
 ## 6. Excel → classification (cols E–H)
