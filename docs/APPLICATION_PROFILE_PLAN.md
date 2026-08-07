@@ -303,25 +303,22 @@ Avoid a separate `PersonApplicationProfileUsage` table unless you need to record
 | 6 | Profile picker sort | **Most recently used** for the **seed** Person first. |
 | 7 | After create from Dossier | **Stay on Dossier** with a link to the new Application. |
 | 8 | Missing required person data | **Create anyway** and **flag** Persons who lack required valid data (e.g. passport when profile requires it) — do not block create. |
+| 9 | “Open” Application (warn) | Any Application that is **not** in a **terminal** state — treat **issued** and **cancelled** (and other workflow terminals) as closed; everything else is open for the duplicate-profile warn. |
+| 10 | Via ministry + no ProjectContract | If seed Person has **no** ProjectContract and profile is **via ministry** → **block** start (cannot proceed until ProjectContract is set / resolvable). |
+| 11 | Dossier Applications section | **Yes** — remodel to Application↔Person M2M + profile name when ApplicationItem is removed. |
 
-**Still open (narrow):**
-
-| # | Topic | Notes |
-|---|--------|------|
-| A | “Open” Application definition | Which progress states count as open for the warn (anything not terminal / issued / cancelled)? |
-| B | Via-ministry ProjectContract | If seed Person has no ProjectContract, block, warn, or fall back to full search? |
-| C | Dossier Applications section | Remodel to Application↔Person M2M + profile name when ApplicationItem is removed — assume **yes** unless objected. |
+**Still open (narrow):** none for §11 — remaining plan opens are outside this flow (TravelHistory validity, Excel sync, unlock policy, etc.).
 
 ```mermaid
 flowchart LR
   Seed[Person / Dossier Start application]
   Seed --> Prof[Pick profile MRU for seed]
-  Prof --> People[Multi-select People]
-  People -->|via ministry| PC[Same ProjectContract]
-  People -->|direct migration| Broad[Broader person search]
+  Prof --> Gate{Via ministry and seed has ProjectContract?}
+  Gate -->|no PC| Block[Block]
+  Gate -->|ok or direct migration| People[Multi-select People]
   People -->|Related to Registration| Fam[Suggest FamilyMembers]
-  People --> Warn[Warn on duplicate open app]
-  Warn --> App[Create Application even if some People flagged]
+  People --> Warn[Warn if open app same profile]
+  Warn --> App[Create + flag incomplete People]
   App --> Dossier[Stay on Dossier + link]
 ```
 
