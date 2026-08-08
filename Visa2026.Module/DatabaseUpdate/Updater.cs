@@ -286,6 +286,8 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         // =====================================================================
         userRole.AddTypePermissionsRecursively<Person>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Application>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationPerson>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationPersonResolvedLink>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationItem>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Passport>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<Visa>(SecurityOperations.FullAccess, SecurityPermissionState.Allow);
@@ -366,6 +368,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
         userRole.AddTypePermissionsRecursively<ApplicationProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileApprovalLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationProfileTemplate>(SecurityOperations.Read, SecurityPermissionState.Allow);
+        userRole.AddTypePermissionsRecursively<ApplicationProfileProgressStateSetting>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApprovalLegProfileMinistryLeg>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ProjectContractApprovalLegProfile>(SecurityOperations.Read, SecurityPermissionState.Allow);
         userRole.AddTypePermissionsRecursively<ApplicationApprovalLegSnapshot>(ReadWriteCreateWithoutDelete, SecurityPermissionState.Allow);
@@ -793,6 +796,9 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadOnlyPermission<ApplicationProfile>(role);
             EnsureReadOnlyPermission<ApplicationProfileApprovalLeg>(role);
             EnsureReadOnlyPermission<ApplicationProfileTemplate>(role);
+            EnsureReadOnlyPermission<ApplicationProfileProgressStateSetting>(role);
+            EnsureReadOnlyPermission<ApplicationPerson>(role);
+            EnsureReadOnlyPermission<ApplicationPersonResolvedLink>(role);
             EnsureReadOnlyPermission<ApprovalLegProfileMinistryLeg>(role);
             EnsureReadOnlyPermission<ProjectContractApprovalLegProfile>(role);
             EnsureReadOnlyPermission<ProjectContract>(role);
@@ -1018,6 +1024,7 @@ IF @sql IS NOT NULL AND LEN(@sql) > 0
             EnsureReadWriteCreatePermission<ApplicationProfile>(role);
             EnsureReadWriteCreatePermission<ApplicationProfileApprovalLeg>(role);
             EnsureReadWriteCreatePermission<ApplicationProfileTemplate>(role);
+            EnsureReadWriteCreatePermission<ApplicationProfileProgressStateSetting>(role);
             EnsureReadWriteCreatePermission<FileData>(role);
             EnsureTypePermission<ReportDataV2>(role, SecurityOperations.Read, SecurityPermissionState.Allow);
             EnsureTypePermission<ReportVisibility>(role, SecurityOperations.Read, SecurityPermissionState.Allow);

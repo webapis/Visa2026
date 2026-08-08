@@ -133,6 +133,18 @@ public sealed class ApplicationWordReportEntryGenerator
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
         CancellationToken cancellationToken)
     {
+        if (ApplicationProfileNestedTemplateCatalogHelper.TryParseEntryKey(entryKey, out var profileTemplateId))
+        {
+            return await GenerateProfileEntryOutputsAsync(
+                    objectSpace,
+                    application,
+                    profileTemplateId,
+                    context,
+                    catalogEntries,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         if (entryKey.StartsWith("user:", StringComparison.Ordinal)
             && Guid.TryParse(entryKey.AsSpan(5), out var templateId))
         {
@@ -143,16 +155,52 @@ public sealed class ApplicationWordReportEntryGenerator
         return new List<(string, MemoryStream)>();
     }
 
+    private async Task<List<(string FileName, MemoryStream Stream)>> GenerateProfileEntryOutputsAsync(
+        IObjectSpace objectSpace,
+        Application application,
+        Guid profileTemplateId,
+        WordReportGenerationContext context,
+        IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
+        CancellationToken cancellationToken)
+    {
+        var profileTemplate = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(
+            objectSpace,
+            profileTemplateId);
+        if (profileTemplate == null
+            || application.ApplicationProfile == null
+            || profileTemplate.ApplicationProfileId != application.ApplicationProfile.ID)
+        {
+            return new List<(string, MemoryStream)>();
+        }
+
+        var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
+            objectSpace,
+            profileTemplate);
+        if (userTemplate == null)
+            return new List<(string, MemoryStream)>();
+
+        return await GenerateUserEntryOutputsAsync(
+                objectSpace,
+                application,
+                userTemplate.ID,
+                context,
+                catalogEntries,
+                cancellationToken,
+                skipVisibilityCheck: true)
+            .ConfigureAwait(false);
+    }
+
     private async Task<List<(string FileName, MemoryStream Stream)>> GenerateUserEntryOutputsAsync(
         IObjectSpace objectSpace,
         Application application,
         Guid templateId,
         WordReportGenerationContext context,
         IReadOnlyList<ApplicationWordReportPackageCatalogEntry> catalogEntries,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool skipVisibilityCheck = false)
     {
         var visibilityService = serviceProvider.GetService<IUserReportVisibilityService>();
-        if (visibilityService == null)
+        if (visibilityService == null && !skipVisibilityCheck)
             return new List<(string, MemoryStream)>();
 
         var template = objectSpace.GetObjectsQuery<UserReportTemplate>()
@@ -167,7 +215,10 @@ public sealed class ApplicationWordReportEntryGenerator
             .Include(t => t.Placeholders)
             .FirstOrDefault(t => t.ID == templateId && t.IsActive);
 
-        if (template == null || !visibilityService.IsTemplateVisible(template, application))
+        if (template == null
+            || (visibilityService != null
+                && !skipVisibilityCheck
+                && !visibilityService.IsTemplateVisible(template, application)))
             return new List<(string, MemoryStream)>();
 
         var entryKey = ApplicationWordReportPackageCatalogService.BuildUserEntryKey(template);

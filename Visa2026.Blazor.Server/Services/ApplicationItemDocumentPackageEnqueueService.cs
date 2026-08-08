@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.PreviewSlot;
 
 namespace Visa2026.Blazor.Server.Services;
 
@@ -13,21 +15,36 @@ public sealed class ApplicationItemDocumentPackageEnqueueService
 {
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly ApplicationItemPdfBatchEnqueueService batchEnqueueService;
+    private readonly ApplicationPersonPdfBatchEnqueueService rosterBatchEnqueueService;
 
     public ApplicationItemDocumentPackageEnqueueService(
         IHttpContextAccessor httpContextAccessor,
-        ApplicationItemPdfBatchEnqueueService batchEnqueueService)
+        ApplicationItemPdfBatchEnqueueService batchEnqueueService,
+        ApplicationPersonPdfBatchEnqueueService rosterBatchEnqueueService)
     {
         this.httpContextAccessor = httpContextAccessor;
         this.batchEnqueueService = batchEnqueueService;
+        this.rosterBatchEnqueueService = rosterBatchEnqueueService;
     }
 
     public Task<ApplicationItemDocumentPackageEnqueueOutcome> EnqueueDefaultPackageAsync(
+        DocumentCopiesLineScope scope,
+        IReadOnlyList<Guid> lineIds) =>
+        EnqueuePackageAsync(scope, lineIds, ApplicationItemDocumentPackageOptions.CreateDefaults());
+
+    public Task<ApplicationItemDocumentPackageEnqueueOutcome> EnqueueDefaultPackageAsync(
         IReadOnlyList<Guid> applicationItemIds) =>
-        EnqueuePackageAsync(applicationItemIds, ApplicationItemDocumentPackageOptions.CreateDefaults());
+        EnqueuePackageAsync(DocumentCopiesLineScope.ApplicationItem, applicationItemIds,
+            ApplicationItemDocumentPackageOptions.CreateDefaults());
 
     public Task<ApplicationItemDocumentPackageEnqueueOutcome> EnqueuePackageAsync(
         IReadOnlyList<Guid> applicationItemIds,
+        ApplicationItemDocumentPackageOptions packageOptions) =>
+        EnqueuePackageAsync(DocumentCopiesLineScope.ApplicationItem, applicationItemIds, packageOptions);
+
+    public Task<ApplicationItemDocumentPackageEnqueueOutcome> EnqueuePackageAsync(
+        DocumentCopiesLineScope scope,
+        IReadOnlyList<Guid> lineIds,
         ApplicationItemDocumentPackageOptions packageOptions)
     {
         string? userName = httpContextAccessor.HttpContext?.User?.Identity?.Name
@@ -43,15 +60,25 @@ public sealed class ApplicationItemDocumentPackageEnqueueService
         }
 
         string culture = VisaUiMessages.NormalizeCultureName(CultureInfo.CurrentUICulture.Name);
-
-        if (!batchEnqueueService.TryEnqueuePackage(
-                applicationItemIds,
+        ApplicationItemPdfBatchEnqueueResult? result = null;
+        string? errorMessageKey = null;
+        bool enqueued = scope == DocumentCopiesLineScope.ApplicationPerson
+            ? rosterBatchEnqueueService.TryEnqueuePackage(
+                lineIds,
                 packageOptions,
                 userName,
                 culture,
-                out var result,
-                out var errorMessageKey)
-            || result == null)
+                out result,
+                out errorMessageKey)
+            : batchEnqueueService.TryEnqueuePackage(
+                lineIds,
+                packageOptions,
+                userName,
+                culture,
+                out result,
+                out errorMessageKey);
+
+        if (!enqueued || result == null)
         {
             return Task.FromResult(new ApplicationItemDocumentPackageEnqueueOutcome
             {

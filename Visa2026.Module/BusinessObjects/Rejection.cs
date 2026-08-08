@@ -11,6 +11,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -58,7 +59,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
+                return ApplicationRosterHelper.GetRosterPeople(Application);
             }
         }
 

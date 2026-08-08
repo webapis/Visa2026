@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -12,6 +13,8 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Localization;
+using Visa2026.Module.Documentation;
 
 namespace Visa2026.Module.BusinessObjects;
 
@@ -20,17 +23,26 @@ namespace Visa2026.Module.BusinessObjects;
 /// Applications hold a live FK; configuration-related fields apply to all linked Applications
 /// until progress lock state A. See docs/APPLICATION_PROFILE_PLAN.md.
 /// </summary>
+[UserDocumentation("administration/configuration/application-profiles", Category = "Configuration")]
 [DefaultClassOptions]
-[NavigationItem("Configuration")]
+[NavigationItem(false)]
 [DefaultProperty(nameof(DisplayName))]
 [XafDisplayName("Application Profile")]
 [ImageName("BO_List")]
+[Appearance(
+    "ApplicationProfileConfigLockedReadOnly",
+    AppearanceItemType = "ViewItem",
+    TargetItems = "*",
+    Criteria = "IsConfigLocked",
+    Enabled = false,
+    Context = "DetailView")]
 public class ApplicationProfile : BaseObject
 {
     public ApplicationProfile()
     {
         ApprovalLegs = new ObservableCollection<ApplicationProfileApprovalLeg>();
         NestedTemplates = new ObservableCollection<ApplicationProfileTemplate>();
+        ProgressStateSettings = new ObservableCollection<ApplicationProfileProgressStateSetting>();
         Applications = new ObservableCollection<Application>();
     }
 
@@ -194,6 +206,11 @@ public class ApplicationProfile : BaseObject
     [XafDisplayName("Nested templates")]
     public virtual IList<ApplicationProfileTemplate> NestedTemplates { get; set; }
 
+    [Aggregated]
+    [InverseProperty(nameof(ApplicationProfileProgressStateSetting.ApplicationProfile))]
+    [XafDisplayName("Progress state settings")]
+    public virtual IList<ApplicationProfileProgressStateSetting> ProgressStateSettings { get; set; }
+
     /// <summary>Freeform XAF criteria filtering when this profile appears in pickers.</summary>
     [FieldSize(FieldSizeAttribute.Unlimited)]
     [XafDisplayName("Applicability criteria")]
@@ -222,7 +239,7 @@ public class ApplicationProfile : BaseObject
     [VisibleInListView(true)]
     [XafDisplayName("Config locked")]
     public bool IsConfigLocked =>
-        Applications?.Any(a => ApplicationProfileLockHelper.IsApplicationAtOrPastLockStateA(a)) == true;
+        ApplicationProfileLockHelper.IsProfileConfigLocked(this, ObjectSpaceHelper.Get(this));
 
     public override string ToString() => DisplayName;
 }
@@ -295,12 +312,60 @@ public enum ApplicationProfileTemplateKind
     PdfForm = 2
 }
 
+/// <summary>Ministry vs migration progress state track on <see cref="ApplicationProfile"/>.</summary>
+public enum ApplicationProfileProgressStateTrack
+{
+    Ministry = 0,
+    Migration = 1
+}
+
+/// <summary>
+/// Per-profile inclusion and SLA tracking for a progress state (wizard step 3).
+/// Runtime progress routing may read these in a later slice.
+/// </summary>
+[DefaultClassOptions]
+[NavigationItem(false)]
+public class ApplicationProfileProgressStateSetting : BaseObject
+{
+    [Browsable(false)]
+    public virtual Guid ApplicationProfileId { get; set; }
+
+    [RuleRequiredField]
+    [ForeignKey(nameof(ApplicationProfileId))]
+    public virtual ApplicationProfile ApplicationProfile { get; set; } = null!;
+
+    [RuleRequiredField]
+    public virtual ApplicationProfileProgressStateTrack? Track { get; set; }
+
+    [RuleRequiredField]
+    [MaxLength(64)]
+    public virtual string StateCode { get; set; } = string.Empty;
+
+    [XafDisplayName("Include")]
+    public virtual bool IsIncluded { get; set; } = true;
+
+    [XafDisplayName("SLA track")]
+    public virtual bool IsSlaTracked { get; set; }
+}
+
 /// <summary>Progress lock state A helpers for <see cref="ApplicationProfile.IsConfigLocked"/>.</summary>
 public static class ApplicationProfileLockHelper
 {
-    /// <summary>
-    /// Lock when progress has left initial office preparation (submitted to ministry or migration, or later).
-    /// </summary>
+    private static readonly string[] UnlockedPrimaryStateCodes =
+    [
+        "OFFICE_PREPARATION",
+        "DRAFT",
+        ApplicationProgressStateCodes.IsBeingPrepared,
+    ];
+
+    public static bool IsPrimaryStateAtOrPastLockStateA(string? stateCode)
+    {
+        if (string.IsNullOrWhiteSpace(stateCode))
+            return false;
+
+        return !UnlockedPrimaryStateCodes.Contains(stateCode.Trim(), StringComparer.OrdinalIgnoreCase);
+    }
+
     public static bool IsApplicationAtOrPastLockStateA(Application? application)
     {
         if (application == null)
@@ -309,14 +374,148 @@ public static class ApplicationProfileLockHelper
         var code = application.LatestPrimaryStateCode
             ?? application.LatestProgress?.State?.Code;
 
-        if (string.IsNullOrWhiteSpace(code))
-            return false;
-
-        // Initial / pre-submit office work — not locked yet.
-        if (code.Equals("OFFICE_PREPARATION", StringComparison.OrdinalIgnoreCase)
-            || code.Equals("DRAFT", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        return true;
+        return IsPrimaryStateAtOrPastLockStateA(code);
     }
+
+    public static bool IsProfileConfigLocked(ApplicationProfile? profile, IObjectSpace? objectSpace = null)
+    {
+        if (profile == null)
+            return false;
+
+        if (objectSpace != null && !objectSpace.IsNewObject(profile))
+        {
+            var profileId = profile.ID;
+            if (profileId != Guid.Empty)
+            {
+                // Client-evaluate state codes — IsPrimaryStateAtOrPastLockStateA is not EF-translatable.
+                var stateCodes = objectSpace.GetObjectsQuery<Application>()
+                    .Where(a => a.ApplicationProfile != null && a.ApplicationProfile.ID == profileId)
+                    .Select(a => a.LatestPrimaryStateCode)
+                    .ToList();
+
+                return stateCodes.Any(IsPrimaryStateAtOrPastLockStateA);
+            }
+        }
+
+        return profile.Applications?.Any(IsApplicationAtOrPastLockStateA) == true;
+    }
+
+    public static void EnsureConfigurationEditable(ApplicationProfile profile, IObjectSpace objectSpace)
+    {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
+        if (objectSpace == null)
+            throw new ArgumentNullException(nameof(objectSpace));
+
+        if (!IsProfileConfigLocked(profile, objectSpace))
+            return;
+
+        if (objectSpace.IsNewObject(profile))
+            return;
+
+        var original = objectSpace.GetObjectByKey<ApplicationProfile>(profile.ID);
+        if (original == null || !HasConfigurationScalarsChanged(original, profile))
+            return;
+
+        throw new UserFriendlyException(VisaUiMessages.Get("ApplicationProfile.ConfigLockedCannotEdit"));
+    }
+
+    public static void EnsureNestedConfigurationEditable(
+        ApplicationProfile? parentProfile,
+        IObjectSpace objectSpace)
+    {
+        if (parentProfile == null || objectSpace == null)
+            return;
+
+        if (!IsProfileConfigLocked(parentProfile, objectSpace))
+            return;
+
+        throw new UserFriendlyException(VisaUiMessages.Get("ApplicationProfile.ConfigLockedCannotEditNested"));
+    }
+
+    public static ApplicationProfile? TryResolveOwningProfile(object? entity, IObjectSpace objectSpace)
+    {
+        switch (entity)
+        {
+            case ApplicationProfile profile:
+                return profile;
+            case ApplicationProfileApprovalLeg leg:
+                return leg.ApplicationProfile
+                    ?? (leg.ApplicationProfileId != Guid.Empty
+                        ? objectSpace.GetObjectByKey<ApplicationProfile>(leg.ApplicationProfileId)
+                        : null);
+            case ApplicationProfileTemplate template:
+                return template.ApplicationProfile
+                    ?? (template.ApplicationProfileId != Guid.Empty
+                        ? objectSpace.GetObjectByKey<ApplicationProfile>(template.ApplicationProfileId)
+                        : null);
+            case ApplicationProfileProgressStateSetting stateSetting:
+                return stateSetting.ApplicationProfile
+                    ?? (stateSetting.ApplicationProfileId != Guid.Empty
+                        ? objectSpace.GetObjectByKey<ApplicationProfile>(stateSetting.ApplicationProfileId)
+                        : null);
+            default:
+                return null;
+        }
+    }
+
+    internal static bool HasConfigurationScalarsChanged(ApplicationProfile original, ApplicationProfile current) =>
+        !string.Equals(original.Name, current.Name, StringComparison.Ordinal)
+        || !string.Equals(original.Description, current.Description, StringComparison.Ordinal)
+        || !string.Equals(original.Code, current.Code, StringComparison.Ordinal)
+        || !string.Equals(original.SelectionCode, current.SelectionCode, StringComparison.Ordinal)
+        || original.ProgressRoute != current.ProgressRoute
+        || original.ForEmployee != current.ForEmployee
+        || original.ForFamilyMember != current.ForFamilyMember
+        || original.ForTemporaryVisitor != current.ForTemporaryVisitor
+        || original.ActionFamily != current.ActionFamily
+        || original.ProduceInvitation != current.ProduceInvitation
+        || original.ProduceWorkPermit != current.ProduceWorkPermit
+        || original.ProduceVisa != current.ProduceVisa
+        || original.ProduceBorderZone != current.ProduceBorderZone
+        || original.ProduceWorkLocation != current.ProduceWorkLocation
+        || original.CancelInvitations != current.CancelInvitations
+        || original.CancelWorkPermits != current.CancelWorkPermits
+        || original.CancelVisas != current.CancelVisas
+        || original.CancelBorderZonePermits != current.CancelBorderZonePermits
+        || original.CancelApplications != current.CancelApplications
+        || original.RequireVisaType != current.RequireVisaType
+        || original.DefaultVisaTypeId != current.DefaultVisaTypeId
+        || original.RequireVisaCategory != current.RequireVisaCategory
+        || original.DefaultVisaCategoryId != current.DefaultVisaCategoryId
+        || original.RequireVisaPeriod != current.RequireVisaPeriod
+        || original.DefaultVisaPeriodId != current.DefaultVisaPeriodId
+        || original.RequireBorderZone != current.RequireBorderZone
+        || !string.Equals(original.DefaultBorderZoneLocation, current.DefaultBorderZoneLocation, StringComparison.Ordinal)
+        || original.RequireMigrationService != current.RequireMigrationService
+        || original.DefaultMigrationServiceId != current.DefaultMigrationServiceId
+        || original.RequireStartDate != current.RequireStartDate
+        || original.RequireEndDate != current.RequireEndDate
+        || original.RequireRegionCity != current.RequireRegionCity
+        || original.RequireBusinessTripAddress != current.RequireBusinessTripAddress
+        || original.RequireProject != current.RequireProject
+        || original.DefaultProjectContractId != current.DefaultProjectContractId
+        || original.RequireUrgency != current.RequireUrgency
+        || original.DefaultUrgencyId != current.DefaultUrgencyId
+        || original.RequireWorkPermitLocation != current.RequireWorkPermitLocation
+        || original.RequireEntryDate != current.RequireEntryDate
+        || original.RequireEntryCheckPoint != current.RequireEntryCheckPoint
+        || original.DefaultEntryCheckPointId != current.DefaultEntryCheckPointId
+        || original.DefaultAuthorizedSignatoryId != current.DefaultAuthorizedSignatoryId
+        || original.DefaultVisaRepresentativeId != current.DefaultVisaRepresentativeId
+        || original.MinistrySlaDays != current.MinistrySlaDays
+        || original.MigrationSlaDays != current.MigrationSlaDays
+        || original.RequirePersonPassport != current.RequirePersonPassport
+        || original.RequirePersonEducation != current.RequirePersonEducation
+        || original.RequirePersonPosition != current.RequirePersonPosition
+        || original.RequirePersonAddressOfResidence != current.RequirePersonAddressOfResidence
+        || original.RequirePersonVisa != current.RequirePersonVisa
+        || original.RequirePersonInvitationItem != current.RequirePersonInvitationItem
+        || original.RequirePersonWorkPermitItem != current.RequirePersonWorkPermitItem
+        || original.RequirePersonBorderZoneItem != current.RequirePersonBorderZoneItem
+        || original.RequirePersonSalary != current.RequirePersonSalary
+        || original.RequirePersonMedical != current.RequirePersonMedical
+        || original.RequirePersonRejectionItem != current.RequirePersonRejectionItem
+        || original.RequirePersonTravelHistory != current.RequirePersonTravelHistory
+        || !string.Equals(original.ApplicabilityCriteria, current.ApplicabilityCriteria, StringComparison.Ordinal);
 }

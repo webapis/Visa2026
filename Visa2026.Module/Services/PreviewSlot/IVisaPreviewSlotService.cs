@@ -63,9 +63,23 @@ public sealed class VisaPreviewSlotState
     public int Version { get; init; }
 }
 
+public enum DocumentCopiesLineScope
+{
+    ApplicationItem = 0,
+    ApplicationPerson = 1,
+}
+
 public sealed class DocumentCopiesSlotRequest
 {
+    public DocumentCopiesLineScope Scope { get; init; } = DocumentCopiesLineScope.ApplicationItem;
+
     public IReadOnlyList<Guid> ApplicationItemIds { get; init; } = Array.Empty<Guid>();
+
+    /// <summary>Roster line ids when <see cref="Scope"/> is <see cref="DocumentCopiesLineScope.ApplicationPerson"/>.</summary>
+    public IReadOnlyList<Guid> ApplicationPersonIds { get; init; } = Array.Empty<Guid>();
+
+    /// <summary>Parent application for roster scope (application form PDF).</summary>
+    public Guid ApplicationId { get; init; }
 }
 
 public sealed class ProgressLettersSlotRequest

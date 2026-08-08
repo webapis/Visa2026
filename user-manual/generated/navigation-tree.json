@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T05:13:14.5986668Z",
+  "generatedAt": "2026-08-07T08:51:32.9167281Z",
   "paths": [
     {
       "path": "(root)",
@@ -18,6 +18,11 @@
           "name": "ApplicationMigrationSlaProfile",
           "displayName": "Application Migration Sla Profile",
           "userDocSlug": "administration/configuration/sla"
+        },
+        {
+          "name": "ApplicationProfile",
+          "displayName": "Application Profile",
+          "userDocSlug": "administration/configuration/application-profiles"
         },
         {
           "name": "ApplicationProgress",

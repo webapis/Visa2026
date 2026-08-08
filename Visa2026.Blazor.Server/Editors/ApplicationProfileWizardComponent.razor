@@ -1,0 +1,241 @@
+@using DevExpress.ExpressApp
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationProfileWizard
+@inject IApplicationProfileWizardSession Session
+
+<div class="ap-wizard">
+    @if (IsLoading)
+    {
+        <div class="ap-wizard__loading" role="status">Loading configuration wizard…</div>
+    }
+    else if (Profile == null)
+    {
+        <div class="ap-wizard__loading ap-wizard__loading--empty">No Application Profile selected.</div>
+    }
+    else
+    {
+        <header class="ap-wizard__header">
+            <div>
+                <h1 class="ap-wizard__title">Application Profile</h1>
+                <p class="ap-wizard__sub">
+                    Configure what applications using this profile need — live FK; per-Application values get defaults at create.
+                </p>
+            </div>
+            <div class="ap-wizard__pills">
+                <span class="ap-wizard__pill ap-wizard__pill--on">Live configuration</span>
+                @if (IsReadOnly)
+                {
+                    <span class="ap-wizard__pill ap-wizard__pill--warn">Config locked</span>
+                }
+                else
+                {
+                    <span class="ap-wizard__pill">Draft · save to publish</span>
+                }
+            </div>
+        </header>
+
+        @if (IsReadOnly)
+        {
+            <div class="ap-wizard__lock-banner">
+                This profile is <strong>read-only</strong> because a linked application has left office preparation.
+                Use <strong>Clone</strong> on the profile list to create an editable copy.
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="ap-wizard__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
+        }
+
+        <div class="ap-wizard__layout">
+            <nav class="ap-wizard__steps" aria-label="Wizard steps">
+                <h2>Steps</h2>
+                @for (var i = 0; i < _steps.Length; i++)
+                {
+                    var step = _steps[i];
+                    <button type="button"
+                            class="ap-wizard__step @(i == _activeStep ? "is-active" : null)"
+                            @onclick="() => GoToStep(i)">
+                        <span class="ap-wizard__step-n">@(i + 1)</span>
+                        <span>
+                            <span class="ap-wizard__step-t">@step.Title</span>
+                            <span class="ap-wizard__step-d">@step.Description</span>
+                        </span>
+                    </button>
+                }
+            </nav>
+
+            <div class="ap-wizard__panel">
+                @if (_activeStep == 0)
+                {
+                    <ApplicationProfileWizardStepIdentity Profile="Profile" Disabled="IsReadOnly" />
+                }
+                else if (_activeStep == 1)
+                {
+                    <ApplicationProfileWizardStepResults Profile="Profile"
+                        Disabled="IsReadOnly"
+                        Lookups="_lookups"
+                        ObjectSpace="Session.ObjectSpace" />
+                }
+                else if (_activeStep == 2)
+                {
+                    <ApplicationProfileWizardStepProcess Profile="Profile"
+                        Disabled="IsReadOnly"
+                        Ministries="Ministries"
+                        OnAddLeg="AddLegCallback"
+                        OnRemoveLeg="RemoveLegCallback" />
+                }
+                else if (_activeStep == 3)
+                {
+                    <ApplicationProfileWizardStepTemplatesPerson Profile="Profile"
+                        Disabled="IsReadOnly"
+                        OnAddTemplate="AddTemplateCallback"
+                        OnRemoveTemplate="RemoveTemplateCallback" />
+                }
+                else
+                {
+                    <ApplicationProfileWizardStepReview Profile="Profile" />
+                }
+
+                <div class="ap-wizard__foot">
+                    <button type="button" class="ap-wizard__btn ap-wizard__btn--secondary"
+                            disabled="@(_activeStep == 0)"
+                            @onclick="PreviousStep">← Back</button>
+                    <div class="ap-wizard__foot-right">
+                        @if (_activeStep < _steps.Length - 1)
+                        {
+                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="NextStep">Continue →</button>
+                        }
+                        else if (!IsReadOnly)
+                        {
+                            <button type="button" class="ap-wizard__btn ap-wizard__btn--primary" @onclick="PublishAsync">Save profile</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly (string Title, string Description)[] _steps =
+    [
+        ("Identity & purpose", "Name, route, audience, action"),
+        ("Results & fields", "Issue / cancel + required properties"),
+        ("Process & SLA", "Legs and durations"),
+        ("Templates & person", "Reports + person data"),
+        ("Review & save", "Summary before publish"),
+    ];
+
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsReadOnly { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback PublishRequested { get; set; }
+
+    private int _activeStep;
+    private IReadOnlyList<ApprovingMinistry> _ministries = Array.Empty<ApprovingMinistry>();
+    private ApplicationProfileWizardLookupData _lookups = new();
+
+    private ApplicationProfile? Profile => Session.GetProfile();
+
+    private IReadOnlyList<ApprovingMinistry> Ministries => _ministries;
+
+    private EventCallback<Guid> AddLegCallback => EventCallback.Factory.Create<Guid>(this, AddLeg);
+
+    private EventCallback<ApplicationProfileApprovalLeg> RemoveLegCallback =>
+        EventCallback.Factory.Create<ApplicationProfileApprovalLeg>(this, RemoveLeg);
+
+    private EventCallback AddTemplateCallback => EventCallback.Factory.Create(this, AddTemplate);
+
+    private EventCallback<ApplicationProfileTemplate> RemoveTemplateCallback =>
+        EventCallback.Factory.Create<ApplicationProfileTemplate>(this, RemoveTemplate);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && InitialLoadRequested.HasDelegate)
+            await InitialLoadRequested.InvokeAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Profile == null || Session.ObjectSpace == null)
+            return;
+
+        ApplicationProfileProgressStateSeeder.EnsureDefaults(Profile, Session.ObjectSpace);
+
+        if (_ministries.Count == 0)
+        {
+            _ministries = Session.ObjectSpace.GetObjectsQuery<ApprovingMinistry>()
+                .OrderBy(m => m.NameTm)
+                .ToList();
+        }
+
+        if (_lookups.VisaTypes.Count == 0)
+            _lookups = ApplicationProfileWizardLookupData.Load(Session.ObjectSpace);
+    }
+
+    private void GoToStep(int index) => _activeStep = Math.Clamp(index, 0, _steps.Length - 1);
+    private void NextStep() => GoToStep(_activeStep + 1);
+    private void PreviousStep() => GoToStep(_activeStep - 1);
+
+    private async Task PublishAsync()
+    {
+        if (PublishRequested.HasDelegate)
+            await PublishRequested.InvokeAsync();
+    }
+
+    private void AddLeg(Guid ministryId)
+    {
+        if (IsReadOnly || Profile == null || Session.ObjectSpace is not { } os || ministryId == Guid.Empty)
+            return;
+
+        var ministry = os.GetObjectByKey<ApprovingMinistry>(ministryId);
+        if (ministry == null)
+            return;
+
+        var leg = os.CreateObject<ApplicationProfileApprovalLeg>();
+        leg.ApplicationProfile = Profile;
+        leg.ApprovingMinistry = ministry;
+        leg.Sequence = (Profile.ApprovalLegs?.Count ?? 0) + 1;
+    }
+
+    private void RemoveLeg(ApplicationProfileApprovalLeg leg)
+    {
+        if (IsReadOnly || Session.ObjectSpace is not { } os || leg == null)
+            return;
+
+        os.Delete(leg);
+        RenumberLegs();
+    }
+
+    private void RenumberLegs()
+    {
+        if (Profile?.ApprovalLegs == null)
+            return;
+
+        var seq = 1;
+        foreach (var leg in Profile.ApprovalLegs.OrderBy(l => l.Sequence ?? 0))
+            leg.Sequence = seq++;
+    }
+
+    private void AddTemplate()
+    {
+        if (IsReadOnly || Profile == null || Session.ObjectSpace is not { } os)
+            return;
+
+        var template = os.CreateObject<ApplicationProfileTemplate>();
+        template.ApplicationProfile = Profile;
+        template.TemplateName = "New template";
+        template.SortOrder = (Profile.NestedTemplates?.Count ?? 0) + 1;
+    }
+
+    private void RemoveTemplate(ApplicationProfileTemplate template)
+    {
+        if (IsReadOnly || Session.ObjectSpace is not { } os || template == null)
+            return;
+
+        os.Delete(template);
+    }
+}

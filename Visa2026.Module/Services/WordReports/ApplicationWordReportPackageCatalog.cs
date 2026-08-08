@@ -35,6 +35,8 @@ public sealed class ApplicationWordReportPackageCatalogEntry
         Array.Empty<ApplicationWordReportPackageReadinessHint>();
 
     public Guid? UserReportTemplateId { get; init; }
+
+    public Guid? ApplicationProfileTemplateId { get; init; }
 }
 
 public sealed class ApplicationWordReportPackageCatalog
@@ -76,6 +78,12 @@ public sealed class ApplicationWordReportPackageCatalogService
 
         var selectedItems = context.ResolveApplicationItems(objectSpace, application);
         var entries = new List<ApplicationWordReportPackageCatalogEntry>();
+
+        if (ApplicationProfileNestedTemplateCatalogHelper.UsesProfileNestedCatalog(application))
+        {
+            entries.AddRange(BuildProfileNestedEntries(objectSpace, application, selectedItems));
+            return new ApplicationWordReportPackageCatalog { Entries = entries };
+        }
 
         var visibilityService = serviceProvider.GetService<IUserReportVisibilityService>();
         if (visibilityService != null)
@@ -119,6 +127,83 @@ public sealed class ApplicationWordReportPackageCatalogService
         }
 
         return new ApplicationWordReportPackageCatalog { Entries = entries };
+    }
+
+    private IEnumerable<ApplicationWordReportPackageCatalogEntry> BuildProfileNestedEntries(
+        IObjectSpace objectSpace,
+        Application application,
+        IList<ApplicationItem> selectedItems)
+    {
+        foreach (var profileTemplate in ApplicationProfileNestedTemplateCatalogHelper.GetOrderedTemplates(application))
+        {
+            var loadedProfileTemplate = ApplicationProfileNestedTemplateCatalogHelper.LoadProfileTemplate(
+                    objectSpace,
+                    profileTemplate.ID)
+                ?? profileTemplate;
+
+            var userTemplate = ApplicationProfileNestedTemplateCatalogHelper.TryResolveMergeTemplate(
+                objectSpace,
+                loadedProfileTemplate);
+
+            var (level, messageKey) = EvaluateProfileTemplateReadiness(
+                objectSpace,
+                application,
+                loadedProfileTemplate,
+                userTemplate,
+                selectedItems);
+
+            var dryRunHints = userTemplate != null
+                ? ApplicationWordReportPackageDryRunEvaluator.CollectUserTemplateHints(
+                    objectSpace, application, userTemplate, selectedItems)
+                : Array.Empty<ApplicationWordReportPackageReadinessHint>();
+
+            (level, messageKey) = ApplicationWordReportPackageReadinessEvaluator.ApplyDryRunHints(
+                level, messageKey, dryRunHints);
+
+            yield return new ApplicationWordReportPackageCatalogEntry
+            {
+                EntryKey = ApplicationProfileNestedTemplateCatalogHelper.BuildEntryKey(loadedProfileTemplate),
+                DisplayName = loadedProfileTemplate.TemplateName ?? string.Empty,
+                OutputFileName = ApplicationProfileNestedTemplateCatalogHelper.ResolveOutputFileName(
+                    loadedProfileTemplate,
+                    userTemplate),
+                Kind = ApplicationProfileNestedTemplateCatalogHelper.ResolveEntryKind(
+                    loadedProfileTemplate,
+                    userTemplate),
+                Readiness = level,
+                ReadinessMessageKey = messageKey,
+                ReadinessHints = dryRunHints,
+                UserReportTemplateId = userTemplate?.ID,
+                ApplicationProfileTemplateId = loadedProfileTemplate.ID,
+            };
+        }
+    }
+
+    private static (ApplicationWordReportPackageReadinessLevel Level, string? MessageKey)
+        EvaluateProfileTemplateReadiness(
+            IObjectSpace objectSpace,
+            Application application,
+            ApplicationProfileTemplate profileTemplate,
+            UserReportTemplate? userTemplate,
+            IList<ApplicationItem> selectedItems)
+    {
+        if (userTemplate == null)
+        {
+            return (ApplicationWordReportPackageReadinessLevel.Warning,
+                "ApplicationReportPackage.Readiness.ProfileTemplateUnlinked");
+        }
+
+        if (!ApplicationProfileNestedTemplateCatalogHelper.HasMergeableFile(profileTemplate, userTemplate))
+        {
+            return (ApplicationWordReportPackageReadinessLevel.Warning,
+                "ApplicationReportPackage.Readiness.NoTemplateFile");
+        }
+
+        return ApplicationWordReportPackageReadinessEvaluator.EvaluateUserTemplate(
+            objectSpace,
+            application,
+            userTemplate,
+            selectedItems);
     }
 
     internal static string BuildUserEntryKey(UserReportTemplate template) =>

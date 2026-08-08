@@ -21,6 +21,7 @@ public class ApplicationItemWordReportsController : ViewController<ListView>
     public ApplicationItemWordReportsController()
     {
         TargetObjectType = typeof(ApplicationItem);
+        Active["Slice10CloseOut"] = false;
 
         resminamalarAction = new SimpleAction(this, "ViewApplicationItemWordReports", "View");
         resminamalarAction.ImageName = "Templates";

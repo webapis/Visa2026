@@ -15,6 +15,9 @@ public sealed class PersonNestedListViewsUpdater : ModelNodesGeneratorUpdater<Mo
     /// <summary>Nested path: date lives on the parent <c>Application</c>, not on <c>ApplicationItem</c>.</summary>
     internal const string ApplicationDatePropertyName = "Application.ApplicationDate";
 
+    /// <summary>Nested path: profile lives on the parent <c>Application</c>.</summary>
+    internal const string ApplicationProfilePropertyName = "Application.ApplicationProfile";
+
     public override void UpdateNode(ModelNode node)
     {
         var views = (IModelViews)node;
@@ -26,8 +29,8 @@ public sealed class PersonNestedListViewsUpdater : ModelNodesGeneratorUpdater<Mo
             ConfigureReadOnlyNestedListView(listView);
         }
 
-        if (views[PersonNestedCollectionLayout.ApplicationItemsListView] is IModelListView applicationItemsListView)
-            EnsureApplicationDateAndTypeColumns(applicationItemsListView);
+        if (views[PersonNestedCollectionLayout.ApplicationPeopleListView] is IModelListView applicationPeopleListView)
+            EnsureApplicationDateAndProfileColumns(applicationPeopleListView);
     }
 
     internal static void ConfigureReadOnlyNestedListView(IModelListView listView)
@@ -40,9 +43,28 @@ public sealed class PersonNestedListViewsUpdater : ModelNodesGeneratorUpdater<Mo
     }
 
     /// <summary>
-    /// Officers need application date and type on Person → Application items (issued);
-    /// items from different applications differ.
+    /// Officers need application date and profile on Person → Applications (linked);
+    /// rows from different applications differ.
     /// </summary>
+    internal static void EnsureApplicationDateAndProfileColumns(IModelListView listView)
+    {
+        var applicationColumn = listView.Columns["Application"];
+        var baseIndex = applicationColumn?.Index is int applicationIndex and >= 0
+            ? applicationIndex
+            : 1;
+
+        var dateColumn = listView.Columns[ApplicationDatePropertyName]
+            ?? listView.Columns.AddNode<IModelColumn>(ApplicationDatePropertyName);
+        dateColumn.PropertyName = ApplicationDatePropertyName;
+        dateColumn.Index = baseIndex + 1;
+
+        var profileColumn = listView.Columns[ApplicationProfilePropertyName]
+            ?? listView.Columns.AddNode<IModelColumn>(ApplicationProfilePropertyName);
+        profileColumn.PropertyName = ApplicationProfilePropertyName;
+        profileColumn.Index = baseIndex + 2;
+    }
+
+    /// <summary>Legacy ApplicationItem nested list (slice 10 close-out).</summary>
     internal static void EnsureApplicationDateAndTypeColumns(IModelListView listView)
     {
         var applicationColumn = listView.Columns["Application"];

@@ -11,7 +11,8 @@ using Visa2026.Module.Services.PreviewSlot;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens linked document copies for one or more selected <see cref="ApplicationItem"/> rows from ListView.
+/// Legacy ListView entry for <see cref="ApplicationItem"/> document copies (slice 10 close-out).
+/// Use Application workspace roster line instead.
 /// </summary>
 public class ApplicationItemDocumentCopiesController : ViewController<ListView>
 {
@@ -20,6 +21,7 @@ public class ApplicationItemDocumentCopiesController : ViewController<ListView>
     public ApplicationItemDocumentCopiesController()
     {
         TargetObjectType = typeof(ApplicationItem);
+        Active["Slice10CloseOut"] = false;
 
         viewDocumentCopiesAction = new SimpleAction(this, "ViewApplicationItemDocumentCopies", "View");
         viewDocumentCopiesAction.ImageName = "DocumentCopies";

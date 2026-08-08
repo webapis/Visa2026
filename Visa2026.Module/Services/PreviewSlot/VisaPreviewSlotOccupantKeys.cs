@@ -42,8 +42,29 @@ public static class VisaPreviewSlotOccupantKeys
         return $"document-copies:items:{string.Join(',', ids.Select(id => id.ToString("N")))}";
     }
 
-    public static string ForDocumentCopies(DocumentCopiesSlotRequest request) =>
-        ForDocumentCopies(request?.ApplicationItemIds ?? Array.Empty<Guid>());
+    public static string ForDocumentCopies(DocumentCopiesSlotRequest? request)
+    {
+        if (request == null)
+            return ForDocumentCopies(Array.Empty<Guid>());
+
+        if (request.Scope == DocumentCopiesLineScope.ApplicationPerson)
+            return ForDocumentCopiesRoster(request.ApplicationId, request.ApplicationPersonIds);
+
+        return ForDocumentCopies(request.ApplicationItemIds);
+    }
+
+    public static string ForDocumentCopiesRoster(Guid applicationId, IReadOnlyList<Guid> applicationPersonIds)
+    {
+        var ids = applicationPersonIds?
+            .Where(id => id != Guid.Empty)
+            .OrderBy(id => id)
+            .ToArray() ?? Array.Empty<Guid>();
+
+        if (applicationId == Guid.Empty || ids.Length == 0)
+            return "document-copies:roster:empty";
+
+        return $"document-copies:roster:{applicationId:N}:{string.Join(',', ids.Select(id => id.ToString("N")))}";
+    }
 
     public static string ForProgressLetters(Guid applicationId) =>
         applicationId == Guid.Empty ? "progress-letters:empty" : $"progress-letters:app:{applicationId:N}";

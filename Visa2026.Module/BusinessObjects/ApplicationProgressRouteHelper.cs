@@ -205,15 +205,7 @@ namespace Visa2026.Module.BusinessObjects
             progress.State != null
             && string.Equals(progress.State.Code, ApplicationProgressDefaults.InitialStateCode, StringComparison.OrdinalIgnoreCase);
 
-        public static ApplicationProgressRouteKind? GetTypePickerRouteFilter(Application? application)
-        {
-            if (application == null)
-                return null;
-
-            if (application.CreationProgressRoute.HasValue)
-                return application.CreationProgressRoute.Value;
-
-            return application.ApplicationType?.ApplicationProgressRoute;
-        }
+        public static ApplicationProgressRouteKind? GetTypePickerRouteFilter(Application? application) =>
+            ApplicationProfileConfigurationResolver.GetProgressRoute(application);
     }
 }

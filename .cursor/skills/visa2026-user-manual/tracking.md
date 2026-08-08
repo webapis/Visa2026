@@ -112,7 +112,8 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 | 15 | 3 | `employee/edit-employee` | Update employee details | Person | — | update | `person-officer-journey` | — | legacy fan-out | **Draft** | 2 |
 | 16 | 3 | `person/mark-incomplete` | Mark incomplete / complete | Person | — | update | _TBD_ | No E2E yet | legacy fan-out | **Draft** | 2 |
 | 16.5 | 4 | `applications/overview` | Applications — ministry and direct migration | Application | — | read | `person-officer-journey` | Four Applications menu lists | legacy fan-out | **Draft** | 2 |
-| 17 | 4 | `applications/create` | Create an application | Application | — | create | `person-officer-journey` | Via ministry / direct migration lists | legacy fan-out | **Draft** | 2 |
+| 16.6 | 4 | `applications/application-profiles` | Application profiles — how configuration works | Application | — | read | — | Profile picker + live FK model; prose/mermaid preview | **none (preview)** | **Draft** | 2 |
+| 17 | 4 | `applications/create` | Create an application | Application | — | create | `person-officer-journey` | Profile picker flow; legacy PNGs flagged | legacy fan-out | **Draft** | 2 |
 | 18 | 4 | `applications/add-items` | Add application items | ApplicationItem | Application | create | `person-officer-journey` | Nested tab + Current* from person | legacy fan-out | **Draft** | 2 |
 | 19 | 4 | `applications/progress` | Track application progress | ApplicationProgress | Application | update | `person-officer-journey` | Progress tab; implied office; ministry letter | legacy fan-out | **Draft** | 2 |
 | 20 | 5 | `applications/document-copies` | Ministry document copies | ApplicationItem | Application | generate | `person-officer-journey` | Preview slot + PDF toast | legacy fan-out | **Draft** | 2 |
@@ -128,6 +129,7 @@ Sync checkboxes with [USER_MANUAL_IMPLEMENTATION_PLAN.md §11](../../../docs/USE
 | 30 | 8 | `administration/configuration/contracts-and-approvals` | Contracts and approvals | ProjectContract | — | update | `person-officer-journey` | Ministries + legs + contracts | legacy fan-out | **Draft** | 2 |
 | 31 | 8 | `administration/configuration/sla` | SLA settings | ApplicationMigrationSlaProfile | — | update | `person-officer-journey` | Migration profile + ministry singleton | legacy fan-out | **Draft** | 2 |
 | 32 | 8 | `administration/configuration/alerts-and-upload-limits` | Alerts and upload limits | ExpirationAlertRule | — | update | `person-officer-journey` | Expiry rules + upload MB caps | legacy fan-out | **Draft** | 2 |
+| 33 | 8 | `administration/configuration/application-profiles` | Configure application profiles | ApplicationProfile | — | update | — | Configure profile wizard; VisaOffice | **none (preview)** | **Draft** | 2 |
 
 **Parent:** domain parent BO for nested-create guides (`Passport` child of `Person`, `Visa` child of `Passport`).  
 **personRole:** `Employee` · `FamilyMember` · `TemporaryVisitor` — matches typed detail view (`Person_DetailView_*`). Omit for cross-role guides.  

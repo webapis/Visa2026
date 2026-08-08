@@ -99,6 +99,18 @@ public static class ReportDashboardPostgresViewsHealSql
         ("vw_rd_work_permit_app_progress", "vw_rd_work_permit_app_progress.postgres.sql"),
     };
 
+    /// <summary>
+    /// Invitation-item dashboard views: heal when missing (ModuleUpdater may be skipped).
+    /// </summary>
+    private static readonly (string ViewName, string ResourceLeaf)[] InvitationViews =
+    {
+        ("vw_rd_invitation_ready", "vw_rd_invitation_ready.postgres.sql"),
+        ("vw_rd_invitation_in_process", "vw_rd_invitation_in_process.postgres.sql"),
+        ("vw_rd_invitation_rejected", "vw_rd_invitation_rejected.postgres.sql"),
+        ("vw_rd_invitation_used", "vw_rd_invitation_used.postgres.sql"),
+        ("vw_rd_invitation_valid_until", "vw_rd_invitation_valid_until.postgres.sql"),
+    };
+
     private static readonly string[] VisaAppProgressDependentViews =
     {
         "vw_rd_visa_app_progress.postgres.sql",
@@ -182,7 +194,22 @@ public static class ReportDashboardPostgresViewsHealSql
 
         HealIncompletePersonsViewIfReady(connection);
         HealWorkPermitViewsIfNeeded(connection);
+        HealInvitationViewsIfNeeded(connection);
         HealPersonSearchViewIfNeeded(connection);
+    }
+
+    private static void HealInvitationViewsIfNeeded(NpgsqlConnection connection)
+    {
+        if (!RelationExists(connection, "InvitationItems") || !RelationExists(connection, "Invitations"))
+            return;
+
+        foreach (var (viewName, resourceLeaf) in InvitationViews)
+        {
+            if (ViewExists(connection, viewName))
+                continue;
+
+            ExecuteEmbeddedSql(connection, resourceLeaf);
+        }
     }
 
     private static void HealWorkPermitViewsIfNeeded(NpgsqlConnection connection)

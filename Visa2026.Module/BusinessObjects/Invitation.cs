@@ -15,6 +15,8 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Editors;
 
+using Visa2026.Module.Services.ApplicationPersonRoster;
+
 namespace Visa2026.Module.BusinessObjects
 {
     /// <summary>
@@ -138,7 +140,9 @@ namespace Visa2026.Module.BusinessObjects
                     return new List<Application>();
 
                 return objectSpace.GetObjectsQuery<Application>()
-                    .Where(a => a.ApplicationType != null && a.ApplicationType.CanIssueInvitation)
+                    .Where(a =>
+                        (a.ApplicationProfile != null && a.ApplicationProfile.ProduceInvitation)
+                        || (a.ApplicationType != null && a.ApplicationType.CanIssueInvitation))
                     .OrderByDescending(a => a.ApplicationDate)
                     .ThenBy(a => a.FullApplicationNumber)
                     .ToList();
@@ -156,7 +160,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (Application == null)
                     return true;
-                return ApplicationTypeCapabilities.CanIssueInvitation(Application.ApplicationType);
+                return ApplicationTypeCapabilities.CanIssueInvitation(Application);
             }
         }
 
@@ -206,13 +210,9 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Application?.ApplicationItems != null)
-                {
-                    return Application.ApplicationItems
-                        .Select(ai => ai.Person)
-                        .Where(p => p != null)
-                        .ToList()!;
-                }
+                var roster = ApplicationRosterHelper.GetRosterPeople(Application);
+                if (roster.Count > 0)
+                    return roster;
 
                 IObjectSpace? objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)

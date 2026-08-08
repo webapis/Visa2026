@@ -473,25 +473,30 @@ public static class PersonDossierResolver
 
     private static PersonDossierSection BuildApplications(Person person)
     {
-        var records = Safe(person.ApplicationItems)
-            .OrderByDescending(item => item.Application?.ApplicationDate ?? DateTime.MinValue)
-            .Select(item => new PersonDossierRecord
+        var apps = Safe(person.ApplicationPeople)
+            .Select(ap => ap.Application)
+            .Where(app => app != null)
+            .Cast<Application>()
+            .GroupBy(app => app.ID)
+            .Select(g => g.First())
+            .OrderByDescending(app => app.ApplicationDate)
+            .Select(app => new PersonDossierRecord
             {
-                RecordKey = $"ApplicationItem:{item.ID}",
-                SourceObjectId = item.ID,
-                SourceObjectType = typeof(ApplicationItem),
+                RecordKey = $"Application:{app.ID}",
+                SourceObjectId = app.ID,
+                SourceObjectType = typeof(Application),
                 Cells =
                 [
-                    item.Application?.FullApplicationNumber ?? string.Empty,
-                    Describe(item.Application?.ApplicationType),
-                    FormatDate(item.Application?.ApplicationDate),
+                    app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
+                    app.ApplicationProfile?.Name ?? Describe(app.ApplicationType),
+                    FormatDate(app.ApplicationDate),
                 ],
-                StatusLabel = item.LastApplicationState ?? string.Empty,
+                StatusLabel = app.LatestProgress?.State?.NameTm ?? string.Empty,
             })
             .ToList();
 
         return Section("applications", 100,
-            ["ApplicationNumber", "ApplicationType", "ApplicationDate"], records);
+            ["ApplicationNumber", "ApplicationProfile", "ApplicationDate"], apps);
     }
 
     private static PersonDossierSection BuildInvitations(Person person)

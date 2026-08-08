@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
@@ -93,6 +94,136 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         }
 
         return true;
+    }
+
+    public bool TryBuildForRoster(
+        IReadOnlyList<Guid> applicationPersonIds,
+        ApplicationItemDocumentBatchSummaryKind kind,
+        ApplicationItemDocumentPackageOptions packageOptions,
+        out byte[]? content,
+        out string? fileName)
+    {
+        content = null;
+        fileName = ApplicationItemDocumentBatchSummaryKindMapping.GetDownloadFileName(kind);
+
+        var rowIds = applicationPersonIds?
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList() ?? new List<Guid>();
+
+        if (rowIds.Count == 0)
+            return false;
+
+        if (kind == ApplicationItemDocumentBatchSummaryKind.AllDiplomas)
+            return TryBuildAllDiplomasPdfForRoster(rowIds, packageOptions, out content);
+
+        string? slotKey = kind switch
+        {
+            ApplicationItemDocumentBatchSummaryKind.CurrentPassports => "Passport.Current",
+            ApplicationItemDocumentBatchSummaryKind.CurrentVisas => "Visa.Current",
+            ApplicationItemDocumentBatchSummaryKind.CurrentWorkPermits => "WorkPermit.Current",
+            _ => null
+        };
+
+        if (slotKey == null)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationPerson>();
+        var rows = rowIds
+            .Select(id => objectSpace.GetObjectByKey<ApplicationPerson>(id))
+            .Where(row => row != null)
+            .Cast<ApplicationPerson>()
+            .ToList();
+
+        if (rows.Count != rowIds.Count)
+            return false;
+
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, rows);
+        var mergedGroup = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines)
+            .FirstOrDefault(g => string.Equals(g.SlotKey, slotKey, StringComparison.Ordinal));
+
+        if (mergedGroup == null || mergedGroup.Files.Count == 0)
+            return false;
+
+        if (!slotMerger.TryBuildMergedPdf(
+                rowIds,
+                slotKey,
+                mergedGroup.SlotLabel,
+                mergedGroup.Files,
+                out content,
+                out _)
+            || content == null
+            || content.Length == 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool TryBuildAllDiplomasPdfForRoster(
+        IReadOnlyList<Guid> rowIds,
+        ApplicationItemDocumentPackageOptions packageOptions,
+        out byte[]? content)
+    {
+        content = null;
+        if (packageOptions.DiplomaScope != PdfBatchDiplomaScope.AllEducations)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationPerson>();
+        var pdfStreams = new List<MemoryStream>();
+
+        try
+        {
+            foreach (var rowId in rowIds)
+            {
+                var row = objectSpace.GetObjectByKey<ApplicationPerson>(rowId);
+                if (row?.Person == null)
+                    continue;
+
+                var personId = row.Person.ID;
+                var educations = objectSpace.GetObjectsQuery<Education>()
+                    .Where(e => e.Person.ID == personId)
+                    .Include(e => e.EducationInstitution)
+                    .AsEnumerable()
+                    .OrderByDescending(e => ParseGraduationYearForSort(e.GraduationYear))
+                    .ThenBy(e => e.EducationInstitution?.Name ?? string.Empty)
+                    .ToList();
+
+                foreach (var education in educations)
+                {
+                    var docs = objectSpace.GetObjectsQuery<EducationDocument>()
+                        .Where(d => d.Education.ID == education.ID)
+                        .OrderBy(d => d.ID)
+                        .Include(d => d.File)
+                        .ToList();
+
+                    foreach (var doc in docs)
+                    {
+                        if (!TryLoadDocumentContent(objectSpace, doc, out var fileContent, out var sourceFileName))
+                            continue;
+
+                        if (!TryCreateMergeSlicePdfStream(fileContent, sourceFileName, landscape: false, out var slice))
+                            continue;
+
+                        pdfStreams.Add(slice);
+                    }
+                }
+            }
+
+            if (pdfStreams.Count == 0)
+                return false;
+
+            using var merged = new MemoryStream();
+            SupportingDocumentsPdfSharpHelper.MergePdfStreams(pdfStreams, merged);
+            content = merged.ToArray();
+            return content.Length > 0;
+        }
+        finally
+        {
+            foreach (var stream in pdfStreams)
+                stream.Dispose();
+        }
     }
 
     private bool TryBuildAllDiplomasPdf(

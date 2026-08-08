@@ -1,0 +1,354 @@
+@using System.Globalization
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="app-workspace">
+    @if (IsLoading || Snapshot == null)
+    {
+        <div class="app-workspace__loading" role="status" aria-live="polite">
+            <div class="app-workspace__loading-label">Loading Application workspace…</div>
+        </div>
+    }
+    else if (Snapshot.ApplicationId == Guid.Empty)
+    {
+        <div class="app-workspace__loading app-workspace__loading--empty">No Application selected.</div>
+    }
+    else
+    {
+        @if (Snapshot.IsPrototypeMock)
+        {
+            <div class="app-workspace__banner">
+                <strong>Prototype</strong> — custom Application workspace with mock data.
+                Layout from <code>docs/prototypes/application-detail-m2m.html</code>.
+            </div>
+        }
+
+        <div class="app-workspace__main">
+            <div class="app-workspace__top">
+                <section class="app-workspace__card">
+                    <div class="app-workspace__card-head">Application Progress</div>
+                    <div class="app-workspace__card-body">
+                        <table class="app-workspace__grid">
+                            <thead>
+                                <tr><th>State</th><th>Date</th><th>Description</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in Snapshot.ProgressHistory)
+                                {
+                                    <tr>
+                                        <td>@row.State</td>
+                                        <td>@row.Date</td>
+                                        <td>@row.Description</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="app-workspace__card">
+                    <div class="app-workspace__card-head">Application</div>
+                    <div class="app-workspace__card-body">
+                        <dl class="app-workspace__meta">
+                            <dt>N</dt><dd>@Snapshot.Header.ApplicationNumber</dd>
+                            <dt>Date</dt><dd>@Snapshot.Header.ApplicationDate</dd>
+                            <dt>Urgency</dt><dd>@Snapshot.Header.Urgency</dd>
+                        </dl>
+                        <div class="app-workspace__sla-label">
+                            Progress · @Snapshot.Header.ProgressStep / @Snapshot.Header.ProgressTotalSteps steps
+                        </div>
+                        <div class="app-workspace__bar" title="SLA">
+                            <i style="width:@ProgressPercent%"></i>
+                        </div>
+                        <div class="app-workspace__bar-cap">
+                            <span>@Snapshot.Header.SlaDaysElapsed / @Snapshot.Header.SlaDaysTotal days</span>
+                            <span>SLA</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="app-workspace__card app-workspace__profile-card">
+                <div class="app-workspace__card-head">
+                    <span>Application profile used by Application</span>
+                    <span class="app-workspace__chip app-workspace__chip--muted" title="Live FK">live link</span>
+                </div>
+                <div class="app-workspace__card-body">
+                    <div class="app-workspace__profile-strip">
+                        <div>
+                            <div class="app-workspace__profile-title">@Snapshot.Profile.Title</div>
+                            <div class="app-workspace__chips">
+                                @foreach (var chip in Snapshot.Profile.Chips)
+                                {
+                                    <span class="app-workspace__chip">@chip</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Snapshot.Profile.Code))
+                                {
+                                    <span class="app-workspace__chip app-workspace__chip--muted">@Snapshot.Profile.Code</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="app-workspace__profile-actions">
+                            <button type="button"
+                                    class="app-workspace__btn"
+                                    disabled="@(Snapshot.Profile.ProfileId == Guid.Empty)"
+                                    title="Open profile configuration wizard"
+                                    @onclick="ConfigureProfileAsync">
+                                Configure
+                            </button>
+                            <button type="button"
+                                    class="app-workspace__btn app-workspace__btn--primary"
+                                    disabled="@(Snapshot.Profile.ProfileId == Guid.Empty)"
+                                    title="Create another Application with this profile"
+                                    @onclick="NewApplicationFromProfileAsync">
+                                New Application
+                            </button>
+                        </div>
+                    </div>
+                    <p class="app-workspace__hint app-workspace__hint--inline">
+                        Browse and edit all profiles under <strong>Configuration → Application Profile</strong>.
+                    </p>
+                </div>
+            </section>
+
+            <section class="app-workspace__card app-workspace__tabs-card">
+                <div class="app-workspace__tabs" role="tablist">
+                    @foreach (var tab in VisibleTabs())
+                    {
+                        <button type="button"
+                                role="tab"
+                                class="app-workspace__tab @(tab.Key == _activeTabKey ? "is-active" : null)"
+                                aria-selected="@(tab.Key == _activeTabKey)"
+                                @onclick="() => SelectTab(tab.Key)">
+                            @tab.Label
+                        </button>
+                    }
+                    <div class="app-workspace__tab-tools">
+                        <button type="button" class="app-workspace__icon-btn" title="Preview / find">⌕</button>
+                    </div>
+                </div>
+
+                <div class="app-workspace__tabs-wrap">
+                    <div class="app-workspace__tab-panel" role="tabpanel">
+                        <div class="app-workspace__toolbar">
+                            @if (_activeTabKey == "person")
+                            {
+                                <button type="button"
+                                        class="app-workspace__btn app-workspace__btn--primary"
+                                        disabled="@(!CanLinkPerson)"
+                                        title="Link an existing person to this Application roster"
+                                        @onclick="LinkPersonAsync">
+                                    Link existing…
+                                </button>
+                                <button type="button"
+                                        class="app-workspace__btn"
+                                        disabled="@(!CanUnlinkPerson)"
+                                        title="Remove a person from this Application roster"
+                                        @onclick="UnlinkPersonAsync">
+                                    Unlink
+                                </button>
+                                <button type="button"
+                                        class="app-workspace__btn"
+                                        disabled="@(!CanOpenPersonDetail)"
+                                        title="Open the selected person DetailView"
+                                        @onclick="OpenPersonDetailAsync">
+                                    Open detail
+                                </button>
+                                <button type="button"
+                                        class="app-workspace__btn app-workspace__btn--primary"
+                                        disabled="@(!CanOpenDocumentCopies)"
+                                        title="Linked document copies for the selected roster line"
+                                        @onclick="OpenDocumentCopiesAsync">
+                                    Document copies
+                                </button>
+                            }
+                        </div>
+
+                        @if (ActiveTab() is { } activeTab)
+                        {
+                            @if (activeTab.Rows.Count == 0)
+                            {
+                                <p class="app-workspace__empty">@(activeTab.EmptyMessage ?? "No rows.")</p>
+                            }
+                            else
+                            {
+                                <table class="app-workspace__grid">
+                                    <thead>
+                                        <tr>
+                                            @foreach (var col in activeTab.Columns)
+                                            {
+                                                <th>@col</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var rowIndex = 0;
+                                        }
+                                        @foreach (var row in activeTab.Rows)
+                                        {
+                                            var currentRow = rowIndex;
+                                            var isSelected = _activeTabKey == "person"
+                                                && currentRow == SelectedPersonRowIndex;
+                                            <tr class="@(isSelected ? "is-selected" : null)"
+                                                @onclick="@(() => SelectRow(currentRow))">
+                                                @foreach (var cell in row)
+                                                {
+                                                    <td>@cell</td>
+                                                }
+                                            </tr>
+                                            rowIndex++;
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        }
+                    </div>
+
+                    <aside class="app-workspace__card app-workspace__sidebox">
+                        <div class="app-workspace__card-head">Link context</div>
+                        <div class="app-workspace__card-body">
+                            <p class="app-workspace__hint">
+                                Many-to-many with Application. Tab content from SQL views joining linked BO properties.
+                            </p>
+                            <ul>
+                                @foreach (var item in Snapshot.LinkContextItems)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <div class="app-workspace__note">
+                <strong>Locked:</strong> Officers only link/unlink <strong>Person</strong>;
+                children auto-resolve on link, DetailView open, and profile person-config save.
+                <strong>TravelHistory</strong> is M2M (not profile scalar config).
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public bool CanLinkPerson { get; set; }
+    [Parameter] public bool CanUnlinkPerson { get; set; }
+    [Parameter] public bool CanOpenPersonDetail { get; set; }
+    [Parameter] public bool CanOpenDocumentCopies { get; set; }
+    [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public EventCallback LinkPersonRequested { get; set; }
+    [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
+    [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
+    [Parameter] public EventCallback<Guid> NewApplicationFromProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenProfileConfigRequested { get; set; }
+    [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
+
+    private bool _initialLoadStarted;
+    private string _activeTabKey = "person";
+
+    private int ProgressPercent =>
+        Snapshot?.Header.ProgressTotalSteps > 0
+            ? (int)Math.Round(
+                100.0 * Snapshot.Header.ProgressStep / Snapshot.Header.ProgressTotalSteps,
+                MidpointRounding.AwayFromZero)
+            : 0;
+
+    protected override void OnParametersSet()
+    {
+        if (Snapshot?.Tabs.Count > 0 && string.IsNullOrEmpty(_activeTabKey))
+            _activeTabKey = Snapshot.Tabs[0].Key;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+
+    private IEnumerable<ApplicationWorkspaceTab> VisibleTabs()
+    {
+        if (Snapshot?.Tabs == null)
+            yield break;
+
+        foreach (var tab in Snapshot.Tabs)
+        {
+            if (tab.Visible)
+                yield return tab;
+        }
+    }
+
+    private ApplicationWorkspaceTab? ActiveTab()
+    {
+        if (Snapshot?.Tabs == null)
+            return null;
+
+        foreach (var tab in Snapshot.Tabs)
+        {
+            if (tab.Key == _activeTabKey)
+                return tab;
+        }
+
+        return Snapshot.Tabs.Count > 0 ? Snapshot.Tabs[0] : null;
+    }
+
+    private void SelectTab(string key) => _activeTabKey = key;
+
+    private async Task SelectRow(int rowIndex)
+    {
+        if (_activeTabKey != "person" || !SelectPersonRowRequested.HasDelegate)
+            return;
+
+        await SelectPersonRowRequested.InvokeAsync(rowIndex);
+    }
+
+    private async Task LinkPersonAsync()
+    {
+        if (LinkPersonRequested.HasDelegate)
+            await LinkPersonRequested.InvokeAsync();
+    }
+
+    private async Task UnlinkPersonAsync()
+    {
+        if (UnlinkPersonRequested.HasDelegate)
+            await UnlinkPersonRequested.InvokeAsync();
+    }
+
+    private async Task OpenPersonDetailAsync()
+    {
+        if (OpenPersonDetailRequested.HasDelegate)
+            await OpenPersonDetailRequested.InvokeAsync();
+    }
+
+    private async Task OpenDocumentCopiesAsync()
+    {
+        if (OpenDocumentCopiesRequested.HasDelegate)
+            await OpenDocumentCopiesRequested.InvokeAsync();
+    }
+
+    private async Task NewApplicationFromProfileAsync()
+    {
+        var profileId = Snapshot?.Profile.ProfileId ?? Guid.Empty;
+        if (profileId == Guid.Empty || !NewApplicationFromProfileRequested.HasDelegate)
+            return;
+
+        await NewApplicationFromProfileRequested.InvokeAsync(profileId);
+    }
+
+    private async Task ConfigureProfileAsync()
+    {
+        var profileId = Snapshot?.Profile.ProfileId ?? Guid.Empty;
+        if (profileId == Guid.Empty || !OpenProfileConfigRequested.HasDelegate)
+            return;
+
+        await OpenProfileConfigRequested.InvokeAsync(profileId);
+    }
+}

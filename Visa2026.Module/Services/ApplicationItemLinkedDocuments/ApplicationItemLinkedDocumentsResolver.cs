@@ -6,6 +6,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using Microsoft.EntityFrameworkCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
@@ -37,22 +38,43 @@ public static class ApplicationItemLinkedDocumentsResolver
             };
         }
 
-        item = objectSpace.GetObject(item);
-        var appType = item.Application?.ApplicationType;
+        if (itemId != Guid.Empty && objectSpace.GetObjectByKey<ApplicationItem>(itemId) != null)
+            item = objectSpace.GetObject(item);
+
+        return ResolveProjection(objectSpace, item, itemId);
+    }
+
+    /// <summary>Resolve groups for a tracked or detached <see cref="ApplicationItem"/> projection (e.g. roster hydrator).</summary>
+    public static ApplicationItemLinkedDocumentsSnapshot ResolveProjection(
+        IObjectSpace objectSpace,
+        ApplicationItem item,
+        Guid? lineIdOverride = null)
+    {
+        ArgumentNullException.ThrowIfNull(objectSpace);
+        if (item == null || item.Person == null)
+        {
+            return new ApplicationItemLinkedDocumentsSnapshot
+            {
+                ApplicationItemId = lineIdOverride ?? item?.ID ?? Guid.Empty,
+                Groups = Array.Empty<ApplicationItemLinkedDocumentGroup>()
+            };
+        }
+
+        var application = item.Application != null ? objectSpace.GetObject(item.Application) : null;
         var groups = new List<ApplicationItemLinkedDocumentGroup>();
 
-        AddPassportGroups(objectSpace, item, appType, groups);
-        AddVisaGroups(objectSpace, item, appType, groups);
-        AddWorkPermitGroups(objectSpace, item, appType, groups);
-        AddEducationGroup(objectSpace, item, appType, groups);
-        AddInvitationGroups(objectSpace, item, appType, groups);
-        AddAddressGroup(objectSpace, item, appType, groups);
-        AddMedicalGroup(objectSpace, item, appType, groups);
+        AddPassportGroups(objectSpace, item, application, groups);
+        AddVisaGroups(objectSpace, item, application, groups);
+        AddWorkPermitGroups(objectSpace, item, application, groups);
+        AddEducationGroup(objectSpace, item, application, groups);
+        AddInvitationGroups(objectSpace, item, application, groups);
+        AddAddressGroup(objectSpace, item, application, groups);
+        AddMedicalGroup(objectSpace, item, application, groups);
         AddFamilyRelationshipGroup(objectSpace, item, groups);
 
         return new ApplicationItemLinkedDocumentsSnapshot
         {
-            ApplicationItemId = itemId,
+            ApplicationItemId = lineIdOverride ?? item.ID,
             Groups = groups
         };
     }
@@ -85,12 +107,12 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddPassportGroups(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         groups.Add(BuildPassportGroup(os, item.CurrentPassport, "Passport.Current"));
 
-        if (appType?.ShowPreviousPassport == true)
+        if (ApplicationProfileConfigurationResolver.ShowPreviousPassport(application))
         {
             var cur = item.CurrentPassport;
             var prev = item.PreviousPassport;
@@ -135,13 +157,13 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddVisaGroups(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
-        if (appType?.ShowCurrentVisa == true)
+        if (ApplicationProfileConfigurationResolver.ShowCurrentVisa(application))
             groups.Add(BuildVisaGroup(os, item.CurrentVisa, "Visa.Current", "ApplicationItemDocumentCopies.Slot.Visa.Current"));
 
-        if (appType?.ShowNextVisa == true)
+        if (ApplicationProfileConfigurationResolver.ShowNextVisa(application))
             groups.Add(BuildVisaGroup(os, item.NextVisa, "Visa.Next", "ApplicationItemDocumentCopies.Slot.Visa.Next"));
     }
 
@@ -177,19 +199,19 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddWorkPermitGroups(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
         if (item.Person?.IsEmployee != true)
             return;
 
-        if (appType?.ShowCurrentWorkPermitItem == true)
+        if (ApplicationProfileConfigurationResolver.ShowCurrentWorkPermitItem(application))
         {
             var curWp = item.CurrentWorkPermitItem?.WorkPermit;
             groups.Add(BuildWorkPermitGroup(os, curWp, "WorkPermit.Current", "ApplicationItemDocumentCopies.Slot.WorkPermit.Current"));
         }
 
-        if (appType?.ShowPreviousWorkPermitItem == true)
+        if (ApplicationProfileConfigurationResolver.ShowPreviousWorkPermitItem(application))
         {
             var prevWp = item.PreviousWorkPermitItem?.WorkPermit;
             var curWp = item.CurrentWorkPermitItem?.WorkPermit;
@@ -230,10 +252,10 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddEducationGroup(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
-        if (appType?.ShowCurrentEducation != true)
+        if (!ApplicationProfileConfigurationResolver.ShowCurrentEducation(application))
             return;
 
         if (IsRegistrationApplicationItem(item))
@@ -268,13 +290,13 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddInvitationGroups(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
-        if (appType?.ShowCurrentInvitationItem == true)
+        if (ApplicationProfileConfigurationResolver.ShowCurrentInvitationItem(application))
             groups.Add(BuildInvitationGroup(os, item.CurrentInvitationItem?.Invitation, "Invitation.Current", "ApplicationItemDocumentCopies.Slot.Invitation.Current"));
 
-        if (appType?.ShowPreviousInvitationItem == true)
+        if (ApplicationProfileConfigurationResolver.ShowPreviousInvitationItem(application))
         {
             var cur = item.CurrentInvitationItem?.Invitation;
             var prev = item.PreviousInvitationItem?.Invitation;
@@ -315,10 +337,10 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddAddressGroup(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
-        if (appType?.ShowCurrentAddressOfResidence != true)
+        if (!ApplicationProfileConfigurationResolver.ShowCurrentAddressOfResidence(application))
             return;
 
         var address = item.CurrentAddressOfResidence;
@@ -363,10 +385,10 @@ public static class ApplicationItemLinkedDocumentsResolver
     private static void AddMedicalGroup(
         IObjectSpace os,
         ApplicationItem item,
-        ApplicationType? appType,
+        Application? application,
         List<ApplicationItemLinkedDocumentGroup> groups)
     {
-        if (appType?.ShowCurrentMedicalRecord != true)
+        if (!ApplicationProfileConfigurationResolver.ShowCurrentMedicalRecord(application))
             return;
 
         var medical = item.CurrentMedicalRecord;
@@ -415,7 +437,8 @@ public static class ApplicationItemLinkedDocumentsResolver
     }
 
     private static bool IsRegistrationApplicationItem(ApplicationItem item) =>
-        item.Application?.ApplicationType?.ShowRegistrations == true;
+        item.Application != null
+        && ApplicationProfileConfigurationResolver.ShowRegistrations(item.Application);
 
     private static string? BuildEducationCaption(Education education)
     {

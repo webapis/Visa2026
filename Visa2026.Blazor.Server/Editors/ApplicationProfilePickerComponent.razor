@@ -1,0 +1,240 @@
+@using Visa2026.Blazor.Server.Editors
+
+<div class="ap-picker">
+    @if (IsLoading)
+    {
+        <div class="ap-picker__loading" role="status">Loading Application Profiles…</div>
+    }
+    else if (IsPersonStartFlow && Step == 2)
+    {
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">Select people</h1>
+                <p class="ap-picker__sub">
+                    Seed person is pre-selected. Add family or colleagues on the same Application roster.
+                </p>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(SeedPersonLabel))
+        {
+            <div class="ap-picker__hint">Starting for <strong>@SeedPersonLabel</strong></div>
+        }
+
+        @RenderStatus()
+
+        <ul class="ap-picker__list ap-picker__people" role="list">
+            @foreach (var row in PeopleRows)
+            {
+                <li class="ap-picker__item ap-picker__people-item @(row.IsSelected ? "is-selected" : null)">
+                    <label class="ap-picker__people-label">
+                        <input type="checkbox"
+                               checked="@row.IsSelected"
+                               @onchange="() => TogglePerson(row.PersonId)" />
+                        <span>
+                            <strong>@row.FullName</strong>
+                            <span class="ap-picker__meta">@row.RoleLabel · @row.PersonalNumber</span>
+                        </span>
+                    </label>
+                    <div class="ap-picker__badges">
+                        @if (row.IsSeedPerson)
+                        {
+                            <span class="ap-picker__badge">Seed</span>
+                        }
+                        @if (row.IsSuggestedFamily)
+                        {
+                            <span class="ap-picker__badge ap-picker__badge--muted">Suggested family</span>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+
+        @if (HasDuplicateWarning)
+        {
+            <label class="ap-picker__warn-ack">
+                <input type="checkbox"
+                       checked="@DuplicateWarningAcknowledged"
+                       @onchange="OnDuplicateAckChanged" />
+                I understand — create Application even if open Applications exist on this profile.
+            </label>
+        }
+
+        <div class="ap-picker__actions">
+            <button type="button" class="ap-picker__btn" @onclick="BackStepAsync">Back</button>
+            <button type="button"
+                    class="ap-picker__btn ap-picker__btn--primary"
+                    disabled="@(!CanCreateFromPeople)"
+                    @onclick="UseProfileAsync">
+                Create application
+            </button>
+        </div>
+    }
+    else
+    {
+        <header class="ap-picker__header">
+            <div>
+                <h1 class="ap-picker__title">@(IsPersonStartFlow ? "Start application" : "Choose Application Profile")</h1>
+                <p class="ap-picker__sub">
+                    Sets a live configuration link and seeds per-Application defaults once. Profile cannot be changed after save.
+                </p>
+            </div>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(RouteHint))
+        {
+            <div class="ap-picker__hint">@RouteHint</div>
+        }
+
+        @if (IsPersonStartFlow && !string.IsNullOrWhiteSpace(SeedPersonLabel))
+        {
+            <div class="ap-picker__hint">Person: <strong>@SeedPersonLabel</strong> — profiles sorted by most recent use for this person.</div>
+        }
+
+        @RenderStatus()
+
+        @if (Rows.Count == 0)
+        {
+            <div class="ap-picker__empty">
+                No active Application Profiles match this list. Configure profiles under <strong>Configuration → Application Profiles</strong>.
+            </div>
+        }
+        else
+        {
+            <ul class="ap-picker__list" role="listbox" aria-label="Application Profiles">
+                @foreach (var row in Rows)
+                {
+                    var selected = row.ProfileId == SelectedProfileId;
+                    <li class="ap-picker__item @(selected ? "is-selected" : null)"
+                        role="option"
+                        aria-selected="@selected"
+                        @onclick="() => SelectProfile(row.ProfileId)">
+                        <div class="ap-picker__item-main">
+                            <strong>@row.Name</strong>
+                            <div class="ap-picker__meta">@row.MetaLine</div>
+                            @if (IsPersonStartFlow && !string.IsNullOrWhiteSpace(row.SeedUsageLine))
+                            {
+                                <div class="ap-picker__meta ap-picker__meta--usage">@row.SeedUsageLine</div>
+                            }
+                        </div>
+                        <div class="ap-picker__badges">
+                            @if (row.HasOpenApplicationForSeedPerson)
+                            {
+                                <span class="ap-picker__badge ap-picker__badge--warn">Open app</span>
+                            }
+                            @if (row.IsConfigLocked)
+                            {
+                                <span class="ap-picker__badge ap-picker__badge--muted">Config locked</span>
+                            }
+                            @if (selected)
+                            {
+                                <span class="ap-picker__badge ap-picker__badge--on">Selected</span>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <div class="ap-picker__actions">
+                @if (IsPersonStartFlow)
+                {
+                    <button type="button"
+                            class="ap-picker__btn ap-picker__btn--primary"
+                            disabled="@(SelectedProfileId == Guid.Empty)"
+                            @onclick="NextStepAsync">
+                        Next: Select people
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            class="ap-picker__btn ap-picker__btn--primary"
+                            disabled="@(SelectedProfileId == Guid.Empty)"
+                            @onclick="UseProfileAsync">
+                        Use profile (live link)
+                    </button>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public bool IsPersonStartFlow { get; set; }
+    [Parameter] public int Step { get; set; } = 1;
+    [Parameter] public string? SeedPersonLabel { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PickerRowModel> Rows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PickerRowModel>();
+    [Parameter] public IReadOnlyList<ApplicationProfilePickerModel.PeopleRowModel> PeopleRows { get; set; } = Array.Empty<ApplicationProfilePickerModel.PeopleRowModel>();
+    [Parameter] public Guid SelectedProfileId { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public bool IsStatusWarning { get; set; }
+    [Parameter] public bool DuplicateWarningAcknowledged { get; set; }
+    [Parameter] public bool HasDuplicateWarning { get; set; }
+    [Parameter] public bool CanCreateFromPeople { get; set; }
+    [Parameter] public string? RouteHint { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback UseProfileRequested { get; set; }
+    [Parameter] public EventCallback NextStepRequested { get; set; }
+    [Parameter] public EventCallback BackStepRequested { get; set; }
+    [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> TogglePersonRequested { get; set; }
+    [Parameter] public EventCallback<bool> DuplicateWarningAcknowledgedChanged { get; set; }
+
+    private bool _initialLoadStarted;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+
+    private async Task OnDuplicateAckChanged(ChangeEventArgs e)
+    {
+        if (DuplicateWarningAcknowledgedChanged.HasDelegate && e.Value is bool value)
+            await DuplicateWarningAcknowledgedChanged.InvokeAsync(value);
+    }
+
+    private RenderFragment RenderStatus() => __builder =>
+    {
+        if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            var css = IsStatusError ? "is-error" : IsStatusWarning ? "is-warn" : "is-ok";
+            <div class="ap-picker__status @css" role="status">@StatusMessage</div>
+        }
+    };
+
+    private async Task SelectProfile(Guid profileId)
+    {
+        if (SelectProfileRequested.HasDelegate)
+            await SelectProfileRequested.InvokeAsync(profileId);
+    }
+
+    private async Task UseProfileAsync()
+    {
+        if (UseProfileRequested.HasDelegate)
+            await UseProfileRequested.InvokeAsync();
+    }
+
+    private async Task NextStepAsync()
+    {
+        if (NextStepRequested.HasDelegate)
+            await NextStepRequested.InvokeAsync();
+    }
+
+    private async Task BackStepAsync()
+    {
+        if (BackStepRequested.HasDelegate)
+            await BackStepRequested.InvokeAsync();
+    }
+
+    private async Task TogglePerson(Guid personId)
+    {
+        if (TogglePersonRequested.HasDelegate)
+            await TogglePersonRequested.InvokeAsync(personId);
+    }
+}

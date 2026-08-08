@@ -228,8 +228,8 @@
         <Member Name="ApplicationItems" Caption="Arza elementleri" />
         <Member Name="ApplicationNumber" Caption="Arza belgisi" />
         <Member Name="ApplicationReason" Caption="Arza sebäbi" />
-        <Member Name="ApplicationType" Caption="Arza görnüşi (köneldi)" />
-        <Member Name="ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi (köneldi)" />
+        <Member Name="ApplicationType" Caption="Arza görnüşi" />
+        <Member Name="ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi" />
         <Member Name="ApprovalLegProfile" Caption="Ministrlik ylalaşyk ädimleri" />
         <Member Name="BorderZoneLocation" Caption="Serhet sebiti ýeri" />
         <Member Name="Category" Caption="Kategoriýa" />
@@ -481,7 +481,7 @@
         <Member Name="ValidityDuration" Caption="Möhleti" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Arza görnüşi (köneldi)">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Arza görnüşi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
         <Member Name="ApplicationProgressRoute" Caption="Ösüş ugry" />
@@ -533,7 +533,7 @@
         <Member Name="FamilyMember" Caption="Maşgala agzy" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi (köneldi)">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Arza görnüşi süzgüçi">
       <OwnMembers>
         <Member Name="Application" Caption="Arza" />
         <Member Name="Category" Caption="Kategoriýa" />
@@ -1921,6 +1921,8 @@
         <Member Name="Notes" Caption="Syýahat bellikleri" />
         <Member Name="Person" Caption="Adam" />
         <Member Name="Region" Caption="Welaýat" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Arza senesi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Arza belgisi" />
         <Member Name="Title" Caption="Ady" />
         <Member Name="TravelDate" Caption="Syýahat senesi" />
         <Member Name="TravelType" Caption="Syýahat görnüşi" />
@@ -2506,10 +2508,10 @@
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationState_DetailView" Caption="Arza ýagdaýy" />
     <ListView Id="ApplicationState_ListView" Caption="Arza ýagdaýlary" />
-    <DetailView Id="ApplicationType_DetailView" Caption="Arza görnüşi (köneldi)" />
-    <ListView Id="ApplicationType_ListView" Caption="Arza görnüşleri (köneldi)" />
-    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Arza görnüşi süzgüçi (köneldi)" />
-    <ListView Id="ApplicationTypeFilter_ListView" Caption="Arza görnüşi süzgüçleri (köneldi)" />
+    <DetailView Id="ApplicationType_DetailView" Caption="Arza görnüşi" />
+    <ListView Id="ApplicationType_ListView" Caption="Arza görnüşleri" />
+    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Arza görnüşi süzgüçi" />
+    <ListView Id="ApplicationTypeFilter_ListView" Caption="Arza görnüşi süzgüçleri" />
     <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Arza görnüşi topary" />
     <ListView Id="ApplicationTypeGroup_ListView" Caption="Arza görnüşi toparlary" />
     <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Arza görnüşi topary agzasy" />
@@ -2927,6 +2929,8 @@
         <ColumnInfo Id="CheckPoint" Caption="Kontrol nokady" />
         <ColumnInfo Id="MovementType" Caption="Hereket görnüşi" />
         <ColumnInfo Id="Notes" Caption="Syýahat bellikleri" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Arza senesi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Arza belgisi" />
         <ColumnInfo Id="TravelDate" Caption="Syýahat senesi" />
         <ColumnInfo Id="TravelType" Caption="Syýahat görnüşi" />
       </Columns>

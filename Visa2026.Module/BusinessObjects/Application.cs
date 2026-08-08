@@ -9,6 +9,7 @@ using DevExpress.Persistent.Base;
 using System.Linq;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.MigrationImport;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.BaseImpl.EF;
@@ -16,6 +17,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp;
 using Visa2026.Module.Documentation;
+
 namespace Visa2026.Module.BusinessObjects
 {
     [UserDocumentation("applications/overview", Category = "Applications")]
@@ -23,6 +25,11 @@ namespace Visa2026.Module.BusinessObjects
     [NavigationItem(false)]
     [XafDisplayName("Application")]
     [DefaultProperty(nameof(DisplayCaption))]
+    [RuleCriteria(
+        "Application_ProfileOrTypeRequired",
+        DefaultContexts.Save,
+        "ApplicationProfile is not null Or ApplicationType is not null",
+        CustomMessageTemplate = "Application Profile is required.")]
     [Appearance(
         "ApplicationReadOnlyAfterOfficePreparation",
         AppearanceItemType = "ViewItem",
@@ -38,12 +45,11 @@ namespace Visa2026.Module.BusinessObjects
         Enabled = false,
         Context = "DetailView")]
 //    [RuleUniqueValue("UniqueAppNumberPerPrefix", DefaultContexts.Save, "AppNumberPrefix;ApplicationNumber;Year", CustomMessageTemplate = "An application with this prefix, number, and year already exists.")]
-    public class Application : BaseObject, IBoListRowState
+    public partial class Application : BaseObject, IBoListRowState
     {
         private const string DefaultBorderZoneLocationNameTm = "Ýok";
 
-        private const string BorderZoneLocationVisibleCriteria =
-            "ApplicationType is not null And ApplicationType.ShowBorderZoneLocation";
+        private const string BorderZoneLocationVisibleCriteria = "!CfgShowBorderZoneLocation";
 
         private const string AppInvApplicationTypeName = "App_Inv";
         private const string AppInvAndWpApplicationTypeName = "App_Inv_And_WP";
@@ -76,12 +82,12 @@ namespace Visa2026.Module.BusinessObjects
         private const string OfDefaultVisaTypeLocalizationKey = "OF";
 
         /// <summary>Registration and business-trip application types target a migration-service office.</summary>
-        private const string MigrationServiceVisibleCriteria =
-            "ApplicationType is null or !(ApplicationType.ShowRegistrations or ApplicationType.ShowBusinessTrips)";
+        private const string MigrationServiceVisibleCriteria = "!CfgShowMigrationService";
 
         public Application()
         {
             ApplicationItems = new ObservableCollection<ApplicationItem>();
+            People = new ObservableCollection<ApplicationPerson>();
             Invitations = new ObservableCollection<Invitation>();
             Rejections = new ObservableCollection<Rejection>();
             WorkPermits = new ObservableCollection<WorkPermit>();
@@ -170,7 +176,7 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInDetailView(false)]
         [VisibleInListView(true)]
         [NotMapped]
-        public int TotalPersonCount => listViewTotalPersonCount ?? ApplicationItems?.Count ?? 0;
+        public int TotalPersonCount => listViewTotalPersonCount ?? ApplicationRosterHelper.GetRosterPersonCountInMemory(this);
 
         private string applicationTypeQuickCode;
 
@@ -328,7 +334,7 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public int? WorkingDaysInMigrationStep => ListViewDisplay.WorkingDaysInMigrationStep;
 
-        [Appearance("ApprovalLegProfileVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApprovalLegProfile", Context = "DetailView")]
+        [Appearance("ApprovalLegProfileVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowApprovalLegProfile", Context = "DetailView")]
         [VisibleInListView(false)]
         [ImmediatePostData]
         [DataSourceProperty(nameof(AvailableApprovalLegProfiles))]
@@ -350,11 +356,16 @@ namespace Visa2026.Module.BusinessObjects
         /// DEPRECATED — use <see cref="ApplicationProfile"/>. Retained for dual-read / import
         /// (see docs/DEPRECATED.md, docs/APPLICATION_PROFILE_PLAN.md).
         /// </summary>
-        [ImmediatePostData, RuleRequiredField]
+        [ImmediatePostData]
         [DataSourceCriteria("!IsNullOrEmpty(SelectionCode)")]
         [Appearance("ApplicationTypeReadOnlyOnDetail", Enabled = false, Context = "DetailView")]
+        [Appearance(
+            "HideApplicationTypeWhenProfileSet",
+            Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide,
+            Criteria = "ApplicationProfile is not null",
+            Context = "DetailView")]
         [XafDisplayName("Application Type (Deprecated)")]
-        [ToolTip("Deprecated. Prefer Application Profile. Still required during dual-read migration.")]
+        [ToolTip("Deprecated. Prefer Application Profile. Retained for legacy rows and import until cutover.")]
         public virtual ApplicationType ApplicationType
         {
             get => applicationType;
@@ -513,15 +524,15 @@ namespace Visa2026.Module.BusinessObjects
             return false;
         }
 
-        [Appearance("VisaPeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaPeriod", Context = "DetailView")]
+        [Appearance("VisaPeriodVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowVisaPeriod", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual VisaPeriod VisaPeriod { get; set; }
 
-        [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaCategory", Context = "DetailView")]
+        [Appearance("VisaCategoryVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowVisaCategory", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual VisaCategory VisaCategory { get; set; }
 
-        [Appearance("VisaTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowVisaType", Context = "DetailView")]
+        [Appearance("VisaTypeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowVisaType", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual VisaType VisaType { get; set; }
 
@@ -538,9 +549,9 @@ namespace Visa2026.Module.BusinessObjects
         [VisibleInListView(false)]
         [NotMapped]
         public bool IsProjectContractLocked =>
-            ApplicationType?.ShowProjectContract == true && IsLockedAfterOfficePreparation;
+            ApplicationProfileConfigurationResolver.ShowProjectContract(this) && IsLockedAfterOfficePreparation;
 
-        [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowProjectContract", Context = "DetailView")]
+        [Appearance("ProjectContractVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowProjectContract", Context = "DetailView")]
         [VisibleInListView(false)]
         [ImmediatePostData]
         [DataSourceProperty(nameof(AvailableProjectContracts))]
@@ -555,7 +566,7 @@ namespace Visa2026.Module.BusinessObjects
         [InverseProperty(nameof(ApplicationApprovalLegSnapshot.Application))]
         public virtual IList<ApplicationApprovalLegSnapshot> ApprovalLegSnapshots { get; set; }
 
-        [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowUrgency", Context = "DetailView")]
+        [Appearance("UrgencyVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowUrgency", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual Urgency Urgency { get; set; }
 
@@ -629,10 +640,10 @@ namespace Visa2026.Module.BusinessObjects
         [NotMapped]
         public string FamilyMember_Relationship_NameTm =>
             JoinTurkmenList(
-                ApplicationItems?
-                    .Select(i => i.Person?.Relationship)
+                ApplicationRosterHelper.GetRosterPeople(this)
+                    .Select(p => p.Relationship)
                     .Where(r => r != null)
-                    .Select(r => string.IsNullOrEmpty(r.ReverseNameTm) ? r.NameTm : r.ReverseNameTm)
+                    .Select(r => string.IsNullOrEmpty(r!.ReverseNameTm) ? r.NameTm : r.ReverseNameTm)
                     .Where(r => !string.IsNullOrEmpty(r))
                     .Distinct()
                     .Select(AddTurkmenGenitive)
@@ -641,30 +652,31 @@ namespace Visa2026.Module.BusinessObjects
         [XafDisplayName("Sponsoring Employee Full Name"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string SponsoringEmployee_FullName =>
-            ApplicationItems?.FirstOrDefault()?.Person?.SponsoringEmployee?.FullName;
+            ApplicationRosterHelper.GetRosterPeople(this).FirstOrDefault()?.SponsoringEmployee?.FullName;
 
         [XafDisplayName("Sponsoring Employee Position (Tm)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string SponsoringEmployee_PositionTm =>
-            PersonCurrentItems.GetCurrentPositionHistory(ApplicationItems?.FirstOrDefault()?.Person?.SponsoringEmployee)?.Position?.NameTm;
+            PersonCurrentItems.GetCurrentPositionHistory(
+                ApplicationRosterHelper.GetRosterPeople(this).FirstOrDefault()?.SponsoringEmployee)?.Position?.NameTm;
 
-        [Appearance("BusinessTripStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
+        [Appearance("BusinessTripStartDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTrips", Context = "DetailView")]
         [VisibleInListView(false)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? BusinessTripStartDate { get; set; }
 
-        [Appearance("BusinessTripEndDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
+        [Appearance("BusinessTripEndDateVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTrips", Context = "DetailView")]
         [VisibleInListView(false)]
         [ModelDefault("DisplayFormat", "{0:dd.MM.yyyy}")]
         [ModelDefault("EditMask", "dd.MM.yyyy")]
         public virtual DateTime? BusinessTripEndDate { get; set; }
 
-        [Appearance("BusinessTripPurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowBusinessTrips", Context = "DetailView")]
+        [Appearance("BusinessTripPurposeVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowBusinessTrips", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual BusinessTripPurpose BusinessTripPurpose { get; set; }
 
-        [Appearance("MovementPermitLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowMovementPermitLocation", Context = "DetailView")]
+        [Appearance("MovementPermitLocationVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowMovementPermitLocation", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual MovementPermitLocation MovementPermitLocation { get; set; }
 
@@ -690,15 +702,19 @@ namespace Visa2026.Module.BusinessObjects
                 ? DefaultBorderZoneLocationNameTm
                 : BorderZoneLocation?.Trim() ?? DefaultBorderZoneLocationNameTm;
 
-        [Appearance("FromCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowFromCity", Context = "DetailView")]
+        [Appearance("FromCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowFromCity", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City FromCity { get; set; }
 
-        [Appearance("ToCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowToCity", Context = "DetailView")]
+        [Appearance("ToCityVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowToCity", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual City ToCity { get; set; }
 
         #region Person Count
+
+        private IEnumerable<ApplicationItem> RosterLinesForReports() =>
+            ApplicationRosterHelper.GetMergeLineItems(this);
+
         [XafDisplayName("Total Person Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
         public string TotalPersonCountText => NumberToTurkmenWords(TotalPersonCount);
@@ -706,7 +722,7 @@ namespace Visa2026.Module.BusinessObjects
         // Used by App_Cancel_Visa_and_WP and App_Cancel_Inv_WP reports
         [XafDisplayName("Cancel Person Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelPersonCount => ApplicationItems?.Count ?? 0;
+        public int CancelPersonCount => RosterLinesForReports().Count();
 
         [XafDisplayName("Cancel Person Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -718,9 +734,8 @@ namespace Visa2026.Module.BusinessObjects
         /// </summary>
         [XafDisplayName("Cancel Visa Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelVisaCount => ApplicationItems?
-            .Where(ai => ai != null)
-            .Sum(ai => (ai.CurrentVisa != null ? 1 : 0) + (ai.NextVisa != null ? 1 : 0)) ?? 0;
+        public int CancelVisaCount => RosterLinesForReports()
+            .Sum(ai => (ai.CurrentVisa != null ? 1 : 0) + (ai.NextVisa != null ? 1 : 0));
 
         [XafDisplayName("Cancel Visa Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -728,8 +743,8 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Cancel WP Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelWPCount => (ApplicationItems?.Count ?? 0)
-            + (ApplicationItems?.Count(ai => ai.PreviousWorkPermitItem != null) ?? 0);
+        public int CancelWPCount => RosterLinesForReports().Count()
+            + RosterLinesForReports().Count(ai => ai.PreviousWorkPermitItem != null);
 
         [XafDisplayName("Cancel WP Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -737,7 +752,7 @@ namespace Visa2026.Module.BusinessObjects
 
         [XafDisplayName("Cancel Inv Count"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
-        public int CancelInvCount => ApplicationItems?.Count(ai => ai.CurrentInvitationItem != null) ?? 0;
+        public int CancelInvCount => RosterLinesForReports().Count(ai => ai.CurrentInvitationItem != null);
 
         [XafDisplayName("Cancel Inv Count (Text)"), VisibleInDetailView(false), VisibleInListView(false)]
         [NotMapped]
@@ -848,26 +863,32 @@ namespace Visa2026.Module.BusinessObjects
         public string BusinessTripPurpose_NameTm => BusinessTripPurpose?.Name;
 
         [Aggregated]
+        [InverseProperty(nameof(ApplicationPerson.Application))]
+        [XafDisplayName("People")]
+        [VisibleInListView(false)]
+        public virtual IList<ApplicationPerson> People { get; set; }
+
+        [Aggregated]
         [InverseProperty(nameof(ApplicationItem.Application))]
-        [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowApplicationItems", Context = "DetailView")]
+        [Appearance("ApplicationItemsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowApplicationItems", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual IList<ApplicationItem> ApplicationItems { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Invitation.Application))]
-        [Appearance("InvitationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowInvitations", Context = "DetailView")]
+        [Appearance("InvitationsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowInvitations", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual IList<Invitation> Invitations { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(Rejection.Application))]
-        [Appearance("RejectionsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowRejections", Context = "DetailView")]
+        [Appearance("RejectionsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowRejections", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual IList<Rejection> Rejections { get; set; }
 
         [Aggregated]
         [InverseProperty(nameof(WorkPermit.Application))]
-        [Appearance("WorkPermitsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "ApplicationType is null or !ApplicationType.ShowWorkPermits", Context = "DetailView")]
+        [Appearance("WorkPermitsVisible", Visibility = DevExpress.ExpressApp.Editors.ViewItemVisibility.Hide, Criteria = "!CfgShowWorkPermits", Context = "DetailView")]
         [VisibleInListView(false)]
         public virtual IList<WorkPermit> WorkPermits { get; set; }
 

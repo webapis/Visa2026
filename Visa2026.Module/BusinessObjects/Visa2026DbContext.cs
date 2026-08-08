@@ -131,6 +131,9 @@ namespace Visa2026.Module.BusinessObjects
         public DbSet<ApplicationProfile> ApplicationProfiles { get; set; }
         public DbSet<ApplicationProfileApprovalLeg> ApplicationProfileApprovalLegs { get; set; }
         public DbSet<ApplicationProfileTemplate> ApplicationProfileTemplates { get; set; }
+        public DbSet<ApplicationProfileProgressStateSetting> ApplicationProfileProgressStateSettings { get; set; }
+        public DbSet<ApplicationPerson> ApplicationPeople { get; set; }
+        public DbSet<ApplicationPersonResolvedLink> ApplicationPersonResolvedLinks { get; set; }
         public DbSet<ApplicationTypeGroup> ApplicationTypeGroups { get; set; }
         public DbSet<ApplicationTypeGroupMember> ApplicationTypeGroupMembers { get; set; }
         public DbSet<ApplicationState> ApplicationStates { get; set; }
@@ -673,6 +676,43 @@ namespace Visa2026.Module.BusinessObjects
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<ApplicationProfileProgressStateSetting>(b =>
+            {
+                b.Property(s => s.StateCode).HasMaxLength(64);
+                b.HasOne(s => s.ApplicationProfile)
+                    .WithMany(p => p.ProgressStateSettings)
+                    .HasForeignKey(s => s.ApplicationProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(s => new { s.ApplicationProfileId, s.Track, s.StateCode })
+                    .HasDatabaseName("IX_ApplicationProfileProgressStateSettings_Profile_Track_Code");
+            });
+
+            modelBuilder.Entity<ApplicationPerson>(b =>
+            {
+                b.HasOne(ap => ap.Application)
+                    .WithMany(a => a.People)
+                    .HasForeignKey(ap => ap.ApplicationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(ap => ap.Person)
+                    .WithMany(p => p.ApplicationPeople)
+                    .HasForeignKey(ap => ap.PersonId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                b.HasIndex(ap => new { ap.ApplicationId, ap.PersonId })
+                    .IsUnique()
+                    .HasDatabaseName("IX_ApplicationPeople_Application_Person");
+            });
+
+            modelBuilder.Entity<ApplicationPersonResolvedLink>(b =>
+            {
+                b.HasOne(l => l.ApplicationPerson)
+                    .WithMany(ap => ap.ResolvedLinks)
+                    .HasForeignKey(l => l.ApplicationPersonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasIndex(l => new { l.ApplicationPersonId, l.LinkKind })
+                    .IsUnique()
+                    .HasDatabaseName("IX_ApplicationPersonResolvedLinks_PersonRow_Kind");
+            });
+
             modelBuilder.Entity<ApplicationProgress>(b => {
                 b.HasIndex("ApplicationID", nameof(ApplicationProgress.Order))
                  .HasDatabaseName("IX_ApplicationProgresses_ApplicationID_ProgressOrder");
@@ -757,6 +797,13 @@ namespace Visa2026.Module.BusinessObjects
 
             modelBuilder.Entity<Visa>(b => {
                 b.HasOne(v => v.Passport).WithMany(p => p.Visas).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(v => v.IssuingApplication)
+                    .WithMany()
+                    .HasForeignKey("IssuingApplicationID")
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired(false);
+                b.HasIndex("IssuingApplicationID")
+                    .HasDatabaseName("IX_Visas_IssuingApplicationID");
                 // Single-use by validation (Visa_IssuingApplicationItemSingleUse / Visa_InvitationItemSingleUse).
                 b.HasOne(v => v.IssuingApplicationItem)
                     .WithOne(ai => ai.IssuedVisa)

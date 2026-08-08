@@ -12,6 +12,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.DC;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -81,7 +82,7 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                return Application?.ApplicationItems.Select(ai => ai.Person).ToList() ?? new List<Person>();
+                return ApplicationRosterHelper.GetRosterPeople(Application);
             }
         }
 

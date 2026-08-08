@@ -18,6 +18,12 @@ using Visa2026.Module.Services.StateNotifications;
 using Visa2026.Module.Services.Feedback;
 using Visa2026.Module.Services.WordReports;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.ApplicationProfilePicker;
+using Visa2026.Module.Services.ApplicationProfileOverview;
+using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.PersonLinkedDocuments;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
@@ -139,6 +145,10 @@ namespace Visa2026.Blazor.Server
                     {
                         ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
+                        VisaIssuingApplicationSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
                 });
@@ -232,6 +242,21 @@ namespace Visa2026.Blazor.Server
             services.AddSingleton<BoStateNotificationNavigationHelper>();
             services.AddSingleton<PersonDossierNavigationHelper>();
             services.AddScoped<IPersonDossierPendingOpen, PersonDossierPendingOpen>();
+            services.AddScoped<IApplicationWorkspacePendingOpen, ApplicationWorkspacePendingOpen>();
+            services.AddScoped<IApplicationProfileWizardPendingOpen, ApplicationProfileWizardPendingOpen>();
+            services.AddScoped<IApplicationProfileWizardSession, ApplicationProfileWizardSession>();
+            services.AddScoped<IApplicationProfilePickerContext, ApplicationProfilePickerContextHolder>();
+            services.AddScoped<IApplicationProfilePickerQueryService, ApplicationProfilePickerQueryService>();
+            services.AddScoped<IApplicationProfileOverviewPendingOpen, ApplicationProfileOverviewPendingOpen>();
+            services.AddScoped<ApplicationProfileOverviewMockQueryService>();
+            services.AddScoped<IApplicationProfileOverviewQueryService, ApplicationProfileOverviewMockQueryService>();
+            services.AddScoped<IApplicationProfileCatalogQueryService, ApplicationProfileCatalogQueryService>();
+            services.AddScoped<ApplicationWorkspacePersonUiActions>();
+            services.AddScoped<IApplicationWorkspacePersonUiActions>(sp =>
+                sp.GetRequiredService<ApplicationWorkspacePersonUiActions>());
+            services.AddScoped<ApplicationWorkspaceMockQueryService>();
+            services.AddScoped<ApplicationWorkspaceQueryService>();
+            services.AddScoped<IApplicationWorkspaceQueryService, ApplicationWorkspaceQueryService>();
             services.Configure<ImportHistoryOptions>(Configuration.GetSection(ImportHistoryOptions.SectionName));
             services.AddSingleton<IImportReimportHistoryReader, ImportReimportHistoryReader>();
             services.AddScoped<ReportDashboardQueryService>();
@@ -253,6 +278,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<FilePreviewSourceRegistry>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
             services.AddScoped<ApplicationItemPdfBatchEnqueueService>();
+            services.AddScoped<ApplicationPersonPdfBatchEnqueueService>();
             services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
             services.AddScoped<ApplicationWordReportPackageCatalogService>();
             services.AddScoped<ApplicationWordReportBatchEnqueueService>();
@@ -275,10 +301,18 @@ namespace Visa2026.Blazor.Server
                 // Additive ProcessNumber / capability / Person incomplete columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
                 ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
+                VisaIssuingApplicationSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);
                 ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
             }
+
+            ApplicationProfileSeedGate.EnsureSynced(
+                app.ApplicationServices,
+                app.ApplicationServices.GetService<ILoggerFactory>()?.CreateLogger(typeof(ApplicationProfileSeedGate)));
 
             UserReportTemplateSeedGate.EnsureSeeded(
                 app.ApplicationServices,

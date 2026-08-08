@@ -893,8 +893,8 @@
               <LayoutGroup Id="FamilyMembers" RelativeSize="100" Index="4" Caption="Family members (linked)" IsNewNode="True">
                 <LayoutItem Id="FamilyMembers" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="ApplicationItems" RelativeSize="100" Caption="Application items (issued)" IsNewNode="True">
-                <LayoutItem Id="ApplicationItems" RelativeSize="100" IsNewNode="True" />
+              <LayoutGroup Id="ApplicationPeople" RelativeSize="100" Caption="Applications (linked)" IsNewNode="True">
+                <LayoutItem Id="ApplicationPeople" RelativeSize="100" ViewItem="ApplicationPeople" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
           </LayoutGroup>
@@ -996,8 +996,8 @@
             </TabbedGroup>
             <LayoutGroup Id="PersonNewRecordIssuedHint" ShowCaption="True" Caption="Application items, work permits, and invitations appear here after you process applications. Add passports and other person data in the tabs above." Index="1" RelativeSize="6" CustomCSSClassName="visa-person-new-record-issued-hint" IsNewNode="True" />
             <TabbedGroup Id="IssuedDocumentsTabs" ShowCaption="True" Caption="Issued documents (view only)" CaptionLocation="Top" Index="2" RelativeSize="32" CustomCSSClassName="visa-person-issued-tabs" IsNewNode="True">
-              <LayoutGroup Id="ApplicationItems" Index="0" RelativeSize="100" Caption="Application items (issued)" IsNewNode="True">
-                <LayoutItem Id="ApplicationItems" RelativeSize="100" IsNewNode="True" />
+              <LayoutGroup Id="ApplicationPeople" Index="0" RelativeSize="100" Caption="Applications (linked)" IsNewNode="True">
+                <LayoutItem Id="ApplicationPeople" RelativeSize="100" ViewItem="ApplicationPeople" IsNewNode="True" />
               </LayoutGroup>
               <LayoutGroup Id="WorkPermitItems" RelativeSize="100" Index="1" Caption="Work permits (issued)" IsNewNode="True">
                 <LayoutItem Id="WorkPermitItems" RelativeSize="100" IsNewNode="True" />
@@ -1106,8 +1106,8 @@
               <LayoutGroup Id="WorkPermitItems" RelativeSize="100" Index="3" Removed="True">
                 <LayoutItem Id="WorkPermitItems" RelativeSize="100" />
               </LayoutGroup>
-              <LayoutGroup Id="ApplicationItems" RelativeSize="100" Caption="Application items (issued)" IsNewNode="True">
-                <LayoutItem Id="ApplicationItems" RelativeSize="100" ViewItem="ApplicationItems" IsNewNode="True" />
+              <LayoutGroup Id="ApplicationPeople" RelativeSize="100" Caption="Applications (linked)" IsNewNode="True">
+                <LayoutItem Id="ApplicationPeople" RelativeSize="100" ViewItem="ApplicationPeople" IsNewNode="True" />
               </LayoutGroup>
             </TabbedGroup>
           </LayoutGroup>

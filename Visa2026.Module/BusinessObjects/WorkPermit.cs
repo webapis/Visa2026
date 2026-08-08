@@ -13,6 +13,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -86,7 +87,7 @@ namespace Visa2026.Module.BusinessObjects
             {
                 if (Application == null)
                     return true;
-                return ApplicationTypeCapabilities.CanIssueWorkPermit(Application.ApplicationType);
+                return ApplicationTypeCapabilities.CanIssueWorkPermit(Application);
             }
         }
 
@@ -118,13 +119,11 @@ namespace Visa2026.Module.BusinessObjects
         {
             get
             {
-                if (Application?.ApplicationItems != null)
-                {
-                    return Application.ApplicationItems
-                        .Select(ai => ai.Person)
-                        .Where(p => p != null && p.IsEmployee)
-                        .ToList()!;
-                }
+                var roster = ApplicationRosterHelper.GetRosterPeople(Application)
+                    .Where(p => p.IsEmployee)
+                    .ToList();
+                if (roster.Count > 0)
+                    return roster;
 
                 IObjectSpace? objectSpace = ObjectSpaceHelper.Get(this);
                 if (objectSpace == null)

@@ -1,6 +1,7 @@
 # Application Profile — live configuration + per-Application values (plan)
 
 **Status:** Binding model locked · **`ApplicationType` deprecated** · first code slice: `ApplicationProfile` BO + `Application.ApplicationProfile` FK (dual-read) · UX prototypes · ApplicationItem / M2M DetailView not implemented yet  
+**Agent skill:** [`.cursor/skills/visa2026-application-profile/SKILL.md`](../.cursor/skills/visa2026-application-profile/SKILL.md) — implementation tracker ([`IMPLEMENTATION_PLAN.md`](../.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md)), experience log (`learnings.md`), officer configuration suggestions.  
 **Prototypes:**
 - Wizard: [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)
 - Usage storyboard: [`docs/prototypes/application-profile-usage.html`](prototypes/application-profile-usage.html)
@@ -434,6 +435,8 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 
 ## 12. Implementation progress
 
+**Maintained in sync with:** [`.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md`](../.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md)
+
 | Slice | Status |
 |-------|--------|
 | Plan + prototypes | Done |
@@ -441,11 +444,16 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | `ApplicationProfile` BO + approval legs + nested templates | Done (v1 scalars/collections) |
 | `Application.ApplicationProfile` live FK + default seeding | Done (optional during dual-read) |
 | Permissions (Users read / VisaOffice manage) | Done |
-| Seed profiles from ApplicationType catalog | Pending |
-| Switch Appearance / progress to profile | Pending |
-| Person M2M DetailView / hard-remove ApplicationItem | Pending |
-| Person/Dossier Start application | Pending |
-| Remove `Application.ApplicationType` FK | Pending (after cutover) |
+| Seed profiles from ApplicationType catalog | Done |
+| Switch Appearance / progress to profile | Done |
+| Config lock enforcement on profile edit | Done |
+| Configuration wizard UX | Done |
+| Profile overview shell | Done |
+| Custom catalog home (replace native List/Detail officer UI) | Done |
+| Profile picker at Application create | Done |
+| Person M2M DetailView / hard-remove ApplicationItem | In progress (workspace 10a–10f done; hard-remove pending) |
+| Person/Dossier Start application | Done |
+| Remove `Application.ApplicationType` FK | Deferred (after import cutover) |
 
 ---
 

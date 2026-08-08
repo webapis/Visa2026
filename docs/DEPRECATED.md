@@ -2,7 +2,7 @@
 
 Human-readable registry for **deprecated or legacy** domain types and members in `Visa2026.Module`. Use this when refactoring, writing updaters, or answering “can we delete this?”
 
-**Related:** state lifecycle deprecations live in [`docs/STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) and [`docs/states/`](states/). Lookup seeding “no longer used” paths are in [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md).
+**Related:** Application Profile cutover — [`docs/APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md) · skill [`.cursor/skills/visa2026-application-profile/`](../.cursor/skills/visa2026-application-profile/). State lifecycle deprecations: [`docs/STATE_SPECIFICATIONS.md`](STATE_SPECIFICATIONS.md) and [`docs/states/`](states/). Lookup seeding “no longer used” paths: [`docs/LOOKUP_SEEDING.md`](LOOKUP_SEEDING.md).
 
 ---
 
@@ -37,12 +37,33 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | **RichTextMailMergeData** / Show in Mail Merge | Retained (disabled) | **User report templates** (`UserReportTemplate`), **Word reports** (`IWordReportDefinition` / Resminamalar), **Reports V2** | `RichTextMailMergeData` table retained; XAF UI off via `MailMergeFeature.Enabled = false` | Office module kept for `ContractTemplate` rich-text editor only. Re-enable: set flag, restore `RichTextMailMergeDataType` in `Startup.cs`, register `MailMergeUpdater`. |
 | **MailMergeVisibility** | Retained (disabled) | Same as mail merge (above) | Table retained; hidden from model when mail merge disabled | Paired with `ShowMailMergeController` / `MailMergeUpdater`. |
 | **Reports V2 predefined XtraReports** (`App_*`, registration, work permit list, etc.) | Retained (disabled) | **Word reports** (`IWordReportDefinition` / Resminamalar), **user report templates** | `ReportDataV2` rows may remain in DB; registration commented out in `ReportsUpdater.cs` | Uncomment `AddPredefinedReport` / `CreateReportVisibility` blocks to re-enable on deploy. |
-| **ApplicationType** | Deprecated | **`ApplicationProfile`** (live FK on `Application`; see [`docs/APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md)) | Table retained during dual-read; do not add new `Show*` / capability flags | UI caption **Application Type (Deprecated)**; XML docs + tooltip. No `[Obsolete]` (dual-read CS0618). Related: **ApplicationTypeGroup** / **ApplicationTypeGroupMember** / **UserReportTemplateApplicationType*** follow profile applicability later. |
-| **ApplicationTypeFilter** | Deprecated | `ApplicationType.SelectionCode` + `ApplicationTypeCodePickerHelper` (hundreds grouping) → then **ApplicationProfile** selection | Table retained; **not** in `LookupCatalogs/manifest.json` | UI caption **Application Type Filter (Deprecated)**. Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
+| **ApplicationType** | Deprecated | **`ApplicationProfile`** (live FK on `Application`; see [`docs/APPLICATION_PROFILE_PLAN.md`](APPLICATION_PROFILE_PLAN.md)) | Table retained during dual-read; do not add new `Show*` / capability flags | UI caption **Application Type (Deprecated)**; XML docs + tooltip. No `[Obsolete]` (dual-read CS0618). All `Show*` / `CanIssue*` / route / SLA / leg-depth members are **configuration** — read via `ApplicationProfileConfigurationResolver` (profile-first, type fallback). See **Application Profile cutover** below. |
+| **ApplicationTypeFilter** | Deprecated | **`ApplicationProfile`** applicability + `ApplicationProfile.SelectionCode` | Table retained; **not** in `LookupCatalogs/manifest.json` | UI caption **Application Type Filter (Deprecated)**. Still exposed read-only in security/Web API for existing FKs. See [`docs/APPLICATION_BO_TYPE_SELECTION_REFACTOR.md`](APPLICATION_BO_TYPE_SELECTION_REFACTOR.md). |
+| **ApplicationTypeGroup** / **ApplicationTypeGroupMember** | Deprecated | **`ApplicationProfile.ApplicabilityCriteria`** (+ audience flags) | Tables retained | Seeded **Registration** group still drives Resminamalar type links until slice 12. Do not add new groups for officer configuration. |
+| **ApplicationMigrationSlaProfile** (as **type** configuration) | Deprecated | **`ApplicationProfile.MigrationSlaDays`** | Table retained; `ApplicationTypes.MigrationSlaProfileID` retained | Lookup UI may remain for legacy rows. New SLA config belongs on the profile, not on `ApplicationType.MigrationSlaProfile`. |
+| **ApplicationReason** (child of **ApplicationType**) | Retained (legacy) | Per-Application reason not in v1 profile model; field unused on `Application` | Table retained | `Application.ApplicationReason` commented out; `ShowApplicationReason` on type is legacy. |
+| **UserReportTemplateApplicationType** | Deprecated | **`ApplicationProfileTemplate`** + profile nested templates (slice 12) | Join table retained | Resminamalar still unions type links with group links until template slice ships. |
+| **UserReportTemplateApplicationTypeGroup** | Deprecated | **`ApplicationProfileTemplate`** + `ApplicabilityCriteria` (slice 12) | Join table retained | Same as type link row. |
+| **ApplicationItem** | Deprecated (officer UI removed slice 10g) | **`Application` ↔ `Person` M2M** (`ApplicationPerson`) + workspace | Table retained | Officer nav, Person tab, dossier fallback, and ListView document copies removed (2026-08-08). **Still required** for Report Dashboard SQL, Resminamalar item merge, sync rules, VISA2014 import until phase B hard-remove. **Do not extend** ApplicationItem-only features. |
 | **ApplicationType `App_Visa_Ext` (702)** | Deprecated | **`App_Visa_and_WP_Ext` (708)** — Extend visa and work permit | Row retained; hidden from type-code picker | Employee visa extension only; legacy `E:7:*` imports map to 708. Migrated rows corrected via `--correct-visa-application-types`. |
 | **ApplicabilityMode** (enum) | Deprecated | `UserReportTemplate.ApplicableTypeLinks`, `ApplicableProjectContractLinks`, `VisibilityCriteria` | Enum column on `UserReportTemplates` retained | `[Obsolete]` on enum and `UserReportTemplate.ApplicabilityMode`. |
 | **VisaIssuingApplicationTypes** (name allowlist) | Removed | `ApplicationType.CanIssueVisa` + `ApplicationTypeCapabilities` | — | Hardcoded `ApplicationType.Name` set replaced by seeded capability flag. |
 | **ApplicationStatus** (enum) | Deprecated | `ApplicationProgress` + `Application.CurrentState`; locations via **ApplicationLocation** catalog | Enum unused on `Application` BO; may remain in old import models | Docs in [`docs/BO_STATE_TRACKING.md`](BO_STATE_TRACKING.md) §8b still describe the old enum — prefer §8c progress model for new work. |
+
+### Application Profile cutover (slices 1–9 shipped)
+
+**Not deprecated:** **`ApplicationProgress`** (workflow history), **`ApplicationState`** catalog, per-Application **`ProjectContract`** / **`ApprovalLegProfile`** choices, or per-Application field values on `Application`. Only **configuration** that used to live on `ApplicationType` (and type-driven item visibility) moves to **`ApplicationProfile`**.
+
+| Legacy configuration | Replacement on `ApplicationProfile` | Runtime reader |
+|----------------------|-----------------------------------|----------------|
+| `ApplicationProgressRoute` | `ProgressRoute` | `ApplicationProfileConfigurationResolver.GetProgressRoute` · `ApplicationProgressRouteHelper` |
+| `MinistryReviewDepth` | `ApprovalLegs` (`ApplicationProfileApprovalLeg`) | `ApplicationProgressProfileResolver.GetMinistryLegCount` (embedded legs first) |
+| `MigrationSlaProfile` | `MigrationSlaDays` | `ApplicationProfileConfigurationResolver` / progress SLA helpers |
+| `Show*` / `CanIssue*` (Application + ApplicationItem visibility) | `ActionFamily`, produce/cancel, `Require*`, `RequirePerson*` | `Application.Cfg*` · `ApplicationProfileConfigurationResolver` |
+| Type nested templates / group applicability | `NestedTemplates` · `ApplicabilityCriteria` | Slice 12 (Resminamalar) pending |
+| `ApplicationType` C# / JSON seed as officer config | Profile wizard + `ApplicationProfileSeedSync` | Deploy seed only; officers use **Application Profiles** nav |
+
+**Slice 13 (deferred):** drop `Applications.ApplicationTypeID` after import cutover — row for `Application.ApplicationType` moves to **Removed schema**.
 
 ### Lookups: seeding vs UI-only (not always “deprecated”)
 
@@ -66,6 +87,14 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 |-----------------|----------|--------|-------------|--------|
 | **UserReportTemplate** | `ApplicabilityMode` | Deprecated | Applicable type/contract links + `VisibilityCriteria` | Column retained |
 | **Application** | `ApplicationType` | Deprecated | **`Application.ApplicationProfile`** (live FK; set only at create) | FK retained during dual-read |
+| **Application** | `ApplicationTypeQuickCode` | Deprecated | **Profile picker** at create (`ApplicationProfilePickerNewController`) | Not mapped; Blazor postback only |
+| **Application** | `CreationProgressRoute` | Deprecated | **`ApplicationProfile.ProgressRoute`** + picker filter | Column retained; was type-picker route filter |
+| **Application** | `ApplyDefaultsForApplicationType()` | Deprecated | **`ApplyDefaultsForApplicationProfile()`** | Method on BO; dual-read may still set Type FK on create |
+| **ApplicationType** | `Show*` / `CanIssue*` (all capability and visibility flags) | Deprecated | Matching **`ApplicationProfile`** scalars (`Require*`, `Produce*`, `Cancel*`, `RequirePerson*`, …) | Columns retained on `ApplicationTypes`; do not add new flags |
+| **ApplicationType** | `ApplicationProgressRoute`, `MinistryReviewDepth` | Deprecated | **`ProgressRoute`**, **`ApprovalLegs`** | Columns retained |
+| **ApplicationType** | `MigrationSlaProfile` | Deprecated | **`MigrationSlaDays`** | FK retained |
+| **Visa** | `IssuingApplicationItem` | Deprecated (slice 10i) | **`Visa.IssuingApplication`** → parent `Application` | FK retained for import; UI hidden when `IssuingApplication` set; backfill on deploy |
+| **Application** | `ApplicationItems` collection | Deprecated (slice 10) | **`People` M2M** + auto-resolved child links | Collection retained until hard-remove |
 | **ProjectContract** | `Description`, `Images`, `Documents` | Retained (legacy) | `Name` / `NameTm` / `Code` on contract; Word static text for letters | Columns retained; UI hidden |
 | **Application** | `Company`, `CompanyHead`, `Representative` | Removed (Phase 3) | `Application_Company_*` / `Application_CompanyHead_*` aliases + singletons | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
 | **Person** | `Company` | Removed (Phase 3) | Single-tenant: no per-person company FK | Dropped by `OrganizationLegacySchemaCleanupUpdater` (Phase 5) |
@@ -126,6 +155,11 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 | `LookupSeeder.cs` (OData POST from `lookup.xlsm`) | **Removed** | Module JSON + `--export-lookup-catalogs` dev tool |
 | `LOOKUPS.md` as source of truth | Removed | JSON catalogs in git; human reference only |
 | `BusinessTripWordController` | Removed | `WordReportsController` + `BusinessTripSanawyReportDef` — see [`docs/WORD_REPORT_GENERATION_IDEA.md`](WORD_REPORT_GENERATION_IDEA.md) |
+| **ApplicationType** configuration seed (`ApplicationTypeConfigurationUpdater`, `ApplicationTypeConfigurationApplier`, `ApplicationTypeConfigurationCatalog.json`, `ApplicationTypeConfigurationSeed`) | Retained (deploy/import only) | **`ApplicationProfileSeedSync`** + **`ApplicationProfileFromApplicationTypeMapper`** — idempotent deploy sync only; not officer UX |
+| **ApplicationType** capability / selection-code updaters (`ApplicationTypeCapabilityFlagsSchemaUpdater`, `ApplicationTypeSelectionCodeUpdater`) | Retained (deploy only) | Profile seed + `ApplicationProfile.SelectionCode` — do not use for new product behavior |
+| **ApplicationTypeSelectionController** + **ApplicationTypeQuickCodeEditor** | Deprecated | **`ApplicationProfilePickerNewController`** + Blazor picker (type quick-code kept for dual-read / legacy detail edit) |
+| **`ApplicationProgressRouteNavigation`** criteria on `ApplicationType.ApplicationProgressRoute` | Deprecated (stale) | Profile route via **`ApplicationProfileConfigurationResolver`** — migrate nav/ListView criteria off Type FK |
+| **ApplicationItem**-scoped Resminamalar / document copies / linked-document services | Deprecated (slice 10) | Application- or Person-scoped after M2M (still active until slice 10b; do not add new item-only surfaces) |
 
 ---
 
@@ -146,6 +180,7 @@ In C#, prefer `[Obsolete("…")]` with the same replacement text when the compil
 
 | Date | Change |
 |------|--------|
+| 2026-08-07 | Application Profile cutover registry: type config seed/UX, group/template links, `ApplicationItem` / `IssuingApplicationItem` (slice 10 pending), progress **configuration** vs `ApplicationProgress` BO clarified. |
 | 2026-07-31 | Registration→TravelHistory auto-sync removed; `SourceApplicationItemID` cleared/dropped; manual TravelHistory CRUD only. |
 | 2026-05-26 | On-prem Windows/WSL scripts and docs moved under `scripts/legacy/` and `docs/legacy/`; Ubuntu path is canonical. |
 | 2026-05-24 | Initial registry; ApplicationLocation JSON seed called out vs BorderZoneLocation UI catalog. |

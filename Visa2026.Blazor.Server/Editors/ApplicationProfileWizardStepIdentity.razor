@@ -1,0 +1,139 @@
+@using Visa2026.Module.BusinessObjects
+
+<div class="ap-wizard__panel-head">
+    <h2>Identity &amp; purpose</h2>
+    <p>Define who this profile is for and how applications created from it are directed.</p>
+</div>
+<div class="ap-wizard__panel-body">
+    <div class="ap-wizard__callout">
+        Applications reference this profile via a <strong>live FK</strong> (set only at create).
+        Configuration stays editable until a linked application reaches lock state <strong>A</strong>.
+    </div>
+    <div class="ap-wizard__section">
+        <h3>Application name and description</h3>
+        <div class="ap-wizard__grid">
+            <label class="ap-wizard__field ap-wizard__field--full">
+                <span>Application name</span>
+                <input type="text" @bind="Profile.Name" disabled="@Disabled" />
+            </label>
+            <label class="ap-wizard__field ap-wizard__field--full">
+                <span>Description</span>
+                <textarea @bind="Profile.Description" disabled="@Disabled"></textarea>
+            </label>
+            <label class="ap-wizard__field">
+                <span>Code</span>
+                <input type="text" @bind="Profile.Code" disabled="@Disabled" />
+            </label>
+            <label class="ap-wizard__field">
+                <span>Selection / quick code</span>
+                <input type="text" maxlength="3" @bind="Profile.SelectionCode" disabled="@Disabled" />
+            </label>
+        </div>
+    </div>
+    <div class="ap-wizard__section">
+        <h3>Directed to</h3>
+        <div class="ap-wizard__choices">
+            <label class="ap-wizard__choice">
+                <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProgressRouteKind.ViaMinistries)"
+                       disabled="@Disabled"
+                       @onchange="@(() => Profile.ProgressRoute = ApplicationProgressRouteKind.ViaMinistries)" />
+                Via ministry
+            </label>
+            <label class="ap-wizard__choice">
+                <input type="radio" name="route" checked="@(Profile.ProgressRoute == ApplicationProgressRouteKind.DirectToMigrationService)"
+                       disabled="@Disabled"
+                       @onchange="@(() => Profile.ProgressRoute = ApplicationProgressRouteKind.DirectToMigrationService)" />
+                Direct migration service
+            </label>
+        </div>
+    </div>
+    <div class="ap-wizard__section">
+        <h3>Application may be for</h3>
+        <div class="ap-wizard__choices">
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForEmployee" disabled="@Disabled" /> Employee</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForFamilyMember" disabled="@Disabled" /> Family member</label>
+            <label class="ap-wizard__choice"><input type="checkbox" @bind="Profile.ForTemporaryVisitor" disabled="@Disabled" /> Temporary visitor</label>
+        </div>
+    </div>
+    <div class="ap-wizard__section">
+        <h3>Application related to</h3>
+        <div class="ap-wizard__choices">
+            @foreach (var family in ActionFamilies)
+            {
+                <label class="ap-wizard__choice">
+                    <input type="radio" name="actionFamily" checked="@(Profile.ActionFamily == family)"
+                           disabled="@Disabled"
+                           @onchange="@(() => Profile.ActionFamily = family)" />
+                    @FormatActionFamily(family)
+                </label>
+            }
+        </div>
+    </div>
+    <div class="ap-wizard__section">
+        <h3>Applicability scope (optional)</h3>
+        <p class="ap-wizard__hint">A profile can be general, or narrowed with XAF criteria (e.g. project contract).</p>
+        <div class="ap-wizard__scope">
+            <button type="button" class="ap-wizard__scope-card @(_scopeMode == ScopeMode.Always ? "is-active" : null)"
+                    disabled="@Disabled" @onclick="SetAlwaysScope">
+                <h4>Always available</h4>
+                <p>Officers can pick this profile for any new Application matching audience and route.</p>
+            </button>
+            <button type="button" class="ap-wizard__scope-card @(_scopeMode == ScopeMode.Scoped ? "is-active" : null)"
+                    disabled="@Disabled" @onclick="SetScopedMode">
+                <h4>Scoped</h4>
+                <p>Limit picker visibility with optional XAF criteria on Application context.</p>
+            </button>
+        </div>
+        @if (_scopeMode == ScopeMode.Scoped)
+        {
+            <label class="ap-wizard__field ap-wizard__field--full">
+                <span>Applicability criteria</span>
+                <textarea @bind="Profile.ApplicabilityCriteria" disabled="@Disabled" placeholder="Optional XAF criteria"></textarea>
+            </label>
+        }
+    </div>
+    <label class="ap-wizard__choice">
+        <input type="checkbox" @bind="Profile.IsActive" disabled="@Disabled" /> Active (available in pickers)
+    </label>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ApplicationProfile Profile { get; set; } = null!;
+
+    [Parameter] public bool Disabled { get; set; }
+
+    private enum ScopeMode { Always, Scoped }
+
+    private ScopeMode _scopeMode;
+
+    protected override void OnParametersSet()
+    {
+        _scopeMode = string.IsNullOrWhiteSpace(Profile.ApplicabilityCriteria)
+            ? ScopeMode.Always
+            : ScopeMode.Scoped;
+    }
+
+    private static readonly ApplicationProfileActionFamily[] ActionFamilies =
+    [
+        ApplicationProfileActionFamily.Issuance,
+        ApplicationProfileActionFamily.Cancellation,
+        ApplicationProfileActionFamily.Registration,
+        ApplicationProfileActionFamily.BusinessTrip,
+    ];
+
+    private void SetAlwaysScope()
+    {
+        _scopeMode = ScopeMode.Always;
+        Profile.ApplicabilityCriteria = null;
+    }
+
+    private void SetScopedMode() => _scopeMode = ScopeMode.Scoped;
+
+    private static string FormatActionFamily(ApplicationProfileActionFamily family) => family switch
+    {
+        ApplicationProfileActionFamily.Cancellation => "Cancellation",
+        ApplicationProfileActionFamily.Registration => "Registration",
+        ApplicationProfileActionFamily.BusinessTrip => "Business trip",
+        _ => "Issuance",
+    };
+}

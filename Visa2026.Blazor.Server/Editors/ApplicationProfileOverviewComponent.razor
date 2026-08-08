@@ -1,0 +1,188 @@
+@using Visa2026.Module.Services.ApplicationProfileOverview
+
+<div class="ap-overview">
+    @if (IsLoading || Snapshot == null)
+    {
+        <div class="ap-overview__loading" role="status">Loading Application Profile overview…</div>
+    }
+    else
+    {
+        @if (Snapshot.IsPrototypeMock)
+        {
+            <div class="ap-overview__banner">
+                <strong>Prototype</strong> — read-only overview shell. Identity and configuration blocks use the selected profile when available;
+                linked-application sample rows remain mock until real analytics ship.
+            </div>
+        }
+
+        <header class="ap-overview__header">
+            <div>
+                <h1 class="ap-overview__title">@Snapshot.Name</h1>
+                <p class="ap-overview__sub">@Snapshot.Code · @Snapshot.ActionFamilyLabel · @Snapshot.ProgressRouteLabel</p>
+                @if (!string.IsNullOrWhiteSpace(Snapshot.Description))
+                {
+                    <p class="ap-overview__desc">@Snapshot.Description</p>
+                }
+            </div>
+            <div class="ap-overview__header-actions">
+                <div class="ap-overview__pills">
+                    @if (Snapshot.IsActive)
+                    {
+                        <span class="ap-overview__pill ap-overview__pill--on">Active</span>
+                    }
+                    @if (Snapshot.IsConfigLocked)
+                    {
+                        <span class="ap-overview__pill ap-overview__pill--warn">Config locked</span>
+                    }
+                    <span class="ap-overview__pill">Live FK model</span>
+                </div>
+                <button type="button"
+                        class="ap-overview__btn ap-overview__btn--primary"
+                        @onclick="ConfigureAsync">
+                    Configure profile
+                </button>
+            </div>
+        </header>
+
+        @if (Snapshot.AudienceLabels.Count > 0)
+        {
+            <div class="ap-overview__audience">
+                <span class="ap-overview__label">Audience</span>
+                @foreach (var audience in Snapshot.AudienceLabels)
+                {
+                    <span class="ap-overview__chip">@audience</span>
+                }
+            </div>
+        }
+
+        <div class="ap-overview__grid">
+            <section class="ap-overview__card">
+                <h2>Configuration (live)</h2>
+                <p class="ap-overview__hint">Applies to all applications linked to this profile.</p>
+                <ul class="ap-overview__list">
+                    @foreach (var line in Snapshot.LiveConfigurationLines)
+                    {
+                        <li>@line</li>
+                    }
+                </ul>
+            </section>
+
+            <section class="ap-overview__card">
+                <h2>Per-application defaults</h2>
+                <p class="ap-overview__hint">Copied once at create; officers may change values on each application.</p>
+                <table class="ap-overview__table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Default</th>
+                            <th>Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Snapshot.PerApplicationDefaults)
+                        {
+                            <tr>
+                                <td>@row.FieldLabel</td>
+                                <td>@row.DefaultValue</td>
+                                <td>@(row.Required ? "Yes" : "—")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+        <div class="ap-overview__grid">
+            <section class="ap-overview__card">
+                <h2>Approval legs</h2>
+                <table class="ap-overview__table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Ministry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var leg in Snapshot.ApprovalLegs)
+                        {
+                            <tr>
+                                <td>@leg.Sequence</td>
+                                <td>@leg.MinistryName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="ap-overview__card">
+                <h2>Person data requirements</h2>
+                <div class="ap-overview__chips">
+                    @foreach (var toggle in Snapshot.PersonDataToggles)
+                    {
+                        <span class="ap-overview__chip">@toggle</span>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <section class="ap-overview__card">
+            <h2>Nested templates</h2>
+            <table class="ap-overview__table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var template in Snapshot.NestedTemplates)
+                    {
+                        <tr>
+                            <td>@template.Name</td>
+                            <td>@template.Kind</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+
+        <section class="ap-overview__card">
+            <h2>Linked applications <span class="ap-overview__count">(@Snapshot.LinkedApplicationCount sample)</span></h2>
+            <p class="ap-overview__hint">Sample rows illustrate linked Applications. Use Configure profile to edit live configuration in the wizard.</p>
+            <table class="ap-overview__table">
+                <thead>
+                    <tr>
+                        <th>Application</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Snapshot.LinkedApplications)
+                    {
+                        <tr>
+                            <td>@app.FullNumber</td>
+                            <td>@app.ApplicationDate</td>
+                            <td>@app.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+</div>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public ApplicationProfileOverviewSnapshot? Snapshot { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback ConfigureRequested { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && InitialLoadRequested.HasDelegate)
+            await InitialLoadRequested.InvokeAsync();
+    }
+
+    private Task ConfigureAsync() => ConfigureRequested.InvokeAsync();
+}

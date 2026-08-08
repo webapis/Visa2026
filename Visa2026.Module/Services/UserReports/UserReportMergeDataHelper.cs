@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.UserReports;
 
@@ -10,12 +11,11 @@ namespace Visa2026.Module.Services.UserReports;
 public static class UserReportMergeDataHelper
 {
     public static IList<ApplicationItem> GetActiveApplicationItems(Application application) =>
-        (application.ApplicationItems ?? Enumerable.Empty<ApplicationItem>())
-        .Where(i => i != null)
-        .ToList();
+        ApplicationRosterHelper.GetMergeLineItems(application);
 
     /// <summary>
-    /// Loads every non-deleted item for the application from the database (avoids a partially loaded navigation collection).
+    /// Loads roster lines for merge: <see cref="ApplicationPerson"/> projections when present,
+    /// otherwise legacy <see cref="ApplicationItem"/> rows from the database.
     /// </summary>
     public static IList<ApplicationItem> GetActiveApplicationItems(IObjectSpace objectSpace, Application application)
     {
@@ -24,11 +24,7 @@ public static class UserReportMergeDataHelper
         if (application == null)
             throw new ArgumentNullException(nameof(application));
 
-        var applicationId = application.ID;
-        return objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(i => i.Application != null && i.Application.ID == applicationId)
-            .OrderBy(i => i.ApplicationItemName)
-            .ToList();
+        return ApplicationRosterHelper.GetMergeLineItems(objectSpace, application);
     }
 
     public static Dictionary<string, object> BuildApplicationHeaderDictionary(Application application)

@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -25,7 +26,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Person == null || ParentObject?.Application == null) return true;
-                return ParentObject.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
+                return ApplicationRosterHelper.IsPersonOnApplication(ParentObject.Application, Person);
             }
         }
     }

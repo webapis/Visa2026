@@ -34,8 +34,8 @@ public static class ApplicationItemVisaDefaults
         visa.Passport = visaObjectSpace.GetObject(passport);
 
         if (visa.IssuingApplicationItem == null
-            && appItem.Application?.ApplicationType != null
-            && ApplicationTypeCapabilities.CanBeIssuingApplicationForVisa(appItem.Application.ApplicationType)
+            && appItem.Application != null
+            && ApplicationTypeCapabilities.CanBeIssuingApplicationForVisa(appItem.Application)
             && passport.Person != null
             && appItem.Person != null
             && appItem.Person.ID == passport.Person.ID)

@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.Validation;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -29,14 +30,8 @@ namespace Visa2026.Module.BusinessObjects
                 if (person != value)
                 {
                     person = value;
-                    if (person != null && BorderZone?.Application != null)
-                    {
-                        var appItem = BorderZone.Application.ApplicationItems.FirstOrDefault(ai => ai.Person?.ID == person.ID);
-                        if (appItem != null)
-                        {
-                            Passport = appItem.CurrentPassport;
-                        }
-                    }
+                    if (person != null)
+                        Passport = ApplicationPersonValidItems.ResolvePassport(person);
                 }
             }
         }

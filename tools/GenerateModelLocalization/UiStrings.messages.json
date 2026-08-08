@@ -1559,6 +1559,12 @@
     "tk-TM": "Şablon faýly ýok ýa-da boş.",
     "ru-RU": "Файл шаблона отсутствует или пуст."
   },
+  "ApplicationReportPackage.Readiness.ProfileTemplateUnlinked": {
+    "en": "No matching User Report Template — link by the same name under Configuration.",
+    "tr-TR": "Eşleşen kullanıcı rapor şablonu yok — Yapılandırma altında aynı adla bağlayın.",
+    "tk-TM": "Gabat gelýän ulanyjy hasabat şablony ýok — Sazlamalar boýunça şol bir at bilen baglaň.",
+    "ru-RU": "Нет соответствующего пользовательского шаблона — свяжите по тем же именем в разделе конфигурации."
+  },
   "ApplicationReportPackage.Readiness.NotValidated": {
     "en": "Placeholders were not extracted or validated.",
     "tr-TR": "Yer tutucular çıkarılmadı veya doğrulanmadı.",
@@ -2188,6 +2194,18 @@
     "tr-TR": "Bakanlık veya göç ilerlemesi kaydedildikten sonra arza alanları değiştirilemez.",
     "tk-TM": "Ministrlik ýa-da migrasiýa ösüşi ýazylan soň arza meýdanlaryny üýtgetmek bolmaýar.",
     "ru-RU": "Поля заявки нельзя изменить после записи прогресса министерства или миграции."
+  },
+  "ApplicationProfile.ConfigLockedCannotEdit": {
+    "en": "This application profile is locked because a linked application has left office preparation. Duplicate the profile to change configuration.",
+    "tr-TR": "Bağlı bir arza ofis hazırlığını geçtiği için bu profil kilitlendi. Yapılandırmayı değiştirmek için profili kopyalayın.",
+    "tk-TM": "Baglanyşykly arza edara taýýarlygyny geçendigi üçin bu profil gulplandy. Sazlamany üýtgetmek üçin profili göçüriň.",
+    "ru-RU": "Профиль заблокирован: связанная заявка вышла из офисной подготовки. Скопируйте профиль, чтобы изменить конфигурацию."
+  },
+  "ApplicationProfile.ConfigLockedCannotEditNested": {
+    "en": "Approval legs and nested templates cannot be changed while this profile is locked.",
+    "tr-TR": "Profil kilitliyken onay adımları ve iç şablonlar değiştirilemez.",
+    "tk-TM": "Profil gulplanykça tassyklama ädimleri we iç şablonlary üýtgedip bolmaýar.",
+    "ru-RU": "Пока профиль заблокирован, нельзя менять этапы согласования и вложенные шаблоны."
   },
   "Application.FieldsLockedWhenWorkflowTerminal": {
     "en": "This application is closed (issued, rejected, or cancelled). Edit the last progress step to reopen it.",

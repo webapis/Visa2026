@@ -49,7 +49,7 @@ public static class ApplicationProgressProfileResolver
 
     {
 
-        if (application?.ApplicationType?.ShowProjectContract != true)
+        if (!ApplicationProfileConfigurationResolver.ShowProjectContract(application))
 
             return false;
 
@@ -67,7 +67,7 @@ public static class ApplicationProgressProfileResolver
 
     {
 
-        if (application?.ApplicationType?.ShowApprovalLegProfile != true)
+        if (!ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application))
 
             return false;
 
@@ -109,7 +109,15 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        if (application.ApplicationType?.ShowApprovalLegProfile == true
+        var embeddedLegCount = ApplicationProfileConfigurationResolver.GetEmbeddedProfileMinistryLegCount(application);
+
+        if (embeddedLegCount > 0)
+
+            return embeddedLegCount;
+
+
+
+        if (ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application)
 
             && application.ApprovalLegProfile != null)
 
@@ -209,7 +217,7 @@ public static class ApplicationProgressProfileResolver
 
     {
 
-        if (application?.ApplicationType?.ShowProjectContract != true)
+        if (!ApplicationProfileConfigurationResolver.ShowProjectContract(application))
 
             return false;
 
@@ -225,7 +233,7 @@ public static class ApplicationProgressProfileResolver
 
     {
 
-        if (application?.ApplicationType?.ShowApprovalLegProfile != true)
+        if (!ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application))
 
             return false;
 
@@ -613,7 +621,7 @@ public static class ApplicationProgressProfileResolver
 
 
 
-        if (application.ApplicationType?.ShowApprovalLegProfile != true)
+        if (!ApplicationProfileConfigurationResolver.ShowApprovalLegProfile(application))
 
             return false;
 

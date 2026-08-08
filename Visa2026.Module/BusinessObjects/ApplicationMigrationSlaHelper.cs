@@ -18,18 +18,26 @@ public static class ApplicationMigrationSlaHelper
         if (!IsMigrationServiceProcessStartedStep(latest.State.Code))
             return default;
 
+        if (application.ApplicationType?.MigrationSlaProfile is { MaxDaysInReview: > 0 } migrationProfile)
+        {
+            var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
+            var maxDays = migrationProfile.MaxDaysInReview.Value;
+            var warningDays = migrationProfile.WarningDaysBeforeMax;
+            var label = ResolveProfileDisplayLabel(migrationProfile);
+            var status = ResolveStatus(workingDays, maxDays, warningDays);
+            return new ApplicationProgressSlaResult(status, workingDays, maxDays, warningDays, label);
+        }
 
-        var profile = application.ApplicationType?.MigrationSlaProfile;
-        if (profile?.MaxDaysInReview is not > 0)
-            return default;
+        if (application.ApplicationProfile is { MigrationSlaDays: > 0 } applicationProfile)
+        {
+            var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
+            var maxDays = applicationProfile.MigrationSlaDays;
+            var label = VisaUiMessages.Get("ApplicationMigration.Sla.DefaultLabel");
+            var status = ResolveStatus(workingDays, maxDays, warningDaysBeforeMax: null);
+            return new ApplicationProgressSlaResult(status, workingDays, maxDays, null, label);
+        }
 
-        var workingDays = WorkingDaysHelper.CountWorkingDaysInclusive(latest.Date, DateTime.Today);
-        var maxDays = profile.MaxDaysInReview.Value;
-        var warningDays = profile.WarningDaysBeforeMax;
-        var label = ResolveProfileDisplayLabel(profile);
-
-        var status = ResolveStatus(workingDays, maxDays, warningDays);
-        return new ApplicationProgressSlaResult(status, workingDays, maxDays, warningDays, label);
+        return default;
     }
 
     public static string FormatStatement(ApplicationProgressSlaResult sla)

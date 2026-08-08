@@ -55,6 +55,19 @@ namespace Visa2026.Module.DatabaseUpdate
             ConfigureApplicationProgressRouteNavigation(navigationItems, modelViews);
             RemoveLegacyLookupOperationalNavigation(navigationItems);
             RemoveStaleInvitationBorderZoneNavigation(navigationItems);
+            RemoveStaleApplicationProfileListNavigation(navigationItems);
+        }
+
+        /// <summary>
+        /// Officers use the custom Application Profile catalog host; strip native BO list nav if model diffs re-add it.
+        /// </summary>
+        private static void RemoveStaleApplicationProfileListNavigation(IModelNavigationItems navigationItems)
+        {
+            if (navigationItems["Configuration"] is not IModelNavigationItem configurationGroup)
+                return;
+
+            if (configurationGroup.Items["ApplicationProfile"] is IModelNavigationItem legacyProfileList)
+                legacyProfileList.Remove();
         }
 
         private static void EnsureTopLevelPersonNavigation(
@@ -145,7 +158,6 @@ namespace Visa2026.Module.DatabaseUpdate
                     ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemViaMinistries);
                 viaItem.View = viaMinistriesView;
                 viaItem.ImageName = "BO_Organization";
-                AttachApplicationItemNavigation(viaItem, modelViews, routeViaMinistries: true);
             }
 
             var directView = EnsureListView(
@@ -165,10 +177,9 @@ namespace Visa2026.Module.DatabaseUpdate
                     ?? applicationGroup.Items.AddNode<IModelNavigationItem>(ApplicationProgressRouteNavigation.NavItemDirectMigration);
                 directItem.View = directView;
                 directItem.ImageName = "BO_Localization";
-                AttachApplicationItemNavigation(directItem, modelViews, routeViaMinistries: false);
             }
 
-            // Default ListView for Application is hidden via [NavigationItem(false)] on the BO.
+            RemoveApplicationItemRouteNavItems(applicationGroup);
             // Remove the node if another generator re-added it (Administrators ignore nav Deny).
             if (applicationGroup.Items["Application"] is IModelNavigationItem legacyApplicationItem)
                 legacyApplicationItem.Remove();
@@ -177,28 +188,25 @@ namespace Visa2026.Module.DatabaseUpdate
                 legacyApplicationItemsItem.Remove();
         }
 
-        private static void AttachApplicationItemNavigation(
-            IModelNavigationItem routeNavItem,
-            IModelViews modelViews,
-            bool routeViaMinistries)
+        private static void RemoveApplicationItemRouteNavItems(IModelNavigationItem applicationGroup)
         {
-            var listViewId = routeViaMinistries
-                ? ApplicationProgressRouteNavigation.ListViewItemsViaMinistries
-                : ApplicationProgressRouteNavigation.ListViewItemsDirectMigration;
-            var criteria = routeViaMinistries
-                ? ApplicationProgressRouteNavigation.CriteriaItemsViaMinistries
-                : ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration;
-            var navItemId = routeViaMinistries
-                ? ApplicationProgressRouteNavigation.NavItemItemsViaMinistries
-                : ApplicationProgressRouteNavigation.NavItemItemsDirectMigration;
-            var itemsView = EnsureListView(modelViews, listViewId, "ApplicationItem_ListView", criteria);
-            if (itemsView == null)
-                return;
+            foreach (var routeNavId in new[]
+                     {
+                         ApplicationProgressRouteNavigation.NavItemViaMinistries,
+                         ApplicationProgressRouteNavigation.NavItemDirectMigration,
+                     })
+            {
+                if (applicationGroup.Items[routeNavId] is not IModelNavigationItem routeNavItem)
+                    continue;
 
-            var itemsNavItem = routeNavItem.Items[navItemId]
-                ?? routeNavItem.Items.AddNode<IModelNavigationItem>(navItemId);
-            itemsNavItem.View = itemsView;
-            itemsNavItem.ImageName = "BO_Order_Item";
+                if (routeNavItem.Items[ApplicationProgressRouteNavigation.NavItemItemsViaMinistries]
+                    is IModelNavigationItem viaItemsNav)
+                    viaItemsNav.Remove();
+
+                if (routeNavItem.Items[ApplicationProgressRouteNavigation.NavItemItemsDirectMigration]
+                    is IModelNavigationItem directItemsNav)
+                    directItemsNav.Remove();
+            }
         }
 
         private static IModelListView? EnsureListView(IModelViews views, string newViewId, string sourceViewId, string criteria)
@@ -335,14 +343,6 @@ namespace Visa2026.Module.DatabaseUpdate
                 modelViews,
                 ApplicationProgressRouteNavigation.ListViewDirectMigration,
                 ApplicationProgressRouteNavigation.CriteriaDirectMigration);
-            CloneApplicationItemListViewIfMissing(
-                modelViews,
-                ApplicationProgressRouteNavigation.ListViewItemsViaMinistries,
-                ApplicationProgressRouteNavigation.CriteriaItemsViaMinistries);
-            CloneApplicationItemListViewIfMissing(
-                modelViews,
-                ApplicationProgressRouteNavigation.ListViewItemsDirectMigration,
-                ApplicationProgressRouteNavigation.CriteriaItemsDirectMigration);
 
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_Employees");
             HideCurrentRejectionItemColumn(modelViews, "Person_ListView_FamilyMembers");
@@ -356,24 +356,6 @@ namespace Visa2026.Module.DatabaseUpdate
         {
             if (modelViews[viewId] is IModelListView listView)
                 SetColumnVisibility(listView, "CurrentRejectionItem", false);
-        }
-
-        private static void CloneApplicationItemListViewIfMissing(
-            IModelViews modelViews,
-            string targetViewId,
-            string criteria)
-        {
-            if (modelViews[targetViewId] != null)
-                return;
-
-            if (modelViews["ApplicationItem_ListView"] is not IModelListView sourceView)
-                return;
-
-            var targetView = modelViews.AddNode<IModelListView>(targetViewId);
-            targetView.Id = targetViewId;
-            targetView.ModelClass = sourceView.ModelClass;
-            targetView.Criteria = criteria;
-            CopyColumns(sourceView, targetView);
         }
 
         private static void CloneApplicationListViewIfMissing(

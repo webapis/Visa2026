@@ -190,15 +190,23 @@ public sealed class ApplicationListViewPreloadController : ViewController<ListVi
             .AsSplitQuery()
             .ToList();
 
-        var itemCounts = ObjectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(item => batchIds.Contains(item.Application.ID))
-            .GroupBy(item => item.Application.ID)
+        var personCounts = ObjectSpace.GetObjectsQuery<ApplicationPerson>()
+            .Where(row => batchIds.Contains(row.ApplicationId))
+            .GroupBy(row => row.ApplicationId)
             .Select(group => new { ApplicationId = group.Key, Count = group.Count() })
             .ToDictionary(x => x.ApplicationId, x => x.Count);
 
+        foreach (var applicationId in batchIds.Where(id => !personCounts.ContainsKey(id)))
+        {
+            var legacyCount = ObjectSpace.GetObjectsQuery<ApplicationItem>()
+                .Count(item => item.Application != null && item.Application.ID == applicationId);
+            if (legacyCount > 0)
+                personCounts[applicationId] = legacyCount;
+        }
+
         foreach (var application in applications)
         {
-            application.SetListViewTotalPersonCount(itemCounts.GetValueOrDefault(application.ID, 0));
+            application.SetListViewTotalPersonCount(personCounts.GetValueOrDefault(application.ID, 0));
             application.InvalidateListViewDisplayCache();
             application.WarmListViewDisplayCache();
             preloadedIds.Add(application.ID);

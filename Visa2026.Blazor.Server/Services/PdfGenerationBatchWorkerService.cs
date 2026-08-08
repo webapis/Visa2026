@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
 using Visa2026.Module.Services;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 using Visa2026.Module.Services.RuntimeLogging;
 
 namespace Visa2026.Blazor.Server.Services;
@@ -212,8 +213,8 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
                         stoppingToken.ThrowIfCancellationRequested();
 
                         var key = ConvertKey(keyType, keyString);
-                        var item = LoadApplicationItemForPdfBatch(os, key);
-                        if (item == null || item.Application == null )
+                        var item = LoadPackageLineForPdfBatch(os, keyType, key);
+                        if (item == null || item.Application == null)
                             continue;
 
                         packagingApplicationId ??= item.Application?.ID;
@@ -414,7 +415,34 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         return ApplicationRuntimeLogErrorCodes.PdfBatchFailed;
     }
 
-    private static ApplicationItem LoadApplicationItemForPdfBatch(IObjectSpace os, object key)
+    private static ApplicationItem? LoadPackageLineForPdfBatch(IObjectSpace os, Type keyType, object key)
+    {
+        if (keyType == typeof(ApplicationPerson))
+        {
+            var row = LoadApplicationPersonForPdfBatch(os, key);
+            return row == null ? null : ApplicationPersonPdfPackageLineHydrator.Hydrate(os, row);
+        }
+
+        return LoadApplicationItemForPdfBatch(os, key);
+    }
+
+    private static ApplicationPerson? LoadApplicationPersonForPdfBatch(IObjectSpace os, object key)
+    {
+        if (key is Guid id)
+        {
+            return os.GetObjectsQuery<ApplicationPerson>()
+                .AsSplitQuery()
+                .Where(ap => ap.ID == id)
+                .Include(ap => ap.Application)
+                .Include(ap => ap.Person)
+                .Include(ap => ap.ResolvedLinks)
+                .FirstOrDefault();
+        }
+
+        return os.GetObjectByKey<ApplicationPerson>(key);
+    }
+
+    private static ApplicationItem? LoadApplicationItemForPdfBatch(IObjectSpace os, object key)
     {
         // GetObjectByKey can leave reference navigations unloaded in background processing; explicit Include
         // ensures CurrentPassport (and other slots) match the DB for ZIP packing.
@@ -460,6 +488,8 @@ public sealed class PdfGenerationBatchWorkerService : BackgroundService
         // typeof(ApplicationItem); treat entity types as Guid for backward compatibility.
         if (t == null || t == typeof(ApplicationItem))
             return typeof(Guid);
+        if (t == typeof(ApplicationPerson))
+            return typeof(ApplicationPerson);
         return t;
     }
 

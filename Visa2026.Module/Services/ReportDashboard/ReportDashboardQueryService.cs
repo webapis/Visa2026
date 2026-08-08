@@ -148,28 +148,34 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .Count(w => w.Person != null && (role == null || w.Person.PersonRole == role)
                                 && (w.ExpirationDate == null || w.ExpirationDate >= cutoff)),
             ReportDashboardCategory.Travel =>
-                objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Count(a => a.Person != null && (role == null || a.Person.PersonRole == role)
-                                && a.TravelDate != null && a.TravelDate >= cutoff),
+                TryGetDbContext(objectSpace, out var dbTravel)
+                    ? ReportDashboardRosterQueryHelper.CountTravelLines(dbTravel, role, cutoff)
+                    : objectSpace.GetObjectsQuery<ApplicationItem>()
+                        .Count(a => a.Person != null && (role == null || a.Person.PersonRole == role)
+                                    && a.TravelDate != null && a.TravelDate >= cutoff),
             ReportDashboardCategory.AddressOfResidence =>
-                objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Count(ai => ai.CurrentAddressOfResidence != null
-                                && ai.Person != null && (role == null || ai.Person.PersonRole == role)
-                                && !ai.Person.IsArchived
-                                && ai.Application != null
-                                && ai.Application.ApplicationDate >= cutoff),
+                TryGetDbContext(objectSpace, out var dbAddr)
+                    ? ReportDashboardRosterQueryHelper.CountAddressApplicationLines(dbAddr, role, cutoff)
+                    : objectSpace.GetObjectsQuery<ApplicationItem>()
+                        .Count(ai => ai.CurrentAddressOfResidence != null
+                                    && ai.Person != null && (role == null || ai.Person.PersonRole == role)
+                                    && !ai.Person.IsArchived
+                                    && ai.Application != null
+                                    && ai.Application.ApplicationDate >= cutoff),
             ReportDashboardCategory.BorderZone =>
                 objectSpace.GetObjectsQuery<BorderZoneItem>()
                     .Count(b => b.Person != null && (role == null || b.Person.PersonRole == role)
                                 && (b.BorderZone == null || b.BorderZone.ExpirationDate == null || b.BorderZone.ExpirationDate >= cutoff)),
             ReportDashboardCategory.Passport =>
-                objectSpace.GetObjectsQuery<ApplicationItem>()
-                    .Count(ai => ai.CurrentPassport != null
-                                && ai.Person != null && (role == null || ai.Person.PersonRole == role)
-                                && !ai.Person.IsArchived
-                                && ai.Application != null
-                                && ai.Application.ApplicationDate != null
-                                && ai.Application.ApplicationDate >= cutoff),
+                TryGetDbContext(objectSpace, out var dbPassport)
+                    ? ReportDashboardRosterQueryHelper.CountPassportApplicationLines(dbPassport, role, cutoff)
+                    : objectSpace.GetObjectsQuery<ApplicationItem>()
+                        .Count(ai => ai.CurrentPassport != null
+                                    && ai.Person != null && (role == null || ai.Person.PersonRole == role)
+                                    && !ai.Person.IsArchived
+                                    && ai.Application != null
+                                    && ai.Application.ApplicationDate != null
+                                    && ai.Application.ApplicationDate >= cutoff),
             ReportDashboardCategory.Education =>
                 objectSpace.GetObjectsQuery<Education>()
                     .Count(e => e.Person != null && (role == null || e.Person.PersonRole == role)),
@@ -3247,8 +3253,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
     }
 
     /// <summary>
-    /// Registration On process: ApplicationItems on any App_Reg_* type whose Application
-    /// is not terminal (same exclude list as Invitation Process). One row per ApplicationItem.
+    /// Registration On process: roster lines on any App_Reg_* type whose Application
+    /// is not terminal (same exclude list as Invitation Process). One row per ApplicationPerson (M2M) or legacy ApplicationItem.
     /// Status = ApplicationType · ProcessState (localized; ProcessState matches StatusListLabel).
     /// </summary>
     private static ReportDashboardPanelData LoadRegistrationOnProcess(
@@ -3268,62 +3274,25 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         try
         {
-            IQueryable<ApplicationItem> query = db.ApplicationItems.AsNoTracking()
-                .Where(ai => ai.Application != null
-                    && ai.Application.ApplicationType != null
-                    && ai.Application.ApplicationType.Name != null
-                    && regTypes.Contains(ai.Application.ApplicationType.Name)
-                    && (ai.Application.ApplicationDate == null || ai.Application.ApplicationDate >= cutoff)
-                    && ai.Person != null
-                    && !ai.Person.IsArchived);
-
-            if (role.HasValue)
-            {
-                var roleValue = role.Value;
-                query = query.Where(ai => ai.Person!.PersonRole == roleValue);
-            }
-
-            if (validVisaPersonIds != null)
-                query = query.Where(ai => validVisaPersonIds.Contains(ai.Person!.ID));
-
-            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            {
-                query = query.Where(ai =>
-                    (ai.Application!.ProjectContract != null
-                        && (ai.Application.ProjectContract.Name == projectKey
-                            || ai.Application.ProjectContract.NameTm == projectKey))
-                    || (ai.Person!.ProjectContract != null
-                        && (ai.Person.ProjectContract.Name == projectKey
-                            || ai.Person.ProjectContract.NameTm == projectKey)));
-            }
-
-            var items = query
-                .Include(ai => ai.Person!)
-                    .ThenInclude(p => p.ProjectContract)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ApplicationType)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ProjectContract)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ApprovalLegSnapshots)
-                .Include(ai => ai.Application!).ThenInclude(a => a.ApprovalLegProfile!)
-                    .ThenInclude(p => p.MinistryLegs!)
-                    .ThenInclude(l => l.ApprovingMinistry)
-                .Include(ai => ai.Application!).ThenInclude(a => a.LatestProgress!)
-                    .ThenInclude(p => p.State)
-                .ToList()
-                .Where(ai =>
+            var items = ReportDashboardRosterQueryHelper.LoadRegistrationOnProcessLines(
+                db, regTypes, cutoff, role, projectKey, validVisaPersonIds)
+                .Where(line =>
                 {
-                    var code = !string.IsNullOrWhiteSpace(ai.Application!.LatestPrimaryStateCode)
-                        ? ai.Application.LatestPrimaryStateCode
-                        : ai.Application.LatestProgress?.State?.Code;
+                    var app = line.Application;
+                    var code = !string.IsNullOrWhiteSpace(app.LatestPrimaryStateCode)
+                        ? app.LatestPrimaryStateCode
+                        : app.LatestProgress?.State?.Code;
                     return !IsInvitationProcessCompleted(code);
                 })
                 .ToList();
 
             var codes = items
-                .Select(ai =>
+                .Select(line =>
                 {
-                    var code = !string.IsNullOrWhiteSpace(ai.Application!.LatestPrimaryStateCode)
-                        ? ai.Application.LatestPrimaryStateCode
-                        : ai.Application.LatestProgress?.State?.Code;
+                    var app = line.Application;
+                    var code = !string.IsNullOrWhiteSpace(app.LatestPrimaryStateCode)
+                        ? app.LatestPrimaryStateCode
+                        : app.LatestProgress?.State?.Code;
                     return code?.Trim();
                 })
                 .Where(c => !string.IsNullOrEmpty(c))
@@ -3339,13 +3308,13 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
                     .GroupBy(s => s.Code!.Trim(), StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
-            var labeled = items.Select(ai =>
+            var labeled = items.Select(line =>
             {
-                var app = ai.Application!;
+                var app = line.Application;
                 var appType = LookupLabelOrMissing(app.ApplicationType, "(No type)");
                 var processState = ResolveInvitationProcessResultStateLabel(app, stateByCode);
                 var status = $"{appType} · {processState}";
-                return (Item: ai, Status: status, ProcessState: processState);
+                return (Line: line, Status: status, ProcessState: processState);
             }).ToList();
 
             var groups = labeled
@@ -3357,20 +3326,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var cssByLabel = buckets.ToDictionary(b => b.Label, b => b.CssClass, StringComparer.Ordinal);
 
             var rows = labeled
-                .OrderByDescending(x => x.Item.Application?.ApplicationDate)
-                .ThenBy(x => x.Item.Person?.FullName)
+                .OrderByDescending(x => x.Line.Application.ApplicationDate)
+                .ThenBy(x => x.Line.Person.FullName)
                 .Take(PreviewLimit)
                 .Select(x =>
                 {
-                    var app = x.Item.Application!;
+                    var app = x.Line.Application;
                     var project = ProjectLabel(app.ProjectContract);
                     if (string.IsNullOrWhiteSpace(project))
-                        project = ProjectLabel(x.Item.Person?.ProjectContract);
+                        project = ProjectLabel(x.Line.Person.ProjectContract);
                     var progressCss = StatusCss(x.ProcessState, null);
                     return new ReportDashboardPreviewRow
                     {
-                        RecordId = x.Item.ID,
-                        Name = x.Item.Person?.FullName ?? string.Empty,
+                        RecordId = x.Line.RecordId,
+                        Name = x.Line.Person.FullName ?? string.Empty,
                         Project = project,
                         ColumnA = app.FullApplicationNumber ?? app.ApplicationNumber ?? string.Empty,
                         ColumnB = FormatDate(app.ApplicationDate),
@@ -4786,23 +4755,37 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         string? excelHint, bool excelConfigured, DateTime cutoff,
         HashSet<Guid>? validVisaPersonIds = null)
     {
-        var query = objectSpace.GetObjectsQuery<ApplicationItem>()
-            .Where(a => a.Person != null && (role == null || a.Person.PersonRole == role)
-                        && a.TravelDate != null && a.TravelDate >= cutoff);
+        List<ReportDashboardRosterQueryHelper.TravelLine> travelLines;
+        if (TryGetDbContext(objectSpace, out var db))
+        {
+            travelLines = ReportDashboardRosterQueryHelper.LoadTravelLines(
+                db, role, projectKey, cutoff, validVisaPersonIds, PreviewLimit);
+        }
+        else
+        {
+            var query = objectSpace.GetObjectsQuery<ApplicationItem>()
+                .Where(a => a.Person != null && (role == null || a.Person.PersonRole == role)
+                            && a.TravelDate != null && a.TravelDate >= cutoff);
 
-        if (validVisaPersonIds != null)
-            query = query.Where(a => validVisaPersonIds.Contains(a.Person!.ID));
+            if (validVisaPersonIds != null)
+                query = query.Where(a => validVisaPersonIds.Contains(a.Person!.ID));
 
-        if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
-            query = query.Where(a => a.Application != null && a.Application.ProjectContract != null
-                && (a.Application.ProjectContract.Name == projectKey || a.Application.ProjectContract.NameTm == projectKey));
+            if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
+                query = query.Where(a => a.Application != null && a.Application.ProjectContract != null
+                    && (a.Application.ProjectContract.Name == projectKey || a.Application.ProjectContract.NameTm == projectKey));
 
-        var rows = query.OrderByDescending(a => a.TravelDate).Take(PreviewLimit).AsEnumerable().Select(a =>
+            travelLines = query.OrderByDescending(a => a.TravelDate).Take(PreviewLimit).AsEnumerable()
+                .Select(a => new ReportDashboardRosterQueryHelper.TravelLine(
+                    a.ID, a.Person!, a.Application, a.TravelDate))
+                .ToList();
+        }
+
+        var rows = travelLines.Select(a =>
         {
             const string status = "Approved";
             return new ReportDashboardPreviewRow
             {
-                RecordId = a.ID,
+                RecordId = a.RecordId,
                 Name = a.Person?.FullName ?? string.Empty,
                 Project = ProjectLabel(a.Application?.ProjectContract),
                 ColumnA = a.Application?.ApplicationNumber ?? string.Empty,
@@ -6409,5 +6392,17 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             || status.Contains("Active",    StringComparison.OrdinalIgnoreCase)
             || status.Contains("Completed", StringComparison.OrdinalIgnoreCase))           return "st-approved";
         return "st-pending";
+    }
+
+    private static bool TryGetDbContext(IObjectSpace objectSpace, out Visa2026EFCoreDbContext db)
+    {
+        if (objectSpace is EFCoreObjectSpace efOs && efOs.DbContext is Visa2026EFCoreDbContext context)
+        {
+            db = context;
+            return true;
+        }
+
+        db = null!;
+        return false;
     }
 }

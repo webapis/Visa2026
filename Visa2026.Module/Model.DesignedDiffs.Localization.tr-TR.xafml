@@ -228,8 +228,8 @@
         <Member Name="ApplicationItems" Caption="Başvuru Kalemleri" />
         <Member Name="ApplicationNumber" Caption="Başvuru Numarası" />
         <Member Name="ApplicationReason" Caption="Başvuru Nedeni" />
-        <Member Name="ApplicationType" Caption="Başvuru Türü (Kullanımdan kaldırıldı)" />
-        <Member Name="ApplicationTypeFilter" Caption="Başvuru Türü Filtresi (Kullanımdan kaldırıldı)" />
+        <Member Name="ApplicationType" Caption="Başvuru Türü" />
+        <Member Name="ApplicationTypeFilter" Caption="Başvuru Türü Filtresi" />
         <Member Name="ApprovalLegProfile" Caption="Onay bakanlık profili" />
         <Member Name="BorderZoneLocation" Caption="Sınır Bölgesi Yeri" />
         <Member Name="Category" Caption="Kategori" />
@@ -481,7 +481,7 @@
         <Member Name="ValidityDuration" Caption="Geçerlilik Süresi" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Başvuru Türü (Kullanımdan kaldırıldı)">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationType" Caption="Başvuru Türü">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="ApplicationProgressRoute" Caption="İlerleme süreci" />
@@ -533,7 +533,7 @@
         <Member Name="FamilyMember" Caption="Aile üyesi" />
       </OwnMembers>
     </Class>
-    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Başvuru Türü Filtresi (Kullanımdan kaldırıldı)">
+    <Class Name="Visa2026.Module.BusinessObjects.ApplicationTypeFilter" Caption="Başvuru Türü Filtresi">
       <OwnMembers>
         <Member Name="Application" Caption="Başvuru" />
         <Member Name="Category" Caption="Kategori" />
@@ -1921,6 +1921,8 @@
         <Member Name="Notes" Caption="Seyahat Notları" />
         <Member Name="Person" Caption="Kişi" />
         <Member Name="Region" Caption="Bölge" />
+        <Member Name="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <Member Name="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
         <Member Name="Title" Caption="Başlık" />
         <Member Name="TravelDate" Caption="Seyahat Tarihi" />
         <Member Name="TravelType" Caption="Seyahat Türü" />
@@ -2506,10 +2508,10 @@
     <DetailView Id="ApplicationReportPackageListHost_DetailView" Caption="Şablonlar" />
     <DetailView Id="ApplicationState_DetailView" Caption="Başvuru Durumu" />
     <ListView Id="ApplicationState_ListView" Caption="Başvuru Durumları" />
-    <DetailView Id="ApplicationType_DetailView" Caption="Başvuru Türü (Kullanımdan kaldırıldı)" />
-    <ListView Id="ApplicationType_ListView" Caption="Başvuru Türleri (Kullanımdan kaldırıldı)" />
-    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Başvuru Türü Filtresi (Kullanımdan kaldırıldı)" />
-    <ListView Id="ApplicationTypeFilter_ListView" Caption="Başvuru Türü Filtreleri (Kullanımdan kaldırıldı)" />
+    <DetailView Id="ApplicationType_DetailView" Caption="Başvuru Türü" />
+    <ListView Id="ApplicationType_ListView" Caption="Başvuru Türleri" />
+    <DetailView Id="ApplicationTypeFilter_DetailView" Caption="Başvuru Türü Filtresi" />
+    <ListView Id="ApplicationTypeFilter_ListView" Caption="Başvuru Türü Filtreleri" />
     <DetailView Id="ApplicationTypeGroup_DetailView" Caption="Başvuru Türü Grubu" />
     <ListView Id="ApplicationTypeGroup_ListView" Caption="Başvuru Türü Grupları" />
     <DetailView Id="ApplicationTypeGroupMember_DetailView" Caption="Başvuru Türü Grubu Üyesi" />
@@ -2927,6 +2929,8 @@
         <ColumnInfo Id="CheckPoint" Caption="Kontrol Noktası" />
         <ColumnInfo Id="MovementType" Caption="Hareket Türü" />
         <ColumnInfo Id="Notes" Caption="Seyahat Notları" />
+        <ColumnInfo Id="SourceApplication_ApplicationDate" Caption="Başvuru Tarihi" />
+        <ColumnInfo Id="SourceApplication_FullApplicationNumber" Caption="Başvuru No" />
         <ColumnInfo Id="TravelDate" Caption="Seyahat Tarihi" />
         <ColumnInfo Id="TravelType" Caption="Seyahat Türü" />
       </Columns>

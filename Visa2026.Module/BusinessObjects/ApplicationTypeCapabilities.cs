@@ -20,4 +20,16 @@ public static class ApplicationTypeCapabilities
     /// </summary>
     public static bool CanBeIssuingApplicationForVisa(ApplicationType? applicationType) =>
         CanIssueVisa(applicationType) || CanIssueInvitation(applicationType);
+
+    public static bool CanIssueVisa(Application? application) =>
+        ApplicationProfileConfigurationResolver.CanIssueVisa(application);
+
+    public static bool CanIssueInvitation(Application? application) =>
+        ApplicationProfileConfigurationResolver.CanIssueInvitation(application);
+
+    public static bool CanIssueWorkPermit(Application? application) =>
+        ApplicationProfileConfigurationResolver.CanIssueWorkPermit(application);
+
+    public static bool CanBeIssuingApplicationForVisa(Application? application) =>
+        ApplicationProfileConfigurationResolver.CanBeIssuingApplicationForVisa(application);
 }

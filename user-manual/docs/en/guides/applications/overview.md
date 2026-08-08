@@ -30,7 +30,19 @@ Use this guide to choose the correct list before you [create an application](cre
 | **Via ministry** | **Applications (via ministry)** | **Application items (ministry)** | Goes through **ministry approval** before the migration service |
 | **Direct migration** | **Applications (direct migration)** | **Application items (migration)** | Goes **directly** to the migration service (no ministry leg) |
 
-If you are unsure which route applies, ask your visa chief. The **application type** must match the list you open.
+If you are unsure which route applies, ask your visa chief. The **application profile** you pick must match the list you open.
+
+## Application profiles (new)
+
+Visa2026 links each application to an **Application Profile** — shared configuration for route, field visibility, progress rules, and templates. Officers choose the profile in a **picker** when they select **New**; it is fixed after save.
+
+| Topic | Guide |
+|-------|--------|
+| What profiles are and how create works | [Application profiles — how configuration works](application-profiles.md) |
+| Short create checklist | [Create an application](create.md) |
+| VisaOffice: define profiles | [Configure application profiles](../administration/configuration/application-profiles.md) |
+
+Legacy **Application Type Code** on a blank form is being replaced by this picker during rollout.
 
 ## The Applications menu (four lists)
 
@@ -89,7 +101,7 @@ The **Application Type Code** picker on this list shows only types valid for the
 The steps are the **same** on both lists; only the menu entry differs.
 
 1. Open the correct **header list** (via ministry **or** direct migration).
-2. **New** → choose **Application Type Code** → fill header fields → **Save**.
+2. **New** → choose **Application Profile** → **Use profile (live link)** → fill header fields → **Save**.
 3. On the saved header, open **Application items** → **New** → pick **Person** → **Save** for each person.
 4. Track progress, document copies, and report packages — [Track application progress](progress.md) · [Document copies](document-copies.md) · [Templates (Resminamalar)](resminamalar.md)
 

@@ -17,6 +17,7 @@ using Visa2026.Module.Services.StateEvaluation.Evaluators;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using Visa2026.Module.Editors;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.BusinessObjects
 {
@@ -160,7 +161,7 @@ namespace Visa2026.Module.BusinessObjects
             get
             {
                 if (Person == null || WorkPermit?.Application == null) return true;
-                return WorkPermit.Application.ApplicationItems.Any(ai => ai.Person?.ID == Person.ID);
+                return ApplicationRosterHelper.IsPersonOnApplication(WorkPermit.Application, Person);
             }
         }
 

@@ -180,7 +180,7 @@ public static class ApplicationProgressTransitionHelper
             }
 
             if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(progress.State?.Code)
-                && progress.Application?.ApplicationType?.MigrationSlaProfile?.MaxDaysInReview is not > 0)
+                && !ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(progress.Application))
             {
                 errorMessage = VisaUiMessages.Get("ApplicationProgress.MigrationSlaProfileRequired");
                 return false;
@@ -235,7 +235,7 @@ public static class ApplicationProgressTransitionHelper
             }
 
             if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(progress.State?.Code)
-                && progress.Application?.ApplicationType?.MigrationSlaProfile?.MaxDaysInReview is not > 0)
+                && !ApplicationProfileConfigurationResolver.HasMigrationSlaConfigured(progress.Application))
             {
                 errorMessage = VisaUiMessages.Get("ApplicationProgress.MigrationSlaProfileRequired");
                 return false;

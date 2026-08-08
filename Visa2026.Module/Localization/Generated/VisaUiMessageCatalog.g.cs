@@ -894,6 +894,20 @@ public static partial class VisaUiMessageCatalog
             ["tk-TM"] = "PDF şablon ýoly sazlanmady. appsettings.json-daky 'PdfSettings:TemplatePath' barlaň.",
             ["ru-RU"] = "Путь к шаблону PDF не настроен. Проверьте PdfSettings:TemplatePath в appsettings.json.",
         },
+        ["ApplicationProfile.ConfigLockedCannotEdit"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "This application profile is locked because a linked application has left office preparation. Duplicate the profile to change configuration.",
+            ["tr-TR"] = "Bağlı bir arza ofis hazırlığını geçtiği için bu profil kilitlendi. Yapılandırmayı değiştirmek için profili kopyalayın.",
+            ["tk-TM"] = "Baglanyşykly arza edara taýýarlygyny geçendigi üçin bu profil gulplandy. Sazlamany üýtgetmek üçin profili göçüriň.",
+            ["ru-RU"] = "Профиль заблокирован: связанная заявка вышла из офисной подготовки. Скопируйте профиль, чтобы изменить конфигурацию.",
+        },
+        ["ApplicationProfile.ConfigLockedCannotEditNested"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "Approval legs and nested templates cannot be changed while this profile is locked.",
+            ["tr-TR"] = "Profil kilitliyken onay adımları ve iç şablonlar değiştirilemez.",
+            ["tk-TM"] = "Profil gulplanykça tassyklama ädimleri we iç şablonlary üýtgedip bolmaýar.",
+            ["ru-RU"] = "Пока профиль заблокирован, нельзя менять этапы согласования и вложенные шаблоны.",
+        },
         ["ApplicationProgress.ApprovalLegProfileRequired"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["en-US"] = "Select an approval leg profile before advancing beyond office preparation.",
@@ -1481,6 +1495,13 @@ public static partial class VisaUiMessageCatalog
             ["tr-TR"] = "Şablon dosyası eksik veya boş.",
             ["tk-TM"] = "Şablon faýly ýok ýa-da boş.",
             ["ru-RU"] = "Файл шаблона отсутствует или пуст.",
+        },
+        ["ApplicationReportPackage.Readiness.ProfileTemplateUnlinked"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["en-US"] = "No matching User Report Template — link by the same name under Configuration.",
+            ["tr-TR"] = "Eşleşen kullanıcı rapor şablonu yok — Yapılandırma altında aynı adla bağlayın.",
+            ["tk-TM"] = "Gabat gelýän ulanyjy hasabat şablony ýok — Sazlamalar boýunça şol bir at bilen baglaň.",
+            ["ru-RU"] = "Нет соответствующего пользовательского шаблона — свяжите по тем же именем в разделе конфигурации.",
         },
         ["ApplicationReportPackage.Readiness.NotValidated"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

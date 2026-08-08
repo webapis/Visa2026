@@ -71,6 +71,11 @@ namespace Visa2026.Module
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.StateNotifications.BoStateNotificationInboxHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ImportReimportHistoryHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ReportDashboard.ReportDashboardHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationWorkspace.ApplicationWorkspaceHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileWizard.ApplicationProfileWizardHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfilePicker.ApplicationProfilePickerHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileOverview.ApplicationProfileOverviewHost));
+            AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.ApplicationProfileCatalog.ApplicationProfileCatalogHost));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Feedback.UserFeedback));
             AdditionalExportedTypes.Add(typeof(Visa2026.Module.BusinessObjects.Operations.ApplicationRuntimeLog));
         }
@@ -98,11 +103,14 @@ namespace Visa2026.Module
                 new DatabaseUpdate.PersonExportBatchSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.InvitationLegacyShapeSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationProgressProcessNumberSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileSchemaUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.VisaIssuingApplicationSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.VisaProcessNumberSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeConfigurationUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSchemaUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationTypeGroupSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApplicationMigrationSlaProfileTypeLinkUpdater(objectSpace, versionFromDB),
+                new DatabaseUpdate.ApplicationProfileSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ApprovalLegProfileSeedUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ReportDashboardPostgresViewsUpdater(objectSpace, versionFromDB),
                 new DatabaseUpdate.ProjectContractApprovalLegProfileLinkUpdater(objectSpace, versionFromDB),
@@ -132,6 +140,17 @@ namespace Visa2026.Module
             updaters.Add(new DatabaseUpdate.ReportDashboardModelUpdater());
             updaters.Add(new DatabaseUpdate.ReportDashboardDetailViewUpdater());
             updaters.Add(new DatabaseUpdate.PersonDossierDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationWorkspaceDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationWorkspaceLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileWizardDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileWizardLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfilePickerDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfilePickerLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileOverviewDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileOverviewLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileCatalogDetailViewUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileCatalogLayoutUpdater());
+            updaters.Add(new DatabaseUpdate.ApplicationProfileCatalogModelUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackModelUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackViewsUpdater());
             updaters.Add(new DatabaseUpdate.UserFeedbackDetailViewUpdater());
@@ -163,6 +182,7 @@ namespace Visa2026.Module
         private static void Application_ObjectSpaceCreated(object? sender, ObjectSpaceCreatedEventArgs e)
         {
             ApprovalLegProfileMinistryLegObjectSpaceHooks.Subscribe(e.ObjectSpace);
+            ApplicationProfileConfigLockObjectSpaceHooks.Subscribe(e.ObjectSpace);
             PersonVisaFamilyManualDefaultsObjectSpaceHooks.Subscribe(e.ObjectSpace);
             MigrationImportAuditTrailObjectSpaceHooks.ApplyIfNeeded(e.ObjectSpace);
         }
