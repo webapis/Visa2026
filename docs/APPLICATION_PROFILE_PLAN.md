@@ -2,12 +2,16 @@
 
 **Status:** Binding model locked · **`ApplicationType` deprecated** · first code slice: `ApplicationProfile` BO + `Application.ApplicationProfile` FK (dual-read) · UX prototypes · ApplicationItem / M2M DetailView not implemented yet  
 **Agent skill:** [`.cursor/skills/visa2026-application-profile/SKILL.md`](../.cursor/skills/visa2026-application-profile/SKILL.md) — implementation tracker ([`IMPLEMENTATION_PLAN.md`](../.cursor/skills/visa2026-application-profile/IMPLEMENTATION_PLAN.md)), experience log (`learnings.md`), officer configuration suggestions.  
-**Prototypes:**
-- Wizard: [`docs/prototypes/application-profile-wizard.html`](prototypes/application-profile-wizard.html)
-- Usage storyboard: [`docs/prototypes/application-profile-usage.html`](prototypes/application-profile-usage.html)
-- Application DetailView (M2M, no ApplicationItem): [`docs/prototypes/application-detail-m2m.html`](prototypes/application-detail-m2m.html)
-- Storyboard images: [`docs/prototypes/images/`](prototypes/images/)
-**Input draft:** [`docs/prototypes/Application-profile-wizard-draft.xlsx`](prototypes/Application-profile-wizard-draft.xlsx) (columns E–H classify each field)  
+**Prototypes:** [`docs/prototypes/`](prototypes/) — **22 PNG mockups** (2026-08-10). Retired same date: HTML storyboards (`application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`), `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`. Field E–H classification remains in this plan (§6) and [skill `reference.md`](../.cursor/skills/visa2026-application-profile/reference.md).
+
+| Group | Files |
+|-------|--------|
+| App shell | `visa2026-custom-left-navigation-shell-mockup.png`, `application-profiles-navigation-sidebar-mockup.png` |
+| Staged profiles | `staged-application-profiles-workspace-mockup.png`, `staged-profiles-listview-table-mockup.png`, `staged-profiles-grid-cards-mockup.png` |
+| In process | `process-started-profiles-listview-table-mockup.png`, `process-started-profiles-list-cards-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` (5 workspace tabs) |
+| Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
+
+Full inventory: **§9**.
 **Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
 
 ---
@@ -141,8 +145,7 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 ## 10. Application DetailView redesign — retire ApplicationItem
 
 **Status:** Decisions largely locked (§10.1) · UX prototype · no domain implementation  
-**Prototype:** [`docs/prototypes/application-detail-m2m.html`](prototypes/application-detail-m2m.html)  
-**Image:** [`docs/prototypes/images/ap-05-application-detail-m2m.png`](prototypes/images/ap-05-application-detail-m2m.png)
+**Prototype:** [`docs/prototypes/process-started-application-profile-workspace-mockup.png`](prototypes/process-started-application-profile-workspace-mockup.png) (+ `process-started-nav-*.png` workspace tabs). Staged queue: `staged-profiles-*.png`.
 
 ### 10.1 Locked decisions
 
@@ -208,7 +211,7 @@ These remain **Application** fields (not `TravelHistory`). Movement history itse
 ### 10.5 Still open (narrow)
 
 1. **TravelHistory “valid”** — current/latest only, or all non-cancelled movements in a window?
-2. **Re-attach Excel** — sync full person-config toggle list into `docs/prototypes/Application-profile-wizard-draft.xlsx`.
+2. **Person-config toggle list** — sync into plan §10.3 and template wizard step 4 mockup (`application-profile-template-wizard-step4-mockup.png`); Excel draft removed from `docs/prototypes/`.
 3. **Wide view columns** — mandatory joined columns for v1 roster?
 4. **Unlock profile config** — auto when no apps ≥ lock state A?
 5. **Person / Dossier → Application** — see §11 (entry points + profile-usage UX).
@@ -429,7 +432,7 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 3. Introduce `ApplicationProfile` + `Application.ApplicationProfile` FK; mark **`ApplicationType` deprecated** (dual-read).  
 4. Seed profiles from type catalog; switch Appearance / progress / reports to profile.  
 5. Remove `Application.ApplicationType` FK and retire Type/group/template-type links.  
-5. Refresh prototypes/images that still say “clone”.
+5. Align plan copy with staged → in-process PNG prototypes (§9); pivot to template → staged → merge model as product direction evolves.
 
 ---
 
@@ -464,13 +467,33 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 
 ---
 
-## 9. Prototype checklist
+## 9. Prototype inventory (PNG — 2026-08-10)
 
-| Artifact | Purpose | Notes |
-|----------|---------|--------|
-| `application-profile-wizard.html` | Configure profile | Update copy: live config vs per-App defaults |
-| `application-profile-usage.html` | Usage storyboard | Replace clone story with live FK + defaults |
-| `images/ap-0*.png` | Visuals | Refresh lifecycle image (no full clone) |
-| `application-detail-m2m.html` | Custom Application DetailView sketch (M2M tabs, no ApplicationItem) |
-| `images/ap-05-application-detail-m2m.png` | Visual mock of Application DetailView |
-| Excel draft | Source of E–H tags | Updated workbook in repo |
+All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
+
+| File | Purpose |
+|------|---------|
+| `visa2026-custom-left-navigation-shell-mockup.png` | Custom app shell — replaces native XAF left nav |
+| `application-profiles-navigation-sidebar-mockup.png` | Staged / In process / Profile templates nav IA |
+| `staged-application-profiles-workspace-mockup.png` | Staged profiles — grouped workspace + Start process |
+| `staged-profiles-listview-table-mockup.png` | Staged profiles — ListView |
+| `staged-profiles-grid-cards-mockup.png` | Staged profiles — grid |
+| `process-started-profiles-listview-table-mockup.png` | In process — ListView |
+| `process-started-profiles-list-cards-mockup.png` | In process — card grid |
+| `process-started-application-profile-workspace-mockup.png` | In process case — Overview tab |
+| `process-started-nav-overview.png` | Workspace — Overview (alt) |
+| `process-started-nav-people-links.png` | Workspace — People & links |
+| `process-started-nav-progress.png` | Workspace — Progress |
+| `process-started-nav-document-copies.png` | Workspace — Document copies |
+| `process-started-nav-resminamalar.png` | Workspace — Resminamalar |
+| `process-started-nav-sla-deadlines.png` | Workspace — SLA & deadlines |
+| `application-profile-templates-listview-mockup.png` | Profile templates catalog — ListView |
+| `application-profile-templates-grid-mockup.png` | Profile templates catalog — grid |
+| `application-profile-template-overview-mockup.png` | Single template — read-only overview |
+| `application-profile-template-wizard-mockup.png` | Template wizard — step 1 Identity & purpose |
+| `application-profile-template-wizard-step2-mockup.png` | Template wizard — step 2 Results & defaults |
+| `application-profile-template-wizard-step3-mockup.png` | Template wizard — step 3 Process & SLA |
+| `application-profile-template-wizard-step4-mockup.png` | Template wizard — step 4 Templates & person |
+| `application-profile-template-wizard-step5-mockup.png` | Template wizard — step 5 Review & publish |
+
+**Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

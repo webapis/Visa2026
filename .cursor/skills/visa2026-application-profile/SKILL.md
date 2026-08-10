@@ -30,12 +30,20 @@ disable-model-invocation: false
 
 | Doc / artifact | Topic |
 |----------------|--------|
-| [`docs/APPLICATION_PROFILE_PLAN.md`](../../../docs/APPLICATION_PROFILE_PLAN.md) | Locked decisions, migration, §12 progress |
+| [`docs/APPLICATION_PROFILE_PLAN.md`](../../../docs/APPLICATION_PROFILE_PLAN.md) | Locked decisions, migration, §9 prototype inventory, §12 progress |
 | [`docs/DEPRECATED.md`](../../../docs/DEPRECATED.md) | `ApplicationType` / `ApplicationTypeFilter` deprecation |
-| [`docs/prototypes/application-profile-wizard.html`](../../../docs/prototypes/application-profile-wizard.html) | Configure wizard UX |
-| [`docs/prototypes/application-profile-usage.html`](../../../docs/prototypes/application-profile-usage.html) | Pick profile, live FK, lock lifecycle |
-| [`docs/prototypes/application-detail-m2m.html`](../../../docs/prototypes/application-detail-m2m.html) | Person M2M DetailView (no ApplicationItem) |
-| [`docs/prototypes/Application-profile-wizard-draft.xlsx`](../../../docs/prototypes/Application-profile-wizard-draft.xlsx) | Field E–H classification source |
+| [`docs/prototypes/`](../../../docs/prototypes/) | **22 PNG UX mockups** (2026-08-10) — shell, staged, in-process workspace, templates, wizard |
+
+**Prototype groups** (all under `docs/prototypes/`):
+
+| Group | Key files |
+|-------|-----------|
+| App shell | `visa2026-custom-left-navigation-shell-mockup.png` |
+| Staged queue | `staged-profiles-listview-table-mockup.png`, `staged-profiles-grid-cards-mockup.png` |
+| In process | `process-started-profiles-listview-table-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` |
+| Templates | `application-profile-templates-listview-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard*.png` |
+
+**Retired:** HTML/Excel/`images/` prototypes removed 2026-08-10 — see plan §9.
 
 **Slice tracker:** [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) · **File map:** [reference.md](./reference.md) · **Experience:** [learnings.md](./learnings.md) · **Maturity:** [MATURITY.md](./MATURITY.md)
 
@@ -116,7 +124,7 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for status. **Default nex
 4. ~~**Wizard UX**~~ — **Done**.
 5. ~~**Profile picker at create**~~ — **Done**.
 5b. ~~**Custom catalog home**~~ — **Done** (slice 8c; native List/Detail not officer UI).
-6. **Person M2M DetailView** — prototype `application-detail-m2m.html`; hard-remove `ApplicationItem`. **10 close-out next**
+6. **Person M2M DetailView** — PNG prototypes `process-started-application-profile-workspace-mockup.png` + `process-started-nav-*.png`; hard-remove `ApplicationItem`. **10 close-out next**
 7. **Person/Dossier Start application** — plan §11.
 8. **Remove `Application.ApplicationType` FK** — after cutover + import.
 

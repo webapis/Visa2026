@@ -20,9 +20,10 @@ Copy into chat with `@visa2026-application-profile` (or `@.cursor/skills/visa202
 
 ## UX prototypes
 
-- Implement the configuration wizard from docs/prototypes/application-profile-wizard.html.
-- Add profile picker at Application create per application-profile-usage.html.
-- Design Person M2M Application DetailView per application-detail-m2m.html — no ApplicationItem.
+- Implement the configuration wizard from `docs/prototypes/application-profile-template-wizard-mockup.png` (steps 1–5 PNGs).
+- Build staged profile queue from `docs/prototypes/staged-profiles-listview-table-mockup.png` / grid variant; Start process merge.
+- Build in-process workspace from `docs/prototypes/process-started-application-profile-workspace-mockup.png` and `process-started-nav-*.png` tabs.
+- Replace native XAF nav with `docs/prototypes/visa2026-custom-left-navigation-shell-mockup.png`.
 
 ## Person / Dossier entry
 

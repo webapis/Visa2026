@@ -12,7 +12,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 | # | Slice | Status | Notes |
 |---|--------|--------|-------|
-| 0 | Plan + HTML prototypes | **Done** | `docs/prototypes/*.html`, images, Excel draft |
+| 0 | Plan + UX prototypes | **Done** | `docs/prototypes/*.png` (22 mockups, 2026-08-10) |
 | 1 | Deprecate `ApplicationType` (registry, UI, dual-read) | **Done** | `docs/DEPRECATED.md` — Application Profile cutover section (2026-08-07) |
 | 2 | `ApplicationProfile` BO + legs + nested templates | **Done** | `ApplicationProfile.cs` v1 scalars/collections |
 | 3 | `Application.ApplicationProfile` FK + default seeding | **Done** | Optional during dual-read; `ApplyDefaultsForApplicationProfile` |
@@ -93,7 +93,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 ## Slice 10a — Workspace mock UI (detail) — **Done**
 
-**Goal:** Officer can open custom Application workspace DetailView with layout from `application-detail-m2m.html` and hard-coded mock rows.
+**Goal:** Officer can open custom Application workspace DetailView with layout from `process-started-application-profile-workspace-mockup.png` and hard-coded mock rows.
 
 **Delivered:**
 
@@ -295,8 +295,8 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 | Gate | Artifact |
 |------|----------|
-| Wizard steps match Excel groups | `application-profile-wizard.html` |
-| Live FK + lock lifecycle copy | `application-profile-usage.html` |
+| Wizard steps match plan §6 E–H groups | `application-profile-template-wizard*.png` |
+| Staged → in-process lifecycle | `staged-profiles-*.png`, `process-started-profiles-*.png` |
 | No “clone profile” language | Refresh `images/ap-04-lifecycle.png` when UX ships |
 
 ---

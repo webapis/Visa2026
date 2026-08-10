@@ -104,13 +104,15 @@ Merge rule: Application value if set; else profile default (plan §4).
 
 ## Prototype → implementation mapping
 
-| Prototype | Slice | Deliverable |
-|-----------|-------|-------------|
-| `application-profile-wizard.html` | 8 | Multi-step Blazor wizard; publish = save profile |
-| `application-profile-usage.html` §1 | 8 | Same |
-| `application-profile-usage.html` §2–3 | 9 | Create flow + read-only profile summary on Application |
-| `application-detail-m2m.html` | 10 | Custom DetailView, wide SQL view, auto-resolve |
-| `images/ap-*.png` | 8–10 | Refresh when officer UX ships |
+| PNG mockup (`docs/prototypes/`) | Slice | Deliverable |
+|----------------------------------|-------|-------------|
+| `application-profile-template-wizard*.png` (steps 1–5) | 8 | Multi-step Blazor template wizard; publish = save profile |
+| `application-profile-templates-*.png`, `application-profile-template-overview-mockup.png` | 8c | Custom template catalog + overview |
+| `staged-profiles-*.png` | 10+ | Staged profile queue (list/grid, Start process) |
+| `process-started-profiles-*.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` | 10 | In-process case workspace (custom shell, tabs) |
+| `visa2026-custom-left-navigation-shell-mockup.png` | shell | Replace native XAF left navigation |
+
+**Retired:** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `images/ap-*.png`, Excel draft (removed 2026-08-10).
 
 ---
 

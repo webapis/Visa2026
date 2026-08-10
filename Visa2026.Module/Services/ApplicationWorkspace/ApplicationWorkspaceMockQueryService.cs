@@ -5,7 +5,7 @@ using DevExpress.ExpressApp;
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
 /// <summary>
-/// Prototype mock — hard-coded rows from docs/prototypes/application-detail-m2m.html.
+/// Prototype mock — layout per docs/prototypes/process-started-application-profile-workspace-mockup.png.
 /// Replace with <see cref="ApplicationWorkspaceQueryService"/> when domain M2M ships.
 /// </summary>
 public sealed class ApplicationWorkspaceMockQueryService : IApplicationWorkspaceQueryService
