@@ -6,6 +6,54 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ## Entries
 
+### 2026-08-10 — B5b Case workspace PNG parity (Blazor)
+
+- **Delivered**: Full case workspace lift from HTML prototype — `ApplicationWorkspaceCaseView` + `ApplicationWorkspaceCaseBuilder`; tab UIs for overview (summary tiles + stepper + linked records), people matrix + rail, progress vertical timeline + advance action, inline `ApplicationItemDocumentCopiesComponent` / `ApplicationReportPackageComponent`, SLA dashboard.
+- **Files**: `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCaseDocumentsTab.razor`, `OfficerShellCaseResminamalarTab.razor`, `ApplicationWorkspaceCaseModels.cs`, `ApplicationWorkspaceCaseBuilder.cs`.
+- **Verify**: F5 → Application Profiles → In process → open row → all 6 tabs; documents/resminamalar render in-tab (wide layout, no preview-slot redirect).
+- **Deferred**: Ministry letter upload + progress notes persistence (read-only shell); hide XAF tab bar.
+
+### 2026-08-10 — B5 Case workspace 6-tab shell
+
+- **Delivered**: `OfficerShellCaseWorkspaceComponent` — PNG `cw-*` layout with tabs (overview, people, progress, documents, resminamalar, SLA); live `ApplicationWorkspaceSnapshot` + new `CaseChrome` header fields; person link/unlink/detail + preview-slot document copies and Resminamalar.
+- **Module**: `ApplicationWorkspaceCaseChrome`, `ApplicationWorkspaceResminamalarOpenHelper`.
+- **Next**: parity sign-off `parity/CHECKLIST.md`; hide XAF tab bar (optional).
+- **Cross-skill**: preview slot — **visa2026-preview-slot**; document copies — **visa2026-document-copies**.
+
+### 2026-08-10 — B4 Profile templates catalog (list/grid + detail)
+
+- **Delivered**: `OfficerShellTemplateCatalogComponent` — PNG-parity templates catalog (family chips, list/grid, pagination, status pills, staged/in-process usage counts); drill-in rail + `ApplicationProfileOverviewComponent`; `ApplicationProfileCatalogRow` extended with usage + family key.
+- **Next**: PNG 6-tab case workspace shell; parity sign-off `parity/CHECKLIST.md`.
+- **Cross-skill**: —
+
+### 2026-08-10 — B2 Start process domain merge + B3 immersive chrome
+
+- **Delivered**: `OfficerShellStartProcessService` — validates staged+ready rows, merges people into primary `Application`, deletes secondary staged shells, allocates `YYYY-NNNN` process number (`OfficerShellProcessNumberAllocator`), appends first progress step (`1_REVIEW_STARTED` or `PROCESS_STARTED` by route), syncs `Application.ProcessNumber` + latest progress.
+- **Blazor**: `StartProcessAsync` commits via `ObjectSpace`, reloads queues, opens case workspace.
+- **B3**: `#visa-app-shell:has(.officer-shell-host)` hides XAF `.sidebar` and strips DetailView padding (`officer-shell-host.css`).
+- **Merge**: multi-select links roster via `ApplicationPersonService`; copies `ProjectContract` / profile when primary empty.
+- **Next**: dedicated templates list/grid screen; PNG 6-tab case workspace; parity sign-off in `parity/CHECKLIST.md`.
+- **Cross-skill**: progress transition rules — **visa2026-application-progress**.
+
+### 2026-08-10 — B0 Blazor officer shell lift
+
+- **Delivered**: `OfficerShellHost` + `OfficerShellComponent.razor` — PNG sidebar (staged / in-process / templates), live badge counts, list/grid queues from `IOfficerShellStagedQueryService` / `IOfficerShellInProcessQueryService`, embedded `ApplicationProfileCatalogComponent` + `ApplicationWorkspaceComponent`.
+- **Nav**: Application → **Application Profiles** (`OfficerShellModelUpdater`).
+- **CSS**: copied `wwwroot/officer-shell/styles/*` → `wwwroot/css/officer-shell/` + `officer-shell-host.css`.
+- **Staged heuristic**: `ProcessNumber` empty + `LatestPrimaryStateCode` in `OFFICE_PREPARATION` / `DRAFT` / null.
+- **Start process (v1)**: opens case workspace for first selected staged row — full merge/number assignment deferred to **B2**.
+- **HTML prototype**: remains at `/officer-shell/` for parity QA; production path is XAF nav.
+- **Next**: **B1** grouped staged + pagination + workspace tab chrome in shell; **B2** domain merge on Start process.
+- **Cross-skill**: —
+
+### 2026-08-10 — B1 Blazor shell PNG polish
+
+- **Delivered**: Family filter chips + legend, pagination (10/25/50), grouped staged accordion (`OfficerShellStagedGroupedView`), rich grid cards with color stripe, toolbar search, SLA chips on in-process; `OfficerShellTemplateFamily` maps profile code/action family → reg/inv/ext/wp.
+- **Components**: `OfficerShellPaginationBar`, `OfficerShellFamilyChips`, `OfficerShellStagedGroupedView`.
+- **Still 🟡 vs PNG/HTML**: full XAF chrome, dedicated templates list/grid, case workspace 6-tab PNG layout, template catalog pagination.
+- **Next**: **B2** Start process merge; optional immersive XAF chrome hide.
+- **Cross-skill**: —
+
 ### 2026-08-08 — Slice 10m: Report Dashboard ministry SQL
 
 - **Delivered**: `ministry_roster_lines` CTE (M2M + legacy) via `{{MINISTRY_ROSTER_CTE}}` in 8 embedded `.postgres.sql` views; visa-extension completed `IssuedVisa` dual-read; ministry invitation legacy EF loader + role filters use M2M roster.

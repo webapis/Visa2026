@@ -1,0 +1,518 @@
+@using System.Linq
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.OfficerShell
+
+<div class="officer-case-workspace">
+    @if (IsLoading || Snapshot == null)
+    {
+        <div class="os-loading" role="status">Loading case workspace…</div>
+    }
+    else if (Snapshot.ApplicationId == Guid.Empty)
+    {
+        <div class="os-loading">No case selected.</div>
+    }
+    else
+    {
+        var view = Snapshot.CaseView;
+        var chrome = view.Chrome;
+        <header class="cw-head">
+            <div class="cw-head__top">
+                <div class="cw-head__title-block">
+                    <div class="cw-head__accent" style="background:@OfficerShellTemplateFamily.GetColor(chrome.TemplateFamilyKey)"></div>
+                    <div>
+                        <h1>Application № @chrome.DisplayNumber</h1>
+                        <p class="cw-head__sub">@chrome.TemplateFamilyLabel · Started @(string.IsNullOrWhiteSpace(chrome.StartedOn) ? "—" : chrome.StartedOn)</p>
+                    </div>
+                </div>
+                <div class="cw-head__badges">
+                    @if (chrome.SlaDaysRemaining is int slaDays)
+                    {
+                        <span class="cw-head-badge cw-head-badge--sla">📅 @slaDays days remaining</span>
+                    }
+                    <span class="cw-head-badge cw-head-badge--process">⚙ In process</span>
+                    <button type="button" class="os-btn os-btn--ghost cw-head__back" @onclick="BackToListAsync">← Back to list</button>
+                </div>
+            </div>
+            <div class="cw-head__people">
+                @foreach (var (name, index) in chrome.PeopleNames.Select((n, i) => (n, i)))
+                {
+                    <span class="cw-person">
+                        <span class="cw-person__avatar" style="background:@PersonColor(index)">@Initials(name)</span>
+                        @name
+                    </span>
+                }
+                @if (chrome.MergedFromCount is int merged && merged > 1)
+                {
+                    <span class="cw-merge">⊞ Merged from @merged staged profiles</span>
+                }
+            </div>
+        </header>
+
+        <div class="cw-layout @(IsWideTab(ActiveTab) ? "cw-layout--wide" : null)">
+            <nav class="cw-nav" aria-label="Case sections">
+                @foreach (var tab in CaseTabs)
+                {
+                    <button type="button"
+                            class="cw-nav__item @(ActiveTab == tab.Key ? "is-active" : null)"
+                            @onclick="() => SelectTab(tab.Key)">
+                        <span aria-hidden="true">@tab.Glyph</span>
+                        <span>@tab.Label</span>
+                    </button>
+                }
+            </nav>
+
+            <div class="cw-main @(IsWideTab(ActiveTab) ? "cw-main--full" : null)">
+                @switch (ActiveTab)
+                {
+                    case "overview":
+                        @RenderOverview(view)
+                        break;
+                    case "people":
+                        @RenderPeople(view)
+                        break;
+                    case "progress":
+                        @RenderProgress(view)
+                        break;
+                    case "documents":
+                        <OfficerShellCaseDocumentsTab ApplicationId="Snapshot.ApplicationId" Snapshot="Snapshot" />
+                        break;
+                    case "resminamalar":
+                        <OfficerShellCaseResminamalarTab ApplicationId="Snapshot.ApplicationId" />
+                        break;
+                    case "sla":
+                        @RenderSla(view)
+                        break;
+                }
+            </div>
+
+            @if (!IsWideTab(ActiveTab))
+            {
+                <aside class="cw-rail">
+                    @RenderRail(view)
+                </aside>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly (string Key, string Label, string Glyph)[] CaseTabs =
+    [
+        ("overview", "Overview", "⌂"),
+        ("people", "People & links", "👥"),
+        ("progress", "Progress", "▤"),
+        ("documents", "Document copies", "📄"),
+        ("resminamalar", "Resminamalar", "📦"),
+        ("sla", "SLA & deadlines", "⏱"),
+    ];
+
+    private static readonly string[] PersonColors =
+        ["#7c3aed", "#0f9d58", "#ea580c", "#2563eb", "#db2777"];
+
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string ActiveTab { get; set; } = "overview";
+    [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public bool CanLinkPerson { get; set; }
+    [Parameter] public bool CanUnlinkPerson { get; set; }
+    [Parameter] public bool CanOpenPersonDetail { get; set; }
+    [Parameter] public bool CanOpenDocumentCopies { get; set; }
+    [Parameter] public EventCallback<string> CaseTabChanged { get; set; }
+    [Parameter] public EventCallback BackToListRequested { get; set; }
+    [Parameter] public EventCallback LinkPersonRequested { get; set; }
+    [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
+    [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
+    [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
+    [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
+    [Parameter] public EventCallback AdvanceProgressRequested { get; set; }
+
+    private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
+
+    private RenderFragment RenderOverview(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="cw-overview">
+            <section class="cw-card">
+                <h2 class="cw-card__title">Case summary</h2>
+                <div class="cw-summary-grid">
+                    @foreach (var tile in view.SummaryTiles)
+                    {
+                        <div class="cw-sum-tile cw-sum-tile--@tile.Tone">
+                            <span class="cw-sum-tile__icon">@tile.Glyph</span>
+                            <span class="cw-sum-tile__label">@tile.Label</span>
+                            <strong class="cw-sum-tile__value">@tile.Value</strong>
+                        </div>
+                    }
+                </div>
+            </section>
+            <section class="cw-card">
+                <h2 class="cw-card__title">Application progress</h2>
+                <div class="cw-prog-stepper">
+                @for (var i = 0; i < view.ProgressSteps.Count; i++)
+                {
+                    var step = view.ProgressSteps[i];
+                    var currentIdx = view.ProgressSteps.ToList().FindIndex(s => s.State == "current");
+                    var badge = step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
+                    var badgeCls = step.State == "done" ? "ok" : step.State == "current" ? "active" : "muted";
+                    var lineCls = i < view.ProgressSteps.Count - 1
+                        ? i < currentIdx ? "done" : i == currentIdx ? "current" : "pending"
+                        : null;
+                        <div class="cw-prog-step cw-prog-step--@step.State">
+                            <div class="cw-prog-step__track">
+                                <span class="cw-prog-step__dot">@(step.State == "done" ? "✓" : (i + 1).ToString())</span>
+                                @if (lineCls != null)
+                                {
+                                    <span class="cw-prog-step__line cw-prog-step__line--@lineCls"></span>
+                                }
+                            </div>
+                            <div class="cw-prog-step__body">
+                                <strong>@step.Label</strong>
+                                <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+            <section class="cw-card">
+                <h2 class="cw-card__title">Linked records</h2>
+                <div class="cw-link-row">
+                    @foreach (var tile in view.LinkedRecordTiles)
+                    {
+                        <button type="button" class="cw-link-tile cw-link-tile--@tile.Tone" @onclick='() => SelectTab("people")'>
+                            <span class="cw-link-tile__icon">@tile.Glyph</span>
+                            <span class="cw-link-tile__label">@tile.Label</span>
+                            <strong class="cw-link-tile__count">@tile.Count</strong>
+                            <span class="cw-link-tile__chev">›</span>
+                        </button>
+                    }
+                </div>
+            </section>
+            <p class="cw-foot">Application Profile instance · Template: @(string.IsNullOrWhiteSpace(view.Chrome.ProfileTemplateName) ? Snapshot!.Profile.Title : view.Chrome.ProfileTemplateName)</p>
+        </div>;
+    };
+
+    private RenderFragment RenderPeople(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="ct-page">
+            <h2 class="ct-page__title">People on this case</h2>
+            <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson)" @onclick="LinkPersonAsync">Link existing…</button>
+                <button type="button" class="os-btn" disabled="@(!CanUnlinkPerson)" @onclick="UnlinkPersonAsync">Unlink</button>
+            </div>
+            @if (view.People.Count == 0)
+            {
+                <p class="os-empty">No people linked.</p>
+            }
+            else
+            {
+                <div class="os-panel" style="margin-bottom:16px">
+                    <table class="os-table">
+                        <thead>
+                            <tr><th>Person</th><th>Role</th><th>Passport</th><th>Visa</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var person in view.People)
+                            {
+                                <tr class="@(person.Index == SelectedPersonRowIndex ? "is-selected" : null)" @onclick="() => SelectPersonRow(person.Index)">
+                                    <td><span class="ct-link">@person.Name</span></td>
+                                    <td>@person.RoleLabel</td>
+                                    <td><code>@person.PassportNumber</code></td>
+                                    <td><code>@person.VisaNumber</code></td>
+                                    <td>
+                                        <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <h2 class="ct-page__title">Linked records by person</h2>
+                @foreach (var person in view.People)
+                {
+                    <details class="ct-person-panel" open>
+                        <summary class="ct-person-panel__head">
+                            <span>👤 <strong>@person.Name</strong></span>
+                            <button type="button" class="os-btn os-btn--ghost ct-btn-sm" @onclick:stopPropagation="true" @onclick="() => OpenPersonByIndex(person.Index)">Open person detail</button>
+                        </summary>
+                        <div class="ct-rec-grid">
+                            @foreach (var record in person.Records)
+                            {
+                                <div class="ct-rec">
+                                    <span class="ct-rec__icon">@record.Glyph</span>
+                                    <span class="ct-rec__label">@record.Label</span>
+                                    <strong class="ct-rec__count">@record.Count</strong>
+                                    @if (record.State == "valid")
+                                    {
+                                        <span class="ct-rec__status ct-rec__status--valid">✓ Valid</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ct-rec__status ct-rec__status--muted">—</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </details>
+                }
+            }
+        </div>;
+    };
+
+    private RenderFragment RenderProgress(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        <div class="ct-page">
+            <h2 class="ct-page__title">Progress</h2>
+            <p class="ct-page__sub">Application process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
+            <div class="ct-prog-v-list">
+                @foreach (var step in view.ProgressSteps)
+                {
+                    var badge = step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
+                    var badgeCls = step.State == "done" ? "ok" : step.State == "current" ? "active" : "muted";
+                    var icon = step.State == "done" ? "✓" : step.State == "current" ? "✎" : "○";
+                    <div class="ct-prog-v ct-prog-v--@step.State">
+                        <div class="ct-prog-v__rail">
+                            <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
+                            <span class="ct-prog-v__dot">@icon</span>
+                            <span class="ct-prog-v__line"></span>
+                        </div>
+                        <div class="ct-prog-v__body">
+                            <div class="ct-prog-v__head">
+                                <strong>@step.Label</strong>
+                                <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                            </div>
+                            @if (step.State == "current")
+                            {
+                                <div class="ct-prog-detail">
+                                    <div class="ct-prog-detail__grid">
+                                        <div>
+                                            <label class="ct-label">Officer notes</label>
+                                            <textarea class="ct-textarea" rows="3" placeholder="Add notes for the current progress step…" readonly></textarea>
+                                            <label class="ct-label" style="margin-top:10px">Ministry letter</label>
+                                            <div class="ct-upload">☁ Upload file<br /><span>PDF, DOCX up to 10 MB</span></div>
+                                        </div>
+                                        <dl class="ct-meta">
+                                            <div><dt>Current state</dt><dd><span class="os-status os-status--process">@step.CurrentStateLabel</span></dd></div>
+                                            <div><dt>Started on</dt><dd>@step.Date</dd></div>
+                                            <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
+                                        </dl>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>;
+    };
+
+    private RenderFragment RenderSla(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        var sla = view.Sla;
+        var casePct = sla.TotalSlaDays > 0
+            ? Math.Clamp((int)Math.Round(100.0 * sla.ElapsedDays / sla.TotalSlaDays), 5, 95)
+            : 73;
+        var stepPct = sla.CurrentStepDaysRemaining is int stepRem && sla.TotalSlaDays > 0
+            ? Math.Clamp(100 - stepRem * 10, 10, 90)
+            : 20;
+        <div class="ct-page">
+            <h2 class="ct-page__title">SLA dashboard</h2>
+            <div class="ct-sla-metrics">
+                <div class="ct-sla-metric">
+                    <h3>Overall case SLA</h3>
+                    <div class="ct-sla-metric__body">
+                        <div class="ct-sla-ring ct-sla-ring--lg" style="--ct-pct:@(100 - casePct)%">
+                            <strong>@(sla.CaseDaysRemaining?.ToString() ?? "—")</strong><span>days remaining</span>
+                        </div>
+                        <div>
+                            <p class="ct-muted">Total SLA <strong>@sla.TotalSlaDays days</strong></p>
+                            <p class="ct-muted">Elapsed <strong>@sla.ElapsedDays days</strong></p>
+                            <p class="ct-on-track"><span></span> On track</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="ct-sla-metric">
+                    <h3>Current step</h3>
+                    <p class="ct-muted">Ministry review deadline · Due @sla.MinistryDueDate</p>
+                    <div class="ct-sla-metric__body">
+                        <div class="ct-sla-ring" style="--ct-pct:@(100 - stepPct)%">
+                            <strong>@(sla.CurrentStepDaysRemaining?.ToString() ?? "—")</strong><span>days remaining</span>
+                        </div>
+                        <p class="ct-on-track"><span></span> On track</p>
+                    </div>
+                </div>
+                <div class="ct-sla-metric">
+                    <h3>Migration SLA</h3>
+                    <p class="ct-sla-metric__big">@sla.MigrationSlaLabel.Split(' ').FirstOrDefault() <span>days</span></p>
+                    <p class="ct-muted">Total configured on profile</p>
+                </div>
+            </div>
+            <div class="ct-sla-timeline">
+                <div class="ct-sla-timeline__node"><span>🚩</span><strong>Started</strong><span>@sla.StartedOn</span></div>
+                <div class="ct-sla-timeline__line"></div>
+                <div class="ct-sla-timeline__node"><span>🏛</span><strong>Ministry due</strong><span>@sla.MinistryDueDate</span></div>
+                <div class="ct-sla-timeline__line"></div>
+                <div class="ct-sla-timeline__node"><span>🏁</span><strong>Expected completion</strong><span>@sla.ExpectedCompletionDate</span></div>
+            </div>
+            <div class="ct-sla-lower">
+                <div class="ct-sla-table-wrap">
+                    <h3>Deadlines</h3>
+                    <table class="os-table">
+                        <thead><tr><th>Step</th><th>Due date</th><th>Days left</th><th>Status</th></tr></thead>
+                        <tbody>
+                            @foreach (var row in sla.Deadlines)
+                            {
+                                <tr class="@(row.IsCurrent ? "ct-sla-row--current" : null)">
+                                    <td>@if (row.IsCurrent) { <strong>@row.Step</strong> } else { @row.Step }</td>
+                                    <td>@row.DueDate</td>
+                                    <td class="@(row.Status == "inprogress" ? "ct-sla-days--ok" : null)">@row.DaysLeft</td>
+                                    <td><span class="os-status os-status--@SlaStatusClass(row.Status)">@SlaStatusLabel(row.Status)</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="ct-sla-aside">
+                    @if (!string.IsNullOrWhiteSpace(sla.AlertMessage))
+                    {
+                        <div class="ct-sla-alert">⚠ <div><strong>Ministry review deadline approaching</strong><p>@sla.AlertMessage</p></div></div>
+                    }
+                    <div class="cw-rail-block" style="box-shadow:none;margin:0">
+                        <h4>SLA source (Profile template)</h4>
+                        <button type="button" class="cw-link-btn">MigrationSlaDays from template</button>
+                        <p class="ct-muted" style="margin:8px 0 0">Total SLA (days): <strong>@sla.TotalSlaDays</strong></p>
+                    </div>
+                </div>
+            </div>
+            <p class="ct-sla-foot">All dates are displayed in system time zone (UTC+5:00) Ashgabat.</p>
+        </div>;
+    };
+
+    private RenderFragment RenderRail(ApplicationWorkspaceCaseView view) => __builder =>
+    {
+        @switch (ActiveTab)
+        {
+            case "overview":
+                <section class="cw-rail-block">
+                    <h4>Readiness</h4>
+                    <ul class="cw-checklist">
+                        <li>✓ Required data complete</li>
+                        <li>✓ BO states valid</li>
+                    </ul>
+                </section>
+                <section class="cw-rail-block">
+                    <h4>Quick actions</h4>
+                    <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("documents")'>📂 Open document copies</button>
+                    <button type="button" class="cw-rail-btn" @onclick='() => SelectTab("resminamalar")'>📦 Generate Resminamalar package</button>
+                    <button type="button" class="cw-rail-btn cw-rail-btn--primary" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                </section>
+                <section class="cw-rail-block">
+                    <h4>Activity</h4>
+                    <ul class="cw-timeline">
+                        @foreach (var item in view.Activities.Take(4))
+                        {
+                            <li><strong>@item.Title</strong><span>@item.Subtitle</span></li>
+                        }
+                    </ul>
+                </section>
+                break;
+            case "people":
+                <section class="cw-rail-block">
+                    <h4>People summary</h4>
+                    <ul class="ct-summary-list">
+                        <li><span>Total</span><strong>@view.PeopleSummary.Total</strong></li>
+                        <li><span>Primary</span><strong>@view.PeopleSummary.Primary</strong></li>
+                        <li><span>Dependents</span><strong>@view.PeopleSummary.Dependents</strong></li>
+                        <li><span>Sponsors</span><strong>@view.PeopleSummary.Sponsors</strong></li>
+                    </ul>
+                </section>
+                <section class="cw-rail-block">
+                    <h4>Linked records summary</h4>
+                    <ul class="ct-summary-list">
+                        @foreach (var pair in view.LinkedRecordsSummary.OrderBy(p => p.Key))
+                        {
+                            <li><span>@pair.Key</span><strong>@pair.Value</strong></li>
+                        }
+                    </ul>
+                </section>
+                break;
+            case "progress":
+                var current = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
+                var ringPct = current?.SlaDaysRemaining is int d ? Math.Clamp(100 - d * 8, 10, 90) : 50;
+                <section class="cw-rail-block">
+                    <h4>SLA for current step</h4>
+                    <div class="ct-sla-ring" style="--ct-pct:@ringPct%">
+                        <strong>@(current?.SlaDaysRemaining?.ToString() ?? "—")</strong><span>days left</span>
+                    </div>
+                    @if (current != null)
+                    {
+                        <ul class="ct-summary-list" style="margin-top:10px">
+                            <li><span>Target date</span><strong>@current.SlaTargetDate</strong></li>
+                        </ul>
+                    }
+                </section>
+                <section class="cw-rail-block">
+                    <button type="button" class="os-btn os-btn--primary" style="width:100%;margin-bottom:8px" @onclick="AdvanceProgressAsync">▶ Advance progress</button>
+                </section>
+                <section class="cw-rail-block">
+                    <h4>History</h4>
+                    <ul class="cw-timeline">
+                        @foreach (var row in Snapshot!.ProgressHistory.Take(3))
+                        {
+                            <li><strong>@row.State</strong><span>@row.Date</span></li>
+                        }
+                    </ul>
+                </section>
+                break;
+            case "sla":
+                break;
+        }
+    };
+
+    private static string SlaStatusClass(string status) => status switch
+    {
+        "completed" => "ready",
+        "inprogress" => "process",
+        _ => "hold",
+    };
+
+    private static string SlaStatusLabel(string status) => status switch
+    {
+        "completed" => "Completed",
+        "inprogress" => "In progress",
+        _ => "Pending",
+    };
+
+    private async Task SelectTab(string key)
+    {
+        if (CaseTabChanged.HasDelegate)
+            await CaseTabChanged.InvokeAsync(key);
+    }
+
+    private Task BackToListAsync() => BackToListRequested.InvokeAsync();
+    private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
+    private Task UnlinkPersonAsync() => UnlinkPersonRequested.InvokeAsync();
+    private Task AdvanceProgressAsync() => AdvanceProgressRequested.InvokeAsync();
+
+    private async Task SelectPersonRow(int rowIndex)
+    {
+        if (SelectPersonRowRequested.HasDelegate)
+            await SelectPersonRowRequested.InvokeAsync(rowIndex);
+    }
+
+    private async Task OpenPersonByIndex(int rowIndex)
+    {
+        if (OpenPersonDetailByIndexRequested.HasDelegate)
+            await OpenPersonDetailByIndexRequested.InvokeAsync(rowIndex);
+        else if (OpenPersonDetailRequested.HasDelegate)
+            await OpenPersonDetailRequested.InvokeAsync();
+    }
+
+    private static string PersonColor(int index) => PersonColors[index % PersonColors.Length];
+
+    private static string Initials(string name)
+    {
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return string.Concat(parts.Take(2).Select(p => char.ToUpperInvariant(p[0])));
+    }
+}

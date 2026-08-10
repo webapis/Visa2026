@@ -1,0 +1,133 @@
+@using DevExpress.ExpressApp
+@using Microsoft.Extensions.DependencyInjection
+@using Visa2026.Blazor.Server.Components
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Localization
+@using Visa2026.Module.Services.PreviewSlot
+@using Visa2026.Module.Services.WordReports
+
+<div class="ct-resmi-page">
+    <div class="ct-resmi-head">
+        <div>
+            <h2 class="ct-page__title">Report package catalog — Resminamalar</h2>
+            <p class="ct-page__sub">Generate a ZIP package of documents from profile nested templates.</p>
+        </div>
+    </div>
+
+    @if (_previewActive)
+    {
+        <ReportPackageInlinePreview @ref="_inlinePreview"
+                                    UiCultureName="_uiCultureName"
+                                    PreviewClosed="OnPreviewClosedAsync" />
+    }
+    else if (!string.IsNullOrWhiteSpace(_emptyMessage))
+    {
+        <div class="app-item-doc-copies__empty" role="status"><p>@_emptyMessage</p></div>
+    }
+    else if (_applicationId == Guid.Empty || _catalogEntries.Count == 0)
+    {
+        <div class="app-item-doc-copies__empty" role="status"><p>@EmptyCatalog</p></div>
+    }
+    else
+    {
+        <div class="ct-resmi-split">
+            <div class="ct-resmi-main">
+                <ApplicationReportPackageComponent ApplicationId="_applicationId"
+                                                 PackageScope="_packageScope"
+                                                 ApplicationItemIds="_applicationItemIds"
+                                                 ApplicationNumber="_applicationNumber"
+                                                 CatalogEntries="_catalogEntries"
+                                                 UiCultureName="_uiCultureName"
+                                                 UseInlinePreview="true"
+                                                 RefreshRequested="_refreshRequested"
+                                                 OnInlinePreviewRequested="HandleInlinePreviewAsync" />
+                <div class="ct-resmi-info">ℹ Readiness is evaluated based on profile data and template merge fields. Templates with warnings can still be generated.</div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+
+    [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+
+    private Guid _applicationId;
+    private WordReportPackageScope _packageScope = WordReportPackageScope.Application;
+    private IReadOnlyList<Guid> _applicationItemIds = Array.Empty<Guid>();
+    private string _applicationNumber = string.Empty;
+    private IReadOnlyList<ApplicationWordReportPackageCatalogEntry> _catalogEntries =
+        Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+    private string _emptyMessage = string.Empty;
+    private string _uiCultureName = string.Empty;
+    private bool _previewActive;
+    private ReportPackageInlinePreview? _inlinePreview;
+    private EventCallback _refreshRequested;
+
+    private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
+
+    protected override void OnInitialized()
+    {
+        _refreshRequested = EventCallback.Factory.Create(this, ReloadCatalogAsync);
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _applicationId = ApplicationId;
+        if (_applicationId == Guid.Empty)
+        {
+            _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _emptyMessage = string.Empty;
+            return;
+        }
+
+        ReloadCatalog();
+    }
+
+    private void ReloadCatalog()
+    {
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<Application>();
+        var application = objectSpace.GetObjectByKey<Application>(_applicationId);
+        if (application == null)
+        {
+            _catalogEntries = Array.Empty<ApplicationWordReportPackageCatalogEntry>();
+            _applicationNumber = string.Empty;
+            _emptyMessage = EmptyCatalog;
+            return;
+        }
+
+        var catalog = CatalogService.Build(objectSpace, application, WordReportGenerationContext.ForApplication());
+        _catalogEntries = catalog.Entries;
+        _applicationNumber = application.FullApplicationNumber ?? application.ProcessNumber ?? string.Empty;
+        _emptyMessage = catalog.TotalCount == 0
+            ? VisaUiMessages.Format(
+                "WordReports.NoApplicationScopeTemplates",
+                application.ApplicationProfile?.Name ?? application.ApplicationType?.NameTm ?? "Application")
+            : string.Empty;
+    }
+
+    private Task ReloadCatalogAsync()
+    {
+        ReloadCatalog();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleInlinePreviewAsync(ReportPackagePreviewRequest request)
+    {
+        _previewActive = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        if (_inlinePreview != null)
+            await _inlinePreview.OpenAsync(request);
+    }
+
+    private async Task OnPreviewClosedAsync()
+    {
+        _previewActive = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}

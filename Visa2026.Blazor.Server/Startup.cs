@@ -24,6 +24,7 @@ using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.ApplicationProfileOverview;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
+using Visa2026.Module.Services.OfficerShell;
 using Visa2026.Module.Services.PersonDossier;
 using Visa2026.Module.Services.PersonLinkedDocuments;
 using Visa2026.Module.Services.HeaderLinkedDocuments;
@@ -251,6 +252,11 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationProfileOverviewMockQueryService>();
             services.AddScoped<IApplicationProfileOverviewQueryService, ApplicationProfileOverviewMockQueryService>();
             services.AddScoped<IApplicationProfileCatalogQueryService, ApplicationProfileCatalogQueryService>();
+            services.AddScoped<IOfficerShellPendingOpen, OfficerShellPendingOpen>();
+            services.AddScoped<IOfficerShellStagedQueryService, OfficerShellStagedQueryService>();
+            services.AddScoped<IOfficerShellInProcessQueryService, OfficerShellInProcessQueryService>();
+            services.AddScoped<IOfficerShellNavQueryService, OfficerShellNavQueryService>();
+            services.AddScoped<IOfficerShellStartProcessService, OfficerShellStartProcessService>();
             services.AddScoped<ApplicationWorkspacePersonUiActions>();
             services.AddScoped<IApplicationWorkspacePersonUiActions>(sp =>
                 sp.GetRequiredService<ApplicationWorkspacePersonUiActions>());

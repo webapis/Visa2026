@@ -1,0 +1,752 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor.Components.Models;
+using DevExpress.ExpressApp.Blazor.Editors;
+using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
+using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Editors;
+using Visa2026.Module.Services.ApplicationProfileCatalog;
+using Visa2026.Module.Services.ApplicationProfileOverview;
+using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.ApplicationWorkspace;
+using Visa2026.Module.Services.OfficerShell;
+using Visa2026.Module.Services.PreviewSlot;
+
+namespace Visa2026.Blazor.Server.Editors;
+
+[PropertyEditor(typeof(string), OfficerShellEditorAliases.Shell, false)]
+public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexViewItem
+{
+    private XafApplication? _application;
+    private IOfficerShellNavQueryService? _navQueryService;
+    private IOfficerShellStagedQueryService? _stagedQueryService;
+    private IOfficerShellInProcessQueryService? _inProcessQueryService;
+    private IApplicationWorkspaceQueryService? _workspaceQueryService;
+    private IApplicationProfileCatalogQueryService? _catalogQueryService;
+    private IApplicationProfileOverviewQueryService? _overviewQueryService;
+    private IOfficerShellStartProcessService? _startProcessService;
+    private IReadOnlyList<ApplicationProfileCatalogRow> _allCatalogRows = Array.Empty<ApplicationProfileCatalogRow>();
+
+    public OfficerShellPropertyEditor(Type objectType, IModelMemberViewItem model)
+        : base(objectType, model) { }
+
+    public override OfficerShellModel ComponentModel => (OfficerShellModel)base.ComponentModel;
+
+    void IComplexViewItem.Setup(IObjectSpace objectSpace, XafApplication application)
+    {
+        _application = application;
+        var sp = application.ServiceProvider;
+        _navQueryService = sp?.GetService<IOfficerShellNavQueryService>();
+        _stagedQueryService = sp?.GetService<IOfficerShellStagedQueryService>();
+        _inProcessQueryService = sp?.GetService<IOfficerShellInProcessQueryService>();
+        _workspaceQueryService = sp?.GetService<IApplicationWorkspaceQueryService>();
+        _catalogQueryService = sp?.GetService<IApplicationProfileCatalogQueryService>();
+        _overviewQueryService = sp?.GetService<IApplicationProfileOverviewQueryService>();
+        _startProcessService = sp?.GetService<IOfficerShellStartProcessService>();
+    }
+
+    protected override IComponentModel CreateComponentModel() => new OfficerShellModel
+    {
+        IsLoading = true,
+        SelectedStagedIds = new HashSet<Guid>(),
+        StagedGroupCollapsed = new HashSet<string>(),
+        InitialLoadRequested = EventCallback.Factory.Create(this, LoadAsync),
+        NavigateRequested = EventCallback.Factory.Create<OfficerShellPage>(this, NavigateAsync),
+        OpenCaseRequested = EventCallback.Factory.Create<Guid>(this, OpenCaseAsync),
+        StartProcessRequested = EventCallback.Factory.Create(this, StartProcessAsync),
+        ToggleStagedSelectionRequested = EventCallback.Factory.Create<Guid>(this, ToggleStagedSelectionAsync),
+        StagedViewModeChanged = EventCallback.Factory.Create<string>(this, OnStagedViewModeChanged),
+        InProcessViewModeChanged = EventCallback.Factory.Create<string>(this, OnInProcessViewModeChanged),
+        SearchTextChanged = EventCallback.Factory.Create<string>(this, OnSearchTextChanged),
+        StagedFamilyFilterChanged = EventCallback.Factory.Create<string>(this, OnStagedFamilyFilterChanged),
+        InProcessFamilyFilterChanged = EventCallback.Factory.Create<string>(this, OnInProcessFamilyFilterChanged),
+        StagedPageChanged = EventCallback.Factory.Create<int>(this, OnStagedPageChanged),
+        StagedPageSizeChanged = EventCallback.Factory.Create<int>(this, OnStagedPageSizeChanged),
+        InProcessPageChanged = EventCallback.Factory.Create<int>(this, OnInProcessPageChanged),
+        InProcessPageSizeChanged = EventCallback.Factory.Create<int>(this, OnInProcessPageSizeChanged),
+        ToggleStagedGroupCollapsed = EventCallback.Factory.Create<string>(this, OnToggleStagedGroupCollapsed),
+        NewProfileRequested = EventCallback.Factory.Create(this, NewProfileAsync),
+        SelectProfileRequested = EventCallback.Factory.Create<Guid>(this, SelectProfileAsync),
+        ConfigureProfileRequested = EventCallback.Factory.Create(this, ConfigureProfileAsync),
+        CatalogSearchTextChanged = EventCallback.Factory.Create<string>(this, OnCatalogSearchChanged),
+        TemplatesViewModeChanged = EventCallback.Factory.Create<string>(this, OnTemplatesViewModeChanged),
+        TemplatesFamilyFilterChanged = EventCallback.Factory.Create<string>(this, OnTemplatesFamilyFilterChanged),
+        TemplatesPageChanged = EventCallback.Factory.Create<int>(this, OnTemplatesPageChanged),
+        TemplatesPageSizeChanged = EventCallback.Factory.Create<int>(this, OnTemplatesPageSizeChanged),
+        OpenTemplateDetailRequested = EventCallback.Factory.Create<Guid>(this, OpenTemplateDetailAsync),
+        BackToTemplateCatalogRequested = EventCallback.Factory.Create(this, BackToTemplateCatalogAsync),
+        ConfigureTemplateRequested = EventCallback.Factory.Create<Guid>(this, ConfigureTemplateAsync),
+        CaseTabChanged = EventCallback.Factory.Create<string>(this, OnCaseTabChanged),
+        BackToInProcessRequested = EventCallback.Factory.Create(this, BackToInProcessAsync),
+        LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
+        UnlinkPersonRequested = EventCallback.Factory.Create(this, UnlinkPersonAsync),
+        OpenPersonDetailRequested = EventCallback.Factory.Create(this, OpenPersonDetailAsync),
+        OpenDocumentCopiesRequested = EventCallback.Factory.Create(this, OpenDocumentCopiesAsync),
+        OpenResminamalarRequested = EventCallback.Factory.Create(this, OpenResminamalarAsync),
+        SelectPersonRowRequested = EventCallback.Factory.Create<int>(this, SelectPersonRow),
+        OpenPersonDetailByIndexRequested = EventCallback.Factory.Create<int>(this, OpenPersonDetailByIndexAsync),
+        AdvanceProgressRequested = EventCallback.Factory.Create(this, AdvanceProgressAsync),
+    };
+
+    protected override void OnCurrentObjectChanged()
+    {
+        base.OnCurrentObjectChanged();
+        ApplyPendingOpen();
+        _ = LoadAsync();
+    }
+
+    private void ApplyPendingOpen()
+    {
+        if (_application == null)
+            return;
+
+        var (page, caseId) = OfficerShellPendingOpenGate.Get(_application);
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.CurrentPage = page;
+        model.CaseApplicationId = caseId;
+    }
+
+    private async Task LoadAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        model.IsLoading = true;
+        model.StatusMessage = null;
+        model.IsStatusError = false;
+        await Task.Delay(16);
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+
+            var navService = _navQueryService ?? _application.ServiceProvider?.GetService<IOfficerShellNavQueryService>();
+            var stagedService = _stagedQueryService ?? _application.ServiceProvider?.GetService<IOfficerShellStagedQueryService>();
+            var inProcessService = _inProcessQueryService ?? _application.ServiceProvider?.GetService<IOfficerShellInProcessQueryService>();
+
+            model.NavCounts = navService?.GetCounts(objectSpace) ?? new OfficerShellNavCounts();
+            model.StagedRows = stagedService?.GetStagedProfiles(objectSpace) ?? Array.Empty<OfficerShellStagedRow>();
+            model.InProcessRows = inProcessService?.GetInProcessProfiles(objectSpace) ?? Array.Empty<OfficerShellInProcessRow>();
+
+            await LoadCatalogAsync(model, objectSpace);
+
+            if (model.CurrentPage == OfficerShellPage.Case && model.CaseApplicationId != Guid.Empty)
+                await LoadWorkspaceAsync(model, model.CaseApplicationId);
+        }
+        catch (Exception ex)
+        {
+            model.StatusMessage = ex.Message;
+            model.IsStatusError = true;
+        }
+        finally
+        {
+            model.IsLoading = false;
+        }
+    }
+
+    private async Task LoadCatalogAsync(OfficerShellModel model, IObjectSpace objectSpace)
+    {
+        var catalogService = _catalogQueryService
+            ?? _application?.ServiceProvider?.GetService<IApplicationProfileCatalogQueryService>();
+        if (catalogService == null)
+            return;
+
+        _allCatalogRows = catalogService.GetProfiles(objectSpace);
+        ApplyCatalogFilter(model);
+
+        if (model.TemplatesDetailOpen && model.SelectedProfileId != Guid.Empty)
+            await SelectProfileAsync(model.SelectedProfileId);
+        else if (model.CurrentPage == OfficerShellPage.Templates && !model.TemplatesDetailOpen)
+        {
+            model.SelectedProfileId = Guid.Empty;
+            model.OverviewSnapshot = null;
+        }
+        else
+        {
+            var keepSelection = model.SelectedProfileId != Guid.Empty
+                && _allCatalogRows.Any(r => r.ProfileId == model.SelectedProfileId);
+            var selectId = keepSelection
+                ? model.SelectedProfileId
+                : (_allCatalogRows.FirstOrDefault()?.ProfileId ?? Guid.Empty);
+
+            if (selectId != Guid.Empty)
+                await SelectProfileAsync(selectId);
+            else
+            {
+                model.SelectedProfileId = Guid.Empty;
+                model.OverviewSnapshot = null;
+            }
+        }
+    }
+
+    private async Task LoadWorkspaceAsync(OfficerShellModel model, Guid applicationId)
+    {
+        if (_application == null || applicationId == Guid.Empty)
+            return;
+
+        model.WorkspaceLoading = true;
+        await Task.Delay(16);
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            var service = _workspaceQueryService
+                ?? _application.ServiceProvider?.GetService<IApplicationWorkspaceQueryService>();
+
+            model.WorkspaceSnapshot = service != null
+                ? service.Load(objectSpace, applicationId)
+                : new ApplicationWorkspaceMockQueryService().Load(objectSpace, applicationId);
+
+            model.SelectedPersonRowIndex = -1;
+            UpdateCaseActionState(model);
+        }
+        finally
+        {
+            model.WorkspaceLoading = false;
+        }
+    }
+
+    private void UpdateCaseActionState(OfficerShellModel model)
+    {
+        var applicationId = model.CaseApplicationId;
+        var canLink = applicationId != Guid.Empty && _application?.MainWindow != null;
+        model.CanLinkPerson = canLink;
+        model.CanUnlinkPerson = canLink;
+
+        var personTab = model.WorkspaceSnapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
+        model.CanOpenPersonDetail = personTab != null
+            && model.SelectedPersonRowIndex >= 0
+            && model.SelectedPersonRowIndex < personTab.RowPersonIds.Count;
+        model.CanOpenDocumentCopies = personTab != null
+            && personTab.RowApplicationPersonIds.Count > 0
+            && (model.SelectedPersonRowIndex < 0
+                || model.SelectedPersonRowIndex < personTab.RowApplicationPersonIds.Count);
+    }
+
+    private void OnWorkspaceChanged()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.SelectedPersonRowIndex = -1;
+        if (model.CaseApplicationId != Guid.Empty)
+            _ = LoadWorkspaceAsync(model, model.CaseApplicationId);
+    }
+
+    private async Task NavigateAsync(OfficerShellPage page)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.CurrentPage = page;
+        model.StatusMessage = null;
+
+        if (page != OfficerShellPage.Templates)
+            model.TemplatesDetailOpen = false;
+
+        if (page == OfficerShellPage.Case && model.CaseApplicationId != Guid.Empty)
+            await LoadWorkspaceAsync(model, model.CaseApplicationId);
+    }
+
+    private async Task OpenCaseAsync(Guid applicationId)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.CaseApplicationId = applicationId;
+        model.CurrentPage = OfficerShellPage.Case;
+        model.CaseTab = "overview";
+        await LoadWorkspaceAsync(model, applicationId);
+    }
+
+    private Task OnCaseTabChanged(string tab)
+    {
+        if (ComponentModel != null)
+            ComponentModel.CaseTab = string.IsNullOrWhiteSpace(tab) ? "overview" : tab;
+        return Task.CompletedTask;
+    }
+
+    private async Task BackToInProcessAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.CurrentPage = OfficerShellPage.InProcess;
+        model.CaseTab = "overview";
+        model.SelectedPersonRowIndex = -1;
+        await LoadAsync();
+    }
+
+    private Task LinkPersonAsync()
+    {
+        if (_application?.MainWindow == null)
+            return Task.CompletedTask;
+
+        var model = ComponentModel;
+        if (model == null || model.CaseApplicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspacePersonLinkHelper.ShowLinkPersonPicker(
+            _application,
+            _application.MainWindow,
+            model.CaseApplicationId,
+            OnWorkspaceChanged);
+
+        return Task.CompletedTask;
+    }
+
+    private Task UnlinkPersonAsync()
+    {
+        if (_application?.MainWindow == null)
+            return Task.CompletedTask;
+
+        var model = ComponentModel;
+        if (model == null || model.CaseApplicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspacePersonLinkHelper.ShowUnlinkPersonPicker(
+            _application,
+            _application.MainWindow,
+            model.CaseApplicationId,
+            OnWorkspaceChanged);
+
+        return Task.CompletedTask;
+    }
+
+    private void SelectPersonRow(int rowIndex)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.SelectedPersonRowIndex = model.SelectedPersonRowIndex == rowIndex ? -1 : rowIndex;
+        UpdateCaseActionState(model);
+    }
+
+    private async Task OpenPersonDetailByIndexAsync(int rowIndex)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return;
+
+        model.SelectedPersonRowIndex = rowIndex;
+        UpdateCaseActionState(model);
+        await OpenPersonDetailAsync();
+    }
+
+    private async Task AdvanceProgressAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+        var application = objectSpace.GetObjectByKey<Application>(model.CaseApplicationId);
+        if (application == null)
+            return;
+
+        var detailView = _application.CreateDetailView(objectSpace, application);
+        detailView.ViewEditMode = ViewEditMode.Edit;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(_application.MainWindow, null));
+
+        await Task.Delay(16);
+    }
+
+    private async Task OpenPersonDetailAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null)
+            return;
+
+        var personTab = model.WorkspaceSnapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
+        if (personTab == null
+            || model.SelectedPersonRowIndex < 0
+            || model.SelectedPersonRowIndex >= personTab.RowPersonIds.Count)
+        {
+            return;
+        }
+
+        var personId = personTab.RowPersonIds[model.SelectedPersonRowIndex];
+        if (personId == Guid.Empty)
+            return;
+
+        using var objectSpace = _application.CreateObjectSpace(typeof(Person));
+        var person = objectSpace.GetObjectByKey<Person>(personId);
+        if (person == null)
+            return;
+
+        var detailView = _application.CreateDetailView(objectSpace, person);
+        detailView.ViewEditMode = ViewEditMode.View;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(_application.MainWindow, null));
+
+        await Task.Delay(16);
+    }
+
+    private Task OpenDocumentCopiesAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        var personTab = model.WorkspaceSnapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
+        if (personTab == null || personTab.RowApplicationPersonIds.Count == 0)
+            return Task.CompletedTask;
+
+        IReadOnlyList<Guid> rowIds;
+        if (model.SelectedPersonRowIndex >= 0
+            && model.SelectedPersonRowIndex < personTab.RowApplicationPersonIds.Count)
+        {
+            rowIds = [personTab.RowApplicationPersonIds[model.SelectedPersonRowIndex]];
+        }
+        else
+        {
+            rowIds = personTab.RowApplicationPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+        }
+
+        ApplicationWorkspaceDocumentCopiesOpenHelper.TryOpen(
+            _application,
+            model.CaseApplicationId,
+            rowIds,
+            VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
+
+        return Task.CompletedTask;
+    }
+
+    private Task OpenResminamalarAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspaceResminamalarOpenHelper.TryOpen(
+            _application,
+            model.CaseApplicationId,
+            VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
+
+        return Task.CompletedTask;
+    }
+
+    private async Task StartProcessAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.SelectedStagedIds.Count == 0)
+            return;
+
+        var selectedIds = model.SelectedStagedIds.ToList();
+        model.SelectedStagedIds.Clear();
+
+        try
+        {
+            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            var service = _startProcessService
+                ?? _application.ServiceProvider?.GetService<IOfficerShellStartProcessService>()
+                ?? new OfficerShellStartProcessService();
+
+            var result = service.Start(objectSpace, selectedIds);
+            if (!result.Success)
+            {
+                model.StatusMessage = result.ErrorMessage ?? "Could not start process.";
+                model.IsStatusError = true;
+                return;
+            }
+
+            objectSpace.CommitChanges();
+
+            model.StatusMessage = result.MergedCount > 1
+                ? $"Started process {result.ProcessNumber} — merged {result.MergedCount} profiles."
+                : $"Started process {result.ProcessNumber}.";
+            model.IsStatusError = false;
+
+            await LoadAsync();
+            await OpenCaseAsync(result.ApplicationId);
+        }
+        catch (Exception ex)
+        {
+            model.StatusMessage = ex.Message;
+            model.IsStatusError = true;
+        }
+    }
+
+    private Task ToggleStagedSelectionAsync(Guid applicationId)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        if (!model.SelectedStagedIds.Add(applicationId))
+            model.SelectedStagedIds.Remove(applicationId);
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnStagedViewModeChanged(string mode)
+    {
+        if (ComponentModel != null)
+        {
+            ComponentModel.StagedViewMode = mode;
+            ComponentModel.StagedPage = 1;
+        }
+        return Task.CompletedTask;
+    }
+
+    private Task OnInProcessViewModeChanged(string mode)
+    {
+        if (ComponentModel != null)
+        {
+            ComponentModel.InProcessViewMode = mode;
+            ComponentModel.InProcessPage = 1;
+        }
+        return Task.CompletedTask;
+    }
+
+    private Task OnSearchTextChanged(string text)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.SearchText = text ?? string.Empty;
+        model.StagedPage = 1;
+        model.InProcessPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task OnStagedFamilyFilterChanged(string key)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.StagedFamilyFilter = string.IsNullOrWhiteSpace(key) ? OfficerShellTemplateFamily.All : key;
+        model.StagedPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInProcessFamilyFilterChanged(string key)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.InProcessFamilyFilter = string.IsNullOrWhiteSpace(key) ? OfficerShellTemplateFamily.All : key;
+        model.InProcessPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task OnStagedPageChanged(int page)
+    {
+        if (ComponentModel != null)
+            ComponentModel.StagedPage = page;
+        return Task.CompletedTask;
+    }
+
+    private Task OnStagedPageSizeChanged(int size)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.StagedPageSize = size;
+        model.StagedPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInProcessPageChanged(int page)
+    {
+        if (ComponentModel != null)
+            ComponentModel.InProcessPage = page;
+        return Task.CompletedTask;
+    }
+
+    private Task OnInProcessPageSizeChanged(int size)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.InProcessPageSize = size;
+        model.InProcessPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task OnToggleStagedGroupCollapsed(string key)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        if (!model.StagedGroupCollapsed.Add(key))
+            model.StagedGroupCollapsed.Remove(key);
+        return Task.CompletedTask;
+    }
+
+    private Task OnCatalogSearchChanged(string text)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.CatalogSearchText = text ?? string.Empty;
+        model.TemplatesPage = 1;
+        ApplyCatalogFilter(model);
+        return Task.CompletedTask;
+    }
+
+    private void ApplyCatalogFilter(OfficerShellModel model)
+    {
+        var q = (model.CatalogSearchText ?? string.Empty).Trim();
+        model.CatalogRows = string.IsNullOrEmpty(q)
+            ? _allCatalogRows
+            : _allCatalogRows.Where(r =>
+                r.Name.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || r.Code.Contains(q, StringComparison.OrdinalIgnoreCase)
+                || (r.SelectionCode?.Contains(q, StringComparison.OrdinalIgnoreCase) ?? false)
+                || r.RailLabel.Contains(q, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+    }
+
+    private Task OnTemplatesViewModeChanged(string mode)
+    {
+        if (ComponentModel != null)
+        {
+            ComponentModel.TemplatesViewMode = mode;
+            ComponentModel.TemplatesPage = 1;
+        }
+        return Task.CompletedTask;
+    }
+
+    private Task OnTemplatesFamilyFilterChanged(string key)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.TemplatesFamilyFilter = string.IsNullOrWhiteSpace(key) ? OfficerShellTemplateFamily.All : key;
+        model.TemplatesPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTemplatesPageChanged(int page)
+    {
+        if (ComponentModel != null)
+            ComponentModel.TemplatesPage = page;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTemplatesPageSizeChanged(int size)
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.TemplatesPageSize = size;
+        model.TemplatesPage = 1;
+        return Task.CompletedTask;
+    }
+
+    private async Task OpenTemplateDetailAsync(Guid profileId)
+    {
+        var model = ComponentModel;
+        if (model == null || profileId == Guid.Empty)
+            return;
+
+        model.TemplatesDetailOpen = true;
+        await SelectProfileAsync(profileId);
+    }
+
+    private Task BackToTemplateCatalogAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.TemplatesDetailOpen = false;
+        model.OverviewSnapshot = null;
+        return Task.CompletedTask;
+    }
+
+    private async Task ConfigureTemplateAsync(Guid profileId)
+    {
+        if (profileId != Guid.Empty)
+            await SelectProfileAsync(profileId);
+        await ConfigureProfileAsync();
+    }
+
+    private async Task SelectProfileAsync(Guid profileId)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || profileId == Guid.Empty)
+            return;
+
+        model.SelectedProfileId = profileId;
+        model.IsOverviewLoading = true;
+
+        try
+        {
+            var overviewService = _overviewQueryService
+                ?? _application.ServiceProvider?.GetService<IApplicationProfileOverviewQueryService>()
+                ?? new ApplicationProfileOverviewMockQueryService();
+
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
+            model.OverviewSnapshot = overviewService.Load(profileId, objectSpace);
+        }
+        finally
+        {
+            model.IsOverviewLoading = false;
+        }
+    }
+
+    private Task NewProfileAsync()
+    {
+        if (_application == null)
+            return Task.CompletedTask;
+
+        var wizardView = ApplicationProfileCatalogCreateHelper.CreateNewProfileAndOpenWizard(_application);
+        if (wizardView == null)
+            return Task.CompletedTask;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(_application.MainWindow, null));
+
+        return Task.CompletedTask;
+    }
+
+    private Task ConfigureProfileAsync()
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.SelectedProfileId == Guid.Empty)
+            return Task.CompletedTask;
+
+        var wizardView = ApplicationProfileWizardOpenHelper.CreateWizardView(_application, model.SelectedProfileId);
+        if (wizardView == null)
+            return Task.CompletedTask;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(_application.MainWindow, null));
+
+        return Task.CompletedTask;
+    }
+}

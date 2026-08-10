@@ -29,7 +29,36 @@ public sealed class ApplicationWorkspaceSnapshot
     public IReadOnlyList<string> LinkContextItems { get; init; }
         = Array.Empty<string>();
 
+    public ApplicationWorkspaceCaseChrome CaseChrome { get; init; } = new();
+
+    public ApplicationWorkspaceCaseView CaseView { get; init; } = new();
+
     public bool IsPrototypeMock { get; init; } = true;
+}
+
+public sealed class ApplicationWorkspaceCaseChrome
+{
+    public string DisplayNumber { get; init; } = string.Empty;
+
+    public string ProcessNumber { get; init; } = string.Empty;
+
+    public string TemplateFamilyKey { get; init; } = "inv";
+
+    public string TemplateFamilyLabel { get; init; } = string.Empty;
+
+    public string StartedOn { get; init; } = string.Empty;
+
+    public string CurrentStep { get; init; } = string.Empty;
+
+    public string ProjectName { get; init; } = string.Empty;
+
+    public int? SlaDaysRemaining { get; init; }
+
+    public IReadOnlyList<string> PeopleNames { get; init; } = Array.Empty<string>();
+
+    public int? MergedFromCount { get; init; }
+
+    public string ProfileTemplateName { get; init; } = string.Empty;
 }
 
 public sealed class ApplicationWorkspaceHeader

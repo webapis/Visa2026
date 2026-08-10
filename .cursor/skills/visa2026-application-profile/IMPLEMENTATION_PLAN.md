@@ -50,6 +50,12 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | H5 | HTML template wizard (5 steps) | **Done** | `#/templates/wizard/{0-4}` → Publish |
 | H6 | HTML PNG gallery + README + parity checklist | **Done** | `parity/CHECKLIST.md` — sign-off pending |
 | H7 | HTML Person DetailView staging | **Deferred** | Post–v1; People nav = stub only |
+| B0 | Blazor officer shell — layout + nav + live queues | **Done** | `OfficerShellHost` · staged/in-process from `Application` · templates embed catalog · case embed workspace |
+| B1 | Blazor shell PNG parity polish | **Done** | Chips, legend, pagination, grouped staged, rich grid, toolbar search |
+| B2 | Start process domain merge | **Done** | Merge staged rows, `YYYY-NNNN` process number, first progress step |
+| B3 | Immersive shell chrome | **Done** | Hide XAF left nav via `:has(.officer-shell-host)` CSS |
+| B4 | Profile templates list/grid + detail | **Done** | PNG catalog, chips, pagination, rail overview drill-in |
+| B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA |
 
 ---
 

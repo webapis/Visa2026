@@ -1,0 +1,115 @@
+@using Visa2026.Module.Services.OfficerShell
+
+<div class="sw-page">
+    @foreach (var group in Groups)
+    {
+        if (group.Rows.Count == 0)
+            continue;
+
+        var collapsed = CollapsedGroups.Contains(group.Key);
+        var color = OfficerShellTemplateFamily.GetColor(group.Key);
+        <section class="sw-group @(collapsed ? "is-collapsed" : null)">
+            <button type="button" class="sw-group__head" style="@($"--sw-color:{color}")" @onclick="() => ToggleGroup(group.Key)">
+                <span class="sw-group__accent"></span>
+                <span class="os-dot" style="background:@color"></span>
+                <span class="sw-group__title">@OfficerShellTemplateFamily.GetLabel(group.Key)</span>
+                <span class="sw-group__count">@group.Rows.Count</span>
+                <span class="sw-group__chev" aria-hidden="true">▾</span>
+            </button>
+            @if (!collapsed)
+            {
+                <div class="sw-group__body">
+                    @foreach (var row in group.Rows)
+                    {
+                        var selected = SelectedIds.Contains(row.ApplicationId);
+                        <div class="sw-row @(row.IsSelectable ? null : "sw-row--disabled")" @onclick="() => OnRowClick(row)">
+                            <label class="sw-row__check" @onclick:stopPropagation="true">
+                                <input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)"
+                                       @onchange="() => ToggleRow(row.ApplicationId)" />
+                            </label>
+                            <div class="sw-row__avatar" aria-hidden="true">@Initials(row.PersonName)</div>
+                            <div class="sw-row__main">
+                                <div class="sw-row__name">@row.PersonName</div>
+                                <div class="sw-row__meta">
+                                    @row.ProfileName
+                                    @if (!string.IsNullOrWhiteSpace(row.ProjectName))
+                                    {
+                                        <span class="sw-meta"> · @row.ProjectName</span>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(row.MissingSummary))
+                                    {
+                                        <span class="sw-badge sw-badge--info">@row.MissingSummary</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="sw-row__status">
+                                <span class="sw-ready sw-ready--@row.Readiness">
+                                    <span class="sw-ready__dot" aria-hidden="true"></span>
+                                    @ReadinessLabel(row.Readiness)
+                                </span>
+                            </div>
+                            <span class="sw-row__chev" aria-hidden="true">›</span>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    }
+
+    @if (SelectedIds.Count > 0)
+    {
+        var incomplete = SelectedIds.Count(id => Rows.FirstOrDefault(r => r.ApplicationId == id) is { IsSelectable: false });
+        <div class="sw-selection-bar">
+            <span>@SelectedIds.Count selected@if (incomplete > 0) { <strong class="sw-selection-bar__warn"> · @incomplete incomplete (cannot start)</strong> } else { <text> · ready to start</text> }</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IReadOnlyList<OfficerShellStagedRow> Rows { get; set; } = Array.Empty<OfficerShellStagedRow>();
+    [Parameter] public HashSet<Guid> SelectedIds { get; set; } = new();
+    [Parameter] public HashSet<string> CollapsedGroups { get; set; } = new();
+    [Parameter] public EventCallback<Guid> ToggleSelection { get; set; }
+    [Parameter] public EventCallback<string> ToggleGroupCollapsed { get; set; }
+
+    private IEnumerable<(string Key, List<OfficerShellStagedRow> Rows)> Groups =>
+        OfficerShellTemplateFamily.DisplayOrder.Select(key => (key, Rows.Where(r => r.TemplateFamilyKey == key).ToList()));
+
+    private static string Initials(string? name)
+    {
+        var parts = (name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0].Length >= 2 ? parts[0][..2].ToUpperInvariant() : parts[0].ToUpperInvariant(),
+            _ => $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant(),
+        };
+    }
+
+    private static string ReadinessLabel(string readiness) => readiness switch
+    {
+        "ready" => "Ready",
+        "incomplete" => "Incomplete",
+        "awaiting" => "Awaiting data",
+        _ => readiness,
+    };
+
+    private async Task ToggleGroup(string key)
+    {
+        if (ToggleGroupCollapsed.HasDelegate)
+            await ToggleGroupCollapsed.InvokeAsync(key);
+    }
+
+    private async Task ToggleRow(Guid id)
+    {
+        if (ToggleSelection.HasDelegate)
+            await ToggleSelection.InvokeAsync(id);
+    }
+
+    private Task OnRowClick(OfficerShellStagedRow row)
+    {
+        if (!row.IsSelectable)
+            return Task.CompletedTask;
+        return ToggleRow(row.ApplicationId);
+    }
+}

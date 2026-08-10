@@ -5,6 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
 
@@ -26,6 +27,8 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
 
         var profile = application.ApplicationProfile;
         var sla = ApplicationProgressSlaHelper.Resolve(application, application.LatestProgress);
+        var tabs = ApplicationWorkspaceTabBuilder.Build(objectSpace, application, profile);
+        var caseChrome = BuildCaseChrome(application, profile, sla);
 
         return new ApplicationWorkspaceSnapshot
         {
@@ -35,8 +38,57 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             Profile = BuildProfileSummary(profile),
             ProfileRail = Array.Empty<ApplicationWorkspaceProfileRailItem>(),
             LinkContextItems = BuildLinkContext(profile),
-            Tabs = ApplicationWorkspaceTabBuilder.Build(objectSpace, application, profile),
+            Tabs = tabs,
+            CaseChrome = caseChrome,
+            CaseView = ApplicationWorkspaceCaseBuilder.Build(application, profile, tabs, sla, caseChrome),
             IsPrototypeMock = false,
+        };
+    }
+
+    private static ApplicationWorkspaceCaseChrome BuildCaseChrome(
+        Application application,
+        ApplicationProfile? profile,
+        ApplicationProgressSlaResult sla)
+    {
+        var processNumber = !string.IsNullOrWhiteSpace(application.ProcessNumber)
+            ? application.ProcessNumber.Trim()
+            : ApplicationProcessNumberHelper.ResolveFromHistory(application.ProgressHistory) ?? string.Empty;
+
+        var displayNumber = !string.IsNullOrWhiteSpace(processNumber)
+            ? processNumber
+            : application.FullApplicationNumber ?? application.ApplicationNumber ?? string.Empty;
+
+        var familyKey = OfficerShellTemplateFamily.ResolveKey(application);
+        var people = ApplicationRosterHelper.GetRosterPeople(application)
+            .Select(p => p.FullName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Cast<string>()
+            .ToList();
+
+        var currentStep = application.LatestProgress?.State?.LocalizedDisplayName
+            ?? application.LatestProgress?.State?.NameTm
+            ?? application.LatestPrimaryStateCode
+            ?? "Office preparation";
+
+        int? slaRemaining = sla.MaxDaysInReview is int maxDays && sla.WorkingDaysInCurrentStep is int elapsed
+            ? maxDays - elapsed
+            : null;
+
+        return new ApplicationWorkspaceCaseChrome
+        {
+            DisplayNumber = displayNumber,
+            ProcessNumber = processNumber,
+            TemplateFamilyKey = familyKey,
+            TemplateFamilyLabel = OfficerShellTemplateFamily.GetLabel(familyKey),
+            StartedOn = application.ApplicationDate == default
+                ? string.Empty
+                : application.ApplicationDate.ToString("dd MMM yyyy", CultureInfo.InvariantCulture),
+            CurrentStep = currentStep,
+            ProjectName = application.ProjectContract?.Name ?? "—",
+            SlaDaysRemaining = slaRemaining,
+            PeopleNames = people,
+            MergedFromCount = people.Count > 1 ? people.Count : null,
+            ProfileTemplateName = profile?.Name ?? string.Empty,
         };
     }
 

@@ -214,14 +214,14 @@ Sidebar: People → placeholder stub (staging actions **not** in v1)
 
 ## 10. Path to real Blazor custom UI
 
-| HTML artifact | Future Blazor home |
-|---------------|-------------------|
-| `styles/*.css` | `wwwroot/css/officer-shell/` (import from site.css) |
-| `render-shell.js` layout | `OfficerShellLayout.razor` |
-| `pages/staged.js` | `StagedProfilesPage.razor` + `IStagedProfileQueryService` |
-| `pages/case-workspace.js` | `InProcessCaseWorkspace.razor` + tab components |
-| `pages/template-wizard.js` | Replace/align with `ApplicationProfileWizardComponent.razor` |
-| `mock-data.js` | Dev-only; replace with Module services + Web API |
+| HTML artifact | Future Blazor home | Status (2026-08-10) |
+|---------------|-------------------|---------------------|
+| `styles/*.css` | `wwwroot/css/officer-shell/` (import from `_Host.cshtml`) | **Done** (B0) |
+| `render-shell.js` layout | `OfficerShellComponent.razor` + `OfficerShellHost` | **Done** (B0) |
+| `pages/staged.js` | Staged queue in shell + `IOfficerShellStagedQueryService` | **Done** (B0 — heuristic filter) |
+| `pages/case-workspace.js` | `ApplicationWorkspaceComponent` embedded in shell | **Done** (B0) |
+| `pages/template-wizard.js` | `ApplicationProfileWizardComponent.razor` (existing) | **Done** (via catalog Configure) |
+| `mock-data.js` | Module query services + `ObjectSpace` | **Partial** (B1–B2) |
 
 **Rule:** Do not fork design — Blazor port is a **lift-and-shift** of HTML/CSS structure, then wire real `ObjectSpace`.
 

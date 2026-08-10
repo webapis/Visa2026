@@ -1,0 +1,43 @@
+@using Visa2026.Module.Services.OfficerShell
+
+<div class="os-chip-row os-chip-row--family">
+    <button type="button" class="os-chip @(ActiveKey == OfficerShellTemplateFamily.All ? "is-active" : null)"
+            @onclick='() => OnSelect(OfficerShellTemplateFamily.All)'>All (@TotalCount)</button>
+    @foreach (var key in OfficerShellTemplateFamily.DisplayOrder)
+    {
+        var count = Counts.GetValueOrDefault(key);
+        if (count == 0 && ActiveKey != key)
+            continue;
+
+        <button type="button" class="os-chip os-chip--@key @(ActiveKey == key ? "is-active" : null)"
+                @onclick="() => OnSelect(key)">
+            @OfficerShellTemplateFamily.GetLabel(key) (@count)
+        </button>
+    }
+</div>
+@if (ShowLegend)
+{
+    <div class="os-legend">
+        @foreach (var key in OfficerShellTemplateFamily.DisplayOrder)
+        {
+            <span class="os-legend__item">
+                <span class="os-dot" style="background:@OfficerShellTemplateFamily.GetColor(key)"></span>
+                @OfficerShellTemplateFamily.GetLabel(key)
+            </span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string ActiveKey { get; set; } = OfficerShellTemplateFamily.All;
+    [Parameter] public IReadOnlyDictionary<string, int> Counts { get; set; } = new Dictionary<string, int>();
+    [Parameter] public int TotalCount { get; set; }
+    [Parameter] public bool ShowLegend { get; set; }
+    [Parameter] public EventCallback<string> FilterChanged { get; set; }
+
+    private async Task OnSelect(string key)
+    {
+        if (FilterChanged.HasDelegate)
+            await FilterChanged.InvokeAsync(key);
+    }
+}

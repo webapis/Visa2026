@@ -95,9 +95,9 @@ Sign-off: **Layout** | **Copy** | **Colors/states** | **Date** | **Notes**
 
 ## Gate checks
 
-- [ ] Primary flows work without console errors
-- [ ] List ↔ Grid ↔ Grouped toggle on staged; List ↔ Grid on in-process / templates
-- [ ] Start process banner when selection blocked
-- [ ] Wizard `#/templates/wizard/{0-4}`
+- [x] Primary flows work without console errors
+- [x] List ↔ Grid ↔ Grouped toggle on staged; List ↔ Grid on in-process / templates
+- [x] Start process banner when selection blocked
+- [x] Wizard `#/templates/wizard/{0-4}`
 
 **H7 deferred:** Person DetailView staging — no PNG in set.

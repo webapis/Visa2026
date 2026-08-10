@@ -1,0 +1,187 @@
+/* Officer shell inside XAF DetailView — fill content area */
+.officer-shell-host .os-app {
+  min-height: calc(100vh - 140px);
+}
+
+/* Immersive mode — hide XAF left navigation while officer shell is active */
+#visa-app-shell:has(.officer-shell-host) app .sidebar {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow: hidden;
+}
+
+#visa-app-shell:has(.officer-shell-host) .dxbl-layout-item:has(.officer-shell-host),
+#visa-app-shell:has(.officer-shell-host) .dxbl-form-group:has(.officer-shell-host),
+#visa-app-shell:has(.officer-shell-host) .dxbl-form-group-item:has(.officer-shell-host) {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#visa-app-shell:has(.officer-shell-host) .officer-shell-host .os-app {
+  min-height: calc(100vh - 72px);
+}
+
+.officer-shell-host .os-content .app-workspace,
+.officer-shell-host .os-content .ap-catalog {
+  margin: -4px 0 0;
+}
+
+.officer-shell-host .os-content .ap-catalog__shell {
+  min-height: 640px;
+}
+
+.officer-shell-host .os-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.officer-shell-host .os-page-title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.officer-shell-host .os-page-sub {
+  margin: 6px 0 0;
+  color: var(--os-muted);
+  font-size: 0.88rem;
+}
+
+.officer-shell-host .os-btn {
+  border: 1px solid var(--os-line);
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.officer-shell-host .os-btn--primary {
+  background: var(--os-accent);
+  border-color: var(--os-accent);
+  color: #fff;
+}
+
+.officer-shell-host .os-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.officer-shell-host .os-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.officer-shell-host .os-card {
+  background: var(--os-panel);
+  border: 1px solid var(--os-line);
+  border-radius: var(--os-radius);
+  padding: 14px;
+  box-shadow: var(--os-shadow);
+}
+
+.officer-shell-host .os-card--clickable,
+.officer-shell-host .os-card:not(.is-selected) {
+  cursor: pointer;
+}
+
+.officer-shell-host .os-card.is-selected {
+  border-color: var(--os-accent);
+  box-shadow: 0 0 0 1px var(--os-accent);
+}
+
+.officer-shell-host .os-card__title {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.officer-shell-host .os-card__meta {
+  color: var(--os-muted);
+  font-size: 0.82rem;
+}
+
+.officer-shell-host .os-banner {
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+}
+
+.officer-shell-host .os-banner--warn {
+  background: var(--os-warn-soft);
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.officer-shell-host .os-banner--ok {
+  background: var(--os-ok-soft);
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.officer-shell-host .os-loading {
+  padding: 24px;
+  color: var(--os-muted);
+}
+
+.officer-shell-host .os-table--clickable tbody tr {
+  cursor: pointer;
+}
+
+.officer-shell-host .os-table tbody tr.is-selected td {
+  background: var(--os-accent-soft);
+}
+
+.officer-shell-host .os-toolbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--os-line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #fff;
+  min-width: 220px;
+}
+
+.officer-shell-host .os-toolbar-search input {
+  border: 0;
+  outline: none;
+  width: 100%;
+  background: transparent;
+}
+
+.officer-shell-host .os-card--rich {
+  position: relative;
+  overflow: hidden;
+  padding-top: 18px;
+}
+
+.officer-shell-host .os-card__stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--os-card-accent, #94a3b8);
+}
+
+.officer-shell-host .os-card__foot {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--os-muted);
+}
+
+.officer-shell-host .os-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}

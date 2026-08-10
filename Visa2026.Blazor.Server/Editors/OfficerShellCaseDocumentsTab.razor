@@ -1,0 +1,118 @@
+@using DevExpress.ExpressApp
+@using Microsoft.Extensions.DependencyInjection
+@using Visa2026.Blazor.Server.Components
+@using Visa2026.Blazor.Server.Localization
+@using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.Services.ApplicationItemLinkedDocuments
+@using Visa2026.Module.Services.ApplicationPersonRoster
+@using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.PreviewSlot
+
+<div class="dc-page">
+    <header class="dc-page__head">
+        <h2>Document copies</h2>
+        <p>Scan and manage required document copies for all people in this application.</p>
+    </header>
+
+    @if (_lineIds.Count == 0)
+    {
+        <p class="os-empty">No roster lines linked yet. Link people on the People tab first.</p>
+    }
+    else if (_previewActive)
+    {
+        <DocumentCopiesInlinePreview @ref="_inlinePreview"
+                                     ApplicationItemIds="_lineIds"
+                                     LineScope="DocumentCopiesLineScope.ApplicationPerson"
+                                     UiCultureName="_uiCultureName"
+                                     PreviewClosed="OnPreviewClosedAsync" />
+    }
+    else
+    {
+        <div class="dc-split">
+            <div class="dc-list">
+                <ApplicationItemDocumentCopiesComponent ApplicationItemIds="_lineIds"
+                                                        LineScope="DocumentCopiesLineScope.ApplicationPerson"
+                                                        ApplicationId="ApplicationId"
+                                                        MergedGroups="_mergedGroups"
+                                                        UiCultureName="_uiCultureName"
+                                                        UseInlinePreview="true"
+                                                        RefreshRequested="_refreshRequested"
+                                                        OnInlinePreviewRequested="HandleInlinePreviewAsync" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
+
+    [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+
+    private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
+    private IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> _mergedGroups =
+        Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+    private string _uiCultureName = string.Empty;
+    private bool _previewActive;
+    private DocumentCopiesInlinePreview? _inlinePreview;
+    private EventCallback _refreshRequested;
+
+    protected override void OnInitialized()
+    {
+        _refreshRequested = EventCallback.Factory.Create(this, ReloadMergedGroupsAsync);
+        _uiCultureName = VisaUiCultureResolver.Resolve();
+    }
+
+    protected override void OnParametersSet()
+    {
+        var personTab = Snapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
+        _lineIds = personTab?.RowApplicationPersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList() ?? [];
+
+        ReloadMergedGroups();
+    }
+
+    private void ReloadMergedGroups()
+    {
+        if (_lineIds.Count == 0)
+        {
+            _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
+            return;
+        }
+
+        using var objectSpace = ObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationPerson>();
+        var rows = _lineIds
+            .Select(id => objectSpace.GetObjectByKey<ApplicationPerson>(id))
+            .Where(row => row != null)
+            .Cast<ApplicationPerson>()
+            .ToList();
+
+        _lineIds = rows.Select(row => row.ID).ToList();
+        var lines = ApplicationPersonLinkedDocumentsResolver.ResolveMany(objectSpace, rows);
+        _mergedGroups = ApplicationItemLinkedDocumentsMerger.MergeBySlot(lines);
+    }
+
+    private Task ReloadMergedGroupsAsync()
+    {
+        ReloadMergedGroups();
+        return InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleInlinePreviewAsync(DocumentCopiesInlinePreviewRequest request)
+    {
+        _previewActive = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Yield();
+
+        if (_inlinePreview != null)
+            await _inlinePreview.OpenAsync(request);
+    }
+
+    private async Task OnPreviewClosedAsync()
+    {
+        _previewActive = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}

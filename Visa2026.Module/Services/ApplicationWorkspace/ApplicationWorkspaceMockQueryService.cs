@@ -28,61 +28,97 @@ public sealed class ApplicationWorkspaceMockQueryService : IApplicationWorkspace
         "RejectionItem",
     ];
 
-    public ApplicationWorkspaceSnapshot Load(IObjectSpace objectSpace, Guid applicationId) =>
-        new()
+    public ApplicationWorkspaceSnapshot Load(IObjectSpace objectSpace, Guid applicationId)
+    {
+        var tabs = BuildTabs();
+        var caseChrome = new ApplicationWorkspaceCaseChrome
+        {
+            DisplayNumber = "2026-0147",
+            ProcessNumber = "2026-0147",
+            TemplateFamilyKey = "inv",
+            TemplateFamilyLabel = "Visa extension",
+            StartedOn = "10 Aug 2026",
+            CurrentStep = "Ministry review",
+            ProjectName = "Plant Expansion 2026",
+            SlaDaysRemaining = 12,
+            PeopleNames = ["Maksat Orazow", "Döwran Ataýew", "Aýgul Berdiýewa"],
+            MergedFromCount = 3,
+            ProfileTemplateName = "Visa extension",
+        };
+
+        var snapshot = new ApplicationWorkspaceSnapshot
         {
             ApplicationId = applicationId == Guid.Empty ? Guid.Parse("11111111-1111-1111-1111-111111111111") : applicationId,
             Header = new ApplicationWorkspaceHeader
             {
-                ApplicationNumber = "12/-7010",
-                ApplicationDate = "01.08.2026",
+                ApplicationNumber = "2026-0147",
+                ApplicationDate = "10.08.2026",
                 Urgency = "Normal",
-                ProgressStep = 3,
-                ProgressTotalSteps = 6,
+                ProgressStep = 2,
+                ProgressTotalSteps = 4,
                 SlaDaysElapsed = 5,
                 SlaDaysTotal = 10,
             },
             ProgressHistory =
             [
-                new() { State = "Office preparation", Date = "01.08.2026", Description = "Draft package" },
-                new() { State = "Submitted (ministry)", Date = "03.08.2026", Description = "Türkmenenergo" },
-                new() { State = "Approved (ministry)", Date = "05.08.2026", Description = "Letter on file" },
-                new() { State = "Submitted (migration)", Date = "06.08.2026", Description = "AS538188" },
+                new() { State = "Office preparation", Date = "10.08.2026", Description = "Draft package" },
+                new() { State = "Ministry review", Date = "11.08.2026", Description = "Under review" },
             ],
             Profile = new ApplicationWorkspaceProfileSummary
             {
                 ProfileId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                Title = "Invitation + WP (employee)",
-                Code = "INV_WP_EMP",
+                Title = "Visa extension",
+                Code = "VISA_EXT",
                 Chips =
                 [
                     "Related to: Issuance",
                     "Via ministry",
                     "For: Employee",
-                    "Produces: Invitation, Work permit",
                 ],
             },
             ProfileRail = Array.Empty<ApplicationWorkspaceProfileRailItem>(),
             LinkContextItems = LinkContext,
-            Tabs = BuildTabs(),
+            Tabs = tabs,
+            CaseChrome = caseChrome,
             IsPrototypeMock = true,
         };
+
+        return new ApplicationWorkspaceSnapshot
+        {
+            ApplicationId = snapshot.ApplicationId,
+            Header = snapshot.Header,
+            ProgressHistory = snapshot.ProgressHistory,
+            Profile = snapshot.Profile,
+            ProfileRail = snapshot.ProfileRail,
+            LinkContextItems = snapshot.LinkContextItems,
+            Tabs = snapshot.Tabs,
+            CaseChrome = snapshot.CaseChrome,
+            CaseView = ApplicationWorkspaceCaseBuilder.BuildFromSnapshot(snapshot),
+            IsPrototypeMock = snapshot.IsPrototypeMock,
+        };
+    }
 
     private static IReadOnlyList<ApplicationWorkspaceTab> BuildTabs() =>
     [
         Tab("person", "Person", ["Person", "Role", "Personal №", "From view"],
             [
-                ["Berdiýew A.A.", "Employee", "I-123456", "vw_app_persons"],
-                ["Berdiýewa G.A.", "Family member", "I-654321", "vw_app_persons"],
+                ["Maksat Orazow", "Employee", "I-123456", "vw_app_persons"],
+                ["Döwran Ataýew", "FamilyMember", "I-654321", "vw_app_persons"],
+                ["Aýgul Berdiýewa", "FamilyMember", "I-789012", "vw_app_persons"],
             ],
             sqlViewHint: "vw_app_persons"),
         Tab("passport", "Passport", ["Person", "Passport №", "Issued", "Expires"],
             [
-                ["Berdiýew A.A.", "A-998877", "12.01.2022", "12.01.2032"],
-                ["Berdiýewa G.A.", "A-112233", "03.05.2021", "03.05.2031"],
+                ["Maksat Orazow", "TM1234567", "12.01.2022", "12.01.2032"],
+                ["Döwran Ataýew", "TM2345678", "03.05.2021", "03.05.2031"],
+                ["Aýgul Berdiýewa", "TM3456789", "08.11.2020", "08.11.2030"],
             ]),
         Tab("visa", "Visa", ["Person", "Visa №", "Type", "Valid to"],
-            [["Berdiýew A.A.", "V-44001", "WP", "01.02.2027"]]),
+            [
+                ["Maksat Orazow", "VISA-2026-0147-01", "WP", "01.02.2027"],
+                ["Döwran Ataýew", "VISA-2026-0147-02", "WP", "01.02.2027"],
+                ["Aýgul Berdiýewa", "VISA-2026-0147-03", "WP", "01.02.2027"],
+            ]),
         Tab("education", "Education", ["Person", "Institution", "Level", "Year"],
             [["Berdiýew A.A.", "TDU", "Bachelor", "2014"]]),
         Tab("address", "Address", ["Person", "City", "Address"],

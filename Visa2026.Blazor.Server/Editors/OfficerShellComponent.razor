@@ -1,0 +1,527 @@
+@using System.Linq
+@using Visa2026.Module.Services.OfficerShell
+@using Visa2026.Module.Services.ApplicationProfileCatalog
+@using Visa2026.Module.Services.ApplicationProfileOverview
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="officer-shell-host">
+    <div class="os-app">
+        <aside class="os-sidebar" aria-label="Application profiles navigation">
+            <div class="os-brand">
+                <div class="os-brand__logo">V26</div>
+                <div>
+                    <span class="os-brand__title">VISA2026</span>
+                    <span class="os-brand__sub">Application profiles</span>
+                </div>
+            </div>
+
+            <div class="os-nav-section">Application profiles</div>
+            @RenderNavItem(OfficerShellPage.Staged, "📚", "Staged profiles", "Before application number", NavCounts.StagedCount, "orange")
+            @RenderNavItem(OfficerShellPage.InProcess, "📁", "In process", "Numbered cases", NavCounts.InProcessCount, "blue")
+            @RenderNavItem(OfficerShellPage.Templates, "📋", "Profile templates", "Configuration · Visa office admin", null, null)
+        </aside>
+
+        <div class="os-main">
+            <header class="os-topbar">
+                <div class="os-topbar__crumb">@Breadcrumb()</div>
+                <div class="os-topbar__grow"></div>
+                @if (ShowListSearch)
+                {
+                    <div class="os-toolbar-search">
+                        <span aria-hidden="true">⌕</span>
+                        <input type="search" placeholder="Search…" value="@SearchText" @oninput="OnSearchInput" />
+                    </div>
+                }
+                @if (CurrentPage == OfficerShellPage.Staged)
+                {
+                    <button type="button" class="os-btn os-btn--primary" disabled="@(!CanStartProcess)" @onclick="OnStartProcess">
+                        Start process
+                    </button>
+                }
+            </header>
+
+            <main class="os-content">
+                @if (!string.IsNullOrWhiteSpace(StatusMessage))
+                {
+                    <div class="os-banner @(IsStatusError ? "os-banner--warn" : "os-banner--ok")" role="status">@StatusMessage</div>
+                }
+
+                @if (IsLoading)
+                {
+                    <div class="os-loading" role="status">Loading…</div>
+                }
+                else
+                {
+                    @switch (CurrentPage)
+                    {
+                        case OfficerShellPage.Staged:
+                            @RenderStagedPage();
+                            break;
+                        case OfficerShellPage.InProcess:
+                            @RenderInProcessPage();
+                            break;
+                        case OfficerShellPage.Templates:
+                            <OfficerShellTemplateCatalogComponent Rows="@CatalogRows"
+                                                                  SearchText="@CatalogSearchText"
+                                                                  ViewMode="@TemplatesViewMode"
+                                                                  FamilyFilter="@TemplatesFamilyFilter"
+                                                                  Page="@TemplatesPage"
+                                                                  PageSize="@TemplatesPageSize"
+                                                                  DetailOpen="@TemplatesDetailOpen"
+                                                                  SelectedProfileId="@SelectedProfileId"
+                                                                  OverviewSnapshot="@OverviewSnapshot"
+                                                                  IsOverviewLoading="@IsOverviewLoading"
+                                                                  SearchTextChanged="@CatalogSearchTextChanged"
+                                                                  ViewModeChanged="@TemplatesViewModeChanged"
+                                                                  FamilyFilterChanged="@TemplatesFamilyFilterChanged"
+                                                                  PageChanged="@TemplatesPageChanged"
+                                                                  PageSizeChanged="@TemplatesPageSizeChanged"
+                                                                  OpenDetailRequested="@OpenTemplateDetailRequested"
+                                                                  BackToCatalogRequested="@BackToTemplateCatalogRequested"
+                                                                  NewProfileRequested="@NewProfileRequested"
+                                                                  ConfigureRequested="@ConfigureProfileRequested"
+                                                                  ConfigureProfileRequested="@ConfigureTemplateRequested" />
+                            break;
+                        case OfficerShellPage.Case:
+                            <OfficerShellCaseWorkspaceComponent Snapshot="@WorkspaceSnapshot"
+                                                                IsLoading="@WorkspaceLoading"
+                                                                ActiveTab="@CaseTab"
+                                                                SelectedPersonRowIndex="@SelectedPersonRowIndex"
+                                                                CanLinkPerson="@CanLinkPerson"
+                                                                CanUnlinkPerson="@CanUnlinkPerson"
+                                                                CanOpenPersonDetail="@CanOpenPersonDetail"
+                                                                CanOpenDocumentCopies="@CanOpenDocumentCopies"
+                                                                CaseTabChanged="@CaseTabChanged"
+                                                                BackToListRequested="@BackToInProcessRequested"
+                                                                LinkPersonRequested="@LinkPersonRequested"
+                                                                UnlinkPersonRequested="@UnlinkPersonRequested"
+                                                                OpenPersonDetailRequested="@OpenPersonDetailRequested"
+                                                                OpenDocumentCopiesRequested="@OpenDocumentCopiesRequested"
+                                                                OpenResminamalarRequested="@OpenResminamalarRequested"
+                                                                SelectPersonRowRequested="@SelectPersonRowRequested"
+                                                                OpenPersonDetailByIndexRequested="@OpenPersonDetailByIndexRequested"
+                                                                AdvanceProgressRequested="@AdvanceProgressRequested" />
+                            break;
+                    }
+                }
+            </main>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public OfficerShellPage CurrentPage { get; set; } = OfficerShellPage.Staged;
+    [Parameter] public OfficerShellNavCounts NavCounts { get; set; } = new();
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public IReadOnlyList<OfficerShellStagedRow> StagedRows { get; set; } = Array.Empty<OfficerShellStagedRow>();
+    [Parameter] public IReadOnlyList<OfficerShellInProcessRow> InProcessRows { get; set; } = Array.Empty<OfficerShellInProcessRow>();
+    [Parameter] public HashSet<Guid> SelectedStagedIds { get; set; } = new();
+    [Parameter] public string StagedViewMode { get; set; } = "list";
+    [Parameter] public string InProcessViewMode { get; set; } = "list";
+    [Parameter] public string SearchText { get; set; } = string.Empty;
+    [Parameter] public string StagedFamilyFilter { get; set; } = OfficerShellTemplateFamily.All;
+    [Parameter] public string InProcessFamilyFilter { get; set; } = OfficerShellTemplateFamily.All;
+    [Parameter] public int StagedPage { get; set; } = 1;
+    [Parameter] public int StagedPageSize { get; set; } = 25;
+    [Parameter] public int InProcessPage { get; set; } = 1;
+    [Parameter] public int InProcessPageSize { get; set; } = 25;
+    [Parameter] public HashSet<string> StagedGroupCollapsed { get; set; } = new();
+    [Parameter] public ApplicationWorkspaceSnapshot? WorkspaceSnapshot { get; set; }
+    [Parameter] public bool WorkspaceLoading { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationProfileCatalogRow> CatalogRows { get; set; } = Array.Empty<ApplicationProfileCatalogRow>();
+    [Parameter] public Guid SelectedProfileId { get; set; }
+    [Parameter] public ApplicationProfileOverviewSnapshot? OverviewSnapshot { get; set; }
+    [Parameter] public bool IsOverviewLoading { get; set; }
+    [Parameter] public string CatalogSearchText { get; set; } = string.Empty;
+    [Parameter] public string TemplatesViewMode { get; set; } = "list";
+    [Parameter] public string TemplatesFamilyFilter { get; set; } = OfficerShellTemplateFamily.All;
+    [Parameter] public int TemplatesPage { get; set; } = 1;
+    [Parameter] public int TemplatesPageSize { get; set; } = 25;
+    [Parameter] public bool TemplatesDetailOpen { get; set; }
+    [Parameter] public string CaseTab { get; set; } = "overview";
+    [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public bool CanLinkPerson { get; set; }
+    [Parameter] public bool CanUnlinkPerson { get; set; }
+    [Parameter] public bool CanOpenPersonDetail { get; set; }
+    [Parameter] public bool CanOpenDocumentCopies { get; set; }
+    [Parameter] public EventCallback InitialLoadRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellPage> NavigateRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenCaseRequested { get; set; }
+    [Parameter] public EventCallback StartProcessRequested { get; set; }
+    [Parameter] public EventCallback<Guid> ToggleStagedSelectionRequested { get; set; }
+    [Parameter] public EventCallback<string> StagedViewModeChanged { get; set; }
+    [Parameter] public EventCallback<string> InProcessViewModeChanged { get; set; }
+    [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public EventCallback<string> StagedFamilyFilterChanged { get; set; }
+    [Parameter] public EventCallback<string> InProcessFamilyFilterChanged { get; set; }
+    [Parameter] public EventCallback<int> StagedPageChanged { get; set; }
+    [Parameter] public EventCallback<int> StagedPageSizeChanged { get; set; }
+    [Parameter] public EventCallback<int> InProcessPageChanged { get; set; }
+    [Parameter] public EventCallback<int> InProcessPageSizeChanged { get; set; }
+    [Parameter] public EventCallback<string> ToggleStagedGroupCollapsed { get; set; }
+    [Parameter] public EventCallback NewProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
+    [Parameter] public EventCallback ConfigureProfileRequested { get; set; }
+    [Parameter] public EventCallback<string> CatalogSearchTextChanged { get; set; }
+    [Parameter] public EventCallback<string> TemplatesViewModeChanged { get; set; }
+    [Parameter] public EventCallback<string> TemplatesFamilyFilterChanged { get; set; }
+    [Parameter] public EventCallback<int> TemplatesPageChanged { get; set; }
+    [Parameter] public EventCallback<int> TemplatesPageSizeChanged { get; set; }
+    [Parameter] public EventCallback<Guid> OpenTemplateDetailRequested { get; set; }
+    [Parameter] public EventCallback BackToTemplateCatalogRequested { get; set; }
+    [Parameter] public EventCallback<Guid> ConfigureTemplateRequested { get; set; }
+    [Parameter] public EventCallback<string> CaseTabChanged { get; set; }
+    [Parameter] public EventCallback BackToInProcessRequested { get; set; }
+    [Parameter] public EventCallback LinkPersonRequested { get; set; }
+    [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
+    [Parameter] public EventCallback OpenPersonDetailRequested { get; set; }
+    [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
+    [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
+    [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
+    [Parameter] public EventCallback<int> OpenPersonDetailByIndexRequested { get; set; }
+    [Parameter] public EventCallback AdvanceProgressRequested { get; set; }
+
+    private bool _initialLoadStarted;
+    private bool ShowListSearch => CurrentPage is OfficerShellPage.Staged or OfficerShellPage.InProcess;
+    private bool CanStartProcess => SelectedStagedIds.Count > 0
+        && StagedRows.Where(r => SelectedStagedIds.Contains(r.ApplicationId)).All(r => r.IsSelectable);
+
+    private IEnumerable<OfficerShellStagedRow> StagedSearchFiltered()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+            return StagedRows;
+        return StagedRows.Where(r =>
+            (r.PersonName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (r.ProfileName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (r.ProjectName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+    }
+
+    private IEnumerable<OfficerShellInProcessRow> InProcessSearchFiltered()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+            return InProcessRows;
+        return InProcessRows.Where(r =>
+            (r.ApplicationNumber?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (r.PersonName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false)
+            || (r.ProfileName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+    }
+
+    private IReadOnlyList<OfficerShellStagedRow> FilteredStagedRows => ApplyStagedFilters().ToList();
+    private IReadOnlyList<OfficerShellInProcessRow> FilteredInProcessRows => ApplyInProcessFilters().ToList();
+    private OfficerShellPaginationResult<OfficerShellStagedRow> StagedPageResult =>
+        OfficerShellPagination.Paginate(FilteredStagedRows, new OfficerShellPaginationState { Page = StagedPage, PageSize = StagedPageSize });
+    private OfficerShellPaginationResult<OfficerShellInProcessRow> InProcessPageResult =>
+        OfficerShellPagination.Paginate(FilteredInProcessRows, new OfficerShellPaginationState { Page = InProcessPage, PageSize = InProcessPageSize });
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _initialLoadStarted || !InitialLoadRequested.HasDelegate)
+            return;
+
+        _initialLoadStarted = true;
+        await InitialLoadRequested.InvokeAsync();
+    }
+
+    private IEnumerable<OfficerShellStagedRow> ApplyStagedFilters()
+    {
+        IEnumerable<OfficerShellStagedRow> rows = StagedSearchFiltered();
+        if (StagedFamilyFilter != OfficerShellTemplateFamily.All)
+            rows = rows.Where(r => r.TemplateFamilyKey == StagedFamilyFilter);
+        return rows;
+    }
+
+    private IEnumerable<OfficerShellInProcessRow> ApplyInProcessFilters()
+    {
+        IEnumerable<OfficerShellInProcessRow> rows = InProcessSearchFiltered();
+        if (InProcessFamilyFilter != OfficerShellTemplateFamily.All)
+            rows = rows.Where(r => r.TemplateFamilyKey == InProcessFamilyFilter);
+        return rows;
+    }
+
+    private Dictionary<string, int> StagedFamilyCounts()
+    {
+        var counts = new Dictionary<string, int>();
+        foreach (var group in StagedSearchFiltered().GroupBy(r => r.TemplateFamilyKey))
+            counts[group.Key] = group.Count();
+        return counts;
+    }
+
+    private Dictionary<string, int> InProcessFamilyCounts()
+    {
+        var counts = new Dictionary<string, int>();
+        foreach (var group in InProcessSearchFiltered().GroupBy(r => r.TemplateFamilyKey))
+            counts[group.Key] = group.Count();
+        return counts;
+    }
+
+    private RenderFragment RenderNavItem(
+        OfficerShellPage page, string icon, string title, string sub, int? count, string? badgeVariant) => __builder =>
+    {
+        var active = CurrentPage == page
+            || (page == OfficerShellPage.InProcess && CurrentPage == OfficerShellPage.Case)
+            || (page == OfficerShellPage.Templates && CurrentPage == OfficerShellPage.Templates);
+        <button type="button" class="os-nav-item @(active ? "is-active" : null)" @onclick="() => Navigate(page)">
+            <span class="os-nav-item__ico">@icon</span>
+            <span class="os-nav-item__grow">
+                <span class="os-nav-item__title">@title</span>
+                <span class="os-nav-item__sub">@sub</span>
+            </span>
+            @if (count is > 0 && badgeVariant != null)
+            {
+                <span class="os-nav-badge os-nav-badge--@badgeVariant">@count</span>
+            }
+        </button>;
+    };
+
+    private string Breadcrumb() => CurrentPage switch
+    {
+        OfficerShellPage.Staged => StagedViewMode == "grouped"
+            ? "Application profiles / Staged profiles / Grouped"
+            : "Application profiles / Staged profiles",
+        OfficerShellPage.InProcess => "Application profiles / In process",
+        OfficerShellPage.Templates => "Application profiles / Profile templates",
+        OfficerShellPage.Case => "Application profiles / In process / Case workspace",
+        _ => "Application profiles",
+    };
+
+    private async Task Navigate(OfficerShellPage page)
+    {
+        if (NavigateRequested.HasDelegate)
+            await NavigateRequested.InvokeAsync(page);
+    }
+
+    private async Task OnStartProcess()
+    {
+        if (StartProcessRequested.HasDelegate)
+            await StartProcessRequested.InvokeAsync();
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        if (SearchTextChanged.HasDelegate)
+            await SearchTextChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    }
+
+    private RenderFragment RenderStagedPage() => __builder =>
+    {
+        <div class="os-page-head">
+            <div>
+                <h1 class="os-page-title">Staged profiles</h1>
+                <p class="os-page-sub">Select ready rows and start process to open a numbered case.</p>
+            </div>
+            @RenderStagedViewToggle()
+        </div>
+
+        <OfficerShellFamilyChips ActiveKey="@StagedFamilyFilter"
+                                 Counts="@StagedFamilyCounts()"
+                                 TotalCount="@StagedSearchFiltered().Count()"
+                                 ShowLegend="true"
+                                 FilterChanged="@StagedFamilyFilterChanged" />
+
+        @if (!CanStartProcess && SelectedStagedIds.Count > 0)
+        {
+            <div class="os-banner os-banner--warn">Some selected rows are not ready — complete profile and person links first.</div>
+        }
+
+        @if (StagedViewMode == "grouped")
+        {
+            <OfficerShellStagedGroupedView Rows="@FilteredStagedRows"
+                                           SelectedIds="@SelectedStagedIds"
+                                           CollapsedGroups="@StagedGroupCollapsed"
+                                           ToggleSelection="@ToggleStagedSelectionRequested"
+                                           ToggleGroupCollapsed="@ToggleStagedGroupCollapsed" />
+        }
+        else if (StagedViewMode == "grid")
+        {
+            <div class="os-card-grid">
+                @foreach (var row in StagedPageResult.PageItems)
+                {
+                    var selected = SelectedStagedIds.Contains(row.ApplicationId);
+                    var color = OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey);
+                    <article class="os-card os-card--rich @(selected ? "is-selected" : null)" style="@($"--os-card-accent:{color}")" @onclick="() => ToggleStaged(row.ApplicationId)">
+                        <div class="os-card__stripe"></div>
+                        <div class="os-card__head">
+                            <input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)" @onclick:stopPropagation="true" @onchange="() => ToggleStaged(row.ApplicationId)" />
+                            <span class="os-status os-status--@row.Readiness">@ReadinessLabel(row.Readiness)</span>
+                        </div>
+                        <div class="os-card__title">@row.PersonName</div>
+                        <div class="os-card__meta">@row.ProfileName</div>
+                        <div class="os-card__foot">@row.StagedOn · @(row.ProjectName ?? "—")</div>
+                    </article>
+                }
+            </div>
+            <OfficerShellPaginationBar PagerId="staged"
+                                       Page="@StagedPageResult.Page"
+                                       PageSize="@StagedPageResult.PageSize"
+                                       Total="@StagedPageResult.Total"
+                                       TotalPages="@StagedPageResult.TotalPages"
+                                       Start="@StagedPageResult.Start"
+                                       End="@StagedPageResult.End"
+                                       PageChanged="@StagedPageChanged"
+                                       PageSizeChanged="@StagedPageSizeChanged" />
+        }
+        else
+        {
+            <table class="os-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Person</th>
+                        <th>Profile</th>
+                        <th>Project</th>
+                        <th>Staged</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in StagedPageResult.PageItems)
+                    {
+                        var selected = SelectedStagedIds.Contains(row.ApplicationId);
+                        <tr class="@(selected ? "is-selected" : null)" @onclick="() => ToggleStaged(row.ApplicationId)">
+                            <td><input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)" @onclick:stopPropagation="true" @onchange="() => ToggleStaged(row.ApplicationId)" /></td>
+                            <td><span class="os-dot" style="background:@OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey)"></span> @row.PersonName</td>
+                            <td>@row.ProfileName</td>
+                            <td>@(row.ProjectName ?? "—")</td>
+                            <td>@row.StagedOn</td>
+                            <td><span class="os-status os-status--@row.Readiness">@ReadinessLabel(row.Readiness)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <OfficerShellPaginationBar PagerId="staged"
+                                       Page="@StagedPageResult.Page"
+                                       PageSize="@StagedPageResult.PageSize"
+                                       Total="@StagedPageResult.Total"
+                                       TotalPages="@StagedPageResult.TotalPages"
+                                       Start="@StagedPageResult.Start"
+                                       End="@StagedPageResult.End"
+                                       PageChanged="@StagedPageChanged"
+                                       PageSizeChanged="@StagedPageSizeChanged" />
+        }
+    };
+
+    private RenderFragment RenderInProcessPage() => __builder =>
+    {
+        <div class="os-page-head">
+            <div>
+                <h1 class="os-page-title">In process</h1>
+                <p class="os-page-sub">Open a case workspace from a numbered application.</p>
+            </div>
+            @RenderViewToggle(InProcessViewMode, InProcessViewModeChanged)
+        </div>
+
+        <OfficerShellFamilyChips ActiveKey="@InProcessFamilyFilter"
+                                 Counts="@InProcessFamilyCounts()"
+                                 TotalCount="@InProcessSearchFiltered().Count()"
+                                 FilterChanged="@InProcessFamilyFilterChanged" />
+
+        @if (InProcessViewMode == "grid")
+        {
+            <div class="os-card-grid">
+                @foreach (var row in InProcessPageResult.PageItems)
+                {
+                    var color = OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey);
+                    <article class="os-card os-card--rich os-card--clickable" style="@($"--os-card-accent:{color}")" @onclick="() => OpenCase(row.ApplicationId)">
+                        <div class="os-card__stripe"></div>
+                        <div class="os-card__title">@row.ApplicationNumber</div>
+                        <div class="os-card__meta">@row.PersonName</div>
+                        <div class="os-card__foot">@row.CurrentStep · @FormatSla(row.SlaDaysRemaining)</div>
+                    </article>
+                }
+            </div>
+            <OfficerShellPaginationBar PagerId="inProcess"
+                                       Page="@InProcessPageResult.Page"
+                                       PageSize="@InProcessPageResult.PageSize"
+                                       Total="@InProcessPageResult.Total"
+                                       TotalPages="@InProcessPageResult.TotalPages"
+                                       Start="@InProcessPageResult.Start"
+                                       End="@InProcessPageResult.End"
+                                       PageChanged="@InProcessPageChanged"
+                                       PageSizeChanged="@InProcessPageSizeChanged" />
+        }
+        else
+        {
+            <table class="os-table os-table--clickable">
+                <thead>
+                    <tr>
+                        <th>Application</th>
+                        <th>Person</th>
+                        <th>Profile</th>
+                        <th>Step</th>
+                        <th>SLA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in InProcessPageResult.PageItems)
+                    {
+                        <tr @onclick="() => OpenCase(row.ApplicationId)">
+                            <td><span class="os-dot" style="background:@OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey)"></span> @row.ApplicationNumber</td>
+                            <td>@row.PersonName</td>
+                            <td>@row.ProfileName</td>
+                            <td>@row.CurrentStep</td>
+                            <td>@FormatSlaMarkup(row.SlaDaysRemaining)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <OfficerShellPaginationBar PagerId="inProcess"
+                                       Page="@InProcessPageResult.Page"
+                                       PageSize="@InProcessPageResult.PageSize"
+                                       Total="@InProcessPageResult.Total"
+                                       TotalPages="@InProcessPageResult.TotalPages"
+                                       Start="@InProcessPageResult.Start"
+                                       End="@InProcessPageResult.End"
+                                       PageChanged="@InProcessPageChanged"
+                                       PageSizeChanged="@InProcessPageSizeChanged" />
+        }
+    };
+
+    private RenderFragment RenderStagedViewToggle() => __builder =>
+    {
+        <div class="os-toggle">
+            <button type="button" class="@(StagedViewMode == "list" ? "is-active" : null)" @onclick='() => StagedViewModeChanged.InvokeAsync("list")'>List</button>
+            <button type="button" class="@(StagedViewMode == "grid" ? "is-active" : null)" @onclick='() => StagedViewModeChanged.InvokeAsync("grid")'>Grid</button>
+            <button type="button" class="@(StagedViewMode == "grouped" ? "is-active" : null)" @onclick='() => StagedViewModeChanged.InvokeAsync("grouped")'>Grouped</button>
+        </div>;
+    };
+
+    private RenderFragment RenderViewToggle(string mode, EventCallback<string> changed) => __builder =>
+    {
+        <div class="os-toggle">
+            <button type="button" class="@(mode == "list" ? "is-active" : null)" @onclick='() => changed.InvokeAsync("list")'>List</button>
+            <button type="button" class="@(mode == "grid" ? "is-active" : null)" @onclick='() => changed.InvokeAsync("grid")'>Grid</button>
+        </div>;
+    };
+
+    private static string ReadinessLabel(string readiness) => readiness switch
+    {
+        "ready" => "Ready",
+        "incomplete" => "Incomplete",
+        "awaiting" => "Awaiting data",
+        _ => readiness,
+    };
+
+    private static string FormatSla(int? days) => days == null ? "—" : $"{days} days";
+
+    private static MarkupString FormatSlaMarkup(int? days)
+    {
+        if (days == null)
+            return new MarkupString("—");
+        var cls = days <= 7 ? "os-sla os-sla--warn" : "os-sla os-sla--ok";
+        return new MarkupString($"<span class=\"{cls}\">{days} days</span>");
+    }
+
+    private async Task ToggleStaged(Guid applicationId)
+    {
+        if (ToggleStagedSelectionRequested.HasDelegate)
+            await ToggleStagedSelectionRequested.InvokeAsync(applicationId);
+    }
+
+    private async Task OpenCase(Guid applicationId)
+    {
+        if (OpenCaseRequested.HasDelegate)
+            await OpenCaseRequested.InvokeAsync(applicationId);
+    }
+}

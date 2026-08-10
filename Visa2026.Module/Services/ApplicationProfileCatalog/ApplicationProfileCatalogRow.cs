@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationProfilePicker;
+using Visa2026.Module.Services.OfficerShell;
 
 namespace Visa2026.Module.Services.ApplicationProfileCatalog;
 
@@ -16,8 +17,13 @@ public sealed class ApplicationProfileCatalogRow
     public bool IsActive { get; init; }
     public bool IsConfigLocked { get; init; }
     public int LinkedApplicationCount { get; init; }
-
-    /// <summary>Compact left-rail caption, e.g. "201 - Gulluk Pasporty…".</summary>
+    public int StagedUses { get; init; }
+    public int InProcessUses { get; init; }
+    public string TemplateFamilyKey { get; init; } = OfficerShellTemplateFamily.Invitation;
+    /// <summary>active · locked · draft — officer-shell template catalog parity.</summary>
+    public string StatusKey { get; init; } = "active";
+    public string ActionFamilyLabel { get; init; } = string.Empty;
+    public string ProgressRouteLabel { get; init; } = string.Empty;
     public string RailLabel
     {
         get
