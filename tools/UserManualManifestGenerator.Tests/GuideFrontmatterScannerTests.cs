@@ -67,12 +67,12 @@ public class GuideFrontmatterScannerTests
     {
         var map = GuideFrontmatterScanner.BuildGuideSlugsByBo(
         [
-            new GuideFrontmatter { Bo = "Visa", Slug = "employee/add-visa" },
-            new GuideFrontmatter { Bo = "Visa", Slug = "employee/extend-visa" },
-            new GuideFrontmatter { Bo = "Visa", Slug = "employee/add-visa" },
-            new GuideFrontmatter { Bo = "Person", Slug = "person/overview" },
-            new GuideFrontmatter { Bo = " ", Slug = "ignored" },
-            new GuideFrontmatter { Bo = "Application", Slug = null },
+            new GuideFrontmatter { FilePath = "a.md", Locale = "en", Bo = "Visa", Slug = "employee/add-visa" },
+            new GuideFrontmatter { FilePath = "b.md", Locale = "en", Bo = "Visa", Slug = "employee/extend-visa" },
+            new GuideFrontmatter { FilePath = "c.md", Locale = "en", Bo = "Visa", Slug = "employee/add-visa" },
+            new GuideFrontmatter { FilePath = "d.md", Locale = "en", Bo = "Person", Slug = "person/overview" },
+            new GuideFrontmatter { FilePath = "e.md", Locale = "en", Bo = " ", Slug = "ignored" },
+            new GuideFrontmatter { FilePath = "f.md", Locale = "en", Bo = "Application", Slug = null },
         ]);
 
         Assert.Equal(["employee/add-visa", "employee/extend-visa"], map["Visa"]);
