@@ -203,4 +203,59 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 - **Context**: Plan + prototypes done; `ApplicationProfile` BO and optional `Application.ApplicationProfile` FK shipped; dual-read with deprecated `ApplicationType` continues.
 - **Decision**: **Slice 5** (seed profiles from ApplicationType + backfill FK) is the recommended next implementation step before wizard UX or M2M DetailView.
 - **Prevent**: Do not build wizard/M2M on empty profile catalog in prod-like DBs — seed first.
-- **Cross-skill**: visa2026-lookup-data (Type configuration JSON) | —
+- **Cross-skill**: —
+
+### 2026-08-10 — P10 case workspace tabs (PNG parity)
+
+- **Delivered**: `case-tabs-ui.js` + `case-tabs.css` — People & links (table + per-person record grid + summary rail), Progress (vertical timeline + ministry detail + rail), Resminamalar (grouped catalog + preview + ZIP), SLA & deadlines (metrics, timeline, deadlines table, alerts).
+- **Routes**: `#/case/p1/people`, `/progress`, `/resminamalar`, `/sla`.
+- **Cross-skill**: visa2026-resminamalar, visa2026-person-detail-tabs (production reference)
+
+### 2026-08-10 — P9 nav badge counts (PNG parity)
+
+- **Delivered**: `nav-ui.js` — live sidebar badges (orange **18** staged, blue **24** in-process); templates subcopy “Configuration · Visa office admin”; `os-nav-badge` styling in `shell.css`.
+- **Mock seed**: `seedInProcessDemoCases()` pads in-process to 24 (ext 8 · inv 6 · reg 5 · wp 5); staged remains 18.
+- **Note**: counts update live after Start process (by design).
+- **Cross-skill**: —
+
+### 2026-08-10 — P8 staged grouped workspace (PNG parity)
+
+- **Delivered**: `staged-workspace-ui.js` + `staged-workspace.css` — accordion groups by template family (reg/inv/ext/wp), avatars, row meta badges, readiness dots, collapsible sections, bottom selection bar; **Grouped** toggle + `#/staged?group=template`.
+- **Cross-skill**: —
+
+### 2026-08-10 — P6 pagination (PNG parity)
+
+- **Delivered**: `pagination-ui.js` + `pagination.css` — shared bar on staged, in-process, and templates (list + grid): “Showing X–Y of Z”, rows-per-page select (10/25/50), Bootstrap prev/next + numbered pages; filter/search resets to page 1.
+- **Store**: `pagination.{staged,inProcess,templates}` in mock-data.
+- **Cross-skill**: —
+
+### 2026-08-10 — P4 template catalog + overview (PNG parity)
+
+- **Delivered**: `template-catalog-ui.js` + `template-catalog.css` — list/grid catalog with status pills (Active/Locked/Draft), rich grid cards (stripe, icon, stats, Configure), toolbar search + filter/sort dropdowns, pagination stub; overview with left rail cards, 4 numbered summary columns, usage stats bar, lock hint footer.
+- **Mock seed**: 12 templates (chip counts All 12 / Issuance 4 / Registration 3 / Cancellation 2 / Business trip 3).
+- **Routes**: `#/templates` (list/grid toggle), `#/templates/t1` (overview).
+- **Cross-skill**: —
+
+### 2026-08-10 — P3 document copies tab (PNG parity)
+
+- **Delivered**: `document-copies-ui.js` — readiness summary + progress bar, per-person accordion (6 slots), Ready/Missing badges, preview pane with metadata; `#/case/:id/documents`.
+- **Cross-skill**: visa2026-document-copies (production dialog reference)
+
+### 2026-08-10 — P2 case workspace overview (PNG parity)
+
+- **Delivered**: `case-workspace-ui.js` + `case-workspace.css` — header with SLA badge, person avatars, summary icon grid, horizontal progress stepper, linked-record tiles, readiness + activity rail.
+- **Route**: `#/case/p1/overview` (any in-process case id).
+- **Cross-skill**: —
+
+- **Delivered**: Template wizard rebuilt with **Bootstrap 5.3** + **Bootstrap Icons** (CDN); `js/wizard-ui.js` + `styles/wizard.css` for PNG stepper, badges, green section headers, all 5 steps.
+- **Wizard mode**: `os-app--wizard` collapses sidebar to icon rail (matches wizard mockup).
+- **Cross-skill**: —
+
+### 2026-08-10 — HTML officer shell (H0–H6)
+
+- **Delivered**: Interactive prototype at `Visa2026.Blazor.Server/wwwroot/officer-shell/` — hash router, mock store, staged merge → in-process workspace, templates + 5-step wizard, PNG gallery; 22 PNGs copied to `assets/png/`.
+- **Plan**: [`docs/APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](../../../docs/APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md) — slices H0–H6 **Done**; H7 (Person staging) deferred.
+- **Parity**: `parity/CHECKLIST.md` created — visual sign-off not yet run at 1440×900.
+- **Wizard routing**: use `#/templates/wizard/{0-4}` (query string in hash unreliable).
+- **Next**: Officer walkthrough + parity checkboxes; then Blazor lift (`OfficerShellLayout.razor`) when product locks template → staged → in-process pivot.
+- **Cross-skill**: —

@@ -339,6 +339,21 @@ namespace Visa2026.Blazor.Server
             // EasyTest listens on http://localhost:5050 only; HTTPS redirect/HSTS breaks Blazor script loading on CI.
             if (!easyTestHost && httpsPort > 0)
                 app.UseHttpsRedirection();
+
+            // Officer-shell HTML prototype: directory URL must resolve to index.html before Blazor fallback.
+            app.Use(async (context, next) =>
+            {
+                var path = context.Request.Path.Value ?? string.Empty;
+                if (path.Equals("/officer-shell", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Response.Redirect("/officer-shell/");
+                    return;
+                }
+                if (path.Equals("/officer-shell/", StringComparison.OrdinalIgnoreCase))
+                    context.Request.Path = "/officer-shell/index.html";
+                await next();
+            });
+
             VisaLocalization.UseVisaRequestLocalization(app);
             app.UseStaticFiles();
             app.UseODataBatching();

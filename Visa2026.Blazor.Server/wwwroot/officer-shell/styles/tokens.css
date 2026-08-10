@@ -1,0 +1,33 @@
+:root {
+  --os-nav-bg: #0f1b2d;
+  --os-nav-text: #c8d4e3;
+  --os-nav-muted: #7b8da3;
+  --os-nav-active: #1d6ef2;
+  --os-nav-active-bg: rgba(29, 110, 242, 0.18);
+  --os-ink: #142033;
+  --os-muted: #5c6b7a;
+  --os-line: #d8e0ea;
+  --os-surface: #eef2f7;
+  --os-panel: #ffffff;
+  --os-accent: #1d6ef2;
+  --os-accent-soft: #e8f1ff;
+  --os-ok: #0f9d58;
+  --os-ok-soft: #e6f6ee;
+  --os-warn: #b45309;
+  --os-warn-soft: #fff4e5;
+  --os-bad: #c62828;
+  --os-bad-soft: #fdecec;
+  --os-hold: #64748b;
+  --os-hold-soft: #f1f5f9;
+  --os-draft: #b45309;
+  --os-tpl-reg: #3b82f6;
+  --os-tpl-inv: #22c55e;
+  --os-tpl-ext: #f59e0b;
+  --os-tpl-wp: #a855f7;
+  --os-tpl-can: #ef4444;
+  --os-sidebar-w: 268px;
+  --os-topbar-h: 56px;
+  --os-radius: 10px;
+  --os-font: "Segoe UI", "IBM Plex Sans", "Source Sans 3", system-ui, sans-serif;
+  --os-shadow: 0 1px 2px rgba(20, 32, 51, 0.06), 0 8px 24px rgba(20, 32, 51, 0.06);
+}

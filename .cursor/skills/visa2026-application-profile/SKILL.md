@@ -33,6 +33,7 @@ disable-model-invocation: false
 | [`docs/APPLICATION_PROFILE_PLAN.md`](../../../docs/APPLICATION_PROFILE_PLAN.md) | Locked decisions, migration, §9 prototype inventory, §12 progress |
 | [`docs/DEPRECATED.md`](../../../docs/DEPRECATED.md) | `ApplicationType` / `ApplicationTypeFilter` deprecation |
 | [`docs/prototypes/`](../../../docs/prototypes/) | **22 PNG UX mockups** (2026-08-10) — shell, staged, in-process workspace, templates, wizard |
+| [`docs/APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](../../../docs/APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md) | PNG → interactive HTML plan (future custom UI) |
 
 **Prototype groups** (all under `docs/prototypes/`):
 

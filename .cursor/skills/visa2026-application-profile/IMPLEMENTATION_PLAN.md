@@ -42,6 +42,14 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 12 | Resminamalar / merge reads profile nested templates | **Done** | Profile nested catalog + `profile:` entry keys; merge via matching `UserReportTemplate` name |
 | 13a | Profile-first runtime + cutover prep | **Done** | Capability resolver; nav route criteria; profile-or-type validation; hide Type when profile set |
 | 13b | Remove `Application.ApplicationType` FK (schema) | **Deferred** | After import cutover; Report Dashboard SQL, sync rules, PDF mapping remain on Type |
+| H0 | HTML officer shell — tokens, router, mock store | **Done** | `wwwroot/officer-shell/` — plan §7 |
+| H1 | HTML staged list/grid + Start process merge | **Done** | Mock `startProcess()` → in-process case |
+| H2 | HTML in-process list/grid | **Done** | Row → `#/case/:id/overview` |
+| H3 | HTML case workspace (6 tabs) | **Done** | overview, people, progress, documents, resminamalar, sla |
+| H4 | HTML templates catalog + overview | **Done** | Left rail + Configure |
+| H5 | HTML template wizard (5 steps) | **Done** | `#/templates/wizard/{0-4}` → Publish |
+| H6 | HTML PNG gallery + README + parity checklist | **Done** | `parity/CHECKLIST.md` — sign-off pending |
+| H7 | HTML Person DetailView staging | **Deferred** | Post–v1; People nav = stub only |
 
 ---
 
