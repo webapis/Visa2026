@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationWorkspace;
-using Visa2026.Module.Controllers;
 using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.PreviewSlot;
@@ -122,10 +121,9 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
     private void UpdateActionState(ApplicationWorkspaceModel model)
     {
         var applicationId = ResolveApplicationId();
-        var personActionsAvailable = applicationId != Guid.Empty
-            && (TryGetWorkspacePersonController() != null || _personUiActions?.IsAvailable == true);
-        model.CanLinkPerson = personActionsAvailable;
-        model.CanUnlinkPerson = personActionsAvailable;
+        var canLink = applicationId != Guid.Empty && _application?.MainWindow != null;
+        model.CanLinkPerson = canLink;
+        model.CanUnlinkPerson = canLink;
 
         var personTab = model.Snapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
         model.CanOpenPersonDetail = personTab != null
@@ -138,32 +136,39 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
 
     private Task LinkPersonAsync()
     {
-        var controller = TryGetWorkspacePersonController();
-        if (controller != null)
-        {
-            controller.TriggerLinkPerson();
+        if (_application?.MainWindow == null)
             return Task.CompletedTask;
-        }
 
-        _personUiActions?.LinkPerson();
+        var applicationId = ResolveApplicationId();
+        if (applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspacePersonLinkHelper.ShowLinkPersonPicker(
+            _application,
+            _application.MainWindow,
+            applicationId,
+            OnWorkspaceChanged);
+
         return Task.CompletedTask;
     }
 
     private Task UnlinkPersonAsync()
     {
-        var controller = TryGetWorkspacePersonController();
-        if (controller != null)
-        {
-            controller.TriggerUnlinkPerson();
+        if (_application?.MainWindow == null)
             return Task.CompletedTask;
-        }
 
-        _personUiActions?.UnlinkPerson();
+        var applicationId = ResolveApplicationId();
+        if (applicationId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspacePersonLinkHelper.ShowUnlinkPersonPicker(
+            _application,
+            _application.MainWindow,
+            applicationId,
+            OnWorkspaceChanged);
+
         return Task.CompletedTask;
     }
-
-    private ApplicationWorkspacePersonController? TryGetWorkspacePersonController() =>
-        _application?.MainWindow?.GetController<ApplicationWorkspacePersonController>();
 
     private void SelectPersonRow(int rowIndex)
     {

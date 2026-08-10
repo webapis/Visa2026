@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EFCore;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Localization;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ReportDashboard;
 
@@ -448,8 +449,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (role.HasValue)
         {
             var roleValue = role.Value;
-            query = query.Where(a => a.ApplicationItems.Any(ai =>
-                ai.Person != null && ai.Person.PersonRole == roleValue));
+            query = query.Where(a =>
+                a.People.Any(ap => ap.Person != null && ap.Person.PersonRole == roleValue)
+                || a.ApplicationItems.Any(ai =>
+                    ai.Person != null && ai.Person.PersonRole == roleValue));
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
@@ -2715,11 +2718,7 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
             var visaPeriod = a.VisaPeriod?.NameTm ?? a.VisaPeriod?.Name ?? string.Empty;
             var visaType = a.VisaType?.NameTm ?? a.VisaType?.Name ?? string.Empty;
 
-            var items = (a.ApplicationItems ?? Array.Empty<ApplicationItem>())
-                .Where(ai => ai != null)
-                .OrderBy(ai => ai.Person?.FullName ?? string.Empty)
-                .ThenBy(ai => ai.ID)
-                .ToList();
+            var items = ApplicationRosterHelper.GetMergeLineItems(objectSpace, a);
             if (items.Count == 0)
                 continue;
 
@@ -2957,8 +2956,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (role.HasValue)
         {
             var roleValue = role.Value;
-            query = query.Where(a => a.ApplicationItems.Any(ai =>
-                ai.Person != null && ai.Person.PersonRole == roleValue));
+            query = query.Where(a =>
+                a.People.Any(ap => ap.Person != null && ap.Person.PersonRole == roleValue)
+                || a.ApplicationItems.Any(ai =>
+                    ai.Person != null && ai.Person.PersonRole == roleValue));
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
@@ -3057,8 +3058,10 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (role.HasValue)
         {
             var roleValue = role.Value;
-            query = query.Where(a => a.ApplicationItems.Any(ai =>
-                ai.Person != null && ai.Person.PersonRole == roleValue));
+            query = query.Where(a =>
+                a.People.Any(ap => ap.Person != null && ap.Person.PersonRole == roleValue)
+                || a.ApplicationItems.Any(ai =>
+                    ai.Person != null && ai.Person.PersonRole == roleValue));
         }
 
         if (!string.IsNullOrWhiteSpace(projectKey) && projectKey != "All")
@@ -4524,14 +4527,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         if (validVisaPersonIds == null)
         {
             // Valid visa only uses a separate person-based path and ignores Last N months.
-            addressIdSet = db.ApplicationItems
-                .AsNoTracking()
-                .Where(ai => ai.CurrentAddressOfResidence != null
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff)
-                .Select(ai => ai.CurrentAddressOfResidence!.ID)
-                .Distinct()
-                .ToHashSet();
+            addressIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationPersonLinkKind.AddressOfResidence, cutoff);
         }
 
         if (addressIdSet is { Count: 0 })
@@ -5473,28 +5470,6 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         };
     }
 
-    /// <summary>
-    /// Education used as <see cref="ApplicationItem.CurrentEducation"/> on an application
-    /// whose <see cref="Application.ApplicationDate"/> is on/after <paramref name="cutoff"/>.
-    /// </summary>
-    private static IQueryable<VwRdEducation> FilterEducationByApplicationDate(
-        Visa2026EFCoreDbContext db, IQueryable<VwRdEducation> query, DateTime cutoff) =>
-        query.Where(r =>
-            db.ApplicationItems.Any(ai =>
-                ai.CurrentEducation != null
-                && ai.CurrentEducation.ID == r.ID
-                && ai.Application != null
-                && ai.Application.ApplicationDate >= cutoff));
-
-    private static IQueryable<VwRdEducationByCountry> FilterEducationByCountryByApplicationDate(
-        Visa2026EFCoreDbContext db, IQueryable<VwRdEducationByCountry> query, DateTime cutoff) =>
-        query.Where(r =>
-            db.ApplicationItems.Any(ai =>
-                ai.CurrentEducation != null
-                && ai.CurrentEducation.ID == r.ID
-                && ai.Application != null
-                && ai.Application.ApplicationDate >= cutoff));
-
     private static ReportDashboardPanelData LoadEducation(
         IObjectSpace objectSpace, PersonRecordRole? role, string projectKey,
         ReportDashboardPersonType personType, string subReport,
@@ -5520,8 +5495,18 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         if (validVisaPersonIds == null)
         {
-            // Used as ApplicationItem.CurrentEducation with Application.ApplicationDate in range.
-            query = FilterEducationByApplicationDate(db, query, cutoff);
+            var educationIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationPersonLinkKind.Education, cutoff);
+            if (educationIdSet.Count == 0)
+            {
+                return BuildPanel(
+                    personType, ReportDashboardCategory.Education, subReport,
+                    new List<ReportDashboardPreviewRow>(),
+                    excelHint, excelConfigured,
+                    Array.Empty<ReportDashboardStatusBucket>(), 0);
+            }
+
+            query = query.Where(r => educationIdSet.Contains(r.ID));
         }
         else
         {
@@ -5640,7 +5625,20 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         IQueryable<VwRdEducationByCountry> query = db.VwRdEducationByCountry.AsNoTracking();
 
         if (validVisaPersonIds == null)
-            query = FilterEducationByCountryByApplicationDate(db, query, cutoff);
+        {
+            var educationIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationPersonLinkKind.Education, cutoff);
+            if (educationIdSet.Count == 0)
+            {
+                return BuildPanel(
+                    personType, ReportDashboardCategory.Education, subReport,
+                    new List<ReportDashboardPreviewRow>(),
+                    excelHint, excelConfigured,
+                    Array.Empty<ReportDashboardStatusBucket>(), 0);
+            }
+
+            query = query.Where(r => educationIdSet.Contains(r.ID));
+        }
         else
             query = query.Where(r => r.PersonOid != null && validVisaPersonIds.Contains(r.PersonOid.Value));
 
@@ -5753,15 +5751,11 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         else if (objectSpace is EFCoreObjectSpace efOs
             && efOs.DbContext is Visa2026EFCoreDbContext db)
         {
-            items = query
-                .Where(e =>
-                    db.ApplicationItems.Any(ai =>
-                        ai.CurrentEducation != null
-                        && ai.CurrentEducation.ID == e.ID
-                        && ai.Application != null
-                        && ai.Application.ApplicationDate >= cutoff))
-                .AsEnumerable()
-                .ToList();
+            var educationIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationPersonLinkKind.Education, cutoff);
+            items = educationIdSet.Count == 0
+                ? new List<Education>()
+                : query.Where(e => educationIdSet.Contains(e.ID)).AsEnumerable().ToList();
         }
         else
         {
@@ -5851,13 +5845,18 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
 
         if (validVisaPersonIds == null)
         {
-            // Used as ApplicationItem.CurrentPositionHistory with Application.ApplicationDate in range.
-            query = query.Where(r =>
-                db.ApplicationItems.Any(ai =>
-                    ai.CurrentPositionHistory != null
-                    && ai.CurrentPositionHistory.ID == r.ID
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff));
+            var positionIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationPersonLinkKind.Position, cutoff);
+            if (positionIdSet.Count == 0)
+            {
+                return BuildPanel(
+                    personType, ReportDashboardCategory.PositionHistory, subReport,
+                    new List<ReportDashboardPreviewRow>(),
+                    excelHint, excelConfigured,
+                    Array.Empty<ReportDashboardStatusBucket>(), 0);
+            }
+
+            query = query.Where(r => positionIdSet.Contains(r.ID));
         }
         else
         {
@@ -6200,14 +6199,8 @@ public sealed class ReportDashboardQueryService : IReportDashboardQueryService
         HashSet<Guid>? medicalIdSet = null;
         if (validVisaPersonIds == null)
         {
-            medicalIdSet = db.ApplicationItems
-                .AsNoTracking()
-                .Where(ai => ai.CurrentMedicalRecord != null
-                    && ai.Application != null
-                    && ai.Application.ApplicationDate >= cutoff)
-                .Select(ai => ai.CurrentMedicalRecord!.ID)
-                .Distinct()
-                .ToHashSet();
+            medicalIdSet = ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange(
+                db, ApplicationPersonLinkKind.MedicalRecord, cutoff);
         }
 
         if (medicalIdSet is { Count: 0 })

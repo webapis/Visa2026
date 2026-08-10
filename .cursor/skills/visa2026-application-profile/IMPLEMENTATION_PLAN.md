@@ -35,6 +35,9 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 10h | Runtime roster reads → `ApplicationPeople` | **Done** | `ApplicationRosterHelper`; merge/Resminamalar hydration; header AvailablePeople; cancel counts |
 | 10i | `Visa.IssuingApplication` dual-read | **Done** | FK + backfill; Path A M2M-first; legacy `IssuingApplicationItem` hidden when app set |
 | 10j | Report Dashboard roster SQL + loaders (phase B start) | **Done** | `vw_rd_registration`, `vw_rd_passport`, to-be-checked-in/out; `ReportDashboardRosterQueryHelper`; Travel/Registration on process |
+| 10k | Report Dashboard child-link C# filters + `vw_rd_application` | **Done** | Education/Address/Position/Medical Last-N via resolved links + legacy fallback; `vw_rd_application` first person from M2M |
+| 10l | Report Dashboard visa extension / work permit SQL | **Done** | `View_VisaExtensionStatus`, `vw_rd_visa_app_progress`, `vw_rd_work_permit_app_progress`, `vw_rd_visa_state`, extension-required CTE; invitation first-person M2M |
+| 10m | Report Dashboard ministry + direct-migration SQL | **Done** | `ministry_roster_lines` CTE in 8 embedded views; `ReportDashboardSqlViewResource` placeholder; legacy EF loaders dual-read |
 | 11 | Person / Dossier **Start application** | **Done** | 2-step picker from Person + Dossier; M2M link; dossier Applications section |
 | 12 | Resminamalar / merge reads profile nested templates | **Done** | Profile nested catalog + `profile:` entry keys; merge via matching `UserReportTemplate` name |
 | 13a | Profile-first runtime + cutover prep | **Done** | Capability resolver; nav route criteria; profile-or-type validation; hide Type when profile set |
@@ -216,7 +219,51 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Verify:** Restart app (DB updater recreates views). Registration / Passport / Travel panels on mixed M2M + legacy DB.
 
-**Next:** Remaining `vw_rd_*` on `ApplicationItems`; `SyncRulesUpdater`; hard-remove `ApplicationItem` BO.
+**Next:** Remaining `vw_rd_*` on `ApplicationItems` (visa extension, work permit app progress); `SyncRulesUpdater`; hard-remove `ApplicationItem` BO.
+
+---
+
+## Slice 10k — Report Dashboard child-link C# filters (detail)
+
+**Delivered (2026-08-08):**
+
+- `ReportDashboardRosterQueryHelper.GetLinkedChildIdsInApplicationDateRange` — M2M `ApplicationPersonResolvedLink` + legacy `ApplicationItem` fallback for Education, Address, Position, Medical.
+- `ReportDashboardQueryService` — Last-N filters for Education (view + legacy), Position history, Address of residence, Medical record.
+- `vw_rd_application` — first person from `ApplicationPeople` (legacy `ApplicationItems` only when no M2M roster); fixed corrupted `ProgressStateCode` SQL line.
+
+**Verify:** Report Dashboard Education / Address / Position / Medical panels on apps with M2M roster only; `vw_rd_application` preview shows correct person name.
+
+**Next:** Visa extension / work permit progress SQL views; sync rules; hard-remove `ApplicationItem`.
+
+---
+
+## Slice 10l — Report Dashboard visa extension SQL (detail)
+
+**Delivered (2026-08-08):**
+
+- `ReportDashboardPostgresRosterSql` — visa/work-permit extension roster CTEs, `View_VisaExtensionStatus`, `vw_rd_visa_app_progress`, `vw_rd_work_permit_app_progress`, `vw_rd_visa_state`, `unfinished_extension_people`, first-person lateral join.
+- `IssuedVisaID` dual-read: `IssuingApplicationItemID` or `IssuingApplicationID` + passport match (slice 10i).
+- `vw_rd_visa_extension_required` — unfinished-extension people from M2M roster.
+- `vw_rd_invitation_in_process` / `vw_rd_invitation_rejected` — first person from `ApplicationPeople`.
+- `ReportDashboardRosterQueryHelper.ApplicationIdsWithPersonRole` — invitation in-process role filter.
+
+**Verify:** Restart app (DB updater). Visa Extension status list, On Extension / Extension Required panels, Work Permit extension progress on M2M-only apps.
+
+**Next:** `SyncRulesUpdater`; hard-remove `ApplicationItem` BO (post-import).
+
+---
+
+## Slice 10m — Report Dashboard ministry SQL (detail)
+
+**Delivered (2026-08-08):**
+
+- `CteMinistryRosterLines` + `{{MINISTRY_ROSTER_CTE}}` placeholder expanded in `ReportDashboardSqlViewResource.Load`.
+- Embedded PostgreSQL views: invitation/visa-extension/other on-process + completed bases, direct-migration on-process + complete (8 files).
+- `ReportDashboardQueryService` — ministry invitation legacy loader uses `ApplicationRosterHelper.GetMergeLineItems`; Application role filters include `ApplicationPeople`.
+
+**Verify:** Report Dashboard → Application (via ministry) sub-reports on M2M-only applications; Open ListView row counts match preview.
+
+**Next:** `SyncRulesUpdater`; `ApplicationItem` BO removal.
 
 ---
 

@@ -1,11 +1,12 @@
 -- Invitation Completed base.
--- One row per ApplicationItem — PostgreSQL.
+-- One row per roster line (ApplicationPerson M2M + legacy ApplicationItem fallback) — PostgreSQL.
 DROP VIEW IF EXISTS vw_rd_application_via_ministry_invitation_completed_base CASCADE;
 CREATE VIEW vw_rd_application_via_ministry_invitation_completed_base AS
+WITH {{MINISTRY_ROSTER_CTE}}
 SELECT
-    ai."ID"                                                                 AS "ID",
+    roster."LineId" AS "ID",
     a."ID"                                                                  AS "ApplicationOid",
-    ai."ID"                                                                 AS "ApplicationItemOid",
+    roster."LineId" AS "ApplicationItemOid",
     p."ID"                                                                  AS "PersonOid",
     latest_ap."StateID"                                                     AS "CurrentStateID",
     COALESCE(
@@ -58,9 +59,9 @@ SELECT
     COALESCE(NULLIF(BTRIM(vp."NameTm"), ''), NULLIF(BTRIM(vp."Name"), ''), '(No period)') AS "PeriodLabel",
     COALESCE(NULLIF(BTRIM(vc."NameTm"), ''), NULLIF(BTRIM(vc."Name"), ''), '(No category)') AS "CategoryLabel",
     COALESCE(NULLIF(BTRIM(vt."NameTm"), ''), NULLIF(BTRIM(vt."Name"), ''), '(No type)') AS "TypeLabel"
-FROM "ApplicationItems" ai
+FROM ministry_roster_lines roster
 INNER JOIN "Applications" a
-    ON a."ID" = ai."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
+    ON a."ID" = roster."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
 INNER JOIN "ApplicationTypes" at
     ON at."ID" = a."ApplicationTypeID" AND COALESCE(at."GCRecord", 0) = 0
    AND COALESCE(at."CanIssueInvitation", FALSE) = TRUE
@@ -68,9 +69,9 @@ INNER JOIN "ApplicationTypes" at
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = a."ProjectContractID" AND COALESCE(pc."GCRecord", 0) = 0
 LEFT JOIN "People" p
-    ON p."ID" = ai."PersonID" AND COALESCE(p."GCRecord", 0) = 0
+    ON p."ID" = roster."PersonID" AND COALESCE(p."GCRecord", 0) = 0
 LEFT JOIN "EmployeePositionHistories" eph
-    ON eph."ID" = ai."CurrentPositionHistoryID" AND COALESCE(eph."GCRecord", 0) = 0
+    ON eph."ID" = roster."PositionHistoryID" AND COALESCE(eph."GCRecord", 0) = 0
 LEFT JOIN "Positions" pos
     ON pos."ID" = eph."PositionID" AND COALESCE(pos."GCRecord", 0) = 0
 LEFT JOIN LATERAL (
@@ -95,13 +96,13 @@ LEFT JOIN LATERAL (
         ON ii."InvitationID" = inv."ID"
        AND COALESCE(ii."GCRecord", 0) = 0
     WHERE inv."ApplicationID" = a."ID"
-      AND ii."PersonID" = ai."PersonID"
+      AND ii."PersonID" = roster."PersonID"
       AND COALESCE(inv."GCRecord", 0) = 0
     ORDER BY inv."StartDate" DESC NULLS LAST, inv."ID" DESC
     LIMIT 1
 ) issued_inv ON TRUE
-WHERE COALESCE(ai."GCRecord", 0) = 0
 
+WHERE COALESCE(a."GCRecord", 0) = 0
   AND (
         COALESCE(NULLIF(BTRIM(a."LatestPrimaryStateCode"), ''), NULLIF(BTRIM(ast."Code"), ''), '')
             IN ('PROCESS_ISSUED','PROCESS_REJECTED','PROCESS_CANCELLED','1_REVIEW_REJECTED','2_REVIEW_REJECTED','3_REVIEW_REJECTED','4_REVIEW_REJECTED','5_REVIEW_REJECTED')

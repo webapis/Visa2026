@@ -1,12 +1,13 @@
 -- Application (direct migration) Process Complete.
--- One row per ApplicationItem; route = DirectToMigrationService (1).
+-- One row per roster line (ApplicationPerson M2M + legacy ApplicationItem fallback); route = DirectToMigrationService (1).
 -- Project from Person.ProjectContract (else sponsor) — not Application.ProjectContract. — PostgreSQL.
 DROP VIEW IF EXISTS vw_rd_application_direct_migration_process_complete;
 CREATE VIEW vw_rd_application_direct_migration_process_complete AS
+WITH {{MINISTRY_ROSTER_CTE}}
 SELECT
-    ai."ID"                                                                 AS "ID",
+    roster."LineId" AS "ID",
     a."ID"                                                                  AS "ApplicationOid",
-    ai."ID"                                                                 AS "ApplicationItemOid",
+    roster."LineId" AS "ApplicationItemOid",
     p."ID"                                                                  AS "PersonOid",
     latest_ap."StateID"                                                     AS "CurrentStateID",
     COALESCE(
@@ -47,14 +48,14 @@ SELECT
       ELSE 'st-pending'
     END                                                                     AS "StatusCssClass",
     COALESCE(p."IsArchived", FALSE)                                         AS "IsArchived"
-FROM "ApplicationItems" ai
+FROM ministry_roster_lines roster
 INNER JOIN "Applications" a
-    ON a."ID" = ai."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
+    ON a."ID" = roster."ApplicationID" AND COALESCE(a."GCRecord", 0) = 0
 INNER JOIN "ApplicationTypes" at
     ON at."ID" = a."ApplicationTypeID" AND COALESCE(at."GCRecord", 0) = 0
    AND COALESCE(at."ApplicationProgressRoute", 0) = 1
 LEFT JOIN "People" p
-    ON p."ID" = ai."PersonID" AND COALESCE(p."GCRecord", 0) = 0
+    ON p."ID" = roster."PersonID" AND COALESCE(p."GCRecord", 0) = 0
 LEFT JOIN "ProjectContracts" pc
     ON pc."ID" = p."ProjectContractID" AND COALESCE(pc."GCRecord", 0) = 0
 LEFT JOIN "People" sp
@@ -68,7 +69,7 @@ LEFT JOIN LATERAL (
 ) latest_ap ON TRUE
 LEFT JOIN "ApplicationStates" ast
     ON ast."ID" = latest_ap."StateID" AND COALESCE(ast."GCRecord", 0) = 0
-WHERE COALESCE(ai."GCRecord", 0) = 0
+WHERE COALESCE(a."GCRecord", 0) = 0
   AND (
         COALESCE(NULLIF(BTRIM(a."LatestPrimaryStateCode"), ''), NULLIF(BTRIM(ast."Code"), ''), '')
             IN ('PROCESS_ISSUED','PROCESS_REJECTED','PROCESS_CANCELLED','1_REVIEW_REJECTED','2_REVIEW_REJECTED','3_REVIEW_REJECTED','4_REVIEW_REJECTED','5_REVIEW_REJECTED')

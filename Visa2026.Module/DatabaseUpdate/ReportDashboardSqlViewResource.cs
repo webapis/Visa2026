@@ -24,6 +24,10 @@ internal static class ReportDashboardSqlViewResource
         }
 
         using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
+        var text = reader.ReadToEnd();
+        return text.Replace(
+            ReportDashboardPostgresRosterSql.MinistryRosterCtePlaceholder,
+            ReportDashboardPostgresRosterSql.CteMinistryRosterLines(),
+            StringComparison.Ordinal);
     }
 }

@@ -293,4 +293,79 @@ internal static class ReportDashboardRosterQueryHelper
 
         return m2mCount + legacyCount;
     }
+
+    /// <summary>
+    /// Child BO ids linked on applications with <see cref="Application.ApplicationDate"/> on/after
+    /// <paramref name="cutoff"/> — M2M resolved links first, legacy <see cref="ApplicationItem"/> fallback.
+    /// </summary>
+    internal static HashSet<Guid> GetLinkedChildIdsInApplicationDateRange(
+        Visa2026EFCoreDbContext db,
+        ApplicationPersonLinkKind linkKind,
+        DateTime cutoff)
+    {
+        var appsWithM2m = ApplicationIdsWithM2mRoster(db);
+
+        var m2mIds =
+            from ap in db.ApplicationPeople.AsNoTracking()
+            join rl in db.ApplicationPersonResolvedLinks.AsNoTracking()
+                on ap.ID equals rl.ApplicationPersonId
+            where rl.LinkKind == linkKind
+                && rl.LinkedObjectId != null
+                && ap.Application != null
+                && ap.Application.ApplicationDate >= cutoff
+            select rl.LinkedObjectId!.Value;
+
+        IQueryable<Guid> legacyIds = linkKind switch
+        {
+            ApplicationPersonLinkKind.Education => db.ApplicationItems.AsNoTracking()
+                .Where(ai => ai.CurrentEducation != null
+                    && ai.Application != null
+                    && ai.Application.ApplicationDate >= cutoff
+                    && !appsWithM2m.Contains(ai.Application.ID))
+                .Select(ai => ai.CurrentEducation!.ID),
+            ApplicationPersonLinkKind.AddressOfResidence => db.ApplicationItems.AsNoTracking()
+                .Where(ai => ai.CurrentAddressOfResidence != null
+                    && ai.Application != null
+                    && ai.Application.ApplicationDate >= cutoff
+                    && !appsWithM2m.Contains(ai.Application.ID))
+                .Select(ai => ai.CurrentAddressOfResidence!.ID),
+            ApplicationPersonLinkKind.Position => db.ApplicationItems.AsNoTracking()
+                .Where(ai => ai.CurrentPositionHistory != null
+                    && ai.Application != null
+                    && ai.Application.ApplicationDate >= cutoff
+                    && !appsWithM2m.Contains(ai.Application.ID))
+                .Select(ai => ai.CurrentPositionHistory!.ID),
+            ApplicationPersonLinkKind.MedicalRecord => db.ApplicationItems.AsNoTracking()
+                .Where(ai => ai.CurrentMedicalRecord != null
+                    && ai.Application != null
+                    && ai.Application.ApplicationDate >= cutoff
+                    && !appsWithM2m.Contains(ai.Application.ID))
+                .Select(ai => ai.CurrentMedicalRecord!.ID),
+            _ => throw new ArgumentOutOfRangeException(nameof(linkKind), linkKind, "Unsupported link kind for application-date filter.")
+        };
+
+        return m2mIds.Union(legacyIds).ToHashSet();
+    }
+
+    /// <summary>Application ids with at least one roster person of <paramref name="role"/> (M2M + legacy fallback).</summary>
+    internal static HashSet<Guid> ApplicationIdsWithPersonRole(
+        Visa2026EFCoreDbContext db,
+        PersonRecordRole role)
+    {
+        var appsWithM2m = ApplicationIdsWithM2mRoster(db);
+        var roleValue = role;
+
+        var m2mAppIds = db.ApplicationPeople.AsNoTracking()
+            .Where(ap => ap.Person != null && ap.Person.PersonRole == roleValue)
+            .Select(ap => ap.ApplicationId);
+
+        var legacyAppIds = db.ApplicationItems.AsNoTracking()
+            .Where(ai => ai.Application != null
+                && ai.Person != null
+                && ai.Person.PersonRole == roleValue
+                && !appsWithM2m.Contains(ai.Application!.ID))
+            .Select(ai => ai.Application!.ID);
+
+        return m2mAppIds.Union(legacyAppIds).ToHashSet();
+    }
 }
