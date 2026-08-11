@@ -4,10 +4,12 @@ description: >-
   Sole Agent skill for Visa2026 Application Profile: live FK configuration model,
   wizard UX, profile picker at create, ApplicationType deprecation/cutover, seeding,
   Appearance/progress wiring, Person M2M DetailView (retire ApplicationItem),
-  Person/Dossier start-application, config lock state A, and officer configuration
-  suggestions. Use for ApplicationProfile BO, profile defaults, dual-read with
-  ApplicationType, prototypes in docs/prototypes/, or APPLICATION_PROFILE_PLAN work.
-  Always read learnings.md first; append after verified changes; update IMPLEMENTATION_PLAN.md.
+  Person/Dossier start-application, config lock state A, officer configuration
+  suggestions, and Blazor officer shell (staged/in-process queues, case workspace
+  tabs, preview-slot catalog routing). Use for ApplicationProfile BO, profile defaults,
+  dual-read with ApplicationType, prototypes in docs/prototypes/, or
+  APPLICATION_PROFILE_PLAN work. Always read learnings.md first; append after verified
+  changes; update IMPLEMENTATION_PLAN.md.
 disable-model-invocation: false
 ---
 
@@ -56,8 +58,9 @@ disable-model-invocation: false
 | `ApplicationType` JSON seed, lookup catalogs | [visa2026-lookup-data](../visa2026-lookup-data/SKILL.md) |
 | Field visibility / `[Appearance]` on Application today | grep `ApplicationType.Show*` — migrate to profile in slice 2 |
 | Resminamalar / nested Word–Excel on profile | [visa2026-resminamalar](../visa2026-resminamalar/SKILL.md) |
+| Document copies on roster (`ApplicationPerson` scope) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
+| Case tab catalog vs `#visa-preview-slot` preview-only | [visa2026-preview-slot](../visa2026-preview-slot/SKILL.md) |
 | Person dossier + Start application entry | [visa2026-person-dossier](../visa2026-person-dossier/SKILL.md) |
-| Document copies (still ApplicationItem until M2M ships) | [visa2026-document-copies](../visa2026-document-copies/SKILL.md) |
 | Schema deploy / `FORCE_XAF_DB_UPDATE` | [visa2026-lifecycle-docker](../visa2026-lifecycle-docker/SKILL.md) |
 | VISA2014 import / dual-read Type FK | [visa2014-to-visa2026-import](../visa2014-to-visa2026-import/SKILL.md) |
 
@@ -70,10 +73,11 @@ disable-model-invocation: false
 | `ApplicationProfile`, `ApplicationProfileApprovalLeg`, `ApplicationProfileTemplate` | Full profile deep-clone (rejected) |
 | `Application.ApplicationProfile` live FK + default seeding at create | Unrelated BO refactors |
 | Config lock state A (`ApplicationProfileLockHelper`) | ListView row colors → **bo-state-colors** |
-| Wizard + profile picker UX (planned) | PDF XFA mapping → **pdf-form-mapping** |
+| Wizard + profile picker UX | PDF XFA mapping → **pdf-form-mapping** |
+| Blazor officer shell + case workspace (B0–B8) | Preview slot shell CSS/resize → **preview-slot** |
 | Seed / cutover from `ApplicationType` | New `ApplicationType` `Show*` flags (forbidden) |
 | Switch Appearance / progress reads to profile | ApplicationProgress transition graph edits (unless profile-driven route) |
-| Person M2M + hard-remove `ApplicationItem` (planned) | User manual prose unless officer-facing rule changes |
+| Person M2M + hard-remove `ApplicationItem` (phase B) | User manual prose unless officer-facing rule changes |
 
 ---
 
@@ -112,6 +116,9 @@ flowchart LR
 | Template list on Application | Nested `ApplicationProfileTemplate` | Read-only child list on Application detail |
 | Person tab missing | `RequirePerson*` toggles on profile | Person-config block; M2M slice |
 | Import sets Type only | VISA2014 mapper | Map Type → Profile FK in import wave |
+| Case tab Preview opens duplicate catalog in slot | `OpenPreviewOnly` on slot request | Tab owns catalog; slot viewer only — **preview-slot** |
+| Document copies preview fails on roster line | `TryBuildMergedPdfForRoster` | Roster IDs are `ApplicationPerson`, not `ApplicationItem` |
+| Person detail crashes after Open from case | `PersonDetailOpenHelper` | Do not dispose ObjectSpace before `ShowView` |
 
 ---
 
@@ -125,11 +132,22 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for status. **Default nex
 4. ~~**Wizard UX**~~ — **Done**.
 5. ~~**Profile picker at create**~~ — **Done**.
 5b. ~~**Custom catalog home**~~ — **Done** (slice 8c; native List/Detail not officer UI).
-6. **Person M2M DetailView** — PNG prototypes `process-started-application-profile-workspace-mockup.png` + `process-started-nav-*.png`; hard-remove `ApplicationItem`. **10 close-out next**
-7. **Person/Dossier Start application** — plan §11.
+6. **Person M2M DetailView** — phase B close-out (`ApplicationItem` BO/schema removal after import). **Officer UI cutoff done** (slice 10g).
+7. **Person/Dossier Start application** — plan §11 (**Done**).
 8. **Remove `Application.ApplicationType` FK** — after cutover + import.
 
+**Blazor officer shell (B0–B8):** tracked in [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) — staged/in-process queues, templates catalog, 6-tab case workspace, immersive chrome, progress tab, person link picker, preview-slot routing for Resminamalar + Document copies.
+
 When starting a slice, set its row to **In progress** in IMPLEMENTATION_PLAN; set **Done** only after build + manual officer path (or test) verified.
+
+### Case workspace preview routing (locked)
+
+| Entry point | Main area | `#visa-preview-slot` |
+|-------------|-----------|----------------------|
+| Case workspace tab → **Preview** | Catalog / list | **Viewer only** (`OpenPreviewOnly` + focus key) |
+| Rail / legacy DetailView action | — | Full catalog in slot |
+
+Resminamalar: `ResminamalarSlotRequest`. Document copies: `DocumentCopiesSlotRequest` (`FocusSlotKey`, `ApplicationPerson` roster scope). Shell behaviour: **visa2026-preview-slot**.
 
 ---
 

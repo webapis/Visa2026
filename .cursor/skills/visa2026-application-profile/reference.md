@@ -9,8 +9,8 @@ Companion to [SKILL.md](./SKILL.md).
 | Area | Path |
 |------|------|
 | Profile BO + children | `Visa2026.Module/BusinessObjects/ApplicationProfile.cs` |
-| Workspace host (mock UI) | `Visa2026.Module/BusinessObjects/ApplicationWorkspace/ApplicationWorkspaceHost.cs` |
-| Workspace mock service | `Visa2026.Module/Services/ApplicationWorkspace/ApplicationWorkspaceMockQueryService.cs` |
+| Workspace host BO | `Visa2026.Module/BusinessObjects/ApplicationWorkspace/ApplicationWorkspaceHost.cs` |
+| Workspace query service | `ApplicationWorkspaceQueryService.cs` (live; mock retained for fallback) |
 | Workspace open helper | `ApplicationWorkspaceOpenHelper.cs` |
 | Parent Application FK | `Visa2026.Module/BusinessObjects/Application.cs` (`ApplicationProfile`, `ApplyDefaultsForApplicationProfile`) |
 | Deprecated Type | `Visa2026.Module/BusinessObjects/LookupBusinessObjects.cs` (`ApplicationType`) |
@@ -30,12 +30,37 @@ Companion to [SKILL.md](./SKILL.md).
 | Registry | `docs/DEPRECATED.md` |
 | Plan | `docs/APPLICATION_PROFILE_PLAN.md` |
 
-### Planned (not yet present — create when slice starts)
+### Officer shell (Blazor B0–B8)
+
+| Area | Path |
+|------|------|
+| Shell host BO + view id | `Visa2026.Module/BusinessObjects/OfficerShell/OfficerShellHost.cs`, `OfficerShellViewIds.cs` |
+| Shell property editor + model | `Visa2026.Blazor.Server/Editors/OfficerShellPropertyEditor.cs`, `OfficerShellModel.cs`, `OfficerShellComponent.razor` |
+| Staged / in-process queues | `OfficerShellStagedQueryService`, `OfficerShellInProcessQueryService`, `OfficerShellStartProcessService` |
+| Case workspace tabs | `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCase*Tab.razor` (overview, people, progress, documents, resminamalar, SLA) |
+| Case snapshot builder | `ApplicationWorkspaceCaseBuilder.cs`, `ApplicationWorkspaceCaseModels.cs` |
+| Person link picker (B8) | `IApplicationPersonLinkQueryService`, `OfficerShellPersonLinkPickerComponent.razor` |
+| Case progress in-shell (B7) | `IOfficerShellCaseProgressService`, `OfficerShellCaseProgressTab.razor` |
+| Immersive tab-bar hide (B6) | `OfficerShellImmersiveTabBarController.cs`, `officer-shell-host.css` |
+| Person detail open (no dispose) | `PersonDetailOpenHelper.cs` |
+| Preview slot requests | `IVisaPreviewSlotService.cs` — `ResminamalarSlotRequest`, `DocumentCopiesSlotRequest` (`OpenPreviewOnly`, roster scope) |
+| Roster document copies merge | `ApplicationItemDocumentCopyPdfMerger.TryBuildMergedPdfForRoster` |
+| HTML prototype (parity) | `wwwroot/officer-shell/`, `parity/CHECKLIST.md` |
+
+### Application workspace (legacy XAF path)
+
+| Area | Path |
+|------|------|
+| Workspace host | `Visa2026.Module/BusinessObjects/ApplicationWorkspace/ApplicationWorkspaceHost.cs` |
+| Live query + tabs | `ApplicationWorkspaceQueryService.cs`, `ApplicationWorkspaceTabBuilder.cs` |
+| Workspace Blazor UI | `ApplicationWorkspacePropertyEditor.cs`, `ApplicationWorkspaceComponent.razor` |
+| Open helpers | `ApplicationWorkspaceOpenHelper.cs`, `ApplicationWorkspaceDocumentCopiesOpenHelper.cs`, `ApplicationWorkspaceResminamalarOpenHelper.cs` |
+
+### Planned (phase B — not yet)
 
 | Area | Expected path |
 |------|----------------|
-| **Workspace UI (10a done)** | `ApplicationWorkspaceHost`, `ApplicationWorkspacePropertyEditor`, `ApplicationWorkspaceComponent.razor` |
-| Person M2M | `Application` People collection + resolve service |
+| Hard-remove `ApplicationItem` BO/schema | After VISA2014 import + Report Dashboard cutover (slice 13b) |
 
 ---
 
@@ -109,8 +134,8 @@ Merge rule: Application value if set; else profile default (plan §4).
 | `application-profile-template-wizard*.png` (steps 1–5) | 8 | Multi-step Blazor template wizard; publish = save profile |
 | `application-profile-templates-*.png`, `application-profile-template-overview-mockup.png` | 8c | Custom template catalog + overview |
 | `staged-profiles-*.png` | 10+ | Staged profile queue (list/grid, Start process) |
-| `process-started-profiles-*.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` | 10 | In-process case workspace (custom shell, tabs) |
-| `visa2026-custom-left-navigation-shell-mockup.png` | shell | Replace native XAF left navigation |
+| `process-started-profiles-*.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` | 10 / B5 | In-process case workspace (officer shell 6 tabs) |
+| `visa2026-custom-left-navigation-shell-mockup.png` | B0–B3 | Blazor officer shell replaces native XAF left nav + immersive chrome |
 
 **Retired:** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `images/ap-*.png`, Excel draft (removed 2026-08-10).
 

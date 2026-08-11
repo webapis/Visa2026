@@ -15,7 +15,7 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ### 2026-08-10 — B5b Case workspace PNG parity (Blazor)
 
-- **Delivered**: Full case workspace lift from HTML prototype — `ApplicationWorkspaceCaseView` + `ApplicationWorkspaceCaseBuilder`; tab UIs for overview (summary tiles + stepper + linked records), people matrix + rail, progress vertical timeline + advance action, inline `ApplicationItemDocumentCopiesComponent` / `ApplicationReportPackageComponent`, SLA dashboard.
+- **Delivered**: Full case workspace lift from HTML prototype — `ApplicationWorkspaceCaseView` + `ApplicationWorkspaceCaseBuilder`; tab UIs for overview (summary tiles + stepper + linked records), people matrix + rail, progress vertical timeline + advance action, document copies + Resminamalar catalogs (preview later moved to global slot).
 - **Files**: `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCaseDocumentsTab.razor`, `OfficerShellCaseResminamalarTab.razor`, `ApplicationWorkspaceCaseModels.cs`, `ApplicationWorkspaceCaseBuilder.cs`.
 - **Verify**: F5 → Application Profiles → In process → open row → all 6 tabs; documents/resminamalar render in-tab (wide layout, no preview-slot redirect).
 
@@ -57,10 +57,10 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ### 2026-08-10 — B5 Case workspace 6-tab shell
 
-- **Delivered**: `OfficerShellCaseWorkspaceComponent` — PNG `cw-*` layout with tabs (overview, people, progress, documents, resminamalar, SLA); live `ApplicationWorkspaceSnapshot` + new `CaseChrome` header fields; person link/unlink/detail + preview-slot document copies and Resminamalar.
-- **Module**: `ApplicationWorkspaceCaseChrome`, `ApplicationWorkspaceResminamalarOpenHelper`.
-- **Next**: parity sign-off `parity/CHECKLIST.md`; hide XAF tab bar (optional).
-- **Cross-skill**: preview slot — **visa2026-preview-slot**; document copies — **visa2026-document-copies**.
+- **Delivered**: `OfficerShellCaseWorkspaceComponent` — PNG `cw-*` layout with tabs (overview, people, progress, documents, resminamalar, SLA); live `ApplicationWorkspaceSnapshot` + `CaseChrome` header; person link/unlink/detail.
+- **Preview**: Resminamalar + Document copies catalogs in tab; **Preview** → `#visa-preview-slot` viewer only (`OpenPreviewOnly`).
+- **Module**: `ApplicationWorkspaceCaseBuilder`, `ApplicationWorkspaceResminamalarOpenHelper`.
+- **Cross-skill**: **visa2026-preview-slot**, **visa2026-document-copies**, **visa2026-resminamalar**.
 
 ### 2026-08-10 — B4 Profile templates catalog (list/grid + detail)
 
