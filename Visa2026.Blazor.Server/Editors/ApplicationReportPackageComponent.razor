@@ -237,6 +237,7 @@
     [Parameter] public EventCallback RefreshRequested { get; set; }
     [Parameter] public string UiCultureName { get; set; } = string.Empty;
     [Parameter] public bool UseInlinePreview { get; set; }
+    [Parameter] public string? FocusEntryKey { get; set; }
     [Parameter] public EventCallback<ReportPackagePreviewRequest> OnInlinePreviewRequested { get; set; }
 
     [Inject] private ApplicationWordReportPackageEnqueueService PackageEnqueueService { get; set; } = null!;
@@ -256,6 +257,7 @@
     private bool _packageBusy;
     private bool _previewBusy;
     private string? _previewEntryKey;
+    private string? _handledFocusEntryKey;
 
     private string _packageStatusMessage = string.Empty;
     private bool _packageStatusIsError;
@@ -275,6 +277,24 @@
 
     private ApplicationWordReportPackageReadinessSummary SelectedReadinessSummary =>
         ApplicationWordReportPackageReadinessSummary.Compute(CatalogEntries, _selectedKeys);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (string.IsNullOrWhiteSpace(FocusEntryKey)
+            || CatalogEntries.Count == 0
+            || string.Equals(_handledFocusEntryKey, FocusEntryKey, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var entry = CatalogEntries.FirstOrDefault(e =>
+            string.Equals(e.EntryKey, FocusEntryKey, StringComparison.Ordinal));
+        if (entry == null)
+            return;
+
+        _handledFocusEntryKey = FocusEntryKey;
+        await PreviewEntryAsync(entry);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

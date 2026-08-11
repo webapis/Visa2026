@@ -48,6 +48,7 @@
                                                      ApplicationNumber="_applicationNumber"
                                                      CatalogEntries="_catalogEntries"
                                                      UiCultureName="_uiCultureName"
+                                                     FocusEntryKey="_focusEntryKey"
                                                      UseInlinePreview="true"
                                                      RefreshRequested="_refreshRequested"
                                                      OnInlinePreviewRequested="HandleInlinePreviewAsync" />
@@ -80,7 +81,10 @@
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     private string _emptyMessage = string.Empty;
     private string _uiCultureName = string.Empty;
+    private string? _focusEntryKey;
     private bool _previewActive;
+    private bool _previewOnlyMode;
+    private ReportPackagePreviewRequest? _pendingPreviewRequest;
     private ReportPackageInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
     private string? _boundOccupantKey;
@@ -103,27 +107,58 @@
             _emptyMessage = string.Empty;
             _boundOccupantKey = null;
             _previewActive = false;
+            _previewOnlyMode = false;
+            _pendingPreviewRequest = null;
             return;
         }
 
         var occupantKey = VisaPreviewSlotOccupantKeys.ForResminamalar(Request);
-        if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
+        var stateKey = Request.OpenPreviewOnly && !string.IsNullOrWhiteSpace(Request.FocusEntryKey)
+            ? $"{occupantKey}|preview:{Request.FocusEntryKey.Trim()}"
+            : occupantKey;
+
+        if (!string.Equals(_boundOccupantKey, stateKey, StringComparison.Ordinal))
         {
-            _boundOccupantKey = occupantKey;
-            _previewActive = false;
+            _boundOccupantKey = stateKey;
+            _previewOnlyMode = Request.OpenPreviewOnly;
+            if (_previewOnlyMode)
+            {
+                _previewActive = true;
+                _pendingPreviewRequest = BuildPreviewRequest(Request);
+            }
+            else
+            {
+                _previewActive = false;
+                _pendingPreviewRequest = null;
+            }
         }
 
         _applicationId = Request.ApplicationId;
         _packageScope = Request.Scope;
         _applicationItemIds = Request.ApplicationItemIds ?? Array.Empty<Guid>();
         _emptyMessage = Request.EmptyCatalogMessage ?? string.Empty;
+        _focusEntryKey = string.IsNullOrWhiteSpace(Request.FocusEntryKey)
+            ? null
+            : Request.FocusEntryKey.Trim();
 
-        if (string.IsNullOrWhiteSpace(_emptyMessage))
+        if (!_previewOnlyMode && string.IsNullOrWhiteSpace(_emptyMessage))
             ReloadCatalog();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (_pendingPreviewRequest != null)
+        {
+            var request = _pendingPreviewRequest;
+            _pendingPreviewRequest = null;
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            if (_inlinePreview != null)
+                await _inlinePreview.OpenAsync(request);
+            return;
+        }
+
         if (_previewActive || _applicationId == Guid.Empty)
             return;
 
@@ -173,16 +208,45 @@
 
     private async Task OnPreviewClosedAsync()
     {
+        if (_previewOnlyMode)
+        {
+            _previewOnlyMode = false;
+            _previewActive = false;
+            _focusEntryKey = null;
+            await SlotService.CloseAsync();
+            return;
+        }
+
         _previewActive = false;
+        _focusEntryKey = null;
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClosePanelAsync()
     {
+        _previewOnlyMode = false;
         _previewActive = false;
+        _focusEntryKey = null;
+        _pendingPreviewRequest = null;
         if (CloseRequested.HasDelegate)
             await CloseRequested.InvokeAsync();
         else
             await SlotService.CloseAsync();
+    }
+
+    private static ReportPackagePreviewRequest? BuildPreviewRequest(ResminamalarSlotRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FocusEntryKey))
+            return null;
+
+        return new ReportPackagePreviewRequest
+        {
+            ApplicationId = request.ApplicationId,
+            EntryKey = request.FocusEntryKey.Trim(),
+            DisplayName = string.IsNullOrWhiteSpace(request.FocusDisplayName)
+                ? request.FocusEntryKey.Trim()
+                : request.FocusDisplayName.Trim(),
+            ApplicationItemIds = request.ApplicationItemIds,
+        };
     }
 }

@@ -1,8 +1,8 @@
 @using DevExpress.ExpressApp
 @using Microsoft.Extensions.DependencyInjection
-@using Visa2026.Blazor.Server.Components
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Localization
 @using Visa2026.Module.Services.PreviewSlot
 @using Visa2026.Module.Services.WordReports
@@ -15,13 +15,7 @@
         </div>
     </div>
 
-    @if (_previewActive)
-    {
-        <ReportPackageInlinePreview @ref="_inlinePreview"
-                                    UiCultureName="_uiCultureName"
-                                    PreviewClosed="OnPreviewClosedAsync" />
-    }
-    else if (!string.IsNullOrWhiteSpace(_emptyMessage))
+    @if (!string.IsNullOrWhiteSpace(_emptyMessage))
     {
         <div class="app-item-doc-copies__empty" role="status"><p>@_emptyMessage</p></div>
     }
@@ -53,6 +47,7 @@
 
     [Inject] private ApplicationWordReportPackageCatalogService CatalogService { get; set; } = null!;
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
     private Guid _applicationId;
     private WordReportPackageScope _packageScope = WordReportPackageScope.Application;
@@ -62,8 +57,6 @@
         Array.Empty<ApplicationWordReportPackageCatalogEntry>();
     private string _emptyMessage = string.Empty;
     private string _uiCultureName = string.Empty;
-    private bool _previewActive;
-    private ReportPackageInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
 
     private string EmptyCatalog => VisaUiMessages.Get("ApplicationReportPackage.Empty", _uiCultureName);
@@ -117,17 +110,17 @@
 
     private async Task HandleInlinePreviewAsync(ReportPackagePreviewRequest request)
     {
-        _previewActive = true;
-        await InvokeAsync(StateHasChanged);
-        await Task.Yield();
+        if (request.ApplicationId == Guid.Empty || string.IsNullOrWhiteSpace(request.EntryKey))
+            return;
 
-        if (_inlinePreview != null)
-            await _inlinePreview.OpenAsync(request);
-    }
-
-    private async Task OnPreviewClosedAsync()
-    {
-        _previewActive = false;
-        await InvokeAsync(StateHasChanged);
+        await PreviewSlotService.OpenResminamalarAsync(new ResminamalarSlotRequest
+        {
+            ApplicationId = request.ApplicationId,
+            Scope = _packageScope,
+            ApplicationItemIds = request.ApplicationItemIds ?? _applicationItemIds,
+            FocusEntryKey = request.EntryKey,
+            FocusDisplayName = request.DisplayName,
+            OpenPreviewOnly = true,
+        }, OfficerShellViewIds.DetailView);
     }
 }

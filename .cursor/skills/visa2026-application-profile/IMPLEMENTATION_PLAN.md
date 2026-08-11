@@ -56,6 +56,9 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | B3 | Immersive shell chrome | **Done** | Hide XAF left nav via `:has(.officer-shell-host)` CSS |
 | B4 | Profile templates list/grid + detail | **Done** | PNG catalog, chips, pagination, rail overview drill-in |
 | B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA |
+| B6 | Immersive tab-bar hide | **Done** | `OfficerShellImmersiveTabBarController` (`TabsModel.CssClass`) + CSS fallback |
+| B7 | Case progress tab wiring | **Done** | Notes + ministry letter + in-shell advance (`OfficerShellCaseProgressService`) |
+| B8 | Custom person link picker | **Done** | Inline picker on People tab (`IApplicationPersonLinkQueryService` + `OfficerShellPersonLinkPickerComponent`; officer shell only) |
 
 ---
 

@@ -232,7 +232,7 @@ public sealed class ApplicationItemDocumentFileAccess
         if (mergedGroup == null || mergedGroup.Files.Count == 0)
             return false;
 
-        if (!pdfMerger.TryBuildMergedPdf(
+        if (!pdfMerger.TryBuildMergedPdfForRoster(
                 rowIds,
                 slotKey,
                 mergedGroup.SlotLabel,

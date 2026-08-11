@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Blazor.Components.Models;
 using Microsoft.AspNetCore.Components;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.ApplicationProfileOverview;
+using Visa2026.Module.Services.ApplicationPersonLink;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.OfficerShell;
 
@@ -446,7 +447,86 @@ public sealed class OfficerShellModel : ComponentModelBase
         set => SetPropertyValue(value);
     }
 
-    public EventCallback AdvanceProgressRequested
+    public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseProgressAdvanceRequest>>();
+        set => SetPropertyValue(value);
+    }
+
+    public string? ProgressStatusMessage
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool ProgressStatusIsError
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<string> SaveProgressNotesRequested
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested
+    {
+        get => GetPropertyValue<EventCallback<OfficerShellCaseProgressFileUpload>>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool ShowPersonLinkPicker
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public IReadOnlyList<ApplicationPersonLinkCandidateRow> PersonLinkCandidates
+    {
+        get => GetPropertyValue<IReadOnlyList<ApplicationPersonLinkCandidateRow>>()
+            ?? Array.Empty<ApplicationPersonLinkCandidateRow>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool PersonLinkIsSearching
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool PersonLinkIsLinking
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public string? PersonLinkStatusMessage
+    {
+        get => GetPropertyValue<string?>();
+        set => SetPropertyValue(value);
+    }
+
+    public bool PersonLinkStatusIsError
+    {
+        get => GetPropertyValue<bool>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<string> PersonLinkSearchRequested
+    {
+        get => GetPropertyValue<EventCallback<string>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> LinkPersonFromPickerRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback ClosePersonLinkPickerRequested
     {
         get => GetPropertyValue<EventCallback>();
         set => SetPropertyValue(value);

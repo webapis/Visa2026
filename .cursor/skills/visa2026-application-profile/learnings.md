@@ -6,12 +6,54 @@ Read **before** Application Profile work; **append** after verified fixes and sl
 
 ## Entries
 
+### 2026-08-11 — Officer shell Document copies preview → global slot (preview-only)
+
+- **Symptom**: Preview on case Document copies tab opened inline in main content (or failed before roster PDF merge fix).
+- **Rule**: Same as Resminamalar — tab owns catalog; slot Preview = viewer only (`DocumentCopiesSlotRequest.OpenPreviewOnly`).
+- **Fix**: `FocusSlotKey` + `FocusDisplayName`; `OfficerShellCaseDocumentsTab` → `OpenDocumentCopiesAsync`; `DocumentCopiesSlotPanel` preview-only mode; roster merge via `TryBuildMergedPdfForRoster`.
+- **Verify**: Tab → Preview — PDF in `#visa-preview-slot`; catalog stays in tab; Close dismisses slot.
+
 ### 2026-08-10 — B5b Case workspace PNG parity (Blazor)
 
 - **Delivered**: Full case workspace lift from HTML prototype — `ApplicationWorkspaceCaseView` + `ApplicationWorkspaceCaseBuilder`; tab UIs for overview (summary tiles + stepper + linked records), people matrix + rail, progress vertical timeline + advance action, inline `ApplicationItemDocumentCopiesComponent` / `ApplicationReportPackageComponent`, SLA dashboard.
 - **Files**: `OfficerShellCaseWorkspaceComponent.razor`, `OfficerShellCaseDocumentsTab.razor`, `OfficerShellCaseResminamalarTab.razor`, `ApplicationWorkspaceCaseModels.cs`, `ApplicationWorkspaceCaseBuilder.cs`.
 - **Verify**: F5 → Application Profiles → In process → open row → all 6 tabs; documents/resminamalar render in-tab (wide layout, no preview-slot redirect).
-- **Deferred**: Ministry letter upload + progress notes persistence (read-only shell); hide XAF tab bar.
+
+### 2026-08-11 — Officer shell Resminamalar preview → global slot (preview-only)
+
+- **Symptom**: Preview on case Resminamalar tab opened full Templates catalog in `#visa-preview-slot` (duplicate of tab catalog).
+- **Rule**: Tab owns catalog; slot Preview = viewer only (`ResminamalarSlotRequest.OpenPreviewOnly`). Rail / Application DetailView still opens slot with catalog.
+- **Fix**: `OpenPreviewOnly` + `FocusDisplayName`; `ResminamalarSlotPanel` skips catalog and closes slot on preview Close.
+- **Verify**: Tab → Preview → PDF in slot only; Close returns to tab catalog.
+
+### 2026-08-11 — Officer shell Resminamalar preview → global slot
+
+- **Symptom**: Preview on case workspace Resminamalar tab opened inline in main content instead of `#visa-preview-slot`.
+- **Fix**: `OfficerShellCaseResminamalarTab` routes preview to `IVisaPreviewSlotService.OpenResminamalarAsync` with `ResminamalarSlotRequest.FocusEntryKey`; `ApplicationReportPackageComponent` auto-previews focused entry (ProgressLetters pattern); slot panel shows `ReportPackageInlinePreview`.
+- **Verify**: F5 → case → Resminamalar tab → Preview — PDF opens in right preview slot; catalog stays in tab.
+
+### 2026-08-11 — Person detail ObjectDisposedException (officer shell / workspace)
+
+- **Symptom**: `ObjectDisposedException` on `SecuredEFCoreObjectSpace` during `ProcessViewShortcut` / page refresh after **Open person detail** from case workspace.
+- **Cause**: `OpenPersonDetailAsync` used `using var objectSpace` then `ShowView` — XAF kept the DetailView but the ObjectSpace was disposed when the method returned.
+- **Fix**: `PersonDetailOpenHelper.TryShowDetailView` (typed detail via `PersonDetailViewModelHelper`; view-owned ObjectSpace not disposed). Used from `OfficerShellPropertyEditor` and `ApplicationWorkspacePropertyEditor`.
+- **Verify**: Stop F5, rebuild, open case → People → Open person detail → refresh page — no error.
+
+### 2026-08-11 — B8 Custom person link picker (Blazor)
+
+- **Delivered**: `IApplicationPersonLinkQueryService` / `ApplicationPersonLinkQueryService` — search link candidates (exclude already linked; `PersonListViewFullTextSearchCriteriaBuilder` for name/personal number/passport). `OfficerShellPersonLinkPickerComponent` — inline panel on People tab; link via `ApplicationPersonService.LinkPerson`. Replaces XAF Person ListView modal in `OfficerShellPropertyEditor` only.
+- **Verify**: F5 → case workspace → People & links → Link existing… → search → Link → person appears in roster; Cancel closes panel.
+
+### 2026-08-11 — B7 Case progress tab wiring (Blazor)
+
+- **Delivered**: `OfficerShellCaseProgressService` — save `ApplicationProgress.Description` (officer notes), upload `MinistryLetterFile` on decision steps, append next progress row via `ApplicationProgressTransitionHelper` (state picker when multiple legal next steps).
+- **UI**: `OfficerShellCaseProgressTab.razor` — editable notes, ministry letter upload + download link, in-shell advance (no Application DetailView redirect).
+- **Verify**: F5 → case workspace → Progress tab → save notes, upload letter on `*_REVIEW_APPROVED`/`REJECTED` step, advance with route validation messages.
+
+### 2026-08-11 — B6 Immersive tab-bar hide
+
+- **Delivered**: `OfficerShellImmersiveTabBarController` toggles `TabsModel.CssClass` (`visa-officer-shell-hide-mdi-tabs`) when `OfficerShellHost_DetailView` is active; `#visa-app-shell:has(.officer-shell-host)` CSS fallback hides TabbedMDI `.dxbl-tabs-header` (not form-layout tabs); shell min-height `calc(100vh - 48px)`.
+- **Verify**: F5 → Application Profiles — no XAF document tab strip; open another view (e.g. Advance progress) — tab strip returns.
 
 ### 2026-08-10 — B5 Case workspace 6-tab shell
 

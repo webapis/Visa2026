@@ -1,6 +1,7 @@
 @namespace Visa2026.Blazor.Server.Components
 @using DevExpress.ExpressApp
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
 @using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
@@ -61,6 +62,7 @@
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
     [Inject] private IVisaPreviewSlotService SlotService { get; set; } = null!;
+    [Inject] private IJSRuntime JS { get; set; } = null!;
 
     private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
     private DocumentCopiesLineScope _lineScope = DocumentCopiesLineScope.ApplicationItem;
@@ -69,6 +71,8 @@
         Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
     private string _uiCultureName = string.Empty;
     private bool _previewActive;
+    private bool _previewOnlyMode;
+    private DocumentCopiesInlinePreviewRequest? _pendingPreviewRequest;
     private DocumentCopiesInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
     private string? _boundOccupantKey;
@@ -103,6 +107,8 @@
             _mergedGroups = Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
             _boundOccupantKey = null;
             _previewActive = false;
+            _previewOnlyMode = false;
+            _pendingPreviewRequest = null;
             return;
         }
 
@@ -111,14 +117,52 @@
             : VisaPreviewSlotOccupantKeys.ForDocumentCopies(
                 new DocumentCopiesSlotRequest { ApplicationItemIds = lineIds });
 
-        if (!string.Equals(_boundOccupantKey, occupantKey, StringComparison.Ordinal))
+        var stateKey = Request?.OpenPreviewOnly == true && !string.IsNullOrWhiteSpace(Request.FocusSlotKey)
+            ? $"{occupantKey}|preview:{Request.FocusSlotKey.Trim()}"
+            : occupantKey;
+
+        if (!string.Equals(_boundOccupantKey, stateKey, StringComparison.Ordinal))
         {
-            _boundOccupantKey = occupantKey;
-            _previewActive = false;
+            _boundOccupantKey = stateKey;
+            _previewOnlyMode = Request?.OpenPreviewOnly == true;
+            if (_previewOnlyMode)
+            {
+                _previewActive = true;
+                _pendingPreviewRequest = BuildPreviewRequest(Request);
+            }
+            else
+            {
+                _previewActive = false;
+                _pendingPreviewRequest = null;
+            }
         }
 
         _lineIds = lineIds;
         ReloadMergedGroups();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_pendingPreviewRequest != null)
+        {
+            var request = _pendingPreviewRequest;
+            _pendingPreviewRequest = null;
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+
+            if (_inlinePreview != null)
+                await _inlinePreview.OpenAsync(request);
+            return;
+        }
+
+        if (_previewActive || _lineIds.Count == 0)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync("visaPreviewDrawer.scheduleSlotThemeSync");
+        }
+        catch (JSDisconnectedException) { }
     }
 
     private void ReloadMergedGroups()
@@ -176,16 +220,40 @@
 
     private async Task OnPreviewClosedAsync()
     {
+        if (_previewOnlyMode)
+        {
+            _previewOnlyMode = false;
+            _previewActive = false;
+            await SlotService.CloseAsync();
+            return;
+        }
+
         _previewActive = false;
         await InvokeAsync(StateHasChanged);
     }
 
     private async Task ClosePanelAsync()
     {
+        _previewOnlyMode = false;
         _previewActive = false;
+        _pendingPreviewRequest = null;
         if (CloseRequested.HasDelegate)
             await CloseRequested.InvokeAsync();
         else
             await SlotService.CloseAsync();
+    }
+
+    private static DocumentCopiesInlinePreviewRequest? BuildPreviewRequest(DocumentCopiesSlotRequest? request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.FocusSlotKey))
+            return null;
+
+        return new DocumentCopiesInlinePreviewRequest
+        {
+            SlotKey = request.FocusSlotKey.Trim(),
+            DisplayName = string.IsNullOrWhiteSpace(request.FocusDisplayName)
+                ? request.FocusSlotKey.Trim()
+                : request.FocusDisplayName.Trim(),
+        };
     }
 }

@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Visa2026.Module;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.BusinessObjects.ApplicationWorkspace;
 using Visa2026.Module.Editors;
@@ -198,18 +199,10 @@ public class ApplicationWorkspacePropertyEditor : BlazorPropertyEditorBase, ICom
         if (personId == Guid.Empty)
             return;
 
-        using var objectSpace = _application.CreateObjectSpace(typeof(Person));
-        var person = objectSpace.GetObjectByKey<Person>(personId);
-        if (person == null)
-            return;
-
-        var detailView = _application.CreateDetailView(objectSpace, person);
-        detailView.ViewEditMode = ViewEditMode.View;
-
-        var sourceFrame = _application.MainWindow;
-        _application.ShowViewStrategy.ShowView(
-            new ShowViewParameters(detailView) { TargetWindow = TargetWindow.Current },
-            new ShowViewSource(sourceFrame, null));
+        PersonDetailOpenHelper.TryShowDetailView(
+            _application,
+            _application.MainWindow,
+            personId);
 
         await Task.Delay(16);
     }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Visa2026.Module.BusinessObjects;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
+using Visa2026.Module.Services.ApplicationPersonRoster;
 
 namespace Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 
@@ -64,6 +65,90 @@ public sealed class ApplicationItemDocumentCopyPdfMerger
         foreach (var entry in entries)
         {
             if (!allowedItemIds.Contains(entry.ApplicationItemId))
+                return false;
+
+            if (!snapshots.TryGetValue(entry.ApplicationItemId, out var snapshot))
+                return false;
+
+            if (!snapshot.ContainsFile(entry.File.FileDataId))
+                return false;
+        }
+
+        var pdfStreams = new List<MemoryStream>();
+        try
+        {
+            foreach (var entry in entries)
+            {
+                if (!TryLoadFileContent(objectSpace, entry.File.FileDataId, out var fileContent, out var fileNameForExt))
+                    continue;
+
+                if (!TryCreateMergeSlicePdfStream(fileContent, fileNameForExt, slotKey, out var pdfStream))
+                    continue;
+
+                pdfStreams.Add(pdfStream);
+            }
+
+            if (pdfStreams.Count == 0)
+                return false;
+
+            using var merged = new MemoryStream();
+            SupportingDocumentsPdfSharpHelper.MergePdfStreams(pdfStreams, merged);
+            content = merged.ToArray();
+            fileName = BuildMergedFileName(entries, slotLabel);
+            return content.Length > 0;
+        }
+        finally
+        {
+            foreach (var stream in pdfStreams)
+                stream.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Merge slot files for <see cref="ApplicationPerson"/> roster lines.
+    /// <paramref name="applicationPersonIds"/> and <see cref="ApplicationItemLinkedDocumentFileEntry.ApplicationItemId"/>
+    /// are roster line ids (legacy property name).
+    /// </summary>
+    public bool TryBuildMergedPdfForRoster(
+        IReadOnlyList<Guid> applicationPersonIds,
+        string slotKey,
+        string slotLabel,
+        IReadOnlyList<ApplicationItemLinkedDocumentFileEntry> entries,
+        out byte[]? content,
+        out string? fileName)
+    {
+        content = null;
+        fileName = null;
+
+        if (applicationPersonIds == null || applicationPersonIds.Count == 0 || string.IsNullOrWhiteSpace(slotKey))
+            return false;
+
+        if (entries == null || entries.Count == 0)
+            return false;
+
+        var allowedRowIds = applicationPersonIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToHashSet();
+
+        if (allowedRowIds.Count == 0)
+            return false;
+
+        using var objectSpace = nonSecuredObjectSpaceFactory.CreateNonSecuredObjectSpace<ApplicationPerson>();
+        var snapshots = new Dictionary<Guid, ApplicationItemLinkedDocumentsSnapshot>();
+
+        foreach (var rowId in allowedRowIds)
+        {
+            var row = objectSpace.GetObjectByKey<ApplicationPerson>(rowId);
+            if (row == null)
+                return false;
+
+            snapshots[rowId] = ApplicationPersonLinkedDocumentsResolver.Resolve(objectSpace, row);
+        }
+
+        foreach (var entry in entries)
+        {
+            if (!allowedRowIds.Contains(entry.ApplicationItemId))
                 return false;
 
             if (!snapshots.TryGetValue(entry.ApplicationItemId, out var snapshot))

@@ -1,0 +1,114 @@
+@using Visa2026.Module.Services.ApplicationPersonLink
+
+@if (IsOpen)
+{
+    <section class="os-person-link-picker" aria-label="Link existing person">
+        <header class="os-person-link-picker__head">
+            <div>
+                <h3 class="os-person-link-picker__title">Link existing person</h3>
+                <p class="os-person-link-picker__sub">Search by name, personal number, or passport number.</p>
+            </div>
+            <button type="button" class="os-btn os-btn--ghost" disabled="@IsBusy" @onclick="CloseAsync">Cancel</button>
+        </header>
+
+        @if (!string.IsNullOrWhiteSpace(StatusMessage))
+        {
+            <div class="os-banner @(IsStatusError ? "os-banner--warn" : "os-banner--ok")" style="margin-bottom:10px">@StatusMessage</div>
+        }
+
+        <div class="os-person-link-picker__search">
+            <input type="search"
+                   class="os-input"
+                   placeholder="Search people…"
+                   value="@_searchText"
+                   @oninput="OnSearchInput"
+                   @onkeydown="OnSearchKeyDown"
+                   disabled="@IsBusy" />
+            <button type="button" class="os-btn" disabled="@IsBusy" @onclick="SearchAsync">Search</button>
+        </div>
+
+        @if (IsSearching)
+        {
+            <div class="os-person-link-picker__loading" role="status">Searching…</div>
+        }
+        else if (Candidates.Count == 0)
+        {
+            <p class="os-empty">No matching people found. Try another search or create the person first.</p>
+        }
+        else
+        {
+            <ul class="os-person-link-picker__list" role="list">
+                @foreach (var row in Candidates)
+                {
+                    <li class="os-person-link-picker__item">
+                        <div class="os-person-link-picker__avatar" aria-hidden="true">@Initials(row.FullName)</div>
+                        <div class="os-person-link-picker__body">
+                            <strong>@row.FullName</strong>
+                            <span class="os-person-link-picker__meta">
+                                @row.RoleLabel · @row.PersonalNumber · Passport @row.PassportNumber
+                            </span>
+                        </div>
+                        <button type="button"
+                                class="os-btn os-btn--primary os-person-link-picker__link"
+                                disabled="@IsBusy"
+                                @onclick="() => LinkAsync(row.PersonId)">
+                            Link
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationPersonLinkCandidateRow> Candidates { get; set; } = Array.Empty<ApplicationPersonLinkCandidateRow>();
+    [Parameter] public bool IsSearching { get; set; }
+    [Parameter] public bool IsLinking { get; set; }
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback<string> SearchRequested { get; set; }
+    [Parameter] public EventCallback<Guid> LinkRequested { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+
+    private string _searchText = string.Empty;
+
+    private bool IsBusy => IsSearching || IsLinking;
+
+    protected override void OnParametersSet()
+    {
+        if (!IsOpen)
+            _searchText = string.Empty;
+    }
+
+    private Task OnSearchInput(ChangeEventArgs e)
+    {
+        _searchText = e.Value?.ToString() ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private async Task OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await SearchAsync();
+    }
+
+    private Task SearchAsync() => SearchRequested.InvokeAsync(_searchText);
+
+    private Task LinkAsync(Guid personId) => LinkRequested.InvokeAsync(personId);
+
+    private Task CloseAsync() => CloseRequested.InvokeAsync();
+
+    private static string Initials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant();
+
+        return string.Concat(parts[0][0], parts[^1][0]).ToUpperInvariant();
+    }
+}

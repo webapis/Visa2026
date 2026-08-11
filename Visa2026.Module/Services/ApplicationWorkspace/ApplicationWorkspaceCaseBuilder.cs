@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
 
 namespace Visa2026.Module.Services.ApplicationWorkspace;
@@ -39,8 +40,9 @@ internal static class ApplicationWorkspaceCaseBuilder
         ApplicationProfile? profile,
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
         ApplicationProgressSlaResult sla,
-        ApplicationWorkspaceCaseChrome chrome) =>
-        BuildCore(application, profile, tabs, sla, chrome);
+        ApplicationWorkspaceCaseChrome chrome,
+        IObjectSpace? objectSpace = null) =>
+        BuildCore(application, profile, tabs, sla, chrome, objectSpace);
 
     public static ApplicationWorkspaceCaseView BuildFromSnapshot(ApplicationWorkspaceSnapshot snapshot)
     {
@@ -63,7 +65,7 @@ internal static class ApplicationWorkspaceCaseBuilder
             };
         }
 
-        return BuildCore(null, null, snapshot.Tabs, default, chrome);
+        return BuildCore(null, null, snapshot.Tabs, default, chrome, null);
     }
 
     private static ApplicationWorkspaceCaseView BuildCore(
@@ -71,13 +73,14 @@ internal static class ApplicationWorkspaceCaseBuilder
         ApplicationProfile? profile,
         IReadOnlyList<ApplicationWorkspaceTab> tabs,
         ApplicationProgressSlaResult sla,
-        ApplicationWorkspaceCaseChrome chrome)
+        ApplicationWorkspaceCaseChrome chrome,
+        IObjectSpace? objectSpace)
     {
         var tabMap = tabs.ToDictionary(t => t.Key, StringComparer.OrdinalIgnoreCase);
         var people = BuildPeople(tabMap, chrome.PeopleNames);
         var linkedSummary = BuildLinkedSummary(people);
         var progressSteps = application != null
-            ? BuildProgressSteps(application, chrome, sla)
+            ? BuildProgressSteps(application, chrome, sla, objectSpace)
             : BuildProgressStepsFromChrome(chrome);
         var slaDashboard = application != null
             ? BuildSla(application, profile, sla, chrome, progressSteps)
@@ -391,12 +394,21 @@ internal static class ApplicationWorkspaceCaseBuilder
     private static IReadOnlyList<ApplicationWorkspaceCaseProgressStep> BuildProgressSteps(
         Application application,
         ApplicationWorkspaceCaseChrome chrome,
-        ApplicationProgressSlaResult sla)
+        ApplicationProgressSlaResult sla,
+        IObjectSpace? objectSpace)
     {
         var currentIndex = ResolveProgressIndex(chrome.CurrentStep);
         var history = application.ProgressHistory?
             .OrderBy(p => p.Order)
             .ToList() ?? [];
+        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        var advanceOptions = BuildAdvanceOptions(application, latest, objectSpace);
+        var canAdvance = advanceOptions.Count > 0;
+        var advanceBlockedReason = canAdvance
+            ? string.Empty
+            : (ApplicationProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code)
+                ? "This application has reached a terminal progress state."
+                : "No further progress steps are available for this route.");
 
         var steps = new List<ApplicationWorkspaceCaseProgressStep>();
         for (var i = 0; i < ProgressStepLabels.Length; i++)
@@ -422,10 +434,53 @@ internal static class ApplicationWorkspaceCaseBuilder
                 CurrentStateLabel = state == "current" ? chrome.CurrentStep : string.Empty,
                 SlaTargetDate = slaTarget,
                 SlaDaysRemaining = daysLeft,
+                ProgressId = state == "current" ? latest?.ID : null,
+                OfficerNotes = state == "current" ? latest?.Description ?? string.Empty : string.Empty,
+                MinistryLetterFileName = state == "current" ? latest?.MinistryLetterFileName ?? string.Empty : string.Empty,
+                ShowMinistryLetterUpload = state == "current" && latest?.IsMinistryDecisionStep == true,
+                CanAdvance = state == "current" && canAdvance,
+                AdvanceBlockedReason = state == "current" ? advanceBlockedReason : string.Empty,
+                AdvanceOptions = state == "current" ? advanceOptions : Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>(),
             });
         }
 
         return steps;
+    }
+
+    private static IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> BuildAdvanceOptions(
+        Application application,
+        ApplicationProgress? latest,
+        IObjectSpace? objectSpace)
+    {
+        var codes = ApplicationProgressTransitionHelper.GetAllowedNextStateCodes(application, latest);
+        if (codes.Count == 0)
+            return Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+
+        return codes
+            .Select(code => new ApplicationWorkspaceCaseProgressAdvanceOption
+            {
+                StateCode = code,
+                Label = ResolveStateLabel(objectSpace, code),
+            })
+            .ToList();
+    }
+
+    private static string ResolveStateLabel(IObjectSpace? objectSpace, string stateCode)
+    {
+        if (objectSpace != null)
+        {
+            var state = objectSpace.GetObjectsQuery<ApplicationState>()
+                .FirstOrDefault(s => s.Code == stateCode);
+            if (state != null)
+            {
+                return state.LocalizedDisplayName
+                    ?? state.NameTm
+                    ?? state.Code
+                    ?? stateCode;
+            }
+        }
+
+        return stateCode;
     }
 
     private static int ResolveProgressIndex(string? stepLabel)

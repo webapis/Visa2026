@@ -27,6 +27,18 @@ public sealed class ResminamalarSlotRequest
 
     /// <summary>When set, catalog area shows this localized message instead of the report list.</summary>
     public string? EmptyCatalogMessage { get; init; }
+
+    /// <summary>When set, the slot catalog auto-opens preview for this report entry key.</summary>
+    public string? FocusEntryKey { get; init; }
+
+    /// <summary>Display name for <see cref="FocusEntryKey"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
+    public string? FocusDisplayName { get; init; }
+
+    /// <summary>
+    /// When true, the slot shows only the report preview viewer (no catalog).
+    /// Used when the catalog already lives in the officer case workspace tab.
+    /// </summary>
+    public bool OpenPreviewOnly { get; init; }
 }
 
 public sealed class PlaceholderManualSlotRequest
@@ -80,6 +92,18 @@ public sealed class DocumentCopiesSlotRequest
 
     /// <summary>Parent application for roster scope (application form PDF).</summary>
     public Guid ApplicationId { get; init; }
+
+    /// <summary>When set, the slot auto-opens preview for this document slot key.</summary>
+    public string? FocusSlotKey { get; init; }
+
+    /// <summary>Display name for <see cref="FocusSlotKey"/> when <see cref="OpenPreviewOnly"/> is true.</summary>
+    public string? FocusDisplayName { get; init; }
+
+    /// <summary>
+    /// When true, the slot shows only the document preview viewer (no catalog).
+    /// Used when the catalog already lives in the officer case workspace tab.
+    /// </summary>
+    public bool OpenPreviewOnly { get; init; }
 }
 
 public sealed class ProgressLettersSlotRequest

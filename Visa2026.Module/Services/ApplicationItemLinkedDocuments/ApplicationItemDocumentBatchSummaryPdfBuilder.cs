@@ -145,7 +145,7 @@ public sealed class ApplicationItemDocumentBatchSummaryPdfBuilder
         if (mergedGroup == null || mergedGroup.Files.Count == 0)
             return false;
 
-        if (!slotMerger.TryBuildMergedPdf(
+        if (!slotMerger.TryBuildMergedPdfForRoster(
                 rowIds,
                 slotKey,
                 mergedGroup.SlotLabel,

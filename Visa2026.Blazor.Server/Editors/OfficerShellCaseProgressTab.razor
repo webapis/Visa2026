@@ -1,0 +1,211 @@
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Forms
+@using Visa2026.Module.Services.ApplicationWorkspace
+
+<div class="ct-page">
+    @if (!string.IsNullOrWhiteSpace(StatusMessage))
+    {
+        <div class="os-banner @(IsStatusError ? "os-banner--warn" : "os-banner--ok")" style="margin-bottom:12px">@StatusMessage</div>
+    }
+
+    @{
+        var currentStep = view.ProgressSteps.FirstOrDefault(s => s.State == "current");
+    }
+
+    <h2 class="ct-page__title">Progress</h2>
+    <p class="ct-page__sub">Application process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
+    <div class="ct-prog-v-list">
+        @foreach (var step in view.ProgressSteps)
+        {
+            var badge = step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
+            var badgeCls = step.State == "done" ? "ok" : step.State == "current" ? "active" : "muted";
+            var icon = step.State == "done" ? "✓" : step.State == "current" ? "✎" : "○";
+            <div class="ct-prog-v ct-prog-v--@step.State">
+                <div class="ct-prog-v__rail">
+                    <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
+                    <span class="ct-prog-v__dot">@icon</span>
+                    <span class="ct-prog-v__line"></span>
+                </div>
+                <div class="ct-prog-v__body">
+                    <div class="ct-prog-v__head">
+                        <strong>@step.Label</strong>
+                        <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
+                    </div>
+                    @if (step.State == "current")
+                    {
+                        <div class="ct-prog-detail">
+                            <div class="ct-prog-detail__grid">
+                                <div>
+                                    <label class="ct-label" for="officer-notes-@ApplicationId">Officer notes</label>
+                                    <textarea id="officer-notes-@ApplicationId"
+                                              class="ct-textarea"
+                                              rows="3"
+                                              placeholder="Add notes for the current progress step…"
+                                              value="@_officerNotes"
+                                              @oninput="OnNotesInput"
+                                              disabled="@_busy"></textarea>
+                                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+                                        <button type="button" class="os-btn" disabled="@(_busy || _notesDirty == false)" @onclick="SaveNotesAsync">Save notes</button>
+                                    </div>
+
+                                    @if (step.ShowMinistryLetterUpload)
+                                    {
+                                        <label class="ct-label" style="margin-top:10px">Ministry letter</label>
+                                        @if (!string.IsNullOrWhiteSpace(step.MinistryLetterFileName) && step.ProgressId is Guid progressId)
+                                        {
+                                            <p class="ct-muted" style="margin:0 0 8px">
+                                                Current file:
+                                                <a href="@MinistryLetterUrl(progressId)" target="_blank" rel="noopener">@step.MinistryLetterFileName</a>
+                                            </p>
+                                        }
+                                        <label class="ct-upload ct-upload--action">
+                                            <InputFile OnChange="OnMinistryLetterSelected" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.gif,.bmp" disabled="@_busy" />
+                                            <span>☁ Upload file<br /><span>PDF or scan up to @MaxUploadMb MB</span></span>
+                                        </label>
+                                    }
+                                </div>
+                                <dl class="ct-meta">
+                                    <div><dt>Current state</dt><dd><span class="os-status os-status--process">@step.CurrentStateLabel</span></dd></div>
+                                    <div><dt>Started on</dt><dd>@step.Date</dd></div>
+                                    <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
+                                </dl>
+                            </div>
+
+                            @if (step.CanAdvance)
+                            {
+                                <div class="ct-prog-advance" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--os-line)">
+                                    @if (step.AdvanceOptions.Count > 1)
+                                    {
+                                        <label class="ct-label" for="advance-state-@ApplicationId">Next step</label>
+                                        <select id="advance-state-@ApplicationId" class="os-input" @bind="_selectedAdvanceStateCode" disabled="@_busy">
+                                            @foreach (var option in step.AdvanceOptions)
+                                            {
+                                                <option value="@option.StateCode">@option.Label</option>
+                                            }
+                                        </select>
+                                    }
+                                    <button type="button"
+                                            class="os-btn os-btn--primary"
+                                            style="margin-top:10px"
+                                            disabled="@(_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))"
+                                            @onclick="AdvanceAsync">
+                                        ▶ Advance progress
+                                    </button>
+                                </div>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(step.AdvanceBlockedReason))
+                            {
+                                <p class="ct-muted" style="margin-top:12px">@step.AdvanceBlockedReason</p>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid ApplicationId { get; set; }
+    [Parameter] public ApplicationWorkspaceCaseView View { get; set; } = new();
+    [Parameter] public string? StatusMessage { get; set; }
+    [Parameter] public bool IsStatusError { get; set; }
+    [Parameter] public EventCallback<string> SaveNotesRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+
+    private string _officerNotes = string.Empty;
+    private string _selectedAdvanceStateCode = string.Empty;
+    private bool _busy;
+    private bool _notesDirty;
+
+    private ApplicationWorkspaceCaseView view => View;
+    private int MaxUploadMb => 10;
+
+    protected override void OnParametersSet()
+    {
+        var current = View.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        if (current == null)
+            return;
+
+        if (!_notesDirty)
+            _officerNotes = current.OfficerNotes ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(_selectedAdvanceStateCode)
+            && current.AdvanceOptions.Count > 0)
+        {
+            _selectedAdvanceStateCode = current.AdvanceOptions[0].StateCode;
+        }
+    }
+
+    private void OnNotesInput(ChangeEventArgs e)
+    {
+        _officerNotes = e.Value?.ToString() ?? string.Empty;
+        _notesDirty = true;
+    }
+
+    private async Task SaveNotesAsync()
+    {
+        if (_busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await SaveNotesRequested.InvokeAsync(_officerNotes);
+            _notesDirty = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task OnMinistryLetterSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null || _busy)
+            return;
+
+        _busy = true;
+        try
+        {
+            await using var stream = file.OpenReadStream(MaxUploadMb * 1024 * 1024);
+            using var memory = new MemoryStream();
+            await stream.CopyToAsync(memory);
+            await UploadMinistryLetterRequested.InvokeAsync(new OfficerShellCaseProgressFileUpload
+            {
+                FileName = file.Name,
+                Content = memory.ToArray(),
+            });
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task AdvanceAsync()
+    {
+        if (_busy || string.IsNullOrWhiteSpace(_selectedAdvanceStateCode))
+            return;
+
+        _busy = true;
+        try
+        {
+            await AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
+            {
+                StateCode = _selectedAdvanceStateCode,
+                Notes = _officerNotes,
+            });
+            _notesDirty = false;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private string MinistryLetterUrl(Guid progressId) =>
+        $"/api/application-progress/applications/{ApplicationId:D}/progress/{progressId:D}/ministry-letter";
+}

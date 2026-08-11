@@ -1,8 +1,9 @@
 @using DevExpress.ExpressApp
 @using Microsoft.Extensions.DependencyInjection
-@using Visa2026.Blazor.Server.Components
+@using Visa2026.Blazor.Server.Editors
 @using Visa2026.Blazor.Server.Localization
 @using Visa2026.Module.BusinessObjects
+@using Visa2026.Module.BusinessObjects.OfficerShell
 @using Visa2026.Module.Services.ApplicationItemLinkedDocuments
 @using Visa2026.Module.Services.ApplicationPersonRoster
 @using Visa2026.Module.Services.ApplicationWorkspace
@@ -17,14 +18,6 @@
     @if (_lineIds.Count == 0)
     {
         <p class="os-empty">No roster lines linked yet. Link people on the People tab first.</p>
-    }
-    else if (_previewActive)
-    {
-        <DocumentCopiesInlinePreview @ref="_inlinePreview"
-                                     ApplicationItemIds="_lineIds"
-                                     LineScope="DocumentCopiesLineScope.ApplicationPerson"
-                                     UiCultureName="_uiCultureName"
-                                     PreviewClosed="OnPreviewClosedAsync" />
     }
     else
     {
@@ -48,13 +41,12 @@
     [Parameter] public ApplicationWorkspaceSnapshot? Snapshot { get; set; }
 
     [Inject] private INonSecuredObjectSpaceFactory ObjectSpaceFactory { get; set; } = null!;
+    [Inject] private IVisaPreviewSlotService PreviewSlotService { get; set; } = null!;
 
     private IReadOnlyList<Guid> _lineIds = Array.Empty<Guid>();
     private IReadOnlyList<ApplicationItemLinkedDocumentMergedGroup> _mergedGroups =
         Array.Empty<ApplicationItemLinkedDocumentMergedGroup>();
     private string _uiCultureName = string.Empty;
-    private bool _previewActive;
-    private DocumentCopiesInlinePreview? _inlinePreview;
     private EventCallback _refreshRequested;
 
     protected override void OnInitialized()
@@ -102,17 +94,17 @@
 
     private async Task HandleInlinePreviewAsync(DocumentCopiesInlinePreviewRequest request)
     {
-        _previewActive = true;
-        await InvokeAsync(StateHasChanged);
-        await Task.Yield();
+        if (string.IsNullOrWhiteSpace(request.SlotKey) || _lineIds.Count == 0)
+            return;
 
-        if (_inlinePreview != null)
-            await _inlinePreview.OpenAsync(request);
-    }
-
-    private async Task OnPreviewClosedAsync()
-    {
-        _previewActive = false;
-        await InvokeAsync(StateHasChanged);
+        await PreviewSlotService.OpenDocumentCopiesAsync(new DocumentCopiesSlotRequest
+        {
+            Scope = DocumentCopiesLineScope.ApplicationPerson,
+            ApplicationPersonIds = _lineIds,
+            ApplicationId = ApplicationId,
+            FocusSlotKey = request.SlotKey,
+            FocusDisplayName = request.DisplayName,
+            OpenPreviewOnly = true,
+        }, OfficerShellViewIds.DetailView);
     }
 }

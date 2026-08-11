@@ -40,7 +40,7 @@ public sealed class ApplicationWorkspaceQueryService : IApplicationWorkspaceQuer
             LinkContextItems = BuildLinkContext(profile),
             Tabs = tabs,
             CaseChrome = caseChrome,
-            CaseView = ApplicationWorkspaceCaseBuilder.Build(application, profile, tabs, sla, caseChrome),
+            CaseView = ApplicationWorkspaceCaseBuilder.Build(application, profile, tabs, sla, caseChrome, objectSpace),
             IsPrototypeMock = false,
         };
     }

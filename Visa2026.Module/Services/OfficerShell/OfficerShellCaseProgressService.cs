@@ -1,0 +1,128 @@
+using System;
+using System.Linq;
+using DevExpress.ExpressApp;
+using DevExpress.Persistent.BaseImpl.EF;
+using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Localization;
+using Visa2026.Module.Services;
+
+namespace Visa2026.Module.Services.OfficerShell;
+
+/// <summary>
+/// Case workspace progress tab: officer notes, ministry letter, and in-shell advance.
+/// </summary>
+public sealed class OfficerShellCaseProgressService : IOfficerShellCaseProgressService
+{
+    public OfficerShellCaseProgressResult SaveOfficerNotes(IObjectSpace objectSpace, Guid applicationId, string? notes)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+
+        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        if (application == null)
+            return OfficerShellCaseProgressResult.Failed("Application not found.");
+
+        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        if (latest == null)
+            return OfficerShellCaseProgressResult.Failed("No progress history on this application.");
+
+        latest.Description = notes?.Trim() ?? string.Empty;
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    public OfficerShellCaseProgressResult SetMinistryLetter(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        string fileName,
+        byte[] content)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+
+        if (content == null || content.Length == 0)
+            return OfficerShellCaseProgressResult.Failed("The uploaded file is empty.");
+
+        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        if (application == null)
+            return OfficerShellCaseProgressResult.Failed("Application not found.");
+
+        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        if (latest == null)
+            return OfficerShellCaseProgressResult.Failed("No progress history on this application.");
+
+        if (!latest.IsMinistryDecisionStep)
+            return OfficerShellCaseProgressResult.Failed("Ministry letter upload is only available on ministry decision steps.");
+
+        var maxBytes = latest.MaxDocumentSizeInMB * 1024L * 1024L;
+        if (content.LongLength > maxBytes)
+            return OfficerShellCaseProgressResult.Failed($"The ministry letter exceeds the maximum allowed size of {latest.MaxDocumentSizeInMB} MB.");
+
+        var file = latest.MinistryLetterFile ?? objectSpace.CreateObject<FileData>();
+        file.FileName = fileName;
+        file.Content = content;
+        file.Size = content.Length;
+
+        if (!DocumentFileUploadConstraints.TryValidate(file, out var validationError))
+            return OfficerShellCaseProgressResult.Failed(validationError ?? "The ministry letter file is not valid.");
+
+        latest.MinistryLetterFile = file;
+        return OfficerShellCaseProgressResult.Succeeded();
+    }
+
+    public OfficerShellCaseProgressResult Advance(
+        IObjectSpace objectSpace,
+        Guid applicationId,
+        string? stateCode,
+        string? notesOnLatestStep)
+    {
+        if (objectSpace == null)
+            return OfficerShellCaseProgressResult.Failed("ObjectSpace is required.");
+
+        var application = objectSpace.GetObjectByKey<Application>(applicationId);
+        if (application == null)
+            return OfficerShellCaseProgressResult.Failed("Application not found.");
+
+        if (!ApplicationProgressProfileResolver.TryValidateProjectContractOnApplication(application, objectSpace, out var contractError))
+            return OfficerShellCaseProgressResult.Failed(contractError ?? VisaUiMessages.Get("ApplicationProgress.ProjectContractRequired"));
+
+        var latest = ApplicationProgressHelper.GetLatest(application.ProgressHistory, objectSpace);
+        if (latest != null && notesOnLatestStep != null)
+            latest.Description = notesOnLatestStep.Trim();
+
+        var allowedCodes = ApplicationProgressTransitionHelper
+            .GetAllowedNextStateCodes(application, latest)
+            .ToList();
+
+        if (allowedCodes.Count == 0)
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.CannotAdvanceFromTerminal"));
+
+        var chosenCode = string.IsNullOrWhiteSpace(stateCode)
+            ? allowedCodes[0]
+            : stateCode.Trim();
+
+        if (!allowedCodes.Contains(chosenCode, StringComparer.OrdinalIgnoreCase))
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+
+        var state = objectSpace.GetObjectsQuery<ApplicationState>()
+            .FirstOrDefault(s => s.Code == chosenCode);
+        if (state == null)
+            return OfficerShellCaseProgressResult.Failed(VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+
+        var progress = objectSpace.CreateObject<ApplicationProgress>();
+        progress.Application = application;
+        progress.Date = DateTime.Today;
+        progress.State = state;
+
+        if (ApplicationMigrationSlaHelper.IsMigrationServiceProcessStartedStep(chosenCode)
+            && !string.IsNullOrWhiteSpace(application.ProcessNumber))
+        {
+            progress.ProcessNumber = application.ProcessNumber.Trim();
+        }
+
+        if (!ApplicationProgressTransitionHelper.TryValidateProgressStep(progress, objectSpace, out var progressError))
+            return OfficerShellCaseProgressResult.Failed(progressError ?? VisaUiMessages.Get("ApplicationProgress.InvalidForRoute"));
+
+        ApplicationLatestProgressSyncHelper.Sync(application, objectSpace);
+        return OfficerShellCaseProgressResult.Succeeded(chosenCode);
+    }
+}

@@ -1,5 +1,6 @@
 @using System.Linq
 @using Visa2026.Module.Services.ApplicationWorkspace
+@using Visa2026.Module.Services.ApplicationPersonLink
 @using Visa2026.Module.Services.OfficerShell
 
 <div class="officer-case-workspace">
@@ -71,7 +72,13 @@
                         @RenderPeople(view)
                         break;
                     case "progress":
-                        @RenderProgress(view)
+                        <OfficerShellCaseProgressTab ApplicationId="Snapshot.ApplicationId"
+                                                     View="view"
+                                                     StatusMessage="@ProgressStatusMessage"
+                                                     IsStatusError="@ProgressStatusIsError"
+                                                     SaveNotesRequested="@SaveProgressNotesRequested"
+                                                     UploadMinistryLetterRequested="@UploadMinistryLetterRequested"
+                                                     AdvanceProgressRequested="@AdvanceProgressRequested" />
                         break;
                     case "documents":
                         <OfficerShellCaseDocumentsTab ApplicationId="Snapshot.ApplicationId" Snapshot="Snapshot" />
@@ -126,7 +133,20 @@
     [Parameter] public EventCallback OpenDocumentCopiesRequested { get; set; }
     [Parameter] public EventCallback OpenResminamalarRequested { get; set; }
     [Parameter] public EventCallback<int> SelectPersonRowRequested { get; set; }
-    [Parameter] public EventCallback AdvanceProgressRequested { get; set; }
+    [Parameter] public string? ProgressStatusMessage { get; set; }
+    [Parameter] public bool ProgressStatusIsError { get; set; }
+    [Parameter] public EventCallback<string> SaveProgressNotesRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
+    [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
+    [Parameter] public bool ShowPersonLinkPicker { get; set; }
+    [Parameter] public IReadOnlyList<ApplicationPersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationPersonLinkCandidateRow>();
+    [Parameter] public bool PersonLinkIsSearching { get; set; }
+    [Parameter] public bool PersonLinkIsLinking { get; set; }
+    [Parameter] public string? PersonLinkStatusMessage { get; set; }
+    [Parameter] public bool PersonLinkStatusIsError { get; set; }
+    [Parameter] public EventCallback<string> PersonLinkSearchRequested { get; set; }
+    [Parameter] public EventCallback<Guid> LinkPersonFromPickerRequested { get; set; }
+    [Parameter] public EventCallback ClosePersonLinkPickerRequested { get; set; }
 
     private static bool IsWideTab(string tab) => tab is "documents" or "resminamalar";
 
@@ -197,9 +217,18 @@
         <div class="ct-page">
             <h2 class="ct-page__title">People on this case</h2>
             <div class="os-toolbar" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
-                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson)" @onclick="LinkPersonAsync">Link existing…</button>
+                <button type="button" class="os-btn os-btn--primary" disabled="@(!CanLinkPerson || ShowPersonLinkPicker)" @onclick="LinkPersonAsync">Link existing…</button>
                 <button type="button" class="os-btn" disabled="@(!CanUnlinkPerson)" @onclick="UnlinkPersonAsync">Unlink</button>
             </div>
+            <OfficerShellPersonLinkPickerComponent IsOpen="@ShowPersonLinkPicker"
+                                                   Candidates="@PersonLinkCandidates"
+                                                   IsSearching="@PersonLinkIsSearching"
+                                                   IsLinking="@PersonLinkIsLinking"
+                                                   StatusMessage="@PersonLinkStatusMessage"
+                                                   IsStatusError="@PersonLinkStatusIsError"
+                                                   SearchRequested="@PersonLinkSearchRequested"
+                                                   LinkRequested="@LinkPersonFromPickerRequested"
+                                                   CloseRequested="@ClosePersonLinkPickerRequested" />
             @if (view.People.Count == 0)
             {
                 <p class="os-empty">No people linked.</p>
@@ -256,53 +285,6 @@
                     </details>
                 }
             }
-        </div>;
-    };
-
-    private RenderFragment RenderProgress(ApplicationWorkspaceCaseView view) => __builder =>
-    {
-        <div class="ct-page">
-            <h2 class="ct-page__title">Progress</h2>
-            <p class="ct-page__sub">Application process for @view.Chrome.TemplateFamilyLabel · current step: @view.Chrome.CurrentStep</p>
-            <div class="ct-prog-v-list">
-                @foreach (var step in view.ProgressSteps)
-                {
-                    var badge = step.State == "done" ? "Completed" : step.State == "current" ? "In progress" : "Pending";
-                    var badgeCls = step.State == "done" ? "ok" : step.State == "current" ? "active" : "muted";
-                    var icon = step.State == "done" ? "✓" : step.State == "current" ? "✎" : "○";
-                    <div class="ct-prog-v ct-prog-v--@step.State">
-                        <div class="ct-prog-v__rail">
-                            <span class="ct-prog-v__date">@(string.IsNullOrWhiteSpace(step.Date) ? "—" : step.Date)</span>
-                            <span class="ct-prog-v__dot">@icon</span>
-                            <span class="ct-prog-v__line"></span>
-                        </div>
-                        <div class="ct-prog-v__body">
-                            <div class="ct-prog-v__head">
-                                <strong>@step.Label</strong>
-                                <span class="cw-prog-step__badge cw-prog-step__badge--@badgeCls">@badge</span>
-                            </div>
-                            @if (step.State == "current")
-                            {
-                                <div class="ct-prog-detail">
-                                    <div class="ct-prog-detail__grid">
-                                        <div>
-                                            <label class="ct-label">Officer notes</label>
-                                            <textarea class="ct-textarea" rows="3" placeholder="Add notes for the current progress step…" readonly></textarea>
-                                            <label class="ct-label" style="margin-top:10px">Ministry letter</label>
-                                            <div class="ct-upload">☁ Upload file<br /><span>PDF, DOCX up to 10 MB</span></div>
-                                        </div>
-                                        <dl class="ct-meta">
-                                            <div><dt>Current state</dt><dd><span class="os-status os-status--process">@step.CurrentStateLabel</span></dd></div>
-                                            <div><dt>Started on</dt><dd>@step.Date</dd></div>
-                                            <div><dt>SLA target</dt><dd>@(string.IsNullOrWhiteSpace(step.SlaTargetDate) ? "—" : step.SlaTargetDate)</dd></div>
-                                        </dl>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
-            </div>
         </div>;
     };
 
@@ -492,7 +474,18 @@
     private Task BackToListAsync() => BackToListRequested.InvokeAsync();
     private Task LinkPersonAsync() => LinkPersonRequested.InvokeAsync();
     private Task UnlinkPersonAsync() => UnlinkPersonRequested.InvokeAsync();
-    private Task AdvanceProgressAsync() => AdvanceProgressRequested.InvokeAsync();
+    private Task AdvanceProgressAsync()
+    {
+        var current = Snapshot?.CaseView.ProgressSteps.FirstOrDefault(s => s.State == "current");
+        if (current?.CanAdvance != true || current.AdvanceOptions.Count == 0)
+            return SelectTab("progress");
+
+        return AdvanceProgressRequested.InvokeAsync(new OfficerShellCaseProgressAdvanceRequest
+        {
+            StateCode = current.AdvanceOptions[0].StateCode,
+            Notes = current.OfficerNotes ?? string.Empty,
+        });
+    }
 
     private async Task SelectPersonRow(int rowIndex)
     {

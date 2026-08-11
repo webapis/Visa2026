@@ -23,7 +23,13 @@
 }
 
 #visa-app-shell:has(.officer-shell-host) .officer-shell-host .os-app {
-  min-height: calc(100vh - 72px);
+  min-height: calc(100vh - 48px);
+}
+
+/* B6 — fallback hide for TabbedMDI document tabs (not form-layout tab groups) */
+#visa-app-shell:has(.officer-shell-host) app .dxbl-tabs:not(.dxbl-fl-tabbed-group) > .dxbl-tabs-header,
+.visa-officer-shell-hide-mdi-tabs > .dxbl-tabs-header {
+  display: none !important;
 }
 
 .officer-shell-host .os-content .app-workspace,

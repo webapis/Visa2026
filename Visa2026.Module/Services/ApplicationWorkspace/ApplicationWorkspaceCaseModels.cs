@@ -69,6 +69,28 @@ public sealed class ApplicationWorkspaceCaseProgressStep
     public string SlaTargetDate { get; init; } = string.Empty;
 
     public int? SlaDaysRemaining { get; init; }
+
+    public Guid? ProgressId { get; init; }
+
+    public string OfficerNotes { get; init; } = string.Empty;
+
+    public string MinistryLetterFileName { get; init; } = string.Empty;
+
+    public bool ShowMinistryLetterUpload { get; init; }
+
+    public bool CanAdvance { get; init; }
+
+    public string AdvanceBlockedReason { get; init; } = string.Empty;
+
+    public IReadOnlyList<ApplicationWorkspaceCaseProgressAdvanceOption> AdvanceOptions { get; init; }
+        = Array.Empty<ApplicationWorkspaceCaseProgressAdvanceOption>();
+}
+
+public sealed class ApplicationWorkspaceCaseProgressAdvanceOption
+{
+    public string StateCode { get; init; } = string.Empty;
+
+    public string Label { get; init; } = string.Empty;
 }
 
 public sealed class ApplicationWorkspaceCasePerson

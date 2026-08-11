@@ -20,6 +20,7 @@ using Visa2026.Module.Services.WordReports;
 using Visa2026.Module.Services.ApplicationItemLinkedDocuments;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Services.ApplicationPersonLink;
 using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.ApplicationProfilePicker;
 using Visa2026.Module.Services.ApplicationProfileOverview;
@@ -257,6 +258,8 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IOfficerShellInProcessQueryService, OfficerShellInProcessQueryService>();
             services.AddScoped<IOfficerShellNavQueryService, OfficerShellNavQueryService>();
             services.AddScoped<IOfficerShellStartProcessService, OfficerShellStartProcessService>();
+            services.AddScoped<IOfficerShellCaseProgressService, OfficerShellCaseProgressService>();
+            services.AddScoped<IApplicationPersonLinkQueryService, ApplicationPersonLinkQueryService>();
             services.AddScoped<ApplicationWorkspacePersonUiActions>();
             services.AddScoped<IApplicationWorkspacePersonUiActions>(sp =>
                 sp.GetRequiredService<ApplicationWorkspacePersonUiActions>());
