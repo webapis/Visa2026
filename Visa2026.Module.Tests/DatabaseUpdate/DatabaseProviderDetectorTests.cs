@@ -9,7 +9,7 @@ public sealed class DatabaseProviderDetectorTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void IsPostgreSql_Blank_ReturnsFalse(string? connectionString)
+    public void IsPostgreSql_Blank_ReturnsFalse(string connectionString)
     {
         Assert.False(DatabaseProviderDetector.IsPostgreSql(connectionString));
     }
