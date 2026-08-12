@@ -51,13 +51,13 @@ public class Visa2014SalaryAmountNormalizerTests
     {
         // Letters force extract path; European grouping yields a token longer than 32 after normalize.
         Assert.True(Visa2014SalaryAmountNormalizer.TryNormalize(
-            "pay 9.999.999.999.999.999.999.999,99 monthly",
+            "pay 99.999.999.999.999.999.999.999,99 monthly",
             out var amount,
             out var note));
 
         Assert.Equal(32, amount.Length);
         Assert.Equal("extracted_truncated", note);
-        Assert.StartsWith("9.999.999.999.999.999.999.999", amount);
+        Assert.Equal("99.999.999.999.999.999.999.999.9", amount);
     }
 
     [Fact]

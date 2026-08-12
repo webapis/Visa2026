@@ -11,7 +11,7 @@ public sealed class PersonDocumentCopiesLocalizationTests
     [InlineData("   ", "Passport —")]
     [InlineData("AB123456", "Passport AB123456")]
     [InlineData("  AB123456  ", "Passport AB123456")]
-    public void FormatPassportRecord_UsesEmDashForBlank(string? number, string expected)
+    public void FormatPassportRecord_UsesEmDashForBlank(string number, string expected)
     {
         Assert.Equal(expected, PersonDocumentCopiesLocalization.FormatPassportRecord(number));
     }
@@ -19,7 +19,7 @@ public sealed class PersonDocumentCopiesLocalizationTests
     [Theory]
     [InlineData(null, "Visa —")]
     [InlineData("V-9", "Visa V-9")]
-    public void FormatVisaRecord_BlankAndValue(string? number, string expected)
+    public void FormatVisaRecord_BlankAndValue(string number, string expected)
     {
         Assert.Equal(expected, PersonDocumentCopiesLocalization.FormatVisaRecord(number));
     }
