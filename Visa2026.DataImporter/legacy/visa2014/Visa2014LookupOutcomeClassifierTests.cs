@@ -97,19 +97,21 @@ public class Visa2014LookupOutcomeClassifierTests
         Assert.Null(target);
     }
 
-    [Theory]
-    [InlineData(Visa2014LookupResolveKind.ExactYaml, null, null, SilentBuckets.ExplicitYaml)]
-    [InlineData(Visa2014LookupResolveKind.NormalizedYaml, null, null, SilentBuckets.NormalizedYaml)]
-    [InlineData(Visa2014LookupResolveKind.IdentityPassThrough, null, null, SilentBuckets.IdentityPassthrough)]
-    public void ToSilentBucket_KnownKinds(
-        Visa2014LookupResolveKind kind,
-        string? expectedTarget,
-        string? documentedDefault,
-        string expectedBucket)
+    [Fact]
+    public void ToSilentBucket_KnownKinds()
     {
         Assert.Equal(
-            expectedBucket,
-            Visa2014LookupOutcomeClassifier.ToSilentBucket(kind, expectedTarget, documentedDefault));
+            SilentBuckets.ExplicitYaml,
+            Visa2014LookupOutcomeClassifier.ToSilentBucket(
+                Visa2014LookupResolveKind.ExactYaml, null, null));
+        Assert.Equal(
+            SilentBuckets.NormalizedYaml,
+            Visa2014LookupOutcomeClassifier.ToSilentBucket(
+                Visa2014LookupResolveKind.NormalizedYaml, null, null));
+        Assert.Equal(
+            SilentBuckets.IdentityPassthrough,
+            Visa2014LookupOutcomeClassifier.ToSilentBucket(
+                Visa2014LookupResolveKind.IdentityPassThrough, null, null));
     }
 
     [Fact]

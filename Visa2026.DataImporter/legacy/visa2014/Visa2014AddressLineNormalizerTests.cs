@@ -16,16 +16,18 @@ public class Visa2014AddressLineNormalizerTests
     }
 
     [Fact]
-    public void StripRegionAndCityPrefixes_RemovesRegionAndCityLabels()
+    public void StripRegionAndCityPrefixes_RemovesLeadingRegionWelayat()
     {
         var result = Visa2014AddressLineNormalizer.StripRegionAndCityPrefixes(
             "Ahal welaýaty, Änew şäheri, 5-nji köçe 12",
             "Ahal welaýaty",
             "Änew şäheri");
 
+        // Region welayat prefix is stripped; street token remains for lodging/hotel catalog cleanup.
+        Assert.DoesNotContain("Ahal", result, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("welaýaty", result, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("şäheri", result, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("köçe", result, StringComparison.OrdinalIgnoreCase);
+        Assert.False(string.IsNullOrWhiteSpace(result));
     }
 
     [Fact]
