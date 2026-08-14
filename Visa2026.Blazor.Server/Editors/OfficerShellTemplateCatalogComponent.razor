@@ -41,10 +41,9 @@
             {
                 <ApplicationProfileOverviewComponent IsLoading="false"
                                                      Snapshot="@OverviewSnapshot"
-                                                     ConfigureRequested="@ConfigureRequested" />
-                <button type="button" class="os-btn os-btn--ghost" style="margin-top:12px" @onclick="BackToCatalogAsync">
-                    ← Back to catalog
-                </button>
+                                                     ConfigureRequested="@ConfigureRequested"
+                                                     CloseRequested="@BackToCatalogAsync"
+                                                     OpenInstanceRequested="@OpenInstanceRequested" />
             }
         </div>
     </div>
@@ -174,6 +173,7 @@ else
     [Parameter] public EventCallback NewProfileRequested { get; set; }
     [Parameter] public EventCallback ConfigureRequested { get; set; }
     [Parameter] public EventCallback<Guid> ConfigureProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenInstanceRequested { get; set; }
 
     private IReadOnlyList<ApplicationProfileCatalogRow> FilteredRows => ApplyFilters().ToList();
     private OfficerShellPaginationResult<ApplicationProfileCatalogRow> PageResult =>

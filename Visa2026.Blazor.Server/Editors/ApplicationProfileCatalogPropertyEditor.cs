@@ -15,6 +15,7 @@ using Visa2026.Module.Editors;
 using Visa2026.Module.Services.ApplicationProfileCatalog;
 using Visa2026.Module.Services.ApplicationProfileOverview;
 using Visa2026.Module.Services.ApplicationProfileWizard;
+using Visa2026.Module.Services.ApplicationWorkspace;
 
 namespace Visa2026.Blazor.Server.Editors;
 
@@ -46,6 +47,8 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
         SelectProfileRequested = EventCallback.Factory.Create<Guid>(this, SelectProfileAsync),
         ConfigureRequested = EventCallback.Factory.Create(this, ConfigureSelectedAsync),
         SearchTextChanged = EventCallback.Factory.Create<string>(this, OnSearchTextChanged),
+        CloseProfileRequested = EventCallback.Factory.Create(this, CloseProfileAsync),
+        OpenInstanceRequested = EventCallback.Factory.Create<Guid>(this, OpenLinkedInstanceAsync),
     };
 
     protected override void OnCurrentObjectChanged()
@@ -69,7 +72,7 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
         {
             if (_application == null)
             {
-                model.StatusMessage = "Application host is not ready.";
+                model.StatusMessage = "ApplicationProfileInstance host is not ready.";
                 model.IsStatusError = true;
                 return;
             }
@@ -87,14 +90,11 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
             _allRows = queryService.GetProfiles(objectSpace);
             ApplyFilter(model);
 
-            var keepSelection = model.SelectedProfileId != Guid.Empty
-                && _allRows.Any(r => r.ProfileId == model.SelectedProfileId);
-            var selectId = keepSelection
-                ? model.SelectedProfileId
-                : (_allRows.FirstOrDefault()?.ProfileId ?? Guid.Empty);
-
-            if (selectId != Guid.Empty)
-                await SelectProfileAsync(selectId);
+            if (model.SelectedProfileId != Guid.Empty
+                && _allRows.Any(r => r.ProfileId == model.SelectedProfileId))
+            {
+                await SelectProfileAsync(model.SelectedProfileId);
+            }
             else
             {
                 model.SelectedProfileId = Guid.Empty;
@@ -149,7 +149,7 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
         {
             var overviewService = _overviewQueryService
                 ?? _application.ServiceProvider?.GetService<IApplicationProfileOverviewQueryService>()
-                ?? new ApplicationProfileOverviewMockQueryService();
+                ?? new ApplicationProfileOverviewQueryService();
 
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
             model.OverviewSnapshot = overviewService.Load(profileId, objectSpace);
@@ -176,6 +176,17 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
         return Task.CompletedTask;
     }
 
+    private Task CloseProfileAsync()
+    {
+        var model = ComponentModel;
+        if (model == null)
+            return Task.CompletedTask;
+
+        model.SelectedProfileId = Guid.Empty;
+        model.OverviewSnapshot = null;
+        return Task.CompletedTask;
+    }
+
     private Task ConfigureSelectedAsync()
     {
         var model = ComponentModel;
@@ -188,6 +199,22 @@ public class ApplicationProfileCatalogPropertyEditor : BlazorPropertyEditorBase,
 
         _application.ShowViewStrategy.ShowView(
             new ShowViewParameters(wizardView) { TargetWindow = TargetWindow.Current },
+            new ShowViewSource(_application.MainWindow, null));
+
+        return Task.CompletedTask;
+    }
+
+    private Task OpenLinkedInstanceAsync(Guid instanceId)
+    {
+        if (_application == null || instanceId == Guid.Empty)
+            return Task.CompletedTask;
+
+        var workspaceView = ApplicationWorkspaceOpenHelper.CreateWorkspaceView(_application, instanceId);
+        if (workspaceView == null)
+            return Task.CompletedTask;
+
+        _application.ShowViewStrategy.ShowView(
+            new ShowViewParameters(workspaceView) { TargetWindow = TargetWindow.Current },
             new ShowViewSource(_application.MainWindow, null));
 
         return Task.CompletedTask;

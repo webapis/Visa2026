@@ -10,13 +10,20 @@
         @if (Snapshot.IsPrototypeMock)
         {
             <div class="ap-overview__banner">
-                <strong>Prototype</strong> — read-only overview shell. Identity and configuration blocks use the selected profile when available;
-                linked-application sample rows remain mock until real analytics ship.
+                <strong>Prototype</strong> — profile id was not resolved. Select a saved Application Profile to see live configuration and linked applications.
             </div>
         }
 
         <header class="ap-overview__header">
             <div>
+                @if (CloseRequested.HasDelegate)
+                {
+                    <button type="button"
+                            class="ap-overview__back"
+                            @onclick="CloseAsync">
+                        ← Back to list
+                    </button>
+                }
                 <h1 class="ap-overview__title">@Snapshot.Name</h1>
                 <p class="ap-overview__sub">@Snapshot.Code · @Snapshot.ActionFamilyLabel · @Snapshot.ProgressRouteLabel</p>
                 @if (!string.IsNullOrWhiteSpace(Snapshot.Description))
@@ -30,11 +37,14 @@
                     {
                         <span class="ap-overview__pill ap-overview__pill--on">Active</span>
                     }
+                    else
+                    {
+                        <span class="ap-overview__pill">Inactive</span>
+                    }
                     @if (Snapshot.IsConfigLocked)
                     {
                         <span class="ap-overview__pill ap-overview__pill--warn">Config locked</span>
                     }
-                    <span class="ap-overview__pill">Live FK model</span>
                 </div>
                 <button type="button"
                         class="ap-overview__btn ap-overview__btn--primary"
@@ -70,104 +80,152 @@
             <section class="ap-overview__card">
                 <h2>Per-application defaults</h2>
                 <p class="ap-overview__hint">Copied once at create; officers may change values on each application.</p>
-                <table class="ap-overview__table">
-                    <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>Default</th>
-                            <th>Required</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var row in Snapshot.PerApplicationDefaults)
-                        {
+                @if (Snapshot.PerApplicationDefaults.Count == 0)
+                {
+                    <p class="ap-overview__empty">No required defaults on this profile.</p>
+                }
+                else
+                {
+                    <table class="ap-overview__table">
+                        <thead>
                             <tr>
-                                <td>@row.FieldLabel</td>
-                                <td>@row.DefaultValue</td>
-                                <td>@(row.Required ? "Yes" : "—")</td>
+                                <th>Field</th>
+                                <th>Default</th>
+                                <th>Required</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Snapshot.PerApplicationDefaults)
+                            {
+                                <tr>
+                                    <td>@row.FieldLabel</td>
+                                    <td>@row.DefaultValue</td>
+                                    <td>@(row.Required ? "Yes" : "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
             </section>
         </div>
 
         <div class="ap-overview__grid">
             <section class="ap-overview__card">
                 <h2>Approval legs</h2>
-                <table class="ap-overview__table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Ministry</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var leg in Snapshot.ApprovalLegs)
-                        {
+                @if (Snapshot.ApprovalLegs.Count == 0)
+                {
+                    <p class="ap-overview__empty">No approval legs (direct migration, or none configured).</p>
+                }
+                else
+                {
+                    <table class="ap-overview__table">
+                        <thead>
                             <tr>
-                                <td>@leg.Sequence</td>
-                                <td>@leg.MinistryName</td>
+                                <th>#</th>
+                                <th>Ministry</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var leg in Snapshot.ApprovalLegs)
+                            {
+                                <tr>
+                                    <td>@leg.Sequence</td>
+                                    <td>@leg.MinistryName</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
             </section>
 
             <section class="ap-overview__card">
                 <h2>Person data requirements</h2>
-                <div class="ap-overview__chips">
-                    @foreach (var toggle in Snapshot.PersonDataToggles)
-                    {
-                        <span class="ap-overview__chip">@toggle</span>
-                    }
-                </div>
+                @if (Snapshot.PersonDataToggles.Count == 0)
+                {
+                    <p class="ap-overview__empty">No person-data requirements on this profile.</p>
+                }
+                else
+                {
+                    <div class="ap-overview__chips">
+                        @foreach (var toggle in Snapshot.PersonDataToggles)
+                        {
+                            <span class="ap-overview__chip">@toggle</span>
+                        }
+                    </div>
+                }
             </section>
         </div>
 
         <section class="ap-overview__card">
             <h2>Nested templates</h2>
-            <table class="ap-overview__table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var template in Snapshot.NestedTemplates)
-                    {
+            @if (Snapshot.NestedTemplates.Count == 0)
+            {
+                <p class="ap-overview__empty">No nested report templates.</p>
+            }
+            else
+            {
+                <table class="ap-overview__table">
+                    <thead>
                         <tr>
-                            <td>@template.Name</td>
-                            <td>@template.Kind</td>
+                            <th>Name</th>
+                            <th>Type</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var template in Snapshot.NestedTemplates)
+                        {
+                            <tr>
+                                <td>@template.Name</td>
+                                <td>@template.Kind</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         </section>
 
         <section class="ap-overview__card">
-            <h2>Linked applications <span class="ap-overview__count">(@Snapshot.LinkedApplicationCount sample)</span></h2>
-            <p class="ap-overview__hint">Sample rows illustrate linked Applications. Use Configure profile to edit live configuration in the wizard.</p>
-            <table class="ap-overview__table">
-                <thead>
-                    <tr>
-                        <th>Application</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var app in Snapshot.LinkedApplications)
-                    {
+            <h2>Linked applications <span class="ap-overview__count">(@LinkedCountCaption(Snapshot))</span></h2>
+            <p class="ap-overview__hint">Applications that use this profile. Open a number to view the case workspace.</p>
+            @if (Snapshot.LinkedApplications.Count == 0)
+            {
+                <p class="ap-overview__empty">No applications use this profile yet.</p>
+            }
+            else
+            {
+                <table class="ap-overview__table">
+                    <thead>
                         <tr>
-                            <td>@app.FullNumber</td>
-                            <td>@app.ApplicationDate</td>
-                            <td>@app.Status</td>
+                            <th>Application</th>
+                            <th>Date</th>
+                            <th>Status</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var app in Snapshot.LinkedApplications)
+                        {
+                            <tr>
+                                <td>
+                                    @if (CanOpenInstance(app))
+                                    {
+                                        <button type="button"
+                                                class="ap-overview__link"
+                                                @onclick="() => OpenInstanceAsync(app.ApplicationProfileInstanceId)">
+                                            @app.FullNumber
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        @app.FullNumber
+                                    }
+                                </td>
+                                <td>@app.ApplicationDate</td>
+                                <td>@app.Status</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
         </section>
     }
 </div>
@@ -177,6 +235,8 @@
     [Parameter] public ApplicationProfileOverviewSnapshot? Snapshot { get; set; }
     [Parameter] public EventCallback InitialLoadRequested { get; set; }
     [Parameter] public EventCallback ConfigureRequested { get; set; }
+    [Parameter] public EventCallback CloseRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenInstanceRequested { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -185,4 +245,18 @@
     }
 
     private Task ConfigureAsync() => ConfigureRequested.InvokeAsync();
+
+    private Task CloseAsync() => CloseRequested.InvokeAsync();
+
+    private Task OpenInstanceAsync(Guid instanceId) => OpenInstanceRequested.InvokeAsync(instanceId);
+
+    private bool CanOpenInstance(ApplicationProfileOverviewLinkedAppRow app) =>
+        OpenInstanceRequested.HasDelegate && app.ApplicationProfileInstanceId != Guid.Empty;
+
+    private static string LinkedCountCaption(ApplicationProfileOverviewSnapshot snapshot)
+    {
+        if (snapshot.LinkedApplicationCount > snapshot.LinkedApplications.Count)
+            return $"{snapshot.LinkedApplications.Count} of {snapshot.LinkedApplicationCount}";
+        return snapshot.LinkedApplicationCount.ToString();
+    }
 }

@@ -8,7 +8,7 @@ public interface IApplicationProfilePickerQueryService
 {
     IReadOnlyList<ApplicationProfilePickerRow> GetProfiles(
         IObjectSpace objectSpace,
-        ApplicationProgressRouteKind? progressRouteFilter,
-        Application? applicabilityProbe = null,
+        ApplicationProfileInstanceProgressRouteKind? progressRouteFilter,
+        ApplicationProfileInstance? applicabilityProbe = null,
         Guid? seedPersonId = null);
 }

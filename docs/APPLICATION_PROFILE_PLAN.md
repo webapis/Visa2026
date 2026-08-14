@@ -10,6 +10,7 @@
 | Staged profiles | `staged-application-profiles-workspace-mockup.png`, `staged-profiles-listview-table-mockup.png`, `staged-profiles-grid-cards-mockup.png` |
 | In process | `process-started-profiles-listview-table-mockup.png`, `process-started-profiles-list-cards-mockup.png`, `process-started-application-profile-workspace-mockup.png`, `process-started-nav-*.png` (5 workspace tabs) |
 | Profile templates | `application-profile-templates-listview-mockup.png`, `application-profile-templates-grid-mockup.png`, `application-profile-template-overview-mockup.png`, `application-profile-template-wizard-mockup.png` + `step2`–`step5` |
+| Wizard template scopes / upload / edit (2026-08-12) | `application-profile-wizard-templates-three-scopes-prototype.png`, `application-profile-wizard-template-initial-upload-prototype.png`, `application-profile-wizard-template-data-scope-prototype.png`, `application-profile-wizard-template-edit-*-prototype.png`, `application-profile-wizard-template-add-data-scope-prototype.png` |
 
 Full inventory: **§9**. **Interactive HTML (planned):** [`APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md`](APPLICATION_PROFILE_HTML_PROTOTYPE_PLAN.md).
 **Related today:** `ApplicationProfile` *(replacement)*, `ApplicationType` *(deprecated — dual-read)*, `Application`, `ApplicationItem` *(planned hard remove)*, `ApplicationProgress`, `Person` + related BOs, `ApprovalLegProfile`, `UserReportTemplate`, `ProjectContract`
@@ -144,24 +145,41 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 
 ## 10. Application DetailView redesign — retire ApplicationItem
 
-**Status:** Decisions largely locked (§10.1) · UX prototype · no domain implementation  
+**Status:** Decisions locked (§10.1 + §10.1a naming) · UX prototypes · People M2M shipped · §10 auto-link + sticky + Linked records tiles + process-complete lock shipped (10n–10p) · Overview **Issued records** 1:N create (10q)
 **Prototype:** [`docs/prototypes/process-started-application-profile-workspace-mockup.png`](prototypes/process-started-application-profile-workspace-mockup.png) (+ `process-started-nav-*.png` workspace tabs). Staged queue: `staged-profiles-*.png`.
+
+### 10.1a Naming (product vs persistence)
+
+| Product language | Persisted BO | Role |
+|------------------|--------------|------|
+| **Application Profile** (template) | `ApplicationProfile` | Shared live configuration (toggles, templates, route, …) |
+| **Application Profile instance** (“in process”) | `ApplicationProfileInstance` | One running case; **live FK** to profile |
+| Progress lines / Application Process | `ApplicationProfileInstanceProgress` | Append-only steps on that **instance** |
+| Linked records (Passport, Visa, …) | `ApplicationProfileInstancePersonResolvedLink` | Sticky auto-links per `(instance, person, kind)`; gated by profile `RequirePerson*` |
+| People on a case | Skip-navigation M2M (join table, **not** a BO) | `People` / `ApplicationProfileInstances`; officers link/unlink Person only |
+| Linked child records (Passport, Visa, …) | Skip-navigation M2M + sticky `ApplicationProfileInstancePersonResolvedLink` | Same join pattern as People; auto-filled when Person is linked |
+
+- **`ApplicationNumber` / `ApplicationDate`** live on the **instance** (`ApplicationProfileInstance`) — not on the shared `ApplicationProfile` template. CLR property names may remain until a follow-on polish; **UI captions** must say profile instance / process number.
+- Persistence cutover: **§13** (new tables + same-Guid copy + hard break). Legacy name `Application` is removed.
 
 ### 10.1 Locked decisions
 
 | # | Topic | Decision |
 |---|--------|----------|
 | 1 | ApplicationItem | **Hard remove** (no migrate-in-place dual model). |
-| 2 | Roster | Application has **many People** via M2M (replaces one-row-per-person `ApplicationItem`). |
-| 3 | Link on Person add | When a `Person` is linked, **auto-resolve and link** related M2M rows for that person — **only active / valid** rows (§10.2). |
-| 4 | Auto-resolve timing / refresh | Resolve at Person link/unlink **and** on **Application DetailView open** and after **profile person-config save**. (No extra triggers required for v1.) |
-| 5 | Manual child links | Officers **only link/unlink `Person`**. Child BOs are **never** manually linked or unlinked — always auto-resolved. |
+| 2 | Roster | Application has **many People** via **EF skip-navigation M2M**. Person-related child BOs (Passport, Visa, Education, AddressOfResidence, EmployeePositionHistory, EmployeeSalary, MedicalRecord, WorkDuty, InvitationItem, WorkPermitItem, BorderZoneItem, TravelHistory) have the **same skip-nav M2M** (`ApplicationProfileInstances` on the child; hidden collections on the instance). Join tables are composite PK only — **no XAF join BO**, no `[Aggregated]`. Sticky history also stays on `ApplicationProfileInstancePersonResolvedLink`; LinkPerson dual-writes M2M membership. **Output headers** Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (instance has many; child FK) — not skip-nav. Visibility on the instance is **May produce**. |
+| 3 | Link on Person add | When a `Person` is linked, **auto-resolve and link** related M2M rows for that person — **only** types with profile **`RequirePerson*` checked**, and **only active / valid** rows (§10.2). |
+| 4 | Sticky links (history) | Keep the **originally linked** child instances. Do **not** silently swap to a newer passport/visa on reopen. Person **unlink** removes that person’s auto-linked child links on the instance. |
+| 5 | Manual child links | Officers **only link/unlink `Person`**. Child BOs are **never** manually linked or unlinked — always auto-resolved (when toggles allow). |
 | 6 | SQL presentation | **One wide roster SQL view** — **one row per linked Person** with joined columns from auto-linked children. |
-| 7 | Tab visibility | Driven by Application Profile **person-config block** (Excel). Full toggle list maintained in Excel (Passport, Education, Position, Address, Visa, InvitationItem, WorkPermitItem, BorderZoneItem, Salary, Medical, Rejection, **TravelHistory**, …). |
-| 8 | Application-scoped props | Per-Application catalog on `Application` (Visa Type … Entry Check Point, etc. — Excel “Application properties required”). Visibility + defaults from profile. |
-| 9 | TravelHistory | **Not** Application Profile scalar configuration. `TravelHistory` (and subtypes) has **M2M with Application**, auto-resolved like other person-related BOs when Person is linked; tab via person-config toggle. |
+| 7 | Tab / linked-record visibility | Driven by Application Profile **person-config** (`RequirePerson*` / wizard “Required person-related data”). |
+| 8 | Application-scoped props | Per-Application catalog on `Application` (Visa Type … Entry Check Point, etc.). Visibility + defaults from profile. |
+| 9 | TravelHistory | **Not** profile scalar configuration. `TravelHistory` M2M on **Application**, auto-resolved when Person is linked **if** `RequirePersonTravelHistory` is on. |
 | 10 | Left rail | Pick at create · open/edit profile config · new Application from profile. |
-| 11 | Issued documents | Input M2M: existing InvitationItem / WorkPermitItem / Visa / … Output: Invitation / WorkPermit headers; new Visa via **`Visa.IssuingApplication`** (remove `IssuingApplicationItem`). |
+| 11 | Issued documents | Input M2M: existing InvitationItem / WorkPermitItem / BorderZoneItem / Visa / … Output headers: **1:N** Invitation / WorkPermit / BorderZone / Rejection / **IssuedVisas** on the instance (`[Aggregated]` + FK; tabs hidden unless profile **May produce**). New visa and visa-extension results use **`Visa.IssuingApplicationProfileInstance`** → `IssuedVisas` (input linked visas stay skip-nav `Visas`). |
+| 12 | Toggle turned off later | **Hide** that type + **stop new** auto-links. **Do not unlink** existing instance links (preserves history). |
+| 13 | Process complete | After the instance process completes, linked person-related BOs on that instance are **locked** from further change (live links only until then). |
+| 14 | Progress integration | Case workspace progress stepper/timeline is append-only **`ApplicationProgress`** on the instance (not nested under the config profile BO). |
 
 ### 10.2 Valid / active resolve rules
 
@@ -180,21 +198,20 @@ Keep **explicit** profile toggles for readiness + enabling person/roster `{{…}
 | RejectionItem | **Current / not cancelled** |
 | TravelHistory | **TBD** (recommend: current / latest relevant movements — confirm) |
 
-### 10.3 Person-config block → tabs
+### 10.3 Person-config block → tabs / linked records
 
-Profile toggles (configuration-related, live) control which person-data tabs/requirements apply. Excel owns the full list (officer-updated workbook). Expected members include at least:
+Profile toggles (configuration-related, live) control which person-data tabs and **Linked records** tiles apply, and which types auto-link when People are linked. Wizard step 4 **Required person-related data** maps to `RequirePerson*` on `ApplicationProfile`.
 
-Passport · Education · Position · Local address of residence · Visa · InvitationItem · WorkPermitItem · BorderZoneItem · EmployeeSalary · MedicalRecord · RejectionItem · **TravelHistory** · …
+Expected members: Passport · Education · Position · Address of residence · Visa · Invitation item · Work permit item · Border zone item · Salary · Medical · Rejection item · Travel history · …
 
-| Toggle enabled | Effect |
-|----------------|--------|
-| (any person-related BO) | Show tab / require that auto-resolved data for linked people |
-
-**Note:** Cloud workspace did not receive `c:\Users\webap\Downloads\Application.xlsx` — re-attach/upload so the repo draft Excel and §10.3 list can be synced to the exact rows.
+| Toggle | Effect |
+|--------|--------|
+| **On** | Visible; auto-link valid instances when Person is linked |
+| **Off** | Not visible for new work; no new auto-links; existing instance links kept (§10.1 #12) |
 
 ### 10.4 Per-Application property catalog
 
-From Excel **Application properties required** (visible + editable + persistent per Application):
+From Excel **Application properties required** (visible + editable + persistent per Application instance):
 
 | # | Property | Default from profile? |
 |---|----------|------------------------|
@@ -206,37 +223,37 @@ From Excel **Application properties required** (visible + editable + persistent 
 | 13 | Entry Date | No |
 | 14 | Entry Check Point | Yes |
 
-These remain **Application** fields (not `TravelHistory`). Movement history itself comes from **`TravelHistory` M2M**, not from profile-configured travel BO settings.
+These remain **Application** (instance) fields. Movement history itself comes from **`TravelHistory` M2M** on the instance.
 
 ### 10.5 Still open (narrow)
 
 1. **TravelHistory “valid”** — current/latest only, or all non-cancelled movements in a window?
-2. **Person-config toggle list** — sync into plan §10.3 and template wizard step 4 mockup (`application-profile-template-wizard-step4-mockup.png`); Excel draft removed from `docs/prototypes/`.
-3. **Wide view columns** — mandatory joined columns for v1 roster?
-4. **Unlock profile config** — auto when no apps ≥ lock state A?
-5. **Person / Dossier → Application** — see §11 (entry points + profile-usage UX).
+2. **Wide view columns** — mandatory joined columns for v1 roster?
+3. **Unlock profile config** — auto when no apps ≥ lock state A?
+4. ~~**Process-complete lock trigger**~~ — **Locked 2026-08-12 (slice 10p):** same as `Application.IsWorkflowTerminal` — latest progress `PROCESS_ISSUED`, `PROCESS_REJECTED`, or `PROCESS_CANCELLED`. Ministry review rejects (`*_REVIEW_REJECTED`) are **not** lock triggers (process may continue). Unlock by editing/deleting the last progress step (existing workflow-terminal UX).
 
 ### Sketch layout (prototype)
 
 | Region | Content |
 |--------|---------|
-| Left rail | Profiles: pick at create · open config · new Application from profile |
-| Top | Progress · header (per-Application props) · SLA |
-| Middle | Live Application Profile summary |
-| Bottom | Wide person roster + tabs from person-config (incl. TravelHistory) |
+| Left rail | Profiles: pick at create · open config · new instance from profile |
+| Top | Progress · header (№ / date on instance) · SLA |
+| Middle | Live profile summary + linked records |
+| Bottom | People roster + tabs from person-config |
 
 ```mermaid
 flowchart TB
-  Rail[Left rail: pick / configure / new from profile]
+  Template[ApplicationProfile template]
+  Inst[Application = profile instance]
+  Template -->|live FK| Inst
   Add[Link or unlink Person only]
-  Add --> Resolve[Auto-resolve valid related BOs]
-  Open[DetailView open] --> Resolve
-  CfgSave[Person-config save on profile] --> Resolve
-  Resolve --> M2M[Auto M2M: Passport Visa TravelHistory …]
-  Prof[Person-config toggles] --> Tabs[Tab visibility]
-  M2M --> View[Wide SQL view: 1 row per Person]
-  AppProps[Per-Application props catalog] --> App[Application]
-  View --> UI[DetailView]
+  Add --> Resolve[Auto-link if RequirePerson* on + valid]
+  Resolve --> M2M[Application M2M: Passport Visa …]
+  ToggleOff[Toggle off later] -->|hide + no new links| M2M
+  ToggleOff -.->|keep existing| M2M
+  Done[Process complete] -->|lock links| M2M
+  Progress[ApplicationProgress append-only] --> Inst
+  M2M --> UI[Case workspace Linked records]
 ```
 
 ---
@@ -451,12 +468,51 @@ When any linked Application reaches lock state **A** (first progress beyond offi
 | Switch Appearance / progress to profile | Done |
 | Config lock enforcement on profile edit | Done |
 | Configuration wizard UX | Done |
-| Profile overview shell | Done |
+| Profile overview (live linked instances) | Done |
 | Custom catalog home (replace native List/Detail officer UI) | Done |
 | Profile picker at Application create | Done |
-| Person M2M DetailView / hard-remove ApplicationItem | In progress (workspace 10a–10f done; hard-remove pending) |
+| Person M2M DetailView / hard-remove ApplicationItem | In progress (skip-navigation People + roster-line BO deleted; F5 heal pending) |
+| Overview Issued records (1:N Invitation / WorkPermit / BorderZone / Rejection / issued Visa) | Done (May produce tiles + New from Overview) |
 | Person/Dossier Start application | Done |
 | Remove `Application.ApplicationType` FK | Deferred (after import cutover) |
+| **§13 Instance rename** (`Application` → `ApplicationProfileInstance`) | Done (R0–R6; Demo F5/import operator-run) |
+
+---
+
+## 13. Instance rename cutover (`Application` → `ApplicationProfileInstance`)
+
+**Status:** Decisions locked 2026-08-12 · Implementation slices R0–R6 in skill IMPLEMENTATION_PLAN  
+**Canonical agent plan:** `.cursor/plans/profile_instance_cutover_*.plan.md` (do not edit from product docs)
+
+### 13.1 Locked decisions
+
+| Topic | Decision |
+|-------|----------|
+| Timing | Parallel with Wave 2b (do not wait for ApplicationItem hard-remove) |
+| Cutover | Big-bang (no dual-read OData alias) |
+| Persistence | New tables + **same-Guid copy**, then drop old |
+| Name scope | Header + related instance types (Progress, Person, ResolvedLink, ApprovalLegSnapshot, child FKs, Visa.Issuing*) |
+| Import | Hard break: `--entity ApplicationProfileInstance` |
+| Officer UI | “Application Profile instance” / process number only — no residual case “Application” |
+
+**Do not rename:** `ApplicationProfile*`, `ApplicationType*`, `ApplicationState` / `ApplicationLocation`, `ApplicationUser*`, `ApplicationRuntimeLog*`, `ApplicationNumberingProfile`, `ApplicationMigrationSlaProfile`, DevExpress `XafApplication`.
+
+### 13.2 Rename map
+
+| Today | After |
+|-------|--------|
+| `Application` / `Applications` | `ApplicationProfileInstance` / `ApplicationProfileInstances` |
+| `ApplicationProgress` | `ApplicationProfileInstanceProgress` |
+| `ApplicationPerson` (+ ResolvedLink) | Skip-nav People + `ApplicationProfileInstancePersonResolvedLink` (no roster-line BO) |
+| `ApplicationApprovalLegSnapshot` | `ApplicationProfileInstanceApprovalLegSnapshot` |
+| `Visa.IssuingApplication` | `Visa.IssuingApplicationProfileInstance` |
+| Import `--entity Application` | `--entity ApplicationProfileInstance` |
+
+`ApplicationItem` is **not** renamed — Wave 2b hard-remove path; FK points at instance table until dropped.
+
+### 13.3 Phases (R0–R6)
+
+See skill IMPLEMENTATION_PLAN slices R0–R6: spec → new BOs/tables → copy updater → code/OData/import/SQL hard switch → drop old → UI copy → verify.
 
 ---
 
@@ -482,6 +538,8 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `process-started-profiles-list-cards-mockup.png` | In process — card grid |
 | `process-started-application-profile-workspace-mockup.png` | In process case — Overview tab |
 | `process-started-nav-overview.png` | Workspace — Overview (alt) |
+| `process-started-nav-overview-issued-records.png` | Overview — Issued records card (1:N Invitation / Work permit / Border zone / Rejection; May produce) |
+| `process-started-nav-overview-issued-records-add.png` | Overview — Add invitation empty state under Issued records |
 | `process-started-nav-people-links.png` | Workspace — People & links |
 | `process-started-nav-progress.png` | Workspace — Progress |
 | `process-started-nav-document-copies.png` | Workspace — Document copies |
@@ -495,5 +553,12 @@ All files live in [`docs/prototypes/`](prototypes/) only (no subfolders).
 | `application-profile-template-wizard-step3-mockup.png` | Template wizard — step 3 Process & SLA |
 | `application-profile-template-wizard-step4-mockup.png` | Template wizard — step 4 Templates & person |
 | `application-profile-template-wizard-step5-mockup.png` | Template wizard — step 5 Review & publish |
+| `application-profile-wizard-templates-three-scopes-prototype.png` | Step 4 — three scopes (profile / category / global) |
+| `application-profile-wizard-template-initial-upload-prototype.png` | Step 4 — Add template initial upload |
+| `application-profile-wizard-template-data-scope-prototype.png` | Step 4 — Data for this template (header / M2M / both) |
+| `application-profile-wizard-template-add-data-scope-prototype.png` | Step 4 — Add modal (upload + data scope) |
+| `application-profile-wizard-template-edit-ui-prototype.png` | Step 4 — Edit template modal |
+| `application-profile-wizard-template-edit-scenario-prototype.png` | Step 4 — Edit Word/Excel scenario |
+| `application-profile-wizard-template-edit-word-prototype.png` | Step 4 — Edit Word template (detail) |
 
 **Retired (do not link):** `application-profile-wizard.html`, `application-profile-usage.html`, `application-detail-m2m.html`, `application-profile-platform-prototype.html`, `images/ap-*.png`, `Application-profile-wizard-draft.xlsx`.

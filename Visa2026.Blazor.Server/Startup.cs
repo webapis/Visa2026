@@ -141,15 +141,21 @@ namespace Visa2026.Blazor.Server
                     }
 
                     // Hot reload can swap Module DLLs without re-running CheckCompatibility; heal PG schema idempotently.
+                    // Skip until People exists — CREATE TABLE heals on an empty DB make EF EnsureCreated no-op.
                     var connectionString = Configuration.GetConnectionString("DefaultConnection")
                         ?? Configuration.GetConnectionString("ConnectionString");
-                    if (!string.IsNullOrWhiteSpace(connectionString))
+                    if (!string.IsNullOrWhiteSpace(connectionString)
+                        && PostgresRelationExists.All(connectionString, "People"))
                     {
-                        ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceCutoverSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
-                        VisaIssuingApplicationSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstancePeopleSkipNavSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationProfileInstanceChildSkipNavSchemaSql.ApplyIfMissing(connectionString);
+                        VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
+                        ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
                         ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                         ReportDashboardPostgresViewsHealSql.ApplyIfMissing(connectionString);
                     }
@@ -250,8 +256,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IApplicationProfilePickerContext, ApplicationProfilePickerContextHolder>();
             services.AddScoped<IApplicationProfilePickerQueryService, ApplicationProfilePickerQueryService>();
             services.AddScoped<IApplicationProfileOverviewPendingOpen, ApplicationProfileOverviewPendingOpen>();
-            services.AddScoped<ApplicationProfileOverviewMockQueryService>();
-            services.AddScoped<IApplicationProfileOverviewQueryService, ApplicationProfileOverviewMockQueryService>();
+            services.AddScoped<IApplicationProfileOverviewQueryService, ApplicationProfileOverviewQueryService>();
             services.AddScoped<IApplicationProfileCatalogQueryService, ApplicationProfileCatalogQueryService>();
             services.AddScoped<IOfficerShellPendingOpen, OfficerShellPendingOpen>();
             services.AddScoped<IOfficerShellStagedQueryService, OfficerShellStagedQueryService>();
@@ -259,7 +264,7 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<IOfficerShellNavQueryService, OfficerShellNavQueryService>();
             services.AddScoped<IOfficerShellStartProcessService, OfficerShellStartProcessService>();
             services.AddScoped<IOfficerShellCaseProgressService, OfficerShellCaseProgressService>();
-            services.AddScoped<IApplicationPersonLinkQueryService, ApplicationPersonLinkQueryService>();
+            services.AddScoped<IApplicationProfileInstancePersonLinkQueryService, ApplicationProfileInstancePersonLinkQueryService>();
             services.AddScoped<ApplicationWorkspacePersonUiActions>();
             services.AddScoped<IApplicationWorkspacePersonUiActions>(sp =>
                 sp.GetRequiredService<ApplicationWorkspacePersonUiActions>());
@@ -282,12 +287,11 @@ namespace Visa2026.Blazor.Server
             services.AddScoped<ApplicationItemDocumentFileAccess>();
             services.AddScoped<PersonDocumentFileAccess>();
             services.AddScoped<HeaderDocumentFileAccess>();
-            services.AddScoped<ApplicationProgressMinistryLetterFileAccess>();
-            services.AddScoped<IFilePreviewSource, ApplicationProgressLetterPreviewSource>();
+            services.AddScoped<ApplicationProfileInstanceProgressMinistryLetterFileAccess>();
+            services.AddScoped<IFilePreviewSource, ApplicationProfileInstanceProgressLetterPreviewSource>();
             services.AddScoped<FilePreviewSourceRegistry>();
             services.AddScoped<Visa2026.Module.Services.PreviewSlot.IVisaPreviewSlotService, VisaPreviewSlotService>();
-            services.AddScoped<ApplicationItemPdfBatchEnqueueService>();
-            services.AddScoped<ApplicationPersonPdfBatchEnqueueService>();
+            services.AddScoped<ApplicationProfileInstancePersonPdfBatchEnqueueService>();
             services.AddScoped<ApplicationItemDocumentPackageEnqueueService>();
             services.AddScoped<ApplicationWordReportPackageCatalogService>();
             services.AddScoped<ApplicationWordReportBatchEnqueueService>();
@@ -305,14 +309,21 @@ namespace Visa2026.Blazor.Server
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection")
                 ?? Configuration.GetConnectionString("ConnectionString");
-            if (!string.IsNullOrWhiteSpace(connectionString))
+            // Configure() runs before CheckCompatibility. Creating satellite tables on an empty DB
+            // makes EF EnsureCreated no-op, so People/users never appear and login cannot succeed.
+            if (!string.IsNullOrWhiteSpace(connectionString)
+                && PostgresRelationExists.All(connectionString, "People"))
             {
                 // Additive ProcessNumber / capability / Person incomplete columns and Report Dashboard vw_rd_* views when ModuleUpdater skips.
-                ApplicationProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceCutoverSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceProgressProcessNumberSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationTypeCapabilityFlagsSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationProfileSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspaceSchemaSql.ApplyIfMissing(connectionString);
-                VisaIssuingApplicationSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstancePeopleSkipNavSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationProfileInstanceChildSkipNavSchemaSql.ApplyIfMissing(connectionString);
+                VisaIssuingApplicationProfileInstanceSchemaSql.ApplyIfMissing(connectionString);
+                ApplicationItemsDropSchemaSql.ApplyIfMissing(connectionString);
                 ApplicationWorkspacePostgresViewsSql.ApplyIfMissing(connectionString);
                 PersonIncompleteDataSchemaSql.ApplyIfMissing(connectionString);
                 PersonExportBatchSchemaSql.ApplyIfMissing(connectionString);

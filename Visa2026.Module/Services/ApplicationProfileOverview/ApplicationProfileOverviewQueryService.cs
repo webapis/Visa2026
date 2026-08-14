@@ -8,11 +8,14 @@ using Visa2026.Module.Services.ApplicationProfilePicker;
 namespace Visa2026.Module.Services.ApplicationProfileOverview;
 
 /// <summary>
-/// Prototype overview — merges real <see cref="ApplicationProfile"/> scalars when available;
-/// linked-application rows and some summary lines remain mock until slice 10b+.
+/// Live Application Profile overview — configuration, defaults, legs, nested templates,
+/// and linked <see cref="ApplicationProfileInstance"/> rows. Mock snapshot only when the
+/// profile id cannot be resolved (designer / missing object space).
 /// </summary>
-public sealed class ApplicationProfileOverviewMockQueryService : IApplicationProfileOverviewQueryService
+public sealed class ApplicationProfileOverviewQueryService : IApplicationProfileOverviewQueryService
 {
+    public const int LinkedApplicationsDisplayCap = 25;
+
     public ApplicationProfileOverviewSnapshot Load(Guid applicationProfileId, IObjectSpace? objectSpace = null)
     {
         if (objectSpace != null && applicationProfileId != Guid.Empty)
@@ -25,7 +28,9 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
         return BuildFallbackMock(applicationProfileId);
     }
 
-    private static ApplicationProfileOverviewSnapshot MapFromProfile(ApplicationProfile profile, IObjectSpace objectSpace)
+    internal static ApplicationProfileOverviewSnapshot MapFromProfile(
+        ApplicationProfile profile,
+        IObjectSpace? objectSpace)
     {
         var audience = new List<string>();
         if (profile.ForEmployee)
@@ -35,46 +40,28 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
         if (profile.ForTemporaryVisitor)
             audience.Add("Temporary visitor");
 
-        var liveLines = BuildLiveConfigurationLines(profile);
-        var defaults = BuildDefaultRows(profile);
         var legs = profile.ApprovalLegs?
             .OrderBy(l => l.Sequence)
             .Select(l => new ApplicationProfileOverviewLegRow
             {
                 Sequence = l.Sequence ?? 0,
-                MinistryName = l.ApprovingMinistry?.ShortNameTm ?? "—",
+                MinistryName = l.ApprovingMinistry?.LocalizedDisplayName
+                    ?? l.ApprovingMinistry?.ShortNameTm
+                    ?? l.ApprovingMinistry?.NameTm
+                    ?? "—",
             })
             .ToList() ?? [];
 
-        if (legs.Count == 0)
-        {
-            legs =
-            [
-                new() { Sequence = 1, MinistryName = "Türkmenenergo (mock)" },
-                new() { Sequence = 2, MinistryName = "Migration service (mock)" },
-            ];
-        }
-
-        var personToggles = BuildPersonToggles(profile);
         var templates = profile.NestedTemplates?
             .OrderBy(t => t.SortOrder)
             .Select(t => new ApplicationProfileOverviewTemplateRow
             {
-                Name = t.TemplateName,
+                Name = string.IsNullOrWhiteSpace(t.TemplateName) ? "—" : t.TemplateName,
                 Kind = t.TemplateKind.ToString(),
             })
             .ToList() ?? [];
 
-        if (templates.Count == 0)
-        {
-            templates =
-            [
-                new() { Name = "Invitation package (mock)", Kind = "Word" },
-                new() { Name = "Ministry letter (mock)", Kind = "Word" },
-            ];
-        }
-
-        var linkedApps = BuildLinkedApplicationsMock();
+        var (linkedRows, linkedCount) = LoadLinkedApplications(profile, objectSpace);
         var locked = ApplicationProfileLockHelper.IsProfileConfigLocked(profile, objectSpace);
 
         return new ApplicationProfileOverviewSnapshot
@@ -88,15 +75,63 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
             AudienceLabels = audience,
             IsConfigLocked = locked,
             IsActive = profile.IsActive,
-            LiveConfigurationLines = liveLines,
-            PerApplicationDefaults = defaults,
+            LiveConfigurationLines = BuildLiveConfigurationLines(profile),
+            PerApplicationDefaults = BuildDefaultRows(profile),
             ApprovalLegs = legs,
-            PersonDataToggles = personToggles,
+            PersonDataToggles = BuildPersonToggles(profile),
             NestedTemplates = templates,
-            LinkedApplications = linkedApps,
-            LinkedApplicationCount = linkedApps.Count,
-            IsPrototypeMock = true,
+            LinkedApplications = linkedRows,
+            LinkedApplicationCount = linkedCount,
+            IsPrototypeMock = false,
         };
+    }
+
+    internal static ApplicationProfileOverviewLinkedAppRow MapLinkedRow(ApplicationProfileInstance instance)
+    {
+        var caption = ApplicationProcessNumberHelper.FormatDisplayCaption(instance);
+        var status = instance.LatestProgress?.State?.LocalizedDisplayName
+            ?? instance.LatestProgress?.State?.NameTm
+            ?? instance.LatestProgressDisplay;
+
+        return new ApplicationProfileOverviewLinkedAppRow
+        {
+            ApplicationProfileInstanceId = instance.ID,
+            FullNumber = string.IsNullOrWhiteSpace(caption) ? "—" : caption,
+            ApplicationDate = instance.ApplicationDateText,
+            Status = string.IsNullOrWhiteSpace(status) ? "—" : status,
+        };
+    }
+
+    internal static (IReadOnlyList<ApplicationProfileOverviewLinkedAppRow> Rows, int Total) LoadLinkedApplications(
+        ApplicationProfile profile,
+        IObjectSpace? objectSpace)
+    {
+        try
+        {
+            if (objectSpace != null && profile.ID != Guid.Empty)
+            {
+                var query = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                    .Where(a => a.ApplicationProfile != null && a.ApplicationProfile.ID == profile.ID);
+                var total = query.Count();
+                var page = query
+                    .OrderByDescending(a => a.ApplicationDate)
+                    .Take(LinkedApplicationsDisplayCap)
+                    .ToList();
+                return (page.Select(MapLinkedRow).ToList(), total);
+            }
+        }
+        catch (Exception)
+        {
+            // Designer / non-queryable object space — fall through to in-memory collection.
+        }
+
+        var instances = profile.Instances?.ToList() ?? [];
+        var rows = instances
+            .OrderByDescending(a => a.ApplicationDate)
+            .Take(LinkedApplicationsDisplayCap)
+            .Select(MapLinkedRow)
+            .ToList();
+        return (rows, instances.Count);
     }
 
     private static List<string> BuildLiveConfigurationLines(ApplicationProfile profile)
@@ -110,6 +145,8 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
             produce.Add("visa");
         if (profile.ProduceBorderZone)
             produce.Add("border zone");
+        if (profile.ProduceRejection)
+            produce.Add("rejection");
         if (profile.ProduceWorkLocation)
             produce.Add("work location");
 
@@ -120,6 +157,10 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
             cancel.Add("work permits");
         if (profile.CancelVisas)
             cancel.Add("visas");
+        if (profile.CancelBorderZonePermits)
+            cancel.Add("border zone permits");
+        if (profile.CancelApplicationProfileInstances)
+            cancel.Add("applications");
 
         var lines = new List<string>
         {
@@ -152,26 +193,26 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
             });
         }
 
-        Add("Visa Type", profile.DefaultVisaType?.NameTm ?? profile.DefaultVisaType?.Name, profile.RequireVisaType);
-        Add("Visa Category", profile.DefaultVisaCategory?.NameTm ?? profile.DefaultVisaCategory?.Name, profile.RequireVisaCategory);
-        Add("Visa Period", profile.DefaultVisaPeriod?.NameTm ?? profile.DefaultVisaPeriod?.Name, profile.RequireVisaPeriod);
-        Add("Urgency", profile.DefaultUrgency?.NameTm ?? profile.DefaultUrgency?.Name, profile.RequireUrgency);
-        Add("Project Contract", profile.DefaultProjectContract?.NameTm ?? profile.DefaultProjectContract?.Name, profile.RequireProject);
-        Add("Migration Service", profile.DefaultMigrationService?.NameTm ?? profile.DefaultMigrationService?.Name, profile.RequireMigrationService);
+        Add("Visa Type", LookupLabel(profile.DefaultVisaType), profile.RequireVisaType);
+        Add("Visa Category", LookupLabel(profile.DefaultVisaCategory), profile.RequireVisaCategory);
+        Add("Visa Period", LookupLabel(profile.DefaultVisaPeriod), profile.RequireVisaPeriod);
+        Add("Urgency", LookupLabel(profile.DefaultUrgency), profile.RequireUrgency);
+        Add("Project Contract", LookupLabel(profile.DefaultProjectContract), profile.RequireProject);
+        Add("Migration Service", LookupLabel(profile.DefaultMigrationService), profile.RequireMigrationService);
         Add("Border Zone", profile.DefaultBorderZoneLocation, profile.RequireBorderZone);
-        Add("Entry Check Point", profile.DefaultEntryCheckPoint?.NameTm ?? profile.DefaultEntryCheckPoint?.Name, profile.RequireEntryCheckPoint);
-
-        if (rows.Count == 0)
-        {
-            rows.Add(new ApplicationProfileOverviewDefaultRow
-            {
-                FieldLabel = "Visa Type",
-                DefaultValue = "WP (mock default)",
-                Required = true,
-            });
-        }
+        Add("Entry Check Point", LookupLabel(profile.DefaultEntryCheckPoint), profile.RequireEntryCheckPoint);
 
         return rows;
+    }
+
+    private static string? LookupLabel(LookupBase? lookup)
+    {
+        if (lookup == null)
+            return null;
+
+        if (!string.IsNullOrWhiteSpace(lookup.LocalizedDisplayName))
+            return lookup.LocalizedDisplayName;
+        return string.IsNullOrWhiteSpace(lookup.NameTm) ? null : lookup.NameTm;
     }
 
     private static List<string> BuildPersonToggles(ApplicationProfile profile)
@@ -191,21 +232,18 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
             toggles.Add("Invitation item");
         if (profile.RequirePersonWorkPermitItem)
             toggles.Add("Work permit item");
+        if (profile.RequirePersonBorderZoneItem)
+            toggles.Add("Border zone item");
+        if (profile.RequirePersonSalary)
+            toggles.Add("Salary");
+        if (profile.RequirePersonMedical)
+            toggles.Add("Medical");
+        if (profile.RequirePersonRejectionItem)
+            toggles.Add("Rejection item");
         if (profile.RequirePersonTravelHistory)
             toggles.Add("Travel history");
-
-        if (toggles.Count == 0)
-            toggles.Add("Passport (mock)");
-
         return toggles;
     }
-
-    private static List<ApplicationProfileOverviewLinkedAppRow> BuildLinkedApplicationsMock() =>
-    [
-        new() { FullNumber = "12/-7010", ApplicationDate = "01.08.2026", Status = "Office preparation" },
-        new() { FullNumber = "12/-6988", ApplicationDate = "15.07.2026", Status = "Submitted (ministry)" },
-        new() { FullNumber = "12/-6901", ApplicationDate = "02.06.2026", Status = "Issued" },
-    ];
 
     private static ApplicationProfileOverviewSnapshot BuildFallbackMock(Guid applicationProfileId) =>
         new()
@@ -243,8 +281,8 @@ public sealed class ApplicationProfileOverviewMockQueryService : IApplicationPro
                 new() { Name = "Invitation package", Kind = "Word" },
                 new() { Name = "Work permit forms", Kind = "PdfForm" },
             ],
-            LinkedApplications = BuildLinkedApplicationsMock(),
-            LinkedApplicationCount = 3,
+            LinkedApplications = [],
+            LinkedApplicationCount = 0,
             IsPrototypeMock = true,
         };
 }

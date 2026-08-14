@@ -40,7 +40,38 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
+    position: relative;
 }
+
+.ap-overview__close {
+    align-self: flex-end;
+    border: none;
+    background: transparent;
+    color: var(--ap-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 2px 8px;
+    margin: -4px -4px 0 0;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.ap-overview__close:hover {
+    background: #eef2f6;
+    color: var(--ap-ink);
+}
+
+.ap-overview__back {
+    display: inline-block;
+    border: none;
+    background: transparent;
+    color: var(--ap-accent);
+    font-size: 0.85rem;
+    font-weight: 650;
+    padding: 0;
+    margin: 0 0 8px;
+    cursor: pointer;
+}
+.ap-overview__back:hover { text-decoration: underline; }
 
 .ap-overview__btn {
     border: 1px solid var(--ap-line);
@@ -166,3 +197,22 @@
     letter-spacing: 0.04em;
     color: var(--ap-muted);
 }
+
+.ap-overview__empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ap-muted);
+}
+
+.ap-overview__link {
+    border: none;
+    background: none;
+    padding: 0;
+    color: var(--ap-accent);
+    font: inherit;
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+.ap-overview__link:hover { filter: brightness(0.85); }

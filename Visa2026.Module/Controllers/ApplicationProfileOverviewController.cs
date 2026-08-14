@@ -7,7 +7,7 @@ using Visa2026.Module.Services.ApplicationProfileOverview;
 namespace Visa2026.Module.Controllers;
 
 /// <summary>
-/// Opens the read-only Application Profile overview (mock / preview shell).
+/// Opens the read-only Application Profile overview (live configuration and linked instances).
 /// </summary>
 public sealed class ApplicationProfileOverviewController : ViewController
 {
@@ -28,7 +28,7 @@ public sealed class ApplicationProfileOverviewController : ViewController
         base.OnActivated();
         openOverviewAction.Caption = "Open profile overview";
         openOverviewAction.ToolTip =
-            "Prototype read-only overview of live configuration, defaults, and linked applications (mock rows where noted).";
+            "Read-only overview of live configuration, defaults, nested templates, and linked applications.";
         UpdateActionState();
         if (View != null)
             View.CurrentObjectChanged += View_CurrentObjectChanged;

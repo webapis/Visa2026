@@ -7,21 +7,6 @@
 
 <div class="officer-shell-host">
     <div class="os-app">
-        <aside class="os-sidebar" aria-label="Application profiles navigation">
-            <div class="os-brand">
-                <div class="os-brand__logo">V26</div>
-                <div>
-                    <span class="os-brand__title">VISA2026</span>
-                    <span class="os-brand__sub">Application profiles</span>
-                </div>
-            </div>
-
-            <div class="os-nav-section">Application profiles</div>
-            @RenderNavItem(OfficerShellPage.Staged, "📚", "Staged profiles", "Before application number", NavCounts.StagedCount, "orange")
-            @RenderNavItem(OfficerShellPage.InProcess, "📁", "In process", "Numbered cases", NavCounts.InProcessCount, "blue")
-            @RenderNavItem(OfficerShellPage.Templates, "📋", "Profile templates", "Configuration · Visa office admin", null, null)
-        </aside>
-
         <div class="os-main">
             <header class="os-topbar">
                 <div class="os-topbar__crumb">@Breadcrumb()</div>
@@ -81,18 +66,23 @@
                                                                   BackToCatalogRequested="@BackToTemplateCatalogRequested"
                                                                   NewProfileRequested="@NewProfileRequested"
                                                                   ConfigureRequested="@ConfigureProfileRequested"
-                                                                  ConfigureProfileRequested="@ConfigureTemplateRequested" />
+                                                                  ConfigureProfileRequested="@ConfigureTemplateRequested"
+                                                                  OpenInstanceRequested="@OpenCaseRequested" />
                             break;
                         case OfficerShellPage.Case:
                             <OfficerShellCaseWorkspaceComponent Snapshot="@WorkspaceSnapshot"
                                                                 IsLoading="@WorkspaceLoading"
                                                                 ActiveTab="@CaseTab"
                                                                 SelectedPersonRowIndex="@SelectedPersonRowIndex"
+                                                                PeopleLinkedRecordFocusKey="@PeopleLinkedRecordFocusKey"
                                                                 CanLinkPerson="@CanLinkPerson"
                                                                 CanUnlinkPerson="@CanUnlinkPerson"
                                                                 CanOpenPersonDetail="@CanOpenPersonDetail"
                                                                 CanOpenDocumentCopies="@CanOpenDocumentCopies"
                                                                 CaseTabChanged="@CaseTabChanged"
+                                                                LinkedRecordTileClicked="@LinkedRecordTileClicked"
+                                                                IssuedHeaderNewRequested="@IssuedHeaderNewRequested"
+                                                                IssuedHeaderOpenRequested="@IssuedHeaderOpenRequested"
                                                                 BackToListRequested="@BackToInProcessRequested"
                                                                 LinkPersonRequested="@LinkPersonRequested"
                                                                 UnlinkPersonRequested="@UnlinkPersonRequested"
@@ -156,6 +146,7 @@
     [Parameter] public bool TemplatesDetailOpen { get; set; }
     [Parameter] public string CaseTab { get; set; } = "overview";
     [Parameter] public int SelectedPersonRowIndex { get; set; } = -1;
+    [Parameter] public string? PeopleLinkedRecordFocusKey { get; set; }
     [Parameter] public bool CanLinkPerson { get; set; }
     [Parameter] public bool CanUnlinkPerson { get; set; }
     [Parameter] public bool CanOpenPersonDetail { get; set; }
@@ -187,6 +178,9 @@
     [Parameter] public EventCallback BackToTemplateCatalogRequested { get; set; }
     [Parameter] public EventCallback<Guid> ConfigureTemplateRequested { get; set; }
     [Parameter] public EventCallback<string> CaseTabChanged { get; set; }
+    [Parameter] public EventCallback<string> LinkedRecordTileClicked { get; set; }
+    [Parameter] public EventCallback<string> IssuedHeaderNewRequested { get; set; }
+    [Parameter] public EventCallback<ApplicationWorkspaceIssuedHeaderOpenRequest> IssuedHeaderOpenRequested { get; set; }
     [Parameter] public EventCallback BackToInProcessRequested { get; set; }
     [Parameter] public EventCallback LinkPersonRequested { get; set; }
     [Parameter] public EventCallback UnlinkPersonRequested { get; set; }
@@ -201,7 +195,7 @@
     [Parameter] public EventCallback<OfficerShellCaseProgressFileUpload> UploadMinistryLetterRequested { get; set; }
     [Parameter] public EventCallback<OfficerShellCaseProgressAdvanceRequest> AdvanceProgressRequested { get; set; }
     [Parameter] public bool ShowPersonLinkPicker { get; set; }
-    [Parameter] public IReadOnlyList<ApplicationPersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationPersonLinkCandidateRow>();
+    [Parameter] public IReadOnlyList<ApplicationProfileInstancePersonLinkCandidateRow> PersonLinkCandidates { get; set; } = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
     [Parameter] public bool PersonLinkIsSearching { get; set; }
     [Parameter] public bool PersonLinkIsLinking { get; set; }
     [Parameter] public string? PersonLinkStatusMessage { get; set; }
@@ -213,7 +207,7 @@
     private bool _initialLoadStarted;
     private bool ShowListSearch => CurrentPage is OfficerShellPage.Staged or OfficerShellPage.InProcess;
     private bool CanStartProcess => SelectedStagedIds.Count > 0
-        && StagedRows.Where(r => SelectedStagedIds.Contains(r.ApplicationId)).All(r => r.IsSelectable);
+        && StagedRows.Where(r => SelectedStagedIds.Contains(r.ApplicationProfileInstanceId)).All(r => r.IsSelectable);
 
     private IEnumerable<OfficerShellStagedRow> StagedSearchFiltered()
     {
@@ -283,34 +277,15 @@
         return counts;
     }
 
-    private RenderFragment RenderNavItem(
-        OfficerShellPage page, string icon, string title, string sub, int? count, string? badgeVariant) => __builder =>
-    {
-        var active = CurrentPage == page
-            || (page == OfficerShellPage.InProcess && CurrentPage == OfficerShellPage.Case)
-            || (page == OfficerShellPage.Templates && CurrentPage == OfficerShellPage.Templates);
-        <button type="button" class="os-nav-item @(active ? "is-active" : null)" @onclick="() => Navigate(page)">
-            <span class="os-nav-item__ico">@icon</span>
-            <span class="os-nav-item__grow">
-                <span class="os-nav-item__title">@title</span>
-                <span class="os-nav-item__sub">@sub</span>
-            </span>
-            @if (count is > 0 && badgeVariant != null)
-            {
-                <span class="os-nav-badge os-nav-badge--@badgeVariant">@count</span>
-            }
-        </button>;
-    };
-
     private string Breadcrumb() => CurrentPage switch
     {
         OfficerShellPage.Staged => StagedViewMode == "grouped"
-            ? "Application profiles / Staged profiles / Grouped"
-            : "Application profiles / Staged profiles",
-        OfficerShellPage.InProcess => "Application profiles / In process",
-        OfficerShellPage.Templates => "Application profiles / Profile templates",
-        OfficerShellPage.Case => "Application profiles / In process / Case workspace",
-        _ => "Application profiles",
+            ? "ApplicationProfileInstance profiles / Staged profiles / Grouped"
+            : "ApplicationProfileInstance profiles / Staged profiles",
+        OfficerShellPage.InProcess => "ApplicationProfileInstance profiles / In process",
+        OfficerShellPage.Templates => "ApplicationProfileInstance profiles / Profile templates",
+        OfficerShellPage.Case => "ApplicationProfileInstance profiles / In process / Case workspace",
+        _ => "ApplicationProfileInstance profiles",
     };
 
     private async Task Navigate(OfficerShellPage page)
@@ -365,12 +340,12 @@
             <div class="os-card-grid">
                 @foreach (var row in StagedPageResult.PageItems)
                 {
-                    var selected = SelectedStagedIds.Contains(row.ApplicationId);
+                    var selected = SelectedStagedIds.Contains(row.ApplicationProfileInstanceId);
                     var color = OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey);
-                    <article class="os-card os-card--rich @(selected ? "is-selected" : null)" style="@($"--os-card-accent:{color}")" @onclick="() => ToggleStaged(row.ApplicationId)">
+                    <article class="os-card os-card--rich @(selected ? "is-selected" : null)" style="@($"--os-card-accent:{color}")" @onclick="() => ToggleStaged(row.ApplicationProfileInstanceId)">
                         <div class="os-card__stripe"></div>
                         <div class="os-card__head">
-                            <input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)" @onclick:stopPropagation="true" @onchange="() => ToggleStaged(row.ApplicationId)" />
+                            <input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)" @onclick:stopPropagation="true" @onchange="() => ToggleStaged(row.ApplicationProfileInstanceId)" />
                             <span class="os-status os-status--@row.Readiness">@ReadinessLabel(row.Readiness)</span>
                         </div>
                         <div class="os-card__title">@row.PersonName</div>
@@ -405,9 +380,9 @@
                 <tbody>
                     @foreach (var row in StagedPageResult.PageItems)
                     {
-                        var selected = SelectedStagedIds.Contains(row.ApplicationId);
-                        <tr class="@(selected ? "is-selected" : null)" @onclick="() => ToggleStaged(row.ApplicationId)">
-                            <td><input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)" @onclick:stopPropagation="true" @onchange="() => ToggleStaged(row.ApplicationId)" /></td>
+                        var selected = SelectedStagedIds.Contains(row.ApplicationProfileInstanceId);
+                        <tr class="@(selected ? "is-selected" : null)" @onclick="() => ToggleStaged(row.ApplicationProfileInstanceId)">
+                            <td><input type="checkbox" checked="@selected" disabled="@(!row.IsSelectable)" @onclick:stopPropagation="true" @onchange="() => ToggleStaged(row.ApplicationProfileInstanceId)" /></td>
                             <td><span class="os-dot" style="background:@OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey)"></span> @row.PersonName</td>
                             <td>@row.ProfileName</td>
                             <td>@(row.ProjectName ?? "—")</td>
@@ -450,7 +425,7 @@
                 @foreach (var row in InProcessPageResult.PageItems)
                 {
                     var color = OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey);
-                    <article class="os-card os-card--rich os-card--clickable" style="@($"--os-card-accent:{color}")" @onclick="() => OpenCase(row.ApplicationId)">
+                    <article class="os-card os-card--rich os-card--clickable" style="@($"--os-card-accent:{color}")" @onclick="() => OpenCase(row.ApplicationProfileInstanceId)">
                         <div class="os-card__stripe"></div>
                         <div class="os-card__title">@row.ApplicationNumber</div>
                         <div class="os-card__meta">@row.PersonName</div>
@@ -483,7 +458,7 @@
                 <tbody>
                     @foreach (var row in InProcessPageResult.PageItems)
                     {
-                        <tr @onclick="() => OpenCase(row.ApplicationId)">
+                        <tr @onclick="() => OpenCase(row.ApplicationProfileInstanceId)">
                             <td><span class="os-dot" style="background:@OfficerShellTemplateFamily.GetColor(row.TemplateFamilyKey)"></span> @row.ApplicationNumber</td>
                             <td>@row.PersonName</td>
                             <td>@row.ProfileName</td>

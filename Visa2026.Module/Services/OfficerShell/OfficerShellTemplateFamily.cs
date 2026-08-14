@@ -14,7 +14,7 @@ public static class OfficerShellTemplateFamily
 
     public static readonly string[] DisplayOrder = { Registration, Invitation, Extension, WorkPermit };
 
-    public static string ResolveKey(Application? application)
+    public static string ResolveKey(ApplicationProfileInstance? application)
     {
         var profile = application?.ApplicationProfile;
         if (profile != null)

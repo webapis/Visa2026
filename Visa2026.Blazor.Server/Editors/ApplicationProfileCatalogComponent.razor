@@ -13,16 +13,21 @@
             <div class="ap-catalog__status @(IsStatusError ? "is-error" : "is-ok")" role="status">@StatusMessage</div>
         }
 
-        <div class="ap-catalog__shell">
-            <aside class="ap-catalog__rail" aria-label="Application Profiles">
-                <h2 class="ap-catalog__rail-title">Application Profiles</h2>
-                <div class="ap-catalog__search">
-                    <span aria-hidden="true">⌕</span>
-                    <input type="search"
-                           placeholder="Search profiles…"
-                           value="@SearchText"
-                           @oninput="OnSearchInput" />
-                </div>
+        @if (SelectedProfileId == Guid.Empty)
+        {
+            <div class="ap-catalog__list-page">
+                <header class="ap-catalog__list-head">
+                    <div class="ap-catalog__search ap-catalog__search--toolbar">
+                        <span aria-hidden="true">⌕</span>
+                        <input type="search"
+                               placeholder="Search profiles…"
+                               value="@SearchText"
+                               @oninput="OnSearchInput" />
+                    </div>
+                    <button type="button" class="ap-catalog__new ap-catalog__new--toolbar" @onclick="NewProfileAsync">
+                        New Application Profile
+                    </button>
+                </header>
 
                 @if (Rows.Count == 0)
                 {
@@ -30,46 +35,51 @@
                 }
                 else
                 {
-                    <ul class="ap-catalog__profile-list" role="listbox" aria-label="Application Profiles">
-                        @foreach (var row in Rows)
-                        {
-                            var selected = row.ProfileId == SelectedProfileId;
-                            <li class="ap-catalog__profile-row @(selected ? "is-active" : null)"
-                                role="option"
-                                aria-selected="@selected"
-                                title="@row.Name"
-                                @onclick="() => SelectProfileAsync(row.ProfileId)">
-                                <span class="ap-catalog__dot" aria-hidden="true"></span>
-                                <span class="ap-catalog__profile-label">@row.RailLabel</span>
-                                @if (row.IsConfigLocked)
+                    <div class="ap-catalog__table-wrap">
+                        <table class="ap-catalog__table">
+                            <thead>
+                                <tr>
+                                    <th>Template</th>
+                                    <th>Code</th>
+                                    <th>Action family</th>
+                                    <th>Progress route</th>
+                                    <th>Status</th>
+                                    <th>Linked</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in Rows)
                                 {
-                                    <span class="ap-catalog__lock" title="Config locked">L</span>
+                                    <tr @onclick="() => SelectProfileAsync(row.ProfileId)">
+                                        <td>
+                                            <span class="ap-catalog__dot" aria-hidden="true"></span>
+                                            @row.RailLabel
+                                        </td>
+                                        <td>@row.Code</td>
+                                        <td>@row.ActionFamilyLabel</td>
+                                        <td>@row.ProgressRouteLabel</td>
+                                        <td>@StatusLabel(row)</td>
+                                        <td>@row.LinkedApplicationCount</td>
+                                        <td class="ap-catalog__chev" aria-hidden="true">›</td>
+                                    </tr>
                                 }
-                            </li>
-                        }
-                    </ul>
-                }
-
-                <button type="button" class="ap-catalog__new" @onclick="NewProfileAsync">
-                    New Application Profile
-                </button>
-            </aside>
-
-            <div class="ap-catalog__main">
-                @if (SelectedProfileId == Guid.Empty)
-                {
-                    <div class="ap-catalog__empty-main">
-                        Select a profile on the left, or create one with <strong>New Application Profile</strong>.
+                            </tbody>
+                        </table>
                     </div>
                 }
-                else
-                {
-                    <ApplicationProfileOverviewComponent IsLoading="@IsOverviewLoading"
-                                                         Snapshot="@OverviewSnapshot"
-                                                         ConfigureRequested="@ConfigureRequested" />
-                }
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="ap-catalog__detail-page">
+                <ApplicationProfileOverviewComponent IsLoading="@IsOverviewLoading"
+                                                     Snapshot="@OverviewSnapshot"
+                                                     ConfigureRequested="@ConfigureRequested"
+                                                     CloseRequested="@CloseProfileAsync"
+                                                     OpenInstanceRequested="@OpenInstanceRequested" />
+            </div>
+        }
     }
 </div>
 
@@ -87,6 +97,8 @@
     [Parameter] public EventCallback<Guid> SelectProfileRequested { get; set; }
     [Parameter] public EventCallback ConfigureRequested { get; set; }
     [Parameter] public EventCallback<string> SearchTextChanged { get; set; }
+    [Parameter] public EventCallback CloseProfileRequested { get; set; }
+    [Parameter] public EventCallback<Guid> OpenInstanceRequested { get; set; }
 
     private bool _initialLoadStarted;
 
@@ -103,9 +115,18 @@
 
     private Task SelectProfileAsync(Guid profileId) => SelectProfileRequested.InvokeAsync(profileId);
 
+    private Task CloseProfileAsync() => CloseProfileRequested.InvokeAsync();
+
     private async Task OnSearchInput(ChangeEventArgs e)
     {
         if (SearchTextChanged.HasDelegate)
             await SearchTextChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+    }
+
+    private static string StatusLabel(ApplicationProfileCatalogRow row)
+    {
+        if (!row.IsActive)
+            return "Inactive";
+        return row.IsConfigLocked ? "Config locked" : "Active";
     }
 }

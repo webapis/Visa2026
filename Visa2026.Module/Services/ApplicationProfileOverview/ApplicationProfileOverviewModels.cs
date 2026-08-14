@@ -47,7 +47,7 @@ public sealed class ApplicationProfileOverviewSnapshot
 
     public int LinkedApplicationCount { get; init; }
 
-    public bool IsPrototypeMock { get; init; } = true;
+    public bool IsPrototypeMock { get; init; }
 }
 
 public sealed class ApplicationProfileOverviewDefaultRow
@@ -75,6 +75,8 @@ public sealed class ApplicationProfileOverviewTemplateRow
 
 public sealed class ApplicationProfileOverviewLinkedAppRow
 {
+    public Guid ApplicationProfileInstanceId { get; init; }
+
     public string FullNumber { get; init; } = string.Empty;
 
     public string ApplicationDate { get; init; } = string.Empty;

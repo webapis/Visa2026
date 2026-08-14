@@ -19,6 +19,7 @@ using Visa2026.Module.Services.ApplicationProfileWizard;
 using Visa2026.Module.Services.ApplicationWorkspace;
 using Visa2026.Module.Services.ApplicationPersonLink;
 using Visa2026.Module.Services.ApplicationPersonRoster;
+using Visa2026.Module.Localization;
 using Visa2026.Module.Services.OfficerShell;
 using Visa2026.Module.Services.PreviewSlot;
 
@@ -36,7 +37,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private IApplicationProfileOverviewQueryService? _overviewQueryService;
     private IOfficerShellStartProcessService? _startProcessService;
     private IOfficerShellCaseProgressService? _caseProgressService;
-    private IApplicationPersonLinkQueryService? _personLinkQueryService;
+    private IApplicationProfileInstancePersonLinkQueryService? _personLinkQueryService;
     private IReadOnlyList<ApplicationProfileCatalogRow> _allCatalogRows = Array.Empty<ApplicationProfileCatalogRow>();
 
     public OfficerShellPropertyEditor(Type objectType, IModelMemberViewItem model)
@@ -56,7 +57,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         _overviewQueryService = sp?.GetService<IApplicationProfileOverviewQueryService>();
         _startProcessService = sp?.GetService<IOfficerShellStartProcessService>();
         _caseProgressService = sp?.GetService<IOfficerShellCaseProgressService>();
-        _personLinkQueryService = sp?.GetService<IApplicationPersonLinkQueryService>();
+        _personLinkQueryService = sp?.GetService<IApplicationProfileInstancePersonLinkQueryService>();
     }
 
     protected override IComponentModel CreateComponentModel() => new OfficerShellModel
@@ -91,6 +92,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         BackToTemplateCatalogRequested = EventCallback.Factory.Create(this, BackToTemplateCatalogAsync),
         ConfigureTemplateRequested = EventCallback.Factory.Create<Guid>(this, ConfigureTemplateAsync),
         CaseTabChanged = EventCallback.Factory.Create<string>(this, OnCaseTabChanged),
+        LinkedRecordTileClicked = EventCallback.Factory.Create<string>(this, OnLinkedRecordTileClicked),
+        IssuedHeaderNewRequested = EventCallback.Factory.Create<string>(this, OnIssuedHeaderNewRequested),
+        IssuedHeaderOpenRequested = EventCallback.Factory.Create<ApplicationWorkspaceIssuedHeaderOpenRequest>(this, OnIssuedHeaderOpenRequested),
         BackToInProcessRequested = EventCallback.Factory.Create(this, BackToInProcessAsync),
         LinkPersonRequested = EventCallback.Factory.Create(this, LinkPersonAsync),
         UnlinkPersonRequested = EventCallback.Factory.Create(this, UnlinkPersonAsync),
@@ -125,7 +129,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return;
 
         model.CurrentPage = page;
-        model.CaseApplicationId = caseId;
+        model.CaseApplicationProfileInstanceId = caseId;
     }
 
     private async Task LoadAsync()
@@ -141,7 +145,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
 
             var navService = _navQueryService ?? _application.ServiceProvider?.GetService<IOfficerShellNavQueryService>();
             var stagedService = _stagedQueryService ?? _application.ServiceProvider?.GetService<IOfficerShellStagedQueryService>();
@@ -153,8 +157,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
             await LoadCatalogAsync(model, objectSpace);
 
-            if (model.CurrentPage == OfficerShellPage.Case && model.CaseApplicationId != Guid.Empty)
-                await LoadWorkspaceAsync(model, model.CaseApplicationId);
+            if (model.CurrentPage == OfficerShellPage.Case && model.CaseApplicationProfileInstanceId != Guid.Empty)
+                await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
         catch (Exception ex)
         {
@@ -212,7 +216,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             var service = _workspaceQueryService
                 ?? _application.ServiceProvider?.GetService<IApplicationWorkspaceQueryService>();
 
@@ -231,8 +235,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
     private void UpdateCaseActionState(OfficerShellModel model)
     {
-        var applicationId = model.CaseApplicationId;
-        var canLink = applicationId != Guid.Empty && _application?.MainWindow != null;
+        var applicationId = model.CaseApplicationProfileInstanceId;
+        var rosterLocked = model.WorkspaceSnapshot?.CaseChrome.ResolvedLinksLocked == true;
+        var canLink = applicationId != Guid.Empty && _application?.MainWindow != null && !rosterLocked;
         model.CanLinkPerson = canLink;
         model.CanUnlinkPerson = canLink;
 
@@ -241,9 +246,9 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             && model.SelectedPersonRowIndex >= 0
             && model.SelectedPersonRowIndex < personTab.RowPersonIds.Count;
         model.CanOpenDocumentCopies = personTab != null
-            && personTab.RowApplicationPersonIds.Count > 0
+            && personTab.RowApplicationProfileInstancePersonIds.Count > 0
             && (model.SelectedPersonRowIndex < 0
-                || model.SelectedPersonRowIndex < personTab.RowApplicationPersonIds.Count);
+                || model.SelectedPersonRowIndex < personTab.RowApplicationProfileInstancePersonIds.Count);
     }
 
     private void OnWorkspaceChanged()
@@ -253,8 +258,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return;
 
         model.SelectedPersonRowIndex = -1;
-        if (model.CaseApplicationId != Guid.Empty)
-            _ = LoadWorkspaceAsync(model, model.CaseApplicationId);
+        if (model.CaseApplicationProfileInstanceId != Guid.Empty)
+            _ = LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
     }
 
     private async Task NavigateAsync(OfficerShellPage page)
@@ -269,8 +274,8 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (page != OfficerShellPage.Templates)
             model.TemplatesDetailOpen = false;
 
-        if (page == OfficerShellPage.Case && model.CaseApplicationId != Guid.Empty)
-            await LoadWorkspaceAsync(model, model.CaseApplicationId);
+        if (page == OfficerShellPage.Case && model.CaseApplicationProfileInstanceId != Guid.Empty)
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
     }
 
     private async Task OpenCaseAsync(Guid applicationId)
@@ -279,16 +284,59 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         if (model == null)
             return;
 
-        model.CaseApplicationId = applicationId;
+        model.CaseApplicationProfileInstanceId = applicationId;
         model.CurrentPage = OfficerShellPage.Case;
         model.CaseTab = "overview";
+        model.PeopleLinkedRecordFocusKey = null;
         await LoadWorkspaceAsync(model, applicationId);
     }
 
     private Task OnCaseTabChanged(string tab)
     {
         if (ComponentModel != null)
+        {
             ComponentModel.CaseTab = string.IsNullOrWhiteSpace(tab) ? "overview" : tab;
+            if (!string.Equals(ComponentModel.CaseTab, "people", StringComparison.OrdinalIgnoreCase))
+                ComponentModel.PeopleLinkedRecordFocusKey = null;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnLinkedRecordTileClicked(string tabKey)
+    {
+        if (ComponentModel == null)
+            return Task.CompletedTask;
+
+        ComponentModel.CaseTab = "people";
+        ComponentModel.PeopleLinkedRecordFocusKey = string.IsNullOrWhiteSpace(tabKey) ? null : tabKey.Trim();
+        return Task.CompletedTask;
+    }
+
+    private Task OnIssuedHeaderNewRequested(string key)
+    {
+        var model = ComponentModel;
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspaceIssuedHeaderOpenHelper.TryCreate(
+            _application,
+            _application.MainWindow,
+            model.CaseApplicationProfileInstanceId,
+            key);
+        return Task.CompletedTask;
+    }
+
+    private Task OnIssuedHeaderOpenRequested(ApplicationWorkspaceIssuedHeaderOpenRequest request)
+    {
+        if (_application == null || request == null || request.Id == Guid.Empty)
+            return Task.CompletedTask;
+
+        ApplicationWorkspaceIssuedHeaderOpenHelper.TryOpen(
+            _application,
+            _application.MainWindow,
+            request.Key,
+            request.Id);
         return Task.CompletedTask;
     }
 
@@ -301,13 +349,14 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         model.CurrentPage = OfficerShellPage.InProcess;
         model.CaseTab = "overview";
         model.SelectedPersonRowIndex = -1;
+        model.PeopleLinkedRecordFocusKey = null;
         await LoadAsync();
     }
 
     private async Task LinkPersonAsync()
     {
         var model = ComponentModel;
-        if (model == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return;
 
         model.ShowPersonLinkPicker = true;
@@ -319,7 +368,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private async Task SearchPersonLinkCandidatesAsync(string searchText)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return;
 
         model.PersonLinkIsSearching = true;
@@ -327,19 +376,19 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         {
             using var objectSpace = _application.CreateObjectSpace(typeof(Person));
             var service = _personLinkQueryService
-                ?? _application.ServiceProvider?.GetService<IApplicationPersonLinkQueryService>()
-                ?? new ApplicationPersonLinkQueryService();
+                ?? _application.ServiceProvider?.GetService<IApplicationProfileInstancePersonLinkQueryService>()
+                ?? new ApplicationProfileInstancePersonLinkQueryService();
 
             model.PersonLinkCandidates = service.SearchCandidates(
                 objectSpace,
-                model.CaseApplicationId,
+                model.CaseApplicationProfileInstanceId,
                 searchText);
         }
         catch (Exception ex)
         {
             model.PersonLinkStatusMessage = ex.Message;
             model.PersonLinkStatusIsError = true;
-            model.PersonLinkCandidates = Array.Empty<ApplicationPersonLinkCandidateRow>();
+            model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
         }
         finally
         {
@@ -350,14 +399,14 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private async Task LinkPersonFromPickerAsync(Guid personId)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty || personId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty || personId == Guid.Empty)
             return;
 
         model.PersonLinkIsLinking = true;
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
-            var application = objectSpace.GetObjectByKey<Application>(model.CaseApplicationId);
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
+            var application = objectSpace.GetObjectByKey<ApplicationProfileInstance>(model.CaseApplicationProfileInstanceId);
             var person = objectSpace.GetObjectByKey<Person>(personId);
             if (application == null || person == null)
             {
@@ -366,7 +415,14 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
                 return;
             }
 
-            var linked = ApplicationPersonService.LinkPerson(objectSpace, application, person);
+            if (ApplicationProfileInstancePersonRosterLockHelper.AreResolvedLinksLocked(application))
+            {
+                model.PersonLinkStatusMessage = VisaUiMessages.Get("ApplicationProfileInstancePerson.RosterLockedWhenWorkflowTerminal");
+                model.PersonLinkStatusIsError = true;
+                return;
+            }
+
+            var linked = ApplicationProfileInstancePersonService.LinkPerson(objectSpace, application, person);
             if (linked == null)
             {
                 model.PersonLinkStatusMessage = "Could not link the selected person.";
@@ -376,10 +432,10 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
             objectSpace.CommitChanges();
             model.ShowPersonLinkPicker = false;
-            model.PersonLinkCandidates = Array.Empty<ApplicationPersonLinkCandidateRow>();
+            model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
             model.PersonLinkStatusMessage = $"{person.FullName} linked.";
             model.PersonLinkStatusIsError = false;
-            await LoadWorkspaceAsync(model, model.CaseApplicationId);
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
         catch (Exception ex)
         {
@@ -399,7 +455,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return Task.CompletedTask;
 
         model.ShowPersonLinkPicker = false;
-        model.PersonLinkCandidates = Array.Empty<ApplicationPersonLinkCandidateRow>();
+        model.PersonLinkCandidates = Array.Empty<ApplicationProfileInstancePersonLinkCandidateRow>();
         model.PersonLinkStatusMessage = null;
         model.PersonLinkStatusIsError = false;
         return Task.CompletedTask;
@@ -411,13 +467,13 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             return Task.CompletedTask;
 
         var model = ComponentModel;
-        if (model == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return Task.CompletedTask;
 
         ApplicationWorkspacePersonLinkHelper.ShowUnlinkPersonPicker(
             _application,
             _application.MainWindow,
-            model.CaseApplicationId,
+            model.CaseApplicationProfileInstanceId,
             OnWorkspaceChanged);
 
         return Task.CompletedTask;
@@ -447,17 +503,17 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private async Task SaveProgressNotesAsync(string notes)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return;
 
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             var service = _caseProgressService
                 ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
                 ?? new OfficerShellCaseProgressService();
 
-            var result = service.SaveOfficerNotes(objectSpace, model.CaseApplicationId, notes);
+            var result = service.SaveOfficerNotes(objectSpace, model.CaseApplicationProfileInstanceId, notes);
             if (!result.Success)
             {
                 model.ProgressStatusMessage = result.ErrorMessage ?? "Could not save notes.";
@@ -468,7 +524,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             objectSpace.CommitChanges();
             model.ProgressStatusMessage = "Notes saved.";
             model.ProgressStatusIsError = false;
-            await LoadWorkspaceAsync(model, model.CaseApplicationId);
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
         catch (Exception ex)
         {
@@ -480,19 +536,19 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private async Task UploadMinistryLetterAsync(OfficerShellCaseProgressFileUpload upload)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return;
 
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             var service = _caseProgressService
                 ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
                 ?? new OfficerShellCaseProgressService();
 
             var result = service.SetMinistryLetter(
                 objectSpace,
-                model.CaseApplicationId,
+                model.CaseApplicationProfileInstanceId,
                 upload.FileName,
                 upload.Content);
 
@@ -506,7 +562,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             objectSpace.CommitChanges();
             model.ProgressStatusMessage = "Ministry letter uploaded.";
             model.ProgressStatusIsError = false;
-            await LoadWorkspaceAsync(model, model.CaseApplicationId);
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
         catch (Exception ex)
         {
@@ -518,19 +574,19 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private async Task AdvanceCaseProgressAsync(OfficerShellCaseProgressAdvanceRequest request)
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return;
 
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             var service = _caseProgressService
                 ?? _application.ServiceProvider?.GetService<IOfficerShellCaseProgressService>()
                 ?? new OfficerShellCaseProgressService();
 
             var result = service.Advance(
                 objectSpace,
-                model.CaseApplicationId,
+                model.CaseApplicationProfileInstanceId,
                 request.StateCode,
                 request.Notes);
 
@@ -545,7 +601,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             model.ProgressStatusMessage = "Progress advanced.";
             model.ProgressStatusIsError = false;
             model.CaseTab = "progress";
-            await LoadWorkspaceAsync(model, model.CaseApplicationId);
+            await LoadWorkspaceAsync(model, model.CaseApplicationProfileInstanceId);
         }
         catch (Exception ex)
         {
@@ -583,27 +639,27 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private Task OpenDocumentCopiesAsync()
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return Task.CompletedTask;
 
         var personTab = model.WorkspaceSnapshot?.Tabs.FirstOrDefault(t => t.Key == "person");
-        if (personTab == null || personTab.RowApplicationPersonIds.Count == 0)
+        if (personTab == null || personTab.RowApplicationProfileInstancePersonIds.Count == 0)
             return Task.CompletedTask;
 
         IReadOnlyList<Guid> rowIds;
         if (model.SelectedPersonRowIndex >= 0
-            && model.SelectedPersonRowIndex < personTab.RowApplicationPersonIds.Count)
+            && model.SelectedPersonRowIndex < personTab.RowApplicationProfileInstancePersonIds.Count)
         {
-            rowIds = [personTab.RowApplicationPersonIds[model.SelectedPersonRowIndex]];
+            rowIds = [personTab.RowApplicationProfileInstancePersonIds[model.SelectedPersonRowIndex]];
         }
         else
         {
-            rowIds = personTab.RowApplicationPersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
+            rowIds = personTab.RowApplicationProfileInstancePersonIds.Where(id => id != Guid.Empty).Distinct().ToList();
         }
 
         ApplicationWorkspaceDocumentCopiesOpenHelper.TryOpen(
             _application,
-            model.CaseApplicationId,
+            model.CaseApplicationProfileInstanceId,
             rowIds,
             VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
 
@@ -613,12 +669,12 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
     private Task OpenResminamalarAsync()
     {
         var model = ComponentModel;
-        if (model == null || _application == null || model.CaseApplicationId == Guid.Empty)
+        if (model == null || _application == null || model.CaseApplicationProfileInstanceId == Guid.Empty)
             return Task.CompletedTask;
 
         ApplicationWorkspaceResminamalarOpenHelper.TryOpen(
             _application,
-            model.CaseApplicationId,
+            model.CaseApplicationProfileInstanceId,
             VisaPreviewSlotViewHelper.ResolveOwnerViewId(View));
 
         return Task.CompletedTask;
@@ -635,7 +691,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
 
         try
         {
-            using var objectSpace = _application.CreateObjectSpace(typeof(Application));
+            using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfileInstance));
             var service = _startProcessService
                 ?? _application.ServiceProvider?.GetService<IOfficerShellStartProcessService>()
                 ?? new OfficerShellStartProcessService();
@@ -656,7 +712,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
             model.IsStatusError = false;
 
             await LoadAsync();
-            await OpenCaseAsync(result.ApplicationId);
+            await OpenCaseAsync(result.ApplicationProfileInstanceId);
         }
         catch (Exception ex)
         {
@@ -883,7 +939,7 @@ public class OfficerShellPropertyEditor : BlazorPropertyEditorBase, IComplexView
         {
             var overviewService = _overviewQueryService
                 ?? _application.ServiceProvider?.GetService<IApplicationProfileOverviewQueryService>()
-                ?? new ApplicationProfileOverviewMockQueryService();
+                ?? new ApplicationProfileOverviewQueryService();
 
             using var objectSpace = _application.CreateObjectSpace(typeof(ApplicationProfile));
             model.OverviewSnapshot = overviewService.Load(profileId, objectSpace);

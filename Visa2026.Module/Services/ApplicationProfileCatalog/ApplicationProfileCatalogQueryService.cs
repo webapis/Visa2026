@@ -15,7 +15,7 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
         if (objectSpace == null)
             return Array.Empty<ApplicationProfileCatalogRow>();
 
-        var usage = objectSpace.GetObjectsQuery<Application>()
+        var usage = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.ApplicationProfile != null)
             .Select(a => new
             {
@@ -31,8 +31,8 @@ public sealed class ApplicationProfileCatalogQueryService : IApplicationProfileC
                     g.Count(a => OfficerShellApplicationFilters.IsStagedState(a.ProcessNumber, a.LatestPrimaryStateCode)),
                     g.Count(a => OfficerShellApplicationFilters.IsInProcessState(a.ProcessNumber, a.LatestPrimaryStateCode))));
 
-        return objectSpace.GetObjectsQuery<ApplicationProfile>()
-            .AsEnumerable()
+        return ApplicationProfileOfficerCatalogSelector
+            .SelectDistinctTemplates(objectSpace.GetObjectsQuery<ApplicationProfile>().AsEnumerable())
             .Select(p =>
             {
                 usage.TryGetValue(p.ID, out var counts);

@@ -13,7 +13,7 @@ public sealed class ApplicationProfileCatalogRow
     public string Code { get; init; } = string.Empty;
     public string? SelectionCode { get; init; }
     public ApplicationProfileActionFamily ActionFamily { get; init; }
-    public ApplicationProgressRouteKind ProgressRoute { get; init; }
+    public ApplicationProfileInstanceProgressRouteKind ProgressRoute { get; init; }
     public bool IsActive { get; init; }
     public bool IsConfigLocked { get; init; }
     public int LinkedApplicationCount { get; init; }

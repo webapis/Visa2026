@@ -24,7 +24,7 @@ Companion to [SKILL.md](./SKILL.md).
 | Profile schema heal | `DatabaseUpdate/ApplicationProfileSchemaSql.cs` |
 | Lock helper | `ApplicationProfileLockHelper` in `ApplicationProfile.cs` |
 | Wizard UX | `ApplicationProfileWizard*`, `ApplicationProfileWizardComponent.razor` |
-| Profile overview (mock) | `ApplicationProfileOverview*`, `ApplicationProfileOverviewComponent.razor` |
+| Profile overview (live) | `ApplicationProfileOverviewQueryService`, `ApplicationProfileOverviewComponent.razor` |
 | Profile picker at create | `ApplicationProfilePicker*`, `ApplicationProfilePickerNewController` |
 | Officer manual | `user-manual/docs/en/guides/applications/application-profiles.md`, `administration/configuration/application-profiles.md` |
 | Registry | `docs/DEPRECATED.md` |
@@ -34,6 +34,7 @@ Companion to [SKILL.md](./SKILL.md).
 
 | Area | Path |
 |------|------|
+| Native Application Profiles nav | `CustomNavigationUpdater`, `ApplicationProfileCatalogModelUpdater`, `ApplicationStagedStartProcessController`, `ApplicationProfileInstanceProgressRouteNavigation` |
 | Shell host BO + view id | `Visa2026.Module/BusinessObjects/OfficerShell/OfficerShellHost.cs`, `OfficerShellViewIds.cs` |
 | Shell property editor + model | `Visa2026.Blazor.Server/Editors/OfficerShellPropertyEditor.cs`, `OfficerShellModel.cs`, `OfficerShellComponent.razor` |
 | Staged / in-process queues | `OfficerShellStagedQueryService`, `OfficerShellInProcessQueryService`, `OfficerShellStartProcessService` |

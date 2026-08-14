@@ -90,4 +90,16 @@ public sealed class ApplicationProfileCatalogModel : ComponentModelBase
         get => GetPropertyValue<EventCallback<string>>();
         set => SetPropertyValue(value);
     }
+
+    public EventCallback CloseProfileRequested
+    {
+        get => GetPropertyValue<EventCallback>();
+        set => SetPropertyValue(value);
+    }
+
+    public EventCallback<Guid> OpenInstanceRequested
+    {
+        get => GetPropertyValue<EventCallback<Guid>>();
+        set => SetPropertyValue(value);
+    }
 }

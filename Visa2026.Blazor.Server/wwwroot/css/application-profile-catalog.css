@@ -115,7 +115,10 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--ap-muted);
+    background: var(--ap-accent);
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 .ap-catalog__profile-row.is-active .ap-catalog__dot {
@@ -156,6 +159,84 @@
 
 .ap-catalog__new:hover {
     background: #d7eee4;
+}
+
+.ap-catalog__new--toolbar {
+    border-style: solid;
+    background: var(--ap-accent);
+    color: #fff;
+    border-color: var(--ap-accent);
+    white-space: nowrap;
+}
+.ap-catalog__new--toolbar:hover {
+    background: var(--ap-accent-deep);
+    color: #fff;
+}
+
+.ap-catalog__list-page {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ap-catalog__list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.ap-catalog__search--toolbar {
+    max-width: 360px;
+}
+
+.ap-catalog__table-wrap {
+    border: 1px solid var(--ap-line);
+    border-radius: 12px;
+    background: var(--ap-panel);
+    overflow: auto;
+}
+
+.ap-catalog__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.ap-catalog__table th,
+.ap-catalog__table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #eef2f6;
+    text-align: left;
+}
+
+.ap-catalog__table th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ap-muted);
+    font-weight: 700;
+}
+
+.ap-catalog__table tbody tr {
+    cursor: pointer;
+}
+
+.ap-catalog__table tbody tr:hover td {
+    background: #f4faf7;
+}
+
+.ap-catalog__chev {
+    color: #94a3b8;
+    text-align: right;
+    width: 28px;
+}
+
+.ap-catalog__detail-page .ap-overview {
+    max-width: none;
+    margin: 0;
+    padding: 4px 0 8px;
 }
 
 .ap-catalog__main {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Visa2026.Module.BusinessObjects;
+using Visa2026.Module.Services.ApplicationProfileCatalog;
 
 namespace Visa2026.Module.Services.ApplicationProfilePicker;
 
@@ -10,14 +11,14 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
 {
     public IReadOnlyList<ApplicationProfilePickerRow> GetProfiles(
         IObjectSpace objectSpace,
-        ApplicationProgressRouteKind? progressRouteFilter,
-        Application? applicabilityProbe = null,
+        ApplicationProfileInstanceProgressRouteKind? progressRouteFilter,
+        ApplicationProfileInstance? applicabilityProbe = null,
         Guid? seedPersonId = null)
     {
         if (objectSpace == null)
             return Array.Empty<ApplicationProfilePickerRow>();
 
-        var lastUsedByProfile = objectSpace.GetObjectsQuery<Application>()
+        var lastUsedByProfile = objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
             .Where(a => a.ApplicationProfile != null)
             .GroupBy(a => a.ApplicationProfile!.ID)
             .Select(g => new { ProfileId = g.Key, LastUsedAt = g.Max(a => (DateTime?)a.ApplicationDate) })
@@ -27,10 +28,12 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
             ? BuildSeedUsage(objectSpace, seedId)
             : null;
 
-        return objectSpace.GetObjectsQuery<ApplicationProfile>()
-            .Where(p => p.IsActive)
-            .AsEnumerable()
-            .Where(p => ApplicationProfileApplicabilityHelper.IsProfileSelectable(p, applicabilityProbe, progressRouteFilter))
+        return ApplicationProfileOfficerCatalogSelector
+            .SelectDistinctTemplates(
+                objectSpace.GetObjectsQuery<ApplicationProfile>()
+                    .Where(p => p.IsActive)
+                    .AsEnumerable()
+                    .Where(p => ApplicationProfileApplicabilityHelper.IsProfileSelectable(p, applicabilityProbe, progressRouteFilter)))
             .Select(p =>
             {
                 SeedProfileUsage? usage = null;
@@ -62,20 +65,20 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
     {
         var result = new Dictionary<Guid, SeedProfileUsage>();
 
-        foreach (var row in objectSpace.GetObjectsQuery<ApplicationPerson>()
-                     .Where(ap => ap.PersonId == seedPersonId && ap.Application != null && ap.Application.ApplicationProfile != null)
+        foreach (var application in objectSpace.GetObjectsQuery<ApplicationProfileInstance>()
+                     .Where(a => a.People.Any(p => p.ID == seedPersonId) && a.ApplicationProfile != null)
                      .AsEnumerable())
         {
-            var profileId = row.Application!.ApplicationProfile!.ID;
+            var profileId = application.ApplicationProfile!.ID;
             if (!result.TryGetValue(profileId, out var usage))
                 usage = new SeedProfileUsage();
 
             usage.Count++;
-            var appDate = row.Application.ApplicationDate;
+            var appDate = application.ApplicationDate;
             if (!usage.LastUsedAt.HasValue || appDate > usage.LastUsedAt)
                 usage.LastUsedAt = appDate;
 
-            if (!usage.HasOpen && !IsApplicationTerminal(row.Application))
+            if (!usage.HasOpen && !IsApplicationTerminal(application))
                 usage.HasOpen = true;
 
             result[profileId] = usage;
@@ -84,12 +87,12 @@ public sealed class ApplicationProfilePickerQueryService : IApplicationProfilePi
         return result;
     }
 
-    private static bool IsApplicationTerminal(Application application)
+    private static bool IsApplicationTerminal(ApplicationProfileInstance application)
     {
         var latest = application.LatestProgress ?? application.ProgressHistory?
             .OrderByDescending(p => p.Order)
             .FirstOrDefault();
-        return ApplicationProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code);
+        return ApplicationProfileInstanceProgressTransitionHelper.IsTerminalStateCode(latest?.State?.Code);
     }
 
     private sealed class SeedProfileUsage

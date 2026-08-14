@@ -21,10 +21,15 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | 6 | Switch Appearance / progress to profile | **Done** | `ApplicationProfileConfigurationResolver`, `Cfg*` criteria, progress route/SLA |
 | 7 | Config lock enforcement on profile edit UI | **Done** | DetailView read-only, save guard, clone duplicate |
 | 8 | Configuration wizard UX | **Done** | 5-step Blazor wizard; **Configure profile** on Application Profiles |
-| 8a | Application Profile overview (mock UI) | **Done** | Read-only overview shell; **Open profile overview** on profiles list |
-| 8c | Custom catalog home (replace native List/Detail UI) | **Done** | Configuration → catalog; row → overview; New/Configure → wizard |
+| 8d | Wizard step 4 real template catalog + persist scope | **Done** | Live `UserReportTemplate` Category/Global; `CatalogScope`/`DataScope`/`CategoryKey` on nested template |
+| 8a | Application Profile overview (live) | **Done** | Live config/defaults/legs/templates + linked `ApplicationProfileInstance` rows; mock only if profile id unresolved |
+| 8c | Custom catalog home (replace native List/Detail UI) | **Done** | List first; row opens overview; **Back to list**; New/Configure → wizard |
 | 9 | Profile picker at Application create | **Done** | Intercepts **New** on Application ListViews; Blazor picker UI |
-| 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | **10g officer UI cutoff** — nav + Person tab + dossier; BO/schema/import still retained |
+| 10 | Person M2M DetailView; hard-remove `ApplicationItem` | **In progress** | Skip-navigation `People` + child BO M2M (includes **MedicalRecord**, **WorkDuty**). Output headers Invitation / WorkPermit / BorderZone / Rejection / IssuedVisas are **1:N** (May produce), not skip-nav. Wizard **May produce** includes Rejection. Person issued tab **Applications (linked)** verified. Rebuild DataImporter + resume Wave 2b (`-StartAt ApplicationProfileInstancePerson`); then People-tab / copies / Resminamalar smoke. |
+| 10n | §10 auto-link gate + sticky ResolvedLinks | **Done** | `RequirePerson*` gate; sticky `LinkedObjectId`; toggle-off keeps existing; unit tests |
+| 10o | Workspace Linked records tiles from ResolvedLinks | **Done** | Catalog + overview tiles; People tab focus; gated by person-config |
+| 10p | Process-complete lock on resolved links | **Done** | `PROCESS_ISSUED` / `REJECTED` / `CANCELLED`; roster + ResolvedLinks immutable; UI lock badge |
+| 10q | Overview Issued records (1:N headers) | **Done** | May produce tiles + inline Add/New; `IssuedHeaderNestedCreateController` still sets FK on native nested New |
 | 10a | Application workspace UX shell (mock) | **Done** | `ApplicationWorkspaceHost`, Blazor component, Open workspace action |
 | 10b | Wire real M2M + SQL views + resolver | **Done** | `ApplicationPerson` M2M, `ApplicationWorkspaceQueryService`, link/unlink toolbar; SQL views deferred (C# tab builder) |
 | 10c | Workspace in-tab actions + person SQL view | **Done** | Link/Unlink/Open detail wired in component; `vw_application_workspace_person`; row selection on Person tab |
@@ -50,15 +55,35 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | H5 | HTML template wizard (5 steps) | **Done** | `#/templates/wizard/{0-4}` → Publish |
 | H6 | HTML PNG gallery + README + parity checklist | **Done** | `parity/CHECKLIST.md` — sign-off pending |
 | H7 | HTML Person DetailView staging | **Deferred** | Post–v1; People nav = stub only |
-| B0 | Blazor officer shell — layout + nav + live queues | **Done** | `OfficerShellHost` · staged/in-process from `Application` · templates embed catalog · case embed workspace |
+| B0 | Blazor officer shell — layout + nav + live queues | **Done** | Native XAF **Application Profiles** folder (staged / in-process / templates / via / direct). Custom left rail removed 2026-08-13 |
 | B1 | Blazor shell PNG parity polish | **Done** | Chips, legend, pagination, grouped staged, rich grid, toolbar search |
 | B2 | Start process domain merge | **Done** | Merge staged rows, `YYYY-NNNN` process number, first progress step |
-| B3 | Immersive shell chrome | **Done** | Hide XAF left nav via `:has(.officer-shell-host)` CSS |
+| B3 | Immersive shell chrome | **Done** | Custom left rail retired; native accordion is the nav. `:has(.officer-shell-host)` hide unused unless leftover shell opens |
 | B4 | Profile templates list/grid + detail | **Done** | PNG catalog, chips, pagination, rail overview drill-in |
 | B5 | Case workspace 6-tab shell | **Done** | PNG parity pass: overview, people matrix, progress, inline doc copies + Resminamalar, SLA |
 | B6 | Immersive tab-bar hide | **Done** | `OfficerShellImmersiveTabBarController` (`TabsModel.CssClass`) + CSS fallback |
 | B7 | Case progress tab wiring | **Done** | Notes + ministry letter + in-shell advance (`OfficerShellCaseProgressService`) |
 | B8 | Custom person link picker | **Done** | Inline picker on People tab (`IApplicationPersonLinkQueryService` + `OfficerShellPersonLinkPickerComponent`; officer shell only) |
+| B9 | Native Application Profiles navigation | **Done** | Folder caption; staged/in-process ListViews + Start process; templates in folder; drop custom sidebar |
+| R0 | Instance rename — spec freeze (§13) | **Done** | Plan locked; docs + slice tracker |
+| R1 | Instance rename — new BOs + empty tables + permissions | **Done** | `ApplicationProfileInstance*` |
+| R2 | Instance rename — same-Guid copy updater + FK repoint | **Done** | From `Applications*` |
+| R3 | Instance rename — code/OData/import/SQL hard switch | **Done** | No Application OData alias |
+| R4 | Instance rename — drop old tables + delete old BOs | **Done** | |
+| R5 | Instance rename — officer copy purge | **Done** | Keep “Application Profile” for templates |
+| R6 | Instance rename — Demo/local verify + learnings | **Done** | Solution Debug 0 errors; 209 Module.Tests passed; Demo F5/import still operator-run |
+
+---
+
+## Slice 8a — Profile overview (live)
+
+**Delivered (2026-08-14):**
+
+- `ApplicationProfileOverviewQueryService` maps the selected `ApplicationProfile` (configuration, defaults, approval legs, person toggles, nested templates) without mock fillers.
+- Linked applications are real `ApplicationProfileInstance` rows (newest 25, full count in the heading). Click a number to open case workspace.
+- Prototype banner only when the profile id cannot be resolved (designer / missing object space).
+
+**Verify:** Application Profiles → Application Profile Templates → select a profile. No Prototype banner; linked table matches instances or shows empty.
 
 ---
 
@@ -98,7 +123,7 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 
 **Delivered:**
 
-- `ApplicationProfileCatalogHost` + Blazor catalog (search, badges, New / Configure / row → overview)
+- `ApplicationProfileCatalogHost` + Blazor catalog (search, badges, New / Configure / **list first**, row → overview, **Back to list**)
 - Nav: `ApplicationProfileCatalogModelUpdater` + `ApplicationProfileCatalogNavigationController` (Configuration → catalog DetailView)
 - `[NavigationItem(false)]` on `ApplicationProfile`; strip stale list nav
 - ListView intercepts: row → overview; New → create + wizard
@@ -315,6 +340,17 @@ Update this file when a slice starts (**In progress**) or ships (**Done**). Mirr
 | Wizard steps match plan §6 E–H groups | `application-profile-template-wizard*.png` |
 | Staged → in-process lifecycle | `staged-profiles-*.png`, `process-started-profiles-*.png` |
 | No “clone profile” language | Refresh `images/ap-04-lifecycle.png` when UX ships |
+
+---
+
+## VISA2014 migration waves (Application Profile catalog)
+
+| Wave | Status | Doc |
+|------|--------|-----|
+| 0b | **Done** | [APPLICATION_PROFILE_CATALOG_WAVE0.md](../../../docs/VISA2014_MIGRATION/APPLICATION_PROFILE_CATALOG_WAVE0.md) |
+| 1 | **Done** | Tenant `application-profile.calik-energi.json` |
+| 2 | **Done** (local) | `Application-Profile.ps1` patch |
+| 3 | **Done** (local) | [APPLICATION_PROFILE_CATALOG_WAVE3.md](../../../docs/VISA2014_MIGRATION/APPLICATION_PROFILE_CATALOG_WAVE3.md) — 637 nested templates patched |
 
 ---
 
