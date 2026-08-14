@@ -73,7 +73,6 @@ public class ApplicationLatestProgressSyncTests
     [Fact]
     public void Apply_EmptyLatestId_UpdatesScalarsWithoutLinkingNavigation()
     {
-        var application = new Application();
         var latest = new ApplicationProgress
         {
             ID = Guid.Empty,
@@ -82,11 +81,16 @@ public class ApplicationLatestProgressSyncTests
             State = new ApplicationState { Code = ApplicationProgressStateCodes.ProcessStarted },
             ProcessNumber = "AS-NEW",
         };
+        var application = new Application
+        {
+            ProgressHistory = [latest],
+        };
 
         ApplicationLatestProgressSyncHelper.Apply(application, latest);
 
         Assert.Equal(ApplicationProgressStateCodes.ProcessStarted, application.LatestPrimaryStateCode);
         Assert.Equal("AS-NEW", application.ProcessNumber);
+        // Empty Guid cannot be linked (circular FK guard) even though scalars update.
         Assert.Null(application.LatestProgressId);
         Assert.Null(application.LatestProgress);
     }
