@@ -77,6 +77,10 @@ _agent_build_out/
 _agent_reflect/
 *_build_out*/
 
+# Local one-off build/test captures redirected under scripts/local (not product scripts)
+scripts/local/*-build*.txt
+scripts/local/*-out.txt
+
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
     
